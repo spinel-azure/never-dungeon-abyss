@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#040711">
+  <title>NDE Card Gallery</title>
+  <!-- Update this version whenever the gallery CSS or JavaScript changes. -->
+  <link rel="stylesheet" href="./style.css?v=20260717-4">
+</head>
+<body>
+  <main class="prototype-shell">
+    <header class="prototype-header">
+      <p>NEVER DUNGEON ENGINE</p>
+      <h1>CARD GALLERY</h1>
+      <p id="cardHeading" class="card-heading">CARD</p>
+    </header>
+
+    <nav id="rarityFilters" class="rarity-filters" aria-label="レアリティフィルター">
+      <button type="button" data-rarity-filter="ALL" aria-pressed="true">ALL</button>
+      <button type="button" data-rarity-filter="C" aria-pressed="false">C</button>
+      <button type="button" data-rarity-filter="R" aria-pressed="false">R</button>
+      <button type="button" data-rarity-filter="SR" aria-pressed="false">SR</button>
+      <button type="button" data-rarity-filter="L" aria-pressed="false">L</button>
+      <button type="button" data-rarity-filter="Z" aria-pressed="false">Z</button>
+    </nav>
+
+    <section class="gallery-card-area" aria-label="カード鑑賞表示">
+      <button id="previousCardButton" class="card-navigation previous" type="button" aria-label="前のカード">◀</button>
+      <div id="cardStage" class="card-stage">
+        <canvas
+          id="cardCanvas"
+          width="360"
+          height="540"
+          aria-label="カード"
+        ></canvas>
+        <p id="emptyGalleryMessage" class="empty-gallery-message" aria-live="polite" hidden></p>
+      </div>
+      <button id="nextCardButton" class="card-navigation next" type="button" aria-label="次のカード">▶</button>
+    </section>
+
+    <section class="view-controls" aria-label="表示モード">
+      <button id="galleryModeButton" type="button" aria-pressed="true">
+        GALLERY <span>EFFECT ON</span>
+      </button>
+      <button id="deckModeButton" type="button" aria-pressed="false">
+        DECK <span>STATIC</span>
+      </button>
+    </section>
+
+    <p id="modeMessage" class="mode-message" aria-live="polite">
+      GALLERY VIEW / RAINBOW EFFECT ON
+    </p>
+
+    <pre id="debugPanel" class="debug-panel" hidden aria-label="描画デバッグ情報"></pre>
+  </main>
+
+  <script type="module" src="./main.js?v=20260717-4"></script>
+</body>
+</html>

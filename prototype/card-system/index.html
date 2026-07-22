@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>NDE Card System</title>
+</head>
+<body>
+  <p>Opening card gallery...</p>
+  <script>
+    const galleryUrl = new URL("./gallery/", globalThis.location.href);
+    galleryUrl.search = globalThis.location.search;
+    globalThis.location.replace(galleryUrl);
+  </script>
+</body>
+</html>

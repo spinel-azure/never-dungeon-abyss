@@ -1,0 +1,7 @@
+.command-region{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.command-button{min-height:45px;padding:7px 5px;border:2px solid #3e392e;border-radius:8px;background:#050606;color:#f7fbff;font:20px NDEGame,sans-serif;box-shadow:inset 0 0 0 1px #000;opacity:.72}
+.command-region.is-active .command-button{opacity:1}
+.command-button.is-selected{border-color:#b0f4ff;background:#14313a;box-shadow:0 0 12px #78e6ffcc,inset 0 0 8px #78e6ff44}
+.command-region:not(.is-active) .command-button{color:transparent;text-shadow:none}
+.command-region::after{content:"＊ Bボタンでメニュー表示";grid-column:1/-1;text-align:right;color:#ddd;font:14px NDEPixel,monospace}
+@media(max-width:420px){.command-button{font-size:17px;min-height:42px}}

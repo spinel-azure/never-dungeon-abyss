@@ -1,0 +1,6 @@
+@media (pointer: coarse), (max-width: 900px) {
+  body { overflow: auto; }
+  .prototype-shell { width: auto; min-height: 100dvh; display: grid; place-items: start center; margin: 0; padding: 8px 0 calc(184px + env(safe-area-inset-bottom)); }
+  .menu-screen { width: min(94vw, 520px); height: calc(100dvh - 200px - env(safe-area-inset-bottom)); min-height: 480px; max-height: 760px; overflow: hidden; }
+  .menu-panel { height: 100%; min-height: 0; }
+}

@@ -1,0 +1,22 @@
+.quick-status {
+  min-width: 0;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .35em;
+  padding: 6px 9px;
+  overflow: hidden;
+  border: 1px solid #5d5545;
+  border-radius: 8px;
+  background: #050606;
+  color: #f7fbff;
+  font: clamp(11px, 3vw, 16px)/1 NDEPixel, monospace;
+  white-space: nowrap;
+}
+.quick-status span { display: inline-flex; flex: 0 0 auto; align-items: baseline; }
+.quick-status output { color: inherit; font: inherit; }
+.quick-status .quick-value { display: inline-block; width: 4ch; text-align: right; }
+@media (max-width: 360px) {
+  .quick-status { gap: .18em; padding-inline: 5px; font-size: 10.5px; }
+}

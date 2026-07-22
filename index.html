@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>NEVER DUNGEON ENGINE</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
+  <link rel="stylesheet" href="css/style.css?v=20260722-2">
+  <link rel="stylesheet" href="css/game-menu.css?v=20260722-6">
+  <link rel="stylesheet" href="css/title-screen.css?v=20260722-1">
+</head>
+<body class="title-active">
+<section id="titleScreen" class="title-screen" role="button" tabindex="0" aria-label="NEVER DUNGEON ENGINEを開始">
+  <h1 class="title-logo">NEVER DUNGEON ENGINE</h1>
+  <p class="title-description">EXPLORE A RANDOMLY GENERATED<br>10 × 10 DUNGEON</p>
+  <p class="title-prompt">PRESS ANY KEY / TAP</p>
+  <p class="title-version">Ver.1.0</p>
+  <p class="title-updated">LAST UPDATED : 2026-07-22</p>
+</section>
+<main class="shell">
+  <section class="game" aria-label="3Dダンジョン">
+    <div class="viewport">
+      <canvas id="screen" width="960" height="540"></canvas>
+      <div class="status">
+        <div class="readout"><span class="chip depth-chip" id="depth">B1F</span><span class="chip coordinate-chip" id="pos">X:0 Y:0</span></div>
+        <div class="meter presence-meter" id="presenceMeter" role="progressbar" aria-label="気配" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+        <canvas id="compass" class="compass" width="72" height="72" aria-label="コンパス"></canvas>
+        <div class="stopwatch" id="stopwatch" aria-label="探索時間">00:00:00</div>
+        <div class="meter torch-meter" aria-label="たいまつ"><span id="torchMeter"></span></div>
+      </div>
+      <canvas id="eventOverlay" class="event-overlay" width="960" height="540" aria-hidden="true"></canvas>
+      <canvas id="treasureCanvas" class="treasure-canvas" width="960" height="540" aria-hidden="true"></canvas>
+    </div>
+
+    <div class="quick-status" aria-label="プレイヤーステータス未接続">
+      <span>Lv:<output id="quickLevel">---</output></span><span>[-]</span>
+      <span>HP <output class="quick-value">----</output> / <output class="quick-value">----</output></span>
+      <span>SP <output class="quick-value">----</output> / <output class="quick-value">----</output></span>
+      <span>Cond:<output>----</output></span>
+    </div>
+    <div class="message" id="message">10×10の床空間を、薄い境界壁が区切っている。</div>
+    <section id="dungeonCommands" class="dungeon-commands" aria-label="ダンジョンコマンド">
+      <button type="button" data-command="items" disabled>アイテム</button>
+      <button type="button" data-command="status">ステータス</button>
+      <button type="button" data-command="deck" disabled>？？？？？</button>
+      <button type="button" data-command="skills" disabled>スキル</button>
+      <button type="button" data-command="save" disabled>セーブ</button>
+      <button type="button" data-command="options">オプション</button>
+    </section>
+    <p id="commandHint" class="command-hint">＊ Bボタンでメニュー表示</p>
+
+    <div class="controls">
+      <div class="pad" aria-label="移動操作">
+        <button id="forward" type="button" title="前進">↑</button><button id="left" type="button" title="左旋回">←</button><button id="back" type="button" title="後退">↓</button><button id="right" type="button" title="右旋回">→</button>
+        <button id="autoReturn" type="button" title="踏破済みの道だけを通ってスタート地点へ戻る">帰還</button><button id="randomGenerate" type="button" title="新しいランダムダンジョンを生成する">ランダム生成</button>
+      </div>
+      <div class="virtual-stick" id="virtualStick" aria-label="移動用バーチャルスティック"><div class="virtual-stick-base"><div class="virtual-stick-knob"></div></div></div>
+      <div class="action-buttons" aria-label="アクションボタン"><button id="buttonB" type="button" class="action-button action-button-b" aria-label="B キャンセル メニュー">B</button><button id="buttonA" type="button" class="action-button action-button-a" aria-label="A 決定">A</button></div>
+    </div>
+
+    <section class="menu-screen" id="menuScreen" aria-label="メニュー画面" hidden>
+      <div class="menu-panel status-panel" data-menu-view="status" hidden>
+        <article class="nde-status-page" data-status-page="0">
+          <h1 class="menu-title">＊ STATUS ＊</h1>
+          <div class="nde-status-identity"><strong>NO_NAME</strong><strong>UNKNOWN</strong><strong>LV ---</strong></div>
+          <div class="nde-status-vitals"><span>HP ---- / ----</span><span>SP ---- / ----</span></div>
+          <section id="ndeStatRows" class="nde-stat-rows" aria-label="能力値未接続"></section>
+          <p class="nde-stat-note">能力値上限 30 / 装備・カード超過不可</p>
+          <h2 class="nde-section-title">＊ EQUIPMENT ＊</h2>
+          <div class="nde-equipment">
+            <span>RIGHT ARM</span><strong>----</strong><span>LEFT ARM</span><strong>----</strong><span>HEAD</span><strong>----</strong><span>BODY</span><strong>----</strong><span>FOOT</span><strong>----</strong><span>ACCESSORY</span><strong>----</strong>
+          </div>
+          <h2 class="nde-experience-title">＊ EXPERIENCE ＊</h2><div class="nde-experience">------- / ------- NEXT LEVEL</div>
+          <div class="nde-condition"><span>CONDITION</span><strong>----</strong></div>
+        </article>
+        <article class="nde-status-page" data-status-page="1" hidden>
+          <h1 class="menu-title">＊ DETAIL STATUS ＊</h1>
+          <div class="nde-detail-list">
+            <div><span>物理ダメージ</span><strong>---%</strong></div><div><span>呪文ダメージ</span><strong>---%</strong></div><div><span>呪文耐性</span><strong>---%</strong></div><div><span>会心率</span><strong>---%</strong></div><div><span>回避率</span><strong>---%</strong></div><div><span>命中率</span><strong>---%</strong></div><div><span>先制率</span><strong>---%</strong></div><div><span>罠解除率</span><strong>---%</strong></div><div><span>状態異常耐性</span><strong>---%</strong></div><div><span>たいまつ消費軽減</span><strong>---%</strong></div><div><span>気配上昇軽減</span><strong>---%</strong></div>
+          </div>
+        </article>
+        <div class="status-pager"><button type="button" class="menu-footer" data-status-nav="back">BACK</button><span data-status-indicator>1/2</span><button type="button" class="menu-footer" data-status-nav="next">NEXT</button></div>
+      </div>
+
+      <div class="menu-panel menu-panel-options" data-menu-view="options" hidden>
+        <h1 class="menu-title">＊ OPTION ＊</h1>
+        <div class="option-page" data-option-page="0">
+          <button type="button" class="option-item option-language" data-option="language"><span>・言語選択/LANGUAGE（未実装）</span><span>日本語/JAPANESE 🔘　英語/ENGLISH ⚫</span></button>
+          <div class="option-section"><div class="option-label">・BGM（未実装）</div><div class="toggle-row is-muted"><span>ON ⚫</span><span>OFF ⚫</span></div><label class="volume-row option-control" data-option="bgmVolume">Volume <input id="bgmVolume" type="range" min="0" max="100" value="0"> <span>0%</span></label></div>
+          <div class="option-section"><button type="button" class="option-item" data-option="seEnabled"><span>・SE</span><b data-option-state="seEnabled">ON 🔘　OFF ⚫</b></button><label class="volume-row option-control" data-option="seVolume">Volume <input id="seVolume" type="range" min="0" max="100" value="10"> <span>10%</span></label></div>
+        </div>
+        <div class="option-page" data-option-page="1" hidden>
+          <button type="button" class="option-item option-with-description" data-option="screenShake"><span class="option-heading">・画面の揺れ <b data-option-state="screenShake">ON 🔘　OFF ⚫</b></span><small>ダンジョン画面のゆらぎ演出を切り替えます。<br>画面酔いしやすい場合はOFFにしてください。</small></button>
+          <button type="button" class="option-item option-with-description" data-option="torchFlicker"><span class="option-heading">・たいまつの揺らぎ <b data-option-state="torchFlicker">ON 🔘　OFF ⚫</b></span><small>たいまつの灯りによる画面の明暗変化を切り替えます。<br>チカチカが気になる場合はOFFにしてください。</small></button>
+          <div class="npc-typewriter-option">
+            <button type="button" class="option-item" data-option="npcTypewriterEnabled"><span>・タイプライター表示</span><b data-option-state="npcTypewriterEnabled">ON 🔘　OFF ⚫</b></button>
+            <button type="button" class="option-item npc-typewriter-speed" data-option="npcTypewriterSpeed"><span data-option-state="npcTypewriterSpeed">SLOW ⚫　NORMAL 🔘　FAST ⚫</span></button>
+            <small>NPCの台詞をタイプライターの様に一文字ずつ表示します。<br>ONの場合は表示速度も変更できます。</small>
+          </div>
+        </div>
+        <div class="option-pager"><button type="button" class="menu-footer" data-option-nav="back">BACK</button><span class="page-indicator" data-page-indicator>1/2</span><button type="button" class="menu-footer" data-option-nav="next">NEXT</button></div>
+      </div>
+
+      <div class="menu-panel debug-panel" data-menu-view="debug" hidden>
+        <h1 class="menu-title">＊ DEBUG MODE ＊</h1>
+        <div class="debug-list" data-debug-page="0">
+          <button type="button" class="option-item" data-debug="random">・ランダム生成 <span data-debug-action="random">ON ⚫</span></button>
+          <button type="button" class="option-item" data-debug="compass">・コンパス表示 <span data-debug-state="compass">ON 🔘　OFF ⚫</span></button>
+          <button type="button" class="option-item" data-debug="readout">・座標/階層表示 <span data-debug-state="readout">ON ⚫　OFF 🔘</span></button>
+          <button type="button" class="option-item" data-debug="autoReturn">・オート帰還 <span data-debug-action="autoReturn">ON ⚫</span></button>
+          <button type="button" class="option-item" data-debug="torchFull">・たいまつゲージ満タン <span data-debug-action="torchFull">ON ⚫</span></button>
+          <button type="button" class="option-item" data-debug="torchFuelDisabled">・たいまつゲージ無効 <span data-debug-state="torchFuelDisabled">ON ⚫　OFF 🔘</span></button>
+          <button type="button" class="option-item" data-debug="presenceDisabled">・気配ゲージ無効 <span data-debug-state="presenceDisabled">ON ⚫　OFF 🔘</span></button>
+          <button type="button" class="option-item" data-debug="stairsDownVisible">・下り階段表示 <span data-debug-state="stairsDownVisible">ON ⚫　OFF 🔘</span></button>
+          <button type="button" class="option-item" data-debug="npcsVisible">・NPC表示 <span data-debug-state="npcsVisible">ON ⚫　OFF 🔘</span></button>
+          <button type="button" class="option-item" data-debug="treasuresVisible">・宝箱表示 <span data-debug-state="treasuresVisible">ON ⚫　OFF 🔘</span></button>
+        </div>
+        <div class="debug-list debug-mist-list" data-debug-page="1" hidden>
+          <div class="debug-stopwatch-row"><span>・経過時間</span><span class="debug-stopwatch-actions"><button type="button" data-debug="stopwatchOn">ON <i data-stopwatch-state="on">🔘</i></button><button type="button" data-debug="stopwatchOff">OFF <i data-stopwatch-state="off">⚫</i></button><button type="button" data-debug="stopwatchReset">RESET <i data-stopwatch-state="reset">⚫</i></button></span></div>
+          <div class="option-item wall-color-row" data-debug="wallColor"><span>・壁の色</span><span class="wall-color-buttons"><span><button type="button" data-wall-color="default">デフォルト <i>🔘</i></button><button type="button" data-wall-color="red">赤 <i>⚫</i></button><button type="button" data-wall-color="blue">青 <i>⚫</i></button></span><span><button type="button" data-wall-color="green">緑 <i>⚫</i></button><button type="button" data-wall-color="white">白 <i>⚫</i></button><button type="button" data-wall-color="black">黒 <i>⚫</i></button></span></span></div>
+          <div class="option-item floor-color-row" data-debug="floorColor"><span>・床の色</span><span class="floor-color-buttons"><span><button type="button" data-floor-color="default">デフォルト <i>🔘</i></button><button type="button" data-floor-color="red">赤 <i>⚫</i></button><button type="button" data-floor-color="blue">青 <i>⚫</i></button></span><span><button type="button" data-floor-color="green">緑 <i>⚫</i></button><button type="button" data-floor-color="purple">紫 <i>⚫</i></button><button type="button" data-floor-color="white">白 <i>⚫</i></button></span></span></div>
+          <button type="button" class="option-item" data-debug="mistEnabled">・霧 <span data-debug-state="mistEnabled">ON 🔘　OFF ⚫</span></button>
+          <div class="option-item mist-color-row" data-debug="mistColor"><span>・霧の色</span><span class="mist-color-buttons"><button type="button" data-mist-color="green">緑 <i>🔘</i></button><button type="button" data-mist-color="frost">青白 <i>⚫</i></button><button type="button" data-mist-color="poison">紫 <i>⚫</i></button></span></div>
+          <label class="option-item debug-slider-row" data-debug="mistIntensity"><span>・霧の濃さ</span><input id="mistIntensity" type="range" min="25" max="200" step="25" value="100"><output data-debug-value="mistIntensity">100%</output></label>
+          <label class="option-item debug-slider-row" data-debug="mistDistance"><span>・霧の距離</span><input id="mistDistance" type="range" min="3" max="9" step="1" value="9"><output data-debug-value="mistDistance">9マス</output></label>
+          <p class="debug-mist-note">霧は環境演出として独立しています。黒い暗闇はたいまつ50%未満から強まり、霧より優先して表示されます。</p>
+        </div>
+        <div class="debug-pager"><button type="button" class="menu-footer" data-debug-nav="back">BACK</button><span class="page-indicator" data-debug-indicator>1/2</span><button type="button" class="menu-footer" data-debug-nav="next">NEXT</button></div>
+      </div>
+    </section>
+  </section>
+</main>
+  <script type="module" src="js/title-screen.js?v=20260721-1"></script>
+  <script type="module" src="js/main.js?v=20260722-22"></script>
+</body>
+</html>

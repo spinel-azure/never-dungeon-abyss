@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>NDE Treasure Chest Prototype</title>
+  <link rel="stylesheet" href="./treasure-chest.css">
+</head>
+<body>
+  <main class="prototype-shell" aria-label="Treasure chest polygon prototype">
+    <canvas id="chestScene" aria-label="Polygon treasure chest preview"></canvas>
+
+    <section class="button-panel" aria-label="Lid controls">
+      <button id="openButton" class="round-command" type="button">OPEN</button>
+      <button id="closeButton" class="round-command" type="button">CLOSE</button>
+      <button id="eventButton" class="round-command" type="button">EVENT</button>
+      <button id="typeButton" class="round-command" type="button">TYPE<output id="typeValue">RED</output></button>
+    </section>
+
+    <label class="slider-control slider-control-size" aria-label="Scale">
+      <span>SIZE <output id="scaleValue">100%</output></span>
+      <input id="scaleSlider" type="range" min="60" max="170" value="100">
+    </label>
+
+    <label class="slider-control slider-control-lid" aria-label="Lid angle">
+      <span>LID <output id="lidValue">0°</output></span>
+      <input id="lidSlider" type="range" min="0" max="100" value="0">
+    </label>
+
+    <label class="slider-control slider-control-rotation" aria-label="Rotation">
+      <span>ROTATE <output id="rotationValue">24°</output></span>
+      <input id="rotationSlider" type="range" min="0" max="360" value="24">
+    </label>
+  </main>
+
+  <script type="module" src="./treasure-chest.js"></script>
+</body>
+</html>

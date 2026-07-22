@@ -1,0 +1,28 @@
+@font-face {
+  font-family: "NDE k8x12";
+  src: url("../../fonts/k8x12.woff2") format("woff2");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "NDE DotGothic16";
+  src: url("../../fonts/DotGothic16-Regular.woff2") format("woff2");
+  font-display: swap;
+}
+
+/* Default UI, headings, stat names and controls. */
+body,
+button,
+select,
+input {
+  font-family: "NDE k8x12", monospace;
+}
+
+/* Readability-first player information. These content classes are also the
+   contract for the future equipment and condition sections. */
+.vitals,
+#experience,
+.equipment-content,
+.condition-content {
+  font-family: "NDE DotGothic16", sans-serif;
+}
