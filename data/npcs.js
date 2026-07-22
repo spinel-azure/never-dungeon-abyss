@@ -6,6 +6,7 @@ export const npcs = [
     image: "images/npc/NPC_01.avif",
     interactionType: "talk",
     greeting: "にゃ～？",
+    voiceSe: ["catVoice01", "catVoice02", "catVoice03"],
     encounters: [
       {
         dialogue: ["素数は孤独な数字にゃん…。でも1だけは寄り添ってくれるにゃん。"],

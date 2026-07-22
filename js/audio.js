@@ -16,7 +16,10 @@ export const SE = Object.freeze({
   confirm: "cursor_1.wav",
   cancel: "cancel.wav",
   item: "item_3.wav",
-  heal: "little_cure.wav"
+  heal: "little_cure.wav",
+  catVoice01: "cat_voice01.mp3",
+  catVoice02: "cat_voice02.mp3",
+  catVoice03: "cat_voice03.mp3"
 });
 
 const audio = {
@@ -45,7 +48,10 @@ const PLAYBACK_POLICIES = {
   door: { mode: "drop", priority: 3 },
   battleStart: { mode: "complete", priority: 3 },
   battleVictory: { mode: "complete", priority: 3 },
-  enemyDefeated: { mode: "complete", priority: 3 }
+  enemyDefeated: { mode: "complete", priority: 3 },
+  catVoice01: { mode: "complete", priority: 2 },
+  catVoice02: { mode: "complete", priority: 2 },
+  catVoice03: { mode: "complete", priority: 2 }
 };
 const DEFAULT_POLICY = { mode: "drop", priority: 2 };
 
@@ -165,6 +171,7 @@ function playSeToEnd(sound, key) {
 function makeSound(url) {
   const sound = new Audio(url);
   sound.preload = "none";
+  sound.loop = false;
   sound.addEventListener("ended", () => audio.activeSounds.delete(sound));
   sound.addEventListener("error", () => audio.activeSounds.delete(sound));
   return sound;

@@ -36,6 +36,7 @@ const hooks = {
   playTreasureOpening: (_type, onComplete) => onComplete(),
   hideTreasure: () => {},
   returnToTown: () => {},
+  playNpcVoice: () => {},
   onStateChanged: () => {}
 };
 
@@ -517,6 +518,10 @@ function renderNpcTypewriter(event) {
   const dialogue = typing.characters.slice(0, typing.visibleLength).join("");
   const closingQuote = typing.active ? "" : "」";
   hooks.say(`${event.npc.name}「${dialogue}${closingQuote}\n＊Aボタンで次へ`);
+  if (!typing.active && !event.voicePlayed && Array.isArray(event.npc.voiceSe) && event.npc.voiceSe.length) {
+    event.voicePlayed = true;
+    hooks.playNpcVoice(event.npc.voiceSe[Math.floor(Math.random() * event.npc.voiceSe.length)]);
+  }
 }
 
 function completeNpcTypewriter(event) {

@@ -36,8 +36,8 @@ export const TOWN_FACILITIES = Object.freeze([
     label: "？？？？？",
     keeper: "？？？？？",
     image: null,
-    greeting: "古びた転送陣は、まだ沈黙している。",
-    services: ["転送陣（予定）"],
+    greeting: "今は利用できない。",
+    services: [],
     unavailable: true
   },
   {
@@ -59,4 +59,3 @@ export const CHARACTER_JOBS = Object.freeze([
 export function getTownFacility(id) {
   return TOWN_FACILITIES.find(facility => facility.id === id) || null;
 }
-

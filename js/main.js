@@ -34,13 +34,13 @@ import {
   startRandomEncounterNotice,
   startFloorLapNotice,
   setNpcTypewriterOptions
-} from "./player.js?v=20260722-4";
+} from "./player.js?v=20260722-6";
 import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setMistOptions, setWallColor, setFloorColor } from "./renderer.js?v=20260722-8";
 import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minimap.js?v=20260722-1";
 import { configureInput } from "./input.js?v=20260722-2";
 import { configureVirtualStick } from "./virtualStick.js?v=20260722-1";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors } from "./menu.js?v=20260722-13";
+import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen } from "./menu.js?v=20260722-14";
 import { resolveFloorTheme } from "./floorTheme.js?v=20260722-1";
 import {
   configureAutoReturn,
@@ -59,9 +59,9 @@ import {
   setPresenceDisabled
 } from "./presence.js";
 import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js";
-import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js?v=20260722-6";
+import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js?v=20260722-8";
 import { loadGame, writeGame } from "./save-data.js";
-import { configureTown, openTown, closeTown, getTownState, handleTownInput, renderCharacterStatus } from "./town.js?v=20260722-1";
+import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260722-3";
 
 (() => {
   const canvas = document.getElementById("screen");
@@ -153,6 +153,7 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, rend
     playTreasureOpening,
     hideTreasure,
     returnToTown,
+    playNpcVoice: playSe,
     onStateChanged: scheduleAutosave
   });
   configureTown({
@@ -160,7 +161,8 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, rend
     getCharacter: () => character,
     onRegister: registerCharacter,
     onEnterDungeon: enterDungeonFromTown,
-    onStateChanged: scheduleAutosave
+    onStateChanged: scheduleAutosave,
+    isMenuOpen
   });
 
   function makeSaveSnapshot() {
@@ -256,7 +258,8 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, rend
     if (savedLocation === "town") {
       openTown({
         registrationRequired: !character,
-        facilityId: save.world?.town?.facilityId
+        facilityId: save.world?.town?.facilityId,
+        mode: save.world?.town?.mode
       });
     } else {
       closeTown();
@@ -305,7 +308,15 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, rend
   function updateCharacterUi() {
     renderCharacterStatus();
     const quickLevel = document.getElementById("quickLevel");
+    const quickJob = document.getElementById("quickJob");
+    const statusName = document.getElementById("statusName");
+    const statusJob = document.getElementById("statusJob");
+    const statusLevel = document.getElementById("statusLevel");
     if (quickLevel) quickLevel.textContent = character ? String(character.level).padStart(3, "0") : "---";
+    if (quickJob) quickJob.textContent = character?.jobLabel || "-";
+    if (statusName) statusName.textContent = character?.name || "NO_NAME";
+    if (statusJob) statusJob.textContent = character?.jobLabel || "UNKNOWN";
+    if (statusLevel) statusLevel.textContent = character ? `LV ${String(character.level).padStart(3, "0")}` : "LV ---";
   }
 
   function enterDungeonFromTown() {
@@ -321,7 +332,7 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, rend
 
   function returnToTown() {
     worldLocation = "town";
-    openTown({ registrationRequired: !character, facilityId: "guild" });
+    openTown({ registrationRequired: !character, facilityId: "guild", mode: "arrival" });
     saveGame();
   }
 
@@ -427,7 +438,10 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, rend
     setStopwatchVisible,
     resetStopwatch,
     saveGame: () => saveGame({ announce: true }),
-    onReturnToDungeon: resumeDismissedStairsPrompt
+    onReturnToDungeon: () => {
+      if (isTownOpen()) showTownArrival();
+      else resumeDismissedStairsPrompt();
+    }
   });
   configureVirtualStick({
     stickEl: virtualStickEl,

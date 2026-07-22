@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="css/style.css?v=20260722-2">
   <link rel="stylesheet" href="css/game-menu.css?v=20260722-6">
   <link rel="stylesheet" href="css/title-screen.css?v=20260722-3">
-  <link rel="stylesheet" href="css/town.css?v=20260722-3">
+  <link rel="stylesheet" href="css/town.css?v=20260722-4">
 </head>
 <body class="title-active">
   <section id="titleScreen" class="title-screen" aria-label="NEVER DUNGEON : ABYSS タイトル画面">
@@ -24,6 +24,7 @@
   <section class="game" aria-label="3Dダンジョン">
     <section id="townScreen" class="town-screen" aria-label="町の施設" hidden>
       <div class="town-portrait-frame">
+        <img id="townBackground" class="town-background" src="images/background/town_01.avif" alt="町の風景" hidden>
         <img id="townPortrait" class="town-portrait" alt="" hidden>
         <div id="townPortraitPlaceholder" class="town-portrait-placeholder" aria-hidden="true">NDA</div>
         <span id="townFacilityName" class="town-facility-badge">ギルド</span>
@@ -58,7 +59,7 @@
     </div>
 
     <div class="quick-status" aria-label="プレイヤーステータス未接続">
-      <span>Lv:<output id="quickLevel">---</output></span><span>[-]</span>
+      <span>Lv:<output id="quickLevel">---</output></span><span>[<output id="quickJob">-</output>]</span>
       <span>HP <output class="quick-value">----</output> / <output class="quick-value">----</output></span>
       <span>SP <output class="quick-value">----</output> / <output class="quick-value">----</output></span>
       <span>Cond:<output>----</output></span>
@@ -87,7 +88,7 @@
       <div class="menu-panel status-panel" data-menu-view="status" hidden>
         <article class="nde-status-page" data-status-page="0">
           <h1 class="menu-title">＊ STATUS ＊</h1>
-          <div class="nde-status-identity"><strong>NO_NAME</strong><strong>UNKNOWN</strong><strong>LV ---</strong></div>
+          <div class="nde-status-identity"><strong id="statusName">NO_NAME</strong><strong id="statusJob">UNKNOWN</strong><strong id="statusLevel">LV ---</strong></div>
           <div class="nde-status-vitals"><span>HP ---- / ----</span><span>SP ---- / ----</span></div>
           <section id="ndeStatRows" class="nde-stat-rows" aria-label="能力値未接続"></section>
           <p class="nde-stat-note">能力値上限 30 / 装備・カード超過不可</p>
@@ -156,6 +157,6 @@
   </section>
 </main>
   <script type="module" src="js/title-screen.js?v=20260722-1"></script>
-  <script type="module" src="js/main.js?v=20260722-27"></script>
+  <script type="module" src="js/main.js?v=20260722-30"></script>
 </body>
 </html>
