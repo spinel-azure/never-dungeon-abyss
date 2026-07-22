@@ -23,7 +23,7 @@ body.title-active .shell{visibility:hidden}
   grid-row:2;
   margin:0;
   color:#f7ffff;
-  font:400 clamp(25px,6.4vw,80px)/1.05 "PixelFont",monospace;
+  font:400 clamp(18px,5.2vw,72px)/1.05 "PixelFont",monospace;
   letter-spacing:.025em;
   white-space:nowrap;
   animation:titleGlow 3.2s ease-in-out infinite;
@@ -31,8 +31,11 @@ body.title-active .shell{visibility:hidden}
 .title-description{
   grid-row:4;
   margin:0;
-  font:400 clamp(19px,3.4vw,46px)/1.8 "PixelFont",monospace;
+  color:#e7f4f4;
+  font:400 clamp(11px,2.2vw,28px)/1.35 "PixelFont",monospace;
   letter-spacing:.02em;
+  white-space:nowrap;
+  animation:subtitleGlow 5s ease-in-out infinite;
 }
 .title-prompt{
   grid-row:6;
@@ -64,17 +67,22 @@ body.title-active .shell{visibility:hidden}
   0%,100%{text-shadow:0 0 4px #dfffff,0 0 10px #69e9ff,0 0 20px rgba(37,184,255,.58)}
   50%{text-shadow:0 0 7px #fff,0 0 18px #8df6ff,0 0 36px rgba(37,184,255,.92),0 0 54px rgba(60,132,255,.4)}
 }
+@keyframes subtitleGlow{
+  0%,100%{opacity:.78;text-shadow:0 0 3px rgba(223,255,255,.42),0 0 8px rgba(83,224,255,.18)}
+  50%{opacity:.94;text-shadow:0 0 4px rgba(255,255,255,.62),0 0 12px rgba(83,224,255,.3)}
+}
 @keyframes promptGlow{
   0%,100%{opacity:.72;text-shadow:0 0 3px #dfffff,0 0 8px rgba(83,224,255,.38)}
   50%{opacity:1;text-shadow:0 0 5px #fff,0 0 13px rgba(83,224,255,.78),0 0 24px rgba(43,132,255,.35)}
 }
 @media(max-width:420px){
   .title-screen{grid-template-rows:1.05fr auto .9fr auto 1.25fr auto}
-  .title-description{line-height:1.9}
+  .title-description{line-height:1.35}
   .title-prompt{margin-bottom:52px}
 }
 @media(prefers-reduced-motion:reduce){
-  .title-logo,.title-prompt{animation:none}
+  .title-logo,.title-description,.title-prompt{animation:none}
   .title-logo{text-shadow:0 0 6px #fff,0 0 18px #69e9ff,0 0 30px rgba(37,184,255,.7)}
+  .title-description{opacity:.88;text-shadow:0 0 3px rgba(223,255,255,.5),0 0 8px rgba(83,224,255,.2)}
   .title-prompt{text-shadow:0 0 4px #fff,0 0 12px rgba(83,224,255,.6)}
 }
