@@ -34,7 +34,8 @@ const hooks = {
   playStairsSequence: () => Promise.resolve(),
   showTreasure: () => {},
   playTreasureOpening: (_type, onComplete) => onComplete(),
-  hideTreasure: () => {}
+  hideTreasure: () => {},
+  onStateChanged: () => {}
 };
 
 const NPC_AWARENESS_MESSAGE = "前方に何かいるようだ";
@@ -165,6 +166,7 @@ export function updateAnimation(now) {
       updateNpcAwareness();
     }
     state.anim = null;
+    hooks.onStateChanged();
     if (state.autoReturning) hooks.continueAutoReturn();
   }
 }
@@ -426,6 +428,7 @@ function confirmTreasureEvent() {
       hooks.say("中には何も入っていなかった！");
     }
     updateNpcAwareness();
+    hooks.onStateChanged();
   });
 }
 
@@ -448,10 +451,12 @@ function advanceNpcTalkEvent() {
   if (event.leaveAfterTalk) {
     removeNpcAt(event.npcGX, event.npcGY);
     hooks.say(`${event.npc.name}は去っていった。`);
+    hooks.onStateChanged();
     return;
   }
 
   hooks.say("");
+  hooks.onStateChanged();
   startNpcRetreat(event);
 }
 
@@ -483,6 +488,7 @@ function cancelOverlayEvent() {
     discoverTreasureAt(event.treasureGX, event.treasureGY);
     hooks.hideTreasure();
   }
+  hooks.onStateChanged();
   if (event.retreatOnCancel) startNpcRetreat(event);
 }
 

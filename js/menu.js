@@ -26,6 +26,7 @@ const menu = {
   setMinimapRevealOptions: () => {},
   setNpcTypewriterOptions: () => {},
   setStopwatchVisible: () => {}, resetStopwatch: () => {},
+  saveGame: () => false,
   onReturnToDungeon: () => {}
 };
 
@@ -97,7 +98,7 @@ function handleCommands(action) {
   if (["up", "down", "left", "right"].includes(action)) { menu.commandIndex = (menu.commandIndex + 1) % menu.enabledCommands.length; updateSelection(); return; }
   if (action === "confirm") openCommand(menu.enabledCommands[menu.commandIndex].dataset.command);
 }
-function openCommand(key) { if (key === "status") { menu.view = "status"; menu.statusPage = 0; updateView(); } else if (key === "options") setOptionPage(0); }
+function openCommand(key) { if (key === "status") { menu.view = "status"; menu.statusPage = 0; updateView(); } else if (key === "options") setOptionPage(0); else if (key === "save") { closeCampMenu("save"); menu.saveGame(); } }
 function handleStatus(action) { if (action === "cancel") { menu.view = "commands"; updateView(); } else if (action === "left") { menu.statusPage = 0; updateStatus(); } else if (action === "right") { menu.statusPage = 1; updateStatus(); } else if (action === "confirm") { menu.view = "commands"; updateView(); } }
 function statusNavigate(key) { if (key === "back") { if (menu.statusPage === 0) { menu.view = "commands"; updateView(); } else { menu.statusPage = 0; updateStatus(); } } else if (menu.statusPage === 0) { menu.statusPage = 1; updateStatus(); } else { menu.view = "commands"; updateView(); } }
 

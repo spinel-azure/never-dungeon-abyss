@@ -1,6 +1,7 @@
 import {
   MAP_W,
-  MAP_H
+  MAP_H,
+  DIRS
 } from "./config.js";
 import {
   cells,
@@ -33,13 +34,13 @@ import {
   startRandomEncounterNotice,
   startFloorLapNotice,
   setNpcTypewriterOptions
-} from "./player.js?v=20260722-2";
+} from "./player.js?v=20260722-3";
 import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setMistOptions, setWallColor, setFloorColor } from "./renderer.js?v=20260722-8";
 import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minimap.js?v=20260722-1";
 import { configureInput } from "./input.js";
 import { configureVirtualStick } from "./virtualStick.js";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors } from "./menu.js?v=20260722-12";
+import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors } from "./menu.js?v=20260722-13";
 import { resolveFloorTheme } from "./floorTheme.js?v=20260722-1";
 import {
   configureAutoReturn,
@@ -53,11 +54,13 @@ import { configureDevice } from "./device.js?v=20260722-1";
 import {
   configurePresence,
   getPresence,
+  restorePresence,
   resetPresence,
   setPresenceDisabled
 } from "./presence.js";
 import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js";
 import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js?v=20260722-6";
+import { loadGame, writeGame } from "./save-data.js";
 
 (() => {
   const canvas = document.getElementById("screen");
@@ -68,6 +71,8 @@ import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js
   const W = canvas.width;
   let runStartedAt = performance.now();
   let floorStartedAt = runStartedAt;
+  let saveEnabled = false;
+  let autosaveTimer = 0;
 
 
   randomizeStartPosition();
@@ -142,8 +147,108 @@ import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js
     playStairsSequence: () => playSeSequence("stairs", 3),
     showTreasure,
     playTreasureOpening,
-    hideTreasure
+    hideTreasure,
+    onStateChanged: scheduleAutosave
   });
+
+  function makeSaveSnapshot() {
+    const now = performance.now();
+    return {
+      player: {
+        gridX: state.gridX,
+        gridY: state.gridY,
+        dir: state.dir,
+        torchFuel: state.torchFuel,
+        npcEncounterCounts: { ...state.npcEncounterCounts },
+        stairsPromptDismissed: state.stairsPromptDismissed
+      },
+      dungeon: {
+        depth: currentDepth,
+        cells: structuredClone(cells),
+        explored: explored.map(row => row.slice()),
+        startPosition: cells.flat().find(cell => cell.type === "stairsUp") || { x: state.gridX, y: state.gridY },
+        theme: getDungeonColors(),
+        presence: getPresence(),
+        runElapsedMs: Math.max(0, now - runStartedAt),
+        floorElapsedMs: Math.max(0, now - floorStartedAt)
+      }
+    };
+  }
+
+  function saveGame({ announce = false } = {}) {
+    if (!saveEnabled) return false;
+    if (autosaveTimer) {
+      clearTimeout(autosaveTimer);
+      autosaveTimer = 0;
+    }
+    const saved = writeGame(makeSaveSnapshot());
+    if (announce) say(saved ? "セーブしました。" : "セーブに失敗しました。");
+    return saved;
+  }
+
+  function scheduleAutosave() {
+    if (!saveEnabled) return;
+    if (autosaveTimer) clearTimeout(autosaveTimer);
+    autosaveTimer = window.setTimeout(() => saveGame(), 250);
+  }
+
+  function restoreGame(save) {
+    const dungeon = save?.dungeon;
+    const player = save?.player;
+    if (!dungeon || !player || dungeon.cells.length !== MAP_H || dungeon.explored.length !== MAP_H) return false;
+    if (!dungeon.cells.every(row => Array.isArray(row) && row.length === MAP_W)) return false;
+    if (!dungeon.explored.every(row => Array.isArray(row) && row.length === MAP_W)) return false;
+    if (!inBounds(player.gridX, player.gridY) || !Number.isInteger(player.dir) || !DIRS[player.dir]) return false;
+
+    for (let y = 0; y < MAP_H; y += 1) {
+      for (let x = 0; x < MAP_W; x += 1) {
+        Object.assign(cells[y][x], structuredClone(dungeon.cells[y][x]));
+        explored[y][x] = Boolean(dungeon.explored[y][x]);
+      }
+    }
+    const start = dungeon.startPosition;
+    if (start && inBounds(start.x, start.y)) setStartPosition(start.x, start.y);
+    currentDepth = Math.max(1, Math.floor(Number(dungeon.depth) || 1));
+    setDungeonColors(dungeon.theme || {});
+    state.anim = null;
+    state.gridX = player.gridX;
+    state.gridY = player.gridY;
+    state.dir = player.dir;
+    state.x = player.gridX + .5;
+    state.y = player.gridY + .5;
+    state.angle = DIRS[player.dir].angle;
+    state.shake = 0;
+    state.torchFuel = Math.max(0, Math.min(100, Number(player.torchFuel) || 0));
+    state.autoReturning = false;
+    state.autoPath = [];
+    state.overlayEvent = null;
+    state.npcAwarenessShown = false;
+    state.npcEncounterCounts = player.npcEncounterCounts && typeof player.npcEncounterCounts === "object" ? { ...player.npcEncounterCounts } : {};
+    state.stairsPromptDismissed = Boolean(player.stairsPromptDismissed);
+    restorePresence(dungeon.presence);
+    const now = performance.now();
+    runStartedAt = now - Math.max(0, Number(dungeon.runElapsedMs) || 0);
+    floorStartedAt = now - Math.max(0, Number(dungeon.floorElapsedMs) || 0);
+    cancelAutoReturn(false);
+    updateAutoReturnButton();
+    updateHud();
+    say("冒険を再開しました。");
+    return true;
+  }
+
+  function startNewGame() {
+    saveEnabled = true;
+    currentDepth = 1;
+    setDungeonColors({ wall: "default", floor: "default" });
+    resetDungeon("", null, true);
+    saveGame();
+  }
+
+  function continueGame() {
+    const save = loadGame();
+    saveEnabled = true;
+    if (!restoreGame(save)) startNewGame();
+  }
 
   function resetDungeon(message = "", nextStart = null, resetTimer = false) {
     cancelAutoReturn(false);
@@ -161,6 +266,7 @@ import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js
     updateAutoReturnButton();
     updateHud();
     if (message) say(message);
+    scheduleAutosave();
   }
 
   function generateRandomDungeon() {
@@ -176,6 +282,7 @@ import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js
     floorStartedAt = descendedAt;
     resetDungeon("", nextStart);
     startFloorLapNotice(currentDepth, lapTime);
+    scheduleAutosave();
   }
 
   function updateHud() {
@@ -243,6 +350,7 @@ import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js
     setNpcTypewriterOptions,
     setStopwatchVisible,
     resetStopwatch,
+    saveGame: () => saveGame({ announce: true }),
     onReturnToDungeon: resumeDismissedStairsPrompt
   });
   configureVirtualStick({
@@ -254,6 +362,10 @@ import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js
 
   updateAutoReturnButton();
   startRenderLoop();
+  window.addEventListener("nda:new-game", startNewGame);
+  window.addEventListener("nda:continue", continueGame);
+  window.addEventListener("pagehide", () => saveGame());
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") saveGame(); });
 })();
 
 

@@ -9,13 +9,13 @@
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
   <link rel="stylesheet" href="css/style.css?v=20260722-2">
   <link rel="stylesheet" href="css/game-menu.css?v=20260722-6">
-  <link rel="stylesheet" href="css/title-screen.css?v=20260722-2">
+  <link rel="stylesheet" href="css/title-screen.css?v=20260722-3">
 </head>
 <body class="title-active">
-  <section id="titleScreen" class="title-screen" role="button" tabindex="0" aria-label="NEVER DUNGEON : ABYSSを開始">
+  <section id="titleScreen" class="title-screen" aria-label="NEVER DUNGEON : ABYSS タイトル画面">
     <h1 class="title-logo">NEVER DUNGEON : ABYSS</h1>
     <p class="title-description">THE MISSING QUEEN AND THE MYSTERIOUS CAT</p>
-  <p class="title-prompt">PRESS ANY KEY / TAP</p>
+  <div id="titleMenu" class="title-menu" aria-label="タイトルメニュー"></div>
     <p class="title-version">MVP1.0</p>
   <p class="title-updated">LAST UPDATED : 2026-07-22</p>
 </section>
@@ -46,7 +46,7 @@
       <button type="button" data-command="status">ステータス</button>
       <button type="button" data-command="deck" disabled>？？？？？</button>
       <button type="button" data-command="skills" disabled>スキル</button>
-      <button type="button" data-command="save" disabled>セーブ</button>
+      <button type="button" data-command="save">セーブ</button>
       <button type="button" data-command="options">オプション</button>
     </section>
     <p id="commandHint" class="command-hint">＊ Bボタンでメニュー表示</p>
@@ -132,7 +132,7 @@
     </section>
   </section>
 </main>
-  <script type="module" src="js/title-screen.js?v=20260721-1"></script>
-  <script type="module" src="js/main.js?v=20260722-22"></script>
+  <script type="module" src="js/title-screen.js?v=20260722-1"></script>
+  <script type="module" src="js/main.js?v=20260722-23"></script>
 </body>
 </html>

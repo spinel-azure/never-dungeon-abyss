@@ -22,6 +22,12 @@ export function getPresence() {
   return presence;
 }
 
+export function restorePresence(value) {
+  presence = Math.max(0, Math.min(PRESENCE_MAX, Math.floor(Number(value) || 0)));
+  encounterActive = presence >= PRESENCE_MAX;
+  hooks.onChange(presence);
+}
+
 export function addPresence(amount) {
   if (presenceDisabled) return false;
   if (encounterActive) return false;

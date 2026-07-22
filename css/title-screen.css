@@ -8,7 +8,7 @@
   min-height:100dvh;
   padding:max(24px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));
   overflow:hidden;
-  cursor:pointer;
+  cursor:default;
   user-select:none;
   touch-action:manipulation;
   background:radial-gradient(circle at 50% 42%,#101615 0,#080b0a 42%,#020303 78%,#000 100%);
@@ -37,13 +37,27 @@ body.title-active .shell{visibility:hidden}
   white-space:nowrap;
   animation:subtitleGlow 5s ease-in-out infinite;
 }
-.title-prompt{
+.title-menu{
   grid-row:6;
   align-self:start;
   margin:0 0 clamp(36px,8vh,86px);
+  display:grid;
+  gap:clamp(10px,2vh,22px);
   font:400 clamp(20px,4.2vw,56px)/1 "PixelFont",monospace;
   white-space:nowrap;
-  animation:promptGlow 4.5s ease-in-out infinite;
+}
+.title-menu button{
+  padding:.12em .45em;
+  border:1px solid transparent;
+  background:transparent;
+  color:#f8ffff;
+  font:inherit;
+  cursor:pointer;
+  text-shadow:0 0 5px #fff,0 0 13px rgba(83,224,255,.78);
+}
+.title-menu button.is-selected{
+  border-color:rgba(176,244,255,.92);
+  box-shadow:0 0 12px rgba(120,230,255,.72),inset 0 0 9px rgba(120,230,255,.24);
 }
 .title-updated{
   position:absolute;
@@ -78,11 +92,10 @@ body.title-active .shell{visibility:hidden}
 @media(max-width:420px){
   .title-screen{grid-template-rows:1.05fr auto .9fr auto 1.25fr auto}
   .title-description{line-height:1.35}
-  .title-prompt{margin-bottom:52px}
+  .title-menu{margin-bottom:52px}
 }
 @media(prefers-reduced-motion:reduce){
-  .title-logo,.title-description,.title-prompt{animation:none}
+  .title-logo,.title-description{animation:none}
   .title-logo{text-shadow:0 0 6px #fff,0 0 18px #69e9ff,0 0 30px rgba(37,184,255,.7)}
   .title-description{opacity:.88;text-shadow:0 0 3px rgba(223,255,255,.5),0 0 8px rgba(83,224,255,.2)}
-  .title-prompt{text-shadow:0 0 4px #fff,0 0 12px rgba(83,224,255,.6)}
 }
