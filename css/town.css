@@ -1,0 +1,27 @@
+.town-screen{display:grid;gap:10px;width:min(98vw,760px);margin:auto;color:#f7fbff;font-family:"GameFont",sans-serif}
+.town-screen[hidden]{display:none}
+.town-portrait[hidden],.town-portrait-placeholder[hidden],.guild-registration[hidden]{display:none}
+.town-portrait-frame{position:relative;height:clamp(220px,47vh,430px);overflow:hidden;border:1px solid #4f493b;border-radius:7px;background:radial-gradient(circle at 50% 28%,#1d201b,#080a08 68%,#020302);box-shadow:inset 0 0 0 1px #ffffff0d}
+.town-portrait{display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;image-rendering:auto}
+.town-portrait-placeholder{display:grid;place-items:center;height:100%;color:#7b786d;font:clamp(28px,8vw,70px) "PixelFont",monospace;text-shadow:0 0 14px #3c675d}
+.town-facility-badge{position:absolute;top:8px;left:10px;padding:4px 8px;border:1px solid #5c5a4d;background:#050706cc;color:#dcece8;font:14px "PixelFont",monospace}
+.town-status{display:grid;grid-template-columns:auto auto 1fr 1fr 1fr;gap:12px;align-items:center;padding:8px 10px;border:1px solid #4f493b;border-radius:7px;background:#050706;font:clamp(12px,2.3vw,18px) "PixelFont",monospace}
+.town-status span:nth-child(n+3){text-align:center}
+.town-message{min-height:72px;padding:9px 11px;border:1px solid #4f493b;border-radius:7px;background:#050706;font-size:clamp(16px,3vw,24px);line-height:1.45;white-space:pre-wrap}
+.town-speaker{color:#87e5ff}
+.town-facilities{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.town-facilities button{min-height:44px;padding:5px 8px;border:1px solid #4f493b;border-radius:6px;background:#080a08;color:#f7fbff;font:clamp(18px,3vw,27px) "GameFont",sans-serif}
+.town-facilities button.is-selected{border-color:#b0f4ff;background:#183039;box-shadow:0 0 9px #78e6ff99,inset 0 0 8px #78e6ff38}
+.town-facilities button.is-locked{color:#77736a}
+.guild-registration{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;padding:10px;border:1px solid #4f493b;border-radius:7px;background:#050706}
+.guild-registration label{display:grid;gap:4px;color:#9be6ff;font:12px "PixelFont",monospace}
+.guild-registration input,.guild-registration select{min-width:0;padding:8px;border:1px solid #5bd1ff;background:#071011;color:#fff;font:18px "GameFont",sans-serif}
+.guild-registration button{align-self:end;min-height:42px;padding:7px 14px;border:1px solid #efff00;background:#efff00;color:#090900;font:18px "PixelFont",monospace}
+.registration-feedback{grid-column:1/-1;min-height:1.2em;margin:0;color:#ffdd66;text-align:center}
+body.town-active .game>.viewport,body.town-active .game>.quick-status,body.town-active .game>.message,body.town-active .game>.dungeon-commands,body.town-active .game>.command-hint{display:none}
+body.town-active .game{grid-template-rows:auto auto}
+body.town-active .pad{visibility:hidden}
+body.town-active .controls{min-height:140px}
+@media(max-width:680px){.town-screen{gap:6px}.town-portrait-frame{height:clamp(190px,43vh,350px)}.town-status{grid-template-columns:auto auto 1fr 1fr;gap:5px;padding:6px;font-size:11px}.town-status span:last-child{grid-column:1/-1}.town-message{min-height:58px;padding:6px 8px;font-size:15px}.town-facilities{gap:4px}.town-facilities button{min-height:38px;padding:3px;font-size:18px}.guild-registration{grid-template-columns:1fr 1fr;padding:7px}.guild-registration button{grid-column:1/-1}.town-facility-badge{font-size:11px}body.town-active .controls{min-height:128px}}
+@media(max-width:680px){.town-screen.is-registering .town-portrait-frame{height:240px}}
+@media(max-height:700px){.town-portrait-frame{height:220px}.town-message{min-height:48px;font-size:14px}.town-facilities button{min-height:34px}.guild-registration{padding:5px}}

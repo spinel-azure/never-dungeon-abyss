@@ -35,6 +35,7 @@ const hooks = {
   showTreasure: () => {},
   playTreasureOpening: (_type, onComplete) => onComplete(),
   hideTreasure: () => {},
+  returnToTown: () => {},
   onStateChanged: () => {}
 };
 
@@ -347,7 +348,7 @@ function confirmStairsPrompt() {
     return;
   }
   state.overlayEvent = null;
-  hooks.say("地上への帰還はまだ実装されていません。");
+  hooks.returnToTown();
 }
 
 export function resumeDismissedStairsPrompt() {

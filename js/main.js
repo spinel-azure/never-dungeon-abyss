@@ -34,11 +34,11 @@ import {
   startRandomEncounterNotice,
   startFloorLapNotice,
   setNpcTypewriterOptions
-} from "./player.js?v=20260722-3";
+} from "./player.js?v=20260722-4";
 import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setMistOptions, setWallColor, setFloorColor } from "./renderer.js?v=20260722-8";
 import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minimap.js?v=20260722-1";
-import { configureInput } from "./input.js";
-import { configureVirtualStick } from "./virtualStick.js";
+import { configureInput } from "./input.js?v=20260722-2";
+import { configureVirtualStick } from "./virtualStick.js?v=20260722-1";
 import { configureCompass, drawCompass } from "./compass.js";
 import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors } from "./menu.js?v=20260722-13";
 import { resolveFloorTheme } from "./floorTheme.js?v=20260722-1";
@@ -61,6 +61,7 @@ import {
 import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js";
 import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js?v=20260722-6";
 import { loadGame, writeGame } from "./save-data.js";
+import { configureTown, openTown, closeTown, getTownState, handleTownInput, renderCharacterStatus } from "./town.js?v=20260722-1";
 
 (() => {
   const canvas = document.getElementById("screen");
@@ -73,6 +74,8 @@ import { loadGame, writeGame } from "./save-data.js";
   let floorStartedAt = runStartedAt;
   let saveEnabled = false;
   let autosaveTimer = 0;
+  let worldLocation = "dungeon";
+  let character = null;
 
 
   randomizeStartPosition();
@@ -100,6 +103,7 @@ import { loadGame, writeGame } from "./save-data.js";
   const buttonB = document.getElementById("buttonB");
   const menuScreen = document.getElementById("menuScreen");
   const dungeonCommands = document.getElementById("dungeonCommands");
+  const townScreen = document.getElementById("townScreen");
   let currentDepth = 1;
   configureDevice();
   configureEvents({ messageEl: msgEl });
@@ -148,6 +152,14 @@ import { loadGame, writeGame } from "./save-data.js";
     showTreasure,
     playTreasureOpening,
     hideTreasure,
+    returnToTown,
+    onStateChanged: scheduleAutosave
+  });
+  configureTown({
+    root: townScreen,
+    getCharacter: () => character,
+    onRegister: registerCharacter,
+    onEnterDungeon: enterDungeonFromTown,
     onStateChanged: scheduleAutosave
   });
 
@@ -161,6 +173,11 @@ import { loadGame, writeGame } from "./save-data.js";
         torchFuel: state.torchFuel,
         npcEncounterCounts: { ...state.npcEncounterCounts },
         stairsPromptDismissed: state.stairsPromptDismissed
+      },
+      character: character ? { ...character } : null,
+      world: {
+        location: worldLocation,
+        town: getTownState()
       },
       dungeon: {
         depth: currentDepth,
@@ -225,6 +242,7 @@ import { loadGame, writeGame } from "./save-data.js";
     state.npcAwarenessShown = false;
     state.npcEncounterCounts = player.npcEncounterCounts && typeof player.npcEncounterCounts === "object" ? { ...player.npcEncounterCounts } : {};
     state.stairsPromptDismissed = Boolean(player.stairsPromptDismissed);
+    character = save.character && typeof save.character === "object" ? { ...save.character } : null;
     restorePresence(dungeon.presence);
     const now = performance.now();
     runStartedAt = now - Math.max(0, Number(dungeon.runElapsedMs) || 0);
@@ -232,7 +250,18 @@ import { loadGame, writeGame } from "./save-data.js";
     cancelAutoReturn(false);
     updateAutoReturnButton();
     updateHud();
-    say("冒険を再開しました。");
+    updateCharacterUi();
+    const savedLocation = save.world?.location === "town" ? "town" : "dungeon";
+    worldLocation = savedLocation;
+    if (savedLocation === "town") {
+      openTown({
+        registrationRequired: !character,
+        facilityId: save.world?.town?.facilityId
+      });
+    } else {
+      closeTown();
+      say("冒険を再開しました。");
+    }
     return true;
   }
 
@@ -241,6 +270,10 @@ import { loadGame, writeGame } from "./save-data.js";
     currentDepth = 1;
     setDungeonColors({ wall: "default", floor: "default" });
     resetDungeon("", null, true);
+    character = null;
+    worldLocation = "town";
+    updateCharacterUi();
+    openTown({ registrationRequired: true, facilityId: "guild" });
     saveGame();
   }
 
@@ -248,6 +281,48 @@ import { loadGame, writeGame } from "./save-data.js";
     const save = loadGame();
     saveEnabled = true;
     if (!restoreGame(save)) startNewGame();
+  }
+
+  function registerCharacter({ name, job, jobLabel }) {
+    character = {
+      name,
+      job,
+      jobLabel,
+      level: 1,
+      experience: 0,
+      carriedExperience: 0,
+      hp: 30,
+      maxHp: 30,
+      sp: 15,
+      maxSp: 15,
+      condition: "GOOD",
+      alive: true
+    };
+    updateCharacterUi();
+    saveGame();
+  }
+
+  function updateCharacterUi() {
+    renderCharacterStatus();
+    const quickLevel = document.getElementById("quickLevel");
+    if (quickLevel) quickLevel.textContent = character ? String(character.level).padStart(3, "0") : "---";
+  }
+
+  function enterDungeonFromTown() {
+    if (!character) {
+      openTown({ registrationRequired: true, facilityId: "guild" });
+      return;
+    }
+    worldLocation = "dungeon";
+    closeTown();
+    say("奈落へ足を踏み入れた。");
+    saveGame();
+  }
+
+  function returnToTown() {
+    worldLocation = "town";
+    openTown({ registrationRequired: !character, facilityId: "guild" });
+    saveGame();
   }
 
   function resetDungeon(message = "", nextStart = null, resetTimer = false) {
@@ -328,6 +403,7 @@ import { loadGame, writeGame } from "./save-data.js";
     buttonA,
     buttonB,
     handleOverlayInput: handleOverlayEventInput,
+    handleTownInput,
     handleDoorInput: openDoorAhead,
     handleMenuInput
   });
@@ -357,6 +433,7 @@ import { loadGame, writeGame } from "./save-data.js";
     stickEl: virtualStickEl,
     manualMove,
     manualTurn,
+    handleTownInput,
     handleMenuInput
   });
 

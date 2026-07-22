@@ -10,6 +10,7 @@ export function configureVirtualStick({
   stickEl,
   manualMove,
   manualTurn,
+  handleTownInput = () => false,
   handleMenuInput = () => false
 }) {
   if (!stickEl) return;
@@ -132,8 +133,12 @@ export function configureVirtualStick({
     activeInputKey = inputKey;
     activeInputType = direction.type;
     const menuAction = menuActionForDirection(direction);
+    if (menuAction && handleTownInput(menuAction)) {
+      startActionRepeat(() => handleTownInput(menuAction));
+      return;
+    }
     if (menuAction && handleMenuInput(menuAction)) {
-      startMenuRepeat(menuAction);
+      startActionRepeat(() => handleMenuInput(menuAction));
       return;
     }
 
@@ -166,9 +171,9 @@ export function configureVirtualStick({
     return null;
   }
 
-  function startMenuRepeat(action) {
+  function startActionRepeat(action) {
     stopRepeat();
-    repeatTimer = window.setInterval(() => handleMenuInput(action), MOVE_REPEAT_MS);
+    repeatTimer = window.setInterval(action, MOVE_REPEAT_MS);
   }
 
   function startMoveRepeat(amount) {
