@@ -14,7 +14,7 @@ export const TOWN_FACILITIES = Object.freeze([
     keeper: "ギルド長",
     image: "images/npc/NPC_10.avif",
     background: "images/background/town_05.avif",
-    greeting: "見ない顔だな。流れ者か？",
+    greeting: "よぉ。今日はどうした？",
     services: ["キャラクター登録", "依頼受注", "依頼報告"]
   },
   {
@@ -38,7 +38,7 @@ export const TOWN_FACILITIES = Object.freeze([
   {
     id: "library",
     label: "図書館",
-    keeper: "",
+    keeper: "司書",
     portraitAlt: "図書館の主",
     image: "images/npc/NPC_14.avif",
     background: "images/background/town_06.avif",
