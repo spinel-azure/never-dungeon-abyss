@@ -364,6 +364,7 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTo
     sceneTransition.hidden = false;
     sceneTransition.classList.remove("is-black", "is-revealing");
     sceneTransition.classList.add("is-running");
+    document.body.classList.add("scene-transition-active");
     sceneTransitionTitle.hidden = !showEnteringTitle;
     void sceneTransition.offsetWidth;
 
@@ -379,6 +380,7 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTo
     await wait(700);
     sceneTransition.classList.remove("is-running", "is-revealing");
     sceneTransition.hidden = true;
+    document.body.classList.remove("scene-transition-active");
     sceneTransitionRunning = false;
     return true;
   }
