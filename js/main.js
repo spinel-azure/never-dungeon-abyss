@@ -24,6 +24,7 @@ import {
   resetPlayer,
   refillTorch,
   setTorchFuelDisabled,
+  setPlayerInputEnabled,
   updateAnimation,
   manualMove,
   manualTurn,
@@ -34,7 +35,7 @@ import {
   startRandomEncounterNotice,
   startFloorLapNotice,
   setNpcTypewriterOptions
-} from "./player.js?v=20260722-6";
+} from "./player.js?v=20260723-1";
 import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setMistOptions, setWallColor, setFloorColor } from "./renderer.js?v=20260722-8";
 import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minimap.js?v=20260722-1";
 import { configureInput } from "./input.js?v=20260722-2";
@@ -48,7 +49,7 @@ import {
   continueAutoReturn,
   cancelAutoReturn,
   updateAutoReturnButton
-} from "./autoReturn.js?v=20260722-1";
+} from "./autoReturn.js?v=20260723-1";
 import { configureEvents, messageFor, say } from "./events.js";
 import { configureDevice } from "./device.js?v=20260722-1";
 import {
@@ -61,7 +62,7 @@ import {
 import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js";
 import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js?v=20260722-8";
 import { loadGame, writeGame } from "./save-data.js";
-import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260722-3";
+import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260723-1";
 
 (() => {
   const canvas = document.getElementById("screen");
@@ -256,12 +257,14 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTo
     const savedLocation = save.world?.location === "town" ? "town" : "dungeon";
     worldLocation = savedLocation;
     if (savedLocation === "town") {
+      setPlayerInputEnabled(false);
       openTown({
         registrationRequired: !character,
         facilityId: save.world?.town?.facilityId,
         mode: save.world?.town?.mode
       });
     } else {
+      setPlayerInputEnabled(true);
       closeTown();
       say("冒険を再開しました。");
     }
@@ -275,6 +278,7 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTo
     resetDungeon("", null, true);
     character = null;
     worldLocation = "town";
+    setPlayerInputEnabled(false);
     updateCharacterUi();
     openTown({ registrationRequired: true, facilityId: "guild" });
     saveGame();
@@ -325,6 +329,7 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTo
       return;
     }
     worldLocation = "dungeon";
+    setPlayerInputEnabled(true);
     closeTown();
     say("奈落へ足を踏み入れた。");
     saveGame();
@@ -332,6 +337,8 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTo
 
   function returnToTown() {
     worldLocation = "town";
+    cancelAutoReturn(false);
+    setPlayerInputEnabled(false);
     openTown({ registrationRequired: !character, facilityId: "guild", mode: "arrival" });
     saveGame();
   }

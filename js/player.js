@@ -48,6 +48,7 @@ const DOOR_OPEN_MS = 520;
 const NPC_TYPEWRITER_DELAYS = { slow: 75, normal: 42, fast: 20 };
 const npcTypewriter = { enabled: true, speed: "normal", timer: 0 };
 let torchFuelDisabled = false;
+let playerInputEnabled = true;
 
 export const state = createPlayerState(2);
 
@@ -112,6 +113,14 @@ export function setTorchFuelDisabled(disabled) {
   if (torchFuelDisabled) refillTorch();
 }
 
+export function setPlayerInputEnabled(enabled) {
+  playerInputEnabled = Boolean(enabled);
+  if (!playerInputEnabled) {
+    state.autoReturning = false;
+    state.autoPath = [];
+  }
+}
+
 export function updateAnimation(now) {
   if (!state.anim) return;
   const a = state.anim;
@@ -174,6 +183,7 @@ export function updateAnimation(now) {
 }
 
 export function tryMove(amount, automated = false) {
+  if (!playerInputEnabled) return;
   if (state.anim) return;
   if (!automated) hooks.cancelAutoReturn(false);
   const currentDir = amount > 0 ? DIRS[state.dir] : DIRS[(state.dir + 2) % 4];
@@ -228,6 +238,7 @@ export function tryMove(amount, automated = false) {
 }
 
 export function turn(amount, automated = false) {
+  if (!playerInputEnabled) return;
   if (state.anim) return;
   if (!automated) hooks.cancelAutoReturn(false);
   const next = (state.dir + amount + 4) % 4;
@@ -243,6 +254,7 @@ export function turn(amount, automated = false) {
 }
 
 export function manualMove(amount) {
+  if (!playerInputEnabled) return;
   if (state.overlayEvent) return;
   if (state.autoReturning) {
     hooks.cancelAutoReturn(false);
@@ -252,6 +264,7 @@ export function manualMove(amount) {
 }
 
 export function manualTurn(amount) {
+  if (!playerInputEnabled) return;
   if (state.overlayEvent) return;
   if (state.autoReturning) {
     hooks.cancelAutoReturn(false);
@@ -261,6 +274,7 @@ export function manualTurn(amount) {
 }
 
 export function openDoorAhead() {
+  if (!playerInputEnabled) return false;
   if (state.overlayEvent || state.anim || state.autoReturning) return false;
   const dir = DIRS[state.dir];
   if (!closedDoorOnCell(state.gridX, state.gridY, dir.key)) return false;

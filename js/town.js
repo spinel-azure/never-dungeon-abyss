@@ -97,14 +97,14 @@ export function handleTownInput(action) {
       beginFacilitySelection();
       return true;
     }
-    return false;
+    return action === "cancel" ? false : true;
   }
   if (town.mode === "facility" && action === "cancel") {
     showTownArrival();
     return true;
   }
-  if (town.mode === "registration") return false;
-  if (town.mode !== "selection") return false;
+  if (town.mode === "registration") return action === "cancel" ? false : true;
+  if (town.mode !== "selection") return action === "cancel" ? false : true;
   if (["up", "left"].includes(action)) {
     moveSelection(-1);
     return true;

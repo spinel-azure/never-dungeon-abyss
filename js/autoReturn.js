@@ -12,7 +12,7 @@ import {
   turn,
   tryMove,
   turnToward
-} from "./player.js";
+} from "./player.js?v=20260723-1";
 
 const options = {
   autoReturnBtn: null,
