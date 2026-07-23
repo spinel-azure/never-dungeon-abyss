@@ -77,7 +77,7 @@ export function configureTown(options) {
     return button;
   });
   town.entranceButtons = [
-    { id: "enter", label: "ダンジョンに入る" },
+    { id: "enter", label: "中に入る" },
     { id: "circle", label: "転送陣" },
     { id: "return", label: "町に戻る" },
     { id: "empty-1", label: "", empty: true },
@@ -426,8 +426,7 @@ function renderDungeonEntrance() {
   town.portraitPlaceholder.hidden = true;
   town.registration.hidden = true;
   town.root.classList.remove("is-registering");
-  town.root.querySelector("#townFacilityName").hidden = false;
-  town.root.querySelector("#townFacilityName").textContent = "ダンジョン";
+  town.root.querySelector("#townFacilityName").hidden = true;
   town.messageEl.textContent = "奈落へ続く階段が、静かに口を開けている。";
   renderEntranceSelection();
   resetTownViewport();
@@ -442,8 +441,7 @@ function renderTransferCircle() {
   town.portrait.hidden = true;
   town.portraitPlaceholder.hidden = true;
   town.registration.hidden = true;
-  town.root.querySelector("#townFacilityName").hidden = false;
-  town.root.querySelector("#townFacilityName").textContent = "転送陣";
+  town.root.querySelector("#townFacilityName").hidden = true;
   town.messageEl.textContent = "転送陣はまだ力を失っている。";
   renderEntranceSelection();
   resetTownViewport();
