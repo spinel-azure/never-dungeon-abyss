@@ -63,9 +63,13 @@ export function openTown({ registrationRequired = false, facilityId = null, mode
   town.registrationRequired = Boolean(registrationRequired);
   const requested = getTownFacility(facilityId);
   const availableRequested = requested && !requested.unavailable ? requested : null;
-  const initialId = town.registrationRequired ? "guild" : availableRequested?.id || "guild";
+  const initialId = town.registrationRequired
+    ? "guild"
+    : mode === "arrival"
+      ? "inn"
+      : availableRequested?.id || "inn";
   town.selectedIndex = Math.max(0, TOWN_FACILITIES.findIndex(facility => facility.id === initialId));
-  town.mode = town.registrationRequired ? "registration" : mode === "facility" ? "facility" : "arrival";
+  town.mode = town.registrationRequired ? "registration" : mode === "facility" ? "facility" : "selection";
   document.body.classList.add("town-active");
   town.root.hidden = false;
   renderTownView();
@@ -152,7 +156,7 @@ function moveSelection(direction) {
 
       const candidateIndex = row * columns + column;
       const candidate = TOWN_FACILITIES[candidateIndex];
-      if (candidate && !candidate.unavailable) {
+      if (candidate) {
         town.selectedIndex = candidateIndex;
         break;
       }
@@ -196,7 +200,8 @@ function beginFacilitySelection() {
 
 export function showTownArrival() {
   if (!town.active || town.registrationRequired) return false;
-  town.mode = "arrival";
+  town.mode = "selection";
+  town.selectedIndex = TOWN_FACILITIES.findIndex(facility => facility.id === "inn");
   renderTownView();
   return true;
 }
@@ -227,7 +232,7 @@ function renderTownView() {
       const unavailable = Boolean(TOWN_FACILITIES[index].unavailable);
       button.disabled = unavailable;
       button.setAttribute("aria-disabled", String(!selecting || unavailable));
-      button.classList.toggle("is-selected", selecting && index === town.selectedIndex && !unavailable);
+      button.classList.toggle("is-selected", selecting && index === town.selectedIndex);
       button.classList.toggle("is-unavailable", unavailable);
       button.classList.remove("is-locked");
     });

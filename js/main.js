@@ -41,7 +41,7 @@ import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minima
 import { configureInput } from "./input.js?v=20260722-2";
 import { configureVirtualStick } from "./virtualStick.js?v=20260722-1";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen } from "./menu.js?v=20260722-14";
+import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen } from "./menu.js?v=20260723-1";
 import { resolveFloorTheme } from "./floorTheme.js?v=20260722-1";
 import {
   configureAutoReturn,
@@ -62,7 +62,7 @@ import {
 import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js";
 import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js?v=20260722-8";
 import { loadGame, writeGame } from "./save-data.js";
-import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260723-3";
+import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260723-4";
 
 (() => {
   const canvas = document.getElementById("screen");

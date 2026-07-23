@@ -84,7 +84,7 @@ export function handleMenuInput(action) {
     return false;
   }
   if (action === "up" || action === "down" || action === "left" || action === "right") menu.playSe("cursorMove");
-  else if (action === "confirm") menu.playSe("confirm");
+  else if (action === "confirm" && !(menu.view === "commands" && menu.commands[menu.commandIndex]?.disabled)) menu.playSe("confirm");
   else if (action === "cancel") menu.playSe("cancel");
   if (menu.view === "commands") handleCommands(action);
   else if (menu.view === "status") handleStatus(action);
@@ -95,8 +95,24 @@ export function handleMenuInput(action) {
 
 function handleCommands(action) {
   if (action === "cancel") { closeCampMenu("back"); return; }
-  if (["up", "down", "left", "right"].includes(action)) { menu.commandIndex = (menu.commandIndex + 1) % menu.enabledCommands.length; updateSelection(); return; }
-  if (action === "confirm") openCommand(menu.enabledCommands[menu.commandIndex].dataset.command);
+  if (["up", "down", "left", "right"].includes(action)) {
+    const columns = 3;
+    const rows = Math.ceil(menu.commands.length / columns);
+    let row = Math.floor(menu.commandIndex / columns);
+    let column = menu.commandIndex % columns;
+    if (action === "left") column = (column - 1 + columns) % columns;
+    if (action === "right") column = (column + 1) % columns;
+    if (action === "up") row = (row - 1 + rows) % rows;
+    if (action === "down") row = (row + 1) % rows;
+    const candidateIndex = row * columns + column;
+    if (menu.commands[candidateIndex]) menu.commandIndex = candidateIndex;
+    updateSelection();
+    return;
+  }
+  if (action === "confirm") {
+    const command = menu.commands[menu.commandIndex];
+    if (!command?.disabled) openCommand(command.dataset.command);
+  }
 }
 function openCommand(key) { if (key === "status") { menu.view = "status"; menu.statusPage = 0; updateView(); } else if (key === "options") setOptionPage(0); else if (key === "save") { closeCampMenu("save"); menu.saveGame(); } }
 function handleStatus(action) { if (action === "cancel") { menu.view = "commands"; updateView(); } else if (action === "left") { menu.statusPage = 0; updateStatus(); } else if (action === "right") { menu.statusPage = 1; updateStatus(); } else if (action === "confirm") { menu.view = "commands"; updateView(); } }
@@ -164,7 +180,7 @@ function executeDebug(key, amount = 1) {
 }
 function triggerAction(key, action) { menu.actionActive[key] = true; updateDebugStates(); setTimeout(() => { menu.actionActive[key] = false; action(); updateDebugStates(); }, ACTION_FEEDBACK_MS); }
 
-function bindCommands() { menu.commands.forEach(button => button.addEventListener("click", () => { if (button.disabled) return; menu.playSe("confirm"); menu.commandIndex = menu.enabledCommands.indexOf(button); updateSelection(); openCommand(button.dataset.command); })); }
+function bindCommands() { menu.commands.forEach(button => button.addEventListener("click", () => { if (button.disabled) return; menu.playSe("confirm"); menu.commandIndex = menu.commands.indexOf(button); updateSelection(); openCommand(button.dataset.command); })); }
 function bindStatus() { menu.statusPanel.querySelectorAll("[data-status-nav]").forEach(button => button.addEventListener("click", () => { menu.playSe(button.dataset.statusNav === "back" ? "cancel" : "confirm"); statusNavigate(button.dataset.statusNav); })); }
 function bindOptions() { menu.optionPages.forEach(page => page.querySelectorAll("[data-option]").forEach(item => item.addEventListener("click", event => { if (item.matches(".volume-row") && event.target.matches("input")) return; menu.playSe("confirm"); menu.optionCursor = menu.optionItems.indexOf(item); updateSelection(); executeOption(item.dataset.option); }))); menu.optionNavButtons.forEach(button => button.addEventListener("click", () => { menu.playSe(button.dataset.optionNav === "back" ? "cancel" : "confirm"); executeOptionNav(button.dataset.optionNav); })); menu.root.querySelectorAll(".volume-row input").forEach(slider => slider.addEventListener("input", () => { slider.parentElement.querySelector("span").textContent = `${slider.value}%`; if (slider.id === "seVolume") applySeOptions(); persistSettings(); })); }
 function bindDebug() {
@@ -200,7 +216,7 @@ function updateView() {
 function updateStatus() { menu.statusPanel.querySelectorAll("[data-status-page]").forEach((page, index) => { page.hidden = index !== menu.statusPage; }); menu.statusPanel.querySelector("[data-status-indicator]").textContent = `${menu.statusPage + 1}/2`; const next = menu.statusPanel.querySelector('[data-status-nav="next"]'); next.textContent = menu.statusPage === 0 ? "NEXT" : "MAIN"; menu.statusPanel.querySelector('[data-status-nav="back"]').classList.toggle("is-selected", menu.statusPage === 0); next.classList.toggle("is-selected", menu.statusPage === 1); }
 function updatePager() { menu.optionsPanel.querySelector("[data-page-indicator]").textContent = `${menu.optionPage + 1}/2`; menu.optionNavButtons.find(button => button.dataset.optionNav === "next").textContent = menu.optionPage === 0 ? "NEXT" : "MAIN"; }
 function updateDebugPager() { menu.debugPanel.querySelector("[data-debug-indicator]").textContent = `${menu.debugPage + 1}/2`; menu.debugNavButtons.find(button => button.dataset.debugNav === "next").textContent = menu.debugPage === 0 ? "NEXT" : "MAIN"; }
-function updateSelection() { menu.commands.forEach(button => button.classList.toggle("is-selected", menu.view === "commands" && button === menu.enabledCommands[menu.commandIndex])); menu.optionItems.forEach((item, index) => item.classList.toggle("is-selected", menu.view === "options" && index === menu.optionCursor)); menu.optionNavButtons.forEach((button, index) => button.classList.toggle("is-selected", menu.view === "options" && menu.optionCursor === menu.optionItems.length + index)); menu.debugItems.forEach((item, index) => item.classList.toggle("is-selected", menu.view === "debug" && index === menu.debugCursor)); menu.debugNavButtons.forEach((button, index) => button.classList.toggle("is-selected", menu.view === "debug" && menu.debugCursor === menu.debugItems.length + index)); updateOptionStates(); updateDebugStates(); }
+function updateSelection() { menu.commands.forEach((button, index) => button.classList.toggle("is-selected", menu.view === "commands" && index === menu.commandIndex)); menu.optionItems.forEach((item, index) => item.classList.toggle("is-selected", menu.view === "options" && index === menu.optionCursor)); menu.optionNavButtons.forEach((button, index) => button.classList.toggle("is-selected", menu.view === "options" && menu.optionCursor === menu.optionItems.length + index)); menu.debugItems.forEach((item, index) => item.classList.toggle("is-selected", menu.view === "debug" && index === menu.debugCursor)); menu.debugNavButtons.forEach((button, index) => button.classList.toggle("is-selected", menu.view === "debug" && menu.debugCursor === menu.debugItems.length + index)); updateOptionStates(); updateDebugStates(); }
 function updateOptionStates() {
   const shake = menu.root.querySelector('[data-option-state="screenShake"]');
   const torch = menu.root.querySelector('[data-option-state="torchFlicker"]');
