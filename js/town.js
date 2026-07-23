@@ -246,6 +246,7 @@ function renderTownView() {
       button.classList.toggle("is-unavailable", unavailable);
       button.classList.remove("is-locked");
     });
+    resetTownViewport();
     town.onStateChanged();
     return;
   }
@@ -282,7 +283,13 @@ function renderFacility() {
   town.feedback.textContent = "";
   if (showRegistration) town.messageEl.textContent = "ギルド長：奈落へ潜るなら、まず名簿に名前を書け。登録なしでは通せん。";
   town.root.querySelector("#townFacilityName").textContent = facility.label;
+  resetTownViewport();
   town.onStateChanged();
+}
+
+function resetTownViewport() {
+  if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+  requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: "auto" }));
 }
 
 function registerCharacter() {
