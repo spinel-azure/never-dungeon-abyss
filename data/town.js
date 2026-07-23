@@ -53,7 +53,8 @@ export const TOWN_FACILITIES = Object.freeze([
 export const CHARACTER_JOBS = Object.freeze([
   { id: "warrior", label: "WARRIOR" },
   { id: "mage", label: "MAGE" },
-  { id: "thief", label: "THIEF" }
+  { id: "thief", label: "THIEF" },
+  { id: "priest", label: "PRIEST" }
 ]);
 
 export function getTownFacility(id) {
