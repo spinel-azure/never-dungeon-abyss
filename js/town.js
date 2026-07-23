@@ -9,6 +9,7 @@ const town = {
   commandRoot: null,
   gameCommandButtons: [],
   facilityButtons: [],
+  portraitPreloads: [],
   registration: null,
   nameInput: null,
   jobSelect: null,
@@ -36,6 +37,15 @@ export function configureTown(options) {
   town.nameInput = document.querySelector("#characterName");
   town.jobSelect = document.querySelector("#characterJob");
   town.feedback = document.querySelector("#registrationFeedback");
+  town.portraitPreloads = TOWN_FACILITIES
+    .filter(facility => facility.image)
+    .map(facility => {
+      const image = new Image();
+      image.decoding = "async";
+      image.src = facility.image;
+      image.decode().catch(() => {});
+      return image;
+    });
 
   town.jobSelect.replaceChildren(...CHARACTER_JOBS.map(job => {
     const option = document.createElement("option");
