@@ -5,8 +5,9 @@ const town = {
   background: null,
   portrait: null,
   portraitPlaceholder: null,
-  speaker: null,
-  dialogue: null,
+  messageEl: null,
+  commandRoot: null,
+  gameCommandButtons: [],
   facilityButtons: [],
   registration: null,
   nameInput: null,
@@ -28,12 +29,13 @@ export function configureTown(options) {
   town.background = town.root.querySelector("#townBackground");
   town.portrait = town.root.querySelector("#townPortrait");
   town.portraitPlaceholder = town.root.querySelector("#townPortraitPlaceholder");
-  town.speaker = town.root.querySelector("#townSpeaker");
-  town.dialogue = town.root.querySelector("#townDialogue");
-  town.registration = town.root.querySelector("#guildRegistration");
-  town.nameInput = town.root.querySelector("#characterName");
-  town.jobSelect = town.root.querySelector("#characterJob");
-  town.feedback = town.root.querySelector("#registrationFeedback");
+  town.messageEl = options.messageEl;
+  town.commandRoot = options.commandRoot;
+  town.gameCommandButtons = [...town.commandRoot.children];
+  town.registration = document.querySelector("#guildRegistration");
+  town.nameInput = document.querySelector("#characterName");
+  town.jobSelect = document.querySelector("#characterJob");
+  town.feedback = document.querySelector("#registrationFeedback");
 
   town.jobSelect.replaceChildren(...CHARACTER_JOBS.map(job => {
     const option = document.createElement("option");
@@ -49,12 +51,11 @@ export function configureTown(options) {
     button.addEventListener("click", () => selectFacility(facility.id, true));
     return button;
   });
-  town.root.querySelector("#townFacilities").replaceChildren(...town.facilityButtons);
   town.registration.addEventListener("submit", event => {
     event.preventDefault();
     registerCharacter();
   });
-  renderTownView();
+  renderCharacterStatus();
 }
 
 export function openTown({ registrationRequired = false, facilityId = null, mode = null } = {}) {
@@ -73,6 +74,8 @@ export function openTown({ registrationRequired = false, facilityId = null, mode
 export function closeTown() {
   town.active = false;
   town.root.hidden = true;
+  town.registration.hidden = true;
+  showGameCommands();
   document.body.classList.remove("town-active");
 }
 
@@ -97,13 +100,23 @@ export function handleTownInput(action) {
       beginFacilitySelection();
       return true;
     }
-    return action === "cancel" ? false : true;
+    if (action === "cancel") {
+      showGameCommands();
+      return false;
+    }
+    return true;
   }
   if (town.mode === "facility" && action === "cancel") {
     showTownArrival();
     return true;
   }
-  if (town.mode === "registration") return action === "cancel" ? false : true;
+  if (town.mode === "registration") {
+    if (action === "cancel") {
+      showGameCommands();
+      return false;
+    }
+    return true;
+  }
   if (town.mode !== "selection") return action === "cancel" ? false : true;
   if (["up", "left"].includes(action)) {
     moveSelection(-1);
@@ -117,7 +130,10 @@ export function handleTownInput(action) {
     activateFacility(TOWN_FACILITIES[town.selectedIndex]);
     return true;
   }
-  if (action === "cancel") return false;
+  if (action === "cancel") {
+    showGameCommands();
+    return false;
+  }
   return false;
 }
 
@@ -183,14 +199,14 @@ function nearestSelectableIndex(start, amount) {
 }
 
 function renderTownView() {
+  showTownCommands();
   if (town.mode === "arrival" || town.mode === "selection") {
     const selecting = town.mode === "selection";
     town.background.hidden = false;
     town.portrait.hidden = true;
     town.portraitPlaceholder.hidden = true;
     town.root.querySelector("#townFacilityName").hidden = true;
-    town.speaker.textContent = "";
-    town.dialogue.textContent = selecting
+    town.messageEl.textContent = selecting
       ? "町に戻ってきた。どこへ行きますか？"
       : "町に戻ってきた。どこへ行きますか？\n＊Aボタンで次へ";
     town.registration.hidden = true;
@@ -212,6 +228,7 @@ function renderTownView() {
 }
 
 function renderFacility() {
+  showTownCommands();
   const facility = TOWN_FACILITIES[town.selectedIndex] || getTownFacility("guild");
   town.facilityButtons.forEach((button, index) => {
     const unavailable = Boolean(TOWN_FACILITIES[index].unavailable);
@@ -221,8 +238,7 @@ function renderFacility() {
     button.classList.toggle("is-locked", town.registrationRequired && button.dataset.facility !== "guild");
     button.classList.toggle("is-unavailable", unavailable);
   });
-  town.speaker.textContent = facility.keeper ? `${facility.keeper}：` : "";
-  town.dialogue.textContent = facility.greeting;
+  town.messageEl.textContent = facility.keeper ? `${facility.keeper}：${facility.greeting}` : facility.greeting;
   town.portrait.hidden = !facility.image;
   town.portraitPlaceholder.hidden = Boolean(facility.image);
   if (facility.image) {
@@ -237,7 +253,7 @@ function renderFacility() {
   town.root.classList.toggle("is-registering", showRegistration);
   town.registration.hidden = !showRegistration;
   town.feedback.textContent = "";
-  if (showRegistration) town.dialogue.textContent = "奈落へ潜るなら、まず名簿に名前を書け。登録なしでは通せん。";
+  if (showRegistration) town.messageEl.textContent = "ギルド長：奈落へ潜るなら、まず名簿に名前を書け。登録なしでは通せん。";
   town.root.querySelector("#townFacilityName").textContent = facility.label;
   town.onStateChanged();
 }
@@ -254,7 +270,7 @@ function registerCharacter() {
   town.mode = "facility";
   town.onRegister({ name, job: job.id, jobLabel: job.label });
   town.registration.hidden = true;
-  town.dialogue.textContent = `${name}だな。登録は済んだ。ようこそ、冒険者ギルドへ。`;
+  town.messageEl.textContent = `ギルド長：${name}だな。登録は済んだ。ようこそ、冒険者ギルドへ。`;
   town.feedback.textContent = "登録しました。";
   renderCharacterStatus();
   town.facilityButtons.forEach(button => button.classList.remove("is-locked"));
@@ -270,14 +286,34 @@ function showRegistrationRequired() {
 export function renderCharacterStatus() {
   const character = town.getCharacter();
   const values = {
-    townLevel: character ? String(character.level).padStart(3, "0") : "---",
-    townJob: character?.jobLabel || "-",
-    townHp: character ? `${character.hp} / ${character.maxHp}` : "---- / ----",
-    townSp: character ? `${character.sp} / ${character.maxSp}` : "---- / ----",
-    townCondition: character?.condition || "----"
+    quickLevel: character ? String(character.level).padStart(3, "0") : "---",
+    quickJob: character?.jobLabel || "-",
+    quickHpCurrent: character ? character.hp : "----",
+    quickHpMax: character ? character.maxHp : "----",
+    quickSpCurrent: character ? character.sp : "----",
+    quickSpMax: character ? character.maxSp : "----",
+    quickCondition: character?.condition || "----"
   };
   Object.entries(values).forEach(([id, value]) => {
-    const element = town.root.querySelector(`#${id}`);
+    const element = document.querySelector(`#${id}`);
     if (element) element.textContent = value;
   });
+}
+
+function showTownCommands() {
+  if (!town.commandRoot) return;
+  if (!town.facilityButtons.every(button => button.parentElement === town.commandRoot)) {
+    town.commandRoot.replaceChildren(...town.facilityButtons);
+  }
+  town.commandRoot.dataset.townActive = "true";
+  town.commandRoot.setAttribute("aria-label", "町の施設");
+}
+
+function showGameCommands() {
+  if (!town.commandRoot) return;
+  if (!town.gameCommandButtons.every(button => button.parentElement === town.commandRoot)) {
+    town.commandRoot.replaceChildren(...town.gameCommandButtons);
+  }
+  delete town.commandRoot.dataset.townActive;
+  town.commandRoot.setAttribute("aria-label", "ダンジョンコマンド");
 }

@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="css/style.css?v=20260722-2">
   <link rel="stylesheet" href="css/game-menu.css?v=20260722-6">
   <link rel="stylesheet" href="css/title-screen.css?v=20260722-3">
-  <link rel="stylesheet" href="css/town.css?v=20260722-4">
+  <link rel="stylesheet" href="css/town.css?v=20260723-3">
 </head>
 <body class="title-active">
   <section id="titleScreen" class="title-screen" aria-label="NEVER DUNGEON : ABYSS タイトル画面">
@@ -29,21 +29,6 @@
         <div id="townPortraitPlaceholder" class="town-portrait-placeholder" aria-hidden="true">NDA</div>
         <span id="townFacilityName" class="town-facility-badge">ギルド</span>
       </div>
-      <div class="town-status" aria-label="キャラクター簡易ステータス">
-        <span>LV:<output id="townLevel">---</output></span>
-        <span>[<output id="townJob">-</output>]</span>
-        <span>HP <output id="townHp">---- / ----</output></span>
-        <span>SP <output id="townSp">---- / ----</output></span>
-        <span>COND:<output id="townCondition">----</output></span>
-      </div>
-      <div class="town-message"><strong id="townSpeaker" class="town-speaker"></strong><span id="townDialogue"></span></div>
-      <div id="townFacilities" class="town-facilities" aria-label="施設一覧"></div>
-      <form id="guildRegistration" class="guild-registration" hidden>
-        <label>NAME<input id="characterName" type="text" maxlength="12" autocomplete="off" required></label>
-        <label>JOB<select id="characterJob"></select></label>
-        <button type="submit">REGISTER</button>
-        <p id="registrationFeedback" class="registration-feedback" aria-live="polite"></p>
-      </form>
     </section>
     <div class="viewport">
       <canvas id="screen" width="960" height="540"></canvas>
@@ -60,9 +45,9 @@
 
     <div class="quick-status" aria-label="プレイヤーステータス未接続">
       <span>Lv:<output id="quickLevel">---</output></span><span>[<output id="quickJob">-</output>]</span>
-      <span>HP <output class="quick-value">----</output> / <output class="quick-value">----</output></span>
-      <span>SP <output class="quick-value">----</output> / <output class="quick-value">----</output></span>
-      <span>Cond:<output>----</output></span>
+      <span>HP <output id="quickHpCurrent" class="quick-value">----</output> / <output id="quickHpMax" class="quick-value">----</output></span>
+      <span>SP <output id="quickSpCurrent" class="quick-value">----</output> / <output id="quickSpMax" class="quick-value">----</output></span>
+      <span>Cond:<output id="quickCondition">----</output></span>
     </div>
     <div class="message" id="message">10×10の床空間を、薄い境界壁が区切っている。</div>
     <section id="dungeonCommands" class="dungeon-commands" aria-label="ダンジョンコマンド">
@@ -74,6 +59,12 @@
       <button type="button" data-command="options">オプション</button>
     </section>
     <p id="commandHint" class="command-hint">＊ Bボタンでメニュー表示</p>
+    <form id="guildRegistration" class="guild-registration" hidden>
+      <label>NAME<input id="characterName" type="text" maxlength="12" autocomplete="off" required></label>
+      <label>JOB<select id="characterJob"></select></label>
+      <button type="submit">REGISTER</button>
+      <p id="registrationFeedback" class="registration-feedback" aria-live="polite"></p>
+    </form>
 
     <div class="controls">
       <div class="pad" aria-label="移動操作">
@@ -157,6 +148,6 @@
   </section>
 </main>
   <script type="module" src="js/title-screen.js?v=20260722-1"></script>
-  <script type="module" src="js/main.js?v=20260723-1"></script>
+  <script type="module" src="js/main.js?v=20260723-2"></script>
 </body>
 </html>
