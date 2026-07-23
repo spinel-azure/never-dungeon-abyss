@@ -13,6 +13,10 @@
 .guild-registration{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;padding:10px;border:1px solid #4f493b;border-radius:7px;background:#050706}
 .guild-registration label{display:grid;gap:4px;color:#9be6ff;font:12px "PixelFont",monospace}
 .guild-registration input,.guild-registration select{min-width:0;padding:8px;border:1px solid #5bd1ff;background:#071011;color:#fff;font:18px "GameFont",sans-serif}
+.guild-registration,.guild-registration label,.guild-registration input,.guild-registration select{pointer-events:auto;touch-action:manipulation;-webkit-touch-callout:default}
+.guild-registration input{user-select:text;-webkit-user-select:text;caret-color:#fff}
+.guild-registration select{user-select:auto;-webkit-user-select:auto;caret-color:auto}
+.guild-registration input:focus,.guild-registration select:focus,.guild-registration button:focus{outline:2px solid #b0f4ff;outline-offset:2px;box-shadow:0 0 10px rgba(120,230,255,.8)}
 .guild-registration button{align-self:end;min-height:42px;padding:7px 14px;border:1px solid #efff00;background:#efff00;color:#090900;font:18px "PixelFont",monospace}
 .registration-feedback{grid-column:1/-1;min-height:1.2em;margin:0;color:#ffdd66;text-align:center}
 body.town-active .game>.viewport{display:none}

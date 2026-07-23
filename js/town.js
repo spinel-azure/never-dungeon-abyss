@@ -14,6 +14,7 @@ const town = {
   nameInput: null,
   jobSelect: null,
   feedback: null,
+  registrationIndex: -1,
   selectedIndex: 1,
   active: false,
   mode: "arrival",
@@ -108,6 +109,7 @@ export function getTownState() {
 export function handleTownInput(action) {
   if (!town.active) return false;
   if (town.isMenuOpen()) return false;
+  if (town.mode === "registration") return handleRegistrationInput(action);
   if (document.activeElement === town.nameInput || document.activeElement === town.jobSelect) return false;
   if (town.mode === "arrival") {
     if (action === "confirm") {
@@ -124,13 +126,6 @@ export function handleTownInput(action) {
     showTownArrival();
     return true;
   }
-  if (town.mode === "registration") {
-    if (action === "cancel") {
-      showGameCommands();
-      return false;
-    }
-    return true;
-  }
   if (town.mode !== "selection") return action === "cancel" ? false : true;
   if (["up", "down", "left", "right"].includes(action)) {
     moveSelection(action);
@@ -145,6 +140,50 @@ export function handleTownInput(action) {
     return false;
   }
   return false;
+}
+
+function handleRegistrationInput(action) {
+  if (action === "cancel") {
+    showGameCommands();
+    return false;
+  }
+
+  const submitButton = town.registration.querySelector('button[type="submit"]');
+  const controls = [town.nameInput, town.jobSelect, submitButton];
+  if (["up", "down"].includes(action)) {
+    const activeIndex = controls.indexOf(document.activeElement);
+    town.registrationIndex = activeIndex >= 0 ? activeIndex : town.registrationIndex;
+    if (town.registrationIndex < 0) {
+      town.registrationIndex = action === "down" ? 0 : controls.length - 1;
+    } else {
+      town.registrationIndex = (
+        town.registrationIndex
+        + (action === "down" ? 1 : controls.length - 1)
+      ) % controls.length;
+    }
+    controls[town.registrationIndex].focus({ preventScroll: true });
+    return true;
+  }
+
+  if (["left", "right"].includes(action) && document.activeElement === town.jobSelect) {
+    const amount = action === "right" ? 1 : -1;
+    const optionCount = town.jobSelect.options.length;
+    town.jobSelect.selectedIndex = (
+      town.jobSelect.selectedIndex + amount + optionCount
+    ) % optionCount;
+    return true;
+  }
+
+  if (action === "confirm") {
+    const activeIndex = controls.indexOf(document.activeElement);
+    town.registrationIndex = activeIndex >= 0 ? activeIndex : town.registrationIndex;
+    if (town.registrationIndex < 0) town.registrationIndex = 0;
+    const control = controls[town.registrationIndex];
+    if (control === submitButton) town.registration.requestSubmit();
+    else control.focus({ preventScroll: true });
+    return true;
+  }
+  return true;
 }
 
 function moveSelection(direction) {
@@ -277,7 +316,10 @@ function renderFacility() {
     town.portrait.alt = "";
   }
   const showRegistration = facility.id === "guild" && town.registrationRequired;
-  if (showRegistration) town.mode = "registration";
+  if (showRegistration) {
+    town.mode = "registration";
+    town.registrationIndex = -1;
+  }
   town.root.classList.toggle("is-registering", showRegistration);
   town.registration.hidden = !showRegistration;
   town.feedback.textContent = "";

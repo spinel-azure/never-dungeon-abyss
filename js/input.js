@@ -88,6 +88,7 @@ function configureTouchGuards() {
 
   function isGuardedTarget(target) {
     return target instanceof Element
+      && !target.closest("input, select, textarea, .guild-registration")
       && !target.closest(".menu-screen")
       && !!target.closest(guardedSelector);
   }
@@ -116,6 +117,7 @@ function configureTouchGuards() {
 
   ["gesturestart", "gesturechange", "gestureend", "selectstart", "dragstart"].forEach((type) => {
     document.addEventListener(type, (e) => {
+      if (e.target instanceof Element && e.target.closest("input, select, textarea, .guild-registration")) return;
       if (isTouchLayout()) e.preventDefault();
     }, { passive: false });
   });
