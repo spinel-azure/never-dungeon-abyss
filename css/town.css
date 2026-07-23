@@ -4,7 +4,9 @@
 .town-portrait-frame{position:relative;box-sizing:content-box;width:calc(100% - 2px);aspect-ratio:16/9;overflow:hidden;border:1px solid #4f493b;border-radius:7px;background:radial-gradient(circle at 50% 28%,#1d201b,#080a08 68%,#020302);box-shadow:inset 0 0 0 1px #ffffff0d}
 .town-background{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center;image-rendering:auto}
 .town-mosaic{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;image-rendering:pixelated}
-.town-portrait{position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;image-rendering:auto}
+.town-portrait{position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;image-rendering:auto;transform-origin:center bottom;animation:npc-breath 3.2s ease-in-out infinite}
+@keyframes npc-breath{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+@media(prefers-reduced-motion:reduce){.town-portrait{animation:none}}
 .town-portrait-placeholder{position:absolute;inset:0;z-index:1;display:grid;place-items:center;height:100%;color:#7b786d;font:clamp(28px,8vw,70px) "PixelFont",monospace;text-shadow:0 0 14px #3c675d}
 .town-facility-badge{position:absolute;z-index:2;top:8px;left:10px;padding:4px 8px;border:1px solid #5c5a4d;background:#050706cc;color:#dcece8;font:14px "PixelFont",monospace}
 .dungeon-commands[data-town-active="true"] button{color:#f7fbff}
