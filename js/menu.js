@@ -36,7 +36,12 @@ export function configureMenu(options) {
   menu.optionsPanel = menu.root.querySelector('[data-menu-view="options"]');
   menu.debugPanel = menu.root.querySelector('[data-menu-view="debug"]');
   menu.commands = [...menu.commandRoot.querySelectorAll("[data-command]")];
-  menu.enabledCommands = menu.commands.filter(button => !button.disabled);
+  menu.commands.forEach(button => {
+    button.dataset.unavailable = String(button.disabled);
+    button.setAttribute("aria-disabled", String(button.disabled));
+    button.disabled = false;
+  });
+  menu.enabledCommands = menu.commands.filter(button => button.dataset.unavailable !== "true");
   menu.optionPages = [...menu.optionsPanel.querySelectorAll("[data-option-page]")];
   menu.optionNavButtons = [...menu.optionsPanel.querySelectorAll("[data-option-nav]")];
   menu.debugPages = [...menu.debugPanel.querySelectorAll("[data-debug-page]")];
@@ -84,7 +89,7 @@ export function handleMenuInput(action) {
     return false;
   }
   if (action === "up" || action === "down" || action === "left" || action === "right") menu.playSe("cursorMove");
-  else if (action === "confirm" && !(menu.view === "commands" && menu.commands[menu.commandIndex]?.disabled)) menu.playSe("confirm");
+  else if (action === "confirm" && !(menu.view === "commands" && isCommandUnavailable(menu.commands[menu.commandIndex]))) menu.playSe("confirm");
   else if (action === "cancel") menu.playSe("cancel");
   if (menu.view === "commands") handleCommands(action);
   else if (menu.view === "status") handleStatus(action);
@@ -111,9 +116,10 @@ function handleCommands(action) {
   }
   if (action === "confirm") {
     const command = menu.commands[menu.commandIndex];
-    if (!command?.disabled) openCommand(command.dataset.command);
+    if (command && !isCommandUnavailable(command)) openCommand(command.dataset.command);
   }
 }
+function isCommandUnavailable(button) { return button?.dataset.unavailable === "true"; }
 function openCommand(key) { if (key === "status") { menu.view = "status"; menu.statusPage = 0; updateView(); } else if (key === "options") setOptionPage(0); else if (key === "save") { closeCampMenu("save"); menu.saveGame(); } }
 function handleStatus(action) { if (action === "cancel") { menu.view = "commands"; updateView(); } else if (action === "left") { menu.statusPage = 0; updateStatus(); } else if (action === "right") { menu.statusPage = 1; updateStatus(); } else if (action === "confirm") { menu.view = "commands"; updateView(); } }
 function statusNavigate(key) { if (key === "back") { if (menu.statusPage === 0) { menu.view = "commands"; updateView(); } else { menu.statusPage = 0; updateStatus(); } } else if (menu.statusPage === 0) { menu.statusPage = 1; updateStatus(); } else { menu.view = "commands"; updateView(); } }
@@ -180,7 +186,7 @@ function executeDebug(key, amount = 1) {
 }
 function triggerAction(key, action) { menu.actionActive[key] = true; updateDebugStates(); setTimeout(() => { menu.actionActive[key] = false; action(); updateDebugStates(); }, ACTION_FEEDBACK_MS); }
 
-function bindCommands() { menu.commands.forEach(button => button.addEventListener("click", () => { if (button.disabled) return; menu.playSe("confirm"); menu.commandIndex = menu.commands.indexOf(button); updateSelection(); openCommand(button.dataset.command); })); }
+function bindCommands() { menu.commands.forEach(button => button.addEventListener("click", () => { menu.commandIndex = menu.commands.indexOf(button); updateSelection(); if (isCommandUnavailable(button)) return; menu.playSe("confirm"); openCommand(button.dataset.command); })); }
 function bindStatus() { menu.statusPanel.querySelectorAll("[data-status-nav]").forEach(button => button.addEventListener("click", () => { menu.playSe(button.dataset.statusNav === "back" ? "cancel" : "confirm"); statusNavigate(button.dataset.statusNav); })); }
 function bindOptions() { menu.optionPages.forEach(page => page.querySelectorAll("[data-option]").forEach(item => item.addEventListener("click", event => { if (item.matches(".volume-row") && event.target.matches("input")) return; menu.playSe("confirm"); menu.optionCursor = menu.optionItems.indexOf(item); updateSelection(); executeOption(item.dataset.option); }))); menu.optionNavButtons.forEach(button => button.addEventListener("click", () => { menu.playSe(button.dataset.optionNav === "back" ? "cancel" : "confirm"); executeOptionNav(button.dataset.optionNav); })); menu.root.querySelectorAll(".volume-row input").forEach(slider => slider.addEventListener("input", () => { slider.parentElement.querySelector("span").textContent = `${slider.value}%`; if (slider.id === "seVolume") applySeOptions(); persistSettings(); })); }
 function bindDebug() {

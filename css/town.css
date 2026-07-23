@@ -2,14 +2,15 @@
 .town-screen[hidden]{display:none}
 .town-background[hidden],.town-portrait[hidden],.town-portrait-placeholder[hidden],.guild-registration[hidden]{display:none}
 .town-portrait-frame{position:relative;box-sizing:content-box;width:calc(100% - 2px);aspect-ratio:16/9;overflow:hidden;border:1px solid #4f493b;border-radius:7px;background:radial-gradient(circle at 50% 28%,#1d201b,#080a08 68%,#020302);box-shadow:inset 0 0 0 1px #ffffff0d}
-.town-background{display:block;width:100%;height:100%;object-fit:cover;object-position:center;image-rendering:auto}
-.town-portrait{display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;image-rendering:auto}
-.town-portrait-placeholder{display:grid;place-items:center;height:100%;color:#7b786d;font:clamp(28px,8vw,70px) "PixelFont",monospace;text-shadow:0 0 14px #3c675d}
-.town-facility-badge{position:absolute;top:8px;left:10px;padding:4px 8px;border:1px solid #5c5a4d;background:#050706cc;color:#dcece8;font:14px "PixelFont",monospace}
+.town-background{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center;image-rendering:auto}
+.town-portrait{position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;image-rendering:auto}
+.town-portrait-placeholder{position:absolute;inset:0;z-index:1;display:grid;place-items:center;height:100%;color:#7b786d;font:clamp(28px,8vw,70px) "PixelFont",monospace;text-shadow:0 0 14px #3c675d}
+.town-facility-badge{position:absolute;z-index:2;top:8px;left:10px;padding:4px 8px;border:1px solid #5c5a4d;background:#050706cc;color:#dcece8;font:14px "PixelFont",monospace}
 .dungeon-commands[data-town-active="true"] button{color:#f7fbff}
 .dungeon-commands[data-town-active="true"] button.is-locked{color:#77736a}
 .dungeon-commands[data-town-active="true"] button.is-unavailable,.dungeon-commands[data-town-active="true"] button.is-unavailable:disabled{border-color:#292822;background:#0b0b0a;color:#65635e;box-shadow:none;cursor:not-allowed;opacity:1}
 .dungeon-commands[data-town-active="true"] button.is-unavailable.is-selected{border-color:#b0f4ff;background:#14313a;box-shadow:0 0 12px rgba(120,230,255,.8),inset 0 0 8px rgba(120,230,255,.25)}
+.dungeon-commands[data-entrance-active="true"] button.is-empty{visibility:hidden;pointer-events:none}
 .guild-registration{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;padding:10px;border:1px solid #4f493b;border-radius:7px;background:#050706}
 .guild-registration label{display:grid;gap:4px;color:#9be6ff;font:12px "PixelFont",monospace}
 .guild-registration input,.guild-registration select{min-width:0;padding:8px;border:1px solid #5bd1ff;background:#071011;color:#fff;font:18px "GameFont",sans-serif}

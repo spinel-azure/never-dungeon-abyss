@@ -89,6 +89,7 @@ function configureTouchGuards() {
   function isGuardedTarget(target) {
     return target instanceof Element
       && !target.closest("input, select, textarea, .guild-registration")
+      && !target.closest(".dungeon-commands button")
       && !target.closest(".menu-screen")
       && !!target.closest(guardedSelector);
   }

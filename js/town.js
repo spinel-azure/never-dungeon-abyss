@@ -1,4 +1,4 @@
-import { CHARACTER_JOBS, TOWN_FACILITIES, getTownFacility } from "../data/town.js?v=20260723-2";
+import { CHARACTER_JOBS, TOWN_FACILITIES, getTownFacility } from "../data/town.js?v=20260723-3";
 
 const town = {
   root: null,
@@ -9,12 +9,15 @@ const town = {
   commandRoot: null,
   gameCommandButtons: [],
   facilityButtons: [],
+  entranceButtons: [],
   portraitPreloads: [],
+  backgroundPreloads: [],
   registration: null,
   nameInput: null,
   jobSelect: null,
   feedback: null,
   registrationIndex: -1,
+  entranceIndex: 0,
   selectedIndex: 1,
   active: false,
   mode: "arrival",
@@ -47,6 +50,17 @@ export function configureTown(options) {
       image.decode().catch(() => {});
       return image;
     });
+  town.backgroundPreloads = [
+    "images/background/town_01.avif",
+    ...TOWN_FACILITIES.map(facility => facility.background).filter(Boolean),
+    "images/background/circle.avif"
+  ].map(src => {
+    const image = new Image();
+    image.decoding = "async";
+    image.src = src;
+    image.decode().catch(() => {});
+    return image;
+  });
 
   town.jobSelect.replaceChildren(...CHARACTER_JOBS.map(job => {
     const option = document.createElement("option");
@@ -60,6 +74,28 @@ export function configureTown(options) {
     button.dataset.facility = facility.id;
     button.textContent = facility.label;
     button.addEventListener("click", () => selectFacility(facility.id, true));
+    return button;
+  });
+  town.entranceButtons = [
+    { id: "enter", label: "ダンジョンに入る" },
+    { id: "circle", label: "転送陣" },
+    { id: "return", label: "町に戻る" },
+    { id: "empty-1", label: "", empty: true },
+    { id: "empty-2", label: "", empty: true },
+    { id: "empty-3", label: "", empty: true }
+  ].map((item, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.entranceCommand = item.id;
+    button.textContent = item.label;
+    button.disabled = Boolean(item.empty);
+    button.classList.toggle("is-empty", Boolean(item.empty));
+    if (!item.empty) {
+      button.addEventListener("click", () => {
+        town.entranceIndex = index;
+        activateEntranceCommand(item.id);
+      });
+    }
     return button;
   });
   town.registration.addEventListener("submit", event => {
@@ -110,6 +146,14 @@ export function handleTownInput(action) {
   if (!town.active) return false;
   if (town.isMenuOpen()) return false;
   if (town.mode === "registration") return handleRegistrationInput(action);
+  if (town.mode === "dungeonEntrance") return handleEntranceInput(action);
+  if (town.mode === "transferCircle") {
+    if (action === "cancel") {
+      town.mode = "dungeonEntrance";
+      renderDungeonEntrance();
+    }
+    return true;
+  }
   if (document.activeElement === town.nameInput || document.activeElement === town.jobSelect) return false;
   if (town.mode === "arrival") {
     if (action === "confirm") {
@@ -186,6 +230,39 @@ function handleRegistrationInput(action) {
   return true;
 }
 
+function handleEntranceInput(action) {
+  if (action === "cancel") {
+    showTownArrival();
+    return true;
+  }
+  if (action === "left" || action === "right") {
+    town.entranceIndex = (
+      town.entranceIndex + (action === "right" ? 1 : 2)
+    ) % 3;
+    renderEntranceSelection();
+    return true;
+  }
+  if (action === "confirm") {
+    activateEntranceCommand(town.entranceButtons[town.entranceIndex]?.dataset.entranceCommand);
+    return true;
+  }
+  return true;
+}
+
+function activateEntranceCommand(command) {
+  if (command === "enter") {
+    closeTown();
+    town.onEnterDungeon();
+    return;
+  }
+  if (command === "circle") {
+    town.mode = "transferCircle";
+    renderTransferCircle();
+    return;
+  }
+  if (command === "return") showTownArrival();
+}
+
 function moveSelection(direction) {
   if (town.registrationRequired) {
     town.selectedIndex = TOWN_FACILITIES.findIndex(facility => facility.id === "guild");
@@ -216,7 +293,12 @@ function moveSelection(direction) {
 
 function selectFacility(id, activate) {
   const index = TOWN_FACILITIES.findIndex(facility => facility.id === id);
-  if (index < 0 || TOWN_FACILITIES[index].unavailable || town.mode === "arrival") return;
+  if (index < 0 || town.mode === "arrival") return;
+  if (TOWN_FACILITIES[index].unavailable) {
+    town.selectedIndex = index;
+    renderTownView();
+    return;
+  }
   if (town.registrationRequired && id !== "guild") {
     showRegistrationRequired();
     return;
@@ -233,8 +315,9 @@ function activateFacility(facility) {
     return;
   }
   if (facility.id === "dungeon") {
-    closeTown();
-    town.onEnterDungeon();
+    town.mode = "dungeonEntrance";
+    town.entranceIndex = 0;
+    renderDungeonEntrance();
     return;
   }
   town.mode = facility.id === "guild" && town.registrationRequired ? "registration" : "facility";
@@ -268,6 +351,8 @@ function renderTownView() {
   showTownCommands();
   if (town.mode === "arrival" || town.mode === "selection") {
     const selecting = town.mode === "selection";
+    town.background.src = "images/background/town_01.avif";
+    town.background.alt = "町の風景";
     town.background.hidden = false;
     town.portrait.hidden = true;
     town.portraitPlaceholder.hidden = true;
@@ -279,7 +364,7 @@ function renderTownView() {
     town.root.classList.remove("is-registering");
     town.facilityButtons.forEach((button, index) => {
       const unavailable = Boolean(TOWN_FACILITIES[index].unavailable);
-      button.disabled = unavailable;
+      button.disabled = false;
       button.setAttribute("aria-disabled", String(!selecting || unavailable));
       button.classList.toggle("is-selected", selecting && index === town.selectedIndex);
       button.classList.toggle("is-unavailable", unavailable);
@@ -299,12 +384,15 @@ function renderFacility() {
   const facility = TOWN_FACILITIES[town.selectedIndex] || getTownFacility("guild");
   town.facilityButtons.forEach((button, index) => {
     const unavailable = Boolean(TOWN_FACILITIES[index].unavailable);
-    button.disabled = unavailable;
+    button.disabled = false;
     button.setAttribute("aria-disabled", String(unavailable));
     button.classList.toggle("is-selected", index === town.selectedIndex);
     button.classList.toggle("is-locked", town.registrationRequired && button.dataset.facility !== "guild");
     button.classList.toggle("is-unavailable", unavailable);
   });
+  town.background.src = facility.background || "images/background/town_01.avif";
+  town.background.alt = `${facility.label}の背景`;
+  town.background.hidden = false;
   town.messageEl.textContent = facility.keeper ? `${facility.keeper}：${facility.greeting}` : facility.greeting;
   town.portrait.hidden = !facility.image;
   town.portraitPlaceholder.hidden = Boolean(facility.image);
@@ -327,6 +415,45 @@ function renderFacility() {
   town.root.querySelector("#townFacilityName").textContent = facility.label;
   resetTownViewport();
   town.onStateChanged();
+}
+
+function renderDungeonEntrance() {
+  showEntranceCommands();
+  town.background.src = "images/background/dungeon_01.avif";
+  town.background.alt = "ダンジョン入口";
+  town.background.hidden = false;
+  town.portrait.hidden = true;
+  town.portraitPlaceholder.hidden = true;
+  town.registration.hidden = true;
+  town.root.classList.remove("is-registering");
+  town.root.querySelector("#townFacilityName").hidden = false;
+  town.root.querySelector("#townFacilityName").textContent = "ダンジョン";
+  town.messageEl.textContent = "奈落へ続く階段が、静かに口を開けている。";
+  renderEntranceSelection();
+  resetTownViewport();
+  town.onStateChanged();
+}
+
+function renderTransferCircle() {
+  showEntranceCommands();
+  town.background.src = "images/background/circle.avif";
+  town.background.alt = "転送陣";
+  town.background.hidden = false;
+  town.portrait.hidden = true;
+  town.portraitPlaceholder.hidden = true;
+  town.registration.hidden = true;
+  town.root.querySelector("#townFacilityName").hidden = false;
+  town.root.querySelector("#townFacilityName").textContent = "転送陣";
+  town.messageEl.textContent = "転送陣はまだ力を失っている。";
+  renderEntranceSelection();
+  resetTownViewport();
+  town.onStateChanged();
+}
+
+function renderEntranceSelection() {
+  town.entranceButtons.forEach((button, index) => {
+    button.classList.toggle("is-selected", index === town.entranceIndex && index < 3);
+  });
 }
 
 function resetTownViewport() {
@@ -382,7 +509,18 @@ function showTownCommands() {
     town.commandRoot.replaceChildren(...town.facilityButtons);
   }
   town.commandRoot.dataset.townActive = "true";
+  delete town.commandRoot.dataset.entranceActive;
   town.commandRoot.setAttribute("aria-label", "町の施設");
+}
+
+function showEntranceCommands() {
+  if (!town.commandRoot) return;
+  if (!town.entranceButtons.every(button => button.parentElement === town.commandRoot)) {
+    town.commandRoot.replaceChildren(...town.entranceButtons);
+  }
+  town.commandRoot.dataset.townActive = "true";
+  town.commandRoot.dataset.entranceActive = "true";
+  town.commandRoot.setAttribute("aria-label", "ダンジョン入口");
 }
 
 function showGameCommands() {
@@ -391,5 +529,6 @@ function showGameCommands() {
     town.commandRoot.replaceChildren(...town.gameCommandButtons);
   }
   delete town.commandRoot.dataset.townActive;
+  delete town.commandRoot.dataset.entranceActive;
   town.commandRoot.setAttribute("aria-label", "ダンジョンコマンド");
 }
