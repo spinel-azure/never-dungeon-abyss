@@ -36,13 +36,14 @@ export const TOWN_FACILITIES = Object.freeze([
     services: ["装備品の売買", "アイテムの売買"]
   },
   {
-    id: "transfer",
-    label: "？？？？？",
-    keeper: "？？？？？",
-    image: null,
-    greeting: "今は利用できない。",
-    services: [],
-    unavailable: true
+    id: "library",
+    label: "図書館",
+    keeper: "",
+    portraitAlt: "図書館の主",
+    image: "images/npc/NPC_14.avif",
+    background: "images/background/town_06.avif",
+    greeting: "…何を…見たいのかしら…？",
+    services: ["魔物図鑑", "アイテム図鑑", "カード図鑑", "冒険記録"]
   },
   {
     id: "dungeon",

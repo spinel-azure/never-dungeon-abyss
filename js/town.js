@@ -1,4 +1,4 @@
-import { CHARACTER_JOBS, TOWN_FACILITIES, getTownFacility } from "../data/town.js?v=20260723-3";
+import { CHARACTER_JOBS, TOWN_FACILITIES, getTownFacility } from "../data/town.js?v=20260723-4";
 
 const FACILITY_COMMANDS = Object.freeze({
   inn: [
@@ -16,6 +16,10 @@ const FACILITY_COMMANDS = Object.freeze({
   shop: [
     ["buy", "購入"], ["sell", "売却"], ["buyback", "買い戻す"],
     ["talk", "話す"], ["return", "町へ戻る"], ["empty-1", ""]
+  ],
+  library: [
+    ["monsters", "魔物図鑑"], ["items", "アイテム図鑑"], ["cards", "カード図鑑"],
+    ["records", "冒険記録"], ["talk", "話す"], ["return", "町へ戻る"]
   ]
 });
 
@@ -512,7 +516,7 @@ function renderFacility() {
   town.portraitPlaceholder.hidden = Boolean(facility.image);
   if (facility.image) {
     town.portrait.src = facility.image;
-    town.portrait.alt = facility.keeper;
+    town.portrait.alt = facility.portraitAlt || facility.keeper;
   } else {
     town.portrait.removeAttribute("src");
     town.portrait.alt = "";
