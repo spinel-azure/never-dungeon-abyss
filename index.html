@@ -11,12 +11,19 @@
   <link rel="stylesheet" href="css/game-menu.css?v=20260723-2">
   <link rel="stylesheet" href="css/title-screen.css?v=20260722-3">
   <link rel="stylesheet" href="css/town.css?v=20260723-9">
+  <link rel="stylesheet" href="css/scene-transition.css?v=20260723-1">
   <link rel="preload" as="image" href="images/npc/NPC_10.avif" type="image/avif">
   <link rel="preload" as="image" href="images/npc/NPC_11.avif" type="image/avif">
   <link rel="preload" as="image" href="images/npc/NPC_12.avif" type="image/avif">
   <link rel="preload" as="image" href="images/npc/NPC_13.avif" type="image/avif">
 </head>
 <body class="title-active">
+  <div id="sceneTransition" class="scene-transition" aria-hidden="true" hidden>
+    <div id="sceneTransitionTitle" class="scene-transition-title" hidden>
+      <span>ENTERING</span>
+      <strong>NEVER DUNGEON : ABYSS</strong>
+    </div>
+  </div>
   <section id="titleScreen" class="title-screen" aria-label="NEVER DUNGEON : ABYSS タイトル画面">
     <h1 class="title-logo">NEVER DUNGEON : ABYSS</h1>
     <p class="title-description">THE MISSING QUEEN AND THE MYSTERIOUS CAT</p>
@@ -153,6 +160,6 @@
   </section>
 </main>
   <script type="module" src="js/title-screen.js?v=20260722-1"></script>
-  <script type="module" src="js/main.js?v=20260723-13"></script>
+  <script type="module" src="js/main.js?v=20260723-14"></script>
 </body>
 </html>

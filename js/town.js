@@ -43,6 +43,7 @@ const town = {
   transferUnlocked: false,
   selectedIndex: 1,
   active: false,
+  transitioning: false,
   mode: "arrival",
   registrationRequired: false,
   getCharacter: () => null,
@@ -195,6 +196,7 @@ export function getTownState() {
 
 export function handleTownInput(action) {
   if (!town.active) return false;
+  if (town.transitioning) return true;
   if (town.isMenuOpen()) return false;
   if (town.mode === "registration") return handleRegistrationInput(action);
   if (town.mode === "dungeonEntrance") return handleEntranceInput(action);
@@ -329,8 +331,11 @@ function handleEntranceInput(action) {
 
 function activateEntranceCommand(command) {
   if (command === "enter") {
-    closeTown();
-    town.onEnterDungeon();
+    if (town.transitioning) return;
+    town.transitioning = true;
+    Promise.resolve(town.onEnterDungeon()).finally(() => {
+      town.transitioning = false;
+    });
     return;
   }
   if (command === "circle") {

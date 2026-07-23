@@ -35,7 +35,7 @@ import {
   startRandomEncounterNotice,
   startFloorLapNotice,
   setNpcTypewriterOptions
-} from "./player.js?v=20260723-2";
+} from "./player.js?v=20260723-3";
 import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setMistOptions, setWallColor, setFloorColor } from "./renderer.js?v=20260722-8";
 import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minimap.js?v=20260722-1";
 import { configureInput } from "./input.js?v=20260723-2";
@@ -62,7 +62,7 @@ import {
 import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js";
 import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js?v=20260722-8";
 import { loadGame, writeGame } from "./save-data.js";
-import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260723-12";
+import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260723-13";
 
 (() => {
   const canvas = document.getElementById("screen");
@@ -105,6 +105,9 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTo
   const menuScreen = document.getElementById("menuScreen");
   const dungeonCommands = document.getElementById("dungeonCommands");
   const townScreen = document.getElementById("townScreen");
+  const sceneTransition = document.getElementById("sceneTransition");
+  const sceneTransitionTitle = document.getElementById("sceneTransitionTitle");
+  let sceneTransitionRunning = false;
   let currentDepth = 1;
   configureDevice();
   configureEvents({ messageEl: msgEl });
@@ -150,6 +153,10 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTo
     descendFloor,
     playSe,
     playStairsSequence: () => playSeSequence("stairs", 3),
+    runStairsTransition: (onDark) => runSceneTransition({
+      playAudio: () => playSeSequence("stairs", 3),
+      onDark
+    }),
     showTreasure,
     playTreasureOpening,
     hideTreasure,
@@ -326,18 +333,58 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTo
     if (statusLevel) statusLevel.textContent = character ? `LV ${String(character.level).padStart(3, "0")}` : "LV ---";
   }
 
-  function enterDungeonFromTown() {
+  async function enterDungeonFromTown() {
     if (!character) {
       openTown({ registrationRequired: true, facilityId: "guild" });
       return;
     }
-    currentDepth = 1;
-    resetDungeon("", null, true);
-    worldLocation = "dungeon";
+    setPlayerInputEnabled(false);
+    await runSceneTransition({
+      showEnteringTitle: true,
+      playAudio: () => playSeSequence("stairs", 3),
+      onDark: () => {
+        currentDepth = 1;
+        resetDungeon("", null, true);
+        worldLocation = "dungeon";
+        closeTown();
+        say("奈落へ足を踏み入れた。");
+        saveGame();
+      }
+    });
     setPlayerInputEnabled(true);
-    closeTown();
-    say("奈落へ足を踏み入れた。");
-    saveGame();
+  }
+
+  async function runSceneTransition({
+    showEnteringTitle = false,
+    playAudio = () => Promise.resolve(),
+    onDark = () => {}
+  } = {}) {
+    if (sceneTransitionRunning) return false;
+    sceneTransitionRunning = true;
+    sceneTransition.hidden = false;
+    sceneTransition.classList.remove("is-black", "is-revealing");
+    sceneTransition.classList.add("is-running");
+    sceneTransitionTitle.hidden = !showEnteringTitle;
+    void sceneTransition.offsetWidth;
+
+    const audioPromise = Promise.resolve().then(playAudio).catch(() => false);
+    requestAnimationFrame(() => sceneTransition.classList.add("is-black"));
+    await Promise.all([wait(2700), audioPromise]);
+    await onDark();
+    await wait(120);
+
+    sceneTransitionTitle.hidden = true;
+    sceneTransition.classList.add("is-revealing");
+    sceneTransition.classList.remove("is-black");
+    await wait(700);
+    sceneTransition.classList.remove("is-running", "is-revealing");
+    sceneTransition.hidden = true;
+    sceneTransitionRunning = false;
+    return true;
+  }
+
+  function wait(milliseconds) {
+    return new Promise(resolve => window.setTimeout(resolve, milliseconds));
   }
 
   function returnToTown() {

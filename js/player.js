@@ -32,6 +32,7 @@ const hooks = {
   descendFloor: () => {},
   playSe: () => {},
   playStairsSequence: () => Promise.resolve(),
+  runStairsTransition: (onDark) => Promise.resolve().then(onDark),
   showTreasure: () => {},
   playTreasureOpening: (_type, onComplete) => onComplete(),
   hideTreasure: () => {},
@@ -355,20 +356,16 @@ function confirmStairsPrompt() {
     const transition = { type: "stairsTransition", canCancel: false };
     state.overlayEvent = transition;
     hooks.say("");
-    hooks.playStairsSequence().finally(() => {
-      if (state.overlayEvent !== transition) return;
-      state.overlayEvent = null;
-      hooks.descendFloor();
+    hooks.runStairsTransition(() => hooks.descendFloor()).finally(() => {
+      if (state.overlayEvent === transition) state.overlayEvent = null;
     });
     return;
   }
   const transition = { type: "stairsTransition", canCancel: false };
   state.overlayEvent = transition;
   hooks.say("");
-  hooks.playStairsSequence().finally(() => {
-    if (state.overlayEvent !== transition) return;
-    state.overlayEvent = null;
-    hooks.returnToTown();
+  hooks.runStairsTransition(() => hooks.returnToTown()).finally(() => {
+    if (state.overlayEvent === transition) state.overlayEvent = null;
   });
 }
 
