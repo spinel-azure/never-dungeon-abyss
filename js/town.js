@@ -118,12 +118,8 @@ export function handleTownInput(action) {
     return true;
   }
   if (town.mode !== "selection") return action === "cancel" ? false : true;
-  if (["up", "left"].includes(action)) {
-    moveSelection(-1);
-    return true;
-  }
-  if (["down", "right"].includes(action)) {
-    moveSelection(1);
+  if (["up", "down", "left", "right"].includes(action)) {
+    moveSelection(action);
     return true;
   }
   if (action === "confirm") {
@@ -137,14 +133,30 @@ export function handleTownInput(action) {
   return false;
 }
 
-function moveSelection(amount) {
+function moveSelection(direction) {
   if (town.registrationRequired) {
     town.selectedIndex = TOWN_FACILITIES.findIndex(facility => facility.id === "guild");
   } else {
-    town.selectedIndex = nearestSelectableIndex(
-      (town.selectedIndex + amount + TOWN_FACILITIES.length) % TOWN_FACILITIES.length,
-      amount
-    );
+    const columns = 3;
+    const rows = Math.ceil(TOWN_FACILITIES.length / columns);
+    const startIndex = town.selectedIndex;
+    let row = Math.floor(startIndex / columns);
+    let column = startIndex % columns;
+    const attempts = direction === "left" || direction === "right" ? columns - 1 : rows - 1;
+
+    for (let count = 0; count < attempts; count += 1) {
+      if (direction === "left") column = (column - 1 + columns) % columns;
+      if (direction === "right") column = (column + 1) % columns;
+      if (direction === "up") row = (row - 1 + rows) % rows;
+      if (direction === "down") row = (row + 1) % rows;
+
+      const candidateIndex = row * columns + column;
+      const candidate = TOWN_FACILITIES[candidateIndex];
+      if (candidate && !candidate.unavailable) {
+        town.selectedIndex = candidateIndex;
+        break;
+      }
+    }
   }
   renderTownView();
 }
