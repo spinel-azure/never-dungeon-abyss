@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="css/style.css?v=20260722-2">
   <link rel="stylesheet" href="css/game-menu.css?v=20260723-2">
   <link rel="stylesheet" href="css/title-screen.css?v=20260722-3">
-  <link rel="stylesheet" href="css/town.css?v=20260723-6">
+  <link rel="stylesheet" href="css/town.css?v=20260723-7">
   <link rel="preload" as="image" href="images/npc/NPC_10.avif" type="image/avif">
   <link rel="preload" as="image" href="images/npc/NPC_11.avif" type="image/avif">
   <link rel="preload" as="image" href="images/npc/NPC_12.avif" type="image/avif">
@@ -29,6 +29,7 @@
     <section id="townScreen" class="town-screen" aria-label="町の施設" hidden>
       <div class="town-portrait-frame">
         <img id="townBackground" class="town-background" src="images/background/town_01.avif" alt="町の風景" hidden>
+        <canvas id="townMosaic" class="town-mosaic" width="64" height="36" aria-label="正体不明の場所" hidden></canvas>
         <img id="townPortrait" class="town-portrait" alt="" hidden>
         <div id="townPortraitPlaceholder" class="town-portrait-placeholder" aria-hidden="true">NDA</div>
         <span id="townFacilityName" class="town-facility-badge">ギルド</span>
@@ -152,6 +153,6 @@
   </section>
 </main>
   <script type="module" src="js/title-screen.js?v=20260722-1"></script>
-  <script type="module" src="js/main.js?v=20260723-10"></script>
+  <script type="module" src="js/main.js?v=20260723-11"></script>
 </body>
 </html>

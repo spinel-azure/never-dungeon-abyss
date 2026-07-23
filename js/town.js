@@ -3,6 +3,7 @@ import { CHARACTER_JOBS, TOWN_FACILITIES, getTownFacility } from "../data/town.j
 const town = {
   root: null,
   background: null,
+  mosaic: null,
   portrait: null,
   portraitPlaceholder: null,
   messageEl: null,
@@ -18,6 +19,7 @@ const town = {
   feedback: null,
   registrationIndex: -1,
   entranceIndex: 0,
+  transferUnlocked: false,
   selectedIndex: 1,
   active: false,
   mode: "arrival",
@@ -32,6 +34,7 @@ const town = {
 export function configureTown(options) {
   Object.assign(town, options);
   town.background = town.root.querySelector("#townBackground");
+  town.mosaic = town.root.querySelector("#townMosaic");
   town.portrait = town.root.querySelector("#townPortrait");
   town.portraitPlaceholder = town.root.querySelector("#townPortraitPlaceholder");
   town.messageEl = options.messageEl;
@@ -78,7 +81,7 @@ export function configureTown(options) {
   });
   town.entranceButtons = [
     { id: "enter", label: "中に入る" },
-    { id: "circle", label: "転送陣" },
+    { id: "circle", label: "？？？" },
     { id: "return", label: "町に戻る" },
     { id: "empty-1", label: "", empty: true },
     { id: "empty-2", label: "", empty: true },
@@ -132,6 +135,12 @@ export function closeTown() {
 
 export function isTownOpen() {
   return town.active;
+}
+
+export function setTransferUnlocked(unlocked) {
+  town.transferUnlocked = Boolean(unlocked);
+  updateEntranceLabels();
+  if (town.active && town.mode === "transferCircle") renderTransferCircle();
 }
 
 export function getTownState() {
@@ -351,6 +360,7 @@ function renderTownView() {
   showTownCommands();
   if (town.mode === "arrival" || town.mode === "selection") {
     const selecting = town.mode === "selection";
+    town.mosaic.hidden = true;
     town.background.src = "images/background/town_01.avif";
     town.background.alt = "町の風景";
     town.background.hidden = false;
@@ -382,6 +392,7 @@ function renderTownView() {
 function renderFacility() {
   showTownCommands();
   const facility = TOWN_FACILITIES[town.selectedIndex] || getTownFacility("guild");
+  town.mosaic.hidden = true;
   town.facilityButtons.forEach((button, index) => {
     const unavailable = Boolean(TOWN_FACILITIES[index].unavailable);
     button.disabled = false;
@@ -419,6 +430,8 @@ function renderFacility() {
 
 function renderDungeonEntrance() {
   showEntranceCommands();
+  updateEntranceLabels();
+  town.mosaic.hidden = true;
   town.background.src = "images/background/dungeon_01.avif";
   town.background.alt = "ダンジョン入口";
   town.background.hidden = false;
@@ -435,14 +448,22 @@ function renderDungeonEntrance() {
 
 function renderTransferCircle() {
   showEntranceCommands();
-  town.background.src = "images/background/circle.avif";
-  town.background.alt = "転送陣";
-  town.background.hidden = false;
+  updateEntranceLabels();
+  if (town.transferUnlocked) {
+    town.mosaic.hidden = true;
+    town.background.src = "images/background/circle.avif";
+    town.background.alt = "転送陣";
+    town.background.hidden = false;
+  } else {
+    renderMosaicBackground("images/background/circle.avif");
+  }
   town.portrait.hidden = true;
   town.portraitPlaceholder.hidden = true;
   town.registration.hidden = true;
   town.root.querySelector("#townFacilityName").hidden = true;
-  town.messageEl.textContent = "転送陣はまだ力を失っている。";
+  town.messageEl.textContent = town.transferUnlocked
+    ? "転送陣が淡い光を放っている。"
+    : "まだ入ることは出来ない。";
   renderEntranceSelection();
   resetTownViewport();
   town.onStateChanged();
@@ -452,6 +473,28 @@ function renderEntranceSelection() {
   town.entranceButtons.forEach((button, index) => {
     button.classList.toggle("is-selected", index === town.entranceIndex && index < 3);
   });
+}
+
+function updateEntranceLabels() {
+  const transferButton = town.entranceButtons.find(button => button.dataset.entranceCommand === "circle");
+  if (transferButton) transferButton.textContent = town.transferUnlocked ? "転送陣" : "？？？";
+}
+
+function renderMosaicBackground(src) {
+  const source = town.backgroundPreloads.find(image => image.src.endsWith(src));
+  town.background.hidden = true;
+  town.mosaic.hidden = false;
+  const draw = () => {
+    if (town.mode !== "transferCircle" || town.transferUnlocked) return;
+    const context = town.mosaic.getContext("2d");
+    context.clearRect(0, 0, town.mosaic.width, town.mosaic.height);
+    context.imageSmoothingEnabled = true;
+    context.drawImage(source, 0, 0, town.mosaic.width, town.mosaic.height);
+    town.background.hidden = true;
+    town.mosaic.hidden = false;
+  };
+  if (source?.complete && source.naturalWidth > 0) draw();
+  else if (source) source.addEventListener("load", draw, { once: true });
 }
 
 function resetTownViewport() {
