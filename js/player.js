@@ -362,8 +362,14 @@ function confirmStairsPrompt() {
     });
     return;
   }
-  state.overlayEvent = null;
-  hooks.returnToTown();
+  const transition = { type: "stairsTransition", canCancel: false };
+  state.overlayEvent = transition;
+  hooks.say("");
+  hooks.playStairsSequence().finally(() => {
+    if (state.overlayEvent !== transition) return;
+    state.overlayEvent = null;
+    hooks.returnToTown();
+  });
 }
 
 export function resumeDismissedStairsPrompt() {
