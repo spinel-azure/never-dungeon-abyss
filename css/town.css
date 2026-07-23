@@ -12,6 +12,7 @@
 .dungeon-commands[data-town-active="true"] button.is-unavailable,.dungeon-commands[data-town-active="true"] button.is-unavailable:disabled{border-color:#292822;background:#0b0b0a;color:#65635e;box-shadow:none;cursor:not-allowed;opacity:1}
 .dungeon-commands[data-town-active="true"] button.is-unavailable.is-selected{border-color:#b0f4ff;background:#14313a;box-shadow:0 0 12px rgba(120,230,255,.8),inset 0 0 8px rgba(120,230,255,.25)}
 .dungeon-commands[data-entrance-active="true"] button.is-empty{visibility:hidden;pointer-events:none}
+.dungeon-commands[data-facility-active="true"] button.is-empty{visibility:hidden;pointer-events:none}
 .guild-registration{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;padding:10px;border:1px solid #4f493b;border-radius:7px;background:#050706}
 .guild-registration label{display:grid;gap:4px;color:#9be6ff;font:12px "PixelFont",monospace}
 .guild-registration input,.guild-registration select{min-width:0;padding:8px;border:1px solid #5bd1ff;background:#071011;color:#fff;font:18px "GameFont",sans-serif}

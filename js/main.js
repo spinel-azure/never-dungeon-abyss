@@ -62,7 +62,7 @@ import {
 import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js";
 import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js?v=20260722-8";
 import { loadGame, writeGame } from "./save-data.js";
-import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260723-11";
+import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260723-12";
 
 (() => {
   const canvas = document.getElementById("screen");
@@ -165,7 +165,8 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTo
     onRegister: registerCharacter,
     onEnterDungeon: enterDungeonFromTown,
     onStateChanged: scheduleAutosave,
-    isMenuOpen
+    isMenuOpen,
+    playSe
   });
 
   function makeSaveSnapshot() {

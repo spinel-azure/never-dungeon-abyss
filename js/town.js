@@ -1,5 +1,24 @@
 import { CHARACTER_JOBS, TOWN_FACILITIES, getTownFacility } from "../data/town.js?v=20260723-3";
 
+const FACILITY_COMMANDS = Object.freeze({
+  inn: [
+    ["stay", "泊まる"], ["talk", "話す"], ["return", "町に戻る"],
+    ["empty-1", ""], ["empty-2", ""], ["empty-3", ""]
+  ],
+  guild: [
+    ["accept", "依頼受注"], ["report", "依頼報告"], ["talk", "話す"],
+    ["return", "町へ戻る"], ["empty-1", ""], ["empty-2", ""]
+  ],
+  temple: [
+    ["heal", "治療"], ["donate", "寄付"], ["talk", "話す"],
+    ["return", "町へ戻る"], ["empty-1", ""], ["empty-2", ""]
+  ],
+  shop: [
+    ["buy", "購入"], ["sell", "売却"], ["buyback", "買い戻す"],
+    ["talk", "話す"], ["return", "町へ戻る"], ["empty-1", ""]
+  ]
+});
+
 const town = {
   root: null,
   background: null,
@@ -11,6 +30,7 @@ const town = {
   gameCommandButtons: [],
   facilityButtons: [],
   entranceButtons: [],
+  facilityCommandButtons: [],
   portraitPreloads: [],
   backgroundPreloads: [],
   registration: null,
@@ -19,6 +39,7 @@ const town = {
   feedback: null,
   registrationIndex: -1,
   entranceIndex: 0,
+  facilityCommandIndex: 0,
   transferUnlocked: false,
   selectedIndex: 1,
   active: false,
@@ -28,7 +49,8 @@ const town = {
   onRegister: () => {},
   onEnterDungeon: () => {},
   onStateChanged: () => {},
-  isMenuOpen: () => false
+  isMenuOpen: () => false,
+  playSe: () => {}
 };
 
 export function configureTown(options) {
@@ -76,7 +98,10 @@ export function configureTown(options) {
     button.type = "button";
     button.dataset.facility = facility.id;
     button.textContent = facility.label;
-    button.addEventListener("click", () => selectFacility(facility.id, true));
+    button.addEventListener("click", () => {
+      town.playSe(facility.unavailable ? "cursorMove" : "confirm");
+      selectFacility(facility.id, true);
+    });
     return button;
   });
   town.entranceButtons = [
@@ -95,10 +120,27 @@ export function configureTown(options) {
     button.classList.toggle("is-empty", Boolean(item.empty));
     if (!item.empty) {
       button.addEventListener("click", () => {
+        town.playSe("confirm");
         town.entranceIndex = index;
         activateEntranceCommand(item.id);
       });
     }
+    return button;
+  });
+  town.facilityCommandButtons = Array.from({ length: 6 }, (_, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.addEventListener("click", () => {
+      if (button.classList.contains("is-empty")) return;
+      town.facilityCommandIndex = index;
+      renderFacilityCommandSelection();
+      if (button.dataset.facilityCommand === "return") {
+        town.playSe("confirm");
+        showTownArrival();
+      } else {
+        town.playSe("cursorMove");
+      }
+    });
     return button;
   });
   town.registration.addEventListener("submit", event => {
@@ -156,8 +198,10 @@ export function handleTownInput(action) {
   if (town.isMenuOpen()) return false;
   if (town.mode === "registration") return handleRegistrationInput(action);
   if (town.mode === "dungeonEntrance") return handleEntranceInput(action);
+  if (town.mode === "facilityMenu" || town.mode === "facility") return handleFacilityMenuInput(action);
   if (town.mode === "transferCircle") {
     if (action === "cancel") {
+      town.playSe("cancel");
       town.mode = "dungeonEntrance";
       renderDungeonEntrance();
     }
@@ -175,16 +219,14 @@ export function handleTownInput(action) {
     }
     return true;
   }
-  if (town.mode === "facility" && action === "cancel") {
-    showTownArrival();
-    return true;
-  }
   if (town.mode !== "selection") return action === "cancel" ? false : true;
   if (["up", "down", "left", "right"].includes(action)) {
+    town.playSe("cursorMove");
     moveSelection(action);
     return true;
   }
   if (action === "confirm") {
+    town.playSe(TOWN_FACILITIES[town.selectedIndex]?.unavailable ? "cursorMove" : "confirm");
     activateFacility(TOWN_FACILITIES[town.selectedIndex]);
     return true;
   }
@@ -193,6 +235,27 @@ export function handleTownInput(action) {
     return false;
   }
   return false;
+}
+
+function handleFacilityMenuInput(action) {
+  if (action === "cancel") {
+    showGameCommands();
+    return false;
+  }
+  if (["up", "down", "left", "right"].includes(action)) {
+    town.playSe("cursorMove");
+    moveFacilityCommandSelection(action);
+    return true;
+  }
+  if (action === "confirm") {
+    const command = town.facilityCommandButtons[town.facilityCommandIndex]?.dataset.facilityCommand;
+    if (command === "return") {
+      town.playSe("confirm");
+      showTownArrival();
+    }
+    return true;
+  }
+  return true;
 }
 
 function handleRegistrationInput(action) {
@@ -204,6 +267,7 @@ function handleRegistrationInput(action) {
   const submitButton = town.registration.querySelector('button[type="submit"]');
   const controls = [town.nameInput, town.jobSelect, submitButton];
   if (["up", "down"].includes(action)) {
+    town.playSe("cursorMove");
     const activeIndex = controls.indexOf(document.activeElement);
     town.registrationIndex = activeIndex >= 0 ? activeIndex : town.registrationIndex;
     if (town.registrationIndex < 0) {
@@ -219,6 +283,7 @@ function handleRegistrationInput(action) {
   }
 
   if (["left", "right"].includes(action) && document.activeElement === town.jobSelect) {
+    town.playSe("cursorMove");
     const amount = action === "right" ? 1 : -1;
     const optionCount = town.jobSelect.options.length;
     town.jobSelect.selectedIndex = (
@@ -228,6 +293,7 @@ function handleRegistrationInput(action) {
   }
 
   if (action === "confirm") {
+    town.playSe("confirm");
     const activeIndex = controls.indexOf(document.activeElement);
     town.registrationIndex = activeIndex >= 0 ? activeIndex : town.registrationIndex;
     if (town.registrationIndex < 0) town.registrationIndex = 0;
@@ -241,10 +307,12 @@ function handleRegistrationInput(action) {
 
 function handleEntranceInput(action) {
   if (action === "cancel") {
+    town.playSe("cancel");
     showTownArrival();
     return true;
   }
   if (action === "left" || action === "right") {
+    town.playSe("cursorMove");
     town.entranceIndex = (
       town.entranceIndex + (action === "right" ? 1 : 2)
     ) % 3;
@@ -252,6 +320,7 @@ function handleEntranceInput(action) {
     return true;
   }
   if (action === "confirm") {
+    town.playSe("confirm");
     activateEntranceCommand(town.entranceButtons[town.entranceIndex]?.dataset.entranceCommand);
     return true;
   }
@@ -300,6 +369,35 @@ function moveSelection(direction) {
   renderTownView();
 }
 
+function moveFacilityCommandSelection(direction) {
+  const validIndices = town.facilityCommandButtons
+    .map((button, index) => button.classList.contains("is-empty") ? -1 : index)
+    .filter(index => index >= 0);
+  town.facilityCommandIndex = moveGridIndex(
+    town.facilityCommandIndex,
+    direction,
+    validIndices
+  );
+  renderFacilityCommandSelection();
+}
+
+function moveGridIndex(startIndex, direction, validIndices) {
+  const columns = 3;
+  const rows = 2;
+  let row = Math.floor(startIndex / columns);
+  let column = startIndex % columns;
+  const attempts = direction === "left" || direction === "right" ? columns - 1 : rows - 1;
+  for (let count = 0; count < attempts; count += 1) {
+    if (direction === "left") column = (column - 1 + columns) % columns;
+    if (direction === "right") column = (column + 1) % columns;
+    if (direction === "up") row = (row - 1 + rows) % rows;
+    if (direction === "down") row = (row + 1) % rows;
+    const candidate = row * columns + column;
+    if (validIndices.includes(candidate)) return candidate;
+  }
+  return startIndex;
+}
+
 function selectFacility(id, activate) {
   const index = TOWN_FACILITIES.findIndex(facility => facility.id === id);
   if (index < 0 || town.mode === "arrival") return;
@@ -313,8 +411,8 @@ function selectFacility(id, activate) {
     return;
   }
   town.selectedIndex = index;
-  renderFacility();
   if (activate) activateFacility(TOWN_FACILITIES[index]);
+  else renderTownView();
 }
 
 function activateFacility(facility) {
@@ -329,7 +427,8 @@ function activateFacility(facility) {
     renderDungeonEntrance();
     return;
   }
-  town.mode = facility.id === "guild" && town.registrationRequired ? "registration" : "facility";
+  town.mode = facility.id === "guild" && town.registrationRequired ? "registration" : "facilityMenu";
+  town.facilityCommandIndex = 0;
   renderFacility();
 }
 
@@ -390,7 +489,6 @@ function renderTownView() {
 }
 
 function renderFacility() {
-  showTownCommands();
   const facility = TOWN_FACILITIES[town.selectedIndex] || getTownFacility("guild");
   town.mosaic.hidden = true;
   town.facilityButtons.forEach((button, index) => {
@@ -418,6 +516,9 @@ function renderFacility() {
   if (showRegistration) {
     town.mode = "registration";
     town.registrationIndex = -1;
+    showTownCommands();
+  } else {
+    showFacilityCommands(facility.id);
   }
   town.root.classList.toggle("is-registering", showRegistration);
   town.registration.hidden = !showRegistration;
@@ -475,6 +576,38 @@ function renderEntranceSelection() {
   });
 }
 
+function showFacilityCommands(facilityId) {
+  const commands = FACILITY_COMMANDS[facilityId] || FACILITY_COMMANDS.inn;
+  town.facilityCommandButtons.forEach((button, index) => {
+    const [id, label] = commands[index];
+    const empty = !label;
+    const available = id === "return";
+    button.dataset.facilityCommand = id;
+    button.textContent = label;
+    button.disabled = empty;
+    button.classList.toggle("is-empty", empty);
+    button.classList.toggle("is-unavailable", !empty && !available);
+    button.setAttribute("aria-disabled", String(!empty && !available));
+  });
+  if (!town.facilityCommandButtons.every(button => button.parentElement === town.commandRoot)) {
+    town.commandRoot.replaceChildren(...town.facilityCommandButtons);
+  }
+  town.commandRoot.dataset.townActive = "true";
+  town.commandRoot.dataset.facilityActive = "true";
+  delete town.commandRoot.dataset.entranceActive;
+  town.commandRoot.setAttribute("aria-label", "施設コマンド");
+  renderFacilityCommandSelection();
+}
+
+function renderFacilityCommandSelection() {
+  town.facilityCommandButtons.forEach((button, index) => {
+    button.classList.toggle(
+      "is-selected",
+      index === town.facilityCommandIndex && !button.classList.contains("is-empty")
+    );
+  });
+}
+
 function updateEntranceLabels() {
   const transferButton = town.entranceButtons.find(button => button.dataset.entranceCommand === "circle");
   if (transferButton) transferButton.textContent = town.transferUnlocked ? "転送陣" : "？？？";
@@ -511,13 +644,15 @@ function registerCharacter() {
   }
   const job = CHARACTER_JOBS.find(item => item.id === town.jobSelect.value) || CHARACTER_JOBS[0];
   town.registrationRequired = false;
-  town.mode = "facility";
+  town.mode = "facilityMenu";
+  town.facilityCommandIndex = 0;
   town.onRegister({ name, job: job.id, jobLabel: job.label });
   town.registration.hidden = true;
-  town.messageEl.textContent = `ギルド長：${name}だな。登録は済んだ。ようこそ、冒険者ギルドへ。`;
-  town.feedback.textContent = "登録しました。";
   renderCharacterStatus();
   town.facilityButtons.forEach(button => button.classList.remove("is-locked"));
+  renderFacility();
+  town.messageEl.textContent = `ギルド長：${name}だな。登録は済んだ。ようこそ、冒険者ギルドへ。`;
+  town.feedback.textContent = "登録しました。";
   town.onStateChanged();
 }
 
@@ -551,6 +686,7 @@ function showTownCommands() {
   }
   town.commandRoot.dataset.townActive = "true";
   delete town.commandRoot.dataset.entranceActive;
+  delete town.commandRoot.dataset.facilityActive;
   town.commandRoot.setAttribute("aria-label", "町の施設");
 }
 
@@ -561,6 +697,7 @@ function showEntranceCommands() {
   }
   town.commandRoot.dataset.townActive = "true";
   town.commandRoot.dataset.entranceActive = "true";
+  delete town.commandRoot.dataset.facilityActive;
   town.commandRoot.setAttribute("aria-label", "ダンジョン入口");
 }
 
@@ -571,5 +708,6 @@ function showGameCommands() {
   }
   delete town.commandRoot.dataset.townActive;
   delete town.commandRoot.dataset.entranceActive;
+  delete town.commandRoot.dataset.facilityActive;
   town.commandRoot.setAttribute("aria-label", "ダンジョンコマンド");
 }
