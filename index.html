@@ -8,11 +8,11 @@
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
   <link rel="stylesheet" href="css/style.css?v=20260722-2">
-  <link rel="stylesheet" href="css/game-menu.css?v=20260723-2">
+  <link rel="stylesheet" href="css/game-menu.css?v=20260724-1">
   <link rel="stylesheet" href="css/title-screen.css?v=20260723-4">
   <link rel="stylesheet" href="css/town.css?v=20260723-9">
   <link rel="stylesheet" href="css/scene-transition.css?v=20260723-2">
-  <link rel="stylesheet" href="css/battle.css?v=20260724-1">
+  <link rel="stylesheet" href="css/battle.css?v=20260724-2">
   <link rel="preload" as="image" href="images/npc/NPC_10.avif" type="image/avif">
   <link rel="preload" as="image" href="images/npc/NPC_11.avif" type="image/avif">
   <link rel="preload" as="image" href="images/npc/NPC_12.avif" type="image/avif">
@@ -56,18 +56,8 @@
       <canvas id="treasureCanvas" class="treasure-canvas" width="960" height="540" aria-hidden="true"></canvas>
       <section id="battleScreen" class="battle-screen" aria-label="戦闘画面" hidden>
         <div class="battle-enemy-stage">
+          <strong id="battleEnemyName" class="battle-enemy-name">ENEMY</strong>
           <img id="battleEnemyImage" class="battle-enemy-image" alt="">
-        </div>
-        <div class="battle-enemy-panel">
-          <strong id="battleEnemyName" class="battle-panel-name">ENEMY</strong>
-          <span>HP <output id="battleEnemyHp">-- / --</output></span>
-          <span>状態 <output id="battleEnemyCondition" class="battle-condition">GOOD</output></span>
-        </div>
-        <div class="battle-player-panel">
-          <strong id="battlePlayerName" class="battle-panel-name">PLAYER</strong>
-          <span>HP <output id="battlePlayerHp">-- / --</output></span>
-          <span>SP <output id="battlePlayerSp">-- / --</output></span>
-          <span>状態 <output id="battlePlayerCondition" class="battle-condition">GOOD</output></span>
         </div>
       </section>
     </div>
@@ -177,6 +167,6 @@
   </section>
 </main>
   <script type="module" src="js/title-screen.js?v=20260722-1"></script>
-  <script type="module" src="js/main.js?v=20260724-1"></script>
+  <script type="module" src="js/main.js?v=20260724-4"></script>
 </body>
 </html>

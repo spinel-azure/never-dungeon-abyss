@@ -1,13 +1,14 @@
 import { createBattleState, resolveBattleRound } from "../combat/battle-engine.js";
 import { getSkills } from "../data/skills.js";
+import { resolveEscapeAttempt } from "../combat/resolve-escape.js";
 
 const COMMANDS = Object.freeze([
-  ["attack", "たたかう"],
+  ["attack", "戦う"],
   ["skills", "スキル"],
-  ["guard", "ぼうぎょ"],
+  ["guard", "防御"],
   ["items", "アイテム"],
   ["auto", "オート"],
-  ["escape", "にげる"]
+  ["escape", "逃げる"]
 ]);
 
 const battleUi = {
@@ -20,10 +21,13 @@ const battleUi = {
   mode: "commands",
   selectedIndex: 0,
   battle: null,
+  autoActive: false,
+  autoTimer: 0,
   getCharacter: () => null,
   onCharacterChanged: () => {},
   onVictory: () => {},
   onDefeat: () => {},
+  onEscape: () => {},
   playSe: () => {}
 };
 
@@ -48,6 +52,8 @@ export function startBattle(enemy) {
   battleUi.active = true;
   battleUi.mode = "commands";
   battleUi.selectedIndex = 0;
+  battleUi.autoActive = false;
+  clearAutoTimer();
   battleUi.battle = createBattleState({ character, enemy });
   battleUi.root.hidden = false;
   document.body.classList.add("battle-active");
@@ -63,6 +69,10 @@ export function isBattleActive() {
 
 export function handleBattleInput(action) {
   if (!battleUi.active) return false;
+  if (battleUi.autoActive) {
+    if (action === "cancel") stopAutoBattle();
+    return true;
+  }
   if (battleUi.battle?.outcome) {
     if (action === "confirm") finishBattle();
     return true;
@@ -143,6 +153,8 @@ function activateSelected() {
   }
   if (command === "attack") executeCommand({ type: "attack" });
   else if (command === "guard") executeCommand({ type: "guard" });
+  else if (command === "auto") startAutoBattle();
+  else if (command === "escape") attemptEscape();
   else {
     battleUi.messageEl.textContent = `${button.textContent}は現在未実装です。`;
   }
@@ -166,6 +178,14 @@ function executeCommand(command) {
     statuses: structuredClone(battleUi.battle.player.statuses),
     alive: battleUi.battle.player.alive
   });
+  if (battleUi.battle.outcome) {
+    battleUi.autoActive = false;
+    clearAutoTimer();
+  }
+  if (battleUi.battle.outcome) {
+    battleUi.autoActive = false;
+    clearAutoTimer();
+  }
   if (battleUi.battle.outcome === "victory") battleUi.playSe("battleVictory");
   else if (battleUi.battle.outcome === "defeat") battleUi.playSe("playerDamage");
   else if (battleUi.battle.log.some(line => line.includes("回復"))) battleUi.playSe("heal");
@@ -174,6 +194,46 @@ function executeCommand(command) {
   battleUi.selectedIndex = 0;
   showCommandButtons();
   renderBattle();
+  if (battleUi.autoActive && !battleUi.battle.outcome) scheduleAutoRound();
+}
+
+function startAutoBattle() {
+  battleUi.autoActive = true;
+  battleUi.messageEl.textContent = "オート戦闘を開始した。\n＊Bボタンで中断";
+  scheduleAutoRound();
+}
+
+function scheduleAutoRound() {
+  clearAutoTimer();
+  battleUi.autoTimer = window.setTimeout(() => {
+    battleUi.autoTimer = 0;
+    if (!battleUi.active || !battleUi.autoActive || battleUi.battle?.outcome) return;
+    executeCommand({ type: "attack" });
+  }, 450);
+}
+
+function stopAutoBattle() {
+  battleUi.autoActive = false;
+  clearAutoTimer();
+  battleUi.playSe("cancel");
+  battleUi.messageEl.textContent = "オート戦闘を中断した。";
+}
+
+function attemptEscape() {
+  const result = resolveEscapeAttempt({
+    escapeRate: battleUi.battle.enemy.escapeRate
+  });
+  if (result.success) {
+    battleUi.battle.outcome = "escaped";
+    battleUi.battle.phase = "complete";
+    battleUi.battle.log = ["戦闘から逃げ切った！"];
+    renderBattle();
+    return;
+  }
+  battleUi.battle.log = ["逃げられなかった！"];
+  executeCommand({ type: "wait" });
+  battleUi.battle.log.unshift("逃げられなかった！");
+  renderBattle();
 }
 
 function finishBattle() {
@@ -181,10 +241,13 @@ function finishBattle() {
   const snapshot = structuredClone(battleUi.battle);
   closeBattle();
   if (outcome === "victory") battleUi.onVictory(snapshot);
-  else battleUi.onDefeat(snapshot);
+  else if (outcome === "defeat") battleUi.onDefeat(snapshot);
+  else battleUi.onEscape(snapshot);
 }
 
 function closeBattle() {
+  clearAutoTimer();
+  battleUi.autoActive = false;
   battleUi.active = false;
   battleUi.root.hidden = true;
   document.body.classList.remove("battle-active");
@@ -200,7 +263,7 @@ function showCommandButtons() {
     delete button.dataset.skillId;
     button.textContent = label;
     button.disabled = false;
-    button.classList.toggle("is-unavailable", ["items", "auto", "escape"].includes(id));
+    button.classList.toggle("is-unavailable", id === "items");
   });
   mountButtons("戦闘コマンド");
 }
@@ -258,6 +321,12 @@ function renderBattle() {
   image.src = battle.enemy.image || "";
   image.alt = battle.enemy.name;
   battleUi.messageEl.textContent = `${battle.log.join("\n")}${battle.outcome ? "\n＊Aボタンで次へ" : ""}`;
+}
+
+function clearAutoTimer() {
+  if (!battleUi.autoTimer) return;
+  window.clearTimeout(battleUi.autoTimer);
+  battleUi.autoTimer = 0;
 }
 
 function statusText(combatant) {

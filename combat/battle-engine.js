@@ -71,6 +71,27 @@ export function createPlayerAction(player, command = {}) {
     };
   }
   if (command.type === "guard") return { ok: true, spCost: 0, action: createGuardAction() };
+  if (command.type === "wait") {
+    return {
+      ok: true,
+      spCost: 0,
+      action: { id: "wait", name: "待機", actionType: "wait", speedModifier: 99 }
+    };
+  }
+  if (command.type === "wait") {
+    return {
+      ok: true,
+      spCost: 0,
+      action: { id: "wait", name: "待機", actionType: "wait", speedModifier: 99 }
+    };
+  }
+  if (command.type === "wait") {
+    return {
+      ok: true,
+      spCost: 0,
+      action: { id: "wait", name: "待機", actionType: "wait", speedModifier: 99 }
+    };
+  }
   if (command.type !== "skill") return { ok: false, reason: "notImplemented" };
   const skill = getSkill(command.skillId);
   if (!skill || !player.skillIds?.includes(skill.id)) return { ok: false, reason: "unknownSkill" };
@@ -103,6 +124,18 @@ function executeAction({ battle, action, actor, target, rng }) {
       skipInitialDecrement: true
     }]);
     battle.log.push(`${actor.name}は身を守った。`);
+    return;
+  }
+  if (action.actionType === "wait") {
+    battle.log.push(`${actor.name}は隙を見せた。`);
+    return;
+  }
+  if (action.actionType === "wait") {
+    battle.log.push(`${actor.name}は隙を見せた。`);
+    return;
+  }
+  if (action.actionType === "wait") {
+    battle.log.push(`${actor.name}は隙を見せた。`);
     return;
   }
   if (action.actionType === "buff") {

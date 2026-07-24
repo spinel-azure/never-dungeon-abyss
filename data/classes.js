@@ -63,6 +63,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     baseStats: { ...characterClass.stats },
     equipmentStatBonuses: {},
     cardStatBonuses: {},
+    def: 0,
     equipment: {
       weaponId: defaultWeaponFor(characterClass.id)
     },
@@ -94,6 +95,7 @@ export function normalizeCharacter(character) {
     baseStats: { ...characterClass.stats, ...(character.baseStats || {}) },
     equipmentStatBonuses: { ...(character.equipmentStatBonuses || {}) },
     cardStatBonuses: { ...(character.cardStatBonuses || {}) },
+    def: Math.max(0, Number(character.def) || 0),
     equipment: {
       weaponId: defaultWeaponFor(characterClass.id),
       ...(character.equipment || {})

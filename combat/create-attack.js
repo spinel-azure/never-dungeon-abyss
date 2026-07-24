@@ -5,7 +5,7 @@ export function createNormalAttack({ weapon, weaponId } = {}) {
   const type = getWeaponType(resolvedWeapon.type);
   return {
     id: "normal_attack",
-    name: "たたかう",
+    name: "攻撃",
     actionType: "physicalAttack",
     hitCount: type.hitCount,
     powerPerHit: type.powerPerHit,

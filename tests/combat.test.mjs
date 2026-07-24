@@ -18,6 +18,7 @@ import {
   calculateSurpriseRate,
   resolveEnvironmentSave
 } from "../combat/resolve-environment-save.js";
+import { resolveEscapeAttempt } from "../combat/resolve-escape.js";
 import { resolveTurnOrder, createGuardAction } from "../combat/resolve-turn-order.js";
 import {
   applyStatus,
@@ -25,6 +26,10 @@ import {
   resolveActionOpportunity,
   resolveEndOfAction
 } from "../combat/status-lifecycle.js";
+import {
+  createInnRecovery,
+  createTempleRevival
+} from "../js/character-services.js";
 
 const fixed = (...values) => {
   let index = 0;
@@ -228,6 +233,11 @@ test("surprise chance is reduced by LUC and never below zero", () => {
   }), 0);
 });
 
+test("escape uses the enemy escape rate with injectable RNG", () => {
+  assert.equal(resolveEscapeAttempt({ escapeRate: 0.75, rng: fixed(0.74) }).success, true);
+  assert.equal(resolveEscapeAttempt({ escapeRate: 0.75, rng: fixed(0.75) }).success, false);
+});
+
 test("poison damages at target action end and lasts three ticks", () => {
   let statuses = applyStatus([], { statusId: "poison", success: true });
   assert.equal(statuses[0].remainingTurns, 3);
@@ -309,4 +319,34 @@ test("legacy characters migrate to their class vitals and skills", () => {
   assert.equal(mage.sp, 30);
   assert.equal(mage.maxSp, 30);
   assert.equal(mage.skillIds.length, 3);
+});
+
+test("inn recovery restores HP and SP to maximum", () => {
+  assert.deepEqual(createInnRecovery({
+    hp: 1,
+    maxHp: 30,
+    sp: 2,
+    maxSp: 15
+  }), {
+    hp: 30,
+    sp: 15,
+    statuses: [],
+    condition: "GOOD",
+    alive: true
+  });
+});
+
+test("temple revival restores one HP and preserves death-time SP", () => {
+  assert.deepEqual(createTempleRevival({
+    hp: 0,
+    maxHp: 30,
+    sp: 7,
+    maxSp: 15
+  }), {
+    hp: 1,
+    sp: 7,
+    statuses: [],
+    condition: "GOOD",
+    alive: true
+  });
 });

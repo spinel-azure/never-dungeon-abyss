@@ -35,11 +35,11 @@ import {
   startRandomEncounterNotice,
   startFloorLapNotice,
   setNpcTypewriterOptions
-} from "./player.js?v=20260723-3";
+} from "./player.js?v=20260724-1";
 import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setMistOptions, setWallColor, setFloorColor } from "./renderer.js?v=20260722-8";
 import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minimap.js?v=20260722-1";
-import { configureInput } from "./input.js?v=20260723-2";
-import { configureVirtualStick } from "./virtualStick.js?v=20260722-1";
+import { configureInput } from "./input.js?v=20260724-1";
+import { configureVirtualStick } from "./virtualStick.js?v=20260724-1";
 import { configureCompass, drawCompass } from "./compass.js";
 import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen } from "./menu.js?v=20260723-2";
 import { resolveFloorTheme } from "./floorTheme.js?v=20260722-1";
@@ -62,10 +62,11 @@ import {
 import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js";
 import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js?v=20260722-8";
 import { loadGame, writeGame } from "./save-data.js";
-import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260723-15";
+import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260724-1";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js";
-import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js";
+import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260724-3";
+import { createInnRecovery, createTempleRevival } from "./character-services.js?v=20260724-1";
 
 (() => {
   const canvas = document.getElementById("screen");
@@ -176,6 +177,8 @@ import { configureBattle, handleBattleInput, isBattleActive, startBattle } from 
     getCharacter: () => character,
     onRegister: registerCharacter,
     onEnterDungeon: enterDungeonFromTown,
+    onStay: stayAtInn,
+    onHeal: healAtTemple,
     onStateChanged: scheduleAutosave,
     isMenuOpen,
     playSe
@@ -188,6 +191,7 @@ import { configureBattle, handleBattleInput, isBattleActive, startBattle } from 
     onCharacterChanged: updateCharacterFromBattle,
     onVictory: finishBattleVictory,
     onDefeat: finishBattleDefeat,
+    onEscape: finishBattleEscape,
     playSe
   });
 
@@ -337,15 +341,42 @@ import { configureBattle, handleBattleInput, isBattleActive, startBattle } from 
     if (vitals) vitals.innerHTML = character
       ? `<span>HP ${character.hp} / ${character.maxHp}</span><span>SP ${character.sp} / ${character.maxSp}</span>`
       : "<span>HP ---- / ----</span><span>SP ---- / ----</span>";
+    renderStatusGauges(character);
+  }
+
+  function renderStatusGauges(target) {
     const statRows = document.getElementById("ndeStatRows");
-    if (statRows) {
-      const labels = [["STR", "str"], ["INT", "int"], ["AGI", "agi"], ["DEX", "dex"], ["LUC", "luc"]];
-      statRows.replaceChildren(...labels.map(([label, key]) => {
-        const row = document.createElement("div");
-        row.innerHTML = `<span>${label}</span><strong>${character?.baseStats?.[key] ?? "---"}</strong>`;
-        return row;
-      }));
-    }
+    if (!statRows) return;
+    const definitions = [
+      ["STR", "str"], ["INT", "int"], ["AGI", "agi"],
+      ["DEX", "dex"], ["LUC", "luc"], ["DEF", "def"]
+    ];
+    statRows.replaceChildren(...definitions.map(([label, key]) => {
+      const base = Math.max(0, Math.floor(Number(
+        key === "def" ? target?.def : target?.baseStats?.[key]
+      ) || 0));
+      const equipment = Math.max(0, Math.floor(Number(target?.equipmentStatBonuses?.[key]) || 0));
+      const cards = Math.max(0, Math.floor(Number(target?.cardStatBonuses?.[key]) || 0));
+      const total = Math.min(30, base + equipment + cards);
+      const row = document.createElement("div");
+      row.className = "nde-stat-row";
+      const name = document.createElement("strong");
+      name.textContent = label;
+      const gauge = document.createElement("span");
+      gauge.className = "nde-empty-gauge";
+      gauge.setAttribute("aria-label", `${label} ${total}/30`);
+      for (let index = 0; index < 30; index += 1) {
+        const cell = document.createElement("i");
+        if (index < Math.min(base, 30)) cell.className = "is-base";
+        else if (index < Math.min(base + equipment, 30)) cell.className = "is-equipment";
+        else if (index < total) cell.className = "is-card";
+        gauge.append(cell);
+      }
+      const value = document.createElement("output");
+      value.textContent = String(total).padStart(2, "0");
+      row.append(name, gauge, value);
+      return row;
+    }));
   }
 
   function beginRandomBattle() {
@@ -375,13 +406,43 @@ import { configureBattle, handleBattleInput, isBattleActive, startBattle } from 
 
   function finishBattleDefeat() {
     if (character) {
-      character.hp = 0;
-      character.alive = false;
-      character.condition = "DEAD";
+      Object.assign(character, createTempleRevival(character));
     }
+    worldLocation = "town";
+    cancelAutoReturn(false);
+    setPlayerInputEnabled(false);
+    openTown({ registrationRequired: false, facilityId: "temple", mode: "facilityMenu" });
     updateCharacterUi();
-    returnToTown();
-    say("力尽きた……寺院で蘇生を待つ。");
+    say("司祭：おお…！女神へ祈りが届いたか…！迷える魂よ、今一度目覚めよ！");
+    saveGame();
+  }
+
+  function finishBattleEscape() {
+    resetPresence();
+    setPlayerInputEnabled(true);
+    say("戦闘から逃げ切った。");
+    updateCharacterUi();
+    saveGame();
+  }
+
+  function stayAtInn() {
+    if (!character) return;
+    Object.assign(character, createInnRecovery(character));
+    updateCharacterUi();
+    say("女将：お代はいらないよ。ゆっくりと身体を休めるんだよ。");
+    saveGame();
+  }
+
+  function healAtTemple() {
+    if (!character) return;
+    if (character.alive && character.hp > 0) {
+      say("司祭：治療の必要はないようですね。");
+      return;
+    }
+    Object.assign(character, createTempleRevival(character));
+    updateCharacterUi();
+    say("司祭：おお…！女神へ祈りが届いたか…！迷える魂よ、今一度目覚めよ！");
+    saveGame();
   }
 
   async function enterDungeonFromTown() {

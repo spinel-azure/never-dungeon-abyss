@@ -67,6 +67,7 @@ export function createEnemyCombatant(enemy) {
     def: enemy.def,
     baseDef: enemy.def,
     attack: enemy.attack,
+    escapeRate: enemy.escapeRate,
     statuses: [],
     elementMultipliers: { ...(enemy.elementMultipliers || {}) },
     statusResistances: structuredClone(enemy.statusResistances || {}),

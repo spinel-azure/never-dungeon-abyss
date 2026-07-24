@@ -53,6 +53,8 @@ const town = {
   getCharacter: () => null,
   onRegister: () => {},
   onEnterDungeon: () => {},
+  onStay: () => {},
+  onHeal: () => {},
   onStateChanged: () => {},
   isMenuOpen: () => false,
   playSe: () => {}
@@ -139,9 +141,12 @@ export function configureTown(options) {
       if (button.classList.contains("is-empty")) return;
       town.facilityCommandIndex = index;
       renderFacilityCommandSelection();
-      if (button.dataset.facilityCommand === "return") {
+      const command = button.dataset.facilityCommand;
+      if (command === "return") {
         town.playSe("confirm");
         showTownArrival();
+      } else if (activateFacilityService(command)) {
+        town.playSe(command === "stay" ? "heal" : "confirm");
       } else {
         town.playSe("cursorMove");
       }
@@ -258,6 +263,8 @@ function handleFacilityMenuInput(action) {
     if (command === "return") {
       town.playSe("confirm");
       showTownArrival();
+    } else if (activateFacilityService(command)) {
+      town.playSe(command === "stay" ? "heal" : "confirm");
     }
     return true;
   }
@@ -590,7 +597,7 @@ function showFacilityCommands(facilityId) {
   town.facilityCommandButtons.forEach((button, index) => {
     const [id, label] = commands[index];
     const empty = !label;
-    const available = id === "return";
+    const available = id === "return" || id === "stay" || id === "heal";
     button.dataset.facilityCommand = id;
     button.textContent = label;
     button.disabled = empty;
@@ -606,6 +613,20 @@ function showFacilityCommands(facilityId) {
   delete town.commandRoot.dataset.entranceActive;
   town.commandRoot.setAttribute("aria-label", "施設コマンド");
   renderFacilityCommandSelection();
+}
+
+function activateFacilityService(command) {
+  if (command === "stay") {
+    town.onStay();
+    town.onStateChanged();
+    return true;
+  }
+  if (command === "heal") {
+    town.onHeal();
+    town.onStateChanged();
+    return true;
+  }
+  return false;
 }
 
 function renderFacilityCommandSelection() {
