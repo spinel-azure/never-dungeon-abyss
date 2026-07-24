@@ -4,9 +4,7 @@
   z-index: 8;
   overflow: hidden;
   border-radius: inherit;
-  background:
-    radial-gradient(circle at 50% 36%, rgba(105, 128, 116, .28), transparent 26%),
-    linear-gradient(#171b18, #050706 72%);
+  background: rgba(0, 0, 0, .8);
   color: #f5f5ec;
   font-family: "DotGothic16", "GameFont", sans-serif;
 }
@@ -45,6 +43,12 @@
   object-fit: contain;
   image-rendering: pixelated;
   filter: drop-shadow(0 8px 8px rgba(0, 0, 0, .72));
+  opacity: 1;
+  transition: opacity 900ms ease-out;
+}
+
+.battle-enemy-image.is-defeated {
+  opacity: 0;
 }
 
 .battle-enemy-name {
@@ -62,11 +66,16 @@
     0 0 5px #fff;
 }
 
-body.battle-active .viewport > #screen,
 body.battle-active .viewport > .status,
 body.battle-active .viewport > #eventOverlay,
 body.battle-active .viewport > #treasureCanvas {
   visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .battle-enemy-image {
+    transition-duration: 1ms;
+  }
 }
 
 .dungeon-commands[data-battle-active="true"] button:disabled {

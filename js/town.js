@@ -171,7 +171,12 @@ export function openTown({ registrationRequired = false, facilityId = null, mode
       ? "inn"
       : availableRequested?.id || "inn";
   town.selectedIndex = Math.max(0, TOWN_FACILITIES.findIndex(facility => facility.id === initialId));
-  town.mode = town.registrationRequired ? "registration" : mode === "facility" ? "facility" : "selection";
+  const opensInsideFacility = mode === "facility" || mode === "facilityMenu";
+  town.mode = town.registrationRequired
+    ? "registration"
+    : opensInsideFacility
+      ? "facilityMenu"
+      : "selection";
   document.body.classList.add("town-active");
   town.root.hidden = false;
   renderTownView();

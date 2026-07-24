@@ -320,6 +320,7 @@ function renderBattle() {
   const image = battleUi.root.querySelector("#battleEnemyImage");
   image.src = battle.enemy.image || "";
   image.alt = battle.enemy.name;
+  image.classList.toggle("is-defeated", battle.outcome === "victory");
   battleUi.messageEl.textContent = `${battle.log.join("\n")}${battle.outcome ? "\n＊Aボタンで次へ" : ""}`;
 }
 
