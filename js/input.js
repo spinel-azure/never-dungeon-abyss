@@ -12,12 +12,19 @@
   buttonA,
   buttonB,
   handleOverlayInput = () => false,
+  handleBattleInput = () => false,
   handleTownInput = () => false,
   handleDoorInput = () => false,
   handleMenuInput
 }) {
   window.addEventListener("keydown", (e) => {
     if (e.target instanceof Element && e.target.closest("input, select, textarea")) return;
+    if (e.key === "ArrowUp" && handleBattleInput("up")) { e.preventDefault(); return; }
+    if (e.key === "ArrowDown" && handleBattleInput("down")) { e.preventDefault(); return; }
+    if (e.key === "ArrowLeft" && handleBattleInput("left")) { e.preventDefault(); return; }
+    if (e.key === "ArrowRight" && handleBattleInput("right")) { e.preventDefault(); return; }
+    if (e.code === "KeyX" && handleBattleInput("confirm")) { e.preventDefault(); return; }
+    if (e.code === "KeyZ" && handleBattleInput("cancel")) { e.preventDefault(); return; }
     if (e.key === "ArrowUp" && handleTownInput("up")) { e.preventDefault(); return; }
     if (e.key === "ArrowDown" && handleTownInput("down")) { e.preventDefault(); return; }
     if (e.key === "ArrowLeft" && handleTownInput("left")) { e.preventDefault(); return; }
@@ -43,8 +50,8 @@
   bindControl(rightBtn, () => handleOverlayInput("dismiss") || manualTurn(1));
   bindControl(autoReturnBtn, () => handleOverlayInput("dismiss") || startAutoReturn());
   bindControl(randomGenerateBtn, () => handleOverlayInput("dismiss") || generateRandomDungeon());
-  bindControl(buttonA, () => handleTownInput("confirm") || handleOverlayInput("confirm") || handleMenuInput("confirm") || handleDoorInput());
-  bindControl(buttonB, () => handleTownInput("cancel") || handleOverlayInput("cancel") || handleMenuInput("cancel"));
+  bindControl(buttonA, () => handleBattleInput("confirm") || handleTownInput("confirm") || handleOverlayInput("confirm") || handleMenuInput("confirm") || handleDoorInput());
+  bindControl(buttonB, () => handleBattleInput("cancel") || handleTownInput("cancel") || handleOverlayInput("cancel") || handleMenuInput("cancel"));
   configureTouchGuards();
 }
 

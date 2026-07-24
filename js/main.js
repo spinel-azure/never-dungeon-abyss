@@ -63,6 +63,9 @@ import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } fr
 import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js?v=20260722-8";
 import { loadGame, writeGame } from "./save-data.js";
 import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260723-15";
+import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
+import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js";
+import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js";
 
 (() => {
   const canvas = document.getElementById("screen");
@@ -105,6 +108,7 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTo
   const menuScreen = document.getElementById("menuScreen");
   const dungeonCommands = document.getElementById("dungeonCommands");
   const townScreen = document.getElementById("townScreen");
+  const battleScreen = document.getElementById("battleScreen");
   const sceneTransition = document.getElementById("sceneTransition");
   const sceneTransitionTitle = document.getElementById("sceneTransitionTitle");
   let sceneTransitionRunning = false;
@@ -161,6 +165,7 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTo
     playTreasureOpening,
     hideTreasure,
     returnToTown,
+    beginBattle: beginRandomBattle,
     playNpcVoice: playSe,
     onStateChanged: scheduleAutosave
   });
@@ -173,6 +178,16 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTo
     onEnterDungeon: enterDungeonFromTown,
     onStateChanged: scheduleAutosave,
     isMenuOpen,
+    playSe
+  });
+  configureBattle({
+    root: battleScreen,
+    commandRoot: dungeonCommands,
+    messageEl: msgEl,
+    getCharacter: () => character,
+    onCharacterChanged: updateCharacterFromBattle,
+    onVictory: finishBattleVictory,
+    onDefeat: finishBattleDefeat,
     playSe
   });
 
@@ -255,7 +270,7 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTo
     state.npcAwarenessShown = false;
     state.npcEncounterCounts = player.npcEncounterCounts && typeof player.npcEncounterCounts === "object" ? { ...player.npcEncounterCounts } : {};
     state.stairsPromptDismissed = Boolean(player.stairsPromptDismissed);
-    character = save.character && typeof save.character === "object" ? { ...save.character } : null;
+    character = normalizeCharacter(save.character);
     restorePresence(dungeon.presence);
     const now = performance.now();
     runStartedAt = now - Math.max(0, Number(dungeon.runElapsedMs) || 0);
@@ -301,20 +316,7 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTo
   }
 
   function registerCharacter({ name, job, jobLabel }) {
-    character = {
-      name,
-      job,
-      jobLabel,
-      level: 1,
-      experience: 0,
-      carriedExperience: 0,
-      hp: 30,
-      maxHp: 30,
-      sp: 15,
-      maxSp: 15,
-      condition: "GOOD",
-      alive: true
-    };
+    character = createInitialCharacter({ name, job, jobLabel });
     updateCharacterUi();
     saveGame();
   }
@@ -331,6 +333,55 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTo
     if (statusName) statusName.textContent = character?.name || "NO_NAME";
     if (statusJob) statusJob.textContent = character?.jobLabel || "UNKNOWN";
     if (statusLevel) statusLevel.textContent = character ? `LV ${String(character.level).padStart(3, "0")}` : "LV ---";
+    const vitals = document.querySelector(".nde-status-vitals");
+    if (vitals) vitals.innerHTML = character
+      ? `<span>HP ${character.hp} / ${character.maxHp}</span><span>SP ${character.sp} / ${character.maxSp}</span>`
+      : "<span>HP ---- / ----</span><span>SP ---- / ----</span>";
+    const statRows = document.getElementById("ndeStatRows");
+    if (statRows) {
+      const labels = [["STR", "str"], ["INT", "int"], ["AGI", "agi"], ["DEX", "dex"], ["LUC", "luc"]];
+      statRows.replaceChildren(...labels.map(([label, key]) => {
+        const row = document.createElement("div");
+        row.innerHTML = `<span>${label}</span><strong>${character?.baseStats?.[key] ?? "---"}</strong>`;
+        return row;
+      }));
+    }
+  }
+
+  function beginRandomBattle() {
+    if (!character || worldLocation !== "dungeon" || isBattleActive()) return false;
+    cancelAutoReturn(false);
+    setPlayerInputEnabled(false);
+    const enemy = createEnemyCombatant(getRandomEnemy({ depth: currentDepth }));
+    const started = startBattle(enemy);
+    if (!started) setPlayerInputEnabled(true);
+    return started;
+  }
+
+  function updateCharacterFromBattle(changes) {
+    if (!character) return;
+    Object.assign(character, changes);
+    updateCharacterUi();
+    scheduleAutosave();
+  }
+
+  function finishBattleVictory() {
+    resetPresence();
+    say("戦闘に勝利した。");
+    setPlayerInputEnabled(true);
+    updateCharacterUi();
+    saveGame();
+  }
+
+  function finishBattleDefeat() {
+    if (character) {
+      character.hp = 0;
+      character.alive = false;
+      character.condition = "DEAD";
+    }
+    updateCharacterUi();
+    returnToTown();
+    say("力尽きた……寺院で蘇生を待つ。");
   }
 
   async function enterDungeonFromTown() {
@@ -475,6 +526,7 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTo
     buttonA,
     buttonB,
     handleOverlayInput: handleOverlayEventInput,
+    handleBattleInput,
     handleTownInput,
     handleDoorInput: openDoorAhead,
     handleMenuInput
@@ -508,6 +560,7 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTo
     stickEl: virtualStickEl,
     manualMove,
     manualTurn,
+    handleBattleInput,
     handleTownInput,
     handleMenuInput
   });

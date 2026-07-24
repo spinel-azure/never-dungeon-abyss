@@ -3,7 +3,7 @@ const NORMAL_STEP_MIN = 4;
 const NORMAL_STEP_MAX = 8;
 const DARK_STEP_MIN = 5;
 const DARK_STEP_MAX = 10;
-const ENCOUNTER_MESSAGE = "＊　何者かと遭遇した！　＊（戦闘は未実装です）";
+const ENCOUNTER_MESSAGE = "＊　何者かと遭遇した！　＊";
 
 let presence = 0;
 let encounterActive = false;

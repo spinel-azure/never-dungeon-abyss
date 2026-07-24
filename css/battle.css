@@ -1,0 +1,115 @@
+.battle-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  overflow: hidden;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 50% 36%, rgba(105, 128, 116, .28), transparent 26%),
+    linear-gradient(#171b18, #050706 72%);
+  color: #f5f5ec;
+  font-family: "DotGothic16", "GameFont", sans-serif;
+}
+
+.battle-screen[hidden] {
+  display: none;
+}
+
+.battle-enemy-stage {
+  position: absolute;
+  inset: 9% 8% 25%;
+  display: grid;
+  place-items: center;
+}
+
+.battle-enemy-stage::after {
+  content: "";
+  position: absolute;
+  right: 15%;
+  bottom: 3%;
+  left: 15%;
+  height: 11%;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .65);
+  filter: blur(7px);
+}
+
+.battle-enemy-image {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: min(55%, 360px);
+  max-height: 82%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 8px 8px rgba(0, 0, 0, .72));
+}
+
+.battle-enemy-panel,
+.battle-player-panel {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  gap: 2px 12px;
+  padding: 7px 10px;
+  border: 1px solid rgba(213, 198, 139, .45);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, .82);
+  font-size: clamp(12px, 2.2vw, 18px);
+  line-height: 1.25;
+}
+
+.battle-enemy-panel {
+  top: 3%;
+  right: 3%;
+  min-width: 34%;
+}
+
+.battle-player-panel {
+  bottom: 3%;
+  left: 3%;
+  min-width: 46%;
+}
+
+.battle-panel-name {
+  color: #fff;
+  font-weight: 400;
+}
+
+.battle-condition {
+  color: #d8cea1;
+}
+
+body.battle-active .viewport > #screen,
+body.battle-active .viewport > .status,
+body.battle-active .viewport > #eventOverlay,
+body.battle-active .viewport > #treasureCanvas {
+  visibility: hidden;
+}
+
+.dungeon-commands[data-battle-active="true"] button:disabled {
+  opacity: .36;
+}
+
+.dungeon-commands[data-battle-active="true"] button {
+  color: #f7fbff;
+}
+
+.dungeon-commands[data-battle-active="true"] button.is-unavailable:not(:disabled) {
+  color: rgba(244, 244, 236, .55);
+}
+
+@media (max-width: 560px) {
+  .battle-enemy-panel,
+  .battle-player-panel {
+    font-size: clamp(10px, 3vw, 15px);
+  }
+
+  .battle-enemy-image {
+    width: min(60%, 260px);
+  }
+
+  .dungeon-commands[data-battle-active="true"] button {
+    font-size: clamp(13px, 4vw, 20px);
+  }
+}

@@ -1,0 +1,271 @@
+import { createBattleState, resolveBattleRound } from "../combat/battle-engine.js";
+import { getSkills } from "../data/skills.js";
+
+const COMMANDS = Object.freeze([
+  ["attack", "たたかう"],
+  ["skills", "スキル"],
+  ["guard", "ぼうぎょ"],
+  ["items", "アイテム"],
+  ["auto", "オート"],
+  ["escape", "にげる"]
+]);
+
+const battleUi = {
+  root: null,
+  commandRoot: null,
+  messageEl: null,
+  normalButtons: [],
+  battleButtons: [],
+  active: false,
+  mode: "commands",
+  selectedIndex: 0,
+  battle: null,
+  getCharacter: () => null,
+  onCharacterChanged: () => {},
+  onVictory: () => {},
+  onDefeat: () => {},
+  playSe: () => {}
+};
+
+export function configureBattle(options) {
+  Object.assign(battleUi, options);
+  battleUi.normalButtons = [...battleUi.commandRoot.children];
+  battleUi.battleButtons = COMMANDS.map(([id, label]) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.battleCommand = id;
+    button.textContent = label;
+    button.addEventListener("click", () => selectByPointer(
+      battleUi.mode === "skills" ? button.dataset.skillId || button.dataset.battleCommand : button.dataset.battleCommand
+    ));
+    return button;
+  });
+}
+
+export function startBattle(enemy) {
+  const character = battleUi.getCharacter();
+  if (!character || battleUi.active) return false;
+  battleUi.active = true;
+  battleUi.mode = "commands";
+  battleUi.selectedIndex = 0;
+  battleUi.battle = createBattleState({ character, enemy });
+  battleUi.root.hidden = false;
+  document.body.classList.add("battle-active");
+  showCommandButtons();
+  battleUi.playSe("battleStart");
+  renderBattle();
+  return true;
+}
+
+export function isBattleActive() {
+  return battleUi.active;
+}
+
+export function handleBattleInput(action) {
+  if (!battleUi.active) return false;
+  if (battleUi.battle?.outcome) {
+    if (action === "confirm") finishBattle();
+    return true;
+  }
+  if (action === "cancel") {
+    if (battleUi.mode === "skills") {
+      battleUi.mode = "commands";
+      battleUi.selectedIndex = 1;
+      battleUi.playSe("cancel");
+      showCommandButtons();
+    }
+    return true;
+  }
+  if (["up", "down", "left", "right"].includes(action)) {
+    moveSelection(action);
+    return true;
+  }
+  if (action === "confirm") {
+    activateSelected();
+    return true;
+  }
+  return true;
+}
+
+function selectByPointer(id) {
+  if (!battleUi.active || battleUi.battle?.outcome) return;
+  const index = battleUi.battleButtons.findIndex(button =>
+    (battleUi.mode === "skills" ? button.dataset.skillId : button.dataset.battleCommand) === id
+  );
+  if (index < 0) return;
+  battleUi.selectedIndex = index;
+  renderSelection();
+  activateSelected();
+}
+
+function moveSelection(action) {
+  const columns = 3;
+  const rows = 2;
+  const row = Math.floor(battleUi.selectedIndex / columns);
+  const column = battleUi.selectedIndex % columns;
+  let nextRow = row;
+  let nextColumn = column;
+  if (action === "left") nextColumn = (column + columns - 1) % columns;
+  if (action === "right") nextColumn = (column + 1) % columns;
+  if (action === "up") nextRow = (row + rows - 1) % rows;
+  if (action === "down") nextRow = (row + 1) % rows;
+  let next = nextRow * columns + nextColumn;
+  if (battleUi.battleButtons[next]?.disabled) {
+    const available = battleUi.battleButtons.findIndex(button => !button.disabled);
+    if (available < 0) return;
+    next = available;
+  }
+  battleUi.selectedIndex = next;
+  battleUi.playSe("cursorMove");
+  renderSelection();
+}
+
+function activateSelected() {
+  const button = battleUi.battleButtons[battleUi.selectedIndex];
+  if (!button || button.disabled) return;
+  battleUi.playSe("confirm");
+  if (battleUi.mode === "skills") {
+    if (button.dataset.battleCommand === "back") {
+      battleUi.mode = "commands";
+      battleUi.selectedIndex = 1;
+      showCommandButtons();
+      return;
+    }
+    executeCommand({ type: "skill", skillId: button.dataset.skillId });
+    return;
+  }
+  const command = button.dataset.battleCommand;
+  if (command === "skills") {
+    battleUi.mode = "skills";
+    battleUi.selectedIndex = 0;
+    showSkillButtons();
+    return;
+  }
+  if (command === "attack") executeCommand({ type: "attack" });
+  else if (command === "guard") executeCommand({ type: "guard" });
+  else {
+    battleUi.messageEl.textContent = `${button.textContent}は現在未実装です。`;
+  }
+}
+
+function executeCommand(command) {
+  const resolved = resolveBattleRound({
+    battle: battleUi.battle,
+    playerCommand: command
+  });
+  if (!resolved.accepted) {
+    battleUi.messageEl.textContent = resolved.reason === "insufficientSp"
+      ? "SPが足りない。"
+      : "現在使用できません。";
+    return;
+  }
+  battleUi.battle = resolved.battle;
+  battleUi.onCharacterChanged({
+    hp: battleUi.battle.player.hp,
+    sp: battleUi.battle.player.sp,
+    statuses: structuredClone(battleUi.battle.player.statuses),
+    alive: battleUi.battle.player.alive
+  });
+  if (battleUi.battle.outcome === "victory") battleUi.playSe("battleVictory");
+  else if (battleUi.battle.outcome === "defeat") battleUi.playSe("playerDamage");
+  else if (battleUi.battle.log.some(line => line.includes("回復"))) battleUi.playSe("heal");
+  else battleUi.playSe("attackHit");
+  battleUi.mode = "commands";
+  battleUi.selectedIndex = 0;
+  showCommandButtons();
+  renderBattle();
+}
+
+function finishBattle() {
+  const outcome = battleUi.battle.outcome;
+  const snapshot = structuredClone(battleUi.battle);
+  closeBattle();
+  if (outcome === "victory") battleUi.onVictory(snapshot);
+  else battleUi.onDefeat(snapshot);
+}
+
+function closeBattle() {
+  battleUi.active = false;
+  battleUi.root.hidden = true;
+  document.body.classList.remove("battle-active");
+  battleUi.commandRoot.replaceChildren(...battleUi.normalButtons);
+  delete battleUi.commandRoot.dataset.battleActive;
+  battleUi.battle = null;
+}
+
+function showCommandButtons() {
+  battleUi.battleButtons.forEach((button, index) => {
+    const [id, label] = COMMANDS[index];
+    button.dataset.battleCommand = id;
+    delete button.dataset.skillId;
+    button.textContent = label;
+    button.disabled = false;
+    button.classList.toggle("is-unavailable", ["items", "auto", "escape"].includes(id));
+  });
+  mountButtons("戦闘コマンド");
+}
+
+function showSkillButtons() {
+  const skills = getSkills(battleUi.battle.player.skillIds);
+  battleUi.battleButtons.forEach((button, index) => {
+    const skill = skills[index];
+    button.classList.remove("is-unavailable");
+    if (skill) {
+      button.dataset.skillId = skill.id;
+      delete button.dataset.battleCommand;
+      button.textContent = `${skill.name} SP${skill.spCost}`;
+      button.disabled = battleUi.battle.player.sp < skill.spCost;
+      button.classList.toggle("is-unavailable", button.disabled);
+    } else if (index === 3) {
+      delete button.dataset.skillId;
+      button.dataset.battleCommand = "back";
+      button.textContent = "戻る";
+      button.disabled = false;
+    } else {
+      delete button.dataset.skillId;
+      button.dataset.battleCommand = "empty";
+      button.textContent = "";
+      button.disabled = true;
+    }
+  });
+  mountButtons("スキル選択");
+}
+
+function mountButtons(label) {
+  battleUi.commandRoot.replaceChildren(...battleUi.battleButtons);
+  battleUi.commandRoot.dataset.battleActive = "true";
+  battleUi.commandRoot.setAttribute("aria-label", label);
+  renderSelection();
+}
+
+function renderSelection() {
+  battleUi.battleButtons.forEach((button, index) => {
+    button.classList.toggle("is-selected", index === battleUi.selectedIndex && !button.disabled);
+  });
+}
+
+function renderBattle() {
+  const battle = battleUi.battle;
+  if (!battle) return;
+  setText("battlePlayerName", `${battle.player.name} [${battle.player.jobLabel || battle.player.job}]`);
+  setText("battlePlayerHp", `${battle.player.hp} / ${battle.player.maxHp}`);
+  setText("battlePlayerSp", `${battle.player.sp} / ${battle.player.maxSp}`);
+  setText("battlePlayerCondition", statusText(battle.player));
+  setText("battleEnemyName", battle.enemy.name);
+  setText("battleEnemyHp", `${battle.enemy.hp} / ${battle.enemy.maxHp}`);
+  setText("battleEnemyCondition", statusText(battle.enemy));
+  const image = battleUi.root.querySelector("#battleEnemyImage");
+  image.src = battle.enemy.image || "";
+  image.alt = battle.enemy.name;
+  battleUi.messageEl.textContent = `${battle.log.join("\n")}${battle.outcome ? "\n＊Aボタンで次へ" : ""}`;
+}
+
+function statusText(combatant) {
+  const names = (combatant.statuses || []).map(status => status.name).filter(Boolean);
+  return names.length ? names.join("・") : "GOOD";
+}
+
+function setText(id, text) {
+  const element = battleUi.root.querySelector(`#${id}`);
+  if (element) element.textContent = text;
+}

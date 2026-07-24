@@ -37,6 +37,7 @@ const hooks = {
   playTreasureOpening: (_type, onComplete) => onComplete(),
   hideTreasure: () => {},
   returnToTown: () => {},
+  beginBattle: () => {},
   playNpcVoice: () => {},
   onStateChanged: () => {}
 };
@@ -319,7 +320,7 @@ export function startRandomEncounterNotice() {
     type: "randomEncounter",
     showOverlay: true,
     overlayMessage: "＊　なにものかと　そうぐうした！　＊",
-    message: "戦闘は未実装です。（Aボタンで次へ）"
+    message: "何者かと遭遇した！（Aボタンで戦闘開始）"
   });
 }
 
@@ -335,7 +336,7 @@ function confirmRandomEncounter() {
   state.overlayEvent = null;
   resetPresence();
   hooks.say("");
-  updateNpcAwareness();
+  hooks.beginBattle();
 }
 
 function startStairsPrompt(cellType) {
