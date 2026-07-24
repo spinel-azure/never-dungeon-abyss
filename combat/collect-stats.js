@@ -18,7 +18,13 @@ export function collectStats(source = {}) {
   }
   return {
     ...stats,
-    def: Math.max(0, numeric(source.def ?? source.defense)),
+    def: Math.max(
+      0,
+      numeric(source.def ?? source.defense)
+        + numeric(equipment.def)
+        + numeric(cards.def)
+        + numeric(temporary.def)
+    ),
     hitBonus: numeric(source.hitBonus),
     criticalBonus: numeric(source.criticalBonus),
     speedBonus: numeric(source.speedBonus),

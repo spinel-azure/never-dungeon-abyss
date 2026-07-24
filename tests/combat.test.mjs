@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import { CHARACTER_CLASSES, createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getWeapon } from "../data/weapons.js";
+import { collectEquipmentBonuses, getEquipmentItem } from "../data/equipment.js";
 import { getSkill } from "../data/skills.js";
 import { collectStats } from "../combat/collect-stats.js";
 import { createNormalAttack, createSkillAttack } from "../combat/create-attack.js";
@@ -41,6 +42,33 @@ test("all classes have 24 stat points and 45 HP+SP", () => {
     assert.equal(Object.values(characterClass.stats).reduce((a, b) => a + b, 0), 24);
     assert.equal(characterClass.maxHp + characterClass.maxSp, 45);
   }
+});
+
+test("initial equipment matches every class profile", () => {
+  const expected = {
+    warrior: { weapon: "鉄の長剣", attack: 8, def: 8, int: 0 },
+    thief: { weapon: "鉄の短剣", attack: 5, def: 5, int: 0 },
+    priest: { weapon: "鉄のメイス", attack: 6, def: 5, int: 0 },
+    mage: { weapon: "樫の杖", attack: 3, def: 2, int: 1 }
+  };
+  for (const [job, profile] of Object.entries(expected)) {
+    const character = createInitialCharacter({ name: "TEST", job });
+    const weapon = getEquipmentItem(character.equipment.rightArmId, "rightArmId");
+    const bonuses = collectEquipmentBonuses(character.equipment);
+    assert.equal(weapon.name, profile.weapon);
+    assert.equal(weapon.attack, profile.attack);
+    assert.equal(bonuses.def || 0, profile.def);
+    assert.equal(bonuses.int || 0, profile.int);
+    assert.equal(character.equipment.accessoryId, null);
+  }
+});
+
+test("equipment bonuses are included in combat stats", () => {
+  const warrior = createInitialCharacter({ name: "TEST", job: "warrior" });
+  const mage = createInitialCharacter({ name: "TEST", job: "mage" });
+  assert.equal(collectStats(warrior).def, 8);
+  assert.equal(collectStats(mage).def, 2);
+  assert.equal(collectStats(mage).int, 9);
 });
 
 test("collected main stats are capped at 30", () => {
@@ -94,7 +122,7 @@ test("critical is 1.5x normal with minimum two", () => {
 });
 
 test("dagger normal attack is two hits, power strike one, poison blade two", () => {
-  const weapon = getWeapon("training_dagger");
+  const weapon = getWeapon("iron_dagger");
   assert.equal(createNormalAttack({ weapon }).hitCount, 2);
   assert.equal(createSkillAttack(getSkill("power_strike"), { weapon }).hitCount, 1);
   assert.equal(createSkillAttack(getSkill("poison_blade"), { weapon }).hitCount, 2);
@@ -104,7 +132,7 @@ test("poison blade resolves poison once on the first landed hit", () => {
   const result = resolvePhysicalAttack({
     attacker: { str: 4, dex: 30 },
     defender: { agi: 0, def: 0, luc: 0, statusResistances: {} },
-    attack: createSkillAttack(getSkill("poison_blade"), { weapon: getWeapon("training_dagger") }),
+    attack: createSkillAttack(getSkill("poison_blade"), { weapon: getWeapon("iron_dagger") }),
     rng: fixed(0, 0.9, 0.5, 0, 0, 0.9, 0.5)
   });
   assert.equal(result.hits.length, 2);
@@ -115,7 +143,7 @@ test("defense penetration is capped at 75 percent", () => {
   const result = resolvePhysicalAttack({
     attacker: { str: 8, dex: 5, defensePenetration: 1 },
     defender: { agi: 5, def: 20 },
-    attack: { ...createNormalAttack({ weaponId: "wooden_mace" }), defensePenetration: 1 },
+    attack: { ...createNormalAttack({ weaponId: "iron_mace" }), defensePenetration: 1 },
     rng: fixed(0, 0.9, 0.5)
   });
   assert.equal(result.defensePenetration, 0.75);

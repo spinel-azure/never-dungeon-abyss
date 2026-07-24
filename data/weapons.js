@@ -27,6 +27,13 @@ export const WEAPON_TYPES = Object.freeze({
     powerPerHit: 1,
     speedModifier: 0,
     defensePenetration: 0.25
+  }),
+  STAFF: Object.freeze({
+    id: "staff",
+    hitCount: 1,
+    powerPerHit: 1,
+    speedModifier: 0,
+    defensePenetration: 0
   })
 });
 
@@ -38,25 +45,25 @@ export const WEAPONS = Object.freeze({
     attack: 8,
     element: "physical"
   }),
-  training_dagger: Object.freeze({
-    id: "training_dagger",
-    name: "練習用の短剣",
+  iron_dagger: Object.freeze({
+    id: "iron_dagger",
+    name: "鉄の短剣",
     type: "dagger",
+    attack: 5,
+    element: "physical"
+  }),
+  iron_mace: Object.freeze({
+    id: "iron_mace",
+    name: "鉄のメイス",
+    type: "blunt",
     attack: 6,
     element: "physical"
   }),
-  wooden_mace: Object.freeze({
-    id: "wooden_mace",
-    name: "木のメイス",
-    type: "blunt",
-    attack: 7,
-    element: "physical"
-  }),
-  apprentice_staff: Object.freeze({
-    id: "apprentice_staff",
-    name: "見習いの杖",
-    type: "blunt",
-    attack: 4,
+  oak_staff: Object.freeze({
+    id: "oak_staff",
+    name: "樫の杖",
+    type: "staff",
+    attack: 3,
     element: "physical"
   }),
   training_greatsword: Object.freeze({

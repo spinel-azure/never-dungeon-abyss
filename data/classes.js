@@ -1,3 +1,5 @@
+import { collectEquipmentBonuses, getInitialEquipment } from "./equipment.js";
+
 export const STAT_KEYS = Object.freeze(["str", "int", "agi", "dex", "luc"]);
 
 export const CHARACTER_CLASSES = Object.freeze({
@@ -49,6 +51,7 @@ export function getCharacterClass(id) {
 
 export function createInitialCharacter({ name, job, jobLabel } = {}) {
   const characterClass = getCharacterClass(job) || CHARACTER_CLASSES.WARRIOR;
+  const equipment = getInitialEquipment(characterClass.id);
   return {
     name: String(name || "").trim().slice(0, 12),
     job: characterClass.id,
@@ -61,12 +64,10 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     sp: characterClass.maxSp,
     maxSp: characterClass.maxSp,
     baseStats: { ...characterClass.stats },
-    equipmentStatBonuses: {},
+    equipmentStatBonuses: collectEquipmentBonuses(equipment),
     cardStatBonuses: {},
     def: 0,
-    equipment: {
-      weaponId: defaultWeaponFor(characterClass.id)
-    },
+    equipment,
     skillIds: [...characterClass.initialSkillIds],
     statuses: [],
     condition: "GOOD",
@@ -84,6 +85,7 @@ export function normalizeCharacter(character) {
   const maxSp = legacyCharacter
     ? characterClass.maxSp
     : positiveInteger(character.maxSp, characterClass.maxSp);
+  const equipment = normalizeEquipment(character.equipment, characterClass.id);
   return {
     ...character,
     job: characterClass.id,
@@ -93,13 +95,10 @@ export function normalizeCharacter(character) {
     hp: legacyCharacter ? maxHp : clampInteger(character.hp, 0, maxHp, maxHp),
     sp: legacyCharacter ? maxSp : clampInteger(character.sp, 0, maxSp, maxSp),
     baseStats: { ...characterClass.stats, ...(character.baseStats || {}) },
-    equipmentStatBonuses: { ...(character.equipmentStatBonuses || {}) },
+    equipmentStatBonuses: collectEquipmentBonuses(equipment),
     cardStatBonuses: { ...(character.cardStatBonuses || {}) },
     def: Math.max(0, Number(character.def) || 0),
-    equipment: {
-      weaponId: defaultWeaponFor(characterClass.id),
-      ...(character.equipment || {})
-    },
+    equipment,
     skillIds: Array.isArray(character.skillIds)
       ? [...character.skillIds]
       : [...characterClass.initialSkillIds],
@@ -109,11 +108,16 @@ export function normalizeCharacter(character) {
   };
 }
 
-function defaultWeaponFor(job) {
-  if (job === "thief") return "training_dagger";
-  if (job === "priest") return "wooden_mace";
-  if (job === "mage") return "apprentice_staff";
-  return "iron_longsword";
+function normalizeEquipment(equipment, job) {
+  const initial = getInitialEquipment(job);
+  const merged = { ...initial, ...(equipment || {}) };
+  const legacyWeaponIds = new Set(["training_dagger", "wooden_mace", "apprentice_staff"]);
+  if (!equipment?.rightArmId && legacyWeaponIds.has(equipment?.weaponId)) {
+    merged.weaponId = initial.weaponId;
+  }
+  merged.rightArmId = merged.weaponId || merged.rightArmId || initial.rightArmId;
+  merged.weaponId = merged.rightArmId;
+  return merged;
 }
 
 function positiveInteger(value, fallback) {

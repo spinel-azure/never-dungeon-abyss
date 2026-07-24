@@ -64,6 +64,7 @@ import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js
 import { loadGame, writeGame } from "./save-data.js";
 import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260724-1";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
+import { getEquipmentItem } from "../data/equipment.js";
 import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js";
 import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260724-3";
 import { createInnRecovery, createTempleRevival } from "./character-services.js?v=20260724-1";
@@ -342,6 +343,7 @@ import { createInnRecovery, createTempleRevival } from "./character-services.js?
       ? `<span>HP ${character.hp} / ${character.maxHp}</span><span>SP ${character.sp} / ${character.maxSp}</span>`
       : "<span>HP ---- / ----</span><span>SP ---- / ----</span>";
     renderStatusGauges(character);
+    renderEquipment(character);
   }
 
   function renderStatusGauges(target) {
@@ -377,6 +379,16 @@ import { createInnRecovery, createTempleRevival } from "./character-services.js?
       row.append(name, gauge, value);
       return row;
     }));
+  }
+
+  function renderEquipment(target) {
+    document.querySelectorAll("[data-equipment-slot]").forEach(element => {
+      const slot = element.dataset.equipmentSlot;
+      const equippedId = slot === "rightArmId"
+        ? target?.equipment?.rightArmId || target?.equipment?.weaponId
+        : target?.equipment?.[slot];
+      element.textContent = getEquipmentItem(equippedId, slot)?.name || "―";
+    });
   }
 
   function beginRandomBattle() {
