@@ -232,7 +232,7 @@ function finishAction(battle, side) {
     actor.alive = actor.hp > 0;
     battle.log.push(`${actor.name}は毒で${end.poisonDamage}ダメージ。`);
     battle.presentationEvents.push({
-      type: "damage",
+      type: "poisonDamage",
       actorSide: null,
       targetSide: side,
       amount: end.poisonDamage,

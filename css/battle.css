@@ -67,6 +67,10 @@
   color: #32df6f;
 }
 
+.battle-number.is-poison {
+  color: #a855f7;
+}
+
 .battle-number.is-multi-high {
   --battle-pop-a: -30px;
   --battle-pop-b: -21px;

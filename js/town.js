@@ -1,4 +1,4 @@
-import { CHARACTER_JOBS, TOWN_FACILITIES, getTownFacility } from "../data/town.js?v=20260723-5";
+import { CHARACTER_JOBS, TOWN_FACILITIES, getTownFacility } from "../data/town.js?v=20260725-1";
 
 const FACILITY_COMMANDS = Object.freeze({
   inn: [
@@ -94,12 +94,14 @@ export function configureTown(options) {
     return image;
   });
 
+  updateRegistrationLanguage();
   town.jobSelect.replaceChildren(...CHARACTER_JOBS.map(job => {
     const option = document.createElement("option");
     option.value = job.id;
-    option.textContent = job.label;
+    option.textContent = localizedJobLabel(job);
     return option;
   }));
+  updateRegistrationLanguage();
   town.facilityButtons = TOWN_FACILITIES.map(facility => {
     const button = document.createElement("button");
     button.type = "button";
@@ -157,6 +159,23 @@ export function configureTown(options) {
     event.preventDefault();
     registerCharacter();
   });
+  town.registration.addEventListener("keydown", event => {
+    if (event.key !== "Enter") return;
+    const submitButton = town.registration.querySelector('button[type="submit"]');
+    if (event.target === town.nameInput) {
+      event.preventDefault();
+      if (validateRegistrationName()) focusRegistrationControl(1);
+    } else if (event.target === town.jobSelect) {
+      event.preventDefault();
+      focusRegistrationControl(2);
+    } else if (event.target !== submitButton) {
+      event.preventDefault();
+    }
+  });
+  [town.nameInput, town.jobSelect, town.registration.querySelector('button[type="submit"]')]
+    .forEach((control, index) => control.addEventListener("focus", () => {
+      town.registrationIndex = index;
+    }));
   renderCharacterStatus();
 }
 
@@ -314,10 +333,18 @@ function handleRegistrationInput(action) {
     town.playSe("confirm");
     const activeIndex = controls.indexOf(document.activeElement);
     town.registrationIndex = activeIndex >= 0 ? activeIndex : town.registrationIndex;
-    if (town.registrationIndex < 0) town.registrationIndex = 0;
+    if (town.registrationIndex < 0) {
+      focusRegistrationControl(0);
+      return true;
+    }
     const control = controls[town.registrationIndex];
-    if (control === submitButton) town.registration.requestSubmit();
-    else control.focus({ preventScroll: true });
+    if (control === town.nameInput) {
+      if (validateRegistrationName()) focusRegistrationControl(1);
+    } else if (control === town.jobSelect) {
+      focusRegistrationControl(2);
+    } else if (control === submitButton) {
+      town.registration.requestSubmit();
+    }
     return true;
   }
   return true;
@@ -536,7 +563,8 @@ function renderFacility() {
   const showRegistration = facility.id === "guild" && town.registrationRequired;
   if (showRegistration) {
     town.mode = "registration";
-    town.registrationIndex = -1;
+    town.registrationIndex = 0;
+    updateRegistrationLanguage();
     showTownCommands();
   } else {
     showFacilityCommands(facility.id);
@@ -547,6 +575,11 @@ function renderFacility() {
   if (showRegistration) town.messageEl.textContent = "ギルド長：奈落へ潜るなら、まず名簿に名前を書け。登録なしでは通せん。";
   town.root.querySelector("#townFacilityName").textContent = facility.label;
   resetTownViewport();
+  if (showRegistration) {
+    requestAnimationFrame(() => {
+      if (town.active && town.mode === "registration") focusRegistrationControl(0);
+    });
+  }
   town.onStateChanged();
 }
 
@@ -672,16 +705,12 @@ function resetTownViewport() {
 
 function registerCharacter() {
   const name = town.nameInput.value.trim().slice(0, 12);
-  if (!name) {
-    town.feedback.textContent = "名前を入力してください。";
-    town.nameInput.focus();
-    return;
-  }
+  if (!validateRegistrationName()) return;
   const job = CHARACTER_JOBS.find(item => item.id === town.jobSelect.value) || CHARACTER_JOBS[0];
   town.registrationRequired = false;
   town.mode = "facilityMenu";
   town.facilityCommandIndex = 0;
-  town.onRegister({ name, job: job.id, jobLabel: job.label });
+  town.onRegister({ name, job: job.id, jobLabel: job.labelEn });
   town.registration.hidden = true;
   renderCharacterStatus();
   town.facilityButtons.forEach(button => button.classList.remove("is-locked"));
@@ -689,6 +718,43 @@ function registerCharacter() {
   town.messageEl.textContent = `ギルド長：${name}だな。登録は済んだ。ようこそ、冒険者ギルドへ。`;
   town.feedback.textContent = "登録しました。";
   town.onStateChanged();
+}
+
+function validateRegistrationName() {
+  if (town.nameInput.value.trim()) {
+    town.feedback.textContent = "";
+    return true;
+  }
+  town.feedback.textContent = isJapaneseUi() ? "名前を入力してください。" : "Enter a name.";
+  focusRegistrationControl(0);
+  return false;
+}
+
+function focusRegistrationControl(index) {
+  const controls = [
+    town.nameInput,
+    town.jobSelect,
+    town.registration.querySelector('button[type="submit"]')
+  ];
+  town.registrationIndex = Math.max(0, Math.min(controls.length - 1, index));
+  controls[town.registrationIndex]?.focus({ preventScroll: true });
+}
+
+function updateRegistrationLanguage() {
+  [...town.jobSelect.options].forEach(option => {
+    const job = CHARACTER_JOBS.find(item => item.id === option.value);
+    if (job) option.textContent = localizedJobLabel(job);
+  });
+  const submitButton = town.registration.querySelector('button[type="submit"]');
+  if (submitButton) submitButton.textContent = isJapaneseUi() ? "登録" : "REGISTER";
+}
+
+function localizedJobLabel(job) {
+  return isJapaneseUi() ? job.labelJa : job.labelEn;
+}
+
+function isJapaneseUi() {
+  return !String(document.documentElement.lang || "ja").toLowerCase().startsWith("en");
 }
 
 function showRegistrationRequired() {

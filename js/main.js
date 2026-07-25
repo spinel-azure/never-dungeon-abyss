@@ -62,11 +62,11 @@ import {
 import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js";
 import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js?v=20260722-8";
 import { loadGame, writeGame } from "./save-data.js";
-import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260724-1";
+import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260725-1";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js";
-import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260725-3";
+import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260725-4";
 import { createInnRecovery, createTempleRevival } from "./character-services.js?v=20260724-1";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 

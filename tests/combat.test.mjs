@@ -22,6 +22,7 @@ import {
 import { resolveEscapeAttempt } from "../combat/resolve-escape.js";
 import { createBattleState, resolveBattleRound } from "../combat/battle-engine.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
+import { CHARACTER_JOBS } from "../data/town.js";
 import { resolveTurnOrder, createGuardAction } from "../combat/resolve-turn-order.js";
 import {
   applyStatus,
@@ -44,6 +45,18 @@ test("all classes have 24 stat points and 45 HP+SP", () => {
     assert.equal(Object.values(characterClass.stats).reduce((a, b) => a + b, 0), 24);
     assert.equal(characterClass.maxHp + characterClass.maxSp, 45);
   }
+});
+
+test("registration jobs use the intended order and localized labels", () => {
+  assert.deepEqual(
+    CHARACTER_JOBS.map(job => [job.id, job.labelJa, job.labelEn]),
+    [
+      ["warrior", "戦士", "WARRIOR"],
+      ["thief", "盗賊", "THIEF"],
+      ["priest", "僧侶", "PRIEST"],
+      ["mage", "魔法使い", "MAGE"]
+    ]
+  );
 });
 
 test("initial equipment matches every class profile", () => {

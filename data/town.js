@@ -57,10 +57,10 @@ export const TOWN_FACILITIES = Object.freeze([
 ]);
 
 export const CHARACTER_JOBS = Object.freeze([
-  { id: "warrior", label: "WARRIOR" },
-  { id: "mage", label: "MAGE" },
-  { id: "thief", label: "THIEF" },
-  { id: "priest", label: "PRIEST" }
+  { id: "warrior", label: "WARRIOR", labelJa: "戦士", labelEn: "WARRIOR" },
+  { id: "thief", label: "THIEF", labelJa: "盗賊", labelEn: "THIEF" },
+  { id: "priest", label: "PRIEST", labelJa: "僧侶", labelEn: "PRIEST" },
+  { id: "mage", label: "MAGE", labelJa: "魔法使い", labelEn: "MAGE" }
 ]);
 
 export function getTownFacility(id) {
