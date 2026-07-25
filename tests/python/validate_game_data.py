@@ -125,25 +125,41 @@ class Validator:
                 self.report("FAIL", "JSON構文", file=relative, actual=str(exc), expected="valid UTF-8 JSON")
 
     def validate_ids(self) -> None:
-        occurrences: dict[str, list[Path]] = {}
-        for relative, records in self.records.items():
-            for record in records:
+        collections: dict[str, list[tuple[Path, dict[str, Any]]]] = {}
+        for relative in DATA_FILES:
+            records = self.records.get(relative, [])
+            for collection_name, collection_records in id_collections(relative, records).items():
+                collections.setdefault(collection_name, []).extend(
+                    (relative, record) for record in collection_records
+                )
+        for relative in CARD_FILES:
+            collections.setdefault("cards", []).extend(
+                (relative, record) for record in self.records.get(relative, [])
+                if record.get("rarity") in RARITY_COSTS
+            )
+
+        duplicates: list[tuple[str, str, list[Path]]] = []
+        for collection_name, entries in collections.items():
+            occurrences: dict[str, list[Path]] = {}
+            for relative, record in entries:
                 record_id = record.get("id")
                 if isinstance(record_id, str):
                     occurrences.setdefault(record_id, []).append(relative)
-        duplicates = {
-            record_id: paths for record_id, paths in occurrences.items()
-            if len(paths) > 1 and not allowed_cross_file_id(record_id, paths)
-        }
+            duplicates.extend(
+                (collection_name, record_id, paths)
+                for record_id, paths in occurrences.items()
+                if len(paths) > 1
+            )
+
         if duplicates:
-            for record_id, paths in sorted(duplicates.items()):
+            for collection_name, record_id, paths in sorted(duplicates):
                 self.report(
                     "FAIL", "IDの重複", file=paths[0], record_id=record_id,
                     actual=[path.as_posix() for path in paths], expected="unique ID",
-                    reason="同一データ種別内でIDは一意である必要があります",
+                    reason=f"同一データコレクション「{collection_name}」内でIDは一意である必要があります",
                 )
         else:
-            self.report("PASS", "静的に抽出できたIDに重複はありません")
+            self.report("PASS", "各データコレクション内のIDに重複はありません")
 
     def validate_core_schemas(self) -> None:
         schemas = {
@@ -201,6 +217,12 @@ class Validator:
         weapon_ids = {
             record["id"] for record in relevant_records(Path("data/weapons.js"), self.records.get(Path("data/weapons.js"), []))
         }
+        class_ids = {
+            record["id"] for record in relevant_records(
+                Path("data/classes.js"),
+                self.records.get(Path("data/classes.js"), []),
+            )
+        }
 
         class_text = self.texts.get(Path("data/classes.js"), "")
         class_refs = re.findall(r"initialSkillIds\s*:\s*Object\.freeze\(\[([^\]]*)\]\)", class_text)
@@ -231,6 +253,13 @@ class Validator:
                 missing_equipment.append(refs[0])
             missing_equipment.extend(ref for ref in refs[1:] if ref not in equipment_ids)
         self._reference_result("初期装備IDの参照", Path("data/equipment.js"), missing_equipment)
+
+        town_job_ids = {
+            record["id"] for record in self.records.get(Path("data/town.js"), [])
+            if "labelJa" in record or "labelEn" in record
+        }
+        missing_classes = sorted(town_job_ids - class_ids)
+        self._reference_result("町の登録職業IDから職業データへの参照", Path("data/town.js"), missing_classes)
 
     def _reference_result(self, label: str, relative: Path, missing: list[str]) -> None:
         if missing:
@@ -481,11 +510,28 @@ def ids_from(records: dict[Path, list[dict[str, Any]]], relative: Path) -> set[s
     }
 
 
-def allowed_cross_file_id(record_id: str, paths: list[Path]) -> bool:
-    # A skill can reference a status with the same semantic ID; those are
-    # separate namespaces and are intentionally allowed.
-    namespaces = {path.as_posix() for path in paths}
-    return namespaces <= {"data/skills.js", "data/spells.js", "data/status-effects.js"}
+def id_collections(
+    relative: Path,
+    records: list[dict[str, Any]],
+) -> dict[str, list[dict[str, Any]]]:
+    """Return independent ID namespaces defined in one data module."""
+    if relative == Path("data/town.js"):
+        return {
+            "town facilities": [
+                record for record in records
+                if "background" in record or "keeper" in record
+            ],
+            "character registration jobs": [
+                record for record in records
+                if "labelJa" in record or "labelEn" in record
+            ],
+        }
+    if relative == Path("data/weapons.js"):
+        return {
+            "weapon types": [record for record in records if "attack" not in record],
+            "weapons": [record for record in records if "attack" in record],
+        }
+    return {relative.as_posix(): records}
 
 
 def looks_like_path(value: str) -> bool:
