@@ -43,6 +43,10 @@
 }
 
 .battle-number {
+  --battle-pop-a: -18px;
+  --battle-pop-b: -11px;
+  --battle-pop-c: -27px;
+  --battle-pop-end: -45px;
   position: absolute;
   top: 0;
   left: 0;
@@ -63,6 +67,20 @@
   color: #32df6f;
 }
 
+.battle-number.is-multi-high {
+  --battle-pop-a: -30px;
+  --battle-pop-b: -21px;
+  --battle-pop-c: -43px;
+  --battle-pop-end: -66px;
+}
+
+.battle-number.is-multi-low {
+  --battle-pop-a: -10px;
+  --battle-pop-b: -5px;
+  --battle-pop-c: -17px;
+  --battle-pop-end: -31px;
+}
+
 .battle-player-numbers .battle-number {
   font-size: clamp(20px, 4vw, 32px);
 }
@@ -74,19 +92,19 @@
   }
   22% {
     opacity: 1;
-    transform: translate(-50%, -18px) scale(1.28);
+    transform: translate(-50%, var(--battle-pop-a)) scale(1.28);
   }
   48% {
     opacity: 1;
-    transform: translate(-50%, -11px) scale(1);
+    transform: translate(-50%, var(--battle-pop-b)) scale(1);
   }
   75% {
     opacity: 1;
-    transform: translate(-50%, -27px) scale(1.06);
+    transform: translate(-50%, var(--battle-pop-c)) scale(1.06);
   }
   100% {
     opacity: 0;
-    transform: translate(-50%, -45px) scale(.92);
+    transform: translate(-50%, var(--battle-pop-end)) scale(.92);
   }
 }
 

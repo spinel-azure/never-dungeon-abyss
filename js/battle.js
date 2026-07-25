@@ -216,7 +216,13 @@ async function playPresentationEvents() {
       showBattleNumber(event.targetSide, event.amount, "healing");
       battleUi.playSe("heal");
     } else if (event.hit || event.type === "damage") {
-      showBattleNumber(event.targetSide, event.damage ?? event.amount, "damage");
+      showBattleNumber(
+        event.targetSide,
+        event.damage ?? event.amount,
+        "damage",
+        event.hitIndex,
+        event.hitCount
+      );
     }
     if (event.targetSide === "enemy" && event.hit) {
       image.classList.remove("is-hit");
@@ -231,14 +237,17 @@ async function playPresentationEvents() {
   }
 }
 
-function showBattleNumber(targetSide, amount, kind) {
+function showBattleNumber(targetSide, amount, kind, hitIndex = null, hitCount = 1) {
   const value = Math.max(0, Math.floor(Number(amount) || 0));
   if (value <= 0) return;
   const layerId = targetSide === "enemy" ? "battleEnemyNumbers" : "battlePlayerNumbers";
   const layer = document.getElementById(layerId);
   if (!layer) return;
   const number = document.createElement("span");
-  number.className = `battle-number is-${kind}`;
+  const multiLevel = hitCount > 1
+    ? Number(hitIndex) % 2 === 0 ? " is-multi-high" : " is-multi-low"
+    : "";
+  number.className = `battle-number is-${kind}${multiLevel}`;
   number.textContent = String(value);
   layer.append(number);
   number.addEventListener("animationend", () => number.remove(), { once: true });

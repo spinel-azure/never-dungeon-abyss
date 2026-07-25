@@ -205,6 +205,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
       actorSide,
       targetSide,
       hitIndex: index,
+      hitCount: presentedHits.length,
       hit: hit.hit,
       damage: hit.damage,
       critical: hit.critical,

@@ -21,6 +21,7 @@ import {
 } from "../combat/resolve-environment-save.js";
 import { resolveEscapeAttempt } from "../combat/resolve-escape.js";
 import { createBattleState, resolveBattleRound } from "../combat/battle-engine.js";
+import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { resolveTurnOrder, createGuardAction } from "../combat/resolve-turn-order.js";
 import {
   applyStatus,
@@ -70,6 +71,23 @@ test("equipment bonuses are included in combat stats", () => {
   assert.equal(collectStats(warrior).def, 8);
   assert.equal(collectStats(mage).def, 2);
   assert.equal(collectStats(mage).int, 9);
+});
+
+test("detail status derives current character percentages", () => {
+  const warrior = deriveDetailStats(createInitialCharacter({ name: "TEST", job: "warrior" }));
+  assert.deepEqual(warrior, {
+    physicalDamage: 100,
+    spellDamage: 100,
+    spellResistance: 0,
+    criticalRate: 5.5,
+    evasionRate: 5,
+    hitRate: 95,
+    initiativeRate: 0,
+    trapDisarmRate: 10,
+    statusResistance: 4,
+    torchReduction: 0,
+    presenceReduction: 0
+  });
 });
 
 test("collected main stats are capped at 30", () => {
@@ -155,6 +173,8 @@ test("dagger battle round exposes two separate hit presentation events", () => {
   assert.equal(playerHits.length, 2);
   assert.equal(playerHits[0].hitIndex, 0);
   assert.equal(playerHits[1].hitIndex, 1);
+  assert.equal(playerHits[0].hitCount, 2);
+  assert.equal(playerHits[1].hitCount, 2);
   assert.match(resolved.battle.log.join("\n"), /1撃目：/);
   assert.match(resolved.battle.log.join("\n"), /2撃目：/);
   assert.match(resolved.battle.log.join("\n"), /合計\d+ダメージ/);

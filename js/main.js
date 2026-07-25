@@ -66,8 +66,9 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTo
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js";
-import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260725-2";
+import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260725-3";
 import { createInnRecovery, createTempleRevival } from "./character-services.js?v=20260724-1";
+import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 
 (() => {
   const canvas = document.getElementById("screen");
@@ -344,6 +345,7 @@ import { createInnRecovery, createTempleRevival } from "./character-services.js?
       : "<span>HP ---- / ----</span><span>SP ---- / ----</span>";
     renderStatusGauges(character);
     renderEquipment(character);
+    renderDetailStats(character);
   }
 
   function renderStatusGauges(target) {
@@ -389,6 +391,18 @@ import { createInnRecovery, createTempleRevival } from "./character-services.js?
         : target?.equipment?.[slot];
       element.textContent = getEquipmentItem(equippedId, slot)?.name || "―";
     });
+  }
+
+  function renderDetailStats(target) {
+    const details = target ? deriveDetailStats(target) : {};
+    document.querySelectorAll("[data-detail-stat]").forEach(element => {
+      const value = details[element.dataset.detailStat];
+      element.textContent = Number.isFinite(value) ? `${formatPercent(value)}%` : "---%";
+    });
+  }
+
+  function formatPercent(value) {
+    return Number.isInteger(value) ? String(value) : value.toFixed(1);
   }
 
   function beginRandomBattle() {
