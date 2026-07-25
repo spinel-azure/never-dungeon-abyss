@@ -23,6 +23,7 @@ const battleUi = {
   battle: null,
   autoActive: false,
   autoTimer: 0,
+  presenting: false,
   getCharacter: () => null,
   onCharacterChanged: () => {},
   onVictory: () => {},
@@ -73,6 +74,7 @@ export function handleBattleInput(action) {
     if (action === "cancel") stopAutoBattle();
     return true;
   }
+  if (battleUi.presenting) return true;
   if (battleUi.battle?.outcome) {
     if (action === "confirm") finishBattle();
     return true;
@@ -98,7 +100,7 @@ export function handleBattleInput(action) {
 }
 
 function selectByPointer(id) {
-  if (!battleUi.active || battleUi.battle?.outcome) return;
+  if (!battleUi.active || battleUi.presenting || battleUi.battle?.outcome) return;
   const index = battleUi.battleButtons.findIndex(button =>
     (battleUi.mode === "skills" ? button.dataset.skillId : button.dataset.battleCommand) === id
   );
@@ -160,7 +162,7 @@ function activateSelected() {
   }
 }
 
-function executeCommand(command) {
+async function executeCommand(command) {
   const resolved = resolveBattleRound({
     battle: battleUi.battle,
     playerCommand: command
@@ -172,6 +174,7 @@ function executeCommand(command) {
     return;
   }
   battleUi.battle = resolved.battle;
+  battleUi.presenting = battleUi.battle.presentationEvents?.length > 0;
   battleUi.onCharacterChanged({
     hp: battleUi.battle.player.hp,
     sp: battleUi.battle.player.sp,
@@ -186,15 +189,60 @@ function executeCommand(command) {
     battleUi.autoActive = false;
     clearAutoTimer();
   }
-  if (battleUi.battle.outcome === "victory") battleUi.playSe("battleVictory");
-  else if (battleUi.battle.outcome === "defeat") battleUi.playSe("playerDamage");
-  else if (battleUi.battle.log.some(line => line.includes("回復"))) battleUi.playSe("heal");
-  else battleUi.playSe("attackHit");
   battleUi.mode = "commands";
   battleUi.selectedIndex = 0;
   showCommandButtons();
   renderBattle();
+  if (battleUi.presenting) await playPresentationEvents();
+  if (!battleUi.active) return;
+  if (battleUi.battle.outcome === "victory") battleUi.playSe("battleVictory");
+  else if (battleUi.battle.outcome === "defeat") battleUi.playSe("playerDamage");
+  else if (
+    !battleUi.battle.presentationEvents?.some(event => event.type === "healing")
+    && battleUi.battle.log.some(line => line.includes("回復"))
+  ) battleUi.playSe("heal");
+  battleUi.presenting = false;
+  renderBattle();
   if (battleUi.autoActive && !battleUi.battle.outcome) scheduleAutoRound();
+}
+
+async function playPresentationEvents() {
+  const events = battleUi.battle.presentationEvents || [];
+  const image = battleUi.root.querySelector("#battleEnemyImage");
+  for (const event of events) {
+    if (!battleUi.active) return;
+    battleUi.messageEl.textContent = event.message;
+    if (event.type === "healing") {
+      showBattleNumber(event.targetSide, event.amount, "healing");
+      battleUi.playSe("heal");
+    } else if (event.hit || event.type === "damage") {
+      showBattleNumber(event.targetSide, event.damage ?? event.amount, "damage");
+    }
+    if (event.targetSide === "enemy" && event.hit) {
+      image.classList.remove("is-hit");
+      void image.offsetWidth;
+      image.classList.add("is-hit");
+      battleUi.playSe("attackHit");
+    } else if (event.targetSide === "player" && event.hit) {
+      battleUi.playSe("playerDamage");
+    }
+    await delay(event.hit ? 320 : 240);
+    image.classList.remove("is-hit");
+  }
+}
+
+function showBattleNumber(targetSide, amount, kind) {
+  const value = Math.max(0, Math.floor(Number(amount) || 0));
+  if (value <= 0) return;
+  const layerId = targetSide === "enemy" ? "battleEnemyNumbers" : "battlePlayerNumbers";
+  const layer = document.getElementById(layerId);
+  if (!layer) return;
+  const number = document.createElement("span");
+  number.className = `battle-number is-${kind}`;
+  number.textContent = String(value);
+  layer.append(number);
+  number.addEventListener("animationend", () => number.remove(), { once: true });
+  window.setTimeout(() => number.remove(), 900);
 }
 
 function startAutoBattle() {
@@ -248,6 +296,7 @@ function finishBattle() {
 function closeBattle() {
   clearAutoTimer();
   battleUi.autoActive = false;
+  battleUi.presenting = false;
   battleUi.active = false;
   battleUi.root.hidden = true;
   document.body.classList.remove("battle-active");
@@ -320,7 +369,7 @@ function renderBattle() {
   const image = battleUi.root.querySelector("#battleEnemyImage");
   image.src = battle.enemy.image || "";
   image.alt = battle.enemy.name;
-  image.classList.toggle("is-defeated", battle.outcome === "victory");
+  image.classList.toggle("is-defeated", battle.outcome === "victory" && !battleUi.presenting);
   battleUi.messageEl.textContent = `${battle.log.join("\n")}${battle.outcome ? "\n＊Aボタンで次へ" : ""}`;
 }
 
@@ -328,6 +377,10 @@ function clearAutoTimer() {
   if (!battleUi.autoTimer) return;
   window.clearTimeout(battleUi.autoTimer);
   battleUi.autoTimer = 0;
+}
+
+function delay(milliseconds) {
+  return new Promise(resolve => window.setTimeout(resolve, milliseconds));
 }
 
 function statusText(combatant) {

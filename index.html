@@ -8,11 +8,11 @@
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
   <link rel="stylesheet" href="css/style.css?v=20260722-2">
-  <link rel="stylesheet" href="css/game-menu.css?v=20260724-1">
+  <link rel="stylesheet" href="css/game-menu.css?v=20260725-1">
   <link rel="stylesheet" href="css/title-screen.css?v=20260723-4">
   <link rel="stylesheet" href="css/town.css?v=20260723-9">
   <link rel="stylesheet" href="css/scene-transition.css?v=20260723-2">
-  <link rel="stylesheet" href="css/battle.css?v=20260724-3">
+  <link rel="stylesheet" href="css/battle.css?v=20260725-2">
   <link rel="preload" as="image" href="images/npc/NPC_10.avif" type="image/avif">
   <link rel="preload" as="image" href="images/npc/NPC_11.avif" type="image/avif">
   <link rel="preload" as="image" href="images/npc/NPC_12.avif" type="image/avif">
@@ -58,13 +58,14 @@
         <div class="battle-enemy-stage">
           <strong id="battleEnemyName" class="battle-enemy-name">ENEMY</strong>
           <img id="battleEnemyImage" class="battle-enemy-image" alt="">
+          <span id="battleEnemyNumbers" class="battle-number-layer battle-enemy-numbers" aria-hidden="true"></span>
         </div>
       </section>
     </div>
 
     <div class="quick-status" aria-label="プレイヤーステータス未接続">
       <span>Lv:<output id="quickLevel">---</output></span><span>[<output id="quickJob">-</output>]</span>
-      <span>HP <output id="quickHpCurrent" class="quick-value">----</output> / <output id="quickHpMax" class="quick-value">----</output></span>
+      <span class="quick-hp">HP <output id="quickHpCurrent" class="quick-value">----</output> / <output id="quickHpMax" class="quick-value">----</output><span id="battlePlayerNumbers" class="battle-number-layer battle-player-numbers" aria-hidden="true"></span></span>
       <span>SP <output id="quickSpCurrent" class="quick-value">----</output> / <output id="quickSpMax" class="quick-value">----</output></span>
       <span>Cond:<output id="quickCondition">----</output></span>
     </div>
@@ -167,6 +168,6 @@
   </section>
 </main>
   <script type="module" src="js/title-screen.js?v=20260722-1"></script>
-  <script type="module" src="js/main.js?v=20260724-5"></script>
+  <script type="module" src="js/main.js?v=20260725-2"></script>
 </body>
 </html>

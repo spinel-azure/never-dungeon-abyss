@@ -22,6 +22,74 @@
   justify-content: center;
 }
 
+.battle-number-layer {
+  position: absolute;
+  z-index: 6;
+  display: block;
+  width: 1px;
+  height: 1px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.battle-enemy-numbers {
+  top: 48%;
+  left: 50%;
+}
+
+.battle-player-numbers {
+  bottom: 85%;
+  left: 50%;
+}
+
+.battle-number {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: #ff3f3f;
+  font: clamp(24px, 5vw, 42px)/1 "PixelFont", monospace;
+  white-space: nowrap;
+  text-shadow:
+    -2px -2px 0 #fff,
+    2px -2px 0 #fff,
+    -2px 2px 0 #fff,
+    2px 2px 0 #fff,
+    0 0 4px #fff;
+  transform: translate(-50%, 0) scale(.65);
+  animation: battle-number-pop 720ms cubic-bezier(.2, .75, .25, 1) forwards;
+}
+
+.battle-number.is-healing {
+  color: #32df6f;
+}
+
+.battle-player-numbers .battle-number {
+  font-size: clamp(20px, 4vw, 32px);
+}
+
+@keyframes battle-number-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 5px) scale(.6);
+  }
+  22% {
+    opacity: 1;
+    transform: translate(-50%, -18px) scale(1.28);
+  }
+  48% {
+    opacity: 1;
+    transform: translate(-50%, -11px) scale(1);
+  }
+  75% {
+    opacity: 1;
+    transform: translate(-50%, -27px) scale(1.06);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -45px) scale(.92);
+  }
+}
+
 .battle-enemy-stage::after {
   content: "";
   position: absolute;
@@ -51,6 +119,41 @@
   opacity: 0;
 }
 
+.battle-enemy-image.is-hit {
+  animation: battle-enemy-hit 260ms steps(2, end);
+}
+
+@keyframes battle-enemy-hit {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+    filter: brightness(1) drop-shadow(0 8px 8px rgba(0, 0, 0, .72));
+  }
+  20% {
+    opacity: .18;
+    transform: translateX(-8px);
+    filter: brightness(2.4) drop-shadow(0 8px 8px rgba(0, 0, 0, .72));
+  }
+  40% {
+    opacity: 1;
+    transform: translateX(8px);
+  }
+  60% {
+    opacity: .28;
+    transform: translateX(-5px);
+    filter: brightness(2) drop-shadow(0 8px 8px rgba(0, 0, 0, .72));
+  }
+  80% {
+    opacity: 1;
+    transform: translateX(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+    filter: brightness(1) drop-shadow(0 8px 8px rgba(0, 0, 0, .72));
+  }
+}
+
 .battle-enemy-name {
   position: relative;
   z-index: 2;
@@ -75,6 +178,14 @@ body.battle-active .viewport > #treasureCanvas {
 @media (prefers-reduced-motion: reduce) {
   .battle-enemy-image {
     transition-duration: 1ms;
+  }
+
+  .battle-enemy-image.is-hit {
+    animation: none;
+  }
+
+  .battle-number {
+    animation-duration: 1ms;
   }
 }
 

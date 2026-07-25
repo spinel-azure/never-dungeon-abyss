@@ -20,6 +20,7 @@ import {
   resolveEnvironmentSave
 } from "../combat/resolve-environment-save.js";
 import { resolveEscapeAttempt } from "../combat/resolve-escape.js";
+import { createBattleState, resolveBattleRound } from "../combat/battle-engine.js";
 import { resolveTurnOrder, createGuardAction } from "../combat/resolve-turn-order.js";
 import {
   applyStatus,
@@ -126,6 +127,63 @@ test("dagger normal attack is two hits, power strike one, poison blade two", () 
   assert.equal(createNormalAttack({ weapon }).hitCount, 2);
   assert.equal(createSkillAttack(getSkill("power_strike"), { weapon }).hitCount, 1);
   assert.equal(createSkillAttack(getSkill("poison_blade"), { weapon }).hitCount, 2);
+});
+
+test("dagger battle round exposes two separate hit presentation events", () => {
+  const thief = createInitialCharacter({ name: "THIEF", job: "thief" });
+  const enemy = {
+    id: "dummy",
+    name: "DUMMY",
+    hp: 99,
+    maxHp: 99,
+    sp: 0,
+    maxSp: 0,
+    stats: { str: 1, int: 1, agi: 1, dex: 1, luc: 1 },
+    def: 0,
+    attack: 1,
+    statuses: [],
+    alive: true
+  };
+  const resolved = resolveBattleRound({
+    battle: createBattleState({ character: thief, enemy }),
+    playerCommand: { type: "attack" },
+    rng: fixed(0.5, 0.5, 0, 0.9, 0.5, 0, 0.9, 0.5, 0, 0.9)
+  });
+  const playerHits = resolved.battle.presentationEvents.filter(event =>
+    event.actorSide === "player" && event.targetSide === "enemy"
+  );
+  assert.equal(playerHits.length, 2);
+  assert.equal(playerHits[0].hitIndex, 0);
+  assert.equal(playerHits[1].hitIndex, 1);
+  assert.match(resolved.battle.log.join("\n"), /1撃目：/);
+  assert.match(resolved.battle.log.join("\n"), /2撃目：/);
+  assert.match(resolved.battle.log.join("\n"), /合計\d+ダメージ/);
+});
+
+test("healing skill exposes a green-number presentation event", () => {
+  const priest = createInitialCharacter({ name: "PRIEST", job: "priest" });
+  priest.hp = 5;
+  const enemy = {
+    id: "dummy",
+    name: "DUMMY",
+    hp: 99,
+    maxHp: 99,
+    sp: 0,
+    maxSp: 0,
+    stats: { str: 1, int: 1, agi: 1, dex: 1, luc: 1 },
+    def: 0,
+    attack: 1,
+    statuses: [],
+    alive: true
+  };
+  const resolved = resolveBattleRound({
+    battle: createBattleState({ character: priest, enemy }),
+    playerCommand: { type: "skill", skillId: "healing_prayer" },
+    rng: fixed(0.5, 0.5, 0.5, 0.5, 0.5)
+  });
+  const healing = resolved.battle.presentationEvents.find(event => event.type === "healing");
+  assert.equal(healing.targetSide, "player");
+  assert.equal(healing.amount, 13);
 });
 
 test("poison blade resolves poison once on the first landed hit", () => {

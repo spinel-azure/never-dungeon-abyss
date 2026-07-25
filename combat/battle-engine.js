@@ -22,7 +22,8 @@ export function createBattleState({ character, enemy }) {
     outcome: null,
     player: cloneCombatant(character),
     enemy: cloneCombatant(enemy),
-    log: [`${enemy.name}が現れた！`]
+    log: [`${enemy.name}が現れた！`],
+    presentationEvents: []
   };
 }
 
@@ -36,6 +37,7 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
     { side: "enemy", actor: combatStats(next.enemy), action: enemyAction }
   ], rng);
   next.log = [];
+  next.presentationEvents = [];
   if (playerAction.spCost > 0) next.player.sp -= playerAction.spCost;
 
   for (const entry of order) {
@@ -51,7 +53,15 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
       finishAction(next, entry.side);
       continue;
     }
-    executeAction({ battle: next, action: entry.action, actor, target, rng });
+    executeAction({
+      battle: next,
+      action: entry.action,
+      actor,
+      actorSide: entry.side,
+      target,
+      targetSide,
+      rng
+    });
     finishAction(next, entry.side);
     updateOutcome(next);
   }
@@ -114,7 +124,7 @@ function createEnemyAction(enemy) {
   });
 }
 
-function executeAction({ battle, action, actor, target, rng }) {
+function executeAction({ battle, action, actor, actorSide, target, targetSide, rng }) {
   const actorStats = combatStats(actor);
   const targetStats = combatStats(target);
   if (action.actionType === "guard") {
@@ -157,6 +167,13 @@ function executeAction({ battle, action, actor, target, rng }) {
     const result = resolveHealing({ caster: actorStats, target: actor, healing: action });
     actor.hp = Math.min(actor.maxHp, actor.hp + result.actualHealing);
     battle.log.push(`${actor.name}のHPが${result.actualHealing}回復した。`);
+    battle.presentationEvents.push({
+      type: "healing",
+      actorSide,
+      targetSide: actorSide,
+      amount: result.actualHealing,
+      message: `${result.actualHealing}回復！`
+    });
     return;
   }
   const result = action.actionType === "spell"
@@ -165,15 +182,36 @@ function executeAction({ battle, action, actor, target, rng }) {
   const reduction = action.actionType === "physicalAttack"
     ? getPhysicalDamageReduction(target.statuses)
     : 0;
-  const actualDamage = Math.max(0, Math.floor(result.totalDamage * (1 - reduction)));
+  const presentedHits = result.hits.map((hit, index) => ({
+    index,
+    hit: hit.hit,
+    critical: hit.critical,
+    damage: hit.hit ? Math.max(0, Math.floor(hit.damage * (1 - reduction))) : 0
+  }));
+  const actualDamage = presentedHits.reduce((total, hit) => total + hit.damage, 0);
   target.hp = Math.max(0, target.hp - actualDamage);
   target.alive = target.hp > 0;
-  const hitCount = result.hits.filter(hit => hit.hit).length;
-  if (hitCount === 0) battle.log.push(`${actor.name}の攻撃は外れた！`);
-  else {
-    battle.log.push(`${actor.name}の${action.name || "攻撃"}！ ${actualDamage}ダメージ。`);
-    if (result.hits.some(hit => hit.critical)) battle.log.push("会心の一撃！");
-  }
+  const hitCount = presentedHits.filter(hit => hit.hit).length;
+  const isMultiHit = presentedHits.length > 1;
+  battle.log.push(`${actor.name}の${action.name || "攻撃"}！`);
+  presentedHits.forEach((hit, index) => {
+    const prefix = isMultiHit ? `${index + 1}撃目：` : "";
+    const message = hit.hit
+      ? `${prefix}${hit.damage}ダメージ！${hit.critical ? " 会心！" : ""}`
+      : `${prefix}攻撃は外れた！`;
+    battle.log.push(message);
+    battle.presentationEvents.push({
+      type: "attackHit",
+      actorSide,
+      targetSide,
+      hitIndex: index,
+      hit: hit.hit,
+      damage: hit.damage,
+      critical: hit.critical,
+      message
+    });
+  });
+  if (isMultiHit && hitCount > 0) battle.log.push(`合計${actualDamage}ダメージ！`);
   const applications = [
     ...result.hits.flatMap(hit => hit.effects || []),
     ...(result.actionEffects || [])
@@ -192,6 +230,13 @@ function finishAction(battle, side) {
     actor.hp = Math.max(0, actor.hp - end.poisonDamage);
     actor.alive = actor.hp > 0;
     battle.log.push(`${actor.name}は毒で${end.poisonDamage}ダメージ。`);
+    battle.presentationEvents.push({
+      type: "damage",
+      actorSide: null,
+      targetSide: side,
+      amount: end.poisonDamage,
+      message: `毒で${end.poisonDamage}ダメージ！`
+    });
   }
 }
 
