@@ -423,6 +423,18 @@ test("initial character receives class vitals, stats and three skills", () => {
   assert.equal(priest.skillIds.length, 3);
 });
 
+test("every initial skill has a display description", () => {
+  for (const jobId of ["warrior", "thief", "priest", "mage"]) {
+    const character = createInitialCharacter({ name: "TEST", jobId });
+    for (const skillId of character.skillIds) {
+      const skill = getSkill(skillId);
+      assert.equal(typeof skill.description, "string");
+      assert.ok(skill.description.length > 0);
+      assert.ok(skill.description.split("\n").length <= 2);
+    }
+  }
+});
+
 test("legacy characters migrate to their class vitals and skills", () => {
   const mage = normalizeCharacter({
     name: "OLD",

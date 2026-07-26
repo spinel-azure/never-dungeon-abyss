@@ -200,6 +200,10 @@
   opacity: 0;
 }
 
+.message.is-skill-description {
+  color: #fff;
+}
+
 body.battle-active .viewport > .status,
 body.battle-active .viewport > #eventOverlay,
 body.battle-active .viewport > #treasureCanvas {

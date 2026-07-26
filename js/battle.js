@@ -311,10 +311,12 @@ function closeBattle() {
   document.body.classList.remove("battle-active");
   battleUi.commandRoot.replaceChildren(...battleUi.normalButtons);
   delete battleUi.commandRoot.dataset.battleActive;
+  battleUi.messageEl.classList.remove("is-skill-description");
   battleUi.battle = null;
 }
 
 function showCommandButtons() {
+  battleUi.messageEl.classList.remove("is-skill-description");
   battleUi.battleButtons.forEach((button, index) => {
     const [id, label] = COMMANDS[index];
     button.dataset.battleCommand = id;
@@ -324,6 +326,7 @@ function showCommandButtons() {
     button.classList.toggle("is-unavailable", id === "items");
   });
   mountButtons("戦闘コマンド");
+  if (battleUi.battle) battleUi.messageEl.textContent = formatBattleMessage(battleUi.battle);
 }
 
 function showSkillButtons() {
@@ -363,11 +366,20 @@ function renderSelection() {
   battleUi.battleButtons.forEach((button, index) => {
     button.classList.toggle("is-selected", index === battleUi.selectedIndex && !button.disabled);
   });
+  if (battleUi.mode === "skills") showSelectedSkillDescription();
+}
+
+function showSelectedSkillDescription() {
+  const button = battleUi.battleButtons[battleUi.selectedIndex];
+  const skill = getSkills([button?.dataset.skillId])[0];
+  battleUi.messageEl.classList.toggle("is-skill-description", Boolean(skill));
+  battleUi.messageEl.textContent = skill?.description || "スキルを選択してください。";
 }
 
 function renderBattle() {
   const battle = battleUi.battle;
   if (!battle) return;
+  battleUi.messageEl.classList.remove("is-skill-description");
   setText("battlePlayerName", `${battle.player.name} [${battle.player.jobLabel || battle.player.job}]`);
   setText("battlePlayerHp", `${battle.player.hp} / ${battle.player.maxHp}`);
   setText("battlePlayerSp", `${battle.player.sp} / ${battle.player.maxSp}`);

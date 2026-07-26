@@ -2,6 +2,7 @@ export const SPELLS = Object.freeze({
   fireball: Object.freeze({
     id: "fireball",
     name: "火球",
+    description: "必中する炎属性攻撃（魔法威力10＋INT×0.5）。\n行動速度－5。DEFを無視する。",
     actionType: "spell",
     category: "attackSpell",
     spCost: 5,
@@ -16,6 +17,7 @@ export const SPELLS = Object.freeze({
   ice_bind: Object.freeze({
     id: "ice_bind",
     name: "氷縛",
+    description: "必中の氷属性攻撃（魔法威力8＋INT×0.5）×0.8。\n行動速度－5。70%で速度－20（3ターン）。",
     actionType: "spell",
     category: "attackSpell",
     spCost: 8,
@@ -35,6 +37,7 @@ export const SPELLS = Object.freeze({
   healing_prayer: Object.freeze({
     id: "healing_prayer",
     name: "癒やしの祈り",
+    description: "自分のHPを回復する。\n回復量は10＋INT×0.5。",
     actionType: "healing",
     category: "miracle",
     spCost: 5,
