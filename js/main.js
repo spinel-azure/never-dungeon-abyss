@@ -59,7 +59,7 @@ import {
   resetPresence,
   setPresenceDisabled
 } from "./presence.js";
-import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js";
+import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js?v=20260726-1";
 import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js?v=20260722-8";
 import { loadGame, writeGame } from "./save-data.js";
 import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260725-1";
