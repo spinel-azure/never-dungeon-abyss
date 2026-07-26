@@ -42,6 +42,7 @@
 }
 
 .skill-overlay-item.is-selected,
+.skill-overlay-back.is-selected,
 .skill-overlay-back:focus-visible {
   border-color: #72eaff;
   box-shadow: 0 0 5px #72eaff, inset 0 0 4px rgba(114, 234, 255, .45);

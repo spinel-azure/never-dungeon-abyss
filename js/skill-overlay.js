@@ -79,13 +79,18 @@ export function handleSkillOverlayInput(action) {
 }
 
 function moveSelection(amount) {
-  if (!overlay.skills.length) return;
-  overlay.selectedIndex = (overlay.selectedIndex + amount + overlay.skills.length) % overlay.skills.length;
+  const itemCount = overlay.skills.length + 1;
+  overlay.selectedIndex = (overlay.selectedIndex + amount + itemCount) % itemCount;
   overlay.playSe("cursorMove");
   renderSelection();
 }
 
 async function activateSelected() {
+  if (overlay.selectedIndex === overlay.skills.length) {
+    overlay.playSe("cancel");
+    closeSkillOverlay();
+    return;
+  }
   const skill = overlay.skills[overlay.selectedIndex];
   if (!skill) return;
   const character = overlay.getCharacter();
@@ -134,9 +139,13 @@ function renderSelection() {
   [...overlay.list.children].forEach((button, index) => {
     button.classList.toggle("is-selected", index === overlay.selectedIndex);
   });
+  const backSelected = overlay.selectedIndex === overlay.skills.length;
+  overlay.backButton.classList.toggle("is-selected", backSelected);
   const skill = overlay.skills[overlay.selectedIndex];
-  overlay.messageEl.classList.add("is-skill-description");
-  overlay.messageEl.textContent = skill?.description || "スキルを選択してください。";
+  overlay.messageEl.classList.toggle("is-skill-description", !backSelected);
+  overlay.messageEl.textContent = backSelected
+    ? "スキル選択を終了する。"
+    : skill?.description || "スキルを選択してください。";
 }
 
 function unavailableReason(skill, character) {
