@@ -63,12 +63,13 @@ import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } fr
 import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js?v=20260722-8";
 import { loadGame, writeGame } from "./save-data.js";
 import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260725-1";
-import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
+import { createInitialCharacter, normalizeCharacter } from "../data/classes.js?v=20260727-1";
 import { getEquipmentItem } from "../data/equipment.js";
-import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js?v=20260727-1";
+import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js?v=20260727-2";
 import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260726-4";
-import { createInnRecovery, createTempleRevival } from "./character-services.js?v=20260724-1";
+import { awardBattleExperience, createTempleRevival, resolveInnStay } from "./character-services.js?v=20260727-1";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js?v=20260726-1";
+import { getNextLevelExperience, MAX_LEVEL } from "../data/growth.js?v=20260727-1";
 import { resolveFieldSkill } from "../combat/resolve-field-skill.js?v=20260727-1";
 import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from "./skill-overlay.js?v=20260727-1";
 
@@ -364,6 +365,7 @@ import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from
     renderStatusGauges(character);
     renderEquipment(character);
     renderDetailStats(character);
+    renderExperience(character);
   }
 
   function renderStatusGauges(target) {
@@ -439,6 +441,21 @@ import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from
     return Number.isInteger(value) ? String(value) : value.toFixed(1);
   }
 
+  function renderExperience(target) {
+    const element = document.querySelector(".nde-experience");
+    if (!element) return;
+    if (!target) {
+      element.textContent = "------- / ------- NEXT LEVEL";
+      return;
+    }
+    const experience = Math.max(0, Math.floor(Number(target.experience) || 0));
+    const carried = Math.max(0, Math.floor(Number(target.carriedExperience) || 0));
+    const next = getNextLevelExperience(target.level);
+    const carriedText = carried > 0 ? `+${carried}` : "";
+    const suffix = target.level >= MAX_LEVEL ? " MAX LEVEL" : " NEXT LEVEL";
+    element.textContent = `${String(experience).padStart(7, "0")}${carriedText} / ${String(next).padStart(7, "0")}${suffix}`;
+  }
+
   function beginRandomBattle() {
     if (!character || worldLocation !== "dungeon" || isBattleActive()) return false;
     cancelAutoReturn(false);
@@ -467,9 +484,13 @@ import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from
     return result;
   }
 
-  function finishBattleVictory() {
+  function finishBattleVictory(battle) {
+    const reward = Math.max(0, Math.floor(Number(battle?.enemy?.experienceReward) || 0));
+    if (character && reward > 0) Object.assign(character, awardBattleExperience(character, reward));
     resetPresence();
-    say("戦闘に勝利した。");
+    say(reward > 0
+      ? `戦闘に勝利した。${reward}EXPを持ち帰った。`
+      : "戦闘に勝利した。");
     setPlayerInputEnabled(true);
     updateCharacterUi();
     saveGame();
@@ -498,9 +519,16 @@ import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from
 
   function stayAtInn() {
     if (!character) return;
-    Object.assign(character, createInnRecovery(character));
+    const result = resolveInnStay(character);
+    Object.assign(character, result.changes);
     updateCharacterUi();
-    say("女将：お代はいらないよ。ゆっくりと身体を休めるんだよ。");
+    if (result.levelsGained > 0) {
+      say(`女将：お代はいらないよ。ゆっくりと身体を休めるんだよ。\n${result.gainedExperience}EXPを精算した。LV${String(character.level).padStart(3, "0")}になった！`);
+    } else if (result.gainedExperience > 0) {
+      say(`女将：お代はいらないよ。ゆっくりと身体を休めるんだよ。\n${result.gainedExperience}EXPを精算した。`);
+    } else {
+      say("女将：お代はいらないよ。ゆっくりと身体を休めるんだよ。");
+    }
     saveGame();
   }
 

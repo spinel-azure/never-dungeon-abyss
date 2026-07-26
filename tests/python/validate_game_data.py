@@ -163,7 +163,7 @@ class Validator:
 
     def validate_core_schemas(self) -> None:
         schemas = {
-            Path("data/enemies.js"): ("敵", ("id", "name", "image", "maxHp", "stats", "def", "attack")),
+            Path("data/enemies.js"): ("敵", ("id", "name", "image", "maxHp", "stats", "def", "attack", "experienceReward")),
             Path("data/weapons.js"): ("武器", ("id", "name", "type", "attack")),
             Path("data/classes.js"): ("職業", ("id", "name", "maxHp", "maxSp", "stats", "initialSkillIds")),
             Path("data/skills.js"): ("戦技", ("id", "name", "spCost")),

@@ -33,9 +33,17 @@ import {
   resolveEndOfAction
 } from "../combat/status-lifecycle.js";
 import {
+  awardBattleExperience,
   createInnRecovery,
-  createTempleRevival
+  createTempleRevival,
+  resolveInnStay
 } from "../js/character-services.js";
+import {
+  getExperienceForLevel,
+  getLevelGrowth,
+  MAX_EXPERIENCE,
+  MAX_LEVEL
+} from "../data/growth.js";
 
 const fixed = (...values) => {
   let index = 0;
@@ -91,6 +99,8 @@ test("early enemies use the MVP difficulty profile", () => {
     { maxHp: slime.maxHp, def: slime.def, attack: slime.attack },
     { maxHp: 24, def: 5, attack: 3 }
   );
+  assert.equal(rat.experienceReward, 4);
+  assert.equal(slime.experienceReward, 6);
 });
 
 test("all initial classes can damage the adjusted cave slime", () => {
@@ -520,6 +530,55 @@ test("temple revival restores one HP and preserves death-time SP", () => {
     condition: "GOOD",
     alive: true
   });
+});
+
+test("growth curve reaches the formal level 197 HP and SP caps", () => {
+  assert.deepEqual(getLevelGrowth("warrior", MAX_LEVEL), {
+    level: 197,
+    hp: 999,
+    sp: 650
+  });
+  assert.deepEqual(getLevelGrowth("priest", MAX_LEVEL), {
+    level: 197,
+    hp: 750,
+    sp: 850
+  });
+  assert.equal(getExperienceForLevel(2), 10);
+  assert.equal(getExperienceForLevel(197), MAX_EXPERIENCE);
+});
+
+test("battle rewards are carried and settled into consecutive inn level-ups", () => {
+  const thief = createInitialCharacter({ name: "TEST", job: "thief" });
+  Object.assign(thief, awardBattleExperience(thief, 4));
+  Object.assign(thief, awardBattleExperience(thief, 6));
+  assert.equal(thief.experience, 0);
+  assert.equal(thief.carriedExperience, 10);
+  thief.hp = 1;
+  thief.sp = 0;
+  const stay = resolveInnStay(thief);
+  assert.equal(stay.gainedExperience, 10);
+  assert.equal(stay.levelsGained, 1);
+  assert.equal(stay.changes.level, 2);
+  assert.equal(stay.changes.experience, 10);
+  assert.equal(stay.changes.carriedExperience, 0);
+  assert.equal(stay.changes.hp, stay.changes.maxHp);
+  assert.equal(stay.changes.sp, stay.changes.maxSp);
+});
+
+test("one inn settlement can gain several levels and stops at level 197", () => {
+  const mage = createInitialCharacter({ name: "TEST", job: "mage" });
+  mage.carriedExperience = getExperienceForLevel(5);
+  const multi = resolveInnStay(mage);
+  assert.equal(multi.levelsGained, 4);
+  assert.equal(multi.changes.level, 5);
+
+  mage.experience = MAX_EXPERIENCE - 1;
+  mage.carriedExperience = 999;
+  mage.level = 196;
+  const maximum = resolveInnStay(mage);
+  assert.equal(maximum.changes.experience, MAX_EXPERIENCE);
+  assert.equal(maximum.changes.level, MAX_LEVEL);
+  assert.equal(maximum.changes.maxSp, 999);
 });
 
 test("healing prayer can restore HP and consume SP outside battle", () => {

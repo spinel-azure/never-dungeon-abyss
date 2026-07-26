@@ -1,4 +1,5 @@
 import { collectEquipmentBonuses, getInitialEquipment } from "./equipment.js";
+import { getLevelGrowth, normalizeExperience } from "./growth.js";
 
 export const STAT_KEYS = Object.freeze(["str", "int", "agi", "dex", "luc"]);
 
@@ -79,17 +80,18 @@ export function normalizeCharacter(character) {
   if (!character || typeof character !== "object") return null;
   const characterClass = getCharacterClass(character.job) || CHARACTER_CLASSES.WARRIOR;
   const legacyCharacter = !character.baseStats || !Array.isArray(character.skillIds);
-  const maxHp = legacyCharacter
-    ? characterClass.maxHp
-    : positiveInteger(character.maxHp, characterClass.maxHp);
-  const maxSp = legacyCharacter
-    ? characterClass.maxSp
-    : positiveInteger(character.maxSp, characterClass.maxSp);
+  const level = Math.max(1, Math.min(197, Math.floor(Number(character.level) || 1)));
+  const growth = getLevelGrowth(characterClass.id, level);
+  const maxHp = growth.hp;
+  const maxSp = growth.sp;
   const equipment = normalizeEquipment(character.equipment, characterClass.id);
   return {
     ...character,
     job: characterClass.id,
     jobLabel: character.jobLabel || characterClass.label,
+    level,
+    experience: normalizeExperience(character.experience),
+    carriedExperience: Math.max(0, Math.floor(Number(character.carriedExperience) || 0)),
     maxHp,
     maxSp,
     hp: legacyCharacter ? maxHp : clampInteger(character.hp, 0, maxHp, maxHp),
@@ -118,11 +120,6 @@ function normalizeEquipment(equipment, job) {
   merged.rightArmId = merged.weaponId || merged.rightArmId || initial.rightArmId;
   merged.weaponId = merged.rightArmId;
   return merged;
-}
-
-function positiveInteger(value, fallback) {
-  const number = Math.floor(Number(value));
-  return Number.isFinite(number) && number > 0 ? number : fallback;
 }
 
 function clampInteger(value, min, max, fallback) {

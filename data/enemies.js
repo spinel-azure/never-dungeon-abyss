@@ -8,6 +8,7 @@ export const enemies = Object.freeze([
     stats: Object.freeze({ str: 5, int: 1, agi: 5, dex: 4, luc: 2 }),
     def: 4,
     attack: 4,
+    experienceReward: 4,
     elementMultipliers: Object.freeze({ fire: 1, ice: 1 }),
     statusResistances: Object.freeze({
       poison: Object.freeze({ resistancePoints: 0, immune: false }),
@@ -28,6 +29,7 @@ export const enemies = Object.freeze([
     stats: Object.freeze({ str: 4, int: 2, agi: 2, dex: 3, luc: 3 }),
     def: 5,
     attack: 3,
+    experienceReward: 6,
     elementMultipliers: Object.freeze({ fire: 1.5, ice: 0.5 }),
     statusResistances: Object.freeze({
       poison: Object.freeze({ resistancePoints: 40, immune: false }),
@@ -67,6 +69,7 @@ export function createEnemyCombatant(enemy) {
     def: enemy.def,
     baseDef: enemy.def,
     attack: enemy.attack,
+    experienceReward: enemy.experienceReward,
     escapeRate: enemy.escapeRate,
     statuses: [],
     elementMultipliers: { ...(enemy.elementMultipliers || {}) },

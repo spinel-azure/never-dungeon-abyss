@@ -4,7 +4,7 @@ export const MAX_LEVEL = 197;
 export const JOBS = Object.freeze({
   warrior: Object.freeze({ name: "WARRIOR", nameJa: "戦士", hp: 30, hpMax: 999, sp: 15, spMax: 650, stats: Object.freeze({ str: 8, int: 2, agi: 5, dex: 5, luc: 4 }) }),
   thief: Object.freeze({ name: "THIEF", nameJa: "盗賊", hp: 25, hpMax: 850, sp: 20, spMax: 750, stats: Object.freeze({ str: 4, int: 3, agi: 7, dex: 7, luc: 3 }) }),
-  cleric: Object.freeze({ name: "CLERIC", nameJa: "僧侶", hp: 20, hpMax: 750, sp: 25, spMax: 850, stats: Object.freeze({ str: 5, int: 6, agi: 4, dex: 4, luc: 5 }) }),
+  priest: Object.freeze({ name: "PRIEST", nameJa: "僧侶", hp: 20, hpMax: 750, sp: 25, spMax: 850, stats: Object.freeze({ str: 5, int: 6, agi: 4, dex: 4, luc: 5 }) }),
   mage: Object.freeze({ name: "MAGE", nameJa: "魔術師", hp: 15, hpMax: 650, sp: 30, spMax: 999, stats: Object.freeze({ str: 2, int: 8, agi: 5, dex: 5, luc: 4 }) }),
 });
 const PRIME_LEVELS = Object.freeze(Array.from({ length: MAX_LEVEL + 1 }, (_, level) => level).filter(isPrime));
