@@ -8,11 +8,11 @@
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
   <link rel="stylesheet" href="css/style.css?v=20260722-2">
-  <link rel="stylesheet" href="css/game-menu.css?v=20260725-1">
+  <link rel="stylesheet" href="css/game-menu.css?v=20260726-1">
   <link rel="stylesheet" href="css/title-screen.css?v=20260723-4">
   <link rel="stylesheet" href="css/town.css?v=20260723-9">
   <link rel="stylesheet" href="css/scene-transition.css?v=20260723-2">
-  <link rel="stylesheet" href="css/battle.css?v=20260726-2">
+  <link rel="stylesheet" href="css/battle.css?v=20260726-3">
   <link rel="preload" as="image" href="images/npc/NPC_10.avif" type="image/avif">
   <link rel="preload" as="image" href="images/npc/NPC_11.avif" type="image/avif">
   <link rel="preload" as="image" href="images/npc/NPC_12.avif" type="image/avif">
@@ -63,10 +63,12 @@
       </section>
     </div>
 
-    <div class="quick-status" aria-label="プレイヤーステータス未接続">
-      <span>Lv:<output id="quickLevel">---</output></span><span>[<output id="quickJob">-</output>]</span>
-      <span class="quick-hp">HP <output id="quickHpCurrent" class="quick-value">----</output> / <output id="quickHpMax" class="quick-value">----</output><span id="battlePlayerNumbers" class="battle-number-layer battle-player-numbers" aria-hidden="true"></span></span>
-      <span>SP <output id="quickSpCurrent" class="quick-value">----</output> / <output id="quickSpMax" class="quick-value">----</output></span>
+    <div class="quick-status" aria-label="プレイヤー簡易ステータス">
+      <span class="quick-name"><output id="quickName">NO_NAME</output></span>
+      <span>[<output id="quickJob">-</output>]</span>
+      <span>LV:<output id="quickLevel">---</output></span>
+      <span class="quick-hp">HP <output id="quickHpCurrent">----</output>/<output id="quickHpMax">----</output><span id="battlePlayerNumbers" class="battle-number-layer battle-player-numbers" aria-hidden="true"></span></span>
+      <span>SP <output id="quickSpCurrent">----</output>/<output id="quickSpMax">----</output></span>
       <span>Cond:<output id="quickCondition">----</output></span>
     </div>
     <div class="message" id="message">10×10の床空間を、薄い境界壁が区切っている。</div>
@@ -168,6 +170,6 @@
   </section>
 </main>
   <script type="module" src="js/title-screen.js?v=20260722-1"></script>
-  <script type="module" src="js/main.js?v=20260726-2"></script>
+  <script type="module" src="js/main.js?v=20260726-3"></script>
 </body>
 </html>

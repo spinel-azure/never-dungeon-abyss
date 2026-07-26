@@ -66,7 +66,7 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTo
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js";
-import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260726-2";
+import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260726-3";
 import { createInnRecovery, createTempleRevival } from "./character-services.js?v=20260724-1";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 
@@ -329,11 +329,13 @@ import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 
   function updateCharacterUi() {
     renderCharacterStatus();
+    const quickName = document.getElementById("quickName");
     const quickLevel = document.getElementById("quickLevel");
     const quickJob = document.getElementById("quickJob");
     const statusName = document.getElementById("statusName");
     const statusJob = document.getElementById("statusJob");
     const statusLevel = document.getElementById("statusLevel");
+    if (quickName) quickName.textContent = character?.name || "NO_NAME";
     if (quickLevel) quickLevel.textContent = character ? String(character.level).padStart(3, "0") : "---";
     if (quickJob) quickJob.textContent = character?.jobLabel || "-";
     if (statusName) statusName.textContent = character?.name || "NO_NAME";

@@ -766,6 +766,7 @@ function showRegistrationRequired() {
 export function renderCharacterStatus() {
   const character = town.getCharacter();
   const values = {
+    quickName: character?.name || "NO_NAME",
     quickLevel: character ? String(character.level).padStart(3, "0") : "---",
     quickJob: character?.jobLabel || "-",
     quickHpCurrent: character ? character.hp : "----",

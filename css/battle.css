@@ -228,6 +228,11 @@ body.battle-active .viewport > #treasureCanvas {
   opacity: .36;
 }
 
+.dungeon-commands[data-battle-complete="true"] button:disabled {
+  color: transparent;
+  opacity: 1;
+}
+
 .dungeon-commands[data-battle-active="true"] button {
   color: #f7fbff;
 }

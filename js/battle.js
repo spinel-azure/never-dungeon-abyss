@@ -311,6 +311,7 @@ function closeBattle() {
   document.body.classList.remove("battle-active");
   battleUi.commandRoot.replaceChildren(...battleUi.normalButtons);
   delete battleUi.commandRoot.dataset.battleActive;
+  delete battleUi.commandRoot.dataset.battleComplete;
   battleUi.messageEl.classList.remove("is-skill-description");
   battleUi.battle = null;
 }
@@ -358,8 +359,20 @@ function showSkillButtons() {
 function mountButtons(label) {
   battleUi.commandRoot.replaceChildren(...battleUi.battleButtons);
   battleUi.commandRoot.dataset.battleActive = "true";
+  delete battleUi.commandRoot.dataset.battleComplete;
   battleUi.commandRoot.setAttribute("aria-label", label);
   renderSelection();
+}
+
+function hideBattleCommands() {
+  battleUi.battleButtons.forEach(button => {
+    button.textContent = "";
+    button.disabled = true;
+    button.classList.remove("is-selected", "is-unavailable");
+  });
+  battleUi.commandRoot.dataset.battleActive = "true";
+  battleUi.commandRoot.dataset.battleComplete = "true";
+  battleUi.commandRoot.setAttribute("aria-label", "戦闘終了");
 }
 
 function renderSelection() {
@@ -379,6 +392,7 @@ function showSelectedSkillDescription() {
 function renderBattle() {
   const battle = battleUi.battle;
   if (!battle) return;
+  if (battle.outcome) hideBattleCommands();
   battleUi.messageEl.classList.remove("is-skill-description");
   setText("battlePlayerName", `${battle.player.name} [${battle.player.jobLabel || battle.player.job}]`);
   setText("battlePlayerHp", `${battle.player.hp} / ${battle.player.maxHp}`);
