@@ -9,6 +9,9 @@ export const JOB_GROWTH = Object.freeze({
 });
 
 const VITAL_GROWTH_EXPONENT = 1.35;
+const PRIME_LEVELS = Object.freeze(
+  Array.from({ length: MAX_LEVEL + 1 }, (_, level) => level).filter(isPrime)
+);
 const EXPERIENCE_ANCHORS = Object.freeze([
   Object.freeze([1, 0]),
   Object.freeze([2, 10]),
@@ -33,8 +36,14 @@ export function getLevelGrowth(jobId, level) {
   return Object.freeze({
     level: normalized,
     hp: Math.round(job.hp + (job.hpMax - job.hp) * progress),
-    sp: Math.round(job.sp + (job.spMax - job.sp) * progress)
+    sp: Math.round(job.sp + (job.spMax - job.sp) * progress),
+    deckCost: getDeckCostAtLevel(normalized)
   });
+}
+
+export function getDeckCostAtLevel(level) {
+  const normalized = normalizeLevel(level);
+  return 3 + PRIME_LEVELS.filter(prime => prime <= normalized).length;
 }
 
 export function getExperienceForLevel(level) {
@@ -65,4 +74,12 @@ export function normalizeExperience(experience) {
 
 function normalizeLevel(level) {
   return Math.min(MAX_LEVEL, Math.max(1, Math.trunc(Number(level) || 1)));
+}
+
+function isPrime(value) {
+  if (value < 2) return false;
+  for (let divisor = 2; divisor * divisor <= value; divisor += 1) {
+    if (value % divisor === 0) return false;
+  }
+  return true;
 }

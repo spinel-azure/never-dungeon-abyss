@@ -1,5 +1,5 @@
 import { collectEquipmentBonuses, getInitialEquipment } from "./equipment.js";
-import { getLevelGrowth, normalizeExperience } from "./growth.js";
+import { getDeckCostAtLevel, getLevelGrowth, normalizeExperience } from "./growth.js?v=20260727-2";
 
 export const STAT_KEYS = Object.freeze(["str", "int", "agi", "dex", "luc"]);
 
@@ -58,6 +58,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     job: characterClass.id,
     jobLabel: jobLabel || characterClass.label,
     level: 1,
+    deckCost: getDeckCostAtLevel(1),
     experience: 0,
     carriedExperience: 0,
     hp: characterClass.maxHp,
@@ -90,6 +91,7 @@ export function normalizeCharacter(character) {
     job: characterClass.id,
     jobLabel: character.jobLabel || characterClass.label,
     level,
+    deckCost: growth.deckCost,
     experience: normalizeExperience(character.experience),
     carriedExperience: Math.max(0, Math.floor(Number(character.carriedExperience) || 0)),
     maxHp,

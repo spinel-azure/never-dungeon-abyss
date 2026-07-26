@@ -63,13 +63,13 @@ import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } fr
 import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js?v=20260722-8";
 import { loadGame, writeGame } from "./save-data.js";
 import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260725-1";
-import { createInitialCharacter, normalizeCharacter } from "../data/classes.js?v=20260727-1";
+import { createInitialCharacter, normalizeCharacter } from "../data/classes.js?v=20260727-2";
 import { getEquipmentItem } from "../data/equipment.js";
 import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js?v=20260727-2";
 import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260726-4";
-import { awardBattleExperience, createTempleRevival, resolveInnStay } from "./character-services.js?v=20260727-1";
+import { awardBattleExperience, createTempleRevival, resolveInnStay } from "./character-services.js?v=20260727-2";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js?v=20260726-1";
-import { getNextLevelExperience, MAX_LEVEL } from "../data/growth.js?v=20260727-1";
+import { getNextLevelExperience, MAX_LEVEL } from "../data/growth.js?v=20260727-2";
 import { resolveFieldSkill } from "../combat/resolve-field-skill.js?v=20260727-1";
 import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from "./skill-overlay.js?v=20260727-1";
 
@@ -360,8 +360,8 @@ import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from
     if (statusCondition) statusCondition.textContent = character?.condition || "----";
     const vitals = document.querySelector(".nde-status-vitals");
     if (vitals) vitals.innerHTML = character
-      ? `<span>HP ${character.hp} / ${character.maxHp}</span><span>SP ${character.sp} / ${character.maxSp}</span>`
-      : "<span>HP ---- / ----</span><span>SP ---- / ----</span>";
+      ? `<span>HP ${character.hp} / ${character.maxHp}</span><span>SP ${character.sp} / ${character.maxSp}</span><span>DECK COST : ${character.deckCost}</span>`
+      : "<span>HP ---- / ----</span><span>SP ---- / ----</span><span>DECK COST : --</span>";
     renderStatusGauges(character);
     renderEquipment(character);
     renderDetailStats(character);

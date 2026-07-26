@@ -40,6 +40,7 @@ import {
 } from "../js/character-services.js";
 import {
   getExperienceForLevel,
+  getDeckCostAtLevel,
   getLevelGrowth,
   MAX_EXPERIENCE,
   MAX_LEVEL
@@ -536,15 +537,29 @@ test("growth curve reaches the formal level 197 HP and SP caps", () => {
   assert.deepEqual(getLevelGrowth("warrior", MAX_LEVEL), {
     level: 197,
     hp: 999,
-    sp: 650
+    sp: 650,
+    deckCost: 48
   });
   assert.deepEqual(getLevelGrowth("priest", MAX_LEVEL), {
     level: 197,
     hp: 750,
-    sp: 850
+    sp: 850,
+    deckCost: 48
   });
   assert.equal(getExperienceForLevel(2), 10);
   assert.equal(getExperienceForLevel(197), MAX_EXPERIENCE);
+});
+
+test("deck cost starts at three and rises only at prime-numbered levels", () => {
+  for (const [level, deckCost] of [
+    [1, 3], [2, 4], [3, 5], [4, 5], [5, 6],
+    [22, 11], [23, 12], [196, 47], [197, 48]
+  ]) {
+    assert.equal(getDeckCostAtLevel(level), deckCost);
+  }
+  const priest = createInitialCharacter({ name: "TEST", job: "priest" });
+  assert.equal(priest.deckCost, 3);
+  assert.equal(normalizeCharacter({ ...priest, level: 23 }).deckCost, 12);
 });
 
 test("battle rewards are carried and settled into consecutive inn level-ups", () => {
@@ -559,6 +574,7 @@ test("battle rewards are carried and settled into consecutive inn level-ups", ()
   assert.equal(stay.gainedExperience, 10);
   assert.equal(stay.levelsGained, 1);
   assert.equal(stay.changes.level, 2);
+  assert.equal(stay.changes.deckCost, 4);
   assert.equal(stay.changes.experience, 10);
   assert.equal(stay.changes.carriedExperience, 0);
   assert.equal(stay.changes.hp, stay.changes.maxHp);
@@ -578,6 +594,7 @@ test("one inn settlement can gain several levels and stops at level 197", () => 
   const maximum = resolveInnStay(mage);
   assert.equal(maximum.changes.experience, MAX_EXPERIENCE);
   assert.equal(maximum.changes.level, MAX_LEVEL);
+  assert.equal(maximum.changes.deckCost, 48);
   assert.equal(maximum.changes.maxSp, 999);
 });
 

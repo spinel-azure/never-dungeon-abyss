@@ -2,7 +2,7 @@ import {
   getLevelForExperience,
   getLevelGrowth,
   normalizeExperience
-} from "../data/growth.js";
+} from "../data/growth.js?v=20260727-2";
 
 export function createInnRecovery(character) {
   return {
@@ -32,6 +32,7 @@ export function resolveInnStay(character) {
       experience,
       carriedExperience: 0,
       level,
+      deckCost: growth.deckCost,
       maxHp: growth.hp,
       maxSp: growth.sp,
       hp: growth.hp,
