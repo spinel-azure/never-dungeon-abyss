@@ -1,9 +1,14 @@
 import { collectStats } from "./collect-stats.js";
 import { COMBAT_CONFIG, clamp } from "./combat-config.js";
+import { getEquipmentItem } from "../data/equipment.js";
 
 export function deriveDetailStats(character = {}) {
   const stats = collectStats(character);
+  const weaponId = character.equipment?.rightArmId || character.equipment?.weaponId;
+  const weapon = getEquipmentItem(weaponId, "rightArmId");
   return {
+    physicalAttack: rounded(numeric(weapon?.attack) + stats.str * COMBAT_CONFIG.strengthMultiplier),
+    spellAttack: rounded(stats.int * COMBAT_CONFIG.intelligenceMultiplier),
     physicalDamage: percent(1 + numeric(character.physicalDamageBonus)),
     spellDamage: percent(1 + numeric(character.spellDamageBonus)),
     spellResistance: percent(clamp(numeric(character.spellResistance), 0, 1)),
@@ -42,6 +47,10 @@ export function deriveDetailStats(character = {}) {
 
 function percent(value) {
   return Math.round(value * 1000) / 10;
+}
+
+function rounded(value) {
+  return Math.round(value * 10) / 10;
 }
 
 function numeric(value) {

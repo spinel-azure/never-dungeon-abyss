@@ -89,6 +89,8 @@ test("equipment bonuses are included in combat stats", () => {
 test("detail status derives current character percentages", () => {
   const warrior = deriveDetailStats(createInitialCharacter({ name: "TEST", job: "warrior" }));
   assert.deepEqual(warrior, {
+    physicalAttack: 12,
+    spellAttack: 1,
     physicalDamage: 100,
     spellDamage: 100,
     spellResistance: 0,
@@ -101,6 +103,12 @@ test("detail status derives current character percentages", () => {
     torchReduction: 0,
     presenceReduction: 0
   });
+});
+
+test("detail status attack power includes weapon and equipment stats", () => {
+  const mage = deriveDetailStats(createInitialCharacter({ name: "TEST", job: "mage" }));
+  assert.equal(mage.physicalAttack, 4);
+  assert.equal(mage.spellAttack, 4.5);
 });
 
 test("collected main stats are capped at 30", () => {

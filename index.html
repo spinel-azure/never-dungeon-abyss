@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
   <link rel="stylesheet" href="css/style.css?v=20260722-2">
-  <link rel="stylesheet" href="css/game-menu.css?v=20260726-1">
+  <link rel="stylesheet" href="css/game-menu.css?v=20260726-2">
   <link rel="stylesheet" href="css/title-screen.css?v=20260723-4">
   <link rel="stylesheet" href="css/town.css?v=20260723-9">
   <link rel="stylesheet" href="css/scene-transition.css?v=20260723-2">
@@ -101,7 +101,7 @@
       <div class="menu-panel status-panel" data-menu-view="status" hidden>
         <article class="nde-status-page" data-status-page="0">
           <h1 class="menu-title">＊ STATUS ＊</h1>
-          <div class="nde-status-identity"><strong id="statusName">NO_NAME</strong><strong id="statusJob">UNKNOWN</strong><strong id="statusLevel">LV ---</strong></div>
+          <div class="nde-status-identity"><strong><span>NAME：</span><output id="statusName">NO_NAME</output></strong><strong><span>JOB：</span><output id="statusJob">UNKNOWN</output></strong><strong><span>LV：</span><output id="statusLevel">---</output></strong></div>
           <div class="nde-status-vitals"><span>HP ---- / ----</span><span>SP ---- / ----</span></div>
           <section id="ndeStatRows" class="nde-stat-rows" aria-label="能力値未接続"></section>
           <p class="nde-stat-note">能力値上限 30 / 装備・カード超過不可</p>
@@ -115,7 +115,7 @@
         <article class="nde-status-page" data-status-page="1" hidden>
           <h1 class="menu-title">＊ DETAIL STATUS ＊</h1>
           <div class="nde-detail-list">
-            <div><span>物理ダメージ</span><strong data-detail-stat="physicalDamage">---%</strong></div><div><span>呪文ダメージ</span><strong data-detail-stat="spellDamage">---%</strong></div><div><span>呪文耐性</span><strong data-detail-stat="spellResistance">---%</strong></div><div><span>会心率</span><strong data-detail-stat="criticalRate">---%</strong></div><div><span>回避率</span><strong data-detail-stat="evasionRate">---%</strong></div><div><span>命中率</span><strong data-detail-stat="hitRate">---%</strong></div><div><span>先制率</span><strong data-detail-stat="initiativeRate">---%</strong></div><div><span>罠解除率</span><strong data-detail-stat="trapDisarmRate">---%</strong></div><div><span>状態異常耐性</span><strong data-detail-stat="statusResistance">---%</strong></div><div><span>たいまつ消費軽減</span><strong data-detail-stat="torchReduction">---%</strong></div><div><span>気配上昇軽減</span><strong data-detail-stat="presenceReduction">---%</strong></div>
+            <div><span>物理攻撃力</span><strong data-detail-stat="physicalAttack" data-detail-format="number">---</strong></div><div><span>呪文攻撃力</span><strong data-detail-stat="spellAttack" data-detail-format="number">---</strong></div><div><span>物理ダメージ</span><strong data-detail-stat="physicalDamage">---%</strong></div><div><span>呪文ダメージ</span><strong data-detail-stat="spellDamage">---%</strong></div><div><span>呪文耐性</span><strong data-detail-stat="spellResistance">---%</strong></div><div><span>会心率</span><strong data-detail-stat="criticalRate">---%</strong></div><div><span>回避率</span><strong data-detail-stat="evasionRate">---%</strong></div><div><span>命中率</span><strong data-detail-stat="hitRate">---%</strong></div><div><span>先制率</span><strong data-detail-stat="initiativeRate">---%</strong></div><div><span>罠解除率</span><strong data-detail-stat="trapDisarmRate">---%</strong></div><div><span>状態異常耐性</span><strong data-detail-stat="statusResistance">---%</strong></div><div><span>たいまつ消費軽減</span><strong data-detail-stat="torchReduction">---%</strong></div><div><span>気配上昇軽減</span><strong data-detail-stat="presenceReduction">---%</strong></div>
           </div>
         </article>
         <div class="status-pager"><button type="button" class="menu-footer" data-status-nav="back">BACK</button><span data-status-indicator>1/2</span><button type="button" class="menu-footer" data-status-nav="next">NEXT</button></div>
@@ -170,6 +170,6 @@
   </section>
 </main>
   <script type="module" src="js/title-screen.js?v=20260722-1"></script>
-  <script type="module" src="js/main.js?v=20260726-3"></script>
+  <script type="module" src="js/main.js?v=20260726-4"></script>
 </body>
 </html>

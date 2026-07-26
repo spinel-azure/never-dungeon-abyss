@@ -7,6 +7,15 @@ body.menu-open.layout-mobile .game{width:min(94vw,520px);gap:0}body.menu-open.la
 body.layout-pc .shell{padding-block:8px}
 @media(max-width:420px){.quick-status{gap:.25em;padding-inline:5px;font-size:14px}.quick-status .quick-name{flex-shrink:1}}
 
+.nde-status-identity{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) auto}
+.nde-status-identity strong{display:flex;min-width:0;color:#5bd1ff;text-align:left}
+.nde-status-identity strong:nth-child(2){justify-content:center}
+.nde-status-identity strong:last-child{justify-content:flex-end;color:#5bd1ff;text-align:left}
+.nde-status-identity output{min-width:0;overflow:hidden;color:#fff;text-overflow:ellipsis;white-space:nowrap}
+.nde-equipment strong{display:flex;align-items:center;gap:8px;text-align:left}
+.nde-equipment-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nde-equipment-bonus{margin-left:auto;color:#ffd75b;text-align:right;white-space:nowrap}
+
 /* Main-screen density and stable message space by device class. */
 body.layout-pc .game{width:min(94vw,880px);gap:10px}
 body.layout-pc.menu-open .game{width:min(94vw,520px)}

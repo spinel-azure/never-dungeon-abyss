@@ -68,7 +68,7 @@ import { getEquipmentItem } from "../data/equipment.js";
 import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js";
 import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260726-3";
 import { createInnRecovery, createTempleRevival } from "./character-services.js?v=20260724-1";
-import { deriveDetailStats } from "../combat/derive-detail-stats.js";
+import { deriveDetailStats } from "../combat/derive-detail-stats.js?v=20260726-1";
 
 (() => {
   const canvas = document.getElementById("screen");
@@ -340,7 +340,7 @@ import { deriveDetailStats } from "../combat/derive-detail-stats.js";
     if (quickJob) quickJob.textContent = character?.jobLabel || "-";
     if (statusName) statusName.textContent = character?.name || "NO_NAME";
     if (statusJob) statusJob.textContent = character?.jobLabel || "UNKNOWN";
-    if (statusLevel) statusLevel.textContent = character ? `LV ${String(character.level).padStart(3, "0")}` : "LV ---";
+    if (statusLevel) statusLevel.textContent = character ? String(character.level).padStart(3, "0") : "---";
     const vitals = document.querySelector(".nde-status-vitals");
     if (vitals) vitals.innerHTML = character
       ? `<span>HP ${character.hp} / ${character.maxHp}</span><span>SP ${character.sp} / ${character.maxSp}</span>`
@@ -391,15 +391,31 @@ import { deriveDetailStats } from "../combat/derive-detail-stats.js";
       const equippedId = slot === "rightArmId"
         ? target?.equipment?.rightArmId || target?.equipment?.weaponId
         : target?.equipment?.[slot];
-      element.textContent = getEquipmentItem(equippedId, slot)?.name || "―";
+      const item = getEquipmentItem(equippedId, slot);
+      const name = document.createElement("span");
+      name.className = "nde-equipment-name";
+      name.textContent = item?.name || "―";
+      const bonus = document.createElement("span");
+      bonus.className = "nde-equipment-bonus";
+      bonus.textContent = formatEquipmentBonuses(item);
+      element.replaceChildren(name, bonus);
     });
+  }
+
+  function formatEquipmentBonuses(item) {
+    if (!item) return "";
+    if (Number.isFinite(item.attack)) return `ATK +${item.attack}`;
+    return Object.entries(item.statBonuses || {})
+      .map(([key, value]) => `${key.toUpperCase()} ${Number(value) >= 0 ? "+" : ""}${value}`)
+      .join(" ");
   }
 
   function renderDetailStats(target) {
     const details = target ? deriveDetailStats(target) : {};
     document.querySelectorAll("[data-detail-stat]").forEach(element => {
       const value = details[element.dataset.detailStat];
-      element.textContent = Number.isFinite(value) ? `${formatPercent(value)}%` : "---%";
+      const suffix = element.dataset.detailFormat === "number" ? "" : "%";
+      element.textContent = Number.isFinite(value) ? `${formatPercent(value)}${suffix}` : `---${suffix}`;
     });
   }
 
