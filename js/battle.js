@@ -69,7 +69,7 @@ export function isBattleActive() {
 }
 
 export function handleBattleInput(action) {
-  if (!battleUi.active) return false;
+  if (!battleUi.active || document.body.classList.contains("menu-open")) return false;
   if (battleUi.autoActive) {
     if (action === "cancel") stopAutoBattle();
     return true;

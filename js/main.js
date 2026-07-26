@@ -38,10 +38,10 @@ import {
 } from "./player.js?v=20260724-1";
 import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setMistOptions, setWallColor, setFloorColor } from "./renderer.js?v=20260722-8";
 import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minimap.js?v=20260722-1";
-import { configureInput } from "./input.js?v=20260724-1";
+import { configureInput } from "./input.js?v=20260726-1";
 import { configureVirtualStick } from "./virtualStick.js?v=20260724-1";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen } from "./menu.js?v=20260723-2";
+import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu } from "./menu.js?v=20260726-1";
 import { resolveFloorTheme } from "./floorTheme.js?v=20260722-1";
 import {
   configureAutoReturn,
@@ -66,7 +66,7 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTo
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js";
-import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260726-3";
+import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260726-4";
 import { createInnRecovery, createTempleRevival } from "./character-services.js?v=20260724-1";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js?v=20260726-1";
 
@@ -632,6 +632,8 @@ import { deriveDetailStats } from "../combat/derive-detail-stats.js?v=20260726-1
     generateRandomDungeon,
     buttonA,
     buttonB,
+    commandRoot: dungeonCommands,
+    openStatusMenu,
     handleOverlayInput: handleOverlayEventInput,
     handleBattleInput,
     handleTownInput,

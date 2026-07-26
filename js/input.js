@@ -11,6 +11,8 @@
   generateRandomDungeon,
   buttonA,
   buttonB,
+  commandRoot,
+  openStatusMenu = () => {},
   handleOverlayInput = () => false,
   handleBattleInput = () => false,
   handleTownInput = () => false,
@@ -52,7 +54,52 @@
   bindControl(randomGenerateBtn, () => handleOverlayInput("dismiss") || generateRandomDungeon());
   bindControl(buttonA, () => handleBattleInput("confirm") || handleTownInput("confirm") || handleOverlayInput("confirm") || handleMenuInput("confirm") || handleDoorInput());
   bindControl(buttonB, () => handleBattleInput("cancel") || handleTownInput("cancel") || handleOverlayInput("cancel") || handleMenuInput("cancel"));
+  configureCommandMouseButtons({
+    commandRoot,
+    confirm: () => handleBattleInput("confirm") || handleTownInput("confirm") || handleOverlayInput("confirm") || handleMenuInput("confirm") || handleDoorInput(),
+    cancel: () => handleBattleInput("cancel") || handleTownInput("cancel") || handleOverlayInput("cancel") || handleMenuInput("cancel"),
+    status: () => {
+      if (handleBattleInput("cancel")) {
+        openStatusMenu();
+        return true;
+      }
+      openStatusMenu();
+      return true;
+    }
+  });
   configureTouchGuards();
+}
+
+function configureCommandMouseButtons({ commandRoot, confirm, cancel, status }) {
+  if (!commandRoot) return;
+  let suppressClickUntil = 0;
+
+  commandRoot.addEventListener("pointerdown", event => {
+    if (event.pointerType !== "mouse" || !event.target.closest("button")) return;
+    event.preventDefault();
+    event.stopPropagation();
+    suppressClickUntil = performance.now() + 500;
+    if (event.button === 2) confirm();
+    else if (event.button === 0) cancel();
+    else if (event.button === 1) status();
+  }, { capture: true });
+
+  commandRoot.addEventListener("click", event => {
+    if (performance.now() > suppressClickUntil) return;
+    event.preventDefault();
+    event.stopPropagation();
+  }, { capture: true });
+
+  commandRoot.addEventListener("auxclick", event => {
+    if (!event.target.closest("button")) return;
+    event.preventDefault();
+    event.stopPropagation();
+  }, { capture: true });
+
+  commandRoot.addEventListener("contextmenu", event => {
+    if (!event.target.closest("button")) return;
+    event.preventDefault();
+  });
 }
 
 function bindControl(el, action) {

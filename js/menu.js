@@ -62,6 +62,7 @@ export function setDungeonColors({ wall, floor } = {}, { save = false } = {}) {
   if (save) persistSettings();
 }
 export function openCampMenu() { menu.view = "commands"; menu.commandIndex = 0; updateView(); }
+export function openStatusMenu() { menu.playSe("confirm"); menu.view = "status"; menu.statusPage = 0; updateView(); }
 export function closeCampMenu(reason = "back") { menu.view = "dungeon"; updateView(); if (reason === "back" || reason === "main") menu.onReturnToDungeon(reason); }
 
 export function handleMenuInput(action) {
