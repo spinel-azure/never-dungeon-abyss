@@ -378,8 +378,16 @@ function renderBattle() {
   const image = battleUi.root.querySelector("#battleEnemyImage");
   image.src = battle.enemy.image || "";
   image.alt = battle.enemy.name;
-  image.classList.toggle("is-defeated", battle.outcome === "victory" && !battleUi.presenting);
-  battleUi.messageEl.textContent = `${battle.log.join("\n")}${battle.outcome ? "\n＊Aボタンで次へ" : ""}`;
+  const defeated = battle.outcome === "victory" && !battleUi.presenting;
+  image.classList.toggle("is-defeated", defeated);
+  battleUi.root.querySelector(".battle-enemy-stage")?.classList.toggle("is-defeated", defeated);
+  battleUi.messageEl.textContent = formatBattleMessage(battle);
+}
+
+function formatBattleMessage(battle) {
+  const prompt = battle.outcome ? "＊Aボタンで次へ" : "";
+  const visibleLogLines = battle.log.slice(-(prompt ? 1 : 2));
+  return [...visibleLogLines, prompt].filter(Boolean).join("\n");
 }
 
 function clearAutoTimer() {

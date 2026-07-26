@@ -66,7 +66,7 @@ import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTo
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js";
-import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260725-4";
+import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260726-1";
 import { createInnRecovery, createTempleRevival } from "./character-services.js?v=20260724-1";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 

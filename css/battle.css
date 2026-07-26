@@ -122,6 +122,8 @@
   border-radius: 50%;
   background: rgba(0, 0, 0, .65);
   filter: blur(7px);
+  opacity: 1;
+  transition: opacity 900ms ease-out;
 }
 
 .battle-enemy-image {
@@ -189,6 +191,13 @@
     -2px 2px 0 #fff,
     2px 2px 0 #fff,
     0 0 5px #fff;
+  opacity: 1;
+  transition: opacity 900ms ease-out;
+}
+
+.battle-enemy-stage.is-defeated::after,
+.battle-enemy-stage.is-defeated .battle-enemy-name {
+  opacity: 0;
 }
 
 body.battle-active .viewport > .status,
