@@ -23,6 +23,7 @@ import { resolveEscapeAttempt } from "../combat/resolve-escape.js";
 import { createBattleState, resolveBattleRound } from "../combat/battle-engine.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { CHARACTER_JOBS } from "../data/town.js";
+import { getEnemyById } from "../data/enemies.js";
 import { resolveTurnOrder, createGuardAction } from "../combat/resolve-turn-order.js";
 import {
   applyStatus,
@@ -75,6 +76,36 @@ test("initial equipment matches every class profile", () => {
     assert.equal(bonuses.def || 0, profile.def);
     assert.equal(bonuses.int || 0, profile.int);
     assert.equal(character.equipment.accessoryId, null);
+  }
+});
+
+test("early enemies use the MVP difficulty profile", () => {
+  const rat = getEnemyById("abyss_rat");
+  const slime = getEnemyById("cave_slime");
+  assert.deepEqual(
+    { maxHp: rat.maxHp, def: rat.def, attack: rat.attack },
+    { maxHp: 20, def: 4, attack: 4 }
+  );
+  assert.deepEqual(
+    { maxHp: slime.maxHp, def: slime.def, attack: slime.attack },
+    { maxHp: 24, def: 5, attack: 3 }
+  );
+});
+
+test("all initial classes can damage the adjusted cave slime", () => {
+  const slime = getEnemyById("cave_slime");
+  const expectedDamage = { warrior: 9, thief: 2, priest: 6, mage: 1 };
+  for (const [job, damage] of Object.entries(expectedDamage)) {
+    const character = createInitialCharacter({ name: "TEST", job });
+    const stats = collectStats(character);
+    const weapon = getEquipmentItem(character.equipment.rightArmId, "rightArmId");
+    const result = resolvePhysicalAttack({
+      attacker: stats,
+      defender: { agi: slime.stats.agi, def: slime.def },
+      attack: createNormalAttack({ weapon }),
+      rng: fixed(0, 0.9, 0.5, 0, 0.9, 0.5)
+    });
+    assert.equal(result.totalDamage, damage);
   }
 });
 
