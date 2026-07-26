@@ -335,12 +335,14 @@ import { deriveDetailStats } from "../combat/derive-detail-stats.js?v=20260726-1
     const statusName = document.getElementById("statusName");
     const statusJob = document.getElementById("statusJob");
     const statusLevel = document.getElementById("statusLevel");
+    const statusCondition = document.getElementById("statusCondition");
     if (quickName) quickName.textContent = character?.name || "NO_NAME";
     if (quickLevel) quickLevel.textContent = character ? String(character.level).padStart(3, "0") : "---";
     if (quickJob) quickJob.textContent = character?.jobLabel || "-";
     if (statusName) statusName.textContent = character?.name || "NO_NAME";
     if (statusJob) statusJob.textContent = character?.jobLabel || "UNKNOWN";
     if (statusLevel) statusLevel.textContent = character ? String(character.level).padStart(3, "0") : "---";
+    if (statusCondition) statusCondition.textContent = character?.condition || "----";
     const vitals = document.querySelector(".nde-status-vitals");
     if (vitals) vitals.innerHTML = character
       ? `<span>HP ${character.hp} / ${character.maxHp}</span><span>SP ${character.sp} / ${character.maxSp}</span>`
