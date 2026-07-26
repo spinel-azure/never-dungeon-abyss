@@ -60,14 +60,14 @@ import {
   setPresenceDisabled
 } from "./presence.js";
 import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js?v=20260726-1";
-import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js?v=20260722-8";
+import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js?v=20260727-9";
 import { loadGame, writeGame } from "./save-data.js";
 import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260725-1";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js?v=20260727-2";
 import { getEquipmentItem } from "../data/equipment.js";
 import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js?v=20260727-2";
 import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260726-4";
-import { awardBattleExperience, createTempleRevival, resolveInnStay } from "./character-services.js?v=20260727-2";
+import { awardBattleExperience, createTempleRevival, resolveInnStay } from "./character-services.js?v=20260727-3";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js?v=20260726-1";
 import { getNextLevelExperience, MAX_LEVEL } from "../data/growth.js?v=20260727-2";
 import { resolveFieldSkill } from "../combat/resolve-field-skill.js?v=20260727-1";
@@ -114,6 +114,7 @@ import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from
   const menuScreen = document.getElementById("menuScreen");
   const dungeonCommands = document.getElementById("dungeonCommands");
   const townScreen = document.getElementById("townScreen");
+  const levelUpEffect = document.getElementById("levelUpEffect");
   const battleScreen = document.getElementById("battleScreen");
   const skillOverlay = document.getElementById("skillOverlay");
   const sceneTransition = document.getElementById("sceneTransition");
@@ -523,13 +524,30 @@ import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from
     Object.assign(character, result.changes);
     updateCharacterUi();
     if (result.levelsGained > 0) {
-      say(`女将：お代はいらないよ。ゆっくりと身体を休めるんだよ。\n${result.gainedExperience}EXPを精算した。LV${String(character.level).padStart(3, "0")}になった！`);
+      showLevelUpEffect();
+      const deckBonus = result.deckCostGained > 0
+        ? `、特別ボーナス DECK COST+${result.deckCostGained}`
+        : "";
+      say(`LVが上がった！HP+${result.hpGained}、SP+${result.spGained}${deckBonus}`);
     } else if (result.gainedExperience > 0) {
       say(`女将：お代はいらないよ。ゆっくりと身体を休めるんだよ。\n${result.gainedExperience}EXPを精算した。`);
     } else {
       say("女将：お代はいらないよ。ゆっくりと身体を休めるんだよ。");
     }
     saveGame();
+  }
+
+  function showLevelUpEffect() {
+    if (!levelUpEffect) return;
+    playSe("levelUp");
+    levelUpEffect.hidden = false;
+    levelUpEffect.classList.remove("is-active");
+    void levelUpEffect.offsetWidth;
+    levelUpEffect.classList.add("is-active");
+    levelUpEffect.addEventListener("animationend", () => {
+      levelUpEffect.classList.remove("is-active");
+      levelUpEffect.hidden = true;
+    }, { once: true });
   }
 
   function healAtTemple() {

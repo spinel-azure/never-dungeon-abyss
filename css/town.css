@@ -9,6 +9,11 @@
 @media(prefers-reduced-motion:reduce){.town-portrait{animation:none}}
 .town-portrait-placeholder{position:absolute;inset:0;z-index:1;display:grid;place-items:center;height:100%;color:#7b786d;font:clamp(28px,8vw,70px) "PixelFont",monospace;text-shadow:0 0 14px #3c675d}
 .town-facility-badge{position:absolute;z-index:2;top:8px;left:10px;padding:4px 8px;border:1px solid #5c5a4d;background:#050706cc;color:#dcece8;font:14px "PixelFont",monospace}
+.level-up-effect{position:absolute;z-index:5;left:50%;top:50%;width:max-content;color:#fff;font:200px/1 "PixelFont",monospace;white-space:nowrap;-webkit-text-stroke:10px #000;paint-order:stroke fill;filter:drop-shadow(0 8px 4px #000);pointer-events:none;transform:translate(-50%,40%);opacity:0}
+.level-up-effect.is-active{animation:level-up-popup 3.2s cubic-bezier(.18,.72,.25,1) both}
+@keyframes level-up-popup{0%{opacity:0;transform:translate(-50%,40%) scale(.88)}22%{opacity:1;transform:translate(-50%,-50%) scale(1)}58%{opacity:1;transform:translate(-50%,-55%) scale(1)}100%{opacity:0;transform:translate(-50%,-95%) scale(1.02)}}
+@media(max-width:700px){.level-up-effect{font-size:clamp(54px,20vw,140px);-webkit-text-stroke-width:5px}}
+@media(prefers-reduced-motion:reduce){.level-up-effect.is-active{animation:level-up-fade 2s ease-out both}@keyframes level-up-fade{0%{opacity:0;transform:translate(-50%,-50%)}20%,65%{opacity:1;transform:translate(-50%,-50%)}100%{opacity:0;transform:translate(-50%,-50%)}}}
 .dungeon-commands[data-town-active="true"] button{color:#f7fbff}
 .dungeon-commands[data-town-active="true"] button.is-locked{color:#77736a}
 .dungeon-commands[data-town-active="true"] button.is-unavailable,.dungeon-commands[data-town-active="true"] button.is-unavailable:disabled{border-color:#292822;background:#0b0b0a;color:#65635e;box-shadow:none;cursor:not-allowed;opacity:1}

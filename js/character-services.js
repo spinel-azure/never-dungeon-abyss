@@ -26,6 +26,7 @@ export function resolveInnStay(character) {
   const experience = normalizeExperience((Number(character.experience) || 0) + gainedExperience);
   const previousLevel = Math.max(1, Math.floor(Number(character.level) || 1));
   const level = getLevelForExperience(experience);
+  const previousGrowth = getLevelGrowth(character.job, previousLevel);
   const growth = getLevelGrowth(character.job, level);
   return {
     changes: {
@@ -42,7 +43,10 @@ export function resolveInnStay(character) {
       alive: true
     },
     gainedExperience,
-    levelsGained: Math.max(0, level - previousLevel)
+    levelsGained: Math.max(0, level - previousLevel),
+    hpGained: Math.max(0, growth.hp - previousGrowth.hp),
+    spGained: Math.max(0, growth.sp - previousGrowth.sp),
+    deckCostGained: Math.max(0, growth.deckCost - previousGrowth.deckCost)
   };
 }
 

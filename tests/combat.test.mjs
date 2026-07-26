@@ -575,6 +575,9 @@ test("battle rewards are carried and settled into consecutive inn level-ups", ()
   assert.equal(stay.levelsGained, 1);
   assert.equal(stay.changes.level, 2);
   assert.equal(stay.changes.deckCost, 4);
+  assert.equal(stay.hpGained, 1);
+  assert.equal(stay.spGained, 1);
+  assert.equal(stay.deckCostGained, 1);
   assert.equal(stay.changes.experience, 10);
   assert.equal(stay.changes.carriedExperience, 0);
   assert.equal(stay.changes.hp, stay.changes.maxHp);
@@ -587,6 +590,9 @@ test("one inn settlement can gain several levels and stops at level 197", () => 
   const multi = resolveInnStay(mage);
   assert.equal(multi.levelsGained, 4);
   assert.equal(multi.changes.level, 5);
+  assert.equal(multi.hpGained, multi.changes.maxHp - mage.maxHp);
+  assert.equal(multi.spGained, multi.changes.maxSp - mage.maxSp);
+  assert.equal(multi.deckCostGained, 3);
 
   mage.experience = MAX_EXPERIENCE - 1;
   mage.carriedExperience = 999;
