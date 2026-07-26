@@ -69,6 +69,8 @@ import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js?v=20260
 import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260726-4";
 import { createInnRecovery, createTempleRevival } from "./character-services.js?v=20260724-1";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js?v=20260726-1";
+import { resolveFieldSkill } from "../combat/resolve-field-skill.js?v=20260727-1";
+import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from "./skill-overlay.js?v=20260727-1";
 
 (() => {
   const canvas = document.getElementById("screen");
@@ -112,6 +114,7 @@ import { deriveDetailStats } from "../combat/derive-detail-stats.js?v=20260726-1
   const dungeonCommands = document.getElementById("dungeonCommands");
   const townScreen = document.getElementById("townScreen");
   const battleScreen = document.getElementById("battleScreen");
+  const skillOverlay = document.getElementById("skillOverlay");
   const sceneTransition = document.getElementById("sceneTransition");
   const sceneTransitionTitle = document.getElementById("sceneTransitionTitle");
   let sceneTransitionRunning = false;
@@ -194,6 +197,17 @@ import { deriveDetailStats } from "../combat/derive-detail-stats.js?v=20260726-1
     onVictory: finishBattleVictory,
     onDefeat: finishBattleDefeat,
     onEscape: finishBattleEscape,
+    openSkills: ({ character: battleCharacter, onUse }) => openSkillOverlay({
+      context: "battle",
+      character: battleCharacter,
+      onUse
+    }),
+    playSe
+  });
+
+  configureSkillOverlay({
+    root: skillOverlay,
+    messageEl: msgEl,
     playSe
   });
 
@@ -442,6 +456,17 @@ import { deriveDetailStats } from "../combat/derive-detail-stats.js?v=20260726-1
     scheduleAutosave();
   }
 
+  async function useFieldSkill(skillId) {
+    const result = resolveFieldSkill({ character, skillId });
+    if (!result.accepted) return result;
+    character = result.character;
+    updateCharacterUi();
+    say(`${result.skill.name}を使った。HPが${result.healing}回復した。`);
+    saveGame();
+    playSe("heal");
+    return result;
+  }
+
   function finishBattleVictory() {
     resetPresence();
     say("戦闘に勝利した。");
@@ -634,6 +659,7 @@ import { deriveDetailStats } from "../combat/derive-detail-stats.js?v=20260726-1
     buttonB,
     commandRoot: dungeonCommands,
     openStatusMenu,
+    handleSkillInput: handleSkillOverlayInput,
     handleOverlayInput: handleOverlayEventInput,
     handleBattleInput,
     handleTownInput,
@@ -660,6 +686,11 @@ import { deriveDetailStats } from "../combat/derive-detail-stats.js?v=20260726-1
     setStopwatchVisible,
     resetStopwatch,
     saveGame: () => saveGame({ announce: true }),
+    openSkills: () => openSkillOverlay({
+      context: "field",
+      character,
+      onUse: useFieldSkill
+    }),
     onReturnToDungeon: () => {
       if (isTownOpen()) showTownArrival();
       else resumeDismissedStairsPrompt();
@@ -669,6 +700,7 @@ import { deriveDetailStats } from "../combat/derive-detail-stats.js?v=20260726-1
     stickEl: virtualStickEl,
     manualMove,
     manualTurn,
+    handleSkillInput: handleSkillOverlayInput,
     handleBattleInput,
     handleTownInput,
     handleMenuInput

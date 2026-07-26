@@ -1,0 +1,80 @@
+.skill-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  color: #fff;
+  background: rgba(0, 0, 0, .88);
+  font-family: "GameFont", sans-serif;
+}
+
+.skill-overlay-title {
+  margin: 2.5% 0 0;
+  text-align: center;
+  font-size: clamp(24px, 4.5vw, 42px);
+  font-weight: 400;
+}
+
+.skill-overlay-list {
+  display: grid;
+  gap: clamp(4px, 1vh, 10px);
+  width: min(32%, 300px);
+  margin: 2% 0 0 8%;
+}
+
+.skill-overlay-item,
+.skill-overlay-back {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 42px;
+  padding: 4px 10px;
+  border: 2px solid transparent;
+  border-radius: 5px;
+  color: #fff;
+  background: transparent;
+  font: inherit;
+  font-size: clamp(17px, 2.7vw, 28px);
+  text-align: left;
+}
+
+.skill-overlay-item small {
+  font: inherit;
+}
+
+.skill-overlay-item.is-selected,
+.skill-overlay-back:focus-visible {
+  border-color: #72eaff;
+  box-shadow: 0 0 5px #72eaff, inset 0 0 4px rgba(114, 234, 255, .45);
+  outline: 0;
+}
+
+.skill-overlay-item:disabled {
+  color: #777;
+}
+
+.skill-overlay-back {
+  position: absolute;
+  left: 8%;
+  bottom: 6%;
+}
+
+.skill-overlay-page {
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  margin: 0;
+  transform: translateX(-50%);
+  font-size: clamp(17px, 2.6vw, 27px);
+}
+
+@media (max-width: 600px) {
+  .skill-overlay-list {
+    width: 46%;
+    margin-top: 1%;
+  }
+  .skill-overlay-item,
+  .skill-overlay-back {
+    min-height: 34px;
+    font-size: clamp(14px, 4vw, 20px);
+  }
+}

@@ -13,6 +13,7 @@ import {
 } from "../combat/resolve-physical-attack.js";
 import { resolveSpell } from "../combat/resolve-spell.js";
 import { resolveHealing } from "../combat/resolve-healing.js";
+import { resolveFieldSkill } from "../combat/resolve-field-skill.js";
 import { resolveStatusEffect } from "../combat/resolve-status-effect.js";
 import { resolveInstantDeath } from "../combat/resolve-status-effect.js";
 import {
@@ -519,4 +520,27 @@ test("temple revival restores one HP and preserves death-time SP", () => {
     condition: "GOOD",
     alive: true
   });
+});
+
+test("healing prayer can restore HP and consume SP outside battle", () => {
+  const priest = createInitialCharacter({ name: "TEST", job: "priest" });
+  priest.hp = 5;
+  const result = resolveFieldSkill({ character: priest, skillId: "healing_prayer" });
+  assert.equal(result.accepted, true);
+  assert.equal(result.healing, 13);
+  assert.equal(result.character.hp, 18);
+  assert.equal(result.character.sp, 20);
+  assert.equal(priest.hp, 5);
+});
+
+test("field skills reject battle-only actions and full-HP healing", () => {
+  const priest = createInitialCharacter({ name: "TEST", job: "priest" });
+  assert.equal(resolveFieldSkill({
+    character: priest,
+    skillId: "holy_strike"
+  }).reason, "battleOnly");
+  assert.equal(resolveFieldSkill({
+    character: priest,
+    skillId: "healing_prayer"
+  }).reason, "fullHp");
 });

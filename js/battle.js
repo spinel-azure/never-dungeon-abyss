@@ -1,5 +1,4 @@
 import { createBattleState, resolveBattleRound } from "../combat/battle-engine.js";
-import { getSkills } from "../data/skills.js";
 import { resolveEscapeAttempt } from "../combat/resolve-escape.js";
 
 const COMMANDS = Object.freeze([
@@ -29,6 +28,7 @@ const battleUi = {
   onVictory: () => {},
   onDefeat: () => {},
   onEscape: () => {},
+  openSkills: () => false,
   playSe: () => {}
 };
 
@@ -79,15 +79,7 @@ export function handleBattleInput(action) {
     if (action === "confirm") finishBattle();
     return true;
   }
-  if (action === "cancel") {
-    if (battleUi.mode === "skills") {
-      battleUi.mode = "commands";
-      battleUi.selectedIndex = 1;
-      battleUi.playSe("cancel");
-      showCommandButtons();
-    }
-    return true;
-  }
+  if (action === "cancel") return true;
   if (["up", "down", "left", "right"].includes(action)) {
     moveSelection(action);
     return true;
@@ -136,21 +128,12 @@ function activateSelected() {
   const button = battleUi.battleButtons[battleUi.selectedIndex];
   if (!button || button.disabled) return;
   battleUi.playSe("confirm");
-  if (battleUi.mode === "skills") {
-    if (button.dataset.battleCommand === "back") {
-      battleUi.mode = "commands";
-      battleUi.selectedIndex = 1;
-      showCommandButtons();
-      return;
-    }
-    executeCommand({ type: "skill", skillId: button.dataset.skillId });
-    return;
-  }
   const command = button.dataset.battleCommand;
   if (command === "skills") {
-    battleUi.mode = "skills";
-    battleUi.selectedIndex = 0;
-    showSkillButtons();
+    battleUi.openSkills({
+      character: battleUi.battle.player,
+      onUse: useBattleSkill
+    });
     return;
   }
   if (command === "attack") executeCommand({ type: "attack" });
@@ -160,6 +143,11 @@ function activateSelected() {
   else {
     battleUi.messageEl.textContent = `${button.textContent}は現在未実装です。`;
   }
+}
+
+async function useBattleSkill(skillId) {
+  await executeCommand({ type: "skill", skillId });
+  return { accepted: true };
 }
 
 async function executeCommand(command) {
@@ -330,32 +318,6 @@ function showCommandButtons() {
   if (battleUi.battle) battleUi.messageEl.textContent = formatBattleMessage(battleUi.battle);
 }
 
-function showSkillButtons() {
-  const skills = getSkills(battleUi.battle.player.skillIds);
-  battleUi.battleButtons.forEach((button, index) => {
-    const skill = skills[index];
-    button.classList.remove("is-unavailable");
-    if (skill) {
-      button.dataset.skillId = skill.id;
-      delete button.dataset.battleCommand;
-      button.textContent = `${skill.name} SP${skill.spCost}`;
-      button.disabled = battleUi.battle.player.sp < skill.spCost;
-      button.classList.toggle("is-unavailable", button.disabled);
-    } else if (index === 3) {
-      delete button.dataset.skillId;
-      button.dataset.battleCommand = "back";
-      button.textContent = "戻る";
-      button.disabled = false;
-    } else {
-      delete button.dataset.skillId;
-      button.dataset.battleCommand = "empty";
-      button.textContent = "";
-      button.disabled = true;
-    }
-  });
-  mountButtons("スキル選択");
-}
-
 function mountButtons(label) {
   battleUi.commandRoot.replaceChildren(...battleUi.battleButtons);
   battleUi.commandRoot.dataset.battleActive = "true";
@@ -379,14 +341,6 @@ function renderSelection() {
   battleUi.battleButtons.forEach((button, index) => {
     button.classList.toggle("is-selected", index === battleUi.selectedIndex && !button.disabled);
   });
-  if (battleUi.mode === "skills") showSelectedSkillDescription();
-}
-
-function showSelectedSkillDescription() {
-  const button = battleUi.battleButtons[battleUi.selectedIndex];
-  const skill = getSkills([button?.dataset.skillId])[0];
-  battleUi.messageEl.classList.toggle("is-skill-description", Boolean(skill));
-  battleUi.messageEl.textContent = skill?.description || "スキルを選択してください。";
 }
 
 function renderBattle() {

@@ -13,6 +13,7 @@
   buttonB,
   commandRoot,
   openStatusMenu = () => {},
+  handleSkillInput = () => false,
   handleOverlayInput = () => false,
   handleBattleInput = () => false,
   handleTownInput = () => false,
@@ -21,6 +22,8 @@
 }) {
   window.addEventListener("keydown", (e) => {
     if (e.target instanceof Element && e.target.closest("input, select, textarea")) return;
+    const skillAction = keyAction(e);
+    if (skillAction && handleSkillInput(skillAction)) { e.preventDefault(); return; }
     if (e.key === "ArrowUp" && handleBattleInput("up")) { e.preventDefault(); return; }
     if (e.key === "ArrowDown" && handleBattleInput("down")) { e.preventDefault(); return; }
     if (e.key === "ArrowLeft" && handleBattleInput("left")) { e.preventDefault(); return; }
@@ -46,19 +49,23 @@
     if (e.key === "ArrowRight") { e.preventDefault(); manualTurn(1); }
   }, { passive: false });
 
-  bindControl(forwardBtn, () => handleOverlayInput("dismiss") || manualMove(1));
-  bindControl(backBtn, () => handleOverlayInput("dismiss") || manualMove(-1));
-  bindControl(leftBtn, () => handleOverlayInput("dismiss") || manualTurn(-1));
-  bindControl(rightBtn, () => handleOverlayInput("dismiss") || manualTurn(1));
-  bindControl(autoReturnBtn, () => handleOverlayInput("dismiss") || startAutoReturn());
-  bindControl(randomGenerateBtn, () => handleOverlayInput("dismiss") || generateRandomDungeon());
-  bindControl(buttonA, () => handleBattleInput("confirm") || handleTownInput("confirm") || handleOverlayInput("confirm") || handleMenuInput("confirm") || handleDoorInput());
-  bindControl(buttonB, () => handleBattleInput("cancel") || handleTownInput("cancel") || handleOverlayInput("cancel") || handleMenuInput("cancel"));
+  bindControl(forwardBtn, () => handleSkillInput("up") || handleOverlayInput("dismiss") || manualMove(1));
+  bindControl(backBtn, () => handleSkillInput("down") || handleOverlayInput("dismiss") || manualMove(-1));
+  bindControl(leftBtn, () => handleSkillInput("left") || handleOverlayInput("dismiss") || manualTurn(-1));
+  bindControl(rightBtn, () => handleSkillInput("right") || handleOverlayInput("dismiss") || manualTurn(1));
+  bindControl(autoReturnBtn, () => handleSkillInput("cancel") || handleOverlayInput("dismiss") || startAutoReturn());
+  bindControl(randomGenerateBtn, () => handleSkillInput("cancel") || handleOverlayInput("dismiss") || generateRandomDungeon());
+  bindControl(buttonA, () => handleSkillInput("confirm") || handleBattleInput("confirm") || handleTownInput("confirm") || handleOverlayInput("confirm") || handleMenuInput("confirm") || handleDoorInput());
+  bindControl(buttonB, () => handleSkillInput("cancel") || handleBattleInput("cancel") || handleTownInput("cancel") || handleOverlayInput("cancel") || handleMenuInput("cancel"));
   configureCommandMouseButtons({
     commandRoot,
-    confirm: () => handleBattleInput("confirm") || handleTownInput("confirm") || handleOverlayInput("confirm") || handleMenuInput("confirm") || handleDoorInput(),
-    cancel: () => handleBattleInput("cancel") || handleTownInput("cancel") || handleOverlayInput("cancel") || handleMenuInput("cancel"),
+    confirm: () => handleSkillInput("confirm") || handleBattleInput("confirm") || handleTownInput("confirm") || handleOverlayInput("confirm") || handleMenuInput("confirm") || handleDoorInput(),
+    cancel: () => handleSkillInput("cancel") || handleBattleInput("cancel") || handleTownInput("cancel") || handleOverlayInput("cancel") || handleMenuInput("cancel"),
     status: () => {
+      if (handleSkillInput("cancel")) {
+        openStatusMenu();
+        return true;
+      }
       if (handleBattleInput("cancel")) {
         openStatusMenu();
         return true;
@@ -68,6 +75,16 @@
     }
   });
   configureTouchGuards();
+}
+
+function keyAction(event) {
+  if (event.key === "ArrowUp") return "up";
+  if (event.key === "ArrowDown") return "down";
+  if (event.key === "ArrowLeft") return "left";
+  if (event.key === "ArrowRight") return "right";
+  if (event.code === "KeyX") return "confirm";
+  if (event.code === "KeyZ") return "cancel";
+  return "";
 }
 
 function configureCommandMouseButtons({ commandRoot, confirm, cancel, status }) {

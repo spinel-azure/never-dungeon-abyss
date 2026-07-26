@@ -10,6 +10,7 @@ export function configureVirtualStick({
   stickEl,
   manualMove,
   manualTurn,
+  handleSkillInput = () => false,
   handleBattleInput = () => false,
   handleTownInput = () => false,
   handleMenuInput = () => false
@@ -134,6 +135,10 @@ export function configureVirtualStick({
     activeInputKey = inputKey;
     activeInputType = direction.type;
     const menuAction = menuActionForDirection(direction);
+    if (menuAction && handleSkillInput(menuAction)) {
+      startActionRepeat(() => handleSkillInput(menuAction));
+      return;
+    }
     if (menuAction && handleBattleInput(menuAction)) {
       startActionRepeat(() => handleBattleInput(menuAction));
       return;

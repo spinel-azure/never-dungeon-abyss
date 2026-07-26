@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="css/town.css?v=20260723-9">
   <link rel="stylesheet" href="css/scene-transition.css?v=20260723-2">
   <link rel="stylesheet" href="css/battle.css?v=20260726-3">
+  <link rel="stylesheet" href="css/skill-overlay.css?v=20260727-1">
   <link rel="preload" as="image" href="images/npc/NPC_10.avif" type="image/avif">
   <link rel="preload" as="image" href="images/npc/NPC_11.avif" type="image/avif">
   <link rel="preload" as="image" href="images/npc/NPC_12.avif" type="image/avif">
@@ -61,6 +62,12 @@
           <span id="battleEnemyNumbers" class="battle-number-layer battle-enemy-numbers" aria-hidden="true"></span>
         </div>
       </section>
+      <section id="skillOverlay" class="skill-overlay" aria-label="スキル選択" hidden>
+        <h2 class="skill-overlay-title">スキル</h2>
+        <div class="skill-overlay-list" data-skill-list></div>
+        <button type="button" class="skill-overlay-back" data-skill-back>戻る</button>
+        <p class="skill-overlay-page" data-skill-page>1/1</p>
+      </section>
     </div>
 
     <div class="quick-status" aria-label="プレイヤー簡易ステータス">
@@ -76,7 +83,7 @@
       <button type="button" data-command="items" disabled>アイテム</button>
       <button type="button" data-command="status">ステータス</button>
       <button type="button" data-command="deck" disabled>？？？？？</button>
-      <button type="button" data-command="skills" disabled>スキル</button>
+      <button type="button" data-command="skills">スキル</button>
       <button type="button" data-command="save">セーブ</button>
       <button type="button" data-command="options">オプション</button>
     </section>
