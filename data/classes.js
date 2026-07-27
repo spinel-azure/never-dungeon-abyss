@@ -1,7 +1,7 @@
 import { collectEquipmentBonuses, getInitialEquipment } from "./equipment.js";
-import { getDeckCostAtLevel, getLevelGrowth, normalizeExperience } from "./growth.js?v=20260727-2";
-import { createInitialCardState, normalizeCardState } from "./deck.js?v=20260727-2";
-import { collectCardStatBonuses } from "./cards.js?v=20260727-2";
+import { getDeckCostAtLevel, getLevelGrowth, normalizeExperience } from "./growth.js";
+import { createInitialCardState, normalizeCardState } from "./deck.js";
+import { collectCardStatBonuses } from "./cards.js";
 import { createInitialInventory, normalizeInventory } from "./inventory.js";
 
 export const STAT_KEYS = Object.freeze(["str", "int", "agi", "dex", "luc"]);

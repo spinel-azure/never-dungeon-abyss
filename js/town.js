@@ -1,4 +1,4 @@
-import { CHARACTER_JOBS, TOWN_FACILITIES, getTownFacility } from "../data/town.js?v=20260725-1";
+import { CHARACTER_JOBS, TOWN_FACILITIES, getTownFacility } from "../data/town.js";
 
 const FACILITY_COMMANDS = Object.freeze({
   inn: [

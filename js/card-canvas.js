@@ -1,5 +1,5 @@
-import { CARD_DISPLAY_MODES } from "../card/card-display.js?v=20260727-1";
-import { drawCard } from "../card/renderers/card-renderer.js?v=20260727-1";
+import { CARD_DISPLAY_MODES } from "../card/card-display.js";
+import { drawCard } from "../card/renderers/card-renderer.js";
 
 export function drawCardCanvas(canvas, card) {
   const context = canvas?.getContext("2d");

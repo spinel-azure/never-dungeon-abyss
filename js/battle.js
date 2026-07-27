@@ -1,4 +1,4 @@
-import { createBattleState, resolveBattleRound } from "../combat/battle-engine.js?v=20260727-1";
+import { createBattleState, resolveBattleRound } from "../combat/battle-engine.js";
 import { resolveEscapeAttempt } from "../combat/resolve-escape.js";
 
 const COMMANDS = Object.freeze([

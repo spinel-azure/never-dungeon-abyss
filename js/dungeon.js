@@ -10,7 +10,7 @@
   BOSS_DOOR_COUNT,
   LOCKED_DOOR_COUNT
 } from "./config.js";
-import { getNpcById } from "../data/npcs.js?v=20260722-1";
+import { getNpcById } from "../data/npcs.js";
 
 export const cells = makeCells(MAP_W, MAP_H);
 export const explored = makeExplored(MAP_W, MAP_H);

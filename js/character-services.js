@@ -2,7 +2,7 @@ import {
   getLevelForExperience,
   getLevelGrowth,
   normalizeExperience
-} from "../data/growth.js?v=20260727-2";
+} from "../data/growth.js";
 
 export function createInnRecovery(character) {
   return {

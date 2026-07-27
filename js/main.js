@@ -35,23 +35,23 @@ import {
   startRandomEncounterNotice,
   startFloorLapNotice,
   setNpcTypewriterOptions
-} from "./player.js?v=20260724-1";
-import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setMistOptions, setWallColor, setFloorColor } from "./renderer.js?v=20260722-8";
-import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minimap.js?v=20260722-1";
-import { configureInput } from "./input.js?v=20260727-1";
-import { configureVirtualStick } from "./virtualStick.js?v=20260727-1";
+} from "./player.js";
+import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setMistOptions, setWallColor, setFloorColor } from "./renderer.js";
+import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minimap.js";
+import { configureInput } from "./input.js";
+import { configureVirtualStick } from "./virtualStick.js";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor } from "./menu.js?v=20260727-7";
-import { resolveFloorTheme } from "./floorTheme.js?v=20260722-1";
+import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor } from "./menu.js";
+import { resolveFloorTheme } from "./floorTheme.js";
 import {
   configureAutoReturn,
   startAutoReturn,
   continueAutoReturn,
   cancelAutoReturn,
   updateAutoReturnButton
-} from "./autoReturn.js?v=20260723-1";
+} from "./autoReturn.js";
 import { configureEvents, messageFor, say } from "./events.js";
-import { configureDevice } from "./device.js?v=20260722-1";
+import { configureDevice } from "./device.js";
 import {
   configurePresence,
   getPresence,
@@ -60,25 +60,25 @@ import {
   resetPresence,
   suppressPresence,
   setPresenceDisabled
-} from "./presence.js?v=20260727-2";
-import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js?v=20260726-1";
-import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js?v=20260727-9";
+} from "./presence.js";
+import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js";
+import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js";
 import { loadGame, writeGame } from "./save-data.js";
-import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260727-4";
-import { createInitialCharacter, normalizeCharacter } from "../data/classes.js?v=20260727-5";
+import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js";
+import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getEquipmentItem } from "../data/equipment.js";
-import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js?v=20260727-3";
-import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260727-1";
-import { awardBattleExperience, createTempleRevival, resolveInnStay } from "./character-services.js?v=20260727-3";
-import { deriveDetailStats } from "../combat/derive-detail-stats.js?v=20260726-1";
-import { getNextLevelExperience, MAX_LEVEL } from "../data/growth.js?v=20260727-2";
-import { resolveFieldSkill } from "../combat/resolve-field-skill.js?v=20260727-1";
-import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from "./skill-overlay.js?v=20260727-1";
-import { configureItemOverlay, openItemOverlay, handleItemOverlayInput } from "./item-overlay.js?v=20260727-1";
-import { resolveFieldItemUse } from "../combat/resolve-item-use.js?v=20260727-1";
-import { grantCard } from "../data/deck.js?v=20260727-3";
-import { collectCardStatBonuses, getCardById } from "../data/cards.js?v=20260727-2";
-import { drawCardCanvas } from "./card-canvas.js?v=20260727-3";
+import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js";
+import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js";
+import { awardBattleExperience, createTempleRevival, resolveInnStay } from "./character-services.js";
+import { deriveDetailStats } from "../combat/derive-detail-stats.js";
+import { getNextLevelExperience, MAX_LEVEL } from "../data/growth.js";
+import { resolveFieldSkill } from "../combat/resolve-field-skill.js";
+import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from "./skill-overlay.js";
+import { configureItemOverlay, openItemOverlay, handleItemOverlayInput } from "./item-overlay.js";
+import { resolveFieldItemUse } from "../combat/resolve-item-use.js";
+import { grantCard } from "../data/deck.js";
+import { collectCardStatBonuses, getCardById } from "../data/cards.js";
+import { drawCardCanvas } from "./card-canvas.js";
 
 (() => {
   const canvas = document.getElementById("screen");

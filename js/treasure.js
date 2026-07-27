@@ -1,4 +1,4 @@
-const THREE_URL = "./vendor/three.module.js?v=0.160.0";
+const THREE_URL = "./vendor/three.module.js";
 const EVENT_SPIN_MS = 900;
 const EVENT_OPEN_MS = 460;
 const TREASURE_EFFECT_MS = 1800;
