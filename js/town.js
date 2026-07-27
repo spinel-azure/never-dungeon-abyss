@@ -75,6 +75,7 @@ export function configureTown(options) {
   town.nameInput = document.querySelector("#characterName");
   town.jobSelect = document.querySelector("#characterJob");
   town.feedback = document.querySelector("#registrationFeedback");
+  town.registrationClassOverlay = document.querySelector("#registrationClassOverlay");
   town.portraitPreloads = TOWN_FACILITIES
     .filter(facility => facility.image)
     .map(facility => {
@@ -103,6 +104,8 @@ export function configureTown(options) {
     option.textContent = localizedJobLabel(job);
     return option;
   }));
+  town.jobSelect.addEventListener("change", updateRegistrationJobDescription);
+  town.jobSelect.addEventListener("input", updateRegistrationJobDescription);
   updateRegistrationLanguage();
   town.facilityButtons = TOWN_FACILITIES.map(facility => {
     const button = document.createElement("button");
@@ -328,6 +331,7 @@ function handleRegistrationInput(action) {
     town.jobSelect.selectedIndex = (
       town.jobSelect.selectedIndex + amount + optionCount
     ) % optionCount;
+    updateRegistrationJobDescription();
     return true;
   }
 
@@ -572,6 +576,7 @@ function renderFacility() {
     showFacilityCommands(facility.id);
   }
   town.root.classList.toggle("is-registering", showRegistration);
+  updateRegistrationJobDescription();
   town.registration.hidden = !showRegistration;
   town.feedback.textContent = "";
   if (showRegistration) town.messageEl.textContent = "ギルド長：奈落へ潜るなら、まず名簿に名前を書け。登録なしでは通せん。";
@@ -766,6 +771,13 @@ function updateRegistrationLanguage() {
   });
   const submitButton = town.registration.querySelector('button[type="submit"]');
   if (submitButton) submitButton.textContent = isJapaneseUi() ? "登録" : "REGISTER";
+}
+
+function updateRegistrationJobDescription() {
+  const selectedJob = town.jobSelect?.value || CHARACTER_JOBS[0].id;
+  town.registrationClassOverlay?.querySelectorAll("[data-registration-job]").forEach(item => {
+    item.classList.toggle("is-selected", item.dataset.registrationJob === selectedJob);
+  });
 }
 
 function localizedJobLabel(job) {

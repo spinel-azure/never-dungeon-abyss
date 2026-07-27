@@ -62,7 +62,7 @@ import {
 import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js?v=20260726-1";
 import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js?v=20260727-9";
 import { loadGame, writeGame } from "./save-data.js";
-import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260727-3";
+import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260727-4";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js?v=20260727-4";
 import { getEquipmentItem } from "../data/equipment.js";
 import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js?v=20260727-2";
@@ -73,7 +73,8 @@ import { getNextLevelExperience, MAX_LEVEL } from "../data/growth.js?v=20260727-
 import { resolveFieldSkill } from "../combat/resolve-field-skill.js?v=20260727-1";
 import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from "./skill-overlay.js?v=20260727-1";
 import { grantCard } from "../data/deck.js?v=20260727-3";
-import { collectCardStatBonuses } from "../data/cards.js?v=20260727-2";
+import { collectCardStatBonuses, getCardById } from "../data/cards.js?v=20260727-2";
+import { drawCardCanvas } from "./card-canvas.js?v=20260727-3";
 
 (() => {
   const canvas = document.getElementById("screen");
@@ -117,11 +118,14 @@ import { collectCardStatBonuses } from "../data/cards.js?v=20260727-2";
   const dungeonCommands = document.getElementById("dungeonCommands");
   const townScreen = document.getElementById("townScreen");
   const levelUpEffect = document.getElementById("levelUpEffect");
+  const cardGetEffect = document.getElementById("cardGetEffect");
+  const cardGetCanvas = document.getElementById("cardGetCanvas");
   const battleScreen = document.getElementById("battleScreen");
   const skillOverlay = document.getElementById("skillOverlay");
   const sceneTransition = document.getElementById("sceneTransition");
   const sceneTransitionTitle = document.getElementById("sceneTransitionTitle");
   let sceneTransitionRunning = false;
+  let cardGetTimer = 0;
   let currentDepth = 1;
   configureDevice();
   configureEvents({ messageEl: msgEl });
@@ -357,7 +361,23 @@ import { collectCardStatBonuses } from "../data/cards.js?v=20260727-2";
     character.cards = result.cards;
     character.eventFlags = { ...(character.eventFlags || {}), [flagId]: true };
     character.cardStatBonuses = collectCardStatBonuses(character.cards.deckSlots);
+    if (result.gained > 0) setTimeout(() => showCardGetEffect(cardId), 0);
     return result.gained > 0;
+  }
+
+  function showCardGetEffect(cardId) {
+    const card = getCardById(cardId);
+    if (!cardGetEffect || !cardGetCanvas || !card) return;
+    window.clearTimeout(cardGetTimer);
+    drawCardCanvas(cardGetCanvas, card);
+    cardGetEffect.hidden = false;
+    cardGetEffect.classList.remove("is-active");
+    void cardGetEffect.offsetWidth;
+    cardGetEffect.classList.add("is-active");
+    cardGetTimer = window.setTimeout(() => {
+      cardGetEffect.classList.remove("is-active");
+      cardGetEffect.hidden = true;
+    }, 3400);
   }
 
   function talkAtFacility(facilityId) {
