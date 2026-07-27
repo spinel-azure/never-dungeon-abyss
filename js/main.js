@@ -41,7 +41,7 @@ import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minima
 import { configureInput } from "./input.js?v=20260726-1";
 import { configureVirtualStick } from "./virtualStick.js?v=20260724-1";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu } from "./menu.js?v=20260727-2";
+import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor } from "./menu.js?v=20260727-3";
 import { resolveFloorTheme } from "./floorTheme.js?v=20260722-1";
 import {
   configureAutoReturn,
@@ -62,7 +62,7 @@ import {
 import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js?v=20260726-1";
 import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js?v=20260727-9";
 import { loadGame, writeGame } from "./save-data.js";
-import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260725-1";
+import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260727-2";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js?v=20260727-3";
 import { getEquipmentItem } from "../data/equipment.js";
 import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js?v=20260727-2";
@@ -186,6 +186,7 @@ import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from
     onEnterDungeon: enterDungeonFromTown,
     onStay: stayAtInn,
     onHeal: healAtTemple,
+    onEditDeck: openDeckEditor,
     onStateChanged: scheduleAutosave,
     isMenuOpen,
     playSe
@@ -716,6 +717,11 @@ import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from
     root: menuScreen,
     commandRoot: dungeonCommands,
     getCharacter: () => character,
+    onDeckChanged: cards => {
+      character.cards = cards;
+      updateCharacterUi();
+      scheduleAutosave();
+    },
     generateRandomDungeon,
     startAutoReturn,
     refillTorch,

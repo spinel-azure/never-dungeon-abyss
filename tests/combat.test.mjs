@@ -26,7 +26,7 @@ import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { CHARACTER_JOBS } from "../data/town.js";
 import { getEnemyById } from "../data/enemies.js";
 import { CARDS, getCardById } from "../data/cards.js";
-import { calculateDeckCost, DECK_SLOT_COUNT, normalizeCardState } from "../data/deck.js";
+import { calculateDeckCost, DECK_SLOT_COUNT, normalizeCardState, setDeckSlot } from "../data/deck.js";
 import { resolveTurnOrder, createGuardAction } from "../combat/resolve-turn-order.js";
 import {
   applyStatus,
@@ -603,6 +603,19 @@ test("card deck normalization rejects unknown, unowned, duplicate and over-cost 
     null
   ]);
   assert.equal(calculateDeckCost(normalized.deckSlots), 3);
+});
+
+test("inn deck editing equips and removes owned cards without exceeding cost", () => {
+  const empty = {
+    ownedCardIds: ["common_strength_up", "rare_defense_up"],
+    deckSlots: Array(DECK_SLOT_COUNT).fill(null)
+  };
+  const withCommon = setDeckSlot(empty, 0, "common_strength_up", 3);
+  const full = setDeckSlot(withCommon, 1, "rare_defense_up", 3);
+  assert.deepEqual(full.deckSlots.slice(0, 2), ["common_strength_up", "rare_defense_up"]);
+  assert.equal(calculateDeckCost(full.deckSlots), 3);
+  assert.deepEqual(setDeckSlot(full, 2, "common_strength_up", 3), full);
+  assert.equal(setDeckSlot(full, 0, null, 3).deckSlots[0], null);
 });
 
 test("main card registry contains every rarity and all twelve zodiac cards", () => {

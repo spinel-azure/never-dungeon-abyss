@@ -37,3 +37,21 @@ export function normalizeCardState(candidate, maxCost = 3) {
   }
   return { ownedCardIds, deckSlots };
 }
+
+export function setDeckSlot(cardState, slotIndex, cardId, maxCost = 3) {
+  const source = normalizeCardState(cardState, maxCost);
+  if (!Number.isInteger(slotIndex) || slotIndex < 0 || slotIndex >= DECK_SLOT_COUNT) return source;
+  const deckSlots = [...source.deckSlots];
+  if (!cardId) {
+    deckSlots[slotIndex] = null;
+    return { ownedCardIds: source.ownedCardIds, deckSlots };
+  }
+  const card = getCardById(cardId);
+  if (!card || !source.ownedCardIds.includes(card.id)) return source;
+  const otherCopies = deckSlots.filter((id, index) => index !== slotIndex && id === card.id).length;
+  if (otherCopies >= card.maxCopies) return source;
+  const currentCost = getCardById(deckSlots[slotIndex])?.cost || 0;
+  if (calculateDeckCost(deckSlots) - currentCost + card.cost > maxCost) return source;
+  deckSlots[slotIndex] = card.id;
+  return { ownedCardIds: source.ownedCardIds, deckSlots };
+}

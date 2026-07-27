@@ -2,8 +2,8 @@ import { CHARACTER_JOBS, TOWN_FACILITIES, getTownFacility } from "../data/town.j
 
 const FACILITY_COMMANDS = Object.freeze({
   inn: [
-    ["stay", "泊まる"], ["talk", "話す"], ["return", "町に戻る"],
-    ["empty-1", ""], ["empty-2", ""], ["empty-3", ""]
+    ["stay", "泊まる"], ["talk", "話す"], ["deck", "デッキ編成"],
+    ["return", "町に戻る"], ["empty-1", ""], ["empty-2", ""]
   ],
   guild: [
     ["accept", "依頼受注"], ["report", "依頼報告"], ["talk", "話す"],
@@ -55,6 +55,7 @@ const town = {
   onEnterDungeon: () => {},
   onStay: () => {},
   onHeal: () => {},
+  onEditDeck: () => {},
   onStateChanged: () => {},
   isMenuOpen: () => false,
   playSe: () => {}
@@ -635,7 +636,7 @@ function showFacilityCommands(facilityId) {
   town.facilityCommandButtons.forEach((button, index) => {
     const [id, label] = commands[index];
     const empty = !label;
-    const available = id === "return" || id === "stay" || id === "heal";
+    const available = id === "return" || id === "stay" || id === "heal" || id === "deck";
     button.dataset.facilityCommand = id;
     button.textContent = label;
     button.disabled = empty;
@@ -662,6 +663,10 @@ function activateFacilityService(command) {
   if (command === "heal") {
     town.onHeal();
     town.onStateChanged();
+    return true;
+  }
+  if (command === "deck") {
+    town.onEditDeck();
     return true;
   }
   return false;
