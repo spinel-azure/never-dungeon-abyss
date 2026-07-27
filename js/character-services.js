@@ -5,6 +5,13 @@ import {
 } from "../data/growth.js";
 import { grantItem } from "../data/inventory.js";
 
+export const TOWN_INTRODUCTION_FLAGS = Object.freeze([
+  "inn_first_talk_card",
+  "temple_first_talk_items",
+  "shop_first_talk_items",
+  "library_first_talk_card"
+]);
+
 export function createInnRecovery(character) {
   return {
     hp: character.maxHp,
@@ -74,4 +81,22 @@ export function grantEventItems(character, flagId, itemIds) {
   }
   next.eventFlags = { ...(next.eventFlags || {}), [flagId]: true };
   return { character: next, gainedItemIds, alreadyReceived: false };
+}
+
+export function unlockGuildRequest(character) {
+  if (!character || character.eventFlags?.guild_first_request_unlocked) {
+    return { character, unlocked: false };
+  }
+  const completed = TOWN_INTRODUCTION_FLAGS.every(flag => character.eventFlags?.[flag]);
+  if (!completed) return { character, unlocked: false };
+  return {
+    character: {
+      ...character,
+      eventFlags: {
+        ...(character.eventFlags || {}),
+        guild_first_request_unlocked: true
+      }
+    },
+    unlocked: true
+  };
 }

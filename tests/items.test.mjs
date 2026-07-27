@@ -8,7 +8,7 @@ import {
   getPresence, getPresenceSuppressedSteps, onPlayerStep, resetPresence,
   restorePresence, suppressPresence
 } from "../js/presence.js";
-import { grantEventItems } from "../js/character-services.js";
+import { grantEventItems, unlockGuildRequest } from "../js/character-services.js";
 
 function characterWith(itemId, amount = 1) {
   const character = createInitialCharacter({ name: "TEST", job: "warrior" });
@@ -119,4 +119,25 @@ test("temple and shop event rewards enter inventory once only", () => {
   assert.equal(getItemCount(shop.character.inventory, "healing_potion"), 1);
   assert.equal(getItemCount(shop.character.inventory, "antidote"), 1);
   assert.equal(getItemCount(shop.character.inventory, "guiding_torch"), 1);
+});
+
+test("guild request unlocks only after every town introduction event", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.eventFlags = {
+    guild_registration_card: true,
+    inn_first_talk_card: true,
+    temple_first_talk_items: true,
+    shop_first_talk_items: true
+  };
+  const incomplete = unlockGuildRequest(character);
+  assert.equal(incomplete.unlocked, false);
+  assert.equal(incomplete.character.eventFlags.guild_first_request_unlocked, undefined);
+
+  character.eventFlags.library_first_talk_card = true;
+  const complete = unlockGuildRequest(character);
+  assert.equal(complete.unlocked, true);
+  assert.equal(complete.character.eventFlags.guild_first_request_unlocked, true);
+
+  const repeated = unlockGuildRequest(complete.character);
+  assert.equal(repeated.unlocked, false);
 });

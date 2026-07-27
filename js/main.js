@@ -69,7 +69,7 @@ import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js";
 import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js";
-import { awardBattleExperience, createTempleRevival, grantEventItems, resolveInnStay } from "./character-services.js";
+import { awardBattleExperience, createTempleRevival, grantEventItems, resolveInnStay, unlockGuildRequest } from "./character-services.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { getNextLevelExperience, MAX_LEVEL } from "../data/growth.js";
 import { resolveFieldSkill } from "../combat/resolve-field-skill.js";
@@ -205,6 +205,7 @@ import { getItem } from "../data/items.js";
     onHeal: healAtTemple,
     onEditDeck: openDeckEditor,
     onTalk: talkAtFacility,
+    onAcceptRequest: acceptGuildRequest,
     onStateChanged: scheduleAutosave,
     isMenuOpen,
     playSe
@@ -377,7 +378,7 @@ import { getItem } from "../data/items.js";
     updateCharacterUi();
     saveGame();
     return {
-      message: "ギルド長：これを持っていけ。ついでに町を見て回ったらどうだ？\n腕力上昇のカードを手に入れた！"
+      message: "ギルド長：これを持っていけ。ついでに町を見て回ったらどうだ？一通り回ったら、また戻ってこい。"
     };
   }
 
@@ -438,6 +439,25 @@ import { getItem } from "../data/items.js";
   }
 
   function talkAtFacility(facilityId) {
+    if (facilityId === "guild" && character?.eventFlags?.guild_registration_card) {
+      const unlock = unlockGuildRequest(character);
+      if (unlock.unlocked) {
+        character = unlock.character;
+        updateCharacterUi();
+        saveGame();
+        return {
+          message: "ギルド長：ふっ…。俺以外にもお節介がいたようだな。…ところで、お前に仕事を頼みたい。",
+          focusCommand: "accept"
+        };
+      }
+      if (character.eventFlags?.guild_first_request_accepted) {
+        return "ギルド長：依頼の件、頼んだぞ。";
+      }
+      if (character.eventFlags?.guild_first_request_unlocked) {
+        return "ギルド長：仕事の話だ。依頼受注を選んでくれ。";
+      }
+      return "ギルド長：これを持っていけ。ついでに町を見て回ったらどうだ？一通り回ったら、また戻ってこい。";
+    }
     const rewards = {
       guild: {
         flag: "guild_registration_card",
@@ -480,6 +500,19 @@ import { getItem } from "../data/items.js";
       saveGame();
     }
     return gained ? reward.first : reward.repeat;
+  }
+
+  function acceptGuildRequest() {
+    if (!character?.eventFlags?.guild_first_request_unlocked) return "";
+    if (character.eventFlags.guild_first_request_accepted) {
+      return "ギルド長：依頼の件、頼んだぞ。";
+    }
+    character.eventFlags = {
+      ...(character.eventFlags || {}),
+      guild_first_request_accepted: true
+    };
+    saveGame();
+    return "ギルド長：よし、頼んだぞ。";
   }
 
   function updateCharacterUi() {

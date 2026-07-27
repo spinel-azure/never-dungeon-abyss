@@ -57,6 +57,7 @@ const town = {
   onHeal: () => {},
   onEditDeck: () => {},
   onTalk: () => "",
+  onAcceptRequest: () => "",
   onStateChanged: () => {},
   isMenuOpen: () => false,
   playSe: () => {}
@@ -639,6 +640,7 @@ function renderEntranceSelection() {
 
 function showFacilityCommands(facilityId) {
   const commands = FACILITY_COMMANDS[facilityId] || FACILITY_COMMANDS.inn;
+  const requestUnlocked = Boolean(town.getCharacter()?.eventFlags?.guild_first_request_unlocked);
   town.facilityCommandButtons.forEach((button, index) => {
     const [id, label] = commands[index];
     const empty = !label;
@@ -646,6 +648,7 @@ function showFacilityCommands(facilityId) {
       || id === "stay"
       || id === "heal"
       || id === "deck"
+      || (facilityId === "guild" && id === "accept" && requestUnlocked)
       || (id === "talk" && ["guild", "inn", "temple", "shop", "library"].includes(facilityId));
     button.dataset.facilityCommand = id;
     button.textContent = label;
@@ -682,7 +685,26 @@ function activateFacilityService(command) {
   if (command === "talk") {
     const facility = TOWN_FACILITIES[town.selectedIndex];
     if (!["guild", "inn", "temple", "shop", "library"].includes(facility?.id)) return false;
-    const message = town.onTalk(facility?.id);
+    const result = town.onTalk(facility?.id);
+    const message = typeof result === "string" ? result : result?.message;
+    if (message) town.messageEl.textContent = message;
+    if (result?.focusCommand) {
+      showFacilityCommands(facility.id);
+      const index = town.facilityCommandButtons.findIndex(
+        button => button.dataset.facilityCommand === result.focusCommand
+      );
+      if (index >= 0) {
+        town.facilityCommandIndex = index;
+        renderFacilityCommandSelection();
+      }
+    }
+    town.onStateChanged();
+    return true;
+  }
+  if (command === "accept") {
+    const facility = TOWN_FACILITIES[town.selectedIndex];
+    if (facility?.id !== "guild" || !town.getCharacter()?.eventFlags?.guild_first_request_unlocked) return false;
+    const message = town.onAcceptRequest();
     if (message) town.messageEl.textContent = message;
     town.onStateChanged();
     return true;
