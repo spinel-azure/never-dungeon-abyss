@@ -1,6 +1,6 @@
 import { calculateDeckCost, DECK_SLOT_COUNT, setDeckSlot } from "../data/deck.js?v=20260727-3";
 import { getCardById } from "../data/cards.js?v=20260727-2";
-import { drawCardCanvas } from "./card-canvas.js?v=20260727-1";
+import { drawCardCanvas } from "./card-canvas.js?v=20260727-2";
 
 const ACTION_FEEDBACK_MS = 260;
 const DEBUG_SEQUENCE_MS = 1000;
@@ -257,7 +257,22 @@ function triggerAction(key, action) { menu.actionActive[key] = true; updateDebug
 
 function bindCommands() { menu.commands.forEach(button => button.addEventListener("click", () => { menu.commandIndex = menu.commands.indexOf(button); updateSelection(); if (isCommandUnavailable(button)) return; menu.playSe("confirm"); openCommand(button.dataset.command); })); }
 function bindStatus() { menu.statusPanel.querySelectorAll("[data-status-nav]").forEach(button => button.addEventListener("click", () => { menu.playSe(button.dataset.statusNav === "back" ? "cancel" : "confirm"); statusNavigate(button.dataset.statusNav); })); }
-function bindDeck() { menu.deckPanel.querySelector("[data-deck-back]").addEventListener("click", () => { menu.playSe("cancel"); closeDeckView(); }); }
+function bindDeck() {
+  menu.deckPanel.querySelector("[data-deck-back]").addEventListener("click", () => { menu.playSe("cancel"); closeDeckView(); });
+  menu.deckPanel.querySelector("[data-deck-add]").addEventListener("click", () => {
+    if (!menu.deckEditable) return;
+    menu.playSe("confirm");
+    openDeckPicker();
+  });
+  menu.deckPanel.querySelector("[data-deck-remove]").addEventListener("click", () => {
+    if (!menu.deckEditable || !menu.deckSlots[menu.deckCursor]) return;
+    menu.playSe("confirm");
+    const character = menu.getCharacter();
+    const next = setDeckSlot(character?.cards, menu.deckCursor, null, character?.deckCost || 3);
+    menu.onDeckChanged(next);
+    renderDeck();
+  });
+}
 function bindOptions() { menu.optionPages.forEach(page => page.querySelectorAll("[data-option]").forEach(item => item.addEventListener("click", event => { if (item.matches(".volume-row") && event.target.matches("input")) return; menu.playSe("confirm"); menu.optionCursor = menu.optionItems.indexOf(item); updateSelection(); executeOption(item.dataset.option); }))); menu.optionNavButtons.forEach(button => button.addEventListener("click", () => { menu.playSe(button.dataset.optionNav === "back" ? "cancel" : "confirm"); executeOptionNav(button.dataset.optionNav); })); menu.root.querySelectorAll(".volume-row input").forEach(slider => slider.addEventListener("input", () => { slider.parentElement.querySelector("span").textContent = `${slider.value}%`; if (slider.id === "seVolume") applySeOptions(); persistSettings(); })); }
 function bindDebug() {
   menu.debugPages.forEach(page => page.querySelectorAll("[data-debug]").forEach(item => item.addEventListener("click", event => {
@@ -284,6 +299,7 @@ function renderEmptyStats() { const rows = ["STR", "INT", "AGI", "DEX", "LUC", "
 function updateView() {
   const screenOpen = ["status", "deck", "options", "debug"].includes(menu.view);
   document.body.classList.toggle("menu-open", screenOpen); document.body.classList.toggle("command-open", menu.view === "commands");
+  document.body.classList.toggle("deck-open", menu.view === "deck");
   menu.root.hidden = !screenOpen; menu.statusPanel.hidden = menu.view !== "status"; menu.deckPanel.hidden = menu.view !== "deck"; menu.optionsPanel.hidden = menu.view !== "options"; menu.debugPanel.hidden = menu.view !== "debug";
   menu.commandRoot.dataset.active = String(menu.view === "commands");
   const hint = document.querySelector("#commandHint"); if (hint) hint.textContent = menu.view === "commands" ? "＊ Bボタンでメニュー非表示" : "＊ Bボタンでメニュー表示";
@@ -294,22 +310,22 @@ function renderDeck() {
   const character = menu.getCharacter();
   menu.deckSlots = Array.from({ length: DECK_SLOT_COUNT }, (_, index) => character?.cards?.deckSlots?.[index] || null);
   const root = menu.deckPanel.querySelector("[data-deck-slots]");
-  menu.deckPanel.querySelector("[data-deck-title]").textContent = menu.deckEditable ? "＊ DECK EDIT ＊" : "＊ CARD DECK ＊";
+  menu.deckPanel.querySelector("[data-deck-title]").textContent = "CARD DECK";
   root.replaceChildren(...menu.deckSlots.map((cardId, index) => {
     const card = getCardById(cardId);
     const button = document.createElement("button");
     button.type = "button";
     button.className = `deck-slot${card ? "" : " is-empty"}`;
     button.dataset.deckSlot = String(index);
+    button.setAttribute("aria-label", card ? `スロット${index + 1} ${card.nameJa}` : `スロット${index + 1} 空き`);
     button.innerHTML = card
-      ? `<small>SLOT ${index + 1}</small><canvas width="180" height="270" aria-label="${card.nameJa}"></canvas>`
-      : `<small>SLOT ${index + 1}</small><strong>EMPTY</strong><span>―</span>`;
+      ? `<canvas width="180" height="260" aria-label="${card.nameJa}"></canvas>`
+      : `<strong>${menu.deckEditable ? "ADD CARD" : "EMPTY"}</strong>`;
     if (card) drawCardCanvas(button.querySelector("canvas"), card);
     button.addEventListener("click", () => {
-      menu.playSe(menu.deckEditable ? "confirm" : "cursorMove");
+      menu.playSe("cursorMove");
       menu.deckCursor = index;
-      if (menu.deckEditable) openDeckPicker();
-      else renderDeckSelection();
+      renderDeckSelection();
     });
     return button;
   }));
@@ -317,6 +333,7 @@ function renderDeck() {
   menu.deckPanel.querySelector("[data-deck-cost-limit]").textContent = String(character?.deckCost || 3);
   const ownedCount = Object.values(character?.cards?.ownedCardCounts || {}).reduce((sum, count) => sum + count, 0);
   menu.deckPanel.querySelector("[data-owned-card-count]").textContent = String(ownedCount);
+  menu.deckPanel.querySelector("[data-deck-add]").disabled = !menu.deckEditable;
   renderDeckSelection();
 }
 
@@ -358,6 +375,7 @@ function renderDeckPicker() {
 function renderDeckSelection() {
   menu.deckPanel.querySelectorAll("[data-deck-slot]").forEach((button, index) => button.classList.toggle("is-selected", index === menu.deckCursor));
   const card = getCardById(menu.deckSlots[menu.deckCursor]);
+  menu.deckPanel.querySelector("[data-deck-remove]").disabled = !menu.deckEditable || !card;
   menu.deckPanel.querySelector("[data-deck-detail]").textContent = card
     ? `[${card.rarity}] ${card.nameJa} / ${card.concept} / COST ${card.cost}`
     : menu.deckEditable
