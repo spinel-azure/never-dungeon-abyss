@@ -14,6 +14,7 @@ const menu = {
   commands: [], enabledCommands: [], commandIndex: 0, statusPage: 0,
   deckCursor: 0, deckSlots: [], deckEditable: false, deckReturnView: "commands",
   deckPickerOpen: false, deckPickerCursor: 0, deckPickerItems: [],
+  deckPointerArmedIndex: -1, deckPickerPointerArmedIndex: -1,
   optionPages: [], optionItems: [], optionNavButtons: [], optionCursor: 0, optionPage: 0,
   debugPages: [], debugItems: [], debugNavButtons: [], debugCursor: 0, debugPage: 0, recentConfirms: [], debugArmed: false, view: "dungeon",
   compassVisible: true, readoutVisible: false, screenShakeEnabled: true,
@@ -81,6 +82,8 @@ export function openDeckEditor() {
   menu.deckReturnView = "town";
   menu.deckPickerOpen = false;
   menu.deckCursor = 0;
+  menu.deckPointerArmedIndex = -1;
+  menu.deckPickerPointerArmedIndex = -1;
   renderDeck();
   updateView();
 }
@@ -148,6 +151,10 @@ function handleStatus(action) { if (action === "cancel") { menu.view = "commands
 function statusNavigate(key) { if (key === "back") { if (menu.statusPage === 0) { menu.view = "commands"; updateView(); } else { menu.statusPage = 0; updateStatus(); } } else if (menu.statusPage === 0) { menu.statusPage = 1; updateStatus(); } else { menu.view = "commands"; updateView(); } }
 
 function handleDeck(action) {
+  if (["up", "down", "left", "right"].includes(action)) {
+    menu.deckPointerArmedIndex = -1;
+    menu.deckPickerPointerArmedIndex = -1;
+  }
   if (menu.deckPickerOpen) {
     if (action === "cancel") { closeDeckPicker(); return; }
     if (action === "up" || action === "left") menu.deckPickerCursor = (menu.deckPickerCursor + menu.deckPickerItems.length - 1) % menu.deckPickerItems.length;
@@ -178,6 +185,7 @@ function openDeckPicker() {
   menu.deckPickerItems = [null, ...(character?.cards?.ownedCardIds || [])];
   menu.deckPickerCursor = Math.max(0, menu.deckPickerItems.indexOf(menu.deckSlots[menu.deckCursor]));
   menu.deckPickerOpen = true;
+  menu.deckPickerPointerArmedIndex = -1;
   renderDeckPicker();
 }
 
@@ -324,8 +332,15 @@ function renderDeck() {
       : `<strong>${menu.deckEditable ? "ADD CARD" : "EMPTY"}</strong>`;
     if (card) drawCardCanvas(button.querySelector("canvas"), card);
     button.addEventListener("click", () => {
+      if (menu.deckPointerArmedIndex === index && menu.deckEditable) {
+        menu.playSe("confirm");
+        menu.deckPointerArmedIndex = -1;
+        openDeckPicker();
+        return;
+      }
       menu.playSe("cursorMove");
       menu.deckCursor = index;
+      menu.deckPointerArmedIndex = index;
       renderDeckSelection();
     });
     return button;
@@ -360,7 +375,15 @@ function renderDeckPicker() {
       button.textContent = "はずす / EMPTY";
     }
     button.addEventListener("click", () => {
+      if (menu.deckPickerPointerArmedIndex !== index) {
+        menu.deckPickerCursor = index;
+        menu.deckPickerPointerArmedIndex = index;
+        menu.playSe("cursorMove");
+        renderDeckPicker();
+        return;
+      }
       menu.deckPickerCursor = index;
+      menu.deckPickerPointerArmedIndex = -1;
       menu.playSe("confirm");
       applyDeckPickerSelection();
     });
