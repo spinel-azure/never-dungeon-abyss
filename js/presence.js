@@ -29,7 +29,7 @@ export function getPresenceSuppressedSteps() {
 
 export function restorePresence(value, suppression = 0) {
   presence = Math.max(0, Math.min(PRESENCE_MAX, Math.floor(Number(value) || 0)));
-  suppressedSteps = Math.max(0, Math.floor(Number(suppression) || 0));
+  suppressedSteps = Math.max(0, Math.min(30, Math.floor(Number(suppression) || 0)));
   encounterActive = presence >= PRESENCE_MAX;
   hooks.onChange(presence);
 }
@@ -55,12 +55,13 @@ export function isPresenceDisabled() {
 
 export function resetPresence() {
   presence = 0;
+  suppressedSteps = 0;
   encounterActive = false;
   hooks.onChange(presence);
 }
 
 export function suppressPresence(steps) {
-  suppressedSteps = Math.max(suppressedSteps, Math.max(0, Math.floor(Number(steps) || 0)));
+  suppressedSteps = Math.max(suppressedSteps, Math.max(0, Math.min(30, Math.floor(Number(steps) || 0))));
   hooks.onChange(presence);
 }
 

@@ -4,6 +4,10 @@ import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { grantItem, getItemCount } from "../data/inventory.js";
 import { resolveFieldItemUse } from "../combat/resolve-item-use.js";
 import { createBattleState, resolveBattleRound } from "../combat/battle-engine.js";
+import {
+  getPresence, getPresenceSuppressedSteps, onPlayerStep, resetPresence,
+  restorePresence, suppressPresence
+} from "../js/presence.js";
 
 function characterWith(itemId, amount = 1) {
   const character = createInitialCharacter({ name: "TEST", job: "warrior" });
@@ -72,4 +76,22 @@ test("holy water only banishes a non-boss undead and awards no experience", () =
   assert.equal(result.battle.outcome, "victory");
   assert.equal(result.battle.enemy.experienceReward, 0);
   assert.equal(getItemCount(result.battle.player.inventory, "holy_water"), 0);
+});
+
+test("presence reset clears a lingering talisman suppression", () => {
+  restorePresence(0);
+  suppressPresence(30);
+  onPlayerStep({ random: () => 0 });
+  assert.equal(getPresence(), 0);
+  assert.equal(getPresenceSuppressedSteps(), 29);
+  resetPresence();
+  assert.equal(getPresenceSuppressedSteps(), 0);
+  onPlayerStep({ random: () => 0 });
+  assert.equal(getPresence(), 4);
+});
+
+test("restored presence suppression is capped at the item-defined 30 steps", () => {
+  restorePresence(0, 999999);
+  assert.equal(getPresenceSuppressedSteps(), 30);
+  resetPresence();
 });

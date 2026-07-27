@@ -60,7 +60,7 @@ import {
   resetPresence,
   suppressPresence,
   setPresenceDisabled
-} from "./presence.js?v=20260727-1";
+} from "./presence.js?v=20260727-2";
 import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js?v=20260726-1";
 import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js?v=20260727-9";
 import { loadGame, writeGame } from "./save-data.js";
