@@ -566,6 +566,9 @@ test("growth curve reaches the formal level 197 HP and SP caps", () => {
     deckCost: 48
   });
   assert.equal(getExperienceForLevel(2), 10);
+  assert.equal(getExperienceForLevel(5), 70);
+  assert.equal(getExperienceForLevel(6), 105);
+  assert.equal(getExperienceForLevel(10), 390);
   assert.equal(getExperienceForLevel(197), MAX_EXPERIENCE);
 });
 

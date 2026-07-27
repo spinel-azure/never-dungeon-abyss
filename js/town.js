@@ -458,10 +458,14 @@ function handleQuestInput(action) {
     return true;
   }
   if (["up", "down"].includes(action)) {
+    const visibleQuestIndexes = getVisibleQuestIndexes();
+    if (visibleQuestIndexes.length === 0) return true;
     town.playSe("cursorMove");
-    town.questIndex = (
-      town.questIndex + (action === "down" ? 1 : QUESTS.length - 1)
-    ) % QUESTS.length;
+    const currentPosition = Math.max(0, visibleQuestIndexes.indexOf(town.questIndex));
+    const direction = action === "down" ? 1 : visibleQuestIndexes.length - 1;
+    town.questIndex = visibleQuestIndexes[
+      (currentPosition + direction) % visibleQuestIndexes.length
+    ];
     renderGuildQuestList();
     return true;
   }
@@ -890,7 +894,7 @@ function activateFacilityService(command) {
 
 function openGuildQuestList(kind) {
   town.mode = kind === "report" ? "questReportList" : "questAcceptList";
-  town.questIndex = 0;
+  town.questIndex = getVisibleQuestIndexes()[0] ?? 0;
   town.mosaic.hidden = true;
   town.background.src = "images/background/guild_quest.avif";
   town.background.alt = kind === "report" ? "依頼報告の掲示板" : "依頼受注の掲示板";
@@ -913,7 +917,12 @@ function openGuildQuestList(kind) {
 
 function renderGuildQuestList() {
   const reportMode = town.mode === "questReportList";
-  town.guildQuestList.replaceChildren(...QUESTS.map((quest, index) => {
+  const visibleQuestIndexes = getVisibleQuestIndexes();
+  if (!visibleQuestIndexes.includes(town.questIndex)) {
+    town.questIndex = visibleQuestIndexes[0] ?? 0;
+  }
+  town.guildQuestList.replaceChildren(...visibleQuestIndexes.map(index => {
+    const quest = QUESTS[index];
     const progress = getQuestProgress(town.getCharacter(), quest.id);
     const selectable = reportMode ? progress.active : quest.available && !progress.active && !progress.completed;
     const button = document.createElement("button");
@@ -947,6 +956,13 @@ function renderGuildQuestList() {
     });
     return button;
   }));
+}
+
+function getVisibleQuestIndexes() {
+  return QUESTS
+    .map((quest, index) => ({ index, progress: getQuestProgress(town.getCharacter(), quest.id) }))
+    .filter(({ progress }) => !progress.completed)
+    .map(({ index }) => index);
 }
 
 function activateSelectedQuest() {
