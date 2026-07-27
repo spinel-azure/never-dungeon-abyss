@@ -369,6 +369,7 @@ import { drawCardCanvas } from "./card-canvas.js?v=20260727-3";
     const card = getCardById(cardId);
     if (!cardGetEffect || !cardGetCanvas || !card) return;
     window.clearTimeout(cardGetTimer);
+    playSe("battleVictory");
     drawCardCanvas(cardGetCanvas, card);
     cardGetEffect.hidden = false;
     cardGetEffect.classList.remove("is-active");
