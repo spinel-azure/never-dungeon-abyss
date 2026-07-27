@@ -2,7 +2,17 @@ export const CARD_EFFECTS = Object.freeze({
   strengthUp: Object.freeze({
     id: "strength_up",
     nameJa: "腕力上昇",
-    descriptionJa: "STR+3",
+    descriptionJa: "STR+1",
+  }),
+  intelligenceUp: Object.freeze({
+    id: "intelligence_up",
+    nameJa: "知識の書",
+    descriptionJa: "INT+1",
+  }),
+  luckUp: Object.freeze({
+    id: "luck_up",
+    nameJa: "幸運のお守り",
+    descriptionJa: "LUC+1",
   }),
   defenseUp: Object.freeze({
     id: "defense_up",

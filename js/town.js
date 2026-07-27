@@ -56,6 +56,7 @@ const town = {
   onStay: () => {},
   onHeal: () => {},
   onEditDeck: () => {},
+  onTalk: () => "",
   onStateChanged: () => {},
   isMenuOpen: () => false,
   playSe: () => {}
@@ -636,7 +637,11 @@ function showFacilityCommands(facilityId) {
   town.facilityCommandButtons.forEach((button, index) => {
     const [id, label] = commands[index];
     const empty = !label;
-    const available = id === "return" || id === "stay" || id === "heal" || id === "deck";
+    const available = id === "return"
+      || id === "stay"
+      || id === "heal"
+      || id === "deck"
+      || (id === "talk" && ["guild", "inn", "library"].includes(facilityId));
     button.dataset.facilityCommand = id;
     button.textContent = label;
     button.disabled = empty;
@@ -667,6 +672,14 @@ function activateFacilityService(command) {
   }
   if (command === "deck") {
     town.onEditDeck();
+    return true;
+  }
+  if (command === "talk") {
+    const facility = TOWN_FACILITIES[town.selectedIndex];
+    if (!["guild", "inn", "library"].includes(facility?.id)) return false;
+    const message = town.onTalk(facility?.id);
+    if (message) town.messageEl.textContent = message;
+    town.onStateChanged();
     return true;
   }
   return false;
@@ -715,12 +728,13 @@ function registerCharacter() {
   town.registrationRequired = false;
   town.mode = "facilityMenu";
   town.facilityCommandIndex = 0;
-  town.onRegister({ name, job: job.id, jobLabel: job.labelEn });
+  const registrationResult = town.onRegister({ name, job: job.id, jobLabel: job.labelEn });
   town.registration.hidden = true;
   renderCharacterStatus();
   town.facilityButtons.forEach(button => button.classList.remove("is-locked"));
   renderFacility();
-  town.messageEl.textContent = `ギルド長：${name}だな。登録は済んだ。ようこそ、冒険者ギルドへ。`;
+  town.messageEl.textContent = registrationResult?.message
+    || `ギルド長：${name}だな。登録は済んだ。ようこそ、冒険者ギルドへ。`;
   town.feedback.textContent = "登録しました。";
   town.onStateChanged();
 }

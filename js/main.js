@@ -41,7 +41,7 @@ import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minima
 import { configureInput } from "./input.js?v=20260726-1";
 import { configureVirtualStick } from "./virtualStick.js?v=20260724-1";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor } from "./menu.js?v=20260727-3";
+import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor } from "./menu.js?v=20260727-4";
 import { resolveFloorTheme } from "./floorTheme.js?v=20260722-1";
 import {
   configureAutoReturn,
@@ -62,8 +62,8 @@ import {
 import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js?v=20260726-1";
 import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js?v=20260727-9";
 import { loadGame, writeGame } from "./save-data.js";
-import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260727-2";
-import { createInitialCharacter, normalizeCharacter } from "../data/classes.js?v=20260727-3";
+import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260727-3";
+import { createInitialCharacter, normalizeCharacter } from "../data/classes.js?v=20260727-4";
 import { getEquipmentItem } from "../data/equipment.js";
 import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js?v=20260727-2";
 import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260726-4";
@@ -72,6 +72,8 @@ import { deriveDetailStats } from "../combat/derive-detail-stats.js?v=20260726-1
 import { getNextLevelExperience, MAX_LEVEL } from "../data/growth.js?v=20260727-2";
 import { resolveFieldSkill } from "../combat/resolve-field-skill.js?v=20260727-1";
 import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from "./skill-overlay.js?v=20260727-1";
+import { grantCard } from "../data/deck.js?v=20260727-3";
+import { collectCardStatBonuses } from "../data/cards.js?v=20260727-2";
 
 (() => {
   const canvas = document.getElementById("screen");
@@ -187,6 +189,7 @@ import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from
     onStay: stayAtInn,
     onHeal: healAtTemple,
     onEditDeck: openDeckEditor,
+    onTalk: talkAtFacility,
     onStateChanged: scheduleAutosave,
     isMenuOpen,
     playSe
@@ -340,8 +343,52 @@ import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from
 
   function registerCharacter({ name, job, jobLabel }) {
     character = createInitialCharacter({ name, job, jobLabel });
+    acquireEventCard("guild_registration_card", "common_strength_up");
     updateCharacterUi();
     saveGame();
+    return {
+      message: "ギルド長：これを持っていけ。ついでに町を見て回ったらどうだ？\n腕力上昇のカードを手に入れた！"
+    };
+  }
+
+  function acquireEventCard(flagId, cardId) {
+    if (!character || character.eventFlags?.[flagId]) return false;
+    const result = grantCard(character.cards, cardId, 1, character.deckCost);
+    character.cards = result.cards;
+    character.eventFlags = { ...(character.eventFlags || {}), [flagId]: true };
+    character.cardStatBonuses = collectCardStatBonuses(character.cards.deckSlots);
+    return result.gained > 0;
+  }
+
+  function talkAtFacility(facilityId) {
+    const rewards = {
+      guild: {
+        flag: "guild_registration_card",
+        cardId: "common_strength_up",
+        first: "ギルド長：これを持っていけ。ついでに町を見て回ったらどうだ？\n腕力上昇のカードを手に入れた！",
+        repeat: "ギルド長：よぉ。今日はどうした？"
+      },
+      inn: {
+        flag: "inn_first_talk_card",
+        cardId: "common_lucky_charm",
+        first: "女将：旅のお守りに、これを持っておいき。\n幸運のお守りのカードを手に入れた！",
+        repeat: "女将：お代はいらないよ。ゆっくりと身体を休めるんだよ。"
+      },
+      library: {
+        flag: "library_first_talk_card",
+        cardId: "common_knowledge_book",
+        first: "司書：…この本なら、あなたの役に立つかしら…？\n知識の書のカードを手に入れた！",
+        repeat: "司書：…何を…見たいのかしら…？"
+      }
+    };
+    const reward = rewards[facilityId];
+    if (!reward) return "";
+    const gained = acquireEventCard(reward.flag, reward.cardId);
+    if (gained) {
+      updateCharacterUi();
+      saveGame();
+    }
+    return gained ? reward.first : reward.repeat;
   }
 
   function updateCharacterUi() {
@@ -719,6 +766,7 @@ import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from
     getCharacter: () => character,
     onDeckChanged: cards => {
       character.cards = cards;
+      character.cardStatBonuses = collectCardStatBonuses(cards.deckSlots);
       updateCharacterUi();
       scheduleAutosave();
     },

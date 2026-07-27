@@ -1,5 +1,6 @@
-import { calculateDeckCost, DECK_SLOT_COUNT, setDeckSlot } from "../data/deck.js?v=20260727-2";
-import { getCardById } from "../data/cards.js?v=20260727-1";
+import { calculateDeckCost, DECK_SLOT_COUNT, setDeckSlot } from "../data/deck.js?v=20260727-3";
+import { getCardById } from "../data/cards.js?v=20260727-2";
+import { drawCardCanvas } from "./card-canvas.js?v=20260727-1";
 
 const ACTION_FEEDBACK_MS = 260;
 const DEBUG_SEQUENCE_MS = 1000;
@@ -301,8 +302,9 @@ function renderDeck() {
     button.className = `deck-slot${card ? "" : " is-empty"}`;
     button.dataset.deckSlot = String(index);
     button.innerHTML = card
-      ? `<small>SLOT ${index + 1} / ${card.rarity}</small><strong>${card.nameJa}</strong><span>COST ${card.cost}</span>`
+      ? `<small>SLOT ${index + 1}</small><canvas width="180" height="270" aria-label="${card.nameJa}"></canvas>`
       : `<small>SLOT ${index + 1}</small><strong>EMPTY</strong><span>―</span>`;
+    if (card) drawCardCanvas(button.querySelector("canvas"), card);
     button.addEventListener("click", () => {
       menu.playSe(menu.deckEditable ? "confirm" : "cursorMove");
       menu.deckCursor = index;
@@ -313,7 +315,8 @@ function renderDeck() {
   }));
   menu.deckPanel.querySelector("[data-deck-used-cost]").textContent = String(calculateDeckCost(menu.deckSlots));
   menu.deckPanel.querySelector("[data-deck-cost-limit]").textContent = String(character?.deckCost || 3);
-  menu.deckPanel.querySelector("[data-owned-card-count]").textContent = String(character?.cards?.ownedCardIds?.length || 0);
+  const ownedCount = Object.values(character?.cards?.ownedCardCounts || {}).reduce((sum, count) => sum + count, 0);
+  menu.deckPanel.querySelector("[data-owned-card-count]").textContent = String(ownedCount);
   renderDeckSelection();
 }
 
@@ -327,7 +330,17 @@ function renderDeckPicker() {
     const button = document.createElement("button");
     button.type = "button";
     button.className = index === menu.deckPickerCursor ? "is-selected" : "";
-    button.textContent = card ? `[${card.rarity}] ${card.nameJa}　COST ${card.cost}` : "はずす / EMPTY";
+    if (card) {
+      const canvas = document.createElement("canvas");
+      canvas.width = 120;
+      canvas.height = 180;
+      drawCardCanvas(canvas, card);
+      const count = document.createElement("span");
+      count.textContent = `${card.nameJa}　×${menu.getCharacter()?.cards?.ownedCardCounts?.[card.id] || 0}`;
+      button.append(canvas, count);
+    } else {
+      button.textContent = "はずす / EMPTY";
+    }
     button.addEventListener("click", () => {
       menu.deckPickerCursor = index;
       menu.playSe("confirm");

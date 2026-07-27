@@ -1,6 +1,7 @@
 import { collectEquipmentBonuses, getInitialEquipment } from "./equipment.js";
 import { getDeckCostAtLevel, getLevelGrowth, normalizeExperience } from "./growth.js?v=20260727-2";
-import { createInitialCardState, normalizeCardState } from "./deck.js?v=20260727-1";
+import { createInitialCardState, normalizeCardState } from "./deck.js?v=20260727-2";
+import { collectCardStatBonuses } from "./cards.js?v=20260727-2";
 
 export const STAT_KEYS = Object.freeze(["str", "int", "agi", "dex", "luc"]);
 
@@ -61,6 +62,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     level: 1,
     deckCost: getDeckCostAtLevel(1),
     cards: createInitialCardState(),
+    eventFlags: {},
     experience: 0,
     carriedExperience: 0,
     hp: characterClass.maxHp,
@@ -88,13 +90,17 @@ export function normalizeCharacter(character) {
   const maxHp = growth.hp;
   const maxSp = growth.sp;
   const equipment = normalizeEquipment(character.equipment, characterClass.id);
+  const cards = normalizeCardState(character.cards, growth.deckCost);
   return {
     ...character,
     job: characterClass.id,
     jobLabel: character.jobLabel || characterClass.label,
     level,
     deckCost: growth.deckCost,
-    cards: normalizeCardState(character.cards, growth.deckCost),
+    cards,
+    eventFlags: character.eventFlags && typeof character.eventFlags === "object"
+      ? { ...character.eventFlags }
+      : {},
     experience: normalizeExperience(character.experience),
     carriedExperience: Math.max(0, Math.floor(Number(character.carriedExperience) || 0)),
     maxHp,
@@ -103,7 +109,7 @@ export function normalizeCharacter(character) {
     sp: legacyCharacter ? maxSp : clampInteger(character.sp, 0, maxSp, maxSp),
     baseStats: { ...characterClass.stats, ...(character.baseStats || {}) },
     equipmentStatBonuses: collectEquipmentBonuses(equipment),
-    cardStatBonuses: { ...(character.cardStatBonuses || {}) },
+    cardStatBonuses: collectCardStatBonuses(cards.deckSlots),
     def: Math.max(0, Number(character.def) || 0),
     equipment,
     skillIds: Array.isArray(character.skillIds)

@@ -25,8 +25,8 @@ import { createBattleState, resolveBattleRound } from "../combat/battle-engine.j
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { CHARACTER_JOBS } from "../data/town.js";
 import { getEnemyById } from "../data/enemies.js";
-import { CARDS, getCardById } from "../data/cards.js";
-import { calculateDeckCost, DECK_SLOT_COUNT, normalizeCardState, setDeckSlot } from "../data/deck.js";
+import { CARDS, collectCardStatBonuses, getCardById } from "../data/cards.js";
+import { calculateDeckCost, DECK_SLOT_COUNT, grantCard, normalizeCardState, setDeckSlot } from "../data/deck.js";
 import { resolveTurnOrder, createGuardAction } from "../combat/resolve-turn-order.js";
 import {
   applyStatus,
@@ -616,6 +616,25 @@ test("inn deck editing equips and removes owned cards without exceeding cost", (
   assert.equal(calculateDeckCost(full.deckSlots), 3);
   assert.deepEqual(setDeckSlot(full, 2, "common_strength_up", 3), full);
   assert.equal(setDeckSlot(full, 0, null, 3).deckSlots[0], null);
+});
+
+test("common event cards share inventory with future drops and apply deck bonuses", () => {
+  const initial = createInitialCharacter({ name: "TEST", job: "warrior" });
+  const first = grantCard(initial.cards, "common_strength_up", 1, initial.deckCost);
+  const dropped = grantCard(first.cards, "common_strength_up", 2, initial.deckCost);
+  assert.equal(dropped.cards.ownedCardCounts.common_strength_up, 3);
+  const slotOne = setDeckSlot(dropped.cards, 0, "common_strength_up", initial.deckCost);
+  const slotTwo = setDeckSlot(slotOne, 1, "common_strength_up", initial.deckCost);
+  const slotThree = setDeckSlot(slotTwo, 2, "common_strength_up", initial.deckCost);
+  assert.equal(calculateDeckCost(slotThree.deckSlots), 3);
+  assert.deepEqual(collectCardStatBonuses(slotThree.deckSlots), { str: 3 });
+  assert.equal(setDeckSlot(slotThree, 3, "common_strength_up", initial.deckCost).deckSlots[3], null);
+});
+
+test("the three initial common cards use the Excel effect values", () => {
+  assert.deepEqual(getCardById("common_strength_up")?.statBonus, { str: 1 });
+  assert.deepEqual(getCardById("common_knowledge_book")?.statBonus, { int: 1 });
+  assert.deepEqual(getCardById("common_lucky_charm")?.statBonus, { luc: 1 });
 });
 
 test("main card registry contains every rarity and all twelve zodiac cards", () => {
