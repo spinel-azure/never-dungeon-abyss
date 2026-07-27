@@ -67,7 +67,7 @@ import { loadGame, writeGame } from "./save-data.js";
 import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getEquipmentItem } from "../data/equipment.js";
-import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js";
+import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
 import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js";
 import { awardBattleExperience, createTempleRevival, grantEventItems, resolveInnStay, unlockGuildRequest } from "./character-services.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
@@ -80,6 +80,14 @@ import { grantCard } from "../data/deck.js";
 import { collectCardStatBonuses, getCardById } from "../data/cards.js";
 import { drawCardCanvas } from "./card-canvas.js";
 import { getItem } from "../data/items.js";
+import {
+  abandonQuest,
+  acceptQuest,
+  hasActiveQuest,
+  recordEnemyDefeat,
+  reportQuest,
+  shouldForceEnemy
+} from "../data/quests.js";
 
 (() => {
   const canvas = document.getElementById("screen");
@@ -206,6 +214,8 @@ import { getItem } from "../data/items.js";
     onEditDeck: openDeckEditor,
     onTalk: talkAtFacility,
     onAcceptRequest: acceptGuildRequest,
+    onAbandonRequest: abandonGuildRequest,
+    onReportRequest: reportGuildRequest,
     onStateChanged: scheduleAutosave,
     isMenuOpen,
     playSe
@@ -450,7 +460,7 @@ import { getItem } from "../data/items.js";
           focusCommand: "accept"
         };
       }
-      if (character.eventFlags?.guild_first_request_accepted) {
+      if (hasActiveQuest(character)) {
         return "ギルド長：依頼の件、頼んだぞ。";
       }
       if (character.eventFlags?.guild_first_request_unlocked) {
@@ -502,17 +512,54 @@ import { getItem } from "../data/items.js";
     return gained ? reward.first : reward.repeat;
   }
 
-  function acceptGuildRequest() {
+  function acceptGuildRequest(questId) {
     if (!character?.eventFlags?.guild_first_request_unlocked) return "";
-    if (character.eventFlags.guild_first_request_accepted) {
-      return "ギルド長：依頼の件、頼んだぞ。";
-    }
-    character.eventFlags = {
-      ...(character.eventFlags || {}),
-      guild_first_request_accepted: true
+    const result = acceptQuest(character, questId);
+    if (!result.accepted) return result;
+    character = {
+      ...result.character,
+      eventFlags: {
+        ...(result.character.eventFlags || {}),
+        guild_first_request_accepted: true
+      }
     };
+    updateCharacterUi();
     saveGame();
-    return "ギルド長：よし、頼んだぞ。";
+    return { ...result, character };
+  }
+
+  function abandonGuildRequest(questId) {
+    const result = abandonQuest(character, questId);
+    if (!result.accepted) return result;
+    character = {
+      ...result.character,
+      eventFlags: {
+        ...(result.character.eventFlags || {}),
+        guild_first_request_accepted: hasActiveQuest(result.character)
+      }
+    };
+    updateCharacterUi();
+    saveGame();
+    return { ...result, character };
+  }
+
+  function reportGuildRequest(questId) {
+    const result = reportQuest(character, questId);
+    if (!result.accepted) return result;
+    character = {
+      ...result.character,
+      eventFlags: {
+        ...(result.character.eventFlags || {}),
+        guild_first_request_accepted: hasActiveQuest(result.character)
+      }
+    };
+    character.cardStatBonuses = collectCardStatBonuses(character.cards.deckSlots);
+    updateCharacterUi();
+    saveGame();
+    if (result.rewardCardId) {
+      setTimeout(() => showCardGetEffect(result.rewardCardId), 0);
+    }
+    return { ...result, character };
   }
 
   function updateCharacterUi() {
@@ -633,7 +680,13 @@ import { getItem } from "../data/items.js";
     if (!character || worldLocation !== "dungeon" || isBattleActive()) return false;
     cancelAutoReturn(false);
     setPlayerInputEnabled(false);
-    const enemy = createEnemyCombatant(getRandomEnemy({ depth: currentDepth }));
+    const enemyData = shouldForceEnemy(character, {
+      depth: currentDepth,
+      enemyId: "abyss_rat"
+    })
+      ? getEnemyById("abyss_rat")
+      : getRandomEnemy({ depth: currentDepth });
+    const enemy = createEnemyCombatant(enemyData);
     const started = startBattle(enemy);
     if (!started) setPlayerInputEnabled(true);
     return started;
@@ -696,6 +749,9 @@ import { getItem } from "../data/items.js";
 
   function finishBattleVictory(battle) {
     const reward = Math.max(0, Math.floor(Number(battle?.enemy?.experienceReward) || 0));
+    if (character && battle?.enemy?.id) {
+      character = recordEnemyDefeat(character, battle.enemy.id);
+    }
     if (character && reward > 0) Object.assign(character, awardBattleExperience(character, reward));
     resetPresence();
     say(reward > 0

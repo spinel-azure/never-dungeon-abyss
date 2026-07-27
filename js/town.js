@@ -1,4 +1,5 @@
 import { CHARACTER_JOBS, TOWN_FACILITIES, getTownFacility } from "../data/town.js";
+import { QUESTS, getQuestProgress, hasActiveQuest } from "../data/quests.js";
 
 const FACILITY_COMMANDS = Object.freeze({
   inn: [
@@ -42,6 +43,7 @@ const town = {
   jobSelect: null,
   feedback: null,
   registrationIndex: -1,
+  questIndex: 0,
   entranceIndex: 0,
   facilityCommandIndex: 0,
   transferUnlocked: false,
@@ -58,6 +60,8 @@ const town = {
   onEditDeck: () => {},
   onTalk: () => "",
   onAcceptRequest: () => "",
+  onAbandonRequest: () => null,
+  onReportRequest: () => null,
   onStateChanged: () => {},
   isMenuOpen: () => false,
   playSe: () => {}
@@ -77,6 +81,10 @@ export function configureTown(options) {
   town.jobSelect = document.querySelector("#characterJob");
   town.feedback = document.querySelector("#registrationFeedback");
   town.registrationClassOverlay = document.querySelector("#registrationClassOverlay");
+  town.guildQuestOverlay = document.querySelector("#guildQuestOverlay");
+  town.guildQuestTitle = document.querySelector("#guildQuestTitle");
+  town.guildQuestList = document.querySelector("#guildQuestList");
+  town.guildQuestDetail = document.querySelector("#guildQuestDetail");
   town.portraitPreloads = TOWN_FACILITIES
     .filter(facility => facility.image)
     .map(facility => {
@@ -90,6 +98,7 @@ export function configureTown(options) {
     "images/background/town_01.avif",
     ...TOWN_FACILITIES.map(facility => facility.background).filter(Boolean),
     "images/background/circle.avif"
+    ,"images/background/guild_quest.avif"
   ].map(src => {
     const image = new Image();
     image.decoding = "async";
@@ -237,6 +246,7 @@ export function handleTownInput(action) {
   if (!town.active) return false;
   if (town.transitioning) return true;
   if (town.isMenuOpen()) return false;
+  if (town.mode.startsWith("quest")) return handleQuestInput(action);
   if (town.mode === "registration") return handleRegistrationInput(action);
   if (town.mode === "dungeonEntrance") return handleEntranceInput(action);
   if (town.mode === "facilityMenu" || town.mode === "facility") return handleFacilityMenuInput(action);
@@ -298,6 +308,59 @@ function handleFacilityMenuInput(action) {
     }
     return true;
   }
+  return true;
+}
+
+function handleQuestInput(action) {
+  if (action === "cancel") {
+    town.playSe("cancel");
+    if (town.mode === "questAcceptDetail" || town.mode === "questAbandonConfirm") {
+      openGuildQuestList(town.mode === "questAcceptDetail" ? "accept" : "report");
+    } else {
+      town.mode = "facilityMenu";
+      renderFacility();
+    }
+    return true;
+  }
+  if (town.mode === "questAcceptDetail") {
+    if (action !== "confirm") return true;
+    const quest = QUESTS[town.questIndex];
+    const result = town.onAcceptRequest(quest?.id);
+    if (result?.accepted) {
+      town.playSe("confirm");
+      town.messageEl.textContent = "ギルド長：よし。頼んだぞ。";
+      town.mode = "facilityMenu";
+      renderFacility();
+      town.messageEl.textContent = "ギルド長：よし。頼んだぞ。";
+    } else {
+      town.playSe("cursorMove");
+      town.messageEl.textContent = questFailureMessage(result?.reason);
+    }
+    town.onStateChanged();
+    return true;
+  }
+  if (town.mode === "questAbandonConfirm") {
+    if (action !== "confirm") return true;
+    const quest = QUESTS[town.questIndex];
+    const result = town.onAbandonRequest(quest?.id);
+    town.playSe(result?.accepted ? "confirm" : "cursorMove");
+    openGuildQuestList("report");
+    town.messageEl.textContent = result?.accepted
+      ? "ギルド長：分かった。依頼は取り下げておく。"
+      : "ギルド長：その依頼は受注していないぞ。";
+    town.onStateChanged();
+    return true;
+  }
+  if (["up", "down"].includes(action)) {
+    town.playSe("cursorMove");
+    town.questIndex = (
+      town.questIndex + (action === "down" ? 1 : QUESTS.length - 1)
+    ) % QUESTS.length;
+    renderGuildQuestList();
+    return true;
+  }
+  if (action !== "confirm") return true;
+  activateSelectedQuest();
   return true;
 }
 
@@ -546,6 +609,7 @@ function renderTownView() {
 function renderFacility() {
   const facility = TOWN_FACILITIES[town.selectedIndex] || getTownFacility("guild");
   town.mosaic.hidden = true;
+  town.guildQuestOverlay.hidden = true;
   town.facilityButtons.forEach((button, index) => {
     const unavailable = Boolean(TOWN_FACILITIES[index].unavailable);
     button.disabled = false;
@@ -641,6 +705,7 @@ function renderEntranceSelection() {
 function showFacilityCommands(facilityId) {
   const commands = FACILITY_COMMANDS[facilityId] || FACILITY_COMMANDS.inn;
   const requestUnlocked = Boolean(town.getCharacter()?.eventFlags?.guild_first_request_unlocked);
+  const reportAvailable = facilityId === "guild" && hasActiveQuest(town.getCharacter());
   town.facilityCommandButtons.forEach((button, index) => {
     const [id, label] = commands[index];
     const empty = !label;
@@ -649,6 +714,7 @@ function showFacilityCommands(facilityId) {
       || id === "heal"
       || id === "deck"
       || (facilityId === "guild" && id === "accept" && requestUnlocked)
+      || (facilityId === "guild" && id === "report" && reportAvailable)
       || (id === "talk" && ["guild", "inn", "temple", "shop", "library"].includes(facilityId));
     button.dataset.facilityCommand = id;
     button.textContent = label;
@@ -704,12 +770,163 @@ function activateFacilityService(command) {
   if (command === "accept") {
     const facility = TOWN_FACILITIES[town.selectedIndex];
     if (facility?.id !== "guild" || !town.getCharacter()?.eventFlags?.guild_first_request_unlocked) return false;
-    const message = town.onAcceptRequest();
-    if (message) town.messageEl.textContent = message;
-    town.onStateChanged();
+    openGuildQuestList("accept");
+    return true;
+  }
+  if (command === "report") {
+    const facility = TOWN_FACILITIES[town.selectedIndex];
+    if (facility?.id !== "guild" || !hasActiveQuest(town.getCharacter())) return false;
+    openGuildQuestList("report");
     return true;
   }
   return false;
+}
+
+function openGuildQuestList(kind) {
+  town.mode = kind === "report" ? "questReportList" : "questAcceptList";
+  town.questIndex = 0;
+  town.mosaic.hidden = true;
+  town.background.src = "images/background/guild_quest.avif";
+  town.background.alt = kind === "report" ? "依頼報告の掲示板" : "依頼受注の掲示板";
+  town.background.hidden = false;
+  town.portrait.hidden = true;
+  town.portraitPlaceholder.hidden = true;
+  town.registration.hidden = true;
+  town.root.classList.remove("is-registering");
+  town.root.querySelector("#townFacilityName").hidden = true;
+  town.guildQuestOverlay.hidden = false;
+  town.guildQuestTitle.textContent = kind === "report" ? "依頼報告" : "依頼受注";
+  town.guildQuestDetail.hidden = true;
+  town.guildQuestList.hidden = false;
+  town.messageEl.textContent = kind === "report"
+    ? "ギルド長：達成した依頼があるのか？報告してくれ。"
+    : "ギルド長：受ける依頼を選んでくれ。";
+  renderGuildQuestList();
+  resetTownViewport();
+}
+
+function renderGuildQuestList() {
+  const reportMode = town.mode === "questReportList";
+  town.guildQuestList.replaceChildren(...QUESTS.map((quest, index) => {
+    const progress = getQuestProgress(town.getCharacter(), quest.id);
+    const selectable = reportMode ? progress.active : quest.available && !progress.active && !progress.completed;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "guild-quest-entry";
+    button.classList.toggle("is-selected", index === town.questIndex);
+    button.classList.toggle("is-unavailable", !selectable);
+    button.classList.toggle(
+      "is-incomplete",
+      reportMode && progress.active && !progress.readyToReport
+    );
+    button.setAttribute("aria-disabled", String(!selectable));
+    if (reportMode && progress.readyToReport) {
+      const star = document.createElement("span");
+      star.className = "quest-star";
+      star.textContent = "★";
+      button.append(star);
+    }
+    button.append(`${quest.number}:${quest.title}`);
+    if (reportMode && progress.active) {
+      button.append(`　${progress.progress}/${quest.requiredCount}`);
+    }
+    button.addEventListener("click", () => {
+      if (town.questIndex !== index) {
+        town.questIndex = index;
+        town.playSe("cursorMove");
+        renderGuildQuestList();
+        return;
+      }
+      activateSelectedQuest();
+    });
+    return button;
+  }));
+}
+
+function activateSelectedQuest() {
+  const quest = QUESTS[town.questIndex];
+  const progress = getQuestProgress(town.getCharacter(), quest?.id);
+  if (town.mode === "questAcceptList") {
+    if (!quest?.available || progress.active || progress.completed) {
+      town.playSe("cursorMove");
+      return;
+    }
+    town.playSe("confirm");
+    town.mode = "questAcceptDetail";
+    renderQuestDetail(quest, progress);
+    town.messageEl.textContent = "ギルド長：この依頼でいいか？\n＊Aボタン：はい　Bボタン：いいえ";
+    return;
+  }
+  if (town.mode !== "questReportList" || !progress.active) {
+    town.playSe("cursorMove");
+    return;
+  }
+  if (progress.readyToReport) {
+    const result = town.onReportRequest(quest.id);
+    town.playSe(result?.accepted ? "confirm" : "cursorMove");
+    if (result?.accepted) {
+      town.mode = "facilityMenu";
+      renderFacility();
+      town.messageEl.textContent = "ギルド長：よくやった。これが報酬だ。";
+    } else {
+      town.messageEl.textContent = "ギルド長：まだ達成条件を満たしていないようだな。";
+    }
+    town.onStateChanged();
+    return;
+  }
+  town.playSe("confirm");
+  town.mode = "questAbandonConfirm";
+  town.messageEl.textContent = "ギルド長：なんだ？依頼を破棄するのか？\n＊A：はい　B：いいえ";
+}
+
+function renderQuestDetail(quest, progress) {
+  town.guildQuestTitle.textContent = `${quest.number}:${quest.title}`;
+  town.guildQuestList.hidden = true;
+  town.guildQuestDetail.hidden = false;
+  town.guildQuestDetail.replaceChildren(
+    detailBlock("依頼人", quest.client),
+    divider(),
+    detailBlock("討伐数", `${quest.targetName}を${quest.requiredCount}匹退治する。`),
+    divider(),
+    detailBlock("報酬", quest.reward.label),
+    divider(),
+    detailBlock("内容", quest.description.join("\n"))
+  );
+  if (progress.active) {
+    const current = document.createElement("p");
+    current.className = "guild-quest-progress";
+    current.textContent = `現在 ${progress.progress}/${quest.requiredCount}`;
+    town.guildQuestDetail.append(current);
+  }
+}
+
+function detailBlock(label, value) {
+  const container = document.createElement("p");
+  const heading = document.createElement("strong");
+  heading.textContent = label;
+  container.append(heading, document.createElement("br"));
+  const lines = String(value || "").split("\n");
+  lines.forEach((line, index) => {
+    if (index > 0) container.append(document.createElement("br"));
+    container.append(line);
+  });
+  return container;
+}
+
+function divider() {
+  const element = document.createElement("div");
+  element.className = "guild-quest-divider";
+  const ornament = document.createElement("span");
+  ornament.textContent = "◆";
+  element.append(ornament);
+  return element;
+}
+
+function questFailureMessage(reason) {
+  if (reason === "activeLimit") return "ギルド長：同時に受けられる依頼は3件までだ。";
+  if (reason === "alreadyAccepted") return "ギルド長：その依頼はもう受注しているぞ。";
+  if (reason === "completed") return "ギルド長：その依頼はもう完了している。";
+  return "ギルド長：今はその依頼を受けられない。";
 }
 
 function renderFacilityCommandSelection() {

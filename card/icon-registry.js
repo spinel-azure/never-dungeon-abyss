@@ -5,6 +5,7 @@ import { drawLuckIcon } from "./icons/luck.js";
 import { drawTorchIcon } from "./icons/torch.js";
 import { drawUnknownIcon } from "./icons/unknown.js";
 import { drawVitalHeartIcon } from "./icons/vital-heart.js";
+import { drawAgilityIcon } from "./icons/agility.js";
 
 const iconDrawers = new Map([
   ["strength", drawStrengthIcon],
@@ -13,6 +14,7 @@ const iconDrawers = new Map([
   ["quartered-shield", drawQuarteredShieldIcon],
   ["torch", drawTorchIcon],
   ["vital-heart", drawVitalHeartIcon],
+  ["agility", drawAgilityIcon],
   ["unknown", drawUnknownIcon],
 ]);
 

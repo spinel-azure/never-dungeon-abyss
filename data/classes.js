@@ -3,6 +3,7 @@ import { getDeckCostAtLevel, getLevelGrowth, normalizeExperience } from "./growt
 import { createInitialCardState, normalizeCardState } from "./deck.js";
 import { collectCardStatBonuses } from "./cards.js";
 import { createInitialInventory, normalizeInventory } from "./inventory.js";
+import { normalizeQuestState } from "./quests.js";
 
 export const STAT_KEYS = Object.freeze(["str", "int", "agi", "dex", "luc"]);
 
@@ -64,6 +65,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     deckCost: getDeckCostAtLevel(1),
     cards: createInitialCardState(),
     inventory: createInitialInventory(),
+    quests: normalizeQuestState(),
     eventFlags: {},
     experience: 0,
     carriedExperience: 0,
@@ -101,6 +103,7 @@ export function normalizeCharacter(character) {
     deckCost: growth.deckCost,
     cards,
     inventory: normalizeInventory(character.inventory),
+    quests: normalizeQuestState(character.quests),
     eventFlags: character.eventFlags && typeof character.eventFlags === "object"
       ? { ...character.eventFlags }
       : {},

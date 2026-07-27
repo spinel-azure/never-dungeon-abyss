@@ -23,6 +23,13 @@ const STANDARD_CARDS = [
     maxOwned: 99, maxCopies: 6
   },
   {
+    id: "common_gale_feather", rarity: "C", cost: 1,
+    name: "Gale Feather", nameJa: "疾風の羽根", concept: "AGI +1",
+    category: "ability", effectId: "agility_up", effectValue: 1,
+    statBonus: Object.freeze({ agi: 1 }), iconId: "agility",
+    maxOwned: 99, maxCopies: 6
+  },
+  {
     id: "rare_defense_up", rarity: "R", cost: 2,
     name: "Defense Up", nameJa: "防御力上昇", concept: "DEF +5",
     category: "ability", effectId: "defense_up", effectValue: 5,

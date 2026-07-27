@@ -1,6 +1,6 @@
 .town-screen{display:block;width:100%;margin:0;color:#f7fbff;font-family:"GameFont",sans-serif}
 .town-screen[hidden]{display:none}
-.town-background[hidden],.town-mosaic[hidden],.town-portrait[hidden],.town-portrait-placeholder[hidden],.guild-registration[hidden],.card-get-effect[hidden]{display:none}
+.town-background[hidden],.town-mosaic[hidden],.town-portrait[hidden],.town-portrait-placeholder[hidden],.guild-registration[hidden],.card-get-effect[hidden],.guild-quest-overlay[hidden],.guild-quest-detail[hidden]{display:none}
 .town-portrait-frame{position:relative;box-sizing:content-box;width:calc(100% - 2px);aspect-ratio:16/9;overflow:hidden;border:1px solid #4f493b;border-radius:7px;background:radial-gradient(circle at 50% 28%,#1d201b,#080a08 68%,#020302);box-shadow:inset 0 0 0 1px #ffffff0d}
 .town-background{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center;image-rendering:auto}
 .town-mosaic{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;image-rendering:pixelated}
@@ -11,6 +11,19 @@
 .town-facility-badge{position:absolute;z-index:4;top:8px;left:10px;padding:4px 8px;border:1px solid #5c5a4d;background:#050706cc;color:#dcece8;font:14px "PixelFont",monospace}
 .registration-class-overlay{position:absolute;inset:0;z-index:3;display:none;align-content:center;gap:clamp(10px,2.3vw,22px);padding:clamp(24px,5vw,58px);background:rgba(0,0,0,.8);color:#fff;font:clamp(13px,2.6vw,22px)/1.45 "GameFont",sans-serif;text-shadow:0 2px 3px #000}
 .town-screen.is-registering .registration-class-overlay{display:grid}.registration-class-overlay h2{margin:0 0 clamp(4px,1vw,12px);font-size:1em;font-weight:400;text-align:center}.registration-class-overlay p{margin:0;color:#b4b4b4;transition:color .15s,text-shadow .15s}.registration-class-overlay p.is-selected{color:#fff;text-shadow:0 0 9px rgba(142,238,255,.85),0 2px 3px #000}.registration-class-overlay strong{color:#74dfff;font-weight:400}
+.guild-quest-overlay{position:absolute;inset:0;z-index:3;color:#161616;font-family:"GameFont",sans-serif;pointer-events:auto}
+.guild-quest-title{position:absolute;left:17%;right:17%;top:6%;margin:0;color:#fff;font:clamp(23px,5vw,48px)/1 "PixelFont",monospace;text-align:center;-webkit-text-stroke:clamp(2px,.45vw,5px) #000;paint-order:stroke fill;text-shadow:0 3px 2px #000}
+.guild-quest-list{position:absolute;left:24%;top:27%;display:grid;width:50%;gap:clamp(4px,1vw,10px)}
+.guild-quest-entry{appearance:none;width:100%;padding:3px 8px;border:0;background:transparent;color:#181818;font:clamp(16px,3.2vw,31px)/1.2 "GameFont",sans-serif;text-align:left;text-shadow:0 1px #fff;cursor:pointer}
+.guild-quest-entry.is-selected{color:#fff;-webkit-text-stroke:clamp(1px,.25vw,2px) #000;paint-order:stroke fill;text-shadow:0 0 7px #61e9ff}
+.guild-quest-entry.is-unavailable{color:#777;filter:grayscale(1);cursor:not-allowed}
+.guild-quest-entry.is-incomplete{color:#5f5f5f;filter:grayscale(1)}
+.guild-quest-entry.is-incomplete.is-selected{color:#9b9b9b}
+.guild-quest-entry .quest-star{color:#ffed00;-webkit-text-stroke:2px #000;paint-order:stroke fill}
+.guild-quest-detail{position:absolute;left:30%;top:25%;width:40%;font:clamp(10px,1.75vw,18px)/1.28 "GameFont",sans-serif}
+.guild-quest-detail p{margin:0}.guild-quest-detail strong{font-weight:400}.guild-quest-divider{display:flex;align-items:center;gap:8px;margin:clamp(3px,.8vw,8px) 0;color:#555}.guild-quest-divider::before,.guild-quest-divider::after{content:"";height:1px;flex:1;background:#777}.guild-quest-divider span{font-size:.7em}
+.guild-quest-progress{margin-top:8px!important;color:#443b22;font-size:.9em}
+@media(max-width:700px){.guild-quest-list{left:22%;top:28%;width:54%}.guild-quest-detail{left:29%;top:25%;width:42%;font-size:clamp(9px,2.15vw,15px)}}
 .level-up-effect{position:absolute;z-index:5;left:50%;top:50%;width:max-content;color:#fff;font:200px/1 "PixelFont",monospace;white-space:nowrap;-webkit-text-stroke:10px #000;paint-order:stroke fill;filter:drop-shadow(0 8px 4px #000);pointer-events:none;transform:translate(-50%,40%);opacity:0}
 .level-up-effect.is-active{animation:level-up-popup 3.2s cubic-bezier(.18,.72,.25,1) both}
 @keyframes level-up-popup{0%{opacity:0;transform:translate(-50%,40%) scale(.88)}22%{opacity:1;transform:translate(-50%,-50%) scale(1)}58%{opacity:1;transform:translate(-50%,-55%) scale(1)}100%{opacity:0;transform:translate(-50%,-95%) scale(1.02)}}
