@@ -1,6 +1,6 @@
 import { calculateDeckCost, DECK_SLOT_COUNT, setDeckSlot } from "../data/deck.js?v=20260727-3";
 import { getCardById } from "../data/cards.js?v=20260727-2";
-import { drawCardCanvas } from "./card-canvas.js?v=20260727-2";
+import { drawCardCanvas } from "./card-canvas.js?v=20260727-3";
 
 const ACTION_FEEDBACK_MS = 260;
 const DEBUG_SEQUENCE_MS = 1000;
