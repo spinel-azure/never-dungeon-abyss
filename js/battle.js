@@ -1,4 +1,4 @@
-import { createBattleState, resolveBattleRound } from "../combat/battle-engine.js";
+import { createBattleState, resolveBattleRound } from "../combat/battle-engine.js?v=20260727-1";
 import { resolveEscapeAttempt } from "../combat/resolve-escape.js";
 
 const COMMANDS = Object.freeze([
@@ -28,6 +28,7 @@ const battleUi = {
   onVictory: () => {},
   onDefeat: () => {},
   onEscape: () => {},
+  openItems: () => false,
   openSkills: () => false,
   playSe: () => {}
 };
@@ -136,6 +137,14 @@ function activateSelected() {
     });
     return;
   }
+  if (command === "items") {
+    battleUi.openItems({
+      character: battleUi.battle.player,
+      enemy: battleUi.battle.enemy,
+      onUse: useBattleItem
+    });
+    return;
+  }
   if (command === "attack") executeCommand({ type: "attack" });
   else if (command === "guard") executeCommand({ type: "guard" });
   else if (command === "auto") startAutoBattle();
@@ -147,6 +156,11 @@ function activateSelected() {
 
 async function useBattleSkill(skillId) {
   await executeCommand({ type: "skill", skillId });
+  return { accepted: true };
+}
+
+async function useBattleItem(itemId) {
+  await executeCommand({ type: "item", itemId });
   return { accepted: true };
 }
 
@@ -167,6 +181,7 @@ async function executeCommand(command) {
     hp: battleUi.battle.player.hp,
     sp: battleUi.battle.player.sp,
     statuses: structuredClone(battleUi.battle.player.statuses),
+    inventory: structuredClone(battleUi.battle.player.inventory),
     alive: battleUi.battle.player.alive
   });
   if (battleUi.battle.outcome) {
@@ -312,7 +327,7 @@ function showCommandButtons() {
     delete button.dataset.skillId;
     button.textContent = label;
     button.disabled = false;
-    button.classList.toggle("is-unavailable", id === "items");
+    button.classList.remove("is-unavailable");
   });
   mountButtons("戦闘コマンド");
   if (battleUi.battle) battleUi.messageEl.textContent = formatBattleMessage(battleUi.battle);

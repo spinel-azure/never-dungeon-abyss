@@ -28,6 +28,7 @@ DATA_FILES = [
     Path("data/classes.js"),
     Path("data/enemies.js"),
     Path("data/equipment.js"),
+    Path("data/items.js"),
     Path("data/npcs.js"),
     Path("data/skills.js"),
     Path("data/spells.js"),
@@ -169,6 +170,7 @@ class Validator:
             Path("data/skills.js"): ("戦技", ("id", "name", "spCost")),
             Path("data/spells.js"): ("呪文・奇蹟", ("id", "name", "spCost")),
             Path("data/npcs.js"): ("NPC", ("id", "name", "image")),
+            Path("data/items.js"): ("アイテム", ("id", "name", "category", "usableIn", "effects", "maxOwned")),
         }
         for relative, (label, required) in schemas.items():
             records = relevant_records(relative, self.records.get(relative, []))
@@ -358,7 +360,6 @@ class Validator:
             self.report("PASS", "Zカードは12種類・ID一意・コスト8です")
 
     def report_skips(self) -> None:
-        self.report("SKIP", "アイテム固有データ", reason="消費アイテム用の独立データ定義は現在未実装です")
         self.report("SKIP", "カードの画像・アイコン実体", reason="カードはiconIdと描画関数レジストリを使用するため、単純なファイルパス検証の対象外です")
         self.report("SKIP", "ダンジョン生成結果の到達率・分布", file=Path("js/dungeon.js"), reason="ランダム生成を実行した結果が必要なため、JavaScript側からJSON出力する集計ブリッジが必要です")
 
@@ -500,6 +501,8 @@ def relevant_records(relative: Path, records: list[dict[str, Any]]) -> list[dict
         return [record for record in records if "maxHp" in record]
     if relative in (Path("data/skills.js"), Path("data/spells.js")):
         return [record for record in records if "spCost" in record]
+    if relative == Path("data/items.js"):
+        return [record for record in records if "maxOwned" in record]
     return records
 
 
@@ -530,6 +533,10 @@ def id_collections(
         return {
             "weapon types": [record for record in records if "attack" not in record],
             "weapons": [record for record in records if "attack" in record],
+        }
+    if relative == Path("data/items.js"):
+        return {
+            "items": [record for record in records if "maxOwned" in record],
         }
     return {relative.as_posix(): records}
 

@@ -6,6 +6,7 @@ const DARK_STEP_MAX = 10;
 const ENCOUNTER_MESSAGE = "＊　何者かと遭遇した！　＊";
 
 let presence = 0;
+let suppressedSteps = 0;
 let encounterActive = false;
 let presenceDisabled = false;
 const hooks = {
@@ -22,8 +23,13 @@ export function getPresence() {
   return presence;
 }
 
-export function restorePresence(value) {
+export function getPresenceSuppressedSteps() {
+  return suppressedSteps;
+}
+
+export function restorePresence(value, suppression = 0) {
   presence = Math.max(0, Math.min(PRESENCE_MAX, Math.floor(Number(value) || 0)));
+  suppressedSteps = Math.max(0, Math.floor(Number(suppression) || 0));
   encounterActive = presence >= PRESENCE_MAX;
   hooks.onChange(presence);
 }
@@ -53,7 +59,17 @@ export function resetPresence() {
   hooks.onChange(presence);
 }
 
+export function suppressPresence(steps) {
+  suppressedSteps = Math.max(suppressedSteps, Math.max(0, Math.floor(Number(steps) || 0)));
+  hooks.onChange(presence);
+}
+
 export function onPlayerStep({ inDarkness = false, random = Math.random } = {}) {
+  if (suppressedSteps > 0) {
+    suppressedSteps -= 1;
+    hooks.onChange(presence);
+    return false;
+  }
   const min = inDarkness ? DARK_STEP_MIN : NORMAL_STEP_MIN;
   const max = inDarkness ? DARK_STEP_MAX : NORMAL_STEP_MAX;
   const amount = Math.floor(random() * (max - min + 1)) + min;

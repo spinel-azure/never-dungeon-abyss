@@ -38,10 +38,10 @@ import {
 } from "./player.js?v=20260724-1";
 import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setMistOptions, setWallColor, setFloorColor } from "./renderer.js?v=20260722-8";
 import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minimap.js?v=20260722-1";
-import { configureInput } from "./input.js?v=20260726-1";
-import { configureVirtualStick } from "./virtualStick.js?v=20260724-1";
+import { configureInput } from "./input.js?v=20260727-1";
+import { configureVirtualStick } from "./virtualStick.js?v=20260727-1";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor } from "./menu.js?v=20260727-6";
+import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor } from "./menu.js?v=20260727-7";
 import { resolveFloorTheme } from "./floorTheme.js?v=20260722-1";
 import {
   configureAutoReturn,
@@ -55,23 +55,27 @@ import { configureDevice } from "./device.js?v=20260722-1";
 import {
   configurePresence,
   getPresence,
+  getPresenceSuppressedSteps,
   restorePresence,
   resetPresence,
+  suppressPresence,
   setPresenceDisabled
-} from "./presence.js";
+} from "./presence.js?v=20260727-1";
 import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js?v=20260726-1";
 import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js?v=20260727-9";
 import { loadGame, writeGame } from "./save-data.js";
 import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260727-4";
-import { createInitialCharacter, normalizeCharacter } from "../data/classes.js?v=20260727-4";
+import { createInitialCharacter, normalizeCharacter } from "../data/classes.js?v=20260727-5";
 import { getEquipmentItem } from "../data/equipment.js";
-import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js?v=20260727-2";
-import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260726-4";
+import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js?v=20260727-3";
+import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260727-1";
 import { awardBattleExperience, createTempleRevival, resolveInnStay } from "./character-services.js?v=20260727-3";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js?v=20260726-1";
 import { getNextLevelExperience, MAX_LEVEL } from "../data/growth.js?v=20260727-2";
 import { resolveFieldSkill } from "../combat/resolve-field-skill.js?v=20260727-1";
 import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from "./skill-overlay.js?v=20260727-1";
+import { configureItemOverlay, openItemOverlay, handleItemOverlayInput } from "./item-overlay.js?v=20260727-1";
+import { resolveFieldItemUse } from "../combat/resolve-item-use.js?v=20260727-1";
 import { grantCard } from "../data/deck.js?v=20260727-3";
 import { collectCardStatBonuses, getCardById } from "../data/cards.js?v=20260727-2";
 import { drawCardCanvas } from "./card-canvas.js?v=20260727-3";
@@ -101,6 +105,9 @@ import { drawCardCanvas } from "./card-canvas.js?v=20260727-3";
   const posEl = document.getElementById("pos");
   const depthEl = document.getElementById("depth");
   const msgEl = document.getElementById("message");
+  const itemOverlay = document.getElementById("itemOverlay");
+  const viewportEl = document.querySelector(".viewport");
+  const townPortraitFrame = document.querySelector(".town-portrait-frame");
   const torchMeterEl = document.getElementById("torchMeter");
   const presenceMeterEl = document.getElementById("presenceMeter");
   const compassCanvas = document.getElementById("compass");
@@ -212,11 +219,25 @@ import { drawCardCanvas } from "./card-canvas.js?v=20260727-3";
       character: battleCharacter,
       onUse
     }),
+    openItems: ({ character: battleCharacter, enemy, onUse }) => {
+      viewportEl.append(itemOverlay);
+      return openItemOverlay({
+        context: "battle",
+        character: battleCharacter,
+        enemy,
+        onUse
+      });
+    },
     playSe
   });
 
   configureSkillOverlay({
     root: skillOverlay,
+    messageEl: msgEl,
+    playSe
+  });
+  configureItemOverlay({
+    root: itemOverlay,
     messageEl: msgEl,
     playSe
   });
@@ -244,6 +265,7 @@ import { drawCardCanvas } from "./card-canvas.js?v=20260727-3";
         startPosition: cells.flat().find(cell => cell.type === "stairsUp") || { x: state.gridX, y: state.gridY },
         theme: getDungeonColors(),
         presence: getPresence(),
+        presenceSuppressedSteps: getPresenceSuppressedSteps(),
         runElapsedMs: Math.max(0, now - runStartedAt),
         floorElapsedMs: Math.max(0, now - floorStartedAt)
       }
@@ -301,7 +323,7 @@ import { drawCardCanvas } from "./card-canvas.js?v=20260727-3";
     state.npcEncounterCounts = player.npcEncounterCounts && typeof player.npcEncounterCounts === "object" ? { ...player.npcEncounterCounts } : {};
     state.stairsPromptDismissed = Boolean(player.stairsPromptDismissed);
     character = normalizeCharacter(save.character);
-    restorePresence(dungeon.presence);
+    restorePresence(dungeon.presence, dungeon.presenceSuppressedSteps);
     const now = performance.now();
     runStartedAt = now - Math.max(0, Number(dungeon.runElapsedMs) || 0);
     floorStartedAt = now - Math.max(0, Number(dungeon.floorElapsedMs) || 0);
@@ -554,6 +576,43 @@ import { drawCardCanvas } from "./card-canvas.js?v=20260727-3";
     return result;
   }
 
+  function openFieldItems() {
+    const context = isTownOpen() ? "town" : "dungeon";
+    (context === "town" ? townPortraitFrame : viewportEl).append(itemOverlay);
+    return openItemOverlay({
+      context,
+      character,
+      torchFuel: state.torchFuel,
+      onUse: useFieldItem,
+      onClose: () => viewportEl.append(itemOverlay)
+    });
+  }
+
+  async function useFieldItem(itemId) {
+    const context = isTownOpen() ? "town" : "dungeon";
+    const result = resolveFieldItemUse({
+      character,
+      itemId,
+      context,
+      torchFuel: state.torchFuel
+    });
+    if (!result.accepted) return result;
+    character = result.character;
+    if (Number.isFinite(result.environment.torchFuel)) {
+      state.torchFuel = result.environment.torchFuel;
+    }
+    if (result.environment.resetPresence) resetPresence();
+    if (result.environment.suppressPresenceSteps) {
+      suppressPresence(result.environment.suppressPresenceSteps);
+    }
+    updateHud();
+    updateCharacterUi();
+    say(result.message);
+    playSe(result.healing > 0 ? "heal" : "confirm");
+    saveGame();
+    return result;
+  }
+
   function finishBattleVictory(battle) {
     const reward = Math.max(0, Math.floor(Number(battle?.enemy?.experienceReward) || 0));
     if (character && reward > 0) Object.assign(character, awardBattleExperience(character, reward));
@@ -775,6 +834,7 @@ import { drawCardCanvas } from "./card-canvas.js?v=20260727-3";
     commandRoot: dungeonCommands,
     openStatusMenu,
     handleSkillInput: handleSkillOverlayInput,
+    handleItemInput: handleItemOverlayInput,
     handleOverlayInput: handleOverlayEventInput,
     handleBattleInput,
     handleTownInput,
@@ -813,6 +873,7 @@ import { drawCardCanvas } from "./card-canvas.js?v=20260727-3";
       character,
       onUse: useFieldSkill
     }),
+    openItems: openFieldItems,
     onReturnToDungeon: () => {
       if (isTownOpen()) showTownArrival();
       else resumeDismissedStairsPrompt();
@@ -823,6 +884,7 @@ import { drawCardCanvas } from "./card-canvas.js?v=20260727-3";
     manualMove,
     manualTurn,
     handleSkillInput: handleSkillOverlayInput,
+    handleItemInput: handleItemOverlayInput,
     handleBattleInput,
     handleTownInput,
     handleMenuInput

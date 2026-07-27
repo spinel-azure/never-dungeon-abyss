@@ -14,6 +14,9 @@ import {
   resolveEndOfAction
 } from "./status-lifecycle.js";
 import { getSkill } from "../data/skills.js";
+import { getItem } from "../data/items.js";
+import { consumeItem } from "../data/inventory.js";
+import { getItemUnavailableReason } from "./resolve-item-use.js";
 
 export function createBattleState({ character, enemy }) {
   return {
@@ -29,7 +32,7 @@ export function createBattleState({ character, enemy }) {
 
 export function resolveBattleRound({ battle, playerCommand, rng = Math.random } = {}) {
   const next = structuredClone(battle);
-  const playerAction = createPlayerAction(next.player, playerCommand);
+  const playerAction = createPlayerAction(next.player, playerCommand, next.enemy);
   if (!playerAction.ok) return { battle: next, accepted: false, reason: playerAction.reason };
   const enemyAction = createEnemyAction(next.enemy);
   const order = resolveTurnOrder([
@@ -72,7 +75,7 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
   return { battle: next, accepted: true };
 }
 
-export function createPlayerAction(player, command = {}) {
+export function createPlayerAction(player, command = {}, enemy = null) {
   if (command.type === "attack") {
     return {
       ok: true,
@@ -100,6 +103,21 @@ export function createPlayerAction(player, command = {}) {
       ok: true,
       spCost: 0,
       action: { id: "wait", name: "待機", actionType: "wait", speedModifier: 99 }
+    };
+  }
+  if (command.type === "item") {
+    const reason = getItemUnavailableReason({
+      character: player,
+      itemId: command.itemId,
+      context: "battle",
+      enemy
+    });
+    if (reason) return { ok: false, reason };
+    const item = getItem(command.itemId);
+    return {
+      ok: true,
+      spCost: 0,
+      action: { id: item.id, name: item.name, actionType: "item", item, speedModifier: 99 }
     };
   }
   if (command.type !== "skill") return { ok: false, reason: "notImplemented" };
@@ -138,6 +156,34 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
   }
   if (action.actionType === "wait") {
     battle.log.push(`${actor.name}は隙を見せた。`);
+    return;
+  }
+  if (action.actionType === "item") {
+    actor.inventory = consumeItem(actor.inventory, action.item.id).inventory;
+    let healing = 0;
+    for (const effect of action.item.effects) {
+      if (effect.id === "heal_hp") {
+        const amount = Math.min(effect.value, actor.maxHp - actor.hp);
+        actor.hp += amount;
+        healing += amount;
+      } else if (effect.id === "cure_poison") {
+        actor.statuses = (actor.statuses || []).filter(status => (status.statusId || status.id) !== "poison");
+      } else if (effect.id === "banish_undead") {
+        target.hp = 0;
+        target.alive = false;
+        target.experienceReward = 0;
+      }
+    }
+    battle.log.push(`${actor.name}は${action.item.name}を使った。`);
+    if (healing > 0) {
+      battle.presentationEvents.push({
+        type: "healing", actorSide, targetSide: actorSide, amount: healing,
+        message: `HPが${healing}回復した。`
+      });
+    }
+    if (action.item.id === "holy_water") {
+      battle.log.push(`${target.name}は聖なる光により消滅した。`);
+    }
     return;
   }
   if (action.actionType === "wait") {

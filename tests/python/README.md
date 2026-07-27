@@ -32,6 +32,7 @@ py tests/python/validate_game_data.py
 - `data/classes.js`
 - `data/enemies.js`
 - `data/equipment.js`
+- `data/items.js`
 - `data/npcs.js`
 - `data/skills.js`
 - `data/spells.js`

@@ -80,6 +80,12 @@
         <button type="button" class="skill-overlay-back" data-skill-back>戻る</button>
         <p class="skill-overlay-page" data-skill-page>1/1</p>
       </section>
+      <section id="itemOverlay" class="skill-overlay item-overlay" aria-label="アイテム選択" hidden>
+        <h2 class="skill-overlay-title">アイテム</h2>
+        <div class="skill-overlay-list" data-item-list></div>
+        <button type="button" class="skill-overlay-back" data-item-back>戻る</button>
+        <p class="skill-overlay-page" data-item-page>1/1</p>
+      </section>
     </div>
 
     <div class="quick-status" aria-label="プレイヤー簡易ステータス">
@@ -92,7 +98,7 @@
     </div>
     <div class="message" id="message">10×10の床空間を、薄い境界壁が区切っている。</div>
     <section id="dungeonCommands" class="dungeon-commands" aria-label="ダンジョンコマンド">
-      <button type="button" data-command="items" disabled>アイテム</button>
+      <button type="button" data-command="items">アイテム</button>
       <button type="button" data-command="status">ステータス</button>
       <button type="button" data-command="deck">デッキ確認</button>
       <button type="button" data-command="skills">スキル</button>
@@ -209,6 +215,6 @@
   </section>
 </main>
   <script type="module" src="js/title-screen.js?v=20260722-1"></script>
-  <script type="module" src="js/main.js?v=20260727-12"></script>
+  <script type="module" src="js/main.js?v=20260727-13"></script>
 </body>
 </html>
