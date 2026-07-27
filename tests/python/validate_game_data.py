@@ -417,7 +417,7 @@ def extract_literal_records(text: str) -> list[dict[str, Any]]:
             else:
                 value = {"true": True, "false": False, "null": None}[match.group(5)]
             record[key] = value
-        for key in ("stats", "initialSkillIds"):
+        for key in ("stats", "initialSkillIds", "usableIn", "effects"):
             if re.search(rf"\b{key}\s*:", masked):
                 record.setdefault(key, "<compound>")
         records.append(record)
