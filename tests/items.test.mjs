@@ -8,6 +8,7 @@ import {
   getPresence, getPresenceSuppressedSteps, onPlayerStep, resetPresence,
   restorePresence, suppressPresence
 } from "../js/presence.js";
+import { grantEventItems } from "../js/character-services.js";
 
 function characterWith(itemId, amount = 1) {
   const character = createInitialCharacter({ name: "TEST", job: "warrior" });
@@ -94,4 +95,28 @@ test("restored presence suppression is capped at the item-defined 30 steps", () 
   restorePresence(0, 999999);
   assert.equal(getPresenceSuppressedSteps(), 30);
   resetPresence();
+});
+
+test("temple and shop event rewards enter inventory once only", () => {
+  const base = createInitialCharacter({ name: "TEST", job: "warrior" });
+  const temple = grantEventItems(base, "temple_first_talk_items", [
+    "exorcism_talisman", "holy_water"
+  ]);
+  assert.deepEqual(temple.gainedItemIds, ["exorcism_talisman", "holy_water"]);
+  assert.equal(getItemCount(temple.character.inventory, "exorcism_talisman"), 1);
+  assert.equal(getItemCount(temple.character.inventory, "holy_water"), 1);
+
+  const repeatedTemple = grantEventItems(temple.character, "temple_first_talk_items", [
+    "exorcism_talisman", "holy_water"
+  ]);
+  assert.equal(repeatedTemple.alreadyReceived, true);
+  assert.equal(getItemCount(repeatedTemple.character.inventory, "holy_water"), 1);
+
+  const shop = grantEventItems(temple.character, "shop_first_talk_items", [
+    "healing_potion", "antidote", "guiding_torch"
+  ]);
+  assert.deepEqual(shop.gainedItemIds, ["healing_potion", "antidote", "guiding_torch"]);
+  assert.equal(getItemCount(shop.character.inventory, "healing_potion"), 1);
+  assert.equal(getItemCount(shop.character.inventory, "antidote"), 1);
+  assert.equal(getItemCount(shop.character.inventory, "guiding_torch"), 1);
 });

@@ -646,7 +646,7 @@ function showFacilityCommands(facilityId) {
       || id === "stay"
       || id === "heal"
       || id === "deck"
-      || (id === "talk" && ["guild", "inn", "library"].includes(facilityId));
+      || (id === "talk" && ["guild", "inn", "temple", "shop", "library"].includes(facilityId));
     button.dataset.facilityCommand = id;
     button.textContent = label;
     button.disabled = empty;
@@ -681,7 +681,7 @@ function activateFacilityService(command) {
   }
   if (command === "talk") {
     const facility = TOWN_FACILITIES[town.selectedIndex];
-    if (!["guild", "inn", "library"].includes(facility?.id)) return false;
+    if (!["guild", "inn", "temple", "shop", "library"].includes(facility?.id)) return false;
     const message = town.onTalk(facility?.id);
     if (message) town.messageEl.textContent = message;
     town.onStateChanged();

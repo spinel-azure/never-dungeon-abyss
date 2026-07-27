@@ -3,6 +3,7 @@ import {
   getLevelGrowth,
   normalizeExperience
 } from "../data/growth.js";
+import { grantItem } from "../data/inventory.js";
 
 export function createInnRecovery(character) {
   return {
@@ -58,4 +59,19 @@ export function createTempleRevival(character) {
     condition: "GOOD",
     alive: true
   };
+}
+
+export function grantEventItems(character, flagId, itemIds) {
+  if (!character || character.eventFlags?.[flagId]) {
+    return { character, gainedItemIds: [], alreadyReceived: true };
+  }
+  const next = structuredClone(character);
+  const gainedItemIds = [];
+  for (const itemId of itemIds || []) {
+    const result = grantItem(next.inventory, itemId, 1);
+    next.inventory = result.inventory;
+    if (result.gained > 0) gainedItemIds.push(itemId);
+  }
+  next.eventFlags = { ...(next.eventFlags || {}), [flagId]: true };
+  return { character: next, gainedItemIds, alreadyReceived: false };
 }

@@ -69,7 +69,7 @@ import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js";
 import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js";
-import { awardBattleExperience, createTempleRevival, resolveInnStay } from "./character-services.js";
+import { awardBattleExperience, createTempleRevival, grantEventItems, resolveInnStay } from "./character-services.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { getNextLevelExperience, MAX_LEVEL } from "../data/growth.js";
 import { resolveFieldSkill } from "../combat/resolve-field-skill.js";
@@ -79,6 +79,7 @@ import { resolveFieldItemUse } from "../combat/resolve-item-use.js";
 import { grantCard } from "../data/deck.js";
 import { collectCardStatBonuses, getCardById } from "../data/cards.js";
 import { drawCardCanvas } from "./card-canvas.js";
+import { getItem } from "../data/items.js";
 
 (() => {
   const canvas = document.getElementById("screen");
@@ -127,12 +128,15 @@ import { drawCardCanvas } from "./card-canvas.js";
   const levelUpEffect = document.getElementById("levelUpEffect");
   const cardGetEffect = document.getElementById("cardGetEffect");
   const cardGetCanvas = document.getElementById("cardGetCanvas");
+  const itemGetEffect = document.getElementById("itemGetEffect");
+  const itemGetItems = document.getElementById("itemGetItems");
   const battleScreen = document.getElementById("battleScreen");
   const skillOverlay = document.getElementById("skillOverlay");
   const sceneTransition = document.getElementById("sceneTransition");
   const sceneTransitionTitle = document.getElementById("sceneTransitionTitle");
   let sceneTransitionRunning = false;
   let cardGetTimer = 0;
+  let itemGetTimer = 0;
   let currentDepth = 1;
   configureDevice();
   configureEvents({ messageEl: msgEl });
@@ -403,6 +407,36 @@ import { drawCardCanvas } from "./card-canvas.js";
     }, 3400);
   }
 
+  function acquireEventItems(flagId, itemIds) {
+    const result = grantEventItems(character, flagId, itemIds);
+    if (result.alreadyReceived) return false;
+    character = result.character;
+    if (result.gainedItemIds.length > 0) {
+      setTimeout(() => showItemGetEffect(result.gainedItemIds), 0);
+    }
+    return true;
+  }
+
+  function showItemGetEffect(itemIds) {
+    const items = itemIds.map(getItem).filter(Boolean);
+    if (!itemGetEffect || !itemGetItems || items.length === 0) return;
+    window.clearTimeout(itemGetTimer);
+    playSe("battleVictory");
+    itemGetItems.replaceChildren(...items.map(item => {
+      const row = document.createElement("span");
+      row.textContent = `${item.name} ×1`;
+      return row;
+    }));
+    itemGetEffect.hidden = false;
+    itemGetEffect.classList.remove("is-active");
+    void itemGetEffect.offsetWidth;
+    itemGetEffect.classList.add("is-active");
+    itemGetTimer = window.setTimeout(() => {
+      itemGetEffect.classList.remove("is-active");
+      itemGetEffect.hidden = true;
+    }, 3400);
+  }
+
   function talkAtFacility(facilityId) {
     const rewards = {
       guild: {
@@ -422,11 +456,25 @@ import { drawCardCanvas } from "./card-canvas.js";
         cardId: "common_knowledge_book",
         first: "司書：…この本なら、あなたの役に立つかしら…？\n知識の書のカードを手に入れた！",
         repeat: "司書：…何を…見たいのかしら…？"
+      },
+      temple: {
+        flag: "temple_first_talk_items",
+        itemIds: ["exorcism_talisman", "holy_water"],
+        first: "司祭：試練へ赴く貴方に、これを授けよと女神様より啓示がありました。退魔の護符と聖水です。どうかご武運を。……次からは寄進もお忘れなく。",
+        repeat: "司祭：迷える魂よ、女神のご加護があらんことを。"
+      },
+      shop: {
+        flag: "shop_first_talk_items",
+        itemIds: ["healing_potion", "antidote", "guiding_torch"],
+        first: "女主人：奈落の迷宮に行くんだろ？だったらこれを持っていきな。回復薬に解毒剤、それと導きのたいまつ。長い付き合いになりそうな気がするからね。今回はサービスだよ。",
+        repeat: "女主人：買いたいのかい、売るのかい？　冷やかしならお断りだよ。"
       }
     };
     const reward = rewards[facilityId];
     if (!reward) return "";
-    const gained = acquireEventCard(reward.flag, reward.cardId);
+    const gained = reward.cardId
+      ? acquireEventCard(reward.flag, reward.cardId)
+      : acquireEventItems(reward.flag, reward.itemIds);
     if (gained) {
       updateCharacterUi();
       saveGame();
