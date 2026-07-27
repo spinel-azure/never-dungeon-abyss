@@ -11,6 +11,8 @@ export function createNormalAttack({ weapon, weaponId } = {}) {
     powerPerHit: type.powerPerHit,
     weapon: resolvedWeapon,
     defensePenetration: type.defensePenetration || 0,
+    attackStat: type.normalAttackStat || "str",
+    ignoresDefense: Boolean(type.normalAttackIgnoresDefense),
     hitBonus: resolvedWeapon.hitBonus || 0,
     criticalBonus: resolvedWeapon.criticalBonus || 0,
     speedModifier: type.speedModifier || 0,

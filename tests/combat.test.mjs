@@ -74,10 +74,10 @@ test("registration jobs use the intended order and localized labels", () => {
 
 test("initial equipment matches every class profile", () => {
   const expected = {
-    warrior: { weapon: "鉄の長剣", attack: 8, def: 8, int: 0 },
-    thief: { weapon: "鉄の短剣", attack: 5, def: 5, int: 0 },
-    priest: { weapon: "鉄のメイス", attack: 6, def: 5, int: 0 },
-    mage: { weapon: "樫の杖", attack: 3, def: 2, int: 1 }
+    warrior: { weapon: "鉄の長剣", attack: 8, def: 8, stat: "str", bonus: 1 },
+    thief: { weapon: "鉄の短剣", attack: 5, def: 5, stat: "dex", bonus: 1 },
+    priest: { weapon: "鉄のメイス", attack: 6, def: 5, stat: "luc", bonus: 1 },
+    mage: { weapon: "樫の杖", attack: 3, def: 3, stat: "int", bonus: 2 }
   };
   for (const [job, profile] of Object.entries(expected)) {
     const character = createInitialCharacter({ name: "TEST", job });
@@ -86,7 +86,7 @@ test("initial equipment matches every class profile", () => {
     assert.equal(weapon.name, profile.weapon);
     assert.equal(weapon.attack, profile.attack);
     assert.equal(bonuses.def || 0, profile.def);
-    assert.equal(bonuses.int || 0, profile.int);
+    assert.equal(bonuses[profile.stat] || 0, profile.bonus);
     assert.equal(character.equipment.accessoryId, null);
   }
 });
@@ -108,7 +108,7 @@ test("early enemies use the MVP difficulty profile", () => {
 
 test("all initial classes can damage the adjusted cave slime", () => {
   const slime = getEnemyById("cave_slime");
-  const expectedDamage = { warrior: 9, thief: 2, priest: 6, mage: 1 };
+  const expectedDamage = { warrior: 10, thief: 2, priest: 6, mage: 8 };
   for (const [job, damage] of Object.entries(expectedDamage)) {
     const character = createInitialCharacter({ name: "TEST", job });
     const stats = collectStats(character);
@@ -123,18 +123,35 @@ test("all initial classes can damage the adjusted cave slime", () => {
   }
 });
 
+test("staff normal attacks use INT and ignore defense", () => {
+  const mage = createInitialCharacter({ name: "TEST", job: "mage" });
+  const stats = collectStats(mage);
+  const attack = createNormalAttack({ weapon: getWeapon("oak_staff") });
+  const result = resolvePhysicalAttack({
+    attacker: stats,
+    defender: { agi: 5, def: 99 },
+    attack,
+    rng: fixed(0, 0.9, 0.5)
+  });
+  assert.equal(attack.attackStat, "int");
+  assert.equal(attack.ignoresDefense, true);
+  assert.equal(result.attackStat, "int");
+  assert.equal(result.effectiveDefense, 0);
+  assert.equal(result.totalDamage, 8);
+});
+
 test("equipment bonuses are included in combat stats", () => {
   const warrior = createInitialCharacter({ name: "TEST", job: "warrior" });
   const mage = createInitialCharacter({ name: "TEST", job: "mage" });
   assert.equal(collectStats(warrior).def, 8);
-  assert.equal(collectStats(mage).def, 2);
-  assert.equal(collectStats(mage).int, 9);
+  assert.equal(collectStats(mage).def, 3);
+  assert.equal(collectStats(mage).int, 10);
 });
 
 test("detail status derives current character percentages", () => {
   const warrior = deriveDetailStats(createInitialCharacter({ name: "TEST", job: "warrior" }));
   assert.deepEqual(warrior, {
-    physicalAttack: 12,
+    physicalAttack: 12.5,
     spellAttack: 1,
     physicalDamage: 100,
     spellDamage: 100,
@@ -152,8 +169,8 @@ test("detail status derives current character percentages", () => {
 
 test("detail status attack power includes weapon and equipment stats", () => {
   const mage = deriveDetailStats(createInitialCharacter({ name: "TEST", job: "mage" }));
-  assert.equal(mage.physicalAttack, 4);
-  assert.equal(mage.spellAttack, 4.5);
+  assert.equal(mage.physicalAttack, 8);
+  assert.equal(mage.spellAttack, 5);
 });
 
 test("collected main stats are capped at 30", () => {

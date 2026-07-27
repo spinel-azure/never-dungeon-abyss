@@ -1,13 +1,18 @@
 import { collectStats } from "./collect-stats.js";
 import { COMBAT_CONFIG, clamp } from "./combat-config.js";
 import { getEquipmentItem } from "../data/equipment.js";
+import { getWeaponType } from "../data/weapons.js";
 
 export function deriveDetailStats(character = {}) {
   const stats = collectStats(character);
   const weaponId = character.equipment?.rightArmId || character.equipment?.weaponId;
   const weapon = getEquipmentItem(weaponId, "rightArmId");
+  const weaponType = getWeaponType(weapon?.type);
+  const normalAttackStat = weaponType.normalAttackStat === "int" ? stats.int : stats.str;
   return {
-    physicalAttack: rounded(numeric(weapon?.attack) + stats.str * COMBAT_CONFIG.strengthMultiplier),
+    physicalAttack: rounded(
+      numeric(weapon?.attack) + normalAttackStat * COMBAT_CONFIG.strengthMultiplier
+    ),
     spellAttack: rounded(stats.int * COMBAT_CONFIG.intelligenceMultiplier),
     physicalDamage: percent(1 + numeric(character.physicalDamageBonus)),
     spellDamage: percent(1 + numeric(character.spellDamageBonus)),

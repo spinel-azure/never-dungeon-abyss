@@ -14,11 +14,14 @@ export function resolvePhysicalAttack({
     0,
     COMBAT_CONFIG.defensePenetrationMaximum
   );
-  const effectiveDefense = Math.max(0, numeric(defender.def))
-    * COMBAT_CONFIG.defenseMultiplier
-    * (1 - penetration);
+  const effectiveDefense = attack.ignoresDefense
+    ? 0
+    : Math.max(0, numeric(defender.def))
+      * COMBAT_CONFIG.defenseMultiplier
+      * (1 - penetration);
+  const attackStat = attack.attackStat === "int" ? "int" : "str";
   const attackPower = Math.max(0, numeric(attack.weapon?.attack ?? attack.weaponAttack))
-    + numeric(attacker.str) * COMBAT_CONFIG.strengthMultiplier;
+    + numeric(attacker[attackStat]) * COMBAT_CONFIG.strengthMultiplier;
   const hitRate = calculatePhysicalHitRate({ attacker, defender, attack });
   const criticalRate = calculateCriticalRate({ attacker, attack });
   const hits = [];
@@ -78,6 +81,8 @@ export function resolvePhysicalAttack({
     hitRate,
     criticalRate,
     attackPower,
+    attackStat,
+    ignoresDefense: Boolean(attack.ignoresDefense),
     effectiveDefense,
     defensePenetration: penetration,
     hits,

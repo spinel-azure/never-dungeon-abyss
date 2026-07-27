@@ -33,7 +33,9 @@ export const WEAPON_TYPES = Object.freeze({
     hitCount: 1,
     powerPerHit: 1,
     speedModifier: 0,
-    defensePenetration: 0
+    defensePenetration: 0,
+    normalAttackStat: "int",
+    normalAttackIgnoresDefense: true
   })
 });
 
