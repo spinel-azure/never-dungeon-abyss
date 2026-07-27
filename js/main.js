@@ -64,7 +64,7 @@ import {
 import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js";
 import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js";
 import { loadGame, writeGame } from "./save-data.js";
-import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js";
+import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, setTownTypewriterOptions } from "./town.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
@@ -1046,7 +1046,10 @@ import {
     playSe,
     setPresenceDisabled,
     setMinimapRevealOptions,
-    setNpcTypewriterOptions,
+    setNpcTypewriterOptions: options => {
+      setNpcTypewriterOptions(options);
+      setTownTypewriterOptions(options);
+    },
     setStopwatchVisible,
     resetStopwatch,
     saveGame: () => saveGame({ announce: true }),

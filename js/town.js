@@ -24,6 +24,18 @@ const FACILITY_COMMANDS = Object.freeze({
   ]
 });
 
+const TOWN_TYPEWRITER_DELAYS = Object.freeze({ slow: 75, normal: 42, fast: 20 });
+const townTypewriter = {
+  enabled: true,
+  speed: "normal",
+  timer: 0,
+  sourceText: "",
+  visibleLength: 0,
+  lastRenderedText: "",
+  active: false,
+  observer: null
+};
+
 const town = {
   root: null,
   background: null,
@@ -74,6 +86,7 @@ export function configureTown(options) {
   town.portrait = town.root.querySelector("#townPortrait");
   town.portraitPlaceholder = town.root.querySelector("#townPortraitPlaceholder");
   town.messageEl = options.messageEl;
+  configureTownMessageObserver();
   town.commandRoot = options.commandRoot;
   town.gameCommandButtons = [...town.commandRoot.children];
   town.registration = document.querySelector("#guildRegistration");
@@ -194,6 +207,12 @@ export function configureTown(options) {
   renderCharacterStatus();
 }
 
+export function setTownTypewriterOptions({ enabled, speed } = {}) {
+  if (typeof enabled === "boolean") townTypewriter.enabled = enabled;
+  if (speed in TOWN_TYPEWRITER_DELAYS) townTypewriter.speed = speed;
+  if (!townTypewriter.enabled && townTypewriter.active) completeTownTypewriter();
+}
+
 export function openTown({ registrationRequired = false, facilityId = null, mode = null } = {}) {
   town.active = true;
   town.registrationRequired = Boolean(registrationRequired);
@@ -218,6 +237,7 @@ export function openTown({ registrationRequired = false, facilityId = null, mode
 
 export function closeTown() {
   town.active = false;
+  clearTownTypewriter();
   town.root.hidden = true;
   town.registration.hidden = true;
   showGameCommands();
@@ -246,6 +266,10 @@ export function handleTownInput(action) {
   if (!town.active) return false;
   if (town.transitioning) return true;
   if (town.isMenuOpen()) return false;
+  if (townTypewriter.active && action === "confirm") {
+    completeTownTypewriter();
+    return true;
+  }
   if (town.mode.startsWith("quest")) return handleQuestInput(action);
   if (town.mode === "registration") return handleRegistrationInput(action);
   if (town.mode === "dungeonEntrance") return handleEntranceInput(action);
@@ -309,6 +333,64 @@ function handleFacilityMenuInput(action) {
     return true;
   }
   return true;
+}
+
+function configureTownMessageObserver() {
+  townTypewriter.observer?.disconnect();
+  townTypewriter.observer = new MutationObserver(() => {
+    const text = town.messageEl?.textContent || "";
+    if (text === townTypewriter.lastRenderedText) return;
+    clearTownTypewriter();
+    if (!town.active || !townTypewriter.enabled || !isNpcTownMessage(text)) {
+      townTypewriter.lastRenderedText = text;
+      return;
+    }
+    townTypewriter.sourceText = text;
+    townTypewriter.visibleLength = 0;
+    townTypewriter.active = true;
+    renderTownTypewriter();
+  });
+  townTypewriter.observer.observe(town.messageEl, {
+    childList: true,
+    characterData: true,
+    subtree: true
+  });
+}
+
+function isNpcTownMessage(text) {
+  return /^[^\n：]{1,20}：/.test(String(text || ""));
+}
+
+function renderTownTypewriter() {
+  const characters = Array.from(townTypewriter.sourceText);
+  townTypewriter.visibleLength = Math.min(townTypewriter.visibleLength + 1, characters.length);
+  townTypewriter.lastRenderedText = characters.slice(0, townTypewriter.visibleLength).join("");
+  town.messageEl.textContent = townTypewriter.lastRenderedText;
+  if (townTypewriter.visibleLength >= characters.length) {
+    townTypewriter.active = false;
+    townTypewriter.timer = 0;
+    return;
+  }
+  townTypewriter.timer = window.setTimeout(
+    renderTownTypewriter,
+    TOWN_TYPEWRITER_DELAYS[townTypewriter.speed]
+  );
+}
+
+function completeTownTypewriter() {
+  if (!townTypewriter.active) return;
+  if (townTypewriter.timer) window.clearTimeout(townTypewriter.timer);
+  townTypewriter.timer = 0;
+  townTypewriter.visibleLength = Array.from(townTypewriter.sourceText).length;
+  townTypewriter.lastRenderedText = townTypewriter.sourceText;
+  townTypewriter.active = false;
+  town.messageEl.textContent = townTypewriter.sourceText;
+}
+
+function clearTownTypewriter() {
+  if (townTypewriter.timer) window.clearTimeout(townTypewriter.timer);
+  townTypewriter.timer = 0;
+  townTypewriter.active = false;
 }
 
 function handleQuestInput(action) {
