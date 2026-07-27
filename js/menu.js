@@ -1,3 +1,6 @@
+import { calculateDeckCost, DECK_SLOT_COUNT } from "../data/deck.js?v=20260727-1";
+import { getCardById } from "../data/cards.js?v=20260727-1";
+
 const ACTION_FEEDBACK_MS = 260;
 const DEBUG_SEQUENCE_MS = 1000;
 const DEBUG_CANCEL_WINDOW_MS = 2000;
@@ -6,8 +9,9 @@ const ON_MARK = "🔘";
 const OFF_MARK = "⚫";
 
 const menu = {
-  root: null, commandRoot: null, statusPanel: null, optionsPanel: null, debugPanel: null,
+  root: null, commandRoot: null, statusPanel: null, deckPanel: null, optionsPanel: null, debugPanel: null,
   commands: [], enabledCommands: [], commandIndex: 0, statusPage: 0,
+  deckCursor: 0, deckSlots: [],
   optionPages: [], optionItems: [], optionNavButtons: [], optionCursor: 0, optionPage: 0,
   debugPages: [], debugItems: [], debugNavButtons: [], debugCursor: 0, debugPage: 0, recentConfirms: [], debugArmed: false, view: "dungeon",
   compassVisible: true, readoutVisible: false, screenShakeEnabled: true,
@@ -27,6 +31,7 @@ const menu = {
   setNpcTypewriterOptions: () => {},
   setStopwatchVisible: () => {}, resetStopwatch: () => {},
   saveGame: () => false,
+  getCharacter: () => null,
   openSkills: () => false,
   onReturnToDungeon: () => {}
 };
@@ -34,6 +39,7 @@ const menu = {
 export function configureMenu(options) {
   Object.assign(menu, options);
   menu.statusPanel = menu.root.querySelector('[data-menu-view="status"]');
+  menu.deckPanel = menu.root.querySelector('[data-menu-view="deck"]');
   menu.optionsPanel = menu.root.querySelector('[data-menu-view="options"]');
   menu.debugPanel = menu.root.querySelector('[data-menu-view="debug"]');
   menu.commands = [...menu.commandRoot.querySelectorAll("[data-command]")];
@@ -48,7 +54,7 @@ export function configureMenu(options) {
   menu.debugPages = [...menu.debugPanel.querySelectorAll("[data-debug-page]")];
   menu.debugNavButtons = [...menu.debugPanel.querySelectorAll("[data-debug-nav]")];
   restoreSettings();
-  renderEmptyStats(); bindCommands(); bindStatus(); bindOptions(); bindDebug();
+  renderEmptyStats(); bindCommands(); bindStatus(); bindDeck(); bindOptions(); bindDebug();
   updateOptionItems(); updateDebugItems(); applyAllSettings(); updateView();
 }
 
@@ -95,6 +101,7 @@ export function handleMenuInput(action) {
   else if (action === "cancel") menu.playSe("cancel");
   if (menu.view === "commands") handleCommands(action);
   else if (menu.view === "status") handleStatus(action);
+  else if (menu.view === "deck") handleDeck(action);
   else if (menu.view === "options") handleOptions(action);
   else if (menu.view === "debug") handleDebug(action);
   return true;
@@ -122,9 +129,20 @@ function handleCommands(action) {
   }
 }
 function isCommandUnavailable(button) { return button?.dataset.unavailable === "true"; }
-function openCommand(key) { if (key === "status") { menu.view = "status"; menu.statusPage = 0; updateView(); } else if (key === "skills") menu.openSkills(); else if (key === "options") setOptionPage(0); else if (key === "save") { closeCampMenu("save"); menu.saveGame(); } }
+function openCommand(key) { if (key === "status") { menu.view = "status"; menu.statusPage = 0; updateView(); } else if (key === "deck") { menu.view = "deck"; menu.deckCursor = 0; renderDeck(); updateView(); } else if (key === "skills") menu.openSkills(); else if (key === "options") setOptionPage(0); else if (key === "save") { closeCampMenu("save"); menu.saveGame(); } }
 function handleStatus(action) { if (action === "cancel") { menu.view = "commands"; updateView(); } else if (action === "left") { menu.statusPage = 0; updateStatus(); } else if (action === "right") { menu.statusPage = 1; updateStatus(); } else if (action === "confirm") { menu.view = "commands"; updateView(); } }
 function statusNavigate(key) { if (key === "back") { if (menu.statusPage === 0) { menu.view = "commands"; updateView(); } else { menu.statusPage = 0; updateStatus(); } } else if (menu.statusPage === 0) { menu.statusPage = 1; updateStatus(); } else { menu.view = "commands"; updateView(); } }
+
+function handleDeck(action) {
+  if (action === "cancel") { menu.view = "commands"; updateView(); return; }
+  const columns = 3;
+  const row = Math.floor(menu.deckCursor / columns);
+  const column = menu.deckCursor % columns;
+  if (action === "left") menu.deckCursor = row * columns + (column + columns - 1) % columns;
+  if (action === "right") menu.deckCursor = row * columns + (column + 1) % columns;
+  if (action === "up" || action === "down") menu.deckCursor = ((row + 1) % 2) * columns + column;
+  renderDeckSelection();
+}
 
 function handleOptions(action) {
   if (action === "cancel") { menu.view = "commands"; updateView(); return; }
@@ -190,6 +208,7 @@ function triggerAction(key, action) { menu.actionActive[key] = true; updateDebug
 
 function bindCommands() { menu.commands.forEach(button => button.addEventListener("click", () => { menu.commandIndex = menu.commands.indexOf(button); updateSelection(); if (isCommandUnavailable(button)) return; menu.playSe("confirm"); openCommand(button.dataset.command); })); }
 function bindStatus() { menu.statusPanel.querySelectorAll("[data-status-nav]").forEach(button => button.addEventListener("click", () => { menu.playSe(button.dataset.statusNav === "back" ? "cancel" : "confirm"); statusNavigate(button.dataset.statusNav); })); }
+function bindDeck() { menu.deckPanel.querySelector("[data-deck-back]").addEventListener("click", () => { menu.playSe("cancel"); menu.view = "commands"; updateView(); }); }
 function bindOptions() { menu.optionPages.forEach(page => page.querySelectorAll("[data-option]").forEach(item => item.addEventListener("click", event => { if (item.matches(".volume-row") && event.target.matches("input")) return; menu.playSe("confirm"); menu.optionCursor = menu.optionItems.indexOf(item); updateSelection(); executeOption(item.dataset.option); }))); menu.optionNavButtons.forEach(button => button.addEventListener("click", () => { menu.playSe(button.dataset.optionNav === "back" ? "cancel" : "confirm"); executeOptionNav(button.dataset.optionNav); })); menu.root.querySelectorAll(".volume-row input").forEach(slider => slider.addEventListener("input", () => { slider.parentElement.querySelector("span").textContent = `${slider.value}%`; if (slider.id === "seVolume") applySeOptions(); persistSettings(); })); }
 function bindDebug() {
   menu.debugPages.forEach(page => page.querySelectorAll("[data-debug]").forEach(item => item.addEventListener("click", event => {
@@ -214,12 +233,42 @@ function bindDebug() {
 function renderEmptyStats() { const rows = ["STR", "INT", "AGI", "DEX", "LUC", "DEF"].map(label => { const row = document.createElement("div"); row.className = "nde-stat-row"; const name = document.createElement("strong"); name.textContent = label; const gauge = document.createElement("span"); gauge.className = "nde-empty-gauge"; for (let index = 0; index < 30; index += 1) gauge.append(document.createElement("i")); const value = document.createElement("output"); value.textContent = "--"; row.append(name, gauge, value); return row; }); menu.root.querySelector("#ndeStatRows").replaceChildren(...rows); }
 
 function updateView() {
-  const screenOpen = ["status", "options", "debug"].includes(menu.view);
+  const screenOpen = ["status", "deck", "options", "debug"].includes(menu.view);
   document.body.classList.toggle("menu-open", screenOpen); document.body.classList.toggle("command-open", menu.view === "commands");
-  menu.root.hidden = !screenOpen; menu.statusPanel.hidden = menu.view !== "status"; menu.optionsPanel.hidden = menu.view !== "options"; menu.debugPanel.hidden = menu.view !== "debug";
+  menu.root.hidden = !screenOpen; menu.statusPanel.hidden = menu.view !== "status"; menu.deckPanel.hidden = menu.view !== "deck"; menu.optionsPanel.hidden = menu.view !== "options"; menu.debugPanel.hidden = menu.view !== "debug";
   menu.commandRoot.dataset.active = String(menu.view === "commands");
   const hint = document.querySelector("#commandHint"); if (hint) hint.textContent = menu.view === "commands" ? "＊ Bボタンでメニュー非表示" : "＊ Bボタンでメニュー表示";
   updateStatus(); updatePager(); updateDebugPager(); updateSelection();
+}
+
+function renderDeck() {
+  const character = menu.getCharacter();
+  menu.deckSlots = Array.from({ length: DECK_SLOT_COUNT }, (_, index) => character?.cards?.deckSlots?.[index] || null);
+  const root = menu.deckPanel.querySelector("[data-deck-slots]");
+  root.replaceChildren(...menu.deckSlots.map((cardId, index) => {
+    const card = getCardById(cardId);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `deck-slot${card ? "" : " is-empty"}`;
+    button.dataset.deckSlot = String(index);
+    button.innerHTML = card
+      ? `<small>SLOT ${index + 1} / ${card.rarity}</small><strong>${card.nameJa}</strong><span>COST ${card.cost}</span>`
+      : `<small>SLOT ${index + 1}</small><strong>EMPTY</strong><span>―</span>`;
+    button.addEventListener("click", () => { menu.playSe("cursorMove"); menu.deckCursor = index; renderDeckSelection(); });
+    return button;
+  }));
+  menu.deckPanel.querySelector("[data-deck-used-cost]").textContent = String(calculateDeckCost(menu.deckSlots));
+  menu.deckPanel.querySelector("[data-deck-cost-limit]").textContent = String(character?.deckCost || 3);
+  menu.deckPanel.querySelector("[data-owned-card-count]").textContent = String(character?.cards?.ownedCardIds?.length || 0);
+  renderDeckSelection();
+}
+
+function renderDeckSelection() {
+  menu.deckPanel.querySelectorAll("[data-deck-slot]").forEach((button, index) => button.classList.toggle("is-selected", index === menu.deckCursor));
+  const card = getCardById(menu.deckSlots[menu.deckCursor]);
+  menu.deckPanel.querySelector("[data-deck-detail]").textContent = card
+    ? `[${card.rarity}] ${card.nameJa} / ${card.concept} / COST ${card.cost}`
+    : `SLOT ${menu.deckCursor + 1}：カードはセットされていません。`;
 }
 function updateStatus() { menu.statusPanel.querySelectorAll("[data-status-page]").forEach((page, index) => { page.hidden = index !== menu.statusPage; }); menu.statusPanel.querySelector("[data-status-indicator]").textContent = `${menu.statusPage + 1}/2`; const next = menu.statusPanel.querySelector('[data-status-nav="next"]'); next.textContent = menu.statusPage === 0 ? "NEXT" : "MAIN"; menu.statusPanel.querySelector('[data-status-nav="back"]').classList.toggle("is-selected", menu.statusPage === 0); next.classList.toggle("is-selected", menu.statusPage === 1); }
 function updatePager() { menu.optionsPanel.querySelector("[data-page-indicator]").textContent = `${menu.optionPage + 1}/2`; menu.optionNavButtons.find(button => button.dataset.optionNav === "next").textContent = menu.optionPage === 0 ? "NEXT" : "MAIN"; }

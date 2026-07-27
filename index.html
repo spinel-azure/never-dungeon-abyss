@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
   <link rel="stylesheet" href="css/style.css?v=20260722-2">
-  <link rel="stylesheet" href="css/game-menu.css?v=20260727-4">
+  <link rel="stylesheet" href="css/game-menu.css?v=20260727-5">
   <link rel="stylesheet" href="css/title-screen.css?v=20260723-4">
   <link rel="stylesheet" href="css/town.css?v=20260727-10">
   <link rel="stylesheet" href="css/scene-transition.css?v=20260723-2">
@@ -83,7 +83,7 @@
     <section id="dungeonCommands" class="dungeon-commands" aria-label="ダンジョンコマンド">
       <button type="button" data-command="items" disabled>アイテム</button>
       <button type="button" data-command="status">ステータス</button>
-      <button type="button" data-command="deck" disabled>？？？？？</button>
+      <button type="button" data-command="deck">デッキ確認</button>
       <button type="button" data-command="skills">スキル</button>
       <button type="button" data-command="save">セーブ</button>
       <button type="button" data-command="options">オプション</button>
@@ -127,6 +127,20 @@
           </div>
         </article>
         <div class="status-pager"><button type="button" class="menu-footer" data-status-nav="back">BACK</button><span data-status-indicator>1/2</span><button type="button" class="menu-footer" data-status-nav="next">NEXT</button></div>
+      </div>
+
+      <div class="menu-panel deck-panel" data-menu-view="deck" hidden>
+        <h1 class="menu-title">＊ CARD DECK ＊</h1>
+        <div class="deck-cost-summary">
+          <span>DECK COST <strong data-deck-used-cost>0</strong></span>
+          <span>LIMIT <strong data-deck-cost-limit>3</strong></span>
+        </div>
+        <div class="deck-slot-grid" data-deck-slots aria-label="カードデッキ6枠"></div>
+        <p class="deck-card-detail" data-deck-detail>カードはセットされていません。</p>
+        <div class="deck-footer">
+          <button type="button" class="menu-footer is-selected" data-deck-back>BACK</button>
+          <span><strong data-owned-card-count>0</strong> CARDS OWNED</span>
+        </div>
       </div>
 
       <div class="menu-panel menu-panel-options" data-menu-view="options" hidden>
@@ -178,6 +192,6 @@
   </section>
 </main>
   <script type="module" src="js/title-screen.js?v=20260722-1"></script>
-  <script type="module" src="js/main.js?v=20260727-5"></script>
+  <script type="module" src="js/main.js?v=20260727-6"></script>
 </body>
 </html>

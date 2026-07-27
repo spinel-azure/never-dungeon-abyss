@@ -25,6 +25,8 @@ import { createBattleState, resolveBattleRound } from "../combat/battle-engine.j
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { CHARACTER_JOBS } from "../data/town.js";
 import { getEnemyById } from "../data/enemies.js";
+import { CARDS, getCardById } from "../data/cards.js";
+import { calculateDeckCost, DECK_SLOT_COUNT, normalizeCardState } from "../data/deck.js";
 import { resolveTurnOrder, createGuardAction } from "../combat/resolve-turn-order.js";
 import {
   applyStatus,
@@ -560,6 +562,53 @@ test("deck cost starts at three and rises only at prime-numbered levels", () => 
   const priest = createInitialCharacter({ name: "TEST", job: "priest" });
   assert.equal(priest.deckCost, 3);
   assert.equal(normalizeCharacter({ ...priest, level: 23 }).deckCost, 12);
+});
+
+test("new characters have an empty six-slot card deck ready for future cards", () => {
+  const warrior = createInitialCharacter({ name: "TEST", job: "warrior" });
+  assert.deepEqual(warrior.cards.ownedCardIds, []);
+  assert.equal(warrior.cards.deckSlots.length, DECK_SLOT_COUNT);
+  assert.ok(warrior.cards.deckSlots.every(cardId => cardId === null));
+  assert.equal(calculateDeckCost(warrior.cards.deckSlots), 0);
+});
+
+test("card deck normalization rejects unknown, unowned, duplicate and over-cost cards", () => {
+  const normalized = normalizeCardState({
+    ownedCardIds: [
+      "common_strength_up",
+      "rare_defense_up",
+      "legendary_unlimited_torch_gauge",
+      "unknown"
+    ],
+    deckSlots: [
+      "common_strength_up",
+      "common_strength_up",
+      "rare_defense_up",
+      "legendary_unlimited_torch_gauge",
+      "unknown",
+      null
+    ]
+  }, 3);
+  assert.deepEqual(normalized.ownedCardIds, [
+    "common_strength_up",
+    "rare_defense_up",
+    "legendary_unlimited_torch_gauge"
+  ]);
+  assert.deepEqual(normalized.deckSlots, [
+    "common_strength_up",
+    null,
+    "rare_defense_up",
+    null,
+    null,
+    null
+  ]);
+  assert.equal(calculateDeckCost(normalized.deckSlots), 3);
+});
+
+test("main card registry contains every rarity and all twelve zodiac cards", () => {
+  assert.deepEqual([...new Set(CARDS.map(card => card.rarity))].sort(), ["C", "L", "R", "SR", "Z"]);
+  assert.equal(CARDS.filter(card => card.rarity === "Z").length, 12);
+  assert.equal(getCardById("zodiac_aries")?.cost, 8);
 });
 
 test("battle rewards are carried and settled into consecutive inn level-ups", () => {

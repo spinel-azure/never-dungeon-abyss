@@ -41,7 +41,7 @@ import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minima
 import { configureInput } from "./input.js?v=20260726-1";
 import { configureVirtualStick } from "./virtualStick.js?v=20260724-1";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu } from "./menu.js?v=20260726-1";
+import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu } from "./menu.js?v=20260727-2";
 import { resolveFloorTheme } from "./floorTheme.js?v=20260722-1";
 import {
   configureAutoReturn,
@@ -63,7 +63,7 @@ import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } fr
 import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js?v=20260727-9";
 import { loadGame, writeGame } from "./save-data.js";
 import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival } from "./town.js?v=20260725-1";
-import { createInitialCharacter, normalizeCharacter } from "../data/classes.js?v=20260727-2";
+import { createInitialCharacter, normalizeCharacter } from "../data/classes.js?v=20260727-3";
 import { getEquipmentItem } from "../data/equipment.js";
 import { createEnemyCombatant, getRandomEnemy } from "../data/enemies.js?v=20260727-2";
 import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260726-4";
@@ -715,6 +715,7 @@ import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from
   configureMenu({
     root: menuScreen,
     commandRoot: dungeonCommands,
+    getCharacter: () => character,
     generateRandomDungeon,
     startAutoReturn,
     refillTorch,
