@@ -67,6 +67,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     inventory: createInitialInventory(),
     quests: normalizeQuestState(),
     eventFlags: {},
+    gold: 0,
     experience: 0,
     carriedExperience: 0,
     hp: characterClass.maxHp,
@@ -107,6 +108,7 @@ export function normalizeCharacter(character) {
     eventFlags: character.eventFlags && typeof character.eventFlags === "object"
       ? { ...character.eventFlags }
       : {},
+    gold: Math.max(0, Math.floor(Number(character.gold) || 0)),
     experience: normalizeExperience(character.experience),
     carriedExperience: Math.max(0, Math.floor(Number(character.carriedExperience) || 0)),
     maxHp,

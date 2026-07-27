@@ -18,6 +18,7 @@ const QUEST_ID = "guild_001_abyss_rat";
 
 test("quest state is normalized into character saves", () => {
   const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  assert.equal(character.gold, 0);
   assert.deepEqual(character.quests, { active: {}, completedQuestIds: [] });
   const normalized = normalizeCharacter({
     ...character,
@@ -79,10 +80,13 @@ test("reporting a completed quest grants the C-rarity AGI card once", () => {
   const report = reportQuest(character, QUEST_ID);
   assert.equal(report.accepted, true);
   assert.equal(report.rewardCardId, "common_gale_feather");
+  assert.equal(report.bonusGold, 200);
+  assert.equal(report.character.gold, 200);
   assert.equal(getOwnedCardCount(report.character.cards, "common_gale_feather"), 1);
   assert.equal(getQuestProgress(report.character, QUEST_ID).completed, true);
   const repeated = reportQuest(report.character, QUEST_ID);
   assert.equal(repeated.accepted, false);
+  assert.equal(repeated.character.gold, 200);
 });
 
 test("invalid quest entries are discarded during normalization", () => {

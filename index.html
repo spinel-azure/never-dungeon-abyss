@@ -55,6 +55,7 @@
           <article id="guildQuestDetail" class="guild-quest-detail" hidden></article>
         </section>
         <div id="levelUpEffect" class="level-up-effect" aria-hidden="true" hidden>LEVEL UP!!</div>
+        <div id="questCompleteEffect" class="level-up-effect" aria-hidden="true" hidden>COMPLETE!!</div>
         <div id="cardGetEffect" class="card-get-effect" aria-hidden="true" hidden>
           <strong class="card-get-title">CARD GET!!</strong>
           <span class="card-get-card"><canvas id="cardGetCanvas" width="180" height="260"></canvas></span>
@@ -62,6 +63,10 @@
         <div id="itemGetEffect" class="card-get-effect item-get-effect" aria-hidden="true" hidden>
           <strong class="card-get-title">ITEM GET!!</strong>
           <span id="itemGetItems" class="item-get-items"></span>
+        </div>
+        <div id="bonusGetEffect" class="card-get-effect item-get-effect" aria-hidden="true" hidden>
+          <strong class="card-get-title">BONUS GET!!</strong>
+          <span id="bonusGetAmount" class="item-get-items bonus-get-amount"></span>
         </div>
       </div>
     </section>
@@ -144,6 +149,7 @@
             <span>RIGHT ARM</span><strong data-equipment-slot="rightArmId">----</strong><span>LEFT ARM</span><strong data-equipment-slot="leftArmId">----</strong><span>HEAD</span><strong data-equipment-slot="headId">----</strong><span>BODY</span><strong data-equipment-slot="bodyId">----</strong><span>FOOT</span><strong data-equipment-slot="footId">----</strong><span>ACCESSORY</span><strong data-equipment-slot="accessoryId">----</strong>
           </div>
           <h2 class="nde-experience-title">＊ EXPERIENCE ＊</h2><div class="nde-experience">------- / ------- NEXT LEVEL</div>
+          <div class="nde-gold">GOLD <strong id="statusGold">0</strong> G</div>
           <div class="nde-condition"><span>CONDITION</span><strong id="statusCondition">----</strong></div>
         </article>
         <article class="nde-status-page" data-status-page="1" hidden>
@@ -224,6 +230,6 @@
   </section>
 </main>
   <script type="module" src="js/title-screen.js?v=20260722-1"></script>
-  <script type="module" src="js/main.js?v=20260727-20"></script>
+  <script type="module" src="js/main.js?v=20260727-21"></script>
 </body>
 </html>

@@ -134,10 +134,13 @@ import {
   const dungeonCommands = document.getElementById("dungeonCommands");
   const townScreen = document.getElementById("townScreen");
   const levelUpEffect = document.getElementById("levelUpEffect");
+  const questCompleteEffect = document.getElementById("questCompleteEffect");
   const cardGetEffect = document.getElementById("cardGetEffect");
   const cardGetCanvas = document.getElementById("cardGetCanvas");
   const itemGetEffect = document.getElementById("itemGetEffect");
   const itemGetItems = document.getElementById("itemGetItems");
+  const bonusGetEffect = document.getElementById("bonusGetEffect");
+  const bonusGetAmount = document.getElementById("bonusGetAmount");
   const battleScreen = document.getElementById("battleScreen");
   const skillOverlay = document.getElementById("skillOverlay");
   const sceneTransition = document.getElementById("sceneTransition");
@@ -145,6 +148,7 @@ import {
   let sceneTransitionRunning = false;
   let cardGetTimer = 0;
   let itemGetTimer = 0;
+  let bonusGetTimer = 0;
   let currentDepth = 1;
   configureDevice();
   configureEvents({ messageEl: msgEl });
@@ -556,10 +560,49 @@ import {
     character.cardStatBonuses = collectCardStatBonuses(character.cards.deckSlots);
     updateCharacterUi();
     saveGame();
-    if (result.rewardCardId) {
-      setTimeout(() => showCardGetEffect(result.rewardCardId), 0);
-    }
+    setTimeout(() => {
+      void showGuildQuestRewardSequence({
+        rewardCardId: result.rewardCardId,
+        bonusGold: result.bonusGold
+      });
+    }, 0);
     return { ...result, character };
+  }
+
+  async function showGuildQuestRewardSequence({ rewardCardId, bonusGold } = {}) {
+    await showTimedEffect(questCompleteEffect, "levelUp", 3400);
+    if (bonusGold > 0) {
+      await showBonusGetEffect(bonusGold);
+    }
+    if (rewardCardId) {
+      showCardGetEffect(rewardCardId);
+    }
+  }
+
+  function showBonusGetEffect(gold) {
+    if (!bonusGetEffect || !bonusGetAmount) return Promise.resolve();
+    bonusGetAmount.textContent = `${Math.max(0, Math.floor(Number(gold) || 0))}G`;
+    window.clearTimeout(bonusGetTimer);
+    return showTimedEffect(bonusGetEffect, "battleVictory", 3400, timer => {
+      bonusGetTimer = timer;
+    });
+  }
+
+  function showTimedEffect(element, seId, duration, captureTimer = () => {}) {
+    if (!element) return Promise.resolve();
+    playSe(seId);
+    element.hidden = false;
+    element.classList.remove("is-active");
+    void element.offsetWidth;
+    element.classList.add("is-active");
+    return new Promise(resolve => {
+      const timer = window.setTimeout(() => {
+        element.classList.remove("is-active");
+        element.hidden = true;
+        resolve();
+      }, duration);
+      captureTimer(timer);
+    });
   }
 
   function updateCharacterUi() {
@@ -571,6 +614,7 @@ import {
     const statusJob = document.getElementById("statusJob");
     const statusLevel = document.getElementById("statusLevel");
     const statusCondition = document.getElementById("statusCondition");
+    const statusGold = document.getElementById("statusGold");
     if (quickName) quickName.textContent = character?.name || "NO_NAME";
     if (quickLevel) quickLevel.textContent = character ? String(character.level).padStart(3, "0") : "---";
     if (quickJob) quickJob.textContent = character?.jobLabel || "-";
@@ -578,6 +622,7 @@ import {
     if (statusJob) statusJob.textContent = character?.jobLabel || "UNKNOWN";
     if (statusLevel) statusLevel.textContent = character ? String(character.level).padStart(3, "0") : "---";
     if (statusCondition) statusCondition.textContent = character?.condition || "----";
+    if (statusGold) statusGold.textContent = String(Math.max(0, Math.floor(Number(character?.gold) || 0)));
     const vitals = document.querySelector(".nde-status-vitals");
     if (vitals) vitals.innerHTML = character
       ? `<span>HP ${character.hp} / ${character.maxHp}</span><span>SP ${character.sp} / ${character.maxSp}</span><span>DECK COST : ${character.deckCost}</span>`

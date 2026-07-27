@@ -314,8 +314,16 @@ function handleFacilityMenuInput(action) {
 function handleQuestInput(action) {
   if (action === "cancel") {
     town.playSe("cancel");
-    if (town.mode === "questAcceptDetail" || town.mode === "questAbandonConfirm") {
+    if (
+      town.mode === "questAcceptDetail"
+      || town.mode === "questAbandonConfirm"
+      || town.mode === "questReportConfirm"
+    ) {
+      const cancelledReport = town.mode === "questReportConfirm";
       openGuildQuestList(town.mode === "questAcceptDetail" ? "accept" : "report");
+      if (cancelledReport) {
+        town.messageEl.textContent = "ギルド長：なんだ、報告しないのか？";
+      }
     } else {
       town.mode = "facilityMenu";
       renderFacility();
@@ -335,6 +343,22 @@ function handleQuestInput(action) {
     } else {
       town.playSe("cursorMove");
       town.messageEl.textContent = questFailureMessage(result?.reason);
+    }
+    town.onStateChanged();
+    return true;
+  }
+  if (town.mode === "questReportConfirm") {
+    if (action !== "confirm") return true;
+    const quest = QUESTS[town.questIndex];
+    const result = town.onReportRequest(quest?.id);
+    town.playSe(result?.accepted ? "confirm" : "cursorMove");
+    if (result?.accepted) {
+      town.mode = "facilityMenu";
+      renderFacility();
+      town.messageEl.textContent = "ギルド長：依頼達成、よくやってくれた！また頼むぜ。";
+    } else {
+      openGuildQuestList("report");
+      town.messageEl.textContent = "ギルド長：まだ達成条件を満たしていないようだな。";
     }
     town.onStateChanged();
     return true;
@@ -862,16 +886,10 @@ function activateSelectedQuest() {
     return;
   }
   if (progress.readyToReport) {
-    const result = town.onReportRequest(quest.id);
-    town.playSe(result?.accepted ? "confirm" : "cursorMove");
-    if (result?.accepted) {
-      town.mode = "facilityMenu";
-      renderFacility();
-      town.messageEl.textContent = "ギルド長：よくやった。これが報酬だ。";
-    } else {
-      town.messageEl.textContent = "ギルド長：まだ達成条件を満たしていないようだな。";
-    }
-    town.onStateChanged();
+    town.playSe("confirm");
+    town.mode = "questReportConfirm";
+    renderQuestDetail(quest, progress);
+    town.messageEl.textContent = "ギルド長：この依頼を報告するのか？\n＊Aボタン：はい　Bボタン：いいえ";
     return;
   }
   town.playSe("confirm");

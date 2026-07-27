@@ -15,7 +15,8 @@ export const QUESTS = Object.freeze([
     reward: Object.freeze({
       type: "card",
       cardId: "common_gale_feather",
-      label: "デッキカード×1"
+      label: "デッキカード×1",
+      bonusGold: 200
     }),
     description: Object.freeze([
       "奈落のB1Fで発生したネズミの大量発生を",
@@ -115,6 +116,7 @@ export function reportQuest(character, questId) {
   quests.completedQuestIds = [...new Set([...quests.completedQuestIds, questId])];
   let next = { ...character, quests };
   let rewardCardId = null;
+  const bonusGold = Math.max(0, Math.floor(Number(progress.quest.reward?.bonusGold) || 0));
   if (progress.quest.reward?.type === "card") {
     const reward = grantCard(
       character.cards,
@@ -125,7 +127,13 @@ export function reportQuest(character, questId) {
     next = { ...next, cards: reward.cards };
     if (reward.gained > 0) rewardCardId = progress.quest.reward.cardId;
   }
-  return { character: next, accepted: true, rewardCardId };
+  if (bonusGold > 0) {
+    next = {
+      ...next,
+      gold: Math.max(0, Math.floor(Number(character.gold) || 0)) + bonusGold
+    };
+  }
+  return { character: next, accepted: true, rewardCardId, bonusGold };
 }
 
 export function hasActiveQuest(character) {
