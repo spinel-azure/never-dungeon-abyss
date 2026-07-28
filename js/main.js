@@ -766,11 +766,19 @@ import {
     if (!character || worldLocation !== "dungeon" || isBattleActive()) return false;
     cancelAutoReturn(false);
     setPlayerInputEnabled(false);
-    const enemyData = shouldForceEnemy(character, {
+    const forcedEnemyId = shouldForceEnemy(character, {
       depth: currentDepth,
-      enemyId: "abyss_rat"
+      enemyId: "cave_slime"
     })
-      ? getEnemyById("abyss_rat")
+      ? "cave_slime"
+      : shouldForceEnemy(character, {
+        depth: currentDepth,
+        enemyId: "abyss_rat"
+      })
+        ? "abyss_rat"
+        : null;
+    const enemyData = forcedEnemyId
+      ? getEnemyById(forcedEnemyId)
       : getRandomEnemy({ depth: currentDepth });
     const enemy = createEnemyCombatant(enemyData);
     const started = startBattle(enemy);

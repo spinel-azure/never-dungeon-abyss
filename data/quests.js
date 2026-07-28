@@ -2,10 +2,11 @@ import { grantCard } from "./deck.js";
 
 export const MAX_ACTIVE_QUESTS = 3;
 export const GUILD_TRIAL_QUEST_ID = "guild_001_abyss_rat";
+export const SLIME_EXTERMINATION_QUEST_ID = "guild_002_cave_slime";
 export const FLOOR_SURVEY_QUEST_ID = "guild_003_b1f_survey";
 export const B2F_UNLOCK_QUEST_IDS = Object.freeze([
   GUILD_TRIAL_QUEST_ID,
-  "guild_002_cave_slime",
+  SLIME_EXTERMINATION_QUEST_ID,
   FLOOR_SURVEY_QUEST_ID
 ]);
 
@@ -32,10 +33,26 @@ export const QUESTS = Object.freeze([
     available: true
   }),
   Object.freeze({
-    id: "guild_002_cave_slime",
+    id: SLIME_EXTERMINATION_QUEST_ID,
     number: "002",
     title: "スライム退治",
-    available: false
+    client: "ギルド長",
+    objectiveType: "defeatEnemy",
+    targetId: "cave_slime",
+    targetName: "洞窟スライム",
+    objectiveLabel: "洞窟スライムを15匹討伐する。",
+    requiredCount: 15,
+    reward: Object.freeze({
+      type: "card",
+      cardId: "common_hp_up",
+      label: "デッキカード×1",
+      bonusGold: 200
+    }),
+    description: Object.freeze([
+      "奈落のB1Fでスライムが異常発生しやがった。数を減らしてくれ。",
+      "やつらは奈落ネズミより手強いぜ。気をつけろ。"
+    ]),
+    available: true
   }),
   Object.freeze({
     id: FLOOR_SURVEY_QUEST_ID,
@@ -191,10 +208,14 @@ export function isDungeonDepthUnlocked(character, depth) {
 }
 
 export function shouldForceEnemy(character, { depth, enemyId } = {}) {
-  const progress = getQuestProgress(character, GUILD_TRIAL_QUEST_ID);
-  return Number(depth) === 1
-    && progress.active
-    && !progress.readyToReport
+  if (Number(depth) !== 1) return false;
+  const slimeProgress = getQuestProgress(character, SLIME_EXTERMINATION_QUEST_ID);
+  if (slimeProgress.active && !slimeProgress.readyToReport) {
+    return enemyId === "cave_slime";
+  }
+  const ratProgress = getQuestProgress(character, GUILD_TRIAL_QUEST_ID);
+  return ratProgress.active
+    && !ratProgress.readyToReport
     && enemyId === "abyss_rat";
 }
 

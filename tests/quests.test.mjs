@@ -6,6 +6,7 @@ import { getOwnedCardCount } from "../data/deck.js";
 import {
   MAX_ACTIVE_QUESTS,
   FLOOR_SURVEY_QUEST_ID,
+  SLIME_EXTERMINATION_QUEST_ID,
   abandonQuest,
   acceptQuest,
   getQuestProgress,
@@ -70,6 +71,40 @@ test("B1F forces rats only until the active quest reaches its target", () => {
     character = recordEnemyDefeat(character, "abyss_rat");
   }
   assert.equal(shouldForceEnemy(character, { depth: 1, enemyId: "abyss_rat" }), false);
+});
+
+test("quest 002 forces cave slimes on B1F and can progress beside quest 003", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character = acceptQuest(character, SLIME_EXTERMINATION_QUEST_ID).character;
+  character = acceptQuest(character, FLOOR_SURVEY_QUEST_ID).character;
+  assert.equal(shouldForceEnemy(character, { depth: 1, enemyId: "cave_slime" }), true);
+  assert.equal(shouldForceEnemy(character, { depth: 1, enemyId: "abyss_rat" }), false);
+  assert.equal(shouldForceEnemy(character, { depth: 2, enemyId: "cave_slime" }), false);
+  const explored = Array.from({ length: 10 }, () => Array(10).fill(false));
+  explored[0][0] = true;
+  character = recordFloorExploration(character, { depth: 1, explored });
+  for (let index = 0; index < 15; index += 1) {
+    character = recordEnemyDefeat(character, "cave_slime");
+  }
+  assert.equal(getQuestProgress(character, SLIME_EXTERMINATION_QUEST_ID).readyToReport, true);
+  assert.equal(getQuestProgress(character, FLOOR_SURVEY_QUEST_ID).progress, 1);
+  assert.equal(shouldForceEnemy(character, { depth: 1, enemyId: "cave_slime" }), false);
+});
+
+test("quest 002 report grants an HP card and 200G", () => {
+  let character = acceptQuest(
+    createInitialCharacter({ name: "TEST", job: "thief" }),
+    SLIME_EXTERMINATION_QUEST_ID
+  ).character;
+  for (let index = 0; index < 15; index += 1) {
+    character = recordEnemyDefeat(character, "cave_slime");
+  }
+  const report = reportQuest(character, SLIME_EXTERMINATION_QUEST_ID);
+  assert.equal(report.accepted, true);
+  assert.equal(report.rewardCardId, "common_hp_up");
+  assert.equal(report.bonusGold, 200);
+  assert.equal(report.character.gold, 200);
+  assert.equal(getOwnedCardCount(report.character.cards, "common_hp_up"), 1);
 });
 
 test("B2F remains locked until quests 001, 002, and 003 are completed", () => {
