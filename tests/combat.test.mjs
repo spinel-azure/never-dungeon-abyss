@@ -615,6 +615,43 @@ test("growth curve reaches the formal level 197 HP and SP caps", () => {
   assert.equal(getExperienceForLevel(197), MAX_EXPERIENCE);
 });
 
+test("HP and SP growth is front-loaded without changing endpoints or job identities", () => {
+  const jobs = [
+    ["warrior", 30, 15, 999, 650, 50, 27],
+    ["thief", 25, 20, 850, 750, 43, 34],
+    ["priest", 20, 25, 750, 850, 34, 43],
+    ["mage", 15, 30, 650, 999, 27, 50]
+  ];
+
+  for (const [jobId, initialHp, initialSp, finalHp, finalSp, targetHp10, targetSp10] of jobs) {
+    const levels = Array.from({ length: MAX_LEVEL }, (_, index) => getLevelGrowth(jobId, index + 1));
+    assert.equal(levels[0].hp, initialHp);
+    assert.equal(levels[0].sp, initialSp);
+    assert.equal(levels.at(-1).hp, finalHp);
+    assert.equal(levels.at(-1).sp, finalSp);
+    assert.ok(Math.abs(levels[9].hp - targetHp10) <= 1);
+    assert.ok(Math.abs(levels[9].sp - targetSp10) <= 1);
+
+    for (let index = 1; index < levels.length; index += 1) {
+      const previous = levels[index - 1];
+      const current = levels[index];
+      assert.ok(Number.isInteger(current.hp) && Number.isInteger(current.sp));
+      assert.ok(current.hp >= previous.hp);
+      assert.ok(current.sp >= previous.sp);
+      assert.ok(current.hp <= 999 && current.sp <= 999);
+      if (current.level <= 10) {
+        assert.ok(current.hp > previous.hp || current.sp > previous.sp);
+      }
+    }
+  }
+
+  for (let level = 1; level <= MAX_LEVEL; level += 1) {
+    const [warrior, thief, priest, mage] = jobs.map(([jobId]) => getLevelGrowth(jobId, level));
+    assert.ok(warrior.hp >= thief.hp && thief.hp >= priest.hp && priest.hp >= mage.hp);
+    assert.ok(mage.sp >= priest.sp && priest.sp >= thief.sp && thief.sp >= warrior.sp);
+  }
+});
+
 test("deck cost starts at three and rises only at prime-numbered levels", () => {
   for (const [level, deckCost] of [
     [1, 3], [2, 4], [3, 5], [4, 5], [5, 6],

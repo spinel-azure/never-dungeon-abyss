@@ -9,6 +9,8 @@ export const JOB_GROWTH = Object.freeze({
 });
 
 const VITAL_GROWTH_EXPONENT = 1.35;
+const VITAL_EARLY_BOOST = 0.009;
+const VITAL_GROWTH_JOIN_LEVEL = 50;
 const PRIME_LEVELS = Object.freeze(
   Array.from({ length: MAX_LEVEL + 1 }, (_, level) => level).filter(isPrime)
 );
@@ -39,7 +41,7 @@ const EXPERIENCE_ANCHORS = Object.freeze([
 export function getLevelGrowth(jobId, level) {
   const job = JOB_GROWTH[jobId] || JOB_GROWTH.warrior;
   const normalized = normalizeLevel(level);
-  const progress = ((normalized - 1) / (MAX_LEVEL - 1)) ** VITAL_GROWTH_EXPONENT;
+  const progress = getVitalGrowthProgress(normalized);
   return Object.freeze({
     level: normalized,
     hp: Math.round(job.hp + (job.hpMax - job.hp) * progress),
@@ -81,6 +83,17 @@ export function normalizeExperience(experience) {
 
 function normalizeLevel(level) {
   return Math.min(MAX_LEVEL, Math.max(1, Math.trunc(Number(level) || 1)));
+}
+
+function getVitalGrowthProgress(level) {
+  const progress = (level - 1) / (MAX_LEVEL - 1);
+  const standardProgress = progress ** VITAL_GROWTH_EXPONENT;
+
+  if (level >= VITAL_GROWTH_JOIN_LEVEL) return standardProgress;
+
+  const earlyPhase = (level - 1) / (VITAL_GROWTH_JOIN_LEVEL - 1);
+  const earlyBoost = VITAL_EARLY_BOOST * Math.sin(Math.PI * earlyPhase);
+  return Math.min(1, standardProgress + earlyBoost);
 }
 
 function isPrime(value) {
