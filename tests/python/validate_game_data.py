@@ -495,6 +495,14 @@ def mask_nested(body: str) -> str:
 
 
 def relevant_records(relative: Path, records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    if relative == Path("data/enemies.js"):
+        # Enemy objects can contain nested action objects with their own IDs.
+        # Only records carrying an enemy-level combat field belong to the
+        # exported enemy collection.
+        return [
+            record for record in records
+            if any(field in record for field in ("maxHp", "image", "experienceReward"))
+        ]
     if relative == Path("data/weapons.js"):
         return [record for record in records if "attack" in record]
     if relative == Path("data/classes.js"):
@@ -537,6 +545,10 @@ def id_collections(
     if relative == Path("data/items.js"):
         return {
             "items": [record for record in records if "maxOwned" in record],
+        }
+    if relative == Path("data/enemies.js"):
+        return {
+            "enemies": relevant_records(relative, records),
         }
     return {relative.as_posix(): records}
 
