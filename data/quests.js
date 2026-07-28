@@ -2,6 +2,12 @@ import { grantCard } from "./deck.js";
 
 export const MAX_ACTIVE_QUESTS = 3;
 export const GUILD_TRIAL_QUEST_ID = "guild_001_abyss_rat";
+export const FLOOR_SURVEY_QUEST_ID = "guild_003_b1f_survey";
+export const B2F_UNLOCK_QUEST_IDS = Object.freeze([
+  GUILD_TRIAL_QUEST_ID,
+  "guild_002_cave_slime",
+  FLOOR_SURVEY_QUEST_ID
+]);
 
 export const QUESTS = Object.freeze([
   Object.freeze({
@@ -32,10 +38,25 @@ export const QUESTS = Object.freeze([
     available: false
   }),
   Object.freeze({
-    id: "guild_003_abyss_rabbit",
+    id: FLOOR_SURVEY_QUEST_ID,
     number: "003",
-    title: "奈落ウサギ退治",
-    available: false
+    title: "迷宮地下1階調査",
+    client: "ギルド長",
+    objectiveType: "exploreFloor",
+    targetDepth: 1,
+    objectiveLabel: "B1Fを全て踏破する",
+    requiredCount: 100,
+    reward: Object.freeze({
+      type: "card",
+      cardId: "common_sp_up",
+      label: "デッキカード×1",
+      bonusGold: 200
+    }),
+    description: Object.freeze([
+      "奈落のB1Fを調査してほしい。ただし、奈落は入る度にその姿を",
+      "変える。一度も帰還せずに隅々まで調べてくれ。"
+    ]),
+    available: true
   })
 ]);
 
@@ -58,7 +79,7 @@ export function normalizeQuestState(candidate) {
     });
   }
   const completedQuestIds = Array.isArray(candidate?.completedQuestIds)
-    ? [...new Set(candidate.completedQuestIds.filter(id => getQuestById(id)?.available))]
+    ? [...new Set(candidate.completedQuestIds.filter(id => getQuestById(id)))]
     : [];
   return { active, completedQuestIds };
 }
@@ -109,6 +130,28 @@ export function recordEnemyDefeat(character, enemyId) {
   return updated ? { ...character, quests } : character;
 }
 
+export function recordFloorExploration(character, { depth, explored } = {}) {
+  const quests = normalizeQuestState(character?.quests);
+  const entry = quests.active[FLOOR_SURVEY_QUEST_ID];
+  const quest = getQuestById(FLOOR_SURVEY_QUEST_ID);
+  if (!entry || entry.progress >= quest.requiredCount) return character;
+
+  const progress = Number(depth) === quest.targetDepth
+    ? Math.min(
+      quest.requiredCount,
+      Array.isArray(explored)
+        ? explored.reduce(
+          (total, row) => total + (Array.isArray(row) ? row.filter(Boolean).length : 0),
+          0
+        )
+        : 0
+    )
+    : 0;
+  if (entry.progress === progress) return character;
+  entry.progress = progress;
+  return { ...character, quests };
+}
+
 export function reportQuest(character, questId) {
   const progress = getQuestProgress(character, questId);
   if (!progress.readyToReport) return result(character, false, "notReady");
@@ -144,7 +187,7 @@ export function hasActiveQuest(character) {
 export function isDungeonDepthUnlocked(character, depth) {
   const requestedDepth = Math.max(1, Math.floor(Number(depth) || 1));
   if (requestedDepth !== 2) return true;
-  return getQuestProgress(character, GUILD_TRIAL_QUEST_ID).completed;
+  return B2F_UNLOCK_QUEST_IDS.every(questId => getQuestProgress(character, questId).completed);
 }
 
 export function shouldForceEnemy(character, { depth, enemyId } = {}) {

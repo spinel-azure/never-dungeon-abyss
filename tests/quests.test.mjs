@@ -5,11 +5,13 @@ import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getOwnedCardCount } from "../data/deck.js";
 import {
   MAX_ACTIVE_QUESTS,
+  FLOOR_SURVEY_QUEST_ID,
   abandonQuest,
   acceptQuest,
   getQuestProgress,
   isDungeonDepthUnlocked,
   normalizeQuestState,
+  recordFloorExploration,
   recordEnemyDefeat,
   reportQuest,
   shouldForceEnemy
@@ -70,7 +72,7 @@ test("B1F forces rats only until the active quest reaches its target", () => {
   assert.equal(shouldForceEnemy(character, { depth: 1, enemyId: "abyss_rat" }), false);
 });
 
-test("B2F remains locked until quest 001 is reported as completed", () => {
+test("B2F remains locked until quests 001, 002, and 003 are completed", () => {
   let character = createInitialCharacter({ name: "TEST", job: "warrior" });
   assert.equal(isDungeonDepthUnlocked(character, 1), true);
   assert.equal(isDungeonDepthUnlocked(character, 2), false);
@@ -81,8 +83,49 @@ test("B2F remains locked until quest 001 is reported as completed", () => {
   assert.equal(getQuestProgress(character, QUEST_ID).readyToReport, true);
   assert.equal(isDungeonDepthUnlocked(character, 2), false);
   character = reportQuest(character, QUEST_ID).character;
+  assert.equal(isDungeonDepthUnlocked(character, 2), false);
+  character = {
+    ...character,
+    quests: {
+      ...character.quests,
+      completedQuestIds: [
+        ...character.quests.completedQuestIds,
+        "guild_002_cave_slime",
+        FLOOR_SURVEY_QUEST_ID
+      ]
+    }
+  };
   assert.equal(isDungeonDepthUnlocked(character, 2), true);
   assert.equal(isDungeonDepthUnlocked(character, 3), true);
+});
+
+test("quest 003 tracks B1F explored cells and resets before completion", () => {
+  let character = acceptQuest(
+    createInitialCharacter({ name: "TEST", job: "mage" }),
+    FLOOR_SURVEY_QUEST_ID
+  ).character;
+  const explored = Array.from({ length: 10 }, () => Array(10).fill(false));
+  explored[0][0] = true;
+  explored[0][1] = true;
+  character = recordFloorExploration(character, { depth: 1, explored });
+  assert.equal(getQuestProgress(character, FLOOR_SURVEY_QUEST_ID).progress, 2);
+  character = recordFloorExploration(character, { depth: 0, explored: [] });
+  assert.equal(getQuestProgress(character, FLOOR_SURVEY_QUEST_ID).progress, 0);
+});
+
+test("quest 003 completion survives return and grants an SP card and 200G", () => {
+  let character = acceptQuest(
+    createInitialCharacter({ name: "TEST", job: "priest" }),
+    FLOOR_SURVEY_QUEST_ID
+  ).character;
+  const explored = Array.from({ length: 10 }, () => Array(10).fill(true));
+  character = recordFloorExploration(character, { depth: 1, explored });
+  character = recordFloorExploration(character, { depth: 0, explored: [] });
+  assert.equal(getQuestProgress(character, FLOOR_SURVEY_QUEST_ID).readyToReport, true);
+  const report = reportQuest(character, FLOOR_SURVEY_QUEST_ID);
+  assert.equal(report.rewardCardId, "common_sp_up");
+  assert.equal(report.bonusGold, 200);
+  assert.equal(getOwnedCardCount(report.character.cards, "common_sp_up"), 1);
 });
 
 test("reporting a completed quest grants the C-rarity AGI card once", () => {

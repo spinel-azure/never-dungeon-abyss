@@ -85,9 +85,11 @@ import { purchaseItem } from "../data/commerce.js";
 import {
   abandonQuest,
   acceptQuest,
+  FLOOR_SURVEY_QUEST_ID,
   hasActiveQuest,
   isDungeonDepthUnlocked,
   recordEnemyDefeat,
+  recordFloorExploration,
   reportQuest,
   shouldForceEnemy
 } from "../data/quests.js";
@@ -148,6 +150,7 @@ import {
   const skillOverlay = document.getElementById("skillOverlay");
   const sceneTransition = document.getElementById("sceneTransition");
   const sceneTransitionTitle = document.getElementById("sceneTransitionTitle");
+  const questTutorialOverlay = document.getElementById("questTutorialOverlay");
   let sceneTransitionRunning = false;
   let cardGetTimer = 0;
   let itemGetTimer = 0;
@@ -212,7 +215,7 @@ import {
     returnToTown,
     beginBattle: beginRandomBattle,
     playNpcVoice: playSe,
-    onDungeonStep: applyDungeonPoisonStep,
+    onDungeonStep: handleDungeonStep,
     onStateChanged: scheduleAutosave
   });
   configureTown({
@@ -539,8 +542,36 @@ import {
     };
     updateCharacterUi();
     saveGame();
+    if (questId === FLOOR_SURVEY_QUEST_ID) showQuestTutorial();
     return { ...result, character };
   }
+
+  function showQuestTutorial() {
+    if (questTutorialOverlay) questTutorialOverlay.hidden = false;
+  }
+
+  function hideQuestTutorial() {
+    if (!questTutorialOverlay || questTutorialOverlay.hidden) return false;
+    questTutorialOverlay.hidden = true;
+    return true;
+  }
+
+  questTutorialOverlay?.addEventListener("click", hideQuestTutorial);
+  window.addEventListener("keydown", event => {
+    if (questTutorialOverlay?.hidden || !["KeyX", "KeyZ", "Enter", "Escape"].includes(event.code)) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    hideQuestTutorial();
+  }, { capture: true });
+  const dismissTutorialFromControl = event => {
+    if (!hideQuestTutorial()) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  };
+  ["click", "touchend"].forEach(type => {
+    buttonA?.addEventListener(type, dismissTutorialFromControl, { capture: true });
+    buttonB?.addEventListener(type, dismissTutorialFromControl, { capture: true });
+  });
 
   function abandonGuildRequest(questId) {
     const result = abandonQuest(character, questId);
@@ -766,6 +797,15 @@ import {
     return damage;
   }
 
+  function handleDungeonStep() {
+    applyDungeonPoisonStep();
+    if (!character) return;
+    const next = recordFloorExploration(character, { depth: currentDepth, explored });
+    if (next === character) return;
+    character = next;
+    updateCharacterUi();
+  }
+
   function purchaseTownItem(itemId) {
     if (!character) return { accepted: false, reason: "noCharacter" };
     const result = purchaseItem(character, itemId);
@@ -846,6 +886,7 @@ import {
   function finishBattleDefeat() {
     if (character) {
       Object.assign(character, createTempleRevival(character));
+      character = recordFloorExploration(character, { depth: 0, explored: [] });
     }
     worldLocation = "town";
     cancelAutoReturn(false);
@@ -965,6 +1006,10 @@ import {
   }
 
   function returnToTown() {
+    if (character) {
+      character = recordFloorExploration(character, { depth: 0, explored: [] });
+      updateCharacterUi();
+    }
     worldLocation = "town";
     cancelAutoReturn(false);
     setPlayerInputEnabled(false);
@@ -984,6 +1029,10 @@ import {
     startDir = chooseStartDirection();
     resetExplored();
     resetPlayer(startDir);
+    if (character) {
+      character = recordFloorExploration(character, { depth: currentDepth, explored });
+      updateCharacterUi();
+    }
     resetPresence();
     updateAutoReturnButton();
     updateHud();

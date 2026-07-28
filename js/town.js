@@ -1138,7 +1138,10 @@ function renderQuestDetail(quest, progress) {
   town.guildQuestDetail.replaceChildren(
     detailBlock("依頼人", quest.client),
     divider(),
-    detailBlock("討伐数", `${quest.targetName}を${quest.requiredCount}匹退治する。`),
+    detailBlock(
+      quest.objectiveType === "exploreFloor" ? "目的" : "討伐数",
+      quest.objectiveLabel || `${quest.targetName}を${quest.requiredCount}匹退治する。`
+    ),
     divider(),
     detailBlock("報酬", quest.reward.label),
     divider(),
