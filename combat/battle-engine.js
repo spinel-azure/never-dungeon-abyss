@@ -34,7 +34,7 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
   const next = structuredClone(battle);
   const playerAction = createPlayerAction(next.player, playerCommand, next.enemy);
   if (!playerAction.ok) return { battle: next, accepted: false, reason: playerAction.reason };
-  const enemyAction = createEnemyAction(next.enemy);
+  const enemyAction = createEnemyAction(next.enemy, rng);
   const order = resolveTurnOrder([
     { side: "player", actor: combatStats(next.player), action: playerAction.action },
     { side: "enemy", actor: combatStats(next.enemy), action: enemyAction }
@@ -130,8 +130,8 @@ export function createPlayerAction(player, command = {}, enemy = null) {
   return { ok: true, spCost: skill.spCost, action };
 }
 
-function createEnemyAction(enemy) {
-  return createNormalAttack({
+export function createEnemyAction(enemy, rng = Math.random) {
+  const attack = createNormalAttack({
     weapon: {
       id: `${enemy.id}_attack`,
       name: "攻撃",
@@ -140,6 +140,16 @@ function createEnemyAction(enemy) {
       element: "physical"
     }
   });
+  const special = enemy.specialAttack;
+  if (!special || Number(rng()) >= Math.max(0, Math.min(1, Number(special.usageRate) || 0))) {
+    return attack;
+  }
+  return {
+    ...attack,
+    id: special.id || attack.id,
+    name: special.name || attack.name,
+    effects: [...attack.effects, ...structuredClone(special.effects || [])]
+  };
 }
 
 function executeAction({ battle, action, actor, actorSide, target, targetSide, rng }) {

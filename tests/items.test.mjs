@@ -9,6 +9,7 @@ import {
   restorePresence, suppressPresence
 } from "../js/presence.js";
 import { grantEventItems, unlockGuildRequest } from "../js/character-services.js";
+import { purchaseItem } from "../data/commerce.js";
 
 function characterWith(itemId, amount = 1) {
   const character = createInitialCharacter({ name: "TEST", job: "warrior" });
@@ -43,6 +44,38 @@ test("antidote cures poison and restores 15 HP", () => {
   const result = resolveFieldItemUse({ character, itemId: "antidote", context: "town" });
   assert.equal(result.character.hp, 25);
   assert.equal(result.character.statuses.length, 0);
+  assert.equal(result.character.condition, "GOOD");
+});
+
+test("shop and temple purchases spend gold and grant the selected item", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.gold = 210;
+  for (const [itemId, price] of [
+    ["healing_potion", 20],
+    ["antidote", 30],
+    ["guiding_torch", 40],
+    ["exorcism_talisman", 50],
+    ["holy_water", 70]
+  ]) {
+    const result = purchaseItem(character, itemId);
+    assert.equal(result.accepted, true);
+    assert.equal(result.cost, price);
+    character = result.character;
+    assert.equal(getItemCount(character.inventory, itemId), 1);
+  }
+  assert.equal(character.gold, 0);
+});
+
+test("purchases reject insufficient gold and full inventories", () => {
+  const poor = createInitialCharacter({ name: "TEST", job: "warrior" });
+  assert.equal(purchaseItem(poor, "healing_potion").reason, "insufficientGold");
+
+  const full = characterWith("healing_potion", 99);
+  full.gold = 999;
+  const result = purchaseItem(full, "healing_potion");
+  assert.equal(result.accepted, false);
+  assert.equal(result.reason, "maxOwned");
+  assert.equal(result.character.gold, 999);
 });
 
 test("torch and talisman expose dungeon environment effects", () => {

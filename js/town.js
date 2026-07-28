@@ -1,5 +1,6 @@
 import { CHARACTER_JOBS, TOWN_FACILITIES, getTownFacility } from "../data/town.js";
 import { QUESTS, getQuestProgress, hasActiveQuest } from "../data/quests.js";
+import { getItem } from "../data/items.js";
 
 const FACILITY_COMMANDS = Object.freeze({
   inn: [
@@ -11,7 +12,7 @@ const FACILITY_COMMANDS = Object.freeze({
     ["return", "町へ戻る"], ["empty-1", ""], ["empty-2", ""]
   ],
   temple: [
-    ["heal", "治療"], ["donate", "寄付"], ["talk", "話す"],
+    ["heal", "治療"], ["donate", "寄進"], ["talk", "話す"],
     ["return", "町へ戻る"], ["empty-1", ""], ["empty-2", ""]
   ],
   shop: [
@@ -69,6 +70,7 @@ const town = {
   onEnterDungeon: () => {},
   onStay: () => {},
   onHeal: () => {},
+  onPurchaseItem: () => null,
   onEditDeck: () => {},
   onTalk: () => "",
   onAcceptRequest: () => "",
@@ -98,6 +100,14 @@ export function configureTown(options) {
   town.guildQuestTitle = document.querySelector("#guildQuestTitle");
   town.guildQuestList = document.querySelector("#guildQuestList");
   town.guildQuestDetail = document.querySelector("#guildQuestDetail");
+  town.commerceOverlay = document.querySelector("#townCommerceOverlay");
+  town.commerceTitle = document.querySelector("#townCommerceTitle");
+  town.commerceList = document.querySelector("#townCommerceList");
+  town.commerceGold = document.querySelector("#townCommerceGold");
+  town.commerceIndex = 0;
+  town.commercePointerArmedIndex = -1;
+  town.commerceKind = "";
+  town.commerceItems = [];
   town.portraitPreloads = TOWN_FACILITIES
     .filter(facility => facility.image)
     .map(facility => {
@@ -182,6 +192,21 @@ export function configureTown(options) {
       }
     });
     return button;
+  });
+  town.commerceList.addEventListener("click", event => {
+    const button = event.target.closest("[data-commerce-index]");
+    if (!button) return;
+    const index = Number(button.dataset.commerceIndex);
+    if (!Number.isInteger(index)) return;
+    town.playSe("cursorMove");
+    town.commerceIndex = index;
+    renderCommerceSelection();
+    if (town.commercePointerArmedIndex === index) {
+      town.commercePointerArmedIndex = -1;
+      purchaseSelectedCommerceItem();
+    } else {
+      town.commercePointerArmedIndex = index;
+    }
   });
   town.registration.addEventListener("submit", event => {
     event.preventDefault();
@@ -270,6 +295,7 @@ export function handleTownInput(action) {
     completeTownTypewriter();
     return true;
   }
+  if (town.mode === "commerce") return handleCommerceInput(action);
   if (town.mode.startsWith("quest")) return handleQuestInput(action);
   if (town.mode === "registration") return handleRegistrationInput(action);
   if (town.mode === "dungeonEntrance") return handleEntranceInput(action);
@@ -720,6 +746,7 @@ function renderFacility() {
   const facility = TOWN_FACILITIES[town.selectedIndex] || getTownFacility("guild");
   town.mosaic.hidden = true;
   town.guildQuestOverlay.hidden = true;
+  town.commerceOverlay.hidden = true;
   town.facilityButtons.forEach((button, index) => {
     const unavailable = Boolean(TOWN_FACILITIES[index].unavailable);
     button.disabled = false;
@@ -822,6 +849,8 @@ function showFacilityCommands(facilityId) {
     const available = id === "return"
       || id === "stay"
       || id === "heal"
+      || (facilityId === "temple" && id === "donate")
+      || (facilityId === "shop" && id === "buy")
       || id === "deck"
       || (facilityId === "guild" && id === "accept" && requestUnlocked)
       || (facilityId === "guild" && id === "report" && reportAvailable)
@@ -858,6 +887,18 @@ function activateFacilityService(command) {
     town.onEditDeck();
     return true;
   }
+  if (command === "donate") {
+    const facility = TOWN_FACILITIES[town.selectedIndex];
+    if (facility?.id !== "temple") return false;
+    openCommerce("donate");
+    return true;
+  }
+  if (command === "buy") {
+    const facility = TOWN_FACILITIES[town.selectedIndex];
+    if (facility?.id !== "shop") return false;
+    openCommerce("buy");
+    return true;
+  }
   if (command === "talk") {
     const facility = TOWN_FACILITIES[town.selectedIndex];
     if (!["guild", "inn", "temple", "shop", "library"].includes(facility?.id)) return false;
@@ -890,6 +931,96 @@ function activateFacilityService(command) {
     return true;
   }
   return false;
+}
+
+function openCommerce(kind) {
+  const ids = kind === "donate"
+    ? ["exorcism_talisman", "holy_water"]
+    : ["healing_potion", "antidote", "guiding_torch"];
+  town.mode = "commerce";
+  town.commerceKind = kind;
+  town.commerceItems = ids.map(getItem).filter(Boolean);
+  town.commerceIndex = 0;
+  town.commercePointerArmedIndex = -1;
+  town.commerceTitle.textContent = kind === "donate" ? "寄進" : "購入";
+  town.commerceOverlay.hidden = false;
+  town.guildQuestOverlay.hidden = true;
+  town.messageEl.textContent = kind === "donate"
+    ? "司祭：いずれを女神へ寄進されますか？\n＊Aボタン：決定　Bボタン：戻る"
+    : "女主人：何を買うんだい？\n＊Aボタン：決定　Bボタン：戻る";
+  renderCommerce();
+  resetTownViewport();
+}
+
+function handleCommerceInput(action) {
+  if (action === "cancel") {
+    town.playSe("cancel");
+    town.mode = "facilityMenu";
+    town.commercePointerArmedIndex = -1;
+    renderFacility();
+    return true;
+  }
+  if (["up", "down", "left", "right"].includes(action)) {
+    town.playSe("cursorMove");
+    const amount = action === "up" || action === "left" ? -1 : 1;
+    town.commerceIndex = (
+      town.commerceIndex + amount + town.commerceItems.length
+    ) % town.commerceItems.length;
+    town.commercePointerArmedIndex = -1;
+    renderCommerceSelection();
+    return true;
+  }
+  if (action === "confirm") {
+    purchaseSelectedCommerceItem();
+    return true;
+  }
+  return true;
+}
+
+function purchaseSelectedCommerceItem() {
+  const item = town.commerceItems[town.commerceIndex];
+  if (!item) return;
+  const result = town.onPurchaseItem(item.id);
+  if (!result?.accepted) {
+    town.playSe("cursorMove");
+    town.messageEl.textContent = result?.reason === "insufficientGold"
+      ? `${town.commerceKind === "donate" ? "司祭" : "女主人"}：ゴールドが足りません。`
+      : `${town.commerceKind === "donate" ? "司祭" : "女主人"}：これ以上は持てないようですね。`;
+    return;
+  }
+  town.playSe("item");
+  const keeper = town.commerceKind === "donate" ? "司祭" : "女主人";
+  town.messageEl.textContent = town.commerceKind === "donate"
+    ? `${keeper}：女神のご加護を。${item.name}を授けましょう。`
+    : `${keeper}：毎度あり。${item.name}を受け取りな。`;
+  town.commercePointerArmedIndex = -1;
+  renderCommerce();
+  town.onStateChanged();
+}
+
+function renderCommerce() {
+  town.commerceList.replaceChildren(...town.commerceItems.map((item, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "town-commerce-entry";
+    button.dataset.commerceIndex = String(index);
+    const name = document.createElement("span");
+    name.textContent = item.name;
+    const price = document.createElement("small");
+    price.textContent = `${item.buyPrice}G`;
+    button.append(name, price);
+    return button;
+  }));
+  if (town.commerceGold) {
+    town.commerceGold.textContent = String(Math.max(0, Math.floor(Number(town.getCharacter()?.gold) || 0)));
+  }
+  renderCommerceSelection();
+}
+
+function renderCommerceSelection() {
+  [...town.commerceList.children].forEach((button, index) => {
+    button.classList.toggle("is-selected", index === town.commerceIndex);
+  });
 }
 
 function openGuildQuestList(kind) {

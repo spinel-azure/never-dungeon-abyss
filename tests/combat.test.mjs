@@ -21,10 +21,10 @@ import {
   resolveEnvironmentSave
 } from "../combat/resolve-environment-save.js";
 import { resolveEscapeAttempt } from "../combat/resolve-escape.js";
-import { createBattleState, resolveBattleRound } from "../combat/battle-engine.js";
+import { createBattleState, createEnemyAction, resolveBattleRound } from "../combat/battle-engine.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { CHARACTER_JOBS } from "../data/town.js";
-import { getEnemyById } from "../data/enemies.js";
+import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
 import { CARDS, collectCardStatBonuses, getCardById } from "../data/cards.js";
 import { calculateDeckCost, DECK_SLOT_COUNT, grantCard, normalizeCardState, setDeckSlot } from "../data/deck.js";
 import { resolveTurnOrder, createGuardAction } from "../combat/resolve-turn-order.js";
@@ -104,6 +104,24 @@ test("early enemies use the MVP difficulty profile", () => {
   );
   assert.equal(rat.experienceReward, 4);
   assert.equal(slime.experienceReward, 6);
+});
+
+test("B2F adds rabbit, undead and poison slime encounters", () => {
+  assert.ok(["abyss_rat", "cave_slime"].includes(getRandomEnemy({ depth: 1, rng: () => 0.99 }).id));
+  assert.equal(getRandomEnemy({ depth: 2, rng: () => 0.99 }).id, "poison_slime");
+  assert.equal(getEnemyById("abyss_rabbit").minimumDepth, 2);
+  assert.equal(getEnemyById("wandering_dead").race, "undead");
+  assert.equal(getEnemyById("poison_slime").minimumDepth, 2);
+});
+
+test("poison slime sometimes selects an attack that can inflict poison", () => {
+  const enemy = createEnemyCombatant(getEnemyById("poison_slime"));
+  const special = createEnemyAction(enemy, () => 0.2);
+  const normal = createEnemyAction(enemy, () => 0.3);
+  assert.equal(special.name, "毒攻撃");
+  assert.equal(special.effects[0].statusId, "poison");
+  assert.equal(normal.name, "攻撃");
+  assert.equal(normal.effects.length, 0);
 });
 
 test("all initial classes can damage the adjusted cave slime", () => {

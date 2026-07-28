@@ -1,6 +1,6 @@
 .town-screen{display:block;width:100%;margin:0;color:#f7fbff;font-family:"GameFont",sans-serif}
 .town-screen[hidden]{display:none}
-.town-background[hidden],.town-mosaic[hidden],.town-portrait[hidden],.town-portrait-placeholder[hidden],.guild-registration[hidden],.card-get-effect[hidden],.guild-quest-overlay[hidden],.guild-quest-list[hidden],.guild-quest-detail[hidden]{display:none}
+.town-background[hidden],.town-mosaic[hidden],.town-portrait[hidden],.town-portrait-placeholder[hidden],.guild-registration[hidden],.card-get-effect[hidden],.guild-quest-overlay[hidden],.guild-quest-list[hidden],.guild-quest-detail[hidden],.town-commerce-overlay[hidden]{display:none}
 .town-portrait-frame{position:relative;box-sizing:content-box;width:calc(100% - 2px);aspect-ratio:16/9;overflow:hidden;border:1px solid #4f493b;border-radius:7px;background:radial-gradient(circle at 50% 28%,#1d201b,#080a08 68%,#020302);box-shadow:inset 0 0 0 1px #ffffff0d}
 .town-background{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center;image-rendering:auto}
 .town-mosaic{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;image-rendering:pixelated}
@@ -24,6 +24,9 @@
 .guild-quest-detail p{margin:0}.guild-quest-detail strong{font-weight:400}.guild-quest-divider{display:flex;align-items:center;gap:6px;margin:clamp(2px,.45vw,5px) 0;color:#555}.guild-quest-divider::before,.guild-quest-divider::after{content:"";height:1px;flex:1;background:#777}.guild-quest-divider span{font-size:.65em}
 .guild-quest-progress{margin-top:4px!important;color:#443b22;font-size:.85em}
 @media(max-width:700px){.guild-quest-title{top:11%}.guild-quest-list{left:22%;top:32%;width:54%}.guild-quest-detail{left:27%;top:29%;width:46%;font-size:clamp(8px,1.95vw,13px);line-height:1.12}}
+.town-commerce-overlay{position:absolute;inset:0;z-index:4;display:grid;align-content:center;justify-items:center;gap:clamp(10px,2vw,18px);padding:clamp(36px,7vw,72px);background:rgba(0,0,0,.82);color:#fff;font-family:"GameFont",sans-serif}
+.town-commerce-title{margin:0;color:#fff;font:clamp(30px,6vw,58px)/1 "PixelFont",monospace;text-shadow:0 0 10px #57e8ff}
+.town-commerce-list{display:grid;width:min(76%,520px);gap:8px}.town-commerce-entry{display:grid;grid-template-columns:1fr auto;width:100%;padding:10px 14px;border:1px solid #319ac0;border-radius:5px;background:#020809e8;color:#fff;font:clamp(15px,3vw,25px)/1.2 "GameFont",sans-serif;text-align:left}.town-commerce-entry.is-selected{border-color:#a9f7ff;background:#123640;box-shadow:0 0 10px #54eaff}.town-commerce-entry small{font:inherit;color:#ffe978}.town-commerce-gold{margin:0;color:#73e7ff;font:clamp(16px,3vw,25px)/1 "PixelFont",monospace}.town-commerce-gold strong{color:#fff;font-weight:400}
 .level-up-effect{position:absolute;z-index:5;left:50%;top:50%;width:max-content;color:#fff;font:200px/1 "PixelFont",monospace;white-space:nowrap;-webkit-text-stroke:10px #000;paint-order:stroke fill;filter:drop-shadow(0 8px 4px #000);pointer-events:none;transform:translate(-50%,40%);opacity:0}
 .level-up-effect.is-active{animation:level-up-popup 3.2s cubic-bezier(.18,.72,.25,1) both}
 @keyframes level-up-popup{0%{opacity:0;transform:translate(-50%,40%) scale(.88)}22%{opacity:1;transform:translate(-50%,-50%) scale(1)}58%{opacity:1;transform:translate(-50%,-55%) scale(1)}100%{opacity:0;transform:translate(-50%,-95%) scale(1.02)}}

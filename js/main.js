@@ -80,6 +80,7 @@ import { grantCard } from "../data/deck.js";
 import { collectCardStatBonuses, getCardById } from "../data/cards.js";
 import { drawCardCanvas } from "./card-canvas.js";
 import { getItem } from "../data/items.js";
+import { purchaseItem } from "../data/commerce.js";
 import {
   abandonQuest,
   acceptQuest,
@@ -215,6 +216,7 @@ import {
     onEnterDungeon: enterDungeonFromTown,
     onStay: stayAtInn,
     onHeal: healAtTemple,
+    onPurchaseItem: purchaseTownItem,
     onEditDeck: openDeckEditor,
     onTalk: talkAtFacility,
     onAcceptRequest: acceptGuildRequest,
@@ -740,8 +742,23 @@ import {
   function updateCharacterFromBattle(changes) {
     if (!character) return;
     Object.assign(character, changes);
+    character.condition = hasCharacterStatus(character, "poison") ? "POISON" : "GOOD";
     updateCharacterUi();
     scheduleAutosave();
+  }
+
+  function purchaseTownItem(itemId) {
+    if (!character) return { accepted: false, reason: "noCharacter" };
+    const result = purchaseItem(character, itemId);
+    if (!result.accepted) return result;
+    character = result.character;
+    updateCharacterUi();
+    saveGame();
+    return { ...result, character };
+  }
+
+  function hasCharacterStatus(target, statusId) {
+    return (target?.statuses || []).some(status => (status.statusId || status.id) === statusId);
   }
 
   async function useFieldSkill(skillId) {

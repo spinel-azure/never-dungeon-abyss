@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="css/style.css?v=20260727-1">
   <link rel="stylesheet" href="css/game-menu.css?v=20260727-9">
   <link rel="stylesheet" href="css/title-screen.css?v=20260723-4">
-  <link rel="stylesheet" href="css/town.css?v=20260728-14">
+  <link rel="stylesheet" href="css/town.css?v=20260728-15">
   <link rel="stylesheet" href="css/scene-transition.css?v=20260723-2">
   <link rel="stylesheet" href="css/battle.css?v=20260726-3">
   <link rel="stylesheet" href="css/skill-overlay.css?v=20260727-1">
@@ -53,6 +53,11 @@
           <h2 id="guildQuestTitle" class="guild-quest-title">依頼受注</h2>
           <div id="guildQuestList" class="guild-quest-list"></div>
           <article id="guildQuestDetail" class="guild-quest-detail" hidden></article>
+        </section>
+        <section id="townCommerceOverlay" class="town-commerce-overlay" aria-label="商品選択" hidden>
+          <h2 id="townCommerceTitle" class="town-commerce-title">購入</h2>
+          <div id="townCommerceList" class="town-commerce-list"></div>
+          <p class="town-commerce-gold">所持金 <strong id="townCommerceGold">0</strong> G</p>
         </section>
         <div id="levelUpEffect" class="level-up-effect" aria-hidden="true" hidden>LEVEL UP!!</div>
         <div id="questCompleteEffect" class="level-up-effect" aria-hidden="true" hidden>COMPLETE!!</div>
@@ -230,6 +235,6 @@
   </section>
 </main>
   <script type="module" src="js/title-screen.js?v=20260722-1"></script>
-  <script type="module" src="js/main.js?v=20260728-1"></script>
+  <script type="module" src="js/main.js?v=20260728-2"></script>
 </body>
 </html>

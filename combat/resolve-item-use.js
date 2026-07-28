@@ -37,6 +37,7 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
       environment.suppressPresenceSteps = effect.value;
     }
   }
+  next.condition = hasPoison(next) ? "POISON" : "GOOD";
   next.inventory = consumeItem(next.inventory, itemId).inventory;
   return {
     accepted: true,
