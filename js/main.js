@@ -71,6 +71,7 @@ import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enem
 import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js";
 import { awardBattleExperience, createTempleRevival, grantEventItems, resolveInnStay, unlockGuildRequest } from "./character-services.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
+import { getNonlethalPoisonDamage } from "../combat/status-lifecycle.js";
 import { getNextLevelExperience, MAX_LEVEL } from "../data/growth.js";
 import { resolveFieldSkill } from "../combat/resolve-field-skill.js";
 import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from "./skill-overlay.js";
@@ -85,6 +86,7 @@ import {
   abandonQuest,
   acceptQuest,
   hasActiveQuest,
+  isDungeonDepthUnlocked,
   recordEnemyDefeat,
   reportQuest,
   shouldForceEnemy
@@ -192,6 +194,11 @@ import {
     cancelAutoReturn,
     continueAutoReturn,
     messageFor,
+    getDescendBlockMessage: () => (
+      isDungeonDepthUnlocked(character, currentDepth + 1)
+        ? ""
+        : "まだこの先に進むのは止めた方がよさそうだ。"
+    ),
     descendFloor,
     playSe,
     playStairsSequence: () => playSeSequence("stairs", 3),
@@ -205,6 +212,7 @@ import {
     returnToTown,
     beginBattle: beginRandomBattle,
     playNpcVoice: playSe,
+    onDungeonStep: applyDungeonPoisonStep,
     onStateChanged: scheduleAutosave
   });
   configureTown({
@@ -745,6 +753,17 @@ import {
     character.condition = hasCharacterStatus(character, "poison") ? "POISON" : "GOOD";
     updateCharacterUi();
     scheduleAutosave();
+  }
+
+  function applyDungeonPoisonStep() {
+    if (!character || worldLocation !== "dungeon" || !hasCharacterStatus(character, "poison")) return 0;
+    const damage = getNonlethalPoisonDamage(character.hp, 1);
+    if (damage <= 0) return 0;
+    character.hp -= damage;
+    character.alive = true;
+    character.condition = "POISON";
+    updateCharacterUi();
+    return damage;
   }
 
   function purchaseTownItem(itemId) {

@@ -1,6 +1,7 @@
 import { grantCard } from "./deck.js";
 
 export const MAX_ACTIVE_QUESTS = 3;
+export const GUILD_TRIAL_QUEST_ID = "guild_001_abyss_rat";
 
 export const QUESTS = Object.freeze([
   Object.freeze({
@@ -140,8 +141,14 @@ export function hasActiveQuest(character) {
   return Object.keys(normalizeQuestState(character?.quests).active).length > 0;
 }
 
+export function isDungeonDepthUnlocked(character, depth) {
+  const requestedDepth = Math.max(1, Math.floor(Number(depth) || 1));
+  if (requestedDepth !== 2) return true;
+  return getQuestProgress(character, GUILD_TRIAL_QUEST_ID).completed;
+}
+
 export function shouldForceEnemy(character, { depth, enemyId } = {}) {
-  const progress = getQuestProgress(character, "guild_001_abyss_rat");
+  const progress = getQuestProgress(character, GUILD_TRIAL_QUEST_ID);
   return Number(depth) === 1
     && progress.active
     && !progress.readyToReport

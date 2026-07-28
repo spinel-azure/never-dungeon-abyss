@@ -29,6 +29,7 @@ const hooks = {
   cancelAutoReturn: () => {},
   continueAutoReturn: () => {},
   messageFor: () => "",
+  getDescendBlockMessage: () => "",
   descendFloor: () => {},
   playSe: () => {},
   playStairsSequence: () => Promise.resolve(),
@@ -39,6 +40,7 @@ const hooks = {
   returnToTown: () => {},
   beginBattle: () => {},
   playNpcVoice: () => {},
+  onDungeonStep: () => {},
   onStateChanged: () => {}
 };
 
@@ -147,6 +149,7 @@ export function updateAnimation(now) {
         markExplored(state.gridX, state.gridY);
         const movedInDarkness = state.torchFuel <= 0;
         if (!torchFuelDisabled) state.torchFuel = Math.max(0, state.torchFuel - TORCH_FUEL_STEP);
+        hooks.onDungeonStep();
         const npc = getNpcAt(state.gridX, state.gridY);
         const treasure = getTreasureAt(state.gridX, state.gridY);
         const isStairs = a.cellType === "stairsUp" || a.cellType === "stairsDown";
@@ -354,6 +357,13 @@ function confirmStairsPrompt() {
   const cellType = state.overlayEvent?.cellType;
   state.stairsPromptDismissed = false;
   if (cellType === "stairsDown") {
+    const blockedMessage = hooks.getDescendBlockMessage();
+    if (blockedMessage) {
+      state.overlayEvent = null;
+      hooks.say(blockedMessage);
+      hooks.onStateChanged();
+      return;
+    }
     const transition = { type: "stairsTransition", canCancel: false };
     state.overlayEvent = transition;
     hooks.say("");

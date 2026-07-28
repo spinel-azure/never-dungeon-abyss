@@ -66,6 +66,12 @@ export function resolveEndOfAction({ statuses = [], maxHp = 0 } = {}) {
   return { statuses: next, poisonDamage };
 }
 
+export function getNonlethalPoisonDamage(currentHp, requestedDamage) {
+  const hp = Math.max(0, Math.floor(Number(currentHp) || 0));
+  const damage = Math.max(0, Math.floor(Number(requestedDamage) || 0));
+  return Math.min(damage, Math.max(0, hp - 1));
+}
+
 export function getPhysicalDamageReduction(statuses = []) {
   return Math.max(0, ...statuses
     .filter(status => status.active !== false)

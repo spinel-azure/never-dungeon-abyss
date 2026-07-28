@@ -31,6 +31,7 @@ import { resolveTurnOrder, createGuardAction } from "../combat/resolve-turn-orde
 import {
   applyStatus,
   applyStatusApplications,
+  getNonlethalPoisonDamage,
   resolveActionOpportunity,
   resolveEndOfAction
 } from "../combat/status-lifecycle.js";
@@ -456,6 +457,30 @@ test("poison damages at target action end and lasts three ticks", () => {
   }
   assert.deepEqual(damages, [5, 5, 5]);
   assert.equal(statuses.length, 0);
+});
+
+test("poison damage stops at one HP", () => {
+  assert.equal(getNonlethalPoisonDamage(10, 5), 5);
+  assert.equal(getNonlethalPoisonDamage(3, 5), 2);
+  assert.equal(getNonlethalPoisonDamage(1, 5), 0);
+
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.hp = 3;
+  character.maxHp = 100;
+  character.statuses = applyStatus([], { statusId: "poison", success: true });
+  const defeatedEnemy = {
+    id: "test_enemy", name: "TEST ENEMY", race: "beast", hp: 0, maxHp: 1,
+    sp: 0, maxSp: 0, stats: { str: 1, int: 1, agi: 1, dex: 1, luc: 1 },
+    def: 0, attack: 0, experienceReward: 0, statuses: [], equipment: {},
+    elementMultipliers: {}, statusResistances: {}, isBoss: false, alive: false
+  };
+  const result = resolveBattleRound({
+    battle: createBattleState({ character, enemy: defeatedEnemy }),
+    playerCommand: { type: "wait" },
+    rng: fixed(0)
+  });
+  assert.equal(result.battle.player.hp, 1);
+  assert.equal(result.battle.player.alive, true);
 });
 
 test("same status refreshes instead of stacking", () => {

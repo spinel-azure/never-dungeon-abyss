@@ -8,6 +8,7 @@ import { createGuardAction, resolveTurnOrder } from "./resolve-turn-order.js";
 import {
   applyStatusApplications,
   getDefenseMultiplier,
+  getNonlethalPoisonDamage,
   getPhysicalDamageReduction,
   getStatusResistanceBonus,
   resolveActionOpportunity,
@@ -284,16 +285,19 @@ function finishAction(battle, side) {
   const end = resolveEndOfAction({ statuses: actor.statuses, maxHp: actor.maxHp });
   actor.statuses = end.statuses;
   if (end.poisonDamage > 0 && actor.hp > 0) {
-    actor.hp = Math.max(0, actor.hp - end.poisonDamage);
+    const actualPoisonDamage = getNonlethalPoisonDamage(actor.hp, end.poisonDamage);
+    actor.hp -= actualPoisonDamage;
     actor.alive = actor.hp > 0;
-    battle.log.push(`${actor.name}は毒で${end.poisonDamage}ダメージ。`);
-    battle.presentationEvents.push({
-      type: "poisonDamage",
-      actorSide: null,
-      targetSide: side,
-      amount: end.poisonDamage,
-      message: `毒で${end.poisonDamage}ダメージ！`
-    });
+    if (actualPoisonDamage > 0) {
+      battle.log.push(`${actor.name}は毒で${actualPoisonDamage}ダメージ。`);
+      battle.presentationEvents.push({
+        type: "poisonDamage",
+        actorSide: null,
+        targetSide: side,
+        amount: actualPoisonDamage,
+        message: `毒で${actualPoisonDamage}ダメージ！`
+      });
+    }
   }
 }
 

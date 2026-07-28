@@ -444,10 +444,13 @@ function handleQuestInput(action) {
     const result = town.onAcceptRequest(quest?.id);
     if (result?.accepted) {
       town.playSe("confirm");
-      town.messageEl.textContent = "ギルド長：よし。頼んだぞ。";
+      const acceptedMessage = quest?.id === "guild_001_abyss_rat"
+        ? "ギルド長：これでお前の実力を試させてもらうぜ。"
+        : "ギルド長：よし。頼んだぞ。";
+      town.messageEl.textContent = acceptedMessage;
       town.mode = "facilityMenu";
       renderFacility();
-      town.messageEl.textContent = "ギルド長：よし。頼んだぞ。";
+      town.messageEl.textContent = acceptedMessage;
     } else {
       town.playSe("cursorMove");
       town.messageEl.textContent = questFailureMessage(result?.reason);
@@ -463,7 +466,9 @@ function handleQuestInput(action) {
     if (result?.accepted) {
       town.mode = "facilityMenu";
       renderFacility();
-      town.messageEl.textContent = "ギルド長：依頼達成、よくやってくれた！また頼むぜ。";
+      town.messageEl.textContent = quest?.id === "guild_001_abyss_rat"
+        ? "ギルド長：よくやってくれた！これなら先に進んでも大丈夫だろう。もっとも、生き残れるかはお前次第、だがな。"
+        : "ギルド長：依頼達成、よくやってくれた！また頼むぜ。";
     } else {
       openGuildQuestList("report");
       town.messageEl.textContent = "ギルド長：まだ達成条件を満たしていないようだな。";

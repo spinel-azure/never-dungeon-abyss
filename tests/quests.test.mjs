@@ -8,6 +8,7 @@ import {
   abandonQuest,
   acceptQuest,
   getQuestProgress,
+  isDungeonDepthUnlocked,
   normalizeQuestState,
   recordEnemyDefeat,
   reportQuest,
@@ -67,6 +68,21 @@ test("B1F forces rats only until the active quest reaches its target", () => {
     character = recordEnemyDefeat(character, "abyss_rat");
   }
   assert.equal(shouldForceEnemy(character, { depth: 1, enemyId: "abyss_rat" }), false);
+});
+
+test("B2F remains locked until quest 001 is reported as completed", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  assert.equal(isDungeonDepthUnlocked(character, 1), true);
+  assert.equal(isDungeonDepthUnlocked(character, 2), false);
+  character = acceptQuest(character, QUEST_ID).character;
+  for (let index = 0; index < 15; index += 1) {
+    character = recordEnemyDefeat(character, "abyss_rat");
+  }
+  assert.equal(getQuestProgress(character, QUEST_ID).readyToReport, true);
+  assert.equal(isDungeonDepthUnlocked(character, 2), false);
+  character = reportQuest(character, QUEST_ID).character;
+  assert.equal(isDungeonDepthUnlocked(character, 2), true);
+  assert.equal(isDungeonDepthUnlocked(character, 3), true);
 });
 
 test("reporting a completed quest grants the C-rarity AGI card once", () => {
