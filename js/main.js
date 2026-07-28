@@ -1064,8 +1064,7 @@ import {
     commandRoot: dungeonCommands,
     getCharacter: () => character,
     onDeckChanged: cards => {
-      character.cards = cards;
-      character.cardStatBonuses = collectCardStatBonuses(cards.deckSlots);
+      character = normalizeCharacter({ ...character, cards });
       updateCharacterUi();
       scheduleAutosave();
     },

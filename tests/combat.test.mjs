@@ -700,6 +700,26 @@ test("the three initial common cards use the Excel effect values", () => {
   assert.deepEqual(getCardById("common_lucky_charm")?.statBonus, { luc: 1 });
 });
 
+test("common HP and SP cards stack up to six copies and raise maximum vitals", () => {
+  const initial = createInitialCharacter({ name: "TEST", job: "mage" });
+  const base = normalizeCharacter({ ...initial, level: 5 });
+  let hpCards = grantCard(base.cards, "common_hp_up", 99, base.deckCost).cards;
+  assert.equal(hpCards.ownedCardCounts.common_hp_up, 99);
+  for (let index = 0; index < DECK_SLOT_COUNT; index += 1) {
+    hpCards = setDeckSlot(hpCards, index, "common_hp_up", base.deckCost);
+  }
+  const hpCharacter = normalizeCharacter({ ...base, cards: hpCards });
+  assert.equal(hpCharacter.cards.deckSlots.filter(Boolean).length, 6);
+  assert.equal(hpCharacter.maxHp, base.maxHp + 30);
+
+  let spCards = grantCard(base.cards, "common_sp_up", 6, base.deckCost).cards;
+  for (let index = 0; index < DECK_SLOT_COUNT; index += 1) {
+    spCards = setDeckSlot(spCards, index, "common_sp_up", base.deckCost);
+  }
+  const spCharacter = normalizeCharacter({ ...base, cards: spCards });
+  assert.equal(spCharacter.maxSp, base.maxSp + 30);
+});
+
 test("main card registry contains every rarity and all twelve zodiac cards", () => {
   assert.deepEqual([...new Set(CARDS.map(card => card.rarity))].sort(), ["C", "L", "R", "SR", "Z"]);
   assert.equal(CARDS.filter(card => card.rarity === "Z").length, 12);

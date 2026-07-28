@@ -30,6 +30,20 @@ const STANDARD_CARDS = [
     maxOwned: 99, maxCopies: 6
   },
   {
+    id: "common_hp_up", rarity: "C", cost: 1,
+    name: "HP +5", nameJa: "HP+5", concept: "MAX HP +5",
+    category: "ability", effectId: "max_hp_up", effectValue: 5,
+    statBonus: Object.freeze({ maxHp: 5 }), iconId: "health-pulse",
+    maxOwned: 99, maxCopies: 6
+  },
+  {
+    id: "common_sp_up", rarity: "C", cost: 1,
+    name: "SP +5", nameJa: "SP+5", concept: "MAX SP +5",
+    category: "ability", effectId: "max_sp_up", effectValue: 5,
+    statBonus: Object.freeze({ maxSp: 5 }), iconId: "mana-core",
+    maxOwned: 99, maxCopies: 6
+  },
+  {
     id: "rare_defense_up", rarity: "R", cost: 2,
     name: "Defense Up", nameJa: "防御力上昇", concept: "DEF +5",
     category: "ability", effectId: "defense_up", effectValue: 5,
