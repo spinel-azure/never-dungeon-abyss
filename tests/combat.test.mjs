@@ -748,6 +748,10 @@ test("common HP and SP cards stack up to six copies and raise maximum vitals", (
   const hpCharacter = normalizeCharacter({ ...base, cards: hpCards });
   assert.equal(hpCharacter.cards.deckSlots.filter(Boolean).length, 6);
   assert.equal(hpCharacter.maxHp, base.maxHp + 30);
+  hpCharacter.hp = 1;
+  const hpStay = resolveInnStay(hpCharacter);
+  assert.equal(hpStay.changes.maxHp, base.maxHp + 30);
+  assert.equal(hpStay.changes.hp, base.maxHp + 30);
 
   let spCards = grantCard(base.cards, "common_sp_up", 6, base.deckCost).cards;
   for (let index = 0; index < DECK_SLOT_COUNT; index += 1) {
@@ -755,6 +759,10 @@ test("common HP and SP cards stack up to six copies and raise maximum vitals", (
   }
   const spCharacter = normalizeCharacter({ ...base, cards: spCards });
   assert.equal(spCharacter.maxSp, base.maxSp + 30);
+  spCharacter.sp = 0;
+  const spStay = resolveInnStay(spCharacter);
+  assert.equal(spStay.changes.maxSp, base.maxSp + 30);
+  assert.equal(spStay.changes.sp, base.maxSp + 30);
 });
 
 test("main card registry contains every rarity and all twelve zodiac cards", () => {

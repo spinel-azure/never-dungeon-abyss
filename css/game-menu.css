@@ -16,6 +16,7 @@ body.layout-pc .shell{padding-block:8px}
 .nde-equipment-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .nde-equipment-bonus{margin-left:auto;color:#ffd75b;text-align:right;white-space:nowrap}
 .nde-equipment strong .nde-equipment-name,.nde-equipment strong .nde-equipment-bonus{display:block;min-height:0;padding:0;border:0;background:transparent;color:#fff;font-family:"GameFont",sans-serif}
+.vital-max-bonus{color:#7dff9b!important;text-shadow:0 0 7px rgba(125,255,155,.55)}
 
 /* Main-screen density and stable message space by device class. */
 body.layout-pc .game{width:min(94vw,880px);gap:10px}

@@ -1304,6 +1304,15 @@ export function renderCharacterStatus() {
     const element = document.querySelector(`#${id}`);
     if (element) element.textContent = value;
   });
+  const hpMax = document.querySelector("#quickHpMax");
+  const spMax = document.querySelector("#quickSpMax");
+  hpMax?.classList.toggle("vital-max-bonus", hasMaxVitalBonus(character, "maxHp"));
+  spMax?.classList.toggle("vital-max-bonus", hasMaxVitalBonus(character, "maxSp"));
+}
+
+function hasMaxVitalBonus(character, key) {
+  return Number(character?.equipmentStatBonuses?.[key]) > 0
+    || Number(character?.cardStatBonuses?.[key]) > 0;
 }
 
 function showTownCommands() {

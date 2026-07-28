@@ -36,16 +36,20 @@ export function resolveInnStay(character) {
   const level = getLevelForExperience(experience);
   const previousGrowth = getLevelGrowth(character.job, previousLevel);
   const growth = getLevelGrowth(character.job, level);
+  const maxHpBonus = getVitalBonus(character, "maxHp");
+  const maxSpBonus = getVitalBonus(character, "maxSp");
+  const maxHp = growth.hp + maxHpBonus;
+  const maxSp = growth.sp + maxSpBonus;
   return {
     changes: {
       experience,
       carriedExperience: 0,
       level,
       deckCost: growth.deckCost,
-      maxHp: growth.hp,
-      maxSp: growth.sp,
-      hp: growth.hp,
-      sp: growth.sp,
+      maxHp,
+      maxSp,
+      hp: maxHp,
+      sp: maxSp,
       statuses: [],
       condition: "GOOD",
       alive: true
@@ -56,6 +60,18 @@ export function resolveInnStay(character) {
     spGained: Math.max(0, growth.sp - previousGrowth.sp),
     deckCostGained: Math.max(0, growth.deckCost - previousGrowth.deckCost)
   };
+}
+
+function getVitalBonus(character, key) {
+  const equipment = Math.max(
+    0,
+    Math.floor(Number(character?.equipmentStatBonuses?.[key]) || 0)
+  );
+  const cards = Math.max(
+    0,
+    Math.floor(Number(character?.cardStatBonuses?.[key]) || 0)
+  );
+  return equipment + cards;
 }
 
 export function createTempleRevival(character) {

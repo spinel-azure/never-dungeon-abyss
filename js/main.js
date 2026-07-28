@@ -665,13 +665,24 @@ import {
     if (statusCondition) statusCondition.textContent = character?.condition || "----";
     if (statusGold) statusGold.textContent = String(Math.max(0, Math.floor(Number(character?.gold) || 0)));
     const vitals = document.querySelector(".nde-status-vitals");
-    if (vitals) vitals.innerHTML = character
-      ? `<span>HP ${character.hp} / ${character.maxHp}</span><span>SP ${character.sp} / ${character.maxSp}</span><span>DECK COST : ${character.deckCost}</span>`
-      : "<span>HP ---- / ----</span><span>SP ---- / ----</span><span>DECK COST : --</span>";
+    if (vitals) {
+      if (character) {
+        const hpClass = hasMaxVitalBonus(character, "maxHp") ? "vital-max-bonus" : "";
+        const spClass = hasMaxVitalBonus(character, "maxSp") ? "vital-max-bonus" : "";
+        vitals.innerHTML = `<span>HP ${character.hp} / <strong class="${hpClass}">${character.maxHp}</strong></span><span>SP ${character.sp} / <strong class="${spClass}">${character.maxSp}</strong></span><span>DECK COST : ${character.deckCost}</span>`;
+      } else {
+        vitals.innerHTML = "<span>HP ---- / ----</span><span>SP ---- / ----</span><span>DECK COST : --</span>";
+      }
+    }
     renderStatusGauges(character);
     renderEquipment(character);
     renderDetailStats(character);
     renderExperience(character);
+  }
+
+  function hasMaxVitalBonus(target, key) {
+    return Number(target?.equipmentStatBonuses?.[key]) > 0
+      || Number(target?.cardStatBonuses?.[key]) > 0;
   }
 
   function renderStatusGauges(target) {

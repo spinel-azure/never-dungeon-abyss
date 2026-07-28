@@ -93,10 +93,15 @@ export function normalizeCharacter(character) {
   const level = Math.max(1, Math.min(197, Math.floor(Number(character.level) || 1)));
   const growth = getLevelGrowth(characterClass.id, level);
   const equipment = normalizeEquipment(character.equipment, characterClass.id);
+  const equipmentStatBonuses = collectEquipmentBonuses(equipment);
   const cards = normalizeCardState(character.cards, growth.deckCost);
   const cardStatBonuses = collectCardStatBonuses(cards.deckSlots);
-  const maxHp = growth.hp + Math.max(0, Math.floor(Number(cardStatBonuses.maxHp) || 0));
-  const maxSp = growth.sp + Math.max(0, Math.floor(Number(cardStatBonuses.maxSp) || 0));
+  const maxHp = growth.hp
+    + Math.max(0, Math.floor(Number(equipmentStatBonuses.maxHp) || 0))
+    + Math.max(0, Math.floor(Number(cardStatBonuses.maxHp) || 0));
+  const maxSp = growth.sp
+    + Math.max(0, Math.floor(Number(equipmentStatBonuses.maxSp) || 0))
+    + Math.max(0, Math.floor(Number(cardStatBonuses.maxSp) || 0));
   return {
     ...character,
     job: characterClass.id,
@@ -117,7 +122,7 @@ export function normalizeCharacter(character) {
     hp: legacyCharacter ? maxHp : clampInteger(character.hp, 0, maxHp, maxHp),
     sp: legacyCharacter ? maxSp : clampInteger(character.sp, 0, maxSp, maxSp),
     baseStats: { ...characterClass.stats, ...(character.baseStats || {}) },
-    equipmentStatBonuses: collectEquipmentBonuses(equipment),
+    equipmentStatBonuses,
     cardStatBonuses,
     def: Math.max(0, Number(character.def) || 0),
     equipment,
