@@ -71,6 +71,8 @@ export function configureAudio() {
 export function setSeOptions({ enabled, volume } = {}) {
   if (typeof enabled === "boolean") audio.enabled = enabled;
   if (Number.isFinite(volume)) audio.volume = Math.max(0, Math.min(1, volume));
+  audio.sounds.forEach(sound => { sound.volume = audio.volume; });
+  audio.sequenceSounds.forEach(sound => { sound.volume = audio.volume; });
   if (!audio.enabled || audio.volume <= 0) stopAllSe();
 }
 

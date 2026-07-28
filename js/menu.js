@@ -113,7 +113,10 @@ export function handleMenuInput(action) {
     menu.recentConfirms = []; menu.debugArmed = false;
     return false;
   }
-  if (action === "up" || action === "down" || action === "left" || action === "right") menu.playSe("cursorMove");
+  const adjustsSeVolume = menu.view === "options"
+    && (action === "left" || action === "right")
+    && menu.optionItems[menu.optionCursor]?.dataset.option === "seVolume";
+  if ((action === "up" || action === "down" || action === "left" || action === "right") && !adjustsSeVolume) menu.playSe("cursorMove");
   else if (action === "confirm" && !(menu.view === "commands" && isCommandUnavailable(menu.commands[menu.commandIndex]))) menu.playSe("confirm");
   else if (action === "cancel") menu.playSe("cancel");
   if (menu.view === "commands") handleCommands(action);
@@ -220,7 +223,7 @@ function executeOption(key) {
   if (key === "npcTypewriterEnabled") { menu.npcTypewriterEnabled = !menu.npcTypewriterEnabled; applyNpcTypewriterOptions(); updateOptionStates(); persistSettings(); }
   if (key === "npcTypewriterSpeed" && menu.npcTypewriterEnabled) { cycleNpcTypewriterSpeed(1); }
 }
-function adjustSelectedOption(amount) { if (menu.optionCursor >= menu.optionItems.length) return; const key = menu.optionItems[menu.optionCursor].dataset.option; if (key === "bgmVolume" || key === "seVolume") { const slider = menu.root.querySelector(`#${key}`); slider.value = String(Math.max(0, Math.min(100, Number(slider.value) + amount * 10))); slider.dispatchEvent(new Event("input", { bubbles: true })); } else if (key === "npcTypewriterSpeed" && menu.npcTypewriterEnabled) cycleNpcTypewriterSpeed(amount); else if (key === "screenShake" || key === "torchFlicker" || key === "npcTypewriterEnabled" || key === "seEnabled") executeOption(key); }
+function adjustSelectedOption(amount) { if (menu.optionCursor >= menu.optionItems.length) return; const key = menu.optionItems[menu.optionCursor].dataset.option; if (key === "bgmVolume" || key === "seVolume") { const slider = menu.root.querySelector(`#${key}`); slider.value = String(Math.max(0, Math.min(100, Number(slider.value) + amount * 10))); slider.dispatchEvent(new Event("input", { bubbles: true })); if (key === "seVolume") menu.playSe("cursorMove"); } else if (key === "npcTypewriterSpeed" && menu.npcTypewriterEnabled) cycleNpcTypewriterSpeed(amount); else if (key === "screenShake" || key === "torchFlicker" || key === "npcTypewriterEnabled" || key === "seEnabled") executeOption(key); }
 
 function cycleNpcTypewriterSpeed(amount) {
   const speeds = ["slow", "normal", "fast"];
@@ -282,7 +285,29 @@ function bindDeck() {
     renderDeck();
   });
 }
-function bindOptions() { menu.optionPages.forEach(page => page.querySelectorAll("[data-option]").forEach(item => item.addEventListener("click", event => { if (item.matches(".volume-row") && event.target.matches("input")) return; menu.playSe("confirm"); menu.optionCursor = menu.optionItems.indexOf(item); updateSelection(); executeOption(item.dataset.option); }))); menu.optionNavButtons.forEach(button => button.addEventListener("click", () => { menu.playSe(button.dataset.optionNav === "back" ? "cancel" : "confirm"); executeOptionNav(button.dataset.optionNav); })); menu.root.querySelectorAll(".volume-row input").forEach(slider => slider.addEventListener("input", () => { slider.parentElement.querySelector("span").textContent = `${slider.value}%`; if (slider.id === "seVolume") applySeOptions(); persistSettings(); })); }
+function bindOptions() {
+  menu.optionPages.forEach(page => page.querySelectorAll("[data-option]").forEach(item => item.addEventListener("click", event => {
+    if (item.matches(".volume-row") && event.target.matches("input")) return;
+    menu.playSe("confirm");
+    menu.optionCursor = menu.optionItems.indexOf(item);
+    updateSelection();
+    executeOption(item.dataset.option);
+  })));
+  menu.optionNavButtons.forEach(button => button.addEventListener("click", () => {
+    menu.playSe(button.dataset.optionNav === "back" ? "cancel" : "confirm");
+    executeOptionNav(button.dataset.optionNav);
+  }));
+  menu.root.querySelectorAll(".volume-row input").forEach(slider => {
+    slider.addEventListener("input", () => {
+      slider.parentElement.querySelector("span").textContent = `${slider.value}%`;
+      if (slider.id === "seVolume") applySeOptions();
+      persistSettings();
+    });
+    slider.addEventListener("change", () => {
+      if (slider.id === "seVolume") menu.playSe("cursorMove");
+    });
+  });
+}
 function bindDebug() {
   menu.debugPages.forEach(page => page.querySelectorAll("[data-debug]").forEach(item => item.addEventListener("click", event => {
     menu.playSe("confirm");
@@ -509,7 +534,9 @@ function restoreSettings() {
     if (bgmSlider && Number.isFinite(bgmValue)) bgmSlider.value = String(Math.max(0, Math.min(100, bgmValue)));
     const seSlider = menu.root.querySelector('#seVolume');
     const seValue = Number(saved.seVolume);
-    if (seSlider && typeof saved.seEnabled === "boolean" && Number.isFinite(seValue)) seSlider.value = String(Math.max(0, Math.min(100, seValue)));
+    if (seSlider && typeof saved.seEnabled === "boolean" && Number.isFinite(seValue)) {
+      seSlider.value = String(Math.round(Math.max(0, Math.min(100, seValue)) / 10) * 10);
+    }
   } catch (error) {
     console.warn("NDE settings could not be restored.", error);
   }
