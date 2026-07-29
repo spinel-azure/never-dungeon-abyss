@@ -71,6 +71,7 @@ import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enem
 import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js";
 import { awardBattleExperience, createTempleRevival, grantEventItems, resolveInnStay, unlockGuildRequest } from "./character-services.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
+import { resolveTreasureTrap } from "../combat/resolve-trap.js";
 import { getNonlethalPoisonDamage } from "../combat/status-lifecycle.js";
 import { getNextLevelExperience, MAX_LEVEL } from "../data/growth.js";
 import { resolveFieldSkill } from "../combat/resolve-field-skill.js";
@@ -212,6 +213,7 @@ import {
     showTreasure,
     playTreasureOpening,
     hideTreasure,
+    resolveTreasureTrap: resolveCurrentTreasureTrap,
     returnToTown,
     beginBattle: beginRandomBattle,
     playNpcVoice: playSe,
@@ -331,7 +333,9 @@ import {
 
     for (let y = 0; y < MAP_H; y += 1) {
       for (let x = 0; x < MAP_W; x += 1) {
-        Object.assign(cells[y][x], structuredClone(dungeon.cells[y][x]));
+        const savedCell = structuredClone(dungeon.cells[y][x]);
+        Object.assign(cells[y][x], savedCell);
+        cells[y][x].treasureTrapId = savedCell.treasureTrapId || null;
         explored[y][x] = Boolean(dungeon.explored[y][x]);
       }
     }
@@ -823,6 +827,14 @@ import {
     if (next === character) return;
     character = next;
     updateCharacterUi();
+  }
+
+  function resolveCurrentTreasureTrap(treasureType, trapId) {
+    if (!character) return { message: "" };
+    const result = resolveTreasureTrap({ character, treasureType, trapId });
+    character = result.character;
+    updateCharacterUi();
+    return result;
   }
 
   function purchaseTownItem(itemId) {

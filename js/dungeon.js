@@ -11,6 +11,7 @@
   LOCKED_DOOR_COUNT
 } from "./config.js";
 import { getNpcById } from "../data/npcs.js";
+import { rollTreasureTrap } from "../data/traps.js";
 
 export const cells = makeCells(MAP_W, MAP_H);
 export const explored = makeExplored(MAP_W, MAP_H);
@@ -42,6 +43,7 @@ export function makeCells(w, h) {
       type: "floor",
       npc: null,
       treasure: null,
+      treasureTrapId: null,
       treasureDiscovered: false,
       walls: { N: true, E: true, S: true, W: true },
       doors: { N: null, E: null, S: null, W: null },
@@ -86,6 +88,7 @@ export function resetAllWalls() {
       cells[y][x].type = "floor";
       cells[y][x].npc = null;
       cells[y][x].treasure = null;
+      cells[y][x].treasureTrapId = null;
       cells[y][x].treasureDiscovered = false;
       cells[y][x].walls = { N: true, E: true, S: true, W: true };
       cells[y][x].doors = { N: null, E: null, S: null, W: null };
@@ -144,9 +147,15 @@ export function getTreasureAt(x, y) {
   return cells[y][x].treasure;
 }
 
+export function getTreasureTrapAt(x, y) {
+  if (!inBounds(x, y)) return null;
+  return cells[y][x].treasureTrapId || null;
+}
+
 export function removeTreasureAt(x, y) {
   if (!inBounds(x, y) || !cells[y][x].treasure) return false;
   cells[y][x].treasure = null;
+  cells[y][x].treasureTrapId = null;
   return true;
 }
 
@@ -182,6 +191,7 @@ export function placeTreasures() {
     const selected = shuffled(candidates)[0];
     if (!selected) continue;
     cells[selected.y][selected.x].treasure = type;
+    cells[selected.y][selected.x].treasureTrapId = rollTreasureTrap(type);
     blocked.push(selected);
   }
 }
@@ -219,6 +229,7 @@ export function resetTreasures() {
   for (let y = 0; y < MAP_H; y++) {
     for (let x = 0; x < MAP_W; x++) {
       cells[y][x].treasure = null;
+      cells[y][x].treasureTrapId = null;
       cells[y][x].treasureDiscovered = false;
     }
   }

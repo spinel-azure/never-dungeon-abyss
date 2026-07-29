@@ -18,6 +18,7 @@ import {
   getNpcAt,
   removeNpcAt,
   getTreasureAt,
+  getTreasureTrapAt,
   removeTreasureAt,
   discoverTreasureAt
 } from "./dungeon.js";
@@ -37,6 +38,7 @@ const hooks = {
   showTreasure: () => {},
   playTreasureOpening: (_type, onComplete) => onComplete(),
   hideTreasure: () => {},
+  resolveTreasureTrap: () => ({ message: "" }),
   returnToTown: () => {},
   beginBattle: () => {},
   playNpcVoice: () => {},
@@ -426,6 +428,7 @@ function startTreasureEvent(treasureType, fromGX, fromGY) {
   startOverlayEvent({
     type: "treasure",
     treasureType,
+    trapId: getTreasureTrapAt(state.gridX, state.gridY),
     phase: "prompt",
     fromGX,
     fromGY,
@@ -442,6 +445,7 @@ function confirmTreasureEvent() {
   const event = state.overlayEvent;
   if (!event || event.phase !== "prompt") return;
   event.phase = "opening";
+  const trapResult = hooks.resolveTreasureTrap(event.treasureType, event.trapId) || {};
   hooks.playSe("door");
   event.canCancel = false;
   hooks.say("");
@@ -450,12 +454,13 @@ function confirmTreasureEvent() {
     removeTreasureAt(event.treasureGX, event.treasureGY);
     state.overlayEvent = null;
     hooks.hideTreasure();
+    const trapMessage = trapResult.message ? `${trapResult.message}\n` : "";
     if (event.treasureType === "black") {
-      hooks.say("宝箱はミミックだった！（未実装）");
+      hooks.say(`${trapMessage}宝箱はミミックだった！（未実装）`);
     } else if (event.treasureType === "gold") {
-      hooks.say("中にはレアアイテムが…入っていなかった！");
+      hooks.say(`${trapMessage}中にはレアアイテムが…入っていなかった！`);
     } else {
-      hooks.say("中には何も入っていなかった！");
+      hooks.say(`${trapMessage}中には何も入っていなかった！`);
     }
     updateNpcAwareness();
     hooks.onStateChanged();
