@@ -1314,8 +1314,10 @@ export function renderCharacterStatus() {
   });
   const hpMax = document.querySelector("#quickHpMax");
   const spMax = document.querySelector("#quickSpMax");
+  const quickCondition = document.querySelector("#quickCondition");
   hpMax?.classList.toggle("vital-max-bonus", hasMaxVitalBonus(character, "maxHp"));
   spMax?.classList.toggle("vital-max-bonus", hasMaxVitalBonus(character, "maxSp"));
+  quickCondition?.classList.toggle("condition-poison", character?.condition === "POISON");
 }
 
 function hasMaxVitalBonus(character, key) {

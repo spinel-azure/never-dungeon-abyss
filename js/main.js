@@ -697,6 +697,7 @@ import {
     if (statusJob) statusJob.textContent = character?.jobLabel || "UNKNOWN";
     if (statusLevel) statusLevel.textContent = character ? String(character.level).padStart(3, "0") : "---";
     if (statusCondition) statusCondition.textContent = character?.condition || "----";
+    statusCondition?.classList.toggle("condition-poison", character?.condition === "POISON");
     if (statusGold) statusGold.textContent = String(Math.max(0, Math.floor(Number(character?.gold) || 0)));
     const vitals = document.querySelector(".nde-status-vitals");
     if (vitals) {
@@ -802,9 +803,21 @@ import {
     const experience = Math.max(0, Math.floor(Number(target.experience) || 0));
     const carried = Math.max(0, Math.floor(Number(target.carriedExperience) || 0));
     const next = getNextLevelExperience(target.level);
-    const carriedText = carried > 0 ? `+${carried}` : "";
     const suffix = target.level >= MAX_LEVEL ? " MAX LEVEL" : " NEXT LEVEL";
-    element.textContent = `${String(experience).padStart(7, "0")}${carriedText} / ${String(next).padStart(7, "0")}${suffix}`;
+    const settled = document.createTextNode(String(experience).padStart(7, "0"));
+    const carriedElement = document.createElement("span");
+    carriedElement.textContent = carried > 0 ? `+${carried}` : "";
+    carriedElement.classList.toggle(
+      "experience-protected",
+      carried > 0 && hasCardEffect(
+        target.cards?.deckSlots,
+        "preserve_experience_on_defeat"
+      )
+    );
+    const remainder = document.createTextNode(
+      ` / ${String(next).padStart(7, "0")}${suffix}`
+    );
+    element.replaceChildren(settled, carriedElement, remainder);
   }
 
   function beginRandomBattle() {
@@ -847,7 +860,17 @@ import {
     character.alive = true;
     character.condition = "POISON";
     updateCharacterUi();
+    showPoisonStepDamage(damage);
     return damage;
+  }
+
+  function showPoisonStepDamage(damage) {
+    const layer = document.getElementById("poisonStepDamage");
+    if (!layer || damage <= 0) return;
+    const popup = document.createElement("i");
+    popup.textContent = `－${damage}`;
+    layer.append(popup);
+    popup.addEventListener("animationend", () => popup.remove(), { once: true });
   }
 
   function handleDungeonStep() {

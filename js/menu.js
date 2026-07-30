@@ -8,12 +8,13 @@ const DEBUG_CANCEL_WINDOW_MS = 2000;
 const SETTINGS_KEY = "nde-settings-v1";
 const ON_MARK = "🔘";
 const OFF_MARK = "⚫";
+const DECK_PICKER_PAGE_SIZE = 5;
 
 const menu = {
   root: null, commandRoot: null, statusPanel: null, deckPanel: null, optionsPanel: null, debugPanel: null,
   commands: [], enabledCommands: [], commandIndex: 0, statusPage: 0,
   deckCursor: 0, deckSlots: [], deckEditable: false, deckReturnView: "commands",
-  deckPickerOpen: false, deckPickerCursor: 0, deckPickerItems: [],
+  deckPickerOpen: false, deckPickerCursor: 0, deckPickerItems: [], deckPickerPage: 0,
   deckPointerArmedIndex: -1, deckPickerPointerArmedIndex: -1,
   optionPages: [], optionItems: [], optionNavButtons: [], optionCursor: 0, optionPage: 0,
   debugPages: [], debugItems: [], debugNavButtons: [], debugCursor: 0, debugPage: 0, recentConfirms: [], debugArmed: false, view: "dungeon",
@@ -160,8 +161,16 @@ function handleDeck(action) {
   }
   if (menu.deckPickerOpen) {
     if (action === "cancel") { closeDeckPicker(); return; }
-    if (action === "up" || action === "left") menu.deckPickerCursor = (menu.deckPickerCursor + menu.deckPickerItems.length - 1) % menu.deckPickerItems.length;
-    if (action === "down" || action === "right") menu.deckPickerCursor = (menu.deckPickerCursor + 1) % menu.deckPickerItems.length;
+    if (action === "left") { changeDeckPickerPage(-1); return; }
+    if (action === "right") { changeDeckPickerPage(1); return; }
+    const visibleIndexes = getDeckPickerVisibleIndexes();
+    const position = Math.max(0, visibleIndexes.indexOf(menu.deckPickerCursor));
+    if (action === "up") {
+      menu.deckPickerCursor = visibleIndexes[(position + visibleIndexes.length - 1) % visibleIndexes.length];
+    }
+    if (action === "down") {
+      menu.deckPickerCursor = visibleIndexes[(position + 1) % visibleIndexes.length];
+    }
     if (action === "confirm") applyDeckPickerSelection();
     renderDeckPicker();
     return;
@@ -187,6 +196,9 @@ function openDeckPicker() {
   const character = menu.getCharacter();
   menu.deckPickerItems = [null, ...(character?.cards?.ownedCardIds || [])];
   menu.deckPickerCursor = Math.max(0, menu.deckPickerItems.indexOf(menu.deckSlots[menu.deckCursor]));
+  menu.deckPickerPage = menu.deckPickerCursor > 0
+    ? Math.floor((menu.deckPickerCursor - 1) / DECK_PICKER_PAGE_SIZE)
+    : 0;
   menu.deckPickerOpen = true;
   menu.deckPickerPointerArmedIndex = -1;
   renderDeckPicker();
@@ -283,6 +295,13 @@ function bindDeck() {
     const next = setDeckSlot(character?.cards, menu.deckCursor, null, character?.deckCost || 3);
     menu.onDeckChanged(next);
     renderDeck();
+  });
+  menu.deckPanel.querySelectorAll("[data-deck-picker-nav]").forEach(button => {
+    button.addEventListener("click", () => {
+      if (button.disabled) return;
+      menu.playSe("cursorMove");
+      changeDeckPickerPage(button.dataset.deckPickerNav === "next" ? 1 : -1);
+    });
   });
 }
 function bindOptions() {
@@ -383,7 +402,9 @@ function renderDeckPicker() {
   const list = menu.deckPanel.querySelector("[data-deck-picker-list]");
   picker.hidden = !menu.deckPickerOpen;
   if (!menu.deckPickerOpen) return;
-  list.replaceChildren(...menu.deckPickerItems.map((cardId, index) => {
+  const visibleIndexes = getDeckPickerVisibleIndexes();
+  list.replaceChildren(...visibleIndexes.map(index => {
+    const cardId = menu.deckPickerItems[index];
     const card = getCardById(cardId);
     const button = document.createElement("button");
     button.type = "button";
@@ -419,6 +440,38 @@ function renderDeckPicker() {
     note.textContent = "所持カードがありません。";
     list.append(note);
   }
+  const pageCount = getDeckPickerPageCount();
+  picker.querySelector("[data-deck-picker-page]").textContent = `${menu.deckPickerPage + 1}/${pageCount}`;
+  picker.querySelector('[data-deck-picker-nav="back"]').disabled = menu.deckPickerPage === 0;
+  picker.querySelector('[data-deck-picker-nav="next"]').disabled = menu.deckPickerPage >= pageCount - 1;
+}
+
+function getDeckPickerPageCount() {
+  return Math.max(1, Math.ceil(Math.max(0, menu.deckPickerItems.length - 1) / DECK_PICKER_PAGE_SIZE));
+}
+
+function getDeckPickerVisibleIndexes() {
+  const start = 1 + menu.deckPickerPage * DECK_PICKER_PAGE_SIZE;
+  const ownedIndexes = Array.from(
+    { length: Math.min(DECK_PICKER_PAGE_SIZE, Math.max(0, menu.deckPickerItems.length - start)) },
+    (_, offset) => start + offset
+  );
+  return [0, ...ownedIndexes];
+}
+
+function changeDeckPickerPage(amount) {
+  const nextPage = Math.max(
+    0,
+    Math.min(getDeckPickerPageCount() - 1, menu.deckPickerPage + amount)
+  );
+  if (nextPage === menu.deckPickerPage) {
+    renderDeckPicker();
+    return;
+  }
+  menu.deckPickerPage = nextPage;
+  menu.deckPickerCursor = getDeckPickerVisibleIndexes()[1] ?? 0;
+  menu.deckPickerPointerArmedIndex = -1;
+  renderDeckPicker();
 }
 
 function renderDeckSelection() {
