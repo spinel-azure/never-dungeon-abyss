@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="css/style.css?v=20260728-2">
   <link rel="stylesheet" href="css/game-menu.css?v=20260728-10">
   <link rel="stylesheet" href="css/title-screen.css?v=20260723-4">
-  <link rel="stylesheet" href="css/town.css?v=20260728-15">
+  <link rel="stylesheet" href="css/town.css?v=20260730-16">
   <link rel="stylesheet" href="css/scene-transition.css?v=20260723-2">
   <link rel="stylesheet" href="css/battle.css?v=20260726-3">
   <link rel="stylesheet" href="css/skill-overlay.css?v=20260727-1">
@@ -37,7 +37,13 @@
     </div>
     <section id="townScreen" class="town-screen" aria-label="町の施設" hidden>
       <div class="town-portrait-frame">
-        <img id="townBackground" class="town-background" src="images/background/town_01.avif" alt="町の風景" hidden>
+        <div id="townCloudLayer" class="town-cloud-layer" aria-hidden="true" hidden>
+          <div class="town-cloud-track">
+            <img src="images/background/town_01c.avif" alt="">
+            <img src="images/background/town_01c.avif" alt="">
+          </div>
+        </div>
+        <img id="townBackground" class="town-background" src="images/background/town_01b.avif" alt="町の風景" hidden>
         <canvas id="townMosaic" class="town-mosaic" width="64" height="36" aria-label="正体不明の場所" hidden></canvas>
         <img id="townPortrait" class="town-portrait" alt="" hidden>
         <div id="townPortraitPlaceholder" class="town-portrait-placeholder" aria-hidden="true">NDA</div>
@@ -238,6 +244,6 @@
   </section>
 </main>
   <script type="module" src="js/title-screen.js?v=20260722-1"></script>
-  <script type="module" src="js/main.js?v=20260729-9"></script>
+  <script type="module" src="js/main.js?v=20260730-10"></script>
 </body>
 </html>

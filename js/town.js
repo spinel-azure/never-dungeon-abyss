@@ -84,6 +84,7 @@ const town = {
 export function configureTown(options) {
   Object.assign(town, options);
   town.background = town.root.querySelector("#townBackground");
+  town.cloudLayer = town.root.querySelector("#townCloudLayer");
   town.mosaic = town.root.querySelector("#townMosaic");
   town.portrait = town.root.querySelector("#townPortrait");
   town.portraitPlaceholder = town.root.querySelector("#townPortraitPlaceholder");
@@ -118,7 +119,8 @@ export function configureTown(options) {
       return image;
     });
   town.backgroundPreloads = [
-    "images/background/town_01.avif",
+    "images/background/town_01b.avif",
+    "images/background/town_01c.avif",
     ...TOWN_FACILITIES.map(facility => facility.background).filter(Boolean),
     "images/background/circle.avif"
     ,"images/background/guild_quest.avif"
@@ -718,8 +720,10 @@ function renderTownView() {
   showTownCommands();
   if (town.mode === "arrival" || town.mode === "selection") {
     const selecting = town.mode === "selection";
+    town.root.classList.add("is-town-view");
     town.mosaic.hidden = true;
-    town.background.src = "images/background/town_01.avif";
+    town.cloudLayer.hidden = false;
+    town.background.src = "images/background/town_01b.avif";
     town.background.alt = "町の風景";
     town.background.hidden = false;
     town.portrait.hidden = true;
@@ -749,6 +753,8 @@ function renderTownView() {
 
 function renderFacility() {
   const facility = TOWN_FACILITIES[town.selectedIndex] || getTownFacility("guild");
+  town.root.classList.remove("is-town-view");
+  town.cloudLayer.hidden = true;
   town.mosaic.hidden = true;
   town.guildQuestOverlay.hidden = true;
   town.commerceOverlay.hidden = true;

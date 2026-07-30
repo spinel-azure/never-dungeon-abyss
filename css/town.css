@@ -1,8 +1,15 @@
 .town-screen{display:block;width:100%;margin:0;color:#f7fbff;font-family:"GameFont",sans-serif}
 .town-screen[hidden]{display:none}
-.town-background[hidden],.town-mosaic[hidden],.town-portrait[hidden],.town-portrait-placeholder[hidden],.guild-registration[hidden],.card-get-effect[hidden],.guild-quest-overlay[hidden],.guild-quest-list[hidden],.guild-quest-detail[hidden],.town-commerce-overlay[hidden]{display:none}
+.town-background[hidden],.town-cloud-layer[hidden],.town-mosaic[hidden],.town-portrait[hidden],.town-portrait-placeholder[hidden],.guild-registration[hidden],.card-get-effect[hidden],.guild-quest-overlay[hidden],.guild-quest-list[hidden],.guild-quest-detail[hidden],.town-commerce-overlay[hidden]{display:none}
 .town-portrait-frame{position:relative;box-sizing:content-box;width:calc(100% - 2px);aspect-ratio:16/9;overflow:hidden;border:1px solid #4f493b;border-radius:7px;background:radial-gradient(circle at 50% 28%,#1d201b,#080a08 68%,#020302);box-shadow:inset 0 0 0 1px #ffffff0d}
 .town-background{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center;image-rendering:auto}
+.town-cloud-layer{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.town-cloud-track{display:flex;width:200%;height:100%;animation:town-cloud-scroll 90s linear infinite;animation-play-state:paused;will-change:transform}
+.town-cloud-track img{display:block;width:50%;height:100%;flex:0 0 50%;object-fit:cover;object-position:center;image-rendering:auto}
+.town-screen.is-town-view .town-background{z-index:1}
+body.town-active .town-screen.is-town-view .town-cloud-track{animation-play-state:running}
+@keyframes town-cloud-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){.town-cloud-track{animation:none;transform:translateX(0)}}
 .town-mosaic{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;image-rendering:pixelated}
 .town-portrait{position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;image-rendering:auto;transform-origin:center bottom;animation:npc-breath 3.2s ease-in-out infinite}
 @keyframes npc-breath{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
