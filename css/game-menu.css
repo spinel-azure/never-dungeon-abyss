@@ -23,6 +23,11 @@ body.layout-pc .shell{padding-block:8px}
 .poison-step-damage i{position:absolute;left:0;top:0;color:#c96cff;font:22px/1 "PixelFont",monospace;font-style:normal;white-space:nowrap;-webkit-text-stroke:3px #fff;paint-order:stroke fill;text-shadow:0 0 7px #8c28c8;animation:poison-step-popup .9s ease-out both}
 @keyframes poison-step-popup{0%{opacity:0;transform:translate(-50%,5px) scale(.8)}18%{opacity:1;transform:translate(-50%,-8px) scale(1.08)}52%{opacity:1;transform:translate(-50%,-22px) scale(1)}100%{opacity:0;transform:translate(-50%,-42px) scale(.95)}}
 @media(prefers-reduced-motion:reduce){.poison-step-damage i{animation:poison-step-fade .65s ease-out both}@keyframes poison-step-fade{0%,20%{opacity:1;transform:translate(-50%,-14px)}100%{opacity:0;transform:translate(-50%,-24px)}}}
+.trap-result-effect{position:absolute;left:50%;top:45%;z-index:12;width:max-content;color:#000;font:80px/1 "PixelFont",monospace;white-space:nowrap;-webkit-text-stroke:7px #fff;paint-order:stroke fill;filter:drop-shadow(0 5px 3px rgba(0,0,0,.72));pointer-events:none;transform:translate(-50%,-50%);opacity:0}
+.trap-result-effect.is-active{animation:trap-result-popup 1.7s cubic-bezier(.18,.72,.25,1) both}
+@keyframes trap-result-popup{0%{opacity:0;transform:translate(-50%,15%) scale(.78)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}55%{opacity:1;transform:translate(-50%,-56%) scale(1)}100%{opacity:0;transform:translate(-50%,-100%) scale(.96)}}
+@media(max-width:540px){.trap-result-effect{font-size:clamp(46px,14vw,80px);-webkit-text-stroke-width:5px}}
+@media(prefers-reduced-motion:reduce){.trap-result-effect.is-active{animation:trap-result-fade 1.4s ease-out both}@keyframes trap-result-fade{0%,20%{opacity:1;transform:translate(-50%,-50%)}100%{opacity:0;transform:translate(-50%,-65%)}}}
 
 /* Main-screen density and stable message space by device class. */
 body.layout-pc .game{width:min(94vw,880px);gap:10px}

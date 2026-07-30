@@ -101,6 +101,7 @@ import {
   const eventOverlayCanvas = document.getElementById("eventOverlay");
   const eventOverlayCtx = eventOverlayCanvas.getContext("2d");
   const treasureCanvas = document.getElementById("treasureCanvas");
+  const trapResultEffect = document.getElementById("trapResultEffect");
   const W = canvas.width;
   let runStartedAt = performance.now();
   let floorStartedAt = runStartedAt;
@@ -156,6 +157,7 @@ import {
   let cardGetTimer = 0;
   let itemGetTimer = 0;
   let bonusGetTimer = 0;
+  let trapResultTimer = 0;
   let currentDepth = 1;
   configureDevice();
   configureEvents({ messageEl: msgEl });
@@ -887,7 +889,22 @@ import {
     const result = resolveTreasureTrap({ character, treasureType, trapId });
     character = result.character;
     updateCharacterUi();
+    if (result.trap) showTrapResultEffect(result.disarmed);
     return result;
+  }
+
+  function showTrapResultEffect(disarmed) {
+    if (!trapResultEffect) return;
+    window.clearTimeout(trapResultTimer);
+    trapResultEffect.textContent = disarmed ? "SUCCESS!!" : "Oops!!";
+    trapResultEffect.hidden = false;
+    trapResultEffect.classList.remove("is-active");
+    void trapResultEffect.offsetWidth;
+    trapResultEffect.classList.add("is-active");
+    trapResultTimer = window.setTimeout(() => {
+      trapResultEffect.classList.remove("is-active");
+      trapResultEffect.hidden = true;
+    }, 1700);
   }
 
   function purchaseTownItem(itemId) {
