@@ -13,7 +13,6 @@ const titleMenu = document.getElementById("titleMenu");
 const loadPanel = document.getElementById("titleLoadPanel");
 const loadSlots = document.getElementById("titleLoadSlots");
 const exportButton = document.getElementById("exportSaveData");
-const importButton = document.getElementById("importSaveData");
 const importFile = document.getElementById("importSaveFile");
 const feedback = document.getElementById("titleSaveFeedback");
 let titleOpen = true;
@@ -175,24 +174,51 @@ loadPanel.addEventListener("pointerdown", event => {
   }
 }, true);
 
-exportButton.addEventListener("click", () => {
+exportButton.addEventListener("click", async () => {
   if (!hasSaveData()) return;
   const archive = createSaveArchive();
-  const blob = new Blob([JSON.stringify(archive, null, 2)], { type: "application/json" });
+  const json = JSON.stringify(archive, null, 2);
+  const filename = `never-dungeon-abyss-saves-${fileTimestamp(new Date())}.json`;
+
+  if (isIosDevice() && typeof File === "function" && typeof navigator.share === "function") {
+    const file = new File([json], filename, { type: "application/json" });
+    let canShareFile = false;
+    try {
+      canShareFile = typeof navigator.canShare === "function"
+        && navigator.canShare({ files: [file] });
+    } catch (error) {
+      console.warn("NDA save file sharing is unavailable.", error);
+    }
+    if (canShareFile) {
+      feedback.textContent = "共有シートから「ファイルに保存」などを選択してください。";
+      try {
+        await navigator.share({
+          files: [file],
+          title: "NEVER DUNGEON : ABYSS SAVE DATA"
+        });
+        feedback.textContent = "セーブデータを共有先へ書き出しました。";
+        return;
+      } catch (error) {
+        if (error?.name === "AbortError") {
+          feedback.textContent = "セーブデータの書き出しをキャンセルしました。";
+          return;
+        }
+        console.warn("NDA save file sharing failed.", error);
+        feedback.textContent = "共有に失敗したため、ダウンロード方式を試します。";
+      }
+    }
+  }
+
+  const blob = new Blob([json], { type: "application/octet-stream" });
   const link = document.createElement("a");
   const url = URL.createObjectURL(blob);
   link.href = url;
-  link.download = `never-dungeon-abyss-saves-${fileTimestamp(new Date())}.json`;
+  link.download = filename;
   document.body.append(link);
   link.click();
   link.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-  feedback.textContent = "セーブデータをJSONファイルへ書き出しました。";
-});
-
-importButton.addEventListener("click", () => {
-  importFile.value = "";
-  importFile.click();
+  window.setTimeout(() => URL.revokeObjectURL(url), 5000);
+  feedback.textContent = "セーブデータのダウンロードを開始しました。";
 });
 
 importFile.addEventListener("change", async () => {
@@ -211,8 +237,15 @@ importFile.addEventListener("change", async () => {
   } catch (error) {
     console.warn("NDA save JSON could not be imported.", error);
     feedback.textContent = "JSONファイルの読み込みに失敗しました。";
+  } finally {
+    importFile.value = "";
   }
 });
+
+function isIosDevice() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent)
+    || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
 
 function fileTimestamp(date) {
   const parts = [
