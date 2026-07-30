@@ -468,9 +468,11 @@ function handleQuestInput(action) {
     if (result?.accepted) {
       town.mode = "facilityMenu";
       renderFacility();
-      town.messageEl.textContent = quest?.id === "guild_001_abyss_rat"
-        ? "ギルド長：よくやってくれた！これなら先に進んでも大丈夫だろう。もっとも、生き残れるかはお前次第、だがな。"
-        : "ギルド長：依頼達成、よくやってくれた！また頼むぜ。";
+      town.messageEl.textContent = result.eventRewardCardId
+        ? "ギルド長：三つの依頼、すべてよくやってくれた。これは俺からの餞別だ。女神の恩寵がお前を守ってくれるだろう。"
+        : quest?.id === "guild_001_abyss_rat"
+          ? "ギルド長：よくやってくれた！これなら先に進んでも大丈夫だろう。もっとも、生き残れるかはお前次第、だがな。"
+          : "ギルド長：依頼達成、よくやってくれた！また頼むぜ。";
     } else {
       openGuildQuestList("report");
       town.messageEl.textContent = "ギルド長：まだ達成条件を満たしていないようだな。";

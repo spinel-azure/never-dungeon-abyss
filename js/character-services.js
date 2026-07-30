@@ -84,6 +84,15 @@ export function createTempleRevival(character) {
   };
 }
 
+export function resolveDungeonDefeat(character, { preserveExperience = false } = {}) {
+  return {
+    ...createTempleRevival(character),
+    carriedExperience: preserveExperience
+      ? Math.max(0, Math.floor(Number(character?.carriedExperience) || 0))
+      : 0
+  };
+}
+
 export function grantEventItems(character, flagId, itemIds) {
   if (!character || character.eventFlags?.[flagId]) {
     return { character, gainedItemIds: [], alreadyReceived: true };

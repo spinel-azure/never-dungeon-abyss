@@ -69,7 +69,7 @@ import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
 import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js";
-import { awardBattleExperience, createTempleRevival, grantEventItems, resolveInnStay, unlockGuildRequest } from "./character-services.js";
+import { awardBattleExperience, createTempleRevival, grantEventItems, resolveDungeonDefeat, resolveInnStay, unlockGuildRequest } from "./character-services.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { resolveTreasureTrap } from "../combat/resolve-trap.js";
 import { getNonlethalPoisonDamage } from "../combat/status-lifecycle.js";
@@ -79,7 +79,7 @@ import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from
 import { configureItemOverlay, openItemOverlay, handleItemOverlayInput } from "./item-overlay.js";
 import { resolveFieldItemUse } from "../combat/resolve-item-use.js";
 import { grantCard } from "../data/deck.js";
-import { collectCardStatBonuses, getCardById } from "../data/cards.js";
+import { collectCardStatBonuses, getCardById, hasCardEffect } from "../data/cards.js";
 import { drawCardCanvas } from "./card-canvas.js";
 import { getItem } from "../data/items.js";
 import { purchaseItem } from "../data/commerce.js";
@@ -602,25 +602,55 @@ import {
         guild_first_request_accepted: hasActiveQuest(result.character)
       }
     };
+    let eventRewardCardId = null;
+    if (
+      isDungeonDepthUnlocked(character, 2)
+      && !character.eventFlags?.guild_all_trial_quests_card
+    ) {
+      const eventReward = grantCard(
+        character.cards,
+        "common_goddess_grace",
+        1,
+        character.deckCost
+      );
+      character = {
+        ...character,
+        cards: eventReward.cards,
+        eventFlags: {
+          ...(character.eventFlags || {}),
+          guild_all_trial_quests_card: true
+        }
+      };
+      if (eventReward.gained > 0) eventRewardCardId = "common_goddess_grace";
+    }
     character.cardStatBonuses = collectCardStatBonuses(character.cards.deckSlots);
     updateCharacterUi();
     saveGame();
     setTimeout(() => {
       void showGuildQuestRewardSequence({
         rewardCardId: result.rewardCardId,
-        bonusGold: result.bonusGold
+        bonusGold: result.bonusGold,
+        eventRewardCardId
       });
     }, 0);
-    return { ...result, character };
+    return { ...result, character, eventRewardCardId };
   }
 
-  async function showGuildQuestRewardSequence({ rewardCardId, bonusGold } = {}) {
+  async function showGuildQuestRewardSequence({
+    rewardCardId,
+    bonusGold,
+    eventRewardCardId
+  } = {}) {
     await showTimedEffect(questCompleteEffect, "levelUp", 3400);
     if (bonusGold > 0) {
       await showBonusGetEffect(bonusGold);
     }
     if (rewardCardId) {
       showCardGetEffect(rewardCardId);
+      if (eventRewardCardId) await wait(3400);
+    }
+    if (eventRewardCardId) {
+      showCardGetEffect(eventRewardCardId);
     }
   }
 
@@ -915,8 +945,20 @@ import {
   }
 
   function finishBattleDefeat() {
+    let lostExperience = 0;
+    let preservedExperience = 0;
     if (character) {
-      Object.assign(character, createTempleRevival(character));
+      const carriedExperience = Math.max(
+        0,
+        Math.floor(Number(character.carriedExperience) || 0)
+      );
+      const preserveExperience = hasCardEffect(
+        character.cards?.deckSlots,
+        "preserve_experience_on_defeat"
+      );
+      Object.assign(character, resolveDungeonDefeat(character, { preserveExperience }));
+      lostExperience = preserveExperience ? 0 : carriedExperience;
+      preservedExperience = preserveExperience ? carriedExperience : 0;
       character = recordFloorExploration(character, { depth: 0, explored: [] });
     }
     worldLocation = "town";
@@ -924,7 +966,12 @@ import {
     setPlayerInputEnabled(false);
     openTown({ registrationRequired: false, facilityId: "temple", mode: "facilityMenu" });
     updateCharacterUi();
-    say("司祭：おお…！女神へ祈りが届いたか…！迷える魂よ、今一度目覚めよ！");
+    const experienceMessage = preservedExperience > 0
+      ? `\n女神の恩寵により${preservedExperience}EXPを守った。`
+      : lostExperience > 0
+        ? `\n持ち帰るはずだった${lostExperience}EXPを失った。`
+        : "";
+    say(`司祭：おお…！女神へ祈りが届いたか…！迷える魂よ、今一度目覚めよ！${experienceMessage}`);
     saveGame();
   }
 

@@ -25,7 +25,7 @@ import { createBattleState, createEnemyAction, resolveBattleRound } from "../com
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { CHARACTER_JOBS } from "../data/town.js";
 import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
-import { CARDS, collectCardStatBonuses, getCardById } from "../data/cards.js";
+import { CARDS, collectCardStatBonuses, getCardById, hasCardEffect } from "../data/cards.js";
 import { calculateDeckCost, DECK_SLOT_COUNT, grantCard, normalizeCardState, setDeckSlot } from "../data/deck.js";
 import { resolveTurnOrder, createGuardAction } from "../combat/resolve-turn-order.js";
 import {
@@ -39,6 +39,7 @@ import {
   awardBattleExperience,
   createInnRecovery,
   createTempleRevival,
+  resolveDungeonDefeat,
   resolveInnStay
 } from "../js/character-services.js";
 import {
@@ -595,6 +596,22 @@ test("temple revival restores one HP and preserves death-time SP", () => {
   });
 });
 
+test("dungeon defeat loses carried experience unless it is protected", () => {
+  const character = {
+    hp: 0,
+    sp: 7,
+    carriedExperience: 345,
+    statuses: [{ statusId: "poison", remainingTurns: 3 }]
+  };
+  assert.equal(resolveDungeonDefeat(character).carriedExperience, 0);
+  assert.equal(
+    resolveDungeonDefeat(character, { preserveExperience: true }).carriedExperience,
+    345
+  );
+  assert.equal(resolveDungeonDefeat(character).hp, 1);
+  assert.equal(resolveDungeonDefeat(character).sp, 7);
+});
+
 test("growth curve reaches the formal level 197 HP and SP caps", () => {
   assert.deepEqual(getLevelGrowth("warrior", MAX_LEVEL), {
     level: 197,
@@ -769,6 +786,19 @@ test("main card registry contains every rarity and all twelve zodiac cards", () 
   assert.deepEqual([...new Set(CARDS.map(card => card.rarity))].sort(), ["C", "L", "R", "SR", "Z"]);
   assert.equal(CARDS.filter(card => card.rarity === "Z").length, 12);
   assert.equal(getCardById("zodiac_aries")?.cost, 8);
+});
+
+test("Goddess's Grace is a unique cost-one C card that preserves defeat experience", () => {
+  const card = getCardById("common_goddess_grace");
+  assert.equal(card.rarity, "C");
+  assert.equal(card.cost, 1);
+  assert.equal(card.maxOwned, 1);
+  assert.equal(card.maxCopies, 1);
+  const character = createInitialCharacter({ name: "TEST", job: "priest" });
+  const granted = grantCard(character.cards, card.id, 2, character.deckCost);
+  assert.equal(granted.gained, 1);
+  const equipped = setDeckSlot(granted.cards, 0, card.id, character.deckCost);
+  assert.equal(hasCardEffect(equipped.deckSlots, "preserve_experience_on_defeat"), true);
 });
 
 test("battle rewards are carried and settled into consecutive inn level-ups", () => {

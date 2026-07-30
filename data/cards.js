@@ -44,6 +44,14 @@ const STANDARD_CARDS = [
     maxOwned: 99, maxCopies: 6
   },
   {
+    id: "common_goddess_grace", rarity: "C", cost: 1,
+    name: "Goddess's Grace", nameJa: "女神の恩寵", concept: "探索EXPロスト無効",
+    descriptionJa: "ダンジョン内で力尽きても、その探索で獲得した経験値を失わずに復活できる。",
+    category: "exploration", effectId: "preserve_experience_on_defeat",
+    iconId: "goddess-silhouette",
+    maxOwned: 1, maxCopies: 1
+  },
+  {
     id: "rare_defense_up", rarity: "R", cost: 2,
     name: "Defense Up", nameJa: "防御力上昇", concept: "DEF +5",
     category: "ability", effectId: "defense_up", effectValue: 5,
@@ -99,4 +107,8 @@ export function collectCardStatBonuses(deckSlots = []) {
     });
     return bonuses;
   }, {});
+}
+
+export function hasCardEffect(deckSlots = [], effectId = "") {
+  return deckSlots.some(cardId => getCardById(cardId)?.effectId === effectId);
 }
