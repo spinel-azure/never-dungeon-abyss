@@ -19,7 +19,7 @@ body.layout-pc .shell{padding-block:8px}
 .vital-max-bonus{color:#7dff9b!important;text-shadow:0 0 7px rgba(125,255,155,.55)}
 .experience-protected{color:#7dff9b;text-shadow:0 0 7px rgba(125,255,155,.55)}
 .condition-poison{color:#c96cff!important;text-shadow:0 0 7px rgba(190,78,255,.65)}
-.poison-step-damage{position:absolute;left:27%;top:50%;z-index:4;pointer-events:none}
+.quick-status .quick-hp-current{position:relative;display:inline-flex}.poison-step-damage{position:absolute;left:.5ch;top:50%;z-index:4;pointer-events:none}
 .poison-step-damage i{position:absolute;left:0;top:0;color:#c96cff;font:22px/1 "PixelFont",monospace;font-style:normal;white-space:nowrap;-webkit-text-stroke:3px #fff;paint-order:stroke fill;text-shadow:0 0 7px #8c28c8;animation:poison-step-popup .9s ease-out both}
 @keyframes poison-step-popup{0%{opacity:0;transform:translate(-50%,5px) scale(.8)}18%{opacity:1;transform:translate(-50%,-8px) scale(1.08)}52%{opacity:1;transform:translate(-50%,-22px) scale(1)}100%{opacity:0;transform:translate(-50%,-42px) scale(.95)}}
 @media(prefers-reduced-motion:reduce){.poison-step-damage i{animation:poison-step-fade .65s ease-out both}@keyframes poison-step-fade{0%,20%{opacity:1;transform:translate(-50%,-14px)}100%{opacity:0;transform:translate(-50%,-24px)}}}

@@ -30,7 +30,9 @@ export function getPresenceSuppressedSteps() {
 export function restorePresence(value, suppression = 0) {
   presence = Math.max(0, Math.min(PRESENCE_MAX, Math.floor(Number(value) || 0)));
   suppressedSteps = Math.max(0, Math.min(30, Math.floor(Number(suppression) || 0)));
-  encounterActive = presence >= PRESENCE_MAX;
+  // The gauge value is persisted, but an in-progress encounter notice is not.
+  // A restored full gauge must therefore be allowed to trigger on the next step.
+  encounterActive = false;
   hooks.onChange(presence);
 }
 

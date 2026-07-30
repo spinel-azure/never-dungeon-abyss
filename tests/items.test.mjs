@@ -5,7 +5,7 @@ import { grantItem, getItemCount } from "../data/inventory.js";
 import { resolveFieldItemUse } from "../combat/resolve-item-use.js";
 import { createBattleState, resolveBattleRound } from "../combat/battle-engine.js";
 import {
-  getPresence, getPresenceSuppressedSteps, onPlayerStep, resetPresence,
+  configurePresence, getPresence, getPresenceSuppressedSteps, onPlayerStep, resetPresence,
   restorePresence, suppressPresence
 } from "../js/presence.js";
 import { grantEventItems, unlockGuildRequest } from "../js/character-services.js";
@@ -127,6 +127,15 @@ test("presence reset clears a lingering talisman suppression", () => {
 test("restored presence suppression is capped at the item-defined 30 steps", () => {
   restorePresence(0, 999999);
   assert.equal(getPresenceSuppressedSteps(), 30);
+  resetPresence();
+});
+
+test("a restored full presence gauge can trigger an encounter on the next step", () => {
+  let encounters = 0;
+  configurePresence({ onEncounter: () => { encounters += 1; } });
+  restorePresence(100);
+  assert.equal(onPlayerStep({ random: () => 0 }), true);
+  assert.equal(encounters, 1);
   resetPresence();
 });
 
