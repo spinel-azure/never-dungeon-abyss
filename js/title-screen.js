@@ -200,6 +200,14 @@ loadPanel.addEventListener("pointerdown", event => {
   }
 }, true);
 
+greetingGameStart.addEventListener("pointerdown", event => {
+  if (greetingOpen) startGame("nda:new-game", {}, event);
+}, true);
+
+greetingGameStart.addEventListener("pointerdown", event => {
+  if (greetingOpen) startGame("nda:new-game", {}, event);
+}, true);
+
 greetingGameStart.addEventListener("click", event => {
   if (greetingOpen) startGame("nda:new-game", {}, event);
 });
