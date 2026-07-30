@@ -15,8 +15,11 @@ const loadSlots = document.getElementById("titleLoadSlots");
 const exportButton = document.getElementById("exportSaveData");
 const importFile = document.getElementById("importSaveFile");
 const feedback = document.getElementById("titleSaveFeedback");
+const greetingScreen = document.getElementById("greetingScreen");
+const greetingGameStart = document.getElementById("greetingGameStart");
 let titleOpen = true;
 let loadOpen = false;
+let greetingOpen = false;
 let selectedIndex = 0;
 let loadSelectedIndex = 0;
 
@@ -99,7 +102,11 @@ function activateTitleAction(action, event) {
     && hasSaveData()
     && !window.confirm("現在のセーブデータを残したまま NEW GAME を開始しますか？オートセーブは新しいゲームで更新されます。")
   ) return;
-  startGame(action === "continue" ? "nda:continue" : "nda:new-game", {}, event);
+  if (action === "new-game") {
+    openGreeting(event);
+    return;
+  }
+  startGame("nda:continue", {}, event);
 }
 
 function startManualLoad(slot, event) {
@@ -108,8 +115,10 @@ function startManualLoad(slot, event) {
 
 function startGame(eventName, detail, event) {
   titleOpen = false;
+  greetingOpen = false;
   event?.preventDefault();
   event?.stopImmediatePropagation();
+  titleScreen.classList.remove("is-greeting");
   titleScreen.hidden = true;
   document.body.classList.remove("title-active");
   window.dispatchEvent(new CustomEvent(eventName, { detail }));
@@ -118,6 +127,12 @@ function startGame(eventName, detail, event) {
 function handleTitleKey(event) {
   if (!titleOpen || event.repeat || event.key === "Unidentified") return;
   event.stopImmediatePropagation();
+  if (greetingOpen) {
+    if (event.key === "Enter" || event.key === " " || event.key === "x" || event.key === "X") {
+      startGame("nda:new-game", {}, event);
+    }
+    return;
+  }
   if (loadOpen) {
     const summaries = getSaveSlotSummaries().filter(summary => MANUAL_SAVE_SLOTS.includes(summary.slot));
     const count = summaries.length + 1;
@@ -157,6 +172,17 @@ function handleTitleKey(event) {
   }
 }
 
+function openGreeting(event) {
+  event?.preventDefault();
+  event?.stopImmediatePropagation();
+  greetingOpen = true;
+  loadOpen = false;
+  feedback.textContent = "";
+  titleScreen.classList.add("is-greeting");
+  greetingScreen.hidden = false;
+  greetingGameStart.focus({ preventScroll: true });
+}
+
 titleMenu.addEventListener("pointerdown", event => {
   const button = event.target.closest("[data-title-action]");
   if (button) activateTitleAction(button.dataset.titleAction, event);
@@ -173,6 +199,10 @@ loadPanel.addEventListener("pointerdown", event => {
     renderMenu();
   }
 }, true);
+
+greetingGameStart.addEventListener("click", event => {
+  if (greetingOpen) startGame("nda:new-game", {}, event);
+});
 
 exportButton.addEventListener("click", async () => {
   if (!hasSaveData()) return;

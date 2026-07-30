@@ -9,7 +9,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
   <link rel="stylesheet" href="css/style.css?v=20260728-2">
   <link rel="stylesheet" href="css/game-menu.css?v=20260730-14">
-  <link rel="stylesheet" href="css/title-screen.css?v=20260730-9">
+  <link rel="stylesheet" href="css/title-screen.css?v=20260730-10">
   <link rel="stylesheet" href="css/town.css?v=20260730-17">
   <link rel="stylesheet" href="css/scene-transition.css?v=20260723-2">
   <link rel="stylesheet" href="css/battle.css?v=20260726-3">
@@ -37,6 +37,20 @@
   <p id="titleSaveFeedback" class="title-save-feedback" aria-live="polite"></p>
     <p class="title-version">MVP1.0</p>
   <p class="title-updated">LAST UPDATE : 2026-07-30</p>
+  <section id="greetingScreen" class="greeting-screen" aria-label="ゲーム開始前のご案内" hidden>
+    <div class="greeting-content">
+      <h2>＊NEVER DUNGEON : ABYSSの世界へようこそ！＊</h2>
+      <h3>＊ はじめに ＊</h3>
+      <div class="greeting-description">
+        <p>・このゲームは基本的にオートセーブされますが、<br>任意のデータセーブも可能です。</p>
+        <p>また、セーブデータを外部へEXPORT（書き出し）<br>IMPORT（読み込み）する事も可能です。</p>
+        <p>ブラウザのキャッシュを削除すると、セーブデータも消えてしまうので、ご活用ください。</p>
+        <p>なお、ダンジョン内ではオートセーブのみ、<br>任意セーブは町でのみ可能となっております。</p>
+        <p>・それではゲームをお楽しみください。<br>まずは冒険者登録からスタートです！</p>
+      </div>
+      <button id="greetingGameStart" type="button">GAME START</button>
+    </div>
+  </section>
 </section>
 <main class="shell">
   <section class="game" aria-label="3Dダンジョン">
@@ -268,7 +282,7 @@
     </section>
   </section>
 </main>
-  <script type="module" src="js/title-screen.js?v=20260730-3"></script>
+  <script type="module" src="js/title-screen.js?v=20260730-4"></script>
   <script type="module" src="js/main.js?v=20260730-16"></script>
 </body>
 </html>
