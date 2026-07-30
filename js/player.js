@@ -321,11 +321,24 @@ export function handleOverlayEventInput(action) {
 }
 
 export function startRandomEncounterNotice() {
+  startEncounterNotice("normal");
+}
+
+export function startAmbushEncounterNotice() {
+  startEncounterNotice("ambush");
+}
+
+function startEncounterNotice(encounterType) {
+  const ambush = encounterType === "ambush";
   startOverlayEvent({
     type: "randomEncounter",
     showOverlay: true,
-    overlayMessage: "＊　なにものかと　そうぐうした！　＊",
-    message: "何者かと遭遇した！（Aボタンで戦闘開始）"
+    encounterType: ambush ? "ambush" : "normal",
+    encounterLabel: ambush ? "AMBUSH!!" : "ENCOUNTER!!",
+    encounterAnimationStartedAt: performance.now(),
+    message: ambush
+      ? "不意を突かれた！（Aボタンで戦闘開始）"
+      : "何者かと遭遇した！（Aボタンで戦闘開始）"
   });
 }
 

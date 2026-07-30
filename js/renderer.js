@@ -264,16 +264,32 @@ function drawMinimapOverlay() {
 
 function drawEncounterMessage() {
   const { ctx, W, H, state } = renderer;
-  const message = state.overlayEvent?.overlayMessage;
-  if (!message) return;
+  const event = state.overlayEvent;
+  if (!event) return;
+  const message = event.encounterLabel || (
+    event.encounterType === "ambush" ? "AMBUSH!!" : "ENCOUNTER!!"
+  );
+  const startedAt = Number(event.encounterAnimationStartedAt) || performance.now();
+  const progress = Math.max(0, Math.min(1, (performance.now() - startedAt) / 1400));
+  const zoomProgress = 1 - Math.pow(1 - progress, 3);
+  const scale = .12 + zoomProgress * 1.23;
+  const fadeIn = Math.min(1, progress / .12);
+  const fadeOut = progress < .58 ? 1 : Math.max(0, 1 - (progress - .58) / .42);
   ctx.save();
   ctx.fillStyle = "rgba(0,0,0,.8)";
   ctx.fillRect(0, 0, W, H);
-  ctx.fillStyle = "#f0eadc";
+  ctx.translate(W / 2, H / 2);
+  ctx.scale(scale, scale);
+  ctx.globalAlpha = fadeIn * fadeOut;
+  ctx.fillStyle = "#000";
+  ctx.strokeStyle = "#fff";
+  ctx.lineWidth = 8;
+  ctx.lineJoin = "round";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.font = `700 ${Math.max(24, Math.floor(H * .063))}px GameFont, sans-serif`;
-  ctx.fillText(message, W / 2, H / 2);
+  ctx.font = '80px "PixelFont", monospace';
+  ctx.strokeText(message, 0, 0);
+  ctx.fillText(message, 0, 0);
   ctx.restore();
 }
 
