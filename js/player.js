@@ -313,7 +313,6 @@ export function handleOverlayEventInput(action) {
   if (action === "confirm") {
     if (state.overlayEvent.type === "npcTalk") advanceNpcTalkEvent();
     else if (state.overlayEvent.type === "stairsPrompt") confirmStairsPrompt();
-    else if (state.overlayEvent.type === "randomEncounter") confirmRandomEncounter();
     else if (state.overlayEvent.type === "treasure") confirmTreasureEvent();
     return true;
   }
@@ -336,10 +335,14 @@ function startEncounterNotice(encounterType) {
     encounterType: ambush ? "ambush" : "normal",
     encounterLabel: ambush ? "AMBUSH!!" : "ENCOUNTER!!",
     encounterAnimationStartedAt: performance.now(),
-    message: ambush
-      ? "不意を突かれた！（Aボタンで戦闘開始）"
-      : "何者かと遭遇した！（Aボタンで戦闘開始）"
+    message: ""
   });
+  const encounterEvent = state.overlayEvent;
+  hooks.say("");
+  hooks.playSe("battleStart");
+  encounterEvent.autoStartTimer = window.setTimeout(() => {
+    if (state.overlayEvent === encounterEvent) confirmRandomEncounter();
+  }, 1400);
 }
 
 export function startFloorLapNotice(depth, lapTime) {
@@ -351,6 +354,9 @@ export function startFloorLapNotice(depth, lapTime) {
 }
 
 function confirmRandomEncounter() {
+  if (state.overlayEvent?.autoStartTimer) {
+    window.clearTimeout(state.overlayEvent.autoStartTimer);
+  }
   state.overlayEvent = null;
   resetPresence();
   hooks.say("");

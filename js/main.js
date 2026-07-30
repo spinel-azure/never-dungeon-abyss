@@ -851,7 +851,7 @@ import {
       ? getEnemyById(forcedEnemyId)
       : getRandomEnemy({ depth: currentDepth });
     const enemy = createEnemyCombatant(enemyData);
-    const started = startBattle(enemy);
+    const started = startBattle(enemy, { playStartSe: false });
     if (!started) setPlayerInputEnabled(true);
     return started;
   }

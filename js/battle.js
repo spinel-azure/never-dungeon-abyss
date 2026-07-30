@@ -48,7 +48,7 @@ export function configureBattle(options) {
   });
 }
 
-export function startBattle(enemy) {
+export function startBattle(enemy, { playStartSe = true } = {}) {
   const character = battleUi.getCharacter();
   if (!character || battleUi.active) return false;
   battleUi.active = true;
@@ -60,7 +60,7 @@ export function startBattle(enemy) {
   battleUi.root.hidden = false;
   document.body.classList.add("battle-active");
   showCommandButtons();
-  battleUi.playSe("battleStart");
+  if (playStartSe) battleUi.playSe("battleStart");
   renderBattle();
   return true;
 }
