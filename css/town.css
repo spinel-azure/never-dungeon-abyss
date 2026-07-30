@@ -4,7 +4,7 @@
 .town-portrait-frame{position:relative;box-sizing:content-box;width:calc(100% - 2px);aspect-ratio:16/9;overflow:hidden;border:1px solid #4f493b;border-radius:7px;background:radial-gradient(circle at 50% 28%,#1d201b,#080a08 68%,#020302);box-shadow:inset 0 0 0 1px #ffffff0d}
 .town-background{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center;image-rendering:auto}
 .town-cloud-layer{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
-.town-cloud-track{display:flex;width:200%;height:100%;animation:town-cloud-scroll 90s linear infinite;animation-play-state:paused;will-change:transform}
+.town-cloud-track{display:flex;width:200%;height:100%;animation:town-cloud-scroll 120s linear infinite;animation-play-state:paused;will-change:transform}
 .town-cloud-track img{display:block;width:50%;height:100%;flex:0 0 50%;object-fit:cover;object-position:center;image-rendering:auto}
 .town-screen.is-town-view .town-background{z-index:1}
 body.town-active .town-screen.is-town-view .town-cloud-track{animation-play-state:running}
