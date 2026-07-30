@@ -11,11 +11,12 @@ const OFF_MARK = "⚫";
 const DECK_PICKER_PAGE_SIZE = 5;
 
 const menu = {
-  root: null, commandRoot: null, statusPanel: null, deckPanel: null, optionsPanel: null, debugPanel: null,
+  root: null, commandRoot: null, statusPanel: null, deckPanel: null, savePanel: null, optionsPanel: null, debugPanel: null,
   commands: [], enabledCommands: [], commandIndex: 0, statusPage: 0,
   deckCursor: 0, deckSlots: [], deckEditable: false, deckReturnView: "commands",
   deckPickerOpen: false, deckPickerCursor: 0, deckPickerItems: [], deckPickerPage: 0,
   deckPointerArmedIndex: -1, deckPickerPointerArmedIndex: -1,
+  saveCursor: 0,
   optionPages: [], optionItems: [], optionNavButtons: [], optionCursor: 0, optionPage: 0,
   debugPages: [], debugItems: [], debugNavButtons: [], debugCursor: 0, debugPage: 0, recentConfirms: [], debugArmed: false, view: "dungeon",
   compassVisible: true, readoutVisible: false, screenShakeEnabled: true,
@@ -35,6 +36,8 @@ const menu = {
   setNpcTypewriterOptions: () => {},
   setStopwatchVisible: () => {}, resetStopwatch: () => {},
   saveGame: () => false,
+  canManualSave: () => false,
+  getSaveSlotSummaries: () => [],
   getCharacter: () => null,
   onDeckChanged: () => {},
   openItems: () => false,
@@ -46,6 +49,7 @@ export function configureMenu(options) {
   Object.assign(menu, options);
   menu.statusPanel = menu.root.querySelector('[data-menu-view="status"]');
   menu.deckPanel = menu.root.querySelector('[data-menu-view="deck"]');
+  menu.savePanel = menu.root.querySelector('[data-menu-view="save"]');
   menu.optionsPanel = menu.root.querySelector('[data-menu-view="options"]');
   menu.debugPanel = menu.root.querySelector('[data-menu-view="debug"]');
   menu.commands = [...menu.commandRoot.querySelectorAll("[data-command]")];
@@ -60,7 +64,7 @@ export function configureMenu(options) {
   menu.debugPages = [...menu.debugPanel.querySelectorAll("[data-debug-page]")];
   menu.debugNavButtons = [...menu.debugPanel.querySelectorAll("[data-debug-nav]")];
   restoreSettings();
-  renderEmptyStats(); bindCommands(); bindStatus(); bindDeck(); bindOptions(); bindDebug();
+  renderEmptyStats(); bindCommands(); bindStatus(); bindDeck(); bindManualSave(); bindOptions(); bindDebug();
   updateOptionItems(); updateDebugItems(); applyAllSettings(); updateView();
 }
 
@@ -123,6 +127,7 @@ export function handleMenuInput(action) {
   if (menu.view === "commands") handleCommands(action);
   else if (menu.view === "status") handleStatus(action);
   else if (menu.view === "deck") handleDeck(action);
+  else if (menu.view === "save") handleManualSave(action);
   else if (menu.view === "options") handleOptions(action);
   else if (menu.view === "debug") handleDebug(action);
   return true;
@@ -149,8 +154,11 @@ function handleCommands(action) {
     if (command && !isCommandUnavailable(command)) openCommand(command.dataset.command);
   }
 }
-function isCommandUnavailable(button) { return button?.dataset.unavailable === "true"; }
-function openCommand(key) { if (key === "status") { menu.view = "status"; menu.statusPage = 0; updateView(); } else if (key === "deck") { menu.view = "deck"; menu.deckEditable = false; menu.deckReturnView = "commands"; menu.deckPickerOpen = false; menu.deckCursor = 0; renderDeck(); updateView(); } else if (key === "items") menu.openItems(); else if (key === "skills") menu.openSkills(); else if (key === "options") setOptionPage(0); else if (key === "save") { closeCampMenu("save"); menu.saveGame(); } }
+function isCommandUnavailable(button) {
+  return button?.dataset.unavailable === "true"
+    || (button?.dataset.command === "save" && !menu.canManualSave());
+}
+function openCommand(key) { if (key === "status") { menu.view = "status"; menu.statusPage = 0; updateView(); } else if (key === "deck") { menu.view = "deck"; menu.deckEditable = false; menu.deckReturnView = "commands"; menu.deckPickerOpen = false; menu.deckCursor = 0; renderDeck(); updateView(); } else if (key === "items") menu.openItems(); else if (key === "skills") menu.openSkills(); else if (key === "options") setOptionPage(0); else if (key === "save" && menu.canManualSave()) { menu.view = "save"; menu.saveCursor = 0; renderManualSave(); updateView(); } }
 function handleStatus(action) { if (action === "cancel") { menu.view = "commands"; updateView(); } else if (action === "left") { menu.statusPage = 0; updateStatus(); } else if (action === "right") { menu.statusPage = 1; updateStatus(); } else if (action === "confirm") { menu.view = "commands"; updateView(); } }
 function statusNavigate(key) { if (key === "back") { if (menu.statusPage === 0) { menu.view = "commands"; updateView(); } else { menu.statusPage = 0; updateStatus(); } } else if (menu.statusPage === 0) { menu.statusPage = 1; updateStatus(); } else { menu.view = "commands"; updateView(); } }
 
@@ -184,6 +192,29 @@ function handleDeck(action) {
   if (action === "up" || action === "down") menu.deckCursor = ((row + 1) % 2) * columns + column;
   if (action === "confirm" && menu.deckEditable) openDeckPicker();
   renderDeckSelection();
+}
+
+function handleManualSave(action) {
+  const summaries = menu.getSaveSlotSummaries().filter(summary => summary.slot !== "auto");
+  const count = summaries.length + 1;
+  if (action === "cancel") { menu.view = "commands"; updateView(); return; }
+  if (action === "up" || action === "down") {
+    menu.saveCursor = (menu.saveCursor + (action === "down" ? 1 : count - 1)) % count;
+    renderManualSave();
+    return;
+  }
+  if (action !== "confirm") return;
+  if (menu.saveCursor === summaries.length) {
+    menu.view = "commands";
+    updateView();
+    return;
+  }
+  const summary = summaries[menu.saveCursor];
+  if (!summary) return;
+  const accepted = !summary.exists || window.confirm(`${summary.label}へ上書き保存しますか？`);
+  if (!accepted) return;
+  const saved = menu.saveGame(summary.slot);
+  renderManualSave(saved ? `${summary.label}へ保存しました。` : "セーブに失敗しました。");
 }
 
 function closeDeckView() {
@@ -304,6 +335,13 @@ function bindDeck() {
     });
   });
 }
+function bindManualSave() {
+  menu.savePanel.querySelector("[data-manual-save-back]").addEventListener("click", () => {
+    menu.playSe("cancel");
+    menu.view = "commands";
+    updateView();
+  });
+}
 function bindOptions() {
   menu.optionPages.forEach(page => page.querySelectorAll("[data-option]").forEach(item => item.addEventListener("click", event => {
     if (item.matches(".volume-row") && event.target.matches("input")) return;
@@ -350,10 +388,10 @@ function bindDebug() {
 function renderEmptyStats() { const rows = ["STR", "INT", "AGI", "DEX", "LUC", "DEF"].map(label => { const row = document.createElement("div"); row.className = "nde-stat-row"; const name = document.createElement("strong"); name.textContent = label; const gauge = document.createElement("span"); gauge.className = "nde-empty-gauge"; for (let index = 0; index < 30; index += 1) gauge.append(document.createElement("i")); const value = document.createElement("output"); value.textContent = "--"; row.append(name, gauge, value); return row; }); menu.root.querySelector("#ndeStatRows").replaceChildren(...rows); }
 
 function updateView() {
-  const screenOpen = ["status", "deck", "options", "debug"].includes(menu.view);
+  const screenOpen = ["status", "deck", "save", "options", "debug"].includes(menu.view);
   document.body.classList.toggle("menu-open", screenOpen); document.body.classList.toggle("command-open", menu.view === "commands");
   document.body.classList.toggle("deck-open", menu.view === "deck");
-  menu.root.hidden = !screenOpen; menu.statusPanel.hidden = menu.view !== "status"; menu.deckPanel.hidden = menu.view !== "deck"; menu.optionsPanel.hidden = menu.view !== "options"; menu.debugPanel.hidden = menu.view !== "debug";
+  menu.root.hidden = !screenOpen; menu.statusPanel.hidden = menu.view !== "status"; menu.deckPanel.hidden = menu.view !== "deck"; menu.savePanel.hidden = menu.view !== "save"; menu.optionsPanel.hidden = menu.view !== "options"; menu.debugPanel.hidden = menu.view !== "debug";
   menu.commandRoot.dataset.active = String(menu.view === "commands");
   const hint = document.querySelector("#commandHint"); if (hint) hint.textContent = menu.view === "commands" ? "＊ Bボタンでメニュー非表示" : "＊ Bボタンでメニュー表示";
   updateStatus(); updatePager(); updateDebugPager(); updateSelection();
@@ -484,10 +522,47 @@ function renderDeckSelection() {
       ? `SLOT ${menu.deckCursor + 1}：Aボタンでセットするカードを選択します。`
       : `SLOT ${menu.deckCursor + 1}：カードはセットされていません。ダンジョン内では編成できません。`;
 }
+function renderManualSave(message = "") {
+  const summaries = menu.getSaveSlotSummaries().filter(summary => summary.slot !== "auto");
+  const root = menu.savePanel.querySelector("[data-manual-save-slots]");
+  root.replaceChildren(...summaries.map((summary, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.manualSaveSlot = summary.slot;
+    button.textContent = formatSaveSummary(summary);
+    button.classList.toggle("is-selected", menu.saveCursor === index);
+    button.addEventListener("click", () => {
+      menu.saveCursor = index;
+      renderManualSave();
+      if (summary.exists && !window.confirm(`${summary.label}へ上書き保存しますか？`)) return;
+      menu.playSe("confirm");
+      const saved = menu.saveGame(summary.slot);
+      renderManualSave(saved ? `${summary.label}へ保存しました。` : "セーブに失敗しました。");
+    });
+    return button;
+  }));
+  menu.savePanel.querySelector("[data-manual-save-back]").classList.toggle(
+    "is-selected",
+    menu.saveCursor === summaries.length
+  );
+  menu.savePanel.querySelector("[data-manual-save-feedback]").textContent = message;
+}
+
+function formatSaveSummary(summary) {
+  if (!summary.exists) return `${summary.label}（データなし）`;
+  const date = new Date(summary.savedAt);
+  const formatted = Number.isNaN(date.getTime())
+    ? "日時不明"
+    : new Intl.DateTimeFormat("ja-JP", {
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit"
+    }).format(date);
+  return `${summary.label}（${summary.name}／Lv${summary.level}／${formatted}）`;
+}
 function updateStatus() { menu.statusPanel.querySelectorAll("[data-status-page]").forEach((page, index) => { page.hidden = index !== menu.statusPage; }); menu.statusPanel.querySelector("[data-status-indicator]").textContent = `${menu.statusPage + 1}/2`; const next = menu.statusPanel.querySelector('[data-status-nav="next"]'); next.textContent = menu.statusPage === 0 ? "NEXT" : "MAIN"; menu.statusPanel.querySelector('[data-status-nav="back"]').classList.toggle("is-selected", menu.statusPage === 0); next.classList.toggle("is-selected", menu.statusPage === 1); }
 function updatePager() { menu.optionsPanel.querySelector("[data-page-indicator]").textContent = `${menu.optionPage + 1}/2`; menu.optionNavButtons.find(button => button.dataset.optionNav === "next").textContent = menu.optionPage === 0 ? "NEXT" : "MAIN"; }
 function updateDebugPager() { menu.debugPanel.querySelector("[data-debug-indicator]").textContent = `${menu.debugPage + 1}/2`; menu.debugNavButtons.find(button => button.dataset.debugNav === "next").textContent = menu.debugPage === 0 ? "NEXT" : "MAIN"; }
-function updateSelection() { menu.commands.forEach((button, index) => button.classList.toggle("is-selected", menu.view === "commands" && index === menu.commandIndex)); menu.optionItems.forEach((item, index) => item.classList.toggle("is-selected", menu.view === "options" && index === menu.optionCursor)); menu.optionNavButtons.forEach((button, index) => button.classList.toggle("is-selected", menu.view === "options" && menu.optionCursor === menu.optionItems.length + index)); menu.debugItems.forEach((item, index) => item.classList.toggle("is-selected", menu.view === "debug" && index === menu.debugCursor)); menu.debugNavButtons.forEach((button, index) => button.classList.toggle("is-selected", menu.view === "debug" && menu.debugCursor === menu.debugItems.length + index)); updateOptionStates(); updateDebugStates(); }
+function updateSelection() { menu.commands.forEach((button, index) => { const unavailable = isCommandUnavailable(button); button.classList.toggle("is-selected", menu.view === "commands" && index === menu.commandIndex); button.classList.toggle("is-unavailable", unavailable); button.setAttribute("aria-disabled", String(unavailable)); }); menu.optionItems.forEach((item, index) => item.classList.toggle("is-selected", menu.view === "options" && index === menu.optionCursor)); menu.optionNavButtons.forEach((button, index) => button.classList.toggle("is-selected", menu.view === "options" && menu.optionCursor === menu.optionItems.length + index)); menu.debugItems.forEach((item, index) => item.classList.toggle("is-selected", menu.view === "debug" && index === menu.debugCursor)); menu.debugNavButtons.forEach((button, index) => button.classList.toggle("is-selected", menu.view === "debug" && menu.debugCursor === menu.debugItems.length + index)); updateOptionStates(); updateDebugStates(); }
 function updateOptionStates() {
   const shake = menu.root.querySelector('[data-option-state="screenShake"]');
   const torch = menu.root.querySelector('[data-option-state="torchFlicker"]');

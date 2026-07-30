@@ -59,6 +59,10 @@ body.title-active .shell{visibility:hidden}
   border-color:rgba(176,244,255,.92);
   box-shadow:0 0 12px rgba(120,230,255,.72),inset 0 0 9px rgba(120,230,255,.24);
 }
+.title-load-panel{grid-row:6;align-self:start;display:grid;width:min(92vw,720px);gap:10px;margin:0 0 38px;padding:16px;border:1px solid #5bd1ff;background:rgba(0,5,8,.96);font:clamp(13px,2.3vw,22px)/1.25 "PixelFont",monospace}
+.title-load-panel[hidden]{display:none}.title-load-panel h2{margin:0 0 4px;font-size:1.4em;font-weight:400}.title-load-slots{display:grid;gap:8px}.title-load-panel button{padding:9px 12px;border:1px solid #287ba6;background:#020607;color:#fff;font:inherit;text-align:left}.title-load-panel button.is-selected{border-color:#b0f4ff;background:#14313a;box-shadow:0 0 10px rgba(120,230,255,.7)}.title-load-panel button:disabled{color:#6f7777;background:#050707}.title-load-panel>[data-title-load-back]{border-color:#efff00;background:#efff00;color:#080800;text-align:center}
+.title-save-tools{position:absolute;left:50%;bottom:max(48px,calc(env(safe-area-inset-bottom) + 38px));display:flex;gap:10px;transform:translateX(-50%)}.title-save-tools button{padding:5px 8px;border:1px solid #4c7b84;background:#061013;color:#d9fbff;font:clamp(9px,1.4vw,14px)/1 "PixelFont",monospace}.title-save-tools button:disabled{color:#596466;border-color:#30393a}
+.title-save-feedback{position:absolute;left:50%;bottom:max(78px,calc(env(safe-area-inset-bottom) + 68px));width:min(90vw,680px);margin:0;color:#9be6ff;font:clamp(10px,1.5vw,15px)/1.2 "GameFont",sans-serif;transform:translateX(-50%)}
 .title-updated{
   position:absolute;
   right:max(14px,env(safe-area-inset-right));
@@ -93,6 +97,8 @@ body.title-active .shell{visibility:hidden}
   .title-screen{grid-template-rows:1.05fr auto .18fr auto 1.97fr auto}
   .title-description{line-height:1.35}
   .title-menu{margin-bottom:52px}
+  .title-load-panel{margin-bottom:70px;padding:10px}
+  .title-save-tools{bottom:42px;gap:5px}.title-save-feedback{bottom:70px}
 }
 @media(prefers-reduced-motion:reduce){
   .title-logo,.title-description{animation:none}

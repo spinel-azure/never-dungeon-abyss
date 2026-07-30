@@ -63,7 +63,7 @@ import {
 } from "./presence.js";
 import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js";
 import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js";
-import { loadGame, writeGame } from "./save-data.js";
+import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
 import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, setTownTypewriterOptions } from "./town.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getEquipmentItem } from "../data/equipment.js";
@@ -308,13 +308,19 @@ import {
     };
   }
 
-  function saveGame({ announce = false } = {}) {
+  function saveGame({ announce = false, slot = "auto" } = {}) {
     if (!saveEnabled) return false;
+    const isManualSave = /^manual[1-3]$/.test(slot);
+    if (isManualSave && worldLocation !== "town") return false;
     if (autosaveTimer) {
       clearTimeout(autosaveTimer);
       autosaveTimer = 0;
     }
-    const saved = writeGame(makeSaveSnapshot());
+    const snapshot = makeSaveSnapshot();
+    const autoSaved = writeGame(snapshot, "auto");
+    const saved = isManualSave
+      ? autoSaved && writeGame(snapshot, slot)
+      : autoSaved;
     if (announce) say(saved ? "セーブしました。" : "セーブに失敗しました。");
     return saved;
   }
@@ -399,10 +405,14 @@ import {
     saveGame();
   }
 
-  function continueGame() {
-    const save = loadGame();
+  function continueGame(slot = "auto") {
+    const save = loadGame(slot);
     saveEnabled = true;
-    if (!restoreGame(save)) startNewGame();
+    if (!restoreGame(save)) {
+      startNewGame();
+      return;
+    }
+    if (slot !== "auto") saveGame();
   }
 
   function registerCharacter({ name, job, jobLabel }) {
@@ -1254,7 +1264,9 @@ import {
     },
     setStopwatchVisible,
     resetStopwatch,
-    saveGame: () => saveGame({ announce: true }),
+    saveGame: slot => saveGame({ announce: true, slot }),
+    canManualSave: () => worldLocation === "town",
+    getSaveSlotSummaries,
     openSkills: () => openSkillOverlay({
       context: "field",
       character,
@@ -1280,7 +1292,8 @@ import {
   updateAutoReturnButton();
   startRenderLoop();
   window.addEventListener("nda:new-game", startNewGame);
-  window.addEventListener("nda:continue", continueGame);
+  window.addEventListener("nda:continue", () => continueGame("auto"));
+  window.addEventListener("nda:load-game", event => continueGame(event.detail?.slot || "auto"));
   window.addEventListener("pagehide", () => saveGame());
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") saveGame(); });
 })();

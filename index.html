@@ -8,8 +8,8 @@
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
   <link rel="stylesheet" href="css/style.css?v=20260728-2">
-  <link rel="stylesheet" href="css/game-menu.css?v=20260730-12">
-  <link rel="stylesheet" href="css/title-screen.css?v=20260723-4">
+  <link rel="stylesheet" href="css/game-menu.css?v=20260730-13">
+  <link rel="stylesheet" href="css/title-screen.css?v=20260730-5">
   <link rel="stylesheet" href="css/town.css?v=20260730-17">
   <link rel="stylesheet" href="css/scene-transition.css?v=20260723-2">
   <link rel="stylesheet" href="css/battle.css?v=20260726-3">
@@ -24,6 +24,17 @@
     <h1 class="title-logo">NEVER DUNGEON : ABYSS</h1>
     <p class="title-description">THE MISSING QUEEN AND THE MYSTERIOUS CAT</p>
   <div id="titleMenu" class="title-menu" aria-label="タイトルメニュー"></div>
+  <section id="titleLoadPanel" class="title-load-panel" aria-label="ロードするセーブデータ" hidden>
+    <h2>LOAD GAME</h2>
+    <div id="titleLoadSlots" class="title-load-slots"></div>
+    <button type="button" data-title-load-back>BACK</button>
+  </section>
+  <nav class="title-save-tools" aria-label="セーブデータのバックアップ">
+    <button id="exportSaveData" type="button">EXPORT SAVE DATA</button>
+    <button id="importSaveData" type="button">IMPORT SAVE DATA</button>
+    <input id="importSaveFile" type="file" accept="application/json,.json" hidden>
+  </nav>
+  <p id="titleSaveFeedback" class="title-save-feedback" aria-live="polite"></p>
     <p class="title-version">MVP1.0</p>
   <p class="title-updated">LAST UPDATED : 2026-07-28</p>
 </section>
@@ -201,6 +212,14 @@
         <p class="deck-owned-count"><strong data-owned-card-count>0</strong> CARDS OWNED</p>
       </div>
 
+      <div class="menu-panel manual-save-panel" data-menu-view="save" hidden>
+        <h1 class="menu-title">＊ SAVE GAME ＊</h1>
+        <p>保存するスロットを選択してください。</p>
+        <div class="manual-save-slots" data-manual-save-slots></div>
+        <button type="button" class="menu-footer" data-manual-save-back>BACK</button>
+        <p class="manual-save-feedback" data-manual-save-feedback aria-live="polite"></p>
+      </div>
+
       <div class="menu-panel menu-panel-options" data-menu-view="options" hidden>
         <h1 class="menu-title">＊ OPTION ＊</h1>
         <div class="option-page" data-option-page="0">
@@ -249,7 +268,7 @@
     </section>
   </section>
 </main>
-  <script type="module" src="js/title-screen.js?v=20260722-1"></script>
-  <script type="module" src="js/main.js?v=20260730-13"></script>
+  <script type="module" src="js/title-screen.js?v=20260730-2"></script>
+  <script type="module" src="js/main.js?v=20260730-14"></script>
 </body>
 </html>
