@@ -836,7 +836,11 @@ test("Alertness is a stackable cost-one C card with two percent surprise resista
 
 test("common HP and SP cards stack up to six copies and raise maximum vitals", () => {
   const initial = createInitialCharacter({ name: "TEST", job: "mage" });
-  const base = normalizeCharacter({ ...initial, level: 5 });
+  const base = normalizeCharacter({
+    ...initial,
+    level: 5,
+    experience: getExperienceForLevel(5)
+  });
   let hpCards = grantCard(base.cards, "common_hp_up", 99, base.deckCost).cards;
   assert.equal(hpCards.ownedCardCounts.common_hp_up, 99);
   for (let index = 0; index < DECK_SLOT_COUNT; index += 1) {
