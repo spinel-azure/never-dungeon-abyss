@@ -37,6 +37,32 @@ const PASSERBY_CONFIGS = Object.freeze([
     initialDirection: 1,
     heightRatio: 0.74,
     sourceFacing: "left"
+  }),
+  Object.freeze({
+    id: "innkeeper",
+    src: "images/npc/NPC_11b.avif",
+    speed: 14,
+    bobAmplitude: 1,
+    walkPeriod: 1080,
+    spawnInterval: Object.freeze([18000, 28000]),
+    initialDelay: 11600,
+    initialPhase: 610,
+    initialDirection: -1,
+    heightRatio: 0.76,
+    sourceFacing: "left"
+  }),
+  Object.freeze({
+    id: "shopkeeper",
+    src: "images/npc/NPC_13b.avif",
+    speed: 27,
+    bobAmplitude: 1,
+    walkPeriod: 750,
+    spawnInterval: Object.freeze([10500, 16800]),
+    initialDelay: 5400,
+    initialPhase: 280,
+    initialDirection: -1,
+    heightRatio: 0.75,
+    sourceFacing: "left"
   })
 ]);
 
