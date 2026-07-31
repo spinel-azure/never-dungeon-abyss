@@ -52,6 +52,14 @@ const STANDARD_CARDS = [
     maxOwned: 1, maxCopies: 1
   },
   {
+    id: "common_alertness", rarity: "C", cost: 1,
+    name: "Alertness", nameJa: "警戒心", concept: "不意打ち耐性 +2%",
+    descriptionJa: "敵から不意打ちされる確率を2％軽減する。",
+    category: "exploration", effectId: "surprise_resistance", effectValue: 0.02,
+    statBonus: Object.freeze({ surpriseResistance: 0.02 }), iconId: "alertness",
+    maxOwned: 99, maxCopies: 6
+  },
+  {
     id: "rare_defense_up", rarity: "R", cost: 2,
     name: "Defense Up", nameJa: "防御力上昇", concept: "DEF +5",
     category: "ability", effectId: "defense_up", effectValue: 5,

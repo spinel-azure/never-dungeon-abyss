@@ -811,6 +811,29 @@ test("the three initial common cards use the Excel effect values", () => {
   assert.deepEqual(getCardById("common_lucky_charm")?.statBonus, { luc: 1 });
 });
 
+test("Alertness is a stackable cost-one C card with two percent surprise resistance", () => {
+  const card = getCardById("common_alertness");
+  assert.equal(card.rarity, "C");
+  assert.equal(card.cost, 1);
+  assert.equal(card.maxOwned, 99);
+  assert.equal(card.maxCopies, 6);
+  assert.deepEqual(card.statBonus, { surpriseResistance: 0.02 });
+  const character = normalizeCharacter({
+    ...createInitialCharacter({ name: "TEST", job: "thief" }),
+    level: 5
+  });
+  let cards = grantCard(character.cards, card.id, 99, character.deckCost).cards;
+  for (let index = 0; index < DECK_SLOT_COUNT; index += 1) {
+    cards = setDeckSlot(cards, index, card.id, character.deckCost);
+  }
+  const bonuses = collectCardStatBonuses(cards.deckSlots);
+  assert.ok(Math.abs(bonuses.surpriseResistance - 0.12) < Number.EPSILON);
+  assert.ok(Math.abs(collectStats({
+    ...character,
+    cardStatBonuses: bonuses
+  }).surpriseResistance - 0.12) < Number.EPSILON);
+});
+
 test("common HP and SP cards stack up to six copies and raise maximum vitals", () => {
   const initial = createInitialCharacter({ name: "TEST", job: "mage" });
   const base = normalizeCharacter({ ...initial, level: 5 });

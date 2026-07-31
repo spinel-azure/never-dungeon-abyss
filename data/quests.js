@@ -4,6 +4,7 @@ export const MAX_ACTIVE_QUESTS = 3;
 export const GUILD_TRIAL_QUEST_ID = "guild_001_abyss_rat";
 export const SLIME_EXTERMINATION_QUEST_ID = "guild_002_cave_slime";
 export const FLOOR_SURVEY_QUEST_ID = "guild_003_b1f_survey";
+export const RABBIT_EXTERMINATION_QUEST_ID = "guild_004_abyss_rabbit";
 export const B2F_UNLOCK_QUEST_IDS = Object.freeze([
   GUILD_TRIAL_QUEST_ID,
   SLIME_EXTERMINATION_QUEST_ID,
@@ -27,8 +28,8 @@ export const QUESTS = Object.freeze([
       bonusGold: 200
     }),
     description: Object.freeze([
-      "奈落のB1Fで発生したネズミの大量発生を",
-      "食い止めてくれ。数が多すぎて困っている。"
+      "奈落のB1Fでネズミが異常繁殖している。外にあふれ出したら",
+      "面倒だ。食い止めてくれ。"
     ]),
     available: true
   }),
@@ -74,6 +75,30 @@ export const QUESTS = Object.freeze([
       "変える。一度も帰還せずに隅々まで調べてくれ。"
     ]),
     available: true
+  }),
+  Object.freeze({
+    id: RABBIT_EXTERMINATION_QUEST_ID,
+    number: "004",
+    title: "奈落ウサギ退治",
+    client: "ギルド長",
+    objectiveType: "defeatEnemy",
+    targetId: "abyss_rabbit",
+    targetName: "奈落ウサギ",
+    objectiveLabel: "奈落ウサギを15匹退治する。",
+    requiredCount: 15,
+    reward: Object.freeze({
+      type: "card",
+      cardId: "common_alertness",
+      label: "デッキカード×1",
+      bonusGold: 200
+    }),
+    descriptionLabel: "目的",
+    description: Object.freeze([
+      "奈落のB2Fでウサギが大量繁殖している。適度に数を減らしてくれ。",
+      "奴らはいきなり襲ってくる。不意打ちには十分に気をつけろ。"
+    ]),
+    prerequisiteQuestIds: B2F_UNLOCK_QUEST_IDS,
+    available: true
   })
 ]);
 
@@ -114,10 +139,19 @@ export function getQuestProgress(character, questId) {
   };
 }
 
+export function isQuestAvailable(character, questOrId) {
+  const quest = typeof questOrId === "string" ? getQuestById(questOrId) : questOrId;
+  if (!quest?.available) return false;
+  const prerequisites = Array.isArray(quest.prerequisiteQuestIds)
+    ? quest.prerequisiteQuestIds
+    : [];
+  return prerequisites.every(questId => getQuestProgress(character, questId).completed);
+}
+
 export function acceptQuest(character, questId) {
   const quest = getQuestById(questId);
   const quests = normalizeQuestState(character?.quests);
-  if (!quest?.available) return result(character, false, "unavailable");
+  if (!isQuestAvailable(character, quest)) return result(character, false, "unavailable");
   if (quests.completedQuestIds.includes(quest.id)) return result(character, false, "completed");
   if (quests.active[quest.id]) return result(character, false, "alreadyAccepted");
   if (Object.keys(quests.active).length >= MAX_ACTIVE_QUESTS) {
@@ -208,7 +242,14 @@ export function isDungeonDepthUnlocked(character, depth) {
 }
 
 export function shouldForceEnemy(character, { depth, enemyId } = {}) {
-  if (Number(depth) !== 1) return false;
+  const requestedDepth = Number(depth);
+  if (requestedDepth === 2) {
+    const rabbitProgress = getQuestProgress(character, RABBIT_EXTERMINATION_QUEST_ID);
+    return rabbitProgress.active
+      && !rabbitProgress.readyToReport
+      && enemyId === "abyss_rabbit";
+  }
+  if (requestedDepth !== 1) return false;
   const slimeProgress = getQuestProgress(character, SLIME_EXTERMINATION_QUEST_ID);
   if (slimeProgress.active && !slimeProgress.readyToReport) {
     return enemyId === "cave_slime";

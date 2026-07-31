@@ -6,11 +6,14 @@ import { getOwnedCardCount } from "../data/deck.js";
 import {
   MAX_ACTIVE_QUESTS,
   FLOOR_SURVEY_QUEST_ID,
+  RABBIT_EXTERMINATION_QUEST_ID,
   SLIME_EXTERMINATION_QUEST_ID,
   abandonQuest,
   acceptQuest,
+  getQuestById,
   getQuestProgress,
   isDungeonDepthUnlocked,
+  isQuestAvailable,
   normalizeQuestState,
   recordFloorExploration,
   recordEnemyDefeat,
@@ -19,6 +22,20 @@ import {
 } from "../data/quests.js";
 
 const QUEST_ID = "guild_001_abyss_rat";
+
+function unlockB2F(character) {
+  return {
+    ...character,
+    quests: {
+      ...character.quests,
+      completedQuestIds: [
+        QUEST_ID,
+        SLIME_EXTERMINATION_QUEST_ID,
+        FLOOR_SURVEY_QUEST_ID
+      ]
+    }
+  };
+}
 
 test("quest state is normalized into character saves", () => {
   const character = createInitialCharacter({ name: "TEST", job: "warrior" });
@@ -161,6 +178,40 @@ test("quest 003 completion survives return and grants an SP card and 200G", () =
   assert.equal(report.rewardCardId, "common_sp_up");
   assert.equal(report.bonusGold, 200);
   assert.equal(getOwnedCardCount(report.character.cards, "common_sp_up"), 1);
+});
+
+test("quest 004 unlocks with B2F and forces abyss rabbits until 15 defeats", () => {
+  const quest = getQuestById(RABBIT_EXTERMINATION_QUEST_ID);
+  assert.equal(quest.objectiveLabel, "奈落ウサギを15匹退治する。");
+  assert.equal(quest.descriptionLabel, "目的");
+  let character = createInitialCharacter({ name: "TEST", job: "thief" });
+  assert.equal(isQuestAvailable(character, RABBIT_EXTERMINATION_QUEST_ID), false);
+  assert.equal(acceptQuest(character, RABBIT_EXTERMINATION_QUEST_ID).reason, "unavailable");
+  character = unlockB2F(character);
+  assert.equal(isQuestAvailable(character, RABBIT_EXTERMINATION_QUEST_ID), true);
+  character = acceptQuest(character, RABBIT_EXTERMINATION_QUEST_ID).character;
+  assert.equal(shouldForceEnemy(character, { depth: 2, enemyId: "abyss_rabbit" }), true);
+  assert.equal(shouldForceEnemy(character, { depth: 2, enemyId: "wandering_dead" }), false);
+  assert.equal(shouldForceEnemy(character, { depth: 1, enemyId: "abyss_rabbit" }), false);
+  for (let index = 0; index < 15; index += 1) {
+    character = recordEnemyDefeat(character, "abyss_rabbit");
+  }
+  assert.equal(getQuestProgress(character, RABBIT_EXTERMINATION_QUEST_ID).readyToReport, true);
+  assert.equal(shouldForceEnemy(character, { depth: 2, enemyId: "abyss_rabbit" }), false);
+});
+
+test("quest 004 report grants Alertness and 200G", () => {
+  let character = unlockB2F(createInitialCharacter({ name: "TEST", job: "mage" }));
+  character = acceptQuest(character, RABBIT_EXTERMINATION_QUEST_ID).character;
+  for (let index = 0; index < 15; index += 1) {
+    character = recordEnemyDefeat(character, "abyss_rabbit");
+  }
+  const report = reportQuest(character, RABBIT_EXTERMINATION_QUEST_ID);
+  assert.equal(report.accepted, true);
+  assert.equal(report.rewardCardId, "common_alertness");
+  assert.equal(report.bonusGold, 200);
+  assert.equal(report.character.gold, 200);
+  assert.equal(getOwnedCardCount(report.character.cards, "common_alertness"), 1);
 });
 
 test("reporting a completed quest grants the C-rarity AGI card once", () => {

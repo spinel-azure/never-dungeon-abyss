@@ -1,5 +1,10 @@
 import { CHARACTER_JOBS, TOWN_FACILITIES, getTownFacility } from "../data/town.js";
-import { QUESTS, getQuestProgress, hasActiveQuest } from "../data/quests.js";
+import {
+  QUESTS,
+  getQuestProgress,
+  hasActiveQuest,
+  isQuestAvailable
+} from "../data/quests.js";
 import { getItem } from "../data/items.js";
 
 const FACILITY_COMMANDS = Object.freeze({
@@ -1068,7 +1073,9 @@ function renderGuildQuestList() {
   town.guildQuestList.replaceChildren(...visibleQuestIndexes.map(index => {
     const quest = QUESTS[index];
     const progress = getQuestProgress(town.getCharacter(), quest.id);
-    const selectable = reportMode ? progress.active : quest.available && !progress.active && !progress.completed;
+    const selectable = reportMode
+      ? progress.active
+      : isQuestAvailable(town.getCharacter(), quest) && !progress.active && !progress.completed;
     const button = document.createElement("button");
     button.type = "button";
     button.className = "guild-quest-entry";
@@ -1113,7 +1120,7 @@ function activateSelectedQuest() {
   const quest = QUESTS[town.questIndex];
   const progress = getQuestProgress(town.getCharacter(), quest?.id);
   if (town.mode === "questAcceptList") {
-    if (!quest?.available || progress.active || progress.completed) {
+    if (!isQuestAvailable(town.getCharacter(), quest) || progress.active || progress.completed) {
       town.playSe("cursorMove");
       return;
     }
@@ -1153,7 +1160,7 @@ function renderQuestDetail(quest, progress) {
     divider(),
     detailBlock("報酬", quest.reward.label),
     divider(),
-    detailBlock("内容", quest.description.join("\n"))
+    detailBlock(quest.descriptionLabel || "内容", quest.description.join("\n"))
   );
   if (progress.active) {
     const current = document.createElement("p");

@@ -839,6 +839,11 @@ import {
   function getRandomEncounterEnemyData() {
     const forcedEnemyId = shouldForceEnemy(character, {
       depth: currentDepth,
+      enemyId: "abyss_rabbit"
+    })
+      ? "abyss_rabbit"
+      : shouldForceEnemy(character, {
+      depth: currentDepth,
       enemyId: "cave_slime"
     })
       ? "cave_slime"

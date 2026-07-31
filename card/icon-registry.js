@@ -9,6 +9,7 @@ import { drawAgilityIcon } from "./icons/agility.js";
 import { drawHealthPulseIcon } from "./icons/health-pulse.js";
 import { drawManaCoreIcon } from "./icons/mana-core.js";
 import { drawGoddessSilhouetteIcon } from "./icons/goddess-silhouette.js";
+import { drawAlertnessIcon } from "./icons/alertness.js";
 
 const iconDrawers = new Map([
   ["strength", drawStrengthIcon],
@@ -21,6 +22,7 @@ const iconDrawers = new Map([
   ["health-pulse", drawHealthPulseIcon],
   ["mana-core", drawManaCoreIcon],
   ["goddess-silhouette", drawGoddessSilhouetteIcon],
+  ["alertness", drawAlertnessIcon],
   ["unknown", drawUnknownIcon],
 ]);
 
