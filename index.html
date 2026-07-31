@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="css/style.css?v=20260728-2">
   <link rel="stylesheet" href="css/game-menu.css?v=20260730-14">
   <link rel="stylesheet" href="css/title-screen.css?v=20260730-11">
-  <link rel="stylesheet" href="css/town.css?v=20260730-17">
+  <link rel="stylesheet" href="css/town.css?v=20260731-1">
   <link rel="stylesheet" href="css/scene-transition.css?v=20260723-2">
   <link rel="stylesheet" href="css/battle.css?v=20260726-3">
   <link rel="stylesheet" href="css/skill-overlay.css?v=20260727-1">
@@ -104,6 +104,10 @@
           <strong class="card-get-title">BONUS GET!!</strong>
           <span id="bonusGetAmount" class="item-get-items bonus-get-amount"></span>
         </div>
+        <button id="experienceSettlementOverlay" class="experience-settlement-overlay" type="button" aria-label="経験値精算結果を閉じる" hidden>
+          <strong>＊ EXP SETTLEMENT ＊</strong>
+          <span id="experienceSettlementDetail"></span>
+        </button>
         <button id="questTutorialOverlay" class="quest-tutorial-overlay" type="button" aria-label="依頼の説明を閉じる" hidden>
           <img src="images/background/tutorial_01.avif" alt="迷宮地下1階調査の説明">
         </button>
@@ -283,6 +287,6 @@
   </section>
 </main>
 <script type="module" src="js/title-screen.js?v=20260730-5"></script>
-  <script type="module" src="js/main.js?v=20260731-3"></script>
+  <script type="module" src="js/main.js?v=20260731-4"></script>
 </body>
 </html>

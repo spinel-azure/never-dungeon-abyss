@@ -155,6 +155,8 @@ import {
   const itemGetItems = document.getElementById("itemGetItems");
   const bonusGetEffect = document.getElementById("bonusGetEffect");
   const bonusGetAmount = document.getElementById("bonusGetAmount");
+  const experienceSettlementOverlay = document.getElementById("experienceSettlementOverlay");
+  const experienceSettlementDetail = document.getElementById("experienceSettlementDetail");
   const battleScreen = document.getElementById("battleScreen");
   const skillOverlay = document.getElementById("skillOverlay");
   const sceneTransition = document.getElementById("sceneTransition");
@@ -165,6 +167,7 @@ import {
   let itemGetTimer = 0;
   let bonusGetTimer = 0;
   let trapResultTimer = 0;
+  let experienceSettlementCloseCallback = null;
   let currentDepth = 1;
   let pendingEncounter = null;
   configureDevice();
@@ -1079,29 +1082,51 @@ import {
     const result = resolveInnStay(character);
     Object.assign(character, result.changes);
     updateCharacterUi();
-    const settlementMessage = result.hadPendingSettlement
-      ? formatDepthReturnSettlement(result.settlement)
-      : "";
-    if (result.levelsGained > 0) {
-      showLevelUpEffect();
+    const finishPresentation = () => {
       const deckBonus = result.deckCostGained > 0
         ? `、特別ボーナス DECK COST+${result.deckCostGained}`
         : "";
-      say([
-        settlementMessage,
-        `LVが上がった！HP+${result.hpGained}、SP+${result.spGained}${deckBonus}`
-      ].filter(Boolean).join("\n"));
-    } else if (result.gainedExperience > 0) {
-      say([
-        "女将：お代はいらないよ。ゆっくりと身体を休めるんだよ。",
-        settlementMessage || `${result.gainedExperience}EXPを精算した。`
-      ].filter(Boolean).join("\n"));
-    } else if (settlementMessage) {
-      say(settlementMessage);
+      if (result.levelsGained > 0) {
+        showLevelUpEffect();
+        say(`LVが上がった！HP+${result.hpGained}、SP+${result.spGained}${deckBonus}`);
+      } else {
+        say("女将：お代はいらないよ。ゆっくりと身体を休めるんだよ。");
+      }
+    };
+    if (result.hadPendingSettlement) {
+      showExperienceSettlement(result.settlement, finishPresentation);
     } else {
-      say("女将：お代はいらないよ。ゆっくりと身体を休めるんだよ。");
+      finishPresentation();
     }
     saveGame();
+  }
+
+  function showExperienceSettlement(settlement, onClose = () => {}) {
+    if (!experienceSettlementOverlay || !experienceSettlementDetail) {
+      onClose();
+      return;
+    }
+    experienceSettlementDetail.textContent = formatDepthReturnSettlement(settlement);
+    experienceSettlementCloseCallback = onClose;
+    experienceSettlementOverlay.hidden = false;
+    experienceSettlementOverlay.focus({ preventScroll: true });
+  }
+
+  function dismissExperienceSettlement(event) {
+    if (!experienceSettlementOverlay || experienceSettlementOverlay.hidden) return false;
+    event?.preventDefault();
+    event?.stopImmediatePropagation();
+    experienceSettlementOverlay.hidden = true;
+    const onClose = experienceSettlementCloseCallback;
+    experienceSettlementCloseCallback = null;
+    onClose?.();
+    return true;
+  }
+
+  function handleExperienceSettlementInput(action) {
+    if (!experienceSettlementOverlay || experienceSettlementOverlay.hidden) return false;
+    if (action === "confirm" || action === "cancel") dismissExperienceSettlement();
+    return true;
   }
 
   function showLevelUpEffect() {
@@ -1290,7 +1315,9 @@ import {
     handleItemInput: handleItemOverlayInput,
     handleOverlayInput: handleOverlayEventInput,
     handleBattleInput,
-    handleTownInput,
+    handleTownInput: action => (
+      handleExperienceSettlementInput(action) || handleTownInput(action)
+    ),
     handleDoorInput: openDoorAhead,
     handleMenuInput
   });
@@ -1343,11 +1370,15 @@ import {
     handleSkillInput: handleSkillOverlayInput,
     handleItemInput: handleItemOverlayInput,
     handleBattleInput,
-    handleTownInput,
+    handleTownInput: action => (
+      handleExperienceSettlementInput(action) || handleTownInput(action)
+    ),
     handleMenuInput
   });
 
   updateAutoReturnButton();
+  experienceSettlementOverlay?.addEventListener("pointerdown", dismissExperienceSettlement, true);
+  experienceSettlementOverlay?.addEventListener("click", dismissExperienceSettlement);
   startRenderLoop();
   window.addEventListener("nda:new-game", startNewGame);
   window.addEventListener("nda:continue", () => continueGame("auto"));
