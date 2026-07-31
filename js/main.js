@@ -33,6 +33,7 @@ import {
   resumeDismissedStairsPrompt,
   playArrivalSequence,
   startRandomEncounterNotice,
+  startAmbushEncounterNotice,
   startFloorLapNotice,
   setNpcTypewriterOptions
 } from "./player.js";
@@ -72,6 +73,8 @@ import { configureBattle, handleBattleInput, isBattleActive, startBattle } from 
 import { awardBattleExperience, createTempleRevival, grantEventItems, resolveDungeonDefeat, resolveInnStay, unlockGuildRequest } from "./character-services.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { resolveTreasureTrap } from "../combat/resolve-trap.js";
+import { collectStats } from "../combat/collect-stats.js";
+import { resolveSurprise } from "../combat/resolve-environment-save.js";
 import { getNonlethalPoisonDamage } from "../combat/status-lifecycle.js";
 import { getNextLevelExperience, MAX_LEVEL } from "../data/growth.js";
 import { resolveFieldSkill } from "../combat/resolve-field-skill.js";
@@ -159,10 +162,11 @@ import {
   let bonusGetTimer = 0;
   let trapResultTimer = 0;
   let currentDepth = 1;
+  let pendingEncounter = null;
   configureDevice();
   configureEvents({ messageEl: msgEl });
   configurePresence({
-    onEncounter: startRandomEncounterNotice
+    onEncounter: prepareRandomEncounter
   });
   configureTreasure({ canvas: treasureCanvas });
   configureAudio();
@@ -832,10 +836,7 @@ import {
     element.replaceChildren(settled, carriedElement, remainder);
   }
 
-  function beginRandomBattle() {
-    if (!character || worldLocation !== "dungeon" || isBattleActive()) return false;
-    cancelAutoReturn(false);
-    setPlayerInputEnabled(false);
+  function getRandomEncounterEnemyData() {
     const forcedEnemyId = shouldForceEnemy(character, {
       depth: currentDepth,
       enemyId: "cave_slime"
@@ -847,11 +848,42 @@ import {
       })
         ? "abyss_rat"
         : null;
-    const enemyData = forcedEnemyId
+    return forcedEnemyId
       ? getEnemyById(forcedEnemyId)
       : getRandomEnemy({ depth: currentDepth });
+  }
+
+  function prepareRandomEncounter() {
+    if (!character || worldLocation !== "dungeon" || isBattleActive()) return false;
+    const enemyData = getRandomEncounterEnemyData();
+    const surprise = resolveSurprise({
+      player: collectStats(character),
+      enemyBaseRate: enemyData.surpriseRate,
+      enemyMaximum: enemyData.surpriseRateMaximum,
+      ignoreNormalCap: Boolean(enemyData.ignoreNormalSurpriseCap)
+    });
+    pendingEncounter = {
+      enemyData,
+      ambush: surprise.ambush,
+      surpriseRate: surprise.rate
+    };
+    if (surprise.ambush) startAmbushEncounterNotice();
+    else startRandomEncounterNotice();
+    return true;
+  }
+
+  function beginRandomBattle() {
+    if (!character || worldLocation !== "dungeon" || isBattleActive()) return false;
+    cancelAutoReturn(false);
+    setPlayerInputEnabled(false);
+    const encounter = pendingEncounter;
+    pendingEncounter = null;
+    const enemyData = encounter?.enemyData || getRandomEncounterEnemyData();
     const enemy = createEnemyCombatant(enemyData);
-    const started = startBattle(enemy, { playStartSe: false });
+    const started = startBattle(enemy, {
+      playStartSe: false,
+      ambush: Boolean(encounter?.ambush)
+    });
     if (!started) setPlayerInputEnabled(true);
     return started;
   }

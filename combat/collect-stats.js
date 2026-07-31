@@ -8,6 +8,7 @@ export function collectStats(source = {}) {
   const equipment = source.equipmentStatBonuses || source.equipmentBonuses || {};
   const cards = source.cardStatBonuses || source.cardBonuses || {};
   const temporary = source.temporaryStatBonuses || {};
+  const npc = source.npcStatBonuses || source.npcBonuses || {};
   const stats = {};
   for (const key of STAT_KEYS) {
     stats[key] = clamp(
@@ -32,7 +33,12 @@ export function collectStats(source = {}) {
     statusPowerBonus: numeric(source.statusPowerBonus),
     statusResistanceBonus: numeric(source.statusResistanceBonus),
     instantDeathResistance: numeric(source.instantDeathResistance),
-    surpriseResistance: numeric(source.surpriseResistance)
+    surpriseResistance:
+      numeric(source.surpriseResistance)
+      + numeric(equipment.surpriseResistance)
+      + numeric(cards.surpriseResistance)
+      + numeric(temporary.surpriseResistance)
+      + numeric(npc.surpriseResistance)
   };
 }
 

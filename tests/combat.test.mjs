@@ -18,10 +18,16 @@ import { resolveStatusEffect } from "../combat/resolve-status-effect.js";
 import { resolveInstantDeath } from "../combat/resolve-status-effect.js";
 import {
   calculateSurpriseRate,
-  resolveEnvironmentSave
+  resolveEnvironmentSave,
+  resolveSurprise
 } from "../combat/resolve-environment-save.js";
 import { resolveEscapeAttempt } from "../combat/resolve-escape.js";
-import { createBattleState, createEnemyAction, resolveBattleRound } from "../combat/battle-engine.js";
+import {
+  createBattleState,
+  createEnemyAction,
+  resolveBattleRound,
+  resolveEnemyAmbush
+} from "../combat/battle-engine.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { CHARACTER_JOBS } from "../data/town.js";
 import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
@@ -440,6 +446,57 @@ test("surprise chance is reduced by LUC and never below zero", () => {
     enemyBaseRate: 0.2,
     enemyMaximum: 0.5
   }), 0);
+});
+
+test("normal enemy surprise is capped at 30 percent and resistance at 15 percent", () => {
+  assert.equal(calculateSurpriseRate({
+    player: { luc: 0 },
+    enemyBaseRate: 0.8,
+    enemyMaximum: 0.8
+  }), 0.3);
+  assert.equal(calculateSurpriseRate({
+    player: { luc: 30, surpriseResistance: 0.15 },
+    enemyBaseRate: 0.3,
+    enemyMaximum: 0.3
+  }), 0);
+  assert.equal(calculateSurpriseRate({
+    player: { luc: 0, surpriseResistance: 0.9 },
+    enemyBaseRate: 0.3,
+    enemyMaximum: 0.3
+  }), 0.15);
+  assert.equal(calculateSurpriseRate({
+    player: { luc: 0 },
+    enemyBaseRate: 0.8,
+    enemyMaximum: 0.8,
+    ignoreNormalCap: true
+  }), 0.8);
+});
+
+test("surprise saving throw uses the final reduced rate", () => {
+  assert.equal(resolveSurprise({
+    player: { luc: 10 },
+    enemyBaseRate: 0.15,
+    enemyMaximum: 0.3,
+    rng: fixed(0.09)
+  }).ambush, true);
+  assert.equal(resolveSurprise({
+    player: { luc: 10 },
+    enemyBaseRate: 0.15,
+    enemyMaximum: 0.3,
+    rng: fixed(0.1)
+  }).ambush, false);
+});
+
+test("enemy ambush grants exactly one enemy opening action", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  const enemy = createEnemyCombatant(getEnemyById("abyss_rat"));
+  const battle = createBattleState({ character, enemy });
+  const resolved = resolveEnemyAmbush({ battle, rng: fixed(0) });
+  assert.equal(resolved.accepted, true);
+  assert.equal(resolved.battle.enemy.hp, enemy.hp);
+  assert.ok(resolved.battle.player.hp < character.hp);
+  assert.ok(resolved.battle.presentationEvents.every(event => event.targetSide === "player"));
+  assert.equal(resolved.battle.phase, "command");
 });
 
 test("escape uses the enemy escape rate with injectable RNG", () => {

@@ -76,6 +76,31 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
   return { battle: next, accepted: true };
 }
 
+export function resolveEnemyAmbush({ battle, rng = Math.random } = {}) {
+  const next = structuredClone(battle);
+  const opportunity = resolveActionOpportunity(next.enemy.statuses);
+  next.enemy.statuses = opportunity.statuses;
+  next.log = [];
+  next.presentationEvents = [];
+  if (opportunity.skipped) {
+    next.log.push(`${next.enemy.name}は動けない！`);
+  } else {
+    executeAction({
+      battle: next,
+      action: createEnemyAction(next.enemy, rng),
+      actor: next.enemy,
+      actorSide: "enemy",
+      target: next.player,
+      targetSide: "player",
+      rng
+    });
+  }
+  finishAction(next, "enemy");
+  updateOutcome(next);
+  next.phase = next.outcome ? "complete" : "command";
+  return { battle: next, accepted: true };
+}
+
 export function createPlayerAction(player, command = {}, enemy = null) {
   if (command.type === "attack") {
     return {

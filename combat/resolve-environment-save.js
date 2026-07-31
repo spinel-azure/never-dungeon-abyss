@@ -1,5 +1,8 @@
 import { COMBAT_CONFIG, clamp } from "./combat-config.js";
 
+export const NORMAL_ENEMY_SURPRISE_MAXIMUM = 0.3;
+export const SURPRISE_RESISTANCE_MAXIMUM = 0.15;
+
 export function resolveEnvironmentSave({
   target = {},
   effect = {},
@@ -24,15 +27,47 @@ export function resolveEnvironmentSave({
 export function calculateSurpriseRate({
   player = {},
   enemyBaseRate = 0,
-  enemyMaximum = 1
+  enemyMaximum = NORMAL_ENEMY_SURPRISE_MAXIMUM,
+  ignoreNormalCap = false
 } = {}) {
-  return clamp(
-    numeric(enemyBaseRate)
-      - numeric(player.luc) * COMBAT_CONFIG.surpriseLuckMultiplier
-      - numeric(player.surpriseResistance),
+  const maximum = ignoreNormalCap
+    ? Math.max(0, numeric(enemyMaximum))
+    : Math.min(NORMAL_ENEMY_SURPRISE_MAXIMUM, Math.max(0, numeric(enemyMaximum)));
+  const baseRate = ignoreNormalCap
+    ? numeric(enemyBaseRate)
+    : Math.min(NORMAL_ENEMY_SURPRISE_MAXIMUM, numeric(enemyBaseRate));
+  const resistance = clamp(
+    numeric(player.surpriseResistance),
     0,
-    Math.max(0, numeric(enemyMaximum))
+    SURPRISE_RESISTANCE_MAXIMUM
   );
+  return clamp(
+    baseRate
+      - numeric(player.luc) * COMBAT_CONFIG.surpriseLuckMultiplier
+      - resistance,
+    0,
+    maximum
+  );
+}
+
+export function resolveSurprise({
+  player = {},
+  enemyBaseRate = 0,
+  enemyMaximum = NORMAL_ENEMY_SURPRISE_MAXIMUM,
+  ignoreNormalCap = false,
+  rng = Math.random
+} = {}) {
+  const rate = calculateSurpriseRate({
+    player,
+    enemyBaseRate,
+    enemyMaximum,
+    ignoreNormalCap
+  });
+  return {
+    actionType: "surpriseSave",
+    ambush: roll(rng) < rate,
+    rate
+  };
 }
 
 function roll(rng) {

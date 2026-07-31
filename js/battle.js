@@ -1,4 +1,8 @@
-import { createBattleState, resolveBattleRound } from "../combat/battle-engine.js";
+import {
+  createBattleState,
+  resolveBattleRound,
+  resolveEnemyAmbush
+} from "../combat/battle-engine.js";
 import { resolveEscapeAttempt } from "../combat/resolve-escape.js";
 
 const COMMANDS = Object.freeze([
@@ -48,7 +52,7 @@ export function configureBattle(options) {
   });
 }
 
-export function startBattle(enemy, { playStartSe = true } = {}) {
+export function startBattle(enemy, { playStartSe = true, ambush = false } = {}) {
   const character = battleUi.getCharacter();
   if (!character || battleUi.active) return false;
   battleUi.active = true;
@@ -62,6 +66,7 @@ export function startBattle(enemy, { playStartSe = true } = {}) {
   showCommandButtons();
   if (playStartSe) battleUi.playSe("battleStart");
   renderBattle();
+  if (ambush) void executeAmbushOpening();
   return true;
 }
 
@@ -207,6 +212,25 @@ async function executeCommand(command) {
   battleUi.presenting = false;
   renderBattle();
   if (battleUi.autoActive && !battleUi.battle.outcome) scheduleAutoRound();
+}
+
+async function executeAmbushOpening() {
+  const resolved = resolveEnemyAmbush({ battle: battleUi.battle });
+  battleUi.battle = resolved.battle;
+  battleUi.presenting = true;
+  battleUi.onCharacterChanged({
+    hp: battleUi.battle.player.hp,
+    sp: battleUi.battle.player.sp,
+    statuses: structuredClone(battleUi.battle.player.statuses),
+    inventory: structuredClone(battleUi.battle.player.inventory),
+    alive: battleUi.battle.player.alive
+  });
+  renderBattle();
+  if (battleUi.battle.presentationEvents?.length) await playPresentationEvents();
+  if (!battleUi.active) return;
+  if (battleUi.battle.outcome === "defeat") battleUi.playSe("playerDamage");
+  battleUi.presenting = false;
+  renderBattle();
 }
 
 async function playPresentationEvents() {
