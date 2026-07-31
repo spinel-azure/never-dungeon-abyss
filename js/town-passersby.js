@@ -134,8 +134,11 @@ function updateAndDrawPasserby(passerby, context, width, height, deltaSeconds, n
     return;
   }
 
-  const walkStep = Math.floor((now + config.initialPhase) / (config.walkPeriod / 4)) % 4;
-  const bobOffset = walkStep === 1 || walkStep === 3 ? -config.bobAmplitude : 0;
+  const walkStep = Math.floor((now + config.initialPhase) / (config.walkPeriod / 8)) % 8;
+  const bobPattern = config.bobAmplitude >= 2
+    ? [0, -1, -2, -1, 0, -1, -2, -1]
+    : [0, -1, -1, 0, 0, -1, -1, 0];
+  const bobOffset = bobPattern[walkStep];
   const drawX = Math.round(passerby.x);
   const drawY = Math.round(height - drawHeight + bobOffset);
   const facesRight = config.sourceFacing === "left" && passerby.direction > 0;
