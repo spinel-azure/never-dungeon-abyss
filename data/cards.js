@@ -1,4 +1,5 @@
 export const CARD_RARITIES = Object.freeze(["C", "R", "SR", "L", "Z"]);
+export const GODDESS_GRACE_CARD_ID = "common_goddess_grace";
 
 const STANDARD_CARDS = [
   {
@@ -44,7 +45,7 @@ const STANDARD_CARDS = [
     maxOwned: 99, maxCopies: 6
   },
   {
-    id: "common_goddess_grace", rarity: "C", cost: 1,
+    id: GODDESS_GRACE_CARD_ID, rarity: "C", cost: 1,
     name: "Goddess's Grace", nameJa: "女神の恩寵", concept: "探索EXPロスト無効",
     descriptionJa: "ダンジョン内で力尽きても、その探索で獲得した経験値を失わずに復活できる。",
     category: "exploration", effectId: "preserve_experience_on_defeat",

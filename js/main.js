@@ -75,6 +75,10 @@ import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { resolveTreasureTrap } from "../combat/resolve-trap.js";
 import { collectStats } from "../combat/collect-stats.js";
 import { resolveSurprise } from "../combat/resolve-environment-save.js";
+import {
+  createDepthReturnSettlement,
+  formatDepthReturnSettlement
+} from "../data/experience-settlement.js";
 import { getNonlethalPoisonDamage } from "../combat/status-lifecycle.js";
 import { getNextLevelExperience, MAX_LEVEL } from "../data/growth.js";
 import { resolveFieldSkill } from "../combat/resolve-field-skill.js";
@@ -1075,14 +1079,25 @@ import {
     const result = resolveInnStay(character);
     Object.assign(character, result.changes);
     updateCharacterUi();
+    const settlementMessage = result.hadPendingSettlement
+      ? formatDepthReturnSettlement(result.settlement)
+      : "";
     if (result.levelsGained > 0) {
       showLevelUpEffect();
       const deckBonus = result.deckCostGained > 0
         ? `、特別ボーナス DECK COST+${result.deckCostGained}`
         : "";
-      say(`LVが上がった！HP+${result.hpGained}、SP+${result.spGained}${deckBonus}`);
+      say([
+        settlementMessage,
+        `LVが上がった！HP+${result.hpGained}、SP+${result.spGained}${deckBonus}`
+      ].filter(Boolean).join("\n"));
     } else if (result.gainedExperience > 0) {
-      say(`女将：お代はいらないよ。ゆっくりと身体を休めるんだよ。\n${result.gainedExperience}EXPを精算した。`);
+      say([
+        "女将：お代はいらないよ。ゆっくりと身体を休めるんだよ。",
+        settlementMessage || `${result.gainedExperience}EXPを精算した。`
+      ].filter(Boolean).join("\n"));
+    } else if (settlementMessage) {
+      say(settlementMessage);
     } else {
       say("女将：お代はいらないよ。ゆっくりと身体を休めるんだよ。");
     }
@@ -1126,6 +1141,7 @@ import {
       onDark: () => {
         currentDepth = 1;
         resetDungeon("", null, true);
+        character.pendingExperienceSettlement = null;
         worldLocation = "dungeon";
         closeTown();
         say("奈落へ足を踏み入れた。");
@@ -1171,7 +1187,12 @@ import {
   }
 
   function returnToTown() {
+    const returnFloor = currentDepth;
     if (character) {
+      character.pendingExperienceSettlement = createDepthReturnSettlement(
+        character,
+        returnFloor
+      );
       character = recordFloorExploration(character, { depth: 0, explored: [] });
       updateCharacterUi();
     }

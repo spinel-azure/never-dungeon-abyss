@@ -4,6 +4,7 @@ import { createInitialCardState, normalizeCardState } from "./deck.js";
 import { collectCardStatBonuses } from "./cards.js";
 import { createInitialInventory, normalizeInventory } from "./inventory.js";
 import { normalizeQuestState } from "./quests.js";
+import { normalizeDepthReturnSettlement } from "./experience-settlement.js";
 
 export const STAT_KEYS = Object.freeze(["str", "int", "agi", "dex", "luc"]);
 
@@ -70,6 +71,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     gold: 0,
     experience: 0,
     carriedExperience: 0,
+    pendingExperienceSettlement: null,
     hp: characterClass.maxHp,
     maxHp: characterClass.maxHp,
     sp: characterClass.maxSp,
@@ -117,6 +119,10 @@ export function normalizeCharacter(character) {
     gold: Math.max(0, Math.floor(Number(character.gold) || 0)),
     experience: normalizeExperience(character.experience),
     carriedExperience: Math.max(0, Math.floor(Number(character.carriedExperience) || 0)),
+    pendingExperienceSettlement: normalizeDepthReturnSettlement(
+      character.pendingExperienceSettlement,
+      character.carriedExperience
+    ),
     maxHp,
     maxSp,
     hp: legacyCharacter ? maxHp : clampInteger(character.hp, 0, maxHp, maxHp),

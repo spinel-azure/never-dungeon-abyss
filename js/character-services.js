@@ -4,6 +4,10 @@ import {
   normalizeExperience
 } from "../data/growth.js";
 import { grantItem } from "../data/inventory.js";
+import {
+  calculateDepthReturnSettlement,
+  normalizeDepthReturnSettlement
+} from "../data/experience-settlement.js";
 
 export const TOWN_INTRODUCTION_FLAGS = Object.freeze([
   "inn_first_talk_card",
@@ -25,12 +29,26 @@ export function createInnRecovery(character) {
 export function awardBattleExperience(character, amount) {
   const reward = Math.max(0, Math.floor(Number(amount) || 0));
   return {
-    carriedExperience: Math.max(0, Math.floor(Number(character.carriedExperience) || 0)) + reward
+    carriedExperience: Math.max(0, Math.floor(Number(character.carriedExperience) || 0)) + reward,
+    pendingExperienceSettlement: null
   };
 }
 
 export function resolveInnStay(character) {
-  const gainedExperience = Math.max(0, Math.floor(Number(character.carriedExperience) || 0));
+  const baseSettlementExp = Math.max(
+    0,
+    Math.floor(Number(character.carriedExperience) || 0)
+  );
+  const pendingSettlement = normalizeDepthReturnSettlement(
+    character.pendingExperienceSettlement,
+    baseSettlementExp
+  );
+  const settlement = pendingSettlement || calculateDepthReturnSettlement({
+    baseSettlementExp,
+    returnFloor: 0,
+    isGoddessGraceEquipped: false
+  });
+  const gainedExperience = settlement.finalSettlementExp;
   const experience = normalizeExperience((Number(character.experience) || 0) + gainedExperience);
   const previousLevel = Math.max(1, Math.floor(Number(character.level) || 1));
   const level = getLevelForExperience(experience);
@@ -44,6 +62,7 @@ export function resolveInnStay(character) {
     changes: {
       experience,
       carriedExperience: 0,
+      pendingExperienceSettlement: null,
       level,
       deckCost: growth.deckCost,
       maxHp,
@@ -54,6 +73,8 @@ export function resolveInnStay(character) {
       condition: "GOOD",
       alive: true
     },
+    settlement,
+    hadPendingSettlement: Boolean(pendingSettlement),
     gainedExperience,
     levelsGained: Math.max(0, level - previousLevel),
     hpGained: Math.max(0, growth.hp - previousGrowth.hp),
@@ -89,7 +110,8 @@ export function resolveDungeonDefeat(character, { preserveExperience = false } =
     ...createTempleRevival(character),
     carriedExperience: preserveExperience
       ? Math.max(0, Math.floor(Number(character?.carriedExperience) || 0))
-      : 0
+      : 0,
+    pendingExperienceSettlement: null
   };
 }
 
