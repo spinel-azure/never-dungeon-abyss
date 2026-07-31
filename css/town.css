@@ -6,7 +6,7 @@
 .town-cloud-layer{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
 .town-cloud-track{display:flex;width:200%;height:100%;animation:town-cloud-scroll 120s linear infinite;animation-play-state:paused;will-change:transform}
 .town-cloud-track img{display:block;width:50%;height:100%;flex:0 0 50%;object-fit:cover;object-position:center;image-rendering:auto}
-.town-passersby{position:absolute;inset:0;z-index:0;display:none;width:100%;height:100%;pointer-events:none;image-rendering:pixelated}
+.town-passersby{position:absolute;inset:0;z-index:2;display:none;width:100%;height:100%;pointer-events:none;image-rendering:pixelated}
 .town-screen.is-town-view .town-passersby{display:block}
 .town-screen.is-town-view .town-background{z-index:1}
 body.town-active .town-screen.is-town-view .town-cloud-track{animation-play-state:running}
