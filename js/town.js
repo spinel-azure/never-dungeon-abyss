@@ -6,6 +6,7 @@ import {
   isQuestAvailable
 } from "../data/quests.js";
 import { getItem } from "../data/items.js";
+import { configureTownPassersby } from "./town-passersby.js";
 
 const FACILITY_COMMANDS = Object.freeze({
   inn: [
@@ -90,6 +91,12 @@ export function configureTown(options) {
   Object.assign(town, options);
   town.background = town.root.querySelector("#townBackground");
   town.cloudLayer = town.root.querySelector("#townCloudLayer");
+  town.passersbyCanvas = town.root.querySelector("#townPassersby");
+  town.disposePassersby?.();
+  town.disposePassersby = configureTownPassersby({
+    canvas: town.passersbyCanvas,
+    root: town.root
+  });
   town.mosaic = town.root.querySelector("#townMosaic");
   town.portrait = town.root.querySelector("#townPortrait");
   town.portraitPlaceholder = town.root.querySelector("#townPortraitPlaceholder");
