@@ -468,7 +468,7 @@ import {
     saveGame();
     startBgm("townFacilities");
     return {
-      message: "ギルド長：これを持っていけ。ついでに町を見て回ったらどうだ？一通り回ったら、また戻ってこい。"
+      message: "ギルドマスター：これを持っていけ。ついでに町を見て回ったらどうだ？一通り回ったら、また戻ってこい。"
     };
   }
 
@@ -536,48 +536,48 @@ import {
         updateCharacterUi();
         saveGame();
         return {
-          message: "ギルド長：ふっ…。俺以外にもお節介がいたようだな。…ところで、お前に仕事を頼みたい。",
+          message: "ギルドマスター：ふっ…。俺以外にもお節介がいたようだな。…ところで、お前に仕事を頼みたい。",
           focusCommand: "accept"
         };
       }
       if (hasActiveQuest(character)) {
-        return "ギルド長：依頼の件、頼んだぞ。";
+        return "ギルドマスター：依頼の件、頼んだぞ。";
       }
       if (character.eventFlags?.guild_first_request_unlocked) {
-        return "ギルド長：仕事の話だ。依頼受注を選んでくれ。";
+        return "ギルドマスター：仕事の話だ。依頼受注を選んでくれ。";
       }
-      return "ギルド長：これを持っていけ。ついでに町を見て回ったらどうだ？一通り回ったら、また戻ってこい。";
+      return "ギルドマスター：これを持っていけ。ついでに町を見て回ったらどうだ？一通り回ったら、また戻ってこい。";
     }
     const rewards = {
       guild: {
         flag: "guild_registration_card",
         cardId: "common_strength_up",
-        first: "ギルド長：これを持っていけ。ついでに町を見て回ったらどうだ？\n腕力上昇のカードを手に入れた！",
-        repeat: "ギルド長：よぉ。今日はどうした？"
+        first: "ギルドマスター：これを持っていけ。ついでに町を見て回ったらどうだ？\n腕力上昇のカードを手に入れた！",
+        repeat: "ギルドマスター：よぉ。今日はどうした？"
       },
       inn: {
         flag: "inn_first_talk_card",
         cardId: "common_lucky_charm",
-        first: "女将：旅のお守りに、これを持っておいき。\n幸運のお守りのカードを手に入れた！",
-        repeat: "女将：お代はいらないよ。ゆっくりと身体を休めるんだよ。"
+        first: "女将ヨハンナ：旅のお守りに、これを持っておいき。\n幸運のお守りのカードを手に入れた！",
+        repeat: "女将ヨハンナ：お代はいらないよ。ゆっくりと身体を休めるんだよ。"
       },
       library: {
         flag: "library_first_talk_card",
         cardId: "common_knowledge_book",
-        first: "司書：…この本なら、あなたの役に立つかしら…？\n知識の書のカードを手に入れた！",
-        repeat: "司書：…何を…見たいのかしら…？"
+        first: "司書イライザ：…この本なら、あなたの役に立つかしら…？\n知識の書のカードを手に入れた！",
+        repeat: "司書イライザ：…何を…見たいのかしら…？"
       },
       temple: {
         flag: "temple_first_talk_items",
         itemIds: ["exorcism_talisman", "holy_water"],
-        first: "司祭：試練へ赴く貴方に、これを授けよと女神様より啓示がありました。退魔の護符と聖水です。どうかご武運を。……次からは寄進もお忘れなく。",
-        repeat: "司祭：迷える魂よ、女神のご加護があらんことを。"
+        first: "司祭アーヴァイン：試練へ赴く貴方に、これを授けよと女神様より啓示がありました。退魔の護符と聖水です。どうかご武運を。……次からは寄進もお忘れなく。",
+        repeat: "司祭アーヴァイン：迷える魂よ、女神のご加護があらんことを。"
       },
       shop: {
         flag: "shop_first_talk_items",
         itemIds: ["healing_potion", "antidote", "guiding_torch"],
-        first: "女主人：奈落の迷宮に行くんだろ？だったらこれを持っていきな。回復薬に解毒剤、それと導きのたいまつ。長い付き合いになりそうな気がするからね。今回はサービスだよ。",
-        repeat: "女主人：買いたいのかい、売るのかい？　冷やかしならお断りだよ。"
+        first: "女主人ヘレン：奈落の迷宮に行くのでしょう？　だったら、これを持っていって。回復薬に解毒剤、それと導きのたいまつ。今回はサービスよ。",
+        repeat: "女主人ヘレン：必要なものがあるなら、ゆっくり見ていってね。"
       }
     };
     const reward = rewards[facilityId];
@@ -1146,7 +1146,7 @@ import {
       : lostExperience > 0
         ? `\n持ち帰るはずだった${lostExperience}EXPを失った。`
         : "";
-    say(`司祭：おお…！女神へ祈りが届いたか…！迷える魂よ、今一度目覚めよ！${experienceMessage}`);
+    say(`司祭アーヴァイン：おお…！女神へ祈りが届いたか…！迷える魂よ、今一度目覚めよ！${experienceMessage}`);
     saveGame();
     void playSeSequence("revival", 1).finally(() => {
       templeRevivalJinglePending = false;
@@ -1224,7 +1224,7 @@ import {
         say(`LVが上がった！HP+${result.hpGained}、SP+${result.spGained}${deckBonus}`);
         await levelUpPresentation;
       } else {
-        say("女将：お代はいらないよ。ゆっくりと身体を休めるんだよ。");
+        say("女将ヨハンナ：お代はいらないよ。ゆっくりと身体を休めるんだよ。");
       }
       if (worldLocation === "town" && getTownState().facilityId === "inn") {
         startBgm("townFacilities");
@@ -1291,13 +1291,13 @@ import {
   async function healAtTemple() {
     if (!character) return;
     if (character.alive && character.hp > 0) {
-      say("司祭：治療の必要はないようですね。");
+      say("司祭アーヴァイン：治療の必要はないようですね。");
       return;
     }
     stopBgm();
     Object.assign(character, createTempleRevival(character));
     updateCharacterUi();
-    say("司祭：おお…！女神へ祈りが届いたか…！迷える魂よ、今一度目覚めよ！");
+    say("司祭アーヴァイン：おお…！女神へ祈りが届いたか…！迷える魂よ、今一度目覚めよ！");
     saveGame();
     await playSeSequence("revival", 1);
     if (worldLocation === "town" && getTownState().facilityId === "temple") {

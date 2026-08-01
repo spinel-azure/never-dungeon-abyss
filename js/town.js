@@ -219,10 +219,10 @@ export function configureTown(options) {
     if (!Number.isInteger(index)) return;
     town.playSe("cursorMove");
     town.commerceIndex = index;
-    renderCommerceSelection();
+    renderCommerceSelection({ showDescription: true });
     if (town.commercePointerArmedIndex === index) {
       town.commercePointerArmedIndex = -1;
-      purchaseSelectedCommerceItem();
+      requestCommerceConfirmation();
     } else {
       town.commercePointerArmedIndex = index;
     }
@@ -317,6 +317,8 @@ export function handleTownInput(action) {
     completeTownTypewriter();
     return true;
   }
+  if (town.mode === "shopCategory") return handleShopCategoryInput(action);
+  if (town.mode === "commerceConfirm") return handleCommerceConfirmationInput(action);
   if (town.mode === "commerce") return handleCommerceInput(action);
   if (town.mode.startsWith("quest")) return handleQuestInput(action);
   if (town.mode === "registration") return handleRegistrationInput(action);
@@ -461,7 +463,7 @@ function handleQuestInput(action) {
       const cancelledReport = town.mode === "questReportConfirm";
       openGuildQuestList(town.mode === "questAcceptDetail" ? "accept" : "report");
       if (cancelledReport) {
-        town.messageEl.textContent = "ギルド長：なんだ、報告しないのか？";
+        town.messageEl.textContent = "ギルドマスター：なんだ、報告しないのか？";
       }
     } else {
       town.mode = "facilityMenu";
@@ -476,8 +478,8 @@ function handleQuestInput(action) {
     if (result?.accepted) {
       town.playSe("confirm");
       const acceptedMessage = quest?.id === "guild_001_abyss_rat"
-        ? "ギルド長：これでお前の実力を試させてもらうぜ。"
-        : "ギルド長：よし。頼んだぞ。";
+        ? "ギルドマスター：これでお前の実力を試させてもらうぜ。"
+        : "ギルドマスター：よし。頼んだぞ。";
       town.messageEl.textContent = acceptedMessage;
       town.mode = "facilityMenu";
       renderFacility();
@@ -498,13 +500,13 @@ function handleQuestInput(action) {
       town.mode = "facilityMenu";
       renderFacility();
       town.messageEl.textContent = result.eventRewardCardId
-        ? "ギルド長：三つの依頼、すべてよくやってくれた。これは俺からの餞別だ。女神の恩寵がお前を守ってくれるだろう。"
+        ? "ギルドマスター：三つの依頼、すべてよくやってくれた。これは俺からの餞別だ。女神の恩寵がお前を守ってくれるだろう。"
         : quest?.id === "guild_001_abyss_rat"
-          ? "ギルド長：よくやってくれた！これなら先に進んでも大丈夫だろう。もっとも、生き残れるかはお前次第、だがな。"
-          : "ギルド長：依頼達成、よくやってくれた！また頼むぜ。";
+          ? "ギルドマスター：よくやってくれた！これなら先に進んでも大丈夫だろう。もっとも、生き残れるかはお前次第、だがな。"
+          : "ギルドマスター：依頼達成、よくやってくれた！また頼むぜ。";
     } else {
       openGuildQuestList("report");
-      town.messageEl.textContent = "ギルド長：まだ達成条件を満たしていないようだな。";
+      town.messageEl.textContent = "ギルドマスター：まだ達成条件を満たしていないようだな。";
     }
     town.onStateChanged();
     return true;
@@ -516,8 +518,8 @@ function handleQuestInput(action) {
     town.playSe(result?.accepted ? "confirm" : "cursorMove");
     openGuildQuestList("report");
     town.messageEl.textContent = result?.accepted
-      ? "ギルド長：分かった。依頼は取り下げておく。"
-      : "ギルド長：その依頼は受注していないぞ。";
+      ? "ギルドマスター：分かった。依頼は取り下げておく。"
+      : "ギルドマスター：その依頼は受注していないぞ。";
     town.onStateChanged();
     return true;
   }
@@ -829,13 +831,14 @@ function renderFacility() {
     updateRegistrationLanguage();
     showTownCommands();
   } else {
+    town.mode = "facilityMenu";
     showFacilityCommands(facility.id);
   }
   town.root.classList.toggle("is-registering", showRegistration);
   updateRegistrationJobDescription();
   town.registration.hidden = !showRegistration;
   town.feedback.textContent = "";
-  if (showRegistration) town.messageEl.textContent = "ギルド長：奈落へ潜るなら、まず名簿に名前を書け。登録なしでは通せん。";
+  if (showRegistration) town.messageEl.textContent = "ギルドマスター：奈落へ潜るなら、まず名簿に名前を書け。登録なしでは通せん。";
   town.root.querySelector("#townFacilityName").textContent = facility.label;
   resetTownViewport();
   if (showRegistration) {
@@ -958,7 +961,19 @@ function activateFacilityService(command) {
   if (command === "buy") {
     const facility = TOWN_FACILITIES[town.selectedIndex];
     if (facility?.id !== "shop") return false;
+    showShopCategoryCommands();
+    return true;
+  }
+  if (command === "shop-items") {
     openCommerce("buy");
+    return true;
+  }
+  if (command === "shop-equipment") {
+    town.messageEl.textContent = "女主人ヘレン：装備品は今、品切れなの。";
+    return true;
+  }
+  if (command === "shop-return") {
+    renderFacility();
     return true;
   }
   if (command === "talk") {
@@ -1009,18 +1024,48 @@ function openCommerce(kind) {
   town.commerceOverlay.hidden = false;
   town.guildQuestOverlay.hidden = true;
   town.messageEl.textContent = kind === "donate"
-    ? "司祭：いずれを女神へ寄進されますか？\n＊Aボタン：決定　Bボタン：戻る"
-    : "女主人：何を買うんだい？\n＊Aボタン：決定　Bボタン：戻る";
-  renderCommerce();
+    ? "司祭アーヴァイン：いずれを女神へ寄進されますか？\n＊Aボタン：決定　Bボタン：戻る"
+    : "女主人ヘレン：どれにするのかしら？\n＊Aボタン：決定　Bボタン：戻る";
+  renderCommerce({ showDescription: false });
   resetTownViewport();
+}
+
+function showShopCategoryCommands() {
+  const commands = [
+    ["shop-equipment", "装備品"], ["shop-items", "道具"], ["shop-return", "戻る"],
+    ["empty-1", ""], ["empty-2", ""], ["empty-3", ""]
+  ];
+  town.mode = "shopCategory";
+  town.commerceOverlay.hidden = true;
+  town.facilityCommandIndex = 0;
+  town.facilityCommandButtons.forEach((button, index) => {
+    const [id, label] = commands[index];
+    button.dataset.facilityCommand = id;
+    button.textContent = label;
+    button.disabled = !label;
+    button.classList.toggle("is-empty", !label);
+    button.classList.remove("is-unavailable");
+    button.setAttribute("aria-disabled", "false");
+  });
+  town.messageEl.textContent = "女主人ヘレン：必要なのは何かしら？道具？それとも装備品？";
+  renderFacilityCommandSelection();
+}
+
+function handleShopCategoryInput(action) {
+  if (action === "cancel") {
+    town.playSe("cancel");
+    renderFacility();
+    return true;
+  }
+  return handleFacilityMenuInput(action);
 }
 
 function handleCommerceInput(action) {
   if (action === "cancel") {
     town.playSe("cancel");
-    town.mode = "facilityMenu";
     town.commercePointerArmedIndex = -1;
-    renderFacility();
+    if (town.commerceKind === "buy") showShopCategoryCommands();
+    else renderFacility();
     return true;
   }
   if (["up", "down", "left", "right"].includes(action)) {
@@ -1030,11 +1075,36 @@ function handleCommerceInput(action) {
       town.commerceIndex + amount + town.commerceItems.length
     ) % town.commerceItems.length;
     town.commercePointerArmedIndex = -1;
-    renderCommerceSelection();
+    renderCommerceSelection({ showDescription: true });
     return true;
   }
   if (action === "confirm") {
+    requestCommerceConfirmation();
+    return true;
+  }
+  return true;
+}
+
+function requestCommerceConfirmation() {
+  const item = town.commerceItems[town.commerceIndex];
+  if (!item) return;
+  town.mode = "commerceConfirm";
+  town.messageEl.textContent = town.commerceKind === "donate"
+    ? "司祭アーヴァイン：こちらでよろしいですか？\n＊Aボタン：はい　Bボタン：いいえ"
+    : "女主人ヘレン：これでいい？\n＊Aボタン：はい　Bボタン：いいえ";
+}
+
+function handleCommerceConfirmationInput(action) {
+  if (action === "confirm") {
     purchaseSelectedCommerceItem();
+    return true;
+  }
+  if (action === "cancel") {
+    town.playSe("cancel");
+    town.mode = "commerce";
+    town.messageEl.textContent = town.commerceKind === "donate"
+      ? "司祭アーヴァイン：承知しました。"
+      : "女主人ヘレン：あら、残念。";
     return true;
   }
   return true;
@@ -1047,21 +1117,25 @@ function purchaseSelectedCommerceItem() {
   if (!result?.accepted) {
     town.playSe("cursorMove");
     town.messageEl.textContent = result?.reason === "insufficientGold"
-      ? `${town.commerceKind === "donate" ? "司祭" : "女主人"}：ゴールドが足りません。`
-      : `${town.commerceKind === "donate" ? "司祭" : "女主人"}：これ以上は持てないようですね。`;
+      ? (town.commerceKind === "donate"
+        ? "司祭アーヴァイン：ゴールドが足りません。"
+        : "女主人ヘレン：あら、お金が足りないわ。")
+      : `${town.commerceKind === "donate" ? "司祭アーヴァイン" : "女主人ヘレン"}：これ以上は持てないようですね。`;
+    town.mode = "commerce";
     return;
   }
   town.playSe("item");
-  const keeper = town.commerceKind === "donate" ? "司祭" : "女主人";
+  const keeper = town.commerceKind === "donate" ? "司祭アーヴァイン" : "女主人ヘレン";
   town.messageEl.textContent = town.commerceKind === "donate"
     ? `${keeper}：女神のご加護を。${item.name}を授けましょう。`
-    : `${keeper}：毎度あり。${item.name}を受け取りな。`;
+    : `${keeper}：はい、どうぞ。`;
+  town.mode = "commerce";
   town.commercePointerArmedIndex = -1;
-  renderCommerce();
+  renderCommerce({ showDescription: false });
   town.onStateChanged();
 }
 
-function renderCommerce() {
+function renderCommerce({ showDescription = true } = {}) {
   town.commerceList.replaceChildren(...town.commerceItems.map((item, index) => {
     const button = document.createElement("button");
     button.type = "button";
@@ -1075,15 +1149,22 @@ function renderCommerce() {
     return button;
   }));
   if (town.commerceGold) {
-    town.commerceGold.textContent = String(Math.max(0, Math.floor(Number(town.getCharacter()?.gold) || 0)));
+    town.commerceGold.textContent = Math.max(
+      0,
+      Math.floor(Number(town.getCharacter()?.gold) || 0)
+    ).toLocaleString("en-US");
   }
-  renderCommerceSelection();
+  renderCommerceSelection({ showDescription });
 }
 
-function renderCommerceSelection() {
+function renderCommerceSelection({ showDescription = true } = {}) {
   [...town.commerceList.children].forEach((button, index) => {
     button.classList.toggle("is-selected", index === town.commerceIndex);
   });
+  const item = town.commerceItems[town.commerceIndex];
+  if (showDescription && item) {
+    town.messageEl.textContent = `${item.description}\n＊Aボタン：決定　Bボタン：戻る`;
+  }
 }
 
 function openGuildQuestList(kind) {
@@ -1103,8 +1184,8 @@ function openGuildQuestList(kind) {
   town.guildQuestDetail.hidden = true;
   town.guildQuestList.hidden = false;
   town.messageEl.textContent = kind === "report"
-    ? "ギルド長：達成した依頼があるのか？報告してくれ。"
-    : "ギルド長：受ける依頼を選んでくれ。";
+    ? "ギルドマスター：達成した依頼があるのか？報告してくれ。"
+    : "ギルドマスター：受ける依頼を選んでくれ。";
   renderGuildQuestList();
   resetTownViewport();
 }
@@ -1172,7 +1253,7 @@ function activateSelectedQuest() {
     town.playSe("confirm");
     town.mode = "questAcceptDetail";
     renderQuestDetail(quest, progress);
-    town.messageEl.textContent = "ギルド長：この依頼でいいか？\n＊Aボタン：はい　Bボタン：いいえ";
+    town.messageEl.textContent = "ギルドマスター：この依頼でいいか？\n＊Aボタン：はい　Bボタン：いいえ";
     return;
   }
   if (town.mode !== "questReportList" || !progress.active) {
@@ -1183,12 +1264,12 @@ function activateSelectedQuest() {
     town.playSe("confirm");
     town.mode = "questReportConfirm";
     renderQuestDetail(quest, progress);
-    town.messageEl.textContent = "ギルド長：この依頼を報告するのか？\n＊Aボタン：はい　Bボタン：いいえ";
+    town.messageEl.textContent = "ギルドマスター：この依頼を報告するのか？\n＊Aボタン：はい　Bボタン：いいえ";
     return;
   }
   town.playSe("confirm");
   town.mode = "questAbandonConfirm";
-  town.messageEl.textContent = "ギルド長：なんだ？依頼を破棄するのか？\n＊A：はい　B：いいえ";
+  town.messageEl.textContent = "ギルドマスター：なんだ？依頼を破棄するのか？\n＊A：はい　B：いいえ";
 }
 
 function renderQuestDetail(quest, progress) {
@@ -1238,10 +1319,10 @@ function divider() {
 }
 
 function questFailureMessage(reason) {
-  if (reason === "activeLimit") return "ギルド長：同時に受けられる依頼は3件までだ。";
-  if (reason === "alreadyAccepted") return "ギルド長：その依頼はもう受注しているぞ。";
-  if (reason === "completed") return "ギルド長：その依頼はもう完了している。";
-  return "ギルド長：今はその依頼を受けられない。";
+  if (reason === "activeLimit") return "ギルドマスター：同時に受けられる依頼は3件までだ。";
+  if (reason === "alreadyAccepted") return "ギルドマスター：その依頼はもう受注しているぞ。";
+  if (reason === "completed") return "ギルドマスター：その依頼はもう完了している。";
+  return "ギルドマスター：今はその依頼を受けられない。";
 }
 
 function renderFacilityCommandSelection() {
@@ -1293,7 +1374,7 @@ function registerCharacter() {
   town.facilityButtons.forEach(button => button.classList.remove("is-locked"));
   renderFacility();
   town.messageEl.textContent = registrationResult?.message
-    || `ギルド長：${name}だな。登録は済んだ。ようこそ、冒険者ギルドへ。`;
+    || `ギルドマスター：${name}だな。登録は済んだ。ようこそ、冒険者ギルドへ。`;
   town.feedback.textContent = "登録しました。";
   town.onStateChanged();
 }

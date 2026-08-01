@@ -2,7 +2,7 @@ export const TOWN_FACILITIES = Object.freeze([
   {
     id: "inn",
     label: "宿屋",
-    keeper: "女将",
+    keeper: "女将ヨハンナ",
     image: "images/npc/NPC_11.avif",
     background: "images/background/town_02.avif",
     greeting: "おかえりなさい。まずは身体を休めていってくださいな。",
@@ -11,7 +11,7 @@ export const TOWN_FACILITIES = Object.freeze([
   {
     id: "guild",
     label: "ギルド",
-    keeper: "ギルド長",
+    keeper: "ギルドマスター",
     image: "images/npc/NPC_10.avif",
     background: "images/background/town_05.avif",
     greeting: "よぉ。今日はどうした？",
@@ -20,7 +20,7 @@ export const TOWN_FACILITIES = Object.freeze([
   {
     id: "temple",
     label: "寺院",
-    keeper: "司祭",
+    keeper: "司祭アーヴァイン",
     image: "images/npc/NPC_12.avif",
     background: "images/background/town_03.avif",
     greeting: "迷える魂に、女神の導きがありますように。",
@@ -29,16 +29,16 @@ export const TOWN_FACILITIES = Object.freeze([
   {
     id: "shop",
     label: "商店",
-    keeper: "女主人",
+    keeper: "女主人ヘレン",
     image: "images/npc/NPC_13.avif",
     background: "images/background/town_04.avif",
-    greeting: "買うのかい、売るのかい？　冷やかしならお断りだよ。",
+    greeting: "あら、いらっしゃい。",
     services: ["装備品の売買", "アイテムの売買"]
   },
   {
     id: "library",
     label: "図書館",
-    keeper: "司書",
+    keeper: "司書イライザ",
     portraitAlt: "図書館の主",
     image: "images/npc/NPC_14.avif",
     background: "images/background/town_06.avif",
