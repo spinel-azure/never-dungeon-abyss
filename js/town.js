@@ -1,5 +1,10 @@
 import { CHARACTER_JOBS, TOWN_FACILITIES, getTownFacility } from "../data/town.js";
-import { formatQuickJob, formatQuickMoney } from "../data/quick-status.js";
+import {
+  formatCompactQuickName,
+  formatQuickJob,
+  formatQuickLevel,
+  formatQuickMoney
+} from "../data/quick-status.js";
 import {
   QUESTS,
   getQuestProgress,
@@ -1431,9 +1436,12 @@ function showRegistrationRequired() {
 
 export function renderCharacterStatus() {
   const character = town.getCharacter();
+  const quickName = character?.name || "NO_NAME";
   const values = {
-    quickName: character?.name || "NO_NAME",
-    quickJob: formatQuickJob(character?.job),
+    quickName,
+    quickNameCompact: formatCompactQuickName(quickName),
+    quickJob: formatQuickJob(character?.job, isJapaneseUi() ? "ja" : "en"),
+    quickLevel: formatQuickLevel(character?.level),
     quickHpCurrent: character ? character.hp : "----",
     quickHpMax: character ? character.maxHp : "----",
     quickSpCurrent: character ? character.sp : "----",
@@ -1446,10 +1454,12 @@ export function renderCharacterStatus() {
   });
   const hpMax = document.querySelector("#quickHpMax");
   const spMax = document.querySelector("#quickSpMax");
-  const quickName = document.querySelector("#quickName");
+  const quickNameElement = document.querySelector("#quickName");
+  const quickNameCompact = document.querySelector("#quickNameCompact");
   hpMax?.classList.toggle("vital-max-bonus", hasMaxVitalBonus(character, "maxHp"));
   spMax?.classList.toggle("vital-max-bonus", hasMaxVitalBonus(character, "maxSp"));
-  quickName?.classList.toggle("condition-poison", character?.condition === "POISON");
+  quickNameElement?.classList.toggle("condition-poison", character?.condition === "POISON");
+  quickNameCompact?.classList.toggle("condition-poison", character?.condition === "POISON");
 }
 
 function hasMaxVitalBonus(character, key) {

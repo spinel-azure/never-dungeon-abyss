@@ -1,12 +1,33 @@
-const QUICK_JOB_CODES = Object.freeze({
+const QUICK_JOB_CODES_EN = Object.freeze({
   warrior: "W",
   thief: "T",
   priest: "P",
   mage: "M"
 });
 
-export function formatQuickJob(job) {
-  return `【${QUICK_JOB_CODES[String(job || "").toLowerCase()] || "-"}】`;
+const QUICK_JOB_CODES_JA = Object.freeze({
+  warrior: "戦",
+  thief: "盗",
+  priest: "僧",
+  mage: "魔"
+});
+
+export function formatQuickJob(job, language = "ja") {
+  const codes = String(language).toLowerCase().startsWith("en")
+    ? QUICK_JOB_CODES_EN
+    : QUICK_JOB_CODES_JA;
+  return `【${codes[String(job || "").toLowerCase()] || "-"}】`;
+}
+
+export function formatCompactQuickName(name) {
+  const characters = Array.from(String(name || "NO_NAME"));
+  return characters.length >= 6
+    ? `${characters.slice(0, 5).join("")}…`
+    : characters.join("");
+}
+
+export function formatQuickLevel(level) {
+  return String(Math.max(1, Math.floor(Number(level) || 1))).padStart(2, "0");
 }
 
 export function formatQuickMoney(gold) {
