@@ -63,7 +63,7 @@ import {
   setPresenceDisabled
 } from "./presence.js";
 import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js";
-import { configureAudio, setSeOptions, playSe, playSeSequence } from "./audio.js";
+import { configureAudio, setSeOptions, playSe, playSeSequence, startLoopSe, stopLoopSe } from "./audio.js";
 import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
 import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, setTownTypewriterOptions } from "./town.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
@@ -389,6 +389,7 @@ import {
     const savedLocation = save.world?.location === "town" ? "town" : "dungeon";
     worldLocation = savedLocation;
     if (savedLocation === "town") {
+      startLoopSe("townAmbience");
       setPlayerInputEnabled(false);
       openTown({
         registrationRequired: !character,
@@ -396,6 +397,7 @@ import {
         mode: save.world?.town?.mode
       });
     } else {
+      stopLoopSe("townAmbience");
       setPlayerInputEnabled(true);
       closeTown();
       say("冒険を再開しました。");
@@ -410,6 +412,7 @@ import {
     resetDungeon("", null, true);
     character = null;
     worldLocation = "town";
+    startLoopSe("townAmbience");
     setPlayerInputEnabled(false);
     updateCharacterUi();
     openTown({ registrationRequired: true, facilityId: "guild" });
@@ -1056,6 +1059,7 @@ import {
       character = recordFloorExploration(character, { depth: 0, explored: [] });
     }
     worldLocation = "town";
+    startLoopSe("townAmbience");
     cancelAutoReturn(false);
     setPlayerInputEnabled(false);
     openTown({ registrationRequired: false, facilityId: "temple", mode: "facilityMenu" });
@@ -1168,6 +1172,7 @@ import {
         resetDungeon("", null, true);
         character.pendingExperienceSettlement = null;
         worldLocation = "dungeon";
+        stopLoopSe("townAmbience");
         closeTown();
         say("奈落へ足を踏み入れた。");
         saveGame();
@@ -1222,6 +1227,7 @@ import {
       updateCharacterUi();
     }
     worldLocation = "town";
+    startLoopSe("townAmbience");
     cancelAutoReturn(false);
     setPlayerInputEnabled(false);
     openTown({ registrationRequired: !character, facilityId: "guild", mode: "arrival" });

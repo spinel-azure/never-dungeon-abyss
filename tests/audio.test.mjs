@@ -39,7 +39,7 @@ test("Web Audio uses one context, caches buffers, and applies SE volume through 
           connect() {},
           disconnect() {},
           start() {},
-          stop() { source.onended?.(); },
+          stop() { source.stopped = true; source.onended?.(); },
           onended: null
         };
         sources.push(source);
@@ -72,6 +72,14 @@ test("Web Audio uses one context, caches buffers, and applies SE volume through 
   assert.equal(fetchCount, 1);
   assert.ok(gainValues.includes(1));
   assert.equal(gainValues.at(-1), .1);
+
+  assert.equal(await audio.startLoopSe("townAmbience"), true);
+  const loopSource = sources.at(-1);
+  assert.equal(loopSource.loop, true);
+  assert.equal(contextCount, 1);
+  assert.equal(fetchCount, 2);
+  audio.stopLoopSe("townAmbience");
+  assert.equal(loopSource.stopped, true);
 
   audio.setSeOptions({ enabled: false });
   assert.equal(await audio.playSe("confirm"), false);

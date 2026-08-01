@@ -20,7 +20,8 @@ export const SE = Object.freeze({
   heal: "little_cure.wav",
   catVoice01: "cat_voice01.mp3",
   catVoice02: "cat_voice02.mp3",
-  catVoice03: "cat_voice03.mp3"
+  catVoice03: "cat_voice03.mp3",
+  townAmbience: "shizen_kohen.mp3"
 });
 
 const audio = {
@@ -32,6 +33,9 @@ const audio = {
   buffers: new Map(),
   bufferRequests: new Map(),
   activeSources: new Map(),
+  loopSources: new Map(),
+  loopRequests: new Map(),
+  desiredLoops: new Set(),
   pendingRequests: new Map(),
   requestIds: new Map(),
   lastStartedAt: new Map(),
@@ -68,9 +72,13 @@ export function configureAudio() {
   document.addEventListener("pointerdown", unlock, { capture: true, passive: true });
   document.addEventListener("touchstart", unlock, { capture: true, passive: true });
   window.addEventListener("keydown", unlock, true);
-  document.addEventListener("visibilitychange", () => { if (document.hidden) stopAllSe(); });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stopAllSe();
+    else restartDesiredLoops();
+  });
   window.addEventListener("pagehide", stopAllSe);
   window.addEventListener("blur", stopAllSe);
+  window.addEventListener("focus", restartDesiredLoops);
 }
 
 export function setSeOptions({ enabled, volume } = {}) {
@@ -78,6 +86,7 @@ export function setSeOptions({ enabled, volume } = {}) {
   if (Number.isFinite(volume)) audio.volume = Math.max(0, Math.min(1, volume));
   applySeGain();
   if (!audio.enabled || audio.volume <= 0) stopAllSe();
+  else restartDesiredLoops();
 }
 
 export async function playSe(key) {
@@ -139,10 +148,72 @@ export async function playSeSequence(key, count = 1) {
   return true;
 }
 
+export function startLoopSe(key) {
+  if (!audio.urls.has(key)) {
+    console.warn(`Unknown loop SE key: ${key}`);
+    return Promise.resolve(false);
+  }
+  audio.desiredLoops.add(key);
+  return startDesiredLoop(key);
+}
+
+export function stopLoopSe(key) {
+  audio.desiredLoops.delete(key);
+  audio.loopRequests.delete(key);
+  stopLoopSource(key);
+}
+
 export function stopAllSe() {
   audio.requestIds.forEach((id, key) => audio.requestIds.set(key, id + 1));
   audio.pendingRequests.clear();
   [...audio.activeSources.keys()].forEach(stopSource);
+  [...audio.loopSources.keys()].forEach(stopLoopSource);
+}
+
+function restartDesiredLoops() {
+  if (!audio.enabled || audio.volume <= 0 || document.hidden) return;
+  audio.desiredLoops.forEach(key => { void startDesiredLoop(key); });
+}
+
+function startDesiredLoop(key) {
+  if (!audio.desiredLoops.has(key) || !audio.enabled || audio.volume <= 0 || document.hidden) {
+    return Promise.resolve(false);
+  }
+  if (audio.loopSources.has(key)) return Promise.resolve(true);
+  if (audio.loopRequests.has(key)) return audio.loopRequests.get(key);
+  const url = audio.urls.get(key);
+  const request = Promise.all([resumeAudioContext(), loadBuffer(key, url)])
+    .then(([context, buffer]) => {
+      if (!context || !buffer || !audio.desiredLoops.has(key) || !audio.enabled || audio.volume <= 0 || document.hidden) return false;
+      const source = context.createBufferSource();
+      source.buffer = buffer;
+      source.loop = true;
+      source.connect(audio.seMasterGain);
+      source.onended = () => {
+        if (audio.loopSources.get(key) === source) audio.loopSources.delete(key);
+      };
+      audio.loopSources.set(key, source);
+      source.start(0);
+      return true;
+    })
+    .catch(error => {
+      warnAudio(`Loop SE could not be played: ${key}`, error);
+      return false;
+    })
+    .finally(() => {
+      if (audio.loopRequests.get(key) === request) audio.loopRequests.delete(key);
+    });
+  audio.loopRequests.set(key, request);
+  return request;
+}
+
+function stopLoopSource(key) {
+  const source = audio.loopSources.get(key);
+  if (!source) return;
+  audio.loopSources.delete(key);
+  source.onended = null;
+  try { source.stop(0); } catch (_error) {}
+  try { source.disconnect(); } catch (_error) {}
 }
 
 function ensureAudioGraph() {
