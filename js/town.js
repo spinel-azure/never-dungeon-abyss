@@ -1,4 +1,5 @@
 import { CHARACTER_JOBS, TOWN_FACILITIES, getTownFacility } from "../data/town.js";
+import { formatQuickJob, formatQuickMoney } from "../data/quick-status.js";
 import {
   QUESTS,
   getQuestProgress,
@@ -1351,13 +1352,12 @@ export function renderCharacterStatus() {
   const character = town.getCharacter();
   const values = {
     quickName: character?.name || "NO_NAME",
-    quickLevel: character ? String(character.level).padStart(3, "0") : "---",
-    quickJob: character?.jobLabel || "-",
+    quickJob: formatQuickJob(character?.job),
     quickHpCurrent: character ? character.hp : "----",
     quickHpMax: character ? character.maxHp : "----",
     quickSpCurrent: character ? character.sp : "----",
     quickSpMax: character ? character.maxSp : "----",
-    quickCondition: character?.condition || "----"
+    quickMoney: formatQuickMoney(character?.gold)
   };
   Object.entries(values).forEach(([id, value]) => {
     const element = document.querySelector(`#${id}`);
@@ -1365,10 +1365,10 @@ export function renderCharacterStatus() {
   });
   const hpMax = document.querySelector("#quickHpMax");
   const spMax = document.querySelector("#quickSpMax");
-  const quickCondition = document.querySelector("#quickCondition");
+  const quickName = document.querySelector("#quickName");
   hpMax?.classList.toggle("vital-max-bonus", hasMaxVitalBonus(character, "maxHp"));
   spMax?.classList.toggle("vital-max-bonus", hasMaxVitalBonus(character, "maxSp"));
-  quickCondition?.classList.toggle("condition-poison", character?.condition === "POISON");
+  quickName?.classList.toggle("condition-poison", character?.condition === "POISON");
 }
 
 function hasMaxVitalBonus(character, key) {

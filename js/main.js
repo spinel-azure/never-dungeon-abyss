@@ -741,17 +741,11 @@ import {
 
   function updateCharacterUi() {
     renderCharacterStatus();
-    const quickName = document.getElementById("quickName");
-    const quickLevel = document.getElementById("quickLevel");
-    const quickJob = document.getElementById("quickJob");
     const statusName = document.getElementById("statusName");
     const statusJob = document.getElementById("statusJob");
     const statusLevel = document.getElementById("statusLevel");
     const statusCondition = document.getElementById("statusCondition");
     const statusGold = document.getElementById("statusGold");
-    if (quickName) quickName.textContent = character?.name || "NO_NAME";
-    if (quickLevel) quickLevel.textContent = character ? String(character.level).padStart(3, "0") : "---";
-    if (quickJob) quickJob.textContent = character?.jobLabel || "-";
     if (statusName) statusName.textContent = character?.name || "NO_NAME";
     if (statusJob) statusJob.textContent = character?.jobLabel || "UNKNOWN";
     if (statusLevel) statusLevel.textContent = character ? String(character.level).padStart(3, "0") : "---";

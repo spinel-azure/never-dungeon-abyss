@@ -153,11 +153,10 @@
 
     <div class="quick-status" aria-label="プレイヤー簡易ステータス">
       <span class="quick-name"><output id="quickName">NO_NAME</output></span>
-      <span>[<output id="quickJob">-</output>]</span>
-      <span>LV:<output id="quickLevel">---</output></span>
+      <span><output id="quickJob">【-】</output></span>
       <span class="quick-hp">HP <span class="quick-hp-current"><output id="quickHpCurrent">----</output><span id="poisonStepDamage" class="poison-step-damage" aria-hidden="true"></span></span>/<output id="quickHpMax">----</output><span id="battlePlayerNumbers" class="battle-number-layer battle-player-numbers" aria-hidden="true"></span></span>
       <span>SP <output id="quickSpCurrent">----</output>/<output id="quickSpMax">----</output></span>
-      <span>Cond:<output id="quickCondition">----</output></span>
+      <span>Money：<output id="quickMoney">0</output>G</span>
     </div>
     <div class="message" id="message">10×10の床空間を、薄い境界壁が区切っている。</div>
     <section id="dungeonCommands" class="dungeon-commands" aria-label="ダンジョンコマンド">
@@ -292,6 +291,6 @@
   </section>
 </main>
 <script type="module" src="js/title-screen.js?v=20260730-5"></script>
-  <script type="module" src="js/main.js?v=20260802-2"></script>
+  <script type="module" src="js/main.js?v=20260802-3"></script>
 </body>
 </html>
