@@ -1,5 +1,11 @@
-export const SAVE_SCHEMA_VERSION = 1;
-export const SAVE_ARCHIVE_VERSION = 1;
+import {
+  isProtectedSavePayload,
+  protectSavePayload,
+  unprotectSavePayload
+} from "./save-integrity.js";
+
+export const SAVE_SCHEMA_VERSION = 2;
+export const SAVE_ARCHIVE_VERSION = 2;
 export const AUTO_SAVE_SLOT = "auto";
 export const MANUAL_SAVE_SLOTS = Object.freeze(["manual1", "manual2", "manual3"]);
 
@@ -25,8 +31,15 @@ function isObject(value) {
 }
 
 export function isValidSaveData(value) {
+  return isValidSaveShape(value) && value.schemaVersion === SAVE_SCHEMA_VERSION;
+}
+
+function isValidLegacySaveData(value) {
+  return isValidSaveShape(value) && value.schemaVersion === 1;
+}
+
+function isValidSaveShape(value) {
   return isObject(value)
-    && value.schemaVersion === SAVE_SCHEMA_VERSION
     && typeof value.savedAt === "string"
     && isObject(value.character)
     && isObject(value.dungeon)
@@ -37,8 +50,12 @@ export function isValidSaveData(value) {
 
 function readKey(key) {
   try {
-    const value = JSON.parse(localStorage.getItem(key) || "null");
-    return isValidSaveData(value) ? value : null;
+    const stored = JSON.parse(localStorage.getItem(key) || "null");
+    if (isProtectedSavePayload(stored)) {
+      const value = unprotectSavePayload(stored);
+      return isValidSaveData(value) ? value : null;
+    }
+    return isValidLegacySaveData(stored) ? stored : null;
   } catch (error) {
     console.warn(`NDA save data could not be read (${key}).`, error);
     return null;
@@ -93,9 +110,10 @@ export function writeGame(snapshot, slot = AUTO_SAVE_SLOT) {
 }
 
 function writeValidatedSave(save, keys) {
-  const serialized = JSON.stringify(save);
+  const serialized = JSON.stringify(protectSavePayload(save));
   localStorage.setItem(keys.temp, serialized);
-  if (!isValidSaveData(JSON.parse(localStorage.getItem(keys.temp) || "null"))) {
+  const temporaryEnvelope = JSON.parse(localStorage.getItem(keys.temp) || "null");
+  if (!isValidSaveData(unprotectSavePayload(temporaryEnvelope))) {
     throw new Error("Temporary save validation failed.");
   }
   const current = localStorage.getItem(keys.current);
@@ -122,40 +140,47 @@ export function createSaveArchive() {
   const slots = {};
   [AUTO_SAVE_SLOT, ...MANUAL_SAVE_SLOTS].forEach(slot => {
     const save = loadGame(slot);
-    if (save) slots[slot] = save;
+    if (save) slots[slot] = { ...save, schemaVersion: SAVE_SCHEMA_VERSION };
   });
-  return {
+  return protectSavePayload({
     format: "NEVER DUNGEON : ABYSS SAVE DATA",
     archiveVersion: SAVE_ARCHIVE_VERSION,
     exportedAt: new Date().toISOString(),
     slots
-  };
+  });
 }
 
 export function importSaveArchive(candidate) {
+  const protectedArchive = isProtectedSavePayload(candidate);
+  const archive = protectedArchive ? unprotectSavePayload(candidate) : candidate;
+  if (protectedArchive && !archive) {
+    return { accepted: false, importedSlots: [], reason: "integrityFailed" };
+  }
+  const isLegacyArchive = archive?.archiveVersion === 1;
   if (
-    !isObject(candidate)
-    || candidate.format !== "NEVER DUNGEON : ABYSS SAVE DATA"
-    || candidate.archiveVersion !== SAVE_ARCHIVE_VERSION
-    || !isObject(candidate.slots)
+    !isObject(archive)
+    || archive.format !== "NEVER DUNGEON : ABYSS SAVE DATA"
+    || (!protectedArchive && !isLegacyArchive)
+    || (protectedArchive && archive.archiveVersion !== SAVE_ARCHIVE_VERSION)
+    || !isObject(archive.slots)
   ) {
     return { accepted: false, importedSlots: [], reason: "invalidArchive" };
   }
 
   const importedSlots = [];
   for (const slot of [AUTO_SAVE_SLOT, ...MANUAL_SAVE_SLOTS]) {
-    const save = candidate.slots[slot];
+    const save = archive.slots[slot];
     if (!save) continue;
-    if (!isValidSaveData(save)) {
+    if (!(isValidSaveData(save) || (isLegacyArchive && isValidLegacySaveData(save)))) {
       return { accepted: false, importedSlots: [], reason: "invalidSave" };
     }
   }
 
   try {
     for (const slot of [AUTO_SAVE_SLOT, ...MANUAL_SAVE_SLOTS]) {
-      const save = candidate.slots[slot];
+      const save = archive.slots[slot];
       if (!save) continue;
-      writeValidatedSave(save, slotKeys(slot));
+      writeValidatedSave({ ...save, schemaVersion: SAVE_SCHEMA_VERSION }, slotKeys(slot));
       importedSlots.push(slot);
     }
     window.dispatchEvent(new CustomEvent("nda:save-changed"));

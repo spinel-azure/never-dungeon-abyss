@@ -79,3 +79,30 @@ test("invalid JSON archive does not alter existing saves", () => {
   assert.equal(result.accepted, false);
   assert.equal(loadGame("auto").character.name, "KEEP");
 });
+
+test("a modified protected archive is rejected without altering existing saves", () => {
+  writeGame(makeSnapshot("EXPORT", 20), "manual1");
+  const archive = createSaveArchive();
+  archive.payload = `${archive.payload.slice(0, -1)}${archive.payload.endsWith("A") ? "B" : "A"}`;
+
+  writeGame(makeSnapshot("KEEP"), "auto");
+  const result = importSaveArchive(archive);
+
+  assert.equal(result.accepted, false);
+  assert.equal(result.reason, "integrityFailed");
+  assert.equal(loadGame("auto").character.name, "KEEP");
+});
+
+test("a modified current save falls back to its protected backup", () => {
+  writeGame(makeSnapshot("BACKUP", 7), "auto");
+  writeGame(makeSnapshot("CURRENT", 8), "auto");
+  const currentKey = "nda.save.slot1.current";
+  const envelope = JSON.parse(storage.get(currentKey));
+  envelope.payload = `${envelope.payload.slice(0, -1)}${envelope.payload.endsWith("A") ? "B" : "A"}`;
+  storage.set(currentKey, JSON.stringify(envelope));
+
+  const restored = loadGame("auto");
+
+  assert.equal(restored.character.name, "BACKUP");
+  assert.equal(loadGame("auto").character.name, "BACKUP");
+});
