@@ -101,6 +101,7 @@ const PASSERBY_CONFIGS = Object.freeze([
     initialPhase: 920,
     initialDirection: 1,
     heightRatio: 0.78,
+    drawOrder: 0,
     sourceFacing: "left"
   })
 ]);
@@ -111,7 +112,11 @@ export function configureTownPassersby({ canvas, root }) {
   if (!canvas || !root) return () => {};
   const context = canvas.getContext("2d");
   context.imageSmoothingEnabled = false;
-  const passersby = PASSERBY_CONFIGS.map(createPasserby);
+  const passersby = PASSERBY_CONFIGS
+    .map(createPasserby)
+    .sort((left, right) => (
+      (left.config.drawOrder ?? 1) - (right.config.drawOrder ?? 1)
+    ));
   let previousTime = performance.now();
   let animationFrame = 0;
 
