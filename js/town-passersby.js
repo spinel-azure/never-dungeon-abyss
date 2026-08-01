@@ -63,8 +63,49 @@ const PASSERBY_CONFIGS = Object.freeze([
     initialDirection: -1,
     heightRatio: 0.75,
     sourceFacing: "left"
+  }),
+  Object.freeze({
+    id: "guildMaster",
+    src: "images/npc/NPC_10b.avif",
+    speed: 24,
+    bobAmplitude: 1,
+    walkPeriod: 790,
+    spawnInterval: Object.freeze([12500, 19500]),
+    initialDelay: 9100,
+    initialPhase: 470,
+    initialDirection: 1,
+    heightRatio: 0.77,
+    sourceFacing: "left"
+  }),
+  Object.freeze({
+    id: "librarian",
+    src: "images/npc/NPC_14b.avif",
+    speed: 18,
+    bobAmplitude: 1,
+    walkPeriod: 940,
+    spawnInterval: Object.freeze([15500, 23800]),
+    initialDelay: 13800,
+    initialPhase: 730,
+    initialDirection: -1,
+    heightRatio: 0.73,
+    sourceFacing: "left"
+  }),
+  Object.freeze({
+    id: "priest",
+    src: "images/npc/NPC_12b.avif",
+    speed: 10,
+    bobAmplitude: 1,
+    walkPeriod: 1240,
+    spawnInterval: Object.freeze([22000, 34000]),
+    initialDelay: 16800,
+    initialPhase: 920,
+    initialDirection: 1,
+    heightRatio: 0.78,
+    sourceFacing: "left"
   })
 ]);
+
+const MAX_VISIBLE_PASSERSBY = 4;
 
 export function configureTownPassersby({ canvas, root }) {
   if (!canvas || !root) return () => {};
@@ -102,13 +143,28 @@ export function configureTownPassersby({ canvas, root }) {
           passerby.initialized = true;
           passerby.nextSpawnAt = now + passerby.config.initialDelay;
         }
+      });
+      const activeCount = passersby.filter(passerby => passerby.active).length;
+      const availableSlots = Math.max(0, MAX_VISIBLE_PASSERSBY - activeCount);
+      const spawnCandidates = passersby
+        .filter(passerby => (
+          !passerby.active
+          && passerby.image.complete
+          && passerby.image.naturalWidth > 0
+          && now >= passerby.nextSpawnAt
+        ))
+        .sort((left, right) => left.nextSpawnAt - right.nextSpawnAt)
+        .slice(0, availableSlots);
+      const allowedToSpawn = new Set(spawnCandidates);
+      passersby.forEach(passerby => {
         updateAndDrawPasserby(
           passerby,
           context,
           canvas.width,
           canvas.height,
           deltaSeconds,
-          now
+          now,
+          allowedToSpawn.has(passerby)
         );
       });
     }
@@ -139,14 +195,14 @@ function createPasserby(config) {
   };
 }
 
-function updateAndDrawPasserby(passerby, context, width, height, deltaSeconds, now) {
+function updateAndDrawPasserby(passerby, context, width, height, deltaSeconds, now, allowSpawn) {
   const { config, image } = passerby;
   if (!image.complete || !image.naturalWidth || !image.naturalHeight) return;
   const drawHeight = Math.max(1, Math.round(height * config.heightRatio));
   const drawWidth = Math.max(1, Math.round(drawHeight * image.naturalWidth / image.naturalHeight));
 
   if (!passerby.active) {
-    if (now < passerby.nextSpawnAt) return;
+    if (!allowSpawn || now < passerby.nextSpawnAt) return;
     passerby.active = true;
     passerby.x = passerby.direction > 0 ? -drawWidth : width;
   }
