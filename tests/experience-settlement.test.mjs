@@ -83,6 +83,28 @@ test("owning Goddess's Grace does not disable the bonus unless it is in the deck
   assert.equal(createDepthReturnSettlement(equipped, 100).isGoddessGraceEquipped, true);
 });
 
+test("Goddess's Grace settlement effect is locked when returning from the dungeon", () => {
+  const initial = createInitialCharacter({ name: "TEST", job: "priest" });
+  const granted = grantCard(initial.cards, GODDESS_GRACE_CARD_ID, 1, initial.deckCost);
+  const equippedCards = setDeckSlot(granted.cards, 0, GODDESS_GRACE_CARD_ID, initial.deckCost);
+  const returned = {
+    ...initial,
+    carriedExperience: 1000,
+    cards: equippedCards
+  };
+  returned.pendingExperienceSettlement = createDepthReturnSettlement(returned, 100);
+
+  const removedBeforeInn = {
+    ...returned,
+    cards: setDeckSlot(equippedCards, 0, null, initial.deckCost)
+  };
+  const result = resolveInnStay(removedBeforeInn);
+
+  assert.equal(result.settlement.isGoddessGraceEquipped, true);
+  assert.equal(result.settlement.depthBonusExp, 0);
+  assert.equal(result.gainedExperience, 1000);
+});
+
 test("return floor survives save normalization and is settled exactly once at the inn", () => {
   const character = {
     ...createInitialCharacter({ name: "TEST", job: "warrior" }),

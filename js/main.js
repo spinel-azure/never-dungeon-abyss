@@ -1185,6 +1185,7 @@ import {
   async function stayAtInn() {
     if (!character || sceneTransitionRunning) return;
     sceneTransitionRunning = true;
+    stopBgm();
     sceneTransition.hidden = false;
     sceneTransition.classList.remove("is-black", "is-revealing", "is-defeat");
     sceneTransition.classList.add("is-running", "is-inn-stay");
@@ -1207,15 +1208,19 @@ import {
     document.body.classList.remove("scene-transition-active");
     sceneTransitionRunning = false;
 
-    const finishPresentation = () => {
+    const finishPresentation = async () => {
       const deckBonus = result.deckCostGained > 0
         ? `、特別ボーナス DECK COST+${result.deckCostGained}`
         : "";
       if (result.levelsGained > 0) {
-        showLevelUpEffect();
+        const levelUpPresentation = showLevelUpEffect();
         say(`LVが上がった！HP+${result.hpGained}、SP+${result.spGained}${deckBonus}`);
+        await levelUpPresentation;
       } else {
         say("女将：お代はいらないよ。ゆっくりと身体を休めるんだよ。");
+      }
+      if (worldLocation === "town" && getTownState().facilityId === "inn") {
+        startBgm("townFacilities");
       }
     };
     if (result.hadPendingSettlement) {
@@ -1254,16 +1259,26 @@ import {
   }
 
   function showLevelUpEffect() {
-    if (!levelUpEffect) return;
+    if (!levelUpEffect) return Promise.resolve();
     playSe("levelUpJingle");
     levelUpEffect.hidden = false;
     levelUpEffect.classList.remove("is-active");
     void levelUpEffect.offsetWidth;
     levelUpEffect.classList.add("is-active");
-    levelUpEffect.addEventListener("animationend", () => {
-      levelUpEffect.classList.remove("is-active");
-      levelUpEffect.hidden = true;
-    }, { once: true });
+    return new Promise((resolve) => {
+      let completed = false;
+      const finish = () => {
+        if (completed) return;
+        completed = true;
+        clearTimeout(fallbackTimer);
+        levelUpEffect.removeEventListener("animationend", finish);
+        levelUpEffect.classList.remove("is-active");
+        levelUpEffect.hidden = true;
+        resolve();
+      };
+      const fallbackTimer = setTimeout(finish, 3500);
+      levelUpEffect.addEventListener("animationend", finish, { once: true });
+    });
   }
 
   async function healAtTemple() {
