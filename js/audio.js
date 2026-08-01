@@ -21,21 +21,29 @@ export const SE = Object.freeze({
   catVoice01: "cat_voice01.mp3",
   catVoice02: "cat_voice02.mp3",
   catVoice03: "cat_voice03.mp3",
-  townAmbience: "shizen_kohen.mp3"
+  townAmbience: "shizen_kohen.mp3",
+  goodNight: "good-night.mp3"
 });
 
 const audio = {
   enabled: true,
   volume: .1,
+  bgmEnabled: true,
+  bgmVolume: .1,
   urls: new Map(),
+  bgmUrls: new Map([["dungeon", "bgm/bukimi-tou.mp3"]]),
   context: null,
   seMasterGain: null,
+  bgmMasterGain: null,
   buffers: new Map(),
   bufferRequests: new Map(),
   activeSources: new Map(),
   loopSources: new Map(),
   loopRequests: new Map(),
   desiredLoops: new Set(),
+  desiredBgmKey: "",
+  bgmSource: null,
+  bgmRequestId: 0,
   pendingRequests: new Map(),
   requestIds: new Map(),
   lastStartedAt: new Map(),
@@ -55,6 +63,7 @@ const PLAYBACK_POLICIES = {
   battleStart: { mode: "complete", priority: 3 },
   battleVictory: { mode: "complete", priority: 3 },
   levelUp: { mode: "complete", priority: 3 },
+  goodNight: { mode: "complete", priority: 3 },
   enemyDefeated: { mode: "complete", priority: 3 },
   catVoice01: { mode: "complete", priority: 2 },
   catVoice02: { mode: "complete", priority: 2 },
@@ -68,17 +77,20 @@ export function configureAudio() {
   });
   if (audio.configured) return;
   audio.configured = true;
-  const unlock = () => { void resumeAudioContext(); };
+  const unlock = () => {
+    void resumeAudioContext().then(restartInterruptedAudio);
+  };
   document.addEventListener("pointerdown", unlock, { capture: true, passive: true });
   document.addEventListener("touchstart", unlock, { capture: true, passive: true });
   window.addEventListener("keydown", unlock, true);
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) stopAllSe();
-    else restartDesiredLoops();
+    if (document.hidden) stopInterruptedAudio();
+    else restartInterruptedAudio();
   });
-  window.addEventListener("pagehide", stopAllSe);
-  window.addEventListener("blur", stopAllSe);
-  window.addEventListener("focus", restartDesiredLoops);
+  window.addEventListener("pagehide", stopInterruptedAudio);
+  window.addEventListener("pageshow", restartInterruptedAudio);
+  window.addEventListener("blur", stopInterruptedAudio);
+  window.addEventListener("focus", restartInterruptedAudio);
 }
 
 export function setSeOptions({ enabled, volume } = {}) {
@@ -87,6 +99,30 @@ export function setSeOptions({ enabled, volume } = {}) {
   applySeGain();
   if (!audio.enabled || audio.volume <= 0) stopAllSe();
   else restartDesiredLoops();
+}
+
+export function setBgmOptions({ enabled, volume } = {}) {
+  if (typeof enabled === "boolean") audio.bgmEnabled = enabled;
+  if (Number.isFinite(volume)) audio.bgmVolume = Math.max(0, Math.min(1, volume));
+  applyBgmGain();
+  if (!audio.bgmEnabled || audio.bgmVolume <= 0) stopBgmSource();
+  else restartBgm();
+}
+
+export function startBgm(key) {
+  if (!audio.bgmUrls.has(key)) {
+    console.warn(`Unknown BGM key: ${key}`);
+    return Promise.resolve(false);
+  }
+  if (audio.desiredBgmKey !== key) stopBgmSource();
+  audio.desiredBgmKey = key;
+  return restartBgm();
+}
+
+export function stopBgm() {
+  audio.desiredBgmKey = "";
+  audio.bgmRequestId += 1;
+  stopBgmSource();
 }
 
 export async function playSe(key) {
@@ -175,6 +211,52 @@ function restartDesiredLoops() {
   audio.desiredLoops.forEach(key => { void startDesiredLoop(key); });
 }
 
+function stopInterruptedAudio() {
+  stopAllSe();
+  stopBgmSource();
+}
+
+function restartInterruptedAudio() {
+  restartDesiredLoops();
+  restartBgm();
+}
+
+function restartBgm() {
+  const key = audio.desiredBgmKey;
+  if (!key || audio.bgmSource || !audio.bgmEnabled || audio.bgmVolume <= 0 || document.hidden) {
+    return Promise.resolve(Boolean(audio.bgmSource));
+  }
+  const requestId = ++audio.bgmRequestId;
+  return Promise.all([resumeAudioContext(), loadBuffer(`bgm:${key}`, audio.bgmUrls.get(key))])
+    .then(([context, buffer]) => {
+      if (!context || !buffer || requestId !== audio.bgmRequestId || key !== audio.desiredBgmKey
+        || !audio.bgmEnabled || audio.bgmVolume <= 0 || document.hidden) return false;
+      const source = context.createBufferSource();
+      source.buffer = buffer;
+      source.loop = true;
+      source.connect(audio.bgmMasterGain);
+      source.onended = () => {
+        if (audio.bgmSource === source) audio.bgmSource = null;
+      };
+      audio.bgmSource = source;
+      source.start(0);
+      return true;
+    })
+    .catch(error => {
+      warnAudio(`BGM could not be played: ${key}`, error);
+      return false;
+    });
+}
+
+function stopBgmSource() {
+  const source = audio.bgmSource;
+  if (!source) return;
+  audio.bgmSource = null;
+  source.onended = null;
+  try { source.stop(0); } catch (_error) {}
+  try { source.disconnect(); } catch (_error) {}
+}
+
 function startDesiredLoop(key) {
   if (!audio.desiredLoops.has(key) || !audio.enabled || audio.volume <= 0 || document.hidden) {
     return Promise.resolve(false);
@@ -228,8 +310,12 @@ function ensureAudioGraph() {
     const gain = context.createGain();
     gain.gain.value = audio.volume;
     gain.connect(context.destination);
+    const bgmGain = context.createGain();
+    bgmGain.gain.value = audio.bgmVolume;
+    bgmGain.connect(context.destination);
     audio.context = context;
     audio.seMasterGain = gain;
+    audio.bgmMasterGain = bgmGain;
     return context;
   } catch (error) {
     warnAudio("Web Audio API initialization failed; sound effects are disabled.", error);
@@ -241,6 +327,7 @@ async function resumeAudioContext() {
   const context = ensureAudioGraph();
   if (!context) return null;
   applySeGain();
+  applyBgmGain();
   if (context.state === "suspended") {
     try { await context.resume(); }
     catch (error) { warnAudio("AudioContext resume failed.", error); }
@@ -255,6 +342,13 @@ function applySeGain() {
   catch (_error) { audio.seMasterGain.gain.value = value; }
 }
 
+function applyBgmGain() {
+  if (!audio.bgmMasterGain) return;
+  const value = audio.bgmEnabled ? audio.bgmVolume : 0;
+  try { audio.bgmMasterGain.gain.setValueAtTime(value, audio.context?.currentTime || 0); }
+  catch (_error) { audio.bgmMasterGain.gain.value = value; }
+}
+
 function loadBuffer(key, url) {
   if (audio.buffers.has(key)) return Promise.resolve(audio.buffers.get(key));
   if (audio.bufferRequests.has(key)) return audio.bufferRequests.get(key);
@@ -267,7 +361,7 @@ function loadBuffer(key, url) {
     audio.buffers.set(key, buffer);
     return buffer;
   })().catch(error => {
-    warnAudio(`SE file could not be loaded: ${url}`, error);
+    warnAudio(`Audio file could not be loaded: ${url}`, error);
     return null;
   }).finally(() => audio.bufferRequests.delete(key));
   audio.bufferRequests.set(key, request);

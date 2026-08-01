@@ -63,7 +63,17 @@ import {
   setPresenceDisabled
 } from "./presence.js";
 import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js";
-import { configureAudio, setSeOptions, playSe, playSeSequence, startLoopSe, stopLoopSe } from "./audio.js";
+import {
+  configureAudio,
+  setBgmOptions,
+  setSeOptions,
+  playSe,
+  playSeSequence,
+  startLoopSe,
+  stopLoopSe,
+  startBgm,
+  stopBgm
+} from "./audio.js";
 import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
 import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, setTownTypewriterOptions } from "./town.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
@@ -248,6 +258,15 @@ import {
     onAcceptRequest: acceptGuildRequest,
     onAbandonRequest: abandonGuildRequest,
     onReportRequest: reportGuildRequest,
+    onAmbienceChanged: enabled => {
+      if (enabled) startLoopSe("townAmbience");
+      else stopLoopSe("townAmbience");
+    },
+    onFacilityVoice: facilityId => {
+      if (facilityId !== "inn") return;
+      const voices = ["catVoice01", "catVoice02", "catVoice03"];
+      playSe(voices[Math.floor(Math.random() * voices.length)]);
+    },
     onStateChanged: scheduleAutosave,
     isMenuOpen,
     playSe
@@ -389,7 +408,7 @@ import {
     const savedLocation = save.world?.location === "town" ? "town" : "dungeon";
     worldLocation = savedLocation;
     if (savedLocation === "town") {
-      startLoopSe("townAmbience");
+      stopBgm();
       setPlayerInputEnabled(false);
       openTown({
         registrationRequired: !character,
@@ -397,7 +416,7 @@ import {
         mode: save.world?.town?.mode
       });
     } else {
-      stopLoopSe("townAmbience");
+      startBgm("dungeon");
       setPlayerInputEnabled(true);
       closeTown();
       say("冒険を再開しました。");
@@ -412,7 +431,7 @@ import {
     resetDungeon("", null, true);
     character = null;
     worldLocation = "town";
-    startLoopSe("townAmbience");
+    stopBgm();
     setPlayerInputEnabled(false);
     updateCharacterUi();
     openTown({ registrationRequired: true, facilityId: "guild" });
@@ -895,11 +914,15 @@ import {
     pendingEncounter = null;
     const enemyData = encounter?.enemyData || getRandomEncounterEnemyData();
     const enemy = createEnemyCombatant(enemyData);
+    stopBgm();
     const started = startBattle(enemy, {
       playStartSe: false,
       ambush: Boolean(encounter?.ambush)
     });
-    if (!started) setPlayerInputEnabled(true);
+    if (!started) {
+      startBgm("dungeon");
+      setPlayerInputEnabled(true);
+    }
     return started;
   }
 
@@ -1027,6 +1050,7 @@ import {
   }
 
   function finishBattleVictory(battle) {
+    startBgm("dungeon");
     const reward = Math.max(0, Math.floor(Number(battle?.enemy?.experienceReward) || 0));
     if (character && battle?.enemy?.id) {
       character = recordEnemyDefeat(character, battle.enemy.id);
@@ -1059,7 +1083,7 @@ import {
       character = recordFloorExploration(character, { depth: 0, explored: [] });
     }
     worldLocation = "town";
-    startLoopSe("townAmbience");
+    stopBgm();
     cancelAutoReturn(false);
     setPlayerInputEnabled(false);
     openTown({ registrationRequired: false, facilityId: "temple", mode: "facilityMenu" });
@@ -1074,6 +1098,7 @@ import {
   }
 
   function finishBattleEscape() {
+    startBgm("dungeon");
     resetPresence();
     setPlayerInputEnabled(true);
     say("戦闘から逃げ切った。");
@@ -1081,11 +1106,31 @@ import {
     saveGame();
   }
 
-  function stayAtInn() {
-    if (!character) return;
+  async function stayAtInn() {
+    if (!character || sceneTransitionRunning) return;
+    sceneTransitionRunning = true;
+    sceneTransition.hidden = false;
+    sceneTransition.classList.remove("is-black", "is-revealing");
+    sceneTransition.classList.add("is-running", "is-inn-stay");
+    sceneTransitionTitle.hidden = true;
+    document.body.classList.add("scene-transition-active");
+    void sceneTransition.offsetWidth;
+    requestAnimationFrame(() => sceneTransition.classList.add("is-black"));
+    await Promise.all([wait(6000), playSeSequence("goodNight", 1)]);
+
     const result = resolveInnStay(character);
     Object.assign(character, result.changes);
     updateCharacterUi();
+    saveGame();
+
+    sceneTransition.classList.add("is-revealing");
+    sceneTransition.classList.remove("is-black");
+    await wait(700);
+    sceneTransition.classList.remove("is-running", "is-revealing", "is-inn-stay");
+    sceneTransition.hidden = true;
+    document.body.classList.remove("scene-transition-active");
+    sceneTransitionRunning = false;
+
     const finishPresentation = () => {
       const deckBonus = result.deckCostGained > 0
         ? `、特別ボーナス DECK COST+${result.deckCostGained}`
@@ -1102,7 +1147,6 @@ import {
     } else {
       finishPresentation();
     }
-    saveGame();
   }
 
   function showExperienceSettlement(settlement, onClose = () => {}) {
@@ -1172,7 +1216,7 @@ import {
         resetDungeon("", null, true);
         character.pendingExperienceSettlement = null;
         worldLocation = "dungeon";
-        stopLoopSe("townAmbience");
+        startBgm("dungeon");
         closeTown();
         say("奈落へ足を踏み入れた。");
         saveGame();
@@ -1189,7 +1233,7 @@ import {
     if (sceneTransitionRunning) return false;
     sceneTransitionRunning = true;
     sceneTransition.hidden = false;
-    sceneTransition.classList.remove("is-black", "is-revealing");
+    sceneTransition.classList.remove("is-black", "is-revealing", "is-inn-stay");
     sceneTransition.classList.add("is-running");
     document.body.classList.add("scene-transition-active");
     sceneTransitionTitle.hidden = !showEnteringTitle;
@@ -1227,7 +1271,7 @@ import {
       updateCharacterUi();
     }
     worldLocation = "town";
-    startLoopSe("townAmbience");
+    stopBgm();
     cancelAutoReturn(false);
     setPlayerInputEnabled(false);
     openTown({ registrationRequired: !character, facilityId: "guild", mode: "arrival" });
@@ -1322,7 +1366,7 @@ import {
     handleOverlayInput: handleOverlayEventInput,
     handleBattleInput,
     handleTownInput: action => (
-      handleExperienceSettlementInput(action) || handleTownInput(action)
+      sceneTransitionRunning || handleExperienceSettlementInput(action) || handleTownInput(action)
     ),
     handleDoorInput: openDoorAhead,
     handleMenuInput
@@ -1345,6 +1389,7 @@ import {
     setMistOptions,
     setWallColor,
     setFloorColor,
+    setBgmOptions,
     setSeOptions,
     playSe,
     setPresenceDisabled,

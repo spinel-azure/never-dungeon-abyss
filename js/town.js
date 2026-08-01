@@ -82,6 +82,9 @@ const town = {
   onAcceptRequest: () => "",
   onAbandonRequest: () => null,
   onReportRequest: () => null,
+  onAmbienceChanged: () => {},
+  onFacilityVoice: () => {},
+  pendingVoiceFacility: "",
   onStateChanged: () => {},
   isMenuOpen: () => false,
   playSe: () => {}
@@ -200,7 +203,7 @@ export function configureTown(options) {
         town.playSe("confirm");
         showTownArrival();
       } else if (activateFacilityService(command)) {
-        town.playSe(command === "stay" ? "heal" : "confirm");
+        if (command !== "stay") town.playSe("confirm");
       } else {
         town.playSe("cursorMove");
       }
@@ -279,8 +282,10 @@ export function closeTown() {
   clearTownTypewriter();
   town.root.hidden = true;
   town.registration.hidden = true;
+  town.pendingVoiceFacility = "";
   showGameCommands();
   document.body.classList.remove("town-active");
+  town.onAmbienceChanged(false);
 }
 
 export function isTownOpen() {
@@ -368,7 +373,7 @@ function handleFacilityMenuInput(action) {
       town.playSe("confirm");
       showTownArrival();
     } else if (activateFacilityService(command)) {
-      town.playSe(command === "stay" ? "heal" : "confirm");
+      if (command !== "stay") town.playSe("confirm");
     }
     return true;
   }
@@ -383,6 +388,7 @@ function configureTownMessageObserver() {
     clearTownTypewriter();
     if (!town.active || !townTypewriter.enabled || !isNpcTownMessage(text)) {
       townTypewriter.lastRenderedText = text;
+      playPendingFacilityVoice();
       return;
     }
     townTypewriter.sourceText = text;
@@ -409,6 +415,7 @@ function renderTownTypewriter() {
   if (townTypewriter.visibleLength >= characters.length) {
     townTypewriter.active = false;
     townTypewriter.timer = 0;
+    playPendingFacilityVoice();
     return;
   }
   townTypewriter.timer = window.setTimeout(
@@ -425,12 +432,19 @@ function completeTownTypewriter() {
   townTypewriter.lastRenderedText = townTypewriter.sourceText;
   townTypewriter.active = false;
   town.messageEl.textContent = townTypewriter.sourceText;
+  playPendingFacilityVoice();
 }
 
 function clearTownTypewriter() {
   if (townTypewriter.timer) window.clearTimeout(townTypewriter.timer);
   townTypewriter.timer = 0;
   townTypewriter.active = false;
+}
+
+function playPendingFacilityVoice() {
+  const facilityId = town.pendingVoiceFacility;
+  town.pendingVoiceFacility = "";
+  if (facilityId) town.onFacilityVoice(facilityId);
 }
 
 function handleQuestInput(action) {
@@ -733,6 +747,8 @@ function nearestSelectableIndex(start, amount) {
 function renderTownView() {
   showTownCommands();
   if (town.mode === "arrival" || town.mode === "selection") {
+    town.onAmbienceChanged(true);
+    town.pendingVoiceFacility = "";
     const selecting = town.mode === "selection";
     town.root.classList.add("is-town-view");
     town.mosaic.hidden = true;
@@ -767,6 +783,7 @@ function renderTownView() {
 
 function renderFacility() {
   const facility = TOWN_FACILITIES[town.selectedIndex] || getTownFacility("guild");
+  town.onAmbienceChanged(false);
   town.root.classList.remove("is-town-view");
   town.cloudLayer.hidden = true;
   town.mosaic.hidden = true;
@@ -783,6 +800,7 @@ function renderFacility() {
   town.background.src = facility.background || "images/background/town_01.avif";
   town.background.alt = `${facility.label}の背景`;
   town.background.hidden = false;
+  town.pendingVoiceFacility = facility.id === "inn" ? "inn" : "";
   town.messageEl.textContent = facility.keeper ? `${facility.keeper}：${facility.greeting}` : facility.greeting;
   town.portrait.hidden = !facility.image;
   town.portraitPlaceholder.hidden = Boolean(facility.image);
@@ -818,8 +836,11 @@ function renderFacility() {
 }
 
 function renderDungeonEntrance() {
+  town.onAmbienceChanged(false);
+  town.pendingVoiceFacility = "";
   showEntranceCommands();
   updateEntranceLabels();
+  town.root.classList.remove("is-town-view");
   town.mosaic.hidden = true;
   town.background.src = "images/background/dungeon_01.avif";
   town.background.alt = "ダンジョン入口";
@@ -836,8 +857,11 @@ function renderDungeonEntrance() {
 }
 
 function renderTransferCircle() {
+  town.onAmbienceChanged(false);
+  town.pendingVoiceFacility = "";
   showEntranceCommands();
   updateEntranceLabels();
+  town.root.classList.remove("is-town-view");
   if (town.transferUnlocked) {
     town.mosaic.hidden = true;
     town.background.src = "images/background/circle.avif";
@@ -929,6 +953,7 @@ function activateFacilityService(command) {
     if (!["guild", "inn", "temple", "shop", "library"].includes(facility?.id)) return false;
     const result = town.onTalk(facility?.id);
     const message = typeof result === "string" ? result : result?.message;
+    town.pendingVoiceFacility = facility.id === "inn" ? "inn" : "";
     if (message) town.messageEl.textContent = message;
     if (result?.focusCommand) {
       showFacilityCommands(facility.id);

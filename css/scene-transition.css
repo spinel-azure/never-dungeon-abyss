@@ -4,6 +4,8 @@
 .scene-transition.is-running{pointer-events:auto}
 .scene-transition.is-black{opacity:1}
 .scene-transition.is-revealing{transition-duration:.7s}
+.scene-transition.is-inn-stay{transition-duration:.6s}
+.scene-transition.is-inn-stay.is-revealing{transition-duration:.7s}
 .scene-transition-title{display:grid;gap:clamp(14px,3vh,28px);padding:24px;text-align:center;color:#fff;font-family:"PixelFont",monospace;text-shadow:0 0 12px rgba(255,255,255,.35)}
 .scene-transition-title[hidden]{display:none}
 .scene-transition-title span{font-size:clamp(24px,6vw,48px);letter-spacing:.12em}
