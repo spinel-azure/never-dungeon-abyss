@@ -488,6 +488,17 @@ test("surprise saving throw uses the final reduced rate", () => {
   }).ambush, false);
 });
 
+test("zero torch fuel can force an ambush regardless of normal resistance", () => {
+  const result = resolveSurprise({
+    player: { luc: 30, surpriseResistance: 0.15 },
+    enemyBaseRate: 0,
+    forceAmbush: true,
+    rng: fixed(0.999)
+  });
+  assert.equal(result.ambush, true);
+  assert.equal(result.rate, 1);
+});
+
 test("enemy ambush grants exactly one enemy opening action", () => {
   const character = createInitialCharacter({ name: "TEST", job: "warrior" });
   const enemy = createEnemyCombatant(getEnemyById("abyss_rat"));

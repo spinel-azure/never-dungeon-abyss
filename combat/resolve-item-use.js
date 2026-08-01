@@ -1,7 +1,7 @@
 import { canUseItemIn, getItem } from "../data/items.js";
 import { consumeItem, getItemCount } from "../data/inventory.js";
 
-export function getItemUnavailableReason({ character, itemId, context, enemy, torchFuel = 0 } = {}) {
+export function getItemUnavailableReason({ character, itemId, context, enemy, torchFuel = 0, treasureCompassActive = false } = {}) {
   const item = getItem(itemId);
   if (!item) return "unknownItem";
   if (getItemCount(character?.inventory, itemId) <= 0) return "notOwned";
@@ -9,6 +9,7 @@ export function getItemUnavailableReason({ character, itemId, context, enemy, to
   if (itemId === "healing_potion" && character.hp >= character.maxHp) return "fullHp";
   if (itemId === "antidote" && character.hp >= character.maxHp && !hasPoison(character)) return "noEffect";
   if (itemId === "guiding_torch" && Number(torchFuel) >= 100) return "fullTorch";
+  if (itemId === "treasure_compass" && treasureCompassActive) return "noEffect";
   if (itemId === "holy_water") {
     if (enemy?.isBoss) return "bossImmune";
     if (enemy?.race !== "undead") return "undeadOnly";
@@ -16,8 +17,8 @@ export function getItemUnavailableReason({ character, itemId, context, enemy, to
   return "";
 }
 
-export function resolveFieldItemUse({ character, itemId, context = "dungeon", torchFuel = 0 } = {}) {
-  const reason = getItemUnavailableReason({ character, itemId, context, torchFuel });
+export function resolveFieldItemUse({ character, itemId, context = "dungeon", torchFuel = 0, treasureCompassActive = false } = {}) {
+  const reason = getItemUnavailableReason({ character, itemId, context, torchFuel, treasureCompassActive });
   if (reason) return { accepted: false, reason };
   const item = getItem(itemId);
   const next = structuredClone(character);
@@ -35,6 +36,8 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
       environment.resetPresence = true;
     } else if (effect.id === "suppress_presence_steps") {
       environment.suppressPresenceSteps = effect.value;
+    } else if (effect.id === "reveal_treasures_until_return") {
+      environment.treasureCompassActive = true;
     }
   }
   next.condition = hasPoison(next) ? "POISON" : "GOOD";

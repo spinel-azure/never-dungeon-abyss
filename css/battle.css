@@ -143,6 +143,10 @@
   opacity: 0;
 }
 
+.battle-enemy-image.is-concealed {
+  filter: brightness(0) drop-shadow(0 8px 8px rgba(0, 0, 0, .72)) !important;
+}
+
 .battle-enemy-image.is-hit {
   animation: battle-enemy-hit 260ms steps(2, end);
 }

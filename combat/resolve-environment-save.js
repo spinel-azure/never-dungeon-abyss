@@ -55,8 +55,12 @@ export function resolveSurprise({
   enemyBaseRate = 0,
   enemyMaximum = NORMAL_ENEMY_SURPRISE_MAXIMUM,
   ignoreNormalCap = false,
+  forceAmbush = false,
   rng = Math.random
 } = {}) {
+  if (forceAmbush) {
+    return { actionType: "surpriseSave", ambush: true, rate: 1 };
+  }
   const rate = calculateSurpriseRate({
     player,
     enemyBaseRate,

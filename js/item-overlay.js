@@ -5,7 +5,7 @@ import { getItemUnavailableReason } from "../combat/resolve-item-use.js";
 const overlay = {
   root: null, list: null, pageEl: null, backButton: null, messageEl: null,
   active: false, selectedIndex: 0, items: [], character: null, context: "dungeon",
-  enemy: null, torchFuel: 0, onUse: async () => ({ accepted: false }),
+  enemy: null, torchFuel: 0, treasureCompassActive: false, onUse: async () => ({ accepted: false }),
   onClose: () => {}, playSe: () => {}, previousMessage: ""
 };
 
@@ -17,13 +17,14 @@ export function configureItemOverlay(options) {
   overlay.backButton.addEventListener("click", () => closeItemOverlay());
 }
 
-export function openItemOverlay({ context = "dungeon", character, enemy = null, torchFuel = 0, onUse, onClose } = {}) {
+export function openItemOverlay({ context = "dungeon", character, enemy = null, torchFuel = 0, treasureCompassActive = false, onUse, onClose } = {}) {
   if (overlay.active || !character) return false;
   overlay.active = true;
   overlay.context = context;
   overlay.character = character;
   overlay.enemy = enemy;
   overlay.torchFuel = torchFuel;
+  overlay.treasureCompassActive = Boolean(treasureCompassActive);
   overlay.items = ITEMS.filter(item => getItemCount(character.inventory, item.id) > 0);
   overlay.selectedIndex = 0;
   overlay.onUse = onUse || overlay.onUse;
@@ -125,7 +126,8 @@ function renderSelection() {
 function unavailableReason(item) {
   return getItemUnavailableReason({
     character: overlay.character, itemId: item.id, context: overlay.context,
-    enemy: overlay.enemy, torchFuel: overlay.torchFuel
+    enemy: overlay.enemy, torchFuel: overlay.torchFuel,
+    treasureCompassActive: overlay.treasureCompassActive
   });
 }
 

@@ -58,7 +58,13 @@
         drawStairsMark(ctx, x1, y1, cell, c.type);
       }
       if (c.npc && (isExplored || revealOptions.npcs)) drawNpcMark(ctx, x1, y1, cell);
-      if (c.treasure && ((isExplored && c.treasureDiscovered) || revealOptions.treasures)) drawTreasureMark(ctx, x1, y1, cell, c.treasure);
+      if (c.treasure && revealOptions.treasures) {
+        drawTreasureMark(ctx, x1, y1, cell, c.treasure);
+      } else if (c.treasure && state.treasureCompassActive) {
+        drawTreasureCompassMark(ctx, x1, y1, cell);
+      } else if (c.treasure && isExplored && c.treasureDiscovered) {
+        drawTreasureMark(ctx, x1, y1, cell, c.treasure);
+      }
     }
   }
 
@@ -149,6 +155,16 @@ export function drawTreasureMark(ctx, x, y, size, type) {
   ctx.lineTo(left + width * .84, top);
   ctx.lineTo(left + width, top + height * .28);
   ctx.stroke();
+  ctx.restore();
+}
+
+export function drawTreasureCompassMark(ctx, x, y, size) {
+  ctx.save();
+  ctx.fillStyle = "#f6df72";
+  ctx.font = `700 ${Math.max(8, size * .7)}px GameFont, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("★", x + size / 2, y + size / 2);
   ctx.restore();
 }
 

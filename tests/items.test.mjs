@@ -49,13 +49,14 @@ test("antidote cures poison and restores 15 HP", () => {
 
 test("shop and temple purchases spend gold and grant the selected item", () => {
   let character = createInitialCharacter({ name: "TEST", job: "warrior" });
-  character.gold = 210;
+  character.gold = 710;
   for (const [itemId, price] of [
     ["healing_potion", 20],
     ["antidote", 30],
     ["guiding_torch", 40],
     ["exorcism_talisman", 50],
-    ["holy_water", 70]
+    ["holy_water", 70],
+    ["treasure_compass", 500]
   ]) {
     const result = purchaseItem(character, itemId);
     assert.equal(result.accepted, true);
@@ -91,6 +92,17 @@ test("torch and talisman expose dungeon environment effects", () => {
   });
   assert.equal(talisman.environment.resetPresence, true);
   assert.equal(talisman.environment.suppressPresenceSteps, 30);
+
+  const compassUser = characterWith("treasure_compass");
+  const compass = resolveFieldItemUse({
+    character: compassUser, itemId: "treasure_compass", context: "dungeon"
+  });
+  assert.equal(compass.environment.treasureCompassActive, true);
+  assert.equal(getItemCount(compass.character.inventory, "treasure_compass"), 0);
+  assert.equal(resolveFieldItemUse({
+    character: characterWith("treasure_compass"), itemId: "treasure_compass",
+    context: "dungeon", treasureCompassActive: true
+  }).reason, "noEffect");
 });
 
 test("holy water only banishes a non-boss undead and awards no experience", () => {

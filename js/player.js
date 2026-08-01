@@ -82,6 +82,7 @@ export function createPlayerState(startDir) {
     shake: 0,
     torch: 0,
     torchFuel: TORCH_FUEL_MAX,
+    treasureCompassActive: false,
     autoReturning: false,
     autoPath: [],
     overlayEvent: null,
@@ -280,9 +281,9 @@ export function manualTurn(amount) {
   if (!state.anim) turn(amount);
 }
 
-export function openDoorAhead() {
+export function openDoorAhead(automated = false) {
   if (!playerInputEnabled) return false;
-  if (state.overlayEvent || state.anim || state.autoReturning) return false;
+  if (state.overlayEvent || state.anim || (state.autoReturning && !automated)) return false;
   const dir = DIRS[state.dir];
   if (!closedDoorOnCell(state.gridX, state.gridY, dir.key)) return false;
   state.anim = {

@@ -3,6 +3,8 @@
 } from "./config.js";
 import {
   explored,
+  getDoorKind,
+  getDoorState,
   getStartPosition,
   inBounds,
   wallOnCell
@@ -11,7 +13,8 @@ import {
   state,
   turn,
   tryMove,
-  turnToward
+  turnToward,
+  openDoorAhead
 } from "./player.js";
 
 const options = {
@@ -65,6 +68,10 @@ export function continueAutoReturn() {
     turn(turnToward(state.dir, targetDir), true);
     return;
   }
+  if (getDoorState(state.gridX, state.gridY, nextDirKey) === "closed") {
+    openDoorAhead(true);
+    return;
+  }
   state.autoPath.shift();
   tryMove(1, true);
 }
@@ -102,7 +109,10 @@ export function findExploredPathToStart() {
       const key = `${nx},${ny}`;
       if (!inBounds(nx, ny)) continue;
       if (!explored[ny][nx]) continue;
-      if (wallOnCell(cur.x, cur.y, dir.key)) continue;
+      const doorState = getDoorState(cur.x, cur.y, dir.key);
+      const doorKind = getDoorKind(cur.x, cur.y, dir.key);
+      if (doorState && (doorKind === "locked" || doorKind === "boss")) continue;
+      if (!doorState && wallOnCell(cur.x, cur.y, dir.key)) continue;
       if (prev.has(key)) continue;
       prev.set(key, { x: cur.x, y: cur.y, dir: dir.key });
       queue.push({ x: nx, y: ny });

@@ -24,6 +24,7 @@ const battleUi = {
   mode: "commands",
   selectedIndex: 0,
   battle: null,
+  concealed: false,
   autoActive: false,
   autoTimer: 0,
   presenting: false,
@@ -52,13 +53,14 @@ export function configureBattle(options) {
   });
 }
 
-export function startBattle(enemy, { playStartSe = true, ambush = false } = {}) {
+export function startBattle(enemy, { playStartSe = true, ambush = false, concealed = false } = {}) {
   const character = battleUi.getCharacter();
   if (!character || battleUi.active) return false;
   battleUi.active = true;
   battleUi.mode = "commands";
   battleUi.selectedIndex = 0;
   battleUi.autoActive = false;
+  battleUi.concealed = Boolean(concealed);
   clearAutoTimer();
   battleUi.battle = createBattleState({ character, enemy });
   battleUi.root.hidden = false;
@@ -391,14 +393,15 @@ function renderBattle() {
   setText("battlePlayerHp", `${battle.player.hp} / ${battle.player.maxHp}`);
   setText("battlePlayerSp", `${battle.player.sp} / ${battle.player.maxSp}`);
   setText("battlePlayerCondition", statusText(battle.player));
-  setText("battleEnemyName", battle.enemy.name);
+  setText("battleEnemyName", battleUi.concealed ? "？？？？？" : battle.enemy.name);
   setText("battleEnemyHp", `${battle.enemy.hp} / ${battle.enemy.maxHp}`);
   setText("battleEnemyCondition", statusText(battle.enemy));
   const image = battleUi.root.querySelector("#battleEnemyImage");
   image.src = battle.enemy.image || "";
-  image.alt = battle.enemy.name;
+  image.alt = battleUi.concealed ? "正体不明の敵" : battle.enemy.name;
   const defeated = battle.outcome === "victory" && !battleUi.presenting;
   image.classList.toggle("is-defeated", defeated);
+  image.classList.toggle("is-concealed", battleUi.concealed);
   battleUi.root.querySelector(".battle-enemy-stage")?.classList.toggle("is-defeated", defeated);
   battleUi.messageEl.textContent = formatBattleMessage(battle);
 }
@@ -406,7 +409,10 @@ function renderBattle() {
 function formatBattleMessage(battle) {
   const prompt = battle.outcome ? "＊Aボタンで次へ" : "";
   const visibleLogLines = battle.log.slice(-(prompt ? 1 : 2));
-  return [...visibleLogLines, prompt].filter(Boolean).join("\n");
+  const lines = battleUi.concealed
+    ? visibleLogLines.map(line => line.replaceAll(battle.enemy.name, "？？？？？"))
+    : visibleLogLines;
+  return [...lines, prompt].filter(Boolean).join("\n");
 }
 
 function clearAutoTimer() {

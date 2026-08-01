@@ -998,7 +998,7 @@ function activateFacilityService(command) {
 function openCommerce(kind) {
   const ids = kind === "donate"
     ? ["exorcism_talisman", "holy_water"]
-    : ["healing_potion", "antidote", "guiding_torch"];
+    : ["healing_potion", "antidote", "guiding_torch", "treasure_compass"];
   town.mode = "commerce";
   town.commerceKind = kind;
   town.commerceItems = ids.map(getItem).filter(Boolean);

@@ -325,6 +325,7 @@ import {
         gridY: state.gridY,
         dir: state.dir,
         torchFuel: state.torchFuel,
+        treasureCompassActive: state.treasureCompassActive,
         npcEncounterCounts: { ...state.npcEncounterCounts },
         stairsPromptDismissed: state.stairsPromptDismissed
       },
@@ -399,6 +400,7 @@ import {
     state.angle = DIRS[player.dir].angle;
     state.shake = 0;
     state.torchFuel = Math.max(0, Math.min(100, Number(player.torchFuel) || 0));
+    state.treasureCompassActive = Boolean(player.treasureCompassActive);
     state.autoReturning = false;
     state.autoPath = [];
     state.overlayEvent = null;
@@ -417,6 +419,7 @@ import {
     const savedLocation = save.world?.location === "town" ? "town" : "dungeon";
     worldLocation = savedLocation;
     if (savedLocation === "town") {
+      state.treasureCompassActive = false;
       stopBgm();
       setPlayerInputEnabled(false);
       openTown({
@@ -440,6 +443,7 @@ import {
     resetDungeon("", null, true);
     character = null;
     worldLocation = "town";
+    state.treasureCompassActive = false;
     stopBgm();
     setPlayerInputEnabled(false);
     updateCharacterUi();
@@ -904,14 +908,16 @@ import {
       player: collectStats(character),
       enemyBaseRate: enemyData.surpriseRate,
       enemyMaximum: enemyData.surpriseRateMaximum,
-      ignoreNormalCap: Boolean(enemyData.ignoreNormalSurpriseCap)
+      ignoreNormalCap: Boolean(enemyData.ignoreNormalSurpriseCap),
+      forceAmbush: state.torchFuel <= 0
     });
     pendingEncounter = {
       enemyData,
       ambush: surprise.ambush,
-      surpriseRate: surprise.rate
+      surpriseRate: surprise.rate,
+      concealed: state.torchFuel <= 0
     };
-    if (surprise.ambush) startAmbushEncounterNotice();
+    if (pendingEncounter.ambush) startAmbushEncounterNotice();
     else startRandomEncounterNotice();
     return true;
   }
@@ -927,7 +933,8 @@ import {
     startBgm(selectBattleBgm(enemyData));
     const started = startBattle(enemy, {
       playStartSe: false,
-      ambush: Boolean(encounter?.ambush)
+      ambush: Boolean(encounter?.ambush),
+      concealed: Boolean(encounter?.concealed)
     });
     if (!started) {
       startBgm(selectDungeonBgm());
@@ -1039,6 +1046,7 @@ import {
       context,
       character,
       torchFuel: state.torchFuel,
+      treasureCompassActive: state.treasureCompassActive,
       onUse: useFieldItem,
       onClose: () => viewportEl.append(itemOverlay)
     });
@@ -1050,7 +1058,8 @@ import {
       character,
       itemId,
       context,
-      torchFuel: state.torchFuel
+      torchFuel: state.torchFuel,
+      treasureCompassActive: state.treasureCompassActive
     });
     if (!result.accepted) return result;
     character = result.character;
@@ -1060,6 +1069,9 @@ import {
     if (result.environment.resetPresence) resetPresence();
     if (result.environment.suppressPresenceSteps) {
       suppressPresence(result.environment.suppressPresenceSteps);
+    }
+    if (result.environment.treasureCompassActive) {
+      state.treasureCompassActive = true;
     }
     updateHud();
     updateCharacterUi();
@@ -1128,6 +1140,7 @@ import {
       character = recordFloorExploration(character, { depth: 0, explored: [] });
     }
     worldLocation = "town";
+    state.treasureCompassActive = false;
     stopBgm();
     templeRevivalJinglePending = true;
     cancelAutoReturn(false);
@@ -1309,6 +1322,7 @@ import {
       playAudio: () => playSeSequence("stairs", 3),
       onDark: () => {
         currentDepth = 1;
+        state.treasureCompassActive = false;
         resetDungeon("", null, true);
         character.pendingExperienceSettlement = null;
         worldLocation = "dungeon";
@@ -1367,6 +1381,7 @@ import {
       updateCharacterUi();
     }
     worldLocation = "town";
+    state.treasureCompassActive = false;
     stopBgm();
     cancelAutoReturn(false);
     setPlayerInputEnabled(false);

@@ -31,6 +31,13 @@ export const ITEMS = Object.freeze([
     effects: Object.freeze([{ id: "banish_undead", value: 1 }]),
     description: "アンデッドを即座に消滅させる。経験値は得られず、ボスには無効。", maxOwned: 99,
     iconId: "holy-water", version: 1
+  }),
+  Object.freeze({
+    number: 6, id: "treasure_compass", name: "トレジャーコンパス", category: "exploration",
+    buyPrice: 500, sellPrice: 250, source: "shop", usableIn: Object.freeze(["dungeon"]),
+    effects: Object.freeze([{ id: "reveal_treasures_until_return", value: 1 }]),
+    description: "帰還するまで、迷宮内の宝箱をミニマップに★で表示する。", maxOwned: 99,
+    iconId: "treasure-compass", version: 1
   })
 ]);
 
