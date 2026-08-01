@@ -85,6 +85,7 @@ import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { resolveTreasureTrap } from "../combat/resolve-trap.js";
 import { collectStats } from "../combat/collect-stats.js";
 import { resolveSurprise } from "../combat/resolve-environment-save.js";
+import { resolveDefeatRecovery } from "../combat/resolve-defeat-recovery.js";
 import {
   createDepthReturnSettlement,
   formatDepthReturnSettlement
@@ -171,8 +172,10 @@ import {
   const skillOverlay = document.getElementById("skillOverlay");
   const sceneTransition = document.getElementById("sceneTransition");
   const sceneTransitionTitle = document.getElementById("sceneTransitionTitle");
+  const defeatMessage = document.getElementById("defeatMessage");
   const questTutorialOverlay = document.getElementById("questTutorialOverlay");
   let sceneTransitionRunning = false;
+  let templeRevivalJinglePending = false;
   let cardGetTimer = 0;
   let itemGetTimer = 0;
   let bonusGetTimer = 0;
@@ -187,6 +190,7 @@ import {
   });
   configureTreasure({ canvas: treasureCanvas });
   configureAudio();
+  startBgm("title");
   configureCompass({ canvas: compassCanvas, state });
   configureRenderer({
     canvas,
@@ -261,6 +265,11 @@ import {
     onAmbienceChanged: enabled => {
       if (enabled) startLoopSe("townAmbience");
       else stopLoopSe("townAmbience");
+    },
+    onBgmChanged: key => {
+      if (key === "temple" && (templeRevivalJinglePending || (character && (!character.alive || character.hp <= 0)))) stopBgm();
+      else if (key) startBgm(key);
+      else stopBgm();
     },
     onFacilityVoice: facilityId => {
       if (facilityId !== "inn") return;
@@ -416,7 +425,7 @@ import {
         mode: save.world?.town?.mode
       });
     } else {
-      startBgm("dungeon");
+      startBgm(selectDungeonBgm());
       setPlayerInputEnabled(true);
       closeTown();
       say("冒険を再開しました。");
@@ -453,6 +462,7 @@ import {
     acquireEventCard("guild_registration_card", "common_strength_up");
     updateCharacterUi();
     saveGame();
+    startBgm("townFacilities");
     return {
       message: "ギルド長：これを持っていけ。ついでに町を見て回ったらどうだ？一通り回ったら、また戻ってこい。"
     };
@@ -494,11 +504,11 @@ import {
     return true;
   }
 
-  function showItemGetEffect(itemIds) {
+  function showItemGetEffect(itemIds, { important = false } = {}) {
     const items = itemIds.map(getItem).filter(Boolean);
     if (!itemGetEffect || !itemGetItems || items.length === 0) return;
     window.clearTimeout(itemGetTimer);
-    playSe("battleVictory");
+    playSe(important ? "importantItem" : "itemGet");
     itemGetItems.replaceChildren(...items.map(item => {
       const row = document.createElement("span");
       row.textContent = `${item.name} ×1`;
@@ -686,7 +696,7 @@ import {
     bonusGold,
     eventRewardCardId
   } = {}) {
-    await showTimedEffect(questCompleteEffect, "levelUp", 3400);
+    await showTimedEffect(questCompleteEffect, "importantItem", 3400);
     if (bonusGold > 0) {
       await showBonusGetEffect(bonusGold);
     }
@@ -914,16 +924,26 @@ import {
     pendingEncounter = null;
     const enemyData = encounter?.enemyData || getRandomEncounterEnemyData();
     const enemy = createEnemyCombatant(enemyData);
-    stopBgm();
+    startBgm(selectBattleBgm(enemyData));
     const started = startBattle(enemy, {
       playStartSe: false,
       ambush: Boolean(encounter?.ambush)
     });
     if (!started) {
-      startBgm("dungeon");
+      startBgm(selectDungeonBgm());
       setPlayerInputEnabled(true);
     }
     return started;
+  }
+
+  function selectDungeonBgm() {
+    return currentDepth >= 101 ? "deepDungeon" : "dungeon";
+  }
+
+  function selectBattleBgm(enemyData) {
+    if (enemyData?.isEventBoss || enemyData?.bossKind === "event") return "eventBoss";
+    if (enemyData?.isBoss) return "floorBoss";
+    return "normalBattle";
   }
 
   function updateCharacterFromBattle(changes) {
@@ -1050,7 +1070,7 @@ import {
   }
 
   function finishBattleVictory(battle) {
-    startBgm("dungeon");
+    startBgm(selectDungeonBgm());
     const reward = Math.max(0, Math.floor(Number(battle?.enemy?.experienceReward) || 0));
     if (character && battle?.enemy?.id) {
       character = recordEnemyDefeat(character, battle.enemy.id);
@@ -1065,7 +1085,32 @@ import {
     saveGame();
   }
 
-  function finishBattleDefeat() {
+  async function finishBattleDefeat(battle) {
+    const recovery = resolveDefeatRecovery({
+      character,
+      battle,
+      recoveryResolvers: getDefeatRecoveryResolvers()
+    });
+    if (recovery.recovered) {
+      character = recovery.character;
+      setPlayerInputEnabled(true);
+      startBgm(selectDungeonBgm());
+      updateCharacterUi();
+      saveGame();
+      return;
+    }
+    stopBgm();
+    await runDefeatPresentation(() => completeDungeonDefeat());
+  }
+
+  function getDefeatRecoveryResolvers() {
+    // Future effects such as causality alteration or reincarnation plug in here.
+    // A resolver must return a living character with HP above zero to suppress
+    // the final defeat presentation.
+    return [];
+  }
+
+  function completeDungeonDefeat() {
     let lostExperience = 0;
     let preservedExperience = 0;
     if (character) {
@@ -1084,6 +1129,7 @@ import {
     }
     worldLocation = "town";
     stopBgm();
+    templeRevivalJinglePending = true;
     cancelAutoReturn(false);
     setPlayerInputEnabled(false);
     openTown({ registrationRequired: false, facilityId: "temple", mode: "facilityMenu" });
@@ -1095,10 +1141,40 @@ import {
         : "";
     say(`司祭：おお…！女神へ祈りが届いたか…！迷える魂よ、今一度目覚めよ！${experienceMessage}`);
     saveGame();
+    void playSeSequence("revival", 1).finally(() => {
+      templeRevivalJinglePending = false;
+      if (worldLocation === "town" && getTownState().facilityId === "temple") {
+        startBgm("temple");
+      }
+    });
+  }
+
+  async function runDefeatPresentation(onBlack = () => {}) {
+    if (sceneTransitionRunning) return false;
+    sceneTransitionRunning = true;
+    sceneTransition.hidden = false;
+    sceneTransition.classList.remove("is-black", "is-revealing", "is-inn-stay");
+    sceneTransition.classList.add("is-running", "is-defeat");
+    sceneTransitionTitle.hidden = true;
+    defeatMessage.hidden = false;
+    document.body.classList.add("scene-transition-active");
+    void sceneTransition.offsetWidth;
+    requestAnimationFrame(() => sceneTransition.classList.add("is-black"));
+    await Promise.all([wait(15000), playSeSequence("gameOver", 1)]);
+    await onBlack();
+    sceneTransition.classList.add("is-revealing");
+    sceneTransition.classList.remove("is-black");
+    await wait(1200);
+    defeatMessage.hidden = true;
+    sceneTransition.classList.remove("is-running", "is-revealing", "is-defeat");
+    sceneTransition.hidden = true;
+    document.body.classList.remove("scene-transition-active");
+    sceneTransitionRunning = false;
+    return true;
   }
 
   function finishBattleEscape() {
-    startBgm("dungeon");
+    startBgm(selectDungeonBgm());
     resetPresence();
     setPlayerInputEnabled(true);
     say("戦闘から逃げ切った。");
@@ -1110,7 +1186,7 @@ import {
     if (!character || sceneTransitionRunning) return;
     sceneTransitionRunning = true;
     sceneTransition.hidden = false;
-    sceneTransition.classList.remove("is-black", "is-revealing");
+    sceneTransition.classList.remove("is-black", "is-revealing", "is-defeat");
     sceneTransition.classList.add("is-running", "is-inn-stay");
     sceneTransitionTitle.hidden = true;
     document.body.classList.add("scene-transition-active");
@@ -1126,7 +1202,7 @@ import {
     sceneTransition.classList.add("is-revealing");
     sceneTransition.classList.remove("is-black");
     await wait(700);
-    sceneTransition.classList.remove("is-running", "is-revealing", "is-inn-stay");
+    sceneTransition.classList.remove("is-running", "is-revealing", "is-inn-stay", "is-defeat");
     sceneTransition.hidden = true;
     document.body.classList.remove("scene-transition-active");
     sceneTransitionRunning = false;
@@ -1179,7 +1255,7 @@ import {
 
   function showLevelUpEffect() {
     if (!levelUpEffect) return;
-    playSe("levelUp");
+    playSe("levelUpJingle");
     levelUpEffect.hidden = false;
     levelUpEffect.classList.remove("is-active");
     void levelUpEffect.offsetWidth;
@@ -1190,16 +1266,21 @@ import {
     }, { once: true });
   }
 
-  function healAtTemple() {
+  async function healAtTemple() {
     if (!character) return;
     if (character.alive && character.hp > 0) {
       say("司祭：治療の必要はないようですね。");
       return;
     }
+    stopBgm();
     Object.assign(character, createTempleRevival(character));
     updateCharacterUi();
     say("司祭：おお…！女神へ祈りが届いたか…！迷える魂よ、今一度目覚めよ！");
     saveGame();
+    await playSeSequence("revival", 1);
+    if (worldLocation === "town" && getTownState().facilityId === "temple") {
+      startBgm("temple");
+    }
   }
 
   async function enterDungeonFromTown() {
@@ -1216,8 +1297,8 @@ import {
         resetDungeon("", null, true);
         character.pendingExperienceSettlement = null;
         worldLocation = "dungeon";
-        startBgm("dungeon");
         closeTown();
+        startBgm(selectDungeonBgm());
         say("奈落へ足を踏み入れた。");
         saveGame();
       }
@@ -1233,7 +1314,7 @@ import {
     if (sceneTransitionRunning) return false;
     sceneTransitionRunning = true;
     sceneTransition.hidden = false;
-    sceneTransition.classList.remove("is-black", "is-revealing", "is-inn-stay");
+    sceneTransition.classList.remove("is-black", "is-revealing", "is-inn-stay", "is-defeat");
     sceneTransition.classList.add("is-running");
     document.body.classList.add("scene-transition-active");
     sceneTransitionTitle.hidden = !showEnteringTitle;
@@ -1310,6 +1391,7 @@ import {
     const lapTime = formatElapsedTime(descendedAt - floorStartedAt);
     const nextStart = { x: state.gridX, y: state.gridY };
     currentDepth += 1;
+    startBgm(selectDungeonBgm());
     setDungeonColors(resolveFloorTheme(currentDepth, getDungeonColors()));
     floorStartedAt = descendedAt;
     resetDungeon("", nextStart);
@@ -1422,7 +1504,7 @@ import {
     handleItemInput: handleItemOverlayInput,
     handleBattleInput,
     handleTownInput: action => (
-      handleExperienceSettlementInput(action) || handleTownInput(action)
+      sceneTransitionRunning || handleExperienceSettlementInput(action) || handleTownInput(action)
     ),
     handleMenuInput
   });

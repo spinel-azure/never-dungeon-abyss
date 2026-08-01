@@ -83,6 +83,7 @@ const town = {
   onAbandonRequest: () => null,
   onReportRequest: () => null,
   onAmbienceChanged: () => {},
+  onBgmChanged: () => {},
   onFacilityVoice: () => {},
   pendingVoiceFacility: "",
   onStateChanged: () => {},
@@ -203,7 +204,7 @@ export function configureTown(options) {
         town.playSe("confirm");
         showTownArrival();
       } else if (activateFacilityService(command)) {
-        if (command !== "stay") town.playSe("confirm");
+        if (command !== "stay" && command !== "heal") town.playSe("confirm");
       } else {
         town.playSe("cursorMove");
       }
@@ -286,6 +287,7 @@ export function closeTown() {
   showGameCommands();
   document.body.classList.remove("town-active");
   town.onAmbienceChanged(false);
+  town.onBgmChanged("");
 }
 
 export function isTownOpen() {
@@ -373,7 +375,7 @@ function handleFacilityMenuInput(action) {
       town.playSe("confirm");
       showTownArrival();
     } else if (activateFacilityService(command)) {
-      if (command !== "stay") town.playSe("confirm");
+      if (command !== "stay" && command !== "heal") town.playSe("confirm");
     }
     return true;
   }
@@ -748,6 +750,7 @@ function renderTownView() {
   showTownCommands();
   if (town.mode === "arrival" || town.mode === "selection") {
     town.onAmbienceChanged(true);
+    town.onBgmChanged("");
     town.pendingVoiceFacility = "";
     const selecting = town.mode === "selection";
     town.root.classList.add("is-town-view");
@@ -784,6 +787,13 @@ function renderTownView() {
 function renderFacility() {
   const facility = TOWN_FACILITIES[town.selectedIndex] || getTownFacility("guild");
   town.onAmbienceChanged(false);
+  town.onBgmChanged(
+    facility.id === "guild" && town.registrationRequired
+      ? "registration"
+      : facility.id === "temple"
+        ? "temple"
+        : "townFacilities"
+  );
   town.root.classList.remove("is-town-view");
   town.cloudLayer.hidden = true;
   town.mosaic.hidden = true;
@@ -837,6 +847,7 @@ function renderFacility() {
 
 function renderDungeonEntrance() {
   town.onAmbienceChanged(false);
+  town.onBgmChanged("");
   town.pendingVoiceFacility = "";
   showEntranceCommands();
   updateEntranceLabels();
@@ -858,6 +869,7 @@ function renderDungeonEntrance() {
 
 function renderTransferCircle() {
   town.onAmbienceChanged(false);
+  town.onBgmChanged("");
   town.pendingVoiceFacility = "";
   showEntranceCommands();
   updateEntranceLabels();

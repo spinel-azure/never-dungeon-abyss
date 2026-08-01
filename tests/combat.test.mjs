@@ -22,6 +22,7 @@ import {
   resolveSurprise
 } from "../combat/resolve-environment-save.js";
 import { resolveEscapeAttempt } from "../combat/resolve-escape.js";
+import { resolveDefeatRecovery } from "../combat/resolve-defeat-recovery.js";
 import {
   createBattleState,
   createEnemyAction,
@@ -948,4 +949,19 @@ test("field skills reject battle-only actions and full-HP healing", () => {
     character: priest,
     skillId: "healing_prayer"
   }).reason, "fullHp");
+});
+
+test("defeat presentation is skipped only when a future recovery resolver restores HP", () => {
+  const defeated = { hp: 0, alive: false };
+  assert.equal(resolveDefeatRecovery({ character: defeated }).recovered, false);
+  const recovered = resolveDefeatRecovery({
+    character: defeated,
+    recoveryResolvers: [({ character }) => ({
+      character: { ...character, hp: 1, alive: true },
+      sourceId: "reincarnation"
+    })]
+  });
+  assert.equal(recovered.recovered, true);
+  assert.equal(recovered.character.hp, 1);
+  assert.equal(recovered.sourceId, "reincarnation");
 });

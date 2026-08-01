@@ -22,7 +22,12 @@ export const SE = Object.freeze({
   catVoice02: "cat_voice02.mp3",
   catVoice03: "cat_voice03.mp3",
   townAmbience: "shizen_kohen.mp3",
-  goodNight: "good-night.mp3"
+  goodNight: "good-night.mp3",
+  gameOver: "game-over1.mp3",
+  revival: "fukkatsu-inori1.mp3",
+  levelUpJingle: "sentou-syouri2.mp3",
+  itemGet: "item-get.mp3",
+  importantItem: "juuyou-item.mp3"
 });
 
 const audio = {
@@ -31,7 +36,18 @@ const audio = {
   bgmEnabled: true,
   bgmVolume: .1,
   urls: new Map(),
-  bgmUrls: new Map([["dungeon", "bgm/bukimi-tou.mp3"]]),
+  bgmUrls: new Map([
+    ["title", "bgm/shinen-tobira.mp3"],
+    ["dungeon", "bgm/bukimi-tou.mp3"],
+    ["deepDungeon", "bgm/matou-izanai.mp3"],
+    ["normalBattle", "bgm/mazieru-shitou.mp3"],
+    ["floorBoss", "bgm/sentou-two.mp3"],
+    ["eventBoss", "bgm/battle-of-galfer.mp3"],
+    ["temple", "bgm/kyoukai.mp3"],
+    ["registration", "bgm/skip-melzo.mp3"],
+    ["townFacilities", "bgm/tabidachi-junbi.mp3"],
+    ["shrine", "bgm/hokora.mp3"]
+  ]),
   context: null,
   seMasterGain: null,
   bgmMasterGain: null,
@@ -64,6 +80,11 @@ const PLAYBACK_POLICIES = {
   battleVictory: { mode: "complete", priority: 3 },
   levelUp: { mode: "complete", priority: 3 },
   goodNight: { mode: "complete", priority: 3 },
+  gameOver: { mode: "complete", priority: 3 },
+  revival: { mode: "complete", priority: 3 },
+  levelUpJingle: { mode: "complete", priority: 3 },
+  itemGet: { mode: "complete", priority: 2 },
+  importantItem: { mode: "complete", priority: 3 },
   enemyDefeated: { mode: "complete", priority: 3 },
   catVoice01: { mode: "complete", priority: 2 },
   catVoice02: { mode: "complete", priority: 2 },
