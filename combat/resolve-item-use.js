@@ -38,6 +38,8 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
       environment.suppressPresenceSteps = effect.value;
     } else if (effect.id === "reveal_treasures_until_return") {
       environment.treasureCompassActive = true;
+    } else if (effect.id === "auto_walk_to_stairs_up") {
+      environment.startAutoWalker = true;
     }
   }
   next.condition = hasPoison(next) ? "POISON" : "GOOD";

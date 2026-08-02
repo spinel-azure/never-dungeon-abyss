@@ -19,11 +19,13 @@
   handleBattleInput = () => false,
   handleTownInput = () => false,
   handleDoorInput = () => false,
+  onUserOperation = () => {},
   handleMenuInput
 }) {
   window.addEventListener("keydown", (e) => {
     if (e.target instanceof Element && e.target.closest("input, select, textarea")) return;
     const skillAction = keyAction(e);
+    if (skillAction) onUserOperation();
     if (skillAction && handleItemInput(skillAction)) { e.preventDefault(); return; }
     if (skillAction && handleSkillInput(skillAction)) { e.preventDefault(); return; }
     if (e.key === "ArrowUp" && handleBattleInput("up")) { e.preventDefault(); return; }
@@ -51,19 +53,21 @@
     if (e.key === "ArrowRight") { e.preventDefault(); manualTurn(1); }
   }, { passive: false });
 
-  bindControl(forwardBtn, () => handleItemInput("up") || handleSkillInput("up") || handleOverlayInput("dismiss") || manualMove(1));
-  bindControl(backBtn, () => handleItemInput("down") || handleSkillInput("down") || handleOverlayInput("dismiss") || manualMove(-1));
-  bindControl(leftBtn, () => handleItemInput("left") || handleSkillInput("left") || handleOverlayInput("dismiss") || manualTurn(-1));
-  bindControl(rightBtn, () => handleItemInput("right") || handleSkillInput("right") || handleOverlayInput("dismiss") || manualTurn(1));
-  bindControl(autoReturnBtn, () => handleItemInput("cancel") || handleSkillInput("cancel") || handleOverlayInput("dismiss") || startAutoReturn());
-  bindControl(randomGenerateBtn, () => handleItemInput("cancel") || handleSkillInput("cancel") || handleOverlayInput("dismiss") || generateRandomDungeon());
-  bindControl(buttonA, () => handleItemInput("confirm") || handleSkillInput("confirm") || handleBattleInput("confirm") || handleTownInput("confirm") || handleOverlayInput("confirm") || handleMenuInput("confirm") || handleDoorInput());
-  bindControl(buttonB, () => handleItemInput("cancel") || handleSkillInput("cancel") || handleBattleInput("cancel") || handleTownInput("cancel") || handleOverlayInput("cancel") || handleMenuInput("cancel"));
+  const operate = handler => () => { onUserOperation(); return handler(); };
+  bindControl(forwardBtn, operate(() => handleItemInput("up") || handleSkillInput("up") || handleOverlayInput("dismiss") || manualMove(1)));
+  bindControl(backBtn, operate(() => handleItemInput("down") || handleSkillInput("down") || handleOverlayInput("dismiss") || manualMove(-1)));
+  bindControl(leftBtn, operate(() => handleItemInput("left") || handleSkillInput("left") || handleOverlayInput("dismiss") || manualTurn(-1)));
+  bindControl(rightBtn, operate(() => handleItemInput("right") || handleSkillInput("right") || handleOverlayInput("dismiss") || manualTurn(1)));
+  bindControl(autoReturnBtn, operate(() => handleItemInput("cancel") || handleSkillInput("cancel") || handleOverlayInput("dismiss") || startAutoReturn()));
+  bindControl(randomGenerateBtn, operate(() => handleItemInput("cancel") || handleSkillInput("cancel") || handleOverlayInput("dismiss") || generateRandomDungeon()));
+  bindControl(buttonA, operate(() => handleItemInput("confirm") || handleSkillInput("confirm") || handleBattleInput("confirm") || handleTownInput("confirm") || handleOverlayInput("confirm") || handleMenuInput("confirm") || handleDoorInput()));
+  bindControl(buttonB, operate(() => handleItemInput("cancel") || handleSkillInput("cancel") || handleBattleInput("cancel") || handleTownInput("cancel") || handleOverlayInput("cancel") || handleMenuInput("cancel")));
   configureCommandMouseButtons({
     commandRoot,
-    confirm: () => handleItemInput("confirm") || handleSkillInput("confirm") || handleBattleInput("confirm") || handleTownInput("confirm") || handleOverlayInput("confirm") || handleMenuInput("confirm") || handleDoorInput(),
-    cancel: () => handleItemInput("cancel") || handleSkillInput("cancel") || handleBattleInput("cancel") || handleTownInput("cancel") || handleOverlayInput("cancel") || handleMenuInput("cancel"),
+    confirm: operate(() => handleItemInput("confirm") || handleSkillInput("confirm") || handleBattleInput("confirm") || handleTownInput("confirm") || handleOverlayInput("confirm") || handleMenuInput("confirm") || handleDoorInput()),
+    cancel: operate(() => handleItemInput("cancel") || handleSkillInput("cancel") || handleBattleInput("cancel") || handleTownInput("cancel") || handleOverlayInput("cancel") || handleMenuInput("cancel")),
     status: () => {
+      onUserOperation();
       if (handleSkillInput("cancel")) {
         openStatusMenu();
         return true;

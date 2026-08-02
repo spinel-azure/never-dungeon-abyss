@@ -27,28 +27,42 @@ export function configureAutoReturn(config) {
   Object.assign(options, config);
 }
 
-export function startAutoReturn() {
+export function getAutoReturnAvailability() {
   const start = getStartPosition();
-  if (state.anim) return;
+  if (state.anim) return { accepted: false, reason: "moving" };
   if (state.gridX === start.x && state.gridY === start.y) {
-    options.say("すでにスタート地点にいる。");
-    return;
+    return { accepted: false, reason: "alreadyAtStart" };
   }
   const path = findExploredPathToStart();
+  if (!path.length) return { accepted: false, reason: "noPath" };
+  return { accepted: true, reason: "", path };
+}
+
+export function startAutoReturn({ persistentThroughBattle = false } = {}) {
+  const availability = getAutoReturnAvailability();
+  if (!availability.accepted) {
+    if (availability.reason === "alreadyAtStart") options.say("すでにスタート地点にいる。");
+    else if (availability.reason === "noPath") options.say("踏破済みの道だけではスタート地点へ戻れない。");
+    return false;
+  }
+  const path = availability.path;
   if (!path.length) {
     options.say("踏破済みの道だけではスタート地点へ戻れない。");
-    return;
+    return false;
   }
   state.autoReturning = true;
+  state.autoWalkerActive = Boolean(persistentThroughBattle);
+  state.autoReturnPaused = false;
   state.autoPath = path;
   updateAutoReturnButton();
   options.say("踏破済みの道をたどって帰還する。");
   continueAutoReturn();
+  return true;
 }
 
 export function continueAutoReturn() {
   const start = getStartPosition();
-  if (!state.autoReturning || state.anim) return;
+  if (!state.autoReturning || state.autoReturnPaused || state.anim) return;
   if (state.gridX === start.x && state.gridY === start.y) {
     cancelAutoReturn(true);
     return;
@@ -79,6 +93,8 @@ export function continueAutoReturn() {
 export function cancelAutoReturn(arrived) {
   if (!state.autoReturning && !state.autoPath.length) return;
   state.autoReturning = false;
+  state.autoWalkerActive = false;
+  state.autoReturnPaused = false;
   state.autoPath = [];
   updateAutoReturnButton();
   if (arrived) {

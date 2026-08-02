@@ -20,14 +20,14 @@ export const ITEMS = Object.freeze([
   }),
   Object.freeze({
     number: 4, id: "exorcism_talisman", name: "退魔の護符", category: "exploration",
-    buyPrice: 50, sellPrice: 0, source: "temple", usableIn: Object.freeze(["dungeon"]),
+    buyPrice: 50, sellPrice: 25, source: "temple", usableIn: Object.freeze(["dungeon"]),
     effects: Object.freeze([{ id: "reset_presence", value: 0 }, { id: "suppress_presence_steps", value: 30 }]),
     description: "気配を0に戻し、30歩の間、気配の上昇を抑える。", maxOwned: 99,
     iconId: "exorcism-talisman", version: 1
   }),
   Object.freeze({
     number: 5, id: "holy_water", name: "聖水", category: "battle",
-    buyPrice: 70, sellPrice: 0, source: "temple", usableIn: Object.freeze(["battle"]),
+    buyPrice: 20, sellPrice: 10, source: "temple", usableIn: Object.freeze(["battle"]),
     effects: Object.freeze([{ id: "banish_undead", value: 1 }]),
     description: "アンデッドを即座に消滅させる。経験値は得られず、ボスには無効。", maxOwned: 99,
     iconId: "holy-water", version: 1
@@ -38,6 +38,13 @@ export const ITEMS = Object.freeze([
     effects: Object.freeze([{ id: "reveal_treasures_until_return", value: 1 }]),
     description: "帰還するまで、迷宮内の宝箱をミニマップに★で表示する。", maxOwned: 99,
     iconId: "treasure-compass", version: 1
+  }),
+  Object.freeze({
+    number: 7, id: "auto_walker", name: "オートウォーカー", category: "exploration",
+    buyPrice: 100, sellPrice: 50, source: "shop", usableIn: Object.freeze(["dungeon"]),
+    effects: Object.freeze([{ id: "auto_walk_to_stairs_up", value: 1 }]),
+    description: "確定エリアを経由して上り階段までオート移動する。移動中、何か操作すると移動中断。移動中に戦闘した場合、戦闘終了後効果継続。",
+    maxOwned: 99, iconId: "auto-walker", version: 1
   })
 ]);
 

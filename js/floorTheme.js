@@ -3,7 +3,7 @@ export const FLOOR_COLORS = Object.freeze(["default", "red", "blue", "green", "p
 export const FLOOR_THEME_MODES = Object.freeze({ FIXED: "fixed", RANDOM: "random" });
 
 const settings = {
-  mode: FLOOR_THEME_MODES.RANDOM,
+  mode: FLOOR_THEME_MODES.FIXED,
   fixed: { wall: "default", floor: "default" },
   floorOverrides: new Map()
 };

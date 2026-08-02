@@ -9,7 +9,7 @@ import {
   restorePresence, suppressPresence
 } from "../js/presence.js";
 import { grantEventItems, unlockGuildRequest } from "../js/character-services.js";
-import { purchaseItem } from "../data/commerce.js";
+import { purchaseItem, sellItem } from "../data/commerce.js";
 
 function characterWith(itemId, amount = 1) {
   const character = createInitialCharacter({ name: "TEST", job: "warrior" });
@@ -49,14 +49,15 @@ test("antidote cures poison and restores 15 HP", () => {
 
 test("shop and temple purchases spend gold and grant the selected item", () => {
   let character = createInitialCharacter({ name: "TEST", job: "warrior" });
-  character.gold = 710;
+  character.gold = 760;
   for (const [itemId, price] of [
     ["healing_potion", 20],
     ["antidote", 30],
     ["guiding_torch", 40],
     ["exorcism_talisman", 50],
-    ["holy_water", 70],
-    ["treasure_compass", 500]
+    ["holy_water", 20],
+    ["treasure_compass", 500],
+    ["auto_walker", 100]
   ]) {
     const result = purchaseItem(character, itemId);
     assert.equal(result.accepted, true);
@@ -78,6 +79,17 @@ test("purchases reject insufficient gold and send full-stack overflow to storage
   assert.equal(result.stored, 1);
   assert.equal(result.character.gold, 979);
   assert.deepEqual(result.character.warehouse.itemStacks, [{ itemId: "healing_potion", count: 1 }]);
+});
+
+test("shop sells one consumable for half its purchase price", () => {
+  const character = characterWith("auto_walker", 2);
+  character.gold = 10;
+  const result = sellItem(character, "auto_walker");
+  assert.equal(result.accepted, true);
+  assert.equal(result.value, 50);
+  assert.equal(result.character.gold, 60);
+  assert.equal(getItemCount(result.character.inventory, "auto_walker"), 1);
+  assert.equal(sellItem(createInitialCharacter({ name: "TEST", job: "warrior" }), "auto_walker").reason, "notOwned");
 });
 
 test("torch and talisman expose dungeon environment effects", () => {
@@ -104,6 +116,12 @@ test("torch and talisman expose dungeon environment effects", () => {
     character: characterWith("treasure_compass"), itemId: "treasure_compass",
     context: "dungeon", treasureCompassActive: true
   }).reason, "noEffect");
+
+  const walker = resolveFieldItemUse({
+    character: characterWith("auto_walker"), itemId: "auto_walker", context: "dungeon"
+  });
+  assert.equal(walker.environment.startAutoWalker, true);
+  assert.equal(getItemCount(walker.character.inventory, "auto_walker"), 0);
 });
 
 test("holy water only banishes a non-boss undead and awards no experience", () => {

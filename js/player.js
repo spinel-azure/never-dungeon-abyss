@@ -84,6 +84,8 @@ export function createPlayerState(startDir) {
     torchFuel: TORCH_FUEL_MAX,
     treasureCompassActive: false,
     autoReturning: false,
+    autoWalkerActive: false,
+    autoReturnPaused: false,
     autoPath: [],
     overlayEvent: null,
     npcAwarenessShown: false,
@@ -105,6 +107,8 @@ export function resetPlayer(startDir) {
   state.shake = 0;
   state.torchFuel = TORCH_FUEL_MAX;
   state.autoPath = [];
+  state.autoWalkerActive = false;
+  state.autoReturnPaused = false;
   state.overlayEvent = null;
   state.npcAwarenessShown = false;
   state.stairsPromptDismissed = false;
@@ -123,8 +127,10 @@ export function setTorchFuelDisabled(disabled) {
 export function setPlayerInputEnabled(enabled) {
   playerInputEnabled = Boolean(enabled);
   if (!playerInputEnabled) {
-    state.autoReturning = false;
-    state.autoPath = [];
+    if (!state.autoWalkerActive) {
+      state.autoReturning = false;
+      state.autoPath = [];
+    }
   }
 }
 
@@ -158,7 +164,8 @@ export function updateAnimation(now) {
         const isStairs = a.cellType === "stairsUp" || a.cellType === "stairsDown";
         const isSpecialEventCell = Boolean(npc) || Boolean(treasure) || isStairs;
         const encounterTriggered = !isSpecialEventCell && onPlayerStep({ inDarkness: movedInDarkness });
-        if (encounterTriggered) hooks.cancelAutoReturn(false);
+        if (encounterTriggered && state.autoWalkerActive) state.autoReturnPaused = true;
+        else if (encounterTriggered) hooks.cancelAutoReturn(false);
         if (npc) {
           startNpcTalkEvent(npc, a.fromGX, a.fromGY);
         } else if (treasure) {

@@ -38,7 +38,7 @@ const renderer = {
   mistEnabled: true,
   mistIntensity: 1,
   mistDistance: 9,
-  mistColor: "green",
+  mistColor: "frost",
   mistLayers: null,
   minimapStaticFrames: []
 };

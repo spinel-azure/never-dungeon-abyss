@@ -26,7 +26,7 @@ const menu = {
   compassVisible: true, readoutVisible: false, screenShakeEnabled: true,
   torchFlickerEnabled: true, torchFuelDisabled: false, presenceDisabled: false, stopwatchVisible: true,
   stairsDownVisible: false, npcsVisible: false, treasuresVisible: false,
-  mistEnabled: true, mistIntensity: 1, mistDistance: 9, mistColor: "green",
+  mistEnabled: true, mistIntensity: 1, mistDistance: 9, mistColor: "frost",
   wallColor: "default",
   floorColor: "default",
   bgmEnabled: true, seEnabled: true,
@@ -836,6 +836,9 @@ function restoreSettings() {
     if (seSlider && typeof saved.seEnabled === "boolean" && Number.isFinite(seValue)) {
       seSlider.value = String(Math.round(Math.max(0, Math.min(100, seValue)) / 10) * 10);
     }
+    menu.wallColor = "default";
+    menu.floorColor = "default";
+    menu.mistColor = "frost";
   } catch (error) {
     console.warn("NDE settings could not be restored.", error);
   }

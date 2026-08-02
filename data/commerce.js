@@ -1,5 +1,5 @@
 import { getItem } from "./items.js";
-import { grantItemWithOverflow } from "./inventory.js";
+import { consumeItem, getItemCount, grantItemWithOverflow } from "./inventory.js";
 
 export function purchaseItem(character, itemId, { price } = {}) {
   if (!character) return { accepted: false, reason: "noCharacter", character };
@@ -18,5 +18,25 @@ export function purchaseItem(character, itemId, { price } = {}) {
     cost,
     stored: granted.stored,
     character: { ...granted.character, gold: gold - cost }
+  };
+}
+
+export function sellItem(character, itemId, { price } = {}) {
+  if (!character) return { accepted: false, reason: "noCharacter", character };
+  const item = getItem(itemId);
+  if (!item) return { accepted: false, reason: "unknownItem", character };
+  if (getItemCount(character.inventory, item.id) <= 0) return { accepted: false, reason: "notOwned", character, item };
+  const value = Math.max(0, Math.floor(Number(price ?? item.sellPrice ?? item.buyPrice / 2) || 0));
+  if (value <= 0) return { accepted: false, reason: "notSellable", character, item };
+  return {
+    accepted: true,
+    reason: "",
+    item,
+    value,
+    character: {
+      ...character,
+      gold: Math.max(0, Math.floor(Number(character.gold) || 0)) + value,
+      inventory: consumeItem(character.inventory, item.id, 1).inventory
+    }
   };
 }

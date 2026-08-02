@@ -42,14 +42,15 @@ import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minima
 import { configureInput } from "./input.js";
 import { configureVirtualStick } from "./virtualStick.js";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor } from "./menu.js";
+import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor, closeCampMenu } from "./menu.js";
 import { resolveFloorTheme } from "./floorTheme.js";
 import {
   configureAutoReturn,
   startAutoReturn,
   continueAutoReturn,
   cancelAutoReturn,
-  updateAutoReturnButton
+  updateAutoReturnButton,
+  getAutoReturnAvailability
 } from "./autoReturn.js";
 import { configureEvents, messageFor, say } from "./events.js";
 import { configureDevice } from "./device.js";
@@ -101,7 +102,7 @@ import { collectCardStatBonuses, getCardById, hasCardEffect } from "../data/card
 import { drawCardCanvas } from "./card-canvas.js";
 import { getItem } from "../data/items.js";
 import { isCriticalHp } from "../data/quick-status.js";
-import { purchaseItem } from "../data/commerce.js";
+import { purchaseItem, sellItem } from "../data/commerce.js";
 import { settleLootBag } from "../data/inventory.js";
 import {
   abandonQuest,
@@ -259,6 +260,7 @@ import {
     onStay: stayAtInn,
     onHeal: healAtTemple,
     onPurchaseItem: purchaseTownItem,
+    onSellItem: sellTownItem,
     onEditDeck: openDeckEditor,
     onTalk: talkAtFacility,
     onAcceptRequest: acceptGuildRequest,
@@ -392,7 +394,7 @@ import {
     const start = dungeon.startPosition;
     if (start && inBounds(start.x, start.y)) setStartPosition(start.x, start.y);
     currentDepth = Math.max(1, Math.floor(Number(dungeon.depth) || 1));
-    setDungeonColors(dungeon.theme || {});
+    setDungeonColors({ wall: "default", floor: "default" });
     state.anim = null;
     state.gridX = player.gridX;
     state.gridY = player.gridY;
@@ -921,7 +923,7 @@ import {
 
   function beginRandomBattle() {
     if (!character || worldLocation !== "dungeon" || isBattleActive()) return false;
-    cancelAutoReturn(false);
+    if (!state.autoWalkerActive) cancelAutoReturn(false);
     setPlayerInputEnabled(false);
     const encounter = pendingEncounter;
     pendingEncounter = null;
@@ -936,6 +938,8 @@ import {
     if (!started) {
       startBgm(selectDungeonBgm());
       setPlayerInputEnabled(true);
+      state.autoReturnPaused = false;
+      if (state.autoWalkerActive) continueAutoReturn();
     }
     return started;
   }
@@ -1021,6 +1025,16 @@ import {
     return { ...result, character };
   }
 
+  function sellTownItem(itemId) {
+    if (!character) return { accepted: false, reason: "noCharacter" };
+    const result = sellItem(character, itemId);
+    if (!result.accepted) return result;
+    character = result.character;
+    updateCharacterUi();
+    saveGame();
+    return { ...result, character };
+  }
+
   function hasCharacterStatus(target, statusId) {
     return (target?.statuses || []).some(status => (status.statusId || status.id) === statusId);
   }
@@ -1051,6 +1065,14 @@ import {
 
   async function useFieldItem(itemId) {
     const context = isTownOpen() ? "town" : "dungeon";
+    if (itemId === "auto_walker") {
+      const availability = getAutoReturnAvailability();
+      if (!availability.accepted) {
+        if (availability.reason === "alreadyAtStart") say("すでに上り階段にいる。");
+        else if (availability.reason === "noPath") say("踏破済みの道だけでは上り階段へ戻れない。");
+        return { accepted: false, reason: availability.reason };
+      }
+    }
     const result = resolveFieldItemUse({
       character,
       itemId,
@@ -1069,6 +1091,10 @@ import {
     }
     if (result.environment.treasureCompassActive) {
       state.treasureCompassActive = true;
+    }
+    if (result.environment.startAutoWalker) {
+      closeCampMenu("main");
+      startAutoReturn({ persistentThroughBattle: true });
     }
     updateHud();
     updateCharacterUi();
@@ -1090,6 +1116,8 @@ import {
       ? `戦闘に勝利した。${reward}EXPを持ち帰った。`
       : "戦闘に勝利した。");
     setPlayerInputEnabled(true);
+    state.autoReturnPaused = false;
+    if (state.autoWalkerActive) window.setTimeout(continueAutoReturn, 0);
     updateCharacterUi();
     saveGame();
   }
@@ -1188,6 +1216,8 @@ import {
     startBgm(selectDungeonBgm());
     resetPresence();
     setPlayerInputEnabled(true);
+    state.autoReturnPaused = false;
+    if (state.autoWalkerActive) window.setTimeout(continueAutoReturn, 0);
     say("戦闘から逃げ切った。");
     updateCharacterUi();
     saveGame();
@@ -1480,6 +1510,11 @@ import {
       sceneTransitionRunning || handleExperienceSettlementInput(action) || handleTownInput(action)
     ),
     handleDoorInput: openDoorAhead,
+    onUserOperation: () => {
+      if (!state.autoWalkerActive || isBattleActive()) return;
+      cancelAutoReturn(false);
+      say("オート移動を中断した。");
+    },
     handleMenuInput
   });
   configureMenu({

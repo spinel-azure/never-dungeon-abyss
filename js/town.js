@@ -84,6 +84,7 @@ const town = {
   onStay: () => {},
   onHeal: () => {},
   onPurchaseItem: () => null,
+  onSellItem: () => null,
   onEditDeck: () => {},
   onTalk: () => "",
   onAcceptRequest: () => "",
@@ -973,6 +974,12 @@ function activateFacilityService(command) {
     showShopCategoryCommands();
     return true;
   }
+  if (command === "sell") {
+    const facility = TOWN_FACILITIES[town.selectedIndex];
+    if (facility?.id !== "shop") return false;
+    openCommerce("sell");
+    return true;
+  }
   if (command === "shop-items") {
     openCommerce("buy");
     return true;
@@ -1023,18 +1030,22 @@ function activateFacilityService(command) {
 function openCommerce(kind) {
   const ids = kind === "donate"
     ? ["exorcism_talisman", "holy_water"]
-    : ["healing_potion", "antidote", "guiding_torch", "treasure_compass"];
+    : kind === "sell"
+      ? Object.keys(town.getCharacter()?.inventory?.counts || {}).filter(id => getItem(id)?.sellPrice > 0)
+      : ["healing_potion", "antidote", "guiding_torch", "treasure_compass", "auto_walker"];
   town.mode = "commerce";
   town.commerceKind = kind;
   town.commerceItems = ids.map(getItem).filter(Boolean);
   town.commerceIndex = 0;
   town.commercePointerArmedIndex = -1;
-  town.commerceTitle.textContent = kind === "donate" ? "寄進" : "購入";
+  town.commerceTitle.textContent = kind === "donate" ? "寄進" : kind === "sell" ? "売却" : "購入";
   town.commerceOverlay.hidden = false;
   town.guildQuestOverlay.hidden = true;
   town.messageEl.textContent = kind === "donate"
     ? "司祭アーヴァイン：いずれを女神へ寄進されますか？\n＊Aボタン：決定　Bボタン：戻る"
-    : "女主人ヘレン：どれにするのかしら？\n＊Aボタン：決定　Bボタン：戻る";
+    : kind === "sell"
+      ? town.commerceItems.length ? "女主人ヘレン：何を売るのかしら？\n＊Aボタン：決定　Bボタン：戻る" : "女主人ヘレン：売れる道具はないようね。"
+      : "女主人ヘレン：どれにするのかしら？\n＊Aボタン：決定　Bボタン：戻る";
   renderCommerce({ showDescription: false });
   resetTownViewport();
 }
@@ -1078,6 +1089,7 @@ function handleCommerceInput(action) {
     return true;
   }
   if (["up", "down", "left", "right"].includes(action)) {
+    if (!town.commerceItems.length) return true;
     town.playSe("cursorMove");
     const amount = action === "up" || action === "left" ? -1 : 1;
     town.commerceIndex = (
@@ -1100,7 +1112,9 @@ function requestCommerceConfirmation() {
   town.mode = "commerceConfirm";
   town.messageEl.textContent = town.commerceKind === "donate"
     ? "司祭アーヴァイン：こちらでよろしいですか？\n＊Aボタン：はい　Bボタン：いいえ"
-    : "女主人ヘレン：これでいい？\n＊Aボタン：はい　Bボタン：いいえ";
+    : town.commerceKind === "sell"
+      ? `女主人ヘレン：${item.sellPrice}Gで買い取るわ。これでいい？\n＊Aボタン：はい　Bボタン：いいえ`
+      : "女主人ヘレン：これでいい？\n＊Aボタン：はい　Bボタン：いいえ";
 }
 
 function handleCommerceConfirmationInput(action) {
@@ -1113,7 +1127,7 @@ function handleCommerceConfirmationInput(action) {
     town.mode = "commerce";
     town.messageEl.textContent = town.commerceKind === "donate"
       ? "司祭アーヴァイン：承知しました。"
-      : "女主人ヘレン：あら、残念。";
+      : town.commerceKind === "sell" ? "女主人ヘレン：あら、残念。" : "女主人ヘレン：あら、残念。";
     return true;
   }
   return true;
@@ -1122,7 +1136,8 @@ function handleCommerceConfirmationInput(action) {
 function purchaseSelectedCommerceItem() {
   const item = town.commerceItems[town.commerceIndex];
   if (!item) return;
-  const result = town.onPurchaseItem(item.id);
+  const selling = town.commerceKind === "sell";
+  const result = selling ? town.onSellItem(item.id) : town.onPurchaseItem(item.id);
   if (!result?.accepted) {
     town.playSe("cursorMove");
     town.messageEl.textContent = result?.reason === "insufficientGold"
@@ -1137,10 +1152,16 @@ function purchaseSelectedCommerceItem() {
   const keeper = town.commerceKind === "donate" ? "司祭アーヴァイン" : "女主人ヘレン";
   town.messageEl.textContent = town.commerceKind === "donate"
     ? `${keeper}：女神のご加護を。${item.name}を授けましょう。`
+    : selling
+      ? `${keeper}：${item.name}を${result.value}Gで買い取ったわ。`
     : result.stored > 0
       ? `${keeper}：はい、どうぞ。\n${item.name}はこれ以上持てません。超過分を倉庫へ送りました。`
       : `${keeper}：はい、どうぞ。`;
   town.mode = "commerce";
+  if (selling && Number(town.getCharacter()?.inventory?.counts?.[item.id] || 0) <= 0) {
+    town.commerceItems.splice(town.commerceIndex, 1);
+    town.commerceIndex = Math.max(0, Math.min(town.commerceIndex, town.commerceItems.length - 1));
+  }
   town.commercePointerArmedIndex = -1;
   renderCommerce({ showDescription: false });
   town.onStateChanged();
@@ -1155,7 +1176,7 @@ function renderCommerce({ showDescription = true } = {}) {
     const name = document.createElement("span");
     name.textContent = item.name;
     const price = document.createElement("small");
-    price.textContent = `${item.buyPrice}G`;
+    price.textContent = `${town.commerceKind === "sell" ? item.sellPrice : item.buyPrice}G${town.commerceKind === "sell" ? ` ×${town.getCharacter()?.inventory?.counts?.[item.id] || 0}` : ""}`;
     button.append(name, price);
     return button;
   }));
