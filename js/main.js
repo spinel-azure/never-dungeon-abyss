@@ -82,7 +82,7 @@ import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceName } from "../data/equipment-inventory.js";
 import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
 import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js";
-import { awardBattleExperience, createTempleRevival, getInnStayFee, grantEventItems, resolveDungeonDefeat, resolveInnStay, unlockGuildRequest } from "./character-services.js";
+import { awardBattleExperience, createInnStableRecovery, createTempleRevival, getInnStayFee, grantEventItems, resolveDungeonDefeat, resolveInnStay, unlockGuildRequest } from "./character-services.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { resolveTreasureTrap } from "../combat/resolve-trap.js";
 import { collectStats } from "../combat/collect-stats.js";
@@ -1310,7 +1310,10 @@ import {
     if (!character || sceneTransitionRunning) return;
     const fee = getInnStayFee(character);
     if (Math.max(0, Math.floor(Number(character.gold) || 0)) < fee) {
-      say(`女将ヨハンナ：宿泊代は${fee}Gだよ。すまないけど、お金が足りないようだね。`);
+      Object.assign(character, createInnStableRecovery(character));
+      say("女将ヨハンナ：おや。持ち合わせがないのかい？夜露がしのげればいいなら、馬小屋を使っておくれ。");
+      updateCharacterUi();
+      saveGame();
       return;
     }
     character.gold -= fee;

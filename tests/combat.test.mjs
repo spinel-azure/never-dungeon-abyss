@@ -135,7 +135,7 @@ test("poison slime sometimes selects an attack that can inflict poison", () => {
 
 test("all initial classes can damage the adjusted cave slime", () => {
   const slime = getEnemyById("cave_slime");
-  const expectedDamage = { warrior: 10, thief: 2, priest: 6, mage: 8 };
+  const expectedDamage = { warrior: 10, thief: 4, priest: 6, mage: 8 };
   for (const [job, damage] of Object.entries(expectedDamage)) {
     const character = createInitialCharacter({ name: "TEST", job });
     const stats = collectStats(character);
@@ -250,11 +250,25 @@ test("critical is 1.5x normal with minimum two", () => {
   assert.equal(result.totalDamage, 2);
 });
 
-test("dagger normal attack is two hits, power strike one, poison blade two", () => {
+test("dagger normal attack, quick strike and poison blade are two hits", () => {
   const weapon = getWeapon("iron_dagger");
   assert.equal(createNormalAttack({ weapon }).hitCount, 2);
   assert.equal(createSkillAttack(getSkill("power_strike"), { weapon }).hitCount, 1);
+  const quickStrike = createSkillAttack(getSkill("quick_strike"), { weapon });
+  assert.equal(quickStrike.hitCount, 2);
+  assert.equal(quickStrike.powerPerHit, 0.9);
   assert.equal(createSkillAttack(getSkill("poison_blade"), { weapon }).hitCount, 2);
+});
+
+test("dagger attacks add one quarter of DEX to attack power", () => {
+  const attack = createNormalAttack({ weapon: getWeapon("iron_dagger") });
+  const result = resolvePhysicalAttack({
+    attacker: { str: 0, dex: 8 },
+    defender: { agi: 0, def: 0 },
+    attack,
+    rng: fixed(0, 0.99, 0.5, 0, 0.99, 0.5)
+  });
+  assert.equal(result.attackPower, 7);
 });
 
 test("dagger battle round exposes two separate hit presentation events", () => {

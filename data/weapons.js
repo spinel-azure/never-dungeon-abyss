@@ -11,7 +11,8 @@ export const WEAPON_TYPES = Object.freeze({
     hitCount: 2,
     powerPerHit: 0.6,
     speedModifier: 5,
-    defensePenetration: 0
+    defensePenetration: 0,
+    damageDexMultiplier: 0.25
   }),
   GREATSWORD: Object.freeze({
     id: "greatsword",

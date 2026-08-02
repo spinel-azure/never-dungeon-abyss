@@ -15,6 +15,7 @@ import {
 import { getItem } from "../data/items.js";
 import { WEAPONS } from "../data/weapons.js";
 import { configureTownPassersby } from "./town-passersby.js";
+import { getInnStayFee } from "./character-services.js";
 
 const FACILITY_COMMANDS = Object.freeze({
   inn: [
@@ -329,6 +330,7 @@ export function handleTownInput(action) {
     return true;
   }
   if (town.mode === "shopCategory") return handleShopCategoryInput(action);
+  if (town.mode === "innStayConfirm") return handleInnStayConfirmationInput(action);
   if (town.mode === "commerceConfirm") return handleCommerceConfirmationInput(action);
   if (town.mode === "commerce") return handleCommerceInput(action);
   if (town.mode.startsWith("quest")) return handleQuestInput(action);
@@ -960,8 +962,7 @@ function showFacilityCommands(facilityId) {
 
 function activateFacilityService(command) {
   if (command === "stay") {
-    town.onStay();
-    town.onStateChanged();
+    requestInnStay();
     return true;
   }
   if (command === "heal") {
@@ -1045,6 +1046,36 @@ function activateFacilityService(command) {
     return true;
   }
   return false;
+}
+
+function requestInnStay() {
+  const character = town.getCharacter();
+  const fee = getInnStayFee(character);
+  if (Math.max(0, Math.floor(Number(character?.gold) || 0)) < fee) {
+    town.onStay();
+    town.onStateChanged();
+    return;
+  }
+  town.mode = "innStayConfirm";
+  town.playSe("confirm");
+  town.messageEl.textContent = `女将ヨハンナ：${fee}Gだけど、いいかい？\n＊Aボタン：はい　Bボタン：いいえ`;
+}
+
+function handleInnStayConfirmationInput(action) {
+  if (action === "confirm") {
+    town.playSe("confirm");
+    town.mode = "facilityMenu";
+    town.onStay();
+    town.onStateChanged();
+    return true;
+  }
+  if (action === "cancel") {
+    town.playSe("cancel");
+    town.mode = "facilityMenu";
+    town.messageEl.textContent = "女将ヨハンナ：そうかい。無理をするんじゃないよ？";
+    return true;
+  }
+  return true;
 }
 
 function openCommerce(kind) {

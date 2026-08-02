@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { rollEnemyDrop, rollRedChestLoot } from "../data/loot.js";
 import { buildBoundaryWallMap, cells } from "../js/dungeon.js";
 import { getWeapon } from "../data/weapons.js";
-import { getInnStayFee } from "../js/character-services.js";
+import { createInnStableRecovery, getInnStayFee } from "../js/character-services.js";
 
 const rng = (...values) => {
   let index = 0;
@@ -22,12 +22,12 @@ test("red chest rewards and stiletto qualities follow configured bands", () => {
   assert.equal(rollRedChestLoot(rng(0.1, 0.59)).amount, 10);
   assert.equal(rollRedChestLoot(rng(0.1, 0.6)).amount, 15);
   assert.equal(rollRedChestLoot(rng(0.1, 0.9)).amount, 20);
-  assert.equal(rollRedChestLoot(rng(0.7)).itemId, "healing_potion");
-  assert.equal(rollRedChestLoot(rng(0.9)).itemId, "antidote");
-  assert.equal(rollRedChestLoot(rng(0.99, 0.49)).enhancement, 0);
-  assert.equal(rollRedChestLoot(rng(0.99, 0.5)).enhancement, 1);
-  assert.equal(rollRedChestLoot(rng(0.99, 0.8)).enhancement, 2);
-  assert.equal(rollRedChestLoot(rng(0.99, 0.951)).enhancement, 3);
+  assert.equal(rollRedChestLoot(rng(0.55)).itemId, "healing_potion");
+  assert.equal(rollRedChestLoot(rng(0.75)).itemId, "antidote");
+  assert.equal(rollRedChestLoot(rng(0.88, 0.749)).enhancement, 0);
+  assert.equal(rollRedChestLoot(rng(0.88, 0.75)).enhancement, 1);
+  assert.equal(rollRedChestLoot(rng(0.88, 0.93)).enhancement, 2);
+  assert.equal(rollRedChestLoot(rng(0.88, 0.99)).enhancement, 3);
   assert.equal(getWeapon("stiletto", 2).defensePenetration, 0.3);
 });
 
@@ -42,7 +42,12 @@ test("B1F to B4F place one to three red chests and no black or gold", () => {
   assert.equal(cells.flat().filter(cell => cell.treasure).length, 0);
 });
 
-test("inn fee is five gold per level", () => {
-  assert.equal(getInnStayFee({ level: 1 }), 5);
-  assert.equal(getInnStayFee({ level: 197 }), 985);
+test("inn fee is two gold per level", () => {
+  assert.equal(getInnStayFee({ level: 1 }), 2);
+  assert.equal(getInnStayFee({ level: 197 }), 394);
+});
+
+test("the inn stable restores thirty percent without exceeding maximums", () => {
+  assert.deepEqual(createInnStableRecovery({ hp: 1, maxHp: 47, sp: 0, maxSp: 40 }), { hp: 16, sp: 12 });
+  assert.deepEqual(createInnStableRecovery({ hp: 45, maxHp: 47, sp: 39, maxSp: 40 }), { hp: 47, sp: 40 });
 });

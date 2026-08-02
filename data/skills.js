@@ -44,13 +44,13 @@ export const SKILLS = Object.freeze({
   quick_strike: Object.freeze({
     id: "quick_strike",
     name: "素早い一撃",
-    description: "行動速度＋15。武器で\n威力80%の素早い一撃を放つ。",
+    description: "行動速度＋15。武器の攻撃回数で\n威力90%の素早い連撃を放つ。",
     actionType: "physicalAttack",
     category: "combatArt",
     spCost: 3,
     target: "enemy",
-    hitCount: 1,
-    powerPerHit: 0.8,
+    hitCountMode: "weapon",
+    powerPerHit: 0.9,
     speedModifier: 15,
     effects: Object.freeze([])
   }),

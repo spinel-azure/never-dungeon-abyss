@@ -84,7 +84,16 @@ export function resolveInnStay(character) {
 }
 
 export function getInnStayFee(character) {
-  return Math.max(5, Math.floor(Number(character?.level) || 1) * 5);
+  return Math.max(2, Math.floor(Number(character?.level) || 1) * 2);
+}
+
+export function createInnStableRecovery(character) {
+  const maxHp = Math.max(1, Math.floor(Number(character?.maxHp) || 1));
+  const maxSp = Math.max(0, Math.floor(Number(character?.maxSp) || 0));
+  return {
+    hp: Math.min(maxHp, Math.max(0, Math.floor(Number(character?.hp) || 0)) + Math.ceil(maxHp * 0.3)),
+    sp: Math.min(maxSp, Math.max(0, Math.floor(Number(character?.sp) || 0)) + Math.ceil(maxSp * 0.3))
+  };
 }
 
 function getVitalBonus(character, key) {

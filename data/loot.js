@@ -1,5 +1,5 @@
 export const ENEMY_DROP_RATES = Object.freeze({ none: 0.4, item: 0.55, redChest: 0.05 });
-export const STILETTO_ENHANCEMENT_RATES = Object.freeze([0.5, 0.3, 0.15, 0.05]);
+export const STILETTO_ENHANCEMENT_RATES = Object.freeze([0.75, 0.18, 0.06, 0.01]);
 
 export function rollEnemyDrop(enemy, rng = Math.random) {
   if (enemy?.noDrop) return { kind: "none" };
@@ -13,9 +13,9 @@ export function rollEnemyDrop(enemy, rng = Math.random) {
 
 export function rollRedChestLoot(rng = Math.random) {
   const roll = normalizedRoll(rng);
-  if (roll < 0.6) return { kind: "gold", amount: rollRedChestGold(rng) };
-  if (roll < 0.8) return { kind: "item", itemId: "healing_potion", amount: 1, unidentifiedName: "？薬" };
-  if (roll < 0.95) return { kind: "item", itemId: "antidote", amount: 1, unidentifiedName: "？薬" };
+  if (roll < 0.55) return { kind: "gold", amount: rollRedChestGold(rng) };
+  if (roll < 0.75) return { kind: "item", itemId: "healing_potion", amount: 1, unidentifiedName: "？薬" };
+  if (roll < 0.88) return { kind: "item", itemId: "antidote", amount: 1, unidentifiedName: "？薬" };
   return { kind: "equipment", equipmentId: "stiletto", slot: "rightArmId",
     enhancement: rollEnhancement(STILETTO_ENHANCEMENT_RATES, rng), unidentifiedName: "？短剣" };
 }
