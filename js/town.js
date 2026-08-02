@@ -1133,7 +1133,9 @@ function purchaseSelectedCommerceItem() {
   const keeper = town.commerceKind === "donate" ? "司祭アーヴァイン" : "女主人ヘレン";
   town.messageEl.textContent = town.commerceKind === "donate"
     ? `${keeper}：女神のご加護を。${item.name}を授けましょう。`
-    : `${keeper}：はい、どうぞ。`;
+    : result.stored > 0
+      ? `${keeper}：はい、どうぞ。\n${item.name}はこれ以上持てません。超過分を倉庫へ送りました。`
+      : `${keeper}：はい、どうぞ。`;
   town.mode = "commerce";
   town.commercePointerArmedIndex = -1;
   renderCommerce({ showDescription: false });

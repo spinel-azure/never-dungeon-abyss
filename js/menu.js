@@ -1,6 +1,9 @@
 import { calculateDeckCost, DECK_SLOT_COUNT, setDeckSlot } from "../data/deck.js";
 import { getCardById } from "../data/cards.js";
 import { drawCardCanvas } from "./card-canvas.js";
+import { ITEMS, canUseItemIn } from "../data/items.js";
+import { normalizeCharacter } from "../data/classes.js";
+import { EQUIPMENT_SLOT_LABELS, canEquipInstance, equipInstance, findEquipmentDefinition, getEquipmentInstanceName, listEquipmentInstances } from "../data/equipment-inventory.js";
 
 const ACTION_FEEDBACK_MS = 260;
 const DEBUG_SEQUENCE_MS = 1000;
@@ -11,12 +14,13 @@ const OFF_MARK = "⚫";
 const DECK_PICKER_PAGE_SIZE = 5;
 
 const menu = {
-  root: null, commandRoot: null, statusPanel: null, deckPanel: null, savePanel: null, optionsPanel: null, debugPanel: null,
+  root: null, commandRoot: null, statusPanel: null, deckPanel: null, inventoryPanel: null, savePanel: null, optionsPanel: null, debugPanel: null,
   commands: [], enabledCommands: [], commandIndex: 0, statusPage: 0,
   deckCursor: 0, deckSlots: [], deckEditable: false, deckReturnView: "commands",
   deckPickerOpen: false, deckPickerCursor: 0, deckPickerItems: [], deckPickerPage: 0,
   deckPointerArmedIndex: -1, deckPickerPointerArmedIndex: -1,
   saveCursor: 0,
+  inventoryTab: "items", inventoryCursor: 0, inventoryPage: 0, inventoryMode: "list", inventorySlot: null,
   optionPages: [], optionItems: [], optionNavButtons: [], optionCursor: 0, optionPage: 0,
   debugPages: [], debugItems: [], debugNavButtons: [], debugCursor: 0, debugPage: 0, recentConfirms: [], debugArmed: false, view: "dungeon",
   compassVisible: true, readoutVisible: false, screenShakeEnabled: true,
@@ -39,6 +43,7 @@ const menu = {
   canManualSave: () => false,
   getSaveSlotSummaries: () => [],
   getCharacter: () => null,
+  getInventoryContext: () => "dungeon", onUseInventoryItem: () => ({ accepted: false }), onEquipmentChanged: () => {},
   onDeckChanged: () => {},
   openItems: () => false,
   openSkills: () => false,
@@ -50,6 +55,7 @@ export function configureMenu(options) {
   menu.statusPanel = menu.root.querySelector('[data-menu-view="status"]');
   menu.deckPanel = menu.root.querySelector('[data-menu-view="deck"]');
   menu.savePanel = menu.root.querySelector('[data-menu-view="save"]');
+  menu.inventoryPanel = menu.root.querySelector('[data-menu-view="inventory"]');
   menu.optionsPanel = menu.root.querySelector('[data-menu-view="options"]');
   menu.debugPanel = menu.root.querySelector('[data-menu-view="debug"]');
   menu.commands = [...menu.commandRoot.querySelectorAll("[data-command]")];
@@ -64,7 +70,7 @@ export function configureMenu(options) {
   menu.debugPages = [...menu.debugPanel.querySelectorAll("[data-debug-page]")];
   menu.debugNavButtons = [...menu.debugPanel.querySelectorAll("[data-debug-nav]")];
   restoreSettings();
-  renderEmptyStats(); bindCommands(); bindStatus(); bindDeck(); bindManualSave(); bindOptions(); bindDebug();
+  renderEmptyStats(); bindCommands(); bindStatus(); bindDeck(); bindInventory(); bindManualSave(); bindOptions(); bindDebug();
   updateOptionItems(); updateDebugItems(); applyAllSettings(); updateView();
 }
 
@@ -127,6 +133,7 @@ export function handleMenuInput(action) {
   if (menu.view === "commands") handleCommands(action);
   else if (menu.view === "status") handleStatus(action);
   else if (menu.view === "deck") handleDeck(action);
+  else if (menu.view === "inventory") handleInventory(action);
   else if (menu.view === "save") handleManualSave(action);
   else if (menu.view === "options") handleOptions(action);
   else if (menu.view === "debug") handleDebug(action);
@@ -158,7 +165,119 @@ function isCommandUnavailable(button) {
   return button?.dataset.unavailable === "true"
     || (button?.dataset.command === "save" && !menu.canManualSave());
 }
-function openCommand(key) { if (key === "status") { menu.view = "status"; menu.statusPage = 0; updateView(); } else if (key === "deck") { menu.view = "deck"; menu.deckEditable = false; menu.deckReturnView = "commands"; menu.deckPickerOpen = false; menu.deckCursor = 0; renderDeck(); updateView(); } else if (key === "items") menu.openItems(); else if (key === "skills") menu.openSkills(); else if (key === "options") setOptionPage(0); else if (key === "save" && menu.canManualSave()) { menu.view = "save"; menu.saveCursor = 0; renderManualSave(); updateView(); } }
+function openCommand(key) { if (key === "status") { menu.view = "status"; menu.statusPage = 0; updateView(); } else if (key === "deck") { menu.view = "deck"; menu.deckEditable = false; menu.deckReturnView = "commands"; menu.deckPickerOpen = false; menu.deckCursor = 0; renderDeck(); updateView(); } else if (key === "items") openInventory(); else if (key === "skills") menu.openSkills(); else if (key === "options") setOptionPage(0); else if (key === "save" && menu.canManualSave()) { menu.view = "save"; menu.saveCursor = 0; renderManualSave(); updateView(); } }
+
+function openInventory() {
+  Object.assign(menu, { view: "inventory", inventoryTab: "items", inventoryCursor: 0, inventoryPage: 0, inventoryMode: "list", inventorySlot: null });
+  renderInventory(); updateView();
+}
+
+function inventoryEntries() {
+  const character = menu.getCharacter();
+  if (menu.inventoryMode === "equip") {
+    return [{ instance: null, label: "装備なし" }, ...listEquipmentInstances(character)
+      .filter(instance => instance.slot === menu.inventorySlot && canEquipInstance(character, instance).accepted)
+      .map(instance => ({ instance }))];
+  }
+  if (menu.inventoryTab === "items") return ITEMS.filter(item => Number(character?.inventory?.counts?.[item.id]) > 0).map(item => ({ item, count: character.inventory.counts[item.id] }));
+  return listEquipmentInstances(character).map(instance => ({ instance }));
+}
+
+function unavailableItemReason(item, character) {
+  const context = menu.getInventoryContext();
+  if (!canUseItemIn(item, context)) return context === "town" ? "ダンジョンまたは戦闘中のみ使用可能です。" : "現在は使用できません。";
+  const heals = item.effects?.some(effect => effect.id === "heal_hp");
+  const cures = item.effects?.some(effect => effect.id === "cure_poison");
+  if (heals && !cures && character.hp >= character.maxHp) return "HPが最大です。";
+  return "";
+}
+
+function handleInventory(action) {
+  if (action === "cancel") {
+    if (menu.inventoryMode === "equip") Object.assign(menu, { inventoryMode: "list", inventoryCursor: 0, inventoryPage: 0 });
+    else { menu.view = "commands"; updateView(); return; }
+    renderInventory(); return;
+  }
+  if (menu.inventoryMode === "list" && (action === "left" || action === "right")) {
+    Object.assign(menu, { inventoryTab: menu.inventoryTab === "items" ? "equipment" : "items", inventoryCursor: 0, inventoryPage: 0 });
+    renderInventory(); return;
+  }
+  const entries = inventoryEntries();
+  if ((action === "up" || action === "down") && entries.length) {
+    menu.inventoryCursor = (menu.inventoryCursor + (action === "down" ? 1 : entries.length - 1)) % entries.length;
+    menu.inventoryPage = Math.floor(menu.inventoryCursor / 10); renderInventory(); return;
+  }
+  if (action !== "confirm") return;
+  const entry = entries[menu.inventoryCursor];
+  if (!entry) return;
+  if (menu.inventoryMode === "equip") { applyEquipmentCandidate(entry); return; }
+  if (entry.item) { Promise.resolve(menu.onUseInventoryItem(entry.item.id)).then(renderInventory); return; }
+  if (menu.getInventoryContext() === "dungeon") {
+    menu.inventoryPanel.querySelector("[data-inventory-description]").textContent = "ダンジョン探索中は装備を変更できません。"; return;
+  }
+  Object.assign(menu, { inventoryMode: "equip", inventorySlot: entry.instance.slot, inventoryCursor: 0, inventoryPage: 0 });
+  const candidates = inventoryEntries();
+  const selectedIndex = candidates.findIndex(candidate => candidate.instance?.instanceId === entry.instance.instanceId);
+  menu.inventoryCursor = Math.max(0, selectedIndex); menu.inventoryPage = Math.floor(menu.inventoryCursor / 10); renderInventory();
+}
+
+function applyEquipmentCandidate(entry) {
+  const result = equipInstance(menu.getCharacter(), menu.inventorySlot, entry.instance?.instanceId || null);
+  if (!result.accepted) { menu.inventoryPanel.querySelector("[data-inventory-description]").textContent = result.reason; return; }
+  menu.onEquipmentChanged(normalizeCharacter(result.character), { curseRevealed: result.curseRevealed });
+  Object.assign(menu, { inventoryMode: "list", inventoryCursor: 0, inventoryPage: 0 }); renderInventory();
+}
+
+function bindInventory() {
+  menu.inventoryPanel.querySelectorAll("[data-inventory-tab]").forEach(button => button.addEventListener("click", () => {
+    Object.assign(menu, { inventoryTab: button.dataset.inventoryTab, inventoryMode: "list", inventoryCursor: 0, inventoryPage: 0 }); renderInventory();
+  }));
+  menu.inventoryPanel.querySelector('[data-inventory-nav="back"]').addEventListener("click", () => {
+    if (menu.inventoryPage > 0) { menu.inventoryPage -= 1; menu.inventoryCursor = menu.inventoryPage * 10; renderInventory(); }
+    else handleInventory("cancel");
+  });
+  menu.inventoryPanel.querySelector('[data-inventory-nav="next"]').addEventListener("click", () => {
+    const pages = Math.max(1, Math.ceil(inventoryEntries().length / 10));
+    if (menu.inventoryPage < pages - 1) { menu.inventoryPage += 1; menu.inventoryCursor = menu.inventoryPage * 10; renderInventory(); }
+  });
+}
+
+function renderInventory() {
+  const panel = menu.inventoryPanel, character = menu.getCharacter(), entries = inventoryEntries();
+  const pages = Math.max(1, Math.ceil(entries.length / 10));
+  menu.inventoryPage = Math.min(menu.inventoryPage, pages - 1); menu.inventoryCursor = entries.length ? Math.min(menu.inventoryCursor, entries.length - 1) : 0;
+  panel.querySelector(".menu-title").textContent = menu.inventoryMode === "equip" ? `EQUIPMENT : ${EQUIPMENT_SLOT_LABELS[menu.inventorySlot]}` : "INVENTORY";
+  panel.querySelector(".inventory-tabs").hidden = menu.inventoryMode === "equip";
+  panel.querySelectorAll("[data-inventory-tab]").forEach(button => button.classList.toggle("is-selected", button.dataset.inventoryTab === menu.inventoryTab));
+  const equippedIds = new Set(Object.values(character?.equippedInstanceIds || {}));
+  panel.querySelector("[data-inventory-list]").replaceChildren(...entries.slice(menu.inventoryPage * 10, menu.inventoryPage * 10 + 10).map((entry, offset) => {
+    const index = menu.inventoryPage * 10 + offset, button = document.createElement("button"); button.type = "button"; button.className = "inventory-entry";
+    if (entry.item) { button.innerHTML = `<span>${entry.item.name}</span><strong>×${entry.count}</strong>`; button.classList.toggle("is-unavailable", Boolean(unavailableItemReason(entry.item, character))); }
+    else if (entry.instance) { button.innerHTML = `<span>${getEquipmentInstanceName(entry.instance)}</span><strong>${equippedIds.has(entry.instance.instanceId) ? "［E］" : ""}${entry.instance.curseKnown ? "［C］" : ""}</strong>`; button.classList.toggle("is-unavailable", menu.inventoryMode === "list" && !canEquipInstance(character, entry.instance).accepted); }
+    else button.textContent = entry.label;
+    button.classList.toggle("is-selected", index === menu.inventoryCursor);
+    button.addEventListener("click", () => { menu.inventoryCursor = index; renderInventory(); });
+    button.addEventListener("dblclick", () => handleInventory("confirm")); return button;
+  }));
+  const selected = entries[menu.inventoryCursor], description = panel.querySelector("[data-inventory-description]");
+  if (!selected) description.textContent = "所持品がありません。";
+  else if (selected.item) description.textContent = unavailableItemReason(selected.item, character) || selected.item.description;
+  else if (!selected.instance) description.textContent = "この装備部位を空にします。";
+  else { const definition = findEquipmentDefinition(selected.instance.equipmentId, selected.instance.slot); const requirements = Object.entries(definition?.requirements || {}).map(([key, value]) => `${key.toUpperCase()} ${value}以上`).join(" / "); description.textContent = `${EQUIPMENT_SLOT_LABELS[selected.instance.slot]} / ${requirements ? `装備条件：${requirements}` : "装備条件なし"}${selected.instance.curseKnown ? " / 呪われているため外せません。" : ""}`; }
+  renderInventoryComparison(panel.querySelector("[data-inventory-compare]"), selected?.instance || null);
+  panel.querySelector("[data-inventory-page]").textContent = `${menu.inventoryPage + 1}/${pages}`;
+  panel.querySelector('[data-inventory-nav="back"]').textContent = menu.inventoryPage > 0 ? "PREV" : "BACK";
+  panel.querySelector('[data-inventory-nav="next"]').disabled = menu.inventoryPage >= pages - 1;
+}
+
+function renderInventoryComparison(root, candidate) {
+  root.hidden = menu.inventoryMode !== "equip"; if (root.hidden) return;
+  const character = menu.getCharacter(), result = equipInstance(character, menu.inventorySlot, candidate?.instanceId || null);
+  if (!result.accepted) { root.textContent = result.reason; return; }
+  const preview = normalizeCharacter(result.character);
+  const values = [["maxHp", "HP"], ["maxSp", "SP"], ["str", "STR"], ["int", "INT"], ["agi", "AGI"], ["dex", "DEX"], ["luc", "LUC"]];
+  root.replaceChildren(...values.map(([key, label]) => { const stats = key !== "maxHp" && key !== "maxSp"; const before = stats ? Number(character.baseStats?.[key] || 0) + Number(character.equipmentStatBonuses?.[key] || 0) : Number(character[key] || 0); const after = stats ? Number(preview.baseStats?.[key] || 0) + Number(preview.equipmentStatBonuses?.[key] || 0) : Number(preview[key] || 0); const delta = after - before, row = document.createElement("span"); row.className = delta > 0 ? "is-up" : delta < 0 ? "is-down" : ""; row.textContent = `${label} ${before} → ${after} (${delta >= 0 ? "+" : ""}${delta})`; return row; }));
+}
 function handleStatus(action) { if (action === "cancel") { menu.view = "commands"; updateView(); } else if (action === "left") { menu.statusPage = 0; updateStatus(); } else if (action === "right") { menu.statusPage = 1; updateStatus(); } else if (action === "confirm") { menu.view = "commands"; updateView(); } }
 function statusNavigate(key) { if (key === "back") { if (menu.statusPage === 0) { menu.view = "commands"; updateView(); } else { menu.statusPage = 0; updateStatus(); } } else if (menu.statusPage === 0) { menu.statusPage = 1; updateStatus(); } else { menu.view = "commands"; updateView(); } }
 
@@ -390,10 +509,11 @@ function bindDebug() {
 function renderEmptyStats() { const rows = ["STR", "INT", "AGI", "DEX", "LUC", "DEF"].map(label => { const row = document.createElement("div"); row.className = "nde-stat-row"; const name = document.createElement("strong"); name.textContent = label; const gauge = document.createElement("span"); gauge.className = "nde-empty-gauge"; for (let index = 0; index < 30; index += 1) gauge.append(document.createElement("i")); const value = document.createElement("output"); value.textContent = "--"; row.append(name, gauge, value); return row; }); menu.root.querySelector("#ndeStatRows").replaceChildren(...rows); }
 
 function updateView() {
-  const screenOpen = ["status", "deck", "save", "options", "debug"].includes(menu.view);
+  const screenOpen = ["status", "deck", "inventory", "save", "options", "debug"].includes(menu.view);
   document.body.classList.toggle("menu-open", screenOpen); document.body.classList.toggle("command-open", menu.view === "commands");
   document.body.classList.toggle("deck-open", menu.view === "deck");
-  menu.root.hidden = !screenOpen; menu.statusPanel.hidden = menu.view !== "status"; menu.deckPanel.hidden = menu.view !== "deck"; menu.savePanel.hidden = menu.view !== "save"; menu.optionsPanel.hidden = menu.view !== "options"; menu.debugPanel.hidden = menu.view !== "debug";
+  document.body.classList.toggle("inventory-open", menu.view === "inventory");
+  menu.root.hidden = !screenOpen; menu.statusPanel.hidden = menu.view !== "status"; menu.deckPanel.hidden = menu.view !== "deck"; menu.inventoryPanel.hidden = menu.view !== "inventory"; menu.savePanel.hidden = menu.view !== "save"; menu.optionsPanel.hidden = menu.view !== "options"; menu.debugPanel.hidden = menu.view !== "debug";
   menu.commandRoot.dataset.active = String(menu.view === "commands");
   const hint = document.querySelector("#commandHint"); if (hint) hint.textContent = menu.view === "commands" ? "＊ Bボタンでメニュー非表示" : "＊ Bボタンでメニュー表示";
   updateStatus(); updatePager(); updateDebugPager(); updateSelection();

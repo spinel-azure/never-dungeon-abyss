@@ -101,6 +101,7 @@ import { collectCardStatBonuses, getCardById, hasCardEffect } from "../data/card
 import { drawCardCanvas } from "./card-canvas.js";
 import { getItem } from "../data/items.js";
 import { purchaseItem } from "../data/commerce.js";
+import { settleLootBag } from "../data/inventory.js";
 import {
   abandonQuest,
   acceptQuest,
@@ -1129,6 +1130,7 @@ import {
         "preserve_experience_on_defeat"
       );
       Object.assign(character, resolveDungeonDefeat(character, { preserveExperience }));
+      character = settleLootBag(character).character;
       lostExperience = preserveExperience ? 0 : carriedExperience;
       preservedExperience = preserveExperience ? carriedExperience : 0;
       character = recordFloorExploration(character, { depth: 0, explored: [] });
@@ -1371,6 +1373,7 @@ import {
         character,
         returnFloor
       );
+      character = settleLootBag(character).character;
       character = recordFloorExploration(character, { depth: 0, explored: [] });
       updateCharacterUi();
     }
@@ -1481,6 +1484,13 @@ import {
     root: menuScreen,
     commandRoot: dungeonCommands,
     getCharacter: () => character,
+    getInventoryContext: () => isTownOpen() ? "town" : "dungeon",
+    onUseInventoryItem: useFieldItem,
+    onEquipmentChanged: next => {
+      character = next;
+      updateCharacterUi();
+      saveGame();
+    },
     onDeckChanged: cards => {
       character = normalizeCharacter({ ...character, cards });
       updateCharacterUi();

@@ -3,7 +3,7 @@ import {
   getLevelGrowth,
   normalizeExperience
 } from "../data/growth.js";
-import { grantItem } from "../data/inventory.js";
+import { grantItemWithOverflow } from "../data/inventory.js";
 import {
   calculateDepthReturnSettlement,
   normalizeDepthReturnSettlement
@@ -122,9 +122,9 @@ export function grantEventItems(character, flagId, itemIds) {
   const next = structuredClone(character);
   const gainedItemIds = [];
   for (const itemId of itemIds || []) {
-    const result = grantItem(next.inventory, itemId, 1);
-    next.inventory = result.inventory;
-    if (result.gained > 0) gainedItemIds.push(itemId);
+    const result = grantItemWithOverflow(next, itemId, 1);
+    Object.assign(next, result.character);
+    if (result.gained > 0 || result.stored > 0) gainedItemIds.push(itemId);
   }
   next.eventFlags = { ...(next.eventFlags || {}), [flagId]: true };
   return { character: next, gainedItemIds, alreadyReceived: false };

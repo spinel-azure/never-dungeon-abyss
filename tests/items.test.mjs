@@ -67,16 +67,17 @@ test("shop and temple purchases spend gold and grant the selected item", () => {
   assert.equal(character.gold, 0);
 });
 
-test("purchases reject insufficient gold and full inventories", () => {
+test("purchases reject insufficient gold and send full-stack overflow to storage", () => {
   const poor = createInitialCharacter({ name: "TEST", job: "warrior" });
   assert.equal(purchaseItem(poor, "healing_potion").reason, "insufficientGold");
 
   const full = characterWith("healing_potion", 99);
   full.gold = 999;
   const result = purchaseItem(full, "healing_potion");
-  assert.equal(result.accepted, false);
-  assert.equal(result.reason, "maxOwned");
-  assert.equal(result.character.gold, 999);
+  assert.equal(result.accepted, true);
+  assert.equal(result.stored, 1);
+  assert.equal(result.character.gold, 979);
+  assert.deepEqual(result.character.warehouse.itemStacks, [{ itemId: "healing_potion", count: 1 }]);
 });
 
 test("torch and talisman expose dungeon environment effects", () => {

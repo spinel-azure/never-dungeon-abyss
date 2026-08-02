@@ -2,7 +2,11 @@ import { collectEquipmentBonuses, getInitialEquipment } from "./equipment.js";
 import { getDeckCostAtLevel, getLevelGrowth, normalizeExperience } from "./growth.js";
 import { createInitialCardState, normalizeCardState } from "./deck.js";
 import { collectCardStatBonuses } from "./cards.js";
-import { createInitialInventory, normalizeInventory } from "./inventory.js";
+import {
+  createInitialInventory, createInitialLootBag, createInitialWarehouse,
+  normalizeInventory, normalizeLootBag, normalizeWarehouse
+} from "./inventory.js";
+import { normalizeEquipmentInventory } from "./equipment-inventory.js";
 import { normalizeQuestState } from "./quests.js";
 import { normalizeDepthReturnSettlement } from "./experience-settlement.js";
 
@@ -58,6 +62,7 @@ export function getCharacterClass(id) {
 export function createInitialCharacter({ name, job, jobLabel } = {}) {
   const characterClass = getCharacterClass(job) || CHARACTER_CLASSES.WARRIOR;
   const equipment = getInitialEquipment(characterClass.id);
+  const equipmentCollection = normalizeEquipmentInventory(null, equipment, null, characterClass.id);
   return {
     name: String(name || "").trim().slice(0, 12),
     job: characterClass.id,
@@ -66,6 +71,8 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     deckCost: getDeckCostAtLevel(1),
     cards: createInitialCardState(),
     inventory: createInitialInventory(),
+    warehouse: createInitialWarehouse(),
+    lootBag: createInitialLootBag(),
     quests: normalizeQuestState(),
     eventFlags: {},
     gold: 0,
@@ -81,6 +88,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     cardStatBonuses: {},
     def: 0,
     equipment,
+    ...equipmentCollection,
     skillIds: [...characterClass.initialSkillIds],
     statuses: [],
     condition: "GOOD",
@@ -95,6 +103,12 @@ export function normalizeCharacter(character) {
   const level = Math.max(1, Math.min(197, Math.floor(Number(character.level) || 1)));
   const growth = getLevelGrowth(characterClass.id, level);
   const equipment = normalizeEquipment(character.equipment, characterClass.id);
+  const equipmentCollection = normalizeEquipmentInventory(
+    character.equipmentInventory,
+    equipment,
+    character.equippedInstanceIds,
+    characterClass.id
+  );
   const equipmentStatBonuses = collectEquipmentBonuses(equipment);
   const cards = normalizeCardState(character.cards, growth.deckCost);
   const cardStatBonuses = collectCardStatBonuses(cards.deckSlots);
@@ -112,6 +126,8 @@ export function normalizeCharacter(character) {
     deckCost: growth.deckCost,
     cards,
     inventory: normalizeInventory(character.inventory),
+    warehouse: normalizeWarehouse(character.warehouse),
+    lootBag: normalizeLootBag(character.lootBag),
     quests: normalizeQuestState(character.quests),
     eventFlags: character.eventFlags && typeof character.eventFlags === "object"
       ? { ...character.eventFlags }
@@ -132,6 +148,7 @@ export function normalizeCharacter(character) {
     cardStatBonuses,
     def: Math.max(0, Number(character.def) || 0),
     equipment,
+    ...equipmentCollection,
     skillIds: Array.isArray(character.skillIds)
       ? [...character.skillIds]
       : [...characterClass.initialSkillIds],
@@ -148,7 +165,10 @@ function normalizeEquipment(equipment, job) {
   if (!equipment?.rightArmId && legacyWeaponIds.has(equipment?.weaponId)) {
     merged.weaponId = initial.weaponId;
   }
-  merged.rightArmId = merged.weaponId || merged.rightArmId || initial.rightArmId;
+  const explicitlyHasRightArm = Object.prototype.hasOwnProperty.call(equipment || {}, "rightArmId");
+  merged.rightArmId = explicitlyHasRightArm
+    ? (equipment.rightArmId || null)
+    : (merged.weaponId || initial.rightArmId);
   merged.weaponId = merged.rightArmId;
   return merged;
 }
