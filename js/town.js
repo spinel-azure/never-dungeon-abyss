@@ -135,6 +135,7 @@ export function configureTown(options) {
   town.commerceList = document.querySelector("#townCommerceList");
   town.commerceGold = document.querySelector("#townCommerceGold");
   town.commerceIndex = 0;
+  town.commerceQuantity = 1;
   town.commercePointerArmedIndex = -1;
   town.commerceKind = "";
   town.commerceItems = [];
@@ -233,6 +234,7 @@ export function configureTown(options) {
     return button;
   });
   town.commerceList.addEventListener("click", event => {
+    if (town.mode !== "commerce") return;
     const button = event.target.closest("[data-commerce-index]");
     if (!button) return;
     const index = Number(button.dataset.commerceIndex);
@@ -339,6 +341,7 @@ export function handleTownInput(action) {
   }
   if (town.mode === "shopCategory") return handleShopCategoryInput(action);
   if (town.mode === "innStayConfirm") return handleInnStayConfirmationInput(action);
+  if (town.mode === "commerceQuantity") return handleCommerceQuantityInput(action);
   if (town.mode === "commerceConfirm") return handleCommerceConfirmationInput(action);
   if (town.mode === "commerce") return handleCommerceInput(action);
   if (town.mode.startsWith("quest")) return handleQuestInput(action);
@@ -1179,6 +1182,21 @@ function handleCommerceInput(action) {
 function requestCommerceConfirmation() {
   const item = town.commerceItems[town.commerceIndex];
   if (!item) return;
+  if (town.commerceKind === "sell") {
+    const owned = Math.max(0, Math.floor(Number(town.getCharacter()?.inventory?.counts?.[item.id]) || 0));
+    town.commerceQuantity = Math.max(1, Math.min(owned, town.commerceQuantity || 1));
+    if (owned > 1) {
+      town.mode = "commerceQuantity";
+      renderCommerceQuantity();
+      return;
+    }
+  }
+  showCommerceConfirmation();
+}
+
+function showCommerceConfirmation() {
+  const item = town.commerceItems[town.commerceIndex];
+  if (!item) return;
   town.mode = "commerceConfirm";
   town.messageEl.textContent = town.commerceKind === "donate"
     ? "司祭アーヴァイン：こちらでよろしいですか？\n＊Aボタン：はい　Bボタン：いいえ"
@@ -1187,8 +1205,39 @@ function requestCommerceConfirmation() {
     : town.commerceKind === "storageDeposit"
       ? "女主人ヘレン：これを預かればいいのね？\n＊Aボタン：はい　Bボタン：いいえ"
     : town.commerceKind === "sell"
-      ? `女主人ヘレン：${item.sellPrice}Gで買い取るわ。これでいい？\n＊Aボタン：はい　Bボタン：いいえ`
+      ? `女主人ヘレン：${item.sellPrice}G ×${town.commerceQuantity || 1}、合計${item.sellPrice * (town.commerceQuantity || 1)}Gで買い取るわ。これでいい？\n＊Aボタン：はい　Bボタン：いいえ`
       : "女主人ヘレン：これでいい？\n＊Aボタン：はい　Bボタン：いいえ";
+}
+
+function handleCommerceQuantityInput(action) {
+  const item = town.commerceItems[town.commerceIndex];
+  if (!item) return true;
+  const owned = Math.max(1, Math.floor(Number(town.getCharacter()?.inventory?.counts?.[item.id]) || 1));
+  if (["up", "down", "left", "right"].includes(action)) {
+    const amount = action === "up" ? 1 : action === "down" ? -1 : action === "right" ? 10 : -10;
+    town.commerceQuantity = Math.max(1, Math.min(owned, town.commerceQuantity + amount));
+    town.playSe("cursorMove");
+    renderCommerceQuantity();
+    return true;
+  }
+  if (action === "confirm") {
+    town.playSe("confirm");
+    showCommerceConfirmation();
+    return true;
+  }
+  if (action === "cancel") {
+    town.playSe("cancel");
+    town.mode = "commerce";
+    town.messageEl.textContent = "女主人ヘレン：あら、残念。";
+    return true;
+  }
+  return true;
+}
+
+function renderCommerceQuantity() {
+  const item = town.commerceItems[town.commerceIndex];
+  const owned = Math.max(1, Math.floor(Number(town.getCharacter()?.inventory?.counts?.[item?.id]) || 1));
+  town.messageEl.textContent = `女主人ヘレン：いくつ売るのかしら？\n売却数 ${town.commerceQuantity} / ${owned}　合計 ${item.sellPrice * town.commerceQuantity}G\n＊↑↓：1個　←→：10個　Aボタン：決定　Bボタン：戻る`;
 }
 
 function handleCommerceConfirmationInput(action) {
@@ -1218,7 +1267,7 @@ function purchaseSelectedCommerceItem() {
     : depositing
       ? town.onDepositItem(item.id)
     : selling
-    ? town.onSellItem(item.id)
+    ? town.onSellItem(item.id, town.commerceQuantity || 1)
     : town.commerceKind === "buyEquipment"
       ? town.onPurchaseEquipment(item.id)
       : town.onPurchaseItem(item.id);
@@ -1241,7 +1290,7 @@ function purchaseSelectedCommerceItem() {
     : depositing
       ? `${keeper}：${item.name}を倉庫で預かったわ。`
     : selling
-      ? `${keeper}：${item.name}を${result.value}Gで買い取ったわ。`
+      ? `${keeper}：${item.name}を${result.quantity}個、${result.value}Gで買い取ったわ。`
     : result.stored > 0
       ? `${keeper}：はい、どうぞ。\n${item.name}はこれ以上持てません。超過分を倉庫へ送りました。`
       : `${keeper}：はい、どうぞ。`;
@@ -1252,6 +1301,7 @@ function purchaseSelectedCommerceItem() {
     town.commerceIndex = Math.max(0, Math.min(town.commerceIndex, town.commerceItems.length - 1));
   }
   town.commercePointerArmedIndex = -1;
+  town.commerceQuantity = 1;
   renderCommerce({ showDescription: false });
   town.onStateChanged();
 }

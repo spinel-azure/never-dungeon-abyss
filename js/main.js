@@ -1085,9 +1085,9 @@ import {
     return { ...result, character };
   }
 
-  function sellTownItem(itemId) {
+  function sellTownItem(itemId, amount = 1) {
     if (!character) return { accepted: false, reason: "noCharacter" };
-    const result = sellItem(character, itemId);
+    const result = sellItem(character, itemId, { amount });
     if (!result.accepted) return result;
     character = result.character;
     updateCharacterUi();

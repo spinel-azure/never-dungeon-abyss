@@ -3,7 +3,10 @@ import { getCardById } from "../data/cards.js";
 import { drawCardCanvas } from "./card-canvas.js";
 import { ITEMS, canUseItemIn } from "../data/items.js";
 import { normalizeCharacter } from "../data/classes.js";
-import { EQUIPMENT_SLOT_LABELS, canEquipInstance, equipInstance, findEquipmentDefinition, getEquipmentInstanceName, listEquipmentInstances } from "../data/equipment-inventory.js";
+import { EQUIPMENT_SLOT_LABELS, canEquipInstance, equipInstance, findEquipmentDefinition, getEquipmentInstanceDefinition, getEquipmentInstanceName, listEquipmentInstances } from "../data/equipment-inventory.js";
+import { collectStats } from "../combat/collect-stats.js";
+import { deriveDetailStats } from "../combat/derive-detail-stats.js";
+import { getWeapon, getWeaponType } from "../data/weapons.js";
 
 const ACTION_FEEDBACK_MS = 260;
 const DEBUG_SEQUENCE_MS = 1000;
@@ -298,7 +301,7 @@ function renderInventory() {
   if (!selected) description.textContent = "所持品がありません。";
   else if (selected.item) description.textContent = unavailableItemReason(selected.item, character) || selected.item.description;
   else if (!selected.instance) description.textContent = "この装備部位を空にします。";
-  else { const definition = findEquipmentDefinition(selected.instance.equipmentId, selected.instance.slot); const requirements = Object.entries(definition?.requirements || {}).map(([key, value]) => `${key.toUpperCase()} ${value}以上`).join(" / "); description.textContent = `${EQUIPMENT_SLOT_LABELS[selected.instance.slot]} / ${requirements ? `装備条件：${requirements}` : "装備条件なし"}${selected.instance.curseKnown ? " / 呪われているため外せません。" : ""}`; }
+  else { const definition = getEquipmentInstanceDefinition(selected.instance); const requirements = Object.entries(definition?.requirements || {}).map(([key, value]) => `${key.toUpperCase()} ${value}以上`).join(" / "); const effects = equipmentEffectLabels(definition); description.textContent = `${EQUIPMENT_SLOT_LABELS[selected.instance.slot]} / ${effects.join(" / ")}${effects.length ? " / " : ""}${requirements ? `装備条件：${requirements}` : "装備条件なし"}${selected.instance.curseKnown ? " / 呪われているため外せません。" : ""}`; }
   renderInventoryComparison(panel.querySelector("[data-inventory-compare]"), selected?.instance || null);
   panel.querySelector("[data-inventory-page]").textContent = `${menu.inventoryPage + 1}/${pages}`;
   const backButton = panel.querySelector('[data-inventory-nav="back"]');
@@ -316,8 +319,37 @@ function renderInventoryComparison(root, candidate) {
   const character = menu.getCharacter(), result = equipInstance(character, slot, candidate?.instanceId || null);
   if (!result.accepted) { root.textContent = result.reason; return; }
   const preview = normalizeCharacter(result.character);
-  const values = [["maxHp", "HP"], ["maxSp", "SP"], ["str", "STR"], ["int", "INT"], ["agi", "AGI"], ["dex", "DEX"], ["luc", "LUC"]];
-  root.replaceChildren(...values.map(([key, label]) => { const stats = key !== "maxHp" && key !== "maxSp"; const before = stats ? Number(character.baseStats?.[key] || 0) + Number(character.equipmentStatBonuses?.[key] || 0) : Number(character[key] || 0); const after = stats ? Number(preview.baseStats?.[key] || 0) + Number(preview.equipmentStatBonuses?.[key] || 0) : Number(preview[key] || 0); const delta = after - before, row = document.createElement("span"); row.className = delta > 0 ? "is-up" : delta < 0 ? "is-down" : ""; row.textContent = `${label} ${before} → ${after} (${delta >= 0 ? "+" : ""}${delta})`; return row; }));
+  const beforeStats = collectStats(character), afterStats = collectStats(preview);
+  const beforeCombat = equipmentCombatValues(character), afterCombat = equipmentCombatValues(preview);
+  const values = [
+    ["ATK", beforeCombat.attack, afterCombat.attack], ["DEF", beforeStats.def, afterStats.def],
+    ["HITS", beforeCombat.hits, afterCombat.hits], ["PEN", beforeCombat.penetration, afterCombat.penetration, "%"],
+    ["HP", character.maxHp, preview.maxHp], ["SP", character.maxSp, preview.maxSp],
+    ["STR", beforeStats.str, afterStats.str], ["INT", beforeStats.int, afterStats.int],
+    ["AGI", beforeStats.agi, afterStats.agi], ["DEX", beforeStats.dex, afterStats.dex], ["LUC", beforeStats.luc, afterStats.luc]
+  ];
+  root.replaceChildren(...values.map(([label, before, after, suffix = ""]) => { const delta = after - before, row = document.createElement("span"); row.className = delta > 0 ? "is-up" : delta < 0 ? "is-down" : ""; row.textContent = `${label} ${before}${suffix} → ${after}${suffix} (${delta >= 0 ? "+" : ""}${delta}${suffix})`; return row; }));
+}
+
+function equipmentCombatValues(character) {
+  const stats = collectStats(character);
+  const weaponId = character?.equipment?.rightArmId || character?.equipment?.weaponId;
+  const weapon = weaponId
+    ? getWeapon(weaponId, character?.equipment?.rightArmEnhancement || 0)
+    : { attack: 0, type: "longsword", defensePenetration: 0 };
+  const type = getWeaponType(weapon?.type);
+  return { attack: deriveDetailStats(character).physicalAttack, hits: type.hitCount || 1, penetration: Math.round(((type.defensePenetration || 0) + (weapon.defensePenetration || 0) + (stats.defensePenetration || 0)) * 100) };
+}
+
+function equipmentEffectLabels(definition) {
+  if (!definition) return [];
+  const labels = [];
+  if (Number.isFinite(definition.attack)) labels.push(`ATK +${definition.attack}`);
+  if (definition.type) labels.push(`${getWeaponType(definition.type).hitCount || 1}回攻撃`);
+  if (Number(definition.defensePenetration) > 0) labels.push(`DEF貫通 ${Math.round(definition.defensePenetration * 100)}%`);
+  if (Number(definition.poisonChance) > 0) labels.push(`毒付与 ${Math.round(definition.poisonChance * 100)}%`);
+  for (const [key, value] of Object.entries(definition.statBonuses || {})) labels.push(`${key.toUpperCase()} ${value >= 0 ? "+" : ""}${value}`);
+  return labels;
 }
 function handleStatus(action) { if (action === "cancel") { menu.view = "commands"; updateView(); } else if (action === "left") { menu.statusPage = 0; updateStatus(); } else if (action === "right") { menu.statusPage = 1; updateStatus(); } else if (action === "confirm") { menu.view = "commands"; updateView(); } }
 function statusNavigate(key) { if (key === "back") { if (menu.statusPage === 0) { menu.view = "commands"; updateView(); } else { menu.statusPage = 0; updateStatus(); } } else if (menu.statusPage === 0) { menu.statusPage = 1; updateStatus(); } else { menu.view = "commands"; updateView(); } }

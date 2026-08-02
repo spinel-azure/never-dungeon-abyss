@@ -200,6 +200,12 @@ test("detail status attack power includes weapon and equipment stats", () => {
   assert.equal(mage.spellAttack, 5);
 });
 
+test("detail status includes the dagger DEX damage contribution", () => {
+  const thief = createInitialCharacter({ name: "TEST", job: "thief" });
+  const stats = collectStats(thief);
+  assert.equal(deriveDetailStats(thief).physicalAttack, 5 + stats.str * 0.5 + stats.dex * 0.25);
+});
+
 test("collected main stats are capped at 30", () => {
   const stats = collectStats({
     baseStats: { str: 29, int: 30, agi: 40, dex: 5, luc: 5 },

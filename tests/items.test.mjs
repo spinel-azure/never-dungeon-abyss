@@ -101,6 +101,18 @@ test("shop sells one consumable for half its purchase price", () => {
   assert.equal(sellItem(createInitialCharacter({ name: "TEST", job: "warrior" }), "auto_walker").reason, "notOwned");
 });
 
+test("shop can sell several stacked consumables at once", () => {
+  const character = characterWith("slime_jelly", 6);
+  character.gold = 10;
+  const result = sellItem(character, "slime_jelly", { amount: 4 });
+  assert.equal(result.accepted, true);
+  assert.equal(result.quantity, 4);
+  assert.equal(result.unitValue, 5);
+  assert.equal(result.value, 20);
+  assert.equal(result.character.gold, 30);
+  assert.equal(getItemCount(result.character.inventory, "slime_jelly"), 2);
+});
+
 test("torch and talisman expose dungeon environment effects", () => {
   const torchUser = characterWith("guiding_torch");
   const torch = resolveFieldItemUse({

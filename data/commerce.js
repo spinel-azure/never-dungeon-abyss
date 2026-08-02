@@ -39,22 +39,25 @@ export function purchaseEquipment(character, equipmentId) {
   };
 }
 
-export function sellItem(character, itemId, { price } = {}) {
+export function sellItem(character, itemId, { price, amount = 1 } = {}) {
   if (!character) return { accepted: false, reason: "noCharacter", character };
   const item = getItem(itemId);
   if (!item) return { accepted: false, reason: "unknownItem", character };
-  if (getItemCount(character.inventory, item.id) <= 0) return { accepted: false, reason: "notOwned", character, item };
-  const value = Math.max(0, Math.floor(Number(price ?? item.sellPrice ?? item.buyPrice / 2) || 0));
-  if (value <= 0) return { accepted: false, reason: "notSellable", character, item };
+  const owned = getItemCount(character.inventory, item.id);
+  if (owned <= 0) return { accepted: false, reason: "notOwned", character, item };
+  const quantity = Math.min(owned, Math.max(1, Math.floor(Number(amount) || 1)));
+  const unitValue = Math.max(0, Math.floor(Number(price ?? item.sellPrice ?? item.buyPrice / 2) || 0));
+  if (unitValue <= 0) return { accepted: false, reason: "notSellable", character, item };
+  const value = unitValue * quantity;
   return {
     accepted: true,
     reason: "",
-    item,
+    item, quantity, unitValue,
     value,
     character: {
       ...character,
       gold: Math.max(0, Math.floor(Number(character.gold) || 0)) + value,
-      inventory: consumeItem(character.inventory, item.id, 1).inventory
+      inventory: consumeItem(character.inventory, item.id, quantity).inventory
     }
   };
 }
