@@ -3,7 +3,8 @@ import {
   formatCompactQuickName,
   formatQuickJob,
   formatQuickLevel,
-  formatQuickMoney
+  formatQuickMoney,
+  isCriticalHp
 } from "../data/quick-status.js";
 import {
   QUESTS,
@@ -906,6 +907,9 @@ function renderTransferCircle() {
 function renderEntranceSelection() {
   town.entranceButtons.forEach((button, index) => {
     button.classList.toggle("is-selected", index === town.entranceIndex && index < 3);
+    const unavailable = button.dataset.entranceCommand === "circle" && !town.transferUnlocked;
+    button.classList.toggle("is-unavailable", unavailable);
+    button.setAttribute("aria-disabled", String(unavailable));
   });
 }
 
@@ -1455,10 +1459,12 @@ export function renderCharacterStatus() {
     if (element) element.textContent = value;
   });
   const hpMax = document.querySelector("#quickHpMax");
+  const hpCurrent = document.querySelector("#quickHpCurrent");
   const spMax = document.querySelector("#quickSpMax");
   const quickNameElement = document.querySelector("#quickName");
   const quickNameCompact = document.querySelector("#quickNameCompact");
   hpMax?.classList.toggle("vital-max-bonus", hasMaxVitalBonus(character, "maxHp"));
+  hpCurrent?.classList.toggle("vital-critical", isCriticalHp(character?.hp, character?.maxHp));
   spMax?.classList.toggle("vital-max-bonus", hasMaxVitalBonus(character, "maxSp"));
   quickNameElement?.classList.toggle("condition-poison", character?.condition === "POISON");
   quickNameCompact?.classList.toggle("condition-poison", character?.condition === "POISON");

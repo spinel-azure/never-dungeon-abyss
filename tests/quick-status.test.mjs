@@ -5,7 +5,8 @@ import {
   formatCompactQuickName,
   formatQuickJob,
   formatQuickLevel,
-  formatQuickMoney
+  formatQuickMoney,
+  isCriticalHp
 } from "../data/quick-status.js";
 
 test("quick status keeps separate Japanese and English job labels", () => {
@@ -34,4 +35,11 @@ test("quick status money is nonnegative and comma-separated", () => {
   assert.equal(formatQuickMoney(10000), "10,000");
   assert.equal(formatQuickMoney(1234567.9), "1,234,567");
   assert.equal(formatQuickMoney(-5), "0");
+});
+
+test("current HP becomes critical only below ten percent", () => {
+  assert.equal(isCriticalHp(9, 100), true);
+  assert.equal(isCriticalHp(10, 100), false);
+  assert.equal(isCriticalHp(0, 47), true);
+  assert.equal(isCriticalHp(1, 0), false);
 });

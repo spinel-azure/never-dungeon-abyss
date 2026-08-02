@@ -68,3 +68,4 @@ body.town-active.command-open .guild-registration{display:none}
 body.town-active.menu-open .town-screen{display:none}
 @media(max-width:680px){.guild-registration{grid-template-columns:1fr 1fr;padding:7px}.guild-registration button{grid-column:1/-1}.town-facility-badge{font-size:11px}body.town-active .controls{min-height:128px}}
 @media(max-height:700px){.guild-registration{padding:5px}}
+.dungeon-commands[data-entrance-active="true"] button.is-unavailable{color:#716e68;background:#0b0b0a;border-color:#292822;opacity:1}.dungeon-commands[data-entrance-active="true"] button.is-unavailable.is-selected{border-color:#b0f4ff;background:#14313a;box-shadow:0 0 12px rgba(120,230,255,.8),inset 0 0 8px rgba(120,230,255,.25)}

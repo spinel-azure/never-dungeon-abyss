@@ -100,6 +100,7 @@ import { grantCard } from "../data/deck.js";
 import { collectCardStatBonuses, getCardById, hasCardEffect } from "../data/cards.js";
 import { drawCardCanvas } from "./card-canvas.js";
 import { getItem } from "../data/items.js";
+import { isCriticalHp } from "../data/quick-status.js";
 import { purchaseItem } from "../data/commerce.js";
 import { settleLootBag } from "../data/inventory.js";
 import {
@@ -758,7 +759,8 @@ import {
       if (character) {
         const hpClass = hasMaxVitalBonus(character, "maxHp") ? "vital-max-bonus" : "";
         const spClass = hasMaxVitalBonus(character, "maxSp") ? "vital-max-bonus" : "";
-        vitals.innerHTML = `<span>HP ${character.hp} / <strong class="${hpClass}">${character.maxHp}</strong></span><span>SP ${character.sp} / <strong class="${spClass}">${character.maxSp}</strong></span><span>DECK COST : ${character.deckCost}</span>`;
+        const currentHpClass = isCriticalHp(character.hp, character.maxHp) ? "vital-critical" : "";
+        vitals.innerHTML = `<span>HP <strong class="${currentHpClass}">${character.hp}</strong> / <strong class="${hpClass}">${character.maxHp}</strong></span><span>SP ${character.sp} / <strong class="${spClass}">${character.maxSp}</strong></span><span>DECK COST : ${character.deckCost}</span>`;
       } else {
         vitals.innerHTML = "<span>HP ---- / ----</span><span>SP ---- / ----</span><span>DECK COST : --</span>";
       }

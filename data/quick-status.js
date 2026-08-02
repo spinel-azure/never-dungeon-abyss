@@ -33,3 +33,9 @@ export function formatQuickLevel(level) {
 export function formatQuickMoney(gold) {
   return Math.max(0, Math.floor(Number(gold) || 0)).toLocaleString("en-US");
 }
+
+export function isCriticalHp(hp, maxHp) {
+  const current = Math.max(0, Number(hp) || 0);
+  const maximum = Math.max(0, Number(maxHp) || 0);
+  return maximum > 0 && current / maximum < 0.1;
+}
