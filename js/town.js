@@ -151,7 +151,8 @@ export function configureTown(options) {
     "images/background/town_01b.avif",
     "images/background/town_01c.avif",
     ...TOWN_FACILITIES.map(facility => facility.background).filter(Boolean),
-    "images/background/circle.avif"
+    "images/background/circle.avif",
+    "images/background/town_02b.avif"
     ,"images/background/guild_quest.avif"
   ].map(src => {
     const image = new Image();
@@ -160,6 +161,13 @@ export function configureTown(options) {
     image.decode().catch(() => {});
     return image;
   });
+  {
+    const image = new Image();
+    image.decoding = "async";
+    image.src = "images/npc/NPC_18.avif";
+    image.decode().catch(() => {});
+    town.portraitPreloads.push(image);
+  }
 
   updateRegistrationLanguage();
   town.jobSelect.replaceChildren(...CHARACTER_JOBS.map(job => {

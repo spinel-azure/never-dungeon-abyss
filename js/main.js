@@ -82,7 +82,7 @@ import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceName } from "../data/equipment-inventory.js";
 import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
 import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js";
-import { awardBattleExperience, createInnStableRecovery, createTempleRevival, getInnStayFee, grantEventItems, resolveDungeonDefeat, resolveInnStay, unlockGuildRequest } from "./character-services.js";
+import { awardBattleExperience, createTempleRevival, getInnStayFee, grantEventItems, resolveDungeonDefeat, resolveInnStableStay, resolveInnStay, unlockGuildRequest } from "./character-services.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { resolveTreasureTrap } from "../combat/resolve-trap.js";
 import { collectStats } from "../combat/collect-stats.js";
@@ -1310,10 +1310,8 @@ import {
     if (!character || sceneTransitionRunning) return;
     const fee = getInnStayFee(character);
     if (Math.max(0, Math.floor(Number(character.gold) || 0)) < fee) {
-      Object.assign(character, createInnStableRecovery(character));
       say("女将ヨハンナ：おや。持ち合わせがないのかい？夜露がしのげればいいなら、馬小屋を使っておくれ。");
-      updateCharacterUi();
-      saveGame();
+      await stayAtInnStable();
       return;
     }
     character.gold -= fee;
@@ -1357,6 +1355,69 @@ import {
       }
       if (worldLocation === "town" && getTownState().facilityId === "inn") {
         startBgm("townFacilities");
+      }
+    };
+    if (result.hadPendingSettlement) {
+      showExperienceSettlement(result.settlement, finishPresentation);
+    } else {
+      finishPresentation();
+    }
+  }
+
+  async function stayAtInnStable() {
+    sceneTransitionRunning = true;
+    stopBgm();
+    sceneTransition.hidden = false;
+    sceneTransition.classList.remove("is-black", "is-revealing", "is-defeat");
+    sceneTransition.classList.add("is-running", "is-inn-stay");
+    sceneTransitionTitle.hidden = true;
+    document.body.classList.add("scene-transition-active");
+    void sceneTransition.offsetWidth;
+    requestAnimationFrame(() => sceneTransition.classList.add("is-black"));
+    await Promise.all([wait(6000), playSeSequence("goodNight", 1)]);
+
+    const stableBackground = document.getElementById("townBackground");
+    const stablePortrait = document.getElementById("townPortrait");
+    const facilityBadge = document.getElementById("townFacilityName");
+    stableBackground.src = "images/background/town_02b.avif";
+    stableBackground.alt = "馬小屋の風景";
+    stableBackground.hidden = false;
+    stablePortrait.src = "images/npc/NPC_18.avif";
+    stablePortrait.alt = "馬小屋の住人";
+    stablePortrait.hidden = false;
+    facilityBadge.textContent = "馬小屋";
+    facilityBadge.hidden = false;
+
+    sceneTransition.classList.remove("is-inn-stay");
+    sceneTransition.classList.add("is-revealing");
+    sceneTransition.classList.remove("is-black");
+    await Promise.all([
+      wait(2500),
+      (async () => {
+        await playSeSequence("horseVoice", 1);
+        await playSeSequence("roosterVoice", 1);
+      })()
+    ]);
+    sceneTransition.classList.remove("is-running", "is-revealing", "is-defeat");
+    sceneTransition.hidden = true;
+    document.body.classList.remove("scene-transition-active");
+    sceneTransitionRunning = false;
+
+    const result = resolveInnStableStay(character);
+    Object.assign(character, result.changes);
+    updateCharacterUi();
+    saveGame();
+
+    const finishPresentation = async () => {
+      const deckBonus = result.deckCostGained > 0
+        ? `、特別ボーナス DECK COST+${result.deckCostGained}`
+        : "";
+      if (result.levelsGained > 0) {
+        const levelUpPresentation = showLevelUpEffect();
+        say(`LVが上がった！HP+${result.hpGained}、SP+${result.spGained}${deckBonus}`);
+        await levelUpPresentation;
+      } else {
+        say("馬小屋で夜露をしのぎ、少し身体を休めた。");
       }
     };
     if (result.hadPendingSettlement) {

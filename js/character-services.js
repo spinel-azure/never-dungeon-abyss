@@ -96,6 +96,25 @@ export function createInnStableRecovery(character) {
   };
 }
 
+export function resolveInnStableStay(character) {
+  const result = resolveInnStay(character);
+  const recovery = createInnStableRecovery({
+    ...character,
+    maxHp: result.changes.maxHp,
+    maxSp: result.changes.maxSp
+  });
+  return {
+    ...result,
+    changes: {
+      ...result.changes,
+      ...recovery,
+      statuses: [...(character?.statuses || [])],
+      condition: character?.condition || "GOOD",
+      alive: character?.alive !== false
+    }
+  };
+}
+
 function getVitalBonus(character, key) {
   const equipment = Math.max(
     0,

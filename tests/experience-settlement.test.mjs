@@ -9,7 +9,7 @@ import {
 import { GODDESS_GRACE_CARD_ID } from "../data/cards.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { grantCard, setDeckSlot } from "../data/deck.js";
-import { resolveInnStay } from "../js/character-services.js";
+import { resolveInnStableStay, resolveInnStay } from "../js/character-services.js";
 
 test("depth return bonus uses integer floor division for specified examples", () => {
   const examples = [
@@ -126,4 +126,20 @@ test("return floor survives save normalization and is settled exactly once at th
   const second = resolveInnStay(settledCharacter);
   assert.equal(second.gainedExperience, 0);
   assert.equal(second.settlement.depthBonusExp, 0);
+});
+
+test("stable lodging settles experience but only restores thirty percent of HP and SP", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "thief" });
+  character.hp = 1;
+  character.sp = 0;
+  character.statuses = [{ statusId: "poison", remainingTurns: 3 }];
+  character.condition = "POISON";
+  character.carriedExperience = 10;
+  const result = resolveInnStableStay(character);
+  assert.equal(result.gainedExperience, 10);
+  assert.equal(result.changes.carriedExperience, 0);
+  assert.ok(result.changes.hp < result.changes.maxHp);
+  assert.ok(result.changes.sp < result.changes.maxSp);
+  assert.deepEqual(result.changes.statuses, character.statuses);
+  assert.equal(result.changes.condition, "POISON");
 });
