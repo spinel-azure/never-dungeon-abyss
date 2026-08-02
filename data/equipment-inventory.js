@@ -62,6 +62,14 @@ export function getEquipmentInstanceName(instance) {
   return `${definition.name}${Number(instance?.enhancement) > 0 ? `＋${instance.enhancement}` : ""}`;
 }
 
+export function getEquipmentInstanceDefinition(instance) {
+  const definition = findEquipmentDefinition(instance?.equipmentId, instance?.slot);
+  if (!definition) return null;
+  const enhancement = Math.max(0, Math.min(3, Math.floor(Number(instance?.enhancement) || 0)));
+  const penetration = definition.penetrationByEnhancement?.[enhancement];
+  return penetration == null ? definition : { ...definition, defensePenetration: penetration };
+}
+
 export function findEquipmentDefinition(equipmentId, slot) {
   if (!equipmentId) return null;
   if (slot) {
@@ -122,6 +130,9 @@ export function grantEquipmentInstance(character, equipmentId, slot, options = {
 export function canEquipInstance(character, instance) {
   const definition = findEquipmentDefinition(instance?.equipmentId, instance?.slot);
   if (!definition) return { accepted: false, reason: "装備品データが見つかりません。" };
+  if (definition.allowedJobs?.length && !definition.allowedJobs.includes(character?.job)) {
+    return { accepted: false, reason: "この職業では装備できません。" };
+  }
   for (const [stat, required] of Object.entries(definition.requirements || {})) {
     const current = Math.floor(Number(character?.baseStats?.[stat]) || 0);
     if (current < Number(required)) return { accepted: false, reason: `装備条件：${stat.toUpperCase()} ${required}以上（現在値 ${current}）` };
@@ -142,7 +153,10 @@ export function equipInstance(character, slot, instanceId) {
   const definition = instance ? findEquipmentDefinition(instance.equipmentId, slot) : null;
   const equippedInstanceIds = { ...(character.equippedInstanceIds || {}), [slot]: instance?.instanceId || null };
   const equipment = { ...(character.equipment || {}), [slot]: definition?.id || null };
-  if (slot === "rightArmId") equipment.weaponId = equipment.rightArmId;
+  if (slot === "rightArmId") {
+    equipment.weaponId = equipment.rightArmId;
+    equipment.rightArmEnhancement = Math.max(0, Math.floor(Number(instance?.enhancement) || 0));
+  }
   if (definition?.twoHanded) {
     const shieldId = equippedInstanceIds.leftArmId;
     const shield = character.equipmentInventory?.instances?.find(entry => entry.instanceId === shieldId);

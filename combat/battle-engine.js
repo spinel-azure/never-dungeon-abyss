@@ -106,7 +106,10 @@ export function createPlayerAction(player, command = {}, enemy = null) {
     return {
       ok: true,
       spCost: 0,
-      action: createNormalAttack({ weaponId: player.equipment?.weaponId })
+      action: createNormalAttack({
+        weaponId: player.equipment?.weaponId,
+        weaponEnhancement: player.equipment?.rightArmEnhancement
+      })
     };
   }
   if (command.type === "guard") return { ok: true, spCost: 0, action: createGuardAction() };
@@ -151,7 +154,10 @@ export function createPlayerAction(player, command = {}, enemy = null) {
   if (!skill || !player.skillIds?.includes(skill.id)) return { ok: false, reason: "unknownSkill" };
   if (player.sp < skill.spCost) return { ok: false, reason: "insufficientSp" };
   const action = skill.actionType === "physicalAttack"
-    ? createSkillAttack(skill, { weaponId: player.equipment?.weaponId })
+    ? createSkillAttack(skill, {
+      weaponId: player.equipment?.weaponId,
+      weaponEnhancement: player.equipment?.rightArmEnhancement
+    })
     : { ...skill };
   return { ok: true, spCost: skill.spCost, action };
 }
@@ -208,6 +214,8 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
         target.hp = 0;
         target.alive = false;
         target.experienceReward = 0;
+        target.dropItemId = null;
+        target.noDrop = true;
       }
     }
     battle.log.push(`${actor.name}は${action.item.name}を使った。`);

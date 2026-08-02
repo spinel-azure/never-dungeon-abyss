@@ -9,7 +9,7 @@ import {
   restorePresence, suppressPresence
 } from "../js/presence.js";
 import { grantEventItems, unlockGuildRequest } from "../js/character-services.js";
-import { purchaseItem, sellItem } from "../data/commerce.js";
+import { purchaseEquipment, purchaseItem, sellItem } from "../data/commerce.js";
 
 function characterWith(itemId, amount = 1) {
   const character = createInitialCharacter({ name: "TEST", job: "warrior" });
@@ -21,6 +21,15 @@ test("legacy characters receive an empty normalized inventory", () => {
   const character = createInitialCharacter({ name: "TEST", job: "warrior" });
   delete character.inventory;
   assert.deepEqual(normalizeCharacter(character).inventory, { counts: {} });
+});
+
+test("shop equipment costs 100G and creates an individual weapon instance", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.gold = 100;
+  const result = purchaseEquipment(character, "iron_greatsword");
+  assert.equal(result.accepted, true);
+  assert.equal(result.character.gold, 0);
+  assert.equal(result.character.equipmentInventory.instances.at(-1).equipmentId, "iron_greatsword");
 });
 
 test("inventory respects the per-item ownership limit", () => {

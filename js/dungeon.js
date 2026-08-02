@@ -66,7 +66,7 @@ export function resetExplored() {
   }
 }
 
-export function buildBoundaryWallMap() {
+export function buildBoundaryWallMap(depth = 1, rng = Math.random) {
   const { x: startX, y: startY } = startPosition;
   resetAllWalls();
   carvePerfectMaze();
@@ -78,7 +78,7 @@ export function buildBoundaryWallMap() {
   }
   placeStairs();
   placeNpc();
-  placeTreasures();
+  placeTreasures(depth, rng);
   placeNormalDoors(NORMAL_DOOR_COUNT);
 }
 
@@ -165,8 +165,9 @@ export function discoverTreasureAt(x, y) {
   return true;
 }
 
-export function placeTreasures() {
+export function placeTreasures(depth = 1, rng = Math.random) {
   resetTreasures();
+  if (Math.floor(Number(depth) || 1) > 4) return;
   const { x: startX, y: startY } = startPosition;
   const distances = makeDistanceMap(startX, startY);
   const blocked = [];
@@ -176,7 +177,9 @@ export function placeTreasures() {
     }
   }
 
-  for (const type of ["red", "black", "gold"]) {
+  const count = 1 + Math.floor(Math.max(0, Math.min(0.999999, Number(rng()) || 0)) * 3);
+  for (let placed = 0; placed < count; placed += 1) {
+    const type = "red";
     const candidates = [];
     for (let y = 0; y < MAP_H; y++) {
       for (let x = 0; x < MAP_W; x++) {
@@ -188,7 +191,7 @@ export function placeTreasures() {
         candidates.push({ x, y });
       }
     }
-    const selected = shuffled(candidates)[0];
+    const selected = shuffled(candidates, rng)[0];
     if (!selected) continue;
     cells[selected.y][selected.x].treasure = type;
     cells[selected.y][selected.x].treasureTrapId = rollTreasureTrap(type);
@@ -371,10 +374,10 @@ export function countReachableCells(startX, startY, blockedCells = null) {
   return seen.size;
 }
 
-export function shuffled(items) {
+export function shuffled(items, rng = Math.random) {
   const result = items.slice();
   for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(rng() * (i + 1));
     [result[i], result[j]] = [result[j], result[i]];
   }
   return result;

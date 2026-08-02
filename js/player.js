@@ -39,6 +39,7 @@ const hooks = {
   playTreasureOpening: (_type, onComplete) => onComplete(),
   hideTreasure: () => {},
   resolveTreasureTrap: () => ({ message: "" }),
+  awardTreasure: () => ({ message: "中には何も入っていなかった！" }),
   returnToTown: () => {},
   beginBattle: () => {},
   playNpcVoice: () => {},
@@ -482,7 +483,10 @@ function confirmTreasureEvent() {
     state.overlayEvent = null;
     hooks.hideTreasure();
     const trapMessage = trapResult.message ? `${trapResult.message}\n` : "";
-    if (event.treasureType === "black") {
+    if (event.treasureType === "red") {
+      const reward = hooks.awardTreasure(event.treasureType) || {};
+      hooks.say(`${trapMessage}${reward.message || "戦利品をロット袋へ入れた。"}`);
+    } else if (event.treasureType === "black") {
       hooks.say(`${trapMessage}宝箱はミミックだった！（未実装）`);
     } else if (event.treasureType === "gold") {
       hooks.say(`${trapMessage}中にはレアアイテムが…入っていなかった！`);

@@ -83,6 +83,10 @@ export function resolveInnStay(character) {
   };
 }
 
+export function getInnStayFee(character) {
+  return Math.max(5, Math.floor(Number(character?.level) || 1) * 5);
+}
+
 function getVitalBonus(character, key) {
   const equipment = Math.max(
     0,

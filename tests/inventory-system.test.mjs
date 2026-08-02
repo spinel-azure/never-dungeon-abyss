@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { equipInstance, grantEquipmentInstance, listEquipmentInstances } from "../data/equipment-inventory.js";
-import { grantItemWithOverflow, settleLootBag, storeItemInWarehouse } from "../data/inventory.js";
+import { depositItemInWarehouse, grantItemWithOverflow, settleLootBag, storeItemInWarehouse, withdrawItemFromWarehouse } from "../data/inventory.js";
 
 test("legacy equipment migrates to stable individual instances", () => {
   const character = normalizeCharacter({
@@ -46,6 +46,17 @@ test("warehouse fills partial consumable stacks before creating another", () => 
   ]);
 });
 
+test("shop warehouse deposits and withdraws one carried item", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "thief" });
+  character = grantItemWithOverflow(character, "healing_potion", 2).character;
+  character = depositItemInWarehouse(character, "healing_potion", 1).character;
+  assert.equal(character.inventory.counts.healing_potion, 1);
+  assert.equal(character.warehouse.itemStacks[0].count, 1);
+  character = withdrawItemFromWarehouse(character, "healing_potion", 1).character;
+  assert.equal(character.inventory.counts.healing_potion, 2);
+  assert.equal(character.warehouse.itemStacks.length, 0);
+});
+
 test("inventory overflow and loot settlement retain every acquired item", () => {
   let character = createInitialCharacter({ name: "TEST", job: "thief" });
   character = grantItemWithOverflow(character, "antidote", 105).character;
@@ -57,4 +68,16 @@ test("inventory overflow and loot settlement retain every acquired item", () => 
   assert.equal(settled.character.warehouse.itemStacks.find(stack => stack.itemId === "antidote").count, 9);
   assert.equal(settled.character.gold, 120);
   assert.deepEqual(settled.character.lootBag.items, {});
+});
+
+test("unidentified stiletto quality is retained when the loot bag is settled", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "thief" });
+  character.lootBag = {
+    items: {}, gold: 0,
+    equipmentInstances: [{ equipmentId: "stiletto", slot: "rightArmId", enhancement: 3, identified: false }]
+  };
+  const settled = settleLootBag(character);
+  assert.equal(settled.equipmentResults[0].equipmentId, "stiletto");
+  assert.equal(settled.equipmentResults[0].enhancement, 3);
+  assert.equal(settled.equipmentResults[0].identified, true);
 });

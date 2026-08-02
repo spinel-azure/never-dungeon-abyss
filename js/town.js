@@ -13,6 +13,7 @@ import {
   isQuestAvailable
 } from "../data/quests.js";
 import { getItem } from "../data/items.js";
+import { WEAPONS } from "../data/weapons.js";
 import { configureTownPassersby } from "./town-passersby.js";
 
 const FACILITY_COMMANDS = Object.freeze({
@@ -84,7 +85,10 @@ const town = {
   onStay: () => {},
   onHeal: () => {},
   onPurchaseItem: () => null,
+  onPurchaseEquipment: () => null,
   onSellItem: () => null,
+  onWithdrawItem: () => null,
+  onDepositItem: () => null,
   onEditDeck: () => {},
   onTalk: () => "",
   onAcceptRequest: () => "",
@@ -821,7 +825,13 @@ function renderFacility() {
   town.background.alt = `${facility.label}の背景`;
   town.background.hidden = false;
   town.pendingVoiceFacility = facility.id === "inn" ? "inn" : "";
-  town.messageEl.textContent = facility.keeper ? `${facility.keeper}：${facility.greeting}` : facility.greeting;
+  if (facility.id === "inn" && !town.getCharacter()?.eventFlags?.inn_visited) {
+    const visitor = town.getCharacter();
+    visitor.eventFlags = { ...(visitor.eventFlags || {}), inn_visited: true };
+    town.messageEl.textContent = "女将ヨハンナ：おや？初めて見る顔だね？どこから来たんだい？";
+  } else {
+    town.messageEl.textContent = facility.keeper ? `${facility.keeper}：${facility.greeting}` : facility.greeting;
+  }
   town.portrait.hidden = !facility.image;
   town.portraitPlaceholder.hidden = Boolean(facility.image);
   if (facility.image) {
@@ -926,6 +936,7 @@ function showFacilityCommands(facilityId) {
       || id === "heal"
       || (facilityId === "temple" && id === "donate")
       || (facilityId === "shop" && id === "buy")
+      || (facilityId === "shop" && ["sell", "storage"].includes(id))
       || id === "deck"
       || (facilityId === "guild" && id === "accept" && requestUnlocked)
       || (facilityId === "guild" && id === "report" && reportAvailable)
@@ -980,12 +991,21 @@ function activateFacilityService(command) {
     openCommerce("sell");
     return true;
   }
+  if (command === "storage") {
+    const facility = TOWN_FACILITIES[town.selectedIndex];
+    if (facility?.id !== "shop") return false;
+    showStorageCommands();
+    return true;
+  }
+  if (command === "storage-deposit") { openCommerce("storageDeposit"); return true; }
+  if (command === "storage-withdraw") { openCommerce("storageWithdraw"); return true; }
+  if (command === "storage-return") { renderFacility(); return true; }
   if (command === "shop-items") {
     openCommerce("buy");
     return true;
   }
   if (command === "shop-equipment") {
-    town.messageEl.textContent = "女主人ヘレン：装備品は今、品切れなの。";
+    openCommerce("buyEquipment");
     return true;
   }
   if (command === "shop-return") {
@@ -1030,19 +1050,29 @@ function activateFacilityService(command) {
 function openCommerce(kind) {
   const ids = kind === "donate"
     ? ["exorcism_talisman", "holy_water"]
+    : kind === "storageWithdraw"
+      ? [...new Set((town.getCharacter()?.warehouse?.itemStacks || []).map(stack => stack.itemId))]
+    : kind === "storageDeposit"
+      ? Object.keys(town.getCharacter()?.inventory?.counts || {})
     : kind === "sell"
       ? Object.keys(town.getCharacter()?.inventory?.counts || {}).filter(id => getItem(id)?.sellPrice > 0)
-      : ["healing_potion", "antidote", "guiding_torch", "treasure_compass", "auto_walker"];
+      : kind === "buyEquipment"
+        ? ["iron_greatsword", "poison_dagger", "morgenstern"]
+        : ["healing_potion", "antidote", "guiding_torch", "treasure_compass", "auto_walker"];
   town.mode = "commerce";
   town.commerceKind = kind;
-  town.commerceItems = ids.map(getItem).filter(Boolean);
+  town.commerceItems = ids.map(id => kind === "buyEquipment" ? WEAPONS[id] : getItem(id)).filter(Boolean);
   town.commerceIndex = 0;
   town.commercePointerArmedIndex = -1;
-  town.commerceTitle.textContent = kind === "donate" ? "寄進" : kind === "sell" ? "売却" : "購入";
+  town.commerceTitle.textContent = kind === "donate" ? "寄進" : kind === "sell" ? "売却" : kind.startsWith("storage") ? "倉庫" : "購入";
   town.commerceOverlay.hidden = false;
   town.guildQuestOverlay.hidden = true;
   town.messageEl.textContent = kind === "donate"
     ? "司祭アーヴァイン：いずれを女神へ寄進されますか？\n＊Aボタン：決定　Bボタン：戻る"
+    : kind === "storageWithdraw"
+      ? town.commerceItems.length ? "女主人ヘレン：取り出すものを選んで。" : "女主人ヘレン：倉庫は空よ。"
+    : kind === "storageDeposit"
+      ? town.commerceItems.length ? "女主人ヘレン：預けるものを選んで。" : "女主人ヘレン：預けられる道具はないようね。"
     : kind === "sell"
       ? town.commerceItems.length ? "女主人ヘレン：何を売るのかしら？\n＊Aボタン：決定　Bボタン：戻る" : "女主人ヘレン：売れる道具はないようね。"
       : "女主人ヘレン：どれにするのかしら？\n＊Aボタン：決定　Bボタン：戻る";
@@ -1084,7 +1114,8 @@ function handleCommerceInput(action) {
   if (action === "cancel") {
     town.playSe("cancel");
     town.commercePointerArmedIndex = -1;
-    if (town.commerceKind === "buy") showShopCategoryCommands();
+    if (town.commerceKind === "buy" || town.commerceKind === "buyEquipment") showShopCategoryCommands();
+    else if (town.commerceKind.startsWith("storage")) showStorageCommands();
     else renderFacility();
     return true;
   }
@@ -1112,6 +1143,10 @@ function requestCommerceConfirmation() {
   town.mode = "commerceConfirm";
   town.messageEl.textContent = town.commerceKind === "donate"
     ? "司祭アーヴァイン：こちらでよろしいですか？\n＊Aボタン：はい　Bボタン：いいえ"
+    : town.commerceKind === "storageWithdraw"
+      ? "女主人ヘレン：これを取り出すのね？\n＊Aボタン：はい　Bボタン：いいえ"
+    : town.commerceKind === "storageDeposit"
+      ? "女主人ヘレン：これを預かればいいのね？\n＊Aボタン：はい　Bボタン：いいえ"
     : town.commerceKind === "sell"
       ? `女主人ヘレン：${item.sellPrice}Gで買い取るわ。これでいい？\n＊Aボタン：はい　Bボタン：いいえ`
       : "女主人ヘレン：これでいい？\n＊Aボタン：はい　Bボタン：いいえ";
@@ -1137,7 +1172,17 @@ function purchaseSelectedCommerceItem() {
   const item = town.commerceItems[town.commerceIndex];
   if (!item) return;
   const selling = town.commerceKind === "sell";
-  const result = selling ? town.onSellItem(item.id) : town.onPurchaseItem(item.id);
+  const withdrawing = town.commerceKind === "storageWithdraw";
+  const depositing = town.commerceKind === "storageDeposit";
+  const result = withdrawing
+    ? town.onWithdrawItem(item.id)
+    : depositing
+      ? town.onDepositItem(item.id)
+    : selling
+    ? town.onSellItem(item.id)
+    : town.commerceKind === "buyEquipment"
+      ? town.onPurchaseEquipment(item.id)
+      : town.onPurchaseItem(item.id);
   if (!result?.accepted) {
     town.playSe("cursorMove");
     town.messageEl.textContent = result?.reason === "insufficientGold"
@@ -1152,13 +1197,18 @@ function purchaseSelectedCommerceItem() {
   const keeper = town.commerceKind === "donate" ? "司祭アーヴァイン" : "女主人ヘレン";
   town.messageEl.textContent = town.commerceKind === "donate"
     ? `${keeper}：女神のご加護を。${item.name}を授けましょう。`
+    : withdrawing
+      ? `${keeper}：${item.name}を倉庫から取り出したわ。`
+    : depositing
+      ? `${keeper}：${item.name}を倉庫で預かったわ。`
     : selling
       ? `${keeper}：${item.name}を${result.value}Gで買い取ったわ。`
     : result.stored > 0
       ? `${keeper}：はい、どうぞ。\n${item.name}はこれ以上持てません。超過分を倉庫へ送りました。`
       : `${keeper}：はい、どうぞ。`;
   town.mode = "commerce";
-  if (selling && Number(town.getCharacter()?.inventory?.counts?.[item.id] || 0) <= 0) {
+  if (((selling || depositing) && Number(town.getCharacter()?.inventory?.counts?.[item.id] || 0) <= 0)
+    || (withdrawing && warehouseItemCount(item.id) <= 0)) {
     town.commerceItems.splice(town.commerceIndex, 1);
     town.commerceIndex = Math.max(0, Math.min(town.commerceIndex, town.commerceItems.length - 1));
   }
@@ -1176,7 +1226,11 @@ function renderCommerce({ showDescription = true } = {}) {
     const name = document.createElement("span");
     name.textContent = item.name;
     const price = document.createElement("small");
-    price.textContent = `${town.commerceKind === "sell" ? item.sellPrice : item.buyPrice}G${town.commerceKind === "sell" ? ` ×${town.getCharacter()?.inventory?.counts?.[item.id] || 0}` : ""}`;
+    price.textContent = town.commerceKind === "storageWithdraw"
+      ? `×${warehouseItemCount(item.id)}`
+      : town.commerceKind === "storageDeposit"
+        ? `×${town.getCharacter()?.inventory?.counts?.[item.id] || 0}`
+      : `${town.commerceKind === "sell" ? item.sellPrice : item.buyPrice}G${town.commerceKind === "sell" ? ` ×${town.getCharacter()?.inventory?.counts?.[item.id] || 0}` : ""}`;
     button.append(name, price);
     return button;
   }));
@@ -1187,6 +1241,33 @@ function renderCommerce({ showDescription = true } = {}) {
     ).toLocaleString("en-US");
   }
   renderCommerceSelection({ showDescription });
+}
+
+function warehouseItemCount(itemId) {
+  return (town.getCharacter()?.warehouse?.itemStacks || [])
+    .filter(stack => stack.itemId === itemId)
+    .reduce((sum, stack) => sum + Math.max(0, Math.floor(Number(stack.count) || 0)), 0);
+}
+
+function showStorageCommands() {
+  const commands = [
+    ["storage-deposit", "預ける"], ["storage-withdraw", "取り出す"], ["storage-return", "戻る"],
+    ["empty-1", ""], ["empty-2", ""], ["empty-3", ""]
+  ];
+  town.mode = "shopCategory";
+  town.commerceOverlay.hidden = true;
+  town.facilityCommandIndex = 0;
+  town.facilityCommandButtons.forEach((button, index) => {
+    const [id, label] = commands[index];
+    button.dataset.facilityCommand = id;
+    button.textContent = label;
+    button.disabled = !label;
+    button.classList.toggle("is-empty", !label);
+    button.classList.remove("is-unavailable");
+    button.setAttribute("aria-disabled", "false");
+  });
+  town.messageEl.textContent = "女主人ヘレン：倉庫を使うのね。預ける？それとも取り出す？";
+  renderFacilityCommandSelection();
 }
 
 function renderCommerceSelection({ showDescription = true } = {}) {

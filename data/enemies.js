@@ -10,6 +10,7 @@ export const enemies = Object.freeze([
     def: 4,
     attack: 4,
     experienceReward: 4,
+    dropItemId: "rat_tail",
     elementMultipliers: Object.freeze({ fire: 1, ice: 1 }),
     statusResistances: Object.freeze({
       poison: Object.freeze({ resistancePoints: 0, immune: false }),
@@ -32,6 +33,7 @@ export const enemies = Object.freeze([
     def: 5,
     attack: 3,
     experienceReward: 6,
+    dropItemId: "slime_jelly",
     elementMultipliers: Object.freeze({ fire: 1.5, ice: 0.5 }),
     statusResistances: Object.freeze({
       poison: Object.freeze({ resistancePoints: 40, immune: false }),
@@ -55,6 +57,7 @@ export const enemies = Object.freeze([
     def: 3,
     attack: 5,
     experienceReward: 8,
+    dropItemId: "rabbit_fur",
     elementMultipliers: Object.freeze({ fire: 1, ice: 1 }),
     statusResistances: Object.freeze({
       poison: Object.freeze({ resistancePoints: 0, immune: false }),
@@ -78,6 +81,7 @@ export const enemies = Object.freeze([
     def: 6,
     attack: 6,
     experienceReward: 10,
+    dropItemId: "dead_bones",
     elementMultipliers: Object.freeze({ fire: 1.5, ice: 0.5 }),
     statusResistances: Object.freeze({
       poison: Object.freeze({ resistancePoints: 0, immune: true }),
@@ -154,6 +158,7 @@ export function createEnemyCombatant(enemy) {
     attack: enemy.attack,
     specialAttack: structuredClone(enemy.specialAttack || null),
     experienceReward: enemy.experienceReward,
+    dropItemId: enemy.dropItemId || null,
     escapeRate: enemy.escapeRate,
     surpriseRate: enemy.surpriseRate,
     surpriseRateMaximum: enemy.surpriseRateMaximum,

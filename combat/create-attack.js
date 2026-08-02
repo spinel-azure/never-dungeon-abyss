@@ -1,7 +1,7 @@
 import { getWeapon, getWeaponType } from "../data/weapons.js";
 
-export function createNormalAttack({ weapon, weaponId } = {}) {
-  const resolvedWeapon = weapon || getWeapon(weaponId);
+export function createNormalAttack({ weapon, weaponId, weaponEnhancement = 0 } = {}) {
+  const resolvedWeapon = weapon || getWeapon(weaponId, weaponEnhancement);
   const type = getWeaponType(resolvedWeapon.type);
   return {
     id: "normal_attack",
@@ -10,7 +10,7 @@ export function createNormalAttack({ weapon, weaponId } = {}) {
     hitCount: type.hitCount,
     powerPerHit: type.powerPerHit,
     weapon: resolvedWeapon,
-    defensePenetration: type.defensePenetration || 0,
+    defensePenetration: (type.defensePenetration || 0) + (resolvedWeapon.defensePenetration || 0),
     attackStat: type.normalAttackStat || "str",
     ignoresDefense: Boolean(type.normalAttackIgnoresDefense),
     hitBonus: resolvedWeapon.hitBonus || 0,
@@ -20,8 +20,8 @@ export function createNormalAttack({ weapon, weaponId } = {}) {
   };
 }
 
-export function createSkillAttack(skill, { weapon, weaponId } = {}) {
-  const resolvedWeapon = weapon || getWeapon(weaponId);
+export function createSkillAttack(skill, { weapon, weaponId, weaponEnhancement = 0 } = {}) {
+  const resolvedWeapon = weapon || getWeapon(weaponId, weaponEnhancement);
   const weaponType = getWeaponType(resolvedWeapon.type);
   const usesWeaponHits = skill.hitCountMode === "weapon";
   return {

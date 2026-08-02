@@ -74,11 +74,34 @@ export const WEAPONS = Object.freeze({
     type: "greatsword",
     attack: 10,
     element: "physical"
+  }),
+  iron_greatsword: Object.freeze({
+    id: "iron_greatsword", name: "鉄の両手剣", type: "greatsword", attack: 12,
+    element: "physical", allowedJobs: Object.freeze(["warrior"]), twoHanded: true,
+    buyPrice: 100, sellPrice: 50
+  }),
+  poison_dagger: Object.freeze({
+    id: "poison_dagger", name: "ポイズンダガー", type: "dagger", attack: 6,
+    element: "physical", allowedJobs: Object.freeze(["thief"]), poisonChance: 0.15,
+    effects: Object.freeze([Object.freeze({ statusId: "poison", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.15 })]),
+    buyPrice: 100, sellPrice: 50
+  }),
+  morgenstern: Object.freeze({
+    id: "morgenstern", name: "モルゲンシュテルン", type: "blunt", attack: 8,
+    element: "physical", allowedJobs: Object.freeze(["priest"]), buyPrice: 100, sellPrice: 50
+  }),
+  stiletto: Object.freeze({
+    id: "stiletto", name: "スティレット", type: "dagger", attack: 7,
+    element: "physical", allowedJobs: Object.freeze(["thief"]), sellPrice: 75,
+    penetrationByEnhancement: Object.freeze([0.2, 0.25, 0.3, 0.35])
   })
 });
 
-export function getWeapon(id) {
-  return WEAPONS[id] || WEAPONS.iron_longsword;
+export function getWeapon(id, enhancement = 0) {
+  const weapon = WEAPONS[id] || WEAPONS.iron_longsword;
+  const level = Math.max(0, Math.min(3, Math.floor(Number(enhancement) || 0)));
+  const penetration = weapon.penetrationByEnhancement?.[level];
+  return penetration == null ? weapon : { ...weapon, defensePenetration: penetration };
 }
 
 export function getWeaponType(id) {

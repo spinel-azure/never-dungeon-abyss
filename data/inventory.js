@@ -101,6 +101,42 @@ export function storeItemInWarehouse(warehouse, itemId, amount = 1) {
   return { warehouse: { ...source, itemStacks }, stored: requested };
 }
 
+export function withdrawItemFromWarehouse(character, itemId, amount = 1) {
+  if (!character || !getItem(itemId)) return { accepted: false, reason: "unknownItem", character };
+  const warehouse = normalizeWarehouse(character.warehouse);
+  const requested = Math.max(1, Math.floor(Number(amount) || 1));
+  let remaining = requested;
+  const itemStacks = [];
+  for (const stack of warehouse.itemStacks) {
+    if (stack.itemId !== itemId || remaining <= 0) { itemStacks.push(stack); continue; }
+    const taken = Math.min(stack.count, remaining);
+    remaining -= taken;
+    if (stack.count > taken) itemStacks.push({ ...stack, count: stack.count - taken });
+  }
+  const taken = requested - remaining;
+  if (taken <= 0) return { accepted: false, reason: "notStored", character };
+  const granted = grantItem(character.inventory, itemId, taken);
+  if (granted.gained < taken) {
+    return { accepted: false, reason: "inventoryFull", character };
+  }
+  return {
+    accepted: true, reason: "", amount: taken,
+    character: { ...character, inventory: granted.inventory, warehouse: { ...warehouse, itemStacks } }
+  };
+}
+
+export function depositItemInWarehouse(character, itemId, amount = 1) {
+  if (!character || !getItem(itemId)) return { accepted: false, reason: "unknownItem", character };
+  const requested = Math.max(1, Math.floor(Number(amount) || 1));
+  const consumed = consumeItem(character.inventory, itemId, requested);
+  if (consumed.consumed <= 0) return { accepted: false, reason: "notOwned", character };
+  const stored = storeItemInWarehouse(character.warehouse, itemId, consumed.consumed);
+  return {
+    accepted: true, reason: "", amount: stored.stored,
+    character: { ...character, inventory: consumed.inventory, warehouse: stored.warehouse }
+  };
+}
+
 export function grantItemWithOverflow(character, itemId, amount = 1) {
   if (!character) return { character, gained: 0, stored: 0, reason: "noCharacter" };
   const requested = Math.max(0, Math.floor(Number(amount) || 0));
@@ -126,6 +162,21 @@ export function addLootItem(lootBag, itemId, amount = 1) {
   };
 }
 
+export function addLootGold(lootBag, amount = 0) {
+  const source = normalizeLootBag(lootBag);
+  const gained = Math.max(0, Math.floor(Number(amount) || 0));
+  return { lootBag: { ...source, gold: source.gold + gained }, gained };
+}
+
+export function addLootEquipment(lootBag, equipment) {
+  const source = normalizeLootBag(lootBag);
+  if (!equipment?.equipmentId) return { lootBag: source, gained: 0 };
+  return {
+    lootBag: { ...source, equipmentInstances: [...source.equipmentInstances, structuredClone(equipment)] },
+    gained: 1
+  };
+}
+
 export function settleLootBag(character) {
   if (!character) return { character, results: [] };
   let next = { ...character, warehouse: normalizeWarehouse(character.warehouse) };
@@ -136,10 +187,28 @@ export function settleLootBag(character) {
     next = result.character;
     results.push({ itemId, count, inventory: result.gained, warehouse: result.stored });
   }
+  const equipmentInventory = structuredClone(next.equipmentInventory || { instances: [], nextOrder: 1 });
+  const equipmentResults = [];
+  for (const raw of bag.equipmentInstances) {
+    const acquiredOrder = Math.max(1, Math.floor(Number(equipmentInventory.nextOrder) || 1));
+    const instance = {
+      instanceId: `eq-${String(acquiredOrder).padStart(6, "0")}`,
+      equipmentId: raw.equipmentId,
+      slot: raw.slot || "rightArmId",
+      acquiredOrder,
+      enhancement: Math.max(0, Math.min(3, Math.floor(Number(raw.enhancement) || 0))),
+      identified: true,
+      curseKnown: false
+    };
+    equipmentInventory.instances.push(instance);
+    equipmentInventory.nextOrder = acquiredOrder + 1;
+    equipmentResults.push(instance);
+  }
   next = {
     ...next,
+    equipmentInventory,
     gold: Math.max(0, Math.floor(Number(next.gold) || 0)) + bag.gold,
     lootBag: createInitialLootBag()
   };
-  return { character: next, results, gold: bag.gold };
+  return { character: next, results, equipmentResults, gold: bag.gold };
 }

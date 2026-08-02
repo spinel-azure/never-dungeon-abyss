@@ -79,9 +79,10 @@ import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
 import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, setTownTypewriterOptions } from "./town.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getEquipmentItem } from "../data/equipment.js";
+import { getEquipmentInstanceName } from "../data/equipment-inventory.js";
 import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
 import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js";
-import { awardBattleExperience, createTempleRevival, grantEventItems, resolveDungeonDefeat, resolveInnStay, unlockGuildRequest } from "./character-services.js";
+import { awardBattleExperience, createTempleRevival, getInnStayFee, grantEventItems, resolveDungeonDefeat, resolveInnStay, unlockGuildRequest } from "./character-services.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { resolveTreasureTrap } from "../combat/resolve-trap.js";
 import { collectStats } from "../combat/collect-stats.js";
@@ -102,8 +103,9 @@ import { collectCardStatBonuses, getCardById, hasCardEffect } from "../data/card
 import { drawCardCanvas } from "./card-canvas.js";
 import { getItem } from "../data/items.js";
 import { isCriticalHp } from "../data/quick-status.js";
-import { purchaseItem, sellItem } from "../data/commerce.js";
-import { settleLootBag } from "../data/inventory.js";
+import { purchaseEquipment, purchaseItem, sellItem } from "../data/commerce.js";
+import { addLootEquipment, addLootGold, addLootItem, depositItemInWarehouse, settleLootBag, withdrawItemFromWarehouse } from "../data/inventory.js";
+import { rollEnemyDrop, rollRedChestLoot } from "../data/loot.js";
 import {
   abandonQuest,
   acceptQuest,
@@ -130,10 +132,11 @@ import {
   let autosaveTimer = 0;
   let worldLocation = "dungeon";
   let character = null;
+  let currentDepth = 1;
 
 
   randomizeStartPosition();
-  buildBoundaryWallMap();
+  buildBoundaryWallMap(currentDepth);
   let startDir = chooseStartDirection();
 
   resetPlayer(startDir);
@@ -171,6 +174,9 @@ import {
   const bonusGetAmount = document.getElementById("bonusGetAmount");
   const experienceSettlementOverlay = document.getElementById("experienceSettlementOverlay");
   const experienceSettlementDetail = document.getElementById("experienceSettlementDetail");
+  const lootIdentifyOverlay = document.getElementById("lootIdentifyOverlay");
+  const lootIdentifyList = document.getElementById("lootIdentifyList");
+  const lootIdentifyAction = document.getElementById("lootIdentifyAction");
   const battleScreen = document.getElementById("battleScreen");
   const skillOverlay = document.getElementById("skillOverlay");
   const sceneTransition = document.getElementById("sceneTransition");
@@ -184,7 +190,20 @@ import {
   let bonusGetTimer = 0;
   let trapResultTimer = 0;
   let experienceSettlementCloseCallback = null;
-  let currentDepth = 1;
+  let pendingLootIdentification = null;
+
+  lootIdentifyAction?.addEventListener("click", () => {
+    if (!pendingLootIdentification) return;
+    if (!pendingLootIdentification.identified) {
+      pendingLootIdentification.identified = true;
+      lootIdentifyList.textContent = formatIdentifiedLoot(pendingLootIdentification);
+      lootIdentifyAction.textContent = "CLOSE";
+      playSe("item");
+      return;
+    }
+    lootIdentifyOverlay.hidden = true;
+    pendingLootIdentification = null;
+  });
   let pendingEncounter = null;
   configureDevice();
   configureEvents({ messageEl: msgEl });
@@ -244,6 +263,7 @@ import {
     playTreasureOpening,
     hideTreasure,
     resolveTreasureTrap: resolveCurrentTreasureTrap,
+    awardTreasure: awardTreasureLoot,
     returnToTown,
     beginBattle: beginRandomBattle,
     playNpcVoice: playSe,
@@ -260,7 +280,10 @@ import {
     onStay: stayAtInn,
     onHeal: healAtTemple,
     onPurchaseItem: purchaseTownItem,
+    onPurchaseEquipment: purchaseTownEquipment,
     onSellItem: sellTownItem,
+    onWithdrawItem: withdrawTownItem,
+    onDepositItem: depositTownItem,
     onEditDeck: openDeckEditor,
     onTalk: talkAtFacility,
     onAcceptRequest: acceptGuildRequest,
@@ -382,10 +405,13 @@ import {
     if (!dungeon.cells.every(row => Array.isArray(row) && row.length === MAP_W)) return false;
     if (!dungeon.explored.every(row => Array.isArray(row) && row.length === MAP_W)) return false;
     if (!inBounds(player.gridX, player.gridY) || !Number.isInteger(player.dir) || !DIRS[player.dir]) return false;
+    currentDepth = Math.max(1, Math.floor(Number(dungeon.depth) || 1));
 
     for (let y = 0; y < MAP_H; y += 1) {
       for (let x = 0; x < MAP_W; x += 1) {
         const savedCell = structuredClone(dungeon.cells[y][x]);
+        if (savedCell.treasure && currentDepth <= 4) savedCell.treasure = "red";
+        if (currentDepth > 4) savedCell.treasure = null;
         Object.assign(cells[y][x], savedCell);
         cells[y][x].treasureTrapId = savedCell.treasureTrapId || null;
         explored[y][x] = Boolean(dungeon.explored[y][x]);
@@ -393,7 +419,6 @@ import {
     }
     const start = dungeon.startPosition;
     if (start && inBounds(start.x, start.y)) setStartPosition(start.x, start.y);
-    currentDepth = Math.max(1, Math.floor(Number(dungeon.depth) || 1));
     setDungeonColors({ wall: "default", floor: "default" });
     state.anim = null;
     state.gridX = player.gridX;
@@ -562,8 +587,8 @@ import {
       inn: {
         flag: "inn_first_talk_card",
         cardId: "common_lucky_charm",
-        first: "女将ヨハンナ：旅のお守りに、これを持っておいき。\n幸運のお守りのカードを手に入れた！",
-        repeat: "女将ヨハンナ：お代はいらないよ。ゆっくりと身体を休めるんだよ。"
+        first: "女将ヨハンナ：焦らなくてもいいんだよ。身体を休める事だって必要さぁね。\n旅のお守りに、これを持っておいき。幸運のお守りのカードを手に入れた！",
+        repeat: "女将ヨハンナ：焦らなくてもいいんだよ。身体を休める事だって必要さぁね。"
       },
       library: {
         flag: "library_first_talk_card",
@@ -1001,6 +1026,31 @@ import {
     return result;
   }
 
+  function addRolledLoot(drop) {
+    if (!character || !drop || drop.kind === "none") return "";
+    if (drop.kind === "gold") {
+      character.lootBag = addLootGold(character.lootBag, drop.amount).lootBag;
+      return `${drop.amount}Gをロット袋へ入れた。`;
+    }
+    if (drop.kind === "item") {
+      character.lootBag = addLootItem(character.lootBag, drop.itemId, drop.amount || 1).lootBag;
+      return `${drop.unidentifiedName || getItem(drop.itemId)?.name || "戦利品"}をロット袋へ入れた。`;
+    }
+    if (drop.kind === "equipment") {
+      character.lootBag = addLootEquipment(character.lootBag, drop).lootBag;
+      return `${drop.unidentifiedName || "？装備品"}をロット袋へ入れた。`;
+    }
+    return "";
+  }
+
+  function awardTreasureLoot(treasureType) {
+    if (treasureType !== "red") return { message: "中には何も入っていなかった！" };
+    const message = addRolledLoot(rollRedChestLoot());
+    updateCharacterUi();
+    saveGame();
+    return { message };
+  }
+
   function showTrapResultEffect(disarmed) {
     if (!trapResultEffect) return;
     window.clearTimeout(trapResultTimer);
@@ -1025,9 +1075,37 @@ import {
     return { ...result, character };
   }
 
+  function purchaseTownEquipment(equipmentId) {
+    if (!character) return { accepted: false, reason: "noCharacter" };
+    const result = purchaseEquipment(character, equipmentId);
+    if (!result.accepted) return result;
+    character = result.character;
+    updateCharacterUi();
+    saveGame();
+    return { ...result, character };
+  }
+
   function sellTownItem(itemId) {
     if (!character) return { accepted: false, reason: "noCharacter" };
     const result = sellItem(character, itemId);
+    if (!result.accepted) return result;
+    character = result.character;
+    updateCharacterUi();
+    saveGame();
+    return { ...result, character };
+  }
+
+  function withdrawTownItem(itemId) {
+    const result = withdrawItemFromWarehouse(character, itemId, 1);
+    if (!result.accepted) return result;
+    character = result.character;
+    updateCharacterUi();
+    saveGame();
+    return { ...result, character };
+  }
+
+  function depositTownItem(itemId) {
+    const result = depositItemInWarehouse(character, itemId, 1);
     if (!result.accepted) return result;
     character = result.character;
     updateCharacterUi();
@@ -1111,10 +1189,12 @@ import {
       character = recordEnemyDefeat(character, battle.enemy.id);
     }
     if (character && reward > 0) Object.assign(character, awardBattleExperience(character, reward));
+    const drop = rollEnemyDrop(battle?.enemy);
+    const dropMessage = drop.kind === "redChest"
+      ? addRolledLoot(rollRedChestLoot())
+      : addRolledLoot(drop);
     resetPresence();
-    say(reward > 0
-      ? `戦闘に勝利した。${reward}EXPを持ち帰った。`
-      : "戦闘に勝利した。");
+    say(`${reward > 0 ? `戦闘に勝利した。${reward}EXPを持ち帰った。` : "戦闘に勝利した。"}${dropMessage ? `\n${drop.kind === "redChest" ? "赤箱を発見！ " : ""}${dropMessage}` : ""}`);
     setPlayerInputEnabled(true);
     state.autoReturnPaused = false;
     if (state.autoWalkerActive) window.setTimeout(continueAutoReturn, 0);
@@ -1160,7 +1240,10 @@ import {
         "preserve_experience_on_defeat"
       );
       Object.assign(character, resolveDungeonDefeat(character, { preserveExperience }));
-      character = settleLootBag(character).character;
+      const bag = structuredClone(character.lootBag);
+      const settled = settleLootBag(character);
+      character = settled.character;
+      showLootIdentification(bag, settled);
       lostExperience = preserveExperience ? 0 : carriedExperience;
       preservedExperience = preserveExperience ? carriedExperience : 0;
       character = recordFloorExploration(character, { depth: 0, explored: [] });
@@ -1225,6 +1308,15 @@ import {
 
   async function stayAtInn() {
     if (!character || sceneTransitionRunning) return;
+    const fee = getInnStayFee(character);
+    if (Math.max(0, Math.floor(Number(character.gold) || 0)) < fee) {
+      say(`女将ヨハンナ：宿泊代は${fee}Gだよ。すまないけど、お金が足りないようだね。`);
+      return;
+    }
+    character.gold -= fee;
+    say(`女将ヨハンナ：${fee}Gいただくよ。さぁ、部屋に上がってゆっくりお休み。`);
+    updateCharacterUi();
+    saveGame();
     sceneTransitionRunning = true;
     stopBgm();
     sceneTransition.hidden = false;
@@ -1258,7 +1350,7 @@ import {
         say(`LVが上がった！HP+${result.hpGained}、SP+${result.spGained}${deckBonus}`);
         await levelUpPresentation;
       } else {
-        say("女将ヨハンナ：お代はいらないよ。ゆっくりと身体を休めるんだよ。");
+        say("女将ヨハンナ：ゆっくり休めたかい？");
       }
       if (worldLocation === "town" && getTownState().facilityId === "inn") {
         startBgm("townFacilities");
@@ -1400,12 +1492,16 @@ import {
 
   function returnToTown() {
     const returnFloor = currentDepth;
+    let bag = null;
+    let settled = null;
     if (character) {
       character.pendingExperienceSettlement = createDepthReturnSettlement(
         character,
         returnFloor
       );
-      character = settleLootBag(character).character;
+      bag = structuredClone(character.lootBag);
+      settled = settleLootBag(character);
+      character = settled.character;
       character = recordFloorExploration(character, { depth: 0, explored: [] });
       updateCharacterUi();
     }
@@ -1415,7 +1511,48 @@ import {
     cancelAutoReturn(false);
     setPlayerInputEnabled(false);
     openTown({ registrationRequired: !character, facilityId: "guild", mode: "arrival" });
+    if (character && bagHasLoot(bag)) showLootIdentification(bag, settled);
     saveGame();
+  }
+
+  function bagHasLoot(bag) {
+    return Number(bag?.gold) > 0
+      || Object.keys(bag?.items || {}).length > 0
+      || (bag?.equipmentInstances || []).length > 0;
+  }
+
+  function showLootIdentification(bag, settled) {
+    if (!lootIdentifyOverlay || !bagHasLoot(bag)) return;
+    pendingLootIdentification = { bag, settled, identified: false };
+    const unknown = [];
+    if (Number(bag.gold) > 0) unknown.push(`？GOLD ×${bag.gold}`);
+    for (const [itemId, count] of Object.entries(bag.items || {})) {
+      const label = ["healing_potion", "antidote"].includes(itemId) ? "？薬" : "？素材";
+      unknown.push(`${label} ×${count}`);
+    }
+    for (const instance of bag.equipmentInstances || []) unknown.push(`${instance.unidentifiedName || "？装備品"} ×1`);
+    lootIdentifyList.textContent = unknown.join("\n");
+    lootIdentifyAction.textContent = "IDENTIFY ALL";
+    lootIdentifyOverlay.hidden = false;
+  }
+
+  function formatIdentifiedLoot({ bag, settled }) {
+    const lines = [];
+    if (Number(bag.gold) > 0) lines.push(`GOLD ${bag.gold}G → 所持金`);
+    for (const result of settled.results || []) {
+      const destination = result.warehouse > 0 ? `インベントリ${result.inventory}／倉庫${result.warehouse}` : "インベントリ";
+      lines.push(`${getItem(result.itemId)?.name || result.itemId} ×${result.count} → ${destination}`);
+    }
+    for (const instance of settled.equipmentResults || []) {
+      lines.push(`${getEquipmentInstanceName(instance)} → インベントリ`);
+    }
+    return lines.join("\n");
+  }
+
+  function handleLootIdentifyInput(action) {
+    if (!lootIdentifyOverlay || lootIdentifyOverlay.hidden) return false;
+    if (action === "confirm" || action === "cancel") lootIdentifyAction.click();
+    return true;
   }
 
   function resetDungeon(message = "", nextStart = null, resetTimer = false) {
@@ -1426,7 +1563,7 @@ import {
     }
     if (nextStart) setStartPosition(nextStart.x, nextStart.y);
     else randomizeStartPosition();
-    buildBoundaryWallMap();
+    buildBoundaryWallMap(currentDepth);
     startDir = chooseStartDirection();
     resetExplored();
     resetPlayer(startDir);
@@ -1507,7 +1644,7 @@ import {
     handleOverlayInput: handleOverlayEventInput,
     handleBattleInput,
     handleTownInput: action => (
-      sceneTransitionRunning || handleExperienceSettlementInput(action) || handleTownInput(action)
+      sceneTransitionRunning || handleLootIdentifyInput(action) || handleExperienceSettlementInput(action) || handleTownInput(action)
     ),
     handleDoorInput: openDoorAhead,
     onUserOperation: () => {

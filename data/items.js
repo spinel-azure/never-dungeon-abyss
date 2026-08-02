@@ -45,6 +45,30 @@ export const ITEMS = Object.freeze([
     effects: Object.freeze([{ id: "auto_walk_to_stairs_up", value: 1 }]),
     description: "確定エリアを経由して上り階段までオート移動する。移動中、何か操作すると移動中断。移動中に戦闘した場合、戦闘終了後効果継続。",
     maxOwned: 99, iconId: "auto-walker", version: 1
+  }),
+  Object.freeze({
+    number: 8, id: "rat_tail", name: "ネズミのしっぽ", category: "material",
+    buyPrice: 0, sellPrice: 3, source: "drop", usableIn: Object.freeze([]),
+    effects: Object.freeze([]), description: "奈落ネズミのしっぽ。売却専用。", maxOwned: 99,
+    repurchasable: false, iconId: "rat-tail", version: 1
+  }),
+  Object.freeze({
+    number: 9, id: "slime_jelly", name: "スライムゼリー", category: "material",
+    buyPrice: 0, sellPrice: 5, source: "drop", usableIn: Object.freeze([]),
+    effects: Object.freeze([]), description: "洞窟スライムから採れるゼリー。売却専用。", maxOwned: 99,
+    repurchasable: false, iconId: "slime-jelly", version: 1
+  }),
+  Object.freeze({
+    number: 10, id: "rabbit_fur", name: "ウサギの毛皮", category: "material",
+    buyPrice: 0, sellPrice: 10, source: "drop", usableIn: Object.freeze([]),
+    effects: Object.freeze([]), description: "奈落ウサギの毛皮。売却専用。", maxOwned: 99,
+    repurchasable: false, iconId: "rabbit-fur", version: 1
+  }),
+  Object.freeze({
+    number: 11, id: "dead_bones", name: "亡者の遺骨", category: "material",
+    buyPrice: 0, sellPrice: 0, source: "drop", usableIn: Object.freeze([]),
+    effects: Object.freeze([]), description: "さまよう亡者が遺した骨。用途はまだ分からない。", maxOwned: 99,
+    iconId: "dead-bones", version: 1
   })
 ]);
 

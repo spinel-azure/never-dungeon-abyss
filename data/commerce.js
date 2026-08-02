@@ -1,5 +1,7 @@
 import { getItem } from "./items.js";
 import { consumeItem, getItemCount, grantItemWithOverflow } from "./inventory.js";
+import { grantEquipmentInstance } from "./equipment-inventory.js";
+import { getWeapon } from "./weapons.js";
 
 export function purchaseItem(character, itemId, { price } = {}) {
   if (!character) return { accepted: false, reason: "noCharacter", character };
@@ -18,6 +20,22 @@ export function purchaseItem(character, itemId, { price } = {}) {
     cost,
     stored: granted.stored,
     character: { ...granted.character, gold: gold - cost }
+  };
+}
+
+export function purchaseEquipment(character, equipmentId) {
+  if (!character) return { accepted: false, reason: "noCharacter", character };
+  const equipment = getWeapon(equipmentId);
+  if (!equipment || equipment.id !== equipmentId || !Number.isFinite(equipment.buyPrice)) {
+    return { accepted: false, reason: "unknownEquipment", character };
+  }
+  const gold = Math.max(0, Math.floor(Number(character.gold) || 0));
+  if (gold < equipment.buyPrice) return { accepted: false, reason: "insufficientGold", character, equipment };
+  const granted = grantEquipmentInstance(character, equipment.id, "rightArmId");
+  if (!granted.accepted) return { ...granted, equipment };
+  return {
+    accepted: true, reason: "", item: equipment, equipment, cost: equipment.buyPrice,
+    character: { ...granted.character, gold: gold - equipment.buyPrice }
   };
 }
 

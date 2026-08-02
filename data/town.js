@@ -5,7 +5,7 @@ export const TOWN_FACILITIES = Object.freeze([
     keeper: "女将ヨハンナ",
     image: "images/npc/NPC_11.avif",
     background: "images/background/town_02.avif",
-    greeting: "おかえりなさい。まずは身体を休めていってくださいな。",
+    greeting: "おかえりなさい。疲れただろう？",
     services: ["HP/SP回復", "持ち帰った経験値の精算", "レベルアップ"]
   },
   {
