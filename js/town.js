@@ -93,6 +93,7 @@ const town = {
   onPurchaseEquipment: () => null,
   onSellItem: () => null,
   onOpenSellInventory: () => {},
+  onOpenPurchaseInventory: () => {},
   onWithdrawItem: () => null,
   onDepositItem: () => null,
   onEditDeck: () => {},
@@ -1061,11 +1062,13 @@ function activateFacilityService(command) {
   if (command === "storage-withdraw") { openCommerce("storageWithdraw"); return true; }
   if (command === "storage-return") { renderFacility(); return true; }
   if (command === "shop-items") {
-    openCommerce("buy");
+    town.messageEl.textContent = "女主人ヘレン：道具を選んでちょうだい。";
+    town.onOpenPurchaseInventory("items");
     return true;
   }
   if (command === "shop-equipment") {
-    openCommerce("buyEquipment");
+    town.messageEl.textContent = "女主人ヘレン：装備品を選んでちょうだい。";
+    town.onOpenPurchaseInventory("equipment");
     return true;
   }
   if (command === "shop-return") {

@@ -42,7 +42,7 @@ import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minima
 import { configureInput } from "./input.js";
 import { configureVirtualStick } from "./virtualStick.js";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor, openShopSellInventory, closeCampMenu } from "./menu.js?v=20260804-03";
+import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js?v=20260804-04";
 import { resolveFloorTheme } from "./floorTheme.js";
 import {
   configureAutoReturn,
@@ -76,7 +76,7 @@ import {
   stopBgm
 } from "./audio.js";
 import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
-import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions } from "./town.js?v=20260804-02";
+import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions } from "./town.js?v=20260804-03";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName } from "../data/equipment-inventory.js";
@@ -285,6 +285,7 @@ import {
     onPurchaseEquipment: purchaseTownEquipment,
     onSellItem: sellTownItem,
     onOpenSellInventory: openShopSellInventory,
+    onOpenPurchaseInventory: openShopPurchaseInventory,
     onWithdrawItem: withdrawTownItem,
     onDepositItem: depositTownItem,
     onEditDeck: openDeckEditor,
@@ -1745,6 +1746,9 @@ import {
     onSellInventoryItem: sellTownItem,
     onSellInventoryEquipment: sellTownEquipment,
     onInventorySaleClosed: renderCharacterStatus,
+    onPurchaseInventoryItem: purchaseTownItem,
+    onPurchaseInventoryEquipment: purchaseTownEquipment,
+    onInventoryPurchaseClosed: renderCharacterStatus,
     onDeckChanged: cards => {
       character = normalizeCharacter({ ...character, cards });
       updateCharacterUi();
