@@ -793,6 +793,12 @@ function startTownNameBanner() {
   town.nameBannerTimer = window.setTimeout(stopTownNameBanner, 7100);
 }
 
+export function showTownNameBanner() {
+  if (!town.active || !town.root.classList.contains("is-town-view")) return false;
+  startTownNameBanner();
+  return true;
+}
+
 function stopTownNameBanner() {
   window.clearTimeout(town.nameBannerTimer);
   town.nameBannerTimer = 0;

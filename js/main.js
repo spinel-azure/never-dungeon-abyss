@@ -76,7 +76,7 @@ import {
   stopBgm
 } from "./audio.js";
 import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
-import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, setTownTypewriterOptions } from "./town.js?v=20260803-03";
+import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions } from "./town.js?v=20260803-04";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceName } from "../data/equipment-inventory.js";
@@ -202,7 +202,9 @@ import {
       return;
     }
     lootIdentifyOverlay.hidden = true;
+    const onClose = pendingLootIdentification.onClose;
     pendingLootIdentification = null;
+    onClose?.();
   });
   let pendingEncounter = null;
   configureDevice();
@@ -1561,7 +1563,11 @@ import {
     cancelAutoReturn(false);
     setPlayerInputEnabled(false);
     openTown({ registrationRequired: !character, facilityId: "guild", mode: "arrival" });
-    if (character && bagHasLoot(bag)) showLootIdentification(bag, settled);
+    if (character && bagHasLoot(bag)) {
+      showLootIdentification(bag, settled, { onClose: showTownNameBanner });
+    } else {
+      showTownNameBanner();
+    }
     saveGame();
   }
 
@@ -1571,9 +1577,9 @@ import {
       || (bag?.equipmentInstances || []).length > 0;
   }
 
-  function showLootIdentification(bag, settled) {
+  function showLootIdentification(bag, settled, { onClose = null } = {}) {
     if (!lootIdentifyOverlay || !bagHasLoot(bag)) return;
-    pendingLootIdentification = { bag, settled, identified: false };
+    pendingLootIdentification = { bag, settled, identified: false, onClose };
     const unknown = [];
     if (Number(bag.gold) > 0) unknown.push(`？GOLD ×${bag.gold}`);
     for (const [itemId, count] of Object.entries(bag.items || {})) {

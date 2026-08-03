@@ -12,7 +12,7 @@
 .town-name-banner{position:absolute;z-index:3;top:-30%;left:50%;width:min(88%,760px);pointer-events:none;will-change:top,opacity,transform;transform:translateX(-50%);perspective:900px}
 .town-name-banner img{display:block;width:100%;height:auto;transform-origin:right center;will-change:transform;filter:drop-shadow(0 8px 7px rgba(0,0,0,.55))}
 .town-name-banner.is-active{animation:town-name-drift 7s cubic-bezier(.2,.65,.3,1) both}
-.town-name-banner.is-active img{animation:town-name-flutter 3.2s ease-in-out infinite}
+.town-name-banner.is-active img{animation:town-name-flutter 2s ease-in-out infinite}
 body.town-active .town-screen.is-town-view .town-cloud-track{animation-play-state:running}
 @keyframes town-cloud-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @keyframes town-name-drift{0%{top:-30%;opacity:0;transform:translateX(-50%) scale(.98)}12%{top:5%;opacity:1;transform:translateX(-50%) scale(1)}58%{top:30%;opacity:1;transform:translateX(-50%) scale(1)}100%{top:88%;opacity:0;transform:translateX(-50%) scale(.98)}}
