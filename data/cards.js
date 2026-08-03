@@ -17,6 +17,13 @@ const STANDARD_CARDS = [
     maxOwned: 99, maxCopies: 6
   },
   {
+    id: "common_dexterity_lesson", rarity: "C", cost: 1,
+    name: "Dexterity Lesson", nameJa: "技巧の心得", concept: "DEX +1",
+    category: "ability", effectId: "dexterity_up", effectValue: 1,
+    statBonus: Object.freeze({ dex: 1 }), iconId: "dexterity",
+    maxOwned: 99, maxCopies: 6
+  },
+  {
     id: "common_lucky_charm", rarity: "C", cost: 1,
     name: "Lucky Charm", nameJa: "幸運のお守り", concept: "LUC +1",
     category: "ability", effectId: "luck_up", effectValue: 1,

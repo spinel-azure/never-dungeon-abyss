@@ -843,6 +843,17 @@ test("the three initial common cards use the Excel effect values", () => {
   assert.deepEqual(getCardById("common_lucky_charm")?.statBonus, { luc: 1 });
 });
 
+test("Dexterity Lesson is a stackable cost-one C card with DEX plus one", () => {
+  const card = getCardById("common_dexterity_lesson");
+  assert.equal(card.nameJa, "技巧の心得");
+  assert.equal(card.rarity, "C");
+  assert.equal(card.cost, 1);
+  assert.equal(card.maxOwned, 99);
+  assert.equal(card.maxCopies, 6);
+  assert.deepEqual(card.statBonus, { dex: 1 });
+  assert.equal(CARDS.filter(entry => entry.id === card.id).length, 1);
+});
+
 test("Alertness is a stackable cost-one C card with two percent surprise resistance", () => {
   const card = getCardById("common_alertness");
   assert.equal(card.rarity, "C");

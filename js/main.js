@@ -110,12 +110,12 @@ import {
   abandonQuest,
   acceptQuest,
   FLOOR_SURVEY_QUEST_ID,
+  getForcedEnemyId,
   hasActiveQuest,
   isDungeonDepthUnlocked,
   recordEnemyDefeat,
   recordFloorExploration,
-  reportQuest,
-  shouldForceEnemy
+  reportQuest
 } from "../data/quests.js";
 
 (() => {
@@ -904,22 +904,7 @@ import {
   }
 
   function getRandomEncounterEnemyData() {
-    const forcedEnemyId = shouldForceEnemy(character, {
-      depth: currentDepth,
-      enemyId: "abyss_rabbit"
-    })
-      ? "abyss_rabbit"
-      : shouldForceEnemy(character, {
-      depth: currentDepth,
-      enemyId: "cave_slime"
-    })
-      ? "cave_slime"
-      : shouldForceEnemy(character, {
-        depth: currentDepth,
-        enemyId: "abyss_rat"
-      })
-        ? "abyss_rat"
-        : null;
+    const forcedEnemyId = getForcedEnemyId(character, { depth: currentDepth });
     return forcedEnemyId
       ? getEnemyById(forcedEnemyId)
       : getRandomEnemy({ depth: currentDepth });
@@ -1186,7 +1171,7 @@ import {
     startBgm(selectDungeonBgm());
     const reward = Math.max(0, Math.floor(Number(battle?.enemy?.experienceReward) || 0));
     if (character && battle?.enemy?.id) {
-      character = recordEnemyDefeat(character, battle.enemy.id);
+      character = recordEnemyDefeat(character, battle.enemy.id, currentDepth);
     }
     if (character && reward > 0) Object.assign(character, awardBattleExperience(character, reward));
     const drop = rollEnemyDrop(battle?.enemy);

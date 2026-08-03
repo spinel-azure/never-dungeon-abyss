@@ -8,6 +8,7 @@ import {
   FLOOR_SURVEY_QUEST_ID,
   RABBIT_EXTERMINATION_QUEST_ID,
   SLIME_EXTERMINATION_QUEST_ID,
+  WANDERING_DEAD_EXTERMINATION_QUEST_ID,
   abandonQuest,
   acceptQuest,
   getQuestById,
@@ -212,6 +213,43 @@ test("quest 004 report grants Alertness and 200G", () => {
   assert.equal(report.bonusGold, 200);
   assert.equal(report.character.gold, 200);
   assert.equal(getOwnedCardCount(report.character.cards, "common_alertness"), 1);
+});
+
+test("quest 005 forces wandering dead only on B4F and ignores other floors", () => {
+  const quest = getQuestById(WANDERING_DEAD_EXTERMINATION_QUEST_ID);
+  assert.equal(quest.targetId, "wandering_dead");
+  assert.equal(quest.targetDepth, 4);
+  assert.equal(quest.objectiveLabel, "さまよう亡者を15体退治する。");
+  let character = acceptQuest(
+    createInitialCharacter({ name: "TEST", job: "thief" }),
+    WANDERING_DEAD_EXTERMINATION_QUEST_ID
+  ).character;
+  assert.equal(shouldForceEnemy(character, { depth: 4, enemyId: "wandering_dead" }), true);
+  assert.equal(shouldForceEnemy(character, { depth: 3, enemyId: "wandering_dead" }), false);
+  character = recordEnemyDefeat(character, "wandering_dead", 3);
+  assert.equal(getQuestProgress(character, WANDERING_DEAD_EXTERMINATION_QUEST_ID).progress, 0);
+  for (let index = 0; index < 15; index += 1) {
+    character = recordEnemyDefeat(character, "wandering_dead", 4);
+  }
+  assert.equal(getQuestProgress(character, WANDERING_DEAD_EXTERMINATION_QUEST_ID).readyToReport, true);
+  assert.equal(shouldForceEnemy(character, { depth: 4, enemyId: "wandering_dead" }), false);
+});
+
+test("quest 005 report grants Dexterity Lesson and 400G once", () => {
+  let character = acceptQuest(
+    createInitialCharacter({ name: "TEST", job: "priest" }),
+    WANDERING_DEAD_EXTERMINATION_QUEST_ID
+  ).character;
+  for (let index = 0; index < 15; index += 1) {
+    character = recordEnemyDefeat(character, "wandering_dead", 4);
+  }
+  const report = reportQuest(character, WANDERING_DEAD_EXTERMINATION_QUEST_ID);
+  assert.equal(report.accepted, true);
+  assert.equal(report.rewardCardId, "common_dexterity_lesson");
+  assert.equal(report.bonusGold, 400);
+  assert.equal(report.character.gold, 400);
+  assert.equal(getOwnedCardCount(report.character.cards, "common_dexterity_lesson"), 1);
+  assert.equal(reportQuest(report.character, WANDERING_DEAD_EXTERMINATION_QUEST_ID).accepted, false);
 });
 
 test("reporting a completed quest grants the C-rarity AGI card once", () => {
