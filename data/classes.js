@@ -9,6 +9,7 @@ import {
 import { normalizeEquipmentInventory } from "./equipment-inventory.js";
 import { normalizeQuestState } from "./quests.js";
 import { normalizeDepthReturnSettlement } from "./experience-settlement.js";
+import { createInitialKeyItemState, normalizeKeyItemState } from "./key-items.js";
 
 export const STAT_KEYS = Object.freeze(["str", "int", "agi", "dex", "luc"]);
 
@@ -71,6 +72,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     deckCost: getDeckCostAtLevel(1),
     cards: createInitialCardState(),
     inventory: createInitialInventory(),
+    keyItems: createInitialKeyItemState(),
     warehouse: createInitialWarehouse(),
     lootBag: createInitialLootBag(),
     quests: normalizeQuestState(),
@@ -126,6 +128,7 @@ export function normalizeCharacter(character) {
     deckCost: growth.deckCost,
     cards,
     inventory: normalizeInventory(character.inventory),
+    keyItems: normalizeKeyItemState(character.keyItems),
     warehouse: normalizeWarehouse(character.warehouse),
     lootBag: normalizeLootBag(character.lootBag),
     quests: normalizeQuestState(character.quests),

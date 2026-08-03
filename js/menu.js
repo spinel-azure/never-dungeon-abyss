@@ -7,6 +7,7 @@ import { EQUIPMENT_SLOT_LABELS, canEquipInstance, equipInstance, findEquipmentDe
 import { collectStats } from "../combat/collect-stats.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { getWeapon, getWeaponType } from "../data/weapons.js";
+import { listOwnedKeyItems } from "../data/key-items.js";
 
 const ACTION_FEEDBACK_MS = 260;
 const DEBUG_SEQUENCE_MS = 1000;
@@ -193,7 +194,14 @@ function inventoryEntries() {
     .filter(item => Number(character?.inventory?.counts?.[item.id]) > 0)
     .filter(item => menu.inventoryPurpose !== "sell" || Number(item.sellPrice) > 0)
     .map(item => ({ item, count: character.inventory.counts[item.id] }));
+  if (menu.inventoryTab === "keyItems") return menu.inventoryPurpose === "sell"
+    ? []
+    : listOwnedKeyItems(character?.keyItems).map(keyItem => ({ keyItem }));
   return listEquipmentInstances(character).map(instance => ({ instance }));
+}
+
+function availableInventoryTabs() {
+  return menu.inventoryPurpose === "sell" ? ["items", "equipment"] : ["items", "keyItems", "equipment"];
 }
 
 function unavailableItemReason(item, character) {
@@ -243,7 +251,10 @@ function handleInventory(action) {
     }
   }
   if (menu.inventoryMode === "list" && (action === "left" || action === "right")) {
-    Object.assign(menu, { inventoryTab: menu.inventoryTab === "items" ? "equipment" : "items", inventoryCursor: 0, inventoryPage: 0 });
+    const tabs = availableInventoryTabs();
+    const current = Math.max(0, tabs.indexOf(menu.inventoryTab));
+    const offset = action === "right" ? 1 : -1;
+    Object.assign(menu, { inventoryTab: tabs[(current + offset + tabs.length) % tabs.length], inventoryCursor: 0, inventoryPage: 0 });
     renderInventory(); return;
   }
   const entries = inventoryEntries();
@@ -385,8 +396,11 @@ function renderInventory() {
   const pages = Math.max(1, Math.ceil(entries.length / 10));
   menu.inventoryPage = Math.min(menu.inventoryPage, pages - 1); menu.inventoryCursor = entries.length ? Math.min(menu.inventoryCursor, entries.length - 1) : 0;
   panel.querySelector(".menu-title").textContent = menu.inventoryPurpose === "sell" ? "SELL" : menu.inventoryMode === "equip" ? `EQUIPMENT : ${EQUIPMENT_SLOT_LABELS[menu.inventorySlot]}` : "INVENTORY";
-  panel.querySelector(".inventory-tabs").hidden = menu.inventoryMode === "equip";
+  const tabs = panel.querySelector(".inventory-tabs");
+  tabs.hidden = menu.inventoryMode === "equip";
+  tabs.classList.toggle("is-sale", menu.inventoryPurpose === "sell");
   panel.querySelectorAll("[data-inventory-tab]").forEach(button => {
+    button.hidden = menu.inventoryPurpose === "sell" && button.dataset.inventoryTab === "keyItems";
     button.classList.toggle("is-selected", button.dataset.inventoryTab === menu.inventoryTab);
     if (button.dataset.inventoryTab === "items") button.textContent = menu.inventoryPurpose === "sell" ? "道具" : "アイテム";
   });
@@ -394,6 +408,7 @@ function renderInventory() {
   panel.querySelector("[data-inventory-list]").replaceChildren(...entries.slice(menu.inventoryPage * 10, menu.inventoryPage * 10 + 10).map((entry, offset) => {
     const index = menu.inventoryPage * 10 + offset, button = document.createElement("button"); button.type = "button"; button.className = "inventory-entry";
     if (entry.item) { button.innerHTML = `<span>${entry.item.name}</span><strong>×${entry.count}</strong>`; button.classList.toggle("is-unavailable", menu.inventoryPurpose !== "sell" && Boolean(unavailableItemReason(entry.item, character))); }
+    else if (entry.keyItem) button.innerHTML = `<span>${entry.keyItem.name}</span><strong></strong>`;
     else if (entry.instance) { button.innerHTML = `<span>${getEquipmentInstanceName(entry.instance)}</span><strong>${equippedIds.has(entry.instance.instanceId) ? "［E］" : ""}${entry.instance.curseKnown ? "［C］" : ""}</strong>`; button.classList.toggle("is-unavailable", menu.inventoryPurpose === "sell" ? Boolean(inventoryEquipmentSaleReason(entry.instance, character)) : menu.inventoryMode === "list" && !canEquipInstance(character, entry.instance).accepted); }
     else button.textContent = entry.label;
     button.classList.toggle("is-selected", menu.inventoryFocus === "list" && index === menu.inventoryCursor);
@@ -404,9 +419,10 @@ function renderInventory() {
     button.addEventListener("dblclick", () => handleInventory("confirm")); return button;
   }));
   const selected = entries[menu.inventoryCursor], description = panel.querySelector("[data-inventory-description]");
-  if (!selected) description.textContent = menu.inventoryPurpose === "sell" ? "売却できる所持品がありません。" : "所持品がありません。";
+  if (!selected) description.textContent = menu.inventoryPurpose === "sell" ? "売却できる所持品がありません。" : menu.inventoryTab === "keyItems" ? "貴重品を所持していません。" : "所持品がありません。";
   else if (menu.inventoryPurpose === "sell") description.textContent = inventorySaleDescription(selected, character);
   else if (selected.item) description.textContent = unavailableItemReason(selected.item, character) || selected.item.description;
+  else if (selected.keyItem) description.textContent = selected.keyItem.description || "大切な貴重品です。";
   else if (!selected.instance) description.textContent = "この装備部位を空にします。";
   else { const definition = getEquipmentInstanceDefinition(selected.instance); const requirements = Object.entries(definition?.requirements || {}).map(([key, value]) => `${key.toUpperCase()} ${value}以上`).join(" / "); const effects = equipmentEffectLabels(definition); description.textContent = `${EQUIPMENT_SLOT_LABELS[selected.instance.slot]} / ${effects.join(" / ")}${effects.length ? " / " : ""}${requirements ? `装備条件：${requirements}` : "装備条件なし"}${selected.instance.curseKnown ? " / 呪われているため外せません。" : ""}`; }
   renderInventoryComparison(panel.querySelector("[data-inventory-compare]"), selected?.instance || null);
