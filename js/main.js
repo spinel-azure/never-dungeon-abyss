@@ -76,7 +76,7 @@ import {
   stopBgm
 } from "./audio.js";
 import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
-import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, setTownTypewriterOptions } from "./town.js?v=20260803-02";
+import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, setTownTypewriterOptions } from "./town.js?v=20260803-03";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceName } from "../data/equipment-inventory.js";

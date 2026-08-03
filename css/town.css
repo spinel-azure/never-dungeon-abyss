@@ -11,12 +11,12 @@
 .town-screen.is-town-view .town-background{z-index:1}
 .town-name-banner{position:absolute;z-index:3;top:-30%;left:50%;width:min(88%,760px);pointer-events:none;will-change:top,opacity,transform;transform:translateX(-50%);perspective:900px}
 .town-name-banner img{display:block;width:100%;height:auto;transform-origin:right center;will-change:transform;filter:drop-shadow(0 8px 7px rgba(0,0,0,.55))}
-.town-name-banner.is-active{animation:town-name-drift 5s cubic-bezier(.2,.65,.3,1) both}
-.town-name-banner.is-active img{animation:town-name-flutter .9s ease-in-out infinite}
+.town-name-banner.is-active{animation:town-name-drift 7s cubic-bezier(.2,.65,.3,1) both}
+.town-name-banner.is-active img{animation:town-name-flutter 3.2s ease-in-out infinite}
 body.town-active .town-screen.is-town-view .town-cloud-track{animation-play-state:running}
 @keyframes town-cloud-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @keyframes town-name-drift{0%{top:-30%;opacity:0;transform:translateX(-50%) scale(.98)}12%{top:5%;opacity:1;transform:translateX(-50%) scale(1)}58%{top:30%;opacity:1;transform:translateX(-50%) scale(1)}100%{top:88%;opacity:0;transform:translateX(-50%) scale(.98)}}
-@keyframes town-name-flutter{0%,100%{transform:rotateY(0deg) skewY(0deg) translateY(0)}28%{transform:rotateY(-5deg) skewY(.7deg) translateY(-2px)}58%{transform:rotateY(3deg) skewY(-.55deg) translateY(2px)}78%{transform:rotateY(-2deg) skewY(.3deg) translateY(-1px)}}
+@keyframes town-name-flutter{0%,100%{transform:rotateY(0deg) skewY(0deg) translateY(0)}32%{transform:rotateY(-1deg) skewY(.12deg) translateY(-.5px)}64%{transform:rotateY(.7deg) skewY(-.08deg) translateY(.5px)}}
 @media(prefers-reduced-motion:reduce){.town-cloud-track{animation:none;transform:translateX(0)}.town-name-banner.is-active{top:16%;animation:town-name-reduced 2.4s ease-in-out both}.town-name-banner.is-active img{animation:none}@keyframes town-name-reduced{0%,100%{opacity:0}18%,72%{opacity:1}}}
 .town-mosaic{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;image-rendering:pixelated}
 .town-portrait{position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;image-rendering:auto;transform-origin:center bottom;animation:npc-breath 3.2s ease-in-out infinite}

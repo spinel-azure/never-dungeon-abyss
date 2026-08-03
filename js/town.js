@@ -790,7 +790,7 @@ function startTownNameBanner() {
   town.nameBanner.classList.remove("is-active");
   void town.nameBanner.offsetWidth;
   town.nameBanner.classList.add("is-active");
-  town.nameBannerTimer = window.setTimeout(stopTownNameBanner, 5100);
+  town.nameBannerTimer = window.setTimeout(stopTownNameBanner, 7100);
 }
 
 function stopTownNameBanner() {
@@ -827,7 +827,7 @@ function renderTownView() {
     town.root.querySelector("#townFacilityName").hidden = true;
     const arrivalMessage = town.arrivalMessage === "firstVisit"
       ? "ここはカッツェンシュタット。『猫の町』とも呼ばれている。どこへ行きますか？"
-      : "カッツェンシュタットの中心部に戻ってきた。どこへいきますか？";
+      : "カッツェンシュタットの中心部に戻ってきた。どこへ行きますか？";
     town.messageEl.textContent = selecting
       ? arrivalMessage
       : `${arrivalMessage}\n＊Aボタンで次へ`;
