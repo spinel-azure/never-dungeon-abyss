@@ -79,7 +79,7 @@ import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
 import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions } from "./town.js?v=20260803-04";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getEquipmentItem } from "../data/equipment.js";
-import { getEquipmentInstanceName } from "../data/equipment-inventory.js";
+import { getEquipmentInstanceDefinition, getEquipmentInstanceName } from "../data/equipment-inventory.js";
 import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
 import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js";
 import { awardBattleExperience, createTempleRevival, getInnStayFee, grantEventItems, resolveDungeonDefeat, resolveInnStableStay, resolveInnStay, unlockGuildRequest } from "./character-services.js";
@@ -844,13 +844,19 @@ import {
   function renderEquipment(target) {
     document.querySelectorAll("[data-equipment-slot]").forEach(element => {
       const slot = element.dataset.equipmentSlot;
+      const equippedInstanceId = target?.equippedInstanceIds?.[slot];
+      const equippedInstance = target?.equipmentInventory?.instances?.find(
+        instance => instance.instanceId === equippedInstanceId && instance.slot === slot
+      );
       const equippedId = slot === "rightArmId"
         ? target?.equipment?.rightArmId || target?.equipment?.weaponId
         : target?.equipment?.[slot];
-      const item = getEquipmentItem(equippedId, slot);
+      const item = equippedInstance
+        ? getEquipmentInstanceDefinition(equippedInstance)
+        : getEquipmentItem(equippedId, slot);
       const name = document.createElement("span");
       name.className = "nde-equipment-name";
-      name.textContent = item?.name || "―";
+      name.textContent = equippedInstance ? getEquipmentInstanceName(equippedInstance) : item?.name || "―";
       const bonus = document.createElement("span");
       bonus.className = "nde-equipment-bonus";
       bonus.textContent = formatEquipmentBonuses(item);
@@ -860,10 +866,14 @@ import {
 
   function formatEquipmentBonuses(item) {
     if (!item) return "";
-    if (Number.isFinite(item.attack)) return `ATK +${item.attack}`;
-    return Object.entries(item.statBonuses || {})
-      .map(([key, value]) => `${key.toUpperCase()} ${Number(value) >= 0 ? "+" : ""}${value}`)
-      .join(" ");
+    const bonuses = [];
+    if (Number.isFinite(item.attack)) bonuses.push(`ATK +${item.attack}`);
+    bonuses.push(...Object.entries(item.statBonuses || {})
+      .map(([key, value]) => `${key.toUpperCase()} ${Number(value) >= 0 ? "+" : ""}${value}`));
+    if (Number(item.defensePenetration) > 0) {
+      bonuses.push(`DEF貫通 ${Math.round(Number(item.defensePenetration) * 100)}%`);
+    }
+    return bonuses.join(" ");
   }
 
   function renderDetailStats(target) {

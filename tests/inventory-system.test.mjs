@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
-import { equipInstance, grantEquipmentInstance, listEquipmentInstances } from "../data/equipment-inventory.js";
+import { equipInstance, getEquipmentInstanceDefinition, getEquipmentInstanceName, grantEquipmentInstance, listEquipmentInstances } from "../data/equipment-inventory.js";
 import { depositItemInWarehouse, grantItemWithOverflow, settleLootBag, storeItemInWarehouse, withdrawItemFromWarehouse } from "../data/inventory.js";
 
 test("legacy equipment migrates to stable individual instances", () => {
@@ -36,6 +36,18 @@ test("identical equipment is kept as independent acquisition-ordered instances",
   assert.equal(new Set(copies.map(instance => instance.instanceId)).size, 3);
   assert.deepEqual(copies.map(instance => instance.enhancement), [0, 0, 1]);
   assert.ok(copies[0].acquiredOrder < copies[1].acquiredOrder && copies[1].acquiredOrder < copies[2].acquiredOrder);
+});
+
+test("enhanced equipped weapons retain their individual display name and effects", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "thief" });
+  const granted = grantEquipmentInstance(character, "stiletto", "rightArmId", { enhancement: 1 });
+  character = granted.character;
+  const equipped = equipInstance(character, "rightArmId", granted.instance.instanceId);
+  const instanceId = equipped.character.equippedInstanceIds.rightArmId;
+  const instance = equipped.character.equipmentInventory.instances.find(entry => entry.instanceId === instanceId);
+
+  assert.equal(getEquipmentInstanceName(instance), "スティレット＋1");
+  assert.equal(getEquipmentInstanceDefinition(instance).defensePenetration, 0.25);
 });
 
 test("warehouse fills partial consumable stacks before creating another", () => {
