@@ -9,7 +9,7 @@ import {
   restorePresence, suppressPresence
 } from "../js/presence.js";
 import { grantEventItems, unlockGuildRequest } from "../js/character-services.js";
-import { purchaseEquipment, purchaseItem, sellItem } from "../data/commerce.js";
+import { purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
 
 function characterWith(itemId, amount = 1) {
   const character = createInitialCharacter({ name: "TEST", job: "warrior" });
@@ -111,6 +111,22 @@ test("shop can sell several stacked consumables at once", () => {
   assert.equal(result.value, 20);
   assert.equal(result.character.gold, 30);
   assert.equal(getItemCount(result.character.inventory, "slime_jelly"), 2);
+});
+
+test("shop sells unequipped equipment instances but rejects equipped ones", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.gold = 100;
+  const purchased = purchaseEquipment(character, "iron_greatsword");
+  const instance = purchased.character.equipmentInventory.instances.at(-1);
+  const sold = sellEquipmentInstance(purchased.character, instance.instanceId);
+
+  assert.equal(sold.accepted, true);
+  assert.equal(sold.value, 50);
+  assert.equal(sold.character.gold, 50);
+  assert.equal(sold.character.equipmentInventory.instances.some(entry => entry.instanceId === instance.instanceId), false);
+
+  const equippedId = character.equippedInstanceIds.rightArmId;
+  assert.equal(sellEquipmentInstance(character, equippedId).reason, "equipped");
 });
 
 test("torch and talisman expose dungeon environment effects", () => {

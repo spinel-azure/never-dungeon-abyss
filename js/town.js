@@ -92,6 +92,7 @@ const town = {
   onPurchaseItem: () => null,
   onPurchaseEquipment: () => null,
   onSellItem: () => null,
+  onOpenSellInventory: () => {},
   onWithdrawItem: () => null,
   onDepositItem: () => null,
   onEditDeck: () => {},
@@ -1046,7 +1047,8 @@ function activateFacilityService(command) {
   if (command === "sell") {
     const facility = TOWN_FACILITIES[town.selectedIndex];
     if (facility?.id !== "shop") return false;
-    openCommerce("sell");
+    town.messageEl.textContent = "女主人ヘレン：何を売るのかしら？";
+    town.onOpenSellInventory();
     return true;
   }
   if (command === "storage") {

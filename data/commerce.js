@@ -1,6 +1,6 @@
 import { getItem } from "./items.js";
 import { consumeItem, getItemCount, grantItemWithOverflow } from "./inventory.js";
-import { grantEquipmentInstance } from "./equipment-inventory.js";
+import { getEquipmentInstanceDefinition, grantEquipmentInstance } from "./equipment-inventory.js";
 import { getWeapon } from "./weapons.js";
 
 export function purchaseItem(character, itemId, { price } = {}) {
@@ -58,6 +58,34 @@ export function sellItem(character, itemId, { price, amount = 1 } = {}) {
       ...character,
       gold: Math.max(0, Math.floor(Number(character.gold) || 0)) + value,
       inventory: consumeItem(character.inventory, item.id, quantity).inventory
+    }
+  };
+}
+
+export function sellEquipmentInstance(character, instanceId, { price } = {}) {
+  if (!character) return { accepted: false, reason: "noCharacter", character };
+  const instance = character.equipmentInventory?.instances?.find(entry => entry.instanceId === instanceId);
+  if (!instance) return { accepted: false, reason: "notOwned", character };
+  if (Object.values(character.equippedInstanceIds || {}).includes(instance.instanceId)) {
+    return { accepted: false, reason: "equipped", character, instance };
+  }
+  const equipment = getEquipmentInstanceDefinition(instance);
+  if (!equipment) return { accepted: false, reason: "unknownEquipment", character, instance };
+  const value = Math.max(0, Math.floor(Number(price ?? equipment.sellPrice ?? equipment.buyPrice / 2) || 0));
+  if (value <= 0) return { accepted: false, reason: "notSellable", character, instance, equipment };
+  return {
+    accepted: true,
+    reason: "",
+    instance,
+    equipment,
+    value,
+    character: {
+      ...character,
+      gold: Math.max(0, Math.floor(Number(character.gold) || 0)) + value,
+      equipmentInventory: {
+        ...character.equipmentInventory,
+        instances: character.equipmentInventory.instances.filter(entry => entry.instanceId !== instance.instanceId)
+      }
     }
   };
 }

@@ -42,7 +42,7 @@ import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minima
 import { configureInput } from "./input.js";
 import { configureVirtualStick } from "./virtualStick.js";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor, closeCampMenu } from "./menu.js";
+import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor, openShopSellInventory, closeCampMenu } from "./menu.js?v=20260804-02";
 import { resolveFloorTheme } from "./floorTheme.js";
 import {
   configureAutoReturn,
@@ -76,7 +76,7 @@ import {
   stopBgm
 } from "./audio.js";
 import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
-import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions } from "./town.js?v=20260803-04";
+import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions } from "./town.js?v=20260804-02";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName } from "../data/equipment-inventory.js";
@@ -103,7 +103,7 @@ import { collectCardStatBonuses, getCardById, hasCardEffect } from "../data/card
 import { drawCardCanvas } from "./card-canvas.js";
 import { getItem } from "../data/items.js";
 import { isCriticalHp } from "../data/quick-status.js";
-import { purchaseEquipment, purchaseItem, sellItem } from "../data/commerce.js";
+import { purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
 import { addLootEquipment, addLootGold, addLootItem, depositItemInWarehouse, settleLootBag, withdrawItemFromWarehouse } from "../data/inventory.js";
 import { rollEnemyDrop, rollRedChestLoot } from "../data/loot.js";
 import {
@@ -284,6 +284,7 @@ import {
     onPurchaseItem: purchaseTownItem,
     onPurchaseEquipment: purchaseTownEquipment,
     onSellItem: sellTownItem,
+    onOpenSellInventory: openShopSellInventory,
     onWithdrawItem: withdrawTownItem,
     onDepositItem: depositTownItem,
     onEditDeck: openDeckEditor,
@@ -1093,6 +1094,16 @@ import {
     return { ...result, character };
   }
 
+  function sellTownEquipment(instanceId) {
+    if (!character) return { accepted: false, reason: "noCharacter" };
+    const result = sellEquipmentInstance(character, instanceId);
+    if (!result.accepted) return result;
+    character = normalizeCharacter(result.character);
+    updateCharacterUi();
+    saveGame();
+    return { ...result, character };
+  }
+
   function withdrawTownItem(itemId) {
     const result = withdrawItemFromWarehouse(character, itemId, 1);
     if (!result.accepted) return result;
@@ -1731,6 +1742,9 @@ import {
       updateCharacterUi();
       saveGame();
     },
+    onSellInventoryItem: sellTownItem,
+    onSellInventoryEquipment: sellTownEquipment,
+    onInventorySaleClosed: renderCharacterStatus,
     onDeckChanged: cards => {
       character = normalizeCharacter({ ...character, cards });
       updateCharacterUi();
