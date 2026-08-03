@@ -76,7 +76,7 @@ import {
   stopBgm
 } from "./audio.js";
 import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
-import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, setTownTypewriterOptions } from "./town.js";
+import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, setTownTypewriterOptions } from "./town.js?v=20260803-02";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceName } from "../data/equipment-inventory.js";
@@ -454,7 +454,8 @@ import {
       openTown({
         registrationRequired: !character,
         facilityId: save.world?.town?.facilityId,
-        mode: save.world?.town?.mode
+        mode: save.world?.town?.mode,
+        firstTownArrivalPending: save.world?.town?.firstTownArrivalPending
       });
     } else {
       startBgm(selectDungeonBgm());

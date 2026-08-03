@@ -55,6 +55,8 @@ const townTypewriter = {
 const town = {
   root: null,
   background: null,
+  nameBanner: null,
+  nameBannerTimer: 0,
   mosaic: null,
   portrait: null,
   portraitPlaceholder: null,
@@ -80,6 +82,8 @@ const town = {
   transitioning: false,
   mode: "arrival",
   registrationRequired: false,
+  firstTownArrivalPending: false,
+  arrivalMessage: "normal",
   getCharacter: () => null,
   onRegister: () => {},
   onEnterDungeon: () => {},
@@ -107,6 +111,7 @@ const town = {
 export function configureTown(options) {
   Object.assign(town, options);
   town.background = town.root.querySelector("#townBackground");
+  town.nameBanner = town.root.querySelector("#townNameBanner");
   town.cloudLayer = town.root.querySelector("#townCloudLayer");
   town.passersbyCanvas = town.root.querySelector("#townPassersby");
   town.disposePassersby?.();
@@ -151,6 +156,7 @@ export function configureTown(options) {
   town.backgroundPreloads = [
     "images/background/town_01b.avif",
     "images/background/town_01c.avif",
+    "images/background/town_name_01.avif",
     ...TOWN_FACILITIES.map(facility => facility.background).filter(Boolean),
     "images/background/circle.avif",
     "images/background/town_02b.avif"
@@ -224,7 +230,7 @@ export function configureTown(options) {
       const command = button.dataset.facilityCommand;
       if (command === "return") {
         town.playSe("confirm");
-        showTownArrival();
+        returnFromFacility();
       } else if (activateFacilityService(command)) {
         if (command !== "stay" && command !== "heal") town.playSe("confirm");
       } else {
@@ -279,9 +285,11 @@ export function setTownTypewriterOptions({ enabled, speed } = {}) {
   if (!townTypewriter.enabled && townTypewriter.active) completeTownTypewriter();
 }
 
-export function openTown({ registrationRequired = false, facilityId = null, mode = null } = {}) {
+export function openTown({ registrationRequired = false, facilityId = null, mode = null, firstTownArrivalPending = false } = {}) {
   town.active = true;
   town.registrationRequired = Boolean(registrationRequired);
+  town.firstTownArrivalPending = Boolean(firstTownArrivalPending);
+  town.arrivalMessage = "normal";
   const requested = getTownFacility(facilityId);
   const availableRequested = requested && !requested.unavailable ? requested : null;
   const initialId = town.registrationRequired
@@ -303,6 +311,7 @@ export function openTown({ registrationRequired = false, facilityId = null, mode
 
 export function closeTown() {
   town.active = false;
+  stopTownNameBanner();
   clearTownTypewriter();
   town.root.hidden = true;
   town.registration.hidden = true;
@@ -327,6 +336,7 @@ export function getTownState() {
   return {
     facilityId: TOWN_FACILITIES[town.selectedIndex]?.id || "guild",
     registrationRequired: town.registrationRequired,
+    firstTownArrivalPending: town.firstTownArrivalPending,
     mode: town.mode
   };
 }
@@ -400,7 +410,7 @@ function handleFacilityMenuInput(action) {
     const command = town.facilityCommandButtons[town.facilityCommandIndex]?.dataset.facilityCommand;
     if (command === "return") {
       town.playSe("confirm");
-      showTownArrival();
+      returnFromFacility();
     } else if (activateFacilityService(command)) {
       if (command !== "stay" && command !== "heal") town.playSe("confirm");
     }
@@ -623,7 +633,7 @@ function handleRegistrationInput(action) {
 function handleEntranceInput(action) {
   if (action === "cancel") {
     town.playSe("cancel");
-    showTownArrival();
+    showTownArrival({ playNameBanner: true });
     return true;
   }
   if (action === "left" || action === "right") {
@@ -656,7 +666,7 @@ function activateEntranceCommand(command) {
     renderTransferCircle();
     return;
   }
-  if (command === "return") showTownArrival();
+  if (command === "return") showTownArrival({ playNameBanner: true });
 }
 
 function moveSelection(direction) {
@@ -756,12 +766,38 @@ function beginFacilitySelection() {
   renderTownView();
 }
 
-export function showTownArrival() {
+export function showTownArrival({ playNameBanner = false, firstVisit = false } = {}) {
   if (!town.active || town.registrationRequired) return false;
   town.mode = "selection";
+  town.arrivalMessage = firstVisit ? "firstVisit" : "normal";
   town.selectedIndex = TOWN_FACILITIES.findIndex(facility => facility.id === "inn");
   renderTownView();
+  if (playNameBanner) startTownNameBanner();
   return true;
+}
+
+function returnFromFacility() {
+  const firstVisit = town.firstTownArrivalPending
+    && TOWN_FACILITIES[town.selectedIndex]?.id === "guild";
+  if (firstVisit) town.firstTownArrivalPending = false;
+  showTownArrival({ playNameBanner: firstVisit, firstVisit });
+}
+
+function startTownNameBanner() {
+  if (!town.nameBanner) return;
+  window.clearTimeout(town.nameBannerTimer);
+  town.nameBanner.hidden = false;
+  town.nameBanner.classList.remove("is-active");
+  void town.nameBanner.offsetWidth;
+  town.nameBanner.classList.add("is-active");
+  town.nameBannerTimer = window.setTimeout(stopTownNameBanner, 5100);
+}
+
+function stopTownNameBanner() {
+  window.clearTimeout(town.nameBannerTimer);
+  town.nameBannerTimer = 0;
+  town.nameBanner?.classList.remove("is-active");
+  if (town.nameBanner) town.nameBanner.hidden = true;
 }
 
 function nearestSelectableIndex(start, amount) {
@@ -789,9 +825,12 @@ function renderTownView() {
     town.portrait.hidden = true;
     town.portraitPlaceholder.hidden = true;
     town.root.querySelector("#townFacilityName").hidden = true;
+    const arrivalMessage = town.arrivalMessage === "firstVisit"
+      ? "ここはカッツェンシュタット。『猫の町』とも呼ばれている。どこへ行きますか？"
+      : "カッツェンシュタットの中心部に戻ってきた。どこへいきますか？";
     town.messageEl.textContent = selecting
-      ? "町に戻ってきた。どこへ行きますか？"
-      : "町に戻ってきた。どこへ行きますか？\n＊Aボタンで次へ";
+      ? arrivalMessage
+      : `${arrivalMessage}\n＊Aボタンで次へ`;
     town.registration.hidden = true;
     town.root.classList.remove("is-registering");
     town.facilityButtons.forEach((button, index) => {
@@ -812,6 +851,7 @@ function renderTownView() {
 }
 
 function renderFacility() {
+  stopTownNameBanner();
   const facility = TOWN_FACILITIES[town.selectedIndex] || getTownFacility("guild");
   town.onAmbienceChanged(false);
   town.onBgmChanged(
@@ -1568,6 +1608,7 @@ function registerCharacter() {
   if (!validateRegistrationName()) return;
   const job = CHARACTER_JOBS.find(item => item.id === town.jobSelect.value) || CHARACTER_JOBS[0];
   town.registrationRequired = false;
+  town.firstTownArrivalPending = true;
   town.mode = "facilityMenu";
   town.facilityCommandIndex = 0;
   const registrationResult = town.onRegister({ name, job: job.id, jobLabel: job.labelEn });
