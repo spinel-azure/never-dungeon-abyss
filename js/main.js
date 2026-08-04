@@ -109,6 +109,7 @@ import { addLootEquipment, addLootGold, addLootItem, depositItemInWarehouse, set
 import { rollEnemyDrop, rollRedChestLoot } from "../data/loot.js";
 import { rollTreasureTrap } from "../data/traps.js";
 import { restAtHealingFountain as restoreAtHealingFountain } from "../data/fountains.js";
+import { getSkill } from "../data/skills.js";
 import {
   abandonQuest,
   acceptQuest,
@@ -324,9 +325,10 @@ import {
     onVictory: finishBattleVictory,
     onDefeat: finishBattleDefeat,
     onEscape: finishBattleEscape,
-    openSkills: ({ character: battleCharacter, onUse }) => openSkillOverlay({
+    openSkills: ({ character: battleCharacter, enemy, onUse }) => openSkillOverlay({
       context: "battle",
       character: battleCharacter,
+      enemy,
       onUse
     }),
     openItems: ({ character: battleCharacter, enemy, onUse }) => {
@@ -1133,7 +1135,9 @@ import {
     if (!result.accepted) return result;
     character = result.character;
     updateCharacterUi();
-    say(`${result.skill.name}を使った。HPが${result.healing}回復した。`);
+    say(result.skill.actionType === "cureStatus"
+      ? `${result.skill.name}を使った。毒が消え去った。`
+      : `${result.skill.name}を使った。HPが${result.healing}回復した。`);
     saveGame();
     playSe("heal");
     return result;
@@ -1362,7 +1366,7 @@ import {
         : "";
       if (result.levelsGained > 0) {
         const levelUpPresentation = showLevelUpEffect();
-        say(`LVが上がった！HP+${result.hpGained}、SP+${result.spGained}${deckBonus}`);
+        say(`LVが上がった！HP+${result.hpGained}、SP+${result.spGained}${deckBonus}${formatLearnedSkills(result.learnedSkillIds)}`);
         await levelUpPresentation;
       } else {
         say("女将ヨハンナ：ゆっくり休めたかい？");
@@ -1441,7 +1445,7 @@ import {
         : "";
       if (result.levelsGained > 0) {
         const levelUpPresentation = showLevelUpEffect();
-        say(`LVが上がった！HP+${result.hpGained}、SP+${result.spGained}${deckBonus}`);
+        say(`LVが上がった！HP+${result.hpGained}、SP+${result.spGained}${deckBonus}${formatLearnedSkills(result.learnedSkillIds)}`);
         await levelUpPresentation;
       } else {
         say("馬小屋で夜露をしのぎ、少し身体を休めた。");
@@ -1579,6 +1583,10 @@ import {
 
   function wait(milliseconds) {
     return new Promise(resolve => window.setTimeout(resolve, milliseconds));
+  }
+
+  function formatLearnedSkills(skillIds = []) {
+    return skillIds.map(id => getSkill(id)?.name).filter(Boolean).map(name => `\n${name}を習得した！`).join("");
   }
 
   function returnToTown() {

@@ -140,6 +140,7 @@ function activateSelected() {
   if (command === "skills") {
     battleUi.openSkills({
       character: battleUi.battle.player,
+      enemy: battleUi.battle.enemy,
       onUse: useBattleSkill
     });
     return;
@@ -177,9 +178,13 @@ async function executeCommand(command) {
     playerCommand: command
   });
   if (!resolved.accepted) {
-    battleUi.messageEl.textContent = resolved.reason === "insufficientSp"
-      ? "SPが足りない。"
-      : "現在使用できません。";
+    const messages = {
+      insufficientSp: "SPが足りない。",
+      noEffect: "毒状態ではない。",
+      undeadOnly: "アンデッドにしか効果がない。",
+      bossImmune: "この敵には効かない。"
+    };
+    battleUi.messageEl.textContent = messages[resolved.reason] || "現在使用できません。";
     return;
   }
   battleUi.battle = resolved.battle;

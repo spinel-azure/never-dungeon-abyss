@@ -153,6 +153,13 @@ export function createPlayerAction(player, command = {}, enemy = null) {
   const skill = getSkill(command.skillId);
   if (!skill || !player.skillIds?.includes(skill.id)) return { ok: false, reason: "unknownSkill" };
   if (player.sp < skill.spCost) return { ok: false, reason: "insufficientSp" };
+  if (skill.actionType === "cureStatus" && !(player.statuses || []).some(status => (status.statusId || status.id) === skill.statusId)) {
+    return { ok: false, reason: "noEffect" };
+  }
+  if (skill.actionType === "banishUndead") {
+    if (enemy?.isBoss) return { ok: false, reason: "bossImmune" };
+    if (enemy?.race !== "undead") return { ok: false, reason: "undeadOnly" };
+  }
   const action = skill.actionType === "physicalAttack"
     ? createSkillAttack(skill, {
       weaponId: player.equipment?.weaponId,
@@ -264,6 +271,21 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
       amount: result.actualHealing,
       message: `${result.actualHealing}回復！`
     });
+    return;
+  }
+  if (action.actionType === "cureStatus") {
+    actor.statuses = (actor.statuses || []).filter(status => (status.statusId || status.id) !== action.statusId);
+    actor.condition = (actor.statuses || []).some(status => (status.statusId || status.id) === "poison") ? "POISON" : "GOOD";
+    battle.log.push(`${actor.name}は${action.name}を唱えた。毒が消え去った。`);
+    return;
+  }
+  if (action.actionType === "banishUndead") {
+    target.hp = 0;
+    target.alive = false;
+    target.experienceReward = 0;
+    target.dropItemId = null;
+    target.noDrop = true;
+    battle.log.push(`${actor.name}は${action.name}を唱えた。${target.name}は聖なる光により消滅した。`);
     return;
   }
   const result = action.actionType === "spell"

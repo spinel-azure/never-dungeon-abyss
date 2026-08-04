@@ -9,6 +9,7 @@ import {
 import { normalizeEquipmentInventory } from "./equipment-inventory.js";
 import { normalizeQuestState } from "./quests.js";
 import { normalizeDepthReturnSettlement } from "./experience-settlement.js";
+import { getLevelUnlockedSkillIds } from "./skills.js";
 import { createInitialKeyItemState, normalizeKeyItemState } from "./key-items.js";
 
 export const STAT_KEYS = Object.freeze(["str", "int", "agi", "dex", "luc"]);
@@ -152,9 +153,10 @@ export function normalizeCharacter(character) {
     def: Math.max(0, Number(character.def) || 0),
     equipment,
     ...equipmentCollection,
-    skillIds: Array.isArray(character.skillIds)
-      ? [...character.skillIds]
-      : [...characterClass.initialSkillIds],
+    skillIds: [...new Set([
+      ...(Array.isArray(character.skillIds) ? character.skillIds : characterClass.initialSkillIds),
+      ...getLevelUnlockedSkillIds(characterClass.id, level)
+    ])],
     statuses: Array.isArray(character.statuses) ? structuredClone(character.statuses) : [],
     condition: character.condition || "GOOD",
     alive: character.alive !== false && Number(character.hp) > 0

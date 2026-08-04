@@ -8,6 +8,7 @@ import {
   calculateDepthReturnSettlement,
   normalizeDepthReturnSettlement
 } from "../data/experience-settlement.js";
+import { getLevelUnlockedSkillIds } from "../data/skills.js";
 
 export const TOWN_INTRODUCTION_FLAGS = Object.freeze([
   "inn_first_talk_card",
@@ -58,6 +59,10 @@ export function resolveInnStay(character) {
   const maxSpBonus = getVitalBonus(character, "maxSp");
   const maxHp = growth.hp + maxHpBonus;
   const maxSp = growth.sp + maxSpBonus;
+  const previousSkillIds = Array.isArray(character.skillIds) ? character.skillIds : [];
+  const unlockedSkillIds = getLevelUnlockedSkillIds(character.job, level);
+  const skillIds = [...new Set([...previousSkillIds, ...unlockedSkillIds])];
+  const learnedSkillIds = skillIds.filter(id => !previousSkillIds.includes(id));
   return {
     changes: {
       experience,
@@ -71,7 +76,8 @@ export function resolveInnStay(character) {
       sp: maxSp,
       statuses: [],
       condition: "GOOD",
-      alive: true
+      alive: true,
+      skillIds
     },
     settlement,
     hadPendingSettlement: Boolean(pendingSettlement),
@@ -79,7 +85,8 @@ export function resolveInnStay(character) {
     levelsGained: Math.max(0, level - previousLevel),
     hpGained: Math.max(0, growth.hp - previousGrowth.hp),
     spGained: Math.max(0, growth.sp - previousGrowth.sp),
-    deckCostGained: Math.max(0, growth.deckCost - previousGrowth.deckCost)
+    deckCostGained: Math.max(0, growth.deckCost - previousGrowth.deckCost),
+    learnedSkillIds
   };
 }
 

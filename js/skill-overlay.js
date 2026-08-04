@@ -10,6 +10,7 @@ const overlay = {
   context: "field",
   selectedIndex: 0,
   skills: [],
+  enemy: null,
   getCharacter: () => null,
   onUse: async () => ({ accepted: false }),
   onClose: () => {},
@@ -25,12 +26,13 @@ export function configureSkillOverlay(options) {
   overlay.backButton.addEventListener("click", closeSkillOverlay);
 }
 
-export function openSkillOverlay({ context = "field", character, onUse, onClose } = {}) {
+export function openSkillOverlay({ context = "field", character, enemy = null, onUse, onClose } = {}) {
   if (overlay.active || !character) return false;
   overlay.active = true;
   overlay.context = context;
   overlay.selectedIndex = 0;
   overlay.skills = getSkills(character.skillIds);
+  overlay.enemy = enemy;
   overlay.getCharacter = () => character;
   if (onUse) overlay.onUse = onUse;
   overlay.onClose = onClose || (() => {});
@@ -150,8 +152,13 @@ function renderSelection() {
 
 function unavailableReason(skill, character) {
   if (character.sp < skill.spCost) return "insufficientSp";
-  if (overlay.context === "field" && skill.actionType !== "healing") return "battleOnly";
-  if (overlay.context === "field" && character.hp >= character.maxHp) return "fullHp";
+  if (overlay.context === "field" && !["healing", "cureStatus"].includes(skill.actionType)) return "battleOnly";
+  if (overlay.context === "field" && skill.actionType === "healing" && character.hp >= character.maxHp) return "fullHp";
+  if (skill.actionType === "cureStatus" && !(character.statuses || []).some(status => (status.statusId || status.id) === skill.statusId)) return "noEffect";
+  if (overlay.context === "battle" && skill.actionType === "banishUndead") {
+    if (overlay.enemy?.isBoss) return "bossImmune";
+    if (overlay.enemy?.race !== "undead") return "undeadOnly";
+  }
   return "";
 }
 
@@ -160,6 +167,9 @@ function showReason(reason) {
     insufficientSp: "SPが足りない。",
     battleOnly: "このスキルは戦闘中のみ使用できる。",
     fullHp: "HPは満タンだ。",
+    noEffect: "毒状態ではない。",
+    undeadOnly: "アンデッドにしか効果がない。",
+    bossImmune: "この敵には効かない。",
     unknownSkill: "現在使用できない。"
   };
   overlay.messageEl.classList.remove("is-skill-description");

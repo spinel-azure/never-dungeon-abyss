@@ -993,6 +993,73 @@ test("field skills reject battle-only actions and full-HP healing", () => {
   }).reason, "fullHp");
 });
 
+test("priests learn Antidote at level 3 and Exorcism at level 5", () => {
+  const priest = createInitialCharacter({ name: "TEST", job: "priest" });
+  assert.equal(priest.skillIds.includes("antidote"), false);
+  assert.equal(priest.skillIds.includes("exorcism"), false);
+  const level3 = normalizeCharacter({ ...priest, level: 3 });
+  assert.equal(level3.skillIds.includes("antidote"), true);
+  assert.equal(level3.skillIds.includes("exorcism"), false);
+  const level5 = normalizeCharacter({ ...level3, level: 5 });
+  assert.equal(level5.skillIds.includes("exorcism"), true);
+  assert.equal(getSkill("antidote").spCost, 3);
+  assert.equal(getSkill("exorcism").spCost, 5);
+
+  const lodging = { ...priest, level: 2, experience: getExperienceForLevel(2) };
+  lodging.carriedExperience = getExperienceForLevel(5) - lodging.experience;
+  const stayed = resolveInnStay(lodging);
+  assert.deepEqual(stayed.learnedSkillIds, ["antidote", "exorcism"]);
+  assert.equal(stayed.changes.skillIds.includes("antidote"), true);
+  assert.equal(stayed.changes.skillIds.includes("exorcism"), true);
+});
+
+test("Antidote cures poison for 3 SP without restoring HP", () => {
+  const priest = normalizeCharacter({ ...createInitialCharacter({ name: "TEST", job: "priest" }), level: 3 });
+  priest.hp = 4;
+  priest.statuses = [{ statusId: "poison", remaining: 3 }];
+  priest.condition = "POISON";
+  const result = resolveFieldSkill({ character: priest, skillId: "antidote" });
+  assert.equal(result.accepted, true);
+  assert.equal(result.character.hp, 4);
+  assert.equal(result.character.sp, priest.sp - 3);
+  assert.equal(result.character.statuses.some(status => status.statusId === "poison"), false);
+  assert.equal(result.character.condition, "GOOD");
+  assert.equal(resolveFieldSkill({ character: result.character, skillId: "antidote" }).reason, "noEffect");
+});
+
+test("Exorcism banishes only non-boss undead for 5 SP and grants no experience", () => {
+  const priest = normalizeCharacter({ ...createInitialCharacter({ name: "TEST", job: "priest" }), level: 5 });
+  const enemy = {
+    id: "test_undead", name: "UNDEAD", race: "undead", hp: 10, maxHp: 10,
+    sp: 0, maxSp: 0, stats: { str: 1, int: 1, agi: 0, dex: 1, luc: 1 },
+    def: 0, attack: 0, experienceReward: 999, statuses: [], equipment: {},
+    elementMultipliers: {}, statusResistances: {}, isBoss: false, alive: true
+  };
+  const result = resolveBattleRound({
+    battle: createBattleState({ character: priest, enemy }),
+    playerCommand: { type: "skill", skillId: "exorcism" },
+    rng: () => 0
+  });
+  assert.equal(result.accepted, true);
+  assert.equal(result.battle.outcome, "victory");
+  assert.equal(result.battle.player.sp, priest.sp - 5);
+  assert.equal(result.battle.enemy.experienceReward, 0);
+  assert.equal(result.battle.enemy.noDrop, true);
+
+  const beast = resolveBattleRound({
+    battle: createBattleState({ character: priest, enemy: { ...enemy, race: "beast" } }),
+    playerCommand: { type: "skill", skillId: "exorcism" }
+  });
+  assert.equal(beast.accepted, false);
+  assert.equal(beast.reason, "undeadOnly");
+  const boss = resolveBattleRound({
+    battle: createBattleState({ character: priest, enemy: { ...enemy, isBoss: true } }),
+    playerCommand: { type: "skill", skillId: "exorcism" }
+  });
+  assert.equal(boss.accepted, false);
+  assert.equal(boss.reason, "bossImmune");
+});
+
 test("defeat presentation is skipped only when a future recovery resolver restores HP", () => {
   const defeated = { hp: 0, alive: false };
   assert.equal(resolveDefeatRecovery({ character: defeated }).recovered, false);

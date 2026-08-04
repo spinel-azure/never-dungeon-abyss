@@ -114,6 +114,29 @@ export const SKILLS = Object.freeze({
     speedModifier: 0,
     effects: Object.freeze([{ statusId: "guardian_prayer", trigger: "perAction", guaranteed: true }])
   }),
+  antidote: Object.freeze({
+    id: "antidote",
+    name: "アンチドート",
+    description: "毒状態を回復する。\nHPは回復しない。",
+    actionType: "cureStatus",
+    category: "miracle",
+    spCost: 3,
+    target: "self",
+    statusId: "poison",
+    speedModifier: 0,
+    effects: Object.freeze([])
+  }),
+  exorcism: Object.freeze({
+    id: "exorcism",
+    name: "エクソシズム",
+    description: "通常のアンデッドを聖なる光で浄化する。\n経験値は得られず、ボスには無効。",
+    actionType: "banishUndead",
+    category: "miracle",
+    spCost: 5,
+    target: "enemy",
+    speedModifier: 0,
+    effects: Object.freeze([])
+  }),
   illusion: Object.freeze({
     id: "illusion",
     name: "幻影",
@@ -135,4 +158,16 @@ export function getSkill(id) {
 
 export function getSkills(ids = []) {
   return ids.map(getSkill).filter(Boolean);
+}
+
+export const LEVEL_SKILL_UNLOCKS = Object.freeze([
+  Object.freeze({ job: "priest", level: 3, skillId: "antidote" }),
+  Object.freeze({ job: "priest", level: 5, skillId: "exorcism" })
+]);
+
+export function getLevelUnlockedSkillIds(job, level) {
+  const normalizedLevel = Math.max(1, Math.floor(Number(level) || 1));
+  return LEVEL_SKILL_UNLOCKS
+    .filter(unlock => unlock.job === job && unlock.level <= normalizedLevel)
+    .map(unlock => unlock.skillId);
 }
