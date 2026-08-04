@@ -336,6 +336,21 @@ export function startAmbushEncounterNotice() {
   startEncounterNotice("ambush");
 }
 
+export function startBattleTreasureEvent(treasureType, trapId, victoryMessage = "") {
+  const typeLabel = treasureType === "red" ? "赤い宝箱" : treasureType === "black" ? "黒い宝箱" : "金色の宝箱";
+  startOverlayEvent({
+    type: "treasure",
+    treasureType,
+    trapId: trapId || null,
+    phase: "prompt",
+    transientAfterBattle: true,
+    message: `${victoryMessage ? `${victoryMessage}\n` : ""}${typeLabel}がある。開けますか？\n＊Aボタン：はい　Bボタン：開けずに立ち去る。（宝箱はなくなります）`,
+    canCancel: true,
+    retreatOnCancel: false
+  });
+  hooks.showTreasure(treasureType);
+}
+
 function startEncounterNotice(encounterType) {
   const ambush = encounterType === "ambush";
   startOverlayEvent({
@@ -479,7 +494,7 @@ function confirmTreasureEvent() {
   hooks.say("");
   hooks.playTreasureOpening(event.treasureType, () => {
     if (state.overlayEvent !== event) return;
-    removeTreasureAt(event.treasureGX, event.treasureGY);
+    if (!event.transientAfterBattle) removeTreasureAt(event.treasureGX, event.treasureGY);
     state.overlayEvent = null;
     hooks.hideTreasure();
     const trapMessage = trapResult.message ? `${trapResult.message}\n` : "";
@@ -495,6 +510,7 @@ function confirmTreasureEvent() {
     }
     updateNpcAwareness();
     hooks.onStateChanged();
+    resumeAutoReturnAfterTransientTreasure(event);
   });
 }
 
@@ -551,11 +567,18 @@ function cancelOverlayEvent() {
   state.overlayEvent = null;
   hooks.say("");
   if (event.type === "treasure") {
-    discoverTreasureAt(event.treasureGX, event.treasureGY);
+    if (!event.transientAfterBattle) discoverTreasureAt(event.treasureGX, event.treasureGY);
     hooks.hideTreasure();
   }
   hooks.onStateChanged();
   if (event.retreatOnCancel) startNpcRetreat(event);
+  resumeAutoReturnAfterTransientTreasure(event);
+}
+
+function resumeAutoReturnAfterTransientTreasure(event) {
+  if (!event?.transientAfterBattle) return;
+  state.autoReturnPaused = false;
+  if (state.autoWalkerActive) window.setTimeout(hooks.continueAutoReturn, 0);
 }
 
 function startNpcTypewriter(event, dialogue) {

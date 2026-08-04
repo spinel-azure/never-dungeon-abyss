@@ -34,6 +34,7 @@ import {
   playArrivalSequence,
   startRandomEncounterNotice,
   startAmbushEncounterNotice,
+  startBattleTreasureEvent,
   startFloorLapNotice,
   setNpcTypewriterOptions
 } from "./player.js";
@@ -106,6 +107,7 @@ import { isCriticalHp } from "../data/quick-status.js";
 import { purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
 import { addLootEquipment, addLootGold, addLootItem, depositItemInWarehouse, settleLootBag, withdrawItemFromWarehouse } from "../data/inventory.js";
 import { rollEnemyDrop, rollRedChestLoot } from "../data/loot.js";
+import { rollTreasureTrap } from "../data/traps.js";
 import {
   abandonQuest,
   acceptQuest,
@@ -872,9 +874,6 @@ import {
     if (Number.isFinite(item.attack)) bonuses.push(`ATK +${item.attack}`);
     bonuses.push(...Object.entries(item.statBonuses || {})
       .map(([key, value]) => `${key.toUpperCase()} ${Number(value) >= 0 ? "+" : ""}${value}`));
-    if (Number(item.defensePenetration) > 0) {
-      bonuses.push(`DEF貫通 ${Math.round(Number(item.defensePenetration) * 100)}%`);
-    }
     return bonuses.join(" ");
   }
 
@@ -1200,14 +1199,17 @@ import {
     }
     if (character && reward > 0) Object.assign(character, awardBattleExperience(character, reward));
     const drop = rollEnemyDrop(battle?.enemy);
-    const dropMessage = drop.kind === "redChest"
-      ? addRolledLoot(rollRedChestLoot())
-      : addRolledLoot(drop);
+    const dropMessage = drop.kind === "redChest" ? "" : addRolledLoot(drop);
+    const victoryMessage = `${reward > 0 ? `戦闘に勝利した。${reward}EXPを持ち帰った。` : "戦闘に勝利した。"}${dropMessage ? `\n${dropMessage}` : ""}`;
     resetPresence();
-    say(`${reward > 0 ? `戦闘に勝利した。${reward}EXPを持ち帰った。` : "戦闘に勝利した。"}${dropMessage ? `\n${drop.kind === "redChest" ? "赤箱を発見！ " : ""}${dropMessage}` : ""}`);
     setPlayerInputEnabled(true);
-    state.autoReturnPaused = false;
-    if (state.autoWalkerActive) window.setTimeout(continueAutoReturn, 0);
+    if (drop.kind === "redChest") {
+      startBattleTreasureEvent("red", rollTreasureTrap("red"), victoryMessage);
+    } else {
+      say(victoryMessage);
+      state.autoReturnPaused = false;
+      if (state.autoWalkerActive) window.setTimeout(continueAutoReturn, 0);
+    }
     updateCharacterUi();
     saveGame();
   }
