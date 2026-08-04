@@ -4,6 +4,7 @@
   MAX_DIST
 } from "./config.js";
 import { npcs, getNpcById } from "../data/npcs.js";
+import { HEALING_FOUNTAIN } from "../data/fountains.js";
 
 const renderer = {
   canvas: null,
@@ -121,6 +122,7 @@ export function configureRenderer(options) {
     locked: makeDoorTexture("locked")
   };
   npcs.forEach(npc => loadCharacterImage(npc.imageId, npc.image));
+  loadCharacterImage(HEALING_FOUNTAIN.id, HEALING_FOUNTAIN.image);
   ["red", "black", "gold"].forEach(type => loadTreasureImage(type, `images/treasure/treasure-${type}.png`));
   renderer.canvas.addEventListener("pointerup", handleCanvasPointerUp);
   renderer.canvas.addEventListener("touchend", handleCanvasTouchEnd, { passive: false });
@@ -612,6 +614,14 @@ export function drawCellEvents(layer = "all") {
           npc
         });
       }
+      if (cell.fountain) {
+        if (layer === "floor") continue;
+        events.push({
+          ...projected,
+          eventKind: "fountain",
+          npc: { imageId: HEALING_FOUNTAIN.id }
+        });
+      }
       if (cell.treasure) {
         if (layer === "floor") continue;
         events.push({
@@ -628,6 +638,7 @@ export function drawCellEvents(layer = "all") {
     .forEach(event => {
       if (event.eventKind === "stairs") drawStairsEventMarker(ctx, W, H, event);
       if (event.eventKind === "npc") drawNpcEvent(ctx, event);
+      if (event.eventKind === "fountain") drawNpcEvent(ctx, event);
       if (event.eventKind === "treasure") drawTreasureEvent(ctx, event);
     });
 }

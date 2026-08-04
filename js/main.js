@@ -108,6 +108,7 @@ import { purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from
 import { addLootEquipment, addLootGold, addLootItem, depositItemInWarehouse, settleLootBag, withdrawItemFromWarehouse } from "../data/inventory.js";
 import { rollEnemyDrop, rollRedChestLoot } from "../data/loot.js";
 import { rollTreasureTrap } from "../data/traps.js";
+import { restAtHealingFountain as restoreAtHealingFountain } from "../data/fountains.js";
 import {
   abandonQuest,
   acceptQuest,
@@ -268,6 +269,7 @@ import {
     hideTreasure,
     resolveTreasureTrap: resolveCurrentTreasureTrap,
     awardTreasure: awardTreasureLoot,
+    restAtFountain: restAtHealingFountain,
     returnToTown,
     beginBattle: beginRandomBattle,
     playNpcVoice: playSe,
@@ -1374,6 +1376,19 @@ import {
     } else {
       finishPresentation();
     }
+  }
+
+  async function restAtHealingFountain() {
+    if (!character || sceneTransitionRunning || worldLocation !== "dungeon") return false;
+    const completed = await runSceneTransition({
+      playAudio: () => playSeSequence("goodNight", 1),
+      onDark: () => {
+        character = restoreAtHealingFountain(character);
+        updateCharacterUi();
+        saveGame();
+      }
+    });
+    return completed;
   }
 
   async function stayAtInnStable() {

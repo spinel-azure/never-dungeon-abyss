@@ -58,6 +58,7 @@
         drawStairsMark(ctx, x1, y1, cell, c.type);
       }
       if (c.npc && (isExplored || revealOptions.npcs)) drawNpcMark(ctx, x1, y1, cell);
+      if (c.fountain && state.torchFuel > 0) drawFountainMark(ctx, x1, y1, cell);
       if (c.treasure && revealOptions.treasures) {
         drawTreasureMark(ctx, x1, y1, cell, c.treasure);
       } else if (c.treasure && state.treasureCompassActive) {
@@ -133,6 +134,16 @@ export function drawNpcMark(ctx, x, y, size) {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText("👤", x + size / 2, y + size / 2);
+  ctx.restore();
+}
+
+export function drawFountainMark(ctx, x, y, size) {
+  ctx.save();
+  ctx.fillStyle = "#74dcff";
+  ctx.font = `${Math.max(9, size * .7)}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("⛲", x + size / 2, y + size / 2);
   ctx.restore();
 }
 

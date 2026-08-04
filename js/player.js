@@ -17,12 +17,15 @@ import {
   getStartPosition,
   getNpcAt,
   removeNpcAt,
+  getFountainAt,
+  removeFountainAt,
   getTreasureAt,
   getTreasureTrapAt,
   removeTreasureAt,
   discoverTreasureAt
 } from "./dungeon.js";
 import { getNpcEncounter } from "../data/npcs.js";
+import { HEALING_FOUNTAIN } from "../data/fountains.js";
 import { onPlayerStep, resetPresence } from "./presence.js";
 
 const hooks = {
@@ -40,6 +43,7 @@ const hooks = {
   hideTreasure: () => {},
   resolveTreasureTrap: () => ({ message: "" }),
   awardTreasure: () => ({ message: "中には何も入っていなかった！" }),
+  restAtFountain: () => Promise.resolve(false),
   returnToTown: () => {},
   beginBattle: () => {},
   playNpcVoice: () => {},
@@ -161,14 +165,17 @@ export function updateAnimation(now) {
         if (!torchFuelDisabled) state.torchFuel = Math.max(0, state.torchFuel - TORCH_FUEL_STEP);
         hooks.onDungeonStep();
         const npc = getNpcAt(state.gridX, state.gridY);
+        const fountain = getFountainAt(state.gridX, state.gridY);
         const treasure = getTreasureAt(state.gridX, state.gridY);
         const isStairs = a.cellType === "stairsUp" || a.cellType === "stairsDown";
-        const isSpecialEventCell = Boolean(npc) || Boolean(treasure) || isStairs;
+        const isSpecialEventCell = Boolean(npc) || Boolean(fountain) || Boolean(treasure) || isStairs;
         const encounterTriggered = !isSpecialEventCell && onPlayerStep({ inDarkness: movedInDarkness });
         if (encounterTriggered && state.autoWalkerActive) state.autoReturnPaused = true;
         else if (encounterTriggered) hooks.cancelAutoReturn(false);
         if (npc) {
           startNpcTalkEvent(npc, a.fromGX, a.fromGY);
+        } else if (fountain) {
+          startFountainEvent(a.fromGX, a.fromGY);
         } else if (treasure) {
           startTreasureEvent(treasure, a.fromGX, a.fromGY);
         } else if (isStairs) {
@@ -321,6 +328,7 @@ export function handleOverlayEventInput(action) {
   }
   if (action === "confirm") {
     if (state.overlayEvent.type === "npcTalk") advanceNpcTalkEvent();
+    else if (state.overlayEvent.type === "fountain") confirmFountainEvent();
     else if (state.overlayEvent.type === "stairsPrompt") confirmStairsPrompt();
     else if (state.overlayEvent.type === "treasure") confirmTreasureEvent();
     return true;
@@ -464,6 +472,43 @@ function startNpcTalkEvent(npc, fromGX, fromGY) {
     message: `${greeting}＊Aボタンで会話　Bボタンで抜けます`,
     canCancel: npc.canCancel,
     retreatOnCancel: npc.retreatOnCancel
+  });
+}
+
+function startFountainEvent(fromGX, fromGY) {
+  startOverlayEvent({
+    type: "fountain",
+    imageId: HEALING_FOUNTAIN.id,
+    phase: "prompt",
+    fromGX,
+    fromGY,
+    fountainGX: state.gridX,
+    fountainGY: state.gridY,
+    message: "癒やしの噴水がある。ここで休息できそうだ。休みますか？\n＊Aボタン：はい　Bボタン：いいえ",
+    canCancel: true,
+    retreatOnCancel: true
+  });
+}
+
+function confirmFountainEvent() {
+  const event = state.overlayEvent;
+  if (!event || event.phase !== "prompt") return;
+  event.phase = "resting";
+  event.canCancel = false;
+  hooks.say("");
+  Promise.resolve(hooks.restAtFountain()).then(rested => {
+    if (state.overlayEvent !== event) return;
+    if (!rested) {
+      event.phase = "prompt";
+      event.canCancel = true;
+      hooks.say(event.message);
+      return;
+    }
+    removeFountainAt(event.fountainGX, event.fountainGY);
+    state.overlayEvent = null;
+    hooks.say("癒やしの噴水で休息した。HPとSPが全回復した。");
+    updateNpcAwareness();
+    hooks.onStateChanged();
   });
 }
 

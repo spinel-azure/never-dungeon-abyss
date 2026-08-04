@@ -12,6 +12,7 @@
 } from "./config.js";
 import { getNpcById } from "../data/npcs.js";
 import { rollTreasureTrap } from "../data/traps.js";
+import { floorHasHealingFountain } from "../data/fountains.js";
 
 export const cells = makeCells(MAP_W, MAP_H);
 export const explored = makeExplored(MAP_W, MAP_H);
@@ -42,6 +43,7 @@ export function makeCells(w, h) {
       y,
       type: "floor",
       npc: null,
+      fountain: null,
       treasure: null,
       treasureTrapId: null,
       treasureDiscovered: false,
@@ -79,6 +81,7 @@ export function buildBoundaryWallMap(depth = 1, rng = Math.random) {
   placeStairs();
   placeNpc();
   placeTreasures(depth, rng);
+  placeFountain(depth, rng);
   placeNormalDoors(NORMAL_DOOR_COUNT);
 }
 
@@ -87,6 +90,7 @@ export function resetAllWalls() {
     for (let x = 0; x < MAP_W; x++) {
       cells[y][x].type = "floor";
       cells[y][x].npc = null;
+      cells[y][x].fountain = null;
       cells[y][x].treasure = null;
       cells[y][x].treasureTrapId = null;
       cells[y][x].treasureDiscovered = false;
@@ -139,6 +143,17 @@ export function getNpcAt(x, y) {
 export function removeNpcAt(x, y) {
   if (!inBounds(x, y) || !cells[y][x].npc) return false;
   cells[y][x].npc = null;
+  return true;
+}
+
+export function getFountainAt(x, y) {
+  if (!inBounds(x, y)) return null;
+  return cells[y][x].fountain || null;
+}
+
+export function removeFountainAt(x, y) {
+  if (!inBounds(x, y) || !cells[y][x].fountain) return false;
+  cells[y][x].fountain = null;
   return true;
 }
 
@@ -236,6 +251,31 @@ export function resetTreasures() {
       cells[y][x].treasureDiscovered = false;
     }
   }
+}
+
+export function placeFountain(depth = 1, rng = Math.random) {
+  for (let y = 0; y < MAP_H; y++) {
+    for (let x = 0; x < MAP_W; x++) cells[y][x].fountain = null;
+  }
+  if (!floorHasHealingFountain(depth)) return null;
+  const { x: startX, y: startY } = startPosition;
+  const distances = makeDistanceMap(startX, startY);
+  const blocked = cells.flat().filter(cell => cell.npc).map(cell => ({ x: cell.x, y: cell.y }));
+  const candidates = [];
+  for (let y = 0; y < MAP_H; y++) {
+    for (let x = 0; x < MAP_W; x++) {
+      const cell = cells[y][x];
+      if (cell.type !== "floor" || cell.npc || cell.treasure || cell.fountain) continue;
+      if (distances[y][x] < 3) continue;
+      const nextBlocked = [...blocked, { x, y }];
+      if (countReachableCells(startX, startY, nextBlocked) !== MAP_W * MAP_H - nextBlocked.length) continue;
+      candidates.push({ x, y });
+    }
+  }
+  const selected = shuffled(candidates, rng)[0];
+  if (!selected) return null;
+  cells[selected.y][selected.x].fountain = "healing_fountain";
+  return selected;
 }
 
 export function placeNormalDoors(count = NORMAL_DOOR_COUNT) {
