@@ -303,6 +303,8 @@ export function openTown({ registrationRequired = false, facilityId = null, mode
   const opensInsideFacility = mode === "facility" || mode === "facilityMenu";
   town.mode = town.registrationRequired
     ? "registration"
+    : mode === "dungeonEntrance"
+      ? "dungeonEntrance"
     : opensInsideFacility
       ? "facilityMenu"
       : "selection";
@@ -819,6 +821,10 @@ function nearestSelectableIndex(start, amount) {
 
 function renderTownView() {
   showTownCommands();
+  if (town.mode === "dungeonEntrance") {
+    renderDungeonEntrance();
+    return;
+  }
   if (town.mode === "arrival" || town.mode === "selection") {
     town.onAmbienceChanged(true);
     town.onBgmChanged("");

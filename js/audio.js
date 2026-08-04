@@ -48,6 +48,7 @@ const audio = {
     ["temple", "bgm/kyoukai.mp3"],
     ["registration", "bgm/skip-melzo.mp3"],
     ["townFacilities", "bgm/tabidachi-junbi.mp3"],
+    ["lotBag", "bgm/casino-hitotooki.mp3"],
     ["shrine", "bgm/hokora.mp3"]
   ]),
   context: null,

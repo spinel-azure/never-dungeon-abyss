@@ -197,15 +197,29 @@ import {
   let pendingLootIdentification = null;
 
   lootIdentifyAction?.addEventListener("click", () => {
-    if (!pendingLootIdentification) return;
+    if (!pendingLootIdentification || pendingLootIdentification.identifying) return;
     if (!pendingLootIdentification.identified) {
-      pendingLootIdentification.identified = true;
-      lootIdentifyList.textContent = formatIdentifiedLoot(pendingLootIdentification);
-      lootIdentifyAction.textContent = "CLOSE";
-      playSe("item");
+      const identification = pendingLootIdentification;
+      identification.identifying = true;
+      lootIdentifyAction.disabled = true;
+      lootIdentifyAction.classList.add("is-identifying");
+      const finishIdentification = () => {
+        if (pendingLootIdentification !== identification || identification.identified) return;
+        identification.identifying = false;
+        identification.identified = true;
+        lootIdentifyAction.classList.remove("is-identifying");
+        lootIdentifyAction.disabled = false;
+        renderLootIdentificationRows(formatIdentifiedLoot(pendingLootIdentification));
+        lootIdentifyAction.textContent = "CLOSE";
+        playSe("item");
+      };
+      lootIdentifyAction.addEventListener("animationend", finishIdentification, { once: true });
+      window.setTimeout(finishIdentification, 1800);
       return;
     }
     lootIdentifyOverlay.hidden = true;
+    document.body.classList.remove("loot-identify-open");
+    stopBgm();
     const onClose = pendingLootIdentification.onClose;
     pendingLootIdentification = null;
     onClose?.();
@@ -1261,7 +1275,14 @@ import {
       const bag = structuredClone(character.lootBag);
       const settled = settleLootBag(character);
       character = settled.character;
-      showLootIdentification(bag, settled);
+      showLootIdentification(bag, settled, {
+        playBgm: false,
+        onClose: () => {
+          if (!templeRevivalJinglePending && worldLocation === "town" && getTownState().facilityId === "temple") {
+            startBgm("temple");
+          }
+        }
+      });
       lostExperience = preserveExperience ? 0 : carriedExperience;
       preservedExperience = preserveExperience ? carriedExperience : 0;
       character = recordFloorExploration(character, { depth: 0, explored: [] });
@@ -1609,11 +1630,9 @@ import {
     stopBgm();
     cancelAutoReturn(false);
     setPlayerInputEnabled(false);
-    openTown({ registrationRequired: !character, facilityId: "guild", mode: "arrival" });
+    openTown({ registrationRequired: !character, facilityId: "dungeon", mode: "dungeonEntrance" });
     if (character && bagHasLoot(bag)) {
-      showLootIdentification(bag, settled, { onClose: showTownNameBanner });
-    } else {
-      showTownNameBanner();
+      showLootIdentification(bag, settled);
     }
     saveGame();
   }
@@ -1624,32 +1643,57 @@ import {
       || (bag?.equipmentInstances || []).length > 0;
   }
 
-  function showLootIdentification(bag, settled, { onClose = null } = {}) {
+  function showLootIdentification(bag, settled, { onClose = null, playBgm = true } = {}) {
     if (!lootIdentifyOverlay || !bagHasLoot(bag)) return;
-    pendingLootIdentification = { bag, settled, identified: false, onClose };
+    pendingLootIdentification = { bag, settled, identified: false, identifying: false, onClose };
     const unknown = [];
-    if (Number(bag.gold) > 0) unknown.push(`？GOLD ×${bag.gold}`);
+    if (Number(bag.gold) > 0) unknown.push({ label: `${Number(bag.gold).toLocaleString()}GOLD`, count: "" });
     for (const [itemId, count] of Object.entries(bag.items || {})) {
-      const label = ["healing_potion", "antidote"].includes(itemId) ? "？薬" : "？素材";
-      unknown.push(`${label} ×${count}`);
+      const item = getItem(itemId);
+      if (item?.category === "material") unknown.push({ label: item.name, count: `×${count}` });
     }
-    for (const instance of bag.equipmentInstances || []) unknown.push(`${instance.unidentifiedName || "？装備品"} ×1`);
-    lootIdentifyList.textContent = unknown.join("\n");
+    for (const [itemId, count] of Object.entries(bag.items || {})) {
+      if (getItem(itemId)?.category !== "material") unknown.push({ label: "？道具", count: `×${count}` });
+    }
+    for (const instance of bag.equipmentInstances || []) unknown.push({ label: instance.unidentifiedName || "？装備", count: "×1" });
+    renderLootIdentificationRows(unknown);
     lootIdentifyAction.textContent = "IDENTIFY ALL";
+    lootIdentifyAction.disabled = false;
+    lootIdentifyAction.classList.remove("is-identifying");
     lootIdentifyOverlay.hidden = false;
+    document.body.classList.add("loot-identify-open");
+    if (playBgm) startBgm("lotBag");
   }
 
   function formatIdentifiedLoot({ bag, settled }) {
     const lines = [];
-    if (Number(bag.gold) > 0) lines.push(`GOLD ${bag.gold}G → 所持金`);
-    for (const result of settled.results || []) {
+    if (Number(bag.gold) > 0) lines.push({ label: `${Number(bag.gold).toLocaleString()}GOLD`, count: "→ 所持金" });
+    const results = settled.results || [];
+    for (const result of results.filter(entry => getItem(entry.itemId)?.category === "material")) {
       const destination = result.warehouse > 0 ? `インベントリ${result.inventory}／倉庫${result.warehouse}` : "インベントリ";
-      lines.push(`${getItem(result.itemId)?.name || result.itemId} ×${result.count} → ${destination}`);
+      lines.push({ label: getItem(result.itemId)?.name || result.itemId, count: `×${result.count} → ${destination}` });
+    }
+    for (const result of results.filter(entry => getItem(entry.itemId)?.category !== "material")) {
+      const destination = result.warehouse > 0 ? `インベントリ${result.inventory}／倉庫${result.warehouse}` : "インベントリ";
+      lines.push({ label: getItem(result.itemId)?.name || result.itemId, count: `×${result.count} → ${destination}` });
     }
     for (const instance of settled.equipmentResults || []) {
-      lines.push(`${getEquipmentInstanceName(instance)} → インベントリ`);
+      lines.push({ label: getEquipmentInstanceName(instance), count: "→ インベントリ" });
     }
-    return lines.join("\n");
+    return lines;
+  }
+
+  function renderLootIdentificationRows(rows) {
+    lootIdentifyList.replaceChildren(...rows.map(({ label, count }) => {
+      const row = document.createElement("div");
+      row.className = "loot-identify-entry";
+      const name = document.createElement("span");
+      name.textContent = label;
+      const amount = document.createElement("strong");
+      amount.textContent = count;
+      row.append(name, amount);
+      return row;
+    }));
   }
 
   function handleLootIdentifyInput(action) {

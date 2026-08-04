@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="css/style.css?v=20260728-2">
   <link rel="stylesheet" href="css/game-menu.css?v=20260804-1">
   <link rel="stylesheet" href="css/title-screen.css?v=20260730-11">
-  <link rel="stylesheet" href="css/town.css?v=20260803-4">
+  <link rel="stylesheet" href="css/town.css?v=20260804-1">
   <link rel="stylesheet" href="css/scene-transition.css?v=20260802-1">
   <link rel="stylesheet" href="css/battle.css?v=20260802-1">
   <link rel="stylesheet" href="css/skill-overlay.css?v=20260727-1">
@@ -117,9 +117,13 @@
           <span id="experienceSettlementDetail"></span>
         </button>
         <section id="lootIdentifyOverlay" class="loot-identify-overlay" aria-label="ロット袋鑑定" hidden>
-          <h2>LOT BAG</h2>
-          <div id="lootIdentifyList" class="loot-identify-list"></div>
-          <button id="lootIdentifyAction" type="button">IDENTIFY ALL</button>
+          <div class="loot-identify-panel">
+            <h2>LOT BAG</h2>
+            <div id="lootIdentifyList" class="loot-identify-list"></div>
+            <div class="loot-identify-stage">
+              <button id="lootIdentifyAction" type="button">IDENTIFY ALL</button>
+            </div>
+          </div>
         </section>
         <button id="questTutorialOverlay" class="quest-tutorial-overlay" type="button" aria-label="依頼の説明を閉じる" hidden>
           <img src="images/background/tutorial_01.avif" alt="迷宮地下1階調査の説明">
@@ -308,6 +312,6 @@
   </section>
 </main>
 <script type="module" src="js/title-screen.js?v=20260730-5"></script>
-  <script type="module" src="js/main.js?v=20260804-08"></script>
+  <script type="module" src="js/main.js?v=20260804-09"></script>
 </body>
 </html>
