@@ -30,6 +30,7 @@ import {
 } from "./dungeon.js";
 import { getNpcEncounter } from "../data/npcs.js";
 import { HEALING_FOUNTAIN } from "../data/fountains.js";
+import { getBossById } from "../data/bosses.js";
 import { onPlayerStep, resetPresence } from "./presence.js";
 
 const hooks = {
@@ -431,9 +432,11 @@ function startStairsPrompt(cellType) {
 }
 
 function startBossEvent(bossId, fromGX, fromGY) {
+  const boss = getBossById(bossId);
   startOverlayEvent({
     type: "bossPrompt",
     bossId,
+    imageId: boss?.encounterImageId ?? "",
     fromGX,
     fromGY,
     message: "部屋の中央に騎士の彫像がある。まるで行く手を遮っているようだ。調べてみますか？\n＊Aボタン：はい　Bボタン：いいえ",
@@ -456,9 +459,11 @@ function confirmBossEvent() {
 }
 
 function startBossRemainsEvent(bossId) {
+  const boss = getBossById(bossId);
   startOverlayEvent({
     type: "bossRemains",
     bossId,
+    imageId: boss?.defeatedEncounterImageId ?? "",
     message: "粉々になった彫像が床一面に散らばっている。もう動き出す事はなさそうだ。\n＊Aボタン：次へ",
     canCancel: false
   });
