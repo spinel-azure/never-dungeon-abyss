@@ -15,7 +15,7 @@ import {
   openDoorOnCell,
   getDoorState,
   getDoorKind,
-  removeBossAt,
+  markBossDefeatedAt,
   setStartPosition,
   randomizeStartPosition
 } from "./dungeon.js";
@@ -1274,7 +1274,7 @@ import {
       const victory = applyBossVictory(character, battle.enemy.id);
       if (victory.accepted) {
         character = victory.character;
-        removeBossAt(state.gridX, state.gridY);
+        markBossDefeatedAt(state.gridX, state.gridY, battle.enemy.id);
       }
     }
     if (character && battle?.enemy?.id) {

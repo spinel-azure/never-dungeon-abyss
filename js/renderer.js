@@ -124,7 +124,10 @@ export function configureRenderer(options) {
     locked: makeDoorTexture("locked")
   };
   npcs.forEach(npc => loadCharacterImage(npc.imageId, npc.image));
-  Object.values(BOSSES).forEach(boss => loadCharacterImage(boss.encounterImageId, boss.encounterImage));
+  Object.values(BOSSES).forEach(boss => {
+    loadCharacterImage(boss.encounterImageId, boss.encounterImage);
+    loadCharacterImage(boss.defeatedEncounterImageId, boss.defeatedEncounterImage);
+  });
   loadCharacterImage(HEALING_FOUNTAIN.id, HEALING_FOUNTAIN.image);
   ["red", "black", "gold"].forEach(type => loadTreasureImage(type, `images/treasure/treasure-${type}.png`));
   renderer.canvas.addEventListener("pointerup", handleCanvasPointerUp);
@@ -613,6 +616,11 @@ export function drawCellEvents(layer = "all") {
         const boss = getBossById(cell.bossId);
         if (boss) events.push({ ...projected, eventKind: "boss", npc: { imageId: boss.encounterImageId } });
       }
+      if (cell.bossRemainsId) {
+        if (layer === "floor") continue;
+        const boss = getBossById(cell.bossRemainsId);
+        if (boss) events.push({ ...projected, eventKind: "bossRemains", npc: { imageId: boss.defeatedEncounterImageId } });
+      }
       if (cell.npc) {
         if (layer === "floor") continue;
         const npc = getNpcById(cell.npc);
@@ -648,6 +656,7 @@ export function drawCellEvents(layer = "all") {
       if (event.eventKind === "stairs") drawStairsEventMarker(ctx, W, H, event);
       if (event.eventKind === "npc") drawNpcEvent(ctx, event);
       if (event.eventKind === "boss") drawNpcEvent(ctx, event);
+      if (event.eventKind === "bossRemains") drawNpcEvent(ctx, event);
       if (event.eventKind === "fountain") drawNpcEvent(ctx, event);
       if (event.eventKind === "treasure") drawTreasureEvent(ctx, event);
     });

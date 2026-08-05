@@ -60,6 +60,7 @@ test("opened B9 red door stays red and defeated boss never respawns", () => {
   buildBoundaryWallMap(9, () => .5, { redDoorUnlocked: true, bossDefeated: true });
   const flat = cells.flat();
   assert.equal(flat.some(cell => cell.bossId), false);
+  assert.equal(flat.filter(cell => cell.bossRemainsId === "strange_knight_statue_b9f").length, 1);
   assert.equal(flat.some(cell => cell.eventTreasureId), false);
   assert.equal(flat.flatMap(cell => Object.values(cell.doorKinds)).filter(kind => kind === "bossUnlocked").length, 2);
 });

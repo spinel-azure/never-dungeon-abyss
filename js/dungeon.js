@@ -49,6 +49,7 @@ export function makeCells(w, h) {
       treasureDiscovered: false,
       eventTreasureId: null,
       bossId: null,
+      bossRemainsId: null,
       reserved: null,
       portal: null,
       walls: { N: true, E: true, S: true, W: true },
@@ -102,6 +103,7 @@ export function resetAllWalls() {
       cells[y][x].treasureDiscovered = false;
       cells[y][x].eventTreasureId = null;
       cells[y][x].bossId = null;
+      cells[y][x].bossRemainsId = null;
       cells[y][x].reserved = null;
       cells[y][x].portal = null;
       cells[y][x].walls = { N: true, E: true, S: true, W: true };
@@ -180,6 +182,18 @@ export function removeBossAt(x, y) {
   if (!inBounds(x, y) || !cells[y][x].bossId) return false;
   cells[y][x].bossId = null;
   return true;
+}
+
+export function getBossRemainsAt(x, y) {
+  if (!inBounds(x, y)) return null;
+  return cells[y][x].bossRemainsId || null;
+}
+
+export function markBossDefeatedAt(x, y, bossId) {
+  if (!inBounds(x, y)) return false;
+  cells[y][x].bossId = null;
+  cells[y][x].bossRemainsId = String(bossId || "") || null;
+  return Boolean(cells[y][x].bossRemainsId);
 }
 
 export function removeFountainAt(x, y) {
@@ -381,6 +395,7 @@ export function placeB9BossRoom(rng = Math.random, progress = {}) {
     boss.reserved = "bossRoom";
     stairs.reserved = "bossRoom";
     boss.bossId = progress.bossDefeated ? null : "strange_knight_statue_b9f";
+    boss.bossRemainsId = progress.bossDefeated ? "strange_knight_statue_b9f" : null;
     stairs.type = "stairsDown";
     for (const target of [blank, boss, stairs]) {
       target.npc = null; target.fountain = null; target.treasure = null; target.eventTreasureId = null;

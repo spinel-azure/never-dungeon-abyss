@@ -18,6 +18,7 @@ import {
   getStartPosition,
   getNpcAt,
   getBossAt,
+  getBossRemainsAt,
   removeNpcAt,
   getFountainAt,
   removeFountainAt,
@@ -171,15 +172,18 @@ export function updateAnimation(now) {
         hooks.onDungeonStep();
         const npc = getNpcAt(state.gridX, state.gridY);
         const bossId = getBossAt(state.gridX, state.gridY);
+        const bossRemainsId = getBossRemainsAt(state.gridX, state.gridY);
         const fountain = getFountainAt(state.gridX, state.gridY);
         const treasure = getTreasureAt(state.gridX, state.gridY);
         const isStairs = a.cellType === "stairsUp" || a.cellType === "stairsDown";
-        const isSpecialEventCell = Boolean(npc) || Boolean(bossId) || Boolean(fountain) || Boolean(treasure) || isStairs;
+        const isSpecialEventCell = Boolean(npc) || Boolean(bossId) || Boolean(bossRemainsId) || Boolean(fountain) || Boolean(treasure) || isStairs;
         const encounterTriggered = !isSpecialEventCell && onPlayerStep({ inDarkness: movedInDarkness });
         if (encounterTriggered && state.autoWalkerActive) state.autoReturnPaused = true;
         else if (encounterTriggered) hooks.cancelAutoReturn(false);
         if (bossId) {
           startBossEvent(bossId, a.fromGX, a.fromGY);
+        } else if (bossRemainsId) {
+          startBossRemainsEvent(bossRemainsId);
         } else if (npc) {
           startNpcTalkEvent(npc, a.fromGX, a.fromGY);
         } else if (fountain) {
@@ -347,6 +351,7 @@ export function handleOverlayEventInput(action) {
   if (action === "confirm") {
     if (state.overlayEvent.type === "npcTalk") advanceNpcTalkEvent();
     else if (state.overlayEvent.type === "bossPrompt") confirmBossEvent();
+    else if (state.overlayEvent.type === "bossRemains") finishBossRemainsEvent();
     else if (state.overlayEvent.type === "fountain") confirmFountainEvent();
     else if (state.overlayEvent.type === "stairsPrompt") confirmStairsPrompt();
     else if (state.overlayEvent.type === "treasure") confirmTreasureEvent();
@@ -448,6 +453,22 @@ function confirmBossEvent() {
     hooks.beginBossBattle(event.bossId);
   }, 1000);
   event.autoStartTimer = timer;
+}
+
+function startBossRemainsEvent(bossId) {
+  startOverlayEvent({
+    type: "bossRemains",
+    bossId,
+    message: "粉々になった彫像が床一面に散らばっている。もう動き出す事はなさそうだ。\n＊Aボタン：次へ",
+    canCancel: false
+  });
+}
+
+function finishBossRemainsEvent() {
+  if (state.overlayEvent?.type !== "bossRemains") return;
+  state.overlayEvent = null;
+  hooks.say("");
+  hooks.onStateChanged();
 }
 
 function confirmStairsPrompt() {

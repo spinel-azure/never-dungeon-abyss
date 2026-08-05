@@ -7,6 +7,8 @@ export const BOSSES = Object.freeze({
     image: "images/bosses/boss_01.avif",
     encounterImageId: "strange_knight_statue_event_b9f",
     encounterImage: "images/npc/NPC_event_01.avif",
+    defeatedEncounterImageId: "strange_knight_statue_remains_b9f",
+    defeatedEncounterImage: "images/npc/NPC_event_02.avif",
     race: "construct",
     maxHp: 140,
     stats: Object.freeze({ str: 10, int: 2, agi: 5, dex: 7, luc: 3 }),
