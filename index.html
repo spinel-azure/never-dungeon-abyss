@@ -10,8 +10,8 @@
   <link rel="stylesheet" href="css/style.css?v=20260728-2">
   <link rel="stylesheet" href="css/game-menu.css?v=20260804-1">
   <link rel="stylesheet" href="css/title-screen.css?v=20260730-11">
-  <link rel="stylesheet" href="css/town.css?v=20260804-1">
-  <link rel="stylesheet" href="css/effects.css?v=20260805-1">
+  <link rel="stylesheet" href="css/town.css?v=20260805-1">
+  <link rel="stylesheet" href="css/effects.css?v=20260805-2">
   <link rel="stylesheet" href="css/scene-transition.css?v=20260802-1">
   <link rel="stylesheet" href="css/battle.css?v=20260802-1">
   <link rel="stylesheet" href="css/skill-overlay.css?v=20260727-1">
@@ -124,9 +124,9 @@
             <div class="loot-identify-stage">
               <button id="lootIdentifyAction" type="button">鑑定する</button>
             </div>
+            <canvas id="lootIdentifyEffectCanvas" class="loot-identify-effect-canvas" width="960" height="540" aria-hidden="true" hidden></canvas>
+            <strong id="lootIdentifyEffectText" class="loot-identify-effect-text" aria-hidden="true" hidden>IDENTIFY ALL</strong>
           </div>
-          <canvas id="lootIdentifyEffectCanvas" class="loot-identify-effect-canvas" width="960" height="540" aria-hidden="true" hidden></canvas>
-          <strong id="lootIdentifyEffectText" class="loot-identify-effect-text" aria-hidden="true" hidden>IDENTIFY ALL</strong>
         </section>
         <button id="questTutorialOverlay" class="quest-tutorial-overlay" type="button" aria-label="依頼の説明を閉じる" hidden>
           <img src="images/background/tutorial_01.avif" alt="迷宮地下1階調査の説明">

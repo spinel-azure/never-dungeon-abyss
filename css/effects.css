@@ -1,10 +1,12 @@
 .loot-identify-panel {
   position: relative;
   z-index: 2;
+  height: min(88vh, 760px);
+  overflow: hidden;
 }
 
 .loot-identify-effect-canvas {
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: 3;
   display: block;
@@ -19,7 +21,7 @@
 }
 
 .loot-identify-effect-text {
-  position: fixed;
+  position: absolute;
   left: 50%;
   top: 50%;
   z-index: 4;
@@ -33,6 +35,11 @@
 
 .loot-identify-effect-text.is-active {
   animation: loot-identify-message 1.6s cubic-bezier(.2, .72, .25, 1) forwards;
+}
+
+.loot-identify-stage {
+  position: relative;
+  z-index: 5;
 }
 
 .loot-identify-overlay button:disabled {
