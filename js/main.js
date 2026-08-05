@@ -43,7 +43,7 @@ import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minima
 import { configureInput } from "./input.js";
 import { configureVirtualStick } from "./virtualStick.js";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js?v=20260804-04";
+import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js?v=20260805-01";
 import { resolveFloorTheme } from "./floorTheme.js";
 import {
   configureAutoReturn,

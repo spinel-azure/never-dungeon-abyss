@@ -379,7 +379,7 @@ function renderInventorySalePrompt() {
   const description = menu.inventoryPanel.querySelector("[data-inventory-description]");
   description.textContent = menu.inventorySaleStage === "quantity"
     ? `売却数 ${quantity} / ${entry.count}　合計 ${unitPrice * quantity}G / ↑↓：1個　←→：10個　Aボタン：決定　Bボタン：戻る`
-    : `${name}${entry.item ? ` ×${quantity}` : ""}を${unitPrice * quantity}Gで売却しますか？ / Aボタン：はい　Bボタン：いいえ`;
+    : `${name}${entry.item ? ` ×${quantity}` : ""}を${unitPrice * quantity}Gで売却しますか？ / Aボタン：はい　Bボタン：いいえ\n所持金：${inventoryGoldText()}G`;
 }
 
 function renderInventoryTradePrompt() {
@@ -387,7 +387,11 @@ function renderInventoryTradePrompt() {
   if (!entry) return;
   const name = entry.item?.name || entry.shopEquipment?.name;
   const price = entry.item?.buyPrice ?? entry.shopEquipment?.buyPrice ?? 0;
-  menu.inventoryPanel.querySelector("[data-inventory-description]").textContent = `${name}を${price}Gで購入しますか？ / Aボタン：はい　Bボタン：いいえ`;
+  menu.inventoryPanel.querySelector("[data-inventory-description]").textContent = `${name}を${price}Gで購入しますか？ / Aボタン：はい　Bボタン：いいえ\n所持金：${inventoryGoldText()}G`;
+}
+
+function inventoryGoldText() {
+  return Math.max(0, Math.floor(Number(menu.getCharacter()?.gold) || 0)).toLocaleString("en-US");
 }
 
 function closeInventoryTrade() {
