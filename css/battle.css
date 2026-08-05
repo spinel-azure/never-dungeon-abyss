@@ -134,9 +134,13 @@
   max-height: 82%;
   object-fit: contain;
   image-rendering: pixelated;
-  filter: drop-shadow(0 8px 8px rgba(0, 0, 0, .72));
+  filter:
+    drop-shadow(0 0 3px rgba(198, 241, 255, .28))
+    drop-shadow(0 0 9px rgba(105, 205, 255, .14))
+    drop-shadow(0 8px 8px rgba(0, 0, 0, .72));
   opacity: 1;
   transition: opacity 900ms ease-out;
+  animation: battle-enemy-aura 3.4s ease-in-out infinite;
 }
 
 .battle-enemy-image.is-defeated {
@@ -145,10 +149,26 @@
 
 .battle-enemy-image.is-concealed {
   filter: brightness(0) drop-shadow(0 8px 8px rgba(0, 0, 0, .72)) !important;
+  animation: none;
 }
 
 .battle-enemy-image.is-hit {
   animation: battle-enemy-hit 260ms steps(2, end);
+}
+
+@keyframes battle-enemy-aura {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 3px rgba(198, 241, 255, .24))
+      drop-shadow(0 0 8px rgba(105, 205, 255, .11))
+      drop-shadow(0 8px 8px rgba(0, 0, 0, .72));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 4px rgba(210, 246, 255, .34))
+      drop-shadow(0 0 11px rgba(105, 205, 255, .18))
+      drop-shadow(0 8px 8px rgba(0, 0, 0, .72));
+  }
 }
 
 @keyframes battle-enemy-hit {
@@ -217,6 +237,7 @@ body.battle-active .viewport > #treasureCanvas {
 @media (prefers-reduced-motion: reduce) {
   .battle-enemy-image {
     transition-duration: 1ms;
+    animation: none;
   }
 
   .battle-enemy-image.is-hit {
