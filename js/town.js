@@ -5,7 +5,7 @@ import {
   formatQuickLevel,
   formatQuickMoney,
   isCriticalHp
-} from "../data/quick-status.js";
+} from "../data/quick-status.js?v=20260805-01";
 import {
   QUESTS,
   getQuestProgress,

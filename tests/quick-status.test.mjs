@@ -31,9 +31,9 @@ test("quick status level uses at least two digits without truncating high levels
   assert.equal(formatQuickLevel(197), "197");
 });
 
-test("quick status money is nonnegative and comma-separated", () => {
-  assert.equal(formatQuickMoney(10000), "10,000");
-  assert.equal(formatQuickMoney(1234567.9), "1,234,567");
+test("quick status money is nonnegative and has no digit separators", () => {
+  assert.equal(formatQuickMoney(10000), "10000");
+  assert.equal(formatQuickMoney(1234567.9), "1234567");
   assert.equal(formatQuickMoney(-5), "0");
 });
 

@@ -79,7 +79,7 @@ import {
 import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
 import { EffectEngine } from "./effects/effect-engine.js";
 import { hasUncertainLoot } from "./loot-identification.js";
-import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions } from "./town.js?v=20260804-03";
+import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions } from "./town.js?v=20260805-01";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName } from "../data/equipment-inventory.js";

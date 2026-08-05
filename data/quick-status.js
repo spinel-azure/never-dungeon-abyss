@@ -31,7 +31,7 @@ export function formatQuickLevel(level) {
 }
 
 export function formatQuickMoney(gold) {
-  return Math.max(0, Math.floor(Number(gold) || 0)).toLocaleString("en-US");
+  return String(Math.max(0, Math.floor(Number(gold) || 0)));
 }
 
 export function isCriticalHp(hp, maxHp) {
