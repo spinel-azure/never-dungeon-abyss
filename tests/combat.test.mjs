@@ -536,17 +536,17 @@ test("escape uses the enemy escape rate with injectable RNG", () => {
   assert.equal(resolveEscapeAttempt({ escapeRate: 0.75, rng: fixed(0.75) }).success, false);
 });
 
-test("poison damages at target action end and lasts three ticks", () => {
+test("poison damages at target action end and never expires naturally", () => {
   let statuses = applyStatus([], { statusId: "poison", success: true });
-  assert.equal(statuses[0].remainingTurns, 3);
+  assert.equal(statuses[0].remainingTurns, undefined);
   const damages = [];
-  for (let index = 0; index < 3; index += 1) {
+  for (let index = 0; index < 10; index += 1) {
     const end = resolveEndOfAction({ statuses, maxHp: 100 });
     statuses = end.statuses;
     damages.push(end.poisonDamage);
   }
-  assert.deepEqual(damages, [5, 5, 5]);
-  assert.equal(statuses.length, 0);
+  assert.deepEqual(damages, Array(10).fill(5));
+  assert.equal(statuses.length, 1);
 });
 
 test("poison damage stops at one HP", () => {
@@ -578,7 +578,7 @@ test("same status refreshes instead of stacking", () => {
   statuses = resolveEndOfAction({ statuses, maxHp: 100 }).statuses;
   statuses = applyStatus(statuses, { statusId: "poison", success: true });
   assert.equal(statuses.length, 1);
-  assert.equal(statuses[0].remainingTurns, 3);
+  assert.equal(statuses[0].remainingTurns, undefined);
 });
 
 test("action skip consumes one opportunity and is removed", () => {
@@ -660,14 +660,27 @@ test("inn recovery restores HP and SP to maximum", () => {
     hp: 1,
     maxHp: 30,
     sp: 2,
-    maxSp: 15
+    maxSp: 15,
+    statuses: [{ statusId: "poison" }],
+    condition: "POISON"
   }), {
     hp: 30,
     sp: 15,
-    statuses: [],
-    condition: "GOOD",
+    statuses: [{ statusId: "poison" }],
+    condition: "POISON",
     alive: true
   });
+});
+
+test("legacy poison turn counters are removed when character data is normalized", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.statuses = [{ statusId: "poison", remainingTurns: 3 }];
+  character.condition = "POISON";
+  const normalized = normalizeCharacter(character);
+  assert.equal(normalized.statuses.length, 1);
+  assert.equal(normalized.statuses[0].statusId, "poison");
+  assert.equal(normalized.statuses[0].remainingTurns, undefined);
+  assert.equal(normalized.condition, "POISON");
 });
 
 test("temple revival restores one HP and preserves death-time SP", () => {

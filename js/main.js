@@ -80,12 +80,12 @@ import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
 import { EffectEngine } from "./effects/effect-engine.js";
 import { hasUncertainLoot } from "./loot-identification.js";
 import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions } from "./town.js?v=20260805-03";
-import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
+import { createInitialCharacter, normalizeCharacter } from "../data/classes.js?v=20260805-01";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName } from "../data/equipment-inventory.js";
 import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
-import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js";
-import { awardBattleExperience, createTempleRevival, getInnStayFee, grantEventItems, resolveDungeonDefeat, resolveInnStableStay, resolveInnStay, unlockGuildRequest } from "./character-services.js";
+import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260805-01";
+import { awardBattleExperience, createTempleRevival, getInnStayFee, grantEventItems, resolveDungeonDefeat, resolveInnStableStay, resolveInnStay, resolveTemplePoisonTreatment, unlockGuildRequest } from "./character-services.js?v=20260805-01";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { resolveTreasureTrap } from "../combat/resolve-trap.js";
 import { collectStats } from "../combat/collect-stats.js";
@@ -1548,7 +1548,20 @@ import {
   async function healAtTemple() {
     if (!character) return;
     if (character.alive && character.hp > 0) {
-      say("司祭アーヴァイン：治療の必要はないようですね。");
+      const treatment = resolveTemplePoisonTreatment(character);
+      if (treatment.reason === "notPoisoned") {
+        say("司祭アーヴァイン：治療の必要はないようですね。");
+        return;
+      }
+      if (treatment.reason === "insufficientGold") {
+        say(`司祭アーヴァイン：毒を浄めるには${treatment.fee}Gの寄進が必要です。`);
+        return;
+      }
+      character = treatment.character;
+      updateCharacterUi();
+      say(`司祭アーヴァイン：${treatment.fee}Gの寄進を受け取りました。毒は浄められました。`);
+      playSe("heal");
+      saveGame();
       return;
     }
     stopBgm();

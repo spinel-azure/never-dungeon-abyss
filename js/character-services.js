@@ -16,13 +16,15 @@ export const TOWN_INTRODUCTION_FLAGS = Object.freeze([
   "shop_first_talk_items",
   "library_first_talk_card"
 ]);
+export const TEMPLE_POISON_TREATMENT_FEE = 15;
 
 export function createInnRecovery(character) {
+  const statuses = retainPoisonStatuses(character);
   return {
     hp: character.maxHp,
     sp: character.maxSp,
-    statuses: [],
-    condition: "GOOD",
+    statuses,
+    condition: statuses.length ? "POISON" : "GOOD",
     alive: true
   };
 }
@@ -36,6 +38,7 @@ export function awardBattleExperience(character, amount) {
 }
 
 export function resolveInnStay(character) {
+  const persistentStatuses = retainPoisonStatuses(character);
   const baseSettlementExp = Math.max(
     0,
     Math.floor(Number(character.carriedExperience) || 0)
@@ -74,8 +77,8 @@ export function resolveInnStay(character) {
       maxSp,
       hp: maxHp,
       sp: maxSp,
-      statuses: [],
-      condition: "GOOD",
+      statuses: persistentStatuses,
+      condition: persistentStatuses.length ? "POISON" : "GOOD",
       alive: true,
       skillIds
     },
@@ -134,6 +137,10 @@ function getVitalBonus(character, key) {
   return equipment + cards;
 }
 
+function retainPoisonStatuses(character) {
+  return structuredClone(character?.statuses || []).filter(status => (status.statusId || status.id) === "poison");
+}
+
 export function createTempleRevival(character) {
   return {
     hp: 1,
@@ -142,6 +149,18 @@ export function createTempleRevival(character) {
     condition: "GOOD",
     alive: true
   };
+}
+
+export function resolveTemplePoisonTreatment(character) {
+  const poisonStatuses = (character?.statuses || []).filter(status => (status.statusId || status.id) === "poison");
+  if (!poisonStatuses.length) return { character, success: false, reason: "notPoisoned", fee: TEMPLE_POISON_TREATMENT_FEE };
+  const gold = Math.max(0, Math.floor(Number(character?.gold) || 0));
+  if (gold < TEMPLE_POISON_TREATMENT_FEE) return { character, success: false, reason: "insufficientGold", fee: TEMPLE_POISON_TREATMENT_FEE };
+  const next = structuredClone(character);
+  next.gold = gold - TEMPLE_POISON_TREATMENT_FEE;
+  next.statuses = (next.statuses || []).filter(status => (status.statusId || status.id) !== "poison");
+  next.condition = "GOOD";
+  return { character: next, success: true, reason: "treated", fee: TEMPLE_POISON_TREATMENT_FEE };
 }
 
 export function resolveDungeonDefeat(character, { preserveExperience = false } = {}) {

@@ -17,7 +17,6 @@ export const STATUS_EFFECTS = Object.freeze({
     id: "poison",
     name: "毒",
     kind: "ailment",
-    duration: 3,
     damageMaxHpRate: 0.05,
     minimumDamage: 1
   }),

@@ -13,7 +13,7 @@ import {
   getStatusResistanceBonus,
   resolveActionOpportunity,
   resolveEndOfAction
-} from "./status-lifecycle.js";
+} from "./status-lifecycle.js?v=20260805-01";
 import { getSkill } from "../data/skills.js";
 import { getItem } from "../data/items.js";
 import { consumeItem } from "../data/inventory.js";

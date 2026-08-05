@@ -9,7 +9,7 @@ import {
 import { GODDESS_GRACE_CARD_ID } from "../data/cards.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { grantCard, setDeckSlot } from "../data/deck.js";
-import { resolveInnStableStay, resolveInnStay } from "../js/character-services.js";
+import { resolveInnStableStay, resolveInnStay, resolveTemplePoisonTreatment } from "../js/character-services.js";
 
 test("depth return bonus uses integer floor division for specified examples", () => {
   const examples = [
@@ -142,4 +142,34 @@ test("stable lodging settles experience but only restores thirty percent of HP a
   assert.ok(result.changes.sp < result.changes.maxSp);
   assert.deepEqual(result.changes.statuses, character.statuses);
   assert.equal(result.changes.condition, "POISON");
+});
+
+test("normal lodging restores HP and SP without curing poison", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "priest" });
+  character.hp = 1;
+  character.statuses = [{ statusId: "poison", remainingTurns: 3 }];
+  character.condition = "POISON";
+  const result = resolveInnStay(character);
+  assert.equal(result.changes.hp, result.changes.maxHp);
+  assert.deepEqual(result.changes.statuses, character.statuses);
+  assert.equal(result.changes.condition, "POISON");
+});
+
+test("temple poison treatment costs 15G and changes neither HP nor SP", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "priest" });
+  character.gold = 15;
+  character.hp = 7;
+  character.sp = 2;
+  character.statuses = [{ statusId: "poison" }];
+  character.condition = "POISON";
+  const result = resolveTemplePoisonTreatment(character);
+  assert.equal(result.success, true);
+  assert.equal(result.character.gold, 0);
+  assert.equal(result.character.hp, 7);
+  assert.equal(result.character.sp, 2);
+  assert.deepEqual(result.character.statuses, []);
+  assert.equal(result.character.condition, "GOOD");
+  const insufficient = resolveTemplePoisonTreatment({ ...character, gold: 14 });
+  assert.equal(insufficient.success, false);
+  assert.equal(insufficient.reason, "insufficientGold");
 });

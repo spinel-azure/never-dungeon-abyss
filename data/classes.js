@@ -157,10 +157,21 @@ export function normalizeCharacter(character) {
       ...(Array.isArray(character.skillIds) ? character.skillIds : characterClass.initialSkillIds),
       ...getLevelUnlockedSkillIds(characterClass.id, level)
     ])],
-    statuses: Array.isArray(character.statuses) ? structuredClone(character.statuses) : [],
+    statuses: normalizeCharacterStatuses(character.statuses),
     condition: character.condition || "GOOD",
     alive: character.alive !== false && Number(character.hp) > 0
   };
+}
+
+function normalizeCharacterStatuses(statuses) {
+  if (!Array.isArray(statuses)) return [];
+  return structuredClone(statuses).map(status => {
+    if ((status?.statusId || status?.id) !== "poison") return status;
+    const persistentPoison = { ...status };
+    delete persistentPoison.remainingTurns;
+    delete persistentPoison.duration;
+    return persistentPoison;
+  });
 }
 
 function normalizeEquipment(equipment, job) {
