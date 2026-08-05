@@ -40,7 +40,7 @@ export const TOWN_FACILITIES = Object.freeze([
     label: "図書館",
     keeper: "司書イライザ",
     portraitAlt: "図書館の主",
-    image: "images/npc/NPC_14.avif",
+    image: "images/npc/NPC_14e.avif",
     background: "images/background/town_06.avif",
     greeting: "…何を…見たいのかしら…？",
     services: ["魔物図鑑", "アイテム図鑑", "カード図鑑", "冒険記録"]
