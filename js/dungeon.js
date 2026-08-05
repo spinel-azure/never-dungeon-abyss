@@ -84,7 +84,7 @@ export function buildBoundaryWallMap(depth = 1, rng = Math.random, progress = {}
   }
   placeStairs(depth);
   if (Math.floor(Number(depth) || 1) === 9) placeB9BossRoom(rng, progress);
-  placeNpc();
+  placeNpc(depth);
   placeTreasures(depth, rng);
   placeFountain(depth, rng);
   if (Math.floor(Number(depth) || 1) === 9) placeB9KeyTreasure(rng, progress);
@@ -120,7 +120,7 @@ export function placeStairs(depth = 1) {
   if (stairsDown) cells[stairsDown.y][stairsDown.x].type = "stairsDown";
 }
 
-export function placeNpc() {
+export function placeNpc(depth = 1) {
   const { x: startX, y: startY } = startPosition;
   resetNpcs();
   const distances = makeDistanceMap(startX, startY);
@@ -140,7 +140,14 @@ export function placeNpc() {
   }
 
   const selected = shuffled(candidates)[0];
-  if (selected) cells[selected.y][selected.x].npc = "NPC_01";
+  if (selected) {
+    const normalizedDepth = Math.floor(Number(depth) || 1);
+    cells[selected.y][selected.x].npc = normalizedDepth === 5
+      ? "NPC_01_b5"
+      : normalizedDepth === 9
+        ? "NPC_01_b9"
+        : "NPC_01";
+  }
 }
 
 export function getCellType(x, y) {

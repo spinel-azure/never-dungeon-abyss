@@ -15,6 +15,43 @@ export const npcs = [
     ],
     canCancel: true,
     retreatOnCancel: true
+  },
+  {
+    id: "NPC_01_b5",
+    name: "みかんにゃんこ",
+    imageId: "NPC_01",
+    image: "images/npc/NPC_01.avif",
+    interactionType: "talk",
+    greeting: "",
+    voiceSe: ["catVoice01", "catVoice02", "catVoice03"],
+    encounters: [
+      {
+        dialogue: ["疲れてないかにゃ？噴水のある場所でひと休みするといいにゃん。"],
+        leaveAfterTalk: true
+      }
+    ],
+    canCancel: true,
+    retreatOnCancel: true
+  },
+  {
+    id: "NPC_01_b9",
+    name: "みかんにゃんこ",
+    imageId: "NPC_01",
+    image: "images/npc/NPC_01.avif",
+    interactionType: "talk",
+    greeting: "",
+    voiceSe: ["catVoice01", "catVoice02", "catVoice03"],
+    encounters: [
+      {
+        dialogue: [
+          "赤い扉が気になるにゃ？カギが必要みたいにゃん。",
+          "この階のどこかにあるかもしれないにゃあ…？"
+        ],
+        leaveAfterTalk: true
+      }
+    ],
+    canCancel: true,
+    retreatOnCancel: true
   }
 ];
 
