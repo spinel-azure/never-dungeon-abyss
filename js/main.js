@@ -15,6 +15,7 @@ import {
   openDoorOnCell,
   getDoorState,
   getDoorKind,
+  removeBossAt,
   setStartPosition,
   randomizeStartPosition
 } from "./dungeon.js";
@@ -79,11 +80,13 @@ import {
 import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
 import { EffectEngine } from "./effects/effect-engine.js";
 import { hasUncertainLoot } from "./loot-identification.js";
-import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions } from "./town.js?v=20260805-03";
+import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js?v=20260805-04";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js?v=20260805-01";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName } from "../data/equipment-inventory.js";
 import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
+import { applyBossVictory, createBossCombatant, getBossById, isBossDefeated } from "../data/bosses.js";
+import { consumeKeyItem, grantKeyItem, hasKeyItem } from "../data/key-items.js";
 import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260805-01";
 import { awardBattleExperience, createTempleRevival, getInnStayFee, grantEventItems, resolveDungeonDefeat, resolveInnStableStay, resolveInnStay, resolveTemplePoisonTreatment, unlockGuildRequest } from "./character-services.js?v=20260805-01";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
@@ -299,9 +302,11 @@ import {
     hideTreasure,
     resolveTreasureTrap: resolveCurrentTreasureTrap,
     awardTreasure: awardTreasureLoot,
+    unlockBossDoor: unlockB9BossDoor,
     restAtFountain: restAtHealingFountain,
     returnToTown,
     beginBattle: beginRandomBattle,
+    beginBossBattle,
     playNpcVoice: playSe,
     onDungeonStep: handleDungeonStep,
     onStateChanged: scheduleAutosave
@@ -313,6 +318,7 @@ import {
     getCharacter: () => character,
     onRegister: registerCharacter,
     onEnterDungeon: enterDungeonFromTown,
+    onUseTransfer: enterB10FromTransfer,
     onStay: stayAtInn,
     onHeal: healAtTemple,
     onPurchaseItem: purchaseTownItem,
@@ -450,7 +456,7 @@ import {
       for (let x = 0; x < MAP_W; x += 1) {
         const savedCell = structuredClone(dungeon.cells[y][x]);
         if (savedCell.treasure && currentDepth <= 4) savedCell.treasure = "red";
-        if (currentDepth > 4) savedCell.treasure = null;
+        if (currentDepth > 4 && !savedCell.eventTreasureId) savedCell.treasure = null;
         Object.assign(cells[y][x], savedCell);
         cells[y][x].treasureTrapId = savedCell.treasureTrapId || null;
         explored[y][x] = Boolean(dungeon.explored[y][x]);
@@ -476,6 +482,16 @@ import {
     state.npcEncounterCounts = player.npcEncounterCounts && typeof player.npcEncounterCounts === "object" ? { ...player.npcEncounterCounts } : {};
     state.stairsPromptDismissed = Boolean(player.stairsPromptDismissed);
     character = normalizeCharacter(save.character);
+    if (cells[state.gridY][state.gridX]?.bossId && !isBossDefeated(character, cells[state.gridY][state.gridX].bossId)) {
+      const retreat = cells.flat().find(cell => cell.reserved === "bossRoom" && cell.type === "floor" && !cell.bossId);
+      if (retreat) {
+        state.gridX = retreat.x;
+        state.gridY = retreat.y;
+        state.x = retreat.x + .5;
+        state.y = retreat.y + .5;
+      }
+    }
+    setTransferUnlocked(Boolean(character?.eventFlags?.transfer_portal_b10f_unlocked));
     restorePresence(dungeon.presence, dungeon.presenceSuppressedSteps);
     const now = performance.now();
     runStartedAt = now - Math.max(0, Number(dungeon.runElapsedMs) || 0);
@@ -511,6 +527,7 @@ import {
     setDungeonColors({ wall: "default", floor: "default" });
     resetDungeon("", null, true);
     character = null;
+    setTransferUnlocked(false);
     worldLocation = "town";
     state.treasureCompassActive = false;
     stopBgm();
@@ -1001,6 +1018,22 @@ import {
     return started;
   }
 
+  function beginBossBattle(bossId) {
+    if (!character || worldLocation !== "dungeon" || isBattleActive()) return false;
+    const boss = getBossById(bossId);
+    if (!boss || isBossDefeated(character, boss)) return false;
+    cancelAutoReturn(false);
+    setPlayerInputEnabled(false);
+    pendingEncounter = null;
+    startBgm(selectBattleBgm(boss));
+    const started = startBattle(createBossCombatant(boss), { playStartSe: true, ambush: false, concealed: false });
+    if (!started) {
+      startBgm(selectDungeonBgm());
+      setPlayerInputEnabled(true);
+    }
+    return started;
+  }
+
   function selectDungeonBgm() {
     return currentDepth >= 101 ? "deepDungeon" : "dungeon";
   }
@@ -1075,7 +1108,15 @@ import {
     return "";
   }
 
-  function awardTreasureLoot(treasureType) {
+  function awardTreasureLoot(treasureType, eventTreasureId = null) {
+    if (eventTreasureId === "red_rust_key_b9f_chest") {
+      const granted = grantKeyItem(character?.keyItems, "red_rust_key_b9f");
+      if (!granted.gained && granted.reason !== "alreadyOwned") return { message: "鍵は見つからなかった。" };
+      if (granted.gained) character = { ...character, keyItems: granted.keyItems };
+      updateCharacterUi();
+      saveGame();
+      return { message: "赤錆びた鍵を手に入れた！" };
+    }
     if (treasureType !== "red") return { message: "中には何も入っていなかった！" };
     const message = addRolledLoot(rollRedChestLoot());
     updateCharacterUi();
@@ -1229,6 +1270,13 @@ import {
   function finishBattleVictory(battle) {
     startBgm(selectDungeonBgm());
     const reward = Math.max(0, Math.floor(Number(battle?.enemy?.experienceReward) || 0));
+    if (character && battle?.enemy?.isBoss) {
+      const victory = applyBossVictory(character, battle.enemy.id);
+      if (victory.accepted) {
+        character = victory.character;
+        removeBossAt(state.gridX, state.gridY);
+      }
+    }
     if (character && battle?.enemy?.id) {
       character = recordEnemyDefeat(character, battle.enemy.id, currentDepth);
     }
@@ -1599,6 +1647,27 @@ import {
     setPlayerInputEnabled(true);
   }
 
+  async function enterB10FromTransfer() {
+    if (!character?.eventFlags?.transfer_portal_b10f_unlocked) return false;
+    setPlayerInputEnabled(false);
+    await runSceneTransition({
+      playAudio: () => playSeSequence("stairs", 3),
+      onDark: () => {
+        currentDepth = 10;
+        state.treasureCompassActive = false;
+        resetDungeon("", null, true);
+        character.pendingExperienceSettlement = null;
+        worldLocation = "dungeon";
+        closeTown();
+        startBgm(selectDungeonBgm());
+        say("転送門を抜け、B10Fへ到達した。");
+        saveGame();
+      }
+    });
+    setPlayerInputEnabled(true);
+    return true;
+  }
+
   async function runSceneTransition({
     showEnteringTitle = false,
     playAudio = () => Promise.resolve(),
@@ -1770,7 +1839,7 @@ import {
     }
     if (nextStart) setStartPosition(nextStart.x, nextStart.y);
     else randomizeStartPosition();
-    buildBoundaryWallMap(currentDepth);
+    buildBoundaryWallMap(currentDepth, Math.random, getDungeonProgress());
     startDir = chooseStartDirection();
     resetExplored();
     resetPlayer(startDir);
@@ -1794,12 +1863,44 @@ import {
     const lapTime = formatElapsedTime(descendedAt - floorStartedAt);
     const nextStart = { x: state.gridX, y: state.gridY };
     currentDepth += 1;
+    if (currentDepth === 10 && character) {
+      character = {
+        ...character,
+        eventFlags: { ...(character.eventFlags || {}), transfer_portal_b10f_unlocked: true }
+      };
+      setTransferUnlocked(true);
+    }
     startBgm(selectDungeonBgm());
     setDungeonColors(resolveFloorTheme(currentDepth, getDungeonColors()));
     floorStartedAt = descendedAt;
     resetDungeon("", nextStart);
     startFloorLapNotice(currentDepth, lapTime);
     scheduleAutosave();
+  }
+
+  function getDungeonProgress() {
+    return {
+      bossDefeated: isBossDefeated(character, "strange_knight_statue_b9f"),
+      redDoorUnlocked: Boolean(character?.eventFlags?.red_door_b9f_unlocked),
+      hasRedKey: hasKeyItem(character?.keyItems, "red_rust_key_b9f")
+    };
+  }
+
+  function unlockB9BossDoor() {
+    if (character?.eventFlags?.red_door_b9f_unlocked) return { accepted: true, message: "赤い扉を開けた。" };
+    if (!hasKeyItem(character?.keyItems, "red_rust_key_b9f")) {
+      return { accepted: false, message: "赤い扉には鍵がかかっている。" };
+    }
+    const consumed = consumeKeyItem(character.keyItems, "red_rust_key_b9f");
+    if (!consumed.consumed) return { accepted: false, message: "赤い扉には鍵がかかっている。" };
+    character = {
+      ...character,
+      keyItems: consumed.keyItems,
+      eventFlags: { ...(character.eventFlags || {}), red_door_b9f_unlocked: true }
+    };
+    updateCharacterUi();
+    saveGame();
+    return { accepted: true, message: "赤錆びた鍵を使った。赤い扉の鍵が開いた。" };
   }
 
   function updateHud() {

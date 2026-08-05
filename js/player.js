@@ -14,13 +14,16 @@ import {
   openDoor,
   closeDoor,
   getDoorKind,
+  setDoor,
   getStartPosition,
   getNpcAt,
+  getBossAt,
   removeNpcAt,
   getFountainAt,
   removeFountainAt,
   getTreasureAt,
   getTreasureTrapAt,
+  getTreasureEventAt,
   removeTreasureAt,
   discoverTreasureAt
 } from "./dungeon.js";
@@ -43,6 +46,8 @@ const hooks = {
   hideTreasure: () => {},
   resolveTreasureTrap: () => ({ message: "" }),
   awardTreasure: () => ({ message: "中には何も入っていなかった！" }),
+  unlockBossDoor: () => ({ accepted: false, message: "鍵がかかっている。" }),
+  beginBossBattle: () => false,
   restAtFountain: () => Promise.resolve(false),
   returnToTown: () => {},
   beginBattle: () => {},
@@ -165,14 +170,17 @@ export function updateAnimation(now) {
         if (!torchFuelDisabled) state.torchFuel = Math.max(0, state.torchFuel - TORCH_FUEL_STEP);
         hooks.onDungeonStep();
         const npc = getNpcAt(state.gridX, state.gridY);
+        const bossId = getBossAt(state.gridX, state.gridY);
         const fountain = getFountainAt(state.gridX, state.gridY);
         const treasure = getTreasureAt(state.gridX, state.gridY);
         const isStairs = a.cellType === "stairsUp" || a.cellType === "stairsDown";
-        const isSpecialEventCell = Boolean(npc) || Boolean(fountain) || Boolean(treasure) || isStairs;
+        const isSpecialEventCell = Boolean(npc) || Boolean(bossId) || Boolean(fountain) || Boolean(treasure) || isStairs;
         const encounterTriggered = !isSpecialEventCell && onPlayerStep({ inDarkness: movedInDarkness });
         if (encounterTriggered && state.autoWalkerActive) state.autoReturnPaused = true;
         else if (encounterTriggered) hooks.cancelAutoReturn(false);
-        if (npc) {
+        if (bossId) {
+          startBossEvent(bossId, a.fromGX, a.fromGY);
+        } else if (npc) {
           startNpcTalkEvent(npc, a.fromGX, a.fromGY);
         } else if (fountain) {
           startFountainEvent(a.fromGX, a.fromGY);
@@ -301,6 +309,16 @@ export function openDoorAhead(automated = false) {
   if (state.overlayEvent || state.anim || (state.autoReturning && !automated)) return false;
   const dir = DIRS[state.dir];
   if (!closedDoorOnCell(state.gridX, state.gridY, dir.key)) return false;
+  if (getDoorKind(state.gridX, state.gridY, dir.key) === "boss") {
+    const result = hooks.unlockBossDoor({ x: state.gridX, y: state.gridY, dirKey: dir.key }) || {};
+    if (!result.accepted) {
+      hooks.playSe("blocked");
+      hooks.say(result.message || "赤い扉には鍵がかかっている。");
+      return true;
+    }
+    setDoor(state.gridX, state.gridY, dir.key, "closed", "bossUnlocked");
+    hooks.say(result.message || "赤錆びた鍵を使った。赤い扉の鍵が開いた。");
+  }
   state.anim = {
     type: "door",
     start: performance.now(),
@@ -328,6 +346,7 @@ export function handleOverlayEventInput(action) {
   }
   if (action === "confirm") {
     if (state.overlayEvent.type === "npcTalk") advanceNpcTalkEvent();
+    else if (state.overlayEvent.type === "bossPrompt") confirmBossEvent();
     else if (state.overlayEvent.type === "fountain") confirmFountainEvent();
     else if (state.overlayEvent.type === "stairsPrompt") confirmStairsPrompt();
     else if (state.overlayEvent.type === "treasure") confirmTreasureEvent();
@@ -404,6 +423,31 @@ function startStairsPrompt(cellType) {
     message: hooks.messageFor(state.gridX, state.gridY, cellType),
     canCancel: true
   });
+}
+
+function startBossEvent(bossId, fromGX, fromGY) {
+  startOverlayEvent({
+    type: "bossPrompt",
+    bossId,
+    fromGX,
+    fromGY,
+    message: "部屋の中央に騎士の彫像がある。まるで行く手を遮っているようだ。調べてみますか？\n＊Aボタン：はい　Bボタン：いいえ",
+    canCancel: true,
+    retreatOnCancel: true
+  });
+}
+
+function confirmBossEvent() {
+  const event = state.overlayEvent;
+  if (!event || event.type !== "bossPrompt") return;
+  event.canCancel = false;
+  hooks.say("あなたが近づいた途端、彫像が動き出した！こちらに向かってくる！");
+  const timer = window.setTimeout(() => {
+    if (state.overlayEvent !== event) return;
+    state.overlayEvent = null;
+    hooks.beginBossBattle(event.bossId);
+  }, 1000);
+  event.autoStartTimer = timer;
 }
 
 function confirmStairsPrompt() {
@@ -517,6 +561,7 @@ function startTreasureEvent(treasureType, fromGX, fromGY) {
     type: "treasure",
     treasureType,
     trapId: getTreasureTrapAt(state.gridX, state.gridY),
+    eventTreasureId: getTreasureEventAt(state.gridX, state.gridY),
     phase: "prompt",
     fromGX,
     fromGY,
@@ -544,12 +589,13 @@ function confirmTreasureEvent() {
     hooks.hideTreasure();
     const trapMessage = trapResult.message ? `${trapResult.message}\n` : "";
     if (event.treasureType === "red") {
-      const reward = hooks.awardTreasure(event.treasureType) || {};
+      const reward = hooks.awardTreasure(event.treasureType, event.eventTreasureId) || {};
       hooks.say(`${trapMessage}${reward.message || "戦利品をロット袋へ入れた。"}`);
     } else if (event.treasureType === "black") {
       hooks.say(`${trapMessage}宝箱はミミックだった！（未実装）`);
     } else if (event.treasureType === "gold") {
-      hooks.say(`${trapMessage}中にはレアアイテムが…入っていなかった！`);
+      const reward = hooks.awardTreasure(event.treasureType, event.eventTreasureId) || {};
+      hooks.say(`${trapMessage}${reward.message || "中にはレアアイテムが…入っていなかった！"}`);
     } else {
       hooks.say(`${trapMessage}中には何も入っていなかった！`);
     }

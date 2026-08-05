@@ -87,6 +87,7 @@ const town = {
   getCharacter: () => null,
   onRegister: () => {},
   onEnterDungeon: () => {},
+  onUseTransfer: () => false,
   onStay: () => {},
   onHeal: () => {},
   onPurchaseItem: () => null,
@@ -363,6 +364,12 @@ export function handleTownInput(action) {
   if (town.mode === "dungeonEntrance") return handleEntranceInput(action);
   if (town.mode === "facilityMenu" || town.mode === "facility") return handleFacilityMenuInput(action);
   if (town.mode === "transferCircle") {
+    if (action === "confirm" && town.transferUnlocked && !town.transitioning) {
+      town.playSe("confirm");
+      town.transitioning = true;
+      Promise.resolve(town.onUseTransfer()).finally(() => { town.transitioning = false; });
+      return true;
+    }
     if (action === "cancel") {
       town.playSe("cancel");
       town.mode = "dungeonEntrance";
@@ -965,7 +972,7 @@ function renderTransferCircle() {
   if (town.transferUnlocked) {
     town.mosaic.hidden = true;
     town.background.src = "images/background/circle.avif";
-    town.background.alt = "転送陣";
+    town.background.alt = "転送門";
     town.background.hidden = false;
   } else {
     renderMosaicBackground("images/background/circle.avif");
@@ -975,7 +982,7 @@ function renderTransferCircle() {
   town.registration.hidden = true;
   town.root.querySelector("#townFacilityName").hidden = true;
   town.messageEl.textContent = town.transferUnlocked
-    ? "転送陣が淡い光を放っている。"
+    ? "転送門がある。利用しますか？\n＊Aボタン：はい　Bボタン：いいえ"
     : "まだ入ることは出来ない。";
   renderEntranceSelection();
   resetTownViewport();
@@ -1595,7 +1602,7 @@ function renderFacilityCommandSelection() {
 
 function updateEntranceLabels() {
   const transferButton = town.entranceButtons.find(button => button.dataset.entranceCommand === "circle");
-  if (transferButton) transferButton.textContent = town.transferUnlocked ? "転送陣" : "？？？";
+  if (transferButton) transferButton.textContent = town.transferUnlocked ? "転送門" : "？？？";
 }
 
 function renderMosaicBackground(src) {

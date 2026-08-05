@@ -5,6 +5,7 @@
 } from "./config.js";
 import { npcs, getNpcById } from "../data/npcs.js";
 import { HEALING_FOUNTAIN } from "../data/fountains.js";
+import { BOSSES, getBossById } from "../data/bosses.js";
 
 const renderer = {
   canvas: null,
@@ -119,9 +120,11 @@ export function configureRenderer(options) {
   renderer.doorTextures = {
     normal: makeDoorTexture("normal"),
     boss: makeDoorTexture("boss"),
+    bossUnlocked: makeDoorTexture("boss"),
     locked: makeDoorTexture("locked")
   };
   npcs.forEach(npc => loadCharacterImage(npc.imageId, npc.image));
+  Object.values(BOSSES).forEach(boss => loadCharacterImage(boss.encounterImageId, boss.encounterImage));
   loadCharacterImage(HEALING_FOUNTAIN.id, HEALING_FOUNTAIN.image);
   ["red", "black", "gold"].forEach(type => loadTreasureImage(type, `images/treasure/treasure-${type}.png`));
   renderer.canvas.addEventListener("pointerup", handleCanvasPointerUp);
@@ -601,8 +604,14 @@ export function drawCellEvents(layer = "all") {
           ...projected,
           footprint: projectCellFootprint(x, y, projected.forward),
           eventKind: "stairs",
-          type: cell.type
+          type: cell.type,
+          portal: cell.portal
         });
+      }
+      if (cell.bossId) {
+        if (layer === "floor") continue;
+        const boss = getBossById(cell.bossId);
+        if (boss) events.push({ ...projected, eventKind: "boss", npc: { imageId: boss.encounterImageId } });
       }
       if (cell.npc) {
         if (layer === "floor") continue;
@@ -638,6 +647,7 @@ export function drawCellEvents(layer = "all") {
     .forEach(event => {
       if (event.eventKind === "stairs") drawStairsEventMarker(ctx, W, H, event);
       if (event.eventKind === "npc") drawNpcEvent(ctx, event);
+      if (event.eventKind === "boss") drawNpcEvent(ctx, event);
       if (event.eventKind === "fountain") drawNpcEvent(ctx, event);
       if (event.eventKind === "treasure") drawTreasureEvent(ctx, event);
     });
@@ -753,7 +763,8 @@ function directionKeyBetween(fromX, fromY, toX, toY) {
 
 function drawStairsEventMarker(ctx, W, H, event) {
   const isUp = event.type === "stairsUp";
-  const color = isUp ? "#8ed4ff" : "#f3b15a";
+  const isPortal = isUp && event.portal === "transfer_b10f";
+  const color = isPortal ? "#c67cff" : isUp ? "#8ed4ff" : "#f3b15a";
   const quad = event.footprint ? (isUp ? event.footprint.ceiling : event.footprint.floor) : null;
   const centerY = isUp ? event.ceilingY : event.floorY;
   const glowY = isUp ? centerY + event.size * .22 : centerY - event.size * .22;
@@ -762,8 +773,8 @@ function drawStairsEventMarker(ctx, W, H, event) {
   ctx.save();
   ctx.globalAlpha = event.alpha;
   const glow = ctx.createRadialGradient(event.x, glowY, 2, event.x, glowY, event.size * 1.55);
-  glow.addColorStop(0, isUp ? "rgba(142,212,255,.68)" : "rgba(243,177,90,.68)");
-  glow.addColorStop(.5, isUp ? "rgba(142,212,255,.24)" : "rgba(243,177,90,.24)");
+  glow.addColorStop(0, isPortal ? "rgba(198,124,255,.72)" : isUp ? "rgba(142,212,255,.68)" : "rgba(243,177,90,.68)");
+  glow.addColorStop(.5, isPortal ? "rgba(198,124,255,.28)" : isUp ? "rgba(142,212,255,.24)" : "rgba(243,177,90,.24)");
   glow.addColorStop(1, "rgba(0,0,0,0)");
   ctx.fillStyle = glow;
   ctx.beginPath();

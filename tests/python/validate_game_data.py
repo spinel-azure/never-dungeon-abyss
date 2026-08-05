@@ -26,6 +26,7 @@ NEGATIVE_FORBIDDEN = {
 
 DATA_FILES = [
     Path("data/classes.js"),
+    Path("data/bosses.js"),
     Path("data/enemies.js"),
     Path("data/equipment.js"),
     Path("data/items.js"),
@@ -164,6 +165,7 @@ class Validator:
 
     def validate_core_schemas(self) -> None:
         schemas = {
+            Path("data/bosses.js"): ("ボス", ("id", "name", "image", "maxHp", "stats", "def", "attack", "experienceReward")),
             Path("data/enemies.js"): ("敵", ("id", "name", "image", "maxHp", "stats", "def", "attack", "experienceReward")),
             Path("data/weapons.js"): ("武器", ("id", "name", "type", "attack")),
             Path("data/classes.js"): ("職業", ("id", "name", "maxHp", "maxSp", "stats", "initialSkillIds")),
@@ -495,7 +497,7 @@ def mask_nested(body: str) -> str:
 
 
 def relevant_records(relative: Path, records: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    if relative == Path("data/enemies.js"):
+    if relative in (Path("data/enemies.js"), Path("data/bosses.js")):
         # Enemy objects can contain nested action objects with their own IDs.
         # Only records carrying an enemy-level combat field belong to the
         # exported enemy collection.

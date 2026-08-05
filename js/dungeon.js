@@ -47,6 +47,10 @@ export function makeCells(w, h) {
       treasure: null,
       treasureTrapId: null,
       treasureDiscovered: false,
+      eventTreasureId: null,
+      bossId: null,
+      reserved: null,
+      portal: null,
       walls: { N: true, E: true, S: true, W: true },
       doors: { N: null, E: null, S: null, W: null },
       doorKinds: { N: null, E: null, S: null, W: null }
@@ -68,7 +72,7 @@ export function resetExplored() {
   }
 }
 
-export function buildBoundaryWallMap(depth = 1, rng = Math.random) {
+export function buildBoundaryWallMap(depth = 1, rng = Math.random, progress = {}) {
   const { x: startX, y: startY } = startPosition;
   resetAllWalls();
   carvePerfectMaze();
@@ -78,11 +82,13 @@ export function buildBoundaryWallMap(depth = 1, rng = Math.random) {
     carvePerfectMaze();
     addLoopOpenings(EXTRA_OPENINGS);
   }
-  placeStairs();
+  placeStairs(depth);
+  if (Math.floor(Number(depth) || 1) === 9) placeB9BossRoom(rng, progress);
   placeNpc();
   placeTreasures(depth, rng);
   placeFountain(depth, rng);
-  placeNormalDoors(NORMAL_DOOR_COUNT);
+  if (Math.floor(Number(depth) || 1) === 9) placeB9KeyTreasure(rng, progress);
+  placeNormalDoors(NORMAL_DOOR_COUNT, false);
 }
 
 export function resetAllWalls() {
@@ -94,6 +100,10 @@ export function resetAllWalls() {
       cells[y][x].treasure = null;
       cells[y][x].treasureTrapId = null;
       cells[y][x].treasureDiscovered = false;
+      cells[y][x].eventTreasureId = null;
+      cells[y][x].bossId = null;
+      cells[y][x].reserved = null;
+      cells[y][x].portal = null;
       cells[y][x].walls = { N: true, E: true, S: true, W: true };
       cells[y][x].doors = { N: null, E: null, S: null, W: null };
       cells[y][x].doorKinds = { N: null, E: null, S: null, W: null };
@@ -101,10 +111,11 @@ export function resetAllWalls() {
   }
 }
 
-export function placeStairs() {
+export function placeStairs(depth = 1) {
   const { x: startX, y: startY } = startPosition;
   resetCellTypes();
   cells[startY][startX].type = "stairsUp";
+  cells[startY][startX].portal = Math.floor(Number(depth) || 1) === 10 ? "transfer_b10f" : null;
   const stairsDown = findFarthestReachableCell(7);
   if (stairsDown) cells[stairsDown.y][stairsDown.x].type = "stairsDown";
 }
@@ -113,15 +124,17 @@ export function placeNpc() {
   const { x: startX, y: startY } = startPosition;
   resetNpcs();
   const distances = makeDistanceMap(startX, startY);
+  const reserved = cells.flat().filter(cell => cell.reserved).map(cell => ({ x: cell.x, y: cell.y }));
   const candidates = [];
   for (let y = 0; y < MAP_H; y++) {
     for (let x = 0; x < MAP_W; x++) {
       if (x === startX && y === startY) continue;
-      if (cells[y][x].type !== "floor") continue;
+      if (cells[y][x].type !== "floor" || cells[y][x].reserved) continue;
       if (distances[y][x] < 4) continue;
       // NPCs currently behave as impassable cells. Reject placements that
       // would disconnect any other cell from the dungeon entrance.
-      if (countReachableCells(startX, startY, { x, y }) !== MAP_W * MAP_H - 1) continue;
+      const blocked = [...reserved, { x, y }];
+      if (countReachableCells(startX, startY, blocked) !== MAP_W * MAP_H - blocked.length) continue;
       candidates.push({ x, y, distance: distances[y][x] });
     }
   }
@@ -151,6 +164,17 @@ export function getFountainAt(x, y) {
   return cells[y][x].fountain || null;
 }
 
+export function getBossAt(x, y) {
+  if (!inBounds(x, y)) return null;
+  return cells[y][x].bossId || null;
+}
+
+export function removeBossAt(x, y) {
+  if (!inBounds(x, y) || !cells[y][x].bossId) return false;
+  cells[y][x].bossId = null;
+  return true;
+}
+
 export function removeFountainAt(x, y) {
   if (!inBounds(x, y) || !cells[y][x].fountain) return false;
   cells[y][x].fountain = null;
@@ -167,10 +191,16 @@ export function getTreasureTrapAt(x, y) {
   return cells[y][x].treasureTrapId || null;
 }
 
+export function getTreasureEventAt(x, y) {
+  if (!inBounds(x, y)) return null;
+  return cells[y][x].eventTreasureId || null;
+}
+
 export function removeTreasureAt(x, y) {
   if (!inBounds(x, y) || !cells[y][x].treasure) return false;
   cells[y][x].treasure = null;
   cells[y][x].treasureTrapId = null;
+  cells[y][x].eventTreasureId = null;
   return true;
 }
 
@@ -199,7 +229,7 @@ export function placeTreasures(depth = 1, rng = Math.random) {
     for (let y = 0; y < MAP_H; y++) {
       for (let x = 0; x < MAP_W; x++) {
         if (x === startX && y === startY) continue;
-        if (cells[y][x].type !== "floor" || cells[y][x].npc || cells[y][x].treasure) continue;
+        if (cells[y][x].type !== "floor" || cells[y][x].reserved || cells[y][x].npc || cells[y][x].treasure) continue;
         if (distances[y][x] < 3) continue;
         const nextBlocked = [...blocked, { x, y }];
         if (countReachableCells(startX, startY, nextBlocked) !== MAP_W * MAP_H - nextBlocked.length) continue;
@@ -249,6 +279,7 @@ export function resetTreasures() {
       cells[y][x].treasure = null;
       cells[y][x].treasureTrapId = null;
       cells[y][x].treasureDiscovered = false;
+      cells[y][x].eventTreasureId = null;
     }
   }
 }
@@ -260,12 +291,12 @@ export function placeFountain(depth = 1, rng = Math.random) {
   if (!floorHasHealingFountain(depth)) return null;
   const { x: startX, y: startY } = startPosition;
   const distances = makeDistanceMap(startX, startY);
-  const blocked = cells.flat().filter(cell => cell.npc).map(cell => ({ x: cell.x, y: cell.y }));
+  const blocked = cells.flat().filter(cell => cell.npc || cell.reserved).map(cell => ({ x: cell.x, y: cell.y }));
   const candidates = [];
   for (let y = 0; y < MAP_H; y++) {
     for (let x = 0; x < MAP_W; x++) {
       const cell = cells[y][x];
-      if (cell.type !== "floor" || cell.npc || cell.treasure || cell.fountain) continue;
+      if (cell.type !== "floor" || cell.reserved || cell.npc || cell.treasure || cell.fountain) continue;
       if (distances[y][x] < 3) continue;
       const nextBlocked = [...blocked, { x, y }];
       if (countReachableCells(startX, startY, nextBlocked) !== MAP_W * MAP_H - nextBlocked.length) continue;
@@ -278,9 +309,9 @@ export function placeFountain(depth = 1, rng = Math.random) {
   return selected;
 }
 
-export function placeNormalDoors(count = NORMAL_DOOR_COUNT) {
+export function placeNormalDoors(count = NORMAL_DOOR_COUNT, reset = true) {
   const { x: startX, y: startY } = startPosition;
-  resetDoors();
+  if (reset) resetDoors();
   const distances = makeDistanceMap(startX, startY);
   const candidates = [];
   for (let y = 0; y < MAP_H; y++) {
@@ -291,6 +322,7 @@ export function placeNormalDoors(count = NORMAL_DOOR_COUNT) {
         if (!inBounds(nx, ny)) continue;
         if (cells[y][x].walls[dir.key]) continue;
         if (isStairCell(x, y) || isStairCell(nx, ny)) continue;
+        if (cells[y][x].reserved || cells[ny][nx].reserved) continue;
         if (cells[y][x].npc || cells[ny][nx].npc) continue;
         if (distances[y][x] < 3 || distances[ny][nx] < 3) continue;
         candidates.push({ x, y, dir: dir.key });
@@ -298,16 +330,121 @@ export function placeNormalDoors(count = NORMAL_DOOR_COUNT) {
     }
   }
 
-  const selected = shuffled(candidates).slice(0, count + BOSS_DOOR_COUNT + LOCKED_DOOR_COUNT);
-  selected.forEach((door, index) => {
-    const kind = index < count
-      ? "normal"
-      : index < count + BOSS_DOOR_COUNT
-        ? "boss"
-        : "locked";
+  const selected = shuffled(candidates).slice(0, count);
+  selected.forEach(door => {
+    const kind = "normal";
     setWall(door.x, door.y, door.dir, true);
     setDoor(door.x, door.y, door.dir, "closed", kind);
   });
+}
+
+export function placeB9BossRoom(rng = Math.random, progress = {}) {
+  const { x: startX, y: startY } = startPosition;
+  const candidates = [];
+  for (let y = 1; y < MAP_H - 1; y += 1) {
+    for (let x = 1; x < MAP_W - 1; x += 1) {
+      for (const dir of DIRS) {
+        const approach = { x: x - dir.dx, y: y - dir.dy };
+        const room = [0, 1, 2].map(offset => ({ x: x + dir.dx * offset, y: y + dir.dy * offset }));
+        if (![approach, ...room].every(cell => inBounds(cell.x, cell.y))) continue;
+        if (room.some(cell => cell.x === startX && cell.y === startY)) continue;
+        candidates.push({ approach, room, dir });
+      }
+    }
+  }
+  for (const candidate of shuffled(candidates, rng)) {
+    const snapshot = structuredClone(cells);
+    const blocked = candidate.room.map(({ x, y }) => ({ x, y }));
+    for (const cell of candidate.room) for (const dir of DIRS) setWall(cell.x, cell.y, dir.key, true);
+    setWall(candidate.room[0].x, candidate.room[0].y, candidate.dir.key, false);
+    setWall(candidate.room[1].x, candidate.room[1].y, candidate.dir.key, false);
+    connectCellsAroundBlockedArea(startX, startY, blocked, rng);
+    if (countReachableCells(startX, startY, blocked) !== MAP_W * MAP_H - blocked.length) {
+      restoreCells(snapshot);
+      continue;
+    }
+    const doorUnlocked = Boolean(progress.redDoorUnlocked || progress.bossDefeated);
+    for (const cell of cells.flat()) {
+      if (cell.type === "stairsDown") cell.type = "floor";
+    }
+    setWall(candidate.approach.x, candidate.approach.y, candidate.dir.key, true);
+    setDoor(candidate.approach.x, candidate.approach.y, candidate.dir.key, "closed", doorUnlocked ? "bossUnlocked" : "boss");
+    const [blank, boss, stairs] = candidate.room.map(cell => cells[cell.y][cell.x]);
+    blank.reserved = "bossRoom";
+    boss.reserved = "bossRoom";
+    stairs.reserved = "bossRoom";
+    boss.bossId = progress.bossDefeated ? null : "strange_knight_statue_b9f";
+    stairs.type = "stairsDown";
+    for (const target of [blank, boss, stairs]) {
+      target.npc = null; target.fountain = null; target.treasure = null; target.eventTreasureId = null;
+    }
+    return { approach: candidate.approach, blank, boss, stairs, doorDirection: candidate.dir.key };
+  }
+  return null;
+}
+
+export function placeB9KeyTreasure(rng = Math.random, progress = {}) {
+  if (progress.redDoorUnlocked || progress.bossDefeated || progress.hasRedKey) return null;
+  const { x: startX, y: startY } = startPosition;
+  const distances = makeDistanceMap(startX, startY);
+  const candidates = cells.flat().filter(cell =>
+    cell.type === "floor" && !cell.reserved && !cell.npc && !cell.fountain && !cell.treasure
+      && distances[cell.y][cell.x] >= 3
+  );
+  const selected = shuffled(candidates, rng)[0];
+  if (!selected) return null;
+  selected.treasure = "gold";
+  let trapRoll = 0;
+  selected.treasureTrapId = rollTreasureTrap("gold", () => trapRoll++ === 0 ? 0 : rng());
+  selected.eventTreasureId = "red_rust_key_b9f_chest";
+  return { x: selected.x, y: selected.y };
+}
+
+function restoreCells(snapshot) {
+  for (let y = 0; y < MAP_H; y += 1) {
+    for (let x = 0; x < MAP_W; x += 1) Object.assign(cells[y][x], snapshot[y][x]);
+  }
+}
+
+function connectCellsAroundBlockedArea(startX, startY, blockedCells, rng = Math.random) {
+  const blocked = new Set(blockedCells.map(cell => `${cell.x},${cell.y}`));
+  const targetCount = MAP_W * MAP_H - blocked.size;
+  for (let attempt = 0; attempt < MAP_W * MAP_H && countReachableCells(startX, startY, blockedCells) < targetCount; attempt += 1) {
+    const reachable = reachableCellKeys(startX, startY, blocked);
+    const bridges = [];
+    for (const key of reachable) {
+      const [x, y] = key.split(",").map(Number);
+      for (const dir of DIRS) {
+        const nx = x + dir.dx;
+        const ny = y + dir.dy;
+        const nextKey = `${nx},${ny}`;
+        if (!inBounds(nx, ny) || blocked.has(nextKey) || reachable.has(nextKey)) continue;
+        bridges.push({ x, y, dir: dir.key });
+      }
+    }
+    const bridge = shuffled(bridges, rng)[0];
+    if (!bridge) break;
+    setWall(bridge.x, bridge.y, bridge.dir, false);
+  }
+}
+
+function reachableCellKeys(startX, startY, blocked) {
+  const startKey = `${startX},${startY}`;
+  if (blocked.has(startKey)) return new Set();
+  const queue = [{ x: startX, y: startY }];
+  const seen = new Set([startKey]);
+  for (let i = 0; i < queue.length; i += 1) {
+    const current = queue[i];
+    for (const dir of DIRS) {
+      const x = current.x + dir.dx;
+      const y = current.y + dir.dy;
+      const key = `${x},${y}`;
+      if (!inBounds(x, y) || blocked.has(key) || seen.has(key) || wallOnCell(current.x, current.y, dir.key)) continue;
+      seen.add(key);
+      queue.push({ x, y });
+    }
+  }
+  return seen;
 }
 
 export function resetDoors() {

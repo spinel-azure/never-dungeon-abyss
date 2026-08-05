@@ -55,9 +55,10 @@
         if (c.walls.S) line(ctx, x1, y2, x2, y2);
       }
       if ((isExplored && c.type === "stairsUp") || (c.type === "stairsDown" && (isExplored || revealOptions.stairsDown))) {
-        drawStairsMark(ctx, x1, y1, cell, c.type);
+        drawStairsMark(ctx, x1, y1, cell, c.type, c.portal);
       }
       if (c.npc && (isExplored || revealOptions.npcs)) drawNpcMark(ctx, x1, y1, cell);
+      if (c.bossId && isExplored) drawBossMark(ctx, x1, y1, cell);
       if (c.fountain && state.torchFuel > 0) drawFountainMark(ctx, x1, y1, cell);
       if (c.treasure && revealOptions.treasures) {
         drawTreasureMark(ctx, x1, y1, cell, c.treasure);
@@ -78,10 +79,10 @@
       const y1 = oy + y * cell;
       const x2 = x1 + cell;
       const y2 = y1 + cell;
-      drawDoorMark(ctx, x1, y1, x2, y1, c.doors.N, cell);
-      drawDoorMark(ctx, x2, y1, x2, y2, c.doors.E, cell);
-      drawDoorMark(ctx, x1, y2, x2, y2, c.doors.S, cell);
-      drawDoorMark(ctx, x1, y1, x1, y2, c.doors.W, cell);
+      drawDoorMark(ctx, x1, y1, x2, y1, c.doors.N, cell, c.doorKinds.N);
+      drawDoorMark(ctx, x2, y1, x2, y2, c.doors.E, cell, c.doorKinds.E);
+      drawDoorMark(ctx, x1, y2, x2, y2, c.doors.S, cell, c.doorKinds.S);
+      drawDoorMark(ctx, x1, y1, x1, y2, c.doors.W, cell, c.doorKinds.W);
     }
   }
 
@@ -116,14 +117,24 @@ export function getMinimapRevealOptions() {
   return { ...revealOptions };
 }
 
-export function drawStairsMark(ctx, x, y, size, type) {
+export function drawStairsMark(ctx, x, y, size, type, portal = null) {
   const label = type === "stairsUp" ? "U" : "D";
   ctx.save();
-  ctx.fillStyle = type === "stairsUp" ? "#87c7ff" : "#f0b35a";
+  ctx.fillStyle = portal === "transfer_b10f" ? "#c67cff" : type === "stairsUp" ? "#87c7ff" : "#f0b35a";
   ctx.font = `700 ${Math.max(8, size * .62)}px GameFont, sans-serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(label, x + size / 2, y + size / 2);
+  ctx.restore();
+}
+
+export function drawBossMark(ctx, x, y, size) {
+  ctx.save();
+  ctx.fillStyle = "#ff6b6b";
+  ctx.font = `700 ${Math.max(8, size * .62)}px GameFont, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("♟", x + size / 2, y + size / 2);
   ctx.restore();
 }
 
@@ -179,7 +190,7 @@ export function drawTreasureCompassMark(ctx, x, y, size) {
   ctx.restore();
 }
 
-export function drawDoorMark(ctx, x1, y1, x2, y2, state, cellSize) {
+export function drawDoorMark(ctx, x1, y1, x2, y2, state, cellSize, kind = "normal") {
   if (!state) return;
   const mx = (x1 + x2) / 2;
   const my = (y1 + y2) / 2;
@@ -188,7 +199,7 @@ export function drawDoorMark(ctx, x1, y1, x2, y2, state, cellSize) {
   const length = Math.max(4, cellSize * .46);
   const half = length / 2;
   const horizontal = Math.abs(dx) > Math.abs(dy);
-  const color = state === "locked" ? "#c78dff" : state === "open" ? "#dfc18a" : "#f0b35a";
+  const color = String(kind).startsWith("boss") ? "#ff3f3f" : state === "locked" ? "#c78dff" : state === "open" ? "#dfc18a" : "#f0b35a";
   ctx.save();
 
   ctx.strokeStyle = "#151d19";
