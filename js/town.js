@@ -1,4 +1,4 @@
-import { CHARACTER_JOBS, TOWN_FACILITIES, getTownFacility } from "../data/town.js";
+import { CHARACTER_JOBS, TOWN_FACILITIES, getTownFacility } from "../data/town.js?v=20260805-01";
 import {
   formatCompactQuickName,
   formatQuickJob,

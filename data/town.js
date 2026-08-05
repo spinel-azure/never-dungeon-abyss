@@ -30,7 +30,7 @@ export const TOWN_FACILITIES = Object.freeze([
     id: "shop",
     label: "商店",
     keeper: "女主人ヘレン",
-    image: "images/npc/NPC_13.avif",
+    image: "images/npc/NPC_13e.avif",
     background: "images/background/town_04.avif",
     greeting: "あら、いらっしゃい。",
     services: ["装備品の売買", "アイテムの売買"]
