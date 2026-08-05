@@ -77,6 +77,8 @@ import {
   stopBgm
 } from "./audio.js";
 import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
+import { EffectEngine } from "./effects/effect-engine.js";
+import { hasUncertainLoot } from "./loot-identification.js";
 import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions } from "./town.js?v=20260804-03";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getEquipmentItem } from "../data/equipment.js";
@@ -181,6 +183,13 @@ import {
   const lootIdentifyOverlay = document.getElementById("lootIdentifyOverlay");
   const lootIdentifyList = document.getElementById("lootIdentifyList");
   const lootIdentifyAction = document.getElementById("lootIdentifyAction");
+  const lootIdentifyTitle = document.getElementById("lootIdentifyTitle");
+  const lootIdentifyEffectCanvas = document.getElementById("lootIdentifyEffectCanvas");
+  const lootIdentifyEffectText = document.getElementById("lootIdentifyEffectText");
+  const lootIdentifyEffectEngine = lootIdentifyEffectCanvas
+    ? new EffectEngine(lootIdentifyEffectCanvas, { transparent: true, backdrop: false })
+    : null;
+  let lootIdentifyEffectReady = null;
   const battleScreen = document.getElementById("battleScreen");
   const skillOverlay = document.getElementById("skillOverlay");
   const sceneTransition = document.getElementById("sceneTransition");
@@ -200,20 +209,26 @@ import {
     if (!pendingLootIdentification || pendingLootIdentification.identifying) return;
     if (!pendingLootIdentification.identified) {
       const identification = pendingLootIdentification;
+      if (!identification.requiresIdentification) {
+        completeLootIdentification(identification);
+        return;
+      }
       identification.identifying = true;
       lootIdentifyAction.disabled = true;
-      lootIdentifyAction.classList.add("is-identifying");
       const finishIdentification = () => {
         if (pendingLootIdentification !== identification || identification.identified) return;
-        identification.identifying = false;
-        identification.identified = true;
-        lootIdentifyAction.classList.remove("is-identifying");
-        lootIdentifyAction.disabled = false;
-        renderLootIdentificationRows(formatIdentifiedLoot(pendingLootIdentification));
-        lootIdentifyAction.textContent = "CLOSE";
-        playSe("item");
+        lootIdentifyEffectText?.removeEventListener("animationend", finishIdentification);
+        completeLootIdentification(identification);
       };
-      lootIdentifyAction.addEventListener("animationend", finishIdentification, { once: true });
+      lootIdentifyEffectCanvas.hidden = false;
+      lootIdentifyEffectText.hidden = false;
+      lootIdentifyEffectText.classList.remove("is-active");
+      void lootIdentifyEffectText.offsetWidth;
+      lootIdentifyEffectText.classList.add("is-active");
+      lootIdentifyEffectText.addEventListener("animationend", finishIdentification, { once: true });
+      void prepareLootIdentifyEffect().then(ready => {
+        if (ready && pendingLootIdentification === identification) lootIdentifyEffectEngine.play();
+      });
       window.setTimeout(finishIdentification, 1800);
       return;
     }
@@ -1645,7 +1660,8 @@ import {
 
   function showLootIdentification(bag, settled, { onClose = null, playBgm = true } = {}) {
     if (!lootIdentifyOverlay || !bagHasLoot(bag)) return;
-    pendingLootIdentification = { bag, settled, identified: false, identifying: false, onClose };
+    const requiresIdentification = hasUncertainLoot(bag, getItem);
+    pendingLootIdentification = { bag, settled, identified: false, identifying: false, requiresIdentification, onClose };
     const unknown = [];
     if (Number(bag.gold) > 0) unknown.push({ label: `${Number(bag.gold).toLocaleString()}GOLD`, count: "" });
     for (const [itemId, count] of Object.entries(bag.items || {})) {
@@ -1657,12 +1673,43 @@ import {
     }
     for (const instance of bag.equipmentInstances || []) unknown.push({ label: instance.unidentifiedName || "？装備", count: "×1" });
     renderLootIdentificationRows(unknown);
-    lootIdentifyAction.textContent = "IDENTIFY ALL";
+    lootIdentifyTitle.textContent = "LOT BAG";
+    lootIdentifyAction.textContent = requiresIdentification ? "鑑定する" : "次へ";
     lootIdentifyAction.disabled = false;
-    lootIdentifyAction.classList.remove("is-identifying");
+    lootIdentifyEffectCanvas.hidden = true;
+    lootIdentifyEffectText.hidden = true;
+    lootIdentifyEffectText.classList.remove("is-active");
     lootIdentifyOverlay.hidden = false;
     document.body.classList.add("loot-identify-open");
     if (playBgm) startBgm("lotBag");
+  }
+
+  function prepareLootIdentifyEffect() {
+    if (!lootIdentifyEffectEngine) return Promise.resolve(false);
+    if (!lootIdentifyEffectReady) {
+      lootIdentifyEffectReady = lootIdentifyEffectEngine.loadFromUrl("data/effects/lot_bag_identify.json")
+        .then(() => true)
+        .catch(error => {
+          console.warn("Lot bag effect could not be loaded.", error);
+          return false;
+        });
+    }
+    return lootIdentifyEffectReady;
+  }
+
+  function completeLootIdentification(identification) {
+    if (pendingLootIdentification !== identification || identification.identified) return;
+    identification.identifying = false;
+    identification.identified = true;
+    lootIdentifyEffectEngine?.stop(false);
+    lootIdentifyEffectCanvas.hidden = true;
+    lootIdentifyEffectText.hidden = true;
+    lootIdentifyEffectText.classList.remove("is-active");
+    lootIdentifyAction.disabled = false;
+    lootIdentifyTitle.textContent = "INVENTORY";
+    renderLootIdentificationRows(formatIdentifiedLoot(identification));
+    lootIdentifyAction.textContent = "閉じる";
+    playSe("item");
   }
 
   function formatIdentifiedLoot({ bag, settled }) {

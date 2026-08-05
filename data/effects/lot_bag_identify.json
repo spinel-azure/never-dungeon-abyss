@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "id": "lot_bag_identify",
+  "name": "LOT BAG IDENTIFY",
+  "width": 960,
+  "height": 540,
+  "duration": 1600,
+  "background": "#10151b",
+  "parts": [
+    {
+      "id": "cracker_msf6zvh8_5",
+      "type": "cracker",
+      "enabled": true,
+      "start": 0,
+      "duration": 500,
+      "x": 480,
+      "y": 270,
+      "easing": "easeOutCubic",
+      "seed": 6,
+      "color": "#ff944d",
+      "secondaryColor": "#ebff57",
+      "count": 200,
+      "speed": 400,
+      "size": 10,
+      "spread": 900,
+      "gravity": 300
+    }
+  ]
+}

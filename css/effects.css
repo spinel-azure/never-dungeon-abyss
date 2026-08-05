@@ -1,0 +1,61 @@
+.loot-identify-panel {
+  position: relative;
+  z-index: 2;
+}
+
+.loot-identify-effect-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.loot-identify-effect-canvas[hidden],
+.loot-identify-effect-text[hidden] {
+  display: none;
+}
+
+.loot-identify-effect-text {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 4;
+  color: #fff;
+  font: clamp(48px, 10vw, 112px)/1 "PixelFont", monospace;
+  font-weight: 400;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.loot-identify-effect-text.is-active {
+  animation: loot-identify-message 1.6s cubic-bezier(.2, .72, .25, 1) forwards;
+}
+
+.loot-identify-overlay button:disabled {
+  opacity: 1;
+}
+
+@keyframes loot-identify-message {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(0) scale(.72);
+  }
+  65% {
+    opacity: .92;
+    transform: translate(-50%, -50%) rotate(540deg) scale(1.65);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(720deg) scale(2.8);
+  }
+}
+
+@media (max-width: 540px) {
+  .loot-identify-effect-text {
+    font-size: clamp(35px, 11vw, 58px);
+  }
+}
