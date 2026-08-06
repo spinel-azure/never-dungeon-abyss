@@ -179,9 +179,13 @@ export function getQuestProgress(character, questId) {
 export function isQuestAvailable(character, questOrId) {
   const quest = typeof questOrId === "string" ? getQuestById(questOrId) : questOrId;
   if (!quest?.available) return false;
-  const prerequisites = Array.isArray(quest.prerequisiteQuestIds)
+  const initialQuestGate = B2F_UNLOCK_QUEST_IDS.includes(quest.id)
+    ? []
+    : B2F_UNLOCK_QUEST_IDS;
+  const questPrerequisites = Array.isArray(quest.prerequisiteQuestIds)
     ? quest.prerequisiteQuestIds
     : [];
+  const prerequisites = [...new Set([...initialQuestGate, ...questPrerequisites])];
   return prerequisites.every(questId => getQuestProgress(character, questId).completed);
 }
 

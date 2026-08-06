@@ -220,8 +220,11 @@ test("quest 005 forces wandering dead only on B4F and ignores other floors", () 
   assert.equal(quest.targetId, "wandering_dead");
   assert.equal(quest.targetDepth, 4);
   assert.equal(quest.objectiveLabel, "さまよう亡者を15体退治する。");
+  const newCharacter = createInitialCharacter({ name: "TEST", job: "thief" });
+  assert.equal(isQuestAvailable(newCharacter, WANDERING_DEAD_EXTERMINATION_QUEST_ID), false);
+  assert.equal(acceptQuest(newCharacter, WANDERING_DEAD_EXTERMINATION_QUEST_ID).reason, "unavailable");
   let character = acceptQuest(
-    createInitialCharacter({ name: "TEST", job: "thief" }),
+    unlockB2F(newCharacter),
     WANDERING_DEAD_EXTERMINATION_QUEST_ID
   ).character;
   assert.equal(shouldForceEnemy(character, { depth: 4, enemyId: "wandering_dead" }), true);
@@ -237,7 +240,7 @@ test("quest 005 forces wandering dead only on B4F and ignores other floors", () 
 
 test("quest 005 report grants Dexterity Lesson and 400G once", () => {
   let character = acceptQuest(
-    createInitialCharacter({ name: "TEST", job: "priest" }),
+    unlockB2F(createInitialCharacter({ name: "TEST", job: "priest" })),
     WANDERING_DEAD_EXTERMINATION_QUEST_ID
   ).character;
   for (let index = 0; index < 15; index += 1) {
