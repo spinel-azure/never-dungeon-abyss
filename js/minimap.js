@@ -60,6 +60,9 @@
       if (c.npc && (isExplored || revealOptions.npcs)) drawNpcMark(ctx, x1, y1, cell);
       if (c.bossId && isExplored) drawBossMark(ctx, x1, y1, cell);
       if (c.fountain && state.torchFuel > 0) drawFountainMark(ctx, x1, y1, cell);
+      if (shouldDrawSpecialRoomMarker(c.specialRoom, isExplored, state.torchFuel)) {
+        drawSpecialRoomMark(ctx, x1, y1, cell, c.specialRoom.content.minimapMarker);
+      }
       if (c.treasure && revealOptions.treasures) {
         drawTreasureMark(ctx, x1, y1, cell, c.treasure);
       } else if (c.treasure && state.treasureCompassActive) {
@@ -155,6 +158,22 @@ export function drawFountainMark(ctx, x, y, size) {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText("⛲", x + size / 2, y + size / 2);
+  ctx.restore();
+}
+
+export function shouldDrawSpecialRoomMarker(room, isExplored, torchFuel) {
+  const content = room?.content;
+  if (!content?.minimapMarker || Number(torchFuel) <= 0) return false;
+  return Boolean(isExplored || content.revealBeforeExploration);
+}
+
+export function drawSpecialRoomMark(ctx, x, y, size, marker = "E") {
+  ctx.save();
+  ctx.fillStyle = "#d8a8ff";
+  ctx.font = `700 ${Math.max(8, size * .62)}px GameFont, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(String(marker).slice(0, 1), x + size / 2, y + size / 2);
   ctx.restore();
 }
 

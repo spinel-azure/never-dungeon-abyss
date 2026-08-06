@@ -9,13 +9,24 @@ import {
   setStartPosition
 } from "../js/dungeon.js";
 import { getSpecialRoomAccessRestriction, getSpecialRoomDefinition, getSpecialRoomUnlockRate } from "../data/special-rooms.js";
+import { shouldDrawSpecialRoomMarker } from "../js/minimap.js";
 
 test("B2 special room contains the repeatable Paul event boss", () => {
   assert.deepEqual(getSpecialRoomDefinition(2).content, {
     type: "repeatableBoss",
-    bossId: "lingering_ghost_paul_b2f"
+    bossId: "lingering_ghost_paul_b2f",
+    minimapMarker: "E",
+    revealBeforeExploration: true
   });
   assert.equal(getSpecialRoomDefinition(1).content, null);
+});
+
+test("Paul's event marker is visible before exploration except at zero torch", () => {
+  const room = getSpecialRoomDefinition(2);
+  assert.equal(shouldDrawSpecialRoomMarker(room, false, 100), true);
+  assert.equal(shouldDrawSpecialRoomMarker(room, false, 1), true);
+  assert.equal(shouldDrawSpecialRoomMarker(room, false, 0), false);
+  assert.equal(shouldDrawSpecialRoomMarker(getSpecialRoomDefinition(1), true, 100), false);
 });
 
 test("forced encounters block special-room unlocking without exposing a rate", () => {
