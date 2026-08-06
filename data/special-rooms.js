@@ -24,7 +24,14 @@ export const DEFAULT_SPECIAL_ROOM_LOCK = Object.freeze({
 });
 
 // Add only differences here when a floor receives an event, treasure or boss.
-export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({});
+export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
+  2: Object.freeze({
+    content: Object.freeze({
+      type: "repeatableBoss",
+      bossId: "lingering_ghost_paul_b2f"
+    })
+  })
+});
 
 export const SPECIAL_ROOM_ACCESS_BLOCKED_MESSAGE = "今はこの扉を開けられないようだ。";
 

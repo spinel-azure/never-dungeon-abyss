@@ -127,8 +127,12 @@ export function configureRenderer(options) {
   };
   npcs.forEach(npc => loadCharacterImage(npc.imageId, npc.image));
   Object.values(BOSSES).forEach(boss => {
-    loadCharacterImage(boss.encounterImageId, boss.encounterImage);
-    loadCharacterImage(boss.defeatedEncounterImageId, boss.defeatedEncounterImage);
+    if (boss.encounterImageId && boss.encounterImage) {
+      loadCharacterImage(boss.encounterImageId, boss.encounterImage);
+    }
+    if (boss.defeatedEncounterImageId && boss.defeatedEncounterImage) {
+      loadCharacterImage(boss.defeatedEncounterImageId, boss.defeatedEncounterImage);
+    }
   });
   loadCharacterImage(HEALING_FOUNTAIN.id, HEALING_FOUNTAIN.image);
   ["red", "black", "gold"].forEach(type => loadTreasureImage(type, `images/treasure/treasure-${type}.png`));
@@ -337,6 +341,14 @@ function drawOverlayEvent() {
   ctx.fillRect(0, 0, W, H);
 
   if (image && image.complete && image.naturalWidth > 0) {
+    if (event.imageFit === "cover") {
+      const scale = Math.max(W / image.naturalWidth, H / image.naturalHeight);
+      const drawW = image.naturalWidth * scale;
+      const drawH = image.naturalHeight * scale;
+      ctx.drawImage(image, (W - drawW) / 2, (H - drawH) / 2, drawW, drawH);
+      ctx.restore();
+      return;
+    }
     const aspect = image.naturalWidth / image.naturalHeight;
     const maxH = H * .86;
     const maxW = W * .68;

@@ -27,6 +27,10 @@ export function collectStats(source = {}) {
         + numeric(temporary.def)
     ),
     hitBonus: numeric(source.hitBonus),
+    evasionBonus: numeric(source.evasionBonus),
+    physicalHitMinimum: Number.isFinite(Number(source.physicalHitMinimum))
+      ? Number(source.physicalHitMinimum)
+      : undefined,
     criticalBonus: numeric(source.criticalBonus),
     speedBonus: numeric(source.speedBonus),
     defensePenetration: numeric(source.defensePenetration),

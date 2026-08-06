@@ -27,7 +27,8 @@ import {
   getTreasureEventAt,
   removeTreasureAt,
   discoverTreasureAt,
-  getSpecialRoomEntryAt
+  getSpecialRoomEntryAt,
+  getSpecialRoomAt
 } from "./dungeon.js";
 import { getNpcEncounter } from "../data/npcs.js";
 import { HEALING_FOUNTAIN } from "../data/fountains.js";
@@ -181,8 +182,9 @@ export function updateAnimation(now) {
         const bossRemainsId = getBossRemainsAt(state.gridX, state.gridY);
         const fountain = getFountainAt(state.gridX, state.gridY);
         const treasure = getTreasureAt(state.gridX, state.gridY);
+        const specialRoom = getSpecialRoomAt(state.gridX, state.gridY);
         const isStairs = a.cellType === "stairsUp" || a.cellType === "stairsDown";
-        const isSpecialEventCell = Boolean(npc) || Boolean(bossId) || Boolean(bossRemainsId) || Boolean(fountain) || Boolean(treasure) || isStairs;
+        const isSpecialEventCell = Boolean(npc) || Boolean(bossId) || Boolean(bossRemainsId) || Boolean(fountain) || Boolean(treasure) || Boolean(specialRoom?.content) || isStairs;
         const encounterTriggered = !isSpecialEventCell && onPlayerStep({ inDarkness: movedInDarkness });
         if (encounterTriggered && state.autoWalkerActive) state.autoReturnPaused = true;
         else if (encounterTriggered) hooks.cancelAutoReturn(false);
@@ -196,6 +198,8 @@ export function updateAnimation(now) {
           startFountainEvent(a.fromGX, a.fromGY);
         } else if (treasure) {
           startTreasureEvent(treasure, a.fromGX, a.fromGY);
+        } else if (specialRoom?.content) {
+          startSpecialRoomContentEvent(specialRoom.content);
         } else if (isStairs) {
           startStairsPrompt(a.cellType);
         } else if (encounterTriggered) {
@@ -428,6 +432,32 @@ function confirmSpecialRoomWarningEvent() {
   tryMove(event.moveAmount, false, true);
 }
 
+function startSpecialRoomContentEvent(content) {
+  if (content?.type !== "repeatableBoss") return;
+  const boss = getBossById(content.bossId);
+  if (!boss) return;
+  startOverlayEvent({
+    type: "specialRoomBoss",
+    bossId: boss.id,
+    imageId: boss.encounterImageId ?? "",
+    imageFit: "cover",
+    canCancel: true,
+    message: "部屋に入ると、古ぼけた机の上に所狭しと本が積み上げられている。\n机の中央には、一冊だけ開かれた本がある。調べますか？\n＊Aボタン：はい　Bボタン：いいえ"
+  });
+}
+
+function confirmSpecialRoomBossEvent() {
+  const event = state.overlayEvent;
+  if (!event || event.type !== "specialRoomBoss") return;
+  event.canCancel = false;
+  hooks.say("本に手を触れようとした瞬間、突然声が響く。「軽々しく、それに触るな！」\n何かが襲ってきた！");
+  event.autoStartTimer = window.setTimeout(() => {
+    if (state.overlayEvent !== event) return;
+    state.overlayEvent = null;
+    hooks.beginBossBattle(event.bossId);
+  }, 1200);
+}
+
 export function handleOverlayEventInput(action) {
   if (!state.overlayEvent) return false;
   if (state.overlayEvent.type === "stairsTransition") return true;
@@ -449,6 +479,7 @@ export function handleOverlayEventInput(action) {
     else if (state.overlayEvent.type === "treasure") confirmTreasureEvent();
     else if (state.overlayEvent.type === "specialDoorLock") confirmSpecialDoorLockEvent();
     else if (state.overlayEvent.type === "specialRoomWarning") confirmSpecialRoomWarningEvent();
+    else if (state.overlayEvent.type === "specialRoomBoss") confirmSpecialRoomBossEvent();
     return true;
   }
   return false;

@@ -244,6 +244,17 @@ test("miss deals zero and a landed hit deals at least one", () => {
   assert.equal(hit.totalDamage, 1);
 });
 
+test("combatants can define a lower physical hit floor and an evasion bonus", () => {
+  assert.ok(Math.abs(calculatePhysicalHitRate({
+    attacker: { dex: 4 },
+    defender: { agi: 12, evasionBonus: 0.2, physicalHitMinimum: 0.65 }
+  }) - 0.67) < Number.EPSILON);
+  assert.ok(Math.abs(calculatePhysicalHitRate({
+    attacker: { dex: 3, hitBonus: -0.2 },
+    defender: { agi: 7 }
+  }) - 0.71) < Number.EPSILON);
+});
+
 test("critical is 1.5x normal with minimum two", () => {
   const attack = createNormalAttack({ weapon: { ...getWeapon("iron_longsword"), attack: 0 } });
   const result = resolvePhysicalAttack({

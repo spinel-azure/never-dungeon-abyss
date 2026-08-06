@@ -38,6 +38,20 @@ test("boss victory persists independently from its future reward", () => {
   assert.deepEqual(result.reward, { type: "none" });
 });
 
+test("B2 Paul is a repeatable undead event boss with experience only", () => {
+  const boss = getBossById("lingering_ghost_paul_b2f");
+  assert.equal(boss.name, "未練ある亡霊ポール");
+  assert.equal(boss.race, "undead");
+  assert.equal(boss.maxHp, 45);
+  assert.equal(boss.experienceReward, 20);
+  assert.equal(boss.isBoss, true);
+  assert.equal(boss.bossKind, "event");
+  assert.equal(boss.repeatable, true);
+  assert.equal(boss.noDrop, true);
+  assert.equal(boss.defeatedFlag, undefined);
+  assert.equal(applyBossVictory({ eventFlags: {} }, boss).accepted, false);
+});
+
 test("B9 always creates one sealed 1x3 boss room and one trapped key chest", () => {
   for (let iteration = 0; iteration < 50; iteration += 1) {
     randomizeStartPosition();

@@ -1,4 +1,37 @@
 export const BOSSES = Object.freeze({
+  lingering_ghost_paul_b2f: Object.freeze({
+    id: "lingering_ghost_paul_b2f",
+    name: "未練ある亡霊ポール",
+    floor: 2,
+    imageId: "lingering_ghost_paul_b2f",
+    image: "images/bosses/boss_02.avif",
+    encounterImageId: "lingering_ghost_paul_event_b2f",
+    encounterImage: "images/background/dungeon_event_01.avif",
+    race: "undead",
+    maxHp: 45,
+    stats: Object.freeze({ str: 5, int: 4, agi: 12, dex: 3, luc: 5 }),
+    def: 5,
+    attack: 4,
+    hitBonus: -0.2,
+    evasionBonus: 0.2,
+    physicalHitMinimum: 0.65,
+    experienceReward: 20,
+    specialAttack: null,
+    reward: Object.freeze({ type: "none" }),
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 40, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 30, immune: false })
+    }),
+    escapeRate: 0.7,
+    surpriseRate: 0,
+    surpriseRateMaximum: 0,
+    noDrop: true,
+    isBoss: true,
+    bossKind: "event",
+    repeatable: true
+  }),
   strange_knight_statue_b9f: Object.freeze({
     id: "strange_knight_statue_b9f",
     name: "奇妙な彫像",
@@ -45,7 +78,7 @@ export function isBossDefeated(character, bossOrId) {
 
 export function applyBossVictory(character, bossOrId) {
   const boss = typeof bossOrId === "string" ? getBossById(bossOrId) : bossOrId;
-  if (!character || !boss) return { character, accepted: false, reward: null };
+  if (!character || !boss?.defeatedFlag) return { character, accepted: false, reward: null };
   return {
     character: {
       ...character,

@@ -117,7 +117,7 @@ import { rollEnemyDrop, rollRedChestLoot } from "../data/loot.js";
 import { rollTreasureTrap } from "../data/traps.js";
 import { restAtHealingFountain as restoreAtHealingFountain } from "../data/fountains.js";
 import { getSkill } from "../data/skills.js";
-import { getSpecialRoomAccessRestriction } from "../data/special-rooms.js";
+import { getSpecialRoomAccessRestriction, getSpecialRoomDefinition } from "../data/special-rooms.js";
 import {
   abandonQuest,
   acceptQuest,
@@ -487,6 +487,9 @@ import {
         if (currentDepth > 4 && !savedCell.eventTreasureId) savedCell.treasure = null;
         Object.assign(cells[y][x], savedCell);
         cells[y][x].specialRoom = savedCell.specialRoom || null;
+        if (cells[y][x].specialRoom) {
+          cells[y][x].specialRoom.content = getSpecialRoomDefinition(currentDepth)?.content ?? null;
+        }
         cells[y][x].featureReservation = savedCell.featureReservation || null;
         cells[y][x].featureApproach = savedCell.featureApproach || null;
         cells[y][x].treasureTrapId = savedCell.treasureTrapId || null;

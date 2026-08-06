@@ -452,6 +452,11 @@ export function getSpecialRoomEntryAt(x, y, dirKey) {
   return cells[nextY][nextX].specialRoom || null;
 }
 
+export function getSpecialRoomAt(x, y) {
+  if (!inBounds(x, y)) return null;
+  return cells[y][x].specialRoom || null;
+}
+
 export function getSpecialRoomLockInfo({ x, y, dirKey, dex = 0 } = {}) {
   const room = getSpecialRoomAtDoor(x, y, dirKey);
   if (!room) return null;

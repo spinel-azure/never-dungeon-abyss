@@ -94,13 +94,16 @@ export function resolvePhysicalAttack({
 
 export function calculatePhysicalHitRate({ attacker = {}, defender = {}, attack = {} } = {}) {
   const illusion = getActiveStatus(defender, "illusion");
-  const minimum = illusion?.physicalHitRateFloor ?? COMBAT_CONFIG.physicalHitMinimum;
+  const minimum = illusion?.physicalHitRateFloor
+    ?? defender.physicalHitMinimum
+    ?? COMBAT_CONFIG.physicalHitMinimum;
   const penalty = illusion?.physicalHitPenalty || 0;
   return clamp(
     COMBAT_CONFIG.physicalHitBase
       + (numeric(attacker.dex) - numeric(defender.agi)) * COMBAT_CONFIG.physicalHitStatStep
       + numeric(attacker.hitBonus)
       + numeric(attack.hitBonus)
+      - numeric(defender.evasionBonus)
       - penalty,
     minimum,
     COMBAT_CONFIG.physicalHitMaximum

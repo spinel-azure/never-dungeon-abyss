@@ -8,7 +8,15 @@ import {
   getSpecialRoomLockInfo,
   setStartPosition
 } from "../js/dungeon.js";
-import { getSpecialRoomAccessRestriction, getSpecialRoomUnlockRate } from "../data/special-rooms.js";
+import { getSpecialRoomAccessRestriction, getSpecialRoomDefinition, getSpecialRoomUnlockRate } from "../data/special-rooms.js";
+
+test("B2 special room contains the repeatable Paul event boss", () => {
+  assert.deepEqual(getSpecialRoomDefinition(2).content, {
+    type: "repeatableBoss",
+    bossId: "lingering_ghost_paul_b2f"
+  });
+  assert.equal(getSpecialRoomDefinition(1).content, null);
+});
 
 test("forced encounters block special-room unlocking without exposing a rate", () => {
   assert.deepEqual(getSpecialRoomAccessRestriction({ forcedEnemyId: "cave_slime" }), {
