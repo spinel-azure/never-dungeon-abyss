@@ -29,6 +29,18 @@ test("Paul's event marker is visible before exploration except at zero torch", (
   assert.equal(shouldDrawSpecialRoomMarker(getSpecialRoomDefinition(1), true, 100), false);
 });
 
+test("B4 special room warns before entering the one-time superboss event", () => {
+  const room = getSpecialRoomDefinition(4);
+  assert.equal(room.dangerWarning, true);
+  assert.deepEqual(room.content, {
+    type: "eventBoss",
+    bossId: "otherworldly_wisdom_b4f",
+    minimapMarker: "E",
+    revealBeforeExploration: true
+  });
+  assert.equal(shouldDrawSpecialRoomMarker(room, false, 100), true);
+});
+
 test("forced encounters block special-room unlocking without exposing a rate", () => {
   assert.deepEqual(getSpecialRoomAccessRestriction({ forcedEnemyId: "cave_slime" }), {
     blocked: true,

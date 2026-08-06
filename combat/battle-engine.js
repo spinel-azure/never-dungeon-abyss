@@ -179,6 +179,11 @@ export function createEnemyAction(enemy, rng = Math.random) {
       element: "physical"
     }
   });
+  const actionTable = Array.isArray(enemy.actions) ? enemy.actions : [];
+  if (actionTable.length > 0) {
+    const selected = selectWeightedEnemyAction(actionTable, rng);
+    if (selected) return buildEnemyAction(selected, attack);
+  }
   const special = enemy.specialAttack;
   if (!special || Number(rng()) >= Math.max(0, Math.min(1, Number(special.usageRate) || 0))) {
     return attack;
@@ -188,6 +193,34 @@ export function createEnemyAction(enemy, rng = Math.random) {
     id: special.id || attack.id,
     name: special.name || attack.name,
     effects: [...attack.effects, ...structuredClone(special.effects || [])]
+  };
+}
+
+function selectWeightedEnemyAction(actionTable, rng) {
+  const weighted = actionTable
+    .map(entry => ({
+      action: entry?.action || entry,
+      weight: Math.max(0, Number(entry?.weight) || 0)
+    }))
+    .filter(entry => entry.action && entry.weight > 0);
+  const total = weighted.reduce((sum, entry) => sum + entry.weight, 0);
+  if (total <= 0) return null;
+  let roll = Math.max(0, Math.min(0.999999999999, Number(rng?.()) || 0)) * total;
+  for (const entry of weighted) {
+    roll -= entry.weight;
+    if (roll < 0) return entry.action;
+  }
+  return weighted.at(-1)?.action || null;
+}
+
+function buildEnemyAction(action, normalAttack) {
+  const source = structuredClone(action);
+  if (source.actionType !== "physicalAttack") return source;
+  return {
+    ...normalAttack,
+    ...source,
+    weapon: normalAttack.weapon,
+    effects: structuredClone(source.effects || [])
   };
 }
 

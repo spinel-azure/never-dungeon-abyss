@@ -32,6 +32,100 @@ export const BOSSES = Object.freeze({
     bossKind: "event",
     repeatable: true
   }),
+  otherworldly_wisdom_b4f: Object.freeze({
+    id: "otherworldly_wisdom_b4f",
+    name: "異界の叡智",
+    floor: 4,
+    imageId: "otherworldly_wisdom_b4f",
+    image: "images/bosses/boss_00.avif",
+    race: "aberration",
+    maxHp: 3000,
+    stats: Object.freeze({ str: 30, int: 30, agi: 28, dex: 28, luc: 30 }),
+    def: 28,
+    attack: 24,
+    experienceReward: 100000,
+    specialAttack: null,
+    actions: Object.freeze([
+      Object.freeze({
+        weight: 20,
+        action: Object.freeze({
+          id: "four_world_assault",
+          name: "四界連撃",
+          actionType: "physicalAttack",
+          hitCount: 4,
+          powerPerHit: 0.72,
+          hitBonus: 0.05,
+          speedModifier: 4,
+          effects: Object.freeze([])
+        })
+      }),
+      Object.freeze({
+        weight: 30,
+        action: Object.freeze({
+          id: "otherworldly_flame",
+          name: "異界の業火",
+          actionType: "spell",
+          element: "fire",
+          spellPower: 145,
+          powerMultiplier: 1,
+          unavoidable: true,
+          speedModifier: -3,
+          effects: Object.freeze([])
+        })
+      }),
+      Object.freeze({
+        weight: 25,
+        action: Object.freeze({
+          id: "otherworldly_frost",
+          name: "異界の凍気",
+          actionType: "spell",
+          element: "ice",
+          spellPower: 115,
+          powerMultiplier: 0.9,
+          unavoidable: true,
+          speedModifier: -1,
+          effects: Object.freeze([Object.freeze({
+            statusId: "speed_down",
+            trigger: "perAction",
+            statusKind: "magical",
+            baseRate: 0.85
+          })])
+        })
+      }),
+      Object.freeze({
+        weight: 25,
+        action: Object.freeze({
+          id: "otherworldly_ray",
+          name: "異界の光条",
+          actionType: "spell",
+          element: "arcane",
+          spellPower: 175,
+          powerMultiplier: 1,
+          unavoidable: true,
+          speedModifier: -6,
+          effects: Object.freeze([])
+        })
+      })
+    ]),
+    reward: Object.freeze({ type: "card", cardId: "zodiac_libra", amount: 1 }),
+    elementMultipliers: Object.freeze({ fire: 0.5, ice: 0.5, arcane: 0.5 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 100, immune: true }),
+      speed_down: Object.freeze({ resistancePoints: 100, immune: true })
+    }),
+    escapeRate: 0.8,
+    surpriseRate: 0,
+    surpriseRateMaximum: 0,
+    noDrop: true,
+    isBoss: true,
+    bossKind: "event",
+    defeatedFlag: "boss_otherworldly_wisdom_b4f_defeated",
+    event: Object.freeze({
+      prompt: "部屋の中央に、この世のものとは思えない異形が佇んでいる。\nその眼差しは、こちらのすべてを見透かしているようだ。挑みますか？\n＊Aボタン：挑む　Bボタン：立ち去る",
+      start: "異形が静かに四本の腕を広げた。\n異界の叡智が襲いかかってきた！"
+    })
+  }),
   strange_knight_statue_b9f: Object.freeze({
     id: "strange_knight_statue_b9f",
     name: "奇妙な彫像",
@@ -103,6 +197,7 @@ export function createBossCombatant(bossOrId) {
     baseDef: boss.def,
     stats: { ...boss.stats },
     specialAttack: structuredClone(boss.specialAttack || null),
+    actions: structuredClone(boss.actions || []),
     reward: structuredClone(boss.reward || { type: "none" }),
     elementMultipliers: { ...boss.elementMultipliers },
     statusResistances: structuredClone(boss.statusResistances || {}),

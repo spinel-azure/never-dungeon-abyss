@@ -52,6 +52,23 @@ test("B2 Paul is a repeatable undead event boss with experience only", () => {
   assert.equal(applyBossVictory({ eventFlags: {} }, boss).accepted, false);
 });
 
+test("B4 otherworldly wisdom is a one-time superboss with Libra reward", () => {
+  const boss = getBossById("otherworldly_wisdom_b4f");
+  assert.equal(boss.name, "異界の叡智");
+  assert.equal(boss.floor, 4);
+  assert.equal(boss.image, "images/bosses/boss_00.avif");
+  assert.equal(boss.maxHp, 3000);
+  assert.equal(boss.experienceReward, 100000);
+  assert.equal(boss.actions.length, 4);
+  assert.equal(boss.actions.find(entry => entry.action.id === "four_world_assault").action.hitCount, 4);
+  assert.deepEqual(boss.reward, { type: "card", cardId: "zodiac_libra", amount: 1 });
+  assert.equal(boss.isBoss, true);
+  assert.equal(boss.noDrop, true);
+  const victory = applyBossVictory({ eventFlags: {} }, boss);
+  assert.equal(victory.accepted, true);
+  assert.equal(isBossDefeated(victory.character, boss), true);
+});
+
 test("B9 always creates one sealed 1x3 boss room and one trapped key chest", () => {
   for (let iteration = 0; iteration < 50; iteration += 1) {
     randomizeStartPosition();

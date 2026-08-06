@@ -330,6 +330,7 @@ import {
     getSpecialDoorLockInfo: getCurrentSpecialDoorLockInfo,
     getSpecialDoorAccessBlock: getCurrentSpecialDoorAccessBlock,
     attemptSpecialDoorUnlock: attemptCurrentSpecialDoorUnlock,
+    isBossDefeated: bossId => isBossDefeated(character, bossId),
     restAtFountain: restAtHealingFountain,
     returnToTown,
     beginBattle: beginRandomBattle,
@@ -1330,11 +1331,25 @@ import {
   function finishBattleVictory(battle) {
     startBgm(selectDungeonBgm());
     const reward = Math.max(0, Math.floor(Number(battle?.enemy?.experienceReward) || 0));
+    let bossRewardMessage = "";
     if (character && battle?.enemy?.isBoss) {
       const victory = applyBossVictory(character, battle.enemy.id);
       if (victory.accepted) {
         character = victory.character;
         markBossDefeatedAt(state.gridX, state.gridY, battle.enemy.id);
+        if (victory.reward?.type === "card" && victory.reward.cardId) {
+          const cardReward = grantCard(
+            character.cards,
+            victory.reward.cardId,
+            victory.reward.amount || 1,
+            character.deckCost
+          );
+          character = { ...character, cards: cardReward.cards };
+          const card = getCardById(victory.reward.cardId);
+          bossRewardMessage = cardReward.gained > 0
+            ? `\nZカード「${card?.nameJa || victory.reward.cardId}」を手に入れた！`
+            : `\nZカード「${card?.nameJa || victory.reward.cardId}」はすでに所持している。`;
+        }
       }
     }
     if (character && battle?.enemy?.id) {
@@ -1343,7 +1358,7 @@ import {
     if (character && reward > 0) Object.assign(character, awardBattleExperience(character, reward));
     const drop = rollEnemyDrop(battle?.enemy);
     const dropMessage = drop.kind === "redChest" ? "" : addRolledLoot(drop);
-    const victoryMessage = `${reward > 0 ? `戦闘に勝利した。${reward}EXPを持ち帰った。` : "戦闘に勝利した。"}${dropMessage ? `\n${dropMessage}` : ""}`;
+    const victoryMessage = `${reward > 0 ? `戦闘に勝利した。${reward}EXPを持ち帰った。` : "戦闘に勝利した。"}${bossRewardMessage}${dropMessage ? `\n${dropMessage}` : ""}`;
     resetPresence();
     setPlayerInputEnabled(true);
     if (drop.kind === "redChest") {

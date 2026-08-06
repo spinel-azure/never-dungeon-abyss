@@ -32,6 +32,7 @@ import {
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { CHARACTER_JOBS } from "../data/town.js";
 import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
+import { createBossCombatant, getBossById } from "../data/bosses.js";
 import { CARDS, collectCardStatBonuses, getCardById, hasCardEffect } from "../data/cards.js";
 import { calculateDeckCost, DECK_SLOT_COUNT, grantCard, normalizeCardState, setDeckSlot } from "../data/deck.js";
 import { resolveTurnOrder, createGuardAction } from "../combat/resolve-turn-order.js";
@@ -131,6 +132,21 @@ test("poison slime sometimes selects an attack that can inflict poison", () => {
   assert.equal(special.effects[0].statusId, "poison");
   assert.equal(normal.name, "攻撃");
   assert.equal(normal.effects.length, 0);
+});
+
+test("enemy action tables select weighted spells and multi-hit attacks", () => {
+  const enemy = createBossCombatant(getBossById("otherworldly_wisdom_b4f"));
+  const fourHits = createEnemyAction(enemy, () => 0.1);
+  const flame = createEnemyAction(enemy, () => 0.3);
+  const frost = createEnemyAction(enemy, () => 0.6);
+  const ray = createEnemyAction(enemy, () => 0.9);
+  assert.equal(fourHits.id, "four_world_assault");
+  assert.equal(fourHits.actionType, "physicalAttack");
+  assert.equal(fourHits.hitCount, 4);
+  assert.equal(flame.id, "otherworldly_flame");
+  assert.equal(flame.actionType, "spell");
+  assert.equal(frost.effects[0].statusId, "speed_down");
+  assert.equal(ray.id, "otherworldly_ray");
 });
 
 test("all initial classes can damage the adjusted cave slime", () => {

@@ -32,6 +32,15 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
       minimapMarker: "E",
       revealBeforeExploration: true
     })
+  }),
+  4: Object.freeze({
+    dangerWarning: true,
+    content: Object.freeze({
+      type: "eventBoss",
+      bossId: "otherworldly_wisdom_b4f",
+      minimapMarker: "E",
+      revealBeforeExploration: true
+    })
   })
 });
 

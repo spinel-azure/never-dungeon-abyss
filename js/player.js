@@ -54,6 +54,7 @@ const hooks = {
   getSpecialDoorLockInfo: () => null,
   getSpecialDoorAccessBlock: () => ({ blocked: false }),
   attemptSpecialDoorUnlock: () => ({ accepted: false }),
+  isBossDefeated: () => false,
   beginBossBattle: () => false,
   beginMimicBattle: () => false,
   restAtFountain: () => Promise.resolve(false),
@@ -433,16 +434,16 @@ function confirmSpecialRoomWarningEvent() {
 }
 
 function startSpecialRoomContentEvent(content) {
-  if (content?.type !== "repeatableBoss") return;
+  if (!["repeatableBoss", "eventBoss"].includes(content?.type)) return;
   const boss = getBossById(content.bossId);
-  if (!boss) return;
+  if (!boss || hooks.isBossDefeated(boss.id)) return;
   startOverlayEvent({
     type: "specialRoomBoss",
     bossId: boss.id,
     imageId: boss.encounterImageId ?? "",
     imageFit: "cover",
     canCancel: true,
-    message: "部屋に入ると、古ぼけた机の上に所狭しと本が積み上げられている。\n机の中央には、一冊だけ開かれた本がある。調べますか？\n＊Aボタン：はい　Bボタン：いいえ"
+    message: boss.event?.prompt || "部屋に入ると、古ぼけた机の上に所狭しと本が積み上げられている。\n机の中央には、一冊だけ開かれた本がある。調べますか？\n＊Aボタン：はい　Bボタン：いいえ"
   });
 }
 
@@ -450,7 +451,8 @@ function confirmSpecialRoomBossEvent() {
   const event = state.overlayEvent;
   if (!event || event.type !== "specialRoomBoss") return;
   event.canCancel = false;
-  hooks.say("本に手を触れようとした瞬間、突然声が響く。「軽々しく、それに触るな！」\n何かが襲ってきた！");
+  const boss = getBossById(event.bossId);
+  hooks.say(boss?.event?.start || "本に手を触れようとした瞬間、突然声が響く。「軽々しく、それに触るな！」\n何かが襲ってきた！");
   event.autoStartTimer = window.setTimeout(() => {
     if (state.overlayEvent !== event) return;
     state.overlayEvent = null;
