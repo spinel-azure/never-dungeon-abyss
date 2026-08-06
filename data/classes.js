@@ -78,6 +78,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     lootBag: createInitialLootBag(),
     quests: normalizeQuestState(),
     eventFlags: {},
+    highestDungeonDepthReached: 1,
     gold: 0,
     experience: 0,
     carriedExperience: 0,
@@ -121,6 +122,7 @@ export function normalizeCharacter(character) {
   const maxSp = growth.sp
     + Math.max(0, Math.floor(Number(equipmentStatBonuses.maxSp) || 0))
     + Math.max(0, Math.floor(Number(cardStatBonuses.maxSp) || 0));
+  const inferredDepth = character.eventFlags?.transfer_portal_b10f_unlocked ? 10 : 1;
   return {
     ...character,
     job: characterClass.id,
@@ -136,6 +138,10 @@ export function normalizeCharacter(character) {
     eventFlags: character.eventFlags && typeof character.eventFlags === "object"
       ? { ...character.eventFlags }
       : {},
+    highestDungeonDepthReached: Math.max(
+      inferredDepth,
+      Math.floor(Number(character.highestDungeonDepthReached) || 1)
+    ),
     gold: Math.max(0, Math.floor(Number(character.gold) || 0)),
     experience: normalizeExperience(character.experience),
     carriedExperience: Math.max(0, Math.floor(Number(character.carriedExperience) || 0)),

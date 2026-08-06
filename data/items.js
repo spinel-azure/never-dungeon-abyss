@@ -1,6 +1,6 @@
 export const ITEMS = Object.freeze([
   Object.freeze({
-    number: 1, id: "healing_potion", name: "回復薬", category: "recovery",
+    number: 1, id: "healing_potion", name: "回復薬（小）", category: "recovery",
     buyPrice: 20, sellPrice: 10, source: "shop", usableIn: Object.freeze(["town", "dungeon", "battle"]),
     effects: Object.freeze([{ id: "heal_hp", value: 30 }]),
     description: "HPを30回復する。", maxOwned: 99, iconId: "healing-potion", version: 1
@@ -81,8 +81,36 @@ export const ITEMS = Object.freeze([
     buyPrice: 0, sellPrice: 20, source: "drop", usableIn: Object.freeze([]),
     effects: Object.freeze([]), description: "吸血コウモリの羽。売却専用。", maxOwned: 99,
     repurchasable: false, iconId: "bat-wing", version: 1
+  }),
+  Object.freeze({
+    number: 14, id: "healing_potion_medium", name: "回復薬（中）", category: "recovery",
+    buyPrice: 60, sellPrice: 30, source: "shop", usableIn: Object.freeze(["town", "dungeon", "battle"]),
+    effects: Object.freeze([{ id: "heal_hp", value: 60 }]),
+    description: "HPを60回復する。B10F到達後に商店へ入荷する。", maxOwned: 99,
+    iconId: "healing-potion", version: 1
+  }),
+  Object.freeze({
+    number: 15, id: "healing_potion_large", name: "回復薬（大）", category: "recovery",
+    buyPrice: 120, sellPrice: 60, source: "shop", usableIn: Object.freeze(["town", "dungeon", "battle"]),
+    effects: Object.freeze([{ id: "heal_hp", value: 120 }]),
+    description: "HPを120回復する。B20F到達後に商店へ入荷する。", maxOwned: 99,
+    iconId: "healing-potion", version: 1
   })
 ]);
+
+const BASE_SHOP_ITEM_IDS = Object.freeze([
+  "healing_potion", "antidote", "guiding_torch", "treasure_compass", "auto_walker"
+]);
+
+export function getShopItemIdsForDepth(depth = 1) {
+  const reached = Math.max(1, Math.floor(Number(depth) || 1));
+  return [
+    "healing_potion",
+    ...(reached >= 10 ? ["healing_potion_medium"] : []),
+    ...(reached >= 20 ? ["healing_potion_large"] : []),
+    ...BASE_SHOP_ITEM_IDS.slice(1)
+  ];
+}
 
 const ITEMS_BY_ID = Object.freeze(Object.fromEntries(ITEMS.map(item => [item.id, item])));
 

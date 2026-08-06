@@ -46,7 +46,7 @@ import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minima
 import { configureInput } from "./input.js";
 import { configureVirtualStick } from "./virtualStick.js";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js?v=20260805-01";
+import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js?v=20260806-02";
 import { resolveFloorTheme } from "./floorTheme.js";
 import {
   configureAutoReturn,
@@ -82,14 +82,14 @@ import {
 import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
 import { EffectEngine } from "./effects/effect-engine.js";
 import { hasUncertainLoot } from "./loot-identification.js";
-import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js?v=20260805-04";
-import { createInitialCharacter, normalizeCharacter } from "../data/classes.js?v=20260805-01";
+import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js?v=20260806-05";
+import { createInitialCharacter, normalizeCharacter } from "../data/classes.js?v=20260806-02";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName } from "../data/equipment-inventory.js";
 import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
 import { applyBossVictory, createBossCombatant, getBossById, isBossDefeated } from "../data/bosses.js";
 import { consumeKeyItem, grantKeyItem, hasKeyItem } from "../data/key-items.js";
-import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260806-03";
+import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260806-04";
 import { awardBattleExperience, createTempleRevival, getInnStayFee, grantEventItems, resolveDungeonDefeat, resolveInnStableStay, resolveInnStay, resolveTemplePoisonTreatment, unlockGuildRequest } from "./character-services.js?v=20260805-01";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { resolveTreasureTrap } from "../combat/resolve-trap.js";
@@ -105,11 +105,11 @@ import { getNextLevelExperience, MAX_LEVEL } from "../data/growth.js";
 import { resolveFieldSkill } from "../combat/resolve-field-skill.js";
 import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from "./skill-overlay.js";
 import { configureItemOverlay, openItemOverlay, handleItemOverlayInput } from "./item-overlay.js";
-import { resolveFieldItemUse } from "../combat/resolve-item-use.js";
+import { resolveFieldItemUse } from "../combat/resolve-item-use.js?v=20260806-01";
 import { grantCard } from "../data/deck.js";
 import { collectCardStatBonuses, getCardById, hasCardEffect } from "../data/cards.js";
 import { drawCardCanvas } from "./card-canvas.js";
-import { getItem } from "../data/items.js";
+import { getItem } from "../data/items.js?v=20260806-01";
 import { isCriticalHp } from "../data/quick-status.js";
 import { purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
 import { addLootEquipment, addLootGold, addLootItem, depositItemInWarehouse, settleLootBag, withdrawItemFromWarehouse } from "../data/inventory.js";
@@ -516,6 +516,10 @@ import {
     state.npcEncounterCounts = player.npcEncounterCounts && typeof player.npcEncounterCounts === "object" ? { ...player.npcEncounterCounts } : {};
     state.stairsPromptDismissed = Boolean(player.stairsPromptDismissed);
     character = normalizeCharacter(save.character);
+    character.highestDungeonDepthReached = Math.max(
+      character.highestDungeonDepthReached || 1,
+      currentDepth
+    );
     if (cells[state.gridY][state.gridX]?.bossId && !isBossDefeated(character, cells[state.gridY][state.gridX].bossId)) {
       const retreat = cells.flat().find(cell => cell.reserved === "bossRoom" && cell.type === "floor" && !cell.bossId);
       if (retreat) {
@@ -1243,8 +1247,8 @@ import {
     return { ...result, character };
   }
 
-  function depositTownItem(itemId) {
-    const result = depositItemInWarehouse(character, itemId, 1);
+  function depositTownItem(itemId, amount = 1) {
+    const result = depositItemInWarehouse(character, itemId, amount);
     if (!result.accepted) return result;
     character = result.character;
     updateCharacterUi();
@@ -1710,6 +1714,10 @@ import {
       playAudio: () => playSeSequence("stairs", 3),
       onDark: () => {
         currentDepth = 10;
+        character.highestDungeonDepthReached = Math.max(
+          character.highestDungeonDepthReached || 1,
+          currentDepth
+        );
         state.treasureCompassActive = false;
         resetDungeon("", null, true);
         character.pendingExperienceSettlement = null;
@@ -1919,6 +1927,12 @@ import {
     const lapTime = formatElapsedTime(descendedAt - floorStartedAt);
     const nextStart = { x: state.gridX, y: state.gridY };
     currentDepth += 1;
+    if (character) {
+      character.highestDungeonDepthReached = Math.max(
+        character.highestDungeonDepthReached || 1,
+        currentDepth
+      );
+    }
     if (currentDepth === 10 && character) {
       character = {
         ...character,

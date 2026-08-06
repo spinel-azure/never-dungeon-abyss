@@ -12,7 +12,7 @@ import {
   hasActiveQuest,
   isQuestAvailable
 } from "../data/quests.js";
-import { getItem } from "../data/items.js";
+import { getItem, getShopItemIdsForDepth } from "../data/items.js?v=20260806-01";
 import { WEAPONS } from "../data/weapons.js";
 import { configureTownPassersby } from "./town-passersby.js";
 import { getInnStayFee } from "./character-services.js";
@@ -1164,7 +1164,7 @@ function openCommerce(kind) {
       ? Object.keys(town.getCharacter()?.inventory?.counts || {}).filter(id => getItem(id)?.sellPrice > 0)
       : kind === "buyEquipment"
         ? ["iron_greatsword", "poison_dagger", "morgenstern"]
-        : ["healing_potion", "antidote", "guiding_torch", "treasure_compass", "auto_walker"];
+        : getShopItemIdsForDepth(town.getCharacter()?.highestDungeonDepthReached);
   town.mode = "commerce";
   town.commerceKind = kind;
   town.commerceItems = ids.map(id => kind === "buyEquipment" ? WEAPONS[id] : getItem(id)).filter(Boolean);
@@ -1246,7 +1246,7 @@ function handleCommerceInput(action) {
 function requestCommerceConfirmation() {
   const item = town.commerceItems[town.commerceIndex];
   if (!item) return;
-  if (town.commerceKind === "sell") {
+  if (town.commerceKind === "sell" || town.commerceKind === "storageDeposit") {
     const owned = Math.max(0, Math.floor(Number(town.getCharacter()?.inventory?.counts?.[item.id]) || 0));
     town.commerceQuantity = Math.max(1, Math.min(owned, town.commerceQuantity || 1));
     if (owned > 1) {
@@ -1267,10 +1267,12 @@ function showCommerceConfirmation() {
     : town.commerceKind === "storageWithdraw"
       ? "女主人ヘレン：これを取り出すのね？\n＊Aボタン：はい　Bボタン：いいえ"
     : town.commerceKind === "storageDeposit"
-      ? "女主人ヘレン：これを預かればいいのね？\n＊Aボタン：はい　Bボタン：いいえ"
+      ? `女主人ヘレン：${item.name}を${town.commerceQuantity || 1}個預かればいいのね？\n＊Aボタン：はい　Bボタン：いいえ`
     : town.commerceKind === "sell"
       ? `女主人ヘレン：${item.sellPrice}G ×${town.commerceQuantity || 1}、合計${item.sellPrice * (town.commerceQuantity || 1)}Gで買い取るわ。これでいい？\n＊Aボタン：はい　Bボタン：いいえ`
-      : "女主人ヘレン：これでいい？\n＊Aボタン：はい　Bボタン：いいえ";
+    : town.commerceKind === "buyEquipment"
+      ? `女主人ヘレン：${item.name}を${item.buyPrice}Gで購入するのね？\n所持金：${formatGold(town.getCharacter()?.gold)}G\n＊Aボタン：はい　Bボタン：いいえ`
+      : `女主人ヘレン：${item.name}を${item.buyPrice}Gで購入するのね？\n所持数：${inventoryItemCount(item.id)}／${item.maxOwned || 99}　倉庫：${warehouseItemCount(item.id)}　所持金：${formatGold(town.getCharacter()?.gold)}G\n＊Aボタン：はい　Bボタン：いいえ`;
 }
 
 function handleCommerceQuantityInput(action) {
@@ -1301,7 +1303,9 @@ function handleCommerceQuantityInput(action) {
 function renderCommerceQuantity() {
   const item = town.commerceItems[town.commerceIndex];
   const owned = Math.max(1, Math.floor(Number(town.getCharacter()?.inventory?.counts?.[item?.id]) || 1));
-  town.messageEl.textContent = `女主人ヘレン：いくつ売るのかしら？\n売却数 ${town.commerceQuantity} / ${owned}　合計 ${item.sellPrice * town.commerceQuantity}G\n＊↑↓：1個　←→：10個　Aボタン：決定　Bボタン：戻る`;
+  town.messageEl.textContent = town.commerceKind === "storageDeposit"
+    ? `女主人ヘレン：いくつ預かればいいのかしら？\n預ける数 ${town.commerceQuantity} / ${owned}\n＊↑↓：1個　←→：10個　Aボタン：決定　Bボタン：戻る`
+    : `女主人ヘレン：いくつ売るのかしら？\n売却数 ${town.commerceQuantity} / ${owned}　合計 ${item.sellPrice * town.commerceQuantity}G\n＊↑↓：1個　←→：10個　Aボタン：決定　Bボタン：戻る`;
 }
 
 function handleCommerceConfirmationInput(action) {
@@ -1329,7 +1333,7 @@ function purchaseSelectedCommerceItem() {
   const result = withdrawing
     ? town.onWithdrawItem(item.id)
     : depositing
-      ? town.onDepositItem(item.id)
+      ? town.onDepositItem(item.id, town.commerceQuantity || 1)
     : selling
     ? town.onSellItem(item.id, town.commerceQuantity || 1)
     : town.commerceKind === "buyEquipment"
@@ -1352,7 +1356,7 @@ function purchaseSelectedCommerceItem() {
     : withdrawing
       ? `${keeper}：${item.name}を倉庫から取り出したわ。`
     : depositing
-      ? `${keeper}：${item.name}を倉庫で預かったわ。`
+      ? `${keeper}：${item.name}を${result.amount}個、倉庫で預かったわ。`
     : selling
       ? `${keeper}：${item.name}を${result.quantity}個、${result.value}Gで買い取ったわ。`
     : result.stored > 0
@@ -1383,7 +1387,11 @@ function renderCommerce({ showDescription = true } = {}) {
       ? `×${warehouseItemCount(item.id)}`
       : town.commerceKind === "storageDeposit"
         ? `×${town.getCharacter()?.inventory?.counts?.[item.id] || 0}`
-      : `${town.commerceKind === "sell" ? item.sellPrice : item.buyPrice}G${town.commerceKind === "sell" ? ` ×${town.getCharacter()?.inventory?.counts?.[item.id] || 0}` : ""}`;
+      : town.commerceKind === "sell"
+        ? `${item.sellPrice}G ×${inventoryItemCount(item.id)}`
+        : town.commerceKind === "buy"
+          ? `${item.buyPrice}G　所持×${inventoryItemCount(item.id)}`
+          : `${item.buyPrice}G`;
     button.append(name, price);
     return button;
   }));
@@ -1400,6 +1408,14 @@ function warehouseItemCount(itemId) {
   return (town.getCharacter()?.warehouse?.itemStacks || [])
     .filter(stack => stack.itemId === itemId)
     .reduce((sum, stack) => sum + Math.max(0, Math.floor(Number(stack.count) || 0)), 0);
+}
+
+function inventoryItemCount(itemId) {
+  return Math.max(0, Math.floor(Number(town.getCharacter()?.inventory?.counts?.[itemId]) || 0));
+}
+
+function formatGold(value) {
+  return Math.max(0, Math.floor(Number(value) || 0)).toLocaleString("en-US");
 }
 
 function showStorageCommands() {
@@ -1429,7 +1445,10 @@ function renderCommerceSelection({ showDescription = true } = {}) {
   });
   const item = town.commerceItems[town.commerceIndex];
   if (showDescription && item) {
-    town.messageEl.textContent = `${item.description}\n＊Aボタン：決定　Bボタン：戻る`;
+    const ownership = town.commerceKind === "buy"
+      ? `\n所持数：${inventoryItemCount(item.id)}／${item.maxOwned || 99}　倉庫：${warehouseItemCount(item.id)}`
+      : "";
+    town.messageEl.textContent = `${item.description}${ownership}\n＊Aボタン：決定　Bボタン：戻る`;
   }
 }
 

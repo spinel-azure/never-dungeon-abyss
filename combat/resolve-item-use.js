@@ -1,4 +1,4 @@
-import { canUseItemIn, getItem } from "../data/items.js";
+import { canUseItemIn, getItem } from "../data/items.js?v=20260806-01";
 import { consumeItem, getItemCount } from "../data/inventory.js";
 
 export function getItemUnavailableReason({ character, itemId, context, enemy, torchFuel = 0, treasureCompassActive = false } = {}) {
@@ -6,7 +6,9 @@ export function getItemUnavailableReason({ character, itemId, context, enemy, to
   if (!item) return "unknownItem";
   if (getItemCount(character?.inventory, itemId) <= 0) return "notOwned";
   if (!canUseItemIn(item, context)) return context === "battle" ? "fieldOnly" : "battleOnly";
-  if (itemId === "healing_potion" && character.hp >= character.maxHp) return "fullHp";
+  const healsHp = item.effects?.some(effect => effect.id === "heal_hp");
+  const hasAnotherEffect = item.effects?.some(effect => effect.id !== "heal_hp");
+  if (healsHp && !hasAnotherEffect && character.hp >= character.maxHp) return "fullHp";
   if (itemId === "antidote" && character.hp >= character.maxHp && !hasPoison(character)) return "noEffect";
   if (itemId === "guiding_torch" && Number(torchFuel) >= 100) return "fullTorch";
   if (itemId === "treasure_compass" && treasureCompassActive) return "noEffect";

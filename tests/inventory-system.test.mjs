@@ -69,6 +69,16 @@ test("shop warehouse deposits and withdraws one carried item", () => {
   assert.equal(character.warehouse.itemStacks.length, 0);
 });
 
+test("shop warehouse deposits a selected quantity from a stack", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character = grantItemWithOverflow(character, "healing_potion", 12).character;
+  const result = depositItemInWarehouse(character, "healing_potion", 7);
+  assert.equal(result.accepted, true);
+  assert.equal(result.amount, 7);
+  assert.equal(result.character.inventory.counts.healing_potion, 5);
+  assert.deepEqual(result.character.warehouse.itemStacks, [{ itemId: "healing_potion", count: 7 }]);
+});
+
 test("inventory overflow and loot settlement retain every acquired item", () => {
   let character = createInitialCharacter({ name: "TEST", job: "thief" });
   character = grantItemWithOverflow(character, "antidote", 105).character;

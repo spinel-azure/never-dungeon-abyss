@@ -10,6 +10,7 @@ import {
 } from "../js/presence.js";
 import { grantEventItems, unlockGuildRequest } from "../js/character-services.js";
 import { purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
+import { getItem, getShopItemIdsForDepth } from "../data/items.js";
 
 function characterWith(itemId, amount = 1) {
   const character = createInitialCharacter({ name: "TEST", job: "warrior" });
@@ -45,6 +46,47 @@ test("healing potion restores 30 HP and is consumed", () => {
   assert.equal(result.accepted, true);
   assert.equal(result.character.hp, 33);
   assert.equal(getItemCount(result.character.inventory, "healing_potion"), 0);
+});
+
+test("small, medium and large healing potions use the intended recovery and prices", () => {
+  assert.deepEqual([
+    ["healing_potion", "回復薬（小）", 30, 20, 10],
+    ["healing_potion_medium", "回復薬（中）", 60, 60, 30],
+    ["healing_potion_large", "回復薬（大）", 120, 120, 60]
+  ].map(([id, name, healing, buyPrice, sellPrice]) => {
+    const item = getItem(id);
+    return [item.id, item.name, item.effects[0].value, item.buyPrice, item.sellPrice];
+  }), [
+    ["healing_potion", "回復薬（小）", 30, 20, 10],
+    ["healing_potion_medium", "回復薬（中）", 60, 60, 30],
+    ["healing_potion_large", "回復薬（大）", 120, 120, 60]
+  ]);
+
+  for (const [itemId, healing] of [["healing_potion_medium", 60], ["healing_potion_large", 120]]) {
+    const character = characterWith(itemId);
+    character.maxHp = 200;
+    character.hp = 1;
+    const result = resolveFieldItemUse({ character, itemId, context: "dungeon" });
+    assert.equal(result.healing, healing);
+    assert.equal(result.character.hp, healing + 1);
+  }
+});
+
+test("shop healing potions unlock permanently by deepest reached floor", () => {
+  assert.deepEqual(getShopItemIdsForDepth(9).filter(id => id.startsWith("healing_potion")), [
+    "healing_potion"
+  ]);
+  assert.deepEqual(getShopItemIdsForDepth(10).filter(id => id.startsWith("healing_potion")), [
+    "healing_potion", "healing_potion_medium"
+  ]);
+  assert.deepEqual(getShopItemIdsForDepth(20).filter(id => id.startsWith("healing_potion")), [
+    "healing_potion", "healing_potion_medium", "healing_potion_large"
+  ]);
+
+  const legacyB10Character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  delete legacyB10Character.highestDungeonDepthReached;
+  legacyB10Character.eventFlags.transfer_portal_b10f_unlocked = true;
+  assert.equal(normalizeCharacter(legacyB10Character).highestDungeonDepthReached, 10);
 });
 
 test("antidote cures poison and restores 15 HP", () => {

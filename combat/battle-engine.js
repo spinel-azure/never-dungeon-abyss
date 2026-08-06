@@ -15,9 +15,9 @@ import {
   resolveEndOfAction
 } from "./status-lifecycle.js?v=20260805-01";
 import { getSkill } from "../data/skills.js";
-import { getItem } from "../data/items.js";
+import { getItem } from "../data/items.js?v=20260806-01";
 import { consumeItem } from "../data/inventory.js";
-import { getItemUnavailableReason } from "./resolve-item-use.js";
+import { getItemUnavailableReason } from "./resolve-item-use.js?v=20260806-01";
 
 export function createBattleState({ character, enemy }) {
   return {

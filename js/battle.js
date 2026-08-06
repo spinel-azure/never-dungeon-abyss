@@ -2,7 +2,7 @@ import {
   createBattleState,
   resolveBattleRound,
   resolveEnemyAmbush
-} from "../combat/battle-engine.js?v=20260806-02";
+} from "../combat/battle-engine.js?v=20260806-03";
 import { resolveEscapeAttempt } from "../combat/resolve-escape.js";
 
 const COMMANDS = Object.freeze([

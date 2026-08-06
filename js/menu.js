@@ -1,8 +1,8 @@
 import { calculateDeckCost, DECK_SLOT_COUNT, setDeckSlot } from "../data/deck.js";
 import { getCardById } from "../data/cards.js";
 import { drawCardCanvas } from "./card-canvas.js";
-import { ITEMS, canUseItemIn } from "../data/items.js";
-import { normalizeCharacter } from "../data/classes.js";
+import { ITEMS, canUseItemIn } from "../data/items.js?v=20260806-01";
+import { normalizeCharacter } from "../data/classes.js?v=20260806-02";
 import { EQUIPMENT_SLOT_LABELS, canEquipInstance, equipInstance, findEquipmentDefinition, getEquipmentInstanceDefinition, getEquipmentInstanceName, listEquipmentInstances } from "../data/equipment-inventory.js";
 import { collectStats } from "../combat/collect-stats.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
@@ -802,7 +802,14 @@ function renderDeckPicker() {
       canvas.height = 180;
       drawCardCanvas(canvas, card);
       const count = document.createElement("span");
-      count.textContent = `${card.nameJa}　×${menu.getCharacter()?.cards?.ownedCardCounts?.[card.id] || 0}`;
+      const setCount = menu.deckSlots.filter(id => id === card.id).length;
+      const setLabel = setCount > 1 ? `[SET×${setCount}]` : setCount === 1 ? "[SET]" : "";
+      const nowLabel = menu.deckSlots[menu.deckCursor] === card.id ? "[NOW]" : "";
+      count.textContent = [
+        `${card.nameJa}　×${menu.getCharacter()?.cards?.ownedCardCounts?.[card.id] || 0}`,
+        setLabel,
+        nowLabel
+      ].filter(Boolean).join(" ");
       button.append(canvas, count);
     } else {
       button.textContent = "はずす / EMPTY";
