@@ -1,4 +1,4 @@
-export const FOUNTAIN_FLOORS = Object.freeze([5, 9]);
+export const FOUNTAIN_FLOORS = Object.freeze([5, 9, 15, 19]);
 
 export const HEALING_FOUNTAIN = Object.freeze({
   id: "healing_fountain",

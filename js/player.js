@@ -703,7 +703,7 @@ function confirmFountainEvent() {
     }
     removeFountainAt(event.fountainGX, event.fountainGY);
     state.overlayEvent = null;
-    hooks.say("癒やしの噴水で休息した。HPとSPが全回復した。");
+    hooks.say("癒やしの噴水で休息した。HPとSP、たいまつゲージが全回復した。");
     updateNpcAwareness();
     hooks.onStateChanged();
   });

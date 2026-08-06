@@ -1551,6 +1551,7 @@ import {
       playAudio: () => playSeSequence("goodNight", 1),
       onDark: () => {
         character = restoreAtHealingFountain(character);
+        refillTorch();
         updateCharacterUi();
         saveGame();
       }
