@@ -117,6 +117,7 @@ import { rollEnemyDrop, rollRedChestLoot } from "../data/loot.js";
 import { rollTreasureTrap } from "../data/traps.js";
 import { restAtHealingFountain as restoreAtHealingFountain } from "../data/fountains.js";
 import { getSkill } from "../data/skills.js";
+import { getSpecialRoomAccessRestriction } from "../data/special-rooms.js";
 import {
   abandonQuest,
   acceptQuest,
@@ -306,6 +307,7 @@ import {
     awardTreasure: awardTreasureLoot,
     unlockBossDoor: unlockB9BossDoor,
     getSpecialDoorLockInfo: getCurrentSpecialDoorLockInfo,
+    getSpecialDoorAccessBlock: getCurrentSpecialDoorAccessBlock,
     attemptSpecialDoorUnlock: attemptCurrentSpecialDoorUnlock,
     restAtFountain: restAtHealingFountain,
     returnToTown,
@@ -1922,6 +1924,12 @@ import {
       y,
       dirKey,
       dex: collectStats(character).dex
+    });
+  }
+
+  function getCurrentSpecialDoorAccessBlock() {
+    return getSpecialRoomAccessRestriction({
+      forcedEnemyId: getForcedEnemyId(character, { depth: currentDepth })
     });
   }
 

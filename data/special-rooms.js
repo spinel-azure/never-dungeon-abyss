@@ -26,6 +26,8 @@ export const DEFAULT_SPECIAL_ROOM_LOCK = Object.freeze({
 // Add only differences here when a floor receives an event, treasure or boss.
 export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({});
 
+export const SPECIAL_ROOM_ACCESS_BLOCKED_MESSAGE = "今はこの扉を開けられないようだ。";
+
 export function getSpecialRoomDefinition(depth) {
   const normalizedDepth = Math.max(1, Math.floor(Number(depth) || 1));
   const override = SPECIAL_ROOM_FLOOR_OVERRIDES[normalizedDepth] || {};
@@ -41,6 +43,12 @@ export function getSpecialRoomDefinition(depth) {
       ...structuredClone(override.lock || {})
     }
   };
+}
+
+export function getSpecialRoomAccessRestriction({ forcedEnemyId = null } = {}) {
+  return forcedEnemyId
+    ? { blocked: true, reason: "forcedEncounter", message: SPECIAL_ROOM_ACCESS_BLOCKED_MESSAGE }
+    : { blocked: false, reason: "", message: "" };
 }
 
 export function getSpecialRoomUnlockRate(lock, dex, attemptIndex = 0) {

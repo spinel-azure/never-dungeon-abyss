@@ -51,6 +51,7 @@ const hooks = {
   awardTreasure: () => ({ message: "中には何も入っていなかった！" }),
   unlockBossDoor: () => ({ accepted: false, message: "鍵がかかっている。" }),
   getSpecialDoorLockInfo: () => null,
+  getSpecialDoorAccessBlock: () => ({ blocked: false }),
   attemptSpecialDoorUnlock: () => ({ accepted: false }),
   beginBossBattle: () => false,
   beginMimicBattle: () => false,
@@ -368,6 +369,12 @@ function startDoorOpening(x, y, dirKey, message = "ギィ……") {
 }
 
 function startSpecialDoorLockEvent(x, y, dirKey) {
+  const access = hooks.getSpecialDoorAccessBlock({ x, y, dirKey }) || {};
+  if (access.blocked) {
+    hooks.playSe("blocked");
+    hooks.say(access.message || "今はこの扉を開けられないようだ。");
+    return;
+  }
   const info = hooks.getSpecialDoorLockInfo({ x, y, dirKey }) || {};
   startOverlayEvent({
     type: "specialDoorLock",

@@ -8,7 +8,20 @@ import {
   getSpecialRoomLockInfo,
   setStartPosition
 } from "../js/dungeon.js";
-import { getSpecialRoomUnlockRate } from "../data/special-rooms.js";
+import { getSpecialRoomAccessRestriction, getSpecialRoomUnlockRate } from "../data/special-rooms.js";
+
+test("forced encounters block special-room unlocking without exposing a rate", () => {
+  assert.deepEqual(getSpecialRoomAccessRestriction({ forcedEnemyId: "cave_slime" }), {
+    blocked: true,
+    reason: "forcedEncounter",
+    message: "今はこの扉を開けられないようだ。"
+  });
+  assert.deepEqual(getSpecialRoomAccessRestriction({ forcedEnemyId: null }), {
+    blocked: false,
+    reason: "",
+    message: ""
+  });
+});
 
 test("each floor creates at most one sealed one-cell special room with an internal black door", () => {
   setStartPosition(0, 0);
