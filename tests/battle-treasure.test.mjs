@@ -6,6 +6,7 @@ import {
   startBattleTreasureEvent,
   state
 } from "../js/player.js";
+import { cells } from "../js/dungeon.js";
 
 test("a declined battle chest disappears without awarding loot", () => {
   let hidden = 0;
@@ -48,4 +49,28 @@ test("an opened battle chest uses the normal trap and loot hooks", () => {
   assert.equal(state.overlayEvent, null);
   assert.equal(resolvedTrap, "poison_needle");
   assert.equal(awarded, 1);
+});
+
+test("an adjacent NPC does not overwrite the opened chest reward message", () => {
+  const messages = [];
+  state.gridX = 1;
+  state.gridY = 1;
+  state.dir = 1;
+  cells[1][2].npc = "NPC_01";
+  configurePlayer({
+    say: message => { messages.push(message); },
+    showTreasure: () => {},
+    hideTreasure: () => {},
+    playSe: () => {},
+    playTreasureOpening: (_type, complete) => complete(),
+    resolveTreasureTrap: () => ({ message: "" }),
+    awardTreasure: () => ({ message: "loot reward" }),
+    cancelAutoReturn: () => {},
+    onStateChanged: () => {}
+  });
+  state.overlayEvent = null;
+  startBattleTreasureEvent("red", null);
+  handleOverlayEventInput("confirm");
+  assert.equal(messages.at(-1), "loot reward");
+  cells[1][2].npc = null;
 });

@@ -211,7 +211,9 @@ import {
   let experienceSettlementCloseCallback = null;
   let pendingLootIdentification = null;
 
-  lootIdentifyAction?.addEventListener("click", () => {
+  let lootIdentifyTouchHandled = false;
+
+  function activateLootIdentifyAction() {
     if (!pendingLootIdentification || pendingLootIdentification.identifying) return;
     if (!pendingLootIdentification.identified) {
       const identification = pendingLootIdentification;
@@ -244,6 +246,25 @@ import {
     const onClose = pendingLootIdentification.onClose;
     pendingLootIdentification = null;
     onClose?.();
+  }
+
+  lootIdentifyAction?.addEventListener("touchend", event => {
+    if (!document.body.classList.contains("layout-mobile") && !document.body.classList.contains("layout-tablet")) return;
+    event.preventDefault();
+    event.stopPropagation();
+    lootIdentifyTouchHandled = true;
+    activateLootIdentifyAction();
+    window.setTimeout(() => {
+      lootIdentifyTouchHandled = false;
+    }, 350);
+  }, { passive: false });
+
+  lootIdentifyAction?.addEventListener("click", event => {
+    if (lootIdentifyTouchHandled) {
+      event.preventDefault();
+      return;
+    }
+    activateLootIdentifyAction();
   });
   let pendingEncounter = null;
   configureDevice();

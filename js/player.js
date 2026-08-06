@@ -713,7 +713,6 @@ function confirmTreasureEvent() {
     } else if (event.treasureType === "black" && trapResult.trap && !trapResult.disarmed) {
       hooks.say(`${trapMessage}宝箱はミミックだった！`);
       hooks.beginMimicBattle();
-      updateNpcAwareness();
       hooks.onStateChanged();
       return;
     } else if (event.treasureType === "black") {
@@ -725,7 +724,6 @@ function confirmTreasureEvent() {
     } else {
       hooks.say(`${trapMessage}中には何も入っていなかった！`);
     }
-    updateNpcAwareness();
     hooks.onStateChanged();
     resumeAutoReturnAfterTransientTreasure(event);
   });
