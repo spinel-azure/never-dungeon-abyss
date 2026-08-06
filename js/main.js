@@ -85,7 +85,7 @@ import { hasUncertainLoot } from "./loot-identification.js";
 import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js?v=20260806-05";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js?v=20260806-02";
 import { getEquipmentItem } from "../data/equipment.js";
-import { getEquipmentInstanceDefinition, getEquipmentInstanceName } from "../data/equipment-inventory.js";
+import { getEquipmentInstanceDefinition, getEquipmentInstanceName, grantEquipmentInstance } from "../data/equipment-inventory.js";
 import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
 import { applyBossVictory, createBossCombatant, getBossById, getFloorBossByDepth, isBossDefeated } from "../data/bosses.js";
 import { consumeKeyItem, getKeyItem, grantKeyItem, hasKeyItem } from "../data/key-items.js";
@@ -111,7 +111,7 @@ import { collectCardStatBonuses, getCardById, hasCardEffect } from "../data/card
 import { drawCardCanvas } from "./card-canvas.js";
 import { getItem } from "../data/items.js?v=20260806-01";
 import { isCriticalHp } from "../data/quick-status.js";
-import { purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
+import { purchaseBuybackEquipment, purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
 import { addLootEquipment, addLootGold, addLootItem, depositItemInWarehouse, settleLootBag, withdrawItemFromWarehouse } from "../data/inventory.js";
 import { rollEnemyDrop, rollRedChestLoot } from "../data/loot.js";
 import { rollTreasureTrap } from "../data/traps.js";
@@ -126,6 +126,7 @@ import {
   hasActiveQuest,
   isDungeonDepthUnlocked,
   recordEnemyDefeat,
+  recordCustomQuestProgress,
   recordFloorExploration,
   reportQuest
 } from "../data/quests.js";
@@ -352,6 +353,7 @@ import {
     onHeal: healAtTemple,
     onPurchaseItem: purchaseTownItem,
     onPurchaseEquipment: purchaseTownEquipment,
+    onBuybackEquipment: buybackTownEquipment,
     onSellItem: sellTownItem,
     onOpenSellInventory: openShopSellInventory,
     onOpenPurchaseInventory: openShopPurchaseInventory,
@@ -485,7 +487,7 @@ import {
       for (let x = 0; x < MAP_W; x += 1) {
         const savedCell = structuredClone(dungeon.cells[y][x]);
         if (savedCell.treasure && currentDepth <= 4) savedCell.treasure = "red";
-        if (currentDepth > 4 && !savedCell.eventTreasureId) savedCell.treasure = null;
+        if (currentDepth > 4 && !savedCell.eventTreasureId && !(savedCell.treasure === "black" && save.character?.eventFlags?.black_chests_unlocked)) savedCell.treasure = null;
         Object.assign(cells[y][x], savedCell);
         cells[y][x].specialRoom = savedCell.specialRoom || null;
         if (cells[y][x].specialRoom) {
@@ -876,6 +878,7 @@ import {
     if (statusLevel) statusLevel.textContent = character ? String(character.level).padStart(3, "0") : "---";
     if (statusCondition) statusCondition.textContent = character?.condition || "----";
     statusCondition?.classList.toggle("condition-poison", character?.condition === "POISON");
+    statusCondition?.classList.toggle("condition-bleeding", character?.condition === "BLEED");
     if (statusGold) statusGold.textContent = String(Math.max(0, Math.floor(Number(character?.gold) || 0)));
     const vitals = document.querySelector(".nde-status-vitals");
     if (vitals) {
@@ -1081,7 +1084,9 @@ import {
     setPlayerInputEnabled(false);
     pendingEncounter = null;
     startBgm(selectBattleBgm(enemyData));
-    const started = startBattle(createEnemyCombatant(enemyData), {
+    const mimic = createEnemyCombatant(enemyData);
+    mimic.depth = currentDepth;
+    const started = startBattle(mimic, {
       playStartSe: true,
       ambush: false,
       concealed: false
@@ -1106,7 +1111,7 @@ import {
   function updateCharacterFromBattle(changes) {
     if (!character) return;
     Object.assign(character, changes);
-    character.condition = hasCharacterStatus(character, "poison") ? "POISON" : "GOOD";
+    character.condition = currentCondition(character);
     updateCharacterUi();
     scheduleAutosave();
   }
@@ -1123,6 +1128,21 @@ import {
     return damage;
   }
 
+  function applyDungeonBleedingStep() {
+    if (!character || worldLocation !== "dungeon" || !hasCharacterStatus(character, "bleeding")) return 0;
+    character.bleedingStepCount = (Math.max(0, Number(character.bleedingStepCount) || 0) + 1) % 5;
+    if (character.bleedingStepCount !== 0) return 0;
+    const requested = Math.max(1, Math.floor(character.maxHp * 0.05));
+    const damage = getNonlethalPoisonDamage(character.hp, requested);
+    if (damage <= 0) return 0;
+    character.hp -= damage; character.alive = true; character.condition = "BLEED";
+    updateCharacterUi(); showPoisonStepDamage(damage); return damage;
+  }
+
+  function currentCondition(target) {
+    return hasCharacterStatus(target, "bleeding") ? "BLEED" : hasCharacterStatus(target, "poison") ? "POISON" : "GOOD";
+  }
+
   function showPoisonStepDamage(damage) {
     const layer = document.getElementById("poisonStepDamage");
     if (!layer || damage <= 0) return;
@@ -1134,7 +1154,10 @@ import {
 
   function handleDungeonStep() {
     applyDungeonPoisonStep();
+    applyDungeonBleedingStep();
     if (!character) return;
+    character.condition = hasCharacterStatus(character, "bleeding") ? "BLEED"
+      : hasCharacterStatus(character, "poison") ? "POISON" : "GOOD";
     const next = recordFloorExploration(character, { depth: currentDepth, explored });
     if (next === character) return;
     character = next;
@@ -1182,7 +1205,7 @@ import {
     }
     if (treasureType !== "red" && treasureType !== "black") return { message: "中には何も入っていなかった！" };
     const message = addRolledLoot(
-      treasureType === "black" ? rollEnemyDrop({ dropProfile: "blackChest" }) : rollRedChestLoot()
+      treasureType === "black" ? rollEnemyDrop({ dropProfile: "blackChest", depth: currentDepth }) : rollRedChestLoot()
     );
     updateCharacterUi();
     saveGame();
@@ -1243,6 +1266,15 @@ import {
     return { ...result, character };
   }
 
+  function buybackTownEquipment(instanceId) {
+    const result = purchaseBuybackEquipment(character, instanceId);
+    if (!result.accepted) return result;
+    character = normalizeCharacter(result.character);
+    updateCharacterUi();
+    saveGame();
+    return { ...result, character };
+  }
+
   function withdrawTownItem(itemId) {
     const result = withdrawItemFromWarehouse(character, itemId, 1);
     if (!result.accepted) return result;
@@ -1271,7 +1303,7 @@ import {
     character = result.character;
     updateCharacterUi();
     say(result.skill.actionType === "cureStatus"
-      ? `${result.skill.name}を使った。毒が消え去った。`
+      ? `${result.skill.name}を使った。${result.skill.statusId === "bleeding" ? "出血が止まった。" : "毒が消え去った。"}`
       : `${result.skill.name}を使った。HPが${result.healing}回復した。`);
     saveGame();
     playSe("heal");
@@ -1353,6 +1385,16 @@ import {
           bossRewardMessage = cardReward.gained > 0
             ? `\nZカード「${card?.nameJa || victory.reward.cardId}」を手に入れた！`
             : `\nZカード「${card?.nameJa || victory.reward.cardId}」はすでに所持している。`;
+        } else if (victory.reward?.type === "equipment" && victory.reward.equipmentId) {
+          const granted = grantEquipmentInstance(character, victory.reward.equipmentId, victory.reward.slot || "rightArmId");
+          if (granted.accepted) {
+            character = granted.character;
+            const equipment = getEquipmentInstanceDefinition(granted.instance);
+            bossRewardMessage = `\n${equipment?.name || victory.reward.equipmentId}を手に入れた！`;
+          }
+        }
+        if (battle.enemy.questProgressId) {
+          character = recordCustomQuestProgress(character, battle.enemy.questProgressId, 1);
         }
       }
     }
@@ -1687,7 +1729,7 @@ import {
       }
       character = treatment.character;
       updateCharacterUi();
-      say(`司祭アーヴァイン：${treatment.fee}Gの寄進を受け取りました。毒は浄められました。`);
+      say(`司祭アーヴァイン：${treatment.fee}Gの寄進を受け取りました。傷と穢れは癒やされました。`);
       playSe("heal");
       saveGame();
       return;
@@ -1973,7 +2015,11 @@ import {
     const room = floorBoss?.room || {};
     return {
       bossDefeated: isBossDefeated(character, "strange_knight_statue_b9f"),
-      bossDefeatedById: floorBoss ? { [floorBoss.id]: isBossDefeated(character, floorBoss) } : {},
+      bossDefeatedById: {
+        ...(floorBoss ? { [floorBoss.id]: isBossDefeated(character, floorBoss) } : {}),
+        quest_mimic_b6f: isBossDefeated(character, "quest_mimic_b6f")
+      },
+      blackChestsUnlocked: Boolean(character?.eventFlags?.black_chests_unlocked),
       redDoorUnlocked: Boolean(room.unlockFlag && character?.eventFlags?.[room.unlockFlag]),
       hasRedKey: Boolean(room.keyItemId && hasKeyItem(character?.keyItems, room.keyItemId))
     };
@@ -1989,6 +2035,13 @@ import {
   }
 
   function getCurrentSpecialDoorAccessBlock() {
+    const room = getSpecialRoomDefinition(currentDepth);
+    if (room?.content?.requiredQuestId) {
+      const progress = getQuestProgress(character, room.content.requiredQuestId);
+      if (!progress.active || progress.completed) {
+        return { blocked: true, reason: "questRequired", message: "今はこの扉は開かないようだ。" };
+      }
+    }
     return getSpecialRoomAccessRestriction({
       forcedEnemyId: getForcedEnemyId(character, { depth: currentDepth })
     });

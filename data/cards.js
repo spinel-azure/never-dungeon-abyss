@@ -68,6 +68,14 @@ const STANDARD_CARDS = [
     maxOwned: 99, maxCopies: 6
   },
   {
+    id: "common_first_aid", rarity: "C", cost: 1,
+    name: "First Aid", nameJa: "応急措置", concept: "出血耐性 +30%",
+    descriptionJa: "出血状態になる確率を30％軽減する。",
+    category: "resistance", effectId: "bleeding_resistance", effectValue: 0.3,
+    statBonus: Object.freeze({ bleedingResistance: 0.3 }), iconId: "bandage",
+    maxOwned: 1, maxCopies: 1
+  },
+  {
     id: "rare_defense_up", rarity: "R", cost: 2,
     name: "Defense Up", nameJa: "防御力上昇", concept: "DEF +5",
     category: "ability", effectId: "defense_up", effectValue: 5,

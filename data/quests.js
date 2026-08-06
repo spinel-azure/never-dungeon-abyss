@@ -6,6 +6,7 @@ export const SLIME_EXTERMINATION_QUEST_ID = "guild_002_cave_slime";
 export const FLOOR_SURVEY_QUEST_ID = "guild_003_b1f_survey";
 export const RABBIT_EXTERMINATION_QUEST_ID = "guild_004_abyss_rabbit";
 export const WANDERING_DEAD_EXTERMINATION_QUEST_ID = "guild_005";
+export const BLACK_BOX_INVESTIGATION_QUEST_ID = "guild_006";
 export const B2F_UNLOCK_QUEST_IDS = Object.freeze([
   GUILD_TRIAL_QUEST_ID,
   SLIME_EXTERMINATION_QUEST_ID,
@@ -136,6 +137,24 @@ export const QUESTS = Object.freeze([
       "対処してくれ。事前に聖水を用意しておくといいかもな。"
     ]),
     available: true
+  }),
+  Object.freeze({
+    id: BLACK_BOX_INVESTIGATION_QUEST_ID, number: "006", title: "黒い箱の調査",
+    client: "ギルドマスター", category: "other", objectiveType: "custom",
+    targetName: "", targetDepth: 6, requiredCount: 1,
+    objectiveLabel: "黒い箱を開けて中身を確かめる",
+    reward: Object.freeze({ type: "card", label: "デッキカード×1", amount: 1,
+      cardId: "common_first_aid", bonusGold: 400 }),
+    descriptionLabel: "内容",
+    description: Object.freeze([
+      "奈落のB6Fで黒い箱が置かれた部屋がある。",
+      "しかし、開けに行った奴が誰も戻って来ない。",
+      "調べに行ってくれ。"
+    ]),
+    prerequisiteQuestIds: Object.freeze([WANDERING_DEAD_EXTERMINATION_QUEST_ID]),
+    customProgressFlag: "boss_quest_mimic_b6f_defeated",
+    reportUnlockFlag: "black_chests_unlocked",
+    available: true
   })
 ]);
 
@@ -198,7 +217,10 @@ export function acceptQuest(character, questId) {
   if (Object.keys(quests.active).length >= MAX_ACTIVE_QUESTS) {
     return result(character, false, "activeLimit");
   }
-  quests.active[quest.id] = { progress: 0 };
+  quests.active[quest.id] = {
+    progress: quest.customProgressFlag && character?.eventFlags?.[quest.customProgressFlag]
+      ? quest.requiredCount : 0
+  };
   return result({ ...character, quests }, true);
 }
 
@@ -245,6 +267,15 @@ export function recordFloorExploration(character, { depth, explored } = {}) {
   return { ...character, quests };
 }
 
+export function recordCustomQuestProgress(character, questId, amount = 1) {
+  const quest = getQuestById(questId);
+  const quests = normalizeQuestState(character?.quests);
+  const entry = quests.active[questId];
+  if (!quest || quest.objectiveType !== "custom" || !entry) return character;
+  entry.progress = Math.min(quest.requiredCount, entry.progress + Math.max(0, Math.floor(Number(amount) || 0)));
+  return { ...character, quests };
+}
+
 export function reportQuest(character, questId) {
   const progress = getQuestProgress(character, questId);
   if (!progress.readyToReport) return result(character, false, "notReady");
@@ -269,6 +300,9 @@ export function reportQuest(character, questId) {
       ...next,
       gold: Math.max(0, Math.floor(Number(character.gold) || 0)) + bonusGold
     };
+  }
+  if (progress.quest.reportUnlockFlag) {
+    next = { ...next, eventFlags: { ...(next.eventFlags || {}), [progress.quest.reportUnlockFlag]: true } };
   }
   return { character: next, accepted: true, rewardCardId, bonusGold };
 }

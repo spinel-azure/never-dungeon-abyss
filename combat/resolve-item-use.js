@@ -10,6 +10,7 @@ export function getItemUnavailableReason({ character, itemId, context, enemy, to
   const hasAnotherEffect = item.effects?.some(effect => effect.id !== "heal_hp");
   if (healsHp && !hasAnotherEffect && character.hp >= character.maxHp) return "fullHp";
   if (itemId === "antidote" && character.hp >= character.maxHp && !hasPoison(character)) return "noEffect";
+  if (itemId === "styptic" && character.hp >= character.maxHp && !hasStatus(character, "bleeding")) return "noEffect";
   if (itemId === "guiding_torch" && Number(torchFuel) >= 100) return "fullTorch";
   if (itemId === "treasure_compass" && treasureCompassActive) return "noEffect";
   if (itemId === "holy_water") {
@@ -32,6 +33,8 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
       next.hp += healing;
     } else if (effect.id === "cure_poison") {
       next.statuses = (next.statuses || []).filter(status => (status.statusId || status.id) !== "poison");
+    } else if (effect.id === "cure_bleeding") {
+      next.statuses = (next.statuses || []).filter(status => (status.statusId || status.id) !== "bleeding");
     } else if (effect.id === "restore_torch") {
       environment.torchFuel = effect.value;
     } else if (effect.id === "reset_presence") {
@@ -44,7 +47,7 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
       environment.startAutoWalker = true;
     }
   }
-  next.condition = hasPoison(next) ? "POISON" : "GOOD";
+  next.condition = hasStatus(next, "bleeding") ? "BLEED" : hasPoison(next) ? "POISON" : "GOOD";
   next.inventory = consumeItem(next.inventory, itemId).inventory;
   return {
     accepted: true,
@@ -58,4 +61,8 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
 
 function hasPoison(character) {
   return (character?.statuses || []).some(status => (status.statusId || status.id) === "poison");
+}
+
+function hasStatus(character, statusId) {
+  return (character?.statuses || []).some(status => (status.statusId || status.id) === statusId);
 }

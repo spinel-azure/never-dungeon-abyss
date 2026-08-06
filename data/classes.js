@@ -93,6 +93,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     def: 0,
     equipment,
     ...equipmentCollection,
+    equipmentBuyback: [],
     skillIds: [...characterClass.initialSkillIds],
     statuses: [],
     condition: "GOOD",
@@ -159,12 +160,18 @@ export function normalizeCharacter(character) {
     def: Math.max(0, Number(character.def) || 0),
     equipment,
     ...equipmentCollection,
+    equipmentBuyback: Array.isArray(character.equipmentBuyback)
+      ? structuredClone(character.equipmentBuyback).filter(entry => entry?.instance?.instanceId)
+      : [],
     skillIds: [...new Set([
       ...(Array.isArray(character.skillIds) ? character.skillIds : characterClass.initialSkillIds),
       ...getLevelUnlockedSkillIds(characterClass.id, level)
     ])],
     statuses: normalizeCharacterStatuses(character.statuses),
-    condition: character.condition || "GOOD",
+    bleedingStepCount: Math.max(0, Math.floor(Number(character.bleedingStepCount) || 0)) % 5,
+    condition: normalizeCharacterStatuses(character.statuses).some(status => (status.statusId || status.id) === "bleeding") ? "BLEED"
+      : normalizeCharacterStatuses(character.statuses).some(status => (status.statusId || status.id) === "poison") ? "POISON"
+      : "GOOD",
     alive: character.alive !== false && Number(character.hp) > 0
   };
 }
@@ -172,7 +179,7 @@ export function normalizeCharacter(character) {
 function normalizeCharacterStatuses(statuses) {
   if (!Array.isArray(statuses)) return [];
   return structuredClone(statuses).map(status => {
-    if ((status?.statusId || status?.id) !== "poison") return status;
+    if (!["poison", "bleeding"].includes(status?.statusId || status?.id)) return status;
     const persistentPoison = { ...status };
     delete persistentPoison.remainingTurns;
     delete persistentPoison.duration;

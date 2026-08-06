@@ -178,6 +178,15 @@ export const enemies = Object.freeze([
     image: "images/enemies/enemy_05.avif", race: "construct", randomEncounter: false,
     maxHp: 60, stats: Object.freeze({ str: 10, int: 3, agi: 6, dex: 8, luc: 7 }),
     def: 9, attack: 8, experienceReward: 20, dropProfile: "blackChest",
+    actions: Object.freeze([
+      Object.freeze({ weight: 65, action: Object.freeze({ id: "mimic_attack", name: "攻撃",
+        actionType: "physicalAttack", hitCount: 1, powerPerHit: 1, effects: Object.freeze([]) }) }),
+      Object.freeze({ weight: 35, when: Object.freeze({ hpRateBelow: 0.5 }), action: Object.freeze({
+        id: "killer_bite", name: "キラーバイト", actionType: "physicalAttack", hitCount: 1,
+        powerPerHit: 1.15, effects: Object.freeze([Object.freeze({ statusId: "bleeding",
+          trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.2 })])
+      }) })
+    ]),
     elementMultipliers: Object.freeze({ fire: 1, ice: 1 }),
     statusResistances: Object.freeze({
       poison: Object.freeze({ resistancePoints: 0, immune: true }),
@@ -218,6 +227,7 @@ export function createEnemyCombatant(enemy) {
     baseDef: enemy.def,
     attack: enemy.attack,
     specialAttack: structuredClone(enemy.specialAttack || null),
+    actions: structuredClone(enemy.actions || []),
     experienceReward: enemy.experienceReward,
     dropItemId: enemy.dropItemId || null,
     dropGold: Math.max(0, Math.floor(Number(enemy.dropGold) || 0)),

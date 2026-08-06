@@ -264,7 +264,7 @@ async function playPresentationEvents() {
     if (event.type === "healing") {
       showBattleNumber(event.targetSide, event.amount, "healing");
       battleUi.playSe("heal");
-    } else if (event.hit || event.type === "damage" || event.type === "poisonDamage") {
+    } else if (event.hit || event.type === "damage" || event.type === "poisonDamage" || event.type === "bleedingDamage") {
       showBattleNumber(
         event.targetSide,
         event.damage ?? event.amount,

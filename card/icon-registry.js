@@ -11,6 +11,7 @@ import { drawManaCoreIcon } from "./icons/mana-core.js";
 import { drawGoddessSilhouetteIcon } from "./icons/goddess-silhouette.js";
 import { drawAlertnessIcon } from "./icons/alertness.js";
 import { drawDexterityIcon } from "./icons/dexterity.js";
+import { drawBandageIcon } from "./icons/bandage.js";
 
 const iconDrawers = new Map([
   ["strength", drawStrengthIcon],
@@ -25,6 +26,7 @@ const iconDrawers = new Map([
   ["goddess-silhouette", drawGoddessSilhouetteIcon],
   ["alertness", drawAlertnessIcon],
   ["dexterity", drawDexterityIcon],
+  ["bandage", drawBandageIcon],
   ["unknown", drawUnknownIcon],
 ]);
 

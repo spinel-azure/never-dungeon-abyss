@@ -28,7 +28,7 @@ export function resolveFieldSkill({ character, skillId } = {}) {
     nextCharacter.sp = Math.max(0, character.sp - skill.spCost);
     nextCharacter.statuses = (nextCharacter.statuses || [])
       .filter(status => (status.statusId || status.id) !== skill.statusId);
-    nextCharacter.condition = hasStatus(nextCharacter, "poison") ? "POISON" : "GOOD";
+    nextCharacter.condition = hasStatus(nextCharacter, "bleeding") ? "BLEED" : hasStatus(nextCharacter, "poison") ? "POISON" : "GOOD";
     return { accepted: true, character: nextCharacter, skill, healing: 0 };
   }
 

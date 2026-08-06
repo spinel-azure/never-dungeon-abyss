@@ -85,7 +85,27 @@ export function sellEquipmentInstance(character, instanceId, { price } = {}) {
       equipmentInventory: {
         ...character.equipmentInventory,
         instances: character.equipmentInventory.instances.filter(entry => entry.instanceId !== instance.instanceId)
-      }
+      },
+      equipmentBuyback: [
+        ...(Array.isArray(character.equipmentBuyback) ? character.equipmentBuyback : []),
+        { instance: structuredClone(instance), price: Math.max(value * 2, Math.floor(Number(equipment.buybackPrice) || 0)) }
+      ]
     }
   };
+}
+
+export function purchaseBuybackEquipment(character, instanceId) {
+  if (!character) return { accepted: false, reason: "noCharacter", character };
+  const entries = Array.isArray(character.equipmentBuyback) ? character.equipmentBuyback : [];
+  const entry = entries.find(candidate => candidate?.instance?.instanceId === instanceId);
+  if (!entry) return { accepted: false, reason: "notFound", character };
+  const cost = Math.max(0, Math.floor(Number(entry.price) || 0));
+  const gold = Math.max(0, Math.floor(Number(character.gold) || 0));
+  if (gold < cost) return { accepted: false, reason: "insufficientGold", character, cost };
+  return { accepted: true, reason: "", instance: entry.instance, cost, character: {
+    ...character,
+    gold: gold - cost,
+    equipmentInventory: { ...character.equipmentInventory, instances: [...(character.equipmentInventory?.instances || []), structuredClone(entry.instance)] },
+    equipmentBuyback: entries.filter(candidate => candidate !== entry)
+  } };
 }

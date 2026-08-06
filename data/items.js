@@ -95,11 +95,18 @@ export const ITEMS = Object.freeze([
     effects: Object.freeze([{ id: "heal_hp", value: 120 }]),
     description: "HPを120回復する。B20F到達後に商店へ入荷する。", maxOwned: 99,
     iconId: "healing-potion", version: 1
+  }),
+  Object.freeze({
+    number: 16, id: "styptic", name: "止血剤", category: "recovery",
+    buyPrice: 30, sellPrice: 15, source: "shop", usableIn: Object.freeze(["town", "dungeon", "battle"]),
+    effects: Object.freeze([{ id: "cure_bleeding", value: 1 }, { id: "heal_hp", value: 15 }]),
+    description: "出血を治療し、HPを15回復する。出血していなくても使用可能。", maxOwned: 99,
+    iconId: "styptic", version: 1
   })
 ]);
 
 const BASE_SHOP_ITEM_IDS = Object.freeze([
-  "healing_potion", "antidote", "guiding_torch", "treasure_compass", "auto_walker"
+  "healing_potion", "antidote", "styptic", "guiding_torch", "treasure_compass", "auto_walker"
 ]);
 
 export function getShopItemIdsForDepth(depth = 1) {

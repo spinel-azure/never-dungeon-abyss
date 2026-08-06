@@ -17,6 +17,7 @@ export const TOWN_INTRODUCTION_FLAGS = Object.freeze([
   "library_first_talk_card"
 ]);
 export const TEMPLE_POISON_TREATMENT_FEE = 15;
+export const TEMPLE_BLEEDING_TREATMENT_FEE = 15;
 
 export function createInnRecovery(character) {
   const statuses = retainPoisonStatuses(character);
@@ -24,7 +25,7 @@ export function createInnRecovery(character) {
     hp: character.maxHp,
     sp: character.maxSp,
     statuses,
-    condition: statuses.length ? "POISON" : "GOOD",
+    condition: conditionFromStatuses(statuses),
     alive: true
   };
 }
@@ -78,7 +79,7 @@ export function resolveInnStay(character) {
       hp: maxHp,
       sp: maxSp,
       statuses: persistentStatuses,
-      condition: persistentStatuses.length ? "POISON" : "GOOD",
+      condition: conditionFromStatuses(persistentStatuses),
       alive: true,
       skillIds
     },
@@ -91,6 +92,12 @@ export function resolveInnStay(character) {
     deckCostGained: Math.max(0, growth.deckCost - previousGrowth.deckCost),
     learnedSkillIds
   };
+}
+
+function conditionFromStatuses(statuses = []) {
+  if (statuses.some(status => (status.statusId || status.id) === "bleeding")) return "BLEED";
+  if (statuses.some(status => (status.statusId || status.id) === "poison")) return "POISON";
+  return "GOOD";
 }
 
 export function getInnStayFee(character) {
@@ -138,7 +145,7 @@ function getVitalBonus(character, key) {
 }
 
 function retainPoisonStatuses(character) {
-  return structuredClone(character?.statuses || []).filter(status => (status.statusId || status.id) === "poison");
+  return structuredClone(character?.statuses || []).filter(status => ["poison", "bleeding"].includes(status.statusId || status.id));
 }
 
 export function createTempleRevival(character) {
@@ -152,13 +159,13 @@ export function createTempleRevival(character) {
 }
 
 export function resolveTemplePoisonTreatment(character) {
-  const poisonStatuses = (character?.statuses || []).filter(status => (status.statusId || status.id) === "poison");
-  if (!poisonStatuses.length) return { character, success: false, reason: "notPoisoned", fee: TEMPLE_POISON_TREATMENT_FEE };
+  const ailments = (character?.statuses || []).filter(status => ["poison", "bleeding"].includes(status.statusId || status.id));
+  if (!ailments.length) return { character, success: false, reason: "notPoisoned", fee: TEMPLE_POISON_TREATMENT_FEE };
   const gold = Math.max(0, Math.floor(Number(character?.gold) || 0));
   if (gold < TEMPLE_POISON_TREATMENT_FEE) return { character, success: false, reason: "insufficientGold", fee: TEMPLE_POISON_TREATMENT_FEE };
   const next = structuredClone(character);
   next.gold = gold - TEMPLE_POISON_TREATMENT_FEE;
-  next.statuses = (next.statuses || []).filter(status => (status.statusId || status.id) !== "poison");
+  next.statuses = (next.statuses || []).filter(status => !["poison", "bleeding"].includes(status.statusId || status.id));
   next.condition = "GOOD";
   return { character: next, success: true, reason: "treated", fee: TEMPLE_POISON_TREATMENT_FEE };
 }

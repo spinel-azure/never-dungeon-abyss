@@ -116,8 +116,8 @@ function buildBoundaryWallMapAttempt(depth = 1, rng = Math.random, progress = {}
   const floorBoss = getFloorBossByDepth(depth);
   if (floorBoss) placeFloorBossRoom(floorBoss, rng, progress);
   placeSpecialRoom(depth, rng);
-  placeNpc(depth);
-  placeTreasures(depth, rng);
+  placeNpc(depth, progress);
+  placeTreasures(depth, rng, progress);
   placeFountain(depth, rng);
   if (floorBoss?.room?.requiresKey) placeFloorBossKeyTreasure(floorBoss, rng, progress);
   placeNormalDoors(NORMAL_DOOR_COUNT, false);
@@ -242,7 +242,7 @@ export function placeStairs(depth = 1) {
   if (stairsDown) cells[stairsDown.y][stairsDown.x].type = "stairsDown";
 }
 
-export function placeNpc(depth = 1) {
+export function placeNpc(depth = 1, progress = {}) {
   const { x: startX, y: startY } = startPosition;
   resetNpcs();
   const distances = makeDistanceMap(startX, startY);
@@ -264,11 +264,10 @@ export function placeNpc(depth = 1) {
   const selected = shuffled(candidates)[0];
   if (selected) {
     const normalizedDepth = Math.floor(Number(depth) || 1);
-    cells[selected.y][selected.x].npc = normalizedDepth === 5
-      ? "NPC_01_b5"
-      : normalizedDepth === 9
-        ? "NPC_01_b9"
-        : "NPC_01";
+    cells[selected.y][selected.x].npc = normalizedDepth === 2 ? "NPC_01_b2"
+      : normalizedDepth === 5 ? "NPC_01_b5"
+      : normalizedDepth === 6 ? (progress.bossDefeatedById?.quest_mimic_b6f ? "NPC_01_b6_after" : "NPC_01_b6")
+      : normalizedDepth === 9 ? "NPC_01_b9" : "NPC_01";
   }
 }
 
@@ -351,9 +350,11 @@ export function discoverTreasureAt(x, y) {
   return true;
 }
 
-export function placeTreasures(depth = 1, rng = Math.random) {
+export function placeTreasures(depth = 1, rng = Math.random, progress = {}) {
   resetTreasures();
-  if (Math.floor(Number(depth) || 1) > 4) return;
+  const floor = Math.floor(Number(depth) || 1);
+  const blackChestEnabled = Boolean(progress.blackChestsUnlocked) && floor >= 6 && floor % 10 !== 9;
+  if (floor > 4 && !blackChestEnabled) return;
   const { x: startX, y: startY } = startPosition;
   const distances = makeDistanceMap(startX, startY);
   const blocked = getTraversalBlockingReservations(cells);
@@ -363,9 +364,9 @@ export function placeTreasures(depth = 1, rng = Math.random) {
     }
   }
 
-  const count = 1 + Math.floor(Math.max(0, Math.min(0.999999, Number(rng()) || 0)) * 3);
+  const count = blackChestEnabled ? 1 : 1 + Math.floor(Math.max(0, Math.min(0.999999, Number(rng()) || 0)) * 3);
   for (let placed = 0; placed < count; placed += 1) {
-    const type = "red";
+    const type = blackChestEnabled ? "black" : "red";
     const candidates = [];
     for (let y = 0; y < MAP_H; y++) {
       for (let x = 0; x < MAP_W; x++) {

@@ -29,6 +29,16 @@ test("Paul's event marker is visible before exploration except at zero torch", (
   assert.equal(shouldDrawSpecialRoomMarker(getSpecialRoomDefinition(1), true, 100), false);
 });
 
+test("B6 special room is the quest-gated one-time mimic event", () => {
+  assert.deepEqual(getSpecialRoomDefinition(6).content, {
+    type: "eventBoss",
+    bossId: "quest_mimic_b6f",
+    minimapMarker: "E",
+    revealBeforeExploration: true,
+    requiredQuestId: "guild_006"
+  });
+});
+
 test("B4 special room warns before entering the one-time superboss event", () => {
   const room = getSpecialRoomDefinition(4);
   assert.equal(room.dangerWarning, true);

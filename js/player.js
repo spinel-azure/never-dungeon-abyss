@@ -452,6 +452,20 @@ function confirmSpecialRoomBossEvent() {
   if (!event || event.type !== "specialRoomBoss") return;
   event.canCancel = false;
   const boss = getBossById(event.bossId);
+  if (boss?.event?.treasureOpening) {
+    hooks.showTreasure(boss.event.treasureOpening);
+    hooks.say("");
+    hooks.playTreasureOpening(boss.event.treasureOpening, () => {
+      hooks.hideTreasure();
+      if (state.overlayEvent !== event) return;
+      beginSpecialRoomBossBattle(event, boss);
+    });
+    return;
+  }
+  beginSpecialRoomBossBattle(event, boss);
+}
+
+function beginSpecialRoomBossBattle(event, boss) {
   hooks.say(boss?.event?.start || "本に手を触れようとした瞬間、突然声が響く。「軽々しく、それに触るな！」\n何かが襲ってきた！");
   event.autoStartTimer = window.setTimeout(() => {
     if (state.overlayEvent !== event) return;

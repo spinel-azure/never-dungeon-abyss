@@ -41,6 +41,7 @@ export function resolveActionOpportunity(statuses = []) {
 
 export function resolveEndOfAction({ statuses = [], maxHp = 0 } = {}) {
   let poisonDamage = 0;
+  let bleedingDamage = 0;
   const next = [];
   for (const original of cloneStatuses(statuses)) {
     const status = { ...original };
@@ -50,6 +51,10 @@ export function resolveEndOfAction({ statuses = [], maxHp = 0 } = {}) {
         Number(status.minimumDamage) || 1,
         Math.floor(Number(maxHp) * (Number(status.damageMaxHpRate) || 0))
       );
+    }
+    if (id === "bleeding") {
+      bleedingDamage += Math.max(Number(status.minimumDamage) || 1,
+        Math.floor(Number(maxHp) * (Number(status.damageMaxHpRate) || 0)));
     }
     if (!Number.isFinite(Number(status.remainingTurns))) {
       next.push(status);
@@ -63,7 +68,7 @@ export function resolveEndOfAction({ statuses = [], maxHp = 0 } = {}) {
     status.remainingTurns -= 1;
     if (status.remainingTurns > 0) next.push(status);
   }
-  return { statuses: next, poisonDamage };
+  return { statuses: next, poisonDamage, bleedingDamage };
 }
 
 export function getNonlethalPoisonDamage(currentHp, requestedDamage) {

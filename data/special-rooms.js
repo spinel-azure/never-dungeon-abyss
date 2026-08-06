@@ -42,6 +42,10 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
       minimapMarker: "E",
       revealBeforeExploration: true
     })
+  }),
+  6: Object.freeze({
+    content: Object.freeze({ type: "eventBoss", bossId: "quest_mimic_b6f",
+      minimapMarker: "E", revealBeforeExploration: true, requiredQuestId: "guild_006" })
   })
 });
 

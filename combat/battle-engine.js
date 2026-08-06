@@ -181,7 +181,7 @@ export function createEnemyAction(enemy, rng = Math.random) {
   });
   const actionTable = Array.isArray(enemy.actions) ? enemy.actions : [];
   if (actionTable.length > 0) {
-    const selected = selectWeightedEnemyAction(actionTable, rng);
+    const selected = selectWeightedEnemyAction(actionTable, enemy, rng);
     if (selected) return buildEnemyAction(selected, attack);
   }
   const special = enemy.specialAttack;
@@ -196,8 +196,9 @@ export function createEnemyAction(enemy, rng = Math.random) {
   };
 }
 
-function selectWeightedEnemyAction(actionTable, rng) {
+function selectWeightedEnemyAction(actionTable, enemy, rng) {
   const weighted = actionTable
+    .filter(entry => actionConditionMatches(entry?.when, enemy))
     .map(entry => ({
       action: entry?.action || entry,
       weight: Math.max(0, Number(entry?.weight) || 0)
@@ -211,6 +212,13 @@ function selectWeightedEnemyAction(actionTable, rng) {
     if (roll < 0) return entry.action;
   }
   return weighted.at(-1)?.action || null;
+}
+
+function actionConditionMatches(condition, enemy) {
+  if (!condition) return true;
+  const rate = Number(enemy?.maxHp) > 0 ? Number(enemy.hp) / Number(enemy.maxHp) : 1;
+  if (Number.isFinite(Number(condition.hpRateBelow)) && !(rate < Number(condition.hpRateBelow))) return false;
+  return true;
 }
 
 function buildEnemyAction(action, normalAttack) {
@@ -250,6 +258,8 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
         healing += amount;
       } else if (effect.id === "cure_poison") {
         actor.statuses = (actor.statuses || []).filter(status => (status.statusId || status.id) !== "poison");
+      } else if (effect.id === "cure_bleeding") {
+        actor.statuses = (actor.statuses || []).filter(status => (status.statusId || status.id) !== "bleeding");
       } else if (effect.id === "banish_undead") {
         target.hp = 0;
         target.alive = false;
@@ -308,8 +318,10 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
   }
   if (action.actionType === "cureStatus") {
     actor.statuses = (actor.statuses || []).filter(status => (status.statusId || status.id) !== action.statusId);
-    actor.condition = (actor.statuses || []).some(status => (status.statusId || status.id) === "poison") ? "POISON" : "GOOD";
-    battle.log.push(`${actor.name}は${action.name}を唱えた。毒が消え去った。`);
+    const bleeding = (actor.statuses || []).some(status => (status.statusId || status.id) === "bleeding");
+    const poison = (actor.statuses || []).some(status => (status.statusId || status.id) === "poison");
+    actor.condition = bleeding ? "BLEED" : poison ? "POISON" : "GOOD";
+    battle.log.push(`${actor.name}は${action.name}を唱えた。${action.statusId === "bleeding" ? "出血が止まった。" : "毒が消え去った。"}`);
     return;
   }
   if (action.actionType === "banishUndead") {
@@ -388,6 +400,16 @@ function finishAction(battle, side) {
       });
     }
   }
+  if (end.bleedingDamage > 0 && actor.hp > 0) {
+    const damage = getNonlethalPoisonDamage(actor.hp, end.bleedingDamage);
+    actor.hp -= damage;
+    actor.alive = actor.hp > 0;
+    if (damage > 0) {
+      battle.log.push(`${actor.name}は出血で${damage}ダメージ。`);
+      battle.presentationEvents.push({ type: "bleedingDamage", actorSide: null, targetSide: side,
+        amount: damage, message: `出血で${damage}ダメージ！` });
+    }
+  }
 }
 
 function updateOutcome(battle) {
@@ -406,12 +428,16 @@ function updateOutcome(battle) {
 
 function combatStats(combatant) {
   const collected = collectStats(combatant);
+  const statusResistances = structuredClone(combatant.statusResistances || {});
+  const bleeding = statusResistances.bleeding || {};
+  statusResistances.bleeding = { ...bleeding,
+    resistancePoints: (Number(bleeding.resistancePoints) || 0) + collected.bleedingResistance * 100 };
   return {
     ...collected,
     def: Math.floor(collected.def * getDefenseMultiplier(combatant.statuses)),
     statusResistanceBonus: collected.statusResistanceBonus + getStatusResistanceBonus(combatant.statuses),
     statuses: structuredClone(combatant.statuses || []),
-    statusResistances: structuredClone(combatant.statusResistances || {}),
+    statusResistances,
     elementMultipliers: { ...(combatant.elementMultipliers || {}) },
     isBoss: Boolean(combatant.isBoss)
   };
@@ -438,6 +464,7 @@ function statusName(id) {
   return ({
     armor_break: "DEF低下",
     poison: "毒",
+    bleeding: "出血",
     action_skip: "行動不能",
     speed_down: "速度低下"
   })[id] || id;

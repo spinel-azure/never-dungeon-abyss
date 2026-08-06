@@ -20,6 +20,10 @@ export const STATUS_EFFECTS = Object.freeze({
     damageMaxHpRate: 0.05,
     minimumDamage: 1
   }),
+  bleeding: Object.freeze({
+    id: "bleeding", name: "出血", kind: "ailment",
+    damageMaxHpRate: 0.05, minimumDamage: 1
+  }),
   action_skip: Object.freeze({
     id: "action_skip",
     name: "行動不能",

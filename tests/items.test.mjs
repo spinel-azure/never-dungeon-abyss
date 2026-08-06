@@ -9,7 +9,7 @@ import {
   restorePresence, suppressPresence
 } from "../js/presence.js";
 import { grantEventItems, unlockGuildRequest } from "../js/character-services.js";
-import { purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
+import { purchaseBuybackEquipment, purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
 import { getItem, getShopItemIdsForDepth } from "../data/items.js";
 
 function characterWith(itemId, amount = 1) {
@@ -99,6 +99,18 @@ test("antidote cures poison and restores 15 HP", () => {
   assert.equal(result.character.condition, "GOOD");
 });
 
+test("styptic cures bleeding and restores 15 HP", () => {
+  let character = characterWith("styptic");
+  character.hp = Math.max(1, character.maxHp - 20);
+  character.statuses = [{ statusId: "bleeding" }];
+  character.condition = "BLEED";
+  const result = resolveFieldItemUse({ character, itemId: "styptic", context: "dungeon" });
+  assert.equal(result.accepted, true);
+  assert.equal(result.character.hp, character.hp + 15);
+  assert.equal(result.character.statuses.some(status => status.statusId === "bleeding"), false);
+  assert.equal(result.character.condition, "GOOD");
+});
+
 test("shop and temple purchases spend gold and grant the selected item", () => {
   let character = createInitialCharacter({ name: "TEST", job: "warrior" });
   character.gold = 760;
@@ -170,6 +182,20 @@ test("shop sells unequipped equipment instances but rejects equipped ones", () =
 
   const equippedId = character.equippedInstanceIds.rightArmId;
   assert.equal(sellEquipmentInstance(character, equippedId).reason, "equipped");
+});
+
+test("sold equipment can be bought back as the same individual instance", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.gold = 20000;
+  const purchased = purchaseEquipment(character, "iron_greatsword");
+  character = purchased.character;
+  const instance = character.equipmentInventory.instances.at(-1);
+  const sold = sellEquipmentInstance(character, instance.instanceId);
+  assert.equal(sold.accepted, true);
+  const bought = purchaseBuybackEquipment(sold.character, instance.instanceId);
+  assert.equal(bought.accepted, true);
+  assert.ok(bought.character.equipmentInventory.instances.some(entry => entry.instanceId === instance.instanceId));
+  assert.equal(bought.character.equipmentBuyback.length, 0);
 });
 
 test("torch and talisman expose dungeon environment effects", () => {

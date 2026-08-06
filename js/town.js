@@ -14,6 +14,7 @@ import {
 } from "../data/quests.js";
 import { getItem, getShopItemIdsForDepth } from "../data/items.js?v=20260806-01";
 import { WEAPONS } from "../data/weapons.js";
+import { getEquipmentInstanceDefinition, getEquipmentInstanceName } from "../data/equipment-inventory.js";
 import { configureTownPassersby } from "./town-passersby.js";
 import { getInnStayFee } from "./character-services.js";
 
@@ -92,6 +93,7 @@ const town = {
   onHeal: () => {},
   onPurchaseItem: () => null,
   onPurchaseEquipment: () => null,
+  onBuybackEquipment: () => null,
   onSellItem: () => null,
   onOpenSellInventory: () => {},
   onOpenPurchaseInventory: () => {},
@@ -1010,7 +1012,7 @@ function showFacilityCommands(facilityId) {
       || id === "heal"
       || (facilityId === "temple" && id === "donate")
       || (facilityId === "shop" && id === "buy")
-      || (facilityId === "shop" && ["sell", "storage"].includes(id))
+      || (facilityId === "shop" && ["sell", "buyback", "storage"].includes(id))
       || id === "deck"
       || (facilityId === "guild" && id === "accept" && requestUnlocked)
       || (facilityId === "guild" && id === "report" && reportAvailable)
@@ -1063,6 +1065,12 @@ function activateFacilityService(command) {
     if (facility?.id !== "shop") return false;
     town.messageEl.textContent = "女主人ヘレン：何を売るのかしら？";
     town.onOpenSellInventory();
+    return true;
+  }
+  if (command === "buyback") {
+    const facility = TOWN_FACILITIES[town.selectedIndex];
+    if (facility?.id !== "shop") return false;
+    openCommerce("buybackEquipment");
     return true;
   }
   if (command === "storage") {
@@ -1154,6 +1162,7 @@ function handleInnStayConfirmationInput(action) {
 }
 
 function openCommerce(kind) {
+  const buybackEntries = kind === "buybackEquipment" ? (town.getCharacter()?.equipmentBuyback || []) : [];
   const ids = kind === "donate"
     ? ["exorcism_talisman", "holy_water"]
     : kind === "storageWithdraw"
@@ -1167,7 +1176,12 @@ function openCommerce(kind) {
         : getShopItemIdsForDepth(town.getCharacter()?.highestDungeonDepthReached);
   town.mode = "commerce";
   town.commerceKind = kind;
-  town.commerceItems = ids.map(id => kind === "buyEquipment" ? WEAPONS[id] : getItem(id)).filter(Boolean);
+  town.commerceItems = kind === "buybackEquipment"
+    ? buybackEntries.map(entry => {
+      const definition = getEquipmentInstanceDefinition(entry.instance);
+      return definition ? { ...definition, id: entry.instance.instanceId, name: getEquipmentInstanceName(entry.instance), buyPrice: entry.price } : null;
+    }).filter(Boolean)
+    : ids.map(id => kind === "buyEquipment" ? WEAPONS[id] : getItem(id)).filter(Boolean);
   town.commerceIndex = 0;
   town.commercePointerArmedIndex = -1;
   town.commerceTitle.textContent = kind === "donate" ? "寄進" : kind === "sell" ? "売却" : kind.startsWith("storage") ? "倉庫" : "購入";
@@ -1270,7 +1284,7 @@ function showCommerceConfirmation() {
       ? `女主人ヘレン：${item.name}を${town.commerceQuantity || 1}個預かればいいのね？\n＊Aボタン：はい　Bボタン：いいえ`
     : town.commerceKind === "sell"
       ? `女主人ヘレン：${item.sellPrice}G ×${town.commerceQuantity || 1}、合計${item.sellPrice * (town.commerceQuantity || 1)}Gで買い取るわ。これでいい？\n＊Aボタン：はい　Bボタン：いいえ`
-    : town.commerceKind === "buyEquipment"
+    : town.commerceKind === "buyEquipment" || town.commerceKind === "buybackEquipment"
       ? `女主人ヘレン：${item.name}を${item.buyPrice}Gで購入するのね？\n所持金：${formatGold(town.getCharacter()?.gold)}G\n＊Aボタン：はい　Bボタン：いいえ`
       : `女主人ヘレン：${item.name}を${item.buyPrice}Gで購入するのね？\n所持数：${inventoryItemCount(item.id)}／${item.maxOwned || 99}　倉庫：${warehouseItemCount(item.id)}　所持金：${formatGold(town.getCharacter()?.gold)}G\n＊Aボタン：はい　Bボタン：いいえ`;
 }
@@ -1338,6 +1352,8 @@ function purchaseSelectedCommerceItem() {
     ? town.onSellItem(item.id, town.commerceQuantity || 1)
     : town.commerceKind === "buyEquipment"
       ? town.onPurchaseEquipment(item.id)
+      : town.commerceKind === "buybackEquipment"
+        ? town.onBuybackEquipment(item.id)
       : town.onPurchaseItem(item.id);
   if (!result?.accepted) {
     town.playSe("cursorMove");
@@ -1364,7 +1380,8 @@ function purchaseSelectedCommerceItem() {
       : `${keeper}：はい、どうぞ。`;
   town.mode = "commerce";
   if (((selling || depositing) && Number(town.getCharacter()?.inventory?.counts?.[item.id] || 0) <= 0)
-    || (withdrawing && warehouseItemCount(item.id) <= 0)) {
+    || (withdrawing && warehouseItemCount(item.id) <= 0)
+    || town.commerceKind === "buybackEquipment") {
     town.commerceItems.splice(town.commerceIndex, 1);
     town.commerceIndex = Math.max(0, Math.min(town.commerceIndex, town.commerceItems.length - 1));
   }
@@ -1743,6 +1760,8 @@ export function renderCharacterStatus() {
   spMax?.classList.toggle("vital-max-bonus", hasMaxVitalBonus(character, "maxSp"));
   quickNameElement?.classList.toggle("condition-poison", character?.condition === "POISON");
   quickNameCompact?.classList.toggle("condition-poison", character?.condition === "POISON");
+  quickNameElement?.classList.toggle("condition-bleeding", character?.condition === "BLEED");
+  quickNameCompact?.classList.toggle("condition-bleeding", character?.condition === "BLEED");
 }
 
 function hasMaxVitalBonus(character, key) {

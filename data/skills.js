@@ -126,6 +126,12 @@ export const SKILLS = Object.freeze({
     speedModifier: 0,
     effects: Object.freeze([])
   }),
+  hemostasis: Object.freeze({
+    id: "hemostasis", name: "ヘモスタシス",
+    description: "出血状態を回復する。\nHPは回復しない。",
+    actionType: "cureStatus", category: "miracle", spCost: 3,
+    target: "self", statusId: "bleeding", speedModifier: 0, effects: Object.freeze([])
+  }),
   exorcism: Object.freeze({
     id: "exorcism",
     name: "エクソシズム",
@@ -162,7 +168,8 @@ export function getSkills(ids = []) {
 
 export const LEVEL_SKILL_UNLOCKS = Object.freeze([
   Object.freeze({ job: "priest", level: 3, skillId: "antidote" }),
-  Object.freeze({ job: "priest", level: 5, skillId: "exorcism" })
+  Object.freeze({ job: "priest", level: 5, skillId: "exorcism" }),
+  Object.freeze({ job: "priest", level: 7, skillId: "hemostasis" })
 ]);
 
 export function getLevelUnlockedSkillIds(job, level) {

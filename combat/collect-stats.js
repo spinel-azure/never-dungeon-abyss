@@ -36,6 +36,8 @@ export function collectStats(source = {}) {
     defensePenetration: numeric(source.defensePenetration),
     statusPowerBonus: numeric(source.statusPowerBonus),
     statusResistanceBonus: numeric(source.statusResistanceBonus),
+    bleedingResistance: numeric(source.bleedingResistance) + numeric(equipment.bleedingResistance)
+      + numeric(cards.bleedingResistance) + numeric(temporary.bleedingResistance),
     instantDeathResistance: numeric(source.instantDeathResistance),
     surpriseResistance:
       numeric(source.surpriseResistance)

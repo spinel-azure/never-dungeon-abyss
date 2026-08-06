@@ -95,6 +95,11 @@ export const WEAPONS = Object.freeze({
     id: "stiletto", name: "スティレット", type: "dagger", attack: 7,
     element: "physical", allowedJobs: Object.freeze(["thief"]), sellPrice: 75,
     penetrationByEnhancement: Object.freeze([0.2, 0.25, 0.3, 0.35])
+  }),
+  vorpal_sword: Object.freeze({
+    id: "vorpal_sword", name: "ヴォーパル・スウォード", type: "longsword", attack: 1,
+    element: "physical", sellPrice: 5000, buybackPrice: 10000,
+    hiddenBossSlayerIds: Object.freeze(["jabberwock_event_boss"])
   })
 });
 

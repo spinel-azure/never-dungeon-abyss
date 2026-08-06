@@ -9,6 +9,7 @@ import {
   RABBIT_EXTERMINATION_QUEST_ID,
   SLIME_EXTERMINATION_QUEST_ID,
   WANDERING_DEAD_EXTERMINATION_QUEST_ID,
+  BLACK_BOX_INVESTIGATION_QUEST_ID,
   abandonQuest,
   acceptQuest,
   getQuestById,
@@ -18,6 +19,7 @@ import {
   normalizeQuestState,
   recordFloorExploration,
   recordEnemyDefeat,
+  recordCustomQuestProgress,
   reportQuest,
   shouldForceEnemy
 } from "../data/quests.js";
@@ -289,4 +291,25 @@ test("invalid quest entries are discarded during normalization", () => {
     normalizeQuestState({ active: { invalid: { progress: 3 } }, completedQuestIds: ["invalid"] }),
     { active: {}, completedQuestIds: [] }
   );
+});
+
+test("quest 006 unlocks after quest 005 and rewards First Aid once", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "priest" });
+  assert.equal(isQuestAvailable(character, BLACK_BOX_INVESTIGATION_QUEST_ID), false);
+  character.quests.completedQuestIds.push(
+    QUEST_ID,
+    SLIME_EXTERMINATION_QUEST_ID,
+    FLOOR_SURVEY_QUEST_ID,
+    RABBIT_EXTERMINATION_QUEST_ID,
+    WANDERING_DEAD_EXTERMINATION_QUEST_ID
+  );
+  assert.equal(isQuestAvailable(character, BLACK_BOX_INVESTIGATION_QUEST_ID), true);
+  character = acceptQuest(character, BLACK_BOX_INVESTIGATION_QUEST_ID).character;
+  character = recordCustomQuestProgress(character, BLACK_BOX_INVESTIGATION_QUEST_ID, 1);
+  const report = reportQuest(character, BLACK_BOX_INVESTIGATION_QUEST_ID);
+  assert.equal(report.accepted, true);
+  assert.equal(report.rewardCardId, "common_first_aid");
+  assert.equal(report.bonusGold, 400);
+  assert.equal(report.character.eventFlags.black_chests_unlocked, true);
+  assert.equal(getOwnedCardCount(report.character.cards, "common_first_aid"), 1);
 });

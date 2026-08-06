@@ -34,6 +34,24 @@ export const npcs = [
     retreatOnCancel: true
   },
   {
+    id: "NPC_01_b2", name: "みかんにゃんこ", imageId: "NPC_01", image: "images/npc/NPC_01.avif",
+    interactionType: "talk", greeting: "", voiceSe: ["catVoice01", "catVoice02", "catVoice03"],
+    encounters: [{ dialogue: ["この階にはお化けが出る部屋があるらしいにゃ。しかも、何度も何度も出るらしいにゃん。怖いにゃあ…。"], leaveAfterTalk: true }],
+    canCancel: true, retreatOnCancel: true
+  },
+  {
+    id: "NPC_01_b6", name: "みかんにゃんこ", imageId: "NPC_01", image: "images/npc/NPC_01.avif",
+    interactionType: "talk", greeting: "", voiceSe: ["catVoice01", "catVoice02", "catVoice03"],
+    encounters: [{ dialogue: ["血が出たら痛いにゃん。とても痛いにゃん。いざという時のために、止血剤があるといいかもにゃあ…。"], leaveAfterTalk: true }],
+    canCancel: true, retreatOnCancel: true
+  },
+  {
+    id: "NPC_01_b6_after", name: "みかんにゃんこ", imageId: "NPC_01", image: "images/npc/NPC_01.avif",
+    interactionType: "talk", greeting: "", voiceSe: ["catVoice01", "catVoice02", "catVoice03"],
+    encounters: [{ dialogue: ["不思議な剣を拾ったみたいにゃん？むかーし、おとぎ話で聞いた事ある気がするにゃん。…でも、忘れちゃったにゃあ…。"], leaveAfterTalk: true }],
+    canCancel: true, retreatOnCancel: true
+  },
+  {
     id: "NPC_01_b9",
     name: "みかんにゃんこ",
     imageId: "NPC_01",

@@ -223,6 +223,39 @@ export const BOSSES = Object.freeze({
       start: "魔術師の周囲に、禍々しい魔力が渦巻く。\n堕落した魔術師が襲いかかってきた！"
     })
   }),
+  quest_mimic_b6f: Object.freeze({
+    id: "quest_mimic_b6f", name: "ミミック", floor: 6,
+    imageId: "quest_mimic_b6f", image: "images/enemies/enemy_05.avif",
+    encounterImageId: "quest_mimic_event_b6f", encounterImage: "images/background/dungeon_event_02.avif",
+    race: "construct", maxHp: 60,
+    stats: Object.freeze({ str: 10, int: 3, agi: 6, dex: 8, luc: 7 }),
+    def: 9, attack: 8, experienceReward: 20, specialAttack: null,
+    actions: Object.freeze([
+      Object.freeze({ weight: 65, action: Object.freeze({ id: "mimic_attack", name: "攻撃",
+        actionType: "physicalAttack", hitCount: 1, powerPerHit: 1, effects: Object.freeze([]) }) }),
+      Object.freeze({ weight: 35, when: Object.freeze({ hpRateBelow: 0.5 }), action: Object.freeze({
+        id: "killer_bite", name: "キラーバイト", actionType: "physicalAttack", hitCount: 1,
+        powerPerHit: 1.15, effects: Object.freeze([Object.freeze({ statusId: "bleeding",
+          trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.2 })])
+      }) })
+    ]),
+    reward: Object.freeze({ type: "equipment", equipmentId: "vorpal_sword", slot: "rightArmId" }),
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      bleeding: Object.freeze({ resistancePoints: 100, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 35, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 25, immune: false })
+    }),
+    escapeRate: 0.5, surpriseRate: 0, surpriseRateMaximum: 0,
+    noDrop: true, isBoss: true, bossKind: "event",
+    defeatedFlag: "boss_quest_mimic_b6f_defeated", questProgressId: "guild_006",
+    event: Object.freeze({
+      prompt: "部屋の中にはたくさんの箱が転がっていた。大半は中身が空のものばかりだったが、\nひとつだけ閉じた黒い箱が部屋の中央に置かれている。開けてみますか？\n＊Aボタン：はい　Bボタン：いいえ",
+      start: "黒い箱が突如、大きな口を開いた！\nミミックが襲いかかってきた！",
+      treasureOpening: "black"
+    })
+  }),
   strange_knight_statue_b9f: Object.freeze({
     id: "strange_knight_statue_b9f",
     name: "奇妙な彫像",
