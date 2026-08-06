@@ -79,17 +79,17 @@ export const WEAPONS = Object.freeze({
   iron_greatsword: Object.freeze({
     id: "iron_greatsword", name: "鉄の両手剣", type: "greatsword", attack: 12,
     element: "physical", allowedJobs: Object.freeze(["warrior"]), twoHanded: true,
-    buyPrice: 100, sellPrice: 50
+    buyPrice: 100, sellPrice: 50, shopUnlockDepth: 1
   }),
   poison_dagger: Object.freeze({
     id: "poison_dagger", name: "ポイズンダガー", type: "dagger", attack: 6,
     element: "physical", allowedJobs: Object.freeze(["thief"]), poisonChance: 0.15,
     effects: Object.freeze([Object.freeze({ statusId: "poison", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.15 })]),
-    buyPrice: 100, sellPrice: 50
+    buyPrice: 100, sellPrice: 50, shopUnlockDepth: 1
   }),
   morgenstern: Object.freeze({
     id: "morgenstern", name: "モルゲンシュテルン", type: "blunt", attack: 8,
-    element: "physical", allowedJobs: Object.freeze(["priest"]), buyPrice: 100, sellPrice: 50
+    element: "physical", allowedJobs: Object.freeze(["priest"]), buyPrice: 100, sellPrice: 50, shopUnlockDepth: 1
   }),
   stiletto: Object.freeze({
     id: "stiletto", name: "スティレット", type: "dagger", attack: 7,

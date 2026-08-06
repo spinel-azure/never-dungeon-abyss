@@ -1,4 +1,5 @@
 .town-screen{display:block;width:100%;margin:0;color:#f7fbff;font-family:"GameFont",sans-serif}
+.dungeon-commands[data-facility-active="true"] button{position:relative}.shop-new-badge{position:absolute;right:clamp(7px,2vw,16px);top:50%;color:#00ffff;font:400 clamp(18px,4vw,30px)/1 "PixelFont",monospace;text-shadow:0 0 7px rgba(0,255,255,.85);transform:translateY(-50%)}
 .town-screen[hidden]{display:none}
 .town-background[hidden],.town-cloud-layer[hidden],.town-name-banner[hidden],.town-mosaic[hidden],.town-portrait[hidden],.town-portrait-placeholder[hidden],.guild-registration[hidden],.card-get-effect[hidden],.guild-quest-overlay[hidden],.guild-quest-list[hidden],.guild-quest-detail[hidden],.town-commerce-overlay[hidden]{display:none}
 .town-portrait-frame{position:relative;box-sizing:content-box;width:calc(100% - 2px);aspect-ratio:16/9;overflow:hidden;border:1px solid #4f493b;border-radius:7px;background:radial-gradient(circle at 50% 28%,#1d201b,#080a08 68%,#020302);box-shadow:inset 0 0 0 1px #ffffff0d}

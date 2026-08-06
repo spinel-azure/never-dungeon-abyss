@@ -87,14 +87,14 @@ export const ITEMS = Object.freeze([
     buyPrice: 60, sellPrice: 30, source: "shop", usableIn: Object.freeze(["town", "dungeon", "battle"]),
     effects: Object.freeze([{ id: "heal_hp", value: 60 }]),
     description: "HPを60回復する。B10F到達後に商店へ入荷する。", maxOwned: 99,
-    iconId: "healing-potion", version: 1
+    iconId: "healing-potion", version: 1, shopUnlockDepth: 10
   }),
   Object.freeze({
     number: 15, id: "healing_potion_large", name: "回復薬（大）", category: "recovery",
     buyPrice: 120, sellPrice: 60, source: "shop", usableIn: Object.freeze(["town", "dungeon", "battle"]),
     effects: Object.freeze([{ id: "heal_hp", value: 120 }]),
     description: "HPを120回復する。B20F到達後に商店へ入荷する。", maxOwned: 99,
-    iconId: "healing-potion", version: 1
+    iconId: "healing-potion", version: 1, shopUnlockDepth: 20
   }),
   Object.freeze({
     number: 16, id: "styptic", name: "止血剤", category: "recovery",

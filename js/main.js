@@ -118,6 +118,7 @@ import { rollTreasureTrap } from "../data/traps.js";
 import { restAtHealingFountain as restoreAtHealingFountain } from "../data/fountains.js";
 import { getSkill } from "../data/skills.js";
 import { getSpecialRoomAccessRestriction, getSpecialRoomDefinition } from "../data/special-rooms.js";
+import { acknowledgeShopStockAnnouncement, getShopStockState, markShopCategorySeen } from "../data/shop-stock.js";
 import {
   abandonQuest,
   acceptQuest,
@@ -357,6 +358,9 @@ import {
     onSellItem: sellTownItem,
     onOpenSellInventory: openShopSellInventory,
     onOpenPurchaseInventory: openShopPurchaseInventory,
+    onEnterShop: enterShop,
+    getShopStockState: () => getShopStockState(character),
+    onViewShopCategory: viewShopCategory,
     onWithdrawItem: withdrawTownItem,
     onDepositItem: depositTownItem,
     onEditDeck: openDeckEditor,
@@ -1264,6 +1268,19 @@ import {
     updateCharacterUi();
     saveGame();
     return { ...result, character };
+  }
+
+  function enterShop() {
+    const result = acknowledgeShopStockAnnouncement(character);
+    if (!result.announced) return null;
+    character = result.character;
+    saveGame();
+    return { message: "女主人ヘレン：あら、いらっしゃい。ちょうど新しい品を仕入れたところなの。見ていかない？" };
+  }
+
+  function viewShopCategory(category) {
+    character = markShopCategorySeen(character, category);
+    saveGame();
   }
 
   function buybackTownEquipment(instanceId) {

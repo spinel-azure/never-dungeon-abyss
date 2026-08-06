@@ -15,6 +15,7 @@ import {
 import { getItem, getShopItemIdsForDepth } from "../data/items.js?v=20260806-01";
 import { WEAPONS } from "../data/weapons.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName } from "../data/equipment-inventory.js";
+import { getShopEquipmentIdsForDepth } from "../data/shop-stock.js";
 import { configureTownPassersby } from "./town-passersby.js";
 import { getInnStayFee } from "./character-services.js";
 
@@ -97,6 +98,9 @@ const town = {
   onSellItem: () => null,
   onOpenSellInventory: () => {},
   onOpenPurchaseInventory: () => {},
+  onEnterShop: () => null,
+  getShopStockState: () => ({ newCategories: {} }),
+  onViewShopCategory: () => {},
   onWithdrawItem: () => null,
   onDepositItem: () => null,
   onEditDeck: () => {},
@@ -908,6 +912,10 @@ function renderFacility() {
   } else {
     town.messageEl.textContent = facility.keeper ? `${facility.keeper}：${facility.greeting}` : facility.greeting;
   }
+  if (facility.id === "shop") {
+    const notice = town.onEnterShop();
+    if (notice?.message) town.messageEl.textContent = notice.message;
+  }
   town.portrait.hidden = !facility.image;
   town.portraitPlaceholder.hidden = Boolean(facility.image);
   if (facility.image) {
@@ -1083,11 +1091,13 @@ function activateFacilityService(command) {
   if (command === "storage-withdraw") { openCommerce("storageWithdraw"); return true; }
   if (command === "storage-return") { renderFacility(); return true; }
   if (command === "shop-items") {
+    town.onViewShopCategory("items");
     town.messageEl.textContent = "女主人ヘレン：道具を選んでちょうだい。";
     town.onOpenPurchaseInventory("items");
     return true;
   }
   if (command === "shop-equipment") {
+    town.onViewShopCategory("equipment");
     town.messageEl.textContent = "女主人ヘレン：装備品を選んでちょうだい。";
     town.onOpenPurchaseInventory("equipment");
     return true;
@@ -1172,7 +1182,7 @@ function openCommerce(kind) {
     : kind === "sell"
       ? Object.keys(town.getCharacter()?.inventory?.counts || {}).filter(id => getItem(id)?.sellPrice > 0)
       : kind === "buyEquipment"
-        ? ["iron_greatsword", "poison_dagger", "morgenstern"]
+        ? getShopEquipmentIdsForDepth(town.getCharacter()?.highestDungeonDepthReached)
         : getShopItemIdsForDepth(town.getCharacter()?.highestDungeonDepthReached);
   town.mode = "commerce";
   town.commerceKind = kind;
@@ -1201,6 +1211,7 @@ function openCommerce(kind) {
 }
 
 function showShopCategoryCommands() {
+  const newCategories = town.getShopStockState()?.newCategories || {};
   const commands = [
     ["shop-equipment", "装備品"], ["shop-items", "道具"], ["shop-return", "戻る"],
     ["empty-1", ""], ["empty-2", ""], ["empty-3", ""]
@@ -1211,7 +1222,14 @@ function showShopCategoryCommands() {
   town.facilityCommandButtons.forEach((button, index) => {
     const [id, label] = commands[index];
     button.dataset.facilityCommand = id;
-    button.textContent = label;
+    button.replaceChildren(document.createTextNode(label));
+    const category = id === "shop-equipment" ? "equipment" : id === "shop-items" ? "items" : "";
+    if (category && newCategories[category]) {
+      const badge = document.createElement("span");
+      badge.className = "shop-new-badge";
+      badge.textContent = "NEW";
+      button.append(badge);
+    }
     button.disabled = !label;
     button.classList.toggle("is-empty", !label);
     button.classList.remove("is-unavailable");
