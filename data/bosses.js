@@ -126,6 +126,103 @@ export const BOSSES = Object.freeze({
       start: "異形が静かに四本の腕を広げた。\n異界の叡智が襲いかかってきた！"
     })
   }),
+  fallen_mage_b19f: Object.freeze({
+    id: "fallen_mage_b19f",
+    name: "堕落した魔術師",
+    floor: 19,
+    imageId: "fallen_mage_b19f",
+    image: "images/bosses/boss_03.avif",
+    race: "human",
+    maxHp: 380,
+    stats: Object.freeze({ str: 8, int: 16, agi: 12, dex: 10, luc: 11 }),
+    def: 11,
+    attack: 8,
+    experienceReward: 1500,
+    specialAttack: null,
+    actions: Object.freeze([
+      Object.freeze({
+        weight: 20,
+        action: Object.freeze({
+          id: "fallen_mage_strike",
+          name: "杖撃",
+          actionType: "physicalAttack",
+          hitCount: 1,
+          powerPerHit: 1,
+          effects: Object.freeze([])
+        })
+      }),
+      Object.freeze({
+        weight: 35,
+        action: Object.freeze({
+          id: "corrupt_flame",
+          name: "堕炎",
+          actionType: "spell",
+          element: "fire",
+          spellPower: 18,
+          powerMultiplier: 1,
+          unavoidable: true,
+          speedModifier: -4,
+          effects: Object.freeze([])
+        })
+      }),
+      Object.freeze({
+        weight: 30,
+        action: Object.freeze({
+          id: "corrupt_frost",
+          name: "堕氷",
+          actionType: "spell",
+          element: "ice",
+          spellPower: 14,
+          powerMultiplier: 0.9,
+          unavoidable: true,
+          speedModifier: -2,
+          effects: Object.freeze([Object.freeze({
+            statusId: "speed_down",
+            trigger: "perAction",
+            statusKind: "magical",
+            baseRate: 0.6
+          })])
+        })
+      }),
+      Object.freeze({
+        weight: 15,
+        action: Object.freeze({
+          id: "corrupt_ray",
+          name: "堕光",
+          actionType: "spell",
+          element: "arcane",
+          spellPower: 24,
+          powerMultiplier: 1,
+          unavoidable: true,
+          speedModifier: -6,
+          effects: Object.freeze([])
+        })
+      })
+    ]),
+    reward: Object.freeze({ type: "none" }),
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1, arcane: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 100, immune: true }),
+      speed_down: Object.freeze({ resistancePoints: 80, immune: false })
+    }),
+    escapeRate: 0.5,
+    surpriseRate: 0,
+    surpriseRateMaximum: 0,
+    noDrop: true,
+    isBoss: true,
+    bossKind: "floor",
+    defeatedFlag: "boss_fallen_mage_b19f_defeated",
+    room: Object.freeze({
+      requiresKey: true,
+      keyItemId: "red_rust_key_b19f",
+      unlockFlag: "red_door_b19f_unlocked"
+    }),
+    event: Object.freeze({
+      prompt: "ひとりの魔術師が、下り階段を背にして立ちはだかっている。\n戦いますか？\n＊Aボタン：はい　Bボタン：いいえ",
+      start: "魔術師の周囲に、禍々しい魔力が渦巻く。\n堕落した魔術師が襲いかかってきた！"
+    })
+  }),
   strange_knight_statue_b9f: Object.freeze({
     id: "strange_knight_statue_b9f",
     name: "奇妙な彫像",
@@ -157,12 +254,22 @@ export const BOSSES = Object.freeze({
     isBoss: true,
     bossKind: "floor",
     defeatedFlag: "boss_strange_knight_statue_b9f_defeated",
-    transferUnlockFlag: "transfer_portal_b10f_unlocked"
+    transferUnlockFlag: "transfer_portal_b10f_unlocked",
+    room: Object.freeze({
+      requiresKey: true,
+      keyItemId: "red_rust_key_b9f",
+      unlockFlag: "red_door_b9f_unlocked"
+    })
   })
 });
 
 export function getBossById(id) {
   return BOSSES[String(id || "")] || null;
+}
+
+export function getFloorBossByDepth(depth) {
+  const normalizedDepth = Math.max(1, Math.floor(Number(depth) || 1));
+  return Object.values(BOSSES).find(boss => boss.bossKind === "floor" && boss.floor === normalizedDepth) || null;
 }
 
 export function isBossDefeated(character, bossOrId) {

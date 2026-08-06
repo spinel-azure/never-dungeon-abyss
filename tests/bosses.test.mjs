@@ -69,6 +69,20 @@ test("B4 otherworldly wisdom is a one-time superboss with Libra reward", () => {
   assert.equal(isBossDefeated(victory.character, boss), true);
 });
 
+test("B19 fallen mage is a one-time magic floor boss with a placeholder reward", () => {
+  const boss = getBossById("fallen_mage_b19f");
+  assert.equal(boss.name, "堕落した魔術師");
+  assert.equal(boss.floor, 19);
+  assert.equal(boss.image, "images/bosses/boss_03.avif");
+  assert.equal(boss.maxHp, 380);
+  assert.equal(boss.experienceReward, 1500);
+  assert.equal(boss.actions.filter(entry => entry.action.actionType === "spell").length, 3);
+  assert.deepEqual(boss.reward, { type: "none" });
+  assert.equal(boss.defeatedFlag, "boss_fallen_mage_b19f_defeated");
+  assert.equal(boss.room.keyItemId, "red_rust_key_b19f");
+  assert.equal(boss.room.unlockFlag, "red_door_b19f_unlocked");
+});
+
 test("B9 always creates one sealed 1x3 boss room and one trapped key chest", () => {
   for (let iteration = 0; iteration < 50; iteration += 1) {
     randomizeStartPosition();
@@ -96,6 +110,31 @@ test("opened B9 red door stays red and defeated boss never respawns", () => {
   assert.equal(flat.flatMap(cell => Object.values(cell.doorKinds)).filter(kind => kind === "bossUnlocked").length, 2);
 });
 
+test("B19 creates a reusable 1x3 checkpoint room and removes its boss permanently", () => {
+  buildBoundaryWallMap(19, () => .5, {
+    bossDefeatedById: { fallen_mage_b19f: false }
+  });
+  let flat = cells.flat();
+  let room = flat.filter(cell => cell.reserved === "bossRoom");
+  assert.equal(room.length, 3);
+  assert.equal(room.filter(cell => cell.bossId === "fallen_mage_b19f").length, 1);
+  assert.equal(room.filter(cell => cell.type === "stairsDown").length, 1);
+  assert.equal(flat.flatMap(cell => Object.values(cell.doorKinds)).filter(kind => kind === "boss").length, 2);
+  const keyChests = flat.filter(cell => cell.eventTreasureId === "red_rust_key_b19f_chest");
+  assert.equal(keyChests.length, 1);
+  assert.equal(keyChests[0].treasure, "gold");
+  assert.ok(keyChests[0].treasureTrapId);
+
+  buildBoundaryWallMap(19, () => .5, {
+    bossDefeatedById: { fallen_mage_b19f: true }
+  });
+  flat = cells.flat();
+  room = flat.filter(cell => cell.reserved === "bossRoom");
+  assert.equal(room.some(cell => cell.bossId || cell.bossRemainsId), false);
+  assert.equal(room.filter(cell => cell.type === "stairsDown").length, 1);
+  assert.equal(flat.some(cell => cell.eventTreasureId === "red_rust_key_b19f_chest"), false);
+});
+
 test("the B9 red rust key is a non-sellable key item", () => {
   const item = getKeyItem("red_rust_key_b9f");
   assert.equal(item.name, "赤錆びた鍵");
@@ -103,6 +142,17 @@ test("the B9 red rust key is a non-sellable key item", () => {
   const granted = grantKeyItem(null, item.id, 1);
   assert.equal(granted.gained, true);
   assert.equal(hasKeyItem(granted.keyItems, item.id), true);
+});
+
+test("B9 and B19 red rust keys share a display name but keep separate IDs", () => {
+  const b9 = getKeyItem("red_rust_key_b9f");
+  const b19 = getKeyItem("red_rust_key_b19f");
+  assert.equal(b9.name, "赤錆びた鍵");
+  assert.equal(b19.name, "赤錆びた鍵");
+  assert.notEqual(b9.id, b19.id);
+  const b19State = grantKeyItem(null, b19.id, 1).keyItems;
+  assert.equal(hasKeyItem(b19State, b19.id), true);
+  assert.equal(hasKeyItem(b19State, b9.id), false);
 });
 
 test("B10 stairs up is marked as the transfer portal", () => {

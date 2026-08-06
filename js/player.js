@@ -565,7 +565,7 @@ function startBossEvent(bossId, fromGX, fromGY) {
     imageId: boss?.encounterImageId ?? "",
     fromGX,
     fromGY,
-    message: "部屋の中央に騎士の彫像がある。まるで行く手を遮っているようだ。調べてみますか？\n＊Aボタン：はい　Bボタン：いいえ",
+    message: boss?.event?.prompt || "部屋の中央に騎士の彫像がある。まるで行く手を遮っているようだ。調べてみますか？\n＊Aボタン：はい　Bボタン：いいえ",
     canCancel: true,
     retreatOnCancel: true
   });
@@ -575,7 +575,8 @@ function confirmBossEvent() {
   const event = state.overlayEvent;
   if (!event || event.type !== "bossPrompt") return;
   event.canCancel = false;
-  hooks.say("あなたが近づいた途端、彫像が動き出した！こちらに向かってくる！");
+  const boss = getBossById(event.bossId);
+  hooks.say(boss?.event?.start || "あなたが近づいた途端、彫像が動き出した！こちらに向かってくる！");
   const timer = window.setTimeout(() => {
     if (state.overlayEvent !== event) return;
     state.overlayEvent = null;
@@ -590,7 +591,7 @@ function startBossRemainsEvent(bossId) {
     type: "bossRemains",
     bossId,
     imageId: boss?.defeatedEncounterImageId ?? "",
-    message: "粉々になった彫像が床一面に散らばっている。もう動き出す事はなさそうだ。\n＊Aボタン：次へ",
+    message: boss?.event?.remains || "粉々になった彫像が床一面に散らばっている。もう動き出す事はなさそうだ。\n＊Aボタン：次へ",
     canCancel: false
   });
 }

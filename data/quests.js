@@ -279,8 +279,13 @@ export function hasActiveQuest(character) {
 
 export function isDungeonDepthUnlocked(character, depth) {
   const requestedDepth = Math.max(1, Math.floor(Number(depth) || 1));
-  if (requestedDepth !== 2) return true;
-  return B2F_UNLOCK_QUEST_IDS.every(questId => getQuestProgress(character, questId).completed);
+  if (requestedDepth === 2) {
+    return B2F_UNLOCK_QUEST_IDS.every(questId => getQuestProgress(character, questId).completed);
+  }
+  if (requestedDepth === 20) {
+    return Boolean(character?.eventFlags?.boss_fallen_mage_b19f_defeated);
+  }
+  return true;
 }
 
 export function shouldForceEnemy(character, { depth, enemyId } = {}) {

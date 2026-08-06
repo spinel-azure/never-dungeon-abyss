@@ -14,6 +14,7 @@ import { getNpcById } from "../data/npcs.js";
 import { rollTreasureTrap } from "../data/traps.js";
 import { floorHasHealingFountain } from "../data/fountains.js";
 import { getSpecialRoomDefinition, getSpecialRoomUnlockRate } from "../data/special-rooms.js";
+import { getFloorBossByDepth } from "../data/bosses.js";
 import {
   DUNGEON_FEATURE_PRIORITIES,
   getTraversalBlockingReservations,
@@ -112,12 +113,13 @@ function buildBoundaryWallMapAttempt(depth = 1, rng = Math.random, progress = {}
     addLoopOpenings(EXTRA_OPENINGS);
   }
   placeStairs(depth);
-  if (Math.floor(Number(depth) || 1) === 9) placeB9BossRoom(rng, progress);
+  const floorBoss = getFloorBossByDepth(depth);
+  if (floorBoss) placeFloorBossRoom(floorBoss, rng, progress);
   placeSpecialRoom(depth, rng);
   placeNpc(depth);
   placeTreasures(depth, rng);
   placeFountain(depth, rng);
-  if (Math.floor(Number(depth) || 1) === 9) placeB9KeyTreasure(rng, progress);
+  if (floorBoss?.room?.requiresKey) placeFloorBossKeyTreasure(floorBoss, rng, progress);
   placeNormalDoors(NORMAL_DOOR_COUNT, false);
 }
 
@@ -165,7 +167,10 @@ export function validateDungeonLayout({ depth = 1 } = {}) {
     if (doorCount !== 1) errors.push(`special room door count ${doorCount}/1 at ${room.x},${room.y}`);
   }
   const normalizedDepth = Math.max(1, Math.floor(Number(depth) || 1));
-  if (normalizedDepth === 9 && !reservationIds.has("boss_room_b9f")) errors.push("required B9F boss room missing");
+  const floorBoss = getFloorBossByDepth(normalizedDepth);
+  if (floorBoss && !reservationIds.has(`boss_room_b${normalizedDepth}f`)) {
+    errors.push(`required B${normalizedDepth}F boss room missing`);
+  }
   const stairsUp = cells.flat().filter(cell => cell.type === "stairsUp");
   const stairsDown = cells.flat().filter(cell => cell.type === "stairsDown");
   if (stairsUp.length !== 1) errors.push(`stairs up count ${stairsUp.length}/1`);
@@ -584,7 +589,11 @@ export function placeNormalDoors(count = NORMAL_DOOR_COUNT, reset = true) {
   });
 }
 
-export function placeB9BossRoom(rng = Math.random, progress = {}) {
+export function placeFloorBossRoom(bossDefinition, rng = Math.random, progress = {}) {
+  const floorBoss = typeof bossDefinition === "number"
+    ? getFloorBossByDepth(bossDefinition)
+    : bossDefinition;
+  if (!floorBoss) return null;
   const { x: startX, y: startY } = startPosition;
   const candidates = [];
   for (let y = 1; y < MAP_H - 1; y += 1) {
@@ -609,7 +618,7 @@ export function placeB9BossRoom(rng = Math.random, progress = {}) {
       connectCellsAroundBlockedArea(startX, startY, blocked, rng);
       if (countReachableCells(startX, startY, blocked) !== MAP_W * MAP_H - blocked.length) return null;
       const reservation = reserveDungeonFeature(cells, {
-        featureId: "boss_room_b9f",
+        featureId: `boss_room_b${floorBoss.floor}f`,
         type: "bossRoom",
         footprint: candidate.room,
         approaches: [candidate.approach],
@@ -617,15 +626,25 @@ export function placeB9BossRoom(rng = Math.random, progress = {}) {
         blocksTraversal: true
       });
       if (!reservation.accepted) return null;
-      const doorUnlocked = Boolean(progress.redDoorUnlocked || progress.bossDefeated);
+      const bossDefeated = Boolean(
+        progress.bossDefeatedById?.[floorBoss.id]
+        || (floorBoss.floor === 9 && progress.bossDefeated)
+      );
+      const doorUnlocked = Boolean(
+        floorBoss.room?.doorStartsUnlocked
+        || bossDefeated
+        || (floorBoss.room?.requiresKey && progress.redDoorUnlocked)
+      );
       for (const cell of cells.flat()) {
         if (cell.type === "stairsDown") cell.type = "floor";
       }
       setWall(candidate.approach.x, candidate.approach.y, candidate.dir.key, true);
       setDoor(candidate.approach.x, candidate.approach.y, candidate.dir.key, "closed", doorUnlocked ? "bossUnlocked" : "boss");
       const [blank, boss, stairs] = candidate.room.map(cell => cells[cell.y][cell.x]);
-      boss.bossId = progress.bossDefeated ? null : "strange_knight_statue_b9f";
-      boss.bossRemainsId = progress.bossDefeated ? "strange_knight_statue_b9f" : null;
+      boss.bossId = bossDefeated ? null : floorBoss.id;
+      boss.bossRemainsId = bossDefeated && (floorBoss.defeatedEncounterImage || floorBoss.event?.remains)
+        ? floorBoss.id
+        : null;
       stairs.type = "stairsDown";
       for (const target of [blank, boss, stairs]) {
         target.npc = null; target.fountain = null; target.treasure = null; target.eventTreasureId = null;
@@ -637,8 +656,25 @@ export function placeB9BossRoom(rng = Math.random, progress = {}) {
   return null;
 }
 
+export function placeB9BossRoom(rng = Math.random, progress = {}) {
+  return placeFloorBossRoom(9, rng, progress);
+}
+
 export function placeB9KeyTreasure(rng = Math.random, progress = {}) {
-  if (progress.redDoorUnlocked || progress.bossDefeated || progress.hasRedKey) return null;
+  return placeFloorBossKeyTreasure(getFloorBossByDepth(9), rng, progress);
+}
+
+export function placeFloorBossKeyTreasure(bossDefinition, rng = Math.random, progress = {}) {
+  const floorBoss = typeof bossDefinition === "number"
+    ? getFloorBossByDepth(bossDefinition)
+    : bossDefinition;
+  const keyItemId = floorBoss?.room?.keyItemId;
+  if (!floorBoss?.room?.requiresKey || !keyItemId) return null;
+  const bossDefeated = Boolean(
+    progress.bossDefeatedById?.[floorBoss.id]
+    || (floorBoss.floor === 9 && progress.bossDefeated)
+  );
+  if (progress.redDoorUnlocked || bossDefeated || progress.hasRedKey) return null;
   const { x: startX, y: startY } = startPosition;
   const distances = makeDistanceMap(startX, startY);
   const candidates = cells.flat().filter(cell =>
@@ -650,7 +686,7 @@ export function placeB9KeyTreasure(rng = Math.random, progress = {}) {
   selected.treasure = "gold";
   let trapRoll = 0;
   selected.treasureTrapId = rollTreasureTrap("gold", () => trapRoll++ === 0 ? 0 : rng());
-  selected.eventTreasureId = "red_rust_key_b9f_chest";
+  selected.eventTreasureId = `${keyItemId}_chest`;
   return { x: selected.x, y: selected.y };
 }
 

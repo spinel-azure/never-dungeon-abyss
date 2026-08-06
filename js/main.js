@@ -87,8 +87,8 @@ import { createInitialCharacter, normalizeCharacter } from "../data/classes.js?v
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName } from "../data/equipment-inventory.js";
 import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
-import { applyBossVictory, createBossCombatant, getBossById, isBossDefeated } from "../data/bosses.js";
-import { consumeKeyItem, grantKeyItem, hasKeyItem } from "../data/key-items.js";
+import { applyBossVictory, createBossCombatant, getBossById, getFloorBossByDepth, isBossDefeated } from "../data/bosses.js";
+import { consumeKeyItem, getKeyItem, grantKeyItem, hasKeyItem } from "../data/key-items.js";
 import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260806-04";
 import { awardBattleExperience, createTempleRevival, getInnStayFee, grantEventItems, resolveDungeonDefeat, resolveInnStableStay, resolveInnStay, resolveTemplePoisonTreatment, unlockGuildRequest } from "./character-services.js?v=20260805-01";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
@@ -326,7 +326,7 @@ import {
     hideTreasure,
     resolveTreasureTrap: resolveCurrentTreasureTrap,
     awardTreasure: awardTreasureLoot,
-    unlockBossDoor: unlockB9BossDoor,
+    unlockBossDoor: unlockCurrentBossDoor,
     getSpecialDoorLockInfo: getCurrentSpecialDoorLockInfo,
     getSpecialDoorAccessBlock: getCurrentSpecialDoorAccessBlock,
     attemptSpecialDoorUnlock: attemptCurrentSpecialDoorUnlock,
@@ -1168,8 +1168,12 @@ import {
   }
 
   function awardTreasureLoot(treasureType, eventTreasureId = null) {
-    if (eventTreasureId === "red_rust_key_b9f_chest") {
-      const granted = grantKeyItem(character?.keyItems, "red_rust_key_b9f");
+    const eventKeyItemId = String(eventTreasureId || "").endsWith("_chest")
+      ? String(eventTreasureId).slice(0, -"_chest".length)
+      : "";
+    const eventKeyItem = getKeyItem(eventKeyItemId);
+    if (eventKeyItem) {
+      const granted = grantKeyItem(character?.keyItems, eventKeyItem.id);
       if (!granted.gained && granted.reason !== "alreadyOwned") return { message: "鍵は見つからなかった。" };
       if (granted.gained) character = { ...character, keyItems: granted.keyItems };
       updateCharacterUi();
@@ -1964,10 +1968,13 @@ import {
   }
 
   function getDungeonProgress() {
+    const floorBoss = getFloorBossByDepth(currentDepth);
+    const room = floorBoss?.room || {};
     return {
       bossDefeated: isBossDefeated(character, "strange_knight_statue_b9f"),
-      redDoorUnlocked: Boolean(character?.eventFlags?.red_door_b9f_unlocked),
-      hasRedKey: hasKeyItem(character?.keyItems, "red_rust_key_b9f")
+      bossDefeatedById: floorBoss ? { [floorBoss.id]: isBossDefeated(character, floorBoss) } : {},
+      redDoorUnlocked: Boolean(room.unlockFlag && character?.eventFlags?.[room.unlockFlag]),
+      hasRedKey: Boolean(room.keyItemId && hasKeyItem(character?.keyItems, room.keyItemId))
     };
   }
 
@@ -1997,17 +2004,23 @@ import {
     return result;
   }
 
-  function unlockB9BossDoor() {
-    if (character?.eventFlags?.red_door_b9f_unlocked) return { accepted: true, message: "赤い扉を開けた。" };
-    if (!hasKeyItem(character?.keyItems, "red_rust_key_b9f")) {
+  function unlockCurrentBossDoor() {
+    const boss = getFloorBossByDepth(currentDepth);
+    const keyItemId = boss?.room?.keyItemId;
+    const unlockFlag = boss?.room?.unlockFlag;
+    if (!boss?.room?.requiresKey || !keyItemId || !unlockFlag) {
+      return { accepted: true, message: "赤い扉を開けた。" };
+    }
+    if (character?.eventFlags?.[unlockFlag]) return { accepted: true, message: "赤い扉を開けた。" };
+    if (!hasKeyItem(character?.keyItems, keyItemId)) {
       return { accepted: false, message: "赤い扉には鍵がかかっている。" };
     }
-    const consumed = consumeKeyItem(character.keyItems, "red_rust_key_b9f");
+    const consumed = consumeKeyItem(character.keyItems, keyItemId);
     if (!consumed.consumed) return { accepted: false, message: "赤い扉には鍵がかかっている。" };
     character = {
       ...character,
       keyItems: consumed.keyItems,
-      eventFlags: { ...(character.eventFlags || {}), red_door_b9f_unlocked: true }
+      eventFlags: { ...(character.eventFlags || {}), [unlockFlag]: true }
     };
     updateCharacterUi();
     saveGame();
