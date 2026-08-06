@@ -10,7 +10,7 @@ import {
 } from "../js/presence.js";
 import { grantEventItems, unlockGuildRequest } from "../js/character-services.js";
 import { purchaseBuybackEquipment, purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
-import { getItem, getShopItemIdsForDepth } from "../data/items.js";
+import { getItem, getShopItemIdsForCharacter, getShopItemIdsForDepth } from "../data/items.js";
 
 function characterWith(itemId, amount = 1) {
   const character = createInitialCharacter({ name: "TEST", job: "warrior" });
@@ -87,6 +87,19 @@ test("shop healing potions unlock permanently by deepest reached floor", () => {
   delete legacyB10Character.highestDungeonDepthReached;
   legacyB10Character.eventFlags.transfer_portal_b10f_unlocked = true;
   assert.equal(normalizeCharacter(legacyB10Character).highestDungeonDepthReached, 10);
+});
+
+test("shop stock uses explicit arrival flags instead of a debug-inflated deepest floor", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.highestDungeonDepthReached = 20;
+  character.eventFlags.transfer_portal_b10f_unlocked = true;
+  assert.deepEqual(getShopItemIdsForCharacter(character).filter(id => id.startsWith("healing_potion")), [
+    "healing_potion", "healing_potion_medium"
+  ]);
+  character.eventFlags.shop_stock_b20f_unlocked = true;
+  assert.deepEqual(getShopItemIdsForCharacter(character).filter(id => id.startsWith("healing_potion")), [
+    "healing_potion", "healing_potion_medium", "healing_potion_large"
+  ]);
 });
 
 test("antidote cures poison and restores 15 HP", () => {

@@ -333,10 +333,19 @@ test("quest 007 requires the B9 boss and restores progress after abandonment", (
   assert.equal(reportQuest(report.character, RED_DOOR_INVESTIGATION_QUEST_ID).accepted, false);
 });
 
-test("quest 007 does not count a boss defeated before it was accepted", () => {
+test("quest 007 rescues saves where the B9 boss was defeated before acceptance", () => {
   let character = createInitialCharacter({ name: "TEST", job: "warrior" });
   character.quests.completedQuestIds.push(QUEST_ID, SLIME_EXTERMINATION_QUEST_ID, FLOOR_SURVEY_QUEST_ID);
-  character = recordBossDefeat(character, "strange_knight_statue_b9f", 9);
+  character.eventFlags.boss_strange_knight_statue_b9f_defeated = true;
   character = acceptQuest(character, RED_DOOR_INVESTIGATION_QUEST_ID).character;
-  assert.equal(getQuestProgress(character, RED_DOOR_INVESTIGATION_QUEST_ID).progress, 0);
+  assert.equal(getQuestProgress(character, RED_DOOR_INVESTIGATION_QUEST_ID).progress, 1);
+});
+
+test("quest 007 rescues an already-active legacy quest after the B9 boss was defeated", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.quests.completedQuestIds.push(QUEST_ID, SLIME_EXTERMINATION_QUEST_ID, FLOOR_SURVEY_QUEST_ID);
+  character = acceptQuest(character, RED_DOOR_INVESTIGATION_QUEST_ID).character;
+  character.eventFlags.boss_strange_knight_statue_b9f_defeated = true;
+  assert.equal(getQuestProgress(character, RED_DOOR_INVESTIGATION_QUEST_ID).readyToReport, true);
+  assert.equal(reportQuest(character, RED_DOOR_INVESTIGATION_QUEST_ID).accepted, true);
 });

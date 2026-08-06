@@ -12,7 +12,7 @@ import {
   hasActiveQuest,
   isQuestAvailable
 } from "../data/quests.js";
-import { getItem, getShopItemIdsForDepth } from "../data/items.js?v=20260806-01";
+import { getItem, getShopItemIdsForCharacter } from "../data/items.js?v=20260807-04";
 import { WEAPONS } from "../data/weapons.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName } from "../data/equipment-inventory.js";
 import { getShopEquipmentIdsForDepth } from "../data/shop-stock.js";
@@ -1183,7 +1183,7 @@ function openCommerce(kind) {
       ? Object.keys(town.getCharacter()?.inventory?.counts || {}).filter(id => getItem(id)?.sellPrice > 0)
       : kind === "buyEquipment"
         ? getShopEquipmentIdsForDepth(town.getCharacter()?.highestDungeonDepthReached)
-        : getShopItemIdsForDepth(town.getCharacter()?.highestDungeonDepthReached);
+        : getShopItemIdsForCharacter(town.getCharacter());
   town.mode = "commerce";
   town.commerceKind = kind;
   town.commerceItems = kind === "buybackEquipment"

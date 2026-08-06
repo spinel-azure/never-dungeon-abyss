@@ -119,6 +119,16 @@ export function getShopItemIdsForDepth(depth = 1) {
   ];
 }
 
+export function getShopItemIdsForCharacter(character) {
+  const flags = character?.eventFlags || {};
+  return [
+    "healing_potion",
+    ...(flags.transfer_portal_b10f_unlocked ? ["healing_potion_medium"] : []),
+    ...(flags.shop_stock_b20f_unlocked ? ["healing_potion_large"] : []),
+    ...BASE_SHOP_ITEM_IDS.slice(1)
+  ];
+}
+
 const ITEMS_BY_ID = Object.freeze(Object.fromEntries(ITEMS.map(item => [item.id, item])));
 
 export function getItem(id) {

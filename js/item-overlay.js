@@ -25,7 +25,9 @@ export function openItemOverlay({ context = "dungeon", character, enemy = null, 
   overlay.enemy = enemy;
   overlay.torchFuel = torchFuel;
   overlay.treasureCompassActive = Boolean(treasureCompassActive);
-  overlay.items = ITEMS.filter(item => getItemCount(character.inventory, item.id) > 0);
+  overlay.items = ITEMS.filter(item =>
+    getItemCount(character.inventory, item.id) > 0 && item.usableIn?.includes(context)
+  );
   overlay.selectedIndex = 0;
   overlay.onUse = onUse || overlay.onUse;
   overlay.onClose = onClose || (() => {});

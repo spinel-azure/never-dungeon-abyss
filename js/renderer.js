@@ -615,6 +615,8 @@ export function drawCellEvents(layer = "all") {
       const projected = projectCellCenter(x, y);
       if (!projected) continue;
       if (!hasLineOfSightToCell(x, y)) continue;
+      const hasSprite = Boolean(cell.bossId || cell.bossRemainsId || cell.npc || cell.fountain || cell.treasure);
+      if (hasSprite && !projectCellFootprint(x, y, projected.forward, true)) continue;
       if (cell.type === "stairsUp" || cell.type === "stairsDown") {
         if (layer === "sprite") continue;
         events.push({
@@ -694,7 +696,7 @@ function projectCellCenter(cellX, cellY) {
   return projectWorldPoint(cellX + .5, cellY + .5);
 }
 
-function projectCellFootprint(cellX, cellY, forward) {
+function projectCellFootprint(cellX, cellY, forward, requireFullVisibility = false) {
   const visibilityInset = .18;
   const projectionInset = .03;
   const visibilitySamples = [
@@ -704,7 +706,7 @@ function projectCellFootprint(cellX, cellY, forward) {
     { x: cellX + visibilityInset, y: cellY + 1 - visibilityInset }
   ];
   if (
-    forward > 1.35 &&
+    (requireFullVisibility || forward > 1.35) &&
     visibilitySamples.some(sample => !hasLineOfSightToPoint(sample.x, sample.y, cellX, cellY))
   ) {
     return null;

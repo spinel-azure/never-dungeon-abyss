@@ -41,7 +41,7 @@ import {
   startFloorLapNotice,
   setNpcTypewriterOptions
 } from "./player.js";
-import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setMistOptions, setWallColor, setFloorColor } from "./renderer.js";
+import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setMistOptions, setWallColor, setFloorColor } from "./renderer.js?v=20260807-04";
 import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minimap.js";
 import { configureInput } from "./input.js";
 import { configureVirtualStick } from "./virtualStick.js";
@@ -82,7 +82,7 @@ import {
 import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
 import { EffectEngine } from "./effects/effect-engine.js";
 import { hasUncertainLoot } from "./loot-identification.js";
-import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js?v=20260806-05";
+import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js?v=20260807-04";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js?v=20260806-02";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName, grantEquipmentInstance } from "../data/equipment-inventory.js";
@@ -104,7 +104,7 @@ import { getNonlethalPoisonDamage } from "../combat/status-lifecycle.js";
 import { getNextLevelExperience, MAX_LEVEL } from "../data/growth.js";
 import { resolveFieldSkill } from "../combat/resolve-field-skill.js";
 import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from "./skill-overlay.js";
-import { configureItemOverlay, openItemOverlay, handleItemOverlayInput } from "./item-overlay.js";
+import { configureItemOverlay, openItemOverlay, handleItemOverlayInput } from "./item-overlay.js?v=20260807-04";
 import { resolveFieldItemUse } from "../combat/resolve-item-use.js?v=20260806-01";
 import { grantCard } from "../data/deck.js";
 import { collectCardStatBonuses, getCardById, hasCardEffect } from "../data/cards.js";
@@ -2020,6 +2020,12 @@ import {
         eventFlags: { ...(character.eventFlags || {}), transfer_portal_b10f_unlocked: true }
       };
       setTransferUnlocked(true);
+    }
+    if (currentDepth === 20 && character) {
+      character = {
+        ...character,
+        eventFlags: { ...(character.eventFlags || {}), shop_stock_b20f_unlocked: true }
+      };
     }
     startBgm(selectDungeonBgm());
     setDungeonColors(resolveFloorTheme(currentDepth, getDungeonColors()));

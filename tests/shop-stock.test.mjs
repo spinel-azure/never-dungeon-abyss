@@ -11,6 +11,8 @@ import {
 function characterAt(depth) {
   const character = createInitialCharacter({ name: "TEST", job: "warrior" });
   character.highestDungeonDepthReached = depth;
+  if (depth >= 10) character.eventFlags.transfer_portal_b10f_unlocked = true;
+  if (depth >= 20) character.eventFlags.shop_stock_b20f_unlocked = true;
   return character;
 }
 

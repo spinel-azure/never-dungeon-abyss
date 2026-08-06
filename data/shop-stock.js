@@ -1,4 +1,4 @@
-import { getItem, getShopItemIdsForDepth } from "./items.js";
+import { getItem, getShopItemIdsForCharacter } from "./items.js";
 import { WEAPONS } from "./weapons.js";
 
 export const SHOP_BASELINE_DEPTH = 1;
@@ -15,7 +15,7 @@ export function getShopStockState(character) {
   const eventFlags = character?.eventFlags || {};
   const categoryDepths = {
     equipment: latestUnlockDepth(getShopEquipmentIdsForDepth(reached).map(id => WEAPONS[id])),
-    items: latestUnlockDepth(getShopItemIdsForDepth(reached).map(getItem))
+    items: latestUnlockDepth(getShopItemIdsForCharacter(character).map(getItem))
   };
   const seen = eventFlags.shopStockSeenCategories || {};
   const newCategories = Object.fromEntries(Object.entries(categoryDepths).map(([category, depth]) => [

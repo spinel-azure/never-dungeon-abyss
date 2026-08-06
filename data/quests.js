@@ -180,6 +180,7 @@ export const QUESTS = Object.freeze([
       "何があるか分からない。十分に注意しろ。"
     ]),
     persistentProgressFlag: "quest_007_strange_statue_defeated_while_active",
+    completedTargetFlag: "boss_strange_knight_statue_b9f_defeated",
     available: true
   })
 ]);
@@ -211,7 +212,12 @@ export function normalizeQuestState(candidate) {
 export function getQuestProgress(character, questId) {
   const quest = getQuestById(questId);
   const state = normalizeQuestState(character?.quests);
-  const progress = Math.max(0, Math.floor(Number(state.active[questId]?.progress) || 0));
+  const savedProgress = Math.max(0, Math.floor(Number(state.active[questId]?.progress) || 0));
+  const targetAlreadyCompleted = Boolean(
+    state.active[questId] && quest?.completedTargetFlag
+    && character?.eventFlags?.[quest.completedTargetFlag]
+  );
+  const progress = targetAlreadyCompleted ? quest.requiredCount : savedProgress;
   return {
     quest,
     active: Boolean(state.active[questId]),
@@ -244,8 +250,11 @@ export function acceptQuest(character, questId) {
     return result(character, false, "activeLimit");
   }
   const persistentProgressFlag = quest.persistentProgressFlag || quest.customProgressFlag;
+  const targetAlreadyCompleted = Boolean(
+    quest.completedTargetFlag && character?.eventFlags?.[quest.completedTargetFlag]
+  );
   quests.active[quest.id] = {
-    progress: persistentProgressFlag && character?.eventFlags?.[persistentProgressFlag]
+    progress: targetAlreadyCompleted || (persistentProgressFlag && character?.eventFlags?.[persistentProgressFlag])
       ? quest.requiredCount : 0
   };
   return result({ ...character, quests }, true);
