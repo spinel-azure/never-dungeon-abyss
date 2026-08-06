@@ -15,6 +15,8 @@ import {
   openDoorOnCell,
   getDoorState,
   getDoorKind,
+  getSpecialRoomLockInfo,
+  attemptSpecialRoomUnlock,
   markBossDefeatedAt,
   setStartPosition,
   randomizeStartPosition
@@ -303,6 +305,8 @@ import {
     resolveTreasureTrap: resolveCurrentTreasureTrap,
     awardTreasure: awardTreasureLoot,
     unlockBossDoor: unlockB9BossDoor,
+    getSpecialDoorLockInfo: getCurrentSpecialDoorLockInfo,
+    attemptSpecialDoorUnlock: attemptCurrentSpecialDoorUnlock,
     restAtFountain: restAtHealingFountain,
     returnToTown,
     beginBattle: beginRandomBattle,
@@ -459,6 +463,9 @@ import {
         if (savedCell.treasure && currentDepth <= 4) savedCell.treasure = "red";
         if (currentDepth > 4 && !savedCell.eventTreasureId) savedCell.treasure = null;
         Object.assign(cells[y][x], savedCell);
+        cells[y][x].specialRoom = savedCell.specialRoom || null;
+        cells[y][x].featureReservation = savedCell.featureReservation || null;
+        cells[y][x].featureApproach = savedCell.featureApproach || null;
         cells[y][x].treasureTrapId = savedCell.treasureTrapId || null;
         explored[y][x] = Boolean(dungeon.explored[y][x]);
       }
@@ -1907,6 +1914,26 @@ import {
       redDoorUnlocked: Boolean(character?.eventFlags?.red_door_b9f_unlocked),
       hasRedKey: hasKeyItem(character?.keyItems, "red_rust_key_b9f")
     };
+  }
+
+  function getCurrentSpecialDoorLockInfo({ x, y, dirKey } = {}) {
+    return getSpecialRoomLockInfo({
+      x,
+      y,
+      dirKey,
+      dex: collectStats(character).dex
+    });
+  }
+
+  function attemptCurrentSpecialDoorUnlock({ x, y, dirKey } = {}) {
+    const result = attemptSpecialRoomUnlock({
+      x,
+      y,
+      dirKey,
+      dex: collectStats(character).dex
+    });
+    scheduleAutosave();
+    return result;
   }
 
   function unlockB9BossDoor() {

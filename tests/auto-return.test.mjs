@@ -30,9 +30,11 @@ test("auto return routes through an explored normal closed door", () => {
   assert.deepEqual(findExploredPathToStart(), ["W"]);
 });
 
-test("auto return does not route through locked or boss doors", () => {
+test("auto return does not route through locked, boss, or special-room doors", () => {
   prepareTwoCellRoute("locked");
   assert.deepEqual(findExploredPathToStart(), []);
   prepareTwoCellRoute("boss");
+  assert.deepEqual(findExploredPathToStart(), []);
+  prepareTwoCellRoute("specialLocked");
   assert.deepEqual(findExploredPathToStart(), []);
 });

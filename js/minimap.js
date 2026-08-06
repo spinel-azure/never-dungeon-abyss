@@ -199,7 +199,15 @@ export function drawDoorMark(ctx, x1, y1, x2, y2, state, cellSize, kind = "norma
   const length = Math.max(4, cellSize * .46);
   const half = length / 2;
   const horizontal = Math.abs(dx) > Math.abs(dy);
-  const color = String(kind).startsWith("boss") ? "#ff3f3f" : state === "locked" ? "#c78dff" : state === "open" ? "#dfc18a" : "#f0b35a";
+  const color = String(kind).startsWith("boss")
+    ? "#ff3f3f"
+    : String(kind).startsWith("special")
+      ? "#713a8a"
+      : state === "locked"
+        ? "#c78dff"
+        : state === "open"
+          ? "#dfc18a"
+          : "#f0b35a";
   ctx.save();
 
   ctx.strokeStyle = "#151d19";

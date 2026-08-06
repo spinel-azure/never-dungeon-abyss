@@ -121,7 +121,9 @@ export function configureRenderer(options) {
     normal: makeDoorTexture("normal"),
     boss: makeDoorTexture("boss"),
     bossUnlocked: makeDoorTexture("boss"),
-    locked: makeDoorTexture("locked")
+    locked: makeDoorTexture("locked"),
+    specialLocked: makeDoorTexture("special"),
+    specialUnlocked: makeDoorTexture("special")
   };
   npcs.forEach(npc => loadCharacterImage(npc.imageId, npc.image));
   Object.values(BOSSES).forEach(boss => {
@@ -1050,7 +1052,8 @@ export function makeDoorTexture(kind = "normal") {
   const palette = {
     normal: { dark: "#3b2416", mid: "#7a4a28", deep: "#2f1c12", frame: "#cda14d" },
     boss: { dark: "#4b0909", mid: "#b32626", deep: "#310505", frame: "#f2c94c" },
-    locked: { dark: "#050505", mid: "#292929", deep: "#010101", frame: "#9b9b9b" }
+    locked: { dark: "#050505", mid: "#292929", deep: "#010101", frame: "#9b9b9b" },
+    special: { dark: "#050306", mid: "#211226", deep: "#010102", frame: "#6f3d82" }
   }[kind] || { dark: "#3b2416", mid: "#7a4a28", deep: "#2f1c12", frame: "#cda14d" };
   const grad = c.createLinearGradient(0, 0, tex.width, 0);
   grad.addColorStop(0, palette.dark);

@@ -26,7 +26,8 @@ import {
   getTreasureTrapAt,
   getTreasureEventAt,
   removeTreasureAt,
-  discoverTreasureAt
+  discoverTreasureAt,
+  getSpecialRoomEntryAt
 } from "./dungeon.js";
 import { getNpcEncounter } from "../data/npcs.js";
 import { HEALING_FOUNTAIN } from "../data/fountains.js";
@@ -49,6 +50,8 @@ const hooks = {
   resolveTreasureTrap: () => ({ message: "" }),
   awardTreasure: () => ({ message: "中には何も入っていなかった！" }),
   unlockBossDoor: () => ({ accepted: false, message: "鍵がかかっている。" }),
+  getSpecialDoorLockInfo: () => null,
+  attemptSpecialDoorUnlock: () => ({ accepted: false }),
   beginBossBattle: () => false,
   beginMimicBattle: () => false,
   restAtFountain: () => Promise.resolve(false),
@@ -210,7 +213,9 @@ export function updateAnimation(now) {
       updateNpcAwareness();
     } else if (a.type === "door") {
       openDoor(a.x, a.y, a.dirKey);
-      hooks.say("扉が　ひらいた。");
+      hooks.say(getDoorKind(a.x, a.y, a.dirKey) === "specialUnlocked"
+        ? "解錠に成功した！\n黒い扉が　ひらいた。"
+        : "扉が　ひらいた。");
       updateNpcAwareness();
     }
     state.anim = null;
@@ -219,7 +224,7 @@ export function updateAnimation(now) {
   }
 }
 
-export function tryMove(amount, automated = false) {
+export function tryMove(amount, automated = false, specialEntryConfirmed = false) {
   if (!playerInputEnabled) return;
   if (state.anim) return;
   if (!automated) hooks.cancelAutoReturn(false);
@@ -230,6 +235,8 @@ export function tryMove(amount, automated = false) {
     const doorKind = getDoorKind(state.gridX, state.gridY, currentDir.key);
     if (doorKind === "boss") {
       hooks.say("＊ボス部屋用扉（未実装）Aボタンで開く");
+    } else if (doorKind === "specialLocked") {
+      startSpecialDoorLockEvent(state.gridX, state.gridY, currentDir.key);
     } else if (doorKind === "locked") {
       hooks.say("＊施錠扉（未実装）Aボタンで開く");
     } else {
@@ -249,6 +256,19 @@ export function tryMove(amount, automated = false) {
     hooks.playSe("blocked");
     state.shake = amount > 0 ? -7 : 5;
     hooks.say("外周の向こうは闇に閉ざされている。");
+    return;
+  }
+  const specialRoomEntry = openDoorOnCell(state.gridX, state.gridY, currentDir.key)
+    ? getSpecialRoomEntryAt(state.gridX, state.gridY, currentDir.key)
+    : null;
+  if (amount > 0 && specialRoomEntry?.dangerWarning && !specialEntryConfirmed) {
+    startOverlayEvent({
+      type: "specialRoomWarning",
+      showOverlay: false,
+      moveAmount: amount,
+      canCancel: true,
+      message: "扉の向こうから、身の毛もよだつような気配を感じる。\nそれでも中へ入りますか？\n＊Aボタン：入る　Bボタン：立ち去る"
+    });
     return;
   }
   state.stairsPromptDismissed = false;
@@ -315,7 +335,12 @@ export function openDoorAhead(automated = false) {
   if (state.overlayEvent || state.anim || (state.autoReturning && !automated)) return false;
   const dir = DIRS[state.dir];
   if (!closedDoorOnCell(state.gridX, state.gridY, dir.key)) return false;
-  if (getDoorKind(state.gridX, state.gridY, dir.key) === "boss") {
+  const doorKind = getDoorKind(state.gridX, state.gridY, dir.key);
+  if (doorKind === "specialLocked") {
+    startSpecialDoorLockEvent(state.gridX, state.gridY, dir.key);
+    return true;
+  }
+  if (doorKind === "boss") {
     const result = hooks.unlockBossDoor({ x: state.gridX, y: state.gridY, dirKey: dir.key }) || {};
     if (!result.accepted) {
       hooks.playSe("blocked");
@@ -325,17 +350,75 @@ export function openDoorAhead(automated = false) {
     setDoor(state.gridX, state.gridY, dir.key, "closed", "bossUnlocked");
     hooks.say(result.message || "赤錆びた鍵を使った。赤い扉の鍵が開いた。");
   }
+  startDoorOpening(state.gridX, state.gridY, dir.key);
+  return true;
+}
+
+function startDoorOpening(x, y, dirKey, message = "ギィ……") {
   state.anim = {
     type: "door",
     start: performance.now(),
     duration: DOOR_OPEN_MS,
-    x: state.gridX,
-    y: state.gridY,
-    dirKey: dir.key
+    x,
+    y,
+    dirKey
   };
   hooks.playSe("door");
-  hooks.say("ギィ……");
-  return true;
+  hooks.say(message);
+}
+
+function startSpecialDoorLockEvent(x, y, dirKey) {
+  const info = hooks.getSpecialDoorLockInfo({ x, y, dirKey }) || {};
+  startOverlayEvent({
+    type: "specialDoorLock",
+    showOverlay: false,
+    x,
+    y,
+    dirKey,
+    canCancel: true,
+    message: specialDoorPrompt(info)
+  });
+}
+
+function specialDoorPrompt(info, failed = false) {
+  const remaining = Math.max(0, Math.floor(Number(info?.remaining) || 0));
+  if (remaining <= 0) {
+    return "解錠に失敗した。\nこの探索中は、もう解錠を試みられない。\n＊Bボタン：立ち去る";
+  }
+  const rate = Math.max(0, Math.min(100, Math.round((Number(info?.rate) || 0) * 100)));
+  return failed
+    ? `解錠に失敗した。黒い扉はまだ開かない。\n再び解錠を試みますか？（成功率：${rate}％　残り${remaining}回）\n＊Aボタン：挑戦　Bボタン：立ち去る`
+    : `黒い扉には複雑な錠前が掛けられている。\n解錠を試みますか？（成功率：${rate}％　残り${remaining}回）\n＊Aボタン：挑戦　Bボタン：立ち去る`;
+}
+
+function confirmSpecialDoorLockEvent() {
+  const event = state.overlayEvent;
+  if (!event || event.type !== "specialDoorLock") return;
+  const result = hooks.attemptSpecialDoorUnlock({ x: event.x, y: event.y, dirKey: event.dirKey }) || {};
+  if (!result.accepted) {
+    event.canCancel = true;
+    hooks.say(specialDoorPrompt(result, true));
+    return;
+  }
+  if (result.unlocked) {
+    state.overlayEvent = null;
+    startDoorOpening(event.x, event.y, event.dirKey, "解錠に成功した！\nギィ……");
+    hooks.onStateChanged();
+    return;
+  }
+  event.canCancel = true;
+  event.message = specialDoorPrompt(result, true);
+  hooks.playSe("blocked");
+  hooks.say(event.message);
+  hooks.onStateChanged();
+}
+
+function confirmSpecialRoomWarningEvent() {
+  const event = state.overlayEvent;
+  if (!event || event.type !== "specialRoomWarning") return;
+  state.overlayEvent = null;
+  hooks.say("");
+  tryMove(event.moveAmount, false, true);
 }
 
 export function handleOverlayEventInput(action) {
@@ -357,6 +440,8 @@ export function handleOverlayEventInput(action) {
     else if (state.overlayEvent.type === "fountain") confirmFountainEvent();
     else if (state.overlayEvent.type === "stairsPrompt") confirmStairsPrompt();
     else if (state.overlayEvent.type === "treasure") confirmTreasureEvent();
+    else if (state.overlayEvent.type === "specialDoorLock") confirmSpecialDoorLockEvent();
+    else if (state.overlayEvent.type === "specialRoomWarning") confirmSpecialRoomWarningEvent();
     return true;
   }
   return false;

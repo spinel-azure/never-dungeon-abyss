@@ -127,7 +127,7 @@ export function findExploredPathToStart() {
       if (!explored[ny][nx]) continue;
       const doorState = getDoorState(cur.x, cur.y, dir.key);
       const doorKind = getDoorKind(cur.x, cur.y, dir.key);
-      if (doorState && (doorKind === "locked" || doorKind === "boss")) continue;
+      if (doorState && (doorKind === "locked" || doorKind === "boss" || doorKind === "specialLocked")) continue;
       if (!doorState && wallOnCell(cur.x, cur.y, dir.key)) continue;
       if (prev.has(key)) continue;
       prev.set(key, { x: cur.x, y: cur.y, dir: dir.key });
