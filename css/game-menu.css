@@ -39,8 +39,8 @@ body.layout-pc #forward,body.layout-pc #left,body.layout-pc #back,body.layout-pc
 body.layout-pc #autoReturn,body.layout-pc #randomGenerate{display:block;grid-row:1;grid-column:auto;font-size:14px}
 body.layout-pc .virtual-stick{display:grid;grid-column:1;grid-row:2}
 body.layout-pc .action-buttons{grid-column:3;grid-row:2}
-body.layout-pc .message,body.layout-tablet .message{height:calc(1.35em * 2 + 18px);min-height:calc(1.35em * 2 + 18px)}
-body.layout-mobile .message{height:calc(1.35em * 3 + 16px);min-height:calc(1.35em * 3 + 16px)}
+body.layout-pc .message{height:calc(1.35em * 3 + 18px);min-height:calc(1.35em * 3 + 18px)}
+body.layout-tablet .message,body.layout-mobile .message{height:calc(1.35em * 3 + 16px);min-height:calc(1.35em * 3 + 16px)}
 body.layout-mobile .dungeon-commands button{font-size:16px}
 .nde-equipment span,.nde-condition span{font-size:14px}.nde-experience{display:flex;justify-content:space-around;gap:12px;font-size:16px}.option-with-description{display:block}.option-with-description .option-heading{display:flex;justify-content:space-between;align-items:center;font:inherit}.option-with-description .option-heading b{font:400 .82em "PixelFont",monospace}.option-with-description small{display:block;margin-top:8px;color:#b7d8df;font:14px/1.45 "GameFont",sans-serif;white-space:normal}.debug-list{margin-top:12px}.debug-panel .debug-back{position:absolute;left:22px;bottom:18px}.debug-panel .option-item{font-size:clamp(17px,4.2vw,23px)}
 .nde-experience{display:block;white-space:nowrap;text-align:center}.nde-gold{text-align:center;color:#5bd1ff;font:14px "GameFont",sans-serif}.nde-gold strong{color:#fff;font-weight:400}
