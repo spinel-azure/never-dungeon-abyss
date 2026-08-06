@@ -1,9 +1,10 @@
 export const SPECIAL_ROOM_UNLOCK_CURVES = Object.freeze({
   standard: Object.freeze([
-    Object.freeze([0, 0.05]),
-    Object.freeze([10, 0.3]),
-    Object.freeze([20, 0.6]),
-    Object.freeze([30, 0.9])
+    Object.freeze([0, 0.25]),
+    Object.freeze([5, 0.45]),
+    Object.freeze([10, 0.65]),
+    Object.freeze([20, 0.85]),
+    Object.freeze([30, 1])
   ]),
   elite: Object.freeze([
     Object.freeze([0, 0.01]),
@@ -20,7 +21,7 @@ export const DEFAULT_SPECIAL_ROOM_LOCK = Object.freeze({
   mode: "dexCurve",
   curveId: "standard",
   attempts: 3,
-  retryMultipliers: Object.freeze([1, 0.65, 0.35])
+  retryMultipliers: Object.freeze([1, 0.8, 0.6])
 });
 
 // Add only differences here when a floor receives an event, treasure or boss.

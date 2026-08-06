@@ -78,17 +78,26 @@ test("special-room lock gets three attempts with a lower rate after each failure
   const edge = findSpecialDoorEdge();
   const first = getSpecialRoomLockInfo({ ...edge, dex: 10 });
   assert.equal(first.remaining, 3);
-  assert.equal(first.rate, 0.3);
+  assert.equal(first.rate, 0.65);
   const failedOnce = attemptSpecialRoomUnlock({ ...edge, dex: 10, rng: () => 0.999 });
   assert.equal(failedOnce.unlocked, false);
   assert.equal(failedOnce.remaining, 2);
-  assert.equal(failedOnce.rate, 0.195);
+  assert.equal(failedOnce.rate, 0.52);
   const failedTwice = attemptSpecialRoomUnlock({ ...edge, dex: 10, rng: () => 0.999 });
   assert.equal(failedTwice.remaining, 1);
-  assert.equal(failedTwice.rate, 0.105);
+  assert.equal(failedTwice.rate, 0.39);
   const failedThird = attemptSpecialRoomUnlock({ ...edge, dex: 10, rng: () => 0.999 });
   assert.equal(failedThird.remaining, 0);
   assert.equal(attemptSpecialRoomUnlock({ ...edge, dex: 30, rng: () => 0 }).accepted, false);
+});
+
+test("standard black doors remain accessible to low-DEX jobs", () => {
+  const room = getSpecialRoomDefinition(2);
+  assert.equal(getSpecialRoomUnlockRate(room.lock, 0, 0), 0.25);
+  assert.equal(getSpecialRoomUnlockRate(room.lock, 5, 0), 0.45);
+  assert.ok(Math.abs(getSpecialRoomUnlockRate(room.lock, 9, 0) - 0.61) < 1e-9);
+  assert.equal(getSpecialRoomUnlockRate(room.lock, 10, 0), 0.65);
+  assert.equal(getSpecialRoomUnlockRate(room.lock, 30, 0), 1);
 });
 
 test("special-room lock supports elite, fixed and guaranteed difficulty modes", () => {
