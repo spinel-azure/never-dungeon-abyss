@@ -10,6 +10,7 @@ import {
   SLIME_EXTERMINATION_QUEST_ID,
   WANDERING_DEAD_EXTERMINATION_QUEST_ID,
   BLACK_BOX_INVESTIGATION_QUEST_ID,
+  RED_DOOR_INVESTIGATION_QUEST_ID,
   abandonQuest,
   acceptQuest,
   getQuestById,
@@ -19,6 +20,7 @@ import {
   normalizeQuestState,
   recordFloorExploration,
   recordEnemyDefeat,
+  recordBossDefeat,
   recordCustomQuestProgress,
   reportQuest,
   shouldForceEnemy
@@ -312,4 +314,29 @@ test("quest 006 unlocks after quest 005 and rewards First Aid once", () => {
   assert.equal(report.bonusGold, 400);
   assert.equal(report.character.eventFlags.black_chests_unlocked, true);
   assert.equal(getOwnedCardCount(report.character.cards, "common_first_aid"), 1);
+});
+
+test("quest 007 requires the B9 boss and restores progress after abandonment", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.quests.completedQuestIds.push(QUEST_ID, SLIME_EXTERMINATION_QUEST_ID, FLOOR_SURVEY_QUEST_ID);
+  character = acceptQuest(character, RED_DOOR_INVESTIGATION_QUEST_ID).character;
+  character = recordBossDefeat(character, "strange_knight_statue_b9f", 9);
+  assert.equal(getQuestProgress(character, RED_DOOR_INVESTIGATION_QUEST_ID).readyToReport, true);
+  character = abandonQuest(character, RED_DOOR_INVESTIGATION_QUEST_ID).character;
+  character = acceptQuest(character, RED_DOOR_INVESTIGATION_QUEST_ID).character;
+  assert.equal(getQuestProgress(character, RED_DOOR_INVESTIGATION_QUEST_ID).readyToReport, true);
+
+  const report = reportQuest(character, RED_DOOR_INVESTIGATION_QUEST_ID);
+  assert.equal(report.rewardCardId, "sr_ability_boost");
+  assert.equal(report.bonusGold, 600);
+  assert.equal(getOwnedCardCount(report.character.cards, "sr_ability_boost"), 1);
+  assert.equal(reportQuest(report.character, RED_DOOR_INVESTIGATION_QUEST_ID).accepted, false);
+});
+
+test("quest 007 does not count a boss defeated before it was accepted", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.quests.completedQuestIds.push(QUEST_ID, SLIME_EXTERMINATION_QUEST_ID, FLOOR_SURVEY_QUEST_ID);
+  character = recordBossDefeat(character, "strange_knight_statue_b9f", 9);
+  character = acceptQuest(character, RED_DOOR_INVESTIGATION_QUEST_ID).character;
+  assert.equal(getQuestProgress(character, RED_DOOR_INVESTIGATION_QUEST_ID).progress, 0);
 });

@@ -12,6 +12,7 @@ import { drawGoddessSilhouetteIcon } from "./icons/goddess-silhouette.js";
 import { drawAlertnessIcon } from "./icons/alertness.js";
 import { drawDexterityIcon } from "./icons/dexterity.js";
 import { drawBandageIcon } from "./icons/bandage.js";
+import { drawPowerPoseIcon } from "./icons/power-pose.js";
 
 const iconDrawers = new Map([
   ["strength", drawStrengthIcon],
@@ -27,6 +28,7 @@ const iconDrawers = new Map([
   ["alertness", drawAlertnessIcon],
   ["dexterity", drawDexterityIcon],
   ["bandage", drawBandageIcon],
+  ["power-pose", drawPowerPoseIcon],
   ["unknown", drawUnknownIcon],
 ]);
 

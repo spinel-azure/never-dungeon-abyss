@@ -7,6 +7,7 @@ export const FLOOR_SURVEY_QUEST_ID = "guild_003_b1f_survey";
 export const RABBIT_EXTERMINATION_QUEST_ID = "guild_004_abyss_rabbit";
 export const WANDERING_DEAD_EXTERMINATION_QUEST_ID = "guild_005";
 export const BLACK_BOX_INVESTIGATION_QUEST_ID = "guild_006";
+export const RED_DOOR_INVESTIGATION_QUEST_ID = "guild_007";
 export const B2F_UNLOCK_QUEST_IDS = Object.freeze([
   GUILD_TRIAL_QUEST_ID,
   SLIME_EXTERMINATION_QUEST_ID,
@@ -155,6 +156,31 @@ export const QUESTS = Object.freeze([
     customProgressFlag: "boss_quest_mimic_b6f_defeated",
     reportUnlockFlag: "black_chests_unlocked",
     available: true
+  }),
+  Object.freeze({
+    id: RED_DOOR_INVESTIGATION_QUEST_ID,
+    number: "007",
+    title: "赤い扉の調査",
+    client: "ギルドマスター",
+    category: "other",
+    objectiveType: "defeatBoss",
+    targetId: "strange_knight_statue_b9f",
+    targetName: "奇妙な彫像",
+    targetDepth: 9,
+    requiredCount: 1,
+    objectiveLabel: "赤い扉を開けて中を調査する",
+    reward: Object.freeze({
+      type: "card", label: "デッキカード", amount: 1,
+      cardId: "sr_ability_boost", bonusGold: 600
+    }),
+    descriptionLabel: "内容",
+    description: Object.freeze([
+      "奈落のB9Fに開かずの赤い扉がある。",
+      "扉を開けて、中がどうなっているのか調査してほしい。",
+      "何があるか分からない。十分に注意しろ。"
+    ]),
+    persistentProgressFlag: "quest_007_strange_statue_defeated_while_active",
+    available: true
   })
 ]);
 
@@ -217,8 +243,9 @@ export function acceptQuest(character, questId) {
   if (Object.keys(quests.active).length >= MAX_ACTIVE_QUESTS) {
     return result(character, false, "activeLimit");
   }
+  const persistentProgressFlag = quest.persistentProgressFlag || quest.customProgressFlag;
   quests.active[quest.id] = {
-    progress: quest.customProgressFlag && character?.eventFlags?.[quest.customProgressFlag]
+    progress: persistentProgressFlag && character?.eventFlags?.[persistentProgressFlag]
       ? quest.requiredCount : 0
   };
   return result({ ...character, quests }, true);
@@ -243,6 +270,26 @@ export function recordEnemyDefeat(character, enemyId, depth = null) {
     updated = true;
   });
   return updated ? { ...character, quests } : character;
+}
+
+export function recordBossDefeat(character, bossId, depth = null) {
+  const quests = normalizeQuestState(character?.quests);
+  let eventFlags = character?.eventFlags || {};
+  let updated = false;
+  Object.entries(quests.active).forEach(([questId, entry]) => {
+    const quest = getQuestById(questId);
+    if (quest?.objectiveType !== "defeatBoss" || quest.targetId !== bossId) return;
+    if (depth != null && quest.targetDepth != null && Number(depth) !== Number(quest.targetDepth)) return;
+    if (entry.progress < quest.requiredCount) {
+      entry.progress = quest.requiredCount;
+      updated = true;
+    }
+    if (quest.persistentProgressFlag && !eventFlags[quest.persistentProgressFlag]) {
+      eventFlags = { ...eventFlags, [quest.persistentProgressFlag]: true };
+      updated = true;
+    }
+  });
+  return updated ? { ...character, quests, eventFlags } : character;
 }
 
 export function recordFloorExploration(character, { depth, explored } = {}) {

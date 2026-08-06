@@ -956,6 +956,30 @@ test("main card registry contains every rarity and all twelve zodiac cards", () 
   assert.equal(getCardById("zodiac_aries")?.cost, 8);
 });
 
+test("Ability Boost is a six-copy SR card that raises all five abilities", () => {
+  const card = getCardById("sr_ability_boost");
+  assert.equal(card.rarity, "SR");
+  assert.equal(card.cost, 4);
+  assert.equal(card.maxOwned, 99);
+  assert.equal(card.maxCopies, 6);
+  assert.deepEqual(card.statBonus, { str: 2, int: 2, agi: 2, dex: 2, luc: 2 });
+  assert.deepEqual(collectCardStatBonuses(Array(6).fill("sr_ability_boost")), {
+    str: 12, int: 12, agi: 12, dex: 12, luc: 12
+  });
+});
+
+test("Ability Boost is a six-copy SR card that raises all five abilities", () => {
+  const card = getCardById("sr_ability_boost");
+  assert.equal(card.rarity, "SR");
+  assert.equal(card.cost, 4);
+  assert.equal(card.maxOwned, 99);
+  assert.equal(card.maxCopies, 6);
+  assert.deepEqual(card.statBonus, { str: 2, int: 2, agi: 2, dex: 2, luc: 2 });
+  assert.deepEqual(collectCardStatBonuses(Array(6).fill("sr_ability_boost")), {
+    str: 12, int: 12, agi: 12, dex: 12, luc: 12
+  });
+});
+
 test("Goddess's Grace is a unique cost-one C card that preserves defeat experience", () => {
   const card = getCardById("common_goddess_grace");
   assert.equal(card.rarity, "C");

@@ -89,6 +89,14 @@ const STANDARD_CARDS = [
     iconId: "vital-heart", maxOwned: 99, maxCopies: 1
   },
   {
+    id: "sr_ability_boost", rarity: "SR", cost: 4,
+    name: "Ability Boost", nameJa: "能力向上", concept: "STR / INT / AGI / DEX / LUC +2",
+    descriptionJa: "STR、INT、AGI、DEX、LUCがそれぞれ2上昇する。",
+    category: "ability", effectId: "all_ability_up", effectValue: 2,
+    statBonus: Object.freeze({ str: 2, int: 2, agi: 2, dex: 2, luc: 2 }),
+    iconId: "power-pose", maxOwned: 99, maxCopies: 6
+  },
+  {
     id: "legendary_unlimited_torch_gauge", rarity: "L", cost: 6,
     name: "UNLIMITED TORCH GAUGE", nameJa: "永久の導き", concept: "たいまつ消費なし",
     category: "exploration", effectId: "unlimited_torch_gauge",

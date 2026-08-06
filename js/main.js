@@ -127,6 +127,7 @@ import {
   hasActiveQuest,
   isDungeonDepthUnlocked,
   recordEnemyDefeat,
+  recordBossDefeat,
   recordCustomQuestProgress,
   recordFloorExploration,
   reportQuest
@@ -1389,6 +1390,7 @@ import {
       const victory = applyBossVictory(character, battle.enemy.id);
       if (victory.accepted) {
         character = victory.character;
+        character = recordBossDefeat(character, battle.enemy.id, currentDepth);
         markBossDefeatedAt(state.gridX, state.gridY, battle.enemy.id);
         if (victory.reward?.type === "card" && victory.reward.cardId) {
           const cardReward = grantCard(
