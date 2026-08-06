@@ -37,12 +37,13 @@ test("inventory respects the per-item ownership limit", () => {
   assert.equal(getItemCount(character.inventory, "healing_potion"), 99);
 });
 
-test("healing potion restores 20 HP and is consumed", () => {
+test("healing potion restores 30 HP and is consumed", () => {
   const character = characterWith("healing_potion");
+  character.maxHp = 60;
   character.hp = 3;
   const result = resolveFieldItemUse({ character, itemId: "healing_potion", context: "dungeon" });
   assert.equal(result.accepted, true);
-  assert.equal(result.character.hp, 23);
+  assert.equal(result.character.hp, 33);
   assert.equal(getItemCount(result.character.inventory, "healing_potion"), 0);
 });
 

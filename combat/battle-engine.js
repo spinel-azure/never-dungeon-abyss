@@ -314,6 +314,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
     battle.log.push(message);
     battle.presentationEvents.push({
       type: "attackHit",
+      actorName: actor.name,
       actorSide,
       targetSide,
       hitIndex: index,

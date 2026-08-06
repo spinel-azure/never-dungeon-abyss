@@ -313,6 +313,7 @@ test("dagger battle round exposes two separate hit presentation events", () => {
   );
   assert.equal(playerHits.length, 2);
   assert.equal(playerHits[0].hitIndex, 0);
+  assert.equal(playerHits[0].actorName, thief.name);
   assert.equal(playerHits[1].hitIndex, 1);
   assert.equal(playerHits[0].hitCount, 2);
   assert.equal(playerHits[1].hitCount, 2);

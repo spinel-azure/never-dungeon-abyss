@@ -2,8 +2,8 @@ export const ITEMS = Object.freeze([
   Object.freeze({
     number: 1, id: "healing_potion", name: "回復薬", category: "recovery",
     buyPrice: 20, sellPrice: 10, source: "shop", usableIn: Object.freeze(["town", "dungeon", "battle"]),
-    effects: Object.freeze([{ id: "heal_hp", value: 20 }]),
-    description: "HPを20回復する。", maxOwned: 99, iconId: "healing-potion", version: 1
+    effects: Object.freeze([{ id: "heal_hp", value: 30 }]),
+    description: "HPを30回復する。", maxOwned: 99, iconId: "healing-potion", version: 1
   }),
   Object.freeze({
     number: 2, id: "antidote", name: "解毒剤", category: "recovery",

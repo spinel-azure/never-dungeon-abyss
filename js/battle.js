@@ -2,7 +2,7 @@ import {
   createBattleState,
   resolveBattleRound,
   resolveEnemyAmbush
-} from "../combat/battle-engine.js?v=20260805-01";
+} from "../combat/battle-engine.js?v=20260806-02";
 import { resolveEscapeAttempt } from "../combat/resolve-escape.js";
 
 const COMMANDS = Object.freeze([
@@ -28,6 +28,7 @@ const battleUi = {
   autoActive: false,
   autoTimer: 0,
   presenting: false,
+  presentationHp: null,
   getCharacter: () => null,
   onCharacterChanged: () => {},
   onVictory: () => {},
@@ -173,6 +174,10 @@ async function useBattleItem(itemId) {
 }
 
 async function executeCommand(command) {
+  const startingHp = {
+    player: battleUi.battle.player.hp,
+    enemy: battleUi.battle.enemy.hp
+  };
   const resolved = resolveBattleRound({
     battle: battleUi.battle,
     playerCommand: command
@@ -189,6 +194,7 @@ async function executeCommand(command) {
   }
   battleUi.battle = resolved.battle;
   battleUi.presenting = battleUi.battle.presentationEvents?.length > 0;
+  battleUi.presentationHp = battleUi.presenting ? startingHp : null;
   battleUi.onCharacterChanged({
     hp: battleUi.battle.player.hp,
     sp: battleUi.battle.player.sp,
@@ -217,14 +223,20 @@ async function executeCommand(command) {
     && battleUi.battle.log.some(line => line.includes("回復"))
   ) battleUi.playSe("heal");
   battleUi.presenting = false;
+  battleUi.presentationHp = null;
   renderBattle();
   if (battleUi.autoActive && !battleUi.battle.outcome) scheduleAutoRound();
 }
 
 async function executeAmbushOpening() {
+  const startingHp = {
+    player: battleUi.battle.player.hp,
+    enemy: battleUi.battle.enemy.hp
+  };
   const resolved = resolveEnemyAmbush({ battle: battleUi.battle });
   battleUi.battle = resolved.battle;
   battleUi.presenting = true;
+  battleUi.presentationHp = startingHp;
   battleUi.onCharacterChanged({
     hp: battleUi.battle.player.hp,
     sp: battleUi.battle.player.sp,
@@ -237,6 +249,7 @@ async function executeAmbushOpening() {
   if (!battleUi.active) return;
   if (battleUi.battle.outcome === "defeat") battleUi.playSe("playerDamage");
   battleUi.presenting = false;
+  battleUi.presentationHp = null;
   renderBattle();
 }
 
@@ -245,7 +258,9 @@ async function playPresentationEvents() {
   const image = battleUi.root.querySelector("#battleEnemyImage");
   for (const event of events) {
     if (!battleUi.active) return;
-    battleUi.messageEl.textContent = event.message;
+    applyPresentationHp(event);
+    renderBattleVitals();
+    battleUi.messageEl.textContent = formatPresentationMessage(event);
     if (event.type === "healing") {
       showBattleNumber(event.targetSide, event.amount, "healing");
       battleUi.playSe("heal");
@@ -266,9 +281,33 @@ async function playPresentationEvents() {
     } else if (event.targetSide === "player" && event.hit) {
       battleUi.playSe("playerDamage");
     }
-    await delay(event.hit ? 320 : 240);
+    const duration = event.targetSide === "player" && event.hit ? 520 : event.hit ? 360 : 280;
+    await delay(duration);
     image.classList.remove("is-hit");
   }
+}
+
+function applyPresentationHp(event) {
+  if (!battleUi.presentationHp || !["player", "enemy"].includes(event.targetSide)) return;
+  const amount = Math.max(0, Math.floor(Number(event.damage ?? event.amount) || 0));
+  if (event.type === "healing") {
+    const maximum = battleUi.battle[event.targetSide]?.maxHp ?? Number.MAX_SAFE_INTEGER;
+    battleUi.presentationHp[event.targetSide] = Math.min(
+      maximum,
+      battleUi.presentationHp[event.targetSide] + amount
+    );
+  } else if (event.hit || event.type === "damage" || event.type === "poisonDamage") {
+    battleUi.presentationHp[event.targetSide] = Math.max(
+      0,
+      battleUi.presentationHp[event.targetSide] - amount
+    );
+  }
+}
+
+function formatPresentationMessage(event) {
+  if (event.type !== "attackHit" || !event.actorName) return event.message;
+  const actorName = battleUi.concealed && event.actorSide === "enemy" ? "？？？？？" : event.actorName;
+  return `${actorName}の攻撃！\n${event.message}`;
 }
 
 function showBattleNumber(targetSide, amount, kind, hitIndex = null, hitCount = 1) {
@@ -340,6 +379,7 @@ function closeBattle() {
   clearAutoTimer();
   battleUi.autoActive = false;
   battleUi.presenting = false;
+  battleUi.presentationHp = null;
   battleUi.active = false;
   battleUi.root.hidden = true;
   document.body.classList.remove("battle-active");
@@ -395,11 +435,10 @@ function renderBattle() {
   if (battle.outcome) hideBattleCommands();
   battleUi.messageEl.classList.remove("is-skill-description");
   setText("battlePlayerName", `${battle.player.name} [${battle.player.jobLabel || battle.player.job}]`);
-  setText("battlePlayerHp", `${battle.player.hp} / ${battle.player.maxHp}`);
+  renderBattleVitals();
   setText("battlePlayerSp", `${battle.player.sp} / ${battle.player.maxSp}`);
   setText("battlePlayerCondition", statusText(battle.player));
   setText("battleEnemyName", battleUi.concealed ? "？？？？？" : battle.enemy.name);
-  setText("battleEnemyHp", `${battle.enemy.hp} / ${battle.enemy.maxHp}`);
   setText("battleEnemyCondition", statusText(battle.enemy));
   const image = battleUi.root.querySelector("#battleEnemyImage");
   image.src = battle.enemy.image || "";
@@ -407,9 +446,18 @@ function renderBattle() {
   const defeated = battle.outcome === "victory" && !battleUi.presenting;
   image.classList.toggle("is-defeated", defeated);
   image.classList.toggle("is-concealed", battleUi.concealed);
-  renderBossHpMeter(battle.enemy);
   battleUi.root.querySelector(".battle-enemy-stage")?.classList.toggle("is-defeated", defeated);
   battleUi.messageEl.textContent = formatBattleMessage(battle);
+}
+
+function renderBattleVitals() {
+  const battle = battleUi.battle;
+  if (!battle) return;
+  const playerHp = battleUi.presentationHp?.player ?? battle.player.hp;
+  const enemyHp = battleUi.presentationHp?.enemy ?? battle.enemy.hp;
+  setText("battlePlayerHp", `${playerHp} / ${battle.player.maxHp}`);
+  setText("battleEnemyHp", `${enemyHp} / ${battle.enemy.maxHp}`);
+  renderBossHpMeter({ ...battle.enemy, hp: enemyHp });
 }
 
 function renderBossHpMeter(enemy) {
