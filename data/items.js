@@ -69,6 +69,18 @@ export const ITEMS = Object.freeze([
     buyPrice: 0, sellPrice: 0, source: "drop", usableIn: Object.freeze([]),
     effects: Object.freeze([]), description: "さまよう亡者が遺した骨。用途はまだ分からない。", maxOwned: 99,
     iconId: "dead-bones", version: 1
+  }),
+  Object.freeze({
+    number: 12, id: "snake_skin", name: "蛇皮", category: "material",
+    buyPrice: 0, sellPrice: 30, source: "drop", usableIn: Object.freeze([]),
+    effects: Object.freeze([]), description: "ヴァイパーから剥ぎ取った丈夫な皮。売却専用。", maxOwned: 99,
+    repurchasable: false, iconId: "snake-skin", version: 1
+  }),
+  Object.freeze({
+    number: 13, id: "bat_wing", name: "コウモリの羽", category: "material",
+    buyPrice: 0, sellPrice: 20, source: "drop", usableIn: Object.freeze([]),
+    effects: Object.freeze([]), description: "吸血コウモリの羽。売却専用。", maxOwned: 99,
+    repurchasable: false, iconId: "bat-wing", version: 1
   })
 ]);
 

@@ -126,6 +126,65 @@ export const enemies = Object.freeze([
     surpriseRate: 0.1,
     surpriseRateMaximum: 0.25,
     isBoss: false
+  }),
+  Object.freeze({
+    id: "vampire_bat", name: "吸血コウモリ", imageId: "vampire_bat",
+    image: "images/enemies/enemy_07.avif", race: "beast", minimumDepth: 3,
+    maxHp: 30, stats: Object.freeze({ str: 6, int: 2, agi: 11, dex: 8, luc: 4 }),
+    def: 4, attack: 5, experienceReward: 10, dropItemId: "bat_wing",
+    futureSpecialAttackId: "life_drain",
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 0, immune: false }),
+      action_skip: Object.freeze({ resistancePoints: 15, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 20, immune: false })
+    }),
+    escapeRate: 0.7, surpriseRate: 0.24, surpriseRateMaximum: 0.35, isBoss: false
+  }),
+  Object.freeze({
+    id: "bouncing_coin", name: "跳ねるコイン", imageId: "bouncing_coin",
+    image: "images/enemies/enemy_08.avif", race: "construct", minimumDepth: 4,
+    maxHp: 34, stats: Object.freeze({ str: 6, int: 3, agi: 8, dex: 7, luc: 10 }),
+    def: 8, attack: 5, experienceReward: 12, dropGold: 40,
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 0, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 25, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 15, immune: false })
+    }),
+    escapeRate: 0.65, surpriseRate: 0.12, surpriseRateMaximum: 0.25, isBoss: false
+  }),
+  Object.freeze({
+    id: "viper", name: "ヴァイパー", imageId: "viper",
+    image: "images/enemies/enemy_09.avif", race: "beast", minimumDepth: 5,
+    maxHp: 42, stats: Object.freeze({ str: 8, int: 2, agi: 10, dex: 9, luc: 5 }),
+    def: 5, attack: 7, experienceReward: 14, dropItemId: "snake_skin",
+    specialAttack: Object.freeze({
+      id: "poison_bite", name: "毒の牙", usageRate: 0.3,
+      effects: Object.freeze([Object.freeze({
+        statusId: "poison", statusKind: "physical", baseRate: 0.55, trigger: "firstHitOnly"
+      })])
+    }),
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 0, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 20, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 15, immune: false })
+    }),
+    escapeRate: 0.6, surpriseRate: 0.22, surpriseRateMaximum: 0.35, isBoss: false
+  }),
+  Object.freeze({
+    id: "mimic", name: "ミミック", imageId: "mimic",
+    image: "images/enemies/enemy_05.avif", race: "construct", randomEncounter: false,
+    maxHp: 60, stats: Object.freeze({ str: 10, int: 3, agi: 6, dex: 8, luc: 7 }),
+    def: 9, attack: 8, experienceReward: 20, dropProfile: "blackChest",
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 0, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 35, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 25, immune: false })
+    }),
+    escapeRate: 0.5, surpriseRate: 0, surpriseRateMaximum: 0, isBoss: false
   })
 ]);
 
@@ -134,7 +193,9 @@ export function getEnemyById(id) {
 }
 
 export function getRandomEnemy({ depth = 1, rng = Math.random } = {}) {
-  const available = enemies.filter(enemy => !enemy.minimumDepth || enemy.minimumDepth <= depth);
+  const available = enemies.filter(enemy =>
+    enemy.randomEncounter !== false && (!enemy.minimumDepth || enemy.minimumDepth <= depth)
+  );
   const index = Math.min(
     available.length - 1,
     Math.floor(Math.max(0, Number(rng()) || 0) * available.length)
@@ -159,6 +220,8 @@ export function createEnemyCombatant(enemy) {
     specialAttack: structuredClone(enemy.specialAttack || null),
     experienceReward: enemy.experienceReward,
     dropItemId: enemy.dropItemId || null,
+    dropGold: Math.max(0, Math.floor(Number(enemy.dropGold) || 0)),
+    dropProfile: enemy.dropProfile || "",
     escapeRate: enemy.escapeRate,
     surpriseRate: enemy.surpriseRate,
     surpriseRateMaximum: enemy.surpriseRateMaximum,

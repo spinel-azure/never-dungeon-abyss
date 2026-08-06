@@ -307,6 +307,7 @@ import {
     returnToTown,
     beginBattle: beginRandomBattle,
     beginBossBattle,
+    beginMimicBattle,
     playNpcVoice: playSe,
     onDungeonStep: handleDungeonStep,
     onStateChanged: scheduleAutosave
@@ -1034,6 +1035,26 @@ import {
     return started;
   }
 
+  function beginMimicBattle() {
+    if (!character || worldLocation !== "dungeon" || isBattleActive()) return false;
+    const enemyData = getEnemyById("mimic");
+    if (!enemyData) return false;
+    cancelAutoReturn(false);
+    setPlayerInputEnabled(false);
+    pendingEncounter = null;
+    startBgm(selectBattleBgm(enemyData));
+    const started = startBattle(createEnemyCombatant(enemyData), {
+      playStartSe: true,
+      ambush: false,
+      concealed: false
+    });
+    if (!started) {
+      startBgm(selectDungeonBgm());
+      setPlayerInputEnabled(true);
+    }
+    return started;
+  }
+
   function selectDungeonBgm() {
     return currentDepth >= 101 ? "deepDungeon" : "dungeon";
   }
@@ -1117,8 +1138,10 @@ import {
       saveGame();
       return { message: "赤錆びた鍵を手に入れた！" };
     }
-    if (treasureType !== "red") return { message: "中には何も入っていなかった！" };
-    const message = addRolledLoot(rollRedChestLoot());
+    if (treasureType !== "red" && treasureType !== "black") return { message: "中には何も入っていなかった！" };
+    const message = addRolledLoot(
+      treasureType === "black" ? rollEnemyDrop({ dropProfile: "blackChest" }) : rollRedChestLoot()
+    );
     updateCharacterUi();
     saveGame();
     return { message };

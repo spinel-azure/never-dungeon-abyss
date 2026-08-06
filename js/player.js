@@ -50,6 +50,7 @@ const hooks = {
   awardTreasure: () => ({ message: "中には何も入っていなかった！" }),
   unlockBossDoor: () => ({ accepted: false, message: "鍵がかかっている。" }),
   beginBossBattle: () => false,
+  beginMimicBattle: () => false,
   restAtFountain: () => Promise.resolve(false),
   returnToTown: () => {},
   beginBattle: () => {},
@@ -617,8 +618,15 @@ function confirmTreasureEvent() {
     if (event.treasureType === "red") {
       const reward = hooks.awardTreasure(event.treasureType, event.eventTreasureId) || {};
       hooks.say(`${trapMessage}${reward.message || "戦利品をロット袋へ入れた。"}`);
+    } else if (event.treasureType === "black" && trapResult.trap && !trapResult.disarmed) {
+      hooks.say(`${trapMessage}宝箱はミミックだった！`);
+      hooks.beginMimicBattle();
+      updateNpcAwareness();
+      hooks.onStateChanged();
+      return;
     } else if (event.treasureType === "black") {
-      hooks.say(`${trapMessage}宝箱はミミックだった！（未実装）`);
+      const reward = hooks.awardTreasure(event.treasureType, event.eventTreasureId) || {};
+      hooks.say(`${trapMessage}${reward.message || "戦利品をロット袋へ入れた。"}`);
     } else if (event.treasureType === "gold") {
       const reward = hooks.awardTreasure(event.treasureType, event.eventTreasureId) || {};
       hooks.say(`${trapMessage}${reward.message || "中にはレアアイテムが…入っていなかった！"}`);
