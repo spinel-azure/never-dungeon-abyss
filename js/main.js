@@ -87,7 +87,7 @@ import { getEquipmentInstanceDefinition, getEquipmentInstanceName } from "../dat
 import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
 import { applyBossVictory, createBossCombatant, getBossById, isBossDefeated } from "../data/bosses.js";
 import { consumeKeyItem, grantKeyItem, hasKeyItem } from "../data/key-items.js";
-import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260805-01";
+import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260806-02";
 import { awardBattleExperience, createTempleRevival, getInnStayFee, grantEventItems, resolveDungeonDefeat, resolveInnStableStay, resolveInnStay, resolveTemplePoisonTreatment, unlockGuildRequest } from "./character-services.js?v=20260805-01";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { resolveTreasureTrap } from "../combat/resolve-trap.js";

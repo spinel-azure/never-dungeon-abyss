@@ -407,8 +407,28 @@ function renderBattle() {
   const defeated = battle.outcome === "victory" && !battleUi.presenting;
   image.classList.toggle("is-defeated", defeated);
   image.classList.toggle("is-concealed", battleUi.concealed);
+  renderBossHpMeter(battle.enemy);
   battleUi.root.querySelector(".battle-enemy-stage")?.classList.toggle("is-defeated", defeated);
   battleUi.messageEl.textContent = formatBattleMessage(battle);
+}
+
+function renderBossHpMeter(enemy) {
+  const meter = battleUi.root.querySelector("#battleBossHpMeter");
+  const fill = battleUi.root.querySelector("#battleBossHpFill");
+  if (!meter || !fill) return;
+  const isBoss = Boolean(enemy?.isBoss);
+  meter.hidden = !isBoss;
+  if (!isBoss) return;
+  const percent = getBattleHpPercent(enemy);
+  fill.style.width = `${percent}%`;
+  meter.setAttribute("aria-valuenow", String(percent));
+  meter.classList.toggle("is-critical", percent > 0 && percent < 10);
+}
+
+export function getBattleHpPercent(enemy) {
+  const maxHp = Math.max(1, Number(enemy?.maxHp) || 1);
+  const hp = Math.max(0, Math.min(maxHp, Number(enemy?.hp) || 0));
+  return Math.ceil((hp / maxHp) * 100);
 }
 
 function formatBattleMessage(battle) {
