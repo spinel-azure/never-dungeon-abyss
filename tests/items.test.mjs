@@ -75,6 +75,56 @@ test("thief plus-three armor requires both B20 progression flags", () => {
   assert.deepEqual(offer.statBonuses, { def: 3, dex: 2 });
 });
 
+test("warrior armor tiers preserve the shield and two-handed defense tradeoff", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  const initialArmor = character.equipmentInventory.instances
+    .filter(instance => instance.slot !== "rightArmId")
+    .map(getEquipmentInstanceDefinition);
+  assert.deepEqual(initialArmor.map(item => item.sellPrice), [25, 25, 25, 25]);
+  character.gold = 10000;
+  character.highestDungeonDepthReached = 20;
+  Object.assign(character.eventFlags, {
+    shop_stock_b20f_unlocked: true,
+    boss_fallen_mage_b19f_defeated: true
+  });
+  const offers = getShopEquipmentStock(character)
+    .filter(item => item.enhancement === 3 && item.allowedJobs?.includes("warrior"));
+  assert.equal(offers.length, 4);
+  for (const offer of offers) {
+    const purchased = purchaseEquipment(character, offer);
+    assert.equal(purchased.accepted, true);
+    assert.equal(purchased.cost, 1500);
+    character = equipInstance(purchased.character, offer.slot, purchased.instance.instanceId).character;
+  }
+  character = normalizeCharacter(character);
+  assert.deepEqual(character.equipmentStatBonuses, { def: 16, dex: 1, str: 3 });
+
+  const greatsword = purchaseEquipment(character, "iron_greatsword");
+  const twoHanded = equipInstance(greatsword.character, "rightArmId", greatsword.instance.instanceId);
+  assert.equal(twoHanded.character.equippedInstanceIds.leftArmId, null);
+  const normalized = normalizeCharacter(twoHanded.character);
+  assert.deepEqual(normalized.equipmentStatBonuses, { def: 12, str: 3 });
+});
+
+test("enhanced warrior armor keeps its tier through sale and buyback", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.gold = 750;
+  character.highestDungeonDepthReached = 10;
+  Object.assign(character.eventFlags, {
+    transfer_portal_b10f_unlocked: true,
+    boss_strange_knight_statue_b9f_defeated: true
+  });
+  const offer = getShopEquipmentOffer(character, "shop_iron_helmet_plus_2");
+  const purchased = purchaseEquipment(character, offer);
+  const sold = sellEquipmentInstance(purchased.character, purchased.instance.instanceId);
+  assert.equal(sold.accepted, true);
+  assert.equal(sold.value, 250);
+  assert.equal(sold.character.equipmentBuyback[0].price, 500);
+  const boughtBack = purchaseBuybackEquipment(sold.character, purchased.instance.instanceId);
+  assert.equal(boughtBack.accepted, true);
+  assert.equal(boughtBack.instance.enhancement, 2);
+});
+
 test("inventory respects the per-item ownership limit", () => {
   const character = characterWith("healing_potion", 120);
   assert.equal(getItemCount(character.inventory, "healing_potion"), 99);

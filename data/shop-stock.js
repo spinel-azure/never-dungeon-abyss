@@ -4,8 +4,9 @@ import { WEAPONS } from "./weapons.js";
 
 export const SHOP_BASELINE_DEPTH = 1;
 
-const THIEF_ARMOR_IDS = Object.freeze([
-  "leather_buckler", "leather_cap", "leather_armor", "leather_boots"
+const ARMOR_FAMILIES = Object.freeze([
+  Object.freeze(["iron_buckler", "iron_helmet", "chainmail", "iron_greaves"]),
+  Object.freeze(["leather_buckler", "leather_cap", "leather_armor", "leather_boots"])
 ]);
 
 export const SHOP_ARMOR_STOCK = Object.freeze([
@@ -87,7 +88,7 @@ export function markShopCategorySeen(character, category) {
 }
 
 function armorTier(enhancement, shopUnlockDepth, requiredFlags) {
-  return THIEF_ARMOR_IDS.map(equipmentId => Object.freeze({
+  return ARMOR_FAMILIES.flatMap(family => family).map(equipmentId => Object.freeze({
     id: `shop_${equipmentId}_plus_${enhancement}`,
     equipmentId,
     enhancement,
