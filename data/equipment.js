@@ -19,7 +19,9 @@ export const EQUIPMENT = Object.freeze({
   wooden_shield: item("wooden_shield", "木の盾", "leftArmId", { def: 1 }, enhancedArmor("priest", {
     1: { def: 2 }, 2: { def: 3 }, 3: { def: 4 }
   })),
-  beginner_grimoire: item("beginner_grimoire", "初級魔導書", "leftArmId", { int: 1 }),
+  beginner_grimoire: item("beginner_grimoire", "初級魔導書", "leftArmId", { int: 1 }, enhancedArmor("mage", {
+    1: { int: 2 }, 2: { int: 3 }, 3: { int: 4 }
+  })),
 
   iron_helmet: item("iron_helmet", "鉄の兜", "headId", { def: 2, str: 1 }, enhancedArmor("warrior", {
     1: { def: 3 }, 2: { def: 4 }, 3: { def: 5 }
@@ -30,7 +32,9 @@ export const EQUIPMENT = Object.freeze({
   priest_hat: item("priest_hat", "聖職者の帽子", "headId", { def: 1, luc: 1 }, enhancedArmor("priest", {
     1: { def: 2, luc: 1 }, 2: { def: 3, luc: 1 }, 3: { def: 4, luc: 2 }
   })),
-  mage_hat: item("mage_hat", "魔術師の帽子", "headId", { def: 1, int: 1 }),
+  mage_hat: item("mage_hat", "魔術師の帽子", "headId", { def: 1, int: 1 }, enhancedArmor("mage", {
+    1: { def: 2, int: 1 }, 2: { def: 3, int: 1 }, 3: { def: 4, int: 1 }
+  })),
 
   chainmail: item("chainmail", "鎖かたびら", "bodyId", { def: 3 }, enhancedArmor("warrior", {
     1: { def: 3, str: 1 }, 2: { def: 3, str: 2 }, 3: { def: 4, str: 2 }
@@ -41,7 +45,9 @@ export const EQUIPMENT = Object.freeze({
   priest_robe: item("priest_robe", "聖職者の法衣", "bodyId", { def: 2 }, enhancedArmor("priest", {
     1: { def: 2, luc: 1 }, 2: { def: 3, luc: 1 }, 3: { def: 4, luc: 1 }
   })),
-  mage_robe: item("mage_robe", "魔術師のローブ", "bodyId", { def: 1 }),
+  mage_robe: item("mage_robe", "魔術師のローブ", "bodyId", { def: 1 }, enhancedArmor("mage", {
+    1: { def: 2 }, 2: { def: 3 }, 3: { def: 4 }
+  })),
 
   iron_greaves: item("iron_greaves", "鉄のすね当て", "footId", { def: 1 }, enhancedArmor("warrior", {
     1: { def: 1, str: 1 }, 2: { def: 2, str: 1 }, 3: { def: 3, str: 1 }
@@ -52,7 +58,9 @@ export const EQUIPMENT = Object.freeze({
   leather_shoes: item("leather_shoes", "革の靴", "footId", { def: 1 }, enhancedArmor("priest", {
     1: { def: 2, agi: 1 }, 2: { def: 2, agi: 2 }, 3: { def: 2, agi: 3 }
   })),
-  cloth_shoes: item("cloth_shoes", "布の靴", "footId", { def: 1 })
+  cloth_shoes: item("cloth_shoes", "布の靴", "footId", { def: 1 }, enhancedArmor("mage", {
+    1: { def: 2, agi: 1 }, 2: { def: 2, agi: 2 }, 3: { def: 2, agi: 3 }
+  }))
 });
 
 export const INITIAL_EQUIPMENT = Object.freeze({
