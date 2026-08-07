@@ -125,6 +125,44 @@ test("enhanced warrior armor keeps its tier through sale and buyback", () => {
   assert.equal(boughtBack.instance.enhancement, 2);
 });
 
+test("priest armor tiers trade some defense growth for LUC and AGI", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "priest" });
+  const initialArmor = character.equipmentInventory.instances
+    .filter(instance => instance.slot !== "rightArmId")
+    .map(getEquipmentInstanceDefinition);
+  assert.deepEqual(initialArmor.map(item => item.sellPrice), [25, 25, 25, 25]);
+  assert.equal(getShopEquipmentStock(character).filter(item => item.enhancement === 1).length, 4);
+
+  character.highestDungeonDepthReached = 20;
+  Object.assign(character.eventFlags, {
+    shop_stock_b20f_unlocked: true,
+    boss_fallen_mage_b19f_defeated: true
+  });
+  character.gold = 6000;
+  const offers = getShopEquipmentStock(character)
+    .filter(item => item.enhancement === 3 && item.allowedJobs?.includes("priest"));
+  assert.equal(offers.length, 4);
+  for (const offer of offers) {
+    const purchased = purchaseEquipment(character, offer);
+    assert.equal(purchased.accepted, true);
+    assert.equal(purchased.cost, 1500);
+    character = equipInstance(purchased.character, offer.slot, purchased.instance.instanceId).character;
+  }
+  character = normalizeCharacter(character);
+  assert.deepEqual(character.equipmentStatBonuses, { def: 14, luc: 3, agi: 3 });
+});
+
+test("priest plus-two armor requires B10 arrival and the strange statue victory", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "priest" });
+  character.highestDungeonDepthReached = 10;
+  character.eventFlags.transfer_portal_b10f_unlocked = true;
+  assert.equal(getShopEquipmentOffer(character, "shop_priest_robe_plus_2"), null);
+  character.eventFlags.boss_strange_knight_statue_b9f_defeated = true;
+  const offer = getShopEquipmentOffer(character, "shop_priest_robe_plus_2");
+  assert.equal(offer.buyPrice, 500);
+  assert.deepEqual(offer.statBonuses, { def: 3, luc: 1 });
+});
+
 test("inventory respects the per-item ownership limit", () => {
   const character = characterWith("healing_potion", 120);
   assert.equal(getItemCount(character.inventory, "healing_potion"), 99);

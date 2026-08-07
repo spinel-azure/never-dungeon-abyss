@@ -6,7 +6,8 @@ export const SHOP_BASELINE_DEPTH = 1;
 
 const ARMOR_FAMILIES = Object.freeze([
   Object.freeze(["iron_buckler", "iron_helmet", "chainmail", "iron_greaves"]),
-  Object.freeze(["leather_buckler", "leather_cap", "leather_armor", "leather_boots"])
+  Object.freeze(["leather_buckler", "leather_cap", "leather_armor", "leather_boots"]),
+  Object.freeze(["wooden_shield", "priest_hat", "priest_robe", "leather_shoes"])
 ]);
 
 export const SHOP_ARMOR_STOCK = Object.freeze([
