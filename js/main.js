@@ -21,7 +21,7 @@ import {
   markBossDefeatedAt,
   setStartPosition,
   randomizeStartPosition
-} from "./dungeon.js?v=20260807-08";
+} from "./dungeon.js";
 import {
   state,
   configurePlayer,
@@ -41,13 +41,13 @@ import {
   startBattleTreasureEvent,
   startFloorLapNotice,
   setNpcTypewriterOptions
-} from "./player.js?v=20260807-05";
-import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setMistOptions, setWallColor, setFloorColor } from "./renderer.js?v=20260807-05";
+} from "./player.js";
+import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setMistOptions, setWallColor, setFloorColor } from "./renderer.js";
 import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minimap.js";
 import { configureInput } from "./input.js";
 import { configureVirtualStick } from "./virtualStick.js";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js?v=20260807-05";
+import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js";
 import { resolveFloorTheme } from "./floorTheme.js";
 import {
   configureAutoReturn,
@@ -83,15 +83,15 @@ import {
 import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
 import { EffectEngine } from "./effects/effect-engine.js";
 import { hasUncertainLoot } from "./loot-identification.js";
-import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js?v=20260807-05";
-import { createInitialCharacter, normalizeCharacter } from "../data/classes.js?v=20260807-06";
+import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js";
+import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName, grantEquipmentInstance } from "../data/equipment-inventory.js";
 import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
 import { applyBossVictory, createBossCombatant, getBossById, getFloorBossByDepth, isBossDefeated } from "../data/bosses.js";
 import { consumeKeyItem, getKeyItem, grantKeyItem, hasKeyItem } from "../data/key-items.js";
-import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js?v=20260806-04";
-import { awardBattleExperience, createTempleRevival, getInnStayFee, grantEventItems, resolveDungeonDefeat, resolveInnStableStay, resolveInnStay, resolveTemplePoisonTreatment, unlockGuildRequest } from "./character-services.js?v=20260805-01";
+import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js";
+import { awardBattleExperience, createTempleRevival, getInnStayFee, grantEventItems, resolveDungeonDefeat, resolveInnStableStay, resolveInnStay, resolveTemplePoisonTreatment, unlockGuildRequest } from "./character-services.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { resolveTreasureTrap } from "../combat/resolve-trap.js";
 import { collectStats } from "../combat/collect-stats.js";
@@ -105,14 +105,14 @@ import { getNonlethalPoisonDamage } from "../combat/status-lifecycle.js";
 import { getNextLevelExperience, MAX_LEVEL } from "../data/growth.js";
 import { resolveFieldSkill } from "../combat/resolve-field-skill.js";
 import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from "./skill-overlay.js";
-import { configureItemOverlay, openItemOverlay, handleItemOverlayInput } from "./item-overlay.js?v=20260807-04";
-import { resolveFieldItemUse } from "../combat/resolve-item-use.js?v=20260806-01";
+import { configureItemOverlay, openItemOverlay, handleItemOverlayInput } from "./item-overlay.js";
+import { resolveFieldItemUse } from "../combat/resolve-item-use.js";
 import { grantCard } from "../data/deck.js";
-import { collectCardStatBonuses, getCardById, hasCardEffect } from "../data/cards.js?v=20260807-06";
+import { collectCardStatBonuses, getCardById, hasCardEffect } from "../data/cards.js";
 import { drawCardCanvas } from "./card-canvas.js";
-import { getItem } from "../data/items.js?v=20260806-01";
+import { getItem } from "../data/items.js";
 import { isCriticalHp } from "../data/quick-status.js";
-import { purchaseBuybackEquipment, purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js?v=20260807-05";
+import { purchaseBuybackEquipment, purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
 import { addLootEquipment, addLootGold, addLootItem, depositItemInWarehouse, settleLootBag, withdrawItemFromWarehouse } from "../data/inventory.js";
 import { rollEnemyDrop, rollRedChestLoot } from "../data/loot.js";
 import { rollTreasureTrap } from "../data/traps.js";
@@ -2212,6 +2212,12 @@ import {
     },
     setStopwatchVisible,
     resetStopwatch,
+    emergencyEscape: () => {
+      if (worldLocation !== "dungeon") return false;
+      returnToTown();
+      say("緊急脱出を実行し、ダンジョン入口へ戻った。");
+      return true;
+    },
     saveGame: slot => saveGame({ announce: true, slot }),
     canManualSave: () => worldLocation === "town",
     getSaveSlotSummaries,

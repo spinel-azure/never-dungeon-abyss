@@ -1,8 +1,8 @@
-import { calculateDeckCost, DECK_SLOT_COUNT, setDeckSlot } from "../data/deck.js?v=20260807-06";
-import { getCardById } from "../data/cards.js?v=20260807-06";
+import { calculateDeckCost, DECK_SLOT_COUNT, setDeckSlot } from "../data/deck.js";
+import { getCardById } from "../data/cards.js";
 import { drawCardCanvas } from "./card-canvas.js";
-import { ITEMS, canUseItemIn } from "../data/items.js?v=20260806-01";
-import { normalizeCharacter } from "../data/classes.js?v=20260806-02";
+import { ITEMS, canUseItemIn } from "../data/items.js";
+import { normalizeCharacter } from "../data/classes.js";
 import { EQUIPMENT_SLOT_LABELS, canEquipInstance, equipInstance, findEquipmentDefinition, getEquipmentInstanceDefinition, getEquipmentInstanceName, listEquipmentInstances } from "../data/equipment-inventory.js";
 import { collectStats } from "../combat/collect-stats.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
@@ -36,8 +36,8 @@ const menu = {
   floorColor: "default",
   bgmEnabled: true, seEnabled: true,
   npcTypewriterEnabled: true, npcTypewriterSpeed: "normal",
-  actionActive: { random: false, autoReturn: false, torchFull: false, stopwatchReset: false },
-  generateRandomDungeon: () => {}, startAutoReturn: () => {}, refillTorch: () => {},
+  actionActive: { random: false, autoReturn: false, emergencyEscape: false, torchFull: false, stopwatchReset: false },
+  generateRandomDungeon: () => {}, startAutoReturn: () => {}, emergencyEscape: () => {}, refillTorch: () => {},
   setScreenShakeEnabled: () => {}, setTorchFlickerEnabled: () => {}, setTorchFuelDisabled: () => {}, setPresenceDisabled: () => {},
   setMistOptions: () => {}, setWallColor: () => {}, setFloorColor: () => {},
   setBgmOptions: () => {}, setSeOptions: () => {}, playSe: () => {},
@@ -652,7 +652,7 @@ function executeDebug(key, amount = 1) {
   if (key === "stopwatchOff") { menu.stopwatchVisible = false; menu.setStopwatchVisible(false); updateDebugStates(); persistSettings(); return; }
   if (key === "stopwatchReset") { triggerAction("stopwatchReset", () => { menu.resetStopwatch(); updateDebugStates(); }); return; }
   if (key === "torchFull" && menu.torchFuelDisabled) return;
-  const actions = { random: menu.generateRandomDungeon, autoReturn: menu.startAutoReturn, torchFull: menu.refillTorch };
+  const actions = { random: menu.generateRandomDungeon, autoReturn: menu.startAutoReturn, emergencyEscape: menu.emergencyEscape, torchFull: menu.refillTorch };
   if (actions[key]) triggerAction(key, () => { closeCampMenu(); actions[key](); });
 }
 function triggerAction(key, action) { menu.actionActive[key] = true; updateDebugStates(); setTimeout(() => { menu.actionActive[key] = false; action(); updateDebugStates(); }, ACTION_FEEDBACK_MS); }

@@ -1,5 +1,5 @@
-import { CARDS } from "./cards.js?v=20260717-3";
-import { getCardEffectById } from "./card-effects.js?v=20260717-3";
+import { CARDS } from "./cards.js";
+import { getCardEffectById } from "./card-effects.js";
 
 export function getCardById(cardId) {
   return Object.values(CARDS).find((card) => card.id === cardId) ?? null;

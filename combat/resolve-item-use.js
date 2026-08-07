@@ -1,4 +1,4 @@
-import { canUseItemIn, getItem } from "../data/items.js?v=20260806-01";
+import { canUseItemIn, getItem } from "../data/items.js";
 import { consumeItem, getItemCount } from "../data/inventory.js";
 
 export function getItemUnavailableReason({ character, itemId, context, enemy, torchFuel = 0, treasureCompassActive = false } = {}) {

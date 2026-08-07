@@ -13,11 +13,11 @@ import {
   getStatusResistanceBonus,
   resolveActionOpportunity,
   resolveEndOfAction
-} from "./status-lifecycle.js?v=20260805-01";
+} from "./status-lifecycle.js";
 import { getSkill } from "../data/skills.js";
-import { getItem } from "../data/items.js?v=20260806-01";
+import { getItem } from "../data/items.js";
 import { consumeItem } from "../data/inventory.js";
-import { getItemUnavailableReason } from "./resolve-item-use.js?v=20260806-01";
+import { getItemUnavailableReason } from "./resolve-item-use.js";
 
 export function createBattleState({ character, enemy }) {
   return {

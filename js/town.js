@@ -1,18 +1,18 @@
-import { CHARACTER_JOBS, TOWN_FACILITIES, getTownFacility } from "../data/town.js?v=20260805-02";
+import { CHARACTER_JOBS, TOWN_FACILITIES, getTownFacility } from "../data/town.js";
 import {
   formatCompactQuickName,
   formatQuickJob,
   formatQuickLevel,
   formatQuickMoney,
   isCriticalHp
-} from "../data/quick-status.js?v=20260805-01";
+} from "../data/quick-status.js";
 import {
   QUESTS,
   getQuestProgress,
   hasActiveQuest,
   isQuestAvailable
 } from "../data/quests.js";
-import { getItem, getShopItemIdsForCharacter } from "../data/items.js?v=20260807-04";
+import { getItem, getShopItemIdsForCharacter } from "../data/items.js";
 import { WEAPONS } from "../data/weapons.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName } from "../data/equipment-inventory.js";
 import { getShopEquipmentIdsForDepth } from "../data/shop-stock.js";

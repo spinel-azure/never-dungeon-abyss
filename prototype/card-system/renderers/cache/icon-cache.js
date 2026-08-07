@@ -2,8 +2,8 @@ import {
   normalizeIconRenderSize,
   RENDER_CACHE_LIMITS,
   RENDER_DESIGN_REVISION,
-} from "../render-config.js?v=20260717-4";
-import { getIconDrawer, getUnknownIconDrawer } from "../icon-registry.js?v=20260717-4";
+} from "../render-config.js";
+import { getIconDrawer, getUnknownIconDrawer } from "../icon-registry.js";
 import { createRenderCanvas, readLruEntry, writeLruEntry } from "./cache-utils.js";
 
 const iconCache = new Map();

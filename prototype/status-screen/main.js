@@ -1,4 +1,4 @@
-import { calculateStats } from "../growth-system/growth-model.js?v=20260719-2";
+import { calculateStats } from "../growth-system/growth-model.js";
 const LABELS={str:"STR",int:"INT",agi:"AGI",dex:"DEX",luc:"LUC",def:"DEF"};
 const build={jobId:"warrior",equipment:{str:2,agi:1,luc:1},cards:{str:3,agi:1,dex:1}};
 const returnTarget=new URLSearchParams(location.search).get("return");let pageIndex=0;

@@ -1,5 +1,5 @@
-import { CARD_DISPLAY_MODES, CARD_RARITIES } from "../data/cards.js?v=20260717-3";
-import { drawCachedIcon } from "./cache/icon-cache.js?v=20260717-4";
+import { CARD_DISPLAY_MODES, CARD_RARITIES } from "../data/cards.js";
+import { drawCachedIcon } from "./cache/icon-cache.js";
 
 const THEMES = Object.freeze({
   C: Object.freeze({

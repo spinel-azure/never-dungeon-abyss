@@ -1,6 +1,6 @@
-import { CARD_DISPLAY_MODES } from "../data/cards.js?v=20260717-3";
-import { getAllCards, getCardById, getCardViewData } from "../data/card-registry.js?v=20260717-3";
-import { drawCard } from "../renderers/card-renderer.js?v=20260717-4";
+import { CARD_DISPLAY_MODES } from "../data/cards.js";
+import { getAllCards, getCardById, getCardViewData } from "../data/card-registry.js";
+import { drawCard } from "../renderers/card-renderer.js";
 import { clearCardCache } from "../renderers/cache/render-cache.js";
 import { bindVirtualControls } from "../../dungeon-command-menu/controls/virtual-controls.js";
 import {

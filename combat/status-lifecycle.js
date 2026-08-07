@@ -1,4 +1,4 @@
-import { getStatusEffect } from "../data/status-effects.js?v=20260805-01";
+import { getStatusEffect } from "../data/status-effects.js";
 
 export function applyStatus(statuses = [], application = {}) {
   if (!application?.success) return cloneStatuses(statuses);

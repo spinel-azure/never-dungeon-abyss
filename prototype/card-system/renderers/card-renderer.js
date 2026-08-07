@@ -1,9 +1,9 @@
-import { CARD_DISPLAY_MODES } from "../data/cards.js?v=20260717-3";
+import { CARD_DISPLAY_MODES } from "../data/cards.js";
 import { getCachedCard } from "./cache/card-cache.js";
 import { drawCachedIcon } from "./cache/icon-cache.js";
-import { drawLegendaryCard } from "./legendary-card.js?v=20260717-3";
-import { drawStandardCard } from "./standard-card.js?v=20260717-4";
-import { drawZodiacCard } from "./zodiac-card.js?v=20260717-3";
+import { drawLegendaryCard } from "./legendary-card.js";
+import { drawStandardCard } from "./standard-card.js";
+import { drawZodiacCard } from "./zodiac-card.js";
 
 const rarityRenderers = new Map([
   ["C", drawStandardCard],

@@ -1,6 +1,6 @@
-import { ITEMS } from "../data/items.js?v=20260806-01";
+import { ITEMS } from "../data/items.js";
 import { getItemCount } from "../data/inventory.js";
-import { getItemUnavailableReason } from "../combat/resolve-item-use.js?v=20260806-01";
+import { getItemUnavailableReason } from "../combat/resolve-item-use.js";
 
 const overlay = {
   root: null, list: null, pageEl: null, backButton: null, messageEl: null,

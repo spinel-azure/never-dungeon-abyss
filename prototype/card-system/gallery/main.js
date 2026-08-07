@@ -1,6 +1,6 @@
-import { CARD_DISPLAY_MODES, CARD_RARITIES, CARDS } from "../data/cards.js?v=20260717-3";
-import { getAllCards, getCardViewData } from "../data/card-registry.js?v=20260717-3";
-import { drawCard } from "../renderers/card-renderer.js?v=20260717-4";
+import { CARD_DISPLAY_MODES, CARD_RARITIES, CARDS } from "../data/cards.js";
+import { getAllCards, getCardViewData } from "../data/card-registry.js";
+import { drawCard } from "../renderers/card-renderer.js";
 import {
   clearAllRenderCaches,
   clearCardCache,
