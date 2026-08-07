@@ -122,7 +122,7 @@ import { rollTreasureTrap } from "../data/traps.js";
 import { restAtHealingFountain as restoreAtHealingFountain } from "../data/fountains.js";
 import { getSkill } from "../data/skills.js";
 import { getQuestRequiredSpecialRoomAccess, getSpecialRoomAccessRestriction, getSpecialRoomDefinition } from "../data/special-rooms.js";
-import { acknowledgeShopStockAnnouncement, getShopStockState, markShopCategorySeen } from "../data/shop-stock.js";
+import { acknowledgeShopStockAnnouncement, getShopEquipmentOffer, getShopStockState, markShopCategorySeen } from "../data/shop-stock.js";
 import {
   abandonQuest,
   acceptQuest,
@@ -1259,7 +1259,8 @@ import {
 
   function purchaseTownEquipment(equipmentId) {
     if (!character) return { accepted: false, reason: "noCharacter" };
-    const result = purchaseEquipment(character, equipmentId);
+    const offer = getShopEquipmentOffer(character, equipmentId);
+    const result = purchaseEquipment(character, offer || equipmentId);
     if (!result.accepted) return result;
     character = result.character;
     updateCharacterUi();

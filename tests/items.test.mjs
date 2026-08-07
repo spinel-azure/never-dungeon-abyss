@@ -12,6 +12,8 @@ import {
 import { grantEventItems, unlockGuildRequest } from "../js/character-services.js";
 import { purchaseBuybackEquipment, purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
 import { getItem, getShopItemIdsForCharacter, getShopItemIdsForDepth } from "../data/items.js";
+import { equipInstance, getEquipmentInstanceDefinition } from "../data/equipment-inventory.js";
+import { getShopEquipmentOffer, getShopEquipmentStock } from "../data/shop-stock.js";
 
 function characterWith(itemId, amount = 1) {
   const character = createInitialCharacter({ name: "TEST", job: "warrior" });
@@ -32,6 +34,45 @@ test("shop equipment costs 100G and creates an individual weapon instance", () =
   assert.equal(result.accepted, true);
   assert.equal(result.character.gold, 0);
   assert.equal(result.character.equipmentInventory.instances.at(-1).equipmentId, "iron_greatsword");
+});
+
+test("thief armor shop tiers share enhancement-aware purchase and stat handling", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "thief" });
+  character.gold = 2000;
+  const initialArmor = character.equipmentInventory.instances
+    .filter(instance => instance.slot !== "rightArmId")
+    .map(getEquipmentInstanceDefinition);
+  assert.deepEqual(initialArmor.map(item => item.sellPrice), [25, 25, 25, 25]);
+
+  assert.equal(getShopEquipmentStock(character).filter(item => item.enhancement === 1).length, 4);
+  assert.equal(getShopEquipmentStock(character).some(item => item.enhancement === 2), false);
+  character.highestDungeonDepthReached = 10;
+  character.eventFlags.transfer_portal_b10f_unlocked = true;
+  assert.equal(getShopEquipmentStock(character).some(item => item.enhancement === 2), false);
+  character.eventFlags.boss_strange_knight_statue_b9f_defeated = true;
+
+  for (const offer of getShopEquipmentStock(character).filter(item => item.enhancement === 2)) {
+    const purchased = purchaseEquipment(character, offer);
+    assert.equal(purchased.accepted, true);
+    assert.equal(purchased.cost, 500);
+    character = purchased.character;
+    const equipped = equipInstance(character, offer.slot, purchased.instance.instanceId);
+    assert.equal(equipped.accepted, true);
+    character = equipped.character;
+  }
+  character = normalizeCharacter(character);
+  assert.deepEqual(character.equipmentStatBonuses, { def: 10, dex: 3, agi: 2 });
+});
+
+test("thief plus-three armor requires both B20 progression flags", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "thief" });
+  character.highestDungeonDepthReached = 20;
+  character.eventFlags.shop_stock_b20f_unlocked = true;
+  assert.equal(getShopEquipmentStock(character).some(item => item.enhancement === 3), false);
+  character.eventFlags.boss_fallen_mage_b19f_defeated = true;
+  const offer = getShopEquipmentOffer(character, "shop_leather_armor_plus_3");
+  assert.equal(offer.buyPrice, 1500);
+  assert.deepEqual(offer.statBonuses, { def: 3, dex: 2 });
 });
 
 test("inventory respects the per-item ownership limit", () => {

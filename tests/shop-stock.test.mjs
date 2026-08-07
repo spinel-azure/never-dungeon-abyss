@@ -43,3 +43,13 @@ test("legacy B10F saves receive the stock notice once", () => {
   assert.equal(result.announced, true);
   assert.equal(result.character.eventFlags.shopStockAnnouncementDepth, 10);
 });
+
+test("thief armor category becomes new only after the boss and arrival requirements", () => {
+  const thief = createInitialCharacter({ name: "TEST", job: "thief" });
+  thief.highestDungeonDepthReached = 10;
+  thief.eventFlags.transfer_portal_b10f_unlocked = true;
+  assert.equal(getShopStockState(thief).newCategories.equipment, false);
+  thief.eventFlags.boss_strange_knight_statue_b9f_defeated = true;
+  assert.equal(getShopStockState(thief).newCategories.equipment, true);
+  assert.equal(getShopStockState(thief).categoryDepths.equipment, 10);
+});

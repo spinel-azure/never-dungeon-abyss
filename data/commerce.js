@@ -1,6 +1,6 @@
 import { getItem } from "./items.js";
 import { consumeItem, getItemCount, grantItemWithOverflow } from "./inventory.js";
-import { getEquipmentInstanceDefinition, grantEquipmentInstance } from "./equipment-inventory.js";
+import { findEquipmentDefinition, getEquipmentInstanceDefinition, grantEquipmentInstance } from "./equipment-inventory.js";
 import { getWeapon } from "./weapons.js";
 
 export function purchaseItem(character, itemId, { price, amount = 1 } = {}) {
@@ -25,19 +25,27 @@ export function purchaseItem(character, itemId, { price, amount = 1 } = {}) {
   };
 }
 
-export function purchaseEquipment(character, equipmentId) {
+export function purchaseEquipment(character, equipmentOrId) {
   if (!character) return { accepted: false, reason: "noCharacter", character };
-  const equipment = getWeapon(equipmentId);
-  if (!equipment || equipment.id !== equipmentId || !Number.isFinite(equipment.buyPrice)) {
+  const offer = typeof equipmentOrId === "object" ? equipmentOrId : null;
+  const equipmentId = offer?.equipmentId || equipmentOrId;
+  const slot = offer?.slot || "rightArmId";
+  const enhancement = Math.max(0, Math.floor(Number(offer?.enhancement) || 0));
+  const equipment = offer || findEquipmentDefinition(equipmentId, slot) || getWeapon(equipmentId);
+  const buyPrice = Number(equipment?.buyPrice);
+  if (!equipment || !Number.isFinite(buyPrice)) {
     return { accepted: false, reason: "unknownEquipment", character };
   }
+  if (equipment.allowedJobs?.length && !equipment.allowedJobs.includes(character.job)) {
+    return { accepted: false, reason: "jobRestricted", character, equipment };
+  }
   const gold = Math.max(0, Math.floor(Number(character.gold) || 0));
-  if (gold < equipment.buyPrice) return { accepted: false, reason: "insufficientGold", character, equipment };
-  const granted = grantEquipmentInstance(character, equipment.id, "rightArmId");
+  if (gold < buyPrice) return { accepted: false, reason: "insufficientGold", character, equipment };
+  const granted = grantEquipmentInstance(character, equipmentId, slot, { enhancement });
   if (!granted.accepted) return { ...granted, equipment };
   return {
-    accepted: true, reason: "", item: equipment, equipment, cost: equipment.buyPrice,
-    character: { ...granted.character, gold: gold - equipment.buyPrice }
+    accepted: true, reason: "", item: equipment, equipment, instance: granted.instance, cost: buyPrice,
+    character: { ...granted.character, gold: gold - buyPrice }
   };
 }
 

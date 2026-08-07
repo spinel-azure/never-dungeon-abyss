@@ -13,9 +13,8 @@ import {
   isQuestAvailable
 } from "../data/quests.js";
 import { getItem, getShopItemIdsForCharacter } from "../data/items.js";
-import { WEAPONS } from "../data/weapons.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName } from "../data/equipment-inventory.js";
-import { getShopEquipmentIdsForDepth } from "../data/shop-stock.js";
+import { getShopEquipmentStock } from "../data/shop-stock.js";
 import { configureTownPassersby } from "./town-passersby.js";
 import { getInnStayFee } from "./character-services.js";
 
@@ -1182,7 +1181,7 @@ function openCommerce(kind) {
     : kind === "sell"
       ? Object.keys(town.getCharacter()?.inventory?.counts || {}).filter(id => getItem(id)?.sellPrice > 0)
       : kind === "buyEquipment"
-        ? getShopEquipmentIdsForDepth(town.getCharacter()?.highestDungeonDepthReached)
+        ? []
         : getShopItemIdsForCharacter(town.getCharacter());
   town.mode = "commerce";
   town.commerceKind = kind;
@@ -1191,7 +1190,9 @@ function openCommerce(kind) {
       const definition = getEquipmentInstanceDefinition(entry.instance);
       return definition ? { ...definition, id: entry.instance.instanceId, name: getEquipmentInstanceName(entry.instance), buyPrice: entry.price } : null;
     }).filter(Boolean)
-    : ids.map(id => kind === "buyEquipment" ? WEAPONS[id] : getItem(id)).filter(Boolean);
+    : kind === "buyEquipment"
+      ? getShopEquipmentStock(town.getCharacter())
+      : ids.map(getItem).filter(Boolean);
   town.commerceIndex = 0;
   town.commercePointerArmedIndex = -1;
   town.commerceTitle.textContent = kind === "donate" ? "寄進" : kind === "sell" ? "売却" : kind.startsWith("storage") ? "倉庫" : "購入";

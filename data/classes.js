@@ -1,4 +1,4 @@
-import { collectEquipmentBonuses, getInitialEquipment } from "./equipment.js";
+import { getInitialEquipment } from "./equipment.js";
 import { getDeckCostAtLevel, getLevelGrowth, normalizeExperience } from "./growth.js";
 import { createInitialCardState, normalizeCardState } from "./deck.js";
 import { collectCardStatBonuses } from "./cards.js";
@@ -6,7 +6,7 @@ import {
   createInitialInventory, createInitialLootBag, createInitialWarehouse,
   normalizeInventory, normalizeLootBag, normalizeWarehouse
 } from "./inventory.js";
-import { normalizeEquipmentInventory } from "./equipment-inventory.js";
+import { collectEquippedInstanceBonuses, normalizeEquipmentInventory } from "./equipment-inventory.js";
 import { normalizeQuestState } from "./quests.js";
 import { normalizeDepthReturnSettlement } from "./experience-settlement.js";
 import { getLevelUnlockedSkillIds } from "./skills.js";
@@ -88,7 +88,10 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     sp: characterClass.maxSp,
     maxSp: characterClass.maxSp,
     baseStats: { ...characterClass.stats },
-    equipmentStatBonuses: collectEquipmentBonuses(equipment),
+    equipmentStatBonuses: collectEquippedInstanceBonuses(
+      equipmentCollection.equipmentInventory,
+      equipmentCollection.equippedInstanceIds
+    ),
     cardStatBonuses: {},
     def: 0,
     equipment,
@@ -114,7 +117,10 @@ export function normalizeCharacter(character) {
     character.equippedInstanceIds,
     characterClass.id
   );
-  const equipmentStatBonuses = collectEquipmentBonuses(equipment);
+  const equipmentStatBonuses = collectEquippedInstanceBonuses(
+    equipmentCollection.equipmentInventory,
+    equipmentCollection.equippedInstanceIds
+  );
   const cards = normalizeCardState(character.cards, growth.deckCost);
   const cardStatBonuses = collectCardStatBonuses(cards.deckSlots);
   const maxHp = growth.hp

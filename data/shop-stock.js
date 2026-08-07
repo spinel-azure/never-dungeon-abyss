@@ -1,7 +1,18 @@
+import { getEquipmentInstanceDefinition, getEquipmentInstanceName } from "./equipment-inventory.js";
 import { getItem, getShopItemIdsForCharacter } from "./items.js";
 import { WEAPONS } from "./weapons.js";
 
 export const SHOP_BASELINE_DEPTH = 1;
+
+const THIEF_ARMOR_IDS = Object.freeze([
+  "leather_buckler", "leather_cap", "leather_armor", "leather_boots"
+]);
+
+export const SHOP_ARMOR_STOCK = Object.freeze([
+  ...armorTier(1, 1, []),
+  ...armorTier(2, 10, ["transfer_portal_b10f_unlocked", "boss_strange_knight_statue_b9f_defeated"]),
+  ...armorTier(3, 20, ["shop_stock_b20f_unlocked", "boss_fallen_mage_b19f_defeated"])
+]);
 
 export function getShopEquipmentIdsForDepth(depth = 1) {
   const reached = normalizeDepth(depth);
@@ -10,11 +21,32 @@ export function getShopEquipmentIdsForDepth(depth = 1) {
     .map(item => item.id);
 }
 
+export function getShopEquipmentStock(character) {
+  const reached = normalizeDepth(character?.highestDungeonDepthReached);
+  const eventFlags = character?.eventFlags || {};
+  const job = character?.job;
+  const weapons = Object.values(WEAPONS)
+    .filter(item => Number.isFinite(item.buyPrice))
+    .filter(item => normalizeDepth(item.shopUnlockDepth) <= reached)
+    .filter(item => !item.allowedJobs?.length || item.allowedJobs.includes(job))
+    .map(item => ({ ...item, equipmentId: item.id, slot: "rightArmId", enhancement: 0 }));
+  const armor = SHOP_ARMOR_STOCK
+    .filter(entry => entry.shopUnlockDepth <= reached)
+    .filter(entry => entry.requiredFlags.every(flag => eventFlags[flag] === true))
+    .map(toEquipmentOffer)
+    .filter(entry => !entry.allowedJobs?.length || entry.allowedJobs.includes(job));
+  return [...weapons, ...armor];
+}
+
+export function getShopEquipmentOffer(character, stockId) {
+  return getShopEquipmentStock(character).find(entry => entry.id === stockId) || null;
+}
+
 export function getShopStockState(character) {
   const reached = normalizeDepth(character?.highestDungeonDepthReached);
   const eventFlags = character?.eventFlags || {};
   const categoryDepths = {
-    equipment: latestUnlockDepth(getShopEquipmentIdsForDepth(reached).map(id => WEAPONS[id])),
+    equipment: latestUnlockDepth(getShopEquipmentStock(character)),
     items: latestUnlockDepth(getShopItemIdsForCharacter(character).map(getItem))
   };
   const seen = eventFlags.shopStockSeenCategories || {};
@@ -39,14 +71,12 @@ export function acknowledgeShopStockAnnouncement(character) {
   return {
     announced: true,
     stock,
-    character: withEventFlags(character, {
-      shopStockAnnouncementDepth: stock.latestDepth
-    })
+    character: withEventFlags(character, { shopStockAnnouncementDepth: stock.latestDepth })
   };
 }
 
 export function markShopCategorySeen(character, category) {
-  if (!['equipment', 'items'].includes(category)) return character;
+  if (!["equipment", "items"].includes(category)) return character;
   const stock = getShopStockState(character);
   return withEventFlags(character, {
     shopStockSeenCategories: {
@@ -54,6 +84,35 @@ export function markShopCategorySeen(character, category) {
       [category]: stock.categoryDepths[category]
     }
   });
+}
+
+function armorTier(enhancement, shopUnlockDepth, requiredFlags) {
+  return THIEF_ARMOR_IDS.map(equipmentId => Object.freeze({
+    id: `shop_${equipmentId}_plus_${enhancement}`,
+    equipmentId,
+    enhancement,
+    shopUnlockDepth,
+    requiredFlags: Object.freeze([...requiredFlags])
+  }));
+}
+
+function toEquipmentOffer(entry) {
+  const instance = { equipmentId: entry.equipmentId, enhancement: entry.enhancement };
+  const definition = getEquipmentInstanceDefinition(instance);
+  return {
+    ...definition,
+    ...entry,
+    name: getEquipmentInstanceName(instance),
+    buyPrice: definition?.buyPrice,
+    sellPrice: definition?.sellPrice,
+    description: describeBonuses(definition?.statBonuses)
+  };
+}
+
+function describeBonuses(bonuses = {}) {
+  return Object.entries(bonuses)
+    .map(([key, value]) => `${key === "def" ? "DEF" : key.toUpperCase()}+${value}`)
+    .join(" / ");
 }
 
 function latestUnlockDepth(items) {

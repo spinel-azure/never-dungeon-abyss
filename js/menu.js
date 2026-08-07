@@ -1,13 +1,14 @@
 import { calculateDeckCost, DECK_SLOT_COUNT, setDeckSlot } from "../data/deck.js";
 import { getCardById } from "../data/cards.js";
 import { drawCardCanvas } from "./card-canvas.js";
-import { ITEMS, canUseItemIn } from "../data/items.js";
+import { ITEMS, canUseItemIn, getShopItemIdsForCharacter } from "../data/items.js";
 import { normalizeCharacter } from "../data/classes.js";
 import { EQUIPMENT_SLOT_LABELS, canEquipInstance, equipInstance, findEquipmentDefinition, getEquipmentInstanceDefinition, getEquipmentInstanceName, listEquipmentInstances } from "../data/equipment-inventory.js";
 import { collectStats } from "../combat/collect-stats.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { getWeapon, getWeaponType } from "../data/weapons.js";
 import { listOwnedKeyItems } from "../data/key-items.js";
+import { getShopEquipmentStock } from "../data/shop-stock.js";
 
 const ACTION_FEEDBACK_MS = 260;
 const DEBUG_SEQUENCE_MS = 1000;
@@ -197,9 +198,10 @@ function inventoryEntries() {
       .map(instance => ({ instance }))];
   }
   if (menu.inventoryPurpose === "buy") {
-    if (menu.inventoryTab === "items") return ITEMS.filter(item => item.source === "shop" && Number(item.buyPrice) > 0).map(item => ({ item }));
-    if (menu.inventoryTab === "equipment") return ["iron_greatsword", "poison_dagger", "morgenstern"]
-      .map(getWeapon).filter(Boolean).map(shopEquipment => ({ shopEquipment }));
+    if (menu.inventoryTab === "items") return getShopItemIdsForCharacter(character)
+      .map(id => ITEMS.find(item => item.id === id)).filter(Boolean).map(item => ({ item }));
+    if (menu.inventoryTab === "equipment") return getShopEquipmentStock(character)
+      .map(shopEquipment => ({ shopEquipment }));
     return [];
   }
   if (menu.inventoryTab === "items") return ITEMS

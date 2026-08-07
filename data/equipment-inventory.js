@@ -67,7 +67,31 @@ export function getEquipmentInstanceDefinition(instance) {
   if (!definition) return null;
   const enhancement = Math.max(0, Math.min(3, Math.floor(Number(instance?.enhancement) || 0)));
   const penetration = definition.penetrationByEnhancement?.[enhancement];
-  return penetration == null ? definition : { ...definition, defensePenetration: penetration };
+  const statBonuses = definition.statBonusesByEnhancement?.[enhancement] || definition.statBonuses;
+  const buyPrice = definition.buyPriceByEnhancement?.[enhancement] ?? definition.buyPrice;
+  const sellPrice = definition.sellPriceByEnhancement?.[enhancement] ?? definition.sellPrice;
+  return {
+    ...definition,
+    enhancement,
+    statBonuses,
+    ...(penetration == null ? {} : { defensePenetration: penetration }),
+    ...(buyPrice == null ? {} : { buyPrice }),
+    ...(sellPrice == null ? {} : { sellPrice })
+  };
+}
+
+export function collectEquippedInstanceBonuses(equipmentInventory, equippedInstanceIds) {
+  const bonuses = {};
+  const instances = equipmentInventory?.instances || [];
+  for (const instanceId of Object.values(equippedInstanceIds || {})) {
+    if (!instanceId) continue;
+    const instance = instances.find(entry => entry.instanceId === instanceId);
+    const definition = getEquipmentInstanceDefinition(instance);
+    for (const [key, value] of Object.entries(definition?.statBonuses || {})) {
+      bonuses[key] = (bonuses[key] || 0) + Number(value || 0);
+    }
+  }
+  return bonuses;
 }
 
 export function findEquipmentDefinition(equipmentId, slot) {
