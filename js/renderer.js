@@ -317,7 +317,7 @@ function drawFloorLapMessage() {
   ctx.fillStyle = "#f0eadc";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.font = `700 ${Math.max(24, Math.floor(H * .063))}px GameFont, sans-serif`;
+  ctx.font = `400 ${Math.max(54, Math.floor(H * .15))}px PixelFont, monospace`;
   const lineHeight = Math.max(42, H * .09);
   lines.forEach((line, index) => {
     const offset = (index - (lines.length - 1) / 2) * lineHeight;

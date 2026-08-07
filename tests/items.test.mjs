@@ -158,6 +158,17 @@ test("purchases reject insufficient gold and send full-stack overflow to storage
   assert.deepEqual(result.character.warehouse.itemStacks, [{ itemId: "healing_potion", count: 1 }]);
 });
 
+test("shop can purchase several consumables at once", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.gold = 100;
+  const result = purchaseItem(character, "healing_potion", { amount: 4 });
+  assert.equal(result.accepted, true);
+  assert.equal(result.quantity, 4);
+  assert.equal(result.cost, 80);
+  assert.equal(result.character.gold, 20);
+  assert.equal(getItemCount(result.character.inventory, "healing_potion"), 4);
+});
+
 test("shop sells one consumable for half its purchase price", () => {
   const character = characterWith("auto_walker", 2);
   character.gold = 10;

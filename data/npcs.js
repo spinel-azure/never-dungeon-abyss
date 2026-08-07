@@ -17,6 +17,12 @@ export const npcs = [
     retreatOnCancel: true
   },
   {
+    id: "NPC_01_b4", name: "みかんにゃんこ", imageId: "NPC_01", image: "images/npc/NPC_01.avif",
+    interactionType: "talk", greeting: "", voiceSe: ["catVoice01", "catVoice02", "catVoice03"],
+    encounters: [{ dialogue: ["怖いにゃ…。この階にはとても恐ろしい何かの気配を感じるにゃ…。近づいちゃダメにゃあ…！"], leaveAfterTalk: true }],
+    canCancel: true, retreatOnCancel: true
+  },
+  {
     id: "NPC_01_b5",
     name: "みかんにゃんこ",
     imageId: "NPC_01",

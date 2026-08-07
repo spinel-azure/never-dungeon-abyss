@@ -265,6 +265,7 @@ export function placeNpc(depth = 1, progress = {}) {
   if (selected) {
     const normalizedDepth = Math.floor(Number(depth) || 1);
     cells[selected.y][selected.x].npc = normalizedDepth === 2 ? "NPC_01_b2"
+      : normalizedDepth === 4 ? "NPC_01_b4"
       : normalizedDepth === 5 ? "NPC_01_b5"
       : normalizedDepth === 6 ? (progress.bossDefeatedById?.quest_mimic_b6f ? "NPC_01_b6_after" : "NPC_01_b6")
       : normalizedDepth === 9 ? "NPC_01_b9" : "NPC_01";

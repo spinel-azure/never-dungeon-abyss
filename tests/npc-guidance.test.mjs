@@ -4,6 +4,18 @@ import assert from "node:assert/strict";
 import { getNpcById, getNpcEncounter } from "../data/npcs.js";
 import { buildBoundaryWallMap, cells, randomizeStartPosition } from "../js/dungeon.js";
 
+test("B4F Mikan Nyanko warns the player away from the superboss room", () => {
+  const npc = getNpcById("NPC_01_b4");
+  const encounter = getNpcEncounter(npc, 0);
+  assert.deepEqual(encounter.dialogue, [
+    "怖いにゃ…。この階にはとても恐ろしい何かの気配を感じるにゃ…。近づいちゃダメにゃあ…！"
+  ]);
+  assert.equal(encounter.leaveAfterTalk, true);
+  randomizeStartPosition();
+  buildBoundaryWallMap(4, () => .5, {});
+  assert.equal(cells.flat().filter(cell => cell.npc === npc.id).length, 1);
+});
+
 test("B5F Mikan Nyanko guides the player to the fountain", () => {
   const npc = getNpcById("NPC_01_b5");
   const encounter = getNpcEncounter(npc, 0);

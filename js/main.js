@@ -40,13 +40,13 @@ import {
   startBattleTreasureEvent,
   startFloorLapNotice,
   setNpcTypewriterOptions
-} from "./player.js";
-import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setMistOptions, setWallColor, setFloorColor } from "./renderer.js?v=20260807-04";
+} from "./player.js?v=20260807-05";
+import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setMistOptions, setWallColor, setFloorColor } from "./renderer.js?v=20260807-05";
 import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minimap.js";
 import { configureInput } from "./input.js";
 import { configureVirtualStick } from "./virtualStick.js";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js?v=20260806-02";
+import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js?v=20260807-05";
 import { resolveFloorTheme } from "./floorTheme.js";
 import {
   configureAutoReturn,
@@ -82,7 +82,7 @@ import {
 import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
 import { EffectEngine } from "./effects/effect-engine.js";
 import { hasUncertainLoot } from "./loot-identification.js";
-import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js?v=20260807-04";
+import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js?v=20260807-05";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js?v=20260806-02";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName, grantEquipmentInstance } from "../data/equipment-inventory.js";
@@ -111,7 +111,7 @@ import { collectCardStatBonuses, getCardById, hasCardEffect } from "../data/card
 import { drawCardCanvas } from "./card-canvas.js";
 import { getItem } from "../data/items.js?v=20260806-01";
 import { isCriticalHp } from "../data/quick-status.js";
-import { purchaseBuybackEquipment, purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
+import { purchaseBuybackEquipment, purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js?v=20260807-05";
 import { addLootEquipment, addLootGold, addLootItem, depositItemInWarehouse, settleLootBag, withdrawItemFromWarehouse } from "../data/inventory.js";
 import { rollEnemyDrop, rollRedChestLoot } from "../data/loot.js";
 import { rollTreasureTrap } from "../data/traps.js";
@@ -1231,9 +1231,9 @@ import {
     }, 1700);
   }
 
-  function purchaseTownItem(itemId) {
+  function purchaseTownItem(itemId, amount = 1) {
     if (!character) return { accepted: false, reason: "noCharacter" };
-    const result = purchaseItem(character, itemId);
+    const result = purchaseItem(character, itemId, { amount });
     if (!result.accepted) return result;
     character = result.character;
     updateCharacterUi();
@@ -2005,7 +2005,6 @@ import {
 
   function descendFloor() {
     const descendedAt = performance.now();
-    const lapTime = formatElapsedTime(descendedAt - floorStartedAt);
     const nextStart = { x: state.gridX, y: state.gridY };
     currentDepth += 1;
     if (character) {
@@ -2031,7 +2030,7 @@ import {
     setDungeonColors(resolveFloorTheme(currentDepth, getDungeonColors()));
     floorStartedAt = descendedAt;
     resetDungeon("", nextStart);
-    startFloorLapNotice(currentDepth, lapTime);
+    startFloorLapNotice(currentDepth);
     scheduleAutosave();
   }
 

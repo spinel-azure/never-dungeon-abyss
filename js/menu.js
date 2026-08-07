@@ -805,11 +805,22 @@ function renderDeckPicker() {
       const setCount = menu.deckSlots.filter(id => id === card.id).length;
       const setLabel = setCount > 1 ? `[SET×${setCount}]` : setCount === 1 ? "[SET]" : "";
       const nowLabel = menu.deckSlots[menu.deckCursor] === card.id ? "[NOW]" : "";
-      count.textContent = [
-        `${card.nameJa}　×${menu.getCharacter()?.cards?.ownedCardCounts?.[card.id] || 0}`,
-        setLabel,
-        nowLabel
-      ].filter(Boolean).join(" ");
+      const cardCount = document.createElement("span");
+      cardCount.className = "deck-picker-card-count";
+      cardCount.textContent = `${card.nameJa}　×${menu.getCharacter()?.cards?.ownedCardCounts?.[card.id] || 0}`;
+      count.append(cardCount);
+      if (setLabel) {
+        const label = document.createElement("em");
+        label.className = "deck-picker-set-label";
+        label.textContent = setLabel;
+        count.append(label);
+      }
+      if (nowLabel) {
+        const label = document.createElement("em");
+        label.className = "deck-picker-now-label";
+        label.textContent = nowLabel;
+        count.append(label);
+      }
       button.append(canvas, count);
     } else {
       button.textContent = "はずす / EMPTY";

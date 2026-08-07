@@ -235,6 +235,13 @@ export function tryMove(amount, automated = false, specialEntryConfirmed = false
   if (state.anim) return;
   if (!automated) hooks.cancelAutoReturn(false);
   const currentDir = amount > 0 ? DIRS[state.dir] : DIRS[(state.dir + 2) % 4];
+  const currentDoorKind = getDoorKind(state.gridX, state.gridY, currentDir.key);
+  if (currentDoorKind === "specialLocked" && !openDoorOnCell(state.gridX, state.gridY, currentDir.key)) {
+    hooks.playSe("blocked");
+    state.shake = amount > 0 ? -12 : 9;
+    startSpecialDoorLockEvent(state.gridX, state.gridY, currentDir.key);
+    return;
+  }
   if (closedDoorOnCell(state.gridX, state.gridY, currentDir.key)) {
     hooks.playSe("blocked");
     state.shake = amount > 0 ? -12 : 9;
@@ -340,12 +347,12 @@ export function openDoorAhead(automated = false) {
   if (!playerInputEnabled) return false;
   if (state.overlayEvent || state.anim || (state.autoReturning && !automated)) return false;
   const dir = DIRS[state.dir];
-  if (!closedDoorOnCell(state.gridX, state.gridY, dir.key)) return false;
   const doorKind = getDoorKind(state.gridX, state.gridY, dir.key);
   if (doorKind === "specialLocked") {
     startSpecialDoorLockEvent(state.gridX, state.gridY, dir.key);
     return true;
   }
+  if (!closedDoorOnCell(state.gridX, state.gridY, dir.key)) return false;
   if (doorKind === "boss") {
     const result = hooks.unlockBossDoor({ x: state.gridX, y: state.gridY, dirKey: dir.key }) || {};
     if (!result.accepted) {
@@ -542,11 +549,11 @@ function startEncounterNotice(encounterType) {
   }, 1400);
 }
 
-export function startFloorLapNotice(depth, lapTime) {
+export function startFloorLapNotice(depth) {
   startOverlayEvent({
     type: "floorLap",
     showOverlay: false,
-    overlayMessage: `＊　B${depth}F　＊\n＊　LAP TIME ${lapTime}　＊`
+    overlayMessage: `B${depth}F`
   });
 }
 

@@ -1278,6 +1278,12 @@ function handleCommerceInput(action) {
 function requestCommerceConfirmation() {
   const item = town.commerceItems[town.commerceIndex];
   if (!item) return;
+  if (town.commerceKind === "buy") {
+    town.commerceQuantity = 1;
+    town.mode = "commerceQuantity";
+    renderCommerceQuantity();
+    return;
+  }
   if (town.commerceKind === "sell" || town.commerceKind === "storageDeposit") {
     const owned = Math.max(0, Math.floor(Number(town.getCharacter()?.inventory?.counts?.[item.id]) || 0));
     town.commerceQuantity = Math.max(1, Math.min(owned, town.commerceQuantity || 1));
@@ -1302,6 +1308,8 @@ function showCommerceConfirmation() {
       ? `女主人ヘレン：${item.name}を${town.commerceQuantity || 1}個預かればいいのね？\n＊Aボタン：はい　Bボタン：いいえ`
     : town.commerceKind === "sell"
       ? `女主人ヘレン：${item.sellPrice}G ×${town.commerceQuantity || 1}、合計${item.sellPrice * (town.commerceQuantity || 1)}Gで買い取るわ。これでいい？\n＊Aボタン：はい　Bボタン：いいえ`
+    : town.commerceKind === "buy"
+      ? `女主人ヘレン：${item.buyPrice}G ×${town.commerceQuantity || 1}、合計${item.buyPrice * (town.commerceQuantity || 1)}Gで購入するのね？\n所持数：${inventoryItemCount(item.id)}／${item.maxOwned || 99}　倉庫：${warehouseItemCount(item.id)}　所持金：${formatGold(town.getCharacter()?.gold)}G\n＊Aボタン：はい　Bボタン：いいえ`
     : town.commerceKind === "buyEquipment" || town.commerceKind === "buybackEquipment"
       ? `女主人ヘレン：${item.name}を${item.buyPrice}Gで購入するのね？\n所持金：${formatGold(town.getCharacter()?.gold)}G\n＊Aボタン：はい　Bボタン：いいえ`
       : `女主人ヘレン：${item.name}を${item.buyPrice}Gで購入するのね？\n所持数：${inventoryItemCount(item.id)}／${item.maxOwned || 99}　倉庫：${warehouseItemCount(item.id)}　所持金：${formatGold(town.getCharacter()?.gold)}G\n＊Aボタン：はい　Bボタン：いいえ`;
@@ -1311,9 +1319,14 @@ function handleCommerceQuantityInput(action) {
   const item = town.commerceItems[town.commerceIndex];
   if (!item) return true;
   const owned = Math.max(1, Math.floor(Number(town.getCharacter()?.inventory?.counts?.[item.id]) || 1));
+  const maximum = town.commerceKind === "buy"
+    ? Math.max(1, Math.min(99, item.buyPrice > 0
+      ? Math.floor(Math.max(0, Number(town.getCharacter()?.gold) || 0) / item.buyPrice)
+      : 99))
+    : owned;
   if (["up", "down", "left", "right"].includes(action)) {
     const amount = action === "up" ? 1 : action === "down" ? -1 : action === "right" ? 10 : -10;
-    town.commerceQuantity = Math.max(1, Math.min(owned, town.commerceQuantity + amount));
+    town.commerceQuantity = Math.max(1, Math.min(maximum, town.commerceQuantity + amount));
     town.playSe("cursorMove");
     renderCommerceQuantity();
     return true;
@@ -1335,7 +1348,9 @@ function handleCommerceQuantityInput(action) {
 function renderCommerceQuantity() {
   const item = town.commerceItems[town.commerceIndex];
   const owned = Math.max(1, Math.floor(Number(town.getCharacter()?.inventory?.counts?.[item?.id]) || 1));
-  town.messageEl.textContent = town.commerceKind === "storageDeposit"
+  town.messageEl.textContent = town.commerceKind === "buy"
+    ? `女主人ヘレン：いくつ購入するのかしら？\n購入数 ${town.commerceQuantity}　合計 ${item.buyPrice * town.commerceQuantity}G\n所持数：${inventoryItemCount(item.id)}／${item.maxOwned || 99}　倉庫：${warehouseItemCount(item.id)}\n＊↑↓：1個　←→：10個　Aボタン：決定　Bボタン：戻る`
+    : town.commerceKind === "storageDeposit"
     ? `女主人ヘレン：いくつ預かればいいのかしら？\n預ける数 ${town.commerceQuantity} / ${owned}\n＊↑↓：1個　←→：10個　Aボタン：決定　Bボタン：戻る`
     : `女主人ヘレン：いくつ売るのかしら？\n売却数 ${town.commerceQuantity} / ${owned}　合計 ${item.sellPrice * town.commerceQuantity}G\n＊↑↓：1個　←→：10個　Aボタン：決定　Bボタン：戻る`;
 }
@@ -1372,7 +1387,7 @@ function purchaseSelectedCommerceItem() {
       ? town.onPurchaseEquipment(item.id)
       : town.commerceKind === "buybackEquipment"
         ? town.onBuybackEquipment(item.id)
-      : town.onPurchaseItem(item.id);
+      : town.onPurchaseItem(item.id, town.commerceQuantity || 1);
   if (!result?.accepted) {
     town.playSe("cursorMove");
     town.messageEl.textContent = result?.reason === "insufficientGold"
@@ -1395,7 +1410,9 @@ function purchaseSelectedCommerceItem() {
       ? `${keeper}：${item.name}を${result.quantity}個、${result.value}Gで買い取ったわ。`
     : result.stored > 0
       ? `${keeper}：はい、どうぞ。\n${item.name}はこれ以上持てません。超過分を倉庫へ送りました。`
-      : `${keeper}：はい、どうぞ。`;
+      : town.commerceKind === "buy" && result.quantity > 1
+        ? `${keeper}：${item.name}を${result.quantity}個ね。はい、どうぞ。`
+        : `${keeper}：はい、どうぞ。`;
   town.mode = "commerce";
   if (((selling || depositing) && Number(town.getCharacter()?.inventory?.counts?.[item.id] || 0) <= 0)
     || (withdrawing && warehouseItemCount(item.id) <= 0)
