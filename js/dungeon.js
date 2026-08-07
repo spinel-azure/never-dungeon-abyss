@@ -116,10 +116,10 @@ function buildBoundaryWallMapAttempt(depth = 1, rng = Math.random, progress = {}
   const floorBoss = getFloorBossByDepth(depth);
   if (floorBoss) placeFloorBossRoom(floorBoss, rng, progress);
   placeSpecialRoom(depth, rng);
+  placeNpc(depth, progress);
   placeTreasures(depth, rng, progress);
   placeFountain(depth, rng);
   if (floorBoss?.room?.requiresKey) placeFloorBossKeyTreasure(floorBoss, rng, progress);
-  placeNpc(depth, progress);
   placeNormalDoors(NORMAL_DOOR_COUNT, false);
 }
 
@@ -246,17 +246,17 @@ export function placeNpc(depth = 1, progress = {}) {
   const { x: startX, y: startY } = startPosition;
   resetNpcs();
   const distances = makeDistanceMap(startX, startY);
+  const reserved = getTraversalBlockingReservations(cells);
   const candidates = [];
   for (let y = 0; y < MAP_H; y++) {
     for (let x = 0; x < MAP_W; x++) {
       if (x === startX && y === startY) continue;
-      if (
-        cells[y][x].type !== "floor"
-        || isDungeonFeatureOccupied(cells[y][x])
-        || cells[y][x].fountain
-        || cells[y][x].treasure
-      ) continue;
-      if (distances[y][x] < 1 || distances[y][x] > 3) continue;
+      if (cells[y][x].type !== "floor" || isDungeonFeatureOccupied(cells[y][x])) continue;
+      if (distances[y][x] < 4) continue;
+      // NPCs currently behave as impassable cells. Reject placements that
+      // would disconnect any other cell from the dungeon entrance.
+      const blocked = [...reserved, { x, y }];
+      if (countReachableCells(startX, startY, blocked) !== MAP_W * MAP_H - blocked.length) continue;
       candidates.push({ x, y, distance: distances[y][x] });
     }
   }

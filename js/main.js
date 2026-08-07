@@ -20,7 +20,7 @@ import {
   markBossDefeatedAt,
   setStartPosition,
   randomizeStartPosition
-} from "./dungeon.js?v=20260807-06";
+} from "./dungeon.js?v=20260807-07";
 import {
   state,
   configurePlayer,
