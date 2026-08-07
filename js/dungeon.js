@@ -131,6 +131,9 @@ export function validateDungeonLayout({ depth = 1 } = {}) {
   const errors = [];
   const blocking = getTraversalBlockingReservations(cells);
   const blocked = new Set(blocking.map(cell => `${cell.x},${cell.y}`));
+  for (const cell of cells.flat()) {
+    if (cell.npc) blocked.add(`${cell.x},${cell.y}`);
+  }
   const reachableBeforeUnlock = validationReachableCellKeys(startPosition.x, startPosition.y, blocked);
   const expectedBeforeUnlock = MAP_W * MAP_H - blocked.size;
   if (reachableBeforeUnlock.size !== expectedBeforeUnlock) {
@@ -917,4 +920,15 @@ export function wallOnCell(x, y, dirKey) {
   if (doorState === "open") return false;
   if (doorState === "closed" || doorState === "locked") return true;
   return cells[y][x].walls[dirKey];
+}
+
+export function isCellCompletelySealed(x, y) {
+  if (!inBounds(x, y)) return true;
+  return DIRS.every(dir => {
+    const nx = x + dir.dx;
+    const ny = y + dir.dy;
+    if (!inBounds(nx, ny)) return true;
+    if (getDoorState(x, y, dir.key)) return false;
+    return wallOnCell(x, y, dir.key);
+  });
 }

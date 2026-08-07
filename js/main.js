@@ -10,6 +10,7 @@ import {
   buildBoundaryWallMap,
   chooseStartDirection,
   inBounds,
+  isCellCompletelySealed,
   wallOnCell,
   closedDoorOnCell,
   openDoorOnCell,
@@ -20,7 +21,7 @@ import {
   markBossDefeatedAt,
   setStartPosition,
   randomizeStartPosition
-} from "./dungeon.js?v=20260807-07";
+} from "./dungeon.js?v=20260807-08";
 import {
   state,
   configurePlayer,
@@ -548,6 +549,11 @@ import {
     updateCharacterUi();
     const savedLocation = save.world?.location === "town" ? "town" : "dungeon";
     worldLocation = savedLocation;
+    if (savedLocation === "dungeon" && isCellCompletelySealed(state.gridX, state.gridY)) {
+      returnToTown();
+      say("移動できない場所から救出され、ダンジョン入口へ戻った。");
+      return true;
+    }
     if (savedLocation === "town") {
       state.treasureCompassActive = false;
       stopBgm();

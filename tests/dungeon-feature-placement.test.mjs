@@ -11,7 +11,10 @@ import {
   buildBoundaryWallMap,
   cells,
   getLastDungeonBuildReport,
+  isCellCompletelySealed,
+  setDoor,
   setStartPosition,
+  setWall,
   validateDungeonLayout
 } from "../js/dungeon.js";
 
@@ -65,6 +68,16 @@ test("post-generation validation protects future feature approaches", () => {
       assert.equal(cell.fountain, null);
     }
   }
+});
+
+test("sealed save cells are distinguished from rooms with an operable door", () => {
+  setStartPosition(0, 0);
+  buildBoundaryWallMap(1, seeded(71), {});
+  setWall(0, 0, "E", true);
+  setWall(0, 0, "S", true);
+  assert.equal(isCellCompletelySealed(0, 0), true);
+  setDoor(0, 0, "E", "closed", "normal");
+  assert.equal(isCellCompletelySealed(0, 0), false);
 });
 
 function makeGrid(width, height) {
