@@ -108,7 +108,8 @@ export function createPlayerAction(player, command = {}, enemy = null) {
       spCost: 0,
       action: createNormalAttack({
         weaponId: player.equipment?.weaponId,
-        weaponEnhancement: player.equipment?.rightArmEnhancement
+        weaponEnhancement: player.equipment?.rightArmEnhancement,
+        skillIds: player.skillIds
       })
     };
   }
@@ -152,6 +153,7 @@ export function createPlayerAction(player, command = {}, enemy = null) {
   if (command.type !== "skill") return { ok: false, reason: "notImplemented" };
   const skill = getSkill(command.skillId);
   if (!skill || !player.skillIds?.includes(skill.id)) return { ok: false, reason: "unknownSkill" };
+  if (skill.actionType === "passive") return { ok: false, reason: "passive" };
   if (player.sp < skill.spCost) return { ok: false, reason: "insufficientSp" };
   if (["cureStatus", "sacrificialCure"].includes(skill.actionType)
     && !(player.statuses || []).some(status => (status.statusId || status.id) === skill.statusId)) {

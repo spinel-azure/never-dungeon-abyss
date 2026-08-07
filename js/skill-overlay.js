@@ -124,7 +124,7 @@ function render() {
     button.className = "skill-overlay-item";
     button.dataset.skillId = skill.id;
     button.disabled = Boolean(unavailableReason(skill, character));
-    button.innerHTML = `<span>${skill.name}</span><small>SP${skill.spCost}</small>`;
+    button.innerHTML = `<span>${skill.name}</span><small>${skill.actionType === "passive" ? "PASSIVE" : `SP${skill.spCost}`}</small>`;
     button.addEventListener("click", () => {
       overlay.selectedIndex = index;
       renderSelection();
@@ -151,6 +151,7 @@ function renderSelection() {
 }
 
 function unavailableReason(skill, character) {
+  if (skill.actionType === "passive") return "passive";
   if (character.sp < skill.spCost) return "insufficientSp";
   if (overlay.context === "field" && !["healing", "cureStatus", "sacrificialCure", "dungeonEffect"].includes(skill.actionType)) return "battleOnly";
   if (overlay.context === "battle" && skill.actionType === "dungeonEffect") return "fieldOnly";
@@ -175,7 +176,8 @@ function showReason(reason) {
     noEffect: "毒状態ではない。",
     undeadOnly: "アンデッドにしか効果がない。",
     bossImmune: "この敵には効かない。",
-    unknownSkill: "現在使用できない。"
+    unknownSkill: "現在使用できない。",
+    passive: "このスキルは常時発動している。"
   };
   overlay.messageEl.classList.remove("is-skill-description");
   overlay.messageEl.textContent = messages[reason] || "現在使用できない。";

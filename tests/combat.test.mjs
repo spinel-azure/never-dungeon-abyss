@@ -25,6 +25,7 @@ import { resolveEscapeAttempt } from "../combat/resolve-escape.js";
 import { resolveDefeatRecovery } from "../combat/resolve-defeat-recovery.js";
 import {
   createBattleState,
+  createPlayerAction,
   createEnemyAction,
   resolveBattleRound,
   resolveEnemyAmbush
@@ -191,6 +192,32 @@ test("future staves do not inherit the oak staff rescue attack", () => {
   assert.equal(attack.attackStat, "str");
   assert.equal(attack.attackStatMultiplier, undefined);
   assert.equal(attack.ignoresDefense, false);
+});
+
+test("Wisdom to Power adds half INT to normal attacks except with the oak staff", () => {
+  const attacker = { str: 2, int: 10, dex: 0, agi: 10 };
+  const defender = { agi: 0, def: 4 };
+  const futureStaff = {
+    id: "future_staff", name: "TEST", type: "staff", attack: 0, element: "physical"
+  };
+  const passiveAttack = createNormalAttack({
+    weapon: futureStaff,
+    skillIds: ["wisdom_to_power"]
+  });
+  const passiveResult = resolvePhysicalAttack({
+    attacker,
+    defender,
+    attack: passiveAttack,
+    rng: fixed(0, 0.9, 0.5)
+  });
+  const oakAttack = createNormalAttack({
+    weapon: getWeapon("oak_staff"),
+    skillIds: ["wisdom_to_power"]
+  });
+
+  assert.deepEqual(passiveAttack.additionalAttackStats, [{ stat: "int", multiplier: 0.5 }]);
+  assert.equal(passiveResult.totalDamage, 4);
+  assert.deepEqual(oakAttack.additionalAttackStats, []);
 });
 
 test("equipment bonuses are included in combat stats", () => {
@@ -1171,6 +1198,15 @@ test("the three jobs learn their new dungeon skills at the intended levels", () 
   assert.equal(normalizeCharacter({ ...createInitialCharacter({ name: "W", job: "warrior" }), level: 5 }).skillIds.includes("survival_instinct"), true);
   assert.equal(normalizeCharacter({ ...createInitialCharacter({ name: "M", job: "mage" }), level: 4 }).skillIds.includes("staff_light"), true);
   assert.equal(normalizeCharacter({ ...createInitialCharacter({ name: "T", job: "thief" }), level: 8 }).skillIds.includes("conceal_presence"), true);
+});
+
+test("mages learn Wisdom to Power at level 25 and cannot activate the passive manually", () => {
+  const level24 = normalizeCharacter({ ...createInitialCharacter({ name: "M", job: "mage" }), level: 24 });
+  const level25 = normalizeCharacter({ ...createInitialCharacter({ name: "M", job: "mage" }), level: 25 });
+  assert.equal(level24.skillIds.includes("wisdom_to_power"), false);
+  assert.equal(level25.skillIds.includes("wisdom_to_power"), true);
+  assert.equal(getSkill("wisdom_to_power").actionType, "passive");
+  assert.equal(createPlayerAction(level25, { type: "skill", skillId: "wisdom_to_power" }).reason, "passive");
 });
 
 test("Staff Light restores fifty torch points and Conceal Presence cannot stack", () => {

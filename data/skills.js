@@ -178,6 +178,16 @@ export const SKILLS = Object.freeze({
     effectValue: 50,
     effects: Object.freeze([])
   }),
+  wisdom_to_power: Object.freeze({
+    id: "wisdom_to_power",
+    name: "知恵よ、力を！",
+    description: "通常攻撃時、INTをSTRに上乗せする。\n樫の杖装備時は発動しない。",
+    actionType: "passive",
+    category: "passive",
+    spCost: 0,
+    target: "self",
+    effects: Object.freeze([])
+  }),
   survival_instinct: Object.freeze({
     id: "survival_instinct",
     name: "生存本能",
@@ -204,6 +214,7 @@ export function getSkills(ids = []) {
 
 export const LEVEL_SKILL_UNLOCKS = Object.freeze([
   Object.freeze({ job: "mage", level: 4, skillId: "staff_light" }),
+  Object.freeze({ job: "mage", level: 25, skillId: "wisdom_to_power" }),
   Object.freeze({ job: "warrior", level: 5, skillId: "survival_instinct" }),
   Object.freeze({ job: "priest", level: 3, skillId: "antidote" }),
   Object.freeze({ job: "priest", level: 5, skillId: "exorcism" }),

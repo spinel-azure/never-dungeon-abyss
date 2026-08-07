@@ -1,8 +1,9 @@
 import { getWeapon, getWeaponType } from "../data/weapons.js";
 
-export function createNormalAttack({ weapon, weaponId, weaponEnhancement = 0 } = {}) {
+export function createNormalAttack({ weapon, weaponId, weaponEnhancement = 0, skillIds = [] } = {}) {
   const resolvedWeapon = weapon || getWeapon(weaponId, weaponEnhancement);
   const type = getWeaponType(resolvedWeapon.type);
+  const wisdomToPowerActive = skillIds.includes("wisdom_to_power") && resolvedWeapon.id !== "oak_staff";
   return {
     id: "normal_attack",
     name: "攻撃",
@@ -13,6 +14,9 @@ export function createNormalAttack({ weapon, weaponId, weaponEnhancement = 0 } =
     defensePenetration: (type.defensePenetration || 0) + (resolvedWeapon.defensePenetration || 0),
     attackStat: resolvedWeapon.normalAttackStat || type.normalAttackStat || "str",
     attackStatMultiplier: resolvedWeapon.normalAttackStatMultiplier ?? type.normalAttackStatMultiplier,
+    additionalAttackStats: wisdomToPowerActive
+      ? Object.freeze([{ stat: "int", multiplier: 0.5 }])
+      : Object.freeze([]),
     damageDexMultiplier: type.damageDexMultiplier || 0,
     ignoresDefense: Boolean(resolvedWeapon.normalAttackIgnoresDefense ?? type.normalAttackIgnoresDefense),
     hitBonus: resolvedWeapon.hitBonus || 0,

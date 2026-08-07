@@ -25,6 +25,9 @@ export function resolvePhysicalAttack({
     : COMBAT_CONFIG.strengthMultiplier;
   const attackPower = Math.max(0, numeric(attack.weapon?.attack ?? attack.weaponAttack))
     + numeric(attacker[attackStat]) * attackStatMultiplier
+    + (attack.additionalAttackStats || []).reduce((total, addition) => (
+      total + numeric(attacker[addition?.stat]) * numeric(addition?.multiplier)
+    ), 0)
     + numeric(attacker.dex) * numeric(attack.damageDexMultiplier);
   const hitRate = calculatePhysicalHitRate({ attacker, defender, attack });
   const criticalRate = calculateCriticalRate({ attacker, attack });
