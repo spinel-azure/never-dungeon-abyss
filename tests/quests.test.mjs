@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
+import { applyBossVictory } from "../data/bosses.js";
 import { getOwnedCardCount } from "../data/deck.js";
 import {
   MAX_ACTIVE_QUESTS,
@@ -314,6 +315,23 @@ test("quest 006 unlocks after quest 005 and rewards First Aid once", () => {
   assert.equal(report.bonusGold, 400);
   assert.equal(report.character.eventFlags.black_chests_unlocked, true);
   assert.equal(getOwnedCardCount(report.character.cards, "common_first_aid"), 1);
+});
+
+test("defeating the B6 quest mimic completes quest 006", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "thief" });
+  character.quests.completedQuestIds.push(
+    QUEST_ID,
+    SLIME_EXTERMINATION_QUEST_ID,
+    FLOOR_SURVEY_QUEST_ID,
+    RABBIT_EXTERMINATION_QUEST_ID,
+    WANDERING_DEAD_EXTERMINATION_QUEST_ID
+  );
+  character = acceptQuest(character, BLACK_BOX_INVESTIGATION_QUEST_ID).character;
+  character = applyBossVictory(character, "quest_mimic_b6f").character;
+  character = recordBossDefeat(character, "quest_mimic_b6f", 6);
+  character = recordCustomQuestProgress(character, BLACK_BOX_INVESTIGATION_QUEST_ID, 1);
+  assert.equal(getQuestProgress(character, BLACK_BOX_INVESTIGATION_QUEST_ID).readyToReport, true);
+  assert.equal(character.eventFlags.boss_quest_mimic_b6f_defeated, true);
 });
 
 test("quest 007 requires the B9 boss and restores progress after abandonment", () => {

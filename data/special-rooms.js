@@ -74,6 +74,15 @@ export function getSpecialRoomAccessRestriction({ forcedEnemyId = null } = {}) {
     : { blocked: false, reason: "", message: "" };
 }
 
+export function getQuestRequiredSpecialRoomAccess(room, progress = {}) {
+  if (!room?.content?.requiredQuestId) {
+    return { blocked: false, reason: "", message: "" };
+  }
+  return progress.active && !progress.completed
+    ? { blocked: false, reason: "", message: "" }
+    : { blocked: true, reason: "questRequired", message: "今はこの扉は開かないようだ。" };
+}
+
 export function getSpecialRoomUnlockRate(lock, dex, attemptIndex = 0) {
   const mode = lock?.mode || "dexCurve";
   if (mode === "alwaysSuccess") return 1;

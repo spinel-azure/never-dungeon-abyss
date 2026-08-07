@@ -121,13 +121,14 @@ import { rollEnemyDrop, rollRedChestLoot } from "../data/loot.js";
 import { rollTreasureTrap } from "../data/traps.js";
 import { restAtHealingFountain as restoreAtHealingFountain } from "../data/fountains.js";
 import { getSkill } from "../data/skills.js";
-import { getSpecialRoomAccessRestriction, getSpecialRoomDefinition } from "../data/special-rooms.js";
+import { getQuestRequiredSpecialRoomAccess, getSpecialRoomAccessRestriction, getSpecialRoomDefinition } from "../data/special-rooms.js";
 import { acknowledgeShopStockAnnouncement, getShopStockState, markShopCategorySeen } from "../data/shop-stock.js";
 import {
   abandonQuest,
   acceptQuest,
   FLOOR_SURVEY_QUEST_ID,
   getForcedEnemyId,
+  getQuestProgress,
   hasActiveQuest,
   isDungeonDepthUnlocked,
   recordEnemyDefeat,
@@ -2114,9 +2115,8 @@ import {
     const room = getSpecialRoomDefinition(currentDepth);
     if (room?.content?.requiredQuestId) {
       const progress = getQuestProgress(character, room.content.requiredQuestId);
-      if (!progress.active || progress.completed) {
-        return { blocked: true, reason: "questRequired", message: "今はこの扉は開かないようだ。" };
-      }
+      const questAccess = getQuestRequiredSpecialRoomAccess(room, progress);
+      if (questAccess.blocked) return questAccess;
     }
     return getSpecialRoomAccessRestriction({
       forcedEnemyId: getForcedEnemyId(character, { depth: currentDepth })

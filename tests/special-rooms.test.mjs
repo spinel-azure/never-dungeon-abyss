@@ -8,7 +8,12 @@ import {
   getSpecialRoomLockInfo,
   setStartPosition
 } from "../js/dungeon.js";
-import { getSpecialRoomAccessRestriction, getSpecialRoomDefinition, getSpecialRoomUnlockRate } from "../data/special-rooms.js";
+import {
+  getQuestRequiredSpecialRoomAccess,
+  getSpecialRoomAccessRestriction,
+  getSpecialRoomDefinition,
+  getSpecialRoomUnlockRate
+} from "../data/special-rooms.js";
 import { shouldDrawSpecialRoomMarker } from "../js/minimap.js";
 
 test("B2 special room contains the repeatable Paul event boss", () => {
@@ -37,6 +42,34 @@ test("B6 special room is the quest-gated one-time mimic event", () => {
     revealBeforeExploration: true,
     requiredQuestId: "guild_006"
   });
+});
+
+test("B6 special room blocks unaccepted or completed quest states and admits an active quest", () => {
+  const room = getSpecialRoomDefinition(6);
+  assert.deepEqual(getQuestRequiredSpecialRoomAccess(room, { active: false, completed: false }), {
+    blocked: true,
+    reason: "questRequired",
+    message: "今はこの扉は開かないようだ。"
+  });
+  assert.deepEqual(getQuestRequiredSpecialRoomAccess(room, { active: true, completed: false }), {
+    blocked: false,
+    reason: "",
+    message: ""
+  });
+  assert.equal(getQuestRequiredSpecialRoomAccess(room, { active: false, completed: true }).blocked, true);
+  assert.equal(getQuestRequiredSpecialRoomAccess(getSpecialRoomDefinition(2), {}).blocked, false);
+  assert.equal(getQuestRequiredSpecialRoomAccess(getSpecialRoomDefinition(4), {}).blocked, false);
+});
+
+test("B6 quest room unlocks and retains the mimic event content", () => {
+  setStartPosition(0, 0);
+  buildBoundaryWallMap(6, seeded(76), {});
+  const edge = findSpecialDoorEdge();
+  const result = attemptSpecialRoomUnlock({ ...edge, dex: 30, rng: () => 0 });
+  assert.equal(result.accepted, true);
+  assert.equal(result.unlocked, true);
+  assert.equal(cells[edge.y][edge.x].doorKinds[edge.dirKey], "specialUnlocked");
+  assert.equal(cells.flat().find(cell => cell.specialRoom)?.specialRoom?.content?.bossId, "quest_mimic_b6f");
 });
 
 test("B4 special room warns before entering the one-time superboss event", () => {

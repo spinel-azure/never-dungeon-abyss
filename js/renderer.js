@@ -614,9 +614,8 @@ export function drawCellEvents(layer = "all") {
       const cell = cells[y][x];
       const projected = projectCellCenter(x, y);
       if (!projected) continue;
-      if (!hasLineOfSightToCell(x, y)) continue;
-      const hasSprite = Boolean(cell.bossId || cell.bossRemainsId || cell.npc || cell.fountain || cell.treasure);
-      if (hasSprite && !projectCellFootprint(x, y, projected.forward)) continue;
+      const hasSprite = isSpriteEventCell(cell);
+      if (hasSprite ? !isSpriteCellVisible(x, y) : !hasLineOfSightToCell(x, y)) continue;
       if (cell.type === "stairsUp" || cell.type === "stairsDown") {
         if (layer === "sprite") continue;
         events.push({
@@ -696,6 +695,23 @@ function projectCellCenter(cellX, cellY) {
   return projectWorldPoint(cellX + .5, cellY + .5);
 }
 
+export function isSpriteEventCell(cell = {}) {
+  return Boolean(cell.bossId || cell.bossRemainsId || cell.npc || cell.fountain || cell.treasure);
+}
+
+function isSpriteCellVisible(cellX, cellY) {
+  const { state } = renderer;
+  return hasGridLineOfSight({
+    viewerX: state.x,
+    viewerY: state.y,
+    targetX: cellX + .5,
+    targetY: cellY + .5,
+    targetCellX: cellX,
+    targetCellY: cellY,
+    wallOnCell: renderer.wallOnCell
+  });
+}
+
 function projectCellFootprint(cellX, cellY, forward, requireFullVisibility = false) {
   const visibilityInset = .18;
   const projectionInset = .03;
@@ -755,22 +771,42 @@ function hasLineOfSightToCell(targetCellX, targetCellY) {
 
 function hasLineOfSightToPoint(targetX, targetY, targetCellX = Math.floor(targetX), targetCellY = Math.floor(targetY)) {
   const { state } = renderer;
-  let prevX = Math.floor(state.x);
-  let prevY = Math.floor(state.y);
-  const dx = targetX - state.x;
-  const dy = targetY - state.y;
+  return hasGridLineOfSight({
+    viewerX: state.x,
+    viewerY: state.y,
+    targetX,
+    targetY,
+    targetCellX,
+    targetCellY,
+    wallOnCell: renderer.wallOnCell
+  });
+}
+
+export function hasGridLineOfSight({
+  viewerX,
+  viewerY,
+  targetX,
+  targetY,
+  targetCellX = Math.floor(targetX),
+  targetCellY = Math.floor(targetY),
+  wallOnCell = () => true
+} = {}) {
+  let prevX = Math.floor(viewerX);
+  let prevY = Math.floor(viewerY);
+  const dx = targetX - viewerX;
+  const dy = targetY - viewerY;
   const steps = Math.max(8, Math.ceil(Math.hypot(dx, dy) * 12));
 
   for (let i = 1; i <= steps; i++) {
     const t = i / steps;
-    const sampleX = state.x + dx * t;
-    const sampleY = state.y + dy * t;
+    const sampleX = viewerX + dx * t;
+    const sampleY = viewerY + dy * t;
     const cellX = Math.floor(sampleX);
     const cellY = Math.floor(sampleY);
     if (cellX === prevX && cellY === prevY) continue;
 
     const dirKey = directionKeyBetween(prevX, prevY, cellX, cellY);
-    if (!dirKey || renderer.wallOnCell(prevX, prevY, dirKey)) return false;
+    if (!dirKey || wallOnCell(prevX, prevY, dirKey)) return false;
     prevX = cellX;
     prevY = cellY;
     if (prevX === targetCellX && prevY === targetCellY) return true;
