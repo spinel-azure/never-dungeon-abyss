@@ -24,10 +24,10 @@ export function rollBlackChestLoot(rng = Math.random, depth = 6) {
   const table = getBlackChestLootTable(depth);
   const roll = normalizedRoll(rng);
   if (Number(depth) >= 6 && Number(depth) <= 10) {
-    if (roll < 0.4) {
+    if (roll < 0.43) {
       return { kind: "item", itemId: "healing_potion_medium", amount: 1, unidentifiedName: "？薬" };
     }
-    if (roll < 0.7) {
+    if (roll < 0.73) {
       return { kind: "card", cardId: rollFromList([
         "rare_strength_up_plus",
         "rare_dexterity_lesson_plus",
@@ -36,7 +36,7 @@ export function rollBlackChestLoot(rng = Math.random, depth = 6) {
         "rare_gale_feather_plus"
       ], rng), amount: 1, unidentifiedName: "？カード", rarity: "R" };
     }
-    if (roll < 0.9) {
+    if (roll < 0.93) {
       return { kind: "card", cardId: rollFromList(["rare_hp_up", "rare_sp_up"], rng),
         amount: 1, unidentifiedName: "？カード", rarity: "R" };
     }

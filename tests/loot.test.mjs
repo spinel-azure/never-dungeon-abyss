@@ -34,12 +34,13 @@ test("red chest rewards and stiletto qualities follow configured bands", () => {
 });
 
 test("B6F to B10F black chests use the potion, R-card and SR-card bands", () => {
-  assert.equal(rollBlackChestLoot(rng(0.399), 6).itemId, "healing_potion_medium");
-  assert.equal(rollBlackChestLoot(rng(0.4, 0), 6).cardId, "rare_strength_up_plus");
-  assert.equal(rollBlackChestLoot(rng(0.4, 0.999), 10).cardId, "rare_gale_feather_plus");
-  assert.equal(rollBlackChestLoot(rng(0.7, 0), 8).cardId, "rare_hp_up");
-  assert.equal(rollBlackChestLoot(rng(0.7, 0.999), 8).cardId, "rare_sp_up");
-  assert.deepEqual(rollBlackChestLoot(rng(0.9), 6), {
+  assert.equal(rollBlackChestLoot(rng(0.429), 6).itemId, "healing_potion_medium");
+  assert.equal(rollBlackChestLoot(rng(0.43, 0), 6).cardId, "rare_strength_up_plus");
+  assert.equal(rollBlackChestLoot(rng(0.43, 0.999), 10).cardId, "rare_gale_feather_plus");
+  assert.equal(rollBlackChestLoot(rng(0.73, 0), 8).cardId, "rare_hp_up");
+  assert.equal(rollBlackChestLoot(rng(0.73, 0.999), 8).cardId, "rare_sp_up");
+  assert.equal(rollBlackChestLoot(rng(0.929, 0.999), 8).cardId, "rare_sp_up");
+  assert.deepEqual(rollBlackChestLoot(rng(0.93), 6), {
     kind: "card", cardId: "sr_indomitable_spirit", amount: 1,
     unidentifiedName: "？カード", rarity: "SR"
   });
