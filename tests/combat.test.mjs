@@ -151,7 +151,7 @@ test("enemy action tables select weighted spells and multi-hit attacks", () => {
 
 test("all initial classes can damage the adjusted cave slime", () => {
   const slime = getEnemyById("cave_slime");
-  const expectedDamage = { warrior: 10, thief: 4, priest: 6, mage: 8 };
+  const expectedDamage = { warrior: 10, thief: 4, priest: 6, mage: 10 };
   for (const [job, damage] of Object.entries(expectedDamage)) {
     const character = createInitialCharacter({ name: "TEST", job });
     const stats = collectStats(character);
@@ -166,7 +166,7 @@ test("all initial classes can damage the adjusted cave slime", () => {
   }
 });
 
-test("staff normal attacks use INT and ignore defense", () => {
+test("the oak staff alone uses 0.75 INT and ignores defense", () => {
   const mage = createInitialCharacter({ name: "TEST", job: "mage" });
   const stats = collectStats(mage);
   const attack = createNormalAttack({ weapon: getWeapon("oak_staff") });
@@ -177,10 +177,20 @@ test("staff normal attacks use INT and ignore defense", () => {
     rng: fixed(0, 0.9, 0.5)
   });
   assert.equal(attack.attackStat, "int");
+  assert.equal(attack.attackStatMultiplier, 0.75);
   assert.equal(attack.ignoresDefense, true);
   assert.equal(result.attackStat, "int");
   assert.equal(result.effectiveDefense, 0);
-  assert.equal(result.totalDamage, 8);
+  assert.equal(result.totalDamage, 10);
+});
+
+test("future staves do not inherit the oak staff rescue attack", () => {
+  const attack = createNormalAttack({ weapon: {
+    id: "future_staff", name: "TEST", type: "staff", attack: 0, element: "physical"
+  } });
+  assert.equal(attack.attackStat, "str");
+  assert.equal(attack.attackStatMultiplier, undefined);
+  assert.equal(attack.ignoresDefense, false);
 });
 
 test("equipment bonuses are included in combat stats", () => {
@@ -212,7 +222,7 @@ test("detail status derives current character percentages", () => {
 
 test("detail status attack power includes weapon and equipment stats", () => {
   const mage = deriveDetailStats(createInitialCharacter({ name: "TEST", job: "mage" }));
-  assert.equal(mage.physicalAttack, 8);
+  assert.equal(mage.physicalAttack, 10.5);
   assert.equal(mage.spellAttack, 5);
 });
 

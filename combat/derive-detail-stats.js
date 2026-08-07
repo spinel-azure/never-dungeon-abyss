@@ -10,11 +10,15 @@ export function deriveDetailStats(character = {}) {
     ? getWeapon(weaponId, character.equipment?.rightArmEnhancement || 0)
     : getEquipmentItem(weaponId, "rightArmId");
   const weaponType = getWeaponType(weapon?.type);
-  const normalAttackStat = weaponType.normalAttackStat === "int" ? stats.int : stats.str;
+  const normalAttackStatId = weapon?.normalAttackStat || weaponType.normalAttackStat;
+  const normalAttackStat = normalAttackStatId === "int" ? stats.int : stats.str;
+  const normalAttackStatMultiplier = Number.isFinite(Number(weapon?.normalAttackStatMultiplier))
+    ? Number(weapon.normalAttackStatMultiplier)
+    : COMBAT_CONFIG.strengthMultiplier;
   return {
     physicalAttack: rounded(
       numeric(weapon?.attack)
-        + normalAttackStat * COMBAT_CONFIG.strengthMultiplier
+        + normalAttackStat * normalAttackStatMultiplier
         + stats.dex * numeric(weaponType.damageDexMultiplier)
     ),
     spellAttack: rounded(stats.int * COMBAT_CONFIG.intelligenceMultiplier),

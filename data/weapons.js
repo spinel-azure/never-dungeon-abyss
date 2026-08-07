@@ -34,9 +34,7 @@ export const WEAPON_TYPES = Object.freeze({
     hitCount: 1,
     powerPerHit: 1,
     speedModifier: 0,
-    defensePenetration: 0,
-    normalAttackStat: "int",
-    normalAttackIgnoresDefense: true
+    defensePenetration: 0
   })
 });
 
@@ -67,7 +65,10 @@ export const WEAPONS = Object.freeze({
     name: "樫の杖",
     type: "staff",
     attack: 3,
-    element: "physical"
+    element: "physical",
+    normalAttackStat: "int",
+    normalAttackStatMultiplier: 0.75,
+    normalAttackIgnoresDefense: true
   }),
   training_greatsword: Object.freeze({
     id: "training_greatsword",
