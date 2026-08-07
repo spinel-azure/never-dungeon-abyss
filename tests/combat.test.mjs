@@ -968,6 +968,18 @@ test("Ability Boost is a six-copy SR card that raises all five abilities", () =>
   });
 });
 
+test("Indomitable Spirit is a six-copy SR card with HP and defense bonuses", () => {
+  const card = getCardById("sr_indomitable_spirit");
+  assert.equal(card.rarity, "SR");
+  assert.equal(card.cost, 4);
+  assert.equal(card.maxOwned, 99);
+  assert.equal(card.maxCopies, 6);
+  assert.deepEqual(card.statBonus, { maxHp: 15, def: 3 });
+  assert.deepEqual(card.acquisition, {
+    type: "blackChest", minDepth: 6, maxDepth: 10, excludedDepths: [9]
+  });
+});
+
 test("Ability Boost is a six-copy SR card that raises all five abilities", () => {
   const card = getCardById("sr_ability_boost");
   assert.equal(card.rarity, "SR");

@@ -1,7 +1,7 @@
 import { collectEquipmentBonuses, getInitialEquipment } from "./equipment.js";
 import { getDeckCostAtLevel, getLevelGrowth, normalizeExperience } from "./growth.js";
-import { createInitialCardState, normalizeCardState } from "./deck.js";
-import { collectCardStatBonuses } from "./cards.js";
+import { createInitialCardState, normalizeCardState } from "./deck.js?v=20260807-06";
+import { collectCardStatBonuses } from "./cards.js?v=20260807-06";
 import {
   createInitialInventory, createInitialLootBag, createInitialWarehouse,
   normalizeInventory, normalizeLootBag, normalizeWarehouse

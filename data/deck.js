@@ -1,4 +1,4 @@
-import { getCardById } from "./cards.js";
+import { getCardById } from "./cards.js?v=20260807-06";
 
 export const DECK_SLOT_COUNT = 6;
 

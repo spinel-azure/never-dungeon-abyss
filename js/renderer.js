@@ -616,7 +616,7 @@ export function drawCellEvents(layer = "all") {
       if (!projected) continue;
       if (!hasLineOfSightToCell(x, y)) continue;
       const hasSprite = Boolean(cell.bossId || cell.bossRemainsId || cell.npc || cell.fountain || cell.treasure);
-      if (hasSprite && !projectCellFootprint(x, y, projected.forward, true)) continue;
+      if (hasSprite && !projectCellFootprint(x, y, projected.forward)) continue;
       if (cell.type === "stairsUp" || cell.type === "stairsDown") {
         if (layer === "sprite") continue;
         events.push({

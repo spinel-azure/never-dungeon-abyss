@@ -1,5 +1,5 @@
-import { calculateDeckCost, DECK_SLOT_COUNT, setDeckSlot } from "../data/deck.js";
-import { getCardById } from "../data/cards.js";
+import { calculateDeckCost, DECK_SLOT_COUNT, setDeckSlot } from "../data/deck.js?v=20260807-06";
+import { getCardById } from "../data/cards.js?v=20260807-06";
 import { drawCardCanvas } from "./card-canvas.js";
 import { ITEMS, canUseItemIn } from "../data/items.js?v=20260806-01";
 import { normalizeCharacter } from "../data/classes.js?v=20260806-02";

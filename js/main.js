@@ -20,7 +20,7 @@ import {
   markBossDefeatedAt,
   setStartPosition,
   randomizeStartPosition
-} from "./dungeon.js";
+} from "./dungeon.js?v=20260807-06";
 import {
   state,
   configurePlayer,
@@ -83,7 +83,7 @@ import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
 import { EffectEngine } from "./effects/effect-engine.js";
 import { hasUncertainLoot } from "./loot-identification.js";
 import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js?v=20260807-05";
-import { createInitialCharacter, normalizeCharacter } from "../data/classes.js?v=20260806-02";
+import { createInitialCharacter, normalizeCharacter } from "../data/classes.js?v=20260807-06";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName, grantEquipmentInstance } from "../data/equipment-inventory.js";
 import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
@@ -107,7 +107,7 @@ import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from
 import { configureItemOverlay, openItemOverlay, handleItemOverlayInput } from "./item-overlay.js?v=20260807-04";
 import { resolveFieldItemUse } from "../combat/resolve-item-use.js?v=20260806-01";
 import { grantCard } from "../data/deck.js";
-import { collectCardStatBonuses, getCardById, hasCardEffect } from "../data/cards.js";
+import { collectCardStatBonuses, getCardById, hasCardEffect } from "../data/cards.js?v=20260807-06";
 import { drawCardCanvas } from "./card-canvas.js";
 import { getItem } from "../data/items.js?v=20260806-01";
 import { isCriticalHp } from "../data/quick-status.js";

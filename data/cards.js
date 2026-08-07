@@ -97,6 +97,15 @@ const STANDARD_CARDS = [
     iconId: "power-pose", maxOwned: 99, maxCopies: 6
   },
   {
+    id: "sr_indomitable_spirit", rarity: "SR", cost: 4,
+    name: "Indomitable Spirit", nameJa: "不屈の闘志", concept: "MAX HP +15 / DEF +3",
+    descriptionJa: "最大HPが15、防御力が3上昇する。",
+    category: "ability", effectId: "indomitable_spirit",
+    statBonus: Object.freeze({ maxHp: 15, def: 3 }),
+    iconId: "quartered-shield", maxOwned: 99, maxCopies: 6,
+    acquisition: Object.freeze({ type: "blackChest", minDepth: 6, maxDepth: 10, excludedDepths: Object.freeze([9]) })
+  },
+  {
     id: "legendary_unlimited_torch_gauge", rarity: "L", cost: 6,
     name: "UNLIMITED TORCH GAUGE", nameJa: "永久の導き", concept: "たいまつ消費なし",
     category: "exploration", effectId: "unlimited_torch_gauge",
