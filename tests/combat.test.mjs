@@ -968,6 +968,39 @@ test("Ability Boost is a six-copy SR card that raises all five abilities", () =>
   });
 });
 
+test("Ability Boost Plus is a six-copy L card that can maximize all abilities at level 137", () => {
+  const card = getCardById("legendary_ability_boost_plus");
+  assert.equal(card.rarity, "L");
+  assert.equal(card.cost, 6);
+  assert.equal(card.maxOwned, 99);
+  assert.equal(card.maxCopies, 6);
+  assert.deepEqual(card.statBonus, { str: 5, int: 5, agi: 5, dex: 5, luc: 5 });
+
+  const level136 = normalizeCharacter({
+    ...createInitialCharacter({ name: "TEST", job: "warrior" }),
+    level: 136
+  });
+  const level137 = normalizeCharacter({ ...level136, level: 137 });
+  assert.equal(level136.deckCost, 35);
+  assert.equal(level137.deckCost, 36);
+
+  let cardsAt136 = grantCard(level136.cards, card.id, 6, level136.deckCost).cards;
+  for (let index = 0; index < DECK_SLOT_COUNT; index += 1) {
+    cardsAt136 = setDeckSlot(cardsAt136, index, card.id, level136.deckCost);
+  }
+  assert.equal(cardsAt136.deckSlots.filter(Boolean).length, 5);
+
+  let cardsAt137 = grantCard(level137.cards, card.id, 6, level137.deckCost).cards;
+  for (let index = 0; index < DECK_SLOT_COUNT; index += 1) {
+    cardsAt137 = setDeckSlot(cardsAt137, index, card.id, level137.deckCost);
+  }
+  assert.equal(cardsAt137.deckSlots.filter(Boolean).length, 6);
+  assert.equal(calculateDeckCost(cardsAt137.deckSlots), 36);
+  assert.deepEqual(collectCardStatBonuses(cardsAt137.deckSlots), {
+    str: 30, int: 30, agi: 30, dex: 30, luc: 30
+  });
+});
+
 test("Indomitable Spirit is a six-copy SR card with HP and defense bonuses", () => {
   const card = getCardById("sr_indomitable_spirit");
   assert.equal(card.rarity, "SR");

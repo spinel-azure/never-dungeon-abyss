@@ -159,6 +159,14 @@ const STANDARD_CARDS = [
     name: "UNLIMITED TORCH GAUGE", nameJa: "永久の導き", concept: "たいまつ消費なし",
     category: "exploration", effectId: "unlimited_torch_gauge",
     iconId: "torch", maxOwned: 1, maxCopies: 1
+  },
+  {
+    id: "legendary_ability_boost_plus", rarity: "L", cost: 6,
+    name: "Ability Boost +", nameJa: "能力向上＋", concept: "STR / INT / AGI / DEX / LUC +5",
+    descriptionJa: "STR、INT、AGI、DEX、LUCがそれぞれ5上昇する。",
+    category: "ability", effectId: "all_ability_up_plus", effectValue: 5,
+    statBonus: Object.freeze({ str: 5, int: 5, agi: 5, dex: 5, luc: 5 }),
+    iconId: "power-pose", maxOwned: 99, maxCopies: 6
   }
 ];
 
