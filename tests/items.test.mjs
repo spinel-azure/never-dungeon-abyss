@@ -255,6 +255,22 @@ test("torch and talisman expose dungeon environment effects", () => {
   assert.equal(getItemCount(walker.character.inventory, "auto_walker"), 0);
 });
 
+test("Emergency Escape is an expensive shop consumable with a dungeon-only escape effect", () => {
+  const item = getItem("emergency_escape");
+  assert.equal(item.buyPrice, 2000);
+  assert.equal(item.sellPrice, 1000);
+  assert.ok(getShopItemIdsForDepth(1).includes(item.id));
+  assert.ok(getShopItemIdsForCharacter(createInitialCharacter({ name: "TEST", job: "thief" })).includes(item.id));
+
+  const user = characterWith(item.id);
+  const used = resolveFieldItemUse({ character: user, itemId: item.id, context: "dungeon" });
+  assert.equal(used.accepted, true);
+  assert.equal(used.environment.emergencyEscape, true);
+  assert.equal(getItemCount(used.character.inventory, item.id), 0);
+  assert.equal(resolveFieldItemUse({ character: characterWith(item.id), itemId: item.id, context: "town" }).reason, "dungeonOnly");
+  assert.equal(resolveFieldItemUse({ character: characterWith(item.id), itemId: item.id, context: "battle" }).reason, "fieldOnly");
+});
+
 test("holy water only banishes a non-boss undead and awards no experience", () => {
   const character = characterWith("holy_water");
   const enemy = {

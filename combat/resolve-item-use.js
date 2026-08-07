@@ -5,7 +5,11 @@ export function getItemUnavailableReason({ character, itemId, context, enemy, to
   const item = getItem(itemId);
   if (!item) return "unknownItem";
   if (getItemCount(character?.inventory, itemId) <= 0) return "notOwned";
-  if (!canUseItemIn(item, context)) return context === "battle" ? "fieldOnly" : "battleOnly";
+  if (!canUseItemIn(item, context)) {
+    if (context === "battle") return "fieldOnly";
+    if (item.usableIn?.includes("dungeon")) return "dungeonOnly";
+    return "battleOnly";
+  }
   const healsHp = item.effects?.some(effect => effect.id === "heal_hp");
   const hasAnotherEffect = item.effects?.some(effect => effect.id !== "heal_hp");
   if (healsHp && !hasAnotherEffect && character.hp >= character.maxHp) return "fullHp";
@@ -45,6 +49,8 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
       environment.treasureCompassActive = true;
     } else if (effect.id === "auto_walk_to_stairs_up") {
       environment.startAutoWalker = true;
+    } else if (effect.id === "emergency_escape") {
+      environment.emergencyEscape = true;
     }
   }
   next.condition = hasStatus(next, "bleeding") ? "BLEED" : hasPoison(next) ? "POISON" : "GOOD";

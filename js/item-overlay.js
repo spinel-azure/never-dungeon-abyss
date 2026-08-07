@@ -141,6 +141,7 @@ function showReason(reason) {
     fullTorch: "たいまつは十分に明るい。",
     battleOnly: "このアイテムは戦闘中のみ使用できる。",
     fieldOnly: "このアイテムは戦闘中には使用できない。",
+    dungeonOnly: "このアイテムはダンジョン探索中のみ使用できる。",
     undeadOnly: "アンデッドにしか効果がない。",
     bossImmune: "ボスには効果がない。",
     notOwned: "そのアイテムは所持していない。"

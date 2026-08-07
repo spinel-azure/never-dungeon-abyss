@@ -1405,6 +1405,13 @@ import {
       closeCampMenu("main");
       startAutoReturn({ persistentThroughBattle: true });
     }
+    if (result.environment.emergencyEscape) {
+      closeCampMenu("main");
+      returnToTown();
+      say("緊急脱出を使い、ダンジョンから脱出した。");
+      playSe("confirm");
+      return result;
+    }
     updateHud();
     updateCharacterUi();
     say(result.message);
