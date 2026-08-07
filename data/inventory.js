@@ -1,4 +1,6 @@
 import { getItem } from "./items.js";
+import { getCardById } from "./cards.js";
+import { grantCard } from "./deck.js";
 
 export function createInitialInventory() {
   return { counts: {} };
@@ -9,7 +11,7 @@ export function createInitialWarehouse() {
 }
 
 export function createInitialLootBag() {
-  return { items: {}, equipmentInstances: [], gold: 0 };
+  return { items: {}, cards: {}, equipmentInstances: [], gold: 0 };
 }
 
 export function normalizeInventory(inventory) {
@@ -72,8 +74,15 @@ export function normalizeLootBag(lootBag) {
     const count = Math.max(0, Math.floor(Number(rawCount) || 0));
     if (count > 0) items[itemId] = count;
   }
+  const cards = {};
+  for (const [cardId, rawCount] of Object.entries(lootBag?.cards || {})) {
+    if (!getCardById(cardId)) continue;
+    const count = Math.max(0, Math.floor(Number(rawCount) || 0));
+    if (count > 0) cards[cardId] = count;
+  }
   return {
     items,
+    cards,
     equipmentInstances: Array.isArray(lootBag?.equipmentInstances)
       ? structuredClone(lootBag.equipmentInstances)
       : [],
@@ -177,6 +186,17 @@ export function addLootEquipment(lootBag, equipment) {
   };
 }
 
+export function addLootCard(lootBag, cardId, amount = 1) {
+  const source = normalizeLootBag(lootBag);
+  if (!getCardById(cardId)) return { lootBag: source, gained: 0, reason: "unknownCard" };
+  const gained = Math.max(0, Math.floor(Number(amount) || 0));
+  return {
+    lootBag: { ...source, cards: { ...source.cards, [cardId]: (source.cards[cardId] || 0) + gained } },
+    gained,
+    reason: ""
+  };
+}
+
 export function settleLootBag(character) {
   if (!character) return { character, results: [] };
   let next = { ...character, warehouse: normalizeWarehouse(character.warehouse) };
@@ -186,6 +206,12 @@ export function settleLootBag(character) {
     const result = grantItemWithOverflow(next, itemId, count);
     next = result.character;
     results.push({ itemId, count, inventory: result.gained, warehouse: result.stored });
+  }
+  const cardResults = [];
+  for (const [cardId, count] of Object.entries(bag.cards)) {
+    const result = grantCard(next.cards, cardId, count, next.deckCost);
+    next = { ...next, cards: result.cards };
+    cardResults.push({ cardId, count, gained: result.gained, discarded: Math.max(0, count - result.gained) });
   }
   const equipmentInventory = structuredClone(next.equipmentInventory || { instances: [], nextOrder: 1 });
   const equipmentResults = [];
@@ -210,5 +236,5 @@ export function settleLootBag(character) {
     gold: Math.max(0, Math.floor(Number(next.gold) || 0)) + bag.gold,
     lootBag: createInitialLootBag()
   };
-  return { character: next, results, equipmentResults, gold: bag.gold };
+  return { character: next, results, cardResults, equipmentResults, gold: bag.gold };
 }

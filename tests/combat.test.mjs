@@ -980,6 +980,26 @@ test("Indomitable Spirit is a six-copy SR card with HP and defense bonuses", () 
   });
 });
 
+test("black-chest R cards cost two and allow six copies", () => {
+  const expected = {
+    rare_strength_up_plus: { str: 2 },
+    rare_dexterity_lesson_plus: { dex: 2 },
+    rare_lucky_charm_plus: { luc: 2 },
+    rare_knowledge_book_plus: { int: 2 },
+    rare_gale_feather_plus: { agi: 2 },
+    rare_hp_up: { maxHp: 10 },
+    rare_sp_up: { maxSp: 10 }
+  };
+  for (const [cardId, statBonus] of Object.entries(expected)) {
+    const card = getCardById(cardId);
+    assert.equal(card.rarity, "R");
+    assert.equal(card.cost, 2);
+    assert.equal(card.maxOwned, 99);
+    assert.equal(card.maxCopies, 6);
+    assert.deepEqual(card.statBonus, statBonus);
+  }
+});
+
 test("Ability Boost is a six-copy SR card that raises all five abilities", () => {
   const card = getCardById("sr_ability_boost");
   assert.equal(card.rarity, "SR");
@@ -1102,6 +1122,49 @@ test("Antidote cures poison for 3 SP without restoring HP", () => {
   assert.equal(result.character.statuses.some(status => status.statusId === "poison"), false);
   assert.equal(result.character.condition, "GOOD");
   assert.equal(resolveFieldSkill({ character: result.character, skillId: "antidote" }).reason, "noEffect");
+});
+
+test("the three jobs learn their new dungeon skills at the intended levels", () => {
+  assert.equal(normalizeCharacter({ ...createInitialCharacter({ name: "W", job: "warrior" }), level: 5 }).skillIds.includes("survival_instinct"), true);
+  assert.equal(normalizeCharacter({ ...createInitialCharacter({ name: "M", job: "mage" }), level: 4 }).skillIds.includes("staff_light"), true);
+  assert.equal(normalizeCharacter({ ...createInitialCharacter({ name: "T", job: "thief" }), level: 8 }).skillIds.includes("conceal_presence"), true);
+});
+
+test("Staff Light restores fifty torch points and Conceal Presence cannot stack", () => {
+  const mage = normalizeCharacter({ ...createInitialCharacter({ name: "M", job: "mage" }), level: 4 });
+  const light = resolveFieldSkill({ character: mage, skillId: "staff_light", torchFuel: 35 });
+  assert.equal(light.accepted, true);
+  assert.equal(light.environment.torchFuel, 85);
+  assert.equal(light.character.sp, mage.sp - 4);
+  assert.equal(resolveFieldSkill({ character: light.character, skillId: "staff_light", torchFuel: 100 }).reason, "fullTorch");
+
+  const thief = normalizeCharacter({ ...createInitialCharacter({ name: "T", job: "thief" }), level: 8 });
+  const conceal = resolveFieldSkill({ character: thief, skillId: "conceal_presence" });
+  assert.equal(conceal.environment.presenceIncreaseReduction, 0.5);
+  assert.equal(conceal.character.sp, thief.sp - 10);
+  assert.equal(resolveFieldSkill({
+    character: conceal.character, skillId: "conceal_presence", presenceIncreaseReduction: 0.5
+  }).reason, "alreadyActive");
+});
+
+test("Survival Instinct cures poison nonlethally in the field and battle", () => {
+  const warrior = normalizeCharacter({ ...createInitialCharacter({ name: "W", job: "warrior" }), level: 5 });
+  warrior.hp = 3;
+  warrior.statuses = [{ statusId: "poison" }];
+  warrior.condition = "POISON";
+  const field = resolveFieldSkill({ character: warrior, skillId: "survival_instinct" });
+  assert.equal(field.accepted, true);
+  assert.equal(field.character.hp, 1);
+  assert.equal(field.character.statuses.some(status => status.statusId === "poison"), false);
+
+  const enemy = createEnemyCombatant(getEnemyById("cave_slime"));
+  const battle = resolveBattleRound({
+    battle: createBattleState({ character: warrior, enemy }),
+    playerCommand: { type: "skill", skillId: "survival_instinct" },
+    rng: fixed(0.5)
+  }).battle;
+  assert.equal(battle.player.statuses.some(status => status.statusId === "poison"), false);
+  assert.ok(battle.log.some(message => message.includes("生存本能")));
 });
 
 test("Exorcism banishes only non-boss undead for 5 SP and grants no experience", () => {

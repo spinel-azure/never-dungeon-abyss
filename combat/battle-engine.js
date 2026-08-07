@@ -153,9 +153,11 @@ export function createPlayerAction(player, command = {}, enemy = null) {
   const skill = getSkill(command.skillId);
   if (!skill || !player.skillIds?.includes(skill.id)) return { ok: false, reason: "unknownSkill" };
   if (player.sp < skill.spCost) return { ok: false, reason: "insufficientSp" };
-  if (skill.actionType === "cureStatus" && !(player.statuses || []).some(status => (status.statusId || status.id) === skill.statusId)) {
+  if (["cureStatus", "sacrificialCure"].includes(skill.actionType)
+    && !(player.statuses || []).some(status => (status.statusId || status.id) === skill.statusId)) {
     return { ok: false, reason: "noEffect" };
   }
+  if (skill.actionType === "dungeonEffect") return { ok: false, reason: "fieldOnly" };
   if (skill.actionType === "banishUndead") {
     if (enemy?.isBoss) return { ok: false, reason: "bossImmune" };
     if (enemy?.race !== "undead") return { ok: false, reason: "undeadOnly" };
@@ -322,6 +324,19 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
     const poison = (actor.statuses || []).some(status => (status.statusId || status.id) === "poison");
     actor.condition = bleeding ? "BLEED" : poison ? "POISON" : "GOOD";
     battle.log.push(`${actor.name}は${action.name}を唱えた。${action.statusId === "bleeding" ? "出血が止まった。" : "毒が消え去った。"}`);
+    return;
+  }
+  if (action.actionType === "sacrificialCure") {
+    actor.statuses = (actor.statuses || []).filter(status => (status.statusId || status.id) !== action.statusId);
+    const damage = Math.floor(Math.max(0, Number(actor.maxHp) || 0) * (Number(action.damageRate) || 0));
+    actor.hp = Math.max(1, actor.hp - damage);
+    const bleeding = (actor.statuses || []).some(status => (status.statusId || status.id) === "bleeding");
+    actor.condition = bleeding ? "BLEED" : "GOOD";
+    battle.log.push(`${actor.name}は${action.name}を使った。毒が消え、${damage}ダメージを受けた。`);
+    battle.presentationEvents.push({
+      type: "damage", actorSide, targetSide: actorSide, amount: damage,
+      message: `${damage}ダメージ！`
+    });
     return;
   }
   if (action.actionType === "banishUndead") {

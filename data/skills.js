@@ -88,6 +88,18 @@ export const SKILLS = Object.freeze({
       baseRate: 0.55
     }])
   }),
+  conceal_presence: Object.freeze({
+    id: "conceal_presence",
+    name: "気配消し",
+    description: "帰還するまで気配ゲージの上昇量を50％軽減する。",
+    actionType: "dungeonEffect",
+    category: "combatArt",
+    spCost: 10,
+    target: "self",
+    environmentEffect: "presenceIncreaseReduction",
+    effectValue: 0.5,
+    effects: Object.freeze([])
+  }),
   holy_strike: Object.freeze({
     id: "holy_strike",
     name: "聖なる打撃",
@@ -154,6 +166,30 @@ export const SKILLS = Object.freeze({
     speedModifier: -5,
     effects: Object.freeze([{ statusId: "illusion", trigger: "perAction", guaranteed: true }])
   }),
+  staff_light: Object.freeze({
+    id: "staff_light",
+    name: "杖よ、灯りを！",
+    description: "たいまつゲージを50％回復する。",
+    actionType: "dungeonEffect",
+    category: "supportSpell",
+    spCost: 4,
+    target: "self",
+    environmentEffect: "restoreTorch",
+    effectValue: 50,
+    effects: Object.freeze([])
+  }),
+  survival_instinct: Object.freeze({
+    id: "survival_instinct",
+    name: "生存本能",
+    description: "毒状態を回復するが、最大HPの50％分のダメージを受ける。HPは1未満にならない。",
+    actionType: "sacrificialCure",
+    category: "combatArt",
+    spCost: 0,
+    target: "self",
+    statusId: "poison",
+    damageRate: 0.5,
+    effects: Object.freeze([])
+  }),
   fireball: SPELLS.fireball,
   ice_bind: SPELLS.ice_bind
 });
@@ -167,9 +203,12 @@ export function getSkills(ids = []) {
 }
 
 export const LEVEL_SKILL_UNLOCKS = Object.freeze([
+  Object.freeze({ job: "mage", level: 4, skillId: "staff_light" }),
+  Object.freeze({ job: "warrior", level: 5, skillId: "survival_instinct" }),
   Object.freeze({ job: "priest", level: 3, skillId: "antidote" }),
   Object.freeze({ job: "priest", level: 5, skillId: "exorcism" }),
-  Object.freeze({ job: "priest", level: 7, skillId: "hemostasis" })
+  Object.freeze({ job: "priest", level: 7, skillId: "hemostasis" }),
+  Object.freeze({ job: "thief", level: 8, skillId: "conceal_presence" })
 ]);
 
 export function getLevelUnlockedSkillIds(job, level) {

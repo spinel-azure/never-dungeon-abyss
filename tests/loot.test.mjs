@@ -1,9 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { rollEnemyDrop, rollRedChestLoot } from "../data/loot.js";
+import { rollBlackChestLoot, rollEnemyDrop, rollRedChestLoot } from "../data/loot.js";
 import { buildBoundaryWallMap, cells } from "../js/dungeon.js";
 import { getWeapon } from "../data/weapons.js";
 import { createInnStableRecovery, getInnStayFee } from "../js/character-services.js";
+import { addLootCard, settleLootBag } from "../data/inventory.js";
+import { createInitialCharacter } from "../data/classes.js";
 
 const rng = (...values) => {
   let index = 0;
@@ -29,6 +31,28 @@ test("red chest rewards and stiletto qualities follow configured bands", () => {
   assert.equal(rollRedChestLoot(rng(0.88, 0.93)).enhancement, 2);
   assert.equal(rollRedChestLoot(rng(0.88, 0.99)).enhancement, 3);
   assert.equal(getWeapon("stiletto", 2).defensePenetration, 0.3);
+});
+
+test("B6F to B10F black chests use the potion, R-card and SR-card bands", () => {
+  assert.equal(rollBlackChestLoot(rng(0.399), 6).itemId, "healing_potion_medium");
+  assert.equal(rollBlackChestLoot(rng(0.4, 0), 6).cardId, "rare_strength_up_plus");
+  assert.equal(rollBlackChestLoot(rng(0.4, 0.999), 10).cardId, "rare_gale_feather_plus");
+  assert.equal(rollBlackChestLoot(rng(0.7, 0), 8).cardId, "rare_hp_up");
+  assert.equal(rollBlackChestLoot(rng(0.7, 0.999), 8).cardId, "rare_sp_up");
+  assert.deepEqual(rollBlackChestLoot(rng(0.9), 6), {
+    kind: "card", cardId: "sr_indomitable_spirit", amount: 1,
+    unidentifiedName: "？カード", rarity: "SR"
+  });
+});
+
+test("unidentified card loot settles into the card collection", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "thief" });
+  character.lootBag = addLootCard(character.lootBag, "rare_strength_up_plus", 2).lootBag;
+  const settled = settleLootBag(character);
+  assert.equal(settled.character.cards.ownedCardCounts.rare_strength_up_plus, 2);
+  assert.deepEqual(settled.cardResults, [{
+    cardId: "rare_strength_up_plus", count: 2, gained: 2, discarded: 0
+  }]);
 });
 
 test("B1F to B4F place one to three red chests and no black or gold", () => {

@@ -5,8 +5,9 @@ import { grantItem, getItemCount } from "../data/inventory.js";
 import { resolveFieldItemUse } from "../combat/resolve-item-use.js";
 import { createBattleState, resolveBattleRound } from "../combat/battle-engine.js";
 import {
-  configurePresence, getPresence, getPresenceSuppressedSteps, onPlayerStep, resetPresence,
-  restorePresence, suppressPresence
+  clearPresenceIncreaseReduction, configurePresence, getPresence, getPresenceIncreaseReduction,
+  getPresenceSuppressedSteps, onPlayerStep, resetPresence, restorePresence,
+  setPresenceIncreaseReduction, suppressPresence
 } from "../js/presence.js";
 import { grantEventItems, unlockGuildRequest } from "../js/character-services.js";
 import { purchaseBuybackEquipment, purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
@@ -289,6 +290,18 @@ test("restored presence suppression is capped at the item-defined 30 steps", () 
   restorePresence(0, 999999);
   assert.equal(getPresenceSuppressedSteps(), 30);
   resetPresence();
+});
+
+test("presence increase reduction halves odd gains in the player's favor and survives gauge resets", () => {
+  restorePresence(0, 0, 0.5);
+  onPlayerStep({ random: () => 0.2 });
+  assert.equal(getPresence(), 2);
+  resetPresence();
+  assert.equal(getPresenceIncreaseReduction(), 0.5);
+  clearPresenceIncreaseReduction();
+  assert.equal(getPresenceIncreaseReduction(), 0);
+  setPresenceIncreaseReduction(0.5);
+  clearPresenceIncreaseReduction();
 });
 
 test("a restored full presence gauge can trigger an encounter on the next step", () => {

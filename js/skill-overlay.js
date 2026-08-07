@@ -152,9 +152,11 @@ function renderSelection() {
 
 function unavailableReason(skill, character) {
   if (character.sp < skill.spCost) return "insufficientSp";
-  if (overlay.context === "field" && !["healing", "cureStatus"].includes(skill.actionType)) return "battleOnly";
+  if (overlay.context === "field" && !["healing", "cureStatus", "sacrificialCure", "dungeonEffect"].includes(skill.actionType)) return "battleOnly";
+  if (overlay.context === "battle" && skill.actionType === "dungeonEffect") return "fieldOnly";
   if (overlay.context === "field" && skill.actionType === "healing" && character.hp >= character.maxHp) return "fullHp";
   if (skill.actionType === "cureStatus" && !(character.statuses || []).some(status => (status.statusId || status.id) === skill.statusId)) return "noEffect";
+  if (skill.actionType === "sacrificialCure" && !(character.statuses || []).some(status => (status.statusId || status.id) === skill.statusId)) return "noEffect";
   if (overlay.context === "battle" && skill.actionType === "banishUndead") {
     if (overlay.enemy?.isBoss) return "bossImmune";
     if (overlay.enemy?.race !== "undead") return "undeadOnly";
@@ -166,7 +168,10 @@ function showReason(reason) {
   const messages = {
     insufficientSp: "SPが足りない。",
     battleOnly: "このスキルは戦闘中のみ使用できる。",
+    fieldOnly: "このスキルは探索中のみ使用できる。",
     fullHp: "HPは満タンだ。",
+    fullTorch: "たいまつゲージは満タンだ。",
+    alreadyActive: "すでに効果が発動している。",
     noEffect: "毒状態ではない。",
     undeadOnly: "アンデッドにしか効果がない。",
     bossImmune: "この敵には効かない。",

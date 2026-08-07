@@ -62,9 +62,12 @@ import { configureDevice } from "./device.js";
 import {
   configurePresence,
   getPresence,
+  getPresenceIncreaseReduction,
   getPresenceSuppressedSteps,
   restorePresence,
   resetPresence,
+  clearPresenceIncreaseReduction,
+  setPresenceIncreaseReduction,
   suppressPresence,
   setPresenceDisabled
 } from "./presence.js";
@@ -113,7 +116,7 @@ import { drawCardCanvas } from "./card-canvas.js";
 import { getItem } from "../data/items.js";
 import { isCriticalHp } from "../data/quick-status.js";
 import { purchaseBuybackEquipment, purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
-import { addLootEquipment, addLootGold, addLootItem, depositItemInWarehouse, settleLootBag, withdrawItemFromWarehouse } from "../data/inventory.js";
+import { addLootCard, addLootEquipment, addLootGold, addLootItem, depositItemInWarehouse, settleLootBag, withdrawItemFromWarehouse } from "../data/inventory.js";
 import { rollEnemyDrop, rollRedChestLoot } from "../data/loot.js";
 import { rollTreasureTrap } from "../data/traps.js";
 import { restAtHealingFountain as restoreAtHealingFountain } from "../data/fountains.js";
@@ -451,6 +454,7 @@ import {
         theme: getDungeonColors(),
         presence: getPresence(),
         presenceSuppressedSteps: getPresenceSuppressedSteps(),
+        presenceIncreaseReduction: getPresenceIncreaseReduction(),
         runElapsedMs: Math.max(0, now - runStartedAt),
         floorElapsedMs: Math.max(0, now - floorStartedAt)
       }
@@ -539,7 +543,7 @@ import {
       }
     }
     setTransferUnlocked(Boolean(character?.eventFlags?.transfer_portal_b10f_unlocked));
-    restorePresence(dungeon.presence, dungeon.presenceSuppressedSteps);
+    restorePresence(dungeon.presence, dungeon.presenceSuppressedSteps, dungeon.presenceIncreaseReduction);
     const now = performance.now();
     runStartedAt = now - Math.max(0, Number(dungeon.runElapsedMs) || 0);
     floorStartedAt = now - Math.max(0, Number(dungeon.floorElapsedMs) || 0);
@@ -548,6 +552,7 @@ import {
     updateHud();
     updateCharacterUi();
     const savedLocation = save.world?.location === "town" ? "town" : "dungeon";
+    if (savedLocation === "town") clearPresenceIncreaseReduction();
     worldLocation = savedLocation;
     if (savedLocation === "dungeon" && isCellCompletelySealed(state.gridX, state.gridY)) {
       returnToTown();
@@ -1198,6 +1203,10 @@ import {
       character.lootBag = addLootEquipment(character.lootBag, drop).lootBag;
       return `${drop.unidentifiedName || "？装備品"}をロット袋へ入れた。`;
     }
+    if (drop.kind === "card") {
+      character.lootBag = addLootCard(character.lootBag, drop.cardId, drop.amount || 1).lootBag;
+      return `${drop.unidentifiedName || "？カード"}をロット袋へ入れた。`;
+    }
     return "";
   }
 
@@ -1322,13 +1331,29 @@ import {
   }
 
   async function useFieldSkill(skillId) {
-    const result = resolveFieldSkill({ character, skillId });
+    const result = resolveFieldSkill({
+      character,
+      skillId,
+      torchFuel: state.torchFuel,
+      presenceIncreaseReduction: getPresenceIncreaseReduction()
+    });
     if (!result.accepted) return result;
     character = result.character;
+    if (Number.isFinite(result.environment?.torchFuel)) state.torchFuel = result.environment.torchFuel;
+    if (Number.isFinite(result.environment?.presenceIncreaseReduction)) {
+      setPresenceIncreaseReduction(result.environment.presenceIncreaseReduction);
+    }
+    updateHud();
     updateCharacterUi();
-    say(result.skill.actionType === "cureStatus"
-      ? `${result.skill.name}を使った。${result.skill.statusId === "bleeding" ? "出血が止まった。" : "毒が消え去った。"}`
-      : `${result.skill.name}を使った。HPが${result.healing}回復した。`);
+    say(result.skill.actionType === "sacrificialCure"
+      ? `${result.skill.name}を使った。毒が消え、${result.damage}ダメージを受けた。`
+      : result.skill.environmentEffect === "restoreTorch"
+        ? `${result.skill.name}を使った。たいまつゲージが回復した。`
+        : result.skill.environmentEffect === "presenceIncreaseReduction"
+          ? `${result.skill.name}を使った。気配を消して進めるようになった。`
+          : result.skill.actionType === "cureStatus"
+            ? `${result.skill.name}を使った。${result.skill.statusId === "bleeding" ? "出血が止まった。" : "毒が消え去った。"}`
+            : `${result.skill.name}を使った。HPが${result.healing}回復した。`);
     saveGame();
     playSe("heal");
     return result;
@@ -1497,6 +1522,7 @@ import {
       character = recordFloorExploration(character, { depth: 0, explored: [] });
     }
     worldLocation = "town";
+    clearPresenceIncreaseReduction();
     state.treasureCompassActive = false;
     stopBgm();
     templeRevivalJinglePending = true;
@@ -1874,6 +1900,7 @@ import {
       updateCharacterUi();
     }
     worldLocation = "town";
+    clearPresenceIncreaseReduction();
     state.treasureCompassActive = false;
     stopBgm();
     cancelAutoReturn(false);
@@ -1888,6 +1915,7 @@ import {
   function bagHasLoot(bag) {
     return Number(bag?.gold) > 0
       || Object.keys(bag?.items || {}).length > 0
+      || Object.keys(bag?.cards || {}).length > 0
       || (bag?.equipmentInstances || []).length > 0;
   }
 
@@ -1903,6 +1931,10 @@ import {
     }
     for (const [itemId, count] of Object.entries(bag.items || {})) {
       if (getItem(itemId)?.category !== "material") unknown.push({ label: "？道具", count: `×${count}` });
+    }
+    for (const [cardId, count] of Object.entries(bag.cards || {})) {
+      unknown.push({ label: "？カード", count: `×${count}`,
+        className: getCardById(cardId)?.rarity === "SR" ? "is-super-rare" : "" });
     }
     for (const instance of bag.equipmentInstances || []) unknown.push({ label: instance.unidentifiedName || "？装備", count: "×1" });
     renderLootIdentificationRows(unknown);
@@ -1957,6 +1989,13 @@ import {
       const destination = result.warehouse > 0 ? `インベントリ${result.inventory}／倉庫${result.warehouse}` : "インベントリ";
       lines.push({ label: getItem(result.itemId)?.name || result.itemId, count: `×${result.count} → ${destination}` });
     }
+    for (const result of settled.cardResults || []) {
+      const card = getCardById(result.cardId);
+      const discarded = result.discarded > 0 ? `（上限超過${result.discarded}枚は破棄）` : "";
+      lines.push({ label: `${card?.rarity || ""}カード「${card?.nameJa || result.cardId}」`,
+        count: `×${result.gained} → カード${discarded}`,
+        className: card?.rarity === "SR" ? "is-super-rare" : "" });
+    }
     for (const instance of settled.equipmentResults || []) {
       lines.push({ label: getEquipmentInstanceName(instance), count: "→ インベントリ" });
     }
@@ -1964,9 +2003,9 @@ import {
   }
 
   function renderLootIdentificationRows(rows) {
-    lootIdentifyList.replaceChildren(...rows.map(({ label, count }) => {
+    lootIdentifyList.replaceChildren(...rows.map(({ label, count, className = "" }) => {
       const row = document.createElement("div");
-      row.className = "loot-identify-entry";
+      row.className = `loot-identify-entry ${className}`.trim();
       const name = document.createElement("span");
       name.textContent = label;
       const amount = document.createElement("strong");

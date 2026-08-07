@@ -83,6 +83,55 @@ const STANDARD_CARDS = [
     maxOwned: 99, maxCopies: 1
   },
   {
+    id: "rare_strength_up_plus", rarity: "R", cost: 2,
+    name: "Strength Up +", nameJa: "腕力上昇＋", concept: "STR +2",
+    category: "ability", effectId: "strength_up_plus", effectValue: 2,
+    statBonus: Object.freeze({ str: 2 }), iconId: "strength",
+    maxOwned: 99, maxCopies: 6
+  },
+  {
+    id: "rare_dexterity_lesson_plus", rarity: "R", cost: 2,
+    name: "Dexterity Lesson +", nameJa: "技巧の心得＋", concept: "DEX +2",
+    category: "ability", effectId: "dexterity_up_plus", effectValue: 2,
+    statBonus: Object.freeze({ dex: 2 }), iconId: "dexterity",
+    maxOwned: 99, maxCopies: 6
+  },
+  {
+    id: "rare_lucky_charm_plus", rarity: "R", cost: 2,
+    name: "Lucky Charm +", nameJa: "幸運のお守り＋", concept: "LUC +2",
+    category: "ability", effectId: "luck_up_plus", effectValue: 2,
+    statBonus: Object.freeze({ luc: 2 }), iconId: "luck",
+    maxOwned: 99, maxCopies: 6
+  },
+  {
+    id: "rare_knowledge_book_plus", rarity: "R", cost: 2,
+    name: "Knowledge Book +", nameJa: "知識の書＋", concept: "INT +2",
+    category: "ability", effectId: "intelligence_up_plus", effectValue: 2,
+    statBonus: Object.freeze({ int: 2 }), iconId: "knowledge",
+    maxOwned: 99, maxCopies: 6
+  },
+  {
+    id: "rare_gale_feather_plus", rarity: "R", cost: 2,
+    name: "Gale Feather +", nameJa: "疾風の羽根＋", concept: "AGI +2",
+    category: "ability", effectId: "agility_up_plus", effectValue: 2,
+    statBonus: Object.freeze({ agi: 2 }), iconId: "agility",
+    maxOwned: 99, maxCopies: 6
+  },
+  {
+    id: "rare_hp_up", rarity: "R", cost: 2,
+    name: "HP +10", nameJa: "HP+10", concept: "MAX HP +10",
+    category: "ability", effectId: "max_hp_up_rare", effectValue: 10,
+    statBonus: Object.freeze({ maxHp: 10 }), iconId: "health-pulse",
+    maxOwned: 99, maxCopies: 6
+  },
+  {
+    id: "rare_sp_up", rarity: "R", cost: 2,
+    name: "SP +10", nameJa: "SP+10", concept: "MAX SP +10",
+    category: "ability", effectId: "max_sp_up_rare", effectValue: 10,
+    statBonus: Object.freeze({ maxSp: 10 }), iconId: "mana-core",
+    maxOwned: 99, maxCopies: 6
+  },
+  {
     id: "super_rare_max_hp_up", rarity: "SR", cost: 4,
     name: "MAX HP+10%", nameJa: "最大HP割合上昇", concept: "MAX HP +10%",
     category: "ability", effectId: "max_hp_percent_up", effectValue: 10,

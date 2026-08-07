@@ -186,6 +186,7 @@ async function executeCommand(command) {
     const messages = {
       insufficientSp: "SPが足りない。",
       noEffect: "毒状態ではない。",
+      fieldOnly: "このスキルは探索中のみ使用できる。",
       undeadOnly: "アンデッドにしか効果がない。",
       bossImmune: "この敵には効かない。"
     };

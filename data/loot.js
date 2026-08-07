@@ -2,8 +2,8 @@ export const ENEMY_DROP_RATES = Object.freeze({ none: 0.4, item: 0.55, redChest:
 export const STILETTO_ENHANCEMENT_RATES = Object.freeze([0.75, 0.18, 0.06, 0.01]);
 export const BLACK_CHEST_STILETTO_ENHANCEMENT_RATES = Object.freeze([0.45, 0.35, 0.15, 0.05]);
 export const BLACK_CHEST_LOOT_TABLES = Object.freeze([
-  Object.freeze({ minDepth: 6, maxDepth: 9, gold: [60, 80, 100], potionId: "healing_potion" }),
-  Object.freeze({ minDepth: 10, maxDepth: 19, gold: [100, 140, 180], potionId: "healing_potion_medium" }),
+  Object.freeze({ minDepth: 6, maxDepth: 10, gold: [60, 80, 100], potionId: "healing_potion_medium" }),
+  Object.freeze({ minDepth: 11, maxDepth: 19, gold: [100, 140, 180], potionId: "healing_potion_medium" }),
   Object.freeze({ minDepth: 20, maxDepth: Infinity, gold: [180, 240, 300], potionId: "healing_potion_large" })
 ]);
 
@@ -23,6 +23,26 @@ export function rollEnemyDrop(enemy, rng = Math.random) {
 export function rollBlackChestLoot(rng = Math.random, depth = 6) {
   const table = getBlackChestLootTable(depth);
   const roll = normalizedRoll(rng);
+  if (Number(depth) >= 6 && Number(depth) <= 10) {
+    if (roll < 0.4) {
+      return { kind: "item", itemId: "healing_potion_medium", amount: 1, unidentifiedName: "？薬" };
+    }
+    if (roll < 0.7) {
+      return { kind: "card", cardId: rollFromList([
+        "rare_strength_up_plus",
+        "rare_dexterity_lesson_plus",
+        "rare_lucky_charm_plus",
+        "rare_knowledge_book_plus",
+        "rare_gale_feather_plus"
+      ], rng), amount: 1, unidentifiedName: "？カード", rarity: "R" };
+    }
+    if (roll < 0.9) {
+      return { kind: "card", cardId: rollFromList(["rare_hp_up", "rare_sp_up"], rng),
+        amount: 1, unidentifiedName: "？カード", rarity: "R" };
+    }
+    return { kind: "card", cardId: "sr_indomitable_spirit", amount: 1,
+      unidentifiedName: "？カード", rarity: "SR" };
+  }
   if (roll < 0.45) return { kind: "gold", amount: rollBlackChestGold(rng, table) };
   if (roll < 0.65) return { kind: "item", itemId: table.potionId, amount: 1, unidentifiedName: "？薬" };
   if (roll < 0.8) return { kind: "item", itemId: "antidote", amount: 1, unidentifiedName: "？薬" };
@@ -67,4 +87,8 @@ export function rollEnhancement(rates, rng = Math.random) {
 
 function normalizedRoll(rng) {
   return Math.max(0, Math.min(0.999999999, Number(rng?.()) || 0));
+}
+
+function rollFromList(values, rng) {
+  return values[Math.floor(normalizedRoll(rng) * values.length)];
 }
