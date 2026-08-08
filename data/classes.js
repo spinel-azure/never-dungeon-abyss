@@ -49,7 +49,7 @@ export const CHARACTER_CLASSES = Object.freeze({
     stats: Object.freeze({ str: 2, int: 8, agi: 5, dex: 5, luc: 4 }),
     maxHp: 15,
     maxSp: 30,
-    initialSkillIds: Object.freeze(["illusion", "fireball", "ice_bind"])
+    initialSkillIds: Object.freeze(["magic_wall", "illusion", "fireball", "ice_bind"])
   })
 });
 
@@ -170,7 +170,8 @@ export function normalizeCharacter(character) {
       ? structuredClone(character.equipmentBuyback).filter(entry => entry?.instance?.instanceId)
       : [],
     skillIds: [...new Set([
-      ...(Array.isArray(character.skillIds) ? character.skillIds : characterClass.initialSkillIds),
+      ...characterClass.initialSkillIds,
+      ...(Array.isArray(character.skillIds) ? character.skillIds : []),
       ...getLevelUnlockedSkillIds(characterClass.id, level)
     ])],
     statuses: normalizeCharacterStatuses(character.statuses),

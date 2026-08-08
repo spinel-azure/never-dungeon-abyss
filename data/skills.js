@@ -1,6 +1,18 @@
 import { SPELLS } from "./spells.js";
 
 export const SKILLS = Object.freeze({
+  magic_wall: Object.freeze({
+    id: "magic_wall",
+    name: "壁よ、守りを！",
+    description: "魔力の壁を作り、弱い物理攻撃を3回まで無効化する。",
+    actionType: "buff",
+    category: "supportSpell",
+    spCost: 3,
+    target: "self",
+    speedModifier: 15,
+    preventWhileStatusActive: "magic_wall",
+    effects: Object.freeze([{ statusId: "magic_wall", trigger: "perAction", guaranteed: true }])
+  }),
   armor_break: Object.freeze({
     id: "armor_break",
     name: "鎧砕き",

@@ -153,6 +153,9 @@ function renderSelection() {
 function unavailableReason(skill, character) {
   if (skill.actionType === "passive") return "passive";
   if (character.sp < skill.spCost) return "insufficientSp";
+  if (skill.preventWhileStatusActive && (character.statuses || []).some(status =>
+    (status.statusId || status.id) === skill.preventWhileStatusActive && status.active !== false
+  )) return "alreadyActive";
   if (overlay.context === "field" && !["healing", "cureStatus", "sacrificialCure", "dungeonEffect"].includes(skill.actionType)) return "battleOnly";
   if (overlay.context === "battle" && skill.actionType === "dungeonEffect") return "fieldOnly";
   if (overlay.context === "field" && skill.actionType === "healing" && character.hp >= character.maxHp) return "fullHp";

@@ -1,4 +1,12 @@
 export const STATUS_EFFECTS = Object.freeze({
+  magic_wall: Object.freeze({
+    id: "magic_wall",
+    name: "魔力の壁",
+    kind: "buff",
+    barrierDamageThreshold: 7,
+    barrierCharges: 3,
+    expiresAfterBattle: true
+  }),
   armor_break: Object.freeze({
     id: "armor_break",
     name: "DEF低下",

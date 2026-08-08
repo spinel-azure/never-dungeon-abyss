@@ -4,6 +4,7 @@ import {
   resolveEnemyAmbush
 } from "../combat/battle-engine.js";
 import { resolveEscapeAttempt } from "../combat/resolve-escape.js";
+import { clearBattleOnlyStatuses } from "../combat/status-lifecycle.js";
 
 const COMMANDS = Object.freeze([
   ["attack", "戦う"],
@@ -369,6 +370,10 @@ function attemptEscape() {
 
 function finishBattle() {
   const outcome = battleUi.battle.outcome;
+  battleUi.battle.player.statuses = clearBattleOnlyStatuses(battleUi.battle.player.statuses);
+  battleUi.onCharacterChanged({
+    statuses: structuredClone(battleUi.battle.player.statuses)
+  });
   const snapshot = structuredClone(battleUi.battle);
   closeBattle();
   if (outcome === "victory") battleUi.onVictory(snapshot);

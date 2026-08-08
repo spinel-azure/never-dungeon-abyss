@@ -154,6 +154,9 @@ export function createPlayerAction(player, command = {}, enemy = null) {
   const skill = getSkill(command.skillId);
   if (!skill || !player.skillIds?.includes(skill.id)) return { ok: false, reason: "unknownSkill" };
   if (skill.actionType === "passive") return { ok: false, reason: "passive" };
+  if (skill.preventWhileStatusActive && (player.statuses || []).some(status =>
+    (status.statusId || status.id) === skill.preventWhileStatusActive && status.active !== false
+  )) return { ok: false, reason: "alreadyActive" };
   if (player.sp < skill.spCost) return { ok: false, reason: "insufficientSp" };
   if (["cureStatus", "sacrificialCure"].includes(skill.actionType)
     && !(player.statuses || []).some(status => (status.statusId || status.id) === skill.statusId)) {
@@ -356,13 +359,26 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
   const reduction = action.actionType === "physicalAttack"
     ? getPhysicalDamageReduction(target.statuses)
     : 0;
-  const presentedHits = result.hits.map((hit, index) => ({
+  let presentedHits = result.hits.map((hit, index) => ({
     index,
     hit: hit.hit,
     critical: hit.critical,
     damage: hit.hit ? Math.max(0, Math.floor(hit.damage * (1 - reduction))) : 0
   }));
-  const actualDamage = presentedHits.reduce((total, hit) => total + hit.damage, 0);
+  let actualDamage = presentedHits.reduce((total, hit) => total + hit.damage, 0);
+  const barrier = action.actionType === "physicalAttack"
+    ? findBlockingBarrier(target.statuses, actualDamage)
+    : null;
+  if (barrier) {
+    presentedHits = presentedHits.map(hit => ({ ...hit, damage: 0 }));
+    actualDamage = 0;
+    barrier.barrierCharges -= 1;
+    const remaining = Math.max(0, Number(barrier.barrierCharges) || 0);
+    target.statuses = remaining > 0
+      ? target.statuses
+      : target.statuses.filter(status => status !== barrier);
+    battle.log.push(`魔力の壁が攻撃を防いだ！ 残り${remaining}回`);
+  }
   target.hp = Math.max(0, target.hp - actualDamage);
   target.alive = target.hp > 0;
   const hitCount = presentedHits.filter(hit => hit.hit).length;
@@ -388,7 +404,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
     });
   });
   if (isMultiHit && hitCount > 0) battle.log.push(`合計${actualDamage}ダメージ！`);
-  const applications = [
+  const applications = barrier ? [] : [
     ...result.hits.flatMap(hit => hit.effects || []),
     ...(result.actionEffects || [])
   ];
@@ -396,6 +412,15 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
   for (const applied of applications.filter(item => item.success)) {
     battle.log.push(`${target.name}は${statusName(applied.statusId)}状態になった。`);
   }
+}
+
+function findBlockingBarrier(statuses = [], damage = 0) {
+  if (damage <= 0) return null;
+  return statuses.find(status =>
+    status.active !== false
+    && Number(status.barrierCharges) > 0
+    && damage <= Number(status.barrierDamageThreshold)
+  ) || null;
 }
 
 function finishAction(battle, side) {

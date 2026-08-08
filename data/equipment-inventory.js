@@ -67,6 +67,7 @@ export function getEquipmentInstanceDefinition(instance) {
   if (!definition) return null;
   const enhancement = Math.max(0, Math.min(3, Math.floor(Number(instance?.enhancement) || 0)));
   const penetration = definition.penetrationByEnhancement?.[enhancement];
+  const attack = definition.attackByEnhancement?.[enhancement];
   const statBonuses = definition.statBonusesByEnhancement?.[enhancement] || definition.statBonuses;
   const buyPrice = definition.buyPriceByEnhancement?.[enhancement] ?? definition.buyPrice;
   const sellPrice = definition.sellPriceByEnhancement?.[enhancement] ?? definition.sellPrice;
@@ -74,6 +75,7 @@ export function getEquipmentInstanceDefinition(instance) {
     ...definition,
     enhancement,
     statBonuses,
+    ...(attack == null ? {} : { attack }),
     ...(penetration == null ? {} : { defensePenetration: penetration }),
     ...(buyPrice == null ? {} : { buyPrice }),
     ...(sellPrice == null ? {} : { sellPrice })

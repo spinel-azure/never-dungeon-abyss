@@ -83,6 +83,10 @@ export function getPhysicalDamageReduction(statuses = []) {
     .map(status => Number(status.physicalDamageReduction) || 0));
 }
 
+export function clearBattleOnlyStatuses(statuses = []) {
+  return cloneStatuses(statuses).filter(status => status.expiresAfterBattle !== true);
+}
+
 export function getStatusResistanceBonus(statuses = []) {
   return statuses
     .filter(status => status.active !== false)

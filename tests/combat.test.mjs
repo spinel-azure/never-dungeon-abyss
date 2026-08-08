@@ -40,6 +40,7 @@ import { resolveTurnOrder, createGuardAction } from "../combat/resolve-turn-orde
 import {
   applyStatus,
   applyStatusApplications,
+  clearBattleOnlyStatuses,
   getNonlethalPoisonDamage,
   resolveActionOpportunity,
   resolveEndOfAction
@@ -683,7 +684,7 @@ test("illusion changes the physical hit floor to 50 percent", () => {
   assert.equal(rate, 0.5);
 });
 
-test("initial character receives class vitals, stats and three skills", () => {
+test("initial character receives class vitals and starting skills", () => {
   const priest = createInitialCharacter({ name: "TEST", job: "priest" });
   assert.equal(priest.maxHp, 20);
   assert.equal(priest.maxSp, 25);
@@ -693,7 +694,7 @@ test("initial character receives class vitals, stats and three skills", () => {
 
 test("every initial skill has a display description", () => {
   for (const jobId of ["warrior", "thief", "priest", "mage"]) {
-    const character = createInitialCharacter({ name: "TEST", jobId });
+    const character = createInitialCharacter({ name: "TEST", job: jobId });
     for (const skillId of character.skillIds) {
       const skill = getSkill(skillId);
       assert.equal(typeof skill.description, "string");
@@ -717,7 +718,77 @@ test("legacy characters migrate to their class vitals and skills", () => {
   assert.equal(mage.maxHp, 15);
   assert.equal(mage.sp, 30);
   assert.equal(mage.maxSp, 30);
-  assert.equal(mage.skillIds.length, 3);
+  assert.equal(mage.skillIds.length, 4);
+});
+
+test("Magic Wall blocks three weak physical actions but not a strong hit", () => {
+  const mage = createInitialCharacter({ name: "M", job: "mage" });
+  const rat = createEnemyCombatant(getEnemyById("abyss_rat"));
+  let battle = createBattleState({ character: mage, enemy: rat });
+  const startingHp = battle.player.hp;
+
+  let round = resolveBattleRound({
+    battle,
+    playerCommand: { type: "skill", skillId: "magic_wall" },
+    rng: () => 0.5
+  });
+  assert.equal(round.accepted, true);
+  battle = round.battle;
+  assert.equal(battle.player.hp, startingHp);
+  assert.equal(battle.player.statuses.find(status => status.statusId === "magic_wall")?.barrierCharges, 2);
+  assert.equal(createPlayerAction(battle.player, { type: "skill", skillId: "magic_wall" }).reason, "alreadyActive");
+
+  for (const remaining of [1, 0]) {
+    round = resolveBattleRound({ battle, playerCommand: { type: "wait" }, rng: () => 0.5 });
+    battle = round.battle;
+    assert.equal(battle.player.hp, startingHp);
+    assert.equal(battle.player.statuses.find(status => status.statusId === "magic_wall")?.barrierCharges || 0, remaining);
+  }
+
+  const strongEnemy = createEnemyCombatant({
+    ...getEnemyById("abyss_rat"), id: "strong_test_enemy", attack: 20,
+    stats: { ...getEnemyById("abyss_rat").stats, str: 10 }
+  });
+  const strongRound = resolveBattleRound({
+    battle: createBattleState({ character: mage, enemy: strongEnemy }),
+    playerCommand: { type: "skill", skillId: "magic_wall" },
+    rng: () => 0.5
+  });
+  assert.ok(strongRound.battle.player.hp < startingHp);
+  assert.equal(strongRound.battle.player.statuses.find(status => status.statusId === "magic_wall")?.barrierCharges, 3);
+});
+
+test("Magic Wall blocks the rat, rabbit, slime and Paul normal attacks", () => {
+  const enemies = [
+    createEnemyCombatant(getEnemyById("abyss_rat")),
+    createEnemyCombatant(getEnemyById("abyss_rabbit")),
+    createEnemyCombatant(getEnemyById("cave_slime")),
+    createBossCombatant(getBossById("lingering_ghost_paul_b2f"))
+  ];
+  for (const enemy of enemies) {
+    const mage = createInitialCharacter({ name: "M", job: "mage" });
+    const round = resolveBattleRound({
+      battle: createBattleState({ character: mage, enemy }),
+      playerCommand: { type: "skill", skillId: "magic_wall" },
+      rng: () => 0.5
+    });
+    assert.equal(round.battle.player.hp, mage.hp, enemy.name);
+    assert.equal(round.battle.player.statuses.find(status => status.statusId === "magic_wall")?.barrierCharges, 2, enemy.name);
+  }
+});
+
+test("existing mage saves receive Magic Wall as a starting skill", () => {
+  const mage = normalizeCharacter({
+    ...createInitialCharacter({ name: "OLD", job: "mage" }),
+    skillIds: ["fireball", "ice_bind", "illusion"]
+  });
+  assert.equal(mage.skillIds.includes("magic_wall"), true);
+});
+
+test("Magic Wall expires when battle-only statuses are cleared", () => {
+  const statuses = applyStatusApplications([], [{ statusId: "magic_wall", success: true }]);
+  assert.equal(statuses[0].barrierCharges, 3);
+  assert.deepEqual(clearBattleOnlyStatuses(statuses), []);
 });
 
 test("inn recovery restores HP and SP to maximum", () => {

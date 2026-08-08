@@ -36,6 +36,47 @@ test("shop equipment costs 100G and creates an individual weapon instance", () =
   assert.equal(result.character.equipmentInventory.instances.at(-1).equipmentId, "iron_greatsword");
 });
 
+test("B10 weapon upgrades require the strange statue victory and keep their enhancement profiles", () => {
+  const expected = {
+    warrior: ["steel_longsword", 11, {}],
+    thief: ["baselard", 8, { dex: 2 }],
+    priest: ["silver_flail", 10, { luc: 1 }]
+  };
+  for (const [job, [weaponId, attack, bonuses]] of Object.entries(expected)) {
+    const character = createInitialCharacter({ name: "TEST", job });
+    character.highestDungeonDepthReached = 10;
+    character.eventFlags.transfer_portal_b10f_unlocked = true;
+    assert.equal(getShopEquipmentStock(character).some(entry => entry.equipmentId === weaponId), false);
+    character.eventFlags.boss_strange_knight_statue_b9f_defeated = true;
+    const offer = getShopEquipmentStock(character).find(entry => entry.equipmentId === weaponId);
+    assert.equal(offer?.attack, attack);
+    assert.equal(offer?.buyPrice, 1200);
+    assert.deepEqual(offer?.statBonuses, bonuses);
+  }
+
+  assert.deepEqual(
+    [0, 1, 2, 3].map(enhancement => {
+      const definition = getEquipmentInstanceDefinition({ equipmentId: "baselard", slot: "rightArmId", enhancement });
+      return [definition.attack, definition.statBonuses.dex];
+    }),
+    [[8, 2], [9, 2], [9, 3], [10, 4]]
+  );
+  assert.deepEqual(
+    [0, 1, 2, 3].map(enhancement => {
+      const definition = getEquipmentInstanceDefinition({ equipmentId: "silver_flail", slot: "rightArmId", enhancement });
+      return [definition.attack, definition.statBonuses.luc];
+    }),
+    [[10, 1], [11, 1], [11, 2], [12, 3]]
+  );
+  assert.deepEqual(
+    [0, 1, 2, 3].map(enhancement => {
+      const definition = getEquipmentInstanceDefinition({ equipmentId: "steel_longsword", slot: "rightArmId", enhancement });
+      return [definition.attack, definition.statBonuses.str || 0];
+    }),
+    [[11, 0], [12, 0], [13, 1], [14, 2]]
+  );
+});
+
 test("thief armor shop tiers share enhancement-aware purchase and stat handling", () => {
   let character = createInitialCharacter({ name: "TEST", job: "thief" });
   character.gold = 2000;

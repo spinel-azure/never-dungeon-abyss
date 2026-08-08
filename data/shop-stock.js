@@ -31,6 +31,7 @@ export function getShopEquipmentStock(character) {
   const weapons = Object.values(WEAPONS)
     .filter(item => Number.isFinite(item.buyPrice))
     .filter(item => normalizeDepth(item.shopUnlockDepth) <= reached)
+    .filter(item => (item.shopRequiredFlags || []).every(flag => eventFlags[flag] === true))
     .filter(item => !item.allowedJobs?.length || item.allowedJobs.includes(job))
     .map(item => ({ ...item, equipmentId: item.id, slot: "rightArmId", enhancement: 0 }));
   const armor = SHOP_ARMOR_STOCK
