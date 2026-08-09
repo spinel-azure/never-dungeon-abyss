@@ -1593,7 +1593,7 @@ import {
     const audioPromise = playSeSequence("revival", 1);
     for (const phrase of ["こんじき――", "いなほ――", "みのり――", "しゅくふくを――！"]) {
       revivalPrayerText.textContent = phrase;
-      await wait(1000);
+      await wait(1500);
     }
     revivalPrayerText.textContent = "";
     revivalGoddess.hidden = false;
