@@ -47,7 +47,7 @@ import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minima
 import { configureInput } from "./input.js";
 import { configureVirtualStick } from "./virtualStick.js";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js";
+import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor, openQuestHistory, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js";
 import { resolveFloorTheme } from "./floorTheme.js";
 import {
   configureAutoReturn,
@@ -373,6 +373,7 @@ import {
     onWithdrawItem: withdrawTownItem,
     onDepositItem: depositTownItem,
     onEditDeck: openDeckEditor,
+    onOpenQuestHistory: openQuestHistory,
     onTalk: talkAtFacility,
     onAcceptRequest: acceptGuildRequest,
     onAbandonRequest: abandonGuildRequest,
@@ -725,6 +726,12 @@ import {
         itemIds: ["healing_potion", "antidote", "guiding_torch"],
         first: "女主人ヘレン：奈落の迷宮に行くのでしょう？　だったら、これを持っていって。回復薬に解毒剤、それと導きのたいまつ。今回はサービスよ。",
         repeat: "女主人ヘレン：必要なものがあるなら、ゆっくり見ていってね。"
+      },
+      tavern: {
+        flag: "tavern_first_talk_emergency_escape",
+        itemIds: ["emergency_escape"],
+        first: "ローザ：いらっしゃい。はじめまして、よね？お近づきのしるしにこれをどうぞ。とても貴重な物だから大切にしてね。\n「緊急脱出」を手に入れた！",
+        repeat: "ローザ：いらっしゃい。何か飲む？それとも…私に会いにきたのかしら？"
       }
     };
     const reward = rewards[facilityId];

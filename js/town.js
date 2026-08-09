@@ -24,8 +24,8 @@ const FACILITY_COMMANDS = Object.freeze({
     ["return", "町に戻る"], ["empty-1", ""], ["empty-2", ""]
   ],
   guild: [
-    ["accept", "依頼受注"], ["report", "依頼報告"], ["talk", "話す"],
-    ["return", "町へ戻る"], ["empty-1", ""], ["empty-2", ""]
+    ["accept", "依頼受注"], ["report", "依頼報告"], ["history", "依頼履歴"],
+    ["talk", "話す"], ["tavern", "酒場"], ["return", "町に戻る"]
   ],
   temple: [
     ["heal", "治療"], ["donate", "寄進"], ["talk", "話す"],
@@ -38,7 +38,21 @@ const FACILITY_COMMANDS = Object.freeze({
   library: [
     ["monsters", "魔物図鑑"], ["items", "アイテム図鑑"], ["cards", "カード図鑑"],
     ["records", "冒険記録"], ["talk", "話す"], ["return", "町へ戻る"]
+  ],
+  tavern: [
+    ["talk", "話す"], ["rumors", "噂話"], ["return", "町に戻る"],
+    ["empty-1", ""], ["empty-2", ""], ["empty-3", ""]
   ]
+});
+
+const TAVERN_FACILITY = Object.freeze({
+  id: "tavern",
+  label: "酒場",
+  keeper: "ローザ",
+  greeting: "いらっしゃい。ゆっくりしていってね。",
+  image: "images/npc/NPC_20.avif",
+  portraitAlt: "酒場の女主人ローザ",
+  background: "images/background/town_07.avif"
 });
 
 const TOWN_TYPEWRITER_DELAYS = Object.freeze({ slow: 75, normal: 42, fast: 20 });
@@ -80,6 +94,7 @@ const town = {
   facilityCommandIndex: 0,
   transferUnlocked: false,
   selectedIndex: 1,
+  subFacilityId: "",
   active: false,
   transitioning: false,
   mode: "arrival",
@@ -104,6 +119,7 @@ const town = {
   onWithdrawItem: () => null,
   onDepositItem: () => null,
   onEditDeck: () => {},
+  onOpenQuestHistory: () => {},
   onTalk: () => "",
   onAcceptRequest: () => "",
   onAbandonRequest: () => null,
@@ -162,11 +178,19 @@ export function configureTown(options) {
       image.decode().catch(() => {});
       return image;
     });
+  {
+    const image = new Image();
+    image.decoding = "async";
+    image.src = TAVERN_FACILITY.image;
+    image.decode().catch(() => {});
+    town.portraitPreloads.push(image);
+  }
   town.backgroundPreloads = [
     "images/background/town_01b.avif",
     "images/background/town_01c.avif",
     "images/background/town_name_01.avif",
     ...TOWN_FACILITIES.map(facility => facility.background).filter(Boolean),
+    TAVERN_FACILITY.background,
     "images/background/circle.avif",
     "images/background/town_02b.avif"
     ,"images/background/guild_quest.avif"
@@ -299,7 +323,8 @@ export function openTown({ registrationRequired = false, facilityId = null, mode
   town.registrationRequired = Boolean(registrationRequired);
   town.firstTownArrivalPending = Boolean(firstTownArrivalPending);
   town.arrivalMessage = "normal";
-  const requested = getTownFacility(facilityId);
+  town.subFacilityId = facilityId === "tavern" ? "tavern" : "";
+  const requested = town.subFacilityId ? getTownFacility("guild") : getTownFacility(facilityId);
   const availableRequested = requested && !requested.unavailable ? requested : null;
   const initialId = town.registrationRequired
     ? "guild"
@@ -327,6 +352,7 @@ export function closeTown() {
   town.root.hidden = true;
   town.registration.hidden = true;
   town.pendingVoiceFacility = "";
+  town.subFacilityId = "";
   showGameCommands();
   document.body.classList.remove("town-active");
   town.onAmbienceChanged(false);
@@ -345,7 +371,7 @@ export function setTransferUnlocked(unlocked) {
 
 export function getTownState() {
   return {
-    facilityId: TOWN_FACILITIES[town.selectedIndex]?.id || "guild",
+    facilityId: currentFacility().id,
     registrationRequired: town.registrationRequired,
     firstTownArrivalPending: town.firstTownArrivalPending,
     mode: town.mode
@@ -792,6 +818,7 @@ function activateFacility(facility) {
 }
 
 function beginFacilitySelection() {
+  town.subFacilityId = "";
   town.mode = "selection";
   town.selectedIndex = nearestSelectableIndex(town.selectedIndex, 1);
   renderTownView();
@@ -800,6 +827,7 @@ function beginFacilitySelection() {
 export function showTownArrival({ playNameBanner = false, firstVisit = false } = {}) {
   if (!town.active || town.registrationRequired) return false;
   town.mode = "selection";
+  town.subFacilityId = "";
   town.arrivalMessage = firstVisit ? "firstVisit" : "normal";
   town.selectedIndex = TOWN_FACILITIES.findIndex(facility => facility.id === "inn");
   renderTownView();
@@ -812,6 +840,12 @@ function returnFromFacility() {
     && TOWN_FACILITIES[town.selectedIndex]?.id === "guild";
   if (firstVisit) town.firstTownArrivalPending = false;
   showTownArrival({ playNameBanner: firstVisit, firstVisit });
+}
+
+function currentFacility() {
+  return town.subFacilityId === "tavern"
+    ? TAVERN_FACILITY
+    : TOWN_FACILITIES[town.selectedIndex] || getTownFacility("guild");
 }
 
 function startTownNameBanner() {
@@ -893,7 +927,7 @@ function renderTownView() {
 
 function renderFacility() {
   stopTownNameBanner();
-  const facility = TOWN_FACILITIES[town.selectedIndex] || getTownFacility("guild");
+  const facility = currentFacility();
   town.onAmbienceChanged(false);
   town.onBgmChanged(
     facility.id === "guild" && town.registrationRequired
@@ -1038,7 +1072,8 @@ function showFacilityCommands(facilityId) {
       || id === "deck"
       || (facilityId === "guild" && id === "accept" && requestUnlocked)
       || (facilityId === "guild" && id === "report" && reportAvailable)
-      || (id === "talk" && ["guild", "inn", "temple", "shop", "library"].includes(facilityId));
+      || (facilityId === "guild" && ["history", "tavern"].includes(id))
+      || (id === "talk" && ["guild", "inn", "temple", "shop", "library", "tavern"].includes(facilityId));
     button.dataset.facilityCommand = id;
     button.textContent = label;
     button.disabled = empty;
@@ -1067,6 +1102,18 @@ function activateFacilityService(command) {
   }
   if (command === "deck") {
     town.onEditDeck();
+    return true;
+  }
+  if (command === "history") {
+    if (currentFacility().id !== "guild") return false;
+    town.onOpenQuestHistory();
+    return true;
+  }
+  if (command === "tavern") {
+    if (currentFacility().id !== "guild") return false;
+    town.subFacilityId = "tavern";
+    town.facilityCommandIndex = 0;
+    renderFacility();
     return true;
   }
   if (command === "donate") {
@@ -1120,8 +1167,8 @@ function activateFacilityService(command) {
     return true;
   }
   if (command === "talk") {
-    const facility = TOWN_FACILITIES[town.selectedIndex];
-    if (!["guild", "inn", "temple", "shop", "library"].includes(facility?.id)) return false;
+    const facility = currentFacility();
+    if (!["guild", "inn", "temple", "shop", "library", "tavern"].includes(facility?.id)) return false;
     const result = town.onTalk(facility?.id);
     const message = typeof result === "string" ? result : result?.message;
     town.pendingVoiceFacility = facility.id === "inn" ? "inn" : "";

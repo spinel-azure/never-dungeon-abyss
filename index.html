@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
   <link rel="stylesheet" href="css/style.css?v=20260806-1">
-  <link rel="stylesheet" href="css/game-menu.css?v=20260809-2">
+  <link rel="stylesheet" href="css/game-menu.css?v=20260809-3">
   <link rel="stylesheet" href="css/title-screen.css?v=20260806-1">
   <link rel="stylesheet" href="css/town.css?v=20260809-2">
   <link rel="stylesheet" href="css/effects.css?v=20260805-2">
@@ -267,6 +267,13 @@
         <nav class="inventory-pager" aria-label="ページ操作"><button type="button" class="menu-footer" data-inventory-nav="back">BACK</button><span data-inventory-page>1/1</span><button type="button" class="menu-footer" data-inventory-nav="next">NEXT</button></nav>
       </div>
 
+      <div class="menu-panel inventory-panel quest-history-panel" data-menu-view="questHistory" hidden>
+        <h1 class="menu-title">QUEST HISTORY</h1>
+        <div class="inventory-list" data-quest-history-list aria-label="依頼履歴"></div>
+        <div class="inventory-description" data-quest-history-description aria-live="polite"></div>
+        <nav class="inventory-pager" aria-label="依頼履歴のページ操作"><button type="button" class="menu-footer" data-quest-history-nav="back">BACK</button><span data-quest-history-page>1/1</span><button type="button" class="menu-footer" data-quest-history-nav="next">NEXT</button></nav>
+      </div>
+
       <div class="menu-panel manual-save-panel" data-menu-view="save" hidden>
         <h1 class="menu-title">＊ SAVE GAME ＊</h1>
         <p>保存するスロットを選択してください。</p>
@@ -325,6 +332,6 @@
   </section>
 </main>
 <script type="module" src="js/title-screen.js"></script>
-  <script type="module" src="js/main.js?v=20260809-04"></script>
+  <script type="module" src="js/main.js?v=20260809-05"></script>
 </body>
 </html>

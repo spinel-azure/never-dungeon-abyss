@@ -367,6 +367,16 @@ export function hasActiveQuest(character) {
   return Object.keys(normalizeQuestState(character?.quests).active).length > 0;
 }
 
+export function getQuestHistory(character) {
+  return QUESTS
+    .map(quest => ({ quest, progress: getQuestProgress(character, quest.id) }))
+    .filter(entry => entry.progress.active || entry.progress.completed)
+    .sort((left, right) => {
+      const rank = entry => entry.progress.readyToReport ? 0 : entry.progress.active ? 1 : 2;
+      return rank(left) - rank(right) || Number(left.quest.number || 0) - Number(right.quest.number || 0);
+    });
+}
+
 export function isDungeonDepthUnlocked(character, depth) {
   const requestedDepth = Math.max(1, Math.floor(Number(depth) || 1));
   if (requestedDepth === 2) {

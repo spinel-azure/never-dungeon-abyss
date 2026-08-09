@@ -9,6 +9,7 @@ import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { getWeapon, getWeaponType } from "../data/weapons.js";
 import { listOwnedKeyItems } from "../data/key-items.js";
 import { getShopEquipmentStock } from "../data/shop-stock.js";
+import { getQuestHistory } from "../data/quests.js";
 
 const ACTION_FEEDBACK_MS = 260;
 const DEBUG_SEQUENCE_MS = 1000;
@@ -19,7 +20,7 @@ const OFF_MARK = "⚫";
 const DECK_PICKER_PAGE_SIZE = 5;
 
 const menu = {
-  root: null, commandRoot: null, statusPanel: null, deckPanel: null, inventoryPanel: null, savePanel: null, optionsPanel: null, debugPanel: null,
+  root: null, commandRoot: null, statusPanel: null, deckPanel: null, inventoryPanel: null, questHistoryPanel: null, savePanel: null, optionsPanel: null, debugPanel: null,
   commands: [], enabledCommands: [], commandIndex: 0, statusPage: 0,
   deckCursor: 0, deckSlots: [], deckEditable: false, deckReturnView: "commands",
   deckPickerOpen: false, deckPickerCursor: 0, deckPickerItems: [], deckPickerPage: 0,
@@ -27,6 +28,7 @@ const menu = {
   saveCursor: 0,
   inventoryTab: "items", inventoryCursor: 0, inventoryPage: 0, inventoryMode: "list", inventorySlot: null, inventoryFocus: "list",
   inventoryPurpose: "manage", inventorySaleStage: "list", inventorySaleQuantity: 1,
+  questHistoryCursor: 0, questHistoryPage: 0, questHistoryFocus: "list",
   optionPages: [], optionItems: [], optionNavButtons: [], optionCursor: 0, optionPage: 0,
   debugPages: [], debugItems: [], debugNavButtons: [], debugCursor: 0, debugPage: 0, recentConfirms: [], debugArmed: false, view: "dungeon",
   compassVisible: true, readoutVisible: false, screenShakeEnabled: true,
@@ -64,6 +66,7 @@ export function configureMenu(options) {
   menu.deckPanel = menu.root.querySelector('[data-menu-view="deck"]');
   menu.savePanel = menu.root.querySelector('[data-menu-view="save"]');
   menu.inventoryPanel = menu.root.querySelector('[data-menu-view="inventory"]');
+  menu.questHistoryPanel = menu.root.querySelector('[data-menu-view="questHistory"]');
   menu.optionsPanel = menu.root.querySelector('[data-menu-view="options"]');
   menu.debugPanel = menu.root.querySelector('[data-menu-view="debug"]');
   menu.commands = [...menu.commandRoot.querySelectorAll("[data-command]")];
@@ -78,7 +81,7 @@ export function configureMenu(options) {
   menu.debugPages = [...menu.debugPanel.querySelectorAll("[data-debug-page]")];
   menu.debugNavButtons = [...menu.debugPanel.querySelectorAll("[data-debug-nav]")];
   restoreSettings();
-  renderEmptyStats(); bindCommands(); bindStatus(); bindDeck(); bindInventory(); bindManualSave(); bindOptions(); bindDebug();
+  renderEmptyStats(); bindCommands(); bindStatus(); bindDeck(); bindInventory(); bindQuestHistory(); bindManualSave(); bindOptions(); bindDebug();
   updateOptionItems(); updateDebugItems(); applyAllSettings(); updateView();
 }
 
@@ -104,6 +107,15 @@ export function openDeckEditor() {
   menu.deckPointerArmedIndex = -1;
   menu.deckPickerPointerArmedIndex = -1;
   renderDeck();
+  updateView();
+}
+export function openQuestHistory() {
+  menu.playSe("confirm");
+  menu.view = "questHistory";
+  menu.questHistoryCursor = 0;
+  menu.questHistoryPage = 0;
+  menu.questHistoryFocus = "list";
+  renderQuestHistory();
   updateView();
 }
 export function closeCampMenu(reason = "back") { menu.view = "dungeon"; updateView(); if (reason === "back" || reason === "main") menu.onReturnToDungeon(reason); }
@@ -142,6 +154,7 @@ export function handleMenuInput(action) {
   else if (menu.view === "status") handleStatus(action);
   else if (menu.view === "deck") handleDeck(action);
   else if (menu.view === "inventory") handleInventory(action);
+  else if (menu.view === "questHistory") handleQuestHistory(action);
   else if (menu.view === "save") handleManualSave(action);
   else if (menu.view === "options") handleOptions(action);
   else if (menu.view === "debug") handleDebug(action);
@@ -428,6 +441,113 @@ function closeInventoryTrade() {
   updateView();
   if (purpose === "buy") menu.onInventoryPurchaseClosed();
   else menu.onInventorySaleClosed();
+}
+
+function handleQuestHistory(action) {
+  const entries = getQuestHistory(menu.getCharacter());
+  const pages = Math.max(1, Math.ceil(entries.length / 10));
+  if (action === "cancel") {
+    menu.view = "dungeon";
+    updateView();
+    return;
+  }
+  if (menu.questHistoryFocus !== "list") {
+    if (action === "left" || action === "right") {
+      menu.questHistoryFocus = menu.questHistoryFocus === "back" ? "next" : "back";
+    } else if (action === "up" || action === "down") {
+      if (entries.length) {
+        const pageStart = menu.questHistoryPage * 10;
+        menu.questHistoryCursor = action === "up" ? Math.min(entries.length - 1, pageStart + 9) : pageStart;
+        menu.questHistoryFocus = "list";
+      }
+    } else if (action === "confirm") {
+      if (menu.questHistoryFocus === "back") {
+        if (menu.questHistoryPage === 0) {
+          menu.view = "dungeon";
+          updateView();
+          return;
+        }
+        menu.questHistoryPage -= 1;
+      } else if (menu.questHistoryPage < pages - 1) {
+        menu.questHistoryPage += 1;
+      }
+      menu.questHistoryCursor = menu.questHistoryPage * 10;
+      menu.questHistoryFocus = "list";
+    }
+    renderQuestHistory();
+    return;
+  }
+  if (action === "up" || action === "down") {
+    if (!entries.length) return;
+    const pageStart = menu.questHistoryPage * 10;
+    const pageEnd = Math.min(entries.length - 1, pageStart + 9);
+    if (action === "up" && menu.questHistoryCursor === pageStart) menu.questHistoryFocus = "back";
+    else if (action === "down" && menu.questHistoryCursor === pageEnd) menu.questHistoryFocus = "back";
+    else menu.questHistoryCursor += action === "down" ? 1 : -1;
+    renderQuestHistory();
+    return;
+  }
+  if (action === "left" && menu.questHistoryPage > 0) {
+    menu.questHistoryPage -= 1;
+    menu.questHistoryCursor = menu.questHistoryPage * 10;
+    renderQuestHistory();
+  } else if (action === "right" && menu.questHistoryPage < pages - 1) {
+    menu.questHistoryPage += 1;
+    menu.questHistoryCursor = menu.questHistoryPage * 10;
+    renderQuestHistory();
+  }
+}
+
+function bindQuestHistory() {
+  const panel = menu.questHistoryPanel;
+  panel.querySelector('[data-quest-history-nav="back"]').addEventListener("click", () => {
+    menu.questHistoryFocus = "back";
+    handleQuestHistory("confirm");
+  });
+  panel.querySelector('[data-quest-history-nav="next"]').addEventListener("click", () => {
+    menu.questHistoryFocus = "next";
+    handleQuestHistory("confirm");
+  });
+}
+
+function renderQuestHistory() {
+  const panel = menu.questHistoryPanel;
+  const entries = getQuestHistory(menu.getCharacter());
+  const pages = Math.max(1, Math.ceil(entries.length / 10));
+  menu.questHistoryPage = Math.min(menu.questHistoryPage, pages - 1);
+  menu.questHistoryCursor = entries.length ? Math.min(menu.questHistoryCursor, entries.length - 1) : 0;
+  panel.querySelector("[data-quest-history-list]").replaceChildren(...entries.slice(menu.questHistoryPage * 10, menu.questHistoryPage * 10 + 10).map((entry, offset) => {
+    const index = menu.questHistoryPage * 10 + offset;
+    const status = entry.progress.readyToReport ? "報告可能" : entry.progress.active ? "進行中" : "達成済";
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "inventory-entry";
+    button.innerHTML = `<span>${entry.quest.number} ${entry.quest.title}</span><strong>［${status}］</strong>`;
+    button.classList.toggle("is-selected", menu.questHistoryFocus === "list" && menu.questHistoryCursor === index);
+    button.addEventListener("click", () => {
+      menu.questHistoryCursor = index;
+      menu.questHistoryFocus = "list";
+      renderQuestHistory();
+    });
+    return button;
+  }));
+  const selected = entries[menu.questHistoryCursor];
+  const description = panel.querySelector("[data-quest-history-description]");
+  if (!selected) {
+    description.textContent = "進行中または達成済みの依頼はありません。";
+  } else {
+    const { quest, progress } = selected;
+    const status = progress.readyToReport ? "報告可能" : progress.active ? "進行中" : "達成済";
+    const progressText = progress.completed ? "完了" : `${Math.min(progress.progress, quest.requiredCount)}／${quest.requiredCount}`;
+    description.textContent = `依頼人：${quest.client} / 状態：${status} / 進捗：${progressText} / 目的：${quest.objectiveLabel || quest.description?.join(" ") || "―"} / 報酬：${quest.reward?.label || "―"}${quest.reward?.bonusGold ? `＋${quest.reward.bonusGold}G` : ""}`;
+  }
+  panel.querySelector("[data-quest-history-page]").textContent = `${menu.questHistoryPage + 1}/${pages}`;
+  const back = panel.querySelector('[data-quest-history-nav="back"]');
+  const next = panel.querySelector('[data-quest-history-nav="next"]');
+  back.textContent = menu.questHistoryPage > 0 ? "PREV" : "BACK";
+  next.disabled = menu.questHistoryPage >= pages - 1;
+  back.classList.toggle("is-selected", menu.questHistoryFocus === "back");
+  next.classList.toggle("is-selected", menu.questHistoryFocus === "next");
 }
 
 function bindInventory() {
@@ -762,11 +882,11 @@ function bindDebug() {
 function renderEmptyStats() { const rows = ["STR", "INT", "AGI", "DEX", "LUC", "DEF"].map(label => { const row = document.createElement("div"); row.className = "nde-stat-row"; const name = document.createElement("strong"); name.textContent = label; const gauge = document.createElement("span"); gauge.className = "nde-empty-gauge"; for (let index = 0; index < 30; index += 1) gauge.append(document.createElement("i")); const value = document.createElement("output"); value.textContent = "--"; row.append(name, gauge, value); return row; }); menu.root.querySelector("#ndeStatRows").replaceChildren(...rows); }
 
 function updateView() {
-  const screenOpen = ["status", "deck", "inventory", "save", "options", "debug"].includes(menu.view);
+  const screenOpen = ["status", "deck", "inventory", "questHistory", "save", "options", "debug"].includes(menu.view);
   document.body.classList.toggle("menu-open", screenOpen); document.body.classList.toggle("command-open", menu.view === "commands");
   document.body.classList.toggle("deck-open", menu.view === "deck");
   document.body.classList.toggle("inventory-open", menu.view === "inventory");
-  menu.root.hidden = !screenOpen; menu.statusPanel.hidden = menu.view !== "status"; menu.deckPanel.hidden = menu.view !== "deck"; menu.inventoryPanel.hidden = menu.view !== "inventory"; menu.savePanel.hidden = menu.view !== "save"; menu.optionsPanel.hidden = menu.view !== "options"; menu.debugPanel.hidden = menu.view !== "debug";
+  menu.root.hidden = !screenOpen; menu.statusPanel.hidden = menu.view !== "status"; menu.deckPanel.hidden = menu.view !== "deck"; menu.inventoryPanel.hidden = menu.view !== "inventory"; menu.questHistoryPanel.hidden = menu.view !== "questHistory"; menu.savePanel.hidden = menu.view !== "save"; menu.optionsPanel.hidden = menu.view !== "options"; menu.debugPanel.hidden = menu.view !== "debug";
   menu.commandRoot.dataset.active = String(menu.view === "commands");
   const hint = document.querySelector("#commandHint"); if (hint) hint.textContent = menu.view === "commands" ? "＊ Bボタンでメニュー非表示" : "＊ Bボタンでメニュー表示";
   updateStatus(); updatePager(); updateDebugPager(); updateSelection();

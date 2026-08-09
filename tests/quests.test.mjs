@@ -15,6 +15,7 @@ import {
   abandonQuest,
   acceptQuest,
   getQuestById,
+  getQuestHistory,
   getQuestProgress,
   isDungeonDepthUnlocked,
   isQuestAvailable,
@@ -28,6 +29,25 @@ import {
 } from "../data/quests.js";
 
 const QUEST_ID = "guild_001_abyss_rat";
+
+test("quest history lists reportable, active, then completed requests", () => {
+  const character = createInitialCharacter("履歴確認", "warrior");
+  character.quests = {
+    active: {
+      [SLIME_EXTERMINATION_QUEST_ID]: { progress: 2 },
+      [FLOOR_SURVEY_QUEST_ID]: { progress: 100 }
+    },
+    completedQuestIds: [QUEST_ID]
+  };
+  const history = getQuestHistory(character);
+  assert.deepEqual(history.map(entry => entry.quest.id), [
+    FLOOR_SURVEY_QUEST_ID,
+    SLIME_EXTERMINATION_QUEST_ID,
+    QUEST_ID
+  ]);
+  assert.equal(history[0].progress.readyToReport, true);
+  assert.equal(history[2].progress.completed, true);
+});
 
 function unlockB2F(character) {
   return {
