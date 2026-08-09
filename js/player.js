@@ -61,6 +61,7 @@ const hooks = {
   returnToTown: () => {},
   beginBattle: () => {},
   playNpcVoice: () => {},
+  onNpcEncountered: () => {},
   onDungeonStep: () => {},
   onStateChanged: () => {}
 };
@@ -799,6 +800,7 @@ function advanceNpcTalkEvent() {
 
   stopNpcTypewriter();
   state.npcEncounterCounts[event.npc.id] = event.encounterCount + 1;
+  hooks.onNpcEncountered(event.npc);
   state.overlayEvent = null;
   if (event.leaveAfterTalk) {
     removeNpcAt(event.npcGX, event.npcGY);

@@ -90,6 +90,9 @@ const town = {
   registrationIndex: -1,
   questIndex: 0,
   questPage: 0,
+  rumorDialogue: [],
+  rumorDialogueIndex: 0,
+  activeRumor: null,
   entranceIndex: 0,
   facilityCommandIndex: 0,
   transferUnlocked: false,
@@ -120,6 +123,8 @@ const town = {
   onDepositItem: () => null,
   onEditDeck: () => {},
   onOpenQuestHistory: () => {},
+  getUnreadRumor: () => null,
+  onCompleteRumor: () => {},
   onTalk: () => "",
   onAcceptRequest: () => "",
   onAbandonRequest: () => null,
@@ -392,6 +397,7 @@ export function handleTownInput(action) {
   if (town.mode === "commerceQuantity") return handleCommerceQuantityInput(action);
   if (town.mode === "commerceConfirm") return handleCommerceConfirmationInput(action);
   if (town.mode === "commerce") return handleCommerceInput(action);
+  if (town.mode === "tavernRumor") return handleTavernRumorInput(action);
   if (town.mode.startsWith("quest")) return handleQuestInput(action);
   if (town.mode === "registration") return handleRegistrationInput(action);
   if (town.mode === "dungeonEntrance") return handleEntranceInput(action);
@@ -460,6 +466,23 @@ function handleFacilityMenuInput(action) {
     }
     return true;
   }
+  return true;
+}
+
+function handleTavernRumorInput(action) {
+  if (action === "cancel") return true;
+  if (action !== "confirm") return true;
+  town.playSe("confirm");
+  town.rumorDialogueIndex += 1;
+  if (town.rumorDialogueIndex < town.rumorDialogue.length) {
+    town.messageEl.textContent = town.rumorDialogue[town.rumorDialogueIndex];
+    return true;
+  }
+  town.onCompleteRumor(town.activeRumor);
+  town.activeRumor = null;
+  town.rumorDialogue = [];
+  town.rumorDialogueIndex = 0;
+  renderFacility();
   return true;
 }
 
@@ -1073,6 +1096,7 @@ function showFacilityCommands(facilityId) {
       || (facilityId === "guild" && id === "accept" && requestUnlocked)
       || (facilityId === "guild" && id === "report" && reportAvailable)
       || (facilityId === "guild" && ["history", "tavern"].includes(id))
+      || (facilityId === "tavern" && id === "rumors" && Boolean(town.getUnreadRumor()))
       || (id === "talk" && ["guild", "inn", "temple", "shop", "library", "tavern"].includes(facilityId));
     button.dataset.facilityCommand = id;
     button.textContent = label;
@@ -1114,6 +1138,17 @@ function activateFacilityService(command) {
     town.subFacilityId = "tavern";
     town.facilityCommandIndex = 0;
     renderFacility();
+    return true;
+  }
+  if (command === "rumors") {
+    if (currentFacility().id !== "tavern") return false;
+    const rumor = town.getUnreadRumor();
+    if (!rumor?.dialogue?.length) return false;
+    town.activeRumor = rumor;
+    town.rumorDialogue = [...rumor.dialogue];
+    town.rumorDialogueIndex = 0;
+    town.mode = "tavernRumor";
+    town.messageEl.textContent = town.rumorDialogue[0];
     return true;
   }
   if (command === "donate") {

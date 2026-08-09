@@ -123,6 +123,7 @@ import { restAtHealingFountain as restoreAtHealingFountain } from "../data/fount
 import { getSkill } from "../data/skills.js";
 import { getQuestRequiredSpecialRoomAccess, getSpecialRoomAccessRestriction, getSpecialRoomDefinition } from "../data/special-rooms.js";
 import { acknowledgeShopStockAnnouncement, getShopEquipmentOffer, getShopStockState, markShopCategorySeen } from "../data/shop-stock.js";
+import { getUnreadTavernRumor, markTavernRumorRead } from "../data/tavern-rumors.js";
 import {
   abandonQuest,
   acceptQuest,
@@ -348,6 +349,13 @@ import {
     beginBossBattle,
     beginMimicBattle,
     playNpcVoice: playSe,
+    onNpcEncountered: npc => {
+      if (!character || !String(npc?.id || "").startsWith("NPC_01")) return;
+      character = {
+        ...character,
+        eventFlags: { ...(character.eventFlags || {}), mikan_nyanko_encountered: true }
+      };
+    },
     onDungeonStep: handleDungeonStep,
     onStateChanged: scheduleAutosave
   });
@@ -374,6 +382,17 @@ import {
     onDepositItem: depositTownItem,
     onEditDeck: openDeckEditor,
     onOpenQuestHistory: openQuestHistory,
+    getUnreadRumor: () => getUnreadTavernRumor(character, {
+      mikanEncountered: Boolean(character?.eventFlags?.mikan_nyanko_encountered)
+        || Object.entries(state.npcEncounterCounts || {}).some(
+          ([npcId, count]) => npcId.startsWith("NPC_01") && Number(count) > 0
+        )
+    }),
+    onCompleteRumor: rumor => {
+      character = markTavernRumorRead(character, rumor);
+      updateCharacterUi();
+      saveGame();
+    },
     onTalk: talkAtFacility,
     onAcceptRequest: acceptGuildRequest,
     onAbandonRequest: abandonGuildRequest,
