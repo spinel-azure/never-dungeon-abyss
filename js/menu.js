@@ -350,7 +350,7 @@ function handleInventorySaleStage(action) {
   if (menu.inventorySaleStage === "quantity" && ["up", "down", "left", "right"].includes(action)) {
     const amount = action === "up" ? 1 : action === "down" ? -1 : action === "right" ? 10 : -10;
     const maximum = menu.inventoryPurpose === "buy"
-      ? Math.max(1, Math.min(99, entry.item?.buyPrice > 0 ? Math.floor(Number(menu.getCharacter()?.gold || 0) / entry.item.buyPrice) : 99))
+      ? 99
       : entry.count;
     menu.inventorySaleQuantity = Math.max(1, Math.min(maximum, menu.inventorySaleQuantity + amount));
     if (menu.inventoryPurpose === "buy") renderInventoryTradePrompt();

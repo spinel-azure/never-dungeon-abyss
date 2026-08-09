@@ -2317,11 +2317,18 @@ import {
     saveGame: slot => saveGame({ announce: true, slot }),
     canManualSave: () => worldLocation === "town",
     getSaveSlotSummaries,
-    openSkills: () => openSkillOverlay({
-      context: "field",
-      character,
-      onUse: useFieldSkill
-    }),
+    openSkills: () => {
+      if (isTownOpen()) townPortraitFrame.append(skillOverlay);
+      else viewportEl.append(skillOverlay);
+      const opened = openSkillOverlay({
+        context: "field",
+        character,
+        onUse: useFieldSkill,
+        onClose: () => viewportEl.append(skillOverlay)
+      });
+      if (!opened) viewportEl.append(skillOverlay);
+      return opened;
+    },
     openItems: openFieldItems,
     onReturnToDungeon: () => {
       if (isTownOpen()) showTownArrival();

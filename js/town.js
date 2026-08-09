@@ -1362,9 +1362,7 @@ function handleCommerceQuantityInput(action) {
     ? Math.max(1, warehouseItemCount(item.id))
     : Math.max(1, Math.floor(Number(town.getCharacter()?.inventory?.counts?.[item.id]) || 1));
   const maximum = town.commerceKind === "buy"
-    ? Math.max(1, Math.min(99, item.buyPrice > 0
-      ? Math.floor(Math.max(0, Number(town.getCharacter()?.gold) || 0) / item.buyPrice)
-      : 99))
+    ? 99
     : owned;
   if (["up", "down", "left", "right"].includes(action)) {
     const amount = action === "up" ? 1 : action === "down" ? -1 : action === "right" ? 10 : -10;
@@ -1536,9 +1534,11 @@ function showStorageCommands() {
 }
 
 function renderCommerceSelection({ showDescription = true } = {}) {
-  [...town.commerceList.children].forEach((button, index) => {
+  const buttons = [...town.commerceList.children];
+  buttons.forEach((button, index) => {
     button.classList.toggle("is-selected", index === town.commerceIndex);
   });
+  buttons[town.commerceIndex]?.scrollIntoView?.({ block: "nearest" });
   const item = town.commerceItems[town.commerceIndex];
   if (showDescription && item) {
     const ownership = town.commerceKind === "buy"
