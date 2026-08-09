@@ -173,6 +173,8 @@
   display: none;
 }
 
+body.layout-tablet .battle-boss-hp-meter{flex:0 0 12px;width:min(52%,360px);min-height:12px;box-sizing:border-box}
+
 .battle-boss-hp-meter::after {
   content: "";
   position: absolute;

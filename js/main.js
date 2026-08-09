@@ -209,6 +209,9 @@ import {
   const sceneTransition = document.getElementById("sceneTransition");
   const sceneTransitionTitle = document.getElementById("sceneTransitionTitle");
   const defeatMessage = document.getElementById("defeatMessage");
+  const revivalPrayer = document.getElementById("revivalPrayer");
+  const revivalPrayerText = document.getElementById("revivalPrayerText");
+  const revivalGoddess = document.getElementById("revivalGoddess");
   const questTutorialOverlay = document.getElementById("questTutorialOverlay");
   let sceneTransitionRunning = false;
   let templeRevivalJinglePending = false;
@@ -1310,8 +1313,8 @@ import {
     return { ...result, character };
   }
 
-  function withdrawTownItem(itemId) {
-    const result = withdrawItemFromWarehouse(character, itemId, 1);
+  function withdrawTownItem(itemId, amount = 1) {
+    const result = withdrawItemFromWarehouse(character, itemId, amount);
     if (!result.accepted) return result;
     character = result.character;
     updateCharacterUi();
@@ -1492,7 +1495,8 @@ import {
       return;
     }
     stopBgm();
-    await runDefeatPresentation(() => completeDungeonDefeat());
+    await runDefeatPresentation();
+    await completeDungeonDefeat();
   }
 
   function getDefeatRecoveryResolvers() {
@@ -1502,9 +1506,11 @@ import {
     return [];
   }
 
-  function completeDungeonDefeat() {
+  async function completeDungeonDefeat() {
     let lostExperience = 0;
     let preservedExperience = 0;
+    let bag = null;
+    let settled = null;
     if (character) {
       const carriedExperience = Math.max(
         0,
@@ -1515,17 +1521,9 @@ import {
         "preserve_experience_on_defeat"
       );
       Object.assign(character, resolveDungeonDefeat(character, { preserveExperience }));
-      const bag = structuredClone(character.lootBag);
-      const settled = settleLootBag(character);
+      bag = structuredClone(character.lootBag);
+      settled = settleLootBag(character);
       character = settled.character;
-      showLootIdentification(bag, settled, {
-        playBgm: false,
-        onClose: () => {
-          if (!templeRevivalJinglePending && worldLocation === "town" && getTownState().facilityId === "temple") {
-            startBgm("temple");
-          }
-        }
-      });
       lostExperience = preserveExperience ? 0 : carriedExperience;
       preservedExperience = preserveExperience ? carriedExperience : 0;
       character = recordFloorExploration(character, { depth: 0, explored: [] });
@@ -1534,7 +1532,6 @@ import {
     clearPresenceIncreaseReduction();
     state.treasureCompassActive = false;
     stopBgm();
-    templeRevivalJinglePending = true;
     cancelAutoReturn(false);
     setPlayerInputEnabled(false);
     openTown({ registrationRequired: false, facilityId: "temple", mode: "facilityMenu" });
@@ -1544,17 +1541,16 @@ import {
       : lostExperience > 0
         ? `\n持ち帰るはずだった${lostExperience}EXPを失った。`
         : "";
-    say(`司祭アーヴァイン：おお…！女神へ祈りが届いたか…！迷える魂よ、今一度目覚めよ！${experienceMessage}`);
     saveGame();
-    void playSeSequence("revival", 1).finally(() => {
-      templeRevivalJinglePending = false;
-      if (worldLocation === "town" && getTownState().facilityId === "temple") {
-        startBgm("temple");
-      }
-    });
+    if (character && bagHasLoot(bag)) {
+      await new Promise(resolve => showLootIdentification(bag, settled, { playBgm: false, onClose: resolve }));
+    }
+    await runRevivalPrayer();
+    say(`司祭アーヴァイン：おお…！女神の祈りが届いたか…！よくぞ目覚めた…！${experienceMessage}`);
+    if (worldLocation === "town" && getTownState().facilityId === "temple") startBgm("temple");
   }
 
-  async function runDefeatPresentation(onBlack = () => {}) {
+  async function runDefeatPresentation() {
     if (sceneTransitionRunning) return false;
     sceneTransitionRunning = true;
     sceneTransition.hidden = false;
@@ -1566,7 +1562,6 @@ import {
     void sceneTransition.offsetWidth;
     requestAnimationFrame(() => sceneTransition.classList.add("is-black"));
     await Promise.all([wait(15000), playSeSequence("gameOver", 1)]);
-    await onBlack();
     sceneTransition.classList.add("is-revealing");
     sceneTransition.classList.remove("is-black");
     await wait(1200);
@@ -1576,6 +1571,41 @@ import {
     document.body.classList.remove("scene-transition-active");
     sceneTransitionRunning = false;
     return true;
+  }
+
+  async function runRevivalPrayer() {
+    if (!revivalPrayer || !revivalPrayerText || !revivalGoddess) return;
+    templeRevivalJinglePending = true;
+    sceneTransitionRunning = true;
+    sceneTransition.hidden = false;
+    sceneTransition.className = "scene-transition is-running is-black is-revival";
+    defeatMessage.hidden = true;
+    sceneTransitionTitle.hidden = true;
+    revivalPrayer.hidden = false;
+    revivalGoddess.hidden = true;
+    revivalGoddess.classList.remove("is-active");
+    document.body.classList.add("scene-transition-active");
+    const audioPromise = playSeSequence("revival", 1);
+    for (const phrase of ["こんじき――", "いなほ――", "みのり――", "しゅくふくを――！"]) {
+      revivalPrayerText.textContent = phrase;
+      await wait(1000);
+    }
+    revivalPrayerText.textContent = "";
+    revivalGoddess.hidden = false;
+    void revivalGoddess.offsetWidth;
+    revivalGoddess.classList.add("is-active");
+    await Promise.all([audioPromise, wait(4000)]);
+    sceneTransition.classList.add("is-revealing");
+    sceneTransition.classList.remove("is-black");
+    await wait(1200);
+    revivalPrayer.hidden = true;
+    revivalGoddess.hidden = true;
+    revivalGoddess.classList.remove("is-active");
+    sceneTransition.className = "scene-transition";
+    sceneTransition.hidden = true;
+    document.body.classList.remove("scene-transition-active");
+    sceneTransitionRunning = false;
+    templeRevivalJinglePending = false;
   }
 
   function finishBattleEscape() {

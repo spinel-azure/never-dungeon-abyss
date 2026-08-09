@@ -287,7 +287,12 @@ function handleInventory(action) {
   const entry = entries[menu.inventoryCursor];
   if (!entry) return;
   if (menu.inventoryPurpose === "sell") { requestInventorySale(entry); return; }
-  if (menu.inventoryPurpose === "buy") { menu.inventorySaleStage = "confirm"; renderInventoryTradePrompt(); return; }
+  if (menu.inventoryPurpose === "buy") {
+    menu.inventorySaleQuantity = 1;
+    menu.inventorySaleStage = entry.item ? "quantity" : "confirm";
+    renderInventoryTradePrompt();
+    return;
+  }
   if (menu.inventoryMode === "equip") { applyEquipmentCandidate(entry); return; }
   if (entry.item) { Promise.resolve(menu.onUseInventoryItem(entry.item.id)).then(renderInventory); return; }
   if (menu.getInventoryContext() === "dungeon") {
@@ -344,8 +349,12 @@ function handleInventorySaleStage(action) {
   if (!entry) { menu.inventorySaleStage = "list"; renderInventory(); return; }
   if (menu.inventorySaleStage === "quantity" && ["up", "down", "left", "right"].includes(action)) {
     const amount = action === "up" ? 1 : action === "down" ? -1 : action === "right" ? 10 : -10;
-    menu.inventorySaleQuantity = Math.max(1, Math.min(entry.count, menu.inventorySaleQuantity + amount));
-    renderInventorySalePrompt();
+    const maximum = menu.inventoryPurpose === "buy"
+      ? Math.max(1, Math.min(99, entry.item?.buyPrice > 0 ? Math.floor(Number(menu.getCharacter()?.gold || 0) / entry.item.buyPrice) : 99))
+      : entry.count;
+    menu.inventorySaleQuantity = Math.max(1, Math.min(maximum, menu.inventorySaleQuantity + amount));
+    if (menu.inventoryPurpose === "buy") renderInventoryTradePrompt();
+    else renderInventorySalePrompt();
     return;
   }
   if (action === "cancel") {
@@ -356,12 +365,13 @@ function handleInventorySaleStage(action) {
   if (action !== "confirm") return;
   if (menu.inventorySaleStage === "quantity") {
     menu.inventorySaleStage = "confirm";
-    renderInventorySalePrompt();
+    if (menu.inventoryPurpose === "buy") renderInventoryTradePrompt();
+    else renderInventorySalePrompt();
     return;
   }
   const buying = menu.inventoryPurpose === "buy";
   const result = buying
-    ? (entry.item ? menu.onPurchaseInventoryItem(entry.item.id) : menu.onPurchaseInventoryEquipment(entry.shopEquipment.id))
+    ? (entry.item ? menu.onPurchaseInventoryItem(entry.item.id, menu.inventorySaleQuantity) : menu.onPurchaseInventoryEquipment(entry.shopEquipment.id))
     : (entry.item ? menu.onSellInventoryItem(entry.item.id, menu.inventorySaleQuantity) : menu.onSellInventoryEquipment(entry.instance.instanceId));
   menu.inventorySaleStage = "list";
   renderInventory();
@@ -389,7 +399,21 @@ function renderInventoryTradePrompt() {
   if (!entry) return;
   const name = entry.item?.name || entry.shopEquipment?.name;
   const price = entry.item?.buyPrice ?? entry.shopEquipment?.buyPrice ?? 0;
-  menu.inventoryPanel.querySelector("[data-inventory-description]").textContent = `${name}を${price}Gで購入しますか？ / Aボタン：はい　Bボタン：いいえ\n所持金：${inventoryGoldText()}G`;
+  const quantity = entry.item ? menu.inventorySaleQuantity : 1;
+  const ownership = entry.item ? `\n所持数：${inventoryOwnedItemCount(entry.item.id)}／${entry.item.maxOwned || 99}　倉庫：${inventoryWarehouseItemCount(entry.item.id)}` : "";
+  menu.inventoryPanel.querySelector("[data-inventory-description]").textContent = menu.inventorySaleStage === "quantity"
+    ? `購入数 ${quantity}　合計 ${price * quantity}G / ↑↓：1個　←→：10個　Aボタン：決定　Bボタン：戻る${ownership}\n所持金：${inventoryGoldText()}G`
+    : `${name}${entry.item ? ` ×${quantity}` : ""}を${price * quantity}Gで購入しますか？ / Aボタン：はい　Bボタン：いいえ${ownership}\n所持金：${inventoryGoldText()}G`;
+}
+
+function inventoryOwnedItemCount(itemId) {
+  return Math.max(0, Math.floor(Number(menu.getCharacter()?.inventory?.counts?.[itemId]) || 0));
+}
+
+function inventoryWarehouseItemCount(itemId) {
+  return (menu.getCharacter()?.warehouse?.itemStacks || [])
+    .filter(stack => stack.itemId === itemId)
+    .reduce((sum, stack) => sum + Math.max(0, Math.floor(Number(stack.count) || 0)), 0);
 }
 
 function inventoryGoldText() {
@@ -453,7 +477,7 @@ function renderInventory() {
   const selected = entries[menu.inventoryCursor], description = panel.querySelector("[data-inventory-description]");
   if (!selected) description.textContent = menu.inventoryPurpose === "sell" ? "売却できる所持品がありません。" : menu.inventoryTab === "keyItems" ? "貴重品を所持していません。" : "所持品がありません。";
   else if (menu.inventoryPurpose === "sell") description.textContent = inventorySaleDescription(selected, character);
-  else if (menu.inventoryPurpose === "buy") description.textContent = selected.item ? `${selected.item.description} / 購入価格 ${selected.item.buyPrice}G / Aボタン：購入` : `${equipmentEffectLabels(selected.shopEquipment).join(" / ")} / 購入価格 ${selected.shopEquipment.buyPrice}G / Aボタン：購入`;
+  else if (menu.inventoryPurpose === "buy") description.textContent = selected.item ? `${selected.item.description} / 購入価格 ${selected.item.buyPrice}G / 所持数 ${inventoryOwnedItemCount(selected.item.id)}／${selected.item.maxOwned || 99} / 倉庫 ${inventoryWarehouseItemCount(selected.item.id)} / Aボタン：購入` : `${equipmentEffectLabels(selected.shopEquipment).join(" / ")} / 購入価格 ${selected.shopEquipment.buyPrice}G / Aボタン：購入`;
   else if (selected.item) description.textContent = unavailableItemReason(selected.item, character) || selected.item.description;
   else if (selected.keyItem) description.textContent = selected.keyItem.description || "大切な貴重品です。";
   else if (!selected.instance) description.textContent = "この装備部位を空にします。";

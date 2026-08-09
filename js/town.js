@@ -75,6 +75,7 @@ const town = {
   feedback: null,
   registrationIndex: -1,
   questIndex: 0,
+  questPage: 0,
   entranceIndex: 0,
   facilityCommandIndex: 0,
   transferUnlocked: false,
@@ -361,6 +362,7 @@ export function handleTownInput(action) {
   }
   if (town.mode === "shopCategory") return handleShopCategoryInput(action);
   if (town.mode === "innStayConfirm") return handleInnStayConfirmationInput(action);
+  if (town.mode === "templeHealConfirm") return handleTempleHealConfirmationInput(action);
   if (town.mode === "commerceQuantity") return handleCommerceQuantityInput(action);
   if (town.mode === "commerceConfirm") return handleCommerceConfirmationInput(action);
   if (town.mode === "commerce") return handleCommerceInput(action);
@@ -576,12 +578,25 @@ function handleQuestInput(action) {
   if (["up", "down"].includes(action)) {
     const visibleQuestIndexes = getVisibleQuestIndexes();
     if (visibleQuestIndexes.length === 0) return true;
+    const pageSize = getQuestPageSize();
+    const pageIndexes = visibleQuestIndexes.slice(town.questPage * pageSize, (town.questPage + 1) * pageSize);
     town.playSe("cursorMove");
-    const currentPosition = Math.max(0, visibleQuestIndexes.indexOf(town.questIndex));
-    const direction = action === "down" ? 1 : visibleQuestIndexes.length - 1;
-    town.questIndex = visibleQuestIndexes[
-      (currentPosition + direction) % visibleQuestIndexes.length
+    const currentPosition = Math.max(0, pageIndexes.indexOf(town.questIndex));
+    const direction = action === "down" ? 1 : pageIndexes.length - 1;
+    town.questIndex = pageIndexes[
+      (currentPosition + direction) % pageIndexes.length
     ];
+    renderGuildQuestList();
+    return true;
+  }
+  if (["left", "right"].includes(action)) {
+    const visibleQuestIndexes = getVisibleQuestIndexes();
+    const pageSize = getQuestPageSize();
+    const pageCount = Math.max(1, Math.ceil(visibleQuestIndexes.length / pageSize));
+    if (pageCount <= 1) return true;
+    town.playSe("cursorMove");
+    town.questPage = (town.questPage + (action === "right" ? 1 : pageCount - 1)) % pageCount;
+    town.questIndex = visibleQuestIndexes[town.questPage * pageSize] ?? visibleQuestIndexes[0] ?? 0;
     renderGuildQuestList();
     return true;
   }
@@ -1047,8 +1062,7 @@ function activateFacilityService(command) {
     return true;
   }
   if (command === "heal") {
-    town.onHeal();
-    town.onStateChanged();
+    requestTempleHealing();
     return true;
   }
   if (command === "deck") {
@@ -1138,6 +1152,29 @@ function activateFacilityService(command) {
     return true;
   }
   return false;
+}
+
+function requestTempleHealing() {
+  town.mode = "templeHealConfirm";
+  town.playSe("confirm");
+  town.messageEl.textContent = "司祭アーヴァイン：15Gの寄進で治療を行います。よろしいですか？\n＊Aボタン：はい　Bボタン：いいえ";
+}
+
+function handleTempleHealConfirmationInput(action) {
+  if (action === "confirm") {
+    town.playSe("confirm");
+    town.mode = "facilityMenu";
+    town.onHeal();
+    town.onStateChanged();
+    return true;
+  }
+  if (action === "cancel") {
+    town.playSe("cancel");
+    town.mode = "facilityMenu";
+    town.messageEl.textContent = "司祭アーヴァイン：承知しました。必要な時はいつでもお申し付けください。";
+    return true;
+  }
+  return true;
 }
 
 function requestInnStay() {
@@ -1285,8 +1322,10 @@ function requestCommerceConfirmation() {
     renderCommerceQuantity();
     return;
   }
-  if (town.commerceKind === "sell" || town.commerceKind === "storageDeposit") {
-    const owned = Math.max(0, Math.floor(Number(town.getCharacter()?.inventory?.counts?.[item.id]) || 0));
+  if (["sell", "storageDeposit", "storageWithdraw"].includes(town.commerceKind)) {
+    const owned = town.commerceKind === "storageWithdraw"
+      ? warehouseItemCount(item.id)
+      : Math.max(0, Math.floor(Number(town.getCharacter()?.inventory?.counts?.[item.id]) || 0));
     town.commerceQuantity = Math.max(1, Math.min(owned, town.commerceQuantity || 1));
     if (owned > 1) {
       town.mode = "commerceQuantity";
@@ -1304,7 +1343,7 @@ function showCommerceConfirmation() {
   town.messageEl.textContent = town.commerceKind === "donate"
     ? "司祭アーヴァイン：こちらでよろしいですか？\n＊Aボタン：はい　Bボタン：いいえ"
     : town.commerceKind === "storageWithdraw"
-      ? "女主人ヘレン：これを取り出すのね？\n＊Aボタン：はい　Bボタン：いいえ"
+      ? `女主人ヘレン：${item.name}を${town.commerceQuantity || 1}個取り出すのね？\n＊Aボタン：はい　Bボタン：いいえ`
     : town.commerceKind === "storageDeposit"
       ? `女主人ヘレン：${item.name}を${town.commerceQuantity || 1}個預かればいいのね？\n＊Aボタン：はい　Bボタン：いいえ`
     : town.commerceKind === "sell"
@@ -1319,7 +1358,9 @@ function showCommerceConfirmation() {
 function handleCommerceQuantityInput(action) {
   const item = town.commerceItems[town.commerceIndex];
   if (!item) return true;
-  const owned = Math.max(1, Math.floor(Number(town.getCharacter()?.inventory?.counts?.[item.id]) || 1));
+  const owned = town.commerceKind === "storageWithdraw"
+    ? Math.max(1, warehouseItemCount(item.id))
+    : Math.max(1, Math.floor(Number(town.getCharacter()?.inventory?.counts?.[item.id]) || 1));
   const maximum = town.commerceKind === "buy"
     ? Math.max(1, Math.min(99, item.buyPrice > 0
       ? Math.floor(Math.max(0, Number(town.getCharacter()?.gold) || 0) / item.buyPrice)
@@ -1353,6 +1394,8 @@ function renderCommerceQuantity() {
     ? `女主人ヘレン：いくつ購入するのかしら？\n購入数 ${town.commerceQuantity}　合計 ${item.buyPrice * town.commerceQuantity}G\n所持数：${inventoryItemCount(item.id)}／${item.maxOwned || 99}　倉庫：${warehouseItemCount(item.id)}\n＊↑↓：1個　←→：10個　Aボタン：決定　Bボタン：戻る`
     : town.commerceKind === "storageDeposit"
     ? `女主人ヘレン：いくつ預かればいいのかしら？\n預ける数 ${town.commerceQuantity} / ${owned}\n＊↑↓：1個　←→：10個　Aボタン：決定　Bボタン：戻る`
+    : town.commerceKind === "storageWithdraw"
+      ? `女主人ヘレン：いくつ取り出すのかしら？\n取り出す数 ${town.commerceQuantity} / ${owned}\n＊↑↓：1個　←→：10個　Aボタン：決定　Bボタン：戻る`
     : `女主人ヘレン：いくつ売るのかしら？\n売却数 ${town.commerceQuantity} / ${owned}　合計 ${item.sellPrice * town.commerceQuantity}G\n＊↑↓：1個　←→：10個　Aボタン：決定　Bボタン：戻る`;
 }
 
@@ -1379,7 +1422,7 @@ function purchaseSelectedCommerceItem() {
   const withdrawing = town.commerceKind === "storageWithdraw";
   const depositing = town.commerceKind === "storageDeposit";
   const result = withdrawing
-    ? town.onWithdrawItem(item.id)
+    ? town.onWithdrawItem(item.id, town.commerceQuantity || 1)
     : depositing
       ? town.onDepositItem(item.id, town.commerceQuantity || 1)
     : selling
@@ -1404,7 +1447,7 @@ function purchaseSelectedCommerceItem() {
   town.messageEl.textContent = town.commerceKind === "donate"
     ? `${keeper}：女神のご加護を。${item.name}を授けましょう。`
     : withdrawing
-      ? `${keeper}：${item.name}を倉庫から取り出したわ。`
+      ? `${keeper}：${item.name}を${result.amount}個、倉庫から取り出したわ。`
     : depositing
       ? `${keeper}：${item.name}を${result.amount}個、倉庫で預かったわ。`
     : selling
@@ -1508,6 +1551,7 @@ function renderCommerceSelection({ showDescription = true } = {}) {
 function openGuildQuestList(kind) {
   town.mode = kind === "report" ? "questReportList" : "questAcceptList";
   town.questIndex = getVisibleQuestIndexes()[0] ?? 0;
+  town.questPage = 0;
   town.mosaic.hidden = true;
   town.background.src = "images/background/guild_quest.avif";
   town.background.alt = kind === "report" ? "依頼報告の掲示板" : "依頼受注の掲示板";
@@ -1534,7 +1578,12 @@ function renderGuildQuestList() {
   if (!visibleQuestIndexes.includes(town.questIndex)) {
     town.questIndex = visibleQuestIndexes[0] ?? 0;
   }
-  town.guildQuestList.replaceChildren(...visibleQuestIndexes.map(index => {
+  const pageSize = getQuestPageSize();
+  const pageCount = Math.max(1, Math.ceil(visibleQuestIndexes.length / pageSize));
+  town.questPage = Math.max(0, Math.min(town.questPage, pageCount - 1));
+  const pageIndexes = visibleQuestIndexes.slice(town.questPage * pageSize, (town.questPage + 1) * pageSize);
+  if (!pageIndexes.includes(town.questIndex)) town.questIndex = pageIndexes[0] ?? visibleQuestIndexes[0] ?? 0;
+  town.guildQuestList.replaceChildren(...pageIndexes.map(index => {
     const quest = QUESTS[index];
     const progress = getQuestProgress(town.getCharacter(), quest.id);
     const selectable = reportMode
@@ -1571,13 +1620,28 @@ function renderGuildQuestList() {
     });
     return button;
   }));
+  const pager = town.root.querySelector("#guildQuestPager");
+  if (pager) {
+    pager.hidden = pageCount <= 1;
+    const indicator = pager.querySelector("strong");
+    if (indicator) indicator.textContent = `${town.questPage + 1}/${pageCount}`;
+  }
 }
 
 function getVisibleQuestIndexes() {
+  const character = town.getCharacter();
+  const initialTrialComplete = QUESTS.slice(0, 3).every(quest => getQuestProgress(character, quest.id).completed);
   return QUESTS
     .map((quest, index) => ({ index, progress: getQuestProgress(town.getCharacter(), quest.id) }))
+    .filter(({ index }) => initialTrialComplete || index < 3)
     .filter(({ progress }) => !progress.completed)
     .map(({ index }) => index);
+}
+
+function getQuestPageSize() {
+  if (document.body.classList.contains("layout-mobile")) return 3;
+  if (document.body.classList.contains("layout-tablet")) return 6;
+  return Number.MAX_SAFE_INTEGER;
 }
 
 function activateSelectedQuest() {

@@ -37,6 +37,7 @@ export function openSkillOverlay({ context = "field", character, enemy = null, o
   if (onUse) overlay.onUse = onUse;
   overlay.onClose = onClose || (() => {});
   overlay.previousMessage = overlay.messageEl.textContent;
+  overlay.root.classList.toggle("is-field-inventory", context === "field");
   overlay.root.hidden = false;
   document.body.classList.add("skill-overlay-open");
   render();
@@ -47,6 +48,7 @@ export function closeSkillOverlay({ restoreMessage = true } = {}) {
   if (!overlay.active) return false;
   overlay.active = false;
   overlay.root.hidden = true;
+  overlay.root.classList.remove("is-field-inventory");
   document.body.classList.remove("skill-overlay-open");
   overlay.messageEl.classList.remove("is-skill-description");
   if (restoreMessage) overlay.messageEl.textContent = overlay.previousMessage;
@@ -138,9 +140,11 @@ function render() {
 }
 
 function renderSelection() {
-  [...overlay.list.children].forEach((button, index) => {
+  const buttons = [...overlay.list.children];
+  buttons.forEach((button, index) => {
     button.classList.toggle("is-selected", index === overlay.selectedIndex);
   });
+  buttons[overlay.selectedIndex]?.scrollIntoView?.({ block: "nearest" });
   const backSelected = overlay.selectedIndex === overlay.skills.length;
   overlay.backButton.classList.toggle("is-selected", backSelected);
   const skill = overlay.skills[overlay.selectedIndex];

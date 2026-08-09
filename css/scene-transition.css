@@ -11,6 +11,7 @@
 .defeat-message{z-index:1;display:grid;gap:clamp(34px,7vh,72px);padding:20px;text-align:center;color:#fff;font:clamp(34px,8vw,80px)/1.15 "PixelFont",monospace}
 .defeat-message[hidden]{display:none}
 .defeat-message span{display:block}
+.revival-prayer{position:absolute;inset:0;z-index:2;display:grid;place-items:center;overflow:hidden}.revival-prayer[hidden],.revival-prayer img[hidden]{display:none}.revival-prayer strong{position:relative;z-index:2;color:#ffd84f;font:clamp(44px,9vw,96px)/1 "PixelFont",monospace;font-weight:400;text-align:center;text-shadow:0 0 8px #fff2a8,0 0 20px #ffcf33,0 0 44px rgba(255,168,0,.8)}.revival-prayer img{position:absolute;left:50%;top:50%;width:min(58%,430px);max-height:92%;object-fit:contain;opacity:0;transform:translate(-50%,-50%) scale(.28);filter:drop-shadow(0 0 8px #fff2a8) drop-shadow(0 0 22px #ffd22e) drop-shadow(0 0 48px rgba(255,162,0,.9));mix-blend-mode:screen}.revival-prayer img.is-active{animation:revival-goddess-approach 4s ease-out both}@keyframes revival-goddess-approach{0%{opacity:0;transform:translate(-50%,-50%) scale(.28)}22%{opacity:.95}68%{opacity:.82}100%{opacity:0;transform:translate(-50%,-50%) scale(1.7)}}
 .scene-transition-title{display:grid;gap:clamp(14px,3vh,28px);padding:24px;text-align:center;color:#fff;font-family:"PixelFont",monospace;text-shadow:0 0 12px rgba(255,255,255,.35)}
 .scene-transition-title[hidden]{display:none}
 .scene-transition-title span{font-size:clamp(24px,6vw,48px);letter-spacing:.12em}
@@ -18,4 +19,5 @@
 @media(max-width:520px){.scene-transition-title{gap:12px;padding:14px}.scene-transition-title span{font-size:clamp(22px,7vw,34px)}.scene-transition-title strong{font-size:clamp(24px,7.5vw,38px)}}
 @media(max-width:520px){.defeat-message{gap:30px;font-size:clamp(28px,9vw,46px)}}
 @media(prefers-reduced-motion:reduce){.scene-transition{transition-timing-function:linear}}
+@media(prefers-reduced-motion:reduce){.revival-prayer img.is-active{animation:revival-goddess-fade 4s linear both}@keyframes revival-goddess-fade{0%,100%{opacity:0;transform:translate(-50%,-50%) scale(1)}20%,70%{opacity:.9;transform:translate(-50%,-50%) scale(1)}}}
 body.scene-transition-active .game>:not(.scene-transition){pointer-events:none}
