@@ -1,11 +1,11 @@
 export const BOSSES = Object.freeze({
-  lingering_ghost_paul_b2f: Object.freeze({
-    id: "lingering_ghost_paul_b2f",
-    name: "未練ある亡霊ポール",
+  lingering_ghost_b2f: Object.freeze({
+    id: "lingering_ghost_b2f",
+    name: "未練ある亡霊",
     floor: 2,
-    imageId: "lingering_ghost_paul_b2f",
+    imageId: "lingering_ghost_b2f",
     image: "images/bosses/boss_02.avif",
-    encounterImageId: "lingering_ghost_paul_event_b2f",
+    encounterImageId: "lingering_ghost_event_b2f",
     encounterImage: "images/background/dungeon_event_01.avif",
     race: "undead",
     maxHp: 45,

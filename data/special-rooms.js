@@ -29,7 +29,7 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
   2: Object.freeze({
     content: Object.freeze({
       type: "repeatableBoss",
-      bossId: "lingering_ghost_paul_b2f",
+      bossId: "lingering_ghost_b2f",
       minimapMarker: "E",
       revealBeforeExploration: true
     })

@@ -758,12 +758,12 @@ test("Magic Wall blocks three weak physical actions but not a strong hit", () =>
   assert.equal(strongRound.battle.player.statuses.find(status => status.statusId === "magic_wall")?.barrierCharges, 3);
 });
 
-test("Magic Wall blocks the rat, rabbit, slime and Paul normal attacks", () => {
+test("Magic Wall blocks the rat, rabbit, slime and lingering ghost normal attacks", () => {
   const enemies = [
     createEnemyCombatant(getEnemyById("abyss_rat")),
     createEnemyCombatant(getEnemyById("abyss_rabbit")),
     createEnemyCombatant(getEnemyById("cave_slime")),
-    createBossCombatant(getBossById("lingering_ghost_paul_b2f"))
+    createBossCombatant(getBossById("lingering_ghost_b2f"))
   ];
   for (const enemy of enemies) {
     const mage = createInitialCharacter({ name: "M", job: "mage" });

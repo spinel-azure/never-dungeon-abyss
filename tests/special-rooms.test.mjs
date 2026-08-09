@@ -16,17 +16,17 @@ import {
 } from "../data/special-rooms.js";
 import { shouldDrawSpecialRoomMarker } from "../js/minimap.js";
 
-test("B2 special room contains the repeatable Paul event boss", () => {
+test("B2 special room contains the repeatable lingering ghost event boss", () => {
   assert.deepEqual(getSpecialRoomDefinition(2).content, {
     type: "repeatableBoss",
-    bossId: "lingering_ghost_paul_b2f",
+    bossId: "lingering_ghost_b2f",
     minimapMarker: "E",
     revealBeforeExploration: true
   });
   assert.equal(getSpecialRoomDefinition(1).content, null);
 });
 
-test("Paul's event marker is visible before exploration except at zero torch", () => {
+test("The lingering ghost event marker is visible before exploration except at zero torch", () => {
   const room = getSpecialRoomDefinition(2);
   assert.equal(shouldDrawSpecialRoomMarker(room, false, 100), true);
   assert.equal(shouldDrawSpecialRoomMarker(room, false, 1), true);
