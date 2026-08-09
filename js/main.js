@@ -1534,8 +1534,7 @@ import {
     stopBgm();
     cancelAutoReturn(false);
     setPlayerInputEnabled(false);
-    openTown({ registrationRequired: false, facilityId: "temple", mode: "facilityMenu" });
-    updateCharacterUi();
+    templeRevivalJinglePending = true;
     const experienceMessage = preservedExperience > 0
       ? `\n女神の恩寵により${preservedExperience}EXPを守った。`
       : lostExperience > 0
@@ -1543,7 +1542,19 @@ import {
         : "";
     saveGame();
     if (character && bagHasLoot(bag)) {
-      await new Promise(resolve => showLootIdentification(bag, settled, { playBgm: false, onClose: resolve }));
+      openTown({ registrationRequired: false, facilityId: "temple", mode: "facilityMenu" });
+      updateCharacterUi();
+      await new Promise(resolve => showLootIdentification(bag, settled, {
+        playBgm: false,
+        onClose: () => {
+          prepareRevivalBlackout();
+          resolve();
+        }
+      }));
+    } else {
+      prepareRevivalBlackout();
+      openTown({ registrationRequired: false, facilityId: "temple", mode: "facilityMenu" });
+      updateCharacterUi();
     }
     await runRevivalPrayer();
     say(`司祭アーヴァイン：おお…！女神の祈りが届いたか…！よくぞ目覚めた…！${experienceMessage}`);
@@ -1575,12 +1586,6 @@ import {
 
   async function runRevivalPrayer() {
     if (!revivalPrayer || !revivalPrayerText || !revivalGoddess) return;
-    templeRevivalJinglePending = true;
-    sceneTransitionRunning = true;
-    sceneTransition.hidden = false;
-    sceneTransition.className = "scene-transition is-running is-black is-revival";
-    defeatMessage.hidden = true;
-    sceneTransitionTitle.hidden = true;
     revivalPrayer.hidden = false;
     revivalGoddess.hidden = true;
     revivalGoddess.classList.remove("is-active");
@@ -1606,6 +1611,20 @@ import {
     document.body.classList.remove("scene-transition-active");
     sceneTransitionRunning = false;
     templeRevivalJinglePending = false;
+  }
+
+  function prepareRevivalBlackout() {
+    templeRevivalJinglePending = true;
+    sceneTransitionRunning = true;
+    sceneTransition.hidden = false;
+    sceneTransition.className = "scene-transition is-running is-black is-revival";
+    defeatMessage.hidden = true;
+    sceneTransitionTitle.hidden = true;
+    revivalPrayer.hidden = false;
+    revivalPrayerText.textContent = "";
+    revivalGoddess.hidden = true;
+    revivalGoddess.classList.remove("is-active");
+    document.body.classList.add("scene-transition-active");
   }
 
   function finishBattleEscape() {
