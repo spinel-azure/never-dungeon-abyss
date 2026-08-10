@@ -47,7 +47,7 @@ import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minima
 import { configureInput } from "./input.js";
 import { configureVirtualStick } from "./virtualStick.js";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor, openQuestHistory, openAdventureRecords, openLibraryCardGallery, openTitleOptions, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js";
+import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor, openQuestHistory, openAdventureRecords, openLibraryCardGallery, openTitleOptions, refreshAdventureRecordsPlayTime, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js";
 import { resolveFloorTheme } from "./floorTheme.js";
 import {
   configureAutoReturn,
@@ -2423,7 +2423,10 @@ import {
   experienceSettlementOverlay?.addEventListener("pointerdown", dismissExperienceSettlement, true);
   experienceSettlementOverlay?.addEventListener("click", dismissExperienceSettlement);
   startRenderLoop();
-  window.setInterval(() => accruePlayTime(), 1000);
+  window.setInterval(() => {
+    accruePlayTime();
+    refreshAdventureRecordsPlayTime();
+  }, 1000);
   window.addEventListener("nda:new-game", startNewGame);
   window.addEventListener("nda:continue", () => continueGame("auto"));
   window.addEventListener("nda:load-game", event => continueGame(event.detail?.slot || "auto"));

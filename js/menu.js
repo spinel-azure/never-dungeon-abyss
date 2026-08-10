@@ -672,6 +672,7 @@ function renderAdventureRecords() {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "inventory-entry";
+    button.dataset.adventureRecordId = entry.id;
     button.classList.toggle("is-unavailable", entry.achieved === false);
     button.innerHTML = `<span>${entry.label}</span><strong>${entry.value}</strong>`;
     button.classList.toggle("is-selected", menu.adventureRecordsFocus === "list" && menu.adventureRecordsCursor === index);
@@ -691,6 +692,13 @@ function renderAdventureRecords() {
   next.disabled = menu.adventureRecordsPage >= pages - 1;
   back.classList.toggle("is-selected", menu.adventureRecordsFocus === "back");
   next.classList.toggle("is-selected", menu.adventureRecordsFocus === "next");
+}
+
+export function refreshAdventureRecordsPlayTime() {
+  if (menu.view !== "adventureRecords" || menu.adventureRecordsTab !== "statistics") return;
+  const playTime = getAdventureRecords(menu.getCharacter()).find(entry => entry.id === "playTime");
+  const value = menu.adventureRecordsPanel.querySelector('[data-adventure-record-id="playTime"] strong');
+  if (playTime && value) value.textContent = playTime.value;
 }
 
 function bindInventory() {
