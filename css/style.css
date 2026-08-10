@@ -797,6 +797,10 @@
       padding: 6px 10px;
     }
 
+    .card-gallery-header .menu-title {
+      font-family: "PixelFont", monospace;
+    }
+
     @media (max-width: 680px) {
       body:not(.layout-mobile) .shell { padding: 8px; align-items: start; }
       body:not(.layout-mobile) .game { width: 100%; }

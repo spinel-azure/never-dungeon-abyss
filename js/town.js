@@ -125,6 +125,7 @@ const town = {
   onOpenQuestHistory: () => {},
   onOpenAdventureRecords: () => {},
   onOpenCardGallery: () => {},
+  facilityPreviewCommand: "",
   getUnreadRumor: () => null,
   onCompleteRumor: () => {},
   onTalk: () => "",
@@ -265,9 +266,16 @@ export function configureTown(options) {
     button.type = "button";
     button.addEventListener("click", () => {
       if (button.classList.contains("is-empty")) return;
+      const command = button.dataset.facilityCommand;
+      const alreadyPrepared = town.facilityCommandIndex === index
+        && town.facilityPreviewCommand === command;
       town.facilityCommandIndex = index;
       renderFacilityCommandSelection();
-      const command = button.dataset.facilityCommand;
+      if (isLibraryPreviewCommand(command) && !alreadyPrepared) {
+        previewLibraryCommand(command);
+        town.playSe("cursorMove");
+        return;
+      }
       if (command === "return") {
         town.playSe("confirm");
         returnFromFacility();
@@ -456,10 +464,17 @@ function handleFacilityMenuInput(action) {
   if (["up", "down", "left", "right"].includes(action)) {
     town.playSe("cursorMove");
     moveFacilityCommandSelection(action);
+    const command = town.facilityCommandButtons[town.facilityCommandIndex]?.dataset.facilityCommand;
+    previewLibraryCommand(command);
     return true;
   }
   if (action === "confirm") {
     const command = town.facilityCommandButtons[town.facilityCommandIndex]?.dataset.facilityCommand;
+    if (isLibraryPreviewCommand(command) && town.facilityPreviewCommand !== command) {
+      previewLibraryCommand(command);
+      town.playSe("cursorMove");
+      return true;
+    }
     if (command === "return") {
       town.playSe("confirm");
       returnFromFacility();
@@ -839,7 +854,24 @@ function activateFacility(facility) {
   }
   town.mode = facility.id === "guild" && town.registrationRequired ? "registration" : "facilityMenu";
   town.facilityCommandIndex = 0;
+  town.facilityPreviewCommand = "";
   renderFacility();
+}
+
+function isLibraryPreviewCommand(command) {
+  return currentFacility().id === "library" && ["records", "cards"].includes(command);
+}
+
+function previewLibraryCommand(command) {
+  if (!isLibraryPreviewCommand(command)) {
+    town.facilityPreviewCommand = "";
+    return false;
+  }
+  town.messageEl.textContent = command === "records"
+    ? "司書イライザ：あなたの冒険の記録をまとめておいたわ。積み重ねてきた足跡を、ゆっくり振り返ってみて。"
+    : "司書イライザ：あなたが手にしたカードを記録してあるわ。気になる一枚を選んでみて。";
+  town.facilityPreviewCommand = command;
+  return true;
 }
 
 function beginFacilitySelection() {
