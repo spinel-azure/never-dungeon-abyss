@@ -1,6 +1,12 @@
+export const PLAY_TIME_ERA = "mvp";
+
 export function normalizeAdventureStats(stats) {
+  const storedEra = typeof stats?.playTimeEra === "string" ? stats.playTimeEra : "mvp";
   return {
-    playTimeSeconds: Math.max(0, Math.floor(Number(stats?.playTimeSeconds) || 0))
+    playTimeSeconds: storedEra === PLAY_TIME_ERA
+      ? Math.max(0, Math.floor(Number(stats?.playTimeSeconds) || 0))
+      : 0,
+    playTimeEra: PLAY_TIME_ERA
   };
 }
 

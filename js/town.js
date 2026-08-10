@@ -17,6 +17,7 @@ import { getEquipmentInstanceDefinition, getEquipmentInstanceName } from "../dat
 import { getShopEquipmentStock } from "../data/shop-stock.js";
 import { configureTownPassersby } from "./town-passersby.js";
 import { getInnStayFee } from "./character-services.js";
+import { getTavernRumorTypewriterParts } from "../data/tavern-rumors.js";
 
 const FACILITY_COMMANDS = Object.freeze({
   inn: [
@@ -61,6 +62,9 @@ const townTypewriter = {
   speed: "normal",
   timer: 0,
   sourceText: "",
+  prefixText: "",
+  typingText: "",
+  suffixText: "",
   visibleLength: 0,
   lastRenderedText: "",
   active: false,
@@ -509,12 +513,16 @@ function configureTownMessageObserver() {
     const text = town.messageEl?.textContent || "";
     if (text === townTypewriter.lastRenderedText) return;
     clearTownTypewriter();
-    if (!town.active || !townTypewriter.enabled || !isNpcTownMessage(text)) {
+    const rumorParts = town.mode === "tavernRumor" ? getTavernRumorTypewriterParts(text) : null;
+    if (!town.active || !townTypewriter.enabled || (!isNpcTownMessage(text) && !rumorParts)) {
       townTypewriter.lastRenderedText = text;
       playPendingFacilityVoice();
       return;
     }
     townTypewriter.sourceText = text;
+    townTypewriter.prefixText = rumorParts?.prefix || "";
+    townTypewriter.typingText = rumorParts?.dialogue || text;
+    townTypewriter.suffixText = rumorParts?.suffix || "";
     townTypewriter.visibleLength = 0;
     townTypewriter.active = true;
     renderTownTypewriter();
@@ -531,11 +539,12 @@ function isNpcTownMessage(text) {
 }
 
 function renderTownTypewriter() {
-  const characters = Array.from(townTypewriter.sourceText);
+  const characters = Array.from(townTypewriter.typingText);
   townTypewriter.visibleLength = Math.min(townTypewriter.visibleLength + 1, characters.length);
-  townTypewriter.lastRenderedText = characters.slice(0, townTypewriter.visibleLength).join("");
+  const completed = townTypewriter.visibleLength >= characters.length;
+  townTypewriter.lastRenderedText = `${townTypewriter.prefixText}${characters.slice(0, townTypewriter.visibleLength).join("")}${completed ? townTypewriter.suffixText : ""}`;
   town.messageEl.textContent = townTypewriter.lastRenderedText;
-  if (townTypewriter.visibleLength >= characters.length) {
+  if (completed) {
     townTypewriter.active = false;
     townTypewriter.timer = 0;
     playPendingFacilityVoice();
@@ -551,7 +560,7 @@ function completeTownTypewriter() {
   if (!townTypewriter.active) return;
   if (townTypewriter.timer) window.clearTimeout(townTypewriter.timer);
   townTypewriter.timer = 0;
-  townTypewriter.visibleLength = Array.from(townTypewriter.sourceText).length;
+  townTypewriter.visibleLength = Array.from(townTypewriter.typingText).length;
   townTypewriter.lastRenderedText = townTypewriter.sourceText;
   townTypewriter.active = false;
   town.messageEl.textContent = townTypewriter.sourceText;

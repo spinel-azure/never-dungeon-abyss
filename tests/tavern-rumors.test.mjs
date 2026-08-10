@@ -2,7 +2,19 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { createInitialCharacter } from "../data/classes.js";
-import { getUnreadTavernRumor, markTavernRumorRead } from "../data/tavern-rumors.js";
+import { getTavernRumorTypewriterParts, getUnreadTavernRumor, markTavernRumorRead } from "../data/tavern-rumors.js";
+
+test("tavern rumor typewriter isolates only customer and Rosa dialogue", () => {
+  assert.deepEqual(
+    getTavernRumorTypewriterParts("あなたはカウンターから耳を澄ます……。\n客「おい、知ってるか？」\n＊Aボタンで次へ"),
+    {
+      prefix: "あなたはカウンターから耳を澄ます……。\n客「",
+      dialogue: "おい、知ってるか？",
+      suffix: "」\n＊Aボタンで次へ"
+    }
+  );
+  assert.equal(getTavernRumorTypewriterParts("あなたはカウンターから耳を澄ます……。"), null);
+});
 
 test("tavern rumor becomes read and is unavailable until its Mikan update", () => {
   let character = createInitialCharacter("噂好き", "thief");

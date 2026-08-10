@@ -3,6 +3,13 @@ export const TAVERN_RUMOR_001_MIKAN_READ_FLAG = "tavern_rumor_001_mikan_read";
 export const TAVERN_RUMOR_002_BASE_READ_FLAG = "tavern_rumor_002_base_read";
 export const TAVERN_RUMOR_002_GHOST_READ_FLAG = "tavern_rumor_002_ghost_read";
 
+export function getTavernRumorTypewriterParts(message) {
+  const text = String(message || "");
+  const match = text.match(/^(.*?(?:客|ローザ)「)([^」]*)(」[\s\S]*)$/s);
+  if (!match) return null;
+  return { prefix: match[1], dialogue: match[2], suffix: match[3] };
+}
+
 export const TAVERN_RUMORS = Object.freeze([
   Object.freeze({
     id: "rumor_001",

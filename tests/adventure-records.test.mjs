@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { getAdventureChronicle, getAdventureRecords } from "../data/adventure-records.js";
-import { formatPlayTime, getActivePlayTimeDelta } from "../data/adventure-stats.js";
+import { formatPlayTime, getActivePlayTimeDelta, normalizeAdventureStats, PLAY_TIME_ERA } from "../data/adventure-stats.js";
 import { createInitialCharacter } from "../data/classes.js";
 
 test("adventure records summarize values already stored in the save", () => {
@@ -50,6 +50,18 @@ test("play time stops for hidden tabs and after five minutes without input", () 
   assert.equal(getActivePlayTimeDelta({ ...active, visible: false }), 0);
   assert.equal(getActivePlayTimeDelta({ ...active, idleMs: 300001 }), 0);
   assert.equal(getActivePlayTimeDelta({ ...active, hasCharacter: false }), 0);
+});
+
+test("play time preserves MVP saves and safely resets when the era changes", () => {
+  assert.equal(normalizeAdventureStats({ playTimeSeconds: 123 }).playTimeSeconds, 123);
+  assert.deepEqual(normalizeAdventureStats({ playTimeSeconds: 123, playTimeEra: PLAY_TIME_ERA }), {
+    playTimeSeconds: 123,
+    playTimeEra: PLAY_TIME_ERA
+  });
+  assert.deepEqual(normalizeAdventureStats({ playTimeSeconds: 123, playTimeEra: "prototype" }), {
+    playTimeSeconds: 0,
+    playTimeEra: PLAY_TIME_ERA
+  });
 });
 
 test("chronicle restores achieved milestones from existing progress flags", () => {
