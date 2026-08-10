@@ -29,6 +29,7 @@ function getActions() {
   if (hasAutoSaveData()) actions.push("continue");
   if (hasManualSaveData()) actions.push("load-game");
   actions.push("new-game");
+  actions.push("option");
   return actions;
 }
 
@@ -36,7 +37,8 @@ function renderMenu() {
   const labels = {
     continue: "CONTINUE",
     "load-game": "LOAD GAME",
-    "new-game": "NEW GAME"
+    "new-game": "NEW GAME",
+    option: "OPTION"
   };
   const actions = getActions();
   selectedIndex = Math.max(0, Math.min(selectedIndex, actions.length - 1));
@@ -112,7 +114,20 @@ function activateTitleAction(action, event) {
     openGreeting(event);
     return;
   }
+  if (action === "option") {
+    openTitleOptions(event);
+    return;
+  }
   startGame("nda:continue", {}, event);
+}
+
+function openTitleOptions(event) {
+  titleOpen = false;
+  event?.preventDefault();
+  event?.stopImmediatePropagation();
+  titleScreen.hidden = true;
+  document.body.classList.remove("title-active");
+  window.dispatchEvent(new CustomEvent("nda:title-options"));
 }
 
 function startManualLoad(slot, event) {
@@ -308,6 +323,16 @@ window.addEventListener("keydown", handleTitleKey, true);
 window.addEventListener("nda:main-ready", () => {
   mainReady = true;
   feedback.textContent = "";
+  renderMenu();
+});
+window.addEventListener("nda:title-options-closed", () => {
+  titleOpen = true;
+  loadOpen = false;
+  greetingOpen = false;
+  selectedIndex = Math.max(0, getActions().indexOf("option"));
+  titleScreen.hidden = false;
+  titleScreen.classList.remove("is-greeting");
+  document.body.classList.add("title-active");
   renderMenu();
 });
 window.addEventListener("nda:save-changed", renderMenu);

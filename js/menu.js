@@ -32,6 +32,7 @@ const menu = {
   inventoryPurpose: "manage", inventorySaleStage: "list", inventorySaleQuantity: 1,
   questHistoryCursor: 0, questHistoryPage: 0, questHistoryFocus: "list",
   adventureRecordsTab: "statistics", adventureRecordsCursor: 0, adventureRecordsPage: 0, adventureRecordsFocus: "list",
+  optionReturnView: "commands",
   optionPages: [], optionItems: [], optionNavButtons: [], optionCursor: 0, optionPage: 0,
   debugPages: [], debugItems: [], debugNavButtons: [], debugCursor: 0, debugPage: 0, recentConfirms: [], debugArmed: false, view: "dungeon",
   compassVisible: true, readoutVisible: false, screenShakeEnabled: true,
@@ -219,6 +220,12 @@ function isCommandUnavailable(button) {
     || (button?.dataset.command === "save" && !menu.canManualSave());
 }
 function openCommand(key) { if (key === "status") { menu.view = "status"; menu.statusPage = 0; updateView(); } else if (key === "deck") { menu.view = "deck"; menu.deckEditable = false; menu.deckReturnView = "commands"; menu.deckPickerOpen = false; menu.deckCursor = 0; renderDeck(); updateView(); } else if (key === "items") openInventory(); else if (key === "skills") menu.openSkills(); else if (key === "options") setOptionPage(0); else if (key === "save" && menu.canManualSave()) { menu.view = "save"; menu.saveCursor = 0; renderManualSave(); updateView(); } }
+
+export function openTitleOptions() {
+  menu.view = "options";
+  menu.optionReturnView = "title";
+  setOptionPage(0);
+}
 
 function openInventory() {
   Object.assign(menu, { view: "inventory", inventoryTab: "items", inventoryCursor: 0, inventoryPage: 0, inventoryMode: "list", inventorySlot: null, inventoryFocus: "list", inventoryPurpose: "manage", inventorySaleStage: "list", inventorySaleQuantity: 1 });
@@ -877,15 +884,22 @@ function applyDeckPickerSelection() {
 }
 
 function handleOptions(action) {
-  if (action === "cancel") { menu.view = "commands"; updateView(); return; }
+  if (action === "cancel") { closeOptions(); return; }
   const count = menu.optionItems.length + menu.optionNavButtons.length;
   if (action === "up" || action === "down") { menu.optionCursor = (menu.optionCursor + (action === "down" ? 1 : count - 1)) % count; updateSelection(); return; }
   if (action === "left" || action === "right") { adjustSelectedOption(action === "right" ? 1 : -1); return; }
   if (action === "confirm") { if (menu.optionCursor >= menu.optionItems.length) executeOptionNav(menu.optionNavButtons[menu.optionCursor - menu.optionItems.length]?.dataset.optionNav); else executeOption(menu.optionItems[menu.optionCursor]?.dataset.option); }
 }
-function setOptionPage(page) { menu.view = "options"; menu.optionPage = Math.max(0, Math.min(1, page)); menu.optionCursor = 0; updateOptionItems(); updateView(); }
+function setOptionPage(page) { if (menu.view !== "options") menu.optionReturnView = "commands"; menu.view = "options"; menu.optionPage = Math.max(0, Math.min(1, page)); menu.optionCursor = 0; updateOptionItems(); updateView(); }
 function updateOptionItems() { menu.optionPages.forEach((page, index) => { page.hidden = index !== menu.optionPage; }); menu.optionItems = [...menu.optionPages[menu.optionPage].querySelectorAll("[data-option]")]; }
-function executeOptionNav(key) { if (key === "back") { if (menu.optionPage === 0) { menu.view = "commands"; updateView(); } else setOptionPage(0); } else if (menu.optionPage === 0) setOptionPage(1); else { menu.view = "commands"; updateView(); } }
+function executeOptionNav(key) { if (key === "back") { if (menu.optionPage === 0) closeOptions(); else setOptionPage(0); } else if (menu.optionPage === 0) setOptionPage(1); else closeOptions(); }
+function closeOptions() {
+  const returnToTitle = menu.optionReturnView === "title";
+  menu.optionReturnView = "commands";
+  menu.view = returnToTitle ? "dungeon" : "commands";
+  updateView();
+  if (returnToTitle) window.dispatchEvent(new CustomEvent("nda:title-options-closed"));
+}
 function executeOption(key) {
   if (key === "language" || key === "bgmVolume" || key === "seVolume") return;
   if (key === "bgmEnabled") { menu.bgmEnabled = !menu.bgmEnabled; applyBgmOptions(); updateOptionStates(); persistSettings(); }
