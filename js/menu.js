@@ -11,6 +11,7 @@ import { listOwnedKeyItems } from "../data/key-items.js";
 import { getShopEquipmentStock } from "../data/shop-stock.js";
 import { getQuestHistory } from "../data/quests.js";
 import { getAdventureRecords } from "../data/adventure-records.js";
+import { closeCardGallery, configureCardGallery, handleCardGalleryInput, openCardGallery } from "./card-gallery.js";
 
 const ACTION_FEEDBACK_MS = 260;
 const DEBUG_SEQUENCE_MS = 1000;
@@ -21,7 +22,7 @@ const OFF_MARK = "⚫";
 const DECK_PICKER_PAGE_SIZE = 5;
 
 const menu = {
-  root: null, commandRoot: null, statusPanel: null, deckPanel: null, inventoryPanel: null, questHistoryPanel: null, adventureRecordsPanel: null, savePanel: null, optionsPanel: null, debugPanel: null,
+  root: null, commandRoot: null, statusPanel: null, deckPanel: null, inventoryPanel: null, questHistoryPanel: null, adventureRecordsPanel: null, cardGalleryPanel: null, savePanel: null, optionsPanel: null, debugPanel: null,
   commands: [], enabledCommands: [], commandIndex: 0, statusPage: 0,
   deckCursor: 0, deckSlots: [], deckEditable: false, deckReturnView: "commands",
   deckPickerOpen: false, deckPickerCursor: 0, deckPickerItems: [], deckPickerPage: 0,
@@ -70,6 +71,7 @@ export function configureMenu(options) {
   menu.inventoryPanel = menu.root.querySelector('[data-menu-view="inventory"]');
   menu.questHistoryPanel = menu.root.querySelector('[data-menu-view="questHistory"]');
   menu.adventureRecordsPanel = menu.root.querySelector('[data-menu-view="adventureRecords"]');
+  menu.cardGalleryPanel = menu.root.querySelector('[data-menu-view="cardGallery"]');
   menu.optionsPanel = menu.root.querySelector('[data-menu-view="options"]');
   menu.debugPanel = menu.root.querySelector('[data-menu-view="debug"]');
   menu.commands = [...menu.commandRoot.querySelectorAll("[data-command]")];
@@ -84,6 +86,16 @@ export function configureMenu(options) {
   menu.debugPages = [...menu.debugPanel.querySelectorAll("[data-debug-page]")];
   menu.debugNavButtons = [...menu.debugPanel.querySelectorAll("[data-debug-nav]")];
   restoreSettings();
+  configureCardGallery({
+    root: menu.cardGalleryPanel,
+    getCharacter: () => menu.getCharacter(),
+    playSe: key => menu.playSe(key),
+    onClose: () => {
+      closeCardGallery();
+      menu.view = "dungeon";
+      updateView();
+    }
+  });
   renderEmptyStats(); bindCommands(); bindStatus(); bindDeck(); bindInventory(); bindQuestHistory(); bindAdventureRecords(); bindManualSave(); bindOptions(); bindDebug();
   updateOptionItems(); updateDebugItems(); applyAllSettings(); updateView();
 }
@@ -130,6 +142,11 @@ export function openAdventureRecords() {
   renderAdventureRecords();
   updateView();
 }
+export function openLibraryCardGallery() {
+  menu.view = "cardGallery";
+  updateView();
+  openCardGallery();
+}
 export function closeCampMenu(reason = "back") { menu.view = "dungeon"; updateView(); if (reason === "back" || reason === "main") menu.onReturnToDungeon(reason); }
 
 export function handleMenuInput(action) {
@@ -168,6 +185,7 @@ export function handleMenuInput(action) {
   else if (menu.view === "inventory") handleInventory(action);
   else if (menu.view === "questHistory") handleQuestHistory(action);
   else if (menu.view === "adventureRecords") handleAdventureRecords(action);
+  else if (menu.view === "cardGallery") handleCardGalleryInput(action);
   else if (menu.view === "save") handleManualSave(action);
   else if (menu.view === "options") handleOptions(action);
   else if (menu.view === "debug") handleDebug(action);
@@ -983,11 +1001,12 @@ function bindDebug() {
 function renderEmptyStats() { const rows = ["STR", "INT", "AGI", "DEX", "LUC", "DEF"].map(label => { const row = document.createElement("div"); row.className = "nde-stat-row"; const name = document.createElement("strong"); name.textContent = label; const gauge = document.createElement("span"); gauge.className = "nde-empty-gauge"; for (let index = 0; index < 30; index += 1) gauge.append(document.createElement("i")); const value = document.createElement("output"); value.textContent = "--"; row.append(name, gauge, value); return row; }); menu.root.querySelector("#ndeStatRows").replaceChildren(...rows); }
 
 function updateView() {
-  const screenOpen = ["status", "deck", "inventory", "questHistory", "adventureRecords", "save", "options", "debug"].includes(menu.view);
+  const screenOpen = ["status", "deck", "inventory", "questHistory", "adventureRecords", "cardGallery", "save", "options", "debug"].includes(menu.view);
   document.body.classList.toggle("menu-open", screenOpen); document.body.classList.toggle("command-open", menu.view === "commands");
   document.body.classList.toggle("deck-open", menu.view === "deck");
   document.body.classList.toggle("inventory-open", menu.view === "inventory");
-  menu.root.hidden = !screenOpen; menu.statusPanel.hidden = menu.view !== "status"; menu.deckPanel.hidden = menu.view !== "deck"; menu.inventoryPanel.hidden = menu.view !== "inventory"; menu.questHistoryPanel.hidden = menu.view !== "questHistory"; menu.adventureRecordsPanel.hidden = menu.view !== "adventureRecords"; menu.savePanel.hidden = menu.view !== "save"; menu.optionsPanel.hidden = menu.view !== "options"; menu.debugPanel.hidden = menu.view !== "debug";
+  document.body.classList.toggle("card-gallery-open", menu.view === "cardGallery");
+  menu.root.hidden = !screenOpen; menu.statusPanel.hidden = menu.view !== "status"; menu.deckPanel.hidden = menu.view !== "deck"; menu.inventoryPanel.hidden = menu.view !== "inventory"; menu.questHistoryPanel.hidden = menu.view !== "questHistory"; menu.adventureRecordsPanel.hidden = menu.view !== "adventureRecords"; menu.cardGalleryPanel.hidden = menu.view !== "cardGallery"; menu.savePanel.hidden = menu.view !== "save"; menu.optionsPanel.hidden = menu.view !== "options"; menu.debugPanel.hidden = menu.view !== "debug";
   menu.commandRoot.dataset.active = String(menu.view === "commands");
   const hint = document.querySelector("#commandHint"); if (hint) hint.textContent = menu.view === "commands" ? "＊ Bボタンでメニュー非表示" : "＊ Bボタンでメニュー表示";
   updateStatus(); updatePager(); updateDebugPager(); updateSelection();

@@ -47,7 +47,7 @@ import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minima
 import { configureInput } from "./input.js";
 import { configureVirtualStick } from "./virtualStick.js";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor, openQuestHistory, openAdventureRecords, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js";
+import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor, openQuestHistory, openAdventureRecords, openLibraryCardGallery, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js";
 import { resolveFloorTheme } from "./floorTheme.js";
 import {
   configureAutoReturn,
@@ -383,6 +383,7 @@ import {
     onEditDeck: openDeckEditor,
     onOpenQuestHistory: openQuestHistory,
     onOpenAdventureRecords: openAdventureRecords,
+    onOpenCardGallery: openLibraryCardGallery,
     getUnreadRumor: () => getUnreadTavernRumor(character, {
       mikanEncountered: Boolean(character?.eventFlags?.mikan_nyanko_encountered)
         || Object.entries(state.npcEncounterCounts || {}).some(

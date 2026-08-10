@@ -9,6 +9,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
   <link rel="stylesheet" href="css/style.css?v=20260806-1">
   <link rel="stylesheet" href="css/game-menu.css?v=20260810-1">
+  <link rel="stylesheet" href="css/card-gallery.css?v=20260810-1">
   <link rel="stylesheet" href="css/title-screen.css?v=20260806-1">
   <link rel="stylesheet" href="css/town.css?v=20260809-2">
   <link rel="stylesheet" href="css/effects.css?v=20260805-2">
@@ -281,6 +282,31 @@
         <nav class="inventory-pager" aria-label="冒険記録のページ操作"><button type="button" class="menu-footer" data-adventure-records-nav="back">BACK</button><span data-adventure-records-page>1/1</span><button type="button" class="menu-footer" data-adventure-records-nav="next">NEXT</button></nav>
       </div>
 
+      <div class="menu-panel card-gallery-panel" data-menu-view="cardGallery" hidden>
+        <header class="card-gallery-header">
+          <h1 class="menu-title">CARD GALLERY</h1>
+          <p data-card-gallery-heading>CARD</p>
+        </header>
+        <nav class="card-gallery-filters" aria-label="レアリティフィルター">
+          <button type="button" data-card-gallery-filter="ALL" aria-pressed="true">ALL</button>
+          <button type="button" data-card-gallery-filter="C" aria-pressed="false">C</button>
+          <button type="button" data-card-gallery-filter="R" aria-pressed="false">R</button>
+          <button type="button" data-card-gallery-filter="SR" aria-pressed="false">SR</button>
+          <button type="button" data-card-gallery-filter="L" aria-pressed="false">L</button>
+          <button type="button" data-card-gallery-filter="Z" aria-pressed="false">Z</button>
+        </nav>
+        <section class="card-gallery-area" aria-label="所持カード図鑑">
+          <button class="card-gallery-nav previous" type="button" data-card-gallery-nav="previous" aria-label="前のカード">◀</button>
+          <div class="card-gallery-stage" data-card-gallery-stage>
+            <canvas width="360" height="540" data-card-gallery-canvas aria-label="カード"></canvas>
+            <p class="card-gallery-empty" data-card-gallery-empty hidden></p>
+          </div>
+          <button class="card-gallery-nav next" type="button" data-card-gallery-nav="next" aria-label="次のカード">▶</button>
+        </section>
+        <p class="card-gallery-count" data-card-gallery-count></p>
+        <p class="card-gallery-hint">↑↓：RARITY　←→：CARD　A：DETAIL　B：BACK</p>
+      </div>
+
       <div class="menu-panel manual-save-panel" data-menu-view="save" hidden>
         <h1 class="menu-title">＊ SAVE GAME ＊</h1>
         <p>保存するスロットを選択してください。</p>
@@ -339,6 +365,6 @@
   </section>
 </main>
 <script type="module" src="js/title-screen.js"></script>
-  <script type="module" src="js/main.js?v=20260810-02"></script>
+  <script type="module" src="js/main.js?v=20260810-03"></script>
 </body>
 </html>

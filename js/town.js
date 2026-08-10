@@ -124,6 +124,7 @@ const town = {
   onEditDeck: () => {},
   onOpenQuestHistory: () => {},
   onOpenAdventureRecords: () => {},
+  onOpenCardGallery: () => {},
   getUnreadRumor: () => null,
   onCompleteRumor: () => {},
   onTalk: () => "",
@@ -1098,6 +1099,7 @@ function showFacilityCommands(facilityId) {
       || (facilityId === "guild" && id === "report" && reportAvailable)
       || (facilityId === "guild" && ["history", "tavern"].includes(id))
       || (facilityId === "library" && id === "records")
+      || (facilityId === "library" && id === "cards")
       || (facilityId === "tavern" && id === "rumors" && Boolean(town.getUnreadRumor()))
       || (id === "talk" && ["guild", "inn", "temple", "shop", "library", "tavern"].includes(facilityId));
     button.dataset.facilityCommand = id;
@@ -1139,6 +1141,12 @@ function activateFacilityService(command) {
     if (currentFacility().id !== "library") return false;
     town.messageEl.textContent = "司書イライザ：あなたの冒険の記録をまとめておいたわ。積み重ねてきた足跡を、ゆっくり振り返ってみて。";
     town.onOpenAdventureRecords();
+    return true;
+  }
+  if (command === "cards") {
+    if (currentFacility().id !== "library") return false;
+    town.messageEl.textContent = "司書イライザ：あなたが手にしたカードを記録してあるわ。気になる一枚を選んでみて。";
+    town.onOpenCardGallery();
     return true;
   }
   if (command === "tavern") {
