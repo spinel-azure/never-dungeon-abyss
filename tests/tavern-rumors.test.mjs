@@ -23,3 +23,27 @@ test("meeting Mikan before hearing the rumor starts with the updated version", (
   character = markTavernRumorRead(character, updated);
   assert.equal(getUnreadTavernRumor(character), null);
 });
+
+test("B2 unlocks the lingering ghost rumor and victory unlocks its update", () => {
+  let character = createInitialCharacter("亡霊見物", "priest");
+  character = markTavernRumorRead(character, getUnreadTavernRumor(character));
+  character.highestDungeonDepthReached = 2;
+
+  const base = getUnreadTavernRumor(character);
+  assert.equal(base.id, "rumor_002_base");
+  assert.match(base.dialogue[0], /地下2階に亡霊/);
+  character = markTavernRumorRead(character, base);
+  assert.equal(getUnreadTavernRumor(character), null);
+
+  const updated = getUnreadTavernRumor(character, { lingeringGhostDefeated: true });
+  assert.equal(updated.id, "rumor_002_ghost");
+  assert.match(updated.dialogue.at(-1), /何度も出てくる/);
+  character = markTavernRumorRead(character, updated);
+  assert.equal(getUnreadTavernRumor(character, { lingeringGhostDefeated: true }), null);
+});
+
+test("unread tavern rumors are returned in registration order", () => {
+  const character = createInitialCharacter("聞き込み屋", "warrior");
+  character.highestDungeonDepthReached = 2;
+  assert.equal(getUnreadTavernRumor(character).id, "rumor_001_base");
+});

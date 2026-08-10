@@ -386,7 +386,9 @@ import {
       mikanEncountered: Boolean(character?.eventFlags?.mikan_nyanko_encountered)
         || Object.entries(state.npcEncounterCounts || {}).some(
           ([npcId, count]) => npcId.startsWith("NPC_01") && Number(count) > 0
-        )
+        ),
+      depthReached: character?.highestDungeonDepthReached,
+      lingeringGhostDefeated: Boolean(character?.eventFlags?.lingering_ghost_b2f_defeated_once)
     }),
     onCompleteRumor: rumor => {
       character = markTavernRumorRead(character, rumor);
@@ -1456,6 +1458,15 @@ import {
     const reward = Math.max(0, Math.floor(Number(battle?.enemy?.experienceReward) || 0));
     let bossRewardMessage = "";
     if (character && battle?.enemy?.isBoss) {
+      if (battle.enemy.id === "lingering_ghost_b2f") {
+        character = {
+          ...character,
+          eventFlags: {
+            ...(character.eventFlags || {}),
+            lingering_ghost_b2f_defeated_once: true
+          }
+        };
+      }
       const victory = applyBossVictory(character, battle.enemy.id);
       if (victory.accepted) {
         character = victory.character;
