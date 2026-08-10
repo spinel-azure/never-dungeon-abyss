@@ -2427,6 +2427,8 @@ import {
   window.addEventListener("nda:new-game", startNewGame);
   window.addEventListener("nda:continue", () => continueGame("auto"));
   window.addEventListener("nda:load-game", event => continueGame(event.detail?.slot || "auto"));
+  document.documentElement.dataset.ndaMainReady = "true";
+  window.dispatchEvent(new CustomEvent("nda:main-ready"));
   window.addEventListener("pointerdown", markUserOperation, { capture: true, passive: true });
   window.addEventListener("pagehide", () => saveGame());
   document.addEventListener("visibilitychange", () => {

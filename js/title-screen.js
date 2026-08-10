@@ -22,6 +22,7 @@ let loadOpen = false;
 let greetingOpen = false;
 let selectedIndex = 0;
 let loadSelectedIndex = 0;
+let mainReady = document.documentElement.dataset.ndaMainReady === "true";
 
 function getActions() {
   const actions = [];
@@ -44,6 +45,7 @@ function renderMenu() {
     button.type = "button";
     button.dataset.titleAction = action;
     button.textContent = labels[action];
+    button.disabled = !mainReady;
     button.classList.toggle("is-selected", index === selectedIndex && !loadOpen);
     return button;
   }));
@@ -90,6 +92,10 @@ function formatDate(value) {
 
 function activateTitleAction(action, event) {
   if (!titleOpen) return;
+  if (!mainReady) {
+    feedback.textContent = "ゲームデータを準備しています。少しお待ちください。";
+    return;
+  }
   if (action === "load-game") {
     event?.preventDefault();
     loadOpen = true;
@@ -299,5 +305,10 @@ function fileTimestamp(date) {
 }
 
 window.addEventListener("keydown", handleTitleKey, true);
+window.addEventListener("nda:main-ready", () => {
+  mainReady = true;
+  feedback.textContent = "";
+  renderMenu();
+});
 window.addEventListener("nda:save-changed", renderMenu);
 renderMenu();
