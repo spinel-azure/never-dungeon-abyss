@@ -8,6 +8,7 @@ import {
 } from "./inventory.js";
 import { collectEquippedInstanceBonuses, normalizeEquipmentInventory } from "./equipment-inventory.js";
 import { normalizeQuestState } from "./quests.js";
+import { normalizeAdventureStats } from "./adventure-stats.js";
 import { normalizeDepthReturnSettlement } from "./experience-settlement.js";
 import { getLevelUnlockedSkillIds } from "./skills.js";
 import { createInitialKeyItemState, normalizeKeyItemState } from "./key-items.js";
@@ -78,6 +79,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     lootBag: createInitialLootBag(),
     quests: normalizeQuestState(),
     eventFlags: {},
+    adventureStats: normalizeAdventureStats(),
     highestDungeonDepthReached: 1,
     gold: 0,
     experience: 0,
@@ -145,6 +147,7 @@ export function normalizeCharacter(character) {
     eventFlags: character.eventFlags && typeof character.eventFlags === "object"
       ? { ...character.eventFlags }
       : {},
+    adventureStats: normalizeAdventureStats(character.adventureStats),
     highestDungeonDepthReached: Math.max(
       inferredDepth,
       Math.floor(Number(character.highestDungeonDepthReached) || 1)

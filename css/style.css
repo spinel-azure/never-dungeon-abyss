@@ -801,6 +801,14 @@
       font-family: "PixelFont", monospace;
     }
 
+    .adventure-records-panel {
+      grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+    }
+
+    .adventure-records-tabs {
+      grid-template-columns: 1fr 1fr;
+    }
+
     @media (max-width: 680px) {
       body:not(.layout-mobile) .shell { padding: 8px; align-items: start; }
       body:not(.layout-mobile) .game { width: 100%; }

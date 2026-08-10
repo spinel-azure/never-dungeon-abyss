@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { getAdventureRecords } from "../data/adventure-records.js";
+import { getAdventureChronicle, getAdventureRecords } from "../data/adventure-records.js";
+import { formatPlayTime, getActivePlayTimeDelta } from "../data/adventure-stats.js";
 import { createInitialCharacter } from "../data/classes.js";
 
 test("adventure records summarize values already stored in the save", () => {
@@ -18,6 +19,7 @@ test("adventure records summarize values already stored in the save", () => {
     boss_strange_knight_statue_b9f_defeated: true,
     lingering_ghost_b2f_defeated_once: true
   };
+  character.adventureStats.playTimeSeconds = 12345;
 
   const values = Object.fromEntries(getAdventureRecords(character).map(entry => [entry.id, entry.value]));
   assert.equal(values.name, "記録係");
@@ -30,9 +32,32 @@ test("adventure records summarize values already stored in the save", () => {
   assert.equal(values.totalCards, "3枚");
   assert.equal(values.gold, "1,234G");
   assert.equal(values.warehouse, "5個");
+  assert.equal(values.playTime, "0003:25:45");
 });
 
-test("the first adventure-record page contains ten stable entries", () => {
+test("adventure statistics include the ten original entries and play time", () => {
   const character = createInitialCharacter({ name: "新人", job: "mage" });
-  assert.equal(getAdventureRecords(character).length, 10);
+  assert.equal(getAdventureRecords(character).length, 11);
+});
+
+test("play time uses an hour counter that can exceed one day", () => {
+  assert.equal(formatPlayTime(100 * 3600 + 61), "0100:01:01");
+});
+
+test("play time stops for hidden tabs and after five minutes without input", () => {
+  const active = { elapsedMs: 1000, hasCharacter: true, visible: true, idleMs: 1000, idleLimitMs: 300000 };
+  assert.equal(getActivePlayTimeDelta(active), 1);
+  assert.equal(getActivePlayTimeDelta({ ...active, visible: false }), 0);
+  assert.equal(getActivePlayTimeDelta({ ...active, idleMs: 300001 }), 0);
+  assert.equal(getActivePlayTimeDelta({ ...active, hasCharacter: false }), 0);
+});
+
+test("chronicle restores achieved milestones from existing progress flags", () => {
+  const character = createInitialCharacter({ name: "年代記", job: "priest" });
+  character.highestDungeonDepthReached = 10;
+  character.eventFlags.lingering_ghost_b2f_defeated_once = true;
+  const chronicle = getAdventureChronicle(character);
+  assert.equal(chronicle.find(entry => entry.id === "ghost").achieved, true);
+  assert.equal(chronicle.find(entry => entry.id === "b10").achieved, true);
+  assert.equal(chronicle.find(entry => entry.id === "mage").label, "？？？？？？？");
 });

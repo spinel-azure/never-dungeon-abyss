@@ -10,7 +10,7 @@ import { getWeapon, getWeaponType } from "../data/weapons.js";
 import { listOwnedKeyItems } from "../data/key-items.js";
 import { getShopEquipmentStock } from "../data/shop-stock.js";
 import { getQuestHistory } from "../data/quests.js";
-import { getAdventureRecords } from "../data/adventure-records.js";
+import { getAdventureChronicle, getAdventureRecords } from "../data/adventure-records.js";
 import { closeCardGallery, configureCardGallery, handleCardGalleryInput, openCardGallery } from "./card-gallery.js";
 
 const ACTION_FEEDBACK_MS = 260;
@@ -31,7 +31,7 @@ const menu = {
   inventoryTab: "items", inventoryCursor: 0, inventoryPage: 0, inventoryMode: "list", inventorySlot: null, inventoryFocus: "list",
   inventoryPurpose: "manage", inventorySaleStage: "list", inventorySaleQuantity: 1,
   questHistoryCursor: 0, questHistoryPage: 0, questHistoryFocus: "list",
-  adventureRecordsCursor: 0, adventureRecordsPage: 0, adventureRecordsFocus: "list",
+  adventureRecordsTab: "statistics", adventureRecordsCursor: 0, adventureRecordsPage: 0, adventureRecordsFocus: "list",
   optionPages: [], optionItems: [], optionNavButtons: [], optionCursor: 0, optionPage: 0,
   debugPages: [], debugItems: [], debugNavButtons: [], debugCursor: 0, debugPage: 0, recentConfirms: [], debugArmed: false, view: "dungeon",
   compassVisible: true, readoutVisible: false, screenShakeEnabled: true,
@@ -138,6 +138,7 @@ export function openAdventureRecords() {
   menu.view = "adventureRecords";
   menu.adventureRecordsCursor = 0;
   menu.adventureRecordsPage = 0;
+  menu.adventureRecordsTab = "statistics";
   menu.adventureRecordsFocus = "list";
   renderAdventureRecords();
   updateView();
@@ -582,7 +583,15 @@ function renderQuestHistory() {
 }
 
 function handleAdventureRecords(action) {
-  const entries = getAdventureRecords(menu.getCharacter());
+  if ((action === "left" || action === "right") && menu.adventureRecordsFocus === "list") {
+    menu.adventureRecordsTab = menu.adventureRecordsTab === "statistics" ? "chronicle" : "statistics";
+    menu.adventureRecordsCursor = 0;
+    menu.adventureRecordsPage = 0;
+    menu.adventureRecordsFocus = "list";
+    renderAdventureRecords();
+    return;
+  }
+  const entries = adventureRecordEntries();
   const pages = Math.max(1, Math.ceil(entries.length / 10));
   if (action === "cancel") { menu.view = "dungeon"; updateView(); return; }
   if (menu.adventureRecordsFocus !== "list") {
@@ -615,19 +624,23 @@ function handleAdventureRecords(action) {
     renderAdventureRecords();
     return;
   }
-  if (action === "left" && menu.adventureRecordsPage > 0) {
-    menu.adventureRecordsPage -= 1;
-    menu.adventureRecordsCursor = menu.adventureRecordsPage * 10;
-    renderAdventureRecords();
-  } else if (action === "right" && menu.adventureRecordsPage < pages - 1) {
-    menu.adventureRecordsPage += 1;
-    menu.adventureRecordsCursor = menu.adventureRecordsPage * 10;
-    renderAdventureRecords();
-  }
+}
+
+function adventureRecordEntries() {
+  return menu.adventureRecordsTab === "chronicle"
+    ? getAdventureChronicle(menu.getCharacter())
+    : getAdventureRecords(menu.getCharacter());
 }
 
 function bindAdventureRecords() {
   const panel = menu.adventureRecordsPanel;
+  panel.querySelectorAll("[data-adventure-records-tab]").forEach(button => button.addEventListener("click", () => {
+    menu.adventureRecordsTab = button.dataset.adventureRecordsTab;
+    menu.adventureRecordsCursor = 0;
+    menu.adventureRecordsPage = 0;
+    menu.adventureRecordsFocus = "list";
+    renderAdventureRecords();
+  }));
   panel.querySelector('[data-adventure-records-nav="back"]').addEventListener("click", () => {
     menu.adventureRecordsFocus = "back";
     handleAdventureRecords("confirm");
@@ -640,7 +653,10 @@ function bindAdventureRecords() {
 
 function renderAdventureRecords() {
   const panel = menu.adventureRecordsPanel;
-  const entries = getAdventureRecords(menu.getCharacter());
+  const entries = adventureRecordEntries();
+  panel.querySelectorAll("[data-adventure-records-tab]").forEach(button => {
+    button.classList.toggle("is-selected", button.dataset.adventureRecordsTab === menu.adventureRecordsTab);
+  });
   const pages = Math.max(1, Math.ceil(entries.length / 10));
   menu.adventureRecordsPage = Math.min(menu.adventureRecordsPage, pages - 1);
   menu.adventureRecordsCursor = entries.length ? Math.min(menu.adventureRecordsCursor, entries.length - 1) : 0;
@@ -649,6 +665,7 @@ function renderAdventureRecords() {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "inventory-entry";
+    button.classList.toggle("is-unavailable", entry.achieved === false);
     button.innerHTML = `<span>${entry.label}</span><strong>${entry.value}</strong>`;
     button.classList.toggle("is-selected", menu.adventureRecordsFocus === "list" && menu.adventureRecordsCursor === index);
     button.addEventListener("click", () => {

@@ -88,6 +88,7 @@ import { EffectEngine } from "./effects/effect-engine.js";
 import { hasUncertainLoot } from "./loot-identification.js";
 import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
+import { getActivePlayTimeDelta, normalizeAdventureStats } from "../data/adventure-stats.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName, grantEquipmentInstance } from "../data/equipment-inventory.js";
 import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
@@ -154,6 +155,9 @@ import {
   let worldLocation = "dungeon";
   let character = null;
   let currentDepth = 1;
+  let playTimeLastTick = performance.now();
+  let lastUserOperationAt = playTimeLastTick;
+  const PLAY_TIME_IDLE_LIMIT_MS = 5 * 60 * 1000;
 
 
   randomizeStartPosition();
@@ -491,6 +495,7 @@ import {
 
   function saveGame({ announce = false, slot = "auto" } = {}) {
     if (!saveEnabled) return false;
+    accruePlayTime();
     const isManualSave = /^manual[1-3]$/.test(slot);
     if (isManualSave && worldLocation !== "town") return false;
     if (autosaveTimer) {
@@ -510,6 +515,32 @@ import {
     if (!saveEnabled) return;
     if (autosaveTimer) clearTimeout(autosaveTimer);
     autosaveTimer = window.setTimeout(() => saveGame(), 250);
+  }
+
+  function accruePlayTime(now = performance.now()) {
+    const elapsedMs = Math.max(0, now - playTimeLastTick);
+    const gainedSeconds = getActivePlayTimeDelta({
+      elapsedMs,
+      hasCharacter: Boolean(character),
+      visible: document.visibilityState === "visible",
+      idleMs: now - lastUserOperationAt,
+      idleLimitMs: PLAY_TIME_IDLE_LIMIT_MS
+    });
+    playTimeLastTick = now;
+    if (!character || gainedSeconds <= 0) return;
+    const stats = character.adventureStats && typeof character.adventureStats === "object"
+      ? character.adventureStats
+      : normalizeAdventureStats();
+    character.adventureStats = {
+      ...stats,
+      playTimeSeconds: Math.max(0, Number(stats.playTimeSeconds) || 0) + gainedSeconds
+    };
+  }
+
+  function markUserOperation() {
+    const now = performance.now();
+    accruePlayTime(now);
+    lastUserOperationAt = now;
   }
 
   function restoreGame(save) {
@@ -2299,6 +2330,7 @@ import {
     ),
     handleDoorInput: openDoorAhead,
     onUserOperation: () => {
+      markUserOperation();
       if (!state.autoWalkerActive || isBattleActive()) return;
       cancelAutoReturn(false);
       say("オート移動を中断した。");
@@ -2391,11 +2423,17 @@ import {
   experienceSettlementOverlay?.addEventListener("pointerdown", dismissExperienceSettlement, true);
   experienceSettlementOverlay?.addEventListener("click", dismissExperienceSettlement);
   startRenderLoop();
+  window.setInterval(() => accruePlayTime(), 1000);
   window.addEventListener("nda:new-game", startNewGame);
   window.addEventListener("nda:continue", () => continueGame("auto"));
   window.addEventListener("nda:load-game", event => continueGame(event.detail?.slot || "auto"));
+  window.addEventListener("pointerdown", markUserOperation, { capture: true, passive: true });
   window.addEventListener("pagehide", () => saveGame());
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") saveGame(); });
+  document.addEventListener("visibilitychange", () => {
+    accruePlayTime();
+    if (document.visibilityState === "hidden") saveGame();
+    else playTimeLastTick = performance.now();
+  });
 })();
 
 
