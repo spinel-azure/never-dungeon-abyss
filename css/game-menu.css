@@ -77,6 +77,6 @@ body.inventory-open .game{width:min(96vw,720px)}body.inventory-open .menu-screen
 .vital-critical{color:#ff4f4f!important;text-shadow:0 0 7px rgba(255,55,55,.55)}
 .quick-gold{gap:.12em}.quick-gold b{color:#5bd1ff;font:inherit;font-weight:400}.quick-gold output{color:#fff}
 .inventory-panel[hidden]{display:none!important}.inventory-panel .menu-title{font-family:"PixelFont",monospace;font-weight:400}.inventory-tabs button{font-family:"PixelFont",monospace;font-weight:400}.inventory-compare .is-up{color:#7dff9b}.inventory-compare .is-down{color:#ff5b5b}.inventory-pager .menu-footer.is-selected{border-color:#b0f4ff;box-shadow:0 0 10px rgba(95,226,255,.75),inset 0 0 7px rgba(135,238,255,.22)}
-.quest-history-panel{grid-template-rows:auto minmax(0,1fr) auto auto}.quest-history-panel .inventory-entry strong{color:#ffe768;font-size:.82em;white-space:nowrap}
+.quest-history-panel,.adventure-records-panel{grid-template-rows:auto minmax(0,1fr) auto auto}.quest-history-panel .inventory-entry strong{color:#ffe768;font-size:.82em;white-space:nowrap}.adventure-records-panel .inventory-entry strong{color:#7de8ff;white-space:nowrap}
 .inventory-tabs[hidden],.inventory-compare[hidden]{display:none!important}
 .inventory-tabs{grid-template-columns:repeat(3,1fr)}.inventory-tabs.is-sale{grid-template-columns:1fr 1fr}.inventory-tabs button[hidden]{display:none}

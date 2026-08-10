@@ -123,6 +123,7 @@ const town = {
   onDepositItem: () => null,
   onEditDeck: () => {},
   onOpenQuestHistory: () => {},
+  onOpenAdventureRecords: () => {},
   getUnreadRumor: () => null,
   onCompleteRumor: () => {},
   onTalk: () => "",
@@ -1096,6 +1097,7 @@ function showFacilityCommands(facilityId) {
       || (facilityId === "guild" && id === "accept" && requestUnlocked)
       || (facilityId === "guild" && id === "report" && reportAvailable)
       || (facilityId === "guild" && ["history", "tavern"].includes(id))
+      || (facilityId === "library" && id === "records")
       || (facilityId === "tavern" && id === "rumors" && Boolean(town.getUnreadRumor()))
       || (id === "talk" && ["guild", "inn", "temple", "shop", "library", "tavern"].includes(facilityId));
     button.dataset.facilityCommand = id;
@@ -1131,6 +1133,12 @@ function activateFacilityService(command) {
   if (command === "history") {
     if (currentFacility().id !== "guild") return false;
     town.onOpenQuestHistory();
+    return true;
+  }
+  if (command === "records") {
+    if (currentFacility().id !== "library") return false;
+    town.messageEl.textContent = "司書イライザ：あなたの冒険の記録をまとめておいたわ。積み重ねてきた足跡を、ゆっくり振り返ってみて。";
+    town.onOpenAdventureRecords();
     return true;
   }
   if (command === "tavern") {

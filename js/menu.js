@@ -10,6 +10,7 @@ import { getWeapon, getWeaponType } from "../data/weapons.js";
 import { listOwnedKeyItems } from "../data/key-items.js";
 import { getShopEquipmentStock } from "../data/shop-stock.js";
 import { getQuestHistory } from "../data/quests.js";
+import { getAdventureRecords } from "../data/adventure-records.js";
 
 const ACTION_FEEDBACK_MS = 260;
 const DEBUG_SEQUENCE_MS = 1000;
@@ -20,7 +21,7 @@ const OFF_MARK = "⚫";
 const DECK_PICKER_PAGE_SIZE = 5;
 
 const menu = {
-  root: null, commandRoot: null, statusPanel: null, deckPanel: null, inventoryPanel: null, questHistoryPanel: null, savePanel: null, optionsPanel: null, debugPanel: null,
+  root: null, commandRoot: null, statusPanel: null, deckPanel: null, inventoryPanel: null, questHistoryPanel: null, adventureRecordsPanel: null, savePanel: null, optionsPanel: null, debugPanel: null,
   commands: [], enabledCommands: [], commandIndex: 0, statusPage: 0,
   deckCursor: 0, deckSlots: [], deckEditable: false, deckReturnView: "commands",
   deckPickerOpen: false, deckPickerCursor: 0, deckPickerItems: [], deckPickerPage: 0,
@@ -29,6 +30,7 @@ const menu = {
   inventoryTab: "items", inventoryCursor: 0, inventoryPage: 0, inventoryMode: "list", inventorySlot: null, inventoryFocus: "list",
   inventoryPurpose: "manage", inventorySaleStage: "list", inventorySaleQuantity: 1,
   questHistoryCursor: 0, questHistoryPage: 0, questHistoryFocus: "list",
+  adventureRecordsCursor: 0, adventureRecordsPage: 0, adventureRecordsFocus: "list",
   optionPages: [], optionItems: [], optionNavButtons: [], optionCursor: 0, optionPage: 0,
   debugPages: [], debugItems: [], debugNavButtons: [], debugCursor: 0, debugPage: 0, recentConfirms: [], debugArmed: false, view: "dungeon",
   compassVisible: true, readoutVisible: false, screenShakeEnabled: true,
@@ -67,6 +69,7 @@ export function configureMenu(options) {
   menu.savePanel = menu.root.querySelector('[data-menu-view="save"]');
   menu.inventoryPanel = menu.root.querySelector('[data-menu-view="inventory"]');
   menu.questHistoryPanel = menu.root.querySelector('[data-menu-view="questHistory"]');
+  menu.adventureRecordsPanel = menu.root.querySelector('[data-menu-view="adventureRecords"]');
   menu.optionsPanel = menu.root.querySelector('[data-menu-view="options"]');
   menu.debugPanel = menu.root.querySelector('[data-menu-view="debug"]');
   menu.commands = [...menu.commandRoot.querySelectorAll("[data-command]")];
@@ -81,7 +84,7 @@ export function configureMenu(options) {
   menu.debugPages = [...menu.debugPanel.querySelectorAll("[data-debug-page]")];
   menu.debugNavButtons = [...menu.debugPanel.querySelectorAll("[data-debug-nav]")];
   restoreSettings();
-  renderEmptyStats(); bindCommands(); bindStatus(); bindDeck(); bindInventory(); bindQuestHistory(); bindManualSave(); bindOptions(); bindDebug();
+  renderEmptyStats(); bindCommands(); bindStatus(); bindDeck(); bindInventory(); bindQuestHistory(); bindAdventureRecords(); bindManualSave(); bindOptions(); bindDebug();
   updateOptionItems(); updateDebugItems(); applyAllSettings(); updateView();
 }
 
@@ -116,6 +119,15 @@ export function openQuestHistory() {
   menu.questHistoryPage = 0;
   menu.questHistoryFocus = "list";
   renderQuestHistory();
+  updateView();
+}
+export function openAdventureRecords() {
+  menu.playSe("confirm");
+  menu.view = "adventureRecords";
+  menu.adventureRecordsCursor = 0;
+  menu.adventureRecordsPage = 0;
+  menu.adventureRecordsFocus = "list";
+  renderAdventureRecords();
   updateView();
 }
 export function closeCampMenu(reason = "back") { menu.view = "dungeon"; updateView(); if (reason === "back" || reason === "main") menu.onReturnToDungeon(reason); }
@@ -155,6 +167,7 @@ export function handleMenuInput(action) {
   else if (menu.view === "deck") handleDeck(action);
   else if (menu.view === "inventory") handleInventory(action);
   else if (menu.view === "questHistory") handleQuestHistory(action);
+  else if (menu.view === "adventureRecords") handleAdventureRecords(action);
   else if (menu.view === "save") handleManualSave(action);
   else if (menu.view === "options") handleOptions(action);
   else if (menu.view === "debug") handleDebug(action);
@@ -550,6 +563,94 @@ function renderQuestHistory() {
   next.classList.toggle("is-selected", menu.questHistoryFocus === "next");
 }
 
+function handleAdventureRecords(action) {
+  const entries = getAdventureRecords(menu.getCharacter());
+  const pages = Math.max(1, Math.ceil(entries.length / 10));
+  if (action === "cancel") { menu.view = "dungeon"; updateView(); return; }
+  if (menu.adventureRecordsFocus !== "list") {
+    if (action === "left" || action === "right") {
+      menu.adventureRecordsFocus = menu.adventureRecordsFocus === "back" ? "next" : "back";
+    } else if (action === "up" || action === "down") {
+      if (entries.length) {
+        const pageStart = menu.adventureRecordsPage * 10;
+        menu.adventureRecordsCursor = action === "up" ? Math.min(entries.length - 1, pageStart + 9) : pageStart;
+        menu.adventureRecordsFocus = "list";
+      }
+    } else if (action === "confirm") {
+      if (menu.adventureRecordsFocus === "back") {
+        if (menu.adventureRecordsPage === 0) { menu.view = "dungeon"; updateView(); return; }
+        menu.adventureRecordsPage -= 1;
+      } else if (menu.adventureRecordsPage < pages - 1) menu.adventureRecordsPage += 1;
+      menu.adventureRecordsCursor = menu.adventureRecordsPage * 10;
+      menu.adventureRecordsFocus = "list";
+    }
+    renderAdventureRecords();
+    return;
+  }
+  if (action === "up" || action === "down") {
+    if (!entries.length) return;
+    const pageStart = menu.adventureRecordsPage * 10;
+    const pageEnd = Math.min(entries.length - 1, pageStart + 9);
+    if (action === "up" && menu.adventureRecordsCursor === pageStart) menu.adventureRecordsFocus = "back";
+    else if (action === "down" && menu.adventureRecordsCursor === pageEnd) menu.adventureRecordsFocus = "back";
+    else menu.adventureRecordsCursor += action === "down" ? 1 : -1;
+    renderAdventureRecords();
+    return;
+  }
+  if (action === "left" && menu.adventureRecordsPage > 0) {
+    menu.adventureRecordsPage -= 1;
+    menu.adventureRecordsCursor = menu.adventureRecordsPage * 10;
+    renderAdventureRecords();
+  } else if (action === "right" && menu.adventureRecordsPage < pages - 1) {
+    menu.adventureRecordsPage += 1;
+    menu.adventureRecordsCursor = menu.adventureRecordsPage * 10;
+    renderAdventureRecords();
+  }
+}
+
+function bindAdventureRecords() {
+  const panel = menu.adventureRecordsPanel;
+  panel.querySelector('[data-adventure-records-nav="back"]').addEventListener("click", () => {
+    menu.adventureRecordsFocus = "back";
+    handleAdventureRecords("confirm");
+  });
+  panel.querySelector('[data-adventure-records-nav="next"]').addEventListener("click", () => {
+    menu.adventureRecordsFocus = "next";
+    handleAdventureRecords("confirm");
+  });
+}
+
+function renderAdventureRecords() {
+  const panel = menu.adventureRecordsPanel;
+  const entries = getAdventureRecords(menu.getCharacter());
+  const pages = Math.max(1, Math.ceil(entries.length / 10));
+  menu.adventureRecordsPage = Math.min(menu.adventureRecordsPage, pages - 1);
+  menu.adventureRecordsCursor = entries.length ? Math.min(menu.adventureRecordsCursor, entries.length - 1) : 0;
+  panel.querySelector("[data-adventure-records-list]").replaceChildren(...entries.slice(menu.adventureRecordsPage * 10, menu.adventureRecordsPage * 10 + 10).map((entry, offset) => {
+    const index = menu.adventureRecordsPage * 10 + offset;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "inventory-entry";
+    button.innerHTML = `<span>${entry.label}</span><strong>${entry.value}</strong>`;
+    button.classList.toggle("is-selected", menu.adventureRecordsFocus === "list" && menu.adventureRecordsCursor === index);
+    button.addEventListener("click", () => {
+      menu.adventureRecordsCursor = index;
+      menu.adventureRecordsFocus = "list";
+      renderAdventureRecords();
+    });
+    return button;
+  }));
+  const selected = entries[menu.adventureRecordsCursor];
+  panel.querySelector("[data-adventure-records-description]").textContent = selected?.description || "記録はありません。";
+  panel.querySelector("[data-adventure-records-page]").textContent = `${menu.adventureRecordsPage + 1}/${pages}`;
+  const back = panel.querySelector('[data-adventure-records-nav="back"]');
+  const next = panel.querySelector('[data-adventure-records-nav="next"]');
+  back.textContent = menu.adventureRecordsPage > 0 ? "PREV" : "BACK";
+  next.disabled = menu.adventureRecordsPage >= pages - 1;
+  back.classList.toggle("is-selected", menu.adventureRecordsFocus === "back");
+  next.classList.toggle("is-selected", menu.adventureRecordsFocus === "next");
+}
+
 function bindInventory() {
   menu.inventoryPanel.querySelectorAll("[data-inventory-tab]").forEach(button => button.addEventListener("click", () => {
     Object.assign(menu, { inventoryTab: button.dataset.inventoryTab, inventoryMode: "list", inventoryCursor: 0, inventoryPage: 0, inventoryFocus: "list", inventorySaleStage: "list", inventorySaleQuantity: 1 }); renderInventory();
@@ -882,11 +983,11 @@ function bindDebug() {
 function renderEmptyStats() { const rows = ["STR", "INT", "AGI", "DEX", "LUC", "DEF"].map(label => { const row = document.createElement("div"); row.className = "nde-stat-row"; const name = document.createElement("strong"); name.textContent = label; const gauge = document.createElement("span"); gauge.className = "nde-empty-gauge"; for (let index = 0; index < 30; index += 1) gauge.append(document.createElement("i")); const value = document.createElement("output"); value.textContent = "--"; row.append(name, gauge, value); return row; }); menu.root.querySelector("#ndeStatRows").replaceChildren(...rows); }
 
 function updateView() {
-  const screenOpen = ["status", "deck", "inventory", "questHistory", "save", "options", "debug"].includes(menu.view);
+  const screenOpen = ["status", "deck", "inventory", "questHistory", "adventureRecords", "save", "options", "debug"].includes(menu.view);
   document.body.classList.toggle("menu-open", screenOpen); document.body.classList.toggle("command-open", menu.view === "commands");
   document.body.classList.toggle("deck-open", menu.view === "deck");
   document.body.classList.toggle("inventory-open", menu.view === "inventory");
-  menu.root.hidden = !screenOpen; menu.statusPanel.hidden = menu.view !== "status"; menu.deckPanel.hidden = menu.view !== "deck"; menu.inventoryPanel.hidden = menu.view !== "inventory"; menu.questHistoryPanel.hidden = menu.view !== "questHistory"; menu.savePanel.hidden = menu.view !== "save"; menu.optionsPanel.hidden = menu.view !== "options"; menu.debugPanel.hidden = menu.view !== "debug";
+  menu.root.hidden = !screenOpen; menu.statusPanel.hidden = menu.view !== "status"; menu.deckPanel.hidden = menu.view !== "deck"; menu.inventoryPanel.hidden = menu.view !== "inventory"; menu.questHistoryPanel.hidden = menu.view !== "questHistory"; menu.adventureRecordsPanel.hidden = menu.view !== "adventureRecords"; menu.savePanel.hidden = menu.view !== "save"; menu.optionsPanel.hidden = menu.view !== "options"; menu.debugPanel.hidden = menu.view !== "debug";
   menu.commandRoot.dataset.active = String(menu.view === "commands");
   const hint = document.querySelector("#commandHint"); if (hint) hint.textContent = menu.view === "commands" ? "＊ Bボタンでメニュー非表示" : "＊ Bボタンでメニュー表示";
   updateStatus(); updatePager(); updateDebugPager(); updateSelection();

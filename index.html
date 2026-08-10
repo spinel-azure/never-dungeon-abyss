@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
   <link rel="stylesheet" href="css/style.css?v=20260806-1">
-  <link rel="stylesheet" href="css/game-menu.css?v=20260809-3">
+  <link rel="stylesheet" href="css/game-menu.css?v=20260810-1">
   <link rel="stylesheet" href="css/title-screen.css?v=20260806-1">
   <link rel="stylesheet" href="css/town.css?v=20260809-2">
   <link rel="stylesheet" href="css/effects.css?v=20260805-2">
@@ -274,6 +274,13 @@
         <nav class="inventory-pager" aria-label="依頼履歴のページ操作"><button type="button" class="menu-footer" data-quest-history-nav="back">BACK</button><span data-quest-history-page>1/1</span><button type="button" class="menu-footer" data-quest-history-nav="next">NEXT</button></nav>
       </div>
 
+      <div class="menu-panel inventory-panel adventure-records-panel" data-menu-view="adventureRecords" hidden>
+        <h1 class="menu-title">ADVENTURE RECORDS</h1>
+        <div class="inventory-list" data-adventure-records-list aria-label="冒険記録"></div>
+        <div class="inventory-description" data-adventure-records-description aria-live="polite"></div>
+        <nav class="inventory-pager" aria-label="冒険記録のページ操作"><button type="button" class="menu-footer" data-adventure-records-nav="back">BACK</button><span data-adventure-records-page>1/1</span><button type="button" class="menu-footer" data-adventure-records-nav="next">NEXT</button></nav>
+      </div>
+
       <div class="menu-panel manual-save-panel" data-menu-view="save" hidden>
         <h1 class="menu-title">＊ SAVE GAME ＊</h1>
         <p>保存するスロットを選択してください。</p>
@@ -332,6 +339,6 @@
   </section>
 </main>
 <script type="module" src="js/title-screen.js"></script>
-  <script type="module" src="js/main.js?v=20260810-01"></script>
+  <script type="module" src="js/main.js?v=20260810-02"></script>
 </body>
 </html>
