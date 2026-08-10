@@ -1149,7 +1149,11 @@ import {
     setPlayerInputEnabled(false);
     pendingEncounter = null;
     startBgm(selectBattleBgm(boss));
-    const started = startBattle(createBossCombatant(boss), { playStartSe: true, ambush: false, concealed: false });
+    const started = startBattle(createBossCombatant(boss), {
+      playStartSe: true,
+      ambush: false,
+      concealed: state.torchFuel <= 0
+    });
     if (!started) {
       startBgm(selectDungeonBgm());
       setPlayerInputEnabled(true);
@@ -1170,7 +1174,7 @@ import {
     const started = startBattle(mimic, {
       playStartSe: true,
       ambush: false,
-      concealed: false
+      concealed: state.torchFuel <= 0
     });
     if (!started) {
       startBgm(selectDungeonBgm());
