@@ -56,8 +56,11 @@ test("chronicle restores achieved milestones from existing progress flags", () =
   const character = createInitialCharacter({ name: "年代記", job: "priest" });
   character.highestDungeonDepthReached = 10;
   character.eventFlags.lingering_ghost_b2f_defeated_once = true;
+  character.eventFlags.boss_otherworldly_wisdom_b4f_defeated = true;
   const chronicle = getAdventureChronicle(character);
   assert.equal(chronicle.find(entry => entry.id === "ghost").achieved, true);
+  assert.equal(chronicle.find(entry => entry.id === "otherworldlyWisdom").achieved, true);
+  assert.equal(chronicle.find(entry => entry.id === "otherworldlyWisdom").label, "異界の叡智を撃破した");
   assert.equal(chronicle.find(entry => entry.id === "b10").achieved, true);
   assert.equal(chronicle.find(entry => entry.id === "mage").label, "？？？？？？？");
 });
