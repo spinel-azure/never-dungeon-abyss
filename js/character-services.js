@@ -127,7 +127,11 @@ export function resolveInnStableStay(character) {
       ...recovery,
       statuses: [...(character?.statuses || [])],
       condition: character?.condition || "GOOD",
-      alive: character?.alive !== false
+      alive: character?.alive !== false,
+      eventFlags: {
+        ...(character?.eventFlags || {}),
+        inn_stable_stayed: true
+      }
     }
   };
 }

@@ -764,7 +764,7 @@ import {
         flag: "inn_first_talk_card",
         cardId: "common_lucky_charm",
         first: "女将ヨハンナ：焦らなくてもいいんだよ。身体を休める事だって必要さぁね。\n旅のお守りに、これを持っておいき。幸運のお守りのカードを手に入れた！",
-        repeat: "女将ヨハンナ：焦らなくてもいいんだよ。身体を休める事だって必要さぁね。"
+        repeat: "女将ヨハンナ：たとえお金が足りなくても泊まりにおいで。何とかしてあげるから。"
       },
       library: {
         flag: "library_first_talk_card",

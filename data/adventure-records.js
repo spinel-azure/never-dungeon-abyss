@@ -54,6 +54,7 @@ export function getAdventureChronicle(character) {
   const depth = Math.max(1, Math.floor(Number(character?.highestDungeonDepthReached) || 1));
   const milestones = [
     ["registered", "冒険者として登録した", true, "ギルドで冒険者としての第一歩を踏み出した。"],
+    ["stable", "馬小屋に宿泊した", flags.inn_stable_stayed, "宿屋の馬小屋で夜露をしのいだ。"],
     ["b2", "B2Fへ到達した", depth >= 2, "奈落の迷宮地下2階へ到達した。"],
     ["ghost", "未練ある亡霊を撃破した", flags.lingering_ghost_b2f_defeated_once, "繰り返し現れる亡霊を初めて退けた。"],
     ["otherworldlyWisdom", "異界の叡智を撃破した", flags.boss_otherworldly_wisdom_b4f_defeated, "B4Fに潜む異界の叡智を打ち破った。"],

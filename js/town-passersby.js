@@ -103,6 +103,19 @@ const PASSERBY_CONFIGS = Object.freeze([
     heightRatio: 0.78,
     drawOrder: 0,
     sourceFacing: "left"
+  }),
+  Object.freeze({
+    id: "rareTownVisitor",
+    src: "images/npc/NPC_21b.avif",
+    speed: 14,
+    bobAmplitude: 1,
+    walkPeriod: 1100,
+    spawnInterval: Object.freeze([240000, 480000]),
+    initialDelay: 90000,
+    initialPhase: 540,
+    initialDirection: -1,
+    heightRatio: 0.76,
+    sourceFacing: "left"
   })
 ]);
 

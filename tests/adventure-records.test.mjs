@@ -69,7 +69,10 @@ test("chronicle restores achieved milestones from existing progress flags", () =
   character.highestDungeonDepthReached = 10;
   character.eventFlags.lingering_ghost_b2f_defeated_once = true;
   character.eventFlags.boss_otherworldly_wisdom_b4f_defeated = true;
+  character.eventFlags.inn_stable_stayed = true;
   const chronicle = getAdventureChronicle(character);
+  assert.deepEqual(chronicle.slice(0, 3).map(entry => entry.id), ["registered", "stable", "b2"]);
+  assert.equal(chronicle.find(entry => entry.id === "stable").achieved, true);
   assert.equal(chronicle.find(entry => entry.id === "ghost").achieved, true);
   assert.equal(chronicle.find(entry => entry.id === "otherworldlyWisdom").achieved, true);
   assert.equal(chronicle.find(entry => entry.id === "otherworldlyWisdom").label, "異界の叡智を撃破した");

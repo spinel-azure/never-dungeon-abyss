@@ -136,6 +136,7 @@ test("stable lodging settles experience but only restores thirty percent of HP a
   character.condition = "POISON";
   character.carriedExperience = 10;
   const result = resolveInnStableStay(character);
+  assert.equal(result.changes.eventFlags.inn_stable_stayed, true);
   assert.equal(result.gainedExperience, 10);
   assert.equal(result.changes.carriedExperience, 0);
   assert.ok(result.changes.hp < result.changes.maxHp);
