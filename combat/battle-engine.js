@@ -18,6 +18,7 @@ import { getSkill } from "../data/skills.js";
 import { getItem } from "../data/items.js";
 import { consumeItem } from "../data/inventory.js";
 import { getItemUnavailableReason } from "./resolve-item-use.js";
+import { resolvePassiveInstantDeath } from "./passive-instant-death.js";
 
 export function createBattleState({ character, enemy }) {
   const vorpalSwordEquippedAtStart = character?.equipment?.weaponId === "vorpal_sword";
@@ -29,6 +30,7 @@ export function createBattleState({ character, enemy }) {
     enemy: cloneCombatant(enemy),
     vorpalSwordEquippedAtStart,
     vorpalExecution: false,
+    slashExecution: null,
     log: [`${enemy.name}が現れた！`],
     presentationEvents: []
   };
@@ -362,12 +364,46 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
   const reduction = action.actionType === "physicalAttack"
     ? getPhysicalDamageReduction(target.statuses)
     : 0;
-  let presentedHits = result.hits.map((hit, index) => ({
+  let resolvedHits = result.hits;
+  let passiveExecution = null;
+  if (actorSide === "player" && action.id === "normal_attack" && action.passiveInstantDeathId) {
+    for (let index = 0; index < resolvedHits.length; index += 1) {
+      if (!resolvedHits[index].hit) continue;
+      const instantDeath = resolvePassiveInstantDeath({
+        passiveId: action.passiveInstantDeathId,
+        attacker: actorStats,
+        defender: targetStats,
+        rng
+      });
+      if (!instantDeath.success) continue;
+      passiveExecution = { index, passiveId: action.passiveInstantDeathId, rate: instantDeath.rate };
+      resolvedHits = resolvedHits.slice(0, index + 1);
+      break;
+    }
+  }
+  let presentedHits = resolvedHits.map((hit, index) => ({
     index,
     hit: hit.hit,
     critical: hit.critical,
     damage: hit.hit ? Math.max(0, Math.floor(hit.damage * (1 - reduction))) : 0
   }));
+  if (passiveExecution) {
+    const damageBeforeExecution = presentedHits
+      .slice(0, passiveExecution.index)
+      .reduce((total, hit) => total + hit.damage, 0);
+    presentedHits = presentedHits.map((hit, index) => ({
+      ...hit,
+      damage: index === passiveExecution.index
+        ? Math.max(0, target.hp - damageBeforeExecution)
+        : hit.damage,
+      slashExecution: index === passiveExecution.index,
+      passiveExecutionId: index === passiveExecution.index ? passiveExecution.passiveId : null
+    }));
+    battle.slashExecution = passiveExecution.passiveId;
+    battle.log.push(passiveExecution.passiveId === "flash_slash"
+      ? "一閃が敵を断ち切った！"
+      : "暗殺術が敵の急所を捉えた！");
+  }
   const vorpalExecution = actorSide === "player"
     && action.id === "normal_attack"
     && action.weapon?.id === "vorpal_sword"
@@ -378,7 +414,8 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
     presentedHits = presentedHits.map((hit, index) => ({
       ...hit,
       damage: index === firstLandedIndex ? target.hp : 0,
-      vorpalExecution: index === firstLandedIndex
+      vorpalExecution: index === firstLandedIndex,
+      slashExecution: index === firstLandedIndex
     }));
     battle.vorpalExecution = true;
     battle.log.push("ヴォーパル・スウォードが怪しく輝いた！");
@@ -420,12 +457,14 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
       damage: hit.damage,
       critical: hit.critical,
       vorpalExecution: Boolean(hit.vorpalExecution),
+      slashExecution: Boolean(hit.slashExecution),
+      passiveExecutionId: hit.passiveExecutionId || null,
       message
     });
   });
   if (isMultiHit && hitCount > 0) battle.log.push(`合計${actualDamage}ダメージ！`);
   const applications = barrier ? [] : [
-    ...result.hits.flatMap(hit => hit.effects || []),
+    ...resolvedHits.flatMap(hit => hit.effects || []),
     ...(result.actionEffects || [])
   ];
   target.statuses = applyStatusApplications(target.statuses, applications);

@@ -22,6 +22,7 @@ import {
   resolveSurprise
 } from "../combat/resolve-environment-save.js";
 import { getEquipmentAdjustedEscapeRate, resolveEscapeAttempt } from "../combat/resolve-escape.js";
+import { calculatePassiveInstantDeathRate, resolvePassiveInstantDeath } from "../combat/passive-instant-death.js";
 import { resolveDefeatRecovery } from "../combat/resolve-defeat-recovery.js";
 import {
   createBattleState,
@@ -1485,4 +1486,59 @@ test("defeat presentation is skipped only when a future recovery resolver restor
   assert.equal(recovered.recovered, true);
   assert.equal(recovered.character.hp, 1);
   assert.equal(recovered.sourceId, "reincarnation");
+});
+
+
+test("warriors and thieves learn their normal-attack instant-death passives at level 38", () => {
+  const warrior37 = normalizeCharacter({ ...createInitialCharacter({ name: "W", job: "warrior" }), level: 37 });
+  const warrior38 = normalizeCharacter({ ...warrior37, level: 38 });
+  const thief37 = normalizeCharacter({ ...createInitialCharacter({ name: "T", job: "thief" }), level: 37 });
+  const thief38 = normalizeCharacter({ ...thief37, level: 38 });
+  assert.equal(warrior37.skillIds.includes("flash_slash"), false);
+  assert.equal(warrior38.skillIds.includes("flash_slash"), true);
+  assert.equal(thief37.skillIds.includes("assassination"), false);
+  assert.equal(thief38.skillIds.includes("assassination"), true);
+  assert.equal(getSkill("flash_slash").actionType, "passive");
+  assert.equal(getSkill("assassination").actionType, "passive");
+});
+
+test("passive instant death reaches fifteen percent only with the intended extreme stats", () => {
+  assert.equal(calculatePassiveInstantDeathRate("flash_slash", { str: 30, agi: 1 }), .15);
+  assert.equal(calculatePassiveInstantDeathRate("assassination", { dex: 30, str: 1 }), .15);
+  assert.equal(calculatePassiveInstantDeathRate("flash_slash", { str: 1, agi: 30 }), .01);
+  assert.equal(resolvePassiveInstantDeath({
+    passiveId: "flash_slash", attacker: { str: 30, agi: 1 }, defender: { isBoss: true }, rng: fixed(0)
+  }).immune, true);
+});
+
+test("The Five Star attacks five times and Musashi Blade is a two-handed two-hit warrior weapon", () => {
+  const fiveStar = getWeapon("the_five_star");
+  const fiveStarAttack = createNormalAttack({ weapon: fiveStar, skillIds: ["assassination"] });
+  assert.equal(fiveStar.attack, 1);
+  assert.equal(fiveStarAttack.hitCount, 5);
+  assert.equal(fiveStarAttack.powerPerHit, .25);
+  assert.equal(fiveStarAttack.passiveInstantDeathId, "assassination");
+  const musashi = getWeapon("musashi_blade");
+  const musashiAttack = createNormalAttack({ weapon: musashi, skillIds: ["flash_slash"] });
+  assert.equal(musashi.twoHanded, true);
+  assert.deepEqual(musashi.allowedJobs, ["warrior"]);
+  assert.equal(musashiAttack.hitCount, 2);
+  assert.equal(musashiAttack.powerPerHit, .65);
+});
+
+test("a successful Flash Slash ends remaining hits and requests the shared slash effect", () => {
+  const warrior = normalizeCharacter({
+    ...createInitialCharacter({ name: "W", job: "warrior" }),
+    level: 38,
+    baseStats: { str: 30, int: 1, agi: 1, dex: 30, luc: 1 }
+  });
+  const enemy = createEnemyCombatant(getEnemyById("cave_slime"));
+  const result = resolveBattleRound({
+    battle: createBattleState({ character: warrior, enemy }),
+    playerCommand: { type: "attack" },
+    rng: fixed(0)
+  });
+  assert.equal(result.battle.outcome, "victory");
+  assert.equal(result.battle.slashExecution, "flash_slash");
+  assert.equal(result.battle.presentationEvents.some(event => event.slashExecution), true);
 });

@@ -34,6 +34,8 @@ export function resolveInstantDeath({
   defender = {},
   baseRate = 0,
   rateBonus = 0,
+  minimumRate = COMBAT_CONFIG.instantDeathMinimum,
+  maximumRate = COMBAT_CONFIG.instantDeathMaximum,
   rng = Math.random
 } = {}) {
   const resistance = getResistance(defender, "instantDeath");
@@ -46,8 +48,8 @@ export function resolveInstantDeath({
       - numeric(defender.luc) * COMBAT_CONFIG.instantDeathLuckMultiplier
       - numeric(resistance.resistancePoints)
       - numeric(defender.instantDeathResistance),
-    COMBAT_CONFIG.instantDeathMinimum,
-    COMBAT_CONFIG.instantDeathMaximum
+    minimumRate,
+    maximumRate
   );
   return { success: roll(rng) < rate, rate, immune: false };
 }

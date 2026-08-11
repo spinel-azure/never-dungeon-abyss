@@ -161,7 +161,7 @@
   animation: battle-enemy-hit 260ms steps(2, end);
 }
 
-.battle-vorpal-fragment {
+.battle-slash-fragment {
   position: absolute;
   z-index: 5;
   object-fit: contain;
@@ -172,17 +172,17 @@
   animation-fill-mode: forwards;
 }
 
-.battle-vorpal-fragment.is-upper {
+.battle-slash-fragment.is-upper {
   clip-path: inset(0 0 50% 0);
-  animation-name: battle-vorpal-upper;
+  animation-name: battle-slash-upper;
 }
 
-.battle-vorpal-fragment.is-lower {
+.battle-slash-fragment.is-lower {
   clip-path: inset(50% 0 0 0);
-  animation-name: battle-vorpal-lower;
+  animation-name: battle-slash-lower;
 }
 
-.battle-vorpal-slash {
+.battle-slash-line {
   position: absolute;
   z-index: 6;
   top: 50%;
@@ -192,21 +192,21 @@
   background: #fff;
   box-shadow: 0 0 8px #fff, 0 0 18px #9feaff;
   transform: translate(-50%, -50%) scaleX(0);
-  animation: battle-vorpal-slash .22s ease-out forwards;
+  animation: battle-slash-line .22s ease-out forwards;
   pointer-events: none;
 }
 
-@keyframes battle-vorpal-upper {
+@keyframes battle-slash-upper {
   0%, 18% { opacity: 1; transform: translate(0, 0) rotate(0); }
   100% { opacity: 0; transform: translate(-115%, -8%) rotate(-7deg); }
 }
 
-@keyframes battle-vorpal-lower {
+@keyframes battle-slash-lower {
   0%, 18% { opacity: 1; transform: translate(0, 0) rotate(0); }
   100% { opacity: 0; transform: translate(115%, 8%) rotate(7deg); }
 }
 
-@keyframes battle-vorpal-slash {
+@keyframes battle-slash-line {
   0% { opacity: 0; transform: translate(-50%, -50%) scaleX(0); }
   35% { opacity: 1; transform: translate(-50%, -50%) scaleX(1); }
   100% { opacity: 0; transform: translate(-50%, -50%) scaleX(1); }

@@ -4,6 +4,9 @@ export function createNormalAttack({ weapon, weaponId, weaponEnhancement = 0, sk
   const resolvedWeapon = weapon || getWeapon(weaponId, weaponEnhancement);
   const type = getWeaponType(resolvedWeapon.type);
   const wisdomToPowerActive = skillIds.includes("wisdom_to_power") && resolvedWeapon.id !== "oak_staff";
+  const passiveInstantDeathId = skillIds.includes("flash_slash")
+    ? "flash_slash"
+    : skillIds.includes("assassination") ? "assassination" : null;
   return {
     id: "normal_attack",
     name: "攻撃",
@@ -17,6 +20,7 @@ export function createNormalAttack({ weapon, weaponId, weaponEnhancement = 0, sk
     additionalAttackStats: wisdomToPowerActive
       ? Object.freeze([{ stat: "int", multiplier: 0.5 }])
       : Object.freeze([]),
+    passiveInstantDeathId,
     damageDexMultiplier: type.damageDexMultiplier || 0,
     ignoresDefense: Boolean(resolvedWeapon.normalAttackIgnoresDefense ?? type.normalAttackIgnoresDefense),
     hitBonus: resolvedWeapon.hitBonus || 0,

@@ -200,6 +200,26 @@ export const SKILLS = Object.freeze({
     target: "self",
     effects: Object.freeze([])
   }),
+  flash_slash: Object.freeze({
+    id: "flash_slash",
+    name: "一閃",
+    description: "通常攻撃の命中ごとに即死判定。\nSTRが高く、AGIが低いほど成功率上昇。",
+    actionType: "passive",
+    category: "passive",
+    spCost: 0,
+    target: "self",
+    effects: Object.freeze([])
+  }),
+  assassination: Object.freeze({
+    id: "assassination",
+    name: "暗殺術",
+    description: "通常攻撃の命中ごとに即死判定。\nDEXが高く、STRが低いほど成功率上昇。",
+    actionType: "passive",
+    category: "passive",
+    spCost: 0,
+    target: "self",
+    effects: Object.freeze([])
+  }),
   survival_instinct: Object.freeze({
     id: "survival_instinct",
     name: "生存本能",
@@ -228,10 +248,12 @@ export const LEVEL_SKILL_UNLOCKS = Object.freeze([
   Object.freeze({ job: "mage", level: 4, skillId: "staff_light" }),
   Object.freeze({ job: "mage", level: 25, skillId: "wisdom_to_power" }),
   Object.freeze({ job: "warrior", level: 5, skillId: "survival_instinct" }),
+  Object.freeze({ job: "warrior", level: 38, skillId: "flash_slash" }),
   Object.freeze({ job: "priest", level: 3, skillId: "antidote" }),
   Object.freeze({ job: "priest", level: 5, skillId: "exorcism" }),
   Object.freeze({ job: "priest", level: 7, skillId: "hemostasis" }),
-  Object.freeze({ job: "thief", level: 8, skillId: "conceal_presence" })
+  Object.freeze({ job: "thief", level: 8, skillId: "conceal_presence" }),
+  Object.freeze({ job: "thief", level: 38, skillId: "assassination" })
 ]);
 
 export function getLevelUnlockedSkillIds(job, level) {

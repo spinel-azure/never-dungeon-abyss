@@ -14,6 +14,22 @@ export const WEAPON_TYPES = Object.freeze({
     defensePenetration: 0,
     damageDexMultiplier: 0.25
   }),
+  FIVE_HIT_DAGGER: Object.freeze({
+    id: "five_hit_dagger",
+    hitCount: 5,
+    powerPerHit: 0.25,
+    speedModifier: 5,
+    defensePenetration: 0,
+    damageDexMultiplier: 0.25
+  }),
+  DUAL_BLADE: Object.freeze({
+    id: "dual_blade",
+    hitCount: 2,
+    powerPerHit: 0.65,
+    speedModifier: 0,
+    defensePenetration: 0,
+    shieldAllowed: false
+  }),
   GREATSWORD: Object.freeze({
     id: "greatsword",
     hitCount: 1,
@@ -134,6 +150,14 @@ export const WEAPONS = Object.freeze({
     id: "vorpal_sword", name: "ヴォーパル・スウォード", type: "longsword", attack: 1,
     element: "physical", sellPrice: 5000, buybackPrice: 10000,
     hiddenBossSlayerIds: Object.freeze(["jabberwock_event_boss"])
+  }),
+  the_five_star: Object.freeze({
+    id: "the_five_star", name: "ザ・ファイブスター", type: "five_hit_dagger", attack: 1,
+    element: "physical", allowedJobs: Object.freeze(["thief"]), sellPrice: 0
+  }),
+  musashi_blade: Object.freeze({
+    id: "musashi_blade", name: "ムサシブレード", type: "dual_blade", attack: 15,
+    element: "physical", allowedJobs: Object.freeze(["warrior"]), twoHanded: true, sellPrice: 0
   })
 });
 

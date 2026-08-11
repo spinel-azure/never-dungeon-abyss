@@ -286,11 +286,11 @@ async function playPresentationEvents() {
     const duration = event.targetSide === "player" && event.hit ? 520 : event.hit ? 360 : 280;
     await delay(duration);
     image.classList.remove("is-hit");
-    if (event.vorpalExecution) await playVorpalExecution(image);
+    if (event.slashExecution) await playSlashEffect(image);
   }
 }
 
-async function playVorpalExecution(image) {
+async function playSlashEffect(image) {
   const stage = image?.closest(".battle-enemy-stage");
   if (!stage || !image.src) return;
   const stageRect = stage.getBoundingClientRect();
@@ -298,7 +298,7 @@ async function playVorpalExecution(image) {
   const fragments = ["upper", "lower"].map(part => {
     const fragment = image.cloneNode(false);
     fragment.removeAttribute("id");
-    fragment.className = `battle-vorpal-fragment is-${part}`;
+    fragment.className = `battle-slash-fragment is-${part}`;
     fragment.style.left = `${imageRect.left - stageRect.left}px`;
     fragment.style.top = `${imageRect.top - stageRect.top}px`;
     fragment.style.width = `${imageRect.width}px`;
@@ -307,7 +307,7 @@ async function playVorpalExecution(image) {
     return fragment;
   });
   const slash = document.createElement("span");
-  slash.className = "battle-vorpal-slash";
+  slash.className = "battle-slash-line";
   stage.append(slash);
   image.style.visibility = "hidden";
   await delay(1250);
