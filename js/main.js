@@ -85,7 +85,7 @@ import {
 } from "./audio.js";
 import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
 import { EffectEngine } from "./effects/effect-engine.js";
-import { hasUncertainLoot } from "./loot-identification.js";
+import { hasUncertainLoot, isHighlightedLotCardRarity, isHighlightedLotEquipment } from "./loot-identification.js";
 import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getActivePlayTimeDelta, normalizeAdventureStats } from "../data/adventure-stats.js";
@@ -2118,9 +2118,13 @@ import {
     }
     for (const [cardId, count] of Object.entries(bag.cards || {})) {
       unknown.push({ label: "？カード", count: `×${count}`,
-        className: getCardById(cardId)?.rarity === "SR" ? "is-super-rare" : "" });
+        className: isHighlightedLotCardRarity(getCardById(cardId)?.rarity) ? "is-super-rare" : "" });
     }
-    for (const instance of bag.equipmentInstances || []) unknown.push({ label: instance.unidentifiedName || "？装備", count: "×1" });
+    for (const instance of bag.equipmentInstances || []) unknown.push({
+      label: instance.unidentifiedName || "？装備",
+      count: "×1",
+      className: isHighlightedLotEquipment(instance) ? "is-super-rare" : ""
+    });
     renderLootIdentificationRows(unknown);
     lootIdentifyTitle.textContent = "LOT BAG";
     lootIdentifyAction.textContent = requiresIdentification ? "鑑定する" : "次へ";
@@ -2178,10 +2182,14 @@ import {
       const discarded = result.discarded > 0 ? `（上限超過${result.discarded}枚は破棄）` : "";
       lines.push({ label: `${card?.rarity || ""}カード「${card?.nameJa || result.cardId}」`,
         count: `×${result.gained} → カード${discarded}`,
-        className: card?.rarity === "SR" ? "is-super-rare" : "" });
+        className: isHighlightedLotCardRarity(card?.rarity) ? "is-super-rare" : "" });
     }
     for (const instance of settled.equipmentResults || []) {
-      lines.push({ label: getEquipmentInstanceName(instance), count: "→ インベントリ" });
+      lines.push({
+        label: getEquipmentInstanceName(instance),
+        count: "→ インベントリ",
+        className: isHighlightedLotEquipment(instance) ? "is-super-rare" : ""
+      });
     }
     return lines;
   }
