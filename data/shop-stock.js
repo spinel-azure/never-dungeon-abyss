@@ -17,6 +17,16 @@ export const SHOP_ARMOR_STOCK = Object.freeze([
   ...armorTier(3, 20, ["shop_stock_b20f_unlocked", "boss_fallen_mage_b19f_defeated"])
 ]);
 
+export const SHOP_ACCESSORY_STOCK = Object.freeze([
+  Object.freeze({
+    id: "shop_anti_magic_necklace",
+    equipmentId: "anti_magic_necklace",
+    enhancement: 0,
+    shopUnlockDepth: 10,
+    requiredFlags: Object.freeze(["transfer_portal_b10f_unlocked", "boss_strange_knight_statue_b9f_defeated"])
+  })
+]);
+
 export function getShopEquipmentIdsForDepth(depth = 1) {
   const reached = normalizeDepth(depth);
   return Object.values(WEAPONS)
@@ -39,7 +49,11 @@ export function getShopEquipmentStock(character) {
     .filter(entry => entry.requiredFlags.every(flag => eventFlags[flag] === true))
     .map(toEquipmentOffer)
     .filter(entry => !entry.allowedJobs?.length || entry.allowedJobs.includes(job));
-  return [...weapons, ...armor];
+  const accessories = SHOP_ACCESSORY_STOCK
+    .filter(entry => entry.shopUnlockDepth <= reached)
+    .filter(entry => entry.requiredFlags.every(flag => eventFlags[flag] === true))
+    .map(toEquipmentOffer);
+  return [...weapons, ...armor, ...accessories];
 }
 
 export function getShopEquipmentOffer(character, stockId) {
@@ -115,7 +129,9 @@ function toEquipmentOffer(entry) {
 
 function describeBonuses(bonuses = {}) {
   return Object.entries(bonuses)
-    .map(([key, value]) => `${key === "def" ? "DEF" : key.toUpperCase()}+${value}`)
+    .map(([key, value]) => key === "magicDamageReduction"
+      ? `魔法ダメージ-${Math.round(Number(value) * 100)}%`
+      : `${key === "def" ? "DEF" : key.toUpperCase()}+${value}`)
     .join(" / ");
 }
 

@@ -2,6 +2,7 @@ export const BOSSES = Object.freeze({
   lingering_ghost_b2f: Object.freeze({
     id: "lingering_ghost_b2f",
     name: "未練ある亡霊",
+    level: 5,
     floor: 2,
     imageId: "lingering_ghost_b2f",
     image: "images/bosses/boss_02.avif",
@@ -35,6 +36,7 @@ export const BOSSES = Object.freeze({
   otherworldly_wisdom_b4f: Object.freeze({
     id: "otherworldly_wisdom_b4f",
     name: "異界の叡智",
+    level: 80,
     floor: 4,
     imageId: "otherworldly_wisdom_b4f",
     image: "images/bosses/boss_00.avif",
@@ -129,6 +131,7 @@ export const BOSSES = Object.freeze({
   fallen_mage_b19f: Object.freeze({
     id: "fallen_mage_b19f",
     name: "堕落した魔術師",
+    level: 22,
     floor: 19,
     imageId: "fallen_mage_b19f",
     image: "images/bosses/boss_03.avif",
@@ -230,6 +233,7 @@ export const BOSSES = Object.freeze({
   }),
   quest_mimic_b6f: Object.freeze({
     id: "quest_mimic_b6f", name: "ミミック", floor: 6,
+    level: 10,
     imageId: "quest_mimic_b6f", image: "images/enemies/enemy_05.avif",
     encounterImageId: "quest_mimic_event_b6f", encounterImage: "images/background/dungeon_event_02.avif",
     race: "construct", maxHp: 60,
@@ -264,6 +268,7 @@ export const BOSSES = Object.freeze({
   strange_knight_statue_b9f: Object.freeze({
     id: "strange_knight_statue_b9f",
     name: "奇妙な彫像",
+    level: 12,
     floor: 9,
     imageId: "strange_knight_statue_b9f",
     image: "images/bosses/boss_01.avif",

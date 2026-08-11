@@ -481,6 +481,7 @@ function combatStats(combatant) {
     statuses: structuredClone(combatant.statuses || []),
     statusResistances,
     elementMultipliers: { ...(combatant.elementMultipliers || {}) },
+    magicDamageReduction: collected.magicDamageReduction,
     isBoss: Boolean(combatant.isBoss)
   };
 }

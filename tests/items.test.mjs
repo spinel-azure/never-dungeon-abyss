@@ -77,6 +77,27 @@ test("B10 weapon upgrades require the strange statue victory and keep their enha
   );
 });
 
+test("the anti-magic necklace unlocks after B10 and the strange statue victory", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.gold = 1500;
+  character.highestDungeonDepthReached = 10;
+  character.eventFlags.transfer_portal_b10f_unlocked = true;
+  assert.equal(getShopEquipmentOffer(character, "shop_anti_magic_necklace"), null);
+
+  character.eventFlags.boss_strange_knight_statue_b9f_defeated = true;
+  const offer = getShopEquipmentOffer(character, "shop_anti_magic_necklace");
+  assert.equal(offer?.slot, "accessoryId");
+  assert.equal(offer?.buyPrice, 1500);
+  assert.equal(offer?.statBonuses.magicDamageReduction, 0.15);
+
+  const purchased = purchaseEquipment(character, offer);
+  assert.equal(purchased.accepted, true);
+  character = equipInstance(purchased.character, "accessoryId", purchased.instance.instanceId).character;
+  character = normalizeCharacter(character);
+  assert.equal(character.equipment.accessoryId, "anti_magic_necklace");
+  assert.equal(character.equipmentStatBonuses.magicDamageReduction, 0.15);
+});
+
 test("thief armor shop tiers share enhancement-aware purchase and stat handling", () => {
   let character = createInitialCharacter({ name: "TEST", job: "thief" });
   character.gold = 2000;

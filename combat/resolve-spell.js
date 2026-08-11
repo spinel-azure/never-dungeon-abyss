@@ -36,7 +36,8 @@ export function resolveSpell({
       COMBAT_CONFIG.spellVarianceMin,
       COMBAT_CONFIG.spellVarianceMax
     );
-    damage = Math.max(1, Math.floor(baseDamage * multiplier * variance));
+    const damageReduction = Math.max(0, Math.min(0.75, numeric(defender.magicDamageReduction)));
+    damage = Math.max(1, Math.floor(baseDamage * multiplier * variance * (1 - damageReduction)));
   }
   const actionEffects = resolveEffects({
     effects: spell.effects,

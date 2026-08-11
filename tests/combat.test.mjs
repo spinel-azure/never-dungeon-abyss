@@ -448,6 +448,32 @@ test("fireball is unavoidable, immunity is zero and weakness is 1.5x", () => {
   assert.equal(weak.totalDamage, Math.floor(normal.totalDamage * 1.5));
 });
 
+test("magic damage reduction lowers final spell damage without changing status resistance", () => {
+  const spell = { id: "test_spell", element: "arcane", spellPower: 100, powerMultiplier: 1, unavoidable: true };
+  const normal = resolveSpell({ attacker: { int: 0 }, defender: {}, spell, rng: () => 0.5 });
+  const protectedResult = resolveSpell({
+    attacker: { int: 0 },
+    defender: { magicDamageReduction: 0.15 },
+    spell,
+    rng: () => 0.5
+  });
+  assert.equal(protectedResult.totalDamage, Math.floor(normal.totalDamage * 0.85));
+});
+
+test("all implemented enemies and bosses expose internal reference levels", () => {
+  for (const id of ["abyss_rat", "cave_slime", "abyss_rabbit", "wandering_dead", "poison_slime", "vampire_bat", "bouncing_coin", "viper", "mimic"]) {
+    const enemy = getEnemyById(id);
+    assert.ok(Number.isInteger(enemy.level) && enemy.level > 0, id);
+    assert.equal(createEnemyCombatant(enemy).level, enemy.level);
+  }
+  for (const id of ["lingering_ghost_b2f", "otherworldly_wisdom_b4f", "fallen_mage_b19f", "quest_mimic_b6f", "strange_knight_statue_b9f"]) {
+    const boss = getBossById(id);
+    assert.ok(Number.isInteger(boss.level) && boss.level > 0, id);
+    assert.equal(createBossCombatant(boss).level, boss.level);
+  }
+  assert.equal(getBossById("fallen_mage_b19f").level, 22);
+});
+
 test("healing uses no RNG and cannot overheal", () => {
   let calls = 0;
   const result = resolveHealing({

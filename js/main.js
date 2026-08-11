@@ -1058,7 +1058,9 @@ import {
     const bonuses = [];
     if (Number.isFinite(item.attack)) bonuses.push(`ATK +${item.attack}`);
     bonuses.push(...Object.entries(item.statBonuses || {})
-      .map(([key, value]) => `${key.toUpperCase()} ${Number(value) >= 0 ? "+" : ""}${value}`));
+      .map(([key, value]) => key === "magicDamageReduction"
+        ? `魔法耐性 ${Math.round(Number(value) * 100)}%`
+        : `${key.toUpperCase()} ${Number(value) >= 0 ? "+" : ""}${value}`));
     return bonuses.join(" ");
   }
 

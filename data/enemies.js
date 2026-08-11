@@ -2,6 +2,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "abyss_rat",
     name: "奈落ネズミ",
+    level: 1,
     imageId: "abyss_rat",
     image: "images/enemies/enemy_01.avif",
     race: "beast",
@@ -25,6 +26,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "cave_slime",
     name: "洞窟スライム",
+    level: 2,
     imageId: "cave_slime",
     image: "images/enemies/enemy_02.avif",
     race: "slime",
@@ -48,6 +50,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "abyss_rabbit",
     name: "奈落ウサギ",
+    level: 3,
     imageId: "abyss_rabbit",
     image: "images/enemies/enemy_04.avif",
     race: "beast",
@@ -72,6 +75,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "wandering_dead",
     name: "さまよう亡者",
+    level: 4,
     imageId: "wandering_dead",
     image: "images/enemies/enemy_03.avif",
     race: "undead",
@@ -96,6 +100,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "poison_slime",
     name: "ポイズンスライム",
+    level: 3,
     imageId: "poison_slime",
     image: "images/enemies/enemy_06.avif",
     race: "slime",
@@ -129,6 +134,7 @@ export const enemies = Object.freeze([
   }),
   Object.freeze({
     id: "vampire_bat", name: "吸血コウモリ", imageId: "vampire_bat",
+    level: 5,
     image: "images/enemies/enemy_07.avif", race: "beast", minimumDepth: 3,
     maxHp: 30, stats: Object.freeze({ str: 6, int: 2, agi: 11, dex: 8, luc: 4 }),
     def: 4, attack: 5, experienceReward: 10, dropItemId: "bat_wing",
@@ -143,6 +149,7 @@ export const enemies = Object.freeze([
   }),
   Object.freeze({
     id: "bouncing_coin", name: "跳ねるコイン", imageId: "bouncing_coin",
+    level: 6,
     image: "images/enemies/enemy_08.avif", race: "construct", minimumDepth: 4,
     maxHp: 34, stats: Object.freeze({ str: 6, int: 3, agi: 8, dex: 7, luc: 10 }),
     def: 8, attack: 5, experienceReward: 12, dropGold: 40,
@@ -156,6 +163,7 @@ export const enemies = Object.freeze([
   }),
   Object.freeze({
     id: "viper", name: "ヴァイパー", imageId: "viper",
+    level: 7,
     image: "images/enemies/enemy_09.avif", race: "beast", minimumDepth: 5,
     maxHp: 42, stats: Object.freeze({ str: 8, int: 2, agi: 10, dex: 9, luc: 5 }),
     def: 5, attack: 7, experienceReward: 14, dropItemId: "snake_skin",
@@ -175,6 +183,7 @@ export const enemies = Object.freeze([
   }),
   Object.freeze({
     id: "mimic", name: "ミミック", imageId: "mimic",
+    level: 10,
     image: "images/enemies/enemy_05.avif", race: "construct", randomEncounter: false,
     maxHp: 60, stats: Object.freeze({ str: 10, int: 3, agi: 6, dex: 8, luc: 7 }),
     def: 9, attack: 8, experienceReward: 20, dropProfile: "blackChest",
@@ -218,6 +227,7 @@ export function createEnemyCombatant(enemy) {
     name: enemy.name,
     image: enemy.image,
     race: enemy.race || "unknown",
+    level: Math.max(1, Math.floor(Number(enemy.level) || 1)),
     hp: enemy.maxHp,
     maxHp: enemy.maxHp,
     sp: 0,

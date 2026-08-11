@@ -799,7 +799,11 @@ function equipmentEffectLabels(definition) {
   if (definition.type) labels.push(`${getWeaponType(definition.type).hitCount || 1}回攻撃`);
   if (Number(definition.defensePenetration) > 0) labels.push(`DEF貫通 ${Math.round(definition.defensePenetration * 100)}%`);
   if (Number(definition.poisonChance) > 0) labels.push(`毒付与 ${Math.round(definition.poisonChance * 100)}%`);
-  for (const [key, value] of Object.entries(definition.statBonuses || {})) labels.push(`${key.toUpperCase()} ${value >= 0 ? "+" : ""}${value}`);
+  for (const [key, value] of Object.entries(definition.statBonuses || {})) {
+    labels.push(key === "magicDamageReduction"
+      ? `魔法耐性 ${Math.round(Number(value) * 100)}%`
+      : `${key.toUpperCase()} ${value >= 0 ? "+" : ""}${value}`);
+  }
   return labels;
 }
 function handleStatus(action) { if (action === "cancel") { menu.view = "commands"; updateView(); } else if (action === "left") { menu.statusPage = 0; updateStatus(); } else if (action === "right") { menu.statusPage = 1; updateStatus(); } else if (action === "confirm") { menu.view = "commands"; updateView(); } }

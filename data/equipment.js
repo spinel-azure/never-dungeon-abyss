@@ -10,6 +10,13 @@ export const EQUIPMENT_SLOTS = Object.freeze([
 ]);
 
 export const EQUIPMENT = Object.freeze({
+  anti_magic_necklace: item("anti_magic_necklace", "魔除けのネックレス", "accessoryId", {
+    magicDamageReduction: 0.15
+  }, {
+    buyPrice: 1500,
+    sellPrice: 750
+  }),
+
   iron_buckler: item("iron_buckler", "鉄の小盾", "leftArmId", { def: 2 }, enhancedArmor("warrior", {
     1: { def: 3 }, 2: { def: 4 }, 3: { def: 4, dex: 1 }
   })),
