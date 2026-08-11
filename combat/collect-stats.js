@@ -38,6 +38,14 @@ export function collectStats(source = {}) {
     statusResistanceBonus: numeric(source.statusResistanceBonus),
     bleedingResistance: numeric(source.bleedingResistance) + numeric(equipment.bleedingResistance)
       + numeric(cards.bleedingResistance) + numeric(temporary.bleedingResistance),
+    actionSkipResistance: clamp(
+      numeric(source.actionSkipResistance)
+        + numeric(equipment.actionSkipResistance)
+        + numeric(cards.actionSkipResistance)
+        + numeric(temporary.actionSkipResistance),
+      0,
+      1
+    ),
     magicDamageReduction: clamp(
       numeric(source.magicDamageReduction)
         + numeric(equipment.magicDamageReduction)

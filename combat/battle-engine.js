@@ -474,6 +474,9 @@ function combatStats(combatant) {
   const bleeding = statusResistances.bleeding || {};
   statusResistances.bleeding = { ...bleeding,
     resistancePoints: (Number(bleeding.resistancePoints) || 0) + collected.bleedingResistance * 100 };
+  const actionSkip = statusResistances.action_skip || {};
+  statusResistances.action_skip = { ...actionSkip,
+    resistancePoints: (Number(actionSkip.resistancePoints) || 0) + collected.actionSkipResistance * 100 };
   return {
     ...collected,
     def: Math.floor(collected.def * getDefenseMultiplier(combatant.statuses)),

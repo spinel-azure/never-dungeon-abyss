@@ -466,7 +466,7 @@ test("all implemented enemies and bosses expose internal reference levels", () =
     assert.ok(Number.isInteger(enemy.level) && enemy.level > 0, id);
     assert.equal(createEnemyCombatant(enemy).level, enemy.level);
   }
-  for (const id of ["lingering_ghost_b2f", "otherworldly_wisdom_b4f", "fallen_mage_b19f", "quest_mimic_b6f", "strange_knight_statue_b9f"]) {
+  for (const id of ["lingering_ghost_b2f", "otherworldly_wisdom_b4f", "fallen_mage_b19f", "iron_maiden_b29f", "quest_mimic_b6f", "strange_knight_statue_b9f"]) {
     const boss = getBossById(id);
     assert.ok(Number.isInteger(boss.level) && boss.level > 0, id);
     assert.equal(createBossCombatant(boss).level, boss.level);
@@ -1133,6 +1133,58 @@ test("Ability Boost Plus is a six-copy L card that can maximize all abilities at
   assert.deepEqual(collectCardStatBonuses(cardsAt137.deckSlots), {
     str: 30, int: 30, agi: 30, dex: 30, luc: 30
   });
+});
+
+test("Resistance Spirit stacks to sixty percent across three R cards", () => {
+  const card = getCardById("rare_resistance_spirit");
+  assert.equal(card.rarity, "R");
+  assert.equal(card.cost, 2);
+  assert.equal(card.maxOwned, 99);
+  assert.equal(card.maxCopies, 3);
+  assert.deepEqual(card.statBonus, { actionSkipResistance: 0.2 });
+  const cardResistance = collectCardStatBonuses(Array(3).fill(card.id)).actionSkipResistance;
+  assert.equal(Math.round(cardResistance * 100), 60);
+  const combinedResistance = collectStats({
+    cardStatBonuses: { actionSkipResistance: cardResistance },
+    equipmentStatBonuses: { actionSkipResistance: 0.3 }
+  }).actionSkipResistance;
+  assert.equal(Math.round(combinedResistance * 100), 90);
+});
+
+test("First Aid is an R card with thirty percent bleeding resistance", () => {
+  const card = getCardById("common_first_aid");
+  assert.equal(card.rarity, "R");
+  assert.equal(card.cost, 2);
+  assert.equal(card.maxOwned, 1);
+  assert.equal(card.maxCopies, 1);
+  assert.deepEqual(card.statBonus, { bleedingResistance: 0.3 });
+});
+
+test("legendary vitality cards allow max HP and SP to exceed four digits", () => {
+  const definitions = [
+    ["warrior", "legendary_vital_surge", "maxHp", 1599, false],
+    ["mage", "legendary_spirit_surge", "maxSp", 1599, true]
+  ];
+  for (const [job, cardId, vitalKey, expected, vorpalSwordUsed] of definitions) {
+    const card = getCardById(cardId);
+    assert.equal(card.rarity, "L");
+    assert.equal(card.cost, 6);
+    assert.equal(card.maxOwned, 99);
+    assert.equal(card.maxCopies, 6);
+    assert.equal(card.acquisition.bossId, "jabberwock");
+    assert.equal(card.acquisition.vorpalSwordUsed, vorpalSwordUsed);
+
+    let character = normalizeCharacter({
+      ...createInitialCharacter({ name: "TEST", job }),
+      level: 197
+    });
+    character.cards = grantCard(character.cards, cardId, 6, character.deckCost).cards;
+    for (let index = 0; index < DECK_SLOT_COUNT; index += 1) {
+      character.cards = setDeckSlot(character.cards, index, cardId, character.deckCost);
+    }
+    character = normalizeCharacter(character);
+    assert.equal(character[vitalKey], expected);
+  }
 });
 
 test("Indomitable Spirit is a six-copy SR card with HP and defense bonuses", () => {

@@ -68,12 +68,20 @@ const STANDARD_CARDS = [
     maxOwned: 99, maxCopies: 6
   },
   {
-    id: "common_first_aid", rarity: "C", cost: 1,
+    id: "common_first_aid", rarity: "R", cost: 2,
     name: "First Aid", nameJa: "応急措置", concept: "出血耐性 +30%",
     descriptionJa: "出血状態になる確率を30％軽減する。",
     category: "resistance", effectId: "bleeding_resistance", effectValue: 0.3,
     statBonus: Object.freeze({ bleedingResistance: 0.3 }), iconId: "bandage",
     maxOwned: 1, maxCopies: 1
+  },
+  {
+    id: "rare_resistance_spirit", rarity: "R", cost: 2,
+    name: "Resistance Spirit", nameJa: "抵抗心", concept: "行動不能耐性 +20%",
+    descriptionJa: "行動不能になる確率を20％軽減する。",
+    category: "resistance", effectId: "action_skip_resistance", effectValue: 0.2,
+    statBonus: Object.freeze({ actionSkipResistance: 0.2 }), iconId: "alertness",
+    maxOwned: 99, maxCopies: 3
   },
   {
     id: "rare_defense_up", rarity: "R", cost: 2,
@@ -167,6 +175,24 @@ const STANDARD_CARDS = [
     category: "ability", effectId: "all_ability_up_plus", effectValue: 5,
     statBonus: Object.freeze({ str: 5, int: 5, agi: 5, dex: 5, luc: 5 }),
     iconId: "power-pose", maxOwned: 99, maxCopies: 6
+  },
+  {
+    id: "legendary_vital_surge", rarity: "L", cost: 6,
+    name: "Vital Surge", nameJa: "生命躍動", concept: "MAX HP +100",
+    descriptionJa: "最大HPが100上昇する。",
+    category: "ability", effectId: "max_hp_up_legendary", effectValue: 100,
+    statBonus: Object.freeze({ maxHp: 100 }), iconId: "vital-heart",
+    maxOwned: 99, maxCopies: 6,
+    acquisition: Object.freeze({ type: "bossRouteReward", bossId: "jabberwock", vorpalSwordUsed: false })
+  },
+  {
+    id: "legendary_spirit_surge", rarity: "L", cost: 6,
+    name: "Spirit Surge", nameJa: "精神躍動", concept: "MAX SP +100",
+    descriptionJa: "最大SPが100上昇する。",
+    category: "ability", effectId: "max_sp_up_legendary", effectValue: 100,
+    statBonus: Object.freeze({ maxSp: 100 }), iconId: "mana-core",
+    maxOwned: 99, maxCopies: 6,
+    acquisition: Object.freeze({ type: "bossRouteReward", bossId: "jabberwock", vorpalSwordUsed: true })
   }
 ];
 

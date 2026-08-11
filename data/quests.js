@@ -420,6 +420,9 @@ export function isDungeonDepthUnlocked(character, depth) {
   if (requestedDepth === 20) {
     return Boolean(character?.eventFlags?.boss_fallen_mage_b19f_defeated);
   }
+  if (requestedDepth === 30) {
+    return Boolean(character?.eventFlags?.boss_iron_maiden_b29f_defeated);
+  }
   return true;
 }
 

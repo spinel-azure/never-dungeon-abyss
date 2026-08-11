@@ -188,6 +188,14 @@ test("B20F remains locked until the B19 checkpoint boss is defeated", () => {
   assert.equal(isDungeonDepthUnlocked(character, 21), true);
 });
 
+test("B30F remains locked until the B29 checkpoint boss is defeated", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  assert.equal(isDungeonDepthUnlocked(character, 29), true);
+  assert.equal(isDungeonDepthUnlocked(character, 30), false);
+  character.eventFlags.boss_iron_maiden_b29f_defeated = true;
+  assert.equal(isDungeonDepthUnlocked(character, 30), true);
+});
+
 test("quest 003 tracks B1F explored cells and resets before completion", () => {
   let character = acceptQuest(
     createInitialCharacter({ name: "TEST", job: "mage" }),

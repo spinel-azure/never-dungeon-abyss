@@ -14,6 +14,14 @@ export const KEY_ITEMS = Object.freeze({
     sellable: false,
     consumable: true,
     version: 1
+  }),
+  red_rust_key_b29f: Object.freeze({
+    id: "red_rust_key_b29f",
+    name: "赤錆びた鍵",
+    description: "B29Fで見つけた赤錆びた鍵。赤い扉を開けられそうだ。",
+    sellable: false,
+    consumable: true,
+    version: 1
   })
 });
 

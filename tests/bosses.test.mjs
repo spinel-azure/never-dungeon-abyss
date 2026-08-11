@@ -89,6 +89,25 @@ test("B19 fallen mage is a one-time magic floor boss with a placeholder reward",
   assert.equal(boss.room.unlockFlag, "red_door_b19f_unlocked");
 });
 
+test("B29 Iron Maiden is a physical checkpoint boss with a low-HP death bite", () => {
+  const boss = getBossById("iron_maiden_b29f");
+  assert.equal(boss.name, "鋼鉄の乙女");
+  assert.equal(boss.level, 38);
+  assert.equal(boss.floor, 29);
+  assert.equal(boss.image, "images/bosses/boss_05.avif");
+  assert.equal(boss.encounterImage, "images/npc/NPC_event_05.avif");
+  assert.equal(boss.defeatedEncounterImage, "images/npc/NPC_event_06.avif");
+  assert.equal(boss.maxHp, 720);
+  assert.equal(boss.experienceReward, 5000);
+  assert.equal(boss.room.keyItemId, "red_rust_key_b29f");
+  assert.equal(boss.room.unlockFlag, "red_door_b29f_unlocked");
+  const deathBite = boss.actions.find(entry => entry.action.id === "death_bite");
+  assert.equal(deathBite.when.hpRateBelow, 0.49);
+  assert.ok(deathBite.action.powerPerHit > 1.5);
+  assert.match(boss.event.prompt, /眠った乙女/);
+  assert.match(boss.event.remains, /朽ちた棺の残骸/);
+});
+
 test("B9 always creates one sealed 1x3 boss room and one trapped key chest", () => {
   for (let iteration = 0; iteration < 50; iteration += 1) {
     randomizeStartPosition();
@@ -142,6 +161,32 @@ test("B19 creates a reusable 1x3 checkpoint room and leaves remains after victor
   assert.equal(flat.some(cell => cell.eventTreasureId === "red_rust_key_b19f_chest"), false);
 });
 
+test("B29 creates a keyed 1x3 checkpoint room and leaves remains after victory", () => {
+  buildBoundaryWallMap(29, () => .5, {
+    bossDefeatedById: { iron_maiden_b29f: false }
+  });
+  let flat = cells.flat();
+  let room = flat.filter(cell => cell.reserved === "bossRoom");
+  assert.equal(room.length, 3);
+  assert.equal(room.filter(cell => cell.bossId === "iron_maiden_b29f").length, 1);
+  assert.equal(room.filter(cell => cell.type === "stairsDown").length, 1);
+  assert.equal(flat.flatMap(cell => Object.values(cell.doorKinds)).filter(kind => kind === "boss").length, 2);
+  const keyChests = flat.filter(cell => cell.eventTreasureId === "red_rust_key_b29f_chest");
+  assert.equal(keyChests.length, 1);
+  assert.equal(keyChests[0].treasure, "gold");
+  assert.ok(keyChests[0].treasureTrapId);
+
+  buildBoundaryWallMap(29, () => .5, {
+    bossDefeatedById: { iron_maiden_b29f: true }
+  });
+  flat = cells.flat();
+  room = flat.filter(cell => cell.reserved === "bossRoom");
+  assert.equal(room.some(cell => cell.bossId), false);
+  assert.equal(room.filter(cell => cell.bossRemainsId === "iron_maiden_b29f").length, 1);
+  assert.equal(room.filter(cell => cell.type === "stairsDown").length, 1);
+  assert.equal(flat.some(cell => cell.eventTreasureId === "red_rust_key_b29f_chest"), false);
+});
+
 test("the B9 red rust key is a non-sellable key item", () => {
   const item = getKeyItem("red_rust_key_b9f");
   assert.equal(item.name, "赤錆びた鍵");
@@ -151,12 +196,15 @@ test("the B9 red rust key is a non-sellable key item", () => {
   assert.equal(hasKeyItem(granted.keyItems, item.id), true);
 });
 
-test("B9 and B19 red rust keys share a display name but keep separate IDs", () => {
+test("B9, B19 and B29 red rust keys share a display name but keep separate IDs", () => {
   const b9 = getKeyItem("red_rust_key_b9f");
   const b19 = getKeyItem("red_rust_key_b19f");
+  const b29 = getKeyItem("red_rust_key_b29f");
   assert.equal(b9.name, "赤錆びた鍵");
   assert.equal(b19.name, "赤錆びた鍵");
+  assert.equal(b29.name, "赤錆びた鍵");
   assert.notEqual(b9.id, b19.id);
+  assert.notEqual(b19.id, b29.id);
   const b19State = grantKeyItem(null, b19.id, 1).keyItems;
   assert.equal(hasKeyItem(b19State, b19.id), true);
   assert.equal(hasKeyItem(b19State, b9.id), false);

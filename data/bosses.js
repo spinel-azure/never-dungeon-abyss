@@ -231,6 +231,109 @@ export const BOSSES = Object.freeze({
       remains: "――もう何者の気配も感じない。一体何の儀式を行っていたのか…。\n＊Aボタン：次へ"
     })
   }),
+  iron_maiden_b29f: Object.freeze({
+    id: "iron_maiden_b29f",
+    name: "鋼鉄の乙女",
+    level: 38,
+    floor: 29,
+    imageId: "iron_maiden_b29f",
+    image: "images/bosses/boss_05.avif",
+    encounterImageId: "iron_maiden_event_b29f",
+    encounterImage: "images/npc/NPC_event_05.avif",
+    defeatedEncounterImageId: "iron_maiden_remains_b29f",
+    defeatedEncounterImage: "images/npc/NPC_event_06.avif",
+    race: "construct",
+    maxHp: 720,
+    stats: Object.freeze({ str: 22, int: 4, agi: 10, dex: 16, luc: 12 }),
+    def: 18,
+    attack: 17,
+    experienceReward: 5000,
+    specialAttack: null,
+    actions: Object.freeze([
+      Object.freeze({
+        weight: 35,
+        action: Object.freeze({
+          id: "iron_maiden_strike",
+          name: "鉄塊撃",
+          actionType: "physicalAttack",
+          hitCount: 1,
+          powerPerHit: 1,
+          effects: Object.freeze([])
+        })
+      }),
+      Object.freeze({
+        weight: 30,
+        action: Object.freeze({
+          id: "chain_restraint",
+          name: "鎖の拘束",
+          actionType: "physicalAttack",
+          hitCount: 1,
+          powerPerHit: 0.85,
+          hitBonus: 0.05,
+          effects: Object.freeze([Object.freeze({
+            statusId: "action_skip",
+            trigger: "firstHitOnly",
+            statusKind: "physical",
+            baseRate: 0.55
+          })])
+        })
+      }),
+      Object.freeze({
+        weight: 20,
+        action: Object.freeze({
+          id: "coffin_crush",
+          name: "棺砕き",
+          actionType: "physicalAttack",
+          hitCount: 1,
+          powerPerHit: 1.3,
+          speedModifier: -2,
+          effects: Object.freeze([])
+        })
+      }),
+      Object.freeze({
+        weight: 15,
+        when: Object.freeze({ hpRateBelow: 0.49 }),
+        action: Object.freeze({
+          id: "death_bite",
+          name: "デスバイト",
+          actionType: "physicalAttack",
+          hitCount: 1,
+          powerPerHit: 1.75,
+          hitBonus: 0.08,
+          effects: Object.freeze([Object.freeze({
+            statusId: "bleeding",
+            trigger: "firstHitOnly",
+            statusKind: "physical",
+            baseRate: 0.4
+          })])
+        })
+      })
+    ]),
+    reward: Object.freeze({ type: "none" }),
+    elementMultipliers: Object.freeze({ fire: 0.75, ice: 0.75, arcane: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 100, immune: true }),
+      speed_down: Object.freeze({ resistancePoints: 70, immune: false })
+    }),
+    escapeRate: 0,
+    surpriseRate: 0,
+    surpriseRateMaximum: 0,
+    noDrop: true,
+    isBoss: true,
+    bossKind: "floor",
+    defeatedFlag: "boss_iron_maiden_b29f_defeated",
+    room: Object.freeze({
+      requiresKey: true,
+      keyItemId: "red_rust_key_b29f",
+      unlockFlag: "red_door_b29f_unlocked"
+    }),
+    event: Object.freeze({
+      prompt: "部屋の中央には棺の様な物が横たわっており、蓋には眠った乙女の様な意匠が施されている。近づいて調べますか？\n＊Aボタン：はい　Bボタン：いいえ",
+      start: "あなたが近づこうとした途端、突然棺が宙に浮かび、襲いかかってきた！",
+      remains: "――朽ちた棺の残骸が転がっている。この乙女が目を覚ます事はもう無いだろう…。\n＊Aボタン：次へ"
+    })
+  }),
   quest_mimic_b6f: Object.freeze({
     id: "quest_mimic_b6f", name: "ミミック", floor: 6,
     level: 10,
