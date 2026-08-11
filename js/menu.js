@@ -26,6 +26,7 @@ const menu = {
   commands: [], enabledCommands: [], commandIndex: 0, statusPage: 0,
   deckCursor: 0, deckSlots: [], deckEditable: false, deckReturnView: "commands",
   deckPickerOpen: false, deckPickerCursor: 0, deckPickerItems: [], deckPickerPage: 0,
+  deckCostOverEl: null, deckCostOverTimer: 0,
   deckPointerArmedIndex: -1, deckPickerPointerArmedIndex: -1,
   saveCursor: 0,
   inventoryTab: "items", inventoryCursor: 0, inventoryPage: 0, inventoryMode: "list", inventorySlot: null, inventoryFocus: "list",
@@ -68,6 +69,7 @@ export function configureMenu(options) {
   Object.assign(menu, options);
   menu.statusPanel = menu.root.querySelector('[data-menu-view="status"]');
   menu.deckPanel = menu.root.querySelector('[data-menu-view="deck"]');
+  menu.deckCostOverEl = menu.deckPanel.querySelector("[data-deck-cost-over]");
   menu.savePanel = menu.root.querySelector('[data-menu-view="save"]');
   menu.inventoryPanel = menu.root.querySelector('[data-menu-view="inventory"]');
   menu.questHistoryPanel = menu.root.querySelector('[data-menu-view="questHistory"]');
@@ -865,6 +867,7 @@ function handleManualSave(action) {
 }
 
 function closeDeckView() {
+  hideDeckCostOver();
   menu.deckPickerOpen = false;
   menu.view = menu.deckReturnView === "town" ? "dungeon" : "commands";
   updateView();
@@ -889,10 +892,36 @@ function closeDeckPicker() {
 
 function applyDeckPickerSelection() {
   const character = menu.getCharacter();
-  const next = setDeckSlot(character?.cards, menu.deckCursor, menu.deckPickerItems[menu.deckPickerCursor], character?.deckCost || 3);
+  const selectedCardId = menu.deckPickerItems[menu.deckPickerCursor];
+  const selectedCard = getCardById(selectedCardId);
+  const costLimit = character?.deckCost || 3;
+  const currentCardCost = getCardById(menu.deckSlots[menu.deckCursor])?.cost || 0;
+  const projectedCost = calculateDeckCost(menu.deckSlots) - currentCardCost + (selectedCard?.cost || 0);
+  if (selectedCard && projectedCost > costLimit) {
+    showDeckCostOver();
+    return;
+  }
+  const next = setDeckSlot(character?.cards, menu.deckCursor, selectedCardId, costLimit);
   menu.onDeckChanged(next);
   menu.deckPickerOpen = false;
   renderDeck();
+}
+
+function showDeckCostOver() {
+  if (!menu.deckCostOverEl) return;
+  window.clearTimeout(menu.deckCostOverTimer);
+  menu.playSe("costOver");
+  menu.deckCostOverEl.hidden = false;
+  menu.deckCostOverEl.style.animation = "none";
+  void menu.deckCostOverEl.offsetWidth;
+  menu.deckCostOverEl.style.animation = "";
+  menu.deckCostOverTimer = window.setTimeout(hideDeckCostOver, 1200);
+}
+
+function hideDeckCostOver() {
+  window.clearTimeout(menu.deckCostOverTimer);
+  menu.deckCostOverTimer = 0;
+  if (menu.deckCostOverEl) menu.deckCostOverEl.hidden = true;
 }
 
 function handleOptions(action) {
