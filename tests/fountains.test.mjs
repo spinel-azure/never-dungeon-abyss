@@ -4,12 +4,16 @@ import { FOUNTAIN_FLOORS, floorHasHealingFountain, restAtHealingFountain } from 
 import { createInitialCharacter } from "../data/classes.js";
 import { buildBoundaryWallMap, cells } from "../js/dungeon.js";
 
-test("healing fountain floors are data-driven and include B5F, B9F, B15F and B19F", () => {
-  assert.deepEqual(FOUNTAIN_FLOORS, [5, 9, 15, 19]);
-  assert.equal(floorHasHealingFountain(5), true);
-  assert.equal(floorHasHealingFountain(9), true);
-  assert.equal(floorHasHealingFountain(15), true);
-  assert.equal(floorHasHealingFountain(19), true);
+test("healing fountains appear on floors ending in 5 or 9 through B99F", () => {
+  assert.deepEqual(FOUNTAIN_FLOORS, [
+    5, 9, 15, 19, 25, 29, 35, 39, 45, 49,
+    55, 59, 65, 69, 75, 79, 85, 89, 95, 99
+  ]);
+  for (let depth = 1; depth <= 99; depth++) {
+    const shouldHaveFountain = depth % 10 === 5 || depth % 10 === 9;
+    assert.equal(floorHasHealingFountain(depth), shouldHaveFountain, `B${depth}F`);
+  }
+  assert.equal(floorHasHealingFountain(100), false);
   assert.equal(floorHasHealingFountain(8), false);
 });
 
