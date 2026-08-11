@@ -57,6 +57,16 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
       minimapMarker: "E",
       revealBeforeExploration: true
     })
+  }),
+  16: Object.freeze({
+    lock: Object.freeze({ mode: "alwaysSuccess", attempts: 1 }),
+    content: Object.freeze({
+      type: "eventBoss",
+      bossId: "jabberwock_event_boss",
+      requiredQuestId: "guild_009",
+      minimapMarker: "E",
+      revealBeforeExploration: true
+    })
   })
 });
 

@@ -9,6 +9,7 @@ export const WANDERING_DEAD_EXTERMINATION_QUEST_ID = "guild_005";
 export const BLACK_BOX_INVESTIGATION_QUEST_ID = "guild_006";
 export const RED_DOOR_INVESTIGATION_QUEST_ID = "guild_007";
 export const QUEEN_SHADOW_QUEST_ID = "guild_008";
+export const JABBERWOCK_QUEST_ID = "guild_009";
 export const QUEEN_SHADOW_PROGRESS_FLAGS = Object.freeze([
   "quest_008_shadow_b11f_found",
   "quest_008_shadow_b12f_found",
@@ -214,6 +215,33 @@ export const QUESTS = Object.freeze([
     ]),
     prerequisiteQuestIds: Object.freeze([RED_DOOR_INVESTIGATION_QUEST_ID]),
     persistentProgressFlags: QUEEN_SHADOW_PROGRESS_FLAGS,
+    available: true
+  }),
+  Object.freeze({
+    id: JABBERWOCK_QUEST_ID,
+    number: "009",
+    title: "燻り狂うもの",
+    client: "ギルドマスター",
+    category: "other",
+    objectiveType: "defeatBoss",
+    targetId: "jabberwock_event_boss",
+    targetName: "ジャバウォック",
+    targetDepth: 16,
+    requiredCount: 1,
+    objectiveLabel: "ジャバウォックを退治する",
+    reward: Object.freeze({
+      type: "card", label: "デッキカード×1", amount: 1,
+      cardId: "sr_floor_detection", bonusGold: 800
+    }),
+    descriptionLabel: "目的",
+    description: Object.freeze([
+      "奈落B16Fのとある場所にジャバウォックと呼ばれる",
+      "恐ろしい怪物が出現するらしい。正体を突き止めて",
+      "退治してくれ。"
+    ]),
+    prerequisiteQuestIds: Object.freeze([BLACK_BOX_INVESTIGATION_QUEST_ID]),
+    persistentProgressFlag: "quest_009_jabberwock_defeated_while_active",
+    completedTargetFlag: "boss_jabberwock_event_boss_defeated",
     available: true
   })
 ]);

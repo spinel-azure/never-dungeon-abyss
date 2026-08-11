@@ -108,6 +108,19 @@ test("B29 Iron Maiden is a physical checkpoint boss with a low-HP death bite", (
   assert.match(boss.event.remains, /朽ちた棺の残骸/);
 });
 
+test("B16 Jabberwock is a one-time high-difficulty event boss", () => {
+  const boss = getBossById("jabberwock_event_boss");
+  assert.equal(boss.name, "ジャバウォック");
+  assert.equal(boss.floor, 16);
+  assert.equal(boss.image, "images/bosses/boss_06.avif");
+  assert.equal(boss.isBoss, true);
+  assert.equal(boss.bossKind, "event");
+  assert.equal(boss.noDrop, true);
+  assert.equal(boss.questProgressId, "guild_009");
+  assert.deepEqual(boss.reward, { type: "routeCard" });
+  assert.equal(boss.event.immediateStart, true);
+});
+
 test("B9 always creates one sealed 1x3 boss room and one trapped key chest", () => {
   for (let iteration = 0; iteration < 50; iteration += 1) {
     randomizeStartPosition();

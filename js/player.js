@@ -462,6 +462,24 @@ function startSpecialRoomContentEvent(content, fromGX, fromGY) {
   if (!["repeatableBoss", "eventBoss"].includes(content?.type)) return;
   const boss = getBossById(content.bossId);
   if (!boss || hooks.isBossDefeated(boss.id)) return;
+  if (boss.event?.immediateStart) {
+    const event = {
+      type: "specialRoomBoss",
+      bossId: boss.id,
+      imageId: boss.encounterImageId || boss.imageId || "",
+      canCancel: false,
+      showOverlay: true
+    };
+    startOverlayEvent(event);
+    const activeEvent = state.overlayEvent;
+    hooks.say(boss.event.start);
+    activeEvent.autoStartTimer = window.setTimeout(() => {
+      if (state.overlayEvent !== activeEvent) return;
+      state.overlayEvent = null;
+      hooks.beginBossBattle(activeEvent.bossId);
+    }, 1200);
+    return;
+  }
   startOverlayEvent({
     type: "specialRoomBoss",
     bossId: boss.id,

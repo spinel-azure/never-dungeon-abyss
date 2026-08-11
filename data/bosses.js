@@ -334,6 +334,58 @@ export const BOSSES = Object.freeze({
       remains: "――朽ちた棺の残骸が転がっている。この乙女が目を覚ます事はもう無いだろう…。\n＊Aボタン：次へ"
     })
   }),
+  jabberwock_event_boss: Object.freeze({
+    id: "jabberwock_event_boss",
+    name: "ジャバウォック",
+    level: 22,
+    floor: 16,
+    imageId: "jabberwock_event_boss",
+    image: "images/bosses/boss_06.avif",
+    race: "dragon",
+    maxHp: 620,
+    stats: Object.freeze({ str: 19, int: 5, agi: 13, dex: 16, luc: 10 }),
+    def: 15,
+    attack: 15,
+    experienceReward: 3000,
+    specialAttack: null,
+    actions: Object.freeze([
+      Object.freeze({ weight: 45, action: Object.freeze({
+        id: "jabberwock_claw", name: "鉤爪", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 30, action: Object.freeze({
+        id: "jabberwock_rampage", name: "爪牙乱舞", actionType: "physicalAttack",
+        hitCount: 3, powerPerHit: 0.62, hitBonus: -0.04, speedModifier: 2, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 25, action: Object.freeze({
+        id: "jabberwock_bite", name: "狂乱の牙", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1.35, hitBonus: 0.04,
+        effects: Object.freeze([Object.freeze({
+          statusId: "bleeding", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.35
+        })])
+      }) })
+    ]),
+    reward: Object.freeze({ type: "routeCard" }),
+    elementMultipliers: Object.freeze({ fire: 0.75, ice: 1.25, arcane: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      bleeding: Object.freeze({ resistancePoints: 100, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 65, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 50, immune: false })
+    }),
+    escapeRate: 0,
+    surpriseRate: 0,
+    surpriseRateMaximum: 0,
+    noDrop: true,
+    isBoss: true,
+    bossKind: "event",
+    defeatedFlag: "boss_jabberwock_event_boss_defeated",
+    questProgressId: "guild_009",
+    event: Object.freeze({
+      immediateStart: true,
+      start: "部屋に入ると突然、燻り狂うような咆哮が響き渡り、それと同時に巨大な何かが襲ってきた！"
+    })
+  }),
   quest_mimic_b6f: Object.freeze({
     id: "quest_mimic_b6f", name: "ミミック", floor: 6,
     level: 10,

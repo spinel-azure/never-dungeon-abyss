@@ -87,7 +87,7 @@ const STANDARD_CARDS = [
     id: "rare_defense_up", rarity: "R", cost: 2,
     name: "Defense Up", nameJa: "防御力上昇", concept: "DEF +3",
     category: "ability", effectId: "defense_up", effectValue: 3,
-    statBonus: Object.freeze({ def: 3 }), iconId: "defense",
+    statBonus: Object.freeze({ def: 3 }), iconId: "quartered-shield",
     maxOwned: 99, maxCopies: 6
   },
   {
@@ -163,6 +163,13 @@ const STANDARD_CARDS = [
     acquisition: Object.freeze({ type: "blackChest", minDepth: 6, maxDepth: 10, excludedDepths: Object.freeze([9]) })
   },
   {
+    id: "sr_floor_detection", rarity: "SR", cost: 4,
+    name: "Floor Detection", nameJa: "階層探知", concept: "下り階段 / 宝箱探知",
+    descriptionJa: "たいまつが灯っている間、下り階段と宝箱をミニマップに表示する。",
+    category: "exploration", effectId: "floor_detection",
+    iconId: "alertness", maxOwned: 1, maxCopies: 1
+  },
+  {
     id: "legendary_unlimited_torch_gauge", rarity: "L", cost: 6,
     name: "UNLIMITED TORCH GAUGE", nameJa: "永久の導き", concept: "たいまつ消費なし",
     category: "exploration", effectId: "unlimited_torch_gauge",
@@ -183,7 +190,7 @@ const STANDARD_CARDS = [
     category: "ability", effectId: "max_hp_up_legendary", effectValue: 100,
     statBonus: Object.freeze({ maxHp: 100 }), iconId: "vital-heart",
     maxOwned: 99, maxCopies: 6,
-    acquisition: Object.freeze({ type: "bossRouteReward", bossId: "jabberwock", vorpalSwordUsed: false })
+    acquisition: Object.freeze({ type: "bossRouteReward", bossId: "jabberwock_event_boss", vorpalSwordUsed: false })
   },
   {
     id: "legendary_spirit_surge", rarity: "L", cost: 6,
@@ -192,7 +199,7 @@ const STANDARD_CARDS = [
     category: "ability", effectId: "max_sp_up_legendary", effectValue: 100,
     statBonus: Object.freeze({ maxSp: 100 }), iconId: "mana-core",
     maxOwned: 99, maxCopies: 6,
-    acquisition: Object.freeze({ type: "bossRouteReward", bossId: "jabberwock", vorpalSwordUsed: true })
+    acquisition: Object.freeze({ type: "bossRouteReward", bossId: "jabberwock_event_boss", vorpalSwordUsed: true })
   }
 ];
 

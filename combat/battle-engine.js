@@ -20,12 +20,15 @@ import { consumeItem } from "../data/inventory.js";
 import { getItemUnavailableReason } from "./resolve-item-use.js";
 
 export function createBattleState({ character, enemy }) {
+  const vorpalSwordEquippedAtStart = character?.equipment?.weaponId === "vorpal_sword";
   return {
     turn: 1,
     phase: "command",
     outcome: null,
     player: cloneCombatant(character),
     enemy: cloneCombatant(enemy),
+    vorpalSwordEquippedAtStart,
+    vorpalExecution: false,
     log: [`${enemy.name}が現れた！`],
     presentationEvents: []
   };
@@ -365,6 +368,22 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
     critical: hit.critical,
     damage: hit.hit ? Math.max(0, Math.floor(hit.damage * (1 - reduction))) : 0
   }));
+  const vorpalExecution = actorSide === "player"
+    && action.id === "normal_attack"
+    && action.weapon?.id === "vorpal_sword"
+    && target.id === "jabberwock_event_boss"
+    && presentedHits.some(hit => hit.hit);
+  if (vorpalExecution) {
+    const firstLandedIndex = presentedHits.findIndex(hit => hit.hit);
+    presentedHits = presentedHits.map((hit, index) => ({
+      ...hit,
+      damage: index === firstLandedIndex ? target.hp : 0,
+      vorpalExecution: index === firstLandedIndex
+    }));
+    battle.vorpalExecution = true;
+    battle.log.push("ヴォーパル・スウォードが怪しく輝いた！");
+    battle.log.push("刃はジャバウォックの首を一閃した！");
+  }
   let actualDamage = presentedHits.reduce((total, hit) => total + hit.damage, 0);
   const barrier = action.actionType === "physicalAttack"
     ? findBlockingBarrier(target.statuses, actualDamage)
@@ -400,6 +419,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
       hit: hit.hit,
       damage: hit.damage,
       critical: hit.critical,
+      vorpalExecution: Boolean(hit.vorpalExecution),
       message
     });
   });

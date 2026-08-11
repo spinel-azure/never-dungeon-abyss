@@ -54,7 +54,8 @@
         if (c.walls.E) line(ctx, x2, y1, x2, y2);
         if (c.walls.S) line(ctx, x1, y2, x2, y2);
       }
-      if ((isExplored && c.type === "stairsUp") || (c.type === "stairsDown" && (isExplored || revealOptions.stairsDown))) {
+      const floorDetectionActive = state.torchFuel > 0 && state.floorDetectionActive;
+      if ((isExplored && c.type === "stairsUp") || (c.type === "stairsDown" && (isExplored || revealOptions.stairsDown || floorDetectionActive))) {
         drawStairsMark(ctx, x1, y1, cell, c.type, c.portal);
       }
       if (c.npc && (isExplored || revealOptions.npcs)) drawNpcMark(ctx, x1, y1, cell);
@@ -63,7 +64,7 @@
       if (shouldDrawSpecialRoomMarker(c.specialRoom, isExplored, state.torchFuel)) {
         drawSpecialRoomMark(ctx, x1, y1, cell, c.specialRoom.content.minimapMarker);
       }
-      if (c.treasure && revealOptions.treasures) {
+      if (c.treasure && (revealOptions.treasures || floorDetectionActive)) {
         drawTreasureMark(ctx, x1, y1, cell, c.treasure);
       } else if (c.treasure && state.treasureCompassActive) {
         drawTreasureCompassMark(ctx, x1, y1, cell);

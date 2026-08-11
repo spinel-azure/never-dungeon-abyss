@@ -83,6 +83,14 @@ test("B14 queen shadow room unlocks only after the first three sightings", () =>
   assert.equal(getQuestRequiredSpecialRoomAccess(room, { active: true, completed: false, progress: 3 }).blocked, false);
 });
 
+test("B16 Jabberwock room is gated by quest 009", () => {
+  const room = getSpecialRoomDefinition(16);
+  assert.equal(room.content.bossId, "jabberwock_event_boss");
+  assert.equal(room.content.requiredQuestId, "guild_009");
+  assert.equal(getQuestRequiredSpecialRoomAccess(room, { active: false, completed: false }).blocked, true);
+  assert.equal(getQuestRequiredSpecialRoomAccess(room, { active: true, completed: false }).blocked, false);
+});
+
 test("B4 special room warns before entering the one-time superboss event", () => {
   const room = getSpecialRoomDefinition(4);
   assert.equal(room.dangerWarning, true);

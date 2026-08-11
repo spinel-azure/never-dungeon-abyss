@@ -156,6 +156,57 @@
   animation: battle-enemy-hit 260ms steps(2, end);
 }
 
+.battle-vorpal-fragment {
+  position: absolute;
+  z-index: 5;
+  object-fit: contain;
+  image-rendering: pixelated;
+  pointer-events: none;
+  animation-duration: 1.2s;
+  animation-timing-function: cubic-bezier(.55, .02, .9, .35);
+  animation-fill-mode: forwards;
+}
+
+.battle-vorpal-fragment.is-upper {
+  clip-path: inset(0 0 50% 0);
+  animation-name: battle-vorpal-upper;
+}
+
+.battle-vorpal-fragment.is-lower {
+  clip-path: inset(50% 0 0 0);
+  animation-name: battle-vorpal-lower;
+}
+
+.battle-vorpal-slash {
+  position: absolute;
+  z-index: 6;
+  top: 50%;
+  left: 50%;
+  width: 74%;
+  height: 3px;
+  background: #fff;
+  box-shadow: 0 0 8px #fff, 0 0 18px #9feaff;
+  transform: translate(-50%, -50%) scaleX(0);
+  animation: battle-vorpal-slash .22s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes battle-vorpal-upper {
+  0%, 18% { opacity: 1; transform: translate(0, 0) rotate(0); }
+  100% { opacity: 0; transform: translate(-115%, -8%) rotate(-7deg); }
+}
+
+@keyframes battle-vorpal-lower {
+  0%, 18% { opacity: 1; transform: translate(0, 0) rotate(0); }
+  100% { opacity: 0; transform: translate(115%, 8%) rotate(7deg); }
+}
+
+@keyframes battle-vorpal-slash {
+  0% { opacity: 0; transform: translate(-50%, -50%) scaleX(0); }
+  35% { opacity: 1; transform: translate(-50%, -50%) scaleX(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scaleX(1); }
+}
+
 .battle-boss-hp-meter {
   position: relative;
   z-index: 3;

@@ -1151,6 +1151,16 @@ test("Resistance Spirit stacks to sixty percent across three R cards", () => {
   assert.equal(Math.round(combinedResistance * 100), 90);
 });
 
+test("Floor Detection is a unique SR exploration card and Defense Up uses the shield icon", () => {
+  const detection = getCardById("sr_floor_detection");
+  assert.equal(detection.rarity, "SR");
+  assert.equal(detection.cost, 4);
+  assert.equal(detection.maxOwned, 1);
+  assert.equal(detection.maxCopies, 1);
+  assert.equal(hasCardEffect([detection.id], "floor_detection"), true);
+  assert.equal(getCardById("rare_defense_up").iconId, "quartered-shield");
+});
+
 test("First Aid is an R card with thirty percent bleeding resistance", () => {
   const card = getCardById("common_first_aid");
   assert.equal(card.rarity, "R");
@@ -1171,7 +1181,7 @@ test("legendary vitality cards allow max HP and SP to exceed four digits", () =>
     assert.equal(card.cost, 6);
     assert.equal(card.maxOwned, 99);
     assert.equal(card.maxCopies, 6);
-    assert.equal(card.acquisition.bossId, "jabberwock");
+    assert.equal(card.acquisition.bossId, "jabberwock_event_boss");
     assert.equal(card.acquisition.vorpalSwordUsed, vorpalSwordUsed);
 
     let character = normalizeCharacter({
@@ -1185,6 +1195,23 @@ test("legendary vitality cards allow max HP and SP to exceed four digits", () =>
     character = normalizeCharacter(character);
     assert.equal(character[vitalKey], expected);
   }
+});
+
+test("a landed Vorpal Sword normal attack executes only Jabberwock", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.equipment.weaponId = "vorpal_sword";
+  let battle = createBattleState({ character, enemy: createBossCombatant("jabberwock_event_boss") });
+  const result = resolveBattleRound({ battle, playerCommand: { type: "attack" }, rng: () => 0.1 });
+  assert.equal(result.battle.outcome, "victory");
+  assert.equal(result.battle.vorpalSwordEquippedAtStart, true);
+  assert.equal(result.battle.vorpalExecution, true);
+  assert.equal(result.battle.presentationEvents.some(event => event.vorpalExecution), true);
+
+  const other = createBossCombatant("strange_knight_statue_b9f");
+  battle = createBattleState({ character, enemy: other });
+  const ordinary = resolveBattleRound({ battle, playerCommand: { type: "attack" }, rng: () => 0.1 });
+  assert.equal(ordinary.battle.vorpalExecution, false);
+  assert.ok(ordinary.battle.enemy.hp > 0);
 });
 
 test("Indomitable Spirit is a six-copy SR card with HP and defense bonuses", () => {

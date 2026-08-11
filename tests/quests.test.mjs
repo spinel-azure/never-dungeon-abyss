@@ -13,6 +13,7 @@ import {
   BLACK_BOX_INVESTIGATION_QUEST_ID,
   RED_DOOR_INVESTIGATION_QUEST_ID,
   QUEEN_SHADOW_QUEST_ID,
+  JABBERWOCK_QUEST_ID,
   RED_DOOR_DEFENSE_CARD_FLAG,
   grantRedDoorInvestigationSupply,
   abandonQuest,
@@ -462,4 +463,20 @@ test("quest 008 keeps unique shadow progress after abandonment and reacceptance"
   character = acceptQuest(character, QUEEN_SHADOW_QUEST_ID).character;
   assert.equal(getQuestProgress(character, QUEEN_SHADOW_QUEST_ID).progress, 1);
   assert.equal(recordQueenShadowEncounter(character, 11), character);
+});
+
+test("quest 009 unlocks after quest 006 and rewards Floor Detection plus 800G", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "mage" });
+  character.quests.completedQuestIds.push(
+    QUEST_ID, SLIME_EXTERMINATION_QUEST_ID, FLOOR_SURVEY_QUEST_ID,
+    BLACK_BOX_INVESTIGATION_QUEST_ID
+  );
+  assert.equal(isQuestAvailable(character, JABBERWOCK_QUEST_ID), true);
+  character = acceptQuest(character, JABBERWOCK_QUEST_ID).character;
+  character = recordBossDefeat(character, "jabberwock_event_boss", 16);
+  assert.equal(getQuestProgress(character, JABBERWOCK_QUEST_ID).readyToReport, true);
+  const report = reportQuest(character, JABBERWOCK_QUEST_ID);
+  assert.equal(report.rewardCardId, "sr_floor_detection");
+  assert.equal(report.bonusGold, 800);
+  assert.equal(getOwnedCardCount(report.character.cards, "sr_floor_detection"), 1);
 });

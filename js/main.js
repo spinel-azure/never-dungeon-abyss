@@ -318,7 +318,10 @@ import {
       MAP_H,
       cells,
       explored,
-      state
+      state: {
+        ...state,
+        floorDetectionActive: hasCardEffect(character?.cards?.deckSlots, "floor_detection")
+      }
     }),
     getMinimapBounds
   });
@@ -1541,7 +1544,24 @@ import {
         character = victory.character;
         character = recordBossDefeat(character, battle.enemy.id, currentDepth);
         markBossDefeatedAt(state.gridX, state.gridY, battle.enemy.id);
-        if (victory.reward?.type === "card" && victory.reward.cardId) {
+        if (victory.reward?.type === "routeCard" && battle.enemy.id === "jabberwock_event_boss") {
+          const usedVorpalSword = Boolean(battle.vorpalSwordEquippedAtStart);
+          const cardId = usedVorpalSword ? "legendary_spirit_surge" : "legendary_vital_surge";
+          const cardReward = grantCard(character.cards, cardId, 1, character.deckCost);
+          character = {
+            ...character,
+            cards: cardReward.cards,
+            eventFlags: {
+              ...(character.eventFlags || {}),
+              quest_009_vorpal_sword_used: usedVorpalSword,
+              quest_009_reward_route_fixed: true
+            }
+          };
+          const card = getCardById(cardId);
+          bossRewardMessage = cardReward.gained > 0
+            ? `\nLカード「${card?.nameJa || cardId}」を手に入れた！`
+            : `\nLカード「${card?.nameJa || cardId}」は所持上限に達している。`;
+        } else if (victory.reward?.type === "card" && victory.reward.cardId) {
           const cardReward = grantCard(
             character.cards,
             victory.reward.cardId,

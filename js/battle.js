@@ -286,7 +286,34 @@ async function playPresentationEvents() {
     const duration = event.targetSide === "player" && event.hit ? 520 : event.hit ? 360 : 280;
     await delay(duration);
     image.classList.remove("is-hit");
+    if (event.vorpalExecution) await playVorpalExecution(image);
   }
+}
+
+async function playVorpalExecution(image) {
+  const stage = image?.closest(".battle-enemy-stage");
+  if (!stage || !image.src) return;
+  const stageRect = stage.getBoundingClientRect();
+  const imageRect = image.getBoundingClientRect();
+  const fragments = ["upper", "lower"].map(part => {
+    const fragment = image.cloneNode(false);
+    fragment.removeAttribute("id");
+    fragment.className = `battle-vorpal-fragment is-${part}`;
+    fragment.style.left = `${imageRect.left - stageRect.left}px`;
+    fragment.style.top = `${imageRect.top - stageRect.top}px`;
+    fragment.style.width = `${imageRect.width}px`;
+    fragment.style.height = `${imageRect.height}px`;
+    stage.append(fragment);
+    return fragment;
+  });
+  const slash = document.createElement("span");
+  slash.className = "battle-vorpal-slash";
+  stage.append(slash);
+  image.style.visibility = "hidden";
+  await delay(1250);
+  fragments.forEach(fragment => fragment.remove());
+  slash.remove();
+  image.style.visibility = "";
 }
 
 function applyPresentationHp(event) {
