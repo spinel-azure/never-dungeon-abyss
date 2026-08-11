@@ -19,6 +19,7 @@ test("B9 strange statue boss data is isolated and balance-adjustable", () => {
   const boss = getBossById("strange_knight_statue_b9f");
   assert.equal(boss.name, "奇妙な彫像");
   assert.equal(boss.maxHp, 140);
+  assert.equal(boss.experienceReward, 500);
   assert.equal(boss.attack, 7);
   assert.equal(boss.def, 8);
   assert.equal(boss.specialAttack, null);
@@ -74,8 +75,13 @@ test("B19 fallen mage is a one-time magic floor boss with a placeholder reward",
   assert.equal(boss.name, "堕落した魔術師");
   assert.equal(boss.floor, 19);
   assert.equal(boss.image, "images/bosses/boss_03.avif");
+  assert.equal(boss.encounterImage, "images/npc/NPC_event_03.avif");
+  assert.equal(boss.defeatedEncounterImage, "images/npc/NPC_event_04.avif");
   assert.equal(boss.maxHp, 380);
   assert.equal(boss.experienceReward, 1500);
+  assert.match(boss.event.prompt, /薄汚れたローブ/);
+  assert.match(boss.event.start, /呪文を唱えはじめる/);
+  assert.match(boss.event.remains, /もう何者の気配も感じない/);
   assert.equal(boss.actions.filter(entry => entry.action.actionType === "spell").length, 3);
   assert.deepEqual(boss.reward, { type: "none" });
   assert.equal(boss.defeatedFlag, "boss_fallen_mage_b19f_defeated");
@@ -110,7 +116,7 @@ test("opened B9 red door stays red and defeated boss never respawns", () => {
   assert.equal(flat.flatMap(cell => Object.values(cell.doorKinds)).filter(kind => kind === "bossUnlocked").length, 2);
 });
 
-test("B19 creates a reusable 1x3 checkpoint room and removes its boss permanently", () => {
+test("B19 creates a reusable 1x3 checkpoint room and leaves remains after victory", () => {
   buildBoundaryWallMap(19, () => .5, {
     bossDefeatedById: { fallen_mage_b19f: false }
   });
@@ -130,7 +136,8 @@ test("B19 creates a reusable 1x3 checkpoint room and removes its boss permanentl
   });
   flat = cells.flat();
   room = flat.filter(cell => cell.reserved === "bossRoom");
-  assert.equal(room.some(cell => cell.bossId || cell.bossRemainsId), false);
+  assert.equal(room.some(cell => cell.bossId), false);
+  assert.equal(room.filter(cell => cell.bossRemainsId === "fallen_mage_b19f").length, 1);
   assert.equal(room.filter(cell => cell.type === "stairsDown").length, 1);
   assert.equal(flat.some(cell => cell.eventTreasureId === "red_rust_key_b19f_chest"), false);
 });

@@ -1552,7 +1552,7 @@ import {
     if (character && reward > 0) Object.assign(character, awardBattleExperience(character, reward));
     const drop = rollEnemyDrop(battle?.enemy);
     const dropMessage = drop.kind === "redChest" ? "" : addRolledLoot(drop);
-    const victoryMessage = `${reward > 0 ? `戦闘に勝利した。${reward}EXPを持ち帰った。` : "戦闘に勝利した。"}${bossRewardMessage}${dropMessage ? `\n${dropMessage}` : ""}`;
+    const victoryMessage = `${reward > 0 ? `戦闘に勝利した。${reward}EXPを獲得した。` : "戦闘に勝利した。"}${bossRewardMessage}${dropMessage ? `\n${dropMessage}` : ""}`;
     resetPresence();
     setPlayerInputEnabled(true);
     if (drop.kind === "redChest") {

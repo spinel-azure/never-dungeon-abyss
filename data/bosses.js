@@ -132,6 +132,10 @@ export const BOSSES = Object.freeze({
     floor: 19,
     imageId: "fallen_mage_b19f",
     image: "images/bosses/boss_03.avif",
+    encounterImageId: "fallen_mage_event_b19f",
+    encounterImage: "images/npc/NPC_event_03.avif",
+    defeatedEncounterImageId: "fallen_mage_remains_b19f",
+    defeatedEncounterImage: "images/npc/NPC_event_04.avif",
     race: "human",
     maxHp: 380,
     stats: Object.freeze({ str: 8, int: 16, agi: 12, dex: 10, luc: 11 }),
@@ -219,8 +223,9 @@ export const BOSSES = Object.freeze({
       unlockFlag: "red_door_b19f_unlocked"
     }),
     event: Object.freeze({
-      prompt: "ひとりの魔術師が、下り階段を背にして立ちはだかっている。\n戦いますか？\n＊Aボタン：はい　Bボタン：いいえ",
-      start: "魔術師の周囲に、禍々しい魔力が渦巻く。\n堕落した魔術師が襲いかかってきた！"
+      prompt: "部屋の中で薄汚れたローブを身に纏った女が何やら儀式を行っている。近づいて調べますか？\n＊Aボタン：はい　Bボタン：いいえ",
+      start: "女は突然振り向き、聞き取れない言葉で何かを叫ぶと杖を振りかざして呪文を唱えはじめる！",
+      remains: "――もう何者の気配も感じない。一体何の儀式を行っていたのか…。\n＊Aボタン：次へ"
     })
   }),
   quest_mimic_b6f: Object.freeze({
@@ -271,7 +276,7 @@ export const BOSSES = Object.freeze({
     stats: Object.freeze({ str: 10, int: 2, agi: 5, dex: 7, luc: 3 }),
     def: 8,
     attack: 7,
-    experienceReward: 100,
+    experienceReward: 500,
     specialAttack: null,
     reward: Object.freeze({ type: "none" }),
     elementMultipliers: Object.freeze({ fire: 1, ice: 1 }),
