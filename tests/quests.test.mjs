@@ -429,7 +429,7 @@ test("quest 007 rescues an already-active legacy quest after the B9 boss was def
   assert.equal(reportQuest(character, RED_DOOR_INVESTIGATION_QUEST_ID).accepted, true);
 });
 
-test("quest 008 follows the queen shadow from B11F through B14F and rewards Resistance Spirit", () => {
+test("quest 008 follows the queen shadow from B10F through B14F and rewards Resistance Spirit", () => {
   let character = createInitialCharacter({ name: "TEST", job: "thief" });
   character.quests.completedQuestIds.push(
     QUEST_ID, SLIME_EXTERMINATION_QUEST_ID, FLOOR_SURVEY_QUEST_ID,
@@ -437,12 +437,13 @@ test("quest 008 follows the queen shadow from B11F through B14F and rewards Resi
   );
   assert.equal(isQuestAvailable(character, QUEEN_SHADOW_QUEST_ID), true);
   character = acceptQuest(character, QUEEN_SHADOW_QUEST_ID).character;
-  character = recordQueenShadowEncounter(character, 12);
+  character = recordQueenShadowEncounter(character, 11);
   assert.equal(getQuestProgress(character, QUEEN_SHADOW_QUEST_ID).progress, 0);
+  character = recordQueenShadowEncounter(character, 10);
   character = recordQueenShadowEncounter(character, 11);
   character = recordQueenShadowEncounter(character, 12);
   character = recordQueenShadowEncounter(character, 13);
-  assert.equal(getQuestProgress(character, QUEEN_SHADOW_QUEST_ID).progress, 3);
+  assert.equal(getQuestProgress(character, QUEEN_SHADOW_QUEST_ID).progress, 4);
   character = completeQueenShadowInvestigation(character);
   assert.equal(getQuestProgress(character, QUEEN_SHADOW_QUEST_ID).readyToReport, true);
   const report = reportQuest(character, QUEEN_SHADOW_QUEST_ID);
@@ -458,11 +459,11 @@ test("quest 008 keeps unique shadow progress after abandonment and reacceptance"
     RED_DOOR_INVESTIGATION_QUEST_ID
   );
   character = acceptQuest(character, QUEEN_SHADOW_QUEST_ID).character;
-  character = recordQueenShadowEncounter(character, 11);
+  character = recordQueenShadowEncounter(character, 10);
   character = abandonQuest(character, QUEEN_SHADOW_QUEST_ID).character;
   character = acceptQuest(character, QUEEN_SHADOW_QUEST_ID).character;
   assert.equal(getQuestProgress(character, QUEEN_SHADOW_QUEST_ID).progress, 1);
-  assert.equal(recordQueenShadowEncounter(character, 11), character);
+  assert.equal(recordQueenShadowEncounter(character, 10), character);
 });
 
 test("quest 009 unlocks after quest 006 and rewards Floor Detection plus 800G", () => {

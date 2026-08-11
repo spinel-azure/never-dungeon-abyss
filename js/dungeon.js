@@ -250,11 +250,11 @@ export function placeNpc(depth = 1, progress = {}) {
   resetNpcs();
   const normalizedDepth = Math.floor(Number(depth) || 1);
   const queenShadowQuest = progress.queenShadowQuest || {};
-  const queenShadowFloor = normalizedDepth >= 11 && normalizedDepth <= 13;
-  const queenShadowExpectedDepth = 11 + Math.min(3, Math.max(0, Math.floor(Number(queenShadowQuest.progress) || 0)));
+  const queenShadowFloor = normalizedDepth >= 10 && normalizedDepth <= 13;
+  const queenShadowExpectedDepth = 10 + Math.min(4, Math.max(0, Math.floor(Number(queenShadowQuest.progress) || 0)));
   const suppressMikanForQuest = queenShadowQuest.active
     && !queenShadowQuest.completed
-    && normalizedDepth >= 11
+    && normalizedDepth >= 10
     && normalizedDepth <= 14;
   const placeQueenShadow = suppressMikanForQuest
     && queenShadowFloor

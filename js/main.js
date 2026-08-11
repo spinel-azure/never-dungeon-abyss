@@ -380,6 +380,7 @@ import {
       character = completeQueenShadowInvestigation({ ...character, keyItems: granted.keyItems });
       updateCharacterUi();
       saveGame();
+      setTimeout(() => showNamedItemGetEffect(["女王のティアラ"]), 0);
       return true;
     },
     onDungeonStep: handleDungeonStep,
@@ -708,11 +709,11 @@ import {
     return result.gained > 0;
   }
 
-  function showCardGetEffect(cardId) {
+  function showCardGetEffect(cardId, { seId = "battleVictory" } = {}) {
     const card = getCardById(cardId);
     if (!cardGetEffect || !cardGetCanvas || !card) return;
     window.clearTimeout(cardGetTimer);
-    playSe("battleVictory");
+    playSe(seId);
     drawCardCanvas(cardGetCanvas, card);
     cardGetEffect.hidden = false;
     cardGetEffect.classList.remove("is-active");
@@ -736,12 +737,16 @@ import {
 
   function showItemGetEffect(itemIds, { important = false } = {}) {
     const items = itemIds.map(getItem).filter(Boolean);
-    if (!itemGetEffect || !itemGetItems || items.length === 0) return;
+    showNamedItemGetEffect(items.map(item => item.name), { important });
+  }
+
+  function showNamedItemGetEffect(itemNames, { important = false } = {}) {
+    if (!itemGetEffect || !itemGetItems || itemNames.length === 0) return;
     window.clearTimeout(itemGetTimer);
     playSe(important ? "importantItem" : "itemGet");
-    itemGetItems.replaceChildren(...items.map(item => {
+    itemGetItems.replaceChildren(...itemNames.map(itemName => {
       const row = document.createElement("span");
-      row.textContent = `${item.name} ×1`;
+      row.textContent = `${itemName} ×1`;
       return row;
     }));
     itemGetEffect.hidden = false;
@@ -1558,6 +1563,9 @@ import {
             }
           };
           const card = getCardById(cardId);
+          if (cardReward.gained > 0) {
+            setTimeout(() => showCardGetEffect(cardId, { seId: "itemGet" }), 0);
+          }
           bossRewardMessage = cardReward.gained > 0
             ? `\nLカード「${card?.nameJa || cardId}」を手に入れた！`
             : `\nLカード「${card?.nameJa || cardId}」は所持上限に達している。`;

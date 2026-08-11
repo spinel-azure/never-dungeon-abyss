@@ -11,6 +11,7 @@ export const RED_DOOR_INVESTIGATION_QUEST_ID = "guild_007";
 export const QUEEN_SHADOW_QUEST_ID = "guild_008";
 export const JABBERWOCK_QUEST_ID = "guild_009";
 export const QUEEN_SHADOW_PROGRESS_FLAGS = Object.freeze([
+  "quest_008_shadow_b10f_found",
   "quest_008_shadow_b11f_found",
   "quest_008_shadow_b12f_found",
   "quest_008_shadow_b13f_found",
@@ -201,7 +202,7 @@ export const QUESTS = Object.freeze([
     category: "other",
     objectiveType: "custom",
     targetDepth: 14,
-    requiredCount: 4,
+    requiredCount: 5,
     objectiveLabel: "女王らしき影を追跡する",
     reward: Object.freeze({
       type: "card", label: "デッキカード×1", amount: 1,
@@ -279,7 +280,7 @@ export function getQuestProgress(character, questId) {
     && character?.eventFlags?.[quest.completedTargetFlag]
   );
   const persistentProgress = Array.isArray(quest?.persistentProgressFlags)
-    ? quest.persistentProgressFlags.filter(flag => character?.eventFlags?.[flag]).length
+    ? countSequentialProgressFlags(character, quest.persistentProgressFlags)
     : 0;
   const progress = targetAlreadyCompleted
     ? quest.requiredCount
@@ -320,7 +321,7 @@ export function acceptQuest(character, questId) {
     quest.completedTargetFlag && character?.eventFlags?.[quest.completedTargetFlag]
   );
   const persistentProgress = Array.isArray(quest.persistentProgressFlags)
-    ? quest.persistentProgressFlags.filter(flag => character?.eventFlags?.[flag]).length
+    ? countSequentialProgressFlags(character, quest.persistentProgressFlags)
     : 0;
   quests.active[quest.id] = {
     progress: targetAlreadyCompleted || (persistentProgressFlag && character?.eventFlags?.[persistentProgressFlag])
@@ -437,13 +438,14 @@ export function recordCustomQuestProgress(character, questId, amount = 1) {
 export function recordQueenShadowEncounter(character, depth) {
   const normalizedDepth = Math.floor(Number(depth) || 0);
   const flag = ({
-    11: QUEEN_SHADOW_PROGRESS_FLAGS[0],
-    12: QUEEN_SHADOW_PROGRESS_FLAGS[1],
-    13: QUEEN_SHADOW_PROGRESS_FLAGS[2]
+    10: QUEEN_SHADOW_PROGRESS_FLAGS[0],
+    11: QUEEN_SHADOW_PROGRESS_FLAGS[1],
+    12: QUEEN_SHADOW_PROGRESS_FLAGS[2],
+    13: QUEEN_SHADOW_PROGRESS_FLAGS[3]
   })[normalizedDepth];
   const progress = getQuestProgress(character, QUEEN_SHADOW_QUEST_ID);
   if (!flag || !progress.active || progress.completed || character?.eventFlags?.[flag]) return character;
-  if (normalizedDepth !== 11 + Math.min(3, progress.progress)) return character;
+  if (normalizedDepth !== 10 + Math.min(4, progress.progress)) return character;
   const next = {
     ...character,
     eventFlags: { ...(character.eventFlags || {}), [flag]: true }
@@ -453,8 +455,8 @@ export function recordQueenShadowEncounter(character, depth) {
 
 export function completeQueenShadowInvestigation(character) {
   const progress = getQuestProgress(character, QUEEN_SHADOW_QUEST_ID);
-  const completionFlag = QUEEN_SHADOW_PROGRESS_FLAGS[3];
-  if (!progress.active || progress.progress < 3 || character?.eventFlags?.[completionFlag]) return character;
+  const completionFlag = QUEEN_SHADOW_PROGRESS_FLAGS[4];
+  if (!progress.active || progress.progress < 4 || character?.eventFlags?.[completionFlag]) return character;
   const next = {
     ...character,
     eventFlags: { ...(character.eventFlags || {}), [completionFlag]: true }
@@ -542,4 +544,13 @@ export function getForcedEnemyId(character, { depth } = {}) {
 
 function result(character, accepted, reason = "") {
   return { character, accepted, reason };
+}
+
+function countSequentialProgressFlags(character, flags) {
+  let count = 0;
+  for (const flag of flags) {
+    if (!character?.eventFlags?.[flag]) break;
+    count += 1;
+  }
+  return count;
 }

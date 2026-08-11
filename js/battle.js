@@ -3,7 +3,7 @@ import {
   resolveBattleRound,
   resolveEnemyAmbush
 } from "../combat/battle-engine.js";
-import { resolveEscapeAttempt } from "../combat/resolve-escape.js";
+import { getEquipmentAdjustedEscapeRate, resolveEscapeAttempt } from "../combat/resolve-escape.js";
 import { clearBattleOnlyStatuses } from "../combat/status-lifecycle.js";
 
 const COMMANDS = Object.freeze([
@@ -379,8 +379,13 @@ function stopAutoBattle() {
 }
 
 function attemptEscape() {
+  const escapeRate = getEquipmentAdjustedEscapeRate({
+    escapeRate: battleUi.battle.enemy.escapeRate,
+    weaponId: battleUi.battle.player.equipment?.weaponId,
+    isBoss: battleUi.battle.enemy.isBoss
+  });
   const result = resolveEscapeAttempt({
-    escapeRate: battleUi.battle.enemy.escapeRate
+    escapeRate
   });
   if (result.success) {
     battleUi.battle.outcome = "escaped";
@@ -479,6 +484,7 @@ function renderBattle() {
   const defeated = battle.outcome === "victory" && !battleUi.presenting;
   image.classList.toggle("is-defeated", defeated);
   image.classList.toggle("is-concealed", battleUi.concealed);
+  image.classList.toggle("is-jabberwock", battle.enemy.id === "jabberwock_event_boss");
   battleUi.root.querySelector(".battle-enemy-stage")?.classList.toggle("is-defeated", defeated);
   battleUi.messageEl.textContent = formatBattleMessage(battle);
 }

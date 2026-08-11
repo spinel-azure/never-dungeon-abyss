@@ -21,7 +21,7 @@ import {
   resolveEnvironmentSave,
   resolveSurprise
 } from "../combat/resolve-environment-save.js";
-import { resolveEscapeAttempt } from "../combat/resolve-escape.js";
+import { getEquipmentAdjustedEscapeRate, resolveEscapeAttempt } from "../combat/resolve-escape.js";
 import { resolveDefeatRecovery } from "../combat/resolve-defeat-recovery.js";
 import {
   createBattleState,
@@ -1158,7 +1158,14 @@ test("Floor Detection is a unique SR exploration card and Defense Up uses the sh
   assert.equal(detection.maxOwned, 1);
   assert.equal(detection.maxCopies, 1);
   assert.equal(hasCardEffect([detection.id], "floor_detection"), true);
+  assert.match(detection.descriptionJa, /NPC/);
   assert.equal(getCardById("rare_defense_up").iconId, "quartered-shield");
+});
+
+test("Vorpal Sword raises normal encounter escape rate to 85 percent without affecting bosses", () => {
+  assert.equal(getEquipmentAdjustedEscapeRate({ escapeRate: .45, weaponId: "vorpal_sword" }), .85);
+  assert.equal(getEquipmentAdjustedEscapeRate({ escapeRate: .9, weaponId: "vorpal_sword" }), .9);
+  assert.equal(getEquipmentAdjustedEscapeRate({ escapeRate: .45, weaponId: "vorpal_sword", isBoss: true }), .45);
 });
 
 test("First Aid is an R card with thirty percent bleeding resistance", () => {

@@ -58,7 +58,7 @@
       if ((isExplored && c.type === "stairsUp") || (c.type === "stairsDown" && (isExplored || revealOptions.stairsDown || floorDetectionActive))) {
         drawStairsMark(ctx, x1, y1, cell, c.type, c.portal);
       }
-      if (c.npc && (isExplored || revealOptions.npcs)) drawNpcMark(ctx, x1, y1, cell);
+      if (c.npc && (isExplored || revealOptions.npcs || floorDetectionActive)) drawNpcMark(ctx, x1, y1, cell);
       if (c.bossId && isExplored) drawBossMark(ctx, x1, y1, cell);
       if (c.fountain && state.torchFuel > 0) drawFountainMark(ctx, x1, y1, cell);
       if (shouldDrawSpecialRoomMarker(c.specialRoom, isExplored, state.torchFuel)) {

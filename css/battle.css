@@ -143,6 +143,11 @@
   animation: battle-enemy-aura 3.4s ease-in-out infinite;
 }
 
+.battle-enemy-image.is-jabberwock {
+  width: min(82%, 560px);
+  max-height: 95%;
+}
+
 .battle-enemy-image.is-defeated {
   opacity: 0;
 }

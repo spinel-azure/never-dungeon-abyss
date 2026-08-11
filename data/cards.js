@@ -164,8 +164,8 @@ const STANDARD_CARDS = [
   },
   {
     id: "sr_floor_detection", rarity: "SR", cost: 4,
-    name: "Floor Detection", nameJa: "階層探知", concept: "下り階段 / 宝箱探知",
-    descriptionJa: "たいまつが灯っている間、下り階段と宝箱をミニマップに表示する。",
+    name: "Floor Detection", nameJa: "階層探知", concept: "下り階段 / 宝箱 / NPC探知",
+    descriptionJa: "たいまつが灯っている間、下り階段と宝箱、NPCをミニマップに表示する。",
     category: "exploration", effectId: "floor_detection",
     iconId: "alertness", maxOwned: 1, maxCopies: 1
   },

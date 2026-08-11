@@ -6,6 +6,7 @@ export const npcs = [
     image: "images/npc/NPC_01b.avif",
     interactionType: "contact",
     glow: "paleBlue",
+    renderScale: 1.85,
     contactMessage: "ここに誰かがいたはずだが…？",
     leaveAfterTalk: true,
     canCancel: false,

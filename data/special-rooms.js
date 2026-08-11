@@ -52,7 +52,7 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
     content: Object.freeze({
       type: "queenShadowFinale",
       requiredQuestId: "guild_008",
-      requiredProgress: 3,
+      requiredProgress: 4,
       accessBlockedMessage: "今はこの扉の先へ進むべきではない気がする。",
       minimapMarker: "E",
       revealBeforeExploration: true
