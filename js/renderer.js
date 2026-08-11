@@ -358,8 +358,12 @@ function drawOverlayEvent() {
       drawW = maxW;
       drawH = drawW / aspect;
     }
-    ctx.shadowColor = "rgba(255,224,150,.42)";
-    ctx.shadowBlur = Math.max(12, H * .035);
+    ctx.shadowColor = event.glow === "paleBlue"
+      ? "rgba(170,235,255,.9)"
+      : "rgba(255,224,150,.42)";
+    ctx.shadowBlur = event.glow === "paleBlue"
+      ? Math.max(22, H * .065)
+      : Math.max(12, H * .035);
     ctx.drawImage(image, (W - drawW) / 2, H * .52 - drawH / 2, drawW, drawH);
   }
   ctx.restore();
@@ -864,8 +868,10 @@ function drawNpcEvent(ctx, event) {
 
   ctx.save();
   ctx.globalAlpha = event.alpha;
-  ctx.shadowColor = "rgba(255,221,151,.45)";
-  ctx.shadowBlur = event.size * .14;
+  ctx.shadowColor = event.npc.glow === "paleBlue"
+    ? "rgba(165,235,255,.95)"
+    : "rgba(255,221,151,.45)";
+  ctx.shadowBlur = event.npc.glow === "paleBlue" ? event.size * .32 : event.size * .14;
   if (image && image.complete && image.naturalWidth > 0) {
     const drawW = spriteH * (image.naturalWidth / image.naturalHeight);
     ctx.drawImage(image, event.x - drawW / 2, top, drawW, spriteH);

@@ -72,6 +72,17 @@ test("B6 quest room unlocks and retains the mimic event content", () => {
   assert.equal(cells.flat().find(cell => cell.specialRoom)?.specialRoom?.content?.bossId, "quest_mimic_b6f");
 });
 
+test("B14 queen shadow room unlocks only after the first three sightings", () => {
+  const room = getSpecialRoomDefinition(14);
+  assert.equal(room.content.type, "queenShadowFinale");
+  assert.equal(room.content.requiredQuestId, "guild_008");
+  assert.equal(getSpecialRoomUnlockRate(room.lock, 0, 0), 1);
+  const blocked = getQuestRequiredSpecialRoomAccess(room, { active: true, completed: false, progress: 2 });
+  assert.equal(blocked.blocked, true);
+  assert.equal(blocked.message, "今はこの扉の先へ進むべきではない気がする。");
+  assert.equal(getQuestRequiredSpecialRoomAccess(room, { active: true, completed: false, progress: 3 }).blocked, false);
+});
+
 test("B4 special room warns before entering the one-time superboss event", () => {
   const room = getSpecialRoomDefinition(4);
   assert.equal(room.dangerWarning, true);

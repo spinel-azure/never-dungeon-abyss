@@ -1,4 +1,12 @@
 export const KEY_ITEMS = Object.freeze({
+  queen_tiara: Object.freeze({
+    id: "queen_tiara",
+    name: "女王のティアラ",
+    description: "女王の物と思われる美しいティアラ。淡い光をたたえている。",
+    sellable: false,
+    consumable: false,
+    version: 1
+  }),
   red_rust_key_b9f: Object.freeze({
     id: "red_rust_key_b9f",
     name: "赤錆びた鍵",

@@ -62,6 +62,8 @@ const hooks = {
   beginBattle: () => {},
   playNpcVoice: () => {},
   onNpcEncountered: () => {},
+  isQueenShadowFinaleCompleted: () => false,
+  onQueenShadowFinaleComplete: () => false,
   onDungeonStep: () => {},
   onStateChanged: () => {}
 };
@@ -201,7 +203,7 @@ export function updateAnimation(now) {
         } else if (treasure) {
           startTreasureEvent(treasure, a.fromGX, a.fromGY);
         } else if (specialRoom?.content) {
-          startSpecialRoomContentEvent(specialRoom.content);
+          startSpecialRoomContentEvent(specialRoom.content, a.fromGX, a.fromGY);
         } else if (isStairs) {
           startStairsPrompt(a.cellType);
         } else if (encounterTriggered) {
@@ -441,7 +443,22 @@ function confirmSpecialRoomWarningEvent() {
   tryMove(event.moveAmount, false, true);
 }
 
-function startSpecialRoomContentEvent(content) {
+function startSpecialRoomContentEvent(content, fromGX, fromGY) {
+  if (content?.type === "queenShadowFinale") {
+    if (hooks.isQueenShadowFinaleCompleted()) return;
+    startOverlayEvent({
+      type: "queenShadowFinale",
+      phase: "prompt",
+      imageId: "NPC_01b",
+      glow: "paleBlue",
+      fromGX,
+      fromGY,
+      canCancel: true,
+      retreatOnCancel: true,
+      message: "部屋の中に誰かいるようだ。近づきますか？\n＊Aボタン：はい　Bボタン：いいえ"
+    });
+    return;
+  }
   if (!["repeatableBoss", "eventBoss"].includes(content?.type)) return;
   const boss = getBossById(content.bossId);
   if (!boss || hooks.isBossDefeated(boss.id)) return;
@@ -453,6 +470,46 @@ function startSpecialRoomContentEvent(content) {
     canCancel: true,
     message: boss.event?.prompt || "部屋に入ると、古ぼけた机の上に所狭しと本が積み上げられている。\n机の中央には、一冊だけ開かれた本がある。調べますか？\n＊Aボタン：はい　Bボタン：いいえ"
   });
+}
+
+function advanceQueenShadowFinaleEvent() {
+  const event = state.overlayEvent;
+  if (!event || event.type !== "queenShadowFinale") return;
+  event.canCancel = false;
+  if (event.phase === "prompt") {
+    event.phase = "vanished";
+    event.imageId = "";
+    event.glow = "";
+    hooks.say("部屋の奥に佇んでいた影へ近づこうとした瞬間、\n青白い光が揺らぎ、その姿がかき消えた。\n＊Aボタン：次へ");
+    return;
+  }
+  if (event.phase === "vanished") {
+    event.phase = "mikan";
+    event.imageId = "NPC_01";
+    hooks.say("みかんにゃんこ「…にゃ～？　どうしたにゃ？\nここに誰かいたかにゃあ？　知らないにゃあ…。」\n＊Aボタン：次へ");
+    return;
+  }
+  if (event.phase === "mikan") {
+    event.phase = "departed";
+    event.imageId = "";
+    hooks.say("みかんにゃんこは去っていった。\n＊Aボタン：次へ");
+    return;
+  }
+  if (event.phase === "departed") {
+    event.phase = "found";
+    hooks.say("みかんにゃんこがいた場所に何か落ちている。\n＊Aボタン：次へ");
+    return;
+  }
+  if (event.phase === "found") {
+    event.phase = "acquired";
+    hooks.onQueenShadowFinaleComplete();
+    hooks.say("「女王のティアラ」を手に入れた！\n＊Aボタン：次へ");
+    hooks.onStateChanged();
+    return;
+  }
+  state.overlayEvent = null;
+  hooks.say("");
+  hooks.onStateChanged();
 }
 
 function confirmSpecialRoomBossEvent() {
@@ -504,6 +561,12 @@ export function handleOverlayEventInput(action) {
     else if (state.overlayEvent.type === "specialDoorLock") confirmSpecialDoorLockEvent();
     else if (state.overlayEvent.type === "specialRoomWarning") confirmSpecialRoomWarningEvent();
     else if (state.overlayEvent.type === "specialRoomBoss") confirmSpecialRoomBossEvent();
+    else if (state.overlayEvent.type === "queenShadowFinale") advanceQueenShadowFinaleEvent();
+    else if (state.overlayEvent.type === "npcContact") {
+      state.overlayEvent = null;
+      hooks.say("");
+      hooks.onStateChanged();
+    }
     return true;
   }
   return false;
@@ -673,6 +736,17 @@ export function playArrivalSequence() {
 }
 
 function startNpcTalkEvent(npc, fromGX, fromGY) {
+  if (npc.interactionType === "contact") {
+    removeNpcAt(state.gridX, state.gridY);
+    hooks.onNpcEncountered(npc);
+    startOverlayEvent({
+      type: "npcContact",
+      showOverlay: false,
+      message: `${npc.contactMessage || "ここに誰かがいたはずだが…？"}\n＊Aボタン：次へ`
+    });
+    hooks.onStateChanged();
+    return;
+  }
   const encounterCount = getNpcEncounterCount(npc.id);
   const encounter = getNpcEncounter(npc, encounterCount);
   const greeting = npc.greeting ? `${npc.name}「${npc.greeting}」\n` : "";

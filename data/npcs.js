@@ -1,5 +1,17 @@
 export const npcs = [
   {
+    id: "queen_shadow",
+    name: "女王の影",
+    imageId: "NPC_01b",
+    image: "images/npc/NPC_01b.avif",
+    interactionType: "contact",
+    glow: "paleBlue",
+    contactMessage: "ここに誰かがいたはずだが…？",
+    leaveAfterTalk: true,
+    canCancel: false,
+    retreatOnCancel: false
+  },
+  {
     id: "NPC_01",
     name: "みかんにゃんこ",
     imageId: "NPC_01",

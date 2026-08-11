@@ -46,6 +46,17 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
   6: Object.freeze({
     content: Object.freeze({ type: "eventBoss", bossId: "quest_mimic_b6f",
       minimapMarker: "E", revealBeforeExploration: true, requiredQuestId: "guild_006" })
+  }),
+  14: Object.freeze({
+    lock: Object.freeze({ mode: "alwaysSuccess", attempts: 1 }),
+    content: Object.freeze({
+      type: "queenShadowFinale",
+      requiredQuestId: "guild_008",
+      requiredProgress: 3,
+      accessBlockedMessage: "今はこの扉の先へ進むべきではない気がする。",
+      minimapMarker: "E",
+      revealBeforeExploration: true
+    })
   })
 });
 
@@ -78,9 +89,15 @@ export function getQuestRequiredSpecialRoomAccess(room, progress = {}) {
   if (!room?.content?.requiredQuestId) {
     return { blocked: false, reason: "", message: "" };
   }
-  return progress.active && !progress.completed
+  const requiredProgress = Math.max(0, Math.floor(Number(room.content.requiredProgress) || 0));
+  const currentProgress = Math.max(0, Math.floor(Number(progress.progress) || 0));
+  return progress.active && !progress.completed && currentProgress >= requiredProgress
     ? { blocked: false, reason: "", message: "" }
-    : { blocked: true, reason: "questRequired", message: "今はこの扉は開かないようだ。" };
+    : {
+      blocked: true,
+      reason: "questRequired",
+      message: room.content.accessBlockedMessage || "今はこの扉は開かないようだ。"
+    };
 }
 
 export function getSpecialRoomUnlockRate(lock, dex, attemptIndex = 0) {

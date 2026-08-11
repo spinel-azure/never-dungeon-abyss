@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
-import { createInitialKeyItemState, normalizeKeyItemState } from "../data/key-items.js";
+import { createInitialKeyItemState, getKeyItem, grantKeyItem, hasKeyItem, normalizeKeyItemState } from "../data/key-items.js";
 
 test("new and legacy characters have an independent empty key-item collection", () => {
   assert.deepEqual(createInitialCharacter({ name: "TEST", job: "thief" }).keyItems, createInitialKeyItemState());
@@ -19,4 +19,14 @@ test("key-item normalization has no owned-type or stack capacity limit", () => {
   assert.equal(Object.keys(normalized.owned).length, 150);
   assert.equal(normalized.acquisitionOrder.length, 150);
   assert.deepEqual(normalized.acquisitionOrder, ids);
+});
+
+test("the queen's tiara is a permanent unsellable key item", () => {
+  const tiara = getKeyItem("queen_tiara");
+  assert.equal(tiara.name, "女王のティアラ");
+  assert.equal(tiara.sellable, false);
+  assert.equal(tiara.consumable, false);
+  const granted = grantKeyItem(null, tiara.id, 1);
+  assert.equal(granted.gained, true);
+  assert.equal(hasKeyItem(granted.keyItems, tiara.id), true);
 });

@@ -12,6 +12,7 @@ import {
   WANDERING_DEAD_EXTERMINATION_QUEST_ID,
   BLACK_BOX_INVESTIGATION_QUEST_ID,
   RED_DOOR_INVESTIGATION_QUEST_ID,
+  QUEEN_SHADOW_QUEST_ID,
   RED_DOOR_DEFENSE_CARD_FLAG,
   grantRedDoorInvestigationSupply,
   abandonQuest,
@@ -23,6 +24,8 @@ import {
   isQuestAvailable,
   normalizeQuestState,
   recordFloorExploration,
+  recordQueenShadowEncounter,
+  completeQueenShadowInvestigation,
   recordEnemyDefeat,
   recordBossDefeat,
   recordCustomQuestProgress,
@@ -397,7 +400,10 @@ test("quest 007 grants the defense card once when accepted", () => {
 
 test("completed quest 007 saves receive the missing acceptance card once", () => {
   const character = createInitialCharacter({ name: "TEST", job: "priest" });
-  character.quests.completedQuestIds.push(RED_DOOR_INVESTIGATION_QUEST_ID);
+  character.quests.completedQuestIds.push(
+    QUEST_ID, SLIME_EXTERMINATION_QUEST_ID, FLOOR_SURVEY_QUEST_ID,
+    RED_DOOR_INVESTIGATION_QUEST_ID
+  );
   const rescued = grantRedDoorInvestigationSupply(character);
   assert.equal(rescued.accepted, true);
   assert.equal(rescued.gained, 1);
@@ -420,4 +426,40 @@ test("quest 007 rescues an already-active legacy quest after the B9 boss was def
   character.eventFlags.boss_strange_knight_statue_b9f_defeated = true;
   assert.equal(getQuestProgress(character, RED_DOOR_INVESTIGATION_QUEST_ID).readyToReport, true);
   assert.equal(reportQuest(character, RED_DOOR_INVESTIGATION_QUEST_ID).accepted, true);
+});
+
+test("quest 008 follows the queen shadow from B11F through B14F and rewards Resistance Spirit", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "thief" });
+  character.quests.completedQuestIds.push(
+    QUEST_ID, SLIME_EXTERMINATION_QUEST_ID, FLOOR_SURVEY_QUEST_ID,
+    RED_DOOR_INVESTIGATION_QUEST_ID
+  );
+  assert.equal(isQuestAvailable(character, QUEEN_SHADOW_QUEST_ID), true);
+  character = acceptQuest(character, QUEEN_SHADOW_QUEST_ID).character;
+  character = recordQueenShadowEncounter(character, 12);
+  assert.equal(getQuestProgress(character, QUEEN_SHADOW_QUEST_ID).progress, 0);
+  character = recordQueenShadowEncounter(character, 11);
+  character = recordQueenShadowEncounter(character, 12);
+  character = recordQueenShadowEncounter(character, 13);
+  assert.equal(getQuestProgress(character, QUEEN_SHADOW_QUEST_ID).progress, 3);
+  character = completeQueenShadowInvestigation(character);
+  assert.equal(getQuestProgress(character, QUEEN_SHADOW_QUEST_ID).readyToReport, true);
+  const report = reportQuest(character, QUEEN_SHADOW_QUEST_ID);
+  assert.equal(report.rewardCardId, "rare_resistance_spirit");
+  assert.equal(report.bonusGold, 600);
+  assert.equal(getOwnedCardCount(report.character.cards, "rare_resistance_spirit"), 1);
+});
+
+test("quest 008 keeps unique shadow progress after abandonment and reacceptance", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "priest" });
+  character.quests.completedQuestIds.push(
+    QUEST_ID, SLIME_EXTERMINATION_QUEST_ID, FLOOR_SURVEY_QUEST_ID,
+    RED_DOOR_INVESTIGATION_QUEST_ID
+  );
+  character = acceptQuest(character, QUEEN_SHADOW_QUEST_ID).character;
+  character = recordQueenShadowEncounter(character, 11);
+  character = abandonQuest(character, QUEEN_SHADOW_QUEST_ID).character;
+  character = acceptQuest(character, QUEEN_SHADOW_QUEST_ID).character;
+  assert.equal(getQuestProgress(character, QUEEN_SHADOW_QUEST_ID).progress, 1);
+  assert.equal(recordQueenShadowEncounter(character, 11), character);
 });

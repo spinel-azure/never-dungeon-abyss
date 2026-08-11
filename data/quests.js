@@ -8,6 +8,13 @@ export const RABBIT_EXTERMINATION_QUEST_ID = "guild_004_abyss_rabbit";
 export const WANDERING_DEAD_EXTERMINATION_QUEST_ID = "guild_005";
 export const BLACK_BOX_INVESTIGATION_QUEST_ID = "guild_006";
 export const RED_DOOR_INVESTIGATION_QUEST_ID = "guild_007";
+export const QUEEN_SHADOW_QUEST_ID = "guild_008";
+export const QUEEN_SHADOW_PROGRESS_FLAGS = Object.freeze([
+  "quest_008_shadow_b11f_found",
+  "quest_008_shadow_b12f_found",
+  "quest_008_shadow_b13f_found",
+  "quest_008_tiara_found"
+]);
 export const RED_DOOR_DEFENSE_CARD_FLAG = "guild_007_defense_card_received";
 export const RED_DOOR_DEFENSE_CARD_ID = "rare_defense_up";
 export const B2F_UNLOCK_QUEST_IDS = Object.freeze([
@@ -184,6 +191,30 @@ export const QUESTS = Object.freeze([
     persistentProgressFlag: "quest_007_strange_statue_defeated_while_active",
     completedTargetFlag: "boss_strange_knight_statue_b9f_defeated",
     available: true
+  }),
+  Object.freeze({
+    id: QUEEN_SHADOW_QUEST_ID,
+    number: "008",
+    title: "女王の影を追え",
+    client: "ギルドマスター",
+    category: "other",
+    objectiveType: "custom",
+    targetDepth: 14,
+    requiredCount: 4,
+    objectiveLabel: "女王らしき影を追跡する",
+    reward: Object.freeze({
+      type: "card", label: "デッキカード×1", amount: 1,
+      cardId: "rare_resistance_spirit", bonusGold: 600
+    }),
+    descriptionLabel: "目的",
+    description: Object.freeze([
+      "行方不明になった女王らしい姿を奈落B11F",
+      "以降で見かけたという噂が広がっている。",
+      "噂が本当なのか確かめてくれ。"
+    ]),
+    prerequisiteQuestIds: Object.freeze([RED_DOOR_INVESTIGATION_QUEST_ID]),
+    persistentProgressFlags: QUEEN_SHADOW_PROGRESS_FLAGS,
+    available: true
   })
 ]);
 
@@ -219,7 +250,12 @@ export function getQuestProgress(character, questId) {
     state.active[questId] && quest?.completedTargetFlag
     && character?.eventFlags?.[quest.completedTargetFlag]
   );
-  const progress = targetAlreadyCompleted ? quest.requiredCount : savedProgress;
+  const persistentProgress = Array.isArray(quest?.persistentProgressFlags)
+    ? quest.persistentProgressFlags.filter(flag => character?.eventFlags?.[flag]).length
+    : 0;
+  const progress = targetAlreadyCompleted
+    ? quest.requiredCount
+    : Math.max(savedProgress, Math.min(quest?.requiredCount || 0, persistentProgress));
   return {
     quest,
     active: Boolean(state.active[questId]),
@@ -255,9 +291,12 @@ export function acceptQuest(character, questId) {
   const targetAlreadyCompleted = Boolean(
     quest.completedTargetFlag && character?.eventFlags?.[quest.completedTargetFlag]
   );
+  const persistentProgress = Array.isArray(quest.persistentProgressFlags)
+    ? quest.persistentProgressFlags.filter(flag => character?.eventFlags?.[flag]).length
+    : 0;
   quests.active[quest.id] = {
     progress: targetAlreadyCompleted || (persistentProgressFlag && character?.eventFlags?.[persistentProgressFlag])
-      ? quest.requiredCount : 0
+      ? quest.requiredCount : Math.min(quest.requiredCount, persistentProgress)
   };
   let next = { ...character, quests };
   let acceptanceRewardCardId = null;
@@ -365,6 +404,34 @@ export function recordCustomQuestProgress(character, questId, amount = 1) {
   if (!quest || quest.objectiveType !== "custom" || !entry) return character;
   entry.progress = Math.min(quest.requiredCount, entry.progress + Math.max(0, Math.floor(Number(amount) || 0)));
   return { ...character, quests };
+}
+
+export function recordQueenShadowEncounter(character, depth) {
+  const normalizedDepth = Math.floor(Number(depth) || 0);
+  const flag = ({
+    11: QUEEN_SHADOW_PROGRESS_FLAGS[0],
+    12: QUEEN_SHADOW_PROGRESS_FLAGS[1],
+    13: QUEEN_SHADOW_PROGRESS_FLAGS[2]
+  })[normalizedDepth];
+  const progress = getQuestProgress(character, QUEEN_SHADOW_QUEST_ID);
+  if (!flag || !progress.active || progress.completed || character?.eventFlags?.[flag]) return character;
+  if (normalizedDepth !== 11 + Math.min(3, progress.progress)) return character;
+  const next = {
+    ...character,
+    eventFlags: { ...(character.eventFlags || {}), [flag]: true }
+  };
+  return recordCustomQuestProgress(next, QUEEN_SHADOW_QUEST_ID, 1);
+}
+
+export function completeQueenShadowInvestigation(character) {
+  const progress = getQuestProgress(character, QUEEN_SHADOW_QUEST_ID);
+  const completionFlag = QUEEN_SHADOW_PROGRESS_FLAGS[3];
+  if (!progress.active || progress.progress < 3 || character?.eventFlags?.[completionFlag]) return character;
+  const next = {
+    ...character,
+    eventFlags: { ...(character.eventFlags || {}), [completionFlag]: true }
+  };
+  return recordCustomQuestProgress(next, QUEEN_SHADOW_QUEST_ID, 1);
 }
 
 export function reportQuest(character, questId) {

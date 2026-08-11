@@ -128,6 +128,7 @@ import { getUnreadTavernRumor, markTavernRumorRead } from "../data/tavern-rumors
 import {
   abandonQuest,
   acceptQuest,
+  completeQueenShadowInvestigation,
   grantRedDoorInvestigationSupply,
   FLOOR_SURVEY_QUEST_ID,
   getForcedEnemyId,
@@ -138,6 +139,7 @@ import {
   recordBossDefeat,
   recordCustomQuestProgress,
   recordFloorExploration,
+  recordQueenShadowEncounter,
   reportQuest
 } from "../data/quests.js";
 
@@ -355,11 +357,27 @@ import {
     beginMimicBattle,
     playNpcVoice: playSe,
     onNpcEncountered: npc => {
+      if (character && npc?.id === "queen_shadow") {
+        character = recordQueenShadowEncounter(character, currentDepth);
+        updateCharacterUi();
+        saveGame();
+        return;
+      }
       if (!character || !String(npc?.id || "").startsWith("NPC_01")) return;
       character = {
         ...character,
         eventFlags: { ...(character.eventFlags || {}), mikan_nyanko_encountered: true }
       };
+    },
+    isQueenShadowFinaleCompleted: () => Boolean(character?.eventFlags?.quest_008_tiara_found),
+    onQueenShadowFinaleComplete: () => {
+      if (!character || character.eventFlags?.quest_008_tiara_found) return false;
+      const granted = grantKeyItem(character.keyItems, "queen_tiara");
+      if (!granted.gained && granted.reason !== "alreadyOwned") return false;
+      character = completeQueenShadowInvestigation({ ...character, keyItems: granted.keyItems });
+      updateCharacterUi();
+      saveGame();
+      return true;
     },
     onDungeonStep: handleDungeonStep,
     onStateChanged: scheduleAutosave
@@ -2228,6 +2246,7 @@ import {
   function getDungeonProgress() {
     const floorBoss = getFloorBossByDepth(currentDepth);
     const room = floorBoss?.room || {};
+    const queenShadowQuest = getQuestProgress(character, "guild_008");
     return {
       bossDefeated: isBossDefeated(character, "strange_knight_statue_b9f"),
       bossDefeatedById: {
@@ -2236,7 +2255,12 @@ import {
       },
       blackChestsUnlocked: Boolean(character?.eventFlags?.black_chests_unlocked),
       redDoorUnlocked: Boolean(room.unlockFlag && character?.eventFlags?.[room.unlockFlag]),
-      hasRedKey: Boolean(room.keyItemId && hasKeyItem(character?.keyItems, room.keyItemId))
+      hasRedKey: Boolean(room.keyItemId && hasKeyItem(character?.keyItems, room.keyItemId)),
+      queenShadowQuest: {
+        active: queenShadowQuest.active,
+        completed: queenShadowQuest.completed,
+        progress: queenShadowQuest.progress
+      }
     };
   }
 

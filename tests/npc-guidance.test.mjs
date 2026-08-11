@@ -40,3 +40,19 @@ test("B9F Mikan Nyanko guides the player to the red-door key", () => {
   buildBoundaryWallMap(9, () => .5, {});
   assert.equal(cells.flat().filter(cell => cell.npc === npc.id).length, 1);
 });
+
+test("quest 008 replaces Mikan with the queen shadow in strict floor order", () => {
+  const active = { active: true, completed: false, progress: 0 };
+  buildBoundaryWallMap(11, () => .5, { queenShadowQuest: active });
+  assert.equal(cells.flat().filter(cell => cell.npc === "queen_shadow").length, 1);
+  assert.equal(cells.flat().filter(cell => String(cell.npc || "").startsWith("NPC_01")).length, 0);
+
+  buildBoundaryWallMap(12, () => .5, { queenShadowQuest: active });
+  assert.equal(cells.flat().filter(cell => cell.npc).length, 0);
+
+  buildBoundaryWallMap(12, () => .5, { queenShadowQuest: { ...active, progress: 1 } });
+  assert.equal(cells.flat().filter(cell => cell.npc === "queen_shadow").length, 1);
+
+  buildBoundaryWallMap(14, () => .5, { queenShadowQuest: { ...active, progress: 3 } });
+  assert.equal(cells.flat().filter(cell => cell.npc).length, 0);
+});

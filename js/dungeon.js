@@ -248,6 +248,18 @@ export function placeStairs(depth = 1) {
 export function placeNpc(depth = 1, progress = {}) {
   const { x: startX, y: startY } = startPosition;
   resetNpcs();
+  const normalizedDepth = Math.floor(Number(depth) || 1);
+  const queenShadowQuest = progress.queenShadowQuest || {};
+  const queenShadowFloor = normalizedDepth >= 11 && normalizedDepth <= 13;
+  const queenShadowExpectedDepth = 11 + Math.min(3, Math.max(0, Math.floor(Number(queenShadowQuest.progress) || 0)));
+  const suppressMikanForQuest = queenShadowQuest.active
+    && !queenShadowQuest.completed
+    && normalizedDepth >= 11
+    && normalizedDepth <= 14;
+  const placeQueenShadow = suppressMikanForQuest
+    && queenShadowFloor
+    && normalizedDepth === queenShadowExpectedDepth;
+  if (suppressMikanForQuest && !placeQueenShadow) return;
   const distances = makeDistanceMap(startX, startY);
   const reserved = getTraversalBlockingReservations(cells);
   const candidates = [];
@@ -266,8 +278,8 @@ export function placeNpc(depth = 1, progress = {}) {
 
   const selected = shuffled(candidates)[0];
   if (selected) {
-    const normalizedDepth = Math.floor(Number(depth) || 1);
-    cells[selected.y][selected.x].npc = normalizedDepth === 2 ? "NPC_01_b2"
+    cells[selected.y][selected.x].npc = placeQueenShadow ? "queen_shadow"
+      : normalizedDepth === 2 ? "NPC_01_b2"
       : normalizedDepth === 4 ? "NPC_01_b4"
       : normalizedDepth === 5 ? "NPC_01_b5"
       : normalizedDepth === 6 ? (progress.bossDefeatedById?.quest_mimic_b6f ? "NPC_01_b6_after" : "NPC_01_b6")
