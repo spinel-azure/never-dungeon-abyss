@@ -12,6 +12,8 @@ import {
   WANDERING_DEAD_EXTERMINATION_QUEST_ID,
   BLACK_BOX_INVESTIGATION_QUEST_ID,
   RED_DOOR_INVESTIGATION_QUEST_ID,
+  RED_DOOR_DEFENSE_CARD_FLAG,
+  grantRedDoorInvestigationSupply,
   abandonQuest,
   acceptQuest,
   getQuestById,
@@ -369,6 +371,30 @@ test("quest 007 requires the B9 boss and restores progress after abandonment", (
   assert.equal(report.bonusGold, 600);
   assert.equal(getOwnedCardCount(report.character.cards, "sr_ability_boost"), 1);
   assert.equal(reportQuest(report.character, RED_DOOR_INVESTIGATION_QUEST_ID).accepted, false);
+});
+
+test("quest 007 grants the defense card once when accepted", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.quests.completedQuestIds.push(QUEST_ID, SLIME_EXTERMINATION_QUEST_ID, FLOOR_SURVEY_QUEST_ID);
+  const accepted = acceptQuest(character, RED_DOOR_INVESTIGATION_QUEST_ID);
+  assert.equal(accepted.acceptanceRewardCardId, "rare_defense_up");
+  assert.equal(getOwnedCardCount(accepted.character.cards, "rare_defense_up"), 1);
+  assert.equal(accepted.character.eventFlags[RED_DOOR_DEFENSE_CARD_FLAG], true);
+
+  const abandoned = abandonQuest(accepted.character, RED_DOOR_INVESTIGATION_QUEST_ID).character;
+  const acceptedAgain = acceptQuest(abandoned, RED_DOOR_INVESTIGATION_QUEST_ID);
+  assert.equal(acceptedAgain.acceptanceRewardCardId, null);
+  assert.equal(getOwnedCardCount(acceptedAgain.character.cards, "rare_defense_up"), 1);
+});
+
+test("completed quest 007 saves receive the missing acceptance card once", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "priest" });
+  character.quests.completedQuestIds.push(RED_DOOR_INVESTIGATION_QUEST_ID);
+  const rescued = grantRedDoorInvestigationSupply(character);
+  assert.equal(rescued.accepted, true);
+  assert.equal(rescued.gained, 1);
+  assert.equal(getOwnedCardCount(rescued.character.cards, "rare_defense_up"), 1);
+  assert.equal(grantRedDoorInvestigationSupply(rescued.character).reason, "alreadyReceived");
 });
 
 test("quest 007 rescues saves where the B9 boss was defeated before acceptance", () => {

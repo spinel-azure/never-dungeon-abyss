@@ -8,6 +8,8 @@ export const RABBIT_EXTERMINATION_QUEST_ID = "guild_004_abyss_rabbit";
 export const WANDERING_DEAD_EXTERMINATION_QUEST_ID = "guild_005";
 export const BLACK_BOX_INVESTIGATION_QUEST_ID = "guild_006";
 export const RED_DOOR_INVESTIGATION_QUEST_ID = "guild_007";
+export const RED_DOOR_DEFENSE_CARD_FLAG = "guild_007_defense_card_received";
+export const RED_DOOR_DEFENSE_CARD_ID = "rare_defense_up";
 export const B2F_UNLOCK_QUEST_IDS = Object.freeze([
   GUILD_TRIAL_QUEST_ID,
   SLIME_EXTERMINATION_QUEST_ID,
@@ -257,7 +259,40 @@ export function acceptQuest(character, questId) {
     progress: targetAlreadyCompleted || (persistentProgressFlag && character?.eventFlags?.[persistentProgressFlag])
       ? quest.requiredCount : 0
   };
-  return result({ ...character, quests }, true);
+  let next = { ...character, quests };
+  let acceptanceRewardCardId = null;
+  if (quest.id === RED_DOOR_INVESTIGATION_QUEST_ID) {
+    const supply = grantRedDoorInvestigationSupply(next);
+    next = supply.character;
+    if (supply.gained > 0) acceptanceRewardCardId = RED_DOOR_DEFENSE_CARD_ID;
+  }
+  return { ...result(next, true), acceptanceRewardCardId };
+}
+
+export function grantRedDoorInvestigationSupply(character) {
+  if (!character || character.eventFlags?.[RED_DOOR_DEFENSE_CARD_FLAG]) {
+    return { character, accepted: false, gained: 0, reason: "alreadyReceived" };
+  }
+  const quests = normalizeQuestState(character.quests);
+  const eligible = Boolean(
+    quests.active[RED_DOOR_INVESTIGATION_QUEST_ID]
+    || quests.completedQuestIds.includes(RED_DOOR_INVESTIGATION_QUEST_ID)
+  );
+  if (!eligible) return { character, accepted: false, gained: 0, reason: "notEligible" };
+  const reward = grantCard(character.cards, RED_DOOR_DEFENSE_CARD_ID, 1, character.deckCost);
+  return {
+    character: {
+      ...character,
+      cards: reward.cards,
+      eventFlags: {
+        ...(character.eventFlags || {}),
+        [RED_DOOR_DEFENSE_CARD_FLAG]: true
+      }
+    },
+    accepted: true,
+    gained: reward.gained,
+    reason: ""
+  };
 }
 
 export function abandonQuest(character, questId) {

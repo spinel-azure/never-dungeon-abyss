@@ -128,6 +128,7 @@ import { getUnreadTavernRumor, markTavernRumorRead } from "../data/tavern-rumors
 import {
   abandonQuest,
   acceptQuest,
+  grantRedDoorInvestigationSupply,
   FLOOR_SURVEY_QUEST_ID,
   getForcedEnemyId,
   getQuestProgress,
@@ -588,6 +589,8 @@ import {
     state.npcEncounterCounts = player.npcEncounterCounts && typeof player.npcEncounterCounts === "object" ? { ...player.npcEncounterCounts } : {};
     state.stairsPromptDismissed = Boolean(player.stairsPromptDismissed);
     character = normalizeCharacter(save.character);
+    const quest007Supply = grantRedDoorInvestigationSupply(character);
+    character = quest007Supply.character;
     character.highestDungeonDepthReached = Math.max(
       character.highestDungeonDepthReached || 1,
       currentDepth
@@ -660,7 +663,7 @@ import {
       startNewGame();
       return;
     }
-    if (slot !== "auto") saveGame();
+    if (slot !== "auto" || character?.eventFlags?.guild_007_defense_card_received !== save?.character?.eventFlags?.guild_007_defense_card_received) saveGame();
   }
 
   function registerCharacter({ name, job, jobLabel }) {
@@ -814,7 +817,16 @@ import {
     updateCharacterUi();
     saveGame();
     if (questId === FLOOR_SURVEY_QUEST_ID) showQuestTutorial();
-    return { ...result, character };
+    return {
+      ...result,
+      character,
+      acceptedMessage: result.acceptanceRewardCardId
+        ? "ギルドマスター：何が起こるか分からない危険な調査になるだろう。これを持っていけ。"
+        : "",
+      acceptanceRewardMessage: result.acceptanceRewardCardId
+        ? "Rカード「防御力上昇」を手に入れた！"
+        : ""
+    };
   }
 
   function showQuestTutorial() {

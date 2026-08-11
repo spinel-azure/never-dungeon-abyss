@@ -77,10 +77,10 @@ const STANDARD_CARDS = [
   },
   {
     id: "rare_defense_up", rarity: "R", cost: 2,
-    name: "Defense Up", nameJa: "防御力上昇", concept: "DEF +5",
-    category: "ability", effectId: "defense_up", effectValue: 5,
-    statBonus: Object.freeze({ def: 5 }), iconId: "defense",
-    maxOwned: 99, maxCopies: 1
+    name: "Defense Up", nameJa: "防御力上昇", concept: "DEF +3",
+    category: "ability", effectId: "defense_up", effectValue: 3,
+    statBonus: Object.freeze({ def: 3 }), iconId: "defense",
+    maxOwned: 99, maxCopies: 6
   },
   {
     id: "rare_strength_up_plus", rarity: "R", cost: 2,

@@ -97,6 +97,7 @@ const town = {
   rumorDialogue: [],
   rumorDialogueIndex: 0,
   activeRumor: null,
+  questAcceptanceRewardMessage: "",
   entranceIndex: 0,
   facilityCommandIndex: 0,
   transferUnlocked: false,
@@ -580,6 +581,16 @@ function playPendingFacilityVoice() {
 }
 
 function handleQuestInput(action) {
+  if (town.mode === "questAcceptanceReward") {
+    if (action !== "confirm") return true;
+    town.playSe("itemGet");
+    const rewardMessage = town.questAcceptanceRewardMessage;
+    town.questAcceptanceRewardMessage = "";
+    renderFacility();
+    town.messageEl.textContent = rewardMessage;
+    town.onStateChanged();
+    return true;
+  }
   if (action === "cancel") {
     town.playSe("cancel");
     if (
@@ -604,13 +615,16 @@ function handleQuestInput(action) {
     const result = town.onAcceptRequest(quest?.id);
     if (result?.accepted) {
       town.playSe("confirm");
-      const acceptedMessage = quest?.id === "guild_001_abyss_rat"
+      const acceptedMessage = result.acceptedMessage || (quest?.id === "guild_001_abyss_rat"
         ? "ギルドマスター：これでお前の実力を試させてもらうぜ。"
-        : "ギルドマスター：よし。頼んだぞ。";
+        : "ギルドマスター：よし。頼んだぞ。");
       town.messageEl.textContent = acceptedMessage;
-      town.mode = "facilityMenu";
       renderFacility();
       town.messageEl.textContent = acceptedMessage;
+      if (result.acceptanceRewardCardId) {
+        town.questAcceptanceRewardMessage = result.acceptanceRewardMessage;
+        town.mode = "questAcceptanceReward";
+      }
     } else {
       town.playSe("cursorMove");
       town.messageEl.textContent = questFailureMessage(result?.reason);

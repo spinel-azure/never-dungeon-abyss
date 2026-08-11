@@ -1141,6 +1141,16 @@ test("black-chest R cards cost two and allow six copies", () => {
   }
 });
 
+test("Defense Up is a six-copy R card with three defense", () => {
+  const card = getCardById("rare_defense_up");
+  assert.equal(card.rarity, "R");
+  assert.equal(card.cost, 2);
+  assert.equal(card.maxOwned, 99);
+  assert.equal(card.maxCopies, 6);
+  assert.deepEqual(card.statBonus, { def: 3 });
+  assert.deepEqual(collectCardStatBonuses(Array(6).fill(card.id)), { def: 18 });
+});
+
 test("Ability Boost is a six-copy SR card that raises all five abilities", () => {
   const card = getCardById("sr_ability_boost");
   assert.equal(card.rarity, "SR");
