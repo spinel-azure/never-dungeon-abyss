@@ -45,6 +45,8 @@ import {
 import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setMistOptions, setWallColor, setFloorColor } from "./renderer.js";
 import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minimap.js";
 import { configureInput } from "./input.js";
+import { configureGamepadInput } from "./gamepad-input.js";
+import { configureGamepadInput } from "./gamepad-input.js";
 import { configureVirtualStick } from "./virtualStick.js";
 import { configureCompass, drawCompass } from "./compass.js";
 import { configureMenu, handleMenuInput, getDungeonColors, getDungeonMistOptions, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor, openQuestHistory, openAdventureRecords, openLibraryCardGallery, openTitleOptions, refreshAdventureRecordsPlayTime, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js";
@@ -2513,6 +2515,40 @@ import {
     updateHud();
   }
 
+  function recordUserInput() {
+    markUserOperation();
+    if (!state.autoWalkerActive || isBattleActive()) return;
+    cancelAutoReturn(false);
+    say("オート移動を中断した。");
+  }
+
+  function dispatchGamepadAction(action) {
+    recordUserInput();
+    if (handleItemOverlayInput(action) || handleSkillOverlayInput(action) || handleBattleInput(action)) return true;
+    if (sceneTransitionRunning || handleLootIdentifyInput(action) || handleExperienceSettlementInput(action) || handleTownInput(action)) return true;
+    if (["up", "down", "left", "right"].includes(action)) {
+      if (handleOverlayEventInput("dismiss") || handleMenuInput(action)) return true;
+      if (action === "up") return manualMove(1);
+      if (action === "down") return manualMove(-1);
+      if (action === "left") return manualTurn(-1);
+      return manualTurn(1);
+    }
+    if (action === "confirm") return handleOverlayEventInput("confirm") || handleMenuInput("confirm") || openDoorAhead();
+    if (action === "cancel") return handleOverlayEventInput("cancel") || handleMenuInput("cancel");
+    return false;
+  }
+
+  configureGamepadInput({
+    dispatchAction: dispatchGamepadAction,
+    openStatusMenu: () => {
+      recordUserInput();
+      handleItemOverlayInput("cancel");
+      handleSkillOverlayInput("cancel");
+      handleBattleInput("cancel");
+      openStatusMenu();
+    }
+  });
+
   configureInput({
     forwardBtn,
     backBtn,
@@ -2536,12 +2572,7 @@ import {
       sceneTransitionRunning || handleLootIdentifyInput(action) || handleExperienceSettlementInput(action) || handleTownInput(action)
     ),
     handleDoorInput: openDoorAhead,
-    onUserOperation: () => {
-      markUserOperation();
-      if (!state.autoWalkerActive || isBattleActive()) return;
-      cancelAutoReturn(false);
-      say("オート移動を中断した。");
-    },
+    onUserOperation: recordUserInput,
     handleMenuInput
   });
   configureMenu({
