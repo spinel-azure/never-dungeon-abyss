@@ -32,6 +32,13 @@ export const SHOP_ACCESSORY_STOCK = Object.freeze([
     enhancement: 0,
     shopUnlockDepth: 10,
     requiredFlags: Object.freeze(["transfer_portal_b10f_unlocked", "boss_strange_knight_statue_b9f_defeated"])
+  }),
+  Object.freeze({
+    id: "shop_rebellious_choker",
+    equipmentId: "rebellious_choker",
+    enhancement: 0,
+    shopUnlockDepth: 20,
+    requiredFlags: Object.freeze(["shop_stock_b20f_unlocked"])
   })
 ]);
 
@@ -149,6 +156,8 @@ function describeBonuses(bonuses = {}) {
   return Object.entries(bonuses)
     .map(([key, value]) => key === "magicDamageReduction"
       ? `魔法ダメージ-${Math.round(Number(value) * 100)}%`
+      : key === "actionSkipResistance"
+        ? `行動不能耐性+${Math.round(Number(value) * 100)}%`
       : `${key === "def" ? "DEF" : key.toUpperCase()}+${value}`)
     .join(" / ");
 }

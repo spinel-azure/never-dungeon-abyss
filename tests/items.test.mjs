@@ -112,6 +112,30 @@ test("the anti-magic necklace unlocks after B10 and the strange statue victory",
   assert.equal(character.equipmentStatBonuses.magicDamageReduction, 0.15);
 });
 
+test("Rebellious Choker unlocks with the large healing potion and grants action-skip resistance", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  const initialEquipmentDef = character.equipmentStatBonuses.def;
+  character.gold = 2000;
+  character.highestDungeonDepthReached = 20;
+  assert.equal(getShopEquipmentOffer(character, "shop_rebellious_choker"), null);
+
+  character.eventFlags.shop_stock_b20f_unlocked = true;
+  const offer = getShopEquipmentOffer(character, "shop_rebellious_choker");
+  assert.equal(offer?.name, "反骨のチョーカー");
+  assert.equal(offer?.slot, "accessoryId");
+  assert.equal(offer?.buyPrice, 2000);
+  assert.equal(offer?.sellPrice, 1000);
+  assert.deepEqual(offer?.statBonuses, { def: 3, actionSkipResistance: 0.15 });
+
+  const purchased = purchaseEquipment(character, offer);
+  assert.equal(purchased.accepted, true);
+  character = equipInstance(purchased.character, "accessoryId", purchased.instance.instanceId).character;
+  character = normalizeCharacter(character);
+  assert.equal(character.equipment.accessoryId, "rebellious_choker");
+  assert.equal(character.equipmentStatBonuses.def, initialEquipmentDef + 3);
+  assert.equal(character.equipmentStatBonuses.actionSkipResistance, 0.15);
+});
+
 test("thief armor shop tiers share enhancement-aware purchase and stat handling", () => {
   let character = createInitialCharacter({ name: "TEST", job: "thief" });
   character.gold = 2000;

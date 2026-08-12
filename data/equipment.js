@@ -19,6 +19,13 @@ export const EQUIPMENT = Object.freeze({
     buyPrice: 1500,
     sellPrice: 750
   }),
+  rebellious_choker: item("rebellious_choker", "反骨のチョーカー", "accessoryId", {
+    def: 3,
+    actionSkipResistance: 0.15
+  }, {
+    buyPrice: 2000,
+    sellPrice: 1000
+  }),
 
   steel_shield: item("steel_shield", "鋼の盾", "leftArmId", { def: 4, dex: 2 }, finalArmor("warrior", {
     1: { def: 5, dex: 2 }, 2: { def: 5, dex: 3 }, 3: { def: 6, dex: 4 }
