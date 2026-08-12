@@ -153,7 +153,9 @@ function rollMidRedChestLoot(roll, depth, rng) {
       amount: 1, unidentifiedName: "？カード", rarity: "SR"
     };
   }
-  const equipmentId = depth <= 12 ? "baselard" : depth <= 15 ? "silver_flail" : "steel_longsword";
+  const equipmentId = depth >= 21
+    ? rollFromList(["baselard", "silver_flail", "steel_longsword"], rng)
+    : depth <= 12 ? "baselard" : depth <= 15 ? "silver_flail" : "steel_longsword";
   return {
     kind: "equipment", equipmentId, slot: "rightArmId",
     enhancement: rollEnhancement(MID_RED_CHEST_WEAPON_ENHANCEMENT_RATES, rng) + 1,

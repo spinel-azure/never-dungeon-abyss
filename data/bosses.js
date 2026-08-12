@@ -454,6 +454,7 @@ export const BOSSES = Object.freeze({
     bossKind: "event",
     defeatedFlag: "boss_glacies_event_boss_defeated"
   }),
+  /*
   glacies_event_boss: Object.freeze({
     id: "glacies_event_boss",
     name: "グラキエス",
@@ -497,6 +498,10 @@ export const BOSSES = Object.freeze({
     bossKind: "event",
     defeatedFlag: "boss_glacies_event_boss_defeated"
   }),
+  */
+  /* Duplicate Glacies definitions accidentally introduced during data expansion.
+     Kept outside the active object until the historical block is removed. */
+  /*
   glacies_event_boss: Object.freeze({
     id: "glacies_event_boss", name: "グラキエス", level: 42,
     imageId: "glacies_event_boss", image: "images/bosses/boss_09.avif", race: "giant",
@@ -557,6 +562,7 @@ export const BOSSES = Object.freeze({
     escapeRate: 0, surpriseRate: 0, surpriseRateMaximum: 0, noDrop: true, isBoss: true,
     bossKind: "event", defeatedFlag: "boss_glacies_event_boss_defeated"
   }),
+  */
   brass_bull_event_boss: Object.freeze({
     id: "brass_bull_event_boss",
     name: "真鍮の雄牛",

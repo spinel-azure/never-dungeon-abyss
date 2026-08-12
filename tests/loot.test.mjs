@@ -75,10 +75,17 @@ test("B19F and B20F red chests retain the midgame table and steel longsword band
 test("B21F to B30F temporarily reuse the midgame red chest table", () => {
   for (const depth of [21, 25, 29, 30]) {
     assert.equal(rollRedChestLoot(rng(0.1, 0.5), depth).itemId, "healing_potion_medium");
-    const weapon = rollRedChestLoot(rng(0.95, 0), depth);
+    const weapon = rollRedChestLoot(rng(0.95, 0.999, 0), depth);
     assert.equal(weapon.equipmentId, "steel_longsword");
     assert.equal(weapon.enhancement, 1);
   }
+});
+
+test("B21F to B30F split the temporary weapon reward evenly across all three weapons", () => {
+  assert.deepEqual(
+    [0, 0.34, 0.67].map(weaponRoll => rollRedChestLoot(rng(0.95, weaponRoll, 0), 21).equipmentId),
+    ["baselard", "silver_flail", "steel_longsword"]
+  );
 });
 
 test("B31F to B40F red chests use floor-fixed class armor and 70/25/5 enhancements", () => {
