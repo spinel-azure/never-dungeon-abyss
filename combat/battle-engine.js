@@ -571,6 +571,8 @@ function combatStats(combatant) {
     statusResistances,
     elementMultipliers: { ...(combatant.elementMultipliers || {}) },
     magicDamageReduction: collected.magicDamageReduction,
+    fireDamageReduction: collected.fireDamageReduction,
+    fireDamageReduction: collected.fireDamageReduction,
     isBoss: Boolean(combatant.isBoss)
   };
 }

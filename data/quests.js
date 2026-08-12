@@ -554,6 +554,12 @@ export function isDungeonDepthUnlocked(character, depth) {
   if (requestedDepth === 30) {
     return Boolean(character?.eventFlags?.boss_iron_maiden_b29f_defeated);
   }
+  if (requestedDepth === 40) {
+    return Boolean(character?.eventFlags?.boss_wicker_man_b39f_defeated);
+  }
+  if (requestedDepth === 40) {
+    return Boolean(character?.eventFlags?.boss_wicker_man_b39f_defeated);
+  }
   return true;
 }
 

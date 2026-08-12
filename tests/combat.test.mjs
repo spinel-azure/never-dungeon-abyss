@@ -512,7 +512,7 @@ test("all implemented enemies and bosses expose internal reference levels", () =
     assert.ok(Number.isInteger(enemy.level) && enemy.level > 0, id);
     assert.equal(createEnemyCombatant(enemy).level, enemy.level);
   }
-  for (const id of ["lingering_ghost_b2f", "otherworldly_wisdom_b4f", "fallen_mage_b19f", "iron_maiden_b29f", "quest_mimic_b6f", "strange_knight_statue_b9f"]) {
+  for (const id of ["lingering_ghost_b2f", "otherworldly_wisdom_b4f", "fallen_mage_b19f", "iron_maiden_b29f", "wicker_man_b39f", "quest_mimic_b6f", "strange_knight_statue_b9f"]) {
     const boss = getBossById(id);
     assert.ok(Number.isInteger(boss.level) && boss.level > 0, id);
     assert.equal(createBossCombatant(boss).level, boss.level);
