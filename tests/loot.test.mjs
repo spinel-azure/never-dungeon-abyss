@@ -74,6 +74,19 @@ test("B6F to B10F black chests use the potion, R-card and SR-card bands", () => 
   });
 });
 
+test("B11F to B20F black chests use SP cards, magic resistance, and enhanced elemental staves", () => {
+  assert.equal(rollBlackChestLoot(rng(0.199), 11).cardId, "common_sp_saver");
+  assert.equal(rollBlackChestLoot(rng(0.2), 20).cardId, "rare_magic_resistance");
+  assert.deepEqual(rollBlackChestLoot(rng(0.4, 0), 15), {
+    kind: "equipment", equipmentId: "salamander_staff", slot: "rightArmId",
+    enhancement: 1, unidentifiedName: "？両手杖"
+  });
+  assert.deepEqual(rollBlackChestLoot(rng(0.7, 0.999), 20), {
+    kind: "equipment", equipmentId: "ice_lizard_staff", slot: "rightArmId",
+    enhancement: 3, unidentifiedName: "？両手杖"
+  });
+});
+
 test("unidentified card loot settles into the card collection", () => {
   const character = createInitialCharacter({ name: "TEST", job: "thief" });
   character.lootBag = addLootCard(character.lootBag, "rare_strength_up_plus", 2).lootBag;

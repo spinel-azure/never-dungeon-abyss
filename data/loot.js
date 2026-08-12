@@ -2,6 +2,7 @@ export const ENEMY_DROP_RATES = Object.freeze({ none: 0.4, item: 0.55, redChest:
 export const STILETTO_ENHANCEMENT_RATES = Object.freeze([0.75, 0.18, 0.06, 0.01]);
 export const BLACK_CHEST_STILETTO_ENHANCEMENT_RATES = Object.freeze([0.45, 0.35, 0.15, 0.05]);
 export const MID_RED_CHEST_WEAPON_ENHANCEMENT_RATES = Object.freeze([0.7, 0.25, 0.05]);
+export const MID_BLACK_CHEST_STAFF_ENHANCEMENT_RATES = Object.freeze([0.7, 0.25, 0.05]);
 export const BLACK_CHEST_LOOT_TABLES = Object.freeze([
   Object.freeze({ minDepth: 6, maxDepth: 10, gold: [60, 80, 100], potionId: "healing_potion_medium" }),
   Object.freeze({ minDepth: 11, maxDepth: 19, gold: [100, 140, 180], potionId: "healing_potion_medium" }),
@@ -43,6 +44,23 @@ export function rollBlackChestLoot(rng = Math.random, depth = 6) {
     }
     return { kind: "card", cardId: "sr_indomitable_spirit", amount: 1,
       unidentifiedName: "？カード", rarity: "SR" };
+  }
+  if (Number(depth) >= 11 && Number(depth) <= 20) {
+    if (roll < 0.2) return {
+      kind: "card", cardId: "common_sp_saver", amount: 1,
+      unidentifiedName: "？カード", rarity: "C"
+    };
+    if (roll < 0.4) return {
+      kind: "card", cardId: "rare_magic_resistance", amount: 1,
+      unidentifiedName: "？カード", rarity: "R"
+    };
+    return {
+      kind: "equipment",
+      equipmentId: roll < 0.7 ? "salamander_staff" : "ice_lizard_staff",
+      slot: "rightArmId",
+      enhancement: rollEnhancement(MID_BLACK_CHEST_STAFF_ENHANCEMENT_RATES, rng) + 1,
+      unidentifiedName: "？両手杖"
+    };
   }
   if (roll < 0.45) return { kind: "gold", amount: rollBlackChestGold(rng, table) };
   if (roll < 0.65) return { kind: "item", itemId: table.potionId, amount: 1, unidentifiedName: "？薬" };

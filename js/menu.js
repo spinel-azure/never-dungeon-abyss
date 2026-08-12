@@ -805,8 +805,16 @@ function equipmentEffectLabels(definition) {
   if (Number(definition.defensePenetration) > 0) labels.push(`DEF貫通 ${Math.round(definition.defensePenetration * 100)}%`);
   if (Number(definition.poisonChance) > 0) labels.push(`毒付与 ${Math.round(definition.poisonChance * 100)}%`);
   for (const [key, value] of Object.entries(definition.statBonuses || {})) {
-    labels.push(key === "magicDamageReduction"
-      ? `魔法耐性 ${Math.round(Number(value) * 100)}%`
+    const percentLabels = {
+      magicDamageReduction: "魔法耐性",
+      nonElementalMagicDamageReduction: "無属性呪文耐性",
+      fireSpellDamageBonus: "炎魔法威力",
+      iceSpellDamageBonus: "氷魔法威力",
+      fireDamageTakenBonus: "被炎ダメージ",
+      iceDamageTakenBonus: "被氷ダメージ"
+    };
+    labels.push(percentLabels[key]
+      ? `${percentLabels[key]} ${value >= 0 ? "+" : ""}${Math.round(Number(value) * 100)}%`
       : `${key.toUpperCase()} ${value >= 0 ? "+" : ""}${value}`);
   }
   return labels;

@@ -20,6 +20,7 @@ import { consumeItem } from "../data/inventory.js";
 import { getItemUnavailableReason } from "./resolve-item-use.js";
 import { resolvePassiveInstantDeath } from "./passive-instant-death.js";
 import { getCardById, hasCardEffect } from "../data/cards.js";
+import { getEffectiveSpCost } from "./sp-cost.js";
 
 export function createBattleState({ character, enemy }) {
   const vorpalSwordEquippedAtStart = character?.equipment?.weaponId === "vorpal_sword";
@@ -164,7 +165,8 @@ export function createPlayerAction(player, command = {}, enemy = null) {
   if (skill.preventWhileStatusActive && (player.statuses || []).some(status =>
     (status.statusId || status.id) === skill.preventWhileStatusActive && status.active !== false
   )) return { ok: false, reason: "alreadyActive" };
-  if (player.sp < skill.spCost) return { ok: false, reason: "insufficientSp" };
+  const spCost = getEffectiveSpCost(skill, player);
+  if (player.sp < spCost) return { ok: false, reason: "insufficientSp" };
   if (["cureStatus", "sacrificialCure"].includes(skill.actionType)
     && !(player.statuses || []).some(status => (status.statusId || status.id) === skill.statusId)) {
     return { ok: false, reason: "noEffect" };
@@ -180,7 +182,7 @@ export function createPlayerAction(player, command = {}, enemy = null) {
       weaponEnhancement: player.equipment?.rightArmEnhancement
     })
     : { ...skill };
-  return { ok: true, spCost: skill.spCost, action };
+  return { ok: true, spCost, action };
 }
 
 export function createEnemyAction(enemy, rng = Math.random) {
@@ -572,7 +574,11 @@ function combatStats(combatant) {
     elementMultipliers: { ...(combatant.elementMultipliers || {}) },
     magicDamageReduction: collected.magicDamageReduction,
     fireDamageReduction: collected.fireDamageReduction,
-    fireDamageReduction: collected.fireDamageReduction,
+    nonElementalMagicDamageReduction: collected.nonElementalMagicDamageReduction,
+    fireSpellDamageBonus: collected.fireSpellDamageBonus,
+    iceSpellDamageBonus: collected.iceSpellDamageBonus,
+    fireDamageTakenBonus: collected.fireDamageTakenBonus,
+    iceDamageTakenBonus: collected.iceDamageTakenBonus,
     isBoss: Boolean(combatant.isBoss)
   };
 }

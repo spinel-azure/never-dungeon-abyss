@@ -1,4 +1,5 @@
 import { getSkills } from "../data/skills.js";
+import { getEffectiveSpCost } from "../combat/sp-cost.js";
 
 const overlay = {
   root: null,
@@ -126,7 +127,7 @@ function render() {
     button.className = "skill-overlay-item";
     button.dataset.skillId = skill.id;
     button.disabled = Boolean(unavailableReason(skill, character));
-    button.innerHTML = `<span>${skill.name}</span><small>${skill.actionType === "passive" ? "PASSIVE" : `SP${skill.spCost}`}</small>`;
+    button.innerHTML = `<span>${skill.name}</span><small>${skill.actionType === "passive" ? "PASSIVE" : `SP${getEffectiveSpCost(skill, character)}`}</small>`;
     button.addEventListener("click", () => {
       overlay.selectedIndex = index;
       renderSelection();
@@ -156,7 +157,7 @@ function renderSelection() {
 
 function unavailableReason(skill, character) {
   if (skill.actionType === "passive") return "passive";
-  if (character.sp < skill.spCost) return "insufficientSp";
+  if (character.sp < getEffectiveSpCost(skill, character)) return "insufficientSp";
   if (skill.preventWhileStatusActive && (character.statuses || []).some(status =>
     (status.statusId || status.id) === skill.preventWhileStatusActive && status.active !== false
   )) return "alreadyActive";

@@ -1100,9 +1100,19 @@ import {
     const bonuses = [];
     if (Number.isFinite(item.attack)) bonuses.push(`ATK +${item.attack}`);
     bonuses.push(...Object.entries(item.statBonuses || {})
-      .map(([key, value]) => key === "magicDamageReduction"
-        ? `魔法耐性 ${Math.round(Number(value) * 100)}%`
-        : `${key.toUpperCase()} ${Number(value) >= 0 ? "+" : ""}${value}`));
+      .map(([key, value]) => {
+        const percentLabels = {
+          magicDamageReduction: "魔法耐性",
+          nonElementalMagicDamageReduction: "無属性呪文耐性",
+          fireSpellDamageBonus: "炎魔法威力",
+          iceSpellDamageBonus: "氷魔法威力",
+          fireDamageTakenBonus: "被炎ダメージ",
+          iceDamageTakenBonus: "被氷ダメージ"
+        };
+        return percentLabels[key]
+          ? `${percentLabels[key]} ${Number(value) >= 0 ? "+" : ""}${Math.round(Number(value) * 100)}%`
+          : `${key.toUpperCase()} ${Number(value) >= 0 ? "+" : ""}${value}`;
+      }));
     return bonuses.join(" ");
   }
 

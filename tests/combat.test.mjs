@@ -14,6 +14,7 @@ import {
 import { resolveSpell } from "../combat/resolve-spell.js";
 import { resolveHealing } from "../combat/resolve-healing.js";
 import { resolveFieldSkill } from "../combat/resolve-field-skill.js";
+import { getEffectiveSpCost } from "../combat/sp-cost.js";
 import { resolveStatusEffect } from "../combat/resolve-status-effect.js";
 import { resolveInstantDeath } from "../combat/resolve-status-effect.js";
 import {
@@ -504,6 +505,34 @@ test("Spell Resistance and Scorching Resistance reduce only their intended spell
   const protectedIce = resolveSpell({ attacker: {}, defender: { fireDamageReduction: 0.2 }, spell: { ...spell, element: "ice" }, rng: () => 0.5 });
   assert.equal(protectedFire.totalDamage, Math.floor(normalFire.totalDamage * 0.8));
   assert.equal(protectedIce.totalDamage, normalFire.totalDamage);
+});
+
+test("elemental staves amplify matching magic and increase opposite incoming damage", () => {
+  const spell = { id: "elemental_staff_test", spellPower: 100, powerMultiplier: 1, unavoidable: true };
+  const normalFire = resolveSpell({ attacker: {}, defender: {}, spell: { ...spell, element: "fire" }, rng: () => 0.5 });
+  const boostedFire = resolveSpell({ attacker: { fireSpellDamageBonus: 0.15 }, defender: {}, spell: { ...spell, element: "fire" }, rng: () => 0.5 });
+  const vulnerableFire = resolveSpell({ attacker: {}, defender: { fireDamageTakenBonus: 0.1 }, spell: { ...spell, element: "fire" }, rng: () => 0.5 });
+  assert.equal(boostedFire.totalDamage, Math.floor(normalFire.totalDamage * 1.15));
+  assert.equal(vulnerableFire.totalDamage, Math.floor(normalFire.totalDamage * 1.1));
+  assert.equal(getWeapon("salamander_staff", 0).statBonuses.int, 1);
+  assert.equal(getWeapon("salamander_staff", 3).statBonuses.int, 4);
+  assert.equal(getWeapon("ice_lizard_staff", 3).statBonuses.iceSpellDamageBonus, 0.15);
+});
+
+test("Magic Resistance affects non-elemental spells only", () => {
+  const spell = { id: "magic_resistance_test", spellPower: 100, powerMultiplier: 1, unavoidable: true };
+  const normal = resolveSpell({ attacker: {}, defender: {}, spell: { ...spell, element: "arcane" }, rng: () => 0.5 });
+  const protectedArcane = resolveSpell({ attacker: {}, defender: { nonElementalMagicDamageReduction: 0.05 }, spell: { ...spell, element: "arcane" }, rng: () => 0.5 });
+  const protectedFire = resolveSpell({ attacker: {}, defender: { nonElementalMagicDamageReduction: 0.05 }, spell: { ...spell, element: "fire" }, rng: () => 0.5 });
+  assert.equal(protectedArcane.totalDamage, Math.floor(normal.totalDamage * 0.95));
+  assert.equal(protectedFire.totalDamage, normal.totalDamage);
+});
+
+test("SP Saver reduces skill costs to a minimum of one", () => {
+  const character = { cardStatBonuses: collectCardStatBonuses(Array(6).fill("common_sp_saver")) };
+  assert.equal(getEffectiveSpCost({ spCost: 10 }, character), 4);
+  assert.equal(getEffectiveSpCost({ spCost: 3 }, character), 1);
+  assert.equal(getEffectiveSpCost({ spCost: 0 }, character), 0);
 });
 
 test("all implemented enemies and bosses expose internal reference levels", () => {

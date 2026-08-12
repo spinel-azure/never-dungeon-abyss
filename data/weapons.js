@@ -86,6 +86,30 @@ export const WEAPONS = Object.freeze({
     normalAttackStatMultiplier: 0.75,
     normalAttackIgnoresDefense: true
   }),
+  salamander_staff: Object.freeze({
+    id: "salamander_staff", name: "火蜥蜴の杖", type: "staff", attack: 3,
+    attackByEnhancement: Object.freeze([3, 3, 3, 3]),
+    statBonuses: Object.freeze({ int: 1, fireSpellDamageBonus: 0.15, iceDamageTakenBonus: 0.1 }),
+    statBonusesByEnhancement: Object.freeze([
+      Object.freeze({ int: 1, fireSpellDamageBonus: 0.15, iceDamageTakenBonus: 0.1 }),
+      Object.freeze({ int: 2, fireSpellDamageBonus: 0.15, iceDamageTakenBonus: 0.1 }),
+      Object.freeze({ int: 3, fireSpellDamageBonus: 0.15, iceDamageTakenBonus: 0.1 }),
+      Object.freeze({ int: 4, fireSpellDamageBonus: 0.15, iceDamageTakenBonus: 0.1 })
+    ]),
+    element: "physical", allowedJobs: Object.freeze(["mage"]), twoHanded: true, sellPrice: 600
+  }),
+  ice_lizard_staff: Object.freeze({
+    id: "ice_lizard_staff", name: "氷蜥蜴の杖", type: "staff", attack: 3,
+    attackByEnhancement: Object.freeze([3, 3, 3, 3]),
+    statBonuses: Object.freeze({ int: 1, iceSpellDamageBonus: 0.15, fireDamageTakenBonus: 0.1 }),
+    statBonusesByEnhancement: Object.freeze([
+      Object.freeze({ int: 1, iceSpellDamageBonus: 0.15, fireDamageTakenBonus: 0.1 }),
+      Object.freeze({ int: 2, iceSpellDamageBonus: 0.15, fireDamageTakenBonus: 0.1 }),
+      Object.freeze({ int: 3, iceSpellDamageBonus: 0.15, fireDamageTakenBonus: 0.1 }),
+      Object.freeze({ int: 4, iceSpellDamageBonus: 0.15, fireDamageTakenBonus: 0.1 })
+    ]),
+    element: "physical", allowedJobs: Object.freeze(["mage"]), twoHanded: true, sellPrice: 600
+  }),
   training_greatsword: Object.freeze({
     id: "training_greatsword",
     name: "訓練用の両手剣",

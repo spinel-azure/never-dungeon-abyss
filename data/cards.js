@@ -143,6 +143,22 @@ const STANDARD_CARDS = [
     maxOwned: 99, maxCopies: 6
   },
   {
+    id: "common_sp_saver", rarity: "C", cost: 1,
+    name: "SP Saver", nameJa: "節約術", concept: "消費SP -1",
+    descriptionJa: "スキル・呪文・奇蹟の消費SPを1減らす。ただし消費SPは1未満にならない。",
+    category: "ability", effectId: "sp_cost_reduction", effectValue: 1,
+    statBonus: Object.freeze({ spCostReduction: 1 }), iconId: "mana-core",
+    maxOwned: 99, maxCopies: 6
+  },
+  {
+    id: "rare_magic_resistance", rarity: "R", cost: 2,
+    name: "Magic Resistance", nameJa: "魔力抵抗", concept: "無属性呪文ダメージ -5%",
+    descriptionJa: "属性を持たない呪文によるダメージを5％軽減する。炎・氷などの属性攻撃には効果がない。",
+    category: "resistance", effectId: "non_elemental_magic_damage_reduction", effectValue: 0.05,
+    statBonus: Object.freeze({ nonElementalMagicDamageReduction: 0.05 }),
+    iconId: "quartered-shield", maxOwned: 99, maxCopies: 6
+  },
+  {
     id: "rare_dexterity_lesson_plus", rarity: "R", cost: 2,
     name: "Dexterity Lesson +", nameJa: "技巧の心得＋", concept: "DEX +2",
     category: "ability", effectId: "dexterity_up_plus", effectValue: 2,

@@ -28,7 +28,10 @@ export function resolveSpell({
 
   const spellAttack = numeric(spell.spellPower)
     + numeric(attacker.int) * COMBAT_CONFIG.intelligenceMultiplier;
-  const baseDamage = spellAttack * numericOr(spell.powerMultiplier, 1);
+  const offensiveBonus = spell.element === "fire"
+    ? numeric(attacker.fireSpellDamageBonus)
+    : spell.element === "ice" ? numeric(attacker.iceSpellDamageBonus) : 0;
+  const baseDamage = spellAttack * numericOr(spell.powerMultiplier, 1) * (1 + offensiveBonus);
   let damage = 0;
   if (multiplier !== 0) {
     const variance = randomBetween(
@@ -37,9 +40,15 @@ export function resolveSpell({
       COMBAT_CONFIG.spellVarianceMax
     );
     const elementalReduction = spell.element === "fire" ? numeric(defender.fireDamageReduction) : 0;
+    const nonElementalReduction = isElementalSpell(spell.element)
+      ? 0
+      : numeric(defender.nonElementalMagicDamageReduction);
     const damageReduction = Math.max(0, Math.min(0.75,
-      numeric(defender.magicDamageReduction) + elementalReduction));
-    damage = Math.max(1, Math.floor(baseDamage * multiplier * variance * (1 - damageReduction)));
+      numeric(defender.magicDamageReduction) + elementalReduction + nonElementalReduction));
+    const damageTakenBonus = spell.element === "fire"
+      ? numeric(defender.fireDamageTakenBonus)
+      : spell.element === "ice" ? numeric(defender.iceDamageTakenBonus) : 0;
+    damage = Math.max(1, Math.floor(baseDamage * multiplier * variance * (1 - damageReduction) * (1 + damageTakenBonus)));
   }
   const actionEffects = resolveEffects({
     effects: spell.effects,
@@ -58,6 +67,10 @@ export function resolveSpell({
     totalDamage: damage,
     actionEffects
   });
+}
+
+function isElementalSpell(element) {
+  return ["fire", "ice", "lightning", "water", "wind", "earth", "holy", "dark"].includes(element);
 }
 
 function resolveElementMultiplier(defender, element, explicit) {

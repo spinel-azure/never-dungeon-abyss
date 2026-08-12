@@ -62,6 +62,18 @@ export function collectStats(source = {}) {
       0,
       0.75
     ),
+    nonElementalMagicDamageReduction: clamp(
+      numeric(source.nonElementalMagicDamageReduction)
+        + numeric(equipment.nonElementalMagicDamageReduction)
+        + numeric(cards.nonElementalMagicDamageReduction)
+        + numeric(temporary.nonElementalMagicDamageReduction),
+      0,
+      0.75
+    ),
+    fireSpellDamageBonus: numeric(source.fireSpellDamageBonus) + numeric(equipment.fireSpellDamageBonus),
+    iceSpellDamageBonus: numeric(source.iceSpellDamageBonus) + numeric(equipment.iceSpellDamageBonus),
+    fireDamageTakenBonus: numeric(source.fireDamageTakenBonus) + numeric(equipment.fireDamageTakenBonus),
+    iceDamageTakenBonus: numeric(source.iceDamageTakenBonus) + numeric(equipment.iceDamageTakenBonus),
     instantDeathResistance: numeric(source.instantDeathResistance),
     surpriseResistance:
       numeric(source.surpriseResistance)
