@@ -14,6 +14,7 @@ import { purchaseBuybackEquipment, purchaseBuybackItem, purchaseEquipment, purch
 import { getItem, getShopItemIdsForCharacter, getShopItemIdsForDepth } from "../data/items.js";
 import { equipInstance, getEquipmentInstanceDefinition } from "../data/equipment-inventory.js";
 import { getShopEquipmentOffer, getShopEquipmentStock } from "../data/shop-stock.js";
+import { readFile } from "node:fs/promises";
 
 function characterWith(itemId, amount = 1) {
   const character = createInitialCharacter({ name: "TEST", job: "warrior" });
@@ -134,6 +135,11 @@ test("Rebellious Choker unlocks with the large healing potion and grants action-
   assert.equal(character.equipment.accessoryId, "rebellious_choker");
   assert.equal(character.equipmentStatBonuses.def, initialEquipmentDef + 3);
   assert.equal(character.equipmentStatBonuses.actionSkipResistance, 0.15);
+});
+
+test("Rebellious Choker uses the compact Japanese resistance label in status displays", async () => {
+  const source = await readFile(new URL("../js/menu.js", import.meta.url), "utf8");
+  assert.match(source, /key === "actionSkipResistance"[\s\S]*`行動不能耐性\$\{Math\.round\(Number\(value\) \* 100\)\}%`/);
 });
 
 test("thief armor shop tiers share enhancement-aware purchase and stat handling", () => {

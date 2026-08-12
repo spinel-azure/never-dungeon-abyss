@@ -19,6 +19,7 @@ import { configureTownPassersby } from "./town-passersby.js";
 import { getInnStayFee } from "./character-services.js";
 import { getTavernRumorTypewriterParts } from "../data/tavern-rumors.js";
 import { CHARACTER_NAME_MAX_LENGTH, CHARACTER_RENAME_COST, normalizeCharacterName } from "../data/character-name.js";
+import { getUnlockedTransferDestinations } from "../data/transfer-destinations.js";
 
 const FACILITY_COMMANDS = Object.freeze({
   inn: [
@@ -101,6 +102,7 @@ const town = {
   questAcceptanceRewardMessage: "",
   entranceIndex: 0,
   transferIndex: 0,
+  transferPage: 0,
   facilityCommandIndex: 0,
   transferUnlocked: false,
   selectedIndex: 1,
@@ -186,6 +188,9 @@ export function configureTown(options) {
   town.commercePointerArmedIndex = -1;
   town.commerceKind = "";
   town.commerceItems = [];
+  town.transferOverlay = document.querySelector("#transferDestinationOverlay");
+  town.transferList = document.querySelector("#transferDestinationList");
+  town.transferPager = document.querySelector("#transferDestinationPager");
   town.portraitPreloads = TOWN_FACILITIES
     .filter(facility => facility.image)
     .map(facility => {
@@ -434,10 +439,19 @@ export function handleTownInput(action) {
   if (town.mode === "dungeonEntrance") return handleEntranceInput(action);
   if (town.mode === "facilityMenu" || town.mode === "facility") return handleFacilityMenuInput(action);
   if (town.mode === "transferCircle") {
-    const optionCount = getTransferDepths().length + 1;
-    if ((action === "left" || action === "right") && optionCount > 1) {
+    const destinations = getTransferDestinations();
+    const pageCount = Math.max(1, Math.ceil(destinations.length / 5));
+    if (["up", "down"].includes(action) && destinations.length > 1) {
       town.playSe("cursorMove");
-      town.transferIndex = (town.transferIndex + (action === "right" ? 1 : optionCount - 1)) % optionCount;
+      town.transferIndex = (town.transferIndex + (action === "down" ? 1 : destinations.length - 1)) % destinations.length;
+      town.transferPage = Math.floor(town.transferIndex / 5);
+      renderTransferCircle();
+      return true;
+    }
+    if (["left", "right"].includes(action) && pageCount > 1) {
+      town.playSe("cursorMove");
+      town.transferPage = (town.transferPage + (action === "right" ? 1 : pageCount - 1)) % pageCount;
+      town.transferIndex = Math.min(town.transferPage * 5, destinations.length - 1);
       renderTransferCircle();
       return true;
     }
@@ -448,6 +462,8 @@ export function handleTownInput(action) {
     }
     if (action === "cancel") {
       town.playSe("cancel");
+      town.transferOverlay.hidden = true;
+      town.commandRoot.hidden = false;
       town.mode = "dungeonEntrance";
       renderDungeonEntrance();
     }
@@ -1105,6 +1121,8 @@ function renderDungeonEntrance() {
   town.onBgmChanged("");
   town.pendingVoiceFacility = "";
   showEntranceCommands();
+  town.transferOverlay.hidden = true;
+  town.commandRoot.hidden = false;
   updateEntranceLabels();
   town.root.classList.remove("is-town-view");
   town.mosaic.hidden = true;
@@ -1126,8 +1144,8 @@ function renderTransferCircle() {
   town.onAmbienceChanged(false);
   town.onBgmChanged("");
   town.pendingVoiceFacility = "";
-  showEntranceCommands();
-  updateEntranceLabels();
+  town.commandRoot.hidden = true;
+  town.transferOverlay.hidden = !town.transferUnlocked;
   town.root.classList.remove("is-town-view");
   if (town.transferUnlocked) {
     town.mosaic.hidden = true;
@@ -1141,27 +1159,13 @@ function renderTransferCircle() {
   town.portraitPlaceholder.hidden = true;
   town.registration.hidden = true;
   town.root.querySelector("#townFacilityName").hidden = true;
-  const depths = getTransferDepths();
-  town.transferIndex = Math.min(town.transferIndex, depths.length);
+  const destinations = getTransferDestinations();
+  town.transferIndex = Math.max(0, Math.min(town.transferIndex, destinations.length - 1));
+  town.transferPage = Math.floor(town.transferIndex / 5);
   town.messageEl.textContent = town.transferUnlocked
     ? "転送先を選んでください。"
     : "まだ入ることは出来ない。";
-  town.entranceButtons.forEach((button, index) => {
-    if (index < depths.length) {
-      button.textContent = `B${depths[index]}F`;
-      button.disabled = false;
-      button.classList.remove("is-empty", "is-unavailable");
-    } else if (index === depths.length) {
-      button.textContent = "戻る";
-      button.disabled = false;
-      button.classList.remove("is-empty", "is-unavailable");
-    } else {
-      button.textContent = "";
-      button.disabled = true;
-      button.classList.add("is-empty");
-    }
-  });
-  renderEntranceSelection();
+  renderTransferDestinationList(destinations);
   resetTownViewport();
   town.onStateChanged();
 }
@@ -1177,30 +1181,46 @@ function renderEntranceSelection() {
   });
 }
 
-function getTransferDepths() {
-  const character = town.getCharacter?.();
-  const flags = character?.eventFlags || {};
-  const depths = [];
-  if (flags.transfer_portal_b10f_unlocked) depths.push(10);
-  if (flags.transfer_portal_b20f_unlocked || flags.shop_stock_b20f_unlocked
-    || Number(character?.highestDungeonDepthReached) >= 20) depths.push(20);
-  return depths;
+function getTransferDestinations() {
+  return getUnlockedTransferDestinations(town.getCharacter?.());
 }
 
 function activateTransferSelection(index) {
-  const depths = getTransferDepths();
-  const depth = depths[index];
-  if (!depth) {
-    town.mode = "dungeonEntrance";
-    renderDungeonEntrance();
-    return;
-  }
+  const destination = getTransferDestinations()[index];
+  if (!destination) return;
   if (town.transitioning) return;
   town.transitioning = true;
-  Promise.resolve(town.onUseTransfer(depth)).finally(() => { town.transitioning = false; });
+  Promise.resolve(town.onUseTransfer(destination.depth)).finally(() => { town.transitioning = false; });
+}
+
+function renderTransferDestinationList(destinations = getTransferDestinations()) {
+  const pageSize = 5;
+  const pageCount = Math.max(1, Math.ceil(destinations.length / pageSize));
+  town.transferPage = Math.max(0, Math.min(town.transferPage, pageCount - 1));
+  const start = town.transferPage * pageSize;
+  const pageItems = destinations.slice(start, start + pageSize);
+  town.transferList.replaceChildren(...pageItems.map((destination, offset) => {
+    const index = start + offset;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = destination.label;
+    button.classList.toggle("is-selected", index === town.transferIndex);
+    button.addEventListener("click", () => {
+      if (town.transferIndex === index) activateTransferSelection(index);
+      else {
+        town.playSe("cursorMove");
+        town.transferIndex = index;
+        renderTransferDestinationList(destinations);
+      }
+    });
+    return button;
+  }));
+  town.transferPager.textContent = `◀ ${town.transferPage + 1}/${pageCount} ▶`;
 }
 
 function showFacilityCommands(facilityId) {
+  town.commandRoot.hidden = false;
+  if (town.transferOverlay) town.transferOverlay.hidden = true;
   const commands = FACILITY_COMMANDS[facilityId] || FACILITY_COMMANDS.inn;
   const requestUnlocked = Boolean(town.getCharacter()?.eventFlags?.guild_first_request_unlocked);
   const reportAvailable = facilityId === "guild" && hasActiveQuest(town.getCharacter());
@@ -2187,6 +2207,8 @@ function hasMaxVitalBonus(character, key) {
 
 function showTownCommands() {
   if (!town.commandRoot) return;
+  town.commandRoot.hidden = false;
+  if (town.transferOverlay) town.transferOverlay.hidden = true;
   if (!town.facilityButtons.every(button => button.parentElement === town.commandRoot)) {
     town.commandRoot.replaceChildren(...town.facilityButtons);
   }
@@ -2198,6 +2220,8 @@ function showTownCommands() {
 
 function showEntranceCommands() {
   if (!town.commandRoot) return;
+  town.commandRoot.hidden = false;
+  if (town.transferOverlay) town.transferOverlay.hidden = true;
   if (!town.entranceButtons.every(button => button.parentElement === town.commandRoot)) {
     town.commandRoot.replaceChildren(...town.entranceButtons);
   }

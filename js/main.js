@@ -126,6 +126,7 @@ import { getQuestRequiredSpecialRoomAccess, getSpecialRoomAccessRestriction, get
 import { acknowledgeShopStockAnnouncement, getShopEquipmentOffer, getShopStockState, markShopCategorySeen } from "../data/shop-stock.js";
 import { getUnreadTavernRumor, markTavernRumorRead } from "../data/tavern-rumors.js";
 import { renameCharacter as applyCharacterRename } from "../data/character-name.js";
+import { isTransferDestinationUnlocked } from "../data/transfer-destinations.js";
 import { getFireFloorStepDamage, isFireFloorDepth } from "../data/fire-floor.js";
 import {
   invalidateMarathonChallenge,
@@ -2098,13 +2099,8 @@ import {
   }
 
   async function enterFloorFromTransfer(depth = 10) {
-    const destination = Number(depth) === 20 ? 20 : 10;
-    const flags = character?.eventFlags || {};
-    const unlocked = destination === 10
-      ? flags.transfer_portal_b10f_unlocked
-      : flags.transfer_portal_b20f_unlocked || flags.shop_stock_b20f_unlocked
-        || Number(character?.highestDungeonDepthReached) >= 20;
-    if (!unlocked) return false;
+    const destination = Math.max(1, Math.floor(Number(depth) || 0));
+    if (!isTransferDestinationUnlocked(character, destination)) return false;
     setPlayerInputEnabled(false);
     await runSceneTransition({
       playAudio: () => playSeSequence("stairs", 3),

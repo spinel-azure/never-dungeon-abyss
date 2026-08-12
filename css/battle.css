@@ -230,6 +230,8 @@
 .battle-boss-hp-meter {
   position: relative;
   z-index: 3;
+  flex: 0 0 10px;
+  box-sizing: border-box;
   width: min(38%, 260px);
   height: 10px;
   margin-top: 10px;
