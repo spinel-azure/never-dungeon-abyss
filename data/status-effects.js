@@ -21,6 +21,17 @@ export const STATUS_EFFECTS = Object.freeze({
     duration: 2,
     physicalDamageReduction: 0.5
   }),
+  immovable_stance: Object.freeze({
+    id: "immovable_stance", name: "不動", kind: "buff", duration: 2,
+    physicalDamageReduction: 0.4, statusResistancePointsById: Object.freeze({ action_skip: 50 })
+  }),
+  action_seal: Object.freeze({
+    id: "action_seal", name: "封技", kind: "debuff", duration: 3, bossDuration: 1
+  }),
+  magic_focus: Object.freeze({
+    id: "magic_focus", name: "魔力集中", kind: "buff", attackSpellDamageMultiplier: 1.5,
+    expiresAfterBattle: true
+  }),
   poison: Object.freeze({
     id: "poison",
     name: "毒",

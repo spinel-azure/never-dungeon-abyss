@@ -1677,6 +1677,43 @@ test("Glacies Hammer is a warrior-only ice two-handed weapon", () => {
   assert.deepEqual(hammer.allowedJobs, ["warrior"]);
 });
 
+test("midgame class skills unlock at levels 22 to 34 with intended costs", () => {
+  const thief22 = normalizeCharacter({ ...createInitialCharacter({ name: "T", job: "thief" }), level: 22 });
+  const thief32 = normalizeCharacter({ ...thief22, level: 32 });
+  assert.equal(thief22.skillIds.includes("gale_blades"), true);
+  assert.equal(thief32.skillIds.includes("art_sealing_stab"), true);
+  assert.equal(getSkill("gale_blades").spCost, 6);
+  assert.equal(getSkill("gale_blades").powerPerHit, 1.8);
+  assert.equal(getSkill("art_sealing_stab").spCost, 10);
+  assert.equal(getSkill("art_sealing_stab").powerPerHit, 0.9);
+  for (const [job, level, skillId] of [
+    ["warrior", 24, "crushing_break"], ["warrior", 34, "immovable_stance"],
+    ["priest", 24, "greater_healing"], ["priest", 34, "holy_light"],
+    ["mage", 24, "lightning_bolt"], ["mage", 34, "magic_focus"]
+  ]) {
+    const character = normalizeCharacter({ ...createInitialCharacter({ name: "X", job }), level });
+    assert.equal(character.skillIds.includes(skillId), true, `${job} level ${level}`);
+  }
+});
+
+test("action seal forces normal enemy attacks for three turns and bosses for one", () => {
+  const normal = createEnemyCombatant(getEnemyById("fire_spirit"));
+  normal.statuses = applyStatusApplications([], [{ statusId: "action_seal", success: true }]);
+  assert.equal(createEnemyAction(normal, () => 0.99).id, "normal_attack");
+  const boss = createBossCombatant(getBossById("fallen_mage_b19f"));
+  boss.statuses = applyStatusApplications([], [{ statusId: "action_seal", success: true, duration: 1 }]);
+  assert.equal(createEnemyAction(boss, () => 0.99).id, "normal_attack");
+});
+
+test("greater healing scales with full INT and magic focus is a one-use multiplier", () => {
+  assert.equal(resolveHealing({
+    caster: { int: 20 }, target: { hp: 1, maxHp: 100 }, healing: getSkill("greater_healing")
+  }).calculatedHealing, 55);
+  const focused = applyStatusApplications([], [{ statusId: "magic_focus", success: true }]);
+  assert.equal(focused[0].attackSpellDamageMultiplier, 1.5);
+  assert.equal(getSkill("holy_light").raceDamageMultipliers.undead, 1.5);
+});
+
 test("a successful Flash Slash ends remaining hits and requests the shared slash effect", () => {
   const warrior = normalizeCharacter({
     ...createInitialCharacter({ name: "W", job: "warrior" }),

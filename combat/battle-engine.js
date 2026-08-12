@@ -196,6 +196,10 @@ export function createEnemyAction(enemy, rng = Math.random) {
     }
   });
   const actionTable = Array.isArray(enemy.actions) ? enemy.actions : [];
+  const actionSealed = enemy.statuses?.some(status =>
+    (status.id || status.statusId) === "action_seal" && status.active !== false
+  );
+  if (actionSealed) return attack;
   if (actionTable.length > 0) {
     const selected = selectWeightedEnemyAction(actionTable, enemy, rng);
     if (selected) return buildEnemyAction(selected, attack);
@@ -385,6 +389,10 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
       break;
     }
   }
+  const magicFocus = action.actionType === "spell" && actorSide === "player"
+    ? actor.statuses?.find(status => (status.id || status.statusId) === "magic_focus" && status.active !== false)
+    : null;
+  const raceMultiplier = Number(action.raceDamageMultipliers?.[target.race]) || 1;
   let presentedHits = resolvedHits.map((hit, index) => ({
     index,
     hit: hit.hit,
@@ -394,8 +402,14 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
         * (1 - reduction)
         * getCapricornDamageMultiplier(battle, actorSide)
         * getCapricornReceivedDamageMultiplier(battle, targetSide)
+        * (magicFocus ? Number(magicFocus.attackSpellDamageMultiplier) || 1 : 1)
+        * raceMultiplier
     )) : 0
   }));
+  if (magicFocus) {
+    actor.statuses = actor.statuses.filter(status => status !== magicFocus);
+    battle.log.push("魔力集中の力が攻撃呪文を増幅した！");
+  }
   if (passiveExecution) {
     const damageBeforeExecution = presentedHits
       .slice(0, passiveExecution.index)
@@ -476,7 +490,11 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
     ...resolvedHits.flatMap(hit => hit.effects || []),
     ...(result.actionEffects || [])
   ];
-  target.statuses = applyStatusApplications(target.statuses, applications);
+  target.statuses = applyStatusApplications(target.statuses, applications.map(application => (
+    application.statusId === "action_seal" && target.isBoss
+      ? { ...application, duration: 1 }
+      : application
+  )));
   for (const applied of applications.filter(item => item.success)) {
     battle.log.push(`${target.name}は${statusName(applied.statusId)}状態になった。`);
   }
@@ -565,6 +583,15 @@ function combatStats(combatant) {
   const actionSkip = statusResistances.action_skip || {};
   statusResistances.action_skip = { ...actionSkip,
     resistancePoints: (Number(actionSkip.resistancePoints) || 0) + collected.actionSkipResistance * 100 };
+  for (const status of combatant.statuses || []) {
+    for (const [statusId, points] of Object.entries(status.statusResistancePointsById || {})) {
+      const resistance = statusResistances[statusId] || {};
+      statusResistances[statusId] = {
+        ...resistance,
+        resistancePoints: (Number(resistance.resistancePoints) || 0) + (Number(points) || 0)
+      };
+    }
+  }
   return {
     ...collected,
     def: Math.floor(collected.def * getDefenseMultiplier(combatant.statuses)),
@@ -604,6 +631,7 @@ function cloneCombatant(source) {
 function statusName(id) {
   return ({
     armor_break: "DEF低下",
+    action_seal: "封技",
     poison: "毒",
     bleeding: "出血",
     action_skip: "行動不能",

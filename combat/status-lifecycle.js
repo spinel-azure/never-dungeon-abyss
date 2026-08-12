@@ -8,7 +8,7 @@ export function applyStatus(statuses = [], application = {}) {
   const status = {
     ...definition,
     statusId: definition.id,
-    remainingTurns: definition.duration,
+    remainingTurns: application.duration ?? definition.duration,
     skipInitialDecrement: Boolean(application.skipInitialDecrement),
     active: true
   };

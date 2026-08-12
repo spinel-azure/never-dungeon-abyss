@@ -9,7 +9,7 @@ export function resolveHealing({
     0,
     Math.floor(
       numeric(healing.baseHealing)
-      + numeric(caster.int) * COMBAT_CONFIG.intelligenceMultiplier
+      + numeric(caster.int) * numericOr(healing.intelligenceMultiplier, COMBAT_CONFIG.intelligenceMultiplier)
     )
   );
   const missingHp = Math.max(0, numeric(target.maxHp) - numeric(target.hp));
@@ -25,4 +25,9 @@ export function resolveHealing({
 function numeric(value) {
   const number = Number(value);
   return Number.isFinite(number) ? number : 0;
+}
+
+function numericOr(value, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
 }

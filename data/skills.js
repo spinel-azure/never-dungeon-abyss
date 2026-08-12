@@ -100,6 +100,59 @@ export const SKILLS = Object.freeze({
       baseRate: 0.55
     }])
   }),
+  gale_blades: Object.freeze({
+    id: "gale_blades", name: "疾風連刃",
+    description: "行動速度＋15。武器の攻撃回数で\n威力180%の高速連撃を放つ。",
+    actionType: "physicalAttack", category: "combatArt", spCost: 6, target: "enemy",
+    hitCountMode: "weapon", powerPerHit: 1.8, speedModifier: 15, effects: Object.freeze([])
+  }),
+  art_sealing_stab: Object.freeze({
+    id: "art_sealing_stab", name: "封技の一刺し",
+    description: "威力90%の攻撃。命中時、敵の特殊行動を封じる。\n通常敵3ターン、ボス1ターン。",
+    actionType: "physicalAttack", category: "combatArt", spCost: 10, target: "enemy",
+    hitCount: 1, powerPerHit: 0.9, speedModifier: 5,
+    effects: Object.freeze([{ statusId: "action_seal", trigger: "firstHitOnly", guaranteed: true }])
+  }),
+  crushing_break: Object.freeze({
+    id: "crushing_break", name: "鎧砕き・改",
+    description: "威力130%の攻撃。命中時、敵のDEFを\n3ターンの間25%低下させる。",
+    actionType: "physicalAttack", category: "combatArt", spCost: 8, target: "enemy",
+    hitCount: 1, powerPerHit: 1.3,
+    effects: Object.freeze([{ statusId: "armor_break", trigger: "firstHitOnly", guaranteed: true }])
+  }),
+  immovable_stance: Object.freeze({
+    id: "immovable_stance", name: "不動の構え",
+    description: "2ターンの間、物理ダメージを40%軽減し、\n行動不能耐性を50上昇させる。",
+    actionType: "buff", category: "combatArt", spCost: 10, target: "self", speedModifier: 10,
+    effects: Object.freeze([{ statusId: "immovable_stance", trigger: "perAction", guaranteed: true }])
+  }),
+  greater_healing: Object.freeze({
+    id: "greater_healing", name: "大治癒",
+    description: "自分のHPを大きく回復する。\n回復量は35＋INT×1.0。",
+    actionType: "healing", category: "miracle", spCost: 10, target: "self",
+    baseHealing: 35, intelligenceMultiplier: 1, speedModifier: 0
+  }),
+  holy_light: Object.freeze({
+    id: "holy_light", name: "聖光",
+    description: "必中する聖属性攻撃。\nアンデッドには与えるダメージが1.5倍。",
+    actionType: "spell", category: "miracle", spCost: 12, target: "enemy", element: "holy",
+    spellPower: 22, powerMultiplier: 1, unavoidable: true, speedModifier: -3,
+    raceDamageMultipliers: Object.freeze({ undead: 1.5 }), effects: Object.freeze([])
+  }),
+  lightning_bolt: Object.freeze({
+    id: "lightning_bolt", name: "雷撃",
+    description: "必中する雷属性攻撃。\n25%で敵の次の行動を1回封じる。",
+    actionType: "spell", category: "attackSpell", spCost: 9, target: "enemy", element: "lightning",
+    spellPower: 18, powerMultiplier: 1, unavoidable: true, speedModifier: -3,
+    effects: Object.freeze([{ statusId: "action_skip", trigger: "perAction", statusKind: "magical", baseRate: 0.25 }])
+  }),
+  magic_focus: Object.freeze({
+    id: "magic_focus", name: "魔力集中",
+    description: "次に使う攻撃呪文の最終ダメージを\n1回だけ1.5倍にする。",
+    actionType: "buff", category: "supportSpell", spCost: 8, target: "self", speedModifier: 10,
+    preventWhileStatusActive: "magic_focus",
+    effects: Object.freeze([{ statusId: "magic_focus", trigger: "perAction", guaranteed: true }])
+  }),
   conceal_presence: Object.freeze({
     id: "conceal_presence",
     name: "気配消し",
@@ -245,6 +298,14 @@ export function getSkills(ids = []) {
 }
 
 export const LEVEL_SKILL_UNLOCKS = Object.freeze([
+  Object.freeze({ job: "thief", level: 22, skillId: "gale_blades" }),
+  Object.freeze({ job: "warrior", level: 24, skillId: "crushing_break" }),
+  Object.freeze({ job: "priest", level: 24, skillId: "greater_healing" }),
+  Object.freeze({ job: "mage", level: 24, skillId: "lightning_bolt" }),
+  Object.freeze({ job: "thief", level: 32, skillId: "art_sealing_stab" }),
+  Object.freeze({ job: "warrior", level: 34, skillId: "immovable_stance" }),
+  Object.freeze({ job: "priest", level: 34, skillId: "holy_light" }),
+  Object.freeze({ job: "mage", level: 34, skillId: "magic_focus" }),
   Object.freeze({ job: "mage", level: 4, skillId: "staff_light" }),
   Object.freeze({ job: "mage", level: 25, skillId: "wisdom_to_power" }),
   Object.freeze({ job: "warrior", level: 5, skillId: "survival_instinct" }),
