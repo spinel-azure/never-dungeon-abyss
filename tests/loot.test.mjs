@@ -43,7 +43,7 @@ test("later red chest reward categories keep their existing bands", () => {
   assert.equal(rollRedChestLoot(rng(0.88), 10).equipmentId, "stiletto");
 });
 
-test("B11F to B18F red chests use the midgame consumable, card and enhanced weapon table", () => {
+test("B11F to B20F red chests use the midgame consumable, card and enhanced weapon table", () => {
   assert.equal(rollRedChestLoot(rng(0.1, 0.1, 0.59), 11).amount, 60);
   assert.equal(rollRedChestLoot(rng(0.1, 0.1, 0.6), 11).amount, 90);
   assert.equal(rollRedChestLoot(rng(0.1, 0.1, 0.9), 11).amount, 120);
@@ -59,6 +59,17 @@ test("B11F to B18F red chests use the midgame consumable, card and enhanced weap
   assert.equal(rollRedChestLoot(rng(0.8, 0), 11).enhancement, 1);
   assert.equal(rollRedChestLoot(rng(0.8, 0.7), 13).enhancement, 2);
   assert.equal(rollRedChestLoot(rng(0.8, 0.95), 16).enhancement, 3);
+});
+
+test("B19F and B20F red chests retain the midgame table and steel longsword band", () => {
+  for (const depth of [19, 20]) {
+    assert.deepEqual(rollRedChestLoot(rng(0.25, 0.75), depth), {
+      kind: "item", itemId: "healing_potion_medium", amount: 1, unidentifiedName: "？薬"
+    });
+    const weapon = rollRedChestLoot(rng(0.95, 0), depth);
+    assert.equal(weapon.equipmentId, "steel_longsword");
+    assert.equal(weapon.enhancement, 1);
+  }
 });
 
 test("B6F to B10F black chests use the potion, R-card and SR-card bands", () => {
@@ -121,6 +132,15 @@ test("B1F to B4F place one to three red chests and no black or gold", () => {
   }
   buildBoundaryWallMap(5, () => 0);
   assert.equal(cells.flat().filter(cell => cell.treasure).length, 0);
+});
+
+test("B11F to B20F place one to three red chests alongside any enabled black chest", () => {
+  for (const depth of [11, 18, 19, 20]) {
+    buildBoundaryWallMap(depth, () => 0.5, { blackChestsUnlocked: true });
+    const treasures = cells.flat().map(cell => cell.treasure).filter(Boolean);
+    assert.equal(treasures.filter(type => type === "red").length, 2);
+    assert.equal(treasures.filter(type => type === "black").length, depth === 19 ? 0 : 1);
+  }
 });
 
 test("inn fee is two gold per level", () => {

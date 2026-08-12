@@ -370,7 +370,8 @@ export function placeTreasures(depth = 1, rng = Math.random, progress = {}) {
   resetTreasures();
   const floor = Math.floor(Number(depth) || 1);
   const blackChestEnabled = Boolean(progress.blackChestsUnlocked) && floor >= 6 && floor % 10 !== 9;
-  if (floor > 4 && !blackChestEnabled) return;
+  const midRedChestsEnabled = floor >= 11 && floor <= 20;
+  if (floor > 4 && !blackChestEnabled && !midRedChestsEnabled) return;
   const { x: startX, y: startY } = startPosition;
   const distances = makeDistanceMap(startX, startY);
   const blocked = getTraversalBlockingReservations(cells);
@@ -380,9 +381,14 @@ export function placeTreasures(depth = 1, rng = Math.random, progress = {}) {
     }
   }
 
-  const count = blackChestEnabled ? 1 : 1 + Math.floor(Math.max(0, Math.min(0.999999, Number(rng()) || 0)) * 3);
-  for (let placed = 0; placed < count; placed += 1) {
-    const type = blackChestEnabled ? "black" : "red";
+  const redChestCount = floor <= 4 || midRedChestsEnabled
+    ? 1 + Math.floor(Math.max(0, Math.min(0.999999, Number(rng()) || 0)) * 3)
+    : 0;
+  const treasureTypes = [
+    ...(blackChestEnabled ? ["black"] : []),
+    ...Array.from({ length: redChestCount }, () => "red")
+  ];
+  for (const type of treasureTypes) {
     const candidates = [];
     for (let y = 0; y < MAP_H; y++) {
       for (let x = 0; x < MAP_W; x++) {

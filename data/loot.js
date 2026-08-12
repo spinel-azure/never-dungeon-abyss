@@ -83,7 +83,7 @@ export function getBlackChestLootTable(depth = 6) {
 export function rollRedChestLoot(rng = Math.random, depth = 1) {
   const roll = normalizedRoll(rng);
   const floor = Math.max(1, Math.floor(Number(depth) || 1));
-  if (floor >= 11 && floor <= 18) return rollMidRedChestLoot(roll, floor, rng);
+  if (floor >= 11 && floor <= 20) return rollMidRedChestLoot(roll, floor, rng);
   const earlyFloor = Number(depth) >= 1 && Number(depth) <= 9;
   if (earlyFloor && roll < 0.4) return { kind: "gold", amount: rollRedChestGold(rng) };
   if (earlyFloor && roll < 0.6) return { kind: "item", itemId: "healing_potion", amount: 1, unidentifiedName: "？薬" };
