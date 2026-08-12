@@ -6,6 +6,7 @@ export const enemies = Object.freeze([
     imageId: "abyss_rat",
     image: "images/enemies/enemy_01.avif",
     race: "beast",
+    maximumDepth: 10,
     maxHp: 20,
     stats: Object.freeze({ str: 5, int: 1, agi: 5, dex: 4, luc: 2 }),
     def: 4,
@@ -30,6 +31,7 @@ export const enemies = Object.freeze([
     imageId: "cave_slime",
     image: "images/enemies/enemy_02.avif",
     race: "slime",
+    maximumDepth: 10,
     maxHp: 24,
     stats: Object.freeze({ str: 4, int: 2, agi: 2, dex: 3, luc: 3 }),
     def: 5,
@@ -55,6 +57,7 @@ export const enemies = Object.freeze([
     image: "images/enemies/enemy_04.avif",
     race: "beast",
     minimumDepth: 2,
+    maximumDepth: 10,
     maxHp: 28,
     stats: Object.freeze({ str: 6, int: 2, agi: 9, dex: 7, luc: 4 }),
     def: 3,
@@ -80,6 +83,7 @@ export const enemies = Object.freeze([
     image: "images/enemies/enemy_03.avif",
     race: "undead",
     minimumDepth: 2,
+    maximumDepth: 10,
     maxHp: 36,
     stats: Object.freeze({ str: 7, int: 3, agi: 2, dex: 5, luc: 2 }),
     def: 6,
@@ -105,6 +109,7 @@ export const enemies = Object.freeze([
     image: "images/enemies/enemy_06.avif",
     race: "slime",
     minimumDepth: 2,
+    maximumDepth: 10,
     maxHp: 32,
     stats: Object.freeze({ str: 5, int: 3, agi: 3, dex: 5, luc: 4 }),
     def: 6,
@@ -136,6 +141,7 @@ export const enemies = Object.freeze([
     id: "vampire_bat", name: "吸血コウモリ", imageId: "vampire_bat",
     level: 5,
     image: "images/enemies/enemy_07.avif", race: "beast", minimumDepth: 3,
+    maximumDepth: 10,
     maxHp: 30, stats: Object.freeze({ str: 6, int: 2, agi: 11, dex: 8, luc: 4 }),
     def: 4, attack: 5, experienceReward: 10, dropItemId: "bat_wing",
     futureSpecialAttackId: "life_drain",
@@ -151,6 +157,7 @@ export const enemies = Object.freeze([
     id: "bouncing_coin", name: "跳ねるコイン", imageId: "bouncing_coin",
     level: 6,
     image: "images/enemies/enemy_08.avif", race: "construct", minimumDepth: 4,
+    maximumDepth: 10,
     maxHp: 34, stats: Object.freeze({ str: 6, int: 3, agi: 8, dex: 7, luc: 10 }),
     def: 8, attack: 5, experienceReward: 12, dropGold: 40,
     elementMultipliers: Object.freeze({ fire: 1, ice: 1 }),
@@ -165,6 +172,7 @@ export const enemies = Object.freeze([
     id: "viper", name: "ヴァイパー", imageId: "viper",
     level: 7,
     image: "images/enemies/enemy_09.avif", race: "beast", minimumDepth: 5,
+    maximumDepth: 10,
     maxHp: 42, stats: Object.freeze({ str: 8, int: 2, agi: 10, dex: 9, luc: 5 }),
     def: 5, attack: 7, experienceReward: 14, dropItemId: "snake_skin",
     specialAttack: Object.freeze({
@@ -180,6 +188,87 @@ export const enemies = Object.freeze([
       speed_down: Object.freeze({ resistancePoints: 15, immune: false })
     }),
     escapeRate: 0.6, surpriseRate: 0.22, surpriseRateMaximum: 0.35, isBoss: false
+  }),
+  Object.freeze({
+    id: "giant_spider", name: "ジャイアントスパイダー", imageId: "giant_spider",
+    level: 12,
+    image: "images/enemies/enemy_10.avif", race: "beast", minimumDepth: 11,
+    maxHp: 72, stats: Object.freeze({ str: 11, int: 3, agi: 13, dex: 12, luc: 6 }),
+    def: 8, attack: 10, experienceReward: 40, dropItemId: "spider_silk",
+    specialAttack: Object.freeze({
+      id: "binding_web", name: "蜘蛛糸", usageRate: 0.3,
+      effects: Object.freeze([Object.freeze({
+        statusId: "action_skip", statusKind: "physical", baseRate: 0.45, trigger: "firstHitOnly"
+      })])
+    }),
+    elementMultipliers: Object.freeze({ fire: 1.5, ice: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 30, immune: false }),
+      action_skip: Object.freeze({ resistancePoints: 20, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 20, immune: false })
+    }),
+    escapeRate: 0.55, surpriseRate: 0.22, surpriseRateMaximum: 0.35, isBoss: false
+  }),
+  Object.freeze({
+    id: "wasp", name: "ワスプ", imageId: "wasp",
+    level: 15,
+    image: "images/enemies/enemy_11.avif", race: "beast", minimumDepth: 13,
+    maxHp: 68, stats: Object.freeze({ str: 11, int: 3, agi: 17, dex: 15, luc: 8 }),
+    def: 8, attack: 10, experienceReward: 55, dropItemId: "beeswax",
+    actions: Object.freeze([Object.freeze({
+      weight: 100,
+      action: Object.freeze({
+        id: "wasp_double_attack", name: "連続攻撃", actionType: "physicalAttack",
+        hitCount: 2, powerPerHit: 0.75, effects: Object.freeze([])
+      })
+    })]),
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 50, immune: false }),
+      action_skip: Object.freeze({ resistancePoints: 15, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 35, immune: false })
+    }),
+    escapeRate: 0.5, surpriseRate: 0.27, surpriseRateMaximum: 0.4, isBoss: false
+  }),
+  Object.freeze({
+    id: "poison_toad", name: "ポイズントード", imageId: "poison_toad",
+    level: 18,
+    image: "images/enemies/enemy_12.avif", race: "beast", minimumDepth: 16,
+    maxHp: 108, stats: Object.freeze({ str: 14, int: 5, agi: 7, dex: 12, luc: 7 }),
+    def: 11, attack: 13, experienceReward: 75, dropItemId: "poison_toad_skin",
+    specialAttack: Object.freeze({
+      id: "venom_spray", name: "毒液", usageRate: 0.35,
+      effects: Object.freeze([Object.freeze({
+        statusId: "poison", statusKind: "physical", baseRate: 0.65, trigger: "firstHitOnly"
+      })])
+    }),
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 30, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 10, immune: false })
+    }),
+    escapeRate: 0.55, surpriseRate: 0.12, surpriseRateMaximum: 0.25, isBoss: false
+  }),
+  Object.freeze({
+    id: "banshee", name: "バンシー", imageId: "banshee",
+    level: 20,
+    image: "images/enemies/enemy_13.avif", race: "undead", minimumDepth: 19,
+    maxHp: 128, stats: Object.freeze({ str: 12, int: 15, agi: 14, dex: 14, luc: 10 }),
+    def: 12, attack: 14, experienceReward: 100,
+    specialAttack: Object.freeze({
+      id: "banshee_wail", name: "泣き叫ぶ", usageRate: 0.3,
+      effects: Object.freeze([Object.freeze({
+        statusId: "action_skip", statusKind: "magical", baseRate: 0.55, trigger: "firstHitOnly"
+      })])
+    }),
+    elementMultipliers: Object.freeze({ fire: 1.25, ice: 0.75, holy: 1.5, dark: 0.5 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 45, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 35, immune: false })
+    }),
+    escapeRate: 0.4, surpriseRate: 0.18, surpriseRateMaximum: 0.3, isBoss: false
   }),
   Object.freeze({
     id: "mimic", name: "ミミック", imageId: "mimic",
@@ -212,7 +301,9 @@ export function getEnemyById(id) {
 
 export function getRandomEnemy({ depth = 1, rng = Math.random } = {}) {
   const available = enemies.filter(enemy =>
-    enemy.randomEncounter !== false && (!enemy.minimumDepth || enemy.minimumDepth <= depth)
+    enemy.randomEncounter !== false
+    && (!enemy.minimumDepth || enemy.minimumDepth <= depth)
+    && (!enemy.maximumDepth || enemy.maximumDepth >= depth)
   );
   const index = Math.min(
     available.length - 1,

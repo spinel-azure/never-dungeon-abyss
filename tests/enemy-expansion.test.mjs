@@ -15,7 +15,7 @@ test("new enemies follow the B3F to B5F encounter progression", () => {
 test("mimic is excluded from random encounters and uses the black chest reward profile", () => {
   const mimic = getEnemyById("mimic");
   assert.equal(mimic.randomEncounter, false);
-  assert.equal(getRandomEnemy({ depth: 999, rng: () => 0.999 }).id, "viper");
+  assert.equal(getRandomEnemy({ depth: 999, rng: () => 0.999 }).id, "banshee");
   assert.equal(createEnemyCombatant(mimic).dropProfile, "blackChest");
   assert.deepEqual(rollEnemyDrop(createEnemyCombatant(mimic), sequence(0, 0)), rollBlackChestLoot(sequence(0, 0)));
 });
@@ -37,6 +37,39 @@ test("viper has poison and vampire bat reserves its future drain attack id", () 
   const viper = getEnemyById("viper");
   assert.equal(viper.specialAttack.effects[0].statusId, "poison");
   assert.equal(getEnemyById("vampire_bat").futureSpecialAttackId, "life_drain");
+});
+
+test("B11F to B20F enemies replace the early encounter pool and unlock progressively", () => {
+  assert.equal(getRandomEnemy({ depth: 10, rng: () => 0.999 }).id, "viper");
+  assert.equal(getRandomEnemy({ depth: 11, rng: () => 0.999 }).id, "giant_spider");
+  assert.equal(getRandomEnemy({ depth: 13, rng: () => 0.999 }).id, "wasp");
+  assert.equal(getRandomEnemy({ depth: 16, rng: () => 0.999 }).id, "poison_toad");
+  assert.equal(getRandomEnemy({ depth: 19, rng: () => 0.999 }).id, "banshee");
+  assert.equal(getRandomEnemy({ depth: 20, rng: () => 0 }).id, "giant_spider");
+});
+
+test("B11F to B20F enemies carry their intended attacks, rewards and materials", () => {
+  const spider = getEnemyById("giant_spider");
+  const wasp = getEnemyById("wasp");
+  const toad = getEnemyById("poison_toad");
+  const banshee = getEnemyById("banshee");
+
+  assert.equal(spider.specialAttack.effects[0].statusId, "action_skip");
+  assert.equal(wasp.actions[0].action.hitCount, 2);
+  assert.equal(wasp.actions[0].action.powerPerHit, 0.75);
+  assert.equal(toad.specialAttack.effects[0].statusId, "poison");
+  assert.equal(banshee.specialAttack.effects[0].statusId, "action_skip");
+  assert.deepEqual([spider.experienceReward, wasp.experienceReward, toad.experienceReward, banshee.experienceReward], [40, 55, 75, 100]);
+
+  for (const [enemy, itemId, sellPrice] of [
+    [spider, "spider_silk", 40],
+    [wasp, "beeswax", 50],
+    [toad, "poison_toad_skin", 60]
+  ]) {
+    assert.equal(enemy.dropItemId, itemId);
+    assert.equal(getItem(itemId).sellPrice, sellPrice);
+    assert.equal(getItem(itemId).repurchasable, false);
+  }
 });
 
 function sequence(...values) {

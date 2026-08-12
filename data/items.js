@@ -109,6 +109,24 @@ export const ITEMS = Object.freeze([
     effects: Object.freeze([{ id: "emergency_escape", value: 1 }]),
     description: "ダンジョンから強制的に脱出する。", maxOwned: 99,
     iconId: "emergency-escape", version: 1
+  }),
+  Object.freeze({
+    number: 18, id: "spider_silk", name: "蜘蛛糸", category: "material",
+    buyPrice: 0, sellPrice: 40, source: "drop", usableIn: Object.freeze([]),
+    effects: Object.freeze([]), description: "ジャイアントスパイダーが吐き出す丈夫な糸。売却専用。", maxOwned: 99,
+    repurchasable: false, iconId: "spider-silk", version: 1
+  }),
+  Object.freeze({
+    number: 19, id: "beeswax", name: "蜂ロウ", category: "material",
+    buyPrice: 0, sellPrice: 50, source: "drop", usableIn: Object.freeze([]),
+    effects: Object.freeze([]), description: "ワスプの巣から採れるロウ。売却専用。", maxOwned: 99,
+    repurchasable: false, iconId: "beeswax", version: 1
+  }),
+  Object.freeze({
+    number: 20, id: "poison_toad_skin", name: "毒ガエルの皮", category: "material",
+    buyPrice: 0, sellPrice: 60, source: "drop", usableIn: Object.freeze([]),
+    effects: Object.freeze([]), description: "ポイズントードから剥ぎ取った毒を帯びた皮。売却専用。", maxOwned: 99,
+    repurchasable: false, iconId: "poison-toad-skin", version: 1
   })
 ]);
 
