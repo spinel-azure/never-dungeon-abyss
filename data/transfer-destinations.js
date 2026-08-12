@@ -4,6 +4,11 @@ export const TRANSFER_DESTINATIONS = Object.freeze([
     character?.eventFlags?.transfer_portal_b20f_unlocked
       || character?.eventFlags?.shop_stock_b20f_unlocked
       || Number(character?.highestDungeonDepthReached) >= 20
+  )),
+  destination(30, character => Boolean(
+    character?.eventFlags?.transfer_portal_b30f_unlocked
+      || character?.eventFlags?.shop_stock_b30f_unlocked
+      || Number(character?.highestDungeonDepthReached) >= 30
   ))
 ]);
 

@@ -138,8 +138,18 @@ test("Rebellious Choker unlocks with the large healing potion and grants action-
 });
 
 test("Rebellious Choker uses the compact Japanese resistance label in status displays", async () => {
-  const source = await readFile(new URL("../js/menu.js", import.meta.url), "utf8");
-  assert.match(source, /key === "actionSkipResistance"[\s\S]*`行動不能耐性\$\{Math\.round\(Number\(value\) \* 100\)\}%`/);
+  const [menuSource, mainSource] = await Promise.all([
+    readFile(new URL("../js/menu.js", import.meta.url), "utf8"),
+    readFile(new URL("../js/main.js", import.meta.url), "utf8")
+  ]);
+  const compactLabel = /key === "actionSkipResistance"[\s\S]*?`行動不能耐性\$\{Math\.round\(Number\(value\) \* 100\)\}%`/;
+  assert.match(menuSource, compactLabel);
+  assert.match(mainSource, compactLabel);
+});
+
+test("Rebellious Choker compact resistance label is also used by the detail status screen", async () => {
+  const source = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
+  assert.match(source, /key === "actionSkipResistance"[\s\S]*?Math\.round\(Number\(value\) \* 100\)/);
 });
 
 test("thief armor shop tiers share enhancement-aware purchase and stat handling", () => {

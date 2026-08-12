@@ -17,6 +17,9 @@ test("transfer destinations are data-driven and expose only unlocked floors", ()
   assert.deepEqual(getUnlockedTransferDestinations(character).map(entry => entry.depth), [10, 20]);
   assert.equal(isTransferDestinationUnlocked(character, 20), true);
   assert.equal(isTransferDestinationUnlocked(character, 30), false);
+  character.highestDungeonDepthReached = 30;
+  assert.deepEqual(getUnlockedTransferDestinations(character).map(entry => entry.depth), [10, 20, 30]);
+  assert.equal(isTransferDestinationUnlocked(character, 30), true);
   assert.ok(TRANSFER_DESTINATIONS.every(entry => entry.label === `B${entry.depth}F`));
 });
 

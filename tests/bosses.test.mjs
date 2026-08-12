@@ -282,6 +282,12 @@ test("B20 stairs up is marked as the second transfer portal", () => {
   assert.equal(stairsUp.portal, "transfer_b20f");
 });
 
+test("B30 stairs up is marked as the third transfer portal", () => {
+  buildBoundaryWallMap(30, () => 0.5);
+  const stairsUp = cells.flat().find(cell => cell.type === "stairsUp");
+  assert.equal(stairsUp.portal, "transfer_b30f");
+});
+
 test("Brass Bull is an unplaced quest event boss with a guaranteed unique material reward", () => {
   const boss = getBossById("brass_bull_event_boss");
   assert.equal(boss.bossKind, "event");

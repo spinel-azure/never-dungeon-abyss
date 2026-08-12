@@ -1116,6 +1116,9 @@ import {
     if (Number.isFinite(item.attack)) bonuses.push(`ATK +${item.attack}`);
     bonuses.push(...Object.entries(item.statBonuses || {})
       .map(([key, value]) => {
+        if (key === "actionSkipResistance") {
+          return `行動不能耐性${Math.round(Number(value) * 100)}%`;
+        }
         const percentLabels = {
           magicDamageReduction: "魔法耐性",
           nonElementalMagicDamageReduction: "無属性呪文耐性",
@@ -2388,7 +2391,11 @@ import {
     if (currentDepth === 30 && character) {
       character = {
         ...character,
-        eventFlags: { ...(character.eventFlags || {}), shop_stock_b30f_unlocked: true }
+        eventFlags: {
+          ...(character.eventFlags || {}),
+          shop_stock_b30f_unlocked: true,
+          transfer_portal_b30f_unlocked: true
+        }
       };
     }
     startBgm(selectDungeonBgm());
