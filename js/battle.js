@@ -198,11 +198,11 @@ async function executeCommand(command) {
   battleUi.presenting = battleUi.battle.presentationEvents?.length > 0;
   battleUi.presentationHp = battleUi.presenting ? startingHp : null;
   battleUi.onCharacterChanged({
-    hp: battleUi.battle.player.hp,
+    hp: battleUi.presenting ? startingHp.player : battleUi.battle.player.hp,
     sp: battleUi.battle.player.sp,
     statuses: structuredClone(battleUi.battle.player.statuses),
     inventory: structuredClone(battleUi.battle.player.inventory),
-    alive: battleUi.battle.player.alive
+    alive: battleUi.presenting ? startingHp.player > 0 : battleUi.battle.player.alive
   });
   if (battleUi.battle.outcome) {
     battleUi.autoActive = false;
@@ -218,6 +218,7 @@ async function executeCommand(command) {
   renderBattle();
   if (battleUi.presenting) await playPresentationEvents();
   if (!battleUi.active) return;
+  syncFinalPlayerState();
   if (battleUi.battle.outcome === "victory") battleUi.playSe("battleVictory");
   else if (battleUi.battle.outcome === "defeat") battleUi.playSe("playerDamage");
   else if (
@@ -240,15 +241,16 @@ async function executeAmbushOpening() {
   battleUi.presenting = true;
   battleUi.presentationHp = startingHp;
   battleUi.onCharacterChanged({
-    hp: battleUi.battle.player.hp,
+    hp: startingHp.player,
     sp: battleUi.battle.player.sp,
     statuses: structuredClone(battleUi.battle.player.statuses),
     inventory: structuredClone(battleUi.battle.player.inventory),
-    alive: battleUi.battle.player.alive
+    alive: startingHp.player > 0
   });
   renderBattle();
   if (battleUi.battle.presentationEvents?.length) await playPresentationEvents();
   if (!battleUi.active) return;
+  syncFinalPlayerState();
   if (battleUi.battle.outcome === "defeat") battleUi.playSe("playerDamage");
   battleUi.presenting = false;
   battleUi.presentationHp = null;
@@ -262,6 +264,10 @@ async function playPresentationEvents() {
     if (!battleUi.active) return;
     applyPresentationHp(event);
     renderBattleVitals();
+    if (event.targetSide === "player") {
+      const hp = battleUi.presentationHp?.player ?? battleUi.battle.player.hp;
+      battleUi.onCharacterChanged({ hp, alive: hp > 0 });
+    }
     battleUi.messageEl.textContent = formatPresentationMessage(event);
     if (event.type === "healing") {
       showBattleNumber(event.targetSide, event.amount, "healing");
@@ -288,6 +294,16 @@ async function playPresentationEvents() {
     image.classList.remove("is-hit");
     if (event.slashExecution) await playSlashEffect(image);
   }
+}
+
+function syncFinalPlayerState() {
+  battleUi.onCharacterChanged({
+    hp: battleUi.battle.player.hp,
+    sp: battleUi.battle.player.sp,
+    statuses: structuredClone(battleUi.battle.player.statuses),
+    inventory: structuredClone(battleUi.battle.player.inventory),
+    alive: battleUi.battle.player.alive
+  });
 }
 
 async function playSlashEffect(image) {
