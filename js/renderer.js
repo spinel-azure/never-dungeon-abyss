@@ -829,7 +829,7 @@ function directionKeyBetween(fromX, fromY, toX, toY) {
 
 function drawStairsEventMarker(ctx, W, H, event) {
   const isUp = event.type === "stairsUp";
-  const isPortal = isUp && event.portal === "transfer_b10f";
+  const isPortal = isUp && String(event.portal || "").startsWith("transfer_b");
   const color = isPortal ? "#c67cff" : isUp ? "#8ed4ff" : "#f3b15a";
   const quad = event.footprint ? (isUp ? event.footprint.ceiling : event.footprint.floor) : null;
   const centerY = isUp ? event.ceilingY : event.floorY;

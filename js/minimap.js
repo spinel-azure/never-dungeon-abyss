@@ -128,7 +128,7 @@ export function getMinimapRevealOptions() {
 export function drawStairsMark(ctx, x, y, size, type, portal = null) {
   const label = type === "stairsUp" ? "U" : "D";
   ctx.save();
-  ctx.fillStyle = portal === "transfer_b10f" ? "#c67cff" : type === "stairsUp" ? "#87c7ff" : "#f0b35a";
+  ctx.fillStyle = String(portal || "").startsWith("transfer_b") ? "#c67cff" : type === "stairsUp" ? "#87c7ff" : "#f0b35a";
   ctx.font = `700 ${Math.max(8, size * .62)}px GameFont, sans-serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";

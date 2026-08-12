@@ -238,9 +238,10 @@ export function resetAllWalls() {
 
 export function placeStairs(depth = 1) {
   const { x: startX, y: startY } = startPosition;
+  const floor = Math.floor(Number(depth) || 1);
   resetCellTypes();
   cells[startY][startX].type = "stairsUp";
-  cells[startY][startX].portal = Math.floor(Number(depth) || 1) === 10 ? "transfer_b10f" : null;
+  cells[startY][startX].portal = [10, 20].includes(floor) ? `transfer_b${floor}f` : null;
   const stairsDown = findFarthestReachableCell(7);
   if (stairsDown) cells[stairsDown.y][stairsDown.x].type = "stairsDown";
 }
