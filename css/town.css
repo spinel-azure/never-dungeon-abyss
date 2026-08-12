@@ -63,6 +63,9 @@ body.town-active .town-screen.is-town-view .town-cloud-track{animation-play-stat
 .dungeon-commands[data-entrance-active="true"] button.is-empty{visibility:hidden;pointer-events:none}
 .dungeon-commands[data-facility-active="true"] button.is-empty{visibility:hidden;pointer-events:none}
 .guild-registration{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;padding:10px;border:1px solid #4f493b;border-radius:7px;background:#050706}
+.guild-registration.is-renaming{grid-template-columns:minmax(0,1fr) auto}
+.guild-registration label[hidden]{display:none}
+.dungeon-commands[hidden]{display:none}
 .loot-identify-overlay button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .guild-registration label{display:grid;gap:4px;color:#9be6ff;font:12px "PixelFont",monospace}
 .guild-registration input,.guild-registration select{min-width:0;padding:8px;border:1px solid #5bd1ff;background:#071011;color:#fff;font:18px "GameFont",sans-serif}

@@ -125,6 +125,7 @@ import { getSkill } from "../data/skills.js";
 import { getQuestRequiredSpecialRoomAccess, getSpecialRoomAccessRestriction, getSpecialRoomDefinition } from "../data/special-rooms.js";
 import { acknowledgeShopStockAnnouncement, getShopEquipmentOffer, getShopStockState, markShopCategorySeen } from "../data/shop-stock.js";
 import { getUnreadTavernRumor, markTavernRumorRead } from "../data/tavern-rumors.js";
+import { renameCharacter as applyCharacterRename } from "../data/character-name.js";
 import { getFireFloorStepDamage, isFireFloorDepth } from "../data/fire-floor.js";
 import {
   invalidateMarathonChallenge,
@@ -407,6 +408,7 @@ import {
     onUseTransfer: enterFloorFromTransfer,
     onStay: stayAtInn,
     onHeal: healAtTemple,
+    onRename: renameCharacterAtTemple,
     onPurchaseItem: purchaseTownItem,
     onPurchaseEquipment: purchaseTownEquipment,
     onBuybackEquipment: buybackTownEquipment,
@@ -710,6 +712,16 @@ import {
     return {
       message: "ギルドマスター：これを持っていけ。ついでに町を見て回ったらどうだ？一通り回ったら、また戻ってこい。"
     };
+  }
+
+  function renameCharacterAtTemple(name) {
+    const result = applyCharacterRename(character, name);
+    if (!result.accepted) return result;
+    character = result.character;
+    updateCharacterUi();
+    renderCharacterStatus();
+    saveGame();
+    return result;
   }
 
   function acquireEventCard(flagId, cardId) {

@@ -18,6 +18,7 @@ import { getShopEquipmentStock } from "../data/shop-stock.js";
 import { configureTownPassersby } from "./town-passersby.js";
 import { getInnStayFee } from "./character-services.js";
 import { getTavernRumorTypewriterParts } from "../data/tavern-rumors.js";
+import { CHARACTER_NAME_MAX_LENGTH, CHARACTER_RENAME_COST, normalizeCharacterName } from "../data/character-name.js";
 
 const FACILITY_COMMANDS = Object.freeze({
   inn: [
@@ -29,8 +30,8 @@ const FACILITY_COMMANDS = Object.freeze({
     ["talk", "話す"], ["tavern", "酒場"], ["return", "町に戻る"]
   ],
   temple: [
-    ["heal", "治療"], ["donate", "寄進"], ["talk", "話す"],
-    ["return", "町へ戻る"], ["empty-1", ""], ["empty-2", ""]
+    ["heal", "治療"], ["donate", "寄進"], ["rename", "改名"],
+    ["talk", "話す"], ["return", "町へ戻る"], ["empty-1", ""]
   ],
   shop: [
     ["buy", "購入"], ["sell", "売却"], ["buyback", "買い戻す"],
@@ -116,6 +117,7 @@ const town = {
   onUseTransfer: () => false,
   onStay: () => {},
   onHeal: () => {},
+  onRename: () => null,
   onPurchaseItem: () => null,
   onPurchaseEquipment: () => null,
   onBuybackEquipment: () => null,
@@ -316,10 +318,16 @@ export function configureTown(options) {
   });
   town.registration.addEventListener("submit", event => {
     event.preventDefault();
-    registerCharacter();
+    if (town.mode === "templeRenameInput") renameCharacterAtTemple();
+    else registerCharacter();
   });
   town.registration.addEventListener("keydown", event => {
     if (event.key !== "Enter") return;
+    if (town.mode === "templeRenameInput") {
+      event.preventDefault();
+      town.registration.requestSubmit();
+      return;
+    }
     const submitButton = town.registration.querySelector('button[type="submit"]');
     if (event.target === town.nameInput) {
       event.preventDefault();
@@ -415,6 +423,8 @@ export function handleTownInput(action) {
   if (town.mode === "shopCategory") return handleShopCategoryInput(action);
   if (town.mode === "innStayConfirm") return handleInnStayConfirmationInput(action);
   if (town.mode === "templeHealConfirm") return handleTempleHealConfirmationInput(action);
+  if (town.mode === "templeRenameConfirm") return handleTempleRenameConfirmationInput(action);
+  if (town.mode === "templeRenameInput") return handleTempleRenameInput(action);
   if (town.mode === "commerceQuantity") return handleCommerceQuantityInput(action);
   if (town.mode === "commerceConfirm") return handleCommerceConfirmationInput(action);
   if (town.mode === "commerce") return handleCommerceInput(action);
@@ -1201,6 +1211,7 @@ function showFacilityCommands(facilityId) {
       || id === "stay"
       || id === "heal"
       || (facilityId === "temple" && id === "donate")
+      || (facilityId === "temple" && id === "rename")
       || (facilityId === "shop" && id === "buy")
       || (facilityId === "shop" && ["sell", "buyback", "storage"].includes(id))
       || id === "deck"
@@ -1235,6 +1246,10 @@ function activateFacilityService(command) {
   }
   if (command === "heal") {
     requestTempleHealing();
+    return true;
+  }
+  if (command === "rename") {
+    requestTempleRename();
     return true;
   }
   if (command === "deck") {
@@ -1382,6 +1397,93 @@ function handleTempleHealConfirmationInput(action) {
     return true;
   }
   return true;
+}
+
+function requestTempleRename() {
+  town.mode = "templeRenameConfirm";
+  town.playSe("confirm");
+  town.messageEl.textContent = `司祭アーヴァイン：魂と紐付けられた名前を変えるのです。それなりの額を寄進していただく必要がありますな…。\n${CHARACTER_RENAME_COST.toLocaleString("ja-JP")}G寄進しますか？\n＊Aボタン：はい　Bボタン：いいえ`;
+}
+
+function handleTempleRenameConfirmationInput(action) {
+  if (action === "cancel") {
+    town.playSe("cancel");
+    town.mode = "facilityMenu";
+    renderFacilityCommandSelection();
+    return true;
+  }
+  if (action !== "confirm") return true;
+  town.playSe("confirm");
+  const gold = Math.max(0, Math.floor(Number(town.getCharacter()?.gold) || 0));
+  if (gold < CHARACTER_RENAME_COST) {
+    town.mode = "facilityMenu";
+    town.messageEl.textContent = "司祭アーヴァイン：申し訳ありませんが、魂の名を書き換えるには10,000Gの寄進が必要なのです。";
+    return true;
+  }
+  town.messageEl.textContent = "司祭アーヴァイン：では、女神様の前で新たな魂の名前を口にするのです…！";
+  openTempleRenameInput();
+  return true;
+}
+
+function openTempleRenameInput() {
+  town.mode = "templeRenameInput";
+  town.registration.classList.add("is-renaming");
+  town.registration.dataset.mode = "rename";
+  town.nameInput.value = town.getCharacter()?.name || "";
+  town.nameInput.maxLength = CHARACTER_NAME_MAX_LENGTH;
+  town.jobSelect.closest("label").hidden = true;
+  town.registration.querySelector('button[type="submit"]').textContent = "改名";
+  town.feedback.textContent = "";
+  town.registration.hidden = false;
+  town.commandRoot.hidden = true;
+  requestAnimationFrame(() => town.nameInput.focus({ preventScroll: true }));
+}
+
+function handleTempleRenameInput(action) {
+  if (action === "cancel") {
+    town.playSe("cancel");
+    closeTempleRenameInput();
+    town.messageEl.textContent = "司祭アーヴァイン：承知しました。魂の名はそのままといたしましょう。";
+    return true;
+  }
+  if (action === "confirm") {
+    town.playSe("confirm");
+    town.registration.requestSubmit();
+  }
+  return true;
+}
+
+function renameCharacterAtTemple() {
+  const name = normalizeCharacterName(town.nameInput.value);
+  if (!name) {
+    town.feedback.textContent = "名前を入力してください。";
+    town.nameInput.focus({ preventScroll: true });
+    return false;
+  }
+  const result = town.onRename(name);
+  if (!result?.accepted) {
+    town.feedback.textContent = result?.reason === "insufficientGold"
+      ? "GOLDが足りません。"
+      : "改名できませんでした。";
+    return false;
+  }
+  closeTempleRenameInput();
+  renderCharacterStatus();
+  town.messageEl.textContent = "司祭アーヴァイン：……確かに承りました。これより、その名こそがあなたの魂の名です。";
+  town.onStateChanged();
+  return true;
+}
+
+function closeTempleRenameInput() {
+  if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+  town.registration.hidden = true;
+  town.registration.classList.remove("is-renaming");
+  delete town.registration.dataset.mode;
+  town.jobSelect.closest("label").hidden = false;
+  town.commandRoot.hidden = false;
+  town.mode = "facilityMenu";
+  updateRegistrationLanguage();
+  showFacilityCommands("temple");
 }
 
 function requestInnStay() {
@@ -1978,7 +2080,7 @@ function resetTownViewport() {
 }
 
 function registerCharacter() {
-  const name = town.nameInput.value.trim().slice(0, 12);
+  const name = normalizeCharacterName(town.nameInput.value);
   if (!validateRegistrationName()) return;
   const job = CHARACTER_JOBS.find(item => item.id === town.jobSelect.value) || CHARACTER_JOBS[0];
   town.registrationRequired = false;
@@ -1997,7 +2099,7 @@ function registerCharacter() {
 }
 
 function validateRegistrationName() {
-  if (town.nameInput.value.trim()) {
+  if (normalizeCharacterName(town.nameInput.value)) {
     town.feedback.textContent = "";
     return true;
   }
