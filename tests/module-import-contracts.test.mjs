@@ -9,3 +9,9 @@ test("main imports quest progress before gating the B6 special door", async () =
   assert.match(questImport[1], /\bgetQuestProgress\b/);
   assert.match(source, /getQuestProgress\(character, room\.content\.requiredQuestId\)/);
 });
+
+test("main does not import the same module more than once", async () => {
+  const source = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
+  const modules = [...source.matchAll(/from\s+["']([^"']+)["'];/g)].map(match => match[1]);
+  assert.deepEqual(modules, [...new Set(modules)]);
+});
