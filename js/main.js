@@ -404,7 +404,7 @@ import {
     getCharacter: () => character,
     onRegister: registerCharacter,
     onEnterDungeon: enterDungeonFromTown,
-    onUseTransfer: enterB10FromTransfer,
+    onUseTransfer: enterFloorFromTransfer,
     onStay: stayAtInn,
     onHeal: healAtTemple,
     onPurchaseItem: purchaseTownItem,
@@ -2079,13 +2079,19 @@ import {
     setPlayerInputEnabled(true);
   }
 
-  async function enterB10FromTransfer() {
-    if (!character?.eventFlags?.transfer_portal_b10f_unlocked) return false;
+  async function enterFloorFromTransfer(depth = 10) {
+    const destination = Number(depth) === 20 ? 20 : 10;
+    const flags = character?.eventFlags || {};
+    const unlocked = destination === 10
+      ? flags.transfer_portal_b10f_unlocked
+      : flags.transfer_portal_b20f_unlocked || flags.shop_stock_b20f_unlocked
+        || Number(character?.highestDungeonDepthReached) >= 20;
+    if (!unlocked) return false;
     setPlayerInputEnabled(false);
     await runSceneTransition({
       playAudio: () => playSeSequence("stairs", 3),
       onDark: () => {
-        currentDepth = 10;
+        currentDepth = destination;
         character = invalidateMarathonChallenge(character);
         setDungeonColors(resolveFloorTheme(currentDepth, getDungeonColors()));
         applyCurrentFloorMist();
@@ -2099,7 +2105,7 @@ import {
         worldLocation = "dungeon";
         closeTown();
         startBgm(selectDungeonBgm());
-        say("転送門を抜け、B10Fへ到達した。");
+        say(`転送門を抜け、B${destination}Fへ到達した。`);
         saveGame();
       }
     });
@@ -2357,7 +2363,11 @@ import {
     if (currentDepth === 20 && character) {
       character = {
         ...character,
-        eventFlags: { ...(character.eventFlags || {}), shop_stock_b20f_unlocked: true }
+        eventFlags: {
+          ...(character.eventFlags || {}),
+          shop_stock_b20f_unlocked: true,
+          transfer_portal_b20f_unlocked: true
+        }
       };
     }
     if (currentDepth === 30 && character) {

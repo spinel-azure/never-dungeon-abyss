@@ -99,6 +99,7 @@ const town = {
   activeRumor: null,
   questAcceptanceRewardMessage: "",
   entranceIndex: 0,
+  transferIndex: 0,
   facilityCommandIndex: 0,
   transferUnlocked: false,
   selectedIndex: 1,
@@ -261,6 +262,10 @@ export function configureTown(options) {
     if (!item.empty) {
       button.addEventListener("click", () => {
         town.playSe("confirm");
+        if (town.mode === "transferCircle") {
+          activateTransferSelection(index);
+          return;
+        }
         town.entranceIndex = index;
         activateEntranceCommand(item.id);
       });
@@ -419,10 +424,16 @@ export function handleTownInput(action) {
   if (town.mode === "dungeonEntrance") return handleEntranceInput(action);
   if (town.mode === "facilityMenu" || town.mode === "facility") return handleFacilityMenuInput(action);
   if (town.mode === "transferCircle") {
-    if (action === "confirm" && town.transferUnlocked && !town.transitioning) {
+    const optionCount = getTransferDepths().length + 1;
+    if ((action === "left" || action === "right") && optionCount > 1) {
+      town.playSe("cursorMove");
+      town.transferIndex = (town.transferIndex + (action === "right" ? 1 : optionCount - 1)) % optionCount;
+      renderTransferCircle();
+      return true;
+    }
+    if (action === "confirm") {
       town.playSe("confirm");
-      town.transitioning = true;
-      Promise.resolve(town.onUseTransfer()).finally(() => { town.transitioning = false; });
+      activateTransferSelection(town.transferIndex);
       return true;
     }
     if (action === "cancel") {
@@ -1120,9 +1131,26 @@ function renderTransferCircle() {
   town.portraitPlaceholder.hidden = true;
   town.registration.hidden = true;
   town.root.querySelector("#townFacilityName").hidden = true;
+  const depths = getTransferDepths();
+  town.transferIndex = Math.min(town.transferIndex, depths.length);
   town.messageEl.textContent = town.transferUnlocked
-    ? "転送門がある。利用しますか？\n＊Aボタン：はい　Bボタン：いいえ"
+    ? "転送先を選んでください。"
     : "まだ入ることは出来ない。";
+  town.entranceButtons.forEach((button, index) => {
+    if (index < depths.length) {
+      button.textContent = `B${depths[index]}F`;
+      button.disabled = false;
+      button.classList.remove("is-empty", "is-unavailable");
+    } else if (index === depths.length) {
+      button.textContent = "戻る";
+      button.disabled = false;
+      button.classList.remove("is-empty", "is-unavailable");
+    } else {
+      button.textContent = "";
+      button.disabled = true;
+      button.classList.add("is-empty");
+    }
+  });
   renderEntranceSelection();
   resetTownViewport();
   town.onStateChanged();
@@ -1130,11 +1158,36 @@ function renderTransferCircle() {
 
 function renderEntranceSelection() {
   town.entranceButtons.forEach((button, index) => {
-    button.classList.toggle("is-selected", index === town.entranceIndex && index < 3);
-    const unavailable = button.dataset.entranceCommand === "circle" && !town.transferUnlocked;
+    const selectedIndex = town.mode === "transferCircle" ? town.transferIndex : town.entranceIndex;
+    button.classList.toggle("is-selected", index === selectedIndex && !button.disabled);
+    const unavailable = town.mode !== "transferCircle"
+      && button.dataset.entranceCommand === "circle" && !town.transferUnlocked;
     button.classList.toggle("is-unavailable", unavailable);
     button.setAttribute("aria-disabled", String(unavailable));
   });
+}
+
+function getTransferDepths() {
+  const character = town.getCharacter?.();
+  const flags = character?.eventFlags || {};
+  const depths = [];
+  if (flags.transfer_portal_b10f_unlocked) depths.push(10);
+  if (flags.transfer_portal_b20f_unlocked || flags.shop_stock_b20f_unlocked
+    || Number(character?.highestDungeonDepthReached) >= 20) depths.push(20);
+  return depths;
+}
+
+function activateTransferSelection(index) {
+  const depths = getTransferDepths();
+  const depth = depths[index];
+  if (!depth) {
+    town.mode = "dungeonEntrance";
+    renderDungeonEntrance();
+    return;
+  }
+  if (town.transitioning) return;
+  town.transitioning = true;
+  Promise.resolve(town.onUseTransfer(depth)).finally(() => { town.transitioning = false; });
 }
 
 function showFacilityCommands(facilityId) {
