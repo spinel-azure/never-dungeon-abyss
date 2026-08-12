@@ -72,6 +72,22 @@ test("B19F and B20F red chests retain the midgame table and steel longsword band
   }
 });
 
+test("B31F to B40F red chests use floor-fixed class armor and 70/25/5 enhancements", () => {
+  assert.equal(rollRedChestLoot(rng(0.099), 31).itemId, "healing_potion_large");
+  assert.equal(rollRedChestLoot(rng(0.1), 31).itemId, "antidote_medium");
+  assert.deepEqual(
+    [31, 34, 37, 39].map(depth => rollRedChestLoot(rng(0.2, 0), depth).equipmentId),
+    ["steel_shield", "silver_buckler", "silver_light_shield", "intermediate_grimoire"]
+  );
+  assert.deepEqual(
+    [0.2, 0.4, 0.6, 0.8].map(roll => rollRedChestLoot(rng(roll, 0), 40).slot),
+    ["leftArmId", "headId", "bodyId", "footId"]
+  );
+  assert.equal(rollRedChestLoot(rng(0.2, 0.699), 31).enhancement, 1);
+  assert.equal(rollRedChestLoot(rng(0.2, 0.7), 31).enhancement, 2);
+  assert.equal(rollRedChestLoot(rng(0.2, 0.95), 31).enhancement, 3);
+});
+
 test("B6F to B10F black chests use the potion, R-card and SR-card bands", () => {
   assert.equal(rollBlackChestLoot(rng(0.429), 6).itemId, "healing_potion_medium");
   assert.equal(rollBlackChestLoot(rng(0.43, 0), 6).cardId, "rare_strength_up_plus");
@@ -140,6 +156,15 @@ test("B11F to B20F place one to three red chests alongside any enabled black che
     const treasures = cells.flat().map(cell => cell.treasure).filter(Boolean);
     assert.equal(treasures.filter(type => type === "red").length, 2);
     assert.equal(treasures.filter(type => type === "black").length, depth === 19 ? 0 : 1);
+  }
+});
+
+test("B31F to B40F place red chests and keep B39F free of black chests", () => {
+  for (const depth of [31, 38, 39, 40]) {
+    buildBoundaryWallMap(depth, () => 0.5, { blackChestsUnlocked: true });
+    const treasures = cells.flat().map(cell => cell.treasure).filter(Boolean);
+    assert.equal(treasures.filter(type => type === "red").length, 2);
+    assert.equal(treasures.filter(type => type === "black").length, depth === 39 ? 0 : 1);
   }
 });
 

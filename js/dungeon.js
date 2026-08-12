@@ -370,8 +370,8 @@ export function placeTreasures(depth = 1, rng = Math.random, progress = {}) {
   resetTreasures();
   const floor = Math.floor(Number(depth) || 1);
   const blackChestEnabled = Boolean(progress.blackChestsUnlocked) && floor >= 6 && floor % 10 !== 9;
-  const midRedChestsEnabled = floor >= 11 && floor <= 20;
-  if (floor > 4 && !blackChestEnabled && !midRedChestsEnabled) return;
+  const redChestsEnabled = (floor >= 11 && floor <= 20) || (floor >= 31 && floor <= 40);
+  if (floor > 4 && !blackChestEnabled && !redChestsEnabled) return;
   const { x: startX, y: startY } = startPosition;
   const distances = makeDistanceMap(startX, startY);
   const blocked = getTraversalBlockingReservations(cells);
@@ -381,7 +381,7 @@ export function placeTreasures(depth = 1, rng = Math.random, progress = {}) {
     }
   }
 
-  const redChestCount = floor <= 4 || midRedChestsEnabled
+  const redChestCount = floor <= 4 || redChestsEnabled
     ? 1 + Math.floor(Math.max(0, Math.min(0.999999, Number(rng()) || 0)) * 3)
     : 0;
   const treasureTypes = [

@@ -2360,6 +2360,12 @@ import {
         eventFlags: { ...(character.eventFlags || {}), shop_stock_b20f_unlocked: true }
       };
     }
+    if (currentDepth === 30 && character) {
+      character = {
+        ...character,
+        eventFlags: { ...(character.eventFlags || {}), shop_stock_b30f_unlocked: true }
+      };
+    }
     startBgm(selectDungeonBgm());
     setDungeonColors(resolveFloorTheme(currentDepth, getDungeonColors()));
     applyCurrentFloorMist();

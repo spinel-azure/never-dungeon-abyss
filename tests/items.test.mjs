@@ -365,6 +365,24 @@ test("antidote cures poison and restores 15 HP", () => {
   assert.equal(result.character.condition, "GOOD");
 });
 
+test("medium antidote shares the final shop unlock and restores 30 HP with or without poison", () => {
+  const character = characterWith("antidote_medium");
+  character.maxHp = 100;
+  character.hp = 10;
+  character.statuses = [{ statusId: "poison", remainingTurns: 3 }];
+  const result = resolveFieldItemUse({ character, itemId: "antidote_medium", context: "town" });
+  assert.equal(result.accepted, true);
+  assert.equal(result.character.hp, 40);
+  assert.equal(result.character.statuses.length, 0);
+
+  const shopper = createInitialCharacter({ name: "TEST", job: "warrior" });
+  shopper.eventFlags.shop_stock_b30f_unlocked = true;
+  assert.equal(getShopItemIdsForCharacter(shopper).includes("antidote_medium"), false);
+  shopper.eventFlags.boss_iron_maiden_b29f_defeated = true;
+  assert.equal(getShopItemIdsForCharacter(shopper).includes("antidote_medium"), true);
+  assert.equal(getItem("antidote_medium").buyPrice, 60);
+});
+
 test("styptic cures bleeding and restores 15 HP", () => {
   let character = characterWith("styptic");
   character.hp = Math.max(1, character.maxHp - 20);

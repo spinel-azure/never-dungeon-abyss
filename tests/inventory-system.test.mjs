@@ -114,3 +114,22 @@ test("unidentified stiletto quality is retained when the loot bag is settled", (
   assert.equal(settled.equipmentResults[0].enhancement, 3);
   assert.equal(settled.equipmentResults[0].identified, true);
 });
+
+test("final shop armor keeps its class identity and enhancement stat profiles", () => {
+  assert.deepEqual(
+    getEquipmentInstanceDefinition({ equipmentId: "steel_shield", enhancement: 3 }).statBonuses,
+    { def: 6, dex: 4 }
+  );
+  assert.deepEqual(
+    getEquipmentInstanceDefinition({ equipmentId: "silver_boots", enhancement: 2 }).statBonuses,
+    { def: 4, agi: 5 }
+  );
+  assert.deepEqual(
+    getEquipmentInstanceDefinition({ equipmentId: "silver_mitre", enhancement: 1 }).statBonuses,
+    { def: 5, luc: 3 }
+  );
+  assert.deepEqual(
+    getEquipmentInstanceDefinition({ equipmentId: "intermediate_grimoire", enhancement: 3 }).statBonuses,
+    { int: 8 }
+  );
+});

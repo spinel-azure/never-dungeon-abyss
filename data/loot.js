@@ -2,6 +2,7 @@ export const ENEMY_DROP_RATES = Object.freeze({ none: 0.4, item: 0.55, redChest:
 export const STILETTO_ENHANCEMENT_RATES = Object.freeze([0.75, 0.18, 0.06, 0.01]);
 export const BLACK_CHEST_STILETTO_ENHANCEMENT_RATES = Object.freeze([0.45, 0.35, 0.15, 0.05]);
 export const MID_RED_CHEST_WEAPON_ENHANCEMENT_RATES = Object.freeze([0.7, 0.25, 0.05]);
+export const DEEP_RED_CHEST_ARMOR_ENHANCEMENT_RATES = Object.freeze([0.7, 0.25, 0.05]);
 export const MID_BLACK_CHEST_STAFF_ENHANCEMENT_RATES = Object.freeze([0.7, 0.25, 0.05]);
 export const BLACK_CHEST_LOOT_TABLES = Object.freeze([
   Object.freeze({ minDepth: 6, maxDepth: 10, gold: [60, 80, 100], potionId: "healing_potion_medium" }),
@@ -84,6 +85,7 @@ export function rollRedChestLoot(rng = Math.random, depth = 1) {
   const roll = normalizedRoll(rng);
   const floor = Math.max(1, Math.floor(Number(depth) || 1));
   if (floor >= 11 && floor <= 20) return rollMidRedChestLoot(roll, floor, rng);
+  if (floor >= 31 && floor <= 40) return rollDeepRedChestLoot(roll, floor, rng);
   const earlyFloor = Number(depth) >= 1 && Number(depth) <= 9;
   if (earlyFloor && roll < 0.4) return { kind: "gold", amount: rollRedChestGold(rng) };
   if (earlyFloor && roll < 0.6) return { kind: "item", itemId: "healing_potion", amount: 1, unidentifiedName: "？薬" };
@@ -104,6 +106,31 @@ export function rollRedChestLoot(rng = Math.random, depth = 1) {
   if (!earlyFloor && roll < 0.88) return { kind: "item", itemId: "antidote", amount: 1, unidentifiedName: "？薬" };
   return { kind: "equipment", equipmentId: "stiletto", slot: "rightArmId",
     enhancement: rollEnhancement(STILETTO_ENHANCEMENT_RATES, rng), unidentifiedName: "？短剣" };
+}
+
+function rollDeepRedChestLoot(roll, depth, rng) {
+  if (roll < 0.1) {
+    return { kind: "item", itemId: "healing_potion_large", amount: 1, unidentifiedName: "？薬" };
+  }
+  if (roll < 0.2) {
+    return { kind: "item", itemId: "antidote_medium", amount: 1, unidentifiedName: "？薬" };
+  }
+  const family = depth <= 33
+    ? ["steel_shield", "steel_helmet", "steel_surcoat", "steel_greaves"]
+    : depth <= 36
+      ? ["silver_buckler", "silver_light_helmet", "silver_light_armor", "silver_boots"]
+      : depth <= 38
+        ? ["silver_light_shield", "silver_mitre", "silver_vestment", "silver_shoes"]
+        : ["intermediate_grimoire", "tudor_hat", "mage_tunic", "leather_poulaines"];
+  const slotIndex = roll < 0.4 ? 0 : roll < 0.6 ? 1 : roll < 0.8 ? 2 : 3;
+  const slots = ["leftArmId", "headId", "bodyId", "footId"];
+  return {
+    kind: "equipment",
+    equipmentId: family[slotIndex],
+    slot: slots[slotIndex],
+    enhancement: rollEnhancement(DEEP_RED_CHEST_ARMOR_ENHANCEMENT_RATES, rng) + 1,
+    unidentifiedName: slotIndex === 0 && depth >= 39 ? "？魔導書" : "？防具"
+  };
 }
 
 function rollMidRedChestLoot(roll, depth, rng) {

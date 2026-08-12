@@ -11,10 +11,18 @@ const ARMOR_FAMILIES = Object.freeze([
   Object.freeze(["beginner_grimoire", "mage_hat", "mage_robe", "cloth_shoes"])
 ]);
 
+export const FINAL_ARMOR_FAMILIES = Object.freeze([
+  Object.freeze(["steel_shield", "steel_helmet", "steel_surcoat", "steel_greaves"]),
+  Object.freeze(["silver_buckler", "silver_light_helmet", "silver_light_armor", "silver_boots"]),
+  Object.freeze(["silver_light_shield", "silver_mitre", "silver_vestment", "silver_shoes"]),
+  Object.freeze(["intermediate_grimoire", "tudor_hat", "mage_tunic", "leather_poulaines"])
+]);
+
 export const SHOP_ARMOR_STOCK = Object.freeze([
   ...armorTier(1, 1, []),
   ...armorTier(2, 10, ["transfer_portal_b10f_unlocked", "boss_strange_knight_statue_b9f_defeated"]),
-  ...armorTier(3, 20, ["shop_stock_b20f_unlocked", "boss_fallen_mage_b19f_defeated"])
+  ...armorTier(3, 20, ["shop_stock_b20f_unlocked", "boss_fallen_mage_b19f_defeated"]),
+  ...finalArmorStock()
 ]);
 
 export const SHOP_ACCESSORY_STOCK = Object.freeze([
@@ -111,6 +119,16 @@ function armorTier(enhancement, shopUnlockDepth, requiredFlags) {
     enhancement,
     shopUnlockDepth,
     requiredFlags: Object.freeze([...requiredFlags])
+  }));
+}
+
+function finalArmorStock() {
+  return FINAL_ARMOR_FAMILIES.flatMap(family => family).map(equipmentId => Object.freeze({
+    id: `shop_${equipmentId}`,
+    equipmentId,
+    enhancement: 0,
+    shopUnlockDepth: 30,
+    requiredFlags: Object.freeze(["shop_stock_b30f_unlocked", "boss_iron_maiden_b29f_defeated"])
   }));
 }
 

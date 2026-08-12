@@ -181,6 +181,13 @@ export const ITEMS = Object.freeze([
     buyPrice: 0, sellPrice: 320, source: "drop", usableIn: Object.freeze([]), effects: Object.freeze([]),
     description: "氷熊の巨大で分厚い手。売却専用。", maxOwned: 99,
     repurchasable: false, iconId: "ice-bear-paw", version: 1
+  }),
+  Object.freeze({
+    number: 30, id: "antidote_medium", name: "解毒剤（中）", category: "recovery",
+    buyPrice: 60, sellPrice: 30, source: "shop", usableIn: Object.freeze(["town", "dungeon", "battle"]),
+    effects: Object.freeze([{ id: "cure_poison", value: 1 }, { id: "heal_hp", value: 30 }]),
+    description: "毒を治療し、HPを30回復する。毒でなくても使用可能。", maxOwned: 99,
+    iconId: "antidote", version: 1, shopUnlockDepth: 30
   })
 ]);
 
@@ -194,6 +201,7 @@ export function getShopItemIdsForDepth(depth = 1) {
     "healing_potion",
     ...(reached >= 10 ? ["healing_potion_medium"] : []),
     ...(reached >= 20 ? ["healing_potion_large"] : []),
+    ...(reached >= 30 ? ["antidote_medium"] : []),
     ...BASE_SHOP_ITEM_IDS.slice(1)
   ];
 }
@@ -204,6 +212,7 @@ export function getShopItemIdsForCharacter(character) {
     "healing_potion",
     ...(flags.transfer_portal_b10f_unlocked ? ["healing_potion_medium"] : []),
     ...(flags.shop_stock_b20f_unlocked ? ["healing_potion_large"] : []),
+    ...(flags.shop_stock_b30f_unlocked && flags.boss_iron_maiden_b29f_defeated ? ["antidote_medium"] : []),
     ...BASE_SHOP_ITEM_IDS.slice(1)
   ];
 }

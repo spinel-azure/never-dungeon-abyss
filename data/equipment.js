@@ -20,6 +20,58 @@ export const EQUIPMENT = Object.freeze({
     sellPrice: 750
   }),
 
+  steel_shield: item("steel_shield", "鋼の盾", "leftArmId", { def: 4, dex: 2 }, finalArmor("warrior", {
+    1: { def: 5, dex: 2 }, 2: { def: 5, dex: 3 }, 3: { def: 6, dex: 4 }
+  })),
+  steel_helmet: item("steel_helmet", "鋼の兜", "headId", { def: 6 }, finalArmor("warrior", {
+    1: { def: 7 }, 2: { def: 8 }, 3: { def: 10 }
+  })),
+  steel_surcoat: item("steel_surcoat", "鋼のサーコート", "bodyId", { def: 5, str: 2 }, finalArmor("warrior", {
+    1: { def: 6, str: 2 }, 2: { def: 6, str: 3 }, 3: { def: 7, str: 4 }
+  })),
+  steel_greaves: item("steel_greaves", "鋼のすね当て", "footId", { def: 4, str: 2 }, finalArmor("warrior", {
+    1: { def: 5, str: 2 }, 2: { def: 5, str: 3 }, 3: { def: 6, str: 4 }
+  })),
+
+  silver_buckler: item("silver_buckler", "銀のバックラー", "leftArmId", { def: 5 }, finalArmor("thief", {
+    1: { def: 6 }, 2: { def: 7 }, 3: { def: 8 }
+  })),
+  silver_light_helmet: item("silver_light_helmet", "銀の軽兜", "headId", { def: 4, dex: 2 }, finalArmor("thief", {
+    1: { def: 5, dex: 2 }, 2: { def: 5, dex: 3 }, 3: { def: 6, dex: 4 }
+  })),
+  silver_light_armor: item("silver_light_armor", "銀の軽鎧", "bodyId", { def: 4, dex: 2 }, finalArmor("thief", {
+    1: { def: 5, dex: 2 }, 2: { def: 5, dex: 3 }, 3: { def: 6, dex: 4 }
+  })),
+  silver_boots: item("silver_boots", "銀のブーツ", "footId", { def: 3, agi: 4 }, finalArmor("thief", {
+    1: { def: 4, agi: 4 }, 2: { def: 4, agi: 5 }, 3: { def: 5, agi: 6 }
+  })),
+
+  silver_light_shield: item("silver_light_shield", "銀の軽盾", "leftArmId", { def: 5 }, finalArmor("priest", {
+    1: { def: 6 }, 2: { def: 7 }, 3: { def: 8 }
+  })),
+  silver_mitre: item("silver_mitre", "銀のミトラ", "headId", { def: 4, luc: 3 }, finalArmor("priest", {
+    1: { def: 5, luc: 3 }, 2: { def: 5, luc: 4 }, 3: { def: 6, luc: 5 }
+  })),
+  silver_vestment: item("silver_vestment", "銀の祭服", "bodyId", { def: 4, luc: 2 }, finalArmor("priest", {
+    1: { def: 5, luc: 2 }, 2: { def: 5, luc: 3 }, 3: { def: 6, luc: 4 }
+  })),
+  silver_shoes: item("silver_shoes", "銀の靴", "footId", { def: 4, agi: 4 }, finalArmor("priest", {
+    1: { def: 5, agi: 4 }, 2: { def: 5, agi: 5 }, 3: { def: 6, agi: 6 }
+  })),
+
+  intermediate_grimoire: item("intermediate_grimoire", "中級魔道書", "leftArmId", { int: 5 }, finalArmor("mage", {
+    1: { int: 6 }, 2: { int: 7 }, 3: { int: 8 }
+  })),
+  tudor_hat: item("tudor_hat", "チューダーハット", "headId", { def: 5 }, finalArmor("mage", {
+    1: { def: 6 }, 2: { def: 7 }, 3: { def: 8 }
+  })),
+  mage_tunic: item("mage_tunic", "魔術師のチュニック", "bodyId", { def: 4, int: 1 }, finalArmor("mage", {
+    1: { def: 5, int: 1 }, 2: { def: 5, int: 2 }, 3: { def: 6, int: 3 }
+  })),
+  leather_poulaines: item("leather_poulaines", "革のプーレーヌ", "footId", { def: 4, agi: 4 }, finalArmor("mage", {
+    1: { def: 5, agi: 4 }, 2: { def: 5, agi: 5 }, 3: { def: 6, agi: 6 }
+  })),
+
   iron_buckler: item("iron_buckler", "鉄の小盾", "leftArmId", { def: 2 }, enhancedArmor("warrior", {
     1: { def: 3 }, 2: { def: 4 }, 3: { def: 4, dex: 1 }
   })),
@@ -131,6 +183,22 @@ function enhancedArmor(job, statBonusesByEnhancement) {
     )),
     buyPriceByEnhancement: Object.freeze({ 1: 100, 2: 500, 3: 1500 }),
     sellPriceByEnhancement: Object.freeze({ 0: 25, 1: 50, 2: 250, 3: 750 })
+  };
+}
+
+function finalArmor(job, statBonusesByEnhancement) {
+  return {
+    allowedJobs: Object.freeze([job]),
+    buyPrice: 3000,
+    sellPrice: 1500,
+    shopUnlockDepth: 30,
+    statBonusesByEnhancement: Object.freeze(Object.fromEntries(
+      Object.entries(statBonusesByEnhancement).map(([level, bonuses]) => [
+        level,
+        Object.freeze({ ...bonuses })
+      ])
+    )),
+    sellPriceByEnhancement: Object.freeze({ 0: 1500, 1: 1800, 2: 2250, 3: 3000 })
   };
 }
 
