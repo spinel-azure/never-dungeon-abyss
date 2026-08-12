@@ -192,7 +192,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "giant_spider", name: "ジャイアントスパイダー", imageId: "giant_spider",
     level: 12,
-    image: "images/enemies/enemy_10.avif", race: "beast", minimumDepth: 11, maximumDepth: 20,
+    image: "images/enemies/enemy_10.avif", race: "beast", minimumDepth: 11, maximumDepth: 29,
     maxHp: 72, stats: Object.freeze({ str: 11, int: 3, agi: 13, dex: 12, luc: 6 }),
     def: 8, attack: 10, experienceReward: 40, dropItemId: "spider_silk",
     specialAttack: Object.freeze({
@@ -212,7 +212,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "wasp", name: "ワスプ", imageId: "wasp",
     level: 15,
-    image: "images/enemies/enemy_11.avif", race: "beast", minimumDepth: 13, maximumDepth: 20,
+    image: "images/enemies/enemy_11.avif", race: "beast", minimumDepth: 13, maximumDepth: 29,
     maxHp: 68, stats: Object.freeze({ str: 11, int: 3, agi: 17, dex: 15, luc: 8 }),
     def: 8, attack: 10, experienceReward: 55, dropItemId: "beeswax",
     actions: Object.freeze([Object.freeze({
@@ -233,7 +233,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "poison_toad", name: "ポイズントード", imageId: "poison_toad",
     level: 18,
-    image: "images/enemies/enemy_12.avif", race: "beast", minimumDepth: 16, maximumDepth: 20,
+    image: "images/enemies/enemy_12.avif", race: "beast", minimumDepth: 16, maximumDepth: 29,
     maxHp: 108, stats: Object.freeze({ str: 14, int: 5, agi: 7, dex: 12, luc: 7 }),
     def: 11, attack: 13, experienceReward: 75, dropItemId: "poison_toad_skin",
     specialAttack: Object.freeze({
@@ -253,7 +253,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "banshee", name: "バンシー", imageId: "banshee",
     level: 20,
-    image: "images/enemies/enemy_13.avif", race: "undead", minimumDepth: 19, maximumDepth: 20,
+    image: "images/enemies/enemy_13.avif", race: "undead", minimumDepth: 19, maximumDepth: 29,
     maxHp: 128, stats: Object.freeze({ str: 12, int: 15, agi: 14, dex: 14, luc: 10 }),
     def: 12, attack: 14, experienceReward: 100,
     specialAttack: Object.freeze({
@@ -273,7 +273,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "fire_spirit", name: "火の精霊", imageId: "fire_spirit",
     level: 23,
-    image: "images/enemies/enemy_14.avif", race: "spirit", minimumDepth: 21, maximumDepth: 30,
+    image: "images/enemies/enemy_14.avif", race: "spirit", minimumDepth: 30, maximumDepth: 39,
     maxHp: 145, stats: Object.freeze({ str: 10, int: 18, agi: 17, dex: 16, luc: 12 }),
     def: 12, attack: 13, experienceReward: 140, dropItemId: "fire_spirit_stone",
     actions: Object.freeze([
@@ -297,7 +297,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "fire_lizard", name: "火トカゲ", imageId: "fire_lizard",
     level: 25,
-    image: "images/enemies/enemy_15.avif", race: "beast", minimumDepth: 23, maximumDepth: 30,
+    image: "images/enemies/enemy_15.avif", race: "beast", minimumDepth: 32, maximumDepth: 39,
     maxHp: 178, stats: Object.freeze({ str: 18, int: 6, agi: 15, dex: 17, luc: 10 }),
     def: 14, attack: 16, experienceReward: 170, dropItemId: "fire_lizard_skin",
     actions: Object.freeze([
@@ -321,7 +321,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "loren_lava", name: "ロレンラヴァ", imageId: "loren_lava",
     level: 27,
-    image: "images/enemies/enemy_16.avif", race: "construct", minimumDepth: 26, maximumDepth: 30,
+    image: "images/enemies/enemy_16.avif", race: "construct", minimumDepth: 35, maximumDepth: 39,
     maxHp: 225, stats: Object.freeze({ str: 22, int: 5, agi: 6, dex: 14, luc: 8 }),
     def: 18, attack: 18, experienceReward: 210, dropItemId: "lava_stone_fragment",
     actions: Object.freeze([
@@ -345,7 +345,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "cassowary", name: "ヒクイドリ", imageId: "cassowary",
     level: 29,
-    image: "images/enemies/enemy_17.avif", race: "beast", minimumDepth: 29, maximumDepth: 30,
+    image: "images/enemies/enemy_17.avif", race: "beast", minimumDepth: 38, maximumDepth: 39,
     maxHp: 205, stats: Object.freeze({ str: 19, int: 15, agi: 22, dex: 20, luc: 12 }),
     def: 15, attack: 18, experienceReward: 260, dropItemId: "cassowary_feather",
     actions: Object.freeze([
@@ -369,7 +369,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "ice_spirit", name: "氷の精霊", imageId: "ice_spirit",
     level: 32,
-    image: "images/enemies/enemy_18.avif", race: "spirit", minimumDepth: 31,
+    image: "images/enemies/enemy_18.avif", race: "spirit", minimumDepth: 40, maximumDepth: 49,
     maxHp: 230, stats: Object.freeze({ str: 12, int: 22, agi: 20, dex: 19, luc: 14 }),
     def: 16, attack: 17, experienceReward: 320, dropItemId: "ice_spirit_stone",
     actions: Object.freeze([
@@ -393,7 +393,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "ice_lizard", name: "氷トカゲ", imageId: "ice_lizard",
     level: 34,
-    image: "images/enemies/enemy_19.avif", race: "beast", minimumDepth: 33,
+    image: "images/enemies/enemy_19.avif", race: "beast", minimumDepth: 42, maximumDepth: 49,
     maxHp: 275, stats: Object.freeze({ str: 21, int: 8, agi: 17, dex: 19, luc: 11 }),
     def: 18, attack: 20, experienceReward: 380, dropItemId: "ice_lizard_skin",
     actions: Object.freeze([
@@ -417,7 +417,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "ice_vogel", name: "アイスフォーゲル", imageId: "ice_vogel",
     level: 37,
-    image: "images/enemies/enemy_20.avif", race: "beast", minimumDepth: 36,
+    image: "images/enemies/enemy_20.avif", race: "beast", minimumDepth: 45, maximumDepth: 49,
     maxHp: 260, stats: Object.freeze({ str: 19, int: 12, agi: 25, dex: 23, luc: 15 }),
     def: 17, attack: 20, experienceReward: 470, dropItemId: "vogel_feather",
     actions: Object.freeze([
@@ -441,7 +441,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "ice_bear", name: "氷熊", imageId: "ice_bear",
     level: 40,
-    image: "images/enemies/enemy_21.avif", race: "beast", minimumDepth: 39,
+    image: "images/enemies/enemy_21.avif", race: "beast", minimumDepth: 48, maximumDepth: 49,
     maxHp: 360, stats: Object.freeze({ str: 26, int: 7, agi: 10, dex: 18, luc: 12 }),
     def: 22, attack: 23, experienceReward: 580, dropItemId: "ice_bear_paw",
     actions: Object.freeze([

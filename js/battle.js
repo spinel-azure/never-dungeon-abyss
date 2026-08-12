@@ -318,19 +318,20 @@ async function playSlashEffect(image) {
 
 function applyPresentationHp(event) {
   if (!battleUi.presentationHp || !["player", "enemy"].includes(event.targetSide)) return;
+  battleUi.presentationHp = applyHpPresentationEvent(battleUi.presentationHp, battleUi.battle, event);
+}
+
+export function applyHpPresentationEvent(presentationHp, battle, event) {
+  if (!presentationHp || !["player", "enemy"].includes(event?.targetSide)) return presentationHp;
+  const next = { ...presentationHp };
   const amount = Math.max(0, Math.floor(Number(event.damage ?? event.amount) || 0));
   if (event.type === "healing") {
-    const maximum = battleUi.battle[event.targetSide]?.maxHp ?? Number.MAX_SAFE_INTEGER;
-    battleUi.presentationHp[event.targetSide] = Math.min(
-      maximum,
-      battleUi.presentationHp[event.targetSide] + amount
-    );
-  } else if (event.hit || event.type === "damage" || event.type === "poisonDamage") {
-    battleUi.presentationHp[event.targetSide] = Math.max(
-      0,
-      battleUi.presentationHp[event.targetSide] - amount
-    );
+    const maximum = battle?.[event.targetSide]?.maxHp ?? Number.MAX_SAFE_INTEGER;
+    next[event.targetSide] = Math.min(maximum, next[event.targetSide] + amount);
+  } else if (event.hit || ["damage", "poisonDamage", "bleedingDamage"].includes(event.type)) {
+    next[event.targetSide] = Math.max(0, next[event.targetSide] - amount);
   }
+  return next;
 }
 
 function formatPresentationMessage(event) {
