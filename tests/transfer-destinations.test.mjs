@@ -31,6 +31,13 @@ test("transfer destination UI is separate from the six command slots and paginat
   assert.doesNotMatch(source, /entranceButtons\.forEach\(\(button, index\) => \{\s+if \(index < depths\.length\)/);
 });
 
+test("closing the transfer UI restores the shared dungeon and battle command area", async () => {
+  const source = await readFile(new URL("../js/town.js", import.meta.url), "utf8");
+  const showGameCommands = source.match(/function showGameCommands\(\) \{[\s\S]*?\n\}/)?.[0] || "";
+  assert.match(showGameCommands, /town\.commandRoot\.hidden = false;/);
+  assert.match(showGameCommands, /town\.transferOverlay\.hidden = true;/);
+});
+
 test("Iron Maiden sizing cannot shrink the boss HP meter", async () => {
   const css = await readFile(new URL("../css/battle.css", import.meta.url), "utf8");
   assert.match(css, /\.battle-boss-hp-meter\s*\{[^}]*flex:\s*0 0 10px;[^}]*box-sizing:\s*border-box;/s);

@@ -2233,6 +2233,8 @@ function showEntranceCommands() {
 
 function showGameCommands() {
   if (!town.commandRoot) return;
+  town.commandRoot.hidden = false;
+  if (town.transferOverlay) town.transferOverlay.hidden = true;
   if (!town.gameCommandButtons.every(button => button.parentElement === town.commandRoot)) {
     town.commandRoot.replaceChildren(...town.gameCommandButtons);
   }
