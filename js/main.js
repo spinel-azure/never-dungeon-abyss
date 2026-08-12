@@ -42,7 +42,7 @@ import {
   startFloorLapNotice,
   setNpcTypewriterOptions
 } from "./player.js";
-import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setMistOptions, setWallColor, setFloorColor } from "./renderer.js";
+import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setMistOptions, setWallColor, setFloorColor, toggleMinimapOverlay } from "./renderer.js";
 import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minimap.js";
 import { configureInput } from "./input.js";
 import { configureGamepadInput } from "./gamepad-input.js";
@@ -2539,12 +2539,11 @@ import {
 
   configureGamepadInput({
     dispatchAction: dispatchGamepadAction,
-    openStatusMenu: () => {
+    toggleMinimap: () => {
       recordUserInput();
-      handleItemOverlayInput("cancel");
-      handleSkillOverlayInput("cancel");
-      handleBattleInput("cancel");
-      openStatusMenu();
+      if (worldLocation !== "dungeon" || isBattleActive() || isMenuOpen()
+        || sceneTransitionRunning || state.overlayEvent) return false;
+      return toggleMinimapOverlay();
     }
   });
 

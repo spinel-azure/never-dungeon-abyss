@@ -35,8 +35,8 @@ test("direction input fires immediately, waits, repeats, and rearms at neutral",
 
 test("buttons use rising edges and expose standard mappings", () => {
   const state = createGamepadInputState();
-  assert.deepEqual(pollGamepadActions(pad({ pressed: [0, 3, 9] }), state, 0), ["confirm", "status", "menu"]);
+  assert.deepEqual(pollGamepadActions(pad({ pressed: [0, 3, 9] }), state, 0), ["cancel", "minimap", "menu"]);
   assert.deepEqual(pollGamepadActions(pad({ pressed: [0, 3, 9] }), state, 16), []);
   pollGamepadActions(pad(), state, 32);
-  assert.deepEqual(pollGamepadActions(pad({ pressed: [1, 4, 5] }), state, 48), ["cancel", "pageLeft", "pageRight"]);
+  assert.deepEqual(pollGamepadActions(pad({ pressed: [1, 4, 5] }), state, 48), ["confirm", "pageLeft", "pageRight"]);
 });

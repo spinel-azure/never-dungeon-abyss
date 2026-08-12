@@ -79,6 +79,15 @@ export function setTorchFlickerEnabled(enabled) {
   if (!renderer.torchFlickerEnabled && renderer.state) renderer.state.torch = 0;
 }
 
+export function toggleMinimapOverlay() {
+  if (!renderer.state || renderer.state.torchFuel <= 0) {
+    renderer.minimapOverlayVisible = false;
+    return false;
+  }
+  renderer.minimapOverlayVisible = !renderer.minimapOverlayVisible;
+  return renderer.minimapOverlayVisible;
+}
+
 export function setMistEnabled(enabled) {
   renderer.mistEnabled = Boolean(enabled);
 }

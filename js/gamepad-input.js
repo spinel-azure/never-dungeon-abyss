@@ -3,7 +3,7 @@ export const GAMEPAD_REPEAT_DELAY = 300;
 export const GAMEPAD_REPEAT_INTERVAL = 120;
 
 const DIRECTION_BUTTONS = Object.freeze({ 12: "up", 13: "down", 14: "left", 15: "right" });
-const ACTION_BUTTONS = Object.freeze({ 0: "confirm", 1: "cancel", 2: "unusedX", 3: "status", 4: "pageLeft", 5: "pageRight", 8: "unusedBack", 9: "menu" });
+const ACTION_BUTTONS = Object.freeze({ 0: "cancel", 1: "confirm", 2: "unusedX", 3: "minimap", 4: "pageLeft", 5: "pageRight", 8: "unusedBack", 9: "menu" });
 
 export function createGamepadInputState() {
   return { buttons: new Map(), direction: "", directionStartedAt: 0, directionRepeatedAt: 0 };
@@ -41,7 +41,7 @@ export function pollGamepadActions(gamepad, state, now) {
   return actions;
 }
 
-export function configureGamepadInput({ dispatchAction, openStatusMenu, isTextInputFocused = defaultTextInputFocused } = {}) {
+export function configureGamepadInput({ dispatchAction, toggleMinimap, isTextInputFocused = defaultTextInputFocused } = {}) {
   if (typeof navigator === "undefined" || typeof navigator.getGamepads !== "function") return () => {};
   const states = new Map();
   let frameId = 0;
@@ -56,7 +56,7 @@ export function configureGamepadInput({ dispatchAction, openStatusMenu, isTextIn
       states.set(gamepad.index, state);
       for (const action of pollGamepadActions(gamepad, state, now)) {
         if (isTextInputFocused()) continue;
-        if (action === "status") openStatusMenu?.();
+        if (action === "minimap") toggleMinimap?.();
         else if (action === "menu") dispatchAction?.("cancel");
         else if (action === "pageLeft") dispatchAction?.("left");
         else if (action === "pageRight") dispatchAction?.("right");
