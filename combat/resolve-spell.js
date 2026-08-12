@@ -43,8 +43,12 @@ export function resolveSpell({
     const nonElementalReduction = isElementalSpell(spell.element)
       ? 0
       : numeric(defender.nonElementalMagicDamageReduction);
+    const elementalMagicReduction = isElementalSpell(spell.element)
+      ? numeric(defender.elementalMagicDamageReduction)
+      : 0;
     const damageReduction = Math.max(0, Math.min(0.75,
-      numeric(defender.magicDamageReduction) + elementalReduction + nonElementalReduction));
+      numeric(defender.magicDamageReduction) + elementalReduction
+        + elementalMagicReduction + nonElementalReduction));
     const damageTakenBonus = spell.element === "fire"
       ? numeric(defender.fireDamageTakenBonus)
       : spell.element === "ice" ? numeric(defender.iceDamageTakenBonus) : 0;

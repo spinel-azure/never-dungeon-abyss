@@ -129,10 +129,10 @@ const STANDARD_CARDS = [
   },
   {
     id: "rare_spell_resistance", rarity: "R", cost: 2,
-    name: "Spell Resistance", nameJa: "呪文耐性", concept: "魔法ダメージ -5%",
-    descriptionJa: "受ける魔法ダメージを5％軽減する。軽減率の上限は75％。",
-    category: "resistance", effectId: "magic_damage_reduction", effectValue: 0.05,
-    statBonus: Object.freeze({ magicDamageReduction: 0.05 }),
+    name: "Elemental Spell Resistance", nameJa: "属性呪文耐性", concept: "属性呪文ダメージ -5%",
+    descriptionJa: "炎・氷・雷など、属性を持つ呪文によるダメージを5％軽減する。",
+    category: "resistance", effectId: "elemental_magic_damage_reduction", effectValue: 0.05,
+    statBonus: Object.freeze({ elementalMagicDamageReduction: 0.05 }),
     iconId: "quartered-shield", maxOwned: 99, maxCopies: 6
   },
   {
@@ -152,7 +152,7 @@ const STANDARD_CARDS = [
   },
   {
     id: "rare_magic_resistance", rarity: "R", cost: 2,
-    name: "Magic Resistance", nameJa: "魔力抵抗", concept: "無属性呪文ダメージ -5%",
+    name: "Non-Elemental Spell Resistance", nameJa: "無属性呪文耐性", concept: "無属性呪文ダメージ -5%",
     descriptionJa: "属性を持たない呪文によるダメージを5％軽減する。炎・氷などの属性攻撃には効果がない。",
     category: "resistance", effectId: "non_elemental_magic_damage_reduction", effectValue: 0.05,
     statBonus: Object.freeze({ nonElementalMagicDamageReduction: 0.05 }),

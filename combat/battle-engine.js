@@ -575,6 +575,7 @@ function combatStats(combatant) {
     magicDamageReduction: collected.magicDamageReduction,
     fireDamageReduction: collected.fireDamageReduction,
     nonElementalMagicDamageReduction: collected.nonElementalMagicDamageReduction,
+    elementalMagicDamageReduction: collected.elementalMagicDamageReduction,
     fireSpellDamageBonus: collected.fireSpellDamageBonus,
     iceSpellDamageBonus: collected.iceSpellDamageBonus,
     fireDamageTakenBonus: collected.fireDamageTakenBonus,

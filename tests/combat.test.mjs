@@ -494,8 +494,8 @@ test("negative ability cards cost one and cannot lower STR or AGI below one", ()
   assert.equal(stats.agi, 1);
 });
 
-test("Spell Resistance and Scorching Resistance reduce only their intended spell damage", () => {
-  assert.equal(getCardById("rare_spell_resistance").statBonus.magicDamageReduction, 0.05);
+test("Elemental Spell Resistance and Scorching Resistance reduce only their intended spell damage", () => {
+  assert.equal(getCardById("rare_spell_resistance").statBonus.elementalMagicDamageReduction, 0.05);
   const scorching = getCardById("sr_scorching_resistance");
   assert.equal(scorching.statBonus.maxHp, 15);
   assert.equal(scorching.statBonus.fireDamageReduction, 0.2);
@@ -505,6 +505,10 @@ test("Spell Resistance and Scorching Resistance reduce only their intended spell
   const protectedIce = resolveSpell({ attacker: {}, defender: { fireDamageReduction: 0.2 }, spell: { ...spell, element: "ice" }, rng: () => 0.5 });
   assert.equal(protectedFire.totalDamage, Math.floor(normalFire.totalDamage * 0.8));
   assert.equal(protectedIce.totalDamage, normalFire.totalDamage);
+  const elementalProtectedFire = resolveSpell({ attacker: {}, defender: { elementalMagicDamageReduction: 0.05 }, spell: { ...spell, element: "fire" }, rng: () => 0.5 });
+  const elementalProtectedArcane = resolveSpell({ attacker: {}, defender: { elementalMagicDamageReduction: 0.05 }, spell: { ...spell, element: "arcane" }, rng: () => 0.5 });
+  assert.equal(elementalProtectedFire.totalDamage, Math.floor(normalFire.totalDamage * 0.95));
+  assert.equal(elementalProtectedArcane.totalDamage, normalFire.totalDamage);
 });
 
 test("elemental staves amplify matching magic and increase opposite incoming damage", () => {

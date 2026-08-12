@@ -70,6 +70,14 @@ export function collectStats(source = {}) {
       0,
       0.75
     ),
+    elementalMagicDamageReduction: clamp(
+      numeric(source.elementalMagicDamageReduction)
+        + numeric(equipment.elementalMagicDamageReduction)
+        + numeric(cards.elementalMagicDamageReduction)
+        + numeric(temporary.elementalMagicDamageReduction),
+      0,
+      0.75
+    ),
     fireSpellDamageBonus: numeric(source.fireSpellDamageBonus) + numeric(equipment.fireSpellDamageBonus),
     iceSpellDamageBonus: numeric(source.iceSpellDamageBonus) + numeric(equipment.iceSpellDamageBonus),
     fireDamageTakenBonus: numeric(source.fireDamageTakenBonus) + numeric(equipment.fireDamageTakenBonus),
