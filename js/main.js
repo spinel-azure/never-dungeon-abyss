@@ -47,7 +47,7 @@ import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minima
 import { configureInput } from "./input.js";
 import { configureVirtualStick } from "./virtualStick.js";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor, openQuestHistory, openAdventureRecords, openLibraryCardGallery, openTitleOptions, refreshAdventureRecordsPlayTime, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js";
+import { configureMenu, handleMenuInput, getDungeonColors, getDungeonMistOptions, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor, openQuestHistory, openAdventureRecords, openLibraryCardGallery, openTitleOptions, refreshAdventureRecordsPlayTime, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js";
 import { resolveFloorTheme } from "./floorTheme.js";
 import {
   configureAutoReturn,
@@ -125,6 +125,7 @@ import { getSkill } from "../data/skills.js";
 import { getQuestRequiredSpecialRoomAccess, getSpecialRoomAccessRestriction, getSpecialRoomDefinition } from "../data/special-rooms.js";
 import { acknowledgeShopStockAnnouncement, getShopEquipmentOffer, getShopStockState, markShopCategorySeen } from "../data/shop-stock.js";
 import { getUnreadTavernRumor, markTavernRumorRead } from "../data/tavern-rumors.js";
+import { getFireFloorStepDamage, isFireFloorDepth } from "../data/fire-floor.js";
 import {
   invalidateMarathonChallenge,
   MARATHON_BOSS_FLOORS,
@@ -603,7 +604,8 @@ import {
     }
     const start = dungeon.startPosition;
     if (start && inBounds(start.x, start.y)) setStartPosition(start.x, start.y);
-    setDungeonColors({ wall: "default", floor: "default" });
+    setDungeonColors(resolveFloorTheme(currentDepth, getDungeonColors()));
+    applyCurrentFloorMist();
     state.anim = null;
     state.gridX = player.gridX;
     state.gridY = player.gridY;
@@ -1274,6 +1276,18 @@ import {
     updateCharacterUi(); showPoisonStepDamage(damage); return damage;
   }
 
+  function applyFireFloorStep() {
+    if (!character || worldLocation !== "dungeon") return 0;
+    const requested = getFireFloorStepDamage(character, currentDepth);
+    const damage = getNonlethalPoisonDamage(character.hp, requested);
+    if (damage <= 0) return 0;
+    character.hp -= damage;
+    character.alive = true;
+    updateCharacterUi();
+    showPoisonStepDamage(damage);
+    return damage;
+  }
+
   function currentCondition(target) {
     return hasCharacterStatus(target, "bleeding") ? "BLEED" : hasCharacterStatus(target, "poison") ? "POISON" : "GOOD";
   }
@@ -1290,6 +1304,7 @@ import {
   function handleDungeonStep() {
     applyDungeonPoisonStep();
     applyDungeonBleedingStep();
+    applyFireFloorStep();
     if (!character) return;
     character.condition = hasCharacterStatus(character, "bleeding") ? "BLEED"
       : hasCharacterStatus(character, "poison") ? "POISON" : "GOOD";
@@ -2011,6 +2026,8 @@ import {
       onDark: () => {
         currentDepth = 1;
         character = startMarathonChallenge(character);
+        setDungeonColors(resolveFloorTheme(currentDepth, getDungeonColors()));
+        applyCurrentFloorMist();
         state.treasureCompassActive = false;
         resetDungeon("", null, true);
         character.pendingExperienceSettlement = null;
@@ -2032,6 +2049,8 @@ import {
       onDark: () => {
         currentDepth = 10;
         character = invalidateMarathonChallenge(character);
+        setDungeonColors(resolveFloorTheme(currentDepth, getDungeonColors()));
+        applyCurrentFloorMist();
         character.highestDungeonDepthReached = Math.max(
           character.highestDungeonDepthReached || 1,
           currentDepth
@@ -2305,6 +2324,7 @@ import {
     }
     startBgm(selectDungeonBgm());
     setDungeonColors(resolveFloorTheme(currentDepth, getDungeonColors()));
+    applyCurrentFloorMist();
     floorStartedAt = descendedAt;
     resetDungeon("", nextStart);
     startFloorLapNotice(currentDepth);
@@ -2313,6 +2333,11 @@ import {
       setTimeout(() => showCardGetEffect(MARATHON_REWARD_CARD_ID, { seId: "itemGet" }), 0);
     }
     scheduleAutosave();
+  }
+
+  function applyCurrentFloorMist() {
+    const options = getDungeonMistOptions();
+    setMistOptions({ ...options, color: isFireFloorDepth(currentDepth) ? "red" : options.color });
   }
 
   function getDungeonProgress() {

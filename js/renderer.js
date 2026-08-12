@@ -48,7 +48,8 @@ const renderer = {
 const MIST_PALETTES = {
   green: { main: [66, 77, 75], veil: [63, 75, 72], haze: [93, 108, 104], bloom: [193, 164, 111] },
   frost: { main: [112, 145, 164], veil: [92, 126, 145], haze: [151, 187, 205], bloom: [150, 203, 229] },
-  poison: { main: [93, 62, 111], veil: [82, 48, 101], haze: [139, 91, 160], bloom: [174, 112, 199] }
+  poison: { main: [93, 62, 111], veil: [82, 48, 101], haze: [139, 91, 160], bloom: [174, 112, 199] },
+  red: { main: [112, 38, 31], veil: [88, 26, 22], haze: [158, 54, 42], bloom: [224, 105, 66] }
 };
 const WALL_PALETTES = {
   default: { base: "#817667", rows: ["#8b806f", "#716756"], mortar: "rgba(28,26,23,.62)", speckle: "rgba(236,220,181,.12)" },

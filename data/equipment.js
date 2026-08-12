@@ -10,6 +10,9 @@ export const EQUIPMENT_SLOTS = Object.freeze([
 ]);
 
 export const EQUIPMENT = Object.freeze({
+  fireproof_boots: item("fireproof_boots", "耐火ブーツ", "footId", { def: 3 }, {
+    fireFloorDamageImmunity: true
+  }),
   anti_magic_necklace: item("anti_magic_necklace", "魔除けのネックレス", "accessoryId", {
     magicDamageReduction: 0.15
   }, {
