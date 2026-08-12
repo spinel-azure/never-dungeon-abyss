@@ -1894,15 +1894,21 @@ import {
 
   async function restAtHealingFountain() {
     if (!character || sceneTransitionRunning || worldLocation !== "dungeon") return false;
+    stopBgm();
     const completed = await runSceneTransition({
       playAudio: () => playSeSequence("goodNight", 1),
       onDark: () => {
         character = restoreAtHealingFountain(character);
         refillTorch();
+        resetPresence();
         updateCharacterUi();
+        updateHud();
         saveGame();
       }
     });
+    if (worldLocation === "dungeon") {
+      startBgm(selectDungeonBgm());
+    }
     return completed;
   }
 

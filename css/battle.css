@@ -148,6 +148,15 @@
   max-height: 95%;
 }
 
+.battle-enemy-image.is-iron-maiden {
+  width: min(70%, 450px);
+  max-height: 94%;
+  transform-origin: 50% 10%;
+  animation:
+    battle-enemy-aura 3.4s ease-in-out infinite,
+    battle-iron-maiden-pendulum 4s ease-in-out infinite;
+}
+
 .battle-enemy-image.is-defeated {
   opacity: 0;
 }
@@ -159,6 +168,12 @@
 
 .battle-enemy-image.is-hit {
   animation: battle-enemy-hit 260ms steps(2, end);
+}
+
+.battle-enemy-image.is-iron-maiden.is-hit {
+  animation:
+    battle-enemy-hit 260ms steps(2, end),
+    battle-iron-maiden-pendulum 4s ease-in-out infinite;
 }
 
 .battle-slash-fragment {
@@ -310,6 +325,11 @@ body.layout-tablet .battle-boss-hp-meter{flex:0 0 12px;width:min(52%,360px);min-
   }
 }
 
+@keyframes battle-iron-maiden-pendulum {
+  0%, 100% { rotate: -1.75deg; }
+  50% { rotate: 1.75deg; }
+}
+
 .battle-enemy-name {
   position: relative;
   z-index: 2;
@@ -352,6 +372,12 @@ body.battle-active .viewport > #treasureCanvas {
     animation: none;
   }
 
+  .battle-enemy-image.is-iron-maiden,
+  .battle-enemy-image.is-iron-maiden.is-hit {
+    rotate: none;
+    animation: none;
+  }
+
   .battle-number {
     animation-duration: 1ms;
   }
@@ -386,6 +412,11 @@ body.battle-active .viewport > #treasureCanvas {
 @media (max-width: 560px) {
   .battle-enemy-image {
     width: min(60%, 260px);
+  }
+
+  .battle-enemy-image.is-iron-maiden {
+    width: min(76%, 360px);
+    max-height: 92%;
   }
 
   .battle-enemy-name {

@@ -502,6 +502,7 @@ function renderBattle() {
   image.classList.toggle("is-defeated", defeated);
   image.classList.toggle("is-concealed", battleUi.concealed);
   image.classList.toggle("is-jabberwock", battle.enemy.id === "jabberwock_event_boss");
+  image.classList.toggle("is-iron-maiden", battle.enemy.id === "iron_maiden_b29f");
   battleUi.root.querySelector(".battle-enemy-stage")?.classList.toggle("is-defeated", defeated);
   battleUi.messageEl.textContent = formatBattleMessage(battle);
 }
