@@ -191,6 +191,14 @@ const STANDARD_CARDS = [
     iconId: "alertness", maxOwned: 1, maxCopies: 1
   },
   {
+    id: "sr_magic_barrier", rarity: "SR", cost: 4,
+    name: "Magic Barrier", nameJa: "魔力障壁", concept: "魔法ダメージ -20%",
+    descriptionJa: "受ける魔法ダメージを20％軽減する。軽減率の上限は75％。",
+    category: "resistance", effectId: "magic_damage_reduction", effectValue: 0.2,
+    statBonus: Object.freeze({ magicDamageReduction: 0.2 }),
+    iconId: "quartered-shield", maxOwned: 3, maxCopies: 3
+  },
+  {
     id: "legendary_unlimited_torch_gauge", rarity: "L", cost: 6,
     name: "UNLIMITED TORCH GAUGE", nameJa: "永久の導き", concept: "たいまつ消費なし",
     category: "exploration", effectId: "unlimited_torch_gauge",

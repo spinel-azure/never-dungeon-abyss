@@ -14,6 +14,7 @@ import {
   RED_DOOR_INVESTIGATION_QUEST_ID,
   QUEEN_SHADOW_QUEST_ID,
   JABBERWOCK_QUEST_ID,
+  SECOND_RED_DOOR_INVESTIGATION_QUEST_ID,
   RED_DOOR_DEFENSE_CARD_FLAG,
   grantRedDoorInvestigationSupply,
   abandonQuest,
@@ -480,4 +481,34 @@ test("quest 009 unlocks after quest 006 and rewards Floor Detection plus 800G", 
   assert.equal(report.rewardCardId, "sr_floor_detection");
   assert.equal(report.bonusGold, 800);
   assert.equal(getOwnedCardCount(report.character.cards, "sr_floor_detection"), 1);
+});
+
+test("quest 010 requires completed quest 007 and B10F, then rewards Magic Barrier plus 1000G", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "priest" });
+  character.quests.completedQuestIds.push(
+    QUEST_ID, SLIME_EXTERMINATION_QUEST_ID, FLOOR_SURVEY_QUEST_ID,
+    RED_DOOR_INVESTIGATION_QUEST_ID
+  );
+  assert.equal(isQuestAvailable(character, SECOND_RED_DOOR_INVESTIGATION_QUEST_ID), false);
+  character.highestDungeonDepthReached = 10;
+  assert.equal(isQuestAvailable(character, SECOND_RED_DOOR_INVESTIGATION_QUEST_ID), true);
+  character = acceptQuest(character, SECOND_RED_DOOR_INVESTIGATION_QUEST_ID).character;
+  character = recordBossDefeat(character, "fallen_mage_b19f", 19);
+  assert.equal(getQuestProgress(character, SECOND_RED_DOOR_INVESTIGATION_QUEST_ID).readyToReport, true);
+  const report = reportQuest(character, SECOND_RED_DOOR_INVESTIGATION_QUEST_ID);
+  assert.equal(report.rewardCardId, "sr_magic_barrier");
+  assert.equal(report.bonusGold, 1000);
+  assert.equal(getOwnedCardCount(report.character.cards, "sr_magic_barrier"), 1);
+});
+
+test("quest 010 rescues saves that already defeated the B19F boss", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "mage" });
+  character.quests.completedQuestIds.push(
+    QUEST_ID, SLIME_EXTERMINATION_QUEST_ID, FLOOR_SURVEY_QUEST_ID,
+    RED_DOOR_INVESTIGATION_QUEST_ID
+  );
+  character.highestDungeonDepthReached = 19;
+  character.eventFlags.boss_fallen_mage_b19f_defeated = true;
+  character = acceptQuest(character, SECOND_RED_DOOR_INVESTIGATION_QUEST_ID).character;
+  assert.equal(getQuestProgress(character, SECOND_RED_DOOR_INVESTIGATION_QUEST_ID).readyToReport, true);
 });

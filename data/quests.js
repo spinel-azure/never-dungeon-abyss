@@ -10,6 +10,7 @@ export const BLACK_BOX_INVESTIGATION_QUEST_ID = "guild_006";
 export const RED_DOOR_INVESTIGATION_QUEST_ID = "guild_007";
 export const QUEEN_SHADOW_QUEST_ID = "guild_008";
 export const JABBERWOCK_QUEST_ID = "guild_009";
+export const SECOND_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_010";
 export const QUEEN_SHADOW_PROGRESS_FLAGS = Object.freeze([
   "quest_008_shadow_b10f_found",
   "quest_008_shadow_b11f_found",
@@ -244,6 +245,34 @@ export const QUESTS = Object.freeze([
     persistentProgressFlag: "quest_009_jabberwock_defeated_while_active",
     completedTargetFlag: "boss_jabberwock_event_boss_defeated",
     available: true
+  }),
+  Object.freeze({
+    id: SECOND_RED_DOOR_INVESTIGATION_QUEST_ID,
+    number: "010",
+    title: "赤い扉の調査――その2",
+    client: "ギルドマスター",
+    category: "other",
+    objectiveType: "defeatBoss",
+    targetId: "fallen_mage_b19f",
+    targetName: "堕落した魔術師",
+    targetDepth: 19,
+    requiredCount: 1,
+    objectiveLabel: "赤い扉を開けて中の様子を調査する",
+    reward: Object.freeze({
+      type: "card", label: "デッキカード×1", amount: 1,
+      cardId: "sr_magic_barrier", bonusGold: 1000
+    }),
+    descriptionLabel: "目的",
+    description: Object.freeze([
+      "奈落のB19Fにある赤い扉の向こう側で何かが",
+      "行われているらしい。扉を開け、中の様子を調査",
+      "してくれ。"
+    ]),
+    prerequisiteQuestIds: Object.freeze([RED_DOOR_INVESTIGATION_QUEST_ID]),
+    minimumDepthReached: 10,
+    persistentProgressFlag: "quest_010_fallen_mage_defeated_while_active",
+    completedTargetFlag: "boss_fallen_mage_b19f_defeated",
+    available: true
   })
 ]);
 
@@ -304,7 +333,12 @@ export function isQuestAvailable(character, questOrId) {
     ? quest.prerequisiteQuestIds
     : [];
   const prerequisites = [...new Set([...initialQuestGate, ...questPrerequisites])];
-  return prerequisites.every(questId => getQuestProgress(character, questId).completed);
+  if (!prerequisites.every(questId => getQuestProgress(character, questId).completed)) return false;
+  const reachedDepth = Math.max(
+    Math.floor(Number(character?.highestDungeonDepthReached) || 1),
+    character?.eventFlags?.transfer_portal_b10f_unlocked ? 10 : 1
+  );
+  return !quest.minimumDepthReached || reachedDepth >= quest.minimumDepthReached;
 }
 
 export function acceptQuest(character, questId) {

@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { getAdventureChronicle, getAdventureRecords } from "../data/adventure-records.js";
-import { formatPlayTime, getActivePlayTimeDelta, normalizeAdventureStats, PLAY_TIME_ERA } from "../data/adventure-stats.js";
+import { formatPlayTime, getActivePlayTimeDelta, normalizeAdventureStats, PLAY_TIME_ERA, recordInnStay, recordShopPurchase, recordTempleDonation } from "../data/adventure-stats.js";
 import { createInitialCharacter } from "../data/classes.js";
 
 test("adventure records summarize values already stored in the save", () => {
@@ -20,6 +20,9 @@ test("adventure records summarize values already stored in the save", () => {
     lingering_ghost_b2f_defeated_once: true
   };
   character.adventureStats.playTimeSeconds = 12345;
+  character.adventureStats = recordInnStay(character.adventureStats);
+  character.adventureStats = recordShopPurchase(character.adventureStats, 1500);
+  character.adventureStats = recordTempleDonation(character.adventureStats, 15);
 
   const values = Object.fromEntries(getAdventureRecords(character).map(entry => [entry.id, entry.value]));
   assert.equal(values.name, "記録係");
@@ -33,11 +36,17 @@ test("adventure records summarize values already stored in the save", () => {
   assert.equal(values.gold, "1,234G");
   assert.equal(values.warehouse, "5個");
   assert.equal(values.playTime, "0003:25:45");
+  assert.equal(values.innStays, "1回");
+  assert.equal(values.shopPurchases, "1回");
+  assert.equal(values.shopPurchaseGold, "1,500G");
+  assert.equal(values.templeDonations, "1回");
+  assert.equal(values.templeDonationGold, "15G");
+  assert.equal(values.bestiaryCompletion, "未集計");
 });
 
-test("adventure statistics include the ten original entries and play time", () => {
+test("adventure statistics include the original entries and new activity counters", () => {
   const character = createInitialCharacter({ name: "新人", job: "mage" });
-  assert.equal(getAdventureRecords(character).length, 11);
+  assert.equal(getAdventureRecords(character).length, 17);
 });
 
 test("play time uses an hour counter that can exceed one day", () => {
@@ -56,11 +65,21 @@ test("play time preserves MVP saves and safely resets when the era changes", () 
   assert.equal(normalizeAdventureStats({ playTimeSeconds: 123 }).playTimeSeconds, 123);
   assert.deepEqual(normalizeAdventureStats({ playTimeSeconds: 123, playTimeEra: PLAY_TIME_ERA }), {
     playTimeSeconds: 123,
-    playTimeEra: PLAY_TIME_ERA
+    playTimeEra: PLAY_TIME_ERA,
+    innStayCount: 0,
+    shopPurchaseCount: 0,
+    shopPurchaseGold: 0,
+    templeDonationCount: 0,
+    templeDonationGold: 0
   });
   assert.deepEqual(normalizeAdventureStats({ playTimeSeconds: 123, playTimeEra: "prototype" }), {
     playTimeSeconds: 0,
-    playTimeEra: PLAY_TIME_ERA
+    playTimeEra: PLAY_TIME_ERA,
+    innStayCount: 0,
+    shopPurchaseCount: 0,
+    shopPurchaseGold: 0,
+    templeDonationCount: 0,
+    templeDonationGold: 0
   });
 });
 
@@ -77,10 +96,18 @@ test("chronicle restores achieved milestones from existing progress flags", () =
   assert.equal(chronicle.find(entry => entry.id === "otherworldlyWisdom").achieved, true);
   assert.equal(chronicle.find(entry => entry.id === "otherworldlyWisdom").label, "異界の叡智を撃破した");
   assert.equal(chronicle.find(entry => entry.id === "b10").achieved, true);
+  assert.equal(chronicle.find(entry => entry.id === "stable").label, "馬小屋に宿泊した");
   assert.equal(chronicle.find(entry => entry.id === "mage").label, "？？？？？？？");
   assert.equal(chronicle.find(entry => entry.id === "marathon42").label, "？？？？？？――地上を忘れし旅人");
   character.eventFlags.b1_b42_marathon_completed = true;
   const completed = getAdventureChronicle(character).find(entry => entry.id === "marathon42");
   assert.equal(completed.label, "深淵への大行軍");
   assert.equal(completed.achieved, true);
+});
+
+test("unachieved stable and Otherworldly Wisdom milestones show their hints", () => {
+  const character = createInitialCharacter({ name: "ヒント", job: "warrior" });
+  const chronicle = getAdventureChronicle(character);
+  assert.equal(chronicle.find(entry => entry.id === "stable").label, "？？？？？？――朝の目覚め");
+  assert.equal(chronicle.find(entry => entry.id === "otherworldlyWisdom").label, "？？？？？？――絶望への挑戦");
 });

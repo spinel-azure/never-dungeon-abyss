@@ -462,6 +462,19 @@ test("magic damage reduction lowers final spell damage without changing status r
   assert.equal(protectedResult.totalDamage, Math.floor(normal.totalDamage * 0.85));
 });
 
+test("three Magic Barrier cards combine with the anti-magic necklace up to the 75 percent cap", () => {
+  const card = getCardById("sr_magic_barrier");
+  assert.equal(card.cost, 4);
+  assert.equal(card.maxOwned, 3);
+  assert.equal(card.maxCopies, 3);
+  assert.ok(Math.abs(collectCardStatBonuses(Array(3).fill(card.id)).magicDamageReduction - 0.6) < Number.EPSILON);
+  const stats = collectStats({
+    equipmentStatBonuses: { magicDamageReduction: 0.15 },
+    cardStatBonuses: collectCardStatBonuses(Array(3).fill(card.id))
+  });
+  assert.equal(stats.magicDamageReduction, 0.75);
+});
+
 test("all implemented enemies and bosses expose internal reference levels", () => {
   for (const id of ["abyss_rat", "cave_slime", "abyss_rabbit", "wandering_dead", "poison_slime", "vampire_bat", "bouncing_coin", "viper", "mimic"]) {
     const enemy = getEnemyById(id);

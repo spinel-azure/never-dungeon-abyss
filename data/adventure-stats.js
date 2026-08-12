@@ -6,7 +6,35 @@ export function normalizeAdventureStats(stats) {
     playTimeSeconds: storedEra === PLAY_TIME_ERA
       ? Math.max(0, Math.floor(Number(stats?.playTimeSeconds) || 0))
       : 0,
-    playTimeEra: PLAY_TIME_ERA
+    playTimeEra: PLAY_TIME_ERA,
+    innStayCount: nonnegativeInteger(stats?.innStayCount),
+    shopPurchaseCount: nonnegativeInteger(stats?.shopPurchaseCount),
+    shopPurchaseGold: nonnegativeInteger(stats?.shopPurchaseGold),
+    templeDonationCount: nonnegativeInteger(stats?.templeDonationCount),
+    templeDonationGold: nonnegativeInteger(stats?.templeDonationGold)
+  };
+}
+
+export function recordInnStay(stats) {
+  const next = normalizeAdventureStats(stats);
+  return { ...next, innStayCount: next.innStayCount + 1 };
+}
+
+export function recordShopPurchase(stats, gold) {
+  const next = normalizeAdventureStats(stats);
+  return {
+    ...next,
+    shopPurchaseCount: next.shopPurchaseCount + 1,
+    shopPurchaseGold: next.shopPurchaseGold + nonnegativeInteger(gold)
+  };
+}
+
+export function recordTempleDonation(stats, gold) {
+  const next = normalizeAdventureStats(stats);
+  return {
+    ...next,
+    templeDonationCount: next.templeDonationCount + 1,
+    templeDonationGold: next.templeDonationGold + nonnegativeInteger(gold)
   };
 }
 
@@ -20,4 +48,8 @@ export function formatPlayTime(totalSeconds) {
 export function getActivePlayTimeDelta({ elapsedMs, hasCharacter, visible, idleMs, idleLimitMs }) {
   if (!hasCharacter || !visible || idleMs > idleLimitMs) return 0;
   return Math.max(0, Number(elapsedMs) || 0) / 1000;
+}
+
+function nonnegativeInteger(value) {
+  return Math.max(0, Math.floor(Number(value) || 0));
 }

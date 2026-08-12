@@ -88,7 +88,7 @@ import { EffectEngine } from "./effects/effect-engine.js";
 import { hasUncertainLoot, isHighlightedLotCardRarity, isHighlightedLotEquipment } from "./loot-identification.js";
 import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
-import { getActivePlayTimeDelta, normalizeAdventureStats } from "../data/adventure-stats.js";
+import { getActivePlayTimeDelta, normalizeAdventureStats, recordInnStay, recordShopPurchase, recordTempleDonation } from "../data/adventure-stats.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName, grantEquipmentInstance } from "../data/equipment-inventory.js";
 import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
@@ -1385,6 +1385,7 @@ import {
     const result = purchaseItem(character, itemId, { amount });
     if (!result.accepted) return result;
     character = result.character;
+    character.adventureStats = recordShopPurchase(character.adventureStats, result.cost);
     updateCharacterUi();
     saveGame();
     return { ...result, character };
@@ -1396,6 +1397,7 @@ import {
     const result = purchaseEquipment(character, offer || equipmentId);
     if (!result.accepted) return result;
     character = result.character;
+    character.adventureStats = recordShopPurchase(character.adventureStats, result.cost);
     updateCharacterUi();
     saveGame();
     return { ...result, character };
@@ -1438,6 +1440,7 @@ import {
     const result = purchaseBuybackEquipment(character, instanceId);
     if (!result.accepted) return result;
     character = normalizeCharacter(result.character);
+    character.adventureStats = recordShopPurchase(character.adventureStats, result.cost);
     updateCharacterUi();
     saveGame();
     return { ...result, character };
@@ -1823,6 +1826,7 @@ import {
 
     const result = resolveInnStay(character);
     Object.assign(character, result.changes);
+    character.adventureStats = recordInnStay(character.adventureStats);
     updateCharacterUi();
     saveGame();
 
@@ -1911,6 +1915,7 @@ import {
 
     const result = resolveInnStableStay(character);
     Object.assign(character, result.changes);
+    character.adventureStats = recordInnStay(character.adventureStats);
     updateCharacterUi();
     saveGame();
 
@@ -1997,6 +2002,7 @@ import {
         return;
       }
       character = treatment.character;
+      character.adventureStats = recordTempleDonation(character.adventureStats, treatment.fee);
       updateCharacterUi();
       say(`司祭アーヴァイン：${treatment.fee}Gの寄進を受け取りました。傷と穢れは癒やされました。`);
       playSe("heal");

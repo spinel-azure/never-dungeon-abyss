@@ -678,7 +678,7 @@ function renderAdventureRecords() {
     button.type = "button";
     button.className = "inventory-entry";
     button.dataset.adventureRecordId = entry.id;
-    button.classList.toggle("is-unavailable", entry.achieved === false);
+    button.classList.toggle("is-unavailable", entry.achieved === false || entry.disabled === true);
     button.innerHTML = `<span>${entry.label}</span><strong>${entry.value}</strong>`;
     button.classList.toggle("is-selected", menu.adventureRecordsFocus === "list" && menu.adventureRecordsCursor === index);
     button.addEventListener("click", () => {
