@@ -126,6 +126,13 @@ import { getQuestRequiredSpecialRoomAccess, getSpecialRoomAccessRestriction, get
 import { acknowledgeShopStockAnnouncement, getShopEquipmentOffer, getShopStockState, markShopCategorySeen } from "../data/shop-stock.js";
 import { getUnreadTavernRumor, markTavernRumorRead } from "../data/tavern-rumors.js";
 import {
+  invalidateMarathonChallenge,
+  MARATHON_BOSS_FLOORS,
+  MARATHON_REWARD_CARD_ID,
+  recordMarathonDescent,
+  startMarathonChallenge
+} from "../data/marathon-challenge.js";
+import {
   abandonQuest,
   acceptQuest,
   completeQueenShadowInvestigation,
@@ -1649,6 +1656,7 @@ import {
     let bag = null;
     let settled = null;
     if (character) {
+      character = invalidateMarathonChallenge(character);
       const carriedExperience = Math.max(
         0,
         Math.floor(Number(character.carriedExperience) || 0)
@@ -2002,6 +2010,7 @@ import {
       playAudio: () => playSeSequence("stairs", 3),
       onDark: () => {
         currentDepth = 1;
+        character = startMarathonChallenge(character);
         state.treasureCompassActive = false;
         resetDungeon("", null, true);
         character.pendingExperienceSettlement = null;
@@ -2022,6 +2031,7 @@ import {
       playAudio: () => playSeSequence("stairs", 3),
       onDark: () => {
         currentDepth = 10;
+        character = invalidateMarathonChallenge(character);
         character.highestDungeonDepthReached = Math.max(
           character.highestDungeonDepthReached || 1,
           currentDepth
@@ -2084,6 +2094,7 @@ import {
     let bag = null;
     let settled = null;
     if (character) {
+      character = invalidateMarathonChallenge(character);
       character.pendingExperienceSettlement = createDepthReturnSettlement(
         character,
         returnFloor
@@ -2256,12 +2267,28 @@ import {
   function descendFloor() {
     const descendedAt = performance.now();
     const nextStart = { x: state.gridX, y: state.gridY };
+    const previousDepth = currentDepth;
     currentDepth += 1;
+    let marathonCompleted = false;
     if (character) {
       character.highestDungeonDepthReached = Math.max(
         character.highestDungeonDepthReached || 1,
         currentDepth
       );
+      const marathon = recordMarathonDescent(character, {
+        fromDepth: previousDepth,
+        toDepth: currentDepth,
+        defeatedBossFloors: MARATHON_BOSS_FLOORS.filter(floor => {
+          const boss = getFloorBossByDepth(floor);
+          return Boolean(boss && isBossDefeated(character, boss));
+        })
+      });
+      character = marathon.character;
+      marathonCompleted = marathon.completed;
+      if (marathonCompleted) {
+        const reward = grantCard(character.cards, MARATHON_REWARD_CARD_ID, 1, character.deckCost);
+        character = { ...character, cards: reward.cards };
+      }
     }
     if (currentDepth === 10 && character) {
       character = {
@@ -2281,6 +2308,10 @@ import {
     floorStartedAt = descendedAt;
     resetDungeon("", nextStart);
     startFloorLapNotice(currentDepth);
+    if (marathonCompleted) {
+      say("――長い、長い旅路の果てに、\nあなたは一度も地上へ戻ることなくB42Fへ到達した。\n\nZカード「カプリコーン」を手に入れた！");
+      setTimeout(() => showCardGetEffect(MARATHON_REWARD_CARD_ID, { seId: "itemGet" }), 0);
+    }
     scheduleAutosave();
   }
 

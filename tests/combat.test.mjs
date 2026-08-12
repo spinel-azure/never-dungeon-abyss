@@ -28,6 +28,7 @@ import {
   createBattleState,
   createPlayerAction,
   createEnemyAction,
+  getCapricornStackCount,
   resolveBattleRound,
   resolveEnemyAmbush
 } from "../combat/battle-engine.js";
@@ -1089,6 +1090,53 @@ test("main card registry contains every rarity and all twelve zodiac cards", () 
   assert.deepEqual([...new Set(CARDS.map(card => card.rarity))].sort(), ["C", "L", "R", "SR", "Z"]);
   assert.equal(CARDS.filter(card => card.rarity === "Z").length, 12);
   assert.equal(getCardById("zodiac_aries")?.cost, 8);
+});
+
+test("Capricorn gains one long-battle stage every five turns up to three", () => {
+  const card = getCardById("zodiac_capricorn");
+  assert.equal(card?.cost, 8);
+  assert.equal(card?.longBattleDamagePerStack, 0.05);
+  assert.equal(card?.longBattleReductionPerStack, 0.05);
+  assert.equal(getCapricornStackCount({ capricornActiveAtStart: false, turn: 99 }), 0);
+  assert.equal(getCapricornStackCount({ capricornActiveAtStart: true, turn: 4 }), 0);
+  assert.equal(getCapricornStackCount({ capricornActiveAtStart: true, turn: 5 }), 1);
+  assert.equal(getCapricornStackCount({ capricornActiveAtStart: true, turn: 10 }), 2);
+  assert.equal(getCapricornStackCount({ capricornActiveAtStart: true, turn: 15 }), 3);
+  assert.equal(getCapricornStackCount({ capricornActiveAtStart: true, turn: 99 }), 3);
+});
+
+test("Capricorn raises dealt damage and reduces received damage in a long battle", () => {
+  const character = createInitialCharacter({ name: "CAPRICORN", job: "warrior" });
+  character.maxHp = 1000;
+  character.hp = 1000;
+  character.baseStats = { str: 30, int: 2, agi: 10, dex: 30, luc: 4 };
+  const enemy = {
+    id: "long_battle_target", name: "TARGET", hp: 1000, maxHp: 1000,
+    sp: 0, maxSp: 0, stats: { str: 30, int: 1, agi: 5, dex: 30, luc: 1 },
+    def: 0, attack: 30, statuses: [], equipment: {}, elementMultipliers: {},
+    statusResistances: {}, isBoss: false, alive: true
+  };
+  const ordinaryBattle = createBattleState({ character, enemy });
+  ordinaryBattle.turn = 15;
+  const ordinary = resolveBattleRound({
+    battle: ordinaryBattle,
+    playerCommand: { type: "attack" },
+    rng: fixed(0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5)
+  }).battle;
+
+  character.cards.deckSlots[0] = "zodiac_capricorn";
+  const capricornBattle = createBattleState({ character, enemy });
+  capricornBattle.turn = 15;
+  const capricorn = resolveBattleRound({
+    battle: capricornBattle,
+    playerCommand: { type: "attack" },
+    rng: fixed(0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5)
+  }).battle;
+
+  const dealt = battle => battle.presentationEvents.find(event => event.actorSide === "player")?.damage;
+  const received = battle => battle.presentationEvents.find(event => event.actorSide === "enemy")?.damage;
+  assert.ok(dealt(capricorn) > dealt(ordinary));
+  assert.ok(received(capricorn) < received(ordinary));
 });
 
 test("Ability Boost is a six-copy SR card that raises all five abilities", () => {

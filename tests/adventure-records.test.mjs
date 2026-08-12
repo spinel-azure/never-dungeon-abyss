@@ -78,4 +78,9 @@ test("chronicle restores achieved milestones from existing progress flags", () =
   assert.equal(chronicle.find(entry => entry.id === "otherworldlyWisdom").label, "異界の叡智を撃破した");
   assert.equal(chronicle.find(entry => entry.id === "b10").achieved, true);
   assert.equal(chronicle.find(entry => entry.id === "mage").label, "？？？？？？？");
+  assert.equal(chronicle.find(entry => entry.id === "marathon42").label, "？？？？？？――地上を忘れし旅人");
+  character.eventFlags.b1_b42_marathon_completed = true;
+  const completed = getAdventureChronicle(character).find(entry => entry.id === "marathon42");
+  assert.equal(completed.label, "深淵への大行軍");
+  assert.equal(completed.achieved, true);
 });

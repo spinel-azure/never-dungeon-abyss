@@ -62,11 +62,12 @@ export function getAdventureChronicle(character) {
     ["b9", "奇妙な彫像を撃破した", flags.boss_strange_knight_statue_b9f_defeated, "B9Fの関所を守る奇妙な彫像を撃破した。"],
     ["b10", "B10Fへ到達した", depth >= 10 || flags.transfer_portal_b10f_unlocked, "奈落の迷宮地下10階へ到達し、転送門を解放した。"],
     ["mage", "堕落した魔術師を撃破した", flags.boss_fallen_mage_b19f_defeated, "B19Fを塞いでいた堕落した魔術師を撃破した。"],
-    ["b20", "B20Fへ到達した", depth >= 20, "奈落の迷宮地下20階へ到達した。"]
+    ["b20", "B20Fへ到達した", depth >= 20, "奈落の迷宮地下20階へ到達した。"],
+    ["marathon42", "深淵への大行軍", flags.b1_b42_marathon_completed, "一度も帰還せず、転送門を使わずにB1FからB42Fへ到達した。", "？？？？？？――地上を忘れし旅人"]
   ];
-  return milestones.map(([id, label, achieved, description]) => ({
+  return milestones.map(([id, label, achieved, description, hiddenLabel]) => ({
     id,
-    label: achieved ? label : "？？？？？？？",
+    label: achieved ? label : hiddenLabel || "？？？？？？？",
     value: achieved ? "達成" : "未達成",
     description: achieved ? description : "まだ記録されていない冒険の節目です。",
     achieved: Boolean(achieved)

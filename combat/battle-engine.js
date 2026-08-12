@@ -19,6 +19,7 @@ import { getItem } from "../data/items.js";
 import { consumeItem } from "../data/inventory.js";
 import { getItemUnavailableReason } from "./resolve-item-use.js";
 import { resolvePassiveInstantDeath } from "./passive-instant-death.js";
+import { getCardById, hasCardEffect } from "../data/cards.js";
 
 export function createBattleState({ character, enemy }) {
   const vorpalSwordEquippedAtStart = character?.equipment?.weaponId === "vorpal_sword";
@@ -29,6 +30,7 @@ export function createBattleState({ character, enemy }) {
     player: cloneCombatant(character),
     enemy: cloneCombatant(enemy),
     vorpalSwordEquippedAtStart,
+    capricornActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_capricorn"),
     vorpalExecution: false,
     slashExecution: null,
     log: [`${enemy.name}が現れた！`],
@@ -385,7 +387,12 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
     index,
     hit: hit.hit,
     critical: hit.critical,
-    damage: hit.hit ? Math.max(0, Math.floor(hit.damage * (1 - reduction))) : 0
+    damage: hit.hit ? Math.max(0, Math.floor(
+      hit.damage
+        * (1 - reduction)
+        * getCapricornDamageMultiplier(battle, actorSide)
+        * getCapricornReceivedDamageMultiplier(battle, targetSide)
+    )) : 0
   }));
   if (passiveExecution) {
     const damageBeforeExecution = presentedHits
@@ -471,6 +478,26 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
   for (const applied of applications.filter(item => item.success)) {
     battle.log.push(`${target.name}は${statusName(applied.statusId)}状態になった。`);
   }
+}
+
+export function getCapricornStackCount(battle = {}) {
+  if (!battle.capricornActiveAtStart) return 0;
+  const card = getCardById("zodiac_capricorn");
+  const turnStep = Math.max(1, Math.floor(Number(card?.longBattleTurnStep) || 5));
+  const maximum = Math.max(0, Math.floor(Number(card?.longBattleMaximumStacks) || 3));
+  return Math.min(maximum, Math.floor(Math.max(0, Number(battle.turn) || 0) / turnStep));
+}
+
+function getCapricornDamageMultiplier(battle, actorSide) {
+  if (actorSide !== "player") return 1;
+  const card = getCardById("zodiac_capricorn");
+  return 1 + getCapricornStackCount(battle) * (Number(card?.longBattleDamagePerStack) || 0);
+}
+
+function getCapricornReceivedDamageMultiplier(battle, targetSide) {
+  if (targetSide !== "player") return 1;
+  const card = getCardById("zodiac_capricorn");
+  return Math.max(0, 1 - getCapricornStackCount(battle) * (Number(card?.longBattleReductionPerStack) || 0));
 }
 
 function findBlockingBarrier(statuses = [], damage = 0) {

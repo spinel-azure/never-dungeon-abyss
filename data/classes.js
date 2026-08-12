@@ -9,6 +9,7 @@ import {
 import { collectEquippedInstanceBonuses, normalizeEquipmentInventory } from "./equipment-inventory.js";
 import { normalizeQuestState } from "./quests.js";
 import { normalizeAdventureStats } from "./adventure-stats.js";
+import { createInitialMarathonChallenge, normalizeMarathonChallenge } from "./marathon-challenge.js";
 import { normalizeDepthReturnSettlement } from "./experience-settlement.js";
 import { getLevelUnlockedSkillIds } from "./skills.js";
 import { createInitialKeyItemState, normalizeKeyItemState } from "./key-items.js";
@@ -80,6 +81,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     quests: normalizeQuestState(),
     eventFlags: {},
     adventureStats: normalizeAdventureStats(),
+    marathonChallenge: createInitialMarathonChallenge(),
     highestDungeonDepthReached: 1,
     gold: 0,
     experience: 0,
@@ -148,6 +150,7 @@ export function normalizeCharacter(character) {
       ? { ...character.eventFlags }
       : {},
     adventureStats: normalizeAdventureStats(character.adventureStats),
+    marathonChallenge: normalizeMarathonChallenge(character.marathonChallenge),
     highestDungeonDepthReached: Math.max(
       inferredDepth,
       Math.floor(Number(character.highestDungeonDepthReached) || 1)

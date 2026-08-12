@@ -241,7 +241,14 @@ const ZODIAC_CARDS = [
   id: `zodiac_${id}`, rarity: "Z", cost: 8, name, nameJa, concept,
   category: "zodiac", effectId: `zodiac_${id}`,
   maxOwned: 1, maxCopies: 1
-}));
+})).map(card => card.id === "zodiac_capricorn" ? {
+  ...card,
+  descriptionJa: "戦闘が5ターン経過するごとに与えるダメージが5％上昇し、受けるダメージが5％減少する。最大3段階。",
+  longBattleTurnStep: 5,
+  longBattleMaximumStacks: 3,
+  longBattleDamagePerStack: 0.05,
+  longBattleReductionPerStack: 0.05
+} : card);
 
 export const CARDS = Object.freeze(
   [...STANDARD_CARDS, ...ZODIAC_CARDS].map(card => Object.freeze(card))
