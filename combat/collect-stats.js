@@ -13,7 +13,7 @@ export function collectStats(source = {}) {
   for (const key of STAT_KEYS) {
     stats[key] = clamp(
       numeric(base[key]) + numeric(equipment[key]) + numeric(cards[key]) + numeric(temporary[key]),
-      0,
+      1,
       COMBAT_CONFIG.statMaximum
     );
   }
@@ -51,6 +51,14 @@ export function collectStats(source = {}) {
         + numeric(equipment.magicDamageReduction)
         + numeric(cards.magicDamageReduction)
         + numeric(temporary.magicDamageReduction),
+      0,
+      0.75
+    ),
+    fireDamageReduction: clamp(
+      numeric(source.fireDamageReduction)
+        + numeric(equipment.fireDamageReduction)
+        + numeric(cards.fireDamageReduction)
+        + numeric(temporary.fireDamageReduction),
       0,
       0.75
     ),

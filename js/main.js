@@ -1045,8 +1045,11 @@ import {
         key === "def" ? target?.def : target?.baseStats?.[key]
       ) || 0));
       const equipment = Math.max(0, Math.floor(Number(target?.equipmentStatBonuses?.[key]) || 0));
-      const cards = Math.max(0, Math.floor(Number(target?.cardStatBonuses?.[key]) || 0));
-      const total = Math.min(30, base + equipment + cards);
+      const cards = Math.floor(Number(target?.cardStatBonuses?.[key]) || 0);
+      const totalBeforePenalty = Math.min(30, base + equipment + Math.max(0, cards));
+      const total = key === "def"
+        ? Math.max(0, totalBeforePenalty + Math.min(0, cards))
+        : Math.max(1, totalBeforePenalty + Math.min(0, cards));
       const row = document.createElement("div");
       row.className = "nde-stat-row";
       const name = document.createElement("strong");
@@ -1056,8 +1059,9 @@ import {
       gauge.setAttribute("aria-label", `${label} ${total}/30`);
       for (let index = 0; index < 30; index += 1) {
         const cell = document.createElement("i");
-        if (index < Math.min(base, 30)) cell.className = "is-base";
-        else if (index < Math.min(base + equipment, 30)) cell.className = "is-equipment";
+        if (index >= total && index < totalBeforePenalty) cell.className = "is-penalty";
+        else if (index < Math.min(base, total)) cell.className = "is-base";
+        else if (index < Math.min(base + equipment, total)) cell.className = "is-equipment";
         else if (index < total) cell.className = "is-card";
         gauge.append(cell);
       }

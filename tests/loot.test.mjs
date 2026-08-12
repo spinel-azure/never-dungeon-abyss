@@ -43,6 +43,24 @@ test("later red chest reward categories keep their existing bands", () => {
   assert.equal(rollRedChestLoot(rng(0.88), 10).equipmentId, "stiletto");
 });
 
+test("B11F to B18F red chests use the midgame consumable, card and enhanced weapon table", () => {
+  assert.equal(rollRedChestLoot(rng(0.1, 0.1, 0.59), 11).amount, 60);
+  assert.equal(rollRedChestLoot(rng(0.1, 0.1, 0.6), 11).amount, 90);
+  assert.equal(rollRedChestLoot(rng(0.1, 0.1, 0.9), 11).amount, 120);
+  assert.equal(rollRedChestLoot(rng(0.1, 0.5), 11).itemId, "healing_potion_medium");
+  assert.equal(rollRedChestLoot(rng(0.5, 0, 0), 11).cardId, "common_strength_down");
+  assert.equal(rollRedChestLoot(rng(0.5, 0, 0.6), 11).cardId, "common_agility_down");
+  assert.equal(rollRedChestLoot(rng(0.5, 0.5), 11).cardId, "rare_spell_resistance");
+  assert.equal(rollRedChestLoot(rng(0.5, 0.95), 11).cardId, "sr_scorching_resistance");
+  assert.deepEqual(
+    [11, 13, 16].map(depth => rollRedChestLoot(rng(0.8, 0), depth).equipmentId),
+    ["baselard", "silver_flail", "steel_longsword"]
+  );
+  assert.equal(rollRedChestLoot(rng(0.8, 0), 11).enhancement, 1);
+  assert.equal(rollRedChestLoot(rng(0.8, 0.7), 13).enhancement, 2);
+  assert.equal(rollRedChestLoot(rng(0.8, 0.95), 16).enhancement, 3);
+});
+
 test("B6F to B10F black chests use the potion, R-card and SR-card bands", () => {
   assert.equal(rollBlackChestLoot(rng(0.429), 6).itemId, "healing_potion_medium");
   assert.equal(rollBlackChestLoot(rng(0.43, 0), 6).cardId, "rare_strength_up_plus");

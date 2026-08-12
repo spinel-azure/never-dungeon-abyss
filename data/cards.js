@@ -68,6 +68,22 @@ const STANDARD_CARDS = [
     maxOwned: 99, maxCopies: 6
   },
   {
+    id: "common_strength_down", rarity: "C", cost: 1,
+    name: "STR -3", nameJa: "STR-3", concept: "STR -3",
+    descriptionJa: "STRを3下げる。ただし、カードによって1未満にはならない。",
+    category: "ability", effectId: "strength_down", effectValue: -3,
+    statBonus: Object.freeze({ str: -3 }), iconId: "strength",
+    maxOwned: 99, maxCopies: 6
+  },
+  {
+    id: "common_agility_down", rarity: "C", cost: 1,
+    name: "AGI -3", nameJa: "AGI-3", concept: "AGI -3",
+    descriptionJa: "AGIを3下げる。ただし、カードによって1未満にはならない。",
+    category: "ability", effectId: "agility_down", effectValue: -3,
+    statBonus: Object.freeze({ agi: -3 }), iconId: "agility",
+    maxOwned: 99, maxCopies: 6
+  },
+  {
     id: "common_stairs_detection", rarity: "C", cost: 1,
     name: "Stairs Detection", nameJa: "階段探知", concept: "下り階段探知",
     descriptionJa: "たいまつが灯っている間、下り階段をミニマップに表示する。",
@@ -110,6 +126,14 @@ const STANDARD_CARDS = [
     category: "ability", effectId: "defense_up", effectValue: 3,
     statBonus: Object.freeze({ def: 3 }), iconId: "quartered-shield",
     maxOwned: 99, maxCopies: 6
+  },
+  {
+    id: "rare_spell_resistance", rarity: "R", cost: 2,
+    name: "Spell Resistance", nameJa: "呪文耐性", concept: "魔法ダメージ -5%",
+    descriptionJa: "受ける魔法ダメージを5％軽減する。軽減率の上限は75％。",
+    category: "resistance", effectId: "magic_damage_reduction", effectValue: 0.05,
+    statBonus: Object.freeze({ magicDamageReduction: 0.05 }),
+    iconId: "quartered-shield", maxOwned: 99, maxCopies: 6
   },
   {
     id: "rare_strength_up_plus", rarity: "R", cost: 2,
@@ -197,6 +221,14 @@ const STANDARD_CARDS = [
     category: "resistance", effectId: "magic_damage_reduction", effectValue: 0.2,
     statBonus: Object.freeze({ magicDamageReduction: 0.2 }),
     iconId: "quartered-shield", maxOwned: 3, maxCopies: 3
+  },
+  {
+    id: "sr_scorching_resistance", rarity: "SR", cost: 4,
+    name: "Scorching Resistance", nameJa: "灼熱耐性", concept: "MAX HP +15 / 炎ダメージ -20%",
+    descriptionJa: "最大HPを15上げ、戦闘中に受ける炎属性ダメージを20％軽減する。火炎床には効果がない。",
+    category: "resistance", effectId: "fire_damage_reduction", effectValue: 0.2,
+    statBonus: Object.freeze({ maxHp: 15, fireDamageReduction: 0.2 }),
+    iconId: "vital-heart", maxOwned: 99, maxCopies: 3
   },
   {
     id: "legendary_unlimited_torch_gauge", rarity: "L", cost: 6,

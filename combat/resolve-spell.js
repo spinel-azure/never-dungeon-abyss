@@ -36,7 +36,9 @@ export function resolveSpell({
       COMBAT_CONFIG.spellVarianceMin,
       COMBAT_CONFIG.spellVarianceMax
     );
-    const damageReduction = Math.max(0, Math.min(0.75, numeric(defender.magicDamageReduction)));
+    const elementalReduction = spell.element === "fire" ? numeric(defender.fireDamageReduction) : 0;
+    const damageReduction = Math.max(0, Math.min(0.75,
+      numeric(defender.magicDamageReduction) + elementalReduction));
     damage = Math.max(1, Math.floor(baseDamage * multiplier * variance * (1 - damageReduction)));
   }
   const actionEffects = resolveEffects({

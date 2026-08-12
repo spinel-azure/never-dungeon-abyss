@@ -475,6 +475,37 @@ test("three Magic Barrier cards combine with the anti-magic necklace up to the 7
   assert.equal(stats.magicDamageReduction, 0.75);
 });
 
+test("negative ability cards cost one and cannot lower STR or AGI below one", () => {
+  const strength = getCardById("common_strength_down");
+  const agility = getCardById("common_agility_down");
+  assert.equal(strength.rarity, "C");
+  assert.equal(strength.cost, 1);
+  assert.equal(strength.maxCopies, 6);
+  assert.equal(agility.cost, 1);
+  const stats = collectStats({
+    baseStats: { str: 8, int: 2, agi: 7, dex: 5, luc: 4 },
+    cardStatBonuses: collectCardStatBonuses([
+      ...Array(6).fill(strength.id),
+      ...Array(6).fill(agility.id)
+    ])
+  });
+  assert.equal(stats.str, 1);
+  assert.equal(stats.agi, 1);
+});
+
+test("Spell Resistance and Scorching Resistance reduce only their intended spell damage", () => {
+  assert.equal(getCardById("rare_spell_resistance").statBonus.magicDamageReduction, 0.05);
+  const scorching = getCardById("sr_scorching_resistance");
+  assert.equal(scorching.statBonus.maxHp, 15);
+  assert.equal(scorching.statBonus.fireDamageReduction, 0.2);
+  const spell = { id: "elemental", spellPower: 100, powerMultiplier: 1, unavoidable: true };
+  const normalFire = resolveSpell({ attacker: {}, defender: {}, spell: { ...spell, element: "fire" }, rng: () => 0.5 });
+  const protectedFire = resolveSpell({ attacker: {}, defender: { fireDamageReduction: 0.2 }, spell: { ...spell, element: "fire" }, rng: () => 0.5 });
+  const protectedIce = resolveSpell({ attacker: {}, defender: { fireDamageReduction: 0.2 }, spell: { ...spell, element: "ice" }, rng: () => 0.5 });
+  assert.equal(protectedFire.totalDamage, Math.floor(normalFire.totalDamage * 0.8));
+  assert.equal(protectedIce.totalDamage, normalFire.totalDamage);
+});
+
 test("all implemented enemies and bosses expose internal reference levels", () => {
   for (const id of ["abyss_rat", "cave_slime", "abyss_rabbit", "wandering_dead", "poison_slime", "vampire_bat", "bouncing_coin", "viper", "mimic"]) {
     const enemy = getEnemyById(id);
