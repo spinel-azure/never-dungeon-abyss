@@ -54,17 +54,21 @@
         if (c.walls.E) line(ctx, x2, y1, x2, y2);
         if (c.walls.S) line(ctx, x1, y2, x2, y2);
       }
-      const floorDetectionActive = state.torchFuel > 0 && state.floorDetectionActive;
-      if ((isExplored && c.type === "stairsUp") || (c.type === "stairsDown" && (isExplored || revealOptions.stairsDown || floorDetectionActive))) {
+      const torchDetectionActive = state.torchFuel > 0;
+      const floorDetectionActive = torchDetectionActive && state.floorDetectionActive;
+      const stairsDetectionActive = floorDetectionActive || (torchDetectionActive && state.stairsDetectionActive);
+      const npcDetectionActive = floorDetectionActive || (torchDetectionActive && state.npcDetectionActive);
+      const treasureDetectionActive = floorDetectionActive || (torchDetectionActive && state.treasureDetectionActive);
+      if ((isExplored && c.type === "stairsUp") || (c.type === "stairsDown" && (isExplored || revealOptions.stairsDown || stairsDetectionActive))) {
         drawStairsMark(ctx, x1, y1, cell, c.type, c.portal);
       }
-      if (c.npc && (isExplored || revealOptions.npcs || floorDetectionActive)) drawNpcMark(ctx, x1, y1, cell);
+      if (c.npc && (isExplored || revealOptions.npcs || npcDetectionActive)) drawNpcMark(ctx, x1, y1, cell);
       if (c.bossId && isExplored) drawBossMark(ctx, x1, y1, cell);
       if (c.fountain && state.torchFuel > 0) drawFountainMark(ctx, x1, y1, cell);
       if (shouldDrawSpecialRoomMarker(c.specialRoom, isExplored, state.torchFuel)) {
         drawSpecialRoomMark(ctx, x1, y1, cell, c.specialRoom.content.minimapMarker);
       }
-      if (c.treasure && (revealOptions.treasures || floorDetectionActive)) {
+      if (c.treasure && (revealOptions.treasures || treasureDetectionActive)) {
         drawTreasureMark(ctx, x1, y1, cell, c.treasure);
       } else if (c.treasure && state.treasureCompassActive) {
         drawTreasureCompassMark(ctx, x1, y1, cell);

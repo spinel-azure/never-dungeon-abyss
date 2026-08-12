@@ -365,14 +365,14 @@ test("styptic cures bleeding and restores 15 HP", () => {
 
 test("shop and temple purchases spend gold and grant the selected item", () => {
   let character = createInitialCharacter({ name: "TEST", job: "warrior" });
-  character.gold = 760;
+  character.gold = 360;
   for (const [itemId, price] of [
     ["healing_potion", 20],
     ["antidote", 30],
     ["guiding_torch", 40],
     ["exorcism_talisman", 50],
     ["holy_water", 20],
-    ["treasure_compass", 500],
+    ["treasure_compass", 100],
     ["auto_walker", 100]
   ]) {
     const result = purchaseItem(character, itemId);

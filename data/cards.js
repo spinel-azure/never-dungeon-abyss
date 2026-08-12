@@ -68,6 +68,27 @@ const STANDARD_CARDS = [
     maxOwned: 99, maxCopies: 6
   },
   {
+    id: "common_stairs_detection", rarity: "C", cost: 1,
+    name: "Stairs Detection", nameJa: "階段探知", concept: "下り階段探知",
+    descriptionJa: "たいまつが灯っている間、下り階段をミニマップに表示する。",
+    category: "exploration", effectId: "stairs_detection", iconId: "stairs-detection",
+    maxOwned: 1, maxCopies: 1, sellPrice: 100, buybackPrice: 1000, overflowGold: 100
+  },
+  {
+    id: "common_person_detection", rarity: "C", cost: 1,
+    name: "People Finder", nameJa: "人捜し", concept: "NPC探知",
+    descriptionJa: "たいまつが灯っている間、NPCをミニマップに表示する。",
+    category: "exploration", effectId: "npc_detection", iconId: "person-detection",
+    maxOwned: 1, maxCopies: 1, sellPrice: 100, buybackPrice: 1000, overflowGold: 100
+  },
+  {
+    id: "common_treasure_detection", rarity: "C", cost: 1,
+    name: "Treasure Detection", nameJa: "宝箱探知", concept: "宝箱探知",
+    descriptionJa: "たいまつが灯っている間、宝箱をミニマップに表示する。",
+    category: "exploration", effectId: "treasure_detection", iconId: "treasure-detection",
+    maxOwned: 1, maxCopies: 1, sellPrice: 100, buybackPrice: 1000, overflowGold: 100
+  },
+  {
     id: "common_first_aid", rarity: "R", cost: 2,
     name: "First Aid", nameJa: "応急措置", concept: "出血耐性 +30%",
     descriptionJa: "出血状態になる確率を30％軽減する。",

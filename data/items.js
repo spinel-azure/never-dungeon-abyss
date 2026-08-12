@@ -34,7 +34,7 @@ export const ITEMS = Object.freeze([
   }),
   Object.freeze({
     number: 6, id: "treasure_compass", name: "トレジャーコンパス", category: "exploration",
-    buyPrice: 500, sellPrice: 250, source: "shop", usableIn: Object.freeze(["dungeon"]),
+    buyPrice: 100, sellPrice: 50, source: "shop", usableIn: Object.freeze(["dungeon"]),
     effects: Object.freeze([{ id: "reveal_treasures_until_return", value: 1 }]),
     description: "帰還するまで、迷宮内の宝箱をミニマップに★で表示する。", maxOwned: 99,
     iconId: "treasure-compass", version: 1

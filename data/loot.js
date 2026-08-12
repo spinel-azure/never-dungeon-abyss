@@ -61,18 +61,33 @@ export function getBlackChestLootTable(depth = 6) {
     || BLACK_CHEST_LOOT_TABLES[0];
 }
 
-export function rollRedChestLoot(rng = Math.random) {
+export function rollRedChestLoot(rng = Math.random, depth = 1) {
   const roll = normalizedRoll(rng);
-  if (roll < 0.55) return { kind: "gold", amount: rollRedChestGold(rng) };
-  if (roll < 0.75) return { kind: "item", itemId: "healing_potion", amount: 1, unidentifiedName: "？薬" };
-  if (roll < 0.88) return { kind: "item", itemId: "antidote", amount: 1, unidentifiedName: "？薬" };
+  const earlyFloor = Number(depth) >= 1 && Number(depth) <= 9;
+  if (earlyFloor && roll < 0.4) return { kind: "gold", amount: rollRedChestGold(rng) };
+  if (earlyFloor && roll < 0.6) return { kind: "item", itemId: "healing_potion", amount: 1, unidentifiedName: "？薬" };
+  if (earlyFloor && roll < 0.73) return { kind: "item", itemId: "antidote", amount: 1, unidentifiedName: "？薬" };
+  if (earlyFloor && roll < 0.88) return {
+    kind: "card",
+    cardId: rollFromList([
+      "common_stairs_detection",
+      "common_person_detection",
+      "common_treasure_detection"
+    ], rng),
+    amount: 1,
+    unidentifiedName: "？カード",
+    rarity: "C"
+  };
+  if (!earlyFloor && roll < 0.55) return { kind: "gold", amount: rollRedChestGold(rng) };
+  if (!earlyFloor && roll < 0.75) return { kind: "item", itemId: "healing_potion", amount: 1, unidentifiedName: "？薬" };
+  if (!earlyFloor && roll < 0.88) return { kind: "item", itemId: "antidote", amount: 1, unidentifiedName: "？薬" };
   return { kind: "equipment", equipmentId: "stiletto", slot: "rightArmId",
     enhancement: rollEnhancement(STILETTO_ENHANCEMENT_RATES, rng), unidentifiedName: "？短剣" };
 }
 
 export function rollRedChestGold(rng = Math.random) {
   const roll = normalizedRoll(rng);
-  return roll < 0.6 ? 10 : roll < 0.9 ? 15 : 20;
+  return roll < 0.6 ? 20 : roll < 0.9 ? 30 : 50;
 }
 
 export function rollEnhancement(rates, rng = Math.random) {

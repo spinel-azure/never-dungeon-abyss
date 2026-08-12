@@ -13,6 +13,9 @@ import { drawAlertnessIcon } from "./icons/alertness.js";
 import { drawDexterityIcon } from "./icons/dexterity.js";
 import { drawBandageIcon } from "./icons/bandage.js";
 import { drawPowerPoseIcon } from "./icons/power-pose.js";
+import { drawStairsDetectionIcon } from "./icons/stairs-detection.js";
+import { drawPersonDetectionIcon } from "./icons/person-detection.js";
+import { drawTreasureDetectionIcon } from "./icons/treasure-detection.js";
 
 const iconDrawers = new Map([
   ["strength", drawStrengthIcon],
@@ -29,6 +32,9 @@ const iconDrawers = new Map([
   ["dexterity", drawDexterityIcon],
   ["bandage", drawBandageIcon],
   ["power-pose", drawPowerPoseIcon],
+  ["stairs-detection", drawStairsDetectionIcon],
+  ["person-detection", drawPersonDetectionIcon],
+  ["treasure-detection", drawTreasureDetectionIcon],
   ["unknown", drawUnknownIcon],
 ]);
 

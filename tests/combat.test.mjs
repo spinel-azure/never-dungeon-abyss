@@ -1163,6 +1163,24 @@ test("Floor Detection is a unique SR exploration card and Defense Up uses the sh
   assert.equal(getCardById("rare_defense_up").iconId, "quartered-shield");
 });
 
+test("early detection cards are unique C cards with individual minimap effects", () => {
+  for (const [cardId, effectId] of [
+    ["common_stairs_detection", "stairs_detection"],
+    ["common_person_detection", "npc_detection"],
+    ["common_treasure_detection", "treasure_detection"]
+  ]) {
+    const card = getCardById(cardId);
+    assert.equal(card?.rarity, "C");
+    assert.equal(card?.cost, 1);
+    assert.equal(card?.maxOwned, 1);
+    assert.equal(card?.maxCopies, 1);
+    assert.equal(card?.sellPrice, 100);
+    assert.equal(card?.buybackPrice, 1000);
+    assert.equal(card?.overflowGold, 100);
+    assert.equal(hasCardEffect([cardId], effectId), true);
+  }
+});
+
 test("Vorpal Sword raises normal encounter escape rate to 85 percent without affecting bosses", () => {
   assert.equal(getEquipmentAdjustedEscapeRate({ escapeRate: .45, weaponId: "vorpal_sword" }), .85);
   assert.equal(getEquipmentAdjustedEscapeRate({ escapeRate: .9, weaponId: "vorpal_sword" }), .9);

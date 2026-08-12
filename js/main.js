@@ -320,7 +320,10 @@ import {
       explored,
       state: {
         ...state,
-        floorDetectionActive: hasCardEffect(character?.cards?.deckSlots, "floor_detection")
+        floorDetectionActive: hasCardEffect(character?.cards?.deckSlots, "floor_detection"),
+        stairsDetectionActive: hasCardEffect(character?.cards?.deckSlots, "stairs_detection"),
+        npcDetectionActive: hasCardEffect(character?.cards?.deckSlots, "npc_detection"),
+        treasureDetectionActive: hasCardEffect(character?.cards?.deckSlots, "treasure_detection")
       }
     }),
     getMinimapBounds
@@ -1334,7 +1337,7 @@ import {
     }
     if (treasureType !== "red" && treasureType !== "black") return { message: "中には何も入っていなかった！" };
     const message = addRolledLoot(
-      treasureType === "black" ? rollEnemyDrop({ dropProfile: "blackChest", depth: currentDepth }) : rollRedChestLoot()
+      treasureType === "black" ? rollEnemyDrop({ dropProfile: "blackChest", depth: currentDepth }) : rollRedChestLoot(Math.random, currentDepth)
     );
     updateCharacterUi();
     saveGame();
@@ -2187,7 +2190,9 @@ import {
     }
     for (const result of settled.cardResults || []) {
       const card = getCardById(result.cardId);
-      const discarded = result.discarded > 0 ? `（上限超過${result.discarded}枚は破棄）` : "";
+      const discarded = result.convertedGold > 0
+        ? `（上限超過${result.discarded}枚は${result.convertedGold}Gに変換）`
+        : result.discarded > 0 ? `（上限超過${result.discarded}枚は破棄）` : "";
       lines.push({ label: `${card?.rarity || ""}カード「${card?.nameJa || result.cardId}」`,
         count: `×${result.gained} → カード${discarded}`,
         className: isHighlightedLotCardRarity(card?.rarity) ? "is-super-rare" : "" });
