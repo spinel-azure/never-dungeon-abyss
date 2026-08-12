@@ -13,6 +13,7 @@ import { createInitialMarathonChallenge, normalizeMarathonChallenge } from "./ma
 import { normalizeDepthReturnSettlement } from "./experience-settlement.js";
 import { getLevelUnlockedSkillIds } from "./skills.js";
 import { createInitialKeyItemState, normalizeKeyItemState } from "./key-items.js";
+import { getItem } from "./items.js";
 
 export const STAT_KEYS = Object.freeze(["str", "int", "agi", "dex", "luc"]);
 
@@ -101,6 +102,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     equipment,
     ...equipmentCollection,
     equipmentBuyback: [],
+    itemBuyback: [],
     skillIds: [...characterClass.initialSkillIds],
     statuses: [],
     condition: "GOOD",
@@ -174,6 +176,9 @@ export function normalizeCharacter(character) {
     ...equipmentCollection,
     equipmentBuyback: Array.isArray(character.equipmentBuyback)
       ? structuredClone(character.equipmentBuyback).filter(entry => entry?.instance?.instanceId)
+      : [],
+    itemBuyback: Array.isArray(character.itemBuyback)
+      ? structuredClone(character.itemBuyback).filter(entry => getItem(entry?.itemId)?.repurchasable && Number(entry?.amount) > 0)
       : [],
     skillIds: [...new Set([
       ...characterClass.initialSkillIds,

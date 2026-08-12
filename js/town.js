@@ -119,6 +119,7 @@ const town = {
   onPurchaseEquipment: () => null,
   onBuybackEquipment: () => null,
   onSellItem: () => null,
+  onBuybackItem: () => null,
   onOpenSellInventory: () => {},
   onOpenPurchaseInventory: () => {},
   onEnterShop: () => null,
@@ -1362,6 +1363,7 @@ function handleInnStayConfirmationInput(action) {
 
 function openCommerce(kind) {
   const buybackEntries = kind === "buybackEquipment" ? (town.getCharacter()?.equipmentBuyback || []) : [];
+  const itemBuybackEntries = kind === "buybackEquipment" ? (town.getCharacter()?.itemBuyback || []) : [];
   const ids = kind === "donate"
     ? ["exorcism_talisman", "holy_water"]
     : kind === "storageWithdraw"
@@ -1376,10 +1378,16 @@ function openCommerce(kind) {
   town.mode = "commerce";
   town.commerceKind = kind;
   town.commerceItems = kind === "buybackEquipment"
-    ? buybackEntries.map(entry => {
+    ? [
+      ...buybackEntries.map(entry => {
       const definition = getEquipmentInstanceDefinition(entry.instance);
-      return definition ? { ...definition, id: entry.instance.instanceId, name: getEquipmentInstanceName(entry.instance), buyPrice: entry.price } : null;
-    }).filter(Boolean)
+      return definition ? { ...definition, id: entry.instance.instanceId, name: getEquipmentInstanceName(entry.instance), buyPrice: entry.price, buybackKind: "equipment" } : null;
+      }),
+      ...itemBuybackEntries.map(entry => {
+        const definition = getItem(entry.itemId);
+        return definition ? { ...definition, buyPrice: entry.price, buybackKind: "item" } : null;
+      })
+    ].filter(Boolean)
     : kind === "buyEquipment"
       ? getShopEquipmentStock(town.getCharacter())
       : ids.map(getItem).filter(Boolean);
@@ -1581,7 +1589,7 @@ function purchaseSelectedCommerceItem() {
     : town.commerceKind === "buyEquipment"
       ? town.onPurchaseEquipment(item.id)
       : town.commerceKind === "buybackEquipment"
-        ? town.onBuybackEquipment(item.id)
+        ? item.buybackKind === "item" ? town.onBuybackItem(item.id) : town.onBuybackEquipment(item.id)
       : town.onPurchaseItem(item.id, town.commerceQuantity || 1);
   if (!result?.accepted) {
     town.playSe("cursorMove");

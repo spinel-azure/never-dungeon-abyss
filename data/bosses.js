@@ -411,6 +411,51 @@ export const BOSSES = Object.freeze({
       remains: "――燃え尽き、朽ちた人型の残骸が転がっている。もう二度と起き上がる事はないだろう…。\n＊Aボタン：次へ"
     })
   }),
+  brass_bull_event_boss: Object.freeze({
+    id: "brass_bull_event_boss",
+    name: "真鍮の雄牛",
+    level: 30,
+    imageId: "brass_bull_event_boss",
+    image: "images/bosses/boss_08.avif",
+    race: "construct",
+    maxHp: 760,
+    stats: Object.freeze({ str: 24, int: 18, agi: 13, dex: 20, luc: 12 }),
+    def: 20,
+    attack: 21,
+    experienceReward: 3500,
+    specialAttack: null,
+    actions: Object.freeze([
+      Object.freeze({ weight: 25, action: Object.freeze({
+        id: "bull_roar", name: "雄牛の咆哮", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 0.8, effects: Object.freeze([Object.freeze({
+          statusId: "action_skip", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.4
+        })])
+      }) }),
+      Object.freeze({ weight: 45, action: Object.freeze({
+        id: "bull_charge", name: "雄牛の突進", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1.5, hitBonus: -0.06, speedModifier: -4, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 30, action: Object.freeze({
+        id: "brass_bull_flame_breath", name: "火炎吐き", actionType: "spell", element: "fire",
+        spellPower: 22, powerMultiplier: 1.1, unavoidable: true, speedModifier: -3, effects: Object.freeze([])
+      }) })
+    ]),
+    reward: Object.freeze({ type: "item", itemId: "molten_brass", amount: 1 }),
+    elementMultipliers: Object.freeze({ fire: 0.5, ice: 1.5, arcane: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      bleeding: Object.freeze({ resistancePoints: 100, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 100, immune: true }),
+      speed_down: Object.freeze({ resistancePoints: 75, immune: false })
+    }),
+    escapeRate: 0,
+    surpriseRate: 0,
+    surpriseRateMaximum: 0,
+    noDrop: true,
+    isBoss: true,
+    bossKind: "event",
+    defeatedFlag: "boss_brass_bull_event_boss_defeated"
+  }),
   jabberwock_event_boss: Object.freeze({
     id: "jabberwock_event_boss",
     name: "ジャバウォック",

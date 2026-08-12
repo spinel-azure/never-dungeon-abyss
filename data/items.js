@@ -127,6 +127,36 @@ export const ITEMS = Object.freeze([
     buyPrice: 0, sellPrice: 60, source: "drop", usableIn: Object.freeze([]),
     effects: Object.freeze([]), description: "ポイズントードから剥ぎ取った毒を帯びた皮。売却専用。", maxOwned: 99,
     repurchasable: false, iconId: "poison-toad-skin", version: 1
+  }),
+  Object.freeze({
+    number: 21, id: "fire_spirit_stone", name: "火の精霊石", category: "material",
+    buyPrice: 0, sellPrice: 80, source: "drop", usableIn: Object.freeze([]), effects: Object.freeze([]),
+    description: "火の精霊が遺す熱を帯びた石。売却専用。", maxOwned: 99,
+    repurchasable: false, iconId: "fire-spirit-stone", version: 1
+  }),
+  Object.freeze({
+    number: 22, id: "fire_lizard_skin", name: "火トカゲの皮", category: "material",
+    buyPrice: 0, sellPrice: 100, source: "drop", usableIn: Object.freeze([]), effects: Object.freeze([]),
+    description: "火トカゲから剥ぎ取った耐熱性の高い皮。売却専用。", maxOwned: 99,
+    repurchasable: false, iconId: "fire-lizard-skin", version: 1
+  }),
+  Object.freeze({
+    number: 23, id: "lava_stone_fragment", name: "溶岩石の欠片", category: "material",
+    buyPrice: 0, sellPrice: 120, source: "drop", usableIn: Object.freeze([]), effects: Object.freeze([]),
+    description: "ロレンラヴァの身体から崩れ落ちた高熱の石片。売却専用。", maxOwned: 99,
+    repurchasable: false, iconId: "lava-stone-fragment", version: 1
+  }),
+  Object.freeze({
+    number: 24, id: "cassowary_feather", name: "ヒクイドリの羽根", category: "material",
+    buyPrice: 0, sellPrice: 150, source: "drop", usableIn: Object.freeze([]), effects: Object.freeze([]),
+    description: "ヒクイドリの鮮やかで丈夫な羽根。売却専用。", maxOwned: 99,
+    repurchasable: false, iconId: "cassowary-feather", version: 1
+  }),
+  Object.freeze({
+    number: 25, id: "molten_brass", name: "溶けた真鍮", category: "material",
+    buyPrice: 0, sellPrice: 5000, buybackPrice: 10000, source: "drop", usableIn: Object.freeze([]),
+    effects: Object.freeze([]), description: "真鍮の雄牛から流れ落ちた希少な真鍮。逸品物。", maxOwned: 1,
+    repurchasable: true, iconId: "molten-brass", version: 1
   })
 ]);
 

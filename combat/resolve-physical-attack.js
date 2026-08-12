@@ -31,6 +31,13 @@ export function resolvePhysicalAttack({
     + numeric(attacker.dex) * numeric(attack.damageDexMultiplier);
   const hitRate = calculatePhysicalHitRate({ attacker, defender, attack });
   const criticalRate = calculateCriticalRate({ attacker, attack });
+  const element = String(attack.element || attack.weapon?.element || "physical");
+  const elementMultiplier = element === "physical"
+    ? 1
+    : Math.max(0, Number(defender.elementMultipliers?.[element] ?? 1));
+  const elementalReduction = element === "fire"
+    ? Math.max(0, Math.min(0.75, Number(defender.fireDamageReduction) || 0))
+    : 0;
   const hits = [];
   let firstHitEffectsResolved = false;
 
@@ -56,7 +63,9 @@ export function resolvePhysicalAttack({
       COMBAT_CONFIG.physicalVarianceMin,
       COMBAT_CONFIG.physicalVarianceMax
     );
-    const normalDamage = Math.max(1, Math.floor(baseDamage * variance));
+    const normalDamage = elementMultiplier <= 0
+      ? 0
+      : Math.max(1, Math.floor(baseDamage * variance * elementMultiplier * (1 - elementalReduction)));
     const damage = critical
       ? Math.max(
         COMBAT_CONFIG.criticalDamageMinimum,
@@ -93,6 +102,8 @@ export function resolvePhysicalAttack({
     ignoresDefense: Boolean(attack.ignoresDefense),
     effectiveDefense,
     defensePenetration: penetration,
+    element,
+    elementMultiplier,
     hits,
     totalDamage: hits.reduce((total, hit) => total + hit.damage, 0),
     actionEffects

@@ -116,8 +116,8 @@ import { collectCardStatBonuses, getCardById, hasCardEffect } from "../data/card
 import { drawCardCanvas } from "./card-canvas.js";
 import { getItem } from "../data/items.js";
 import { isCriticalHp } from "../data/quick-status.js";
-import { purchaseBuybackEquipment, purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
-import { addLootCard, addLootEquipment, addLootGold, addLootItem, depositItemInWarehouse, settleLootBag, withdrawItemFromWarehouse } from "../data/inventory.js";
+import { purchaseBuybackEquipment, purchaseBuybackItem, purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
+import { addLootCard, addLootEquipment, addLootGold, addLootItem, depositItemInWarehouse, grantItemWithOverflow, settleLootBag, withdrawItemFromWarehouse } from "../data/inventory.js";
 import { rollEnemyDrop, rollRedChestLoot } from "../data/loot.js";
 import { rollTreasureTrap } from "../data/traps.js";
 import { restAtHealingFountain as restoreAtHealingFountain } from "../data/fountains.js";
@@ -410,6 +410,7 @@ import {
     onPurchaseItem: purchaseTownItem,
     onPurchaseEquipment: purchaseTownEquipment,
     onBuybackEquipment: buybackTownEquipment,
+    onBuybackItem: buybackTownItem,
     onSellItem: sellTownItem,
     onOpenSellInventory: openShopSellInventory,
     onOpenPurchaseInventory: openShopPurchaseInventory,
@@ -1438,6 +1439,16 @@ import {
     return { ...result, character };
   }
 
+  function buybackTownItem(itemId) {
+    if (!character) return { accepted: false, reason: "noCharacter" };
+    const result = purchaseBuybackItem(character, itemId);
+    if (!result.accepted) return result;
+    character = normalizeCharacter(result.character);
+    updateCharacterUi();
+    saveGame();
+    return { ...result, character };
+  }
+
   function enterShop() {
     const result = acknowledgeShopStockAnnouncement(character);
     if (!result.announced) return null;
@@ -1631,6 +1642,12 @@ import {
             const equipment = getEquipmentInstanceDefinition(granted.instance);
             bossRewardMessage = `\n${equipment?.name || victory.reward.equipmentId}を手に入れた！`;
           }
+        } else if (victory.reward?.type === "item" && victory.reward.itemId) {
+          const amount = Math.max(1, Math.floor(Number(victory.reward.amount) || 1));
+          const granted = grantItemWithOverflow(character, victory.reward.itemId, amount);
+          character = granted.character;
+          const item = getItem(victory.reward.itemId);
+          bossRewardMessage = `\n${item?.name || victory.reward.itemId}を手に入れた！`;
         }
         if (battle.enemy.questProgressId) {
           character = recordCustomQuestProgress(character, battle.enemy.questProgressId, 1);

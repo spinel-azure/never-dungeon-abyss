@@ -67,9 +67,30 @@ export function sellItem(character, itemId, { price, amount = 1 } = {}) {
     character: {
       ...character,
       gold: Math.max(0, Math.floor(Number(character.gold) || 0)) + value,
-      inventory: consumeItem(character.inventory, item.id, quantity).inventory
+      inventory: consumeItem(character.inventory, item.id, quantity).inventory,
+      itemBuyback: item.repurchasable ? [
+        ...(Array.isArray(character.itemBuyback) ? character.itemBuyback : []),
+        { itemId: item.id, amount: quantity, price: Math.max(unitValue * 2, Math.floor(Number(item.buybackPrice) || 0)) }
+      ] : (character.itemBuyback || [])
     }
   };
+}
+
+export function purchaseBuybackItem(character, itemId) {
+  if (!character) return { accepted: false, reason: "noCharacter", character };
+  const entries = Array.isArray(character.itemBuyback) ? character.itemBuyback : [];
+  const entry = entries.find(candidate => candidate?.itemId === itemId);
+  if (!entry) return { accepted: false, reason: "notFound", character };
+  const item = getItem(itemId);
+  const cost = Math.max(0, Math.floor(Number(entry.price) || 0));
+  const gold = Math.max(0, Math.floor(Number(character.gold) || 0));
+  if (gold < cost) return { accepted: false, reason: "insufficientGold", character, cost };
+  const granted = grantItemWithOverflow(character, itemId, Math.max(1, Math.floor(Number(entry.amount) || 1)));
+  return { accepted: true, reason: "", item, cost, character: {
+    ...granted.character,
+    gold: gold - cost,
+    itemBuyback: entries.filter(candidate => candidate !== entry)
+  } };
 }
 
 export function sellEquipmentInstance(character, instanceId, { price } = {}) {

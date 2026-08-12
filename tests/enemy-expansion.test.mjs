@@ -15,7 +15,7 @@ test("new enemies follow the B3F to B5F encounter progression", () => {
 test("mimic is excluded from random encounters and uses the black chest reward profile", () => {
   const mimic = getEnemyById("mimic");
   assert.equal(mimic.randomEncounter, false);
-  assert.equal(getRandomEnemy({ depth: 999, rng: () => 0.999 }).id, "banshee");
+  assert.equal(getRandomEnemy({ depth: 999, rng: () => 0.999 }).id, "cassowary");
   assert.equal(createEnemyCombatant(mimic).dropProfile, "blackChest");
   assert.deepEqual(rollEnemyDrop(createEnemyCombatant(mimic), sequence(0, 0)), rollBlackChestLoot(sequence(0, 0)));
 });
@@ -70,6 +70,27 @@ test("B11F to B20F enemies carry their intended attacks, rewards and materials",
     assert.equal(getItem(itemId).sellPrice, sellPrice);
     assert.equal(getItem(itemId).repurchasable, false);
   }
+});
+
+test("B21F to B30F fire enemies unlock progressively and replace the previous pool", () => {
+  assert.equal(getRandomEnemy({ depth: 21, rng: () => 0.999 }).id, "fire_spirit");
+  assert.equal(getRandomEnemy({ depth: 23, rng: () => 0.999 }).id, "fire_lizard");
+  assert.equal(getRandomEnemy({ depth: 26, rng: () => 0.999 }).id, "loren_lava");
+  assert.equal(getRandomEnemy({ depth: 29, rng: () => 0.999 }).id, "cassowary");
+});
+
+test("B21F to B30F enemies use fire and heavy attacks with balanced rewards", () => {
+  const spirit = getEnemyById("fire_spirit");
+  const lizard = getEnemyById("fire_lizard");
+  const lava = getEnemyById("loren_lava");
+  const cassowary = getEnemyById("cassowary");
+  assert.equal(spirit.actions[1].action.actionType, "spell");
+  assert.equal(spirit.actions[1].action.element, "fire");
+  assert.equal(lizard.actions[1].action.element, "fire");
+  assert.equal(lava.actions[1].action.powerPerHit, 1.65);
+  assert.equal(lava.actions[1].action.speedModifier, -8);
+  assert.equal(cassowary.actions[1].action.element, "fire");
+  assert.deepEqual([spirit.experienceReward, lizard.experienceReward, lava.experienceReward, cassowary.experienceReward], [140, 170, 210, 260]);
 });
 
 function sequence(...values) {

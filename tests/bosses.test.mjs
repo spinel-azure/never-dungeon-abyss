@@ -275,3 +275,14 @@ test("B10 stairs up is marked as the transfer portal", () => {
   const stairsUp = cells.flat().find(cell => cell.type === "stairsUp");
   assert.equal(stairsUp.portal, "transfer_b10f");
 });
+
+test("Brass Bull is an unplaced quest event boss with a guaranteed unique material reward", () => {
+  const boss = getBossById("brass_bull_event_boss");
+  assert.equal(boss.bossKind, "event");
+  assert.equal(boss.floor, undefined);
+  assert.equal(boss.level, 30);
+  assert.equal(boss.experienceReward, 3500);
+  assert.deepEqual(boss.reward, { type: "item", itemId: "molten_brass", amount: 1 });
+  assert.deepEqual(boss.actions.map(entry => entry.action.name), ["雄牛の咆哮", "雄牛の突進", "火炎吐き"]);
+  assert.equal(createBossCombatant(boss).isBoss, true);
+});

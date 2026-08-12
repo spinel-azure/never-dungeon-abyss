@@ -10,7 +10,7 @@ import {
   setPresenceIncreaseReduction, suppressPresence
 } from "../js/presence.js";
 import { grantEventItems, unlockGuildRequest } from "../js/character-services.js";
-import { purchaseBuybackEquipment, purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
+import { purchaseBuybackEquipment, purchaseBuybackItem, purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
 import { getItem, getShopItemIdsForCharacter, getShopItemIdsForDepth } from "../data/items.js";
 import { equipInstance, getEquipmentInstanceDefinition } from "../data/equipment-inventory.js";
 import { getShopEquipmentOffer, getShopEquipmentStock } from "../data/shop-stock.js";
@@ -20,6 +20,20 @@ function characterWith(itemId, amount = 1) {
   character.inventory = grantItem(character.inventory, itemId, amount).inventory;
   return character;
 }
+
+test("Molten Brass is a valuable unique material that can be bought back", () => {
+  const item = getItem("molten_brass");
+  assert.equal(item.maxOwned, 1);
+  assert.equal(item.sellPrice, 5000);
+  assert.equal(item.buybackPrice, 10000);
+  const sold = sellItem(characterWith(item.id), item.id);
+  assert.equal(sold.accepted, true);
+  assert.equal(sold.character.itemBuyback[0].price, 10000);
+  const bought = purchaseBuybackItem({ ...sold.character, gold: 10000 }, item.id);
+  assert.equal(bought.accepted, true);
+  assert.equal(getItemCount(bought.character.inventory, item.id), 1);
+  assert.equal(bought.character.itemBuyback.length, 0);
+});
 
 test("legacy characters receive an empty normalized inventory", () => {
   const character = createInitialCharacter({ name: "TEST", job: "warrior" });
