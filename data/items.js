@@ -157,6 +157,30 @@ export const ITEMS = Object.freeze([
     buyPrice: 0, sellPrice: 5000, buybackPrice: 10000, source: "drop", usableIn: Object.freeze([]),
     effects: Object.freeze([]), description: "真鍮の雄牛から流れ落ちた希少な真鍮。逸品物。", maxOwned: 1,
     repurchasable: true, iconId: "molten-brass", version: 1
+  }),
+  Object.freeze({
+    number: 26, id: "ice_spirit_stone", name: "氷の精霊石", category: "material",
+    buyPrice: 0, sellPrice: 180, source: "drop", usableIn: Object.freeze([]), effects: Object.freeze([]),
+    description: "氷の精霊が遺す冷気を帯びた石。売却専用。", maxOwned: 99,
+    repurchasable: false, iconId: "ice-spirit-stone", version: 1
+  }),
+  Object.freeze({
+    number: 27, id: "ice_lizard_skin", name: "氷トカゲの皮", category: "material",
+    buyPrice: 0, sellPrice: 220, source: "drop", usableIn: Object.freeze([]), effects: Object.freeze([]),
+    description: "氷トカゲから剥ぎ取った冷気に強い皮。売却専用。", maxOwned: 99,
+    repurchasable: false, iconId: "ice-lizard-skin", version: 1
+  }),
+  Object.freeze({
+    number: 28, id: "vogel_feather", name: "フォーゲルの羽根", category: "material",
+    buyPrice: 0, sellPrice: 260, source: "drop", usableIn: Object.freeze([]), effects: Object.freeze([]),
+    description: "アイスフォーゲルの鋭く硬質な羽根。売却専用。", maxOwned: 99,
+    repurchasable: false, iconId: "vogel-feather", version: 1
+  }),
+  Object.freeze({
+    number: 29, id: "ice_bear_paw", name: "氷熊の手", category: "material",
+    buyPrice: 0, sellPrice: 320, source: "drop", usableIn: Object.freeze([]), effects: Object.freeze([]),
+    description: "氷熊の巨大で分厚い手。売却専用。", maxOwned: 99,
+    repurchasable: false, iconId: "ice-bear-paw", version: 1
   })
 ]);
 

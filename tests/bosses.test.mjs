@@ -286,3 +286,13 @@ test("Brass Bull is an unplaced quest event boss with a guaranteed unique materi
   assert.deepEqual(boss.actions.map(entry => entry.action.name), ["雄牛の咆哮", "雄牛の突進", "火炎吐き"]);
   assert.equal(createBossCombatant(boss).isBoss, true);
 });
+
+test("Glacies is an unplaced quest event boss with a warrior hammer reward", () => {
+  const boss = getBossById("glacies_event_boss");
+  assert.equal(boss.bossKind, "event");
+  assert.equal(boss.floor, undefined);
+  assert.equal(boss.level, 42);
+  assert.equal(boss.experienceReward, 6500);
+  assert.deepEqual(boss.reward, { type: "equipment", equipmentId: "glacies_hammer", slot: "rightArmId" });
+  assert.deepEqual(boss.actions.map(entry => entry.action.name), ["ぶん回し", "振り下ろし", "巨人の突進"]);
+});

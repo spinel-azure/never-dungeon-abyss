@@ -273,7 +273,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "fire_spirit", name: "火の精霊", imageId: "fire_spirit",
     level: 23,
-    image: "images/enemies/enemy_14.avif", race: "spirit", minimumDepth: 21,
+    image: "images/enemies/enemy_14.avif", race: "spirit", minimumDepth: 21, maximumDepth: 30,
     maxHp: 145, stats: Object.freeze({ str: 10, int: 18, agi: 17, dex: 16, luc: 12 }),
     def: 12, attack: 13, experienceReward: 140, dropItemId: "fire_spirit_stone",
     actions: Object.freeze([
@@ -297,7 +297,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "fire_lizard", name: "火トカゲ", imageId: "fire_lizard",
     level: 25,
-    image: "images/enemies/enemy_15.avif", race: "beast", minimumDepth: 23,
+    image: "images/enemies/enemy_15.avif", race: "beast", minimumDepth: 23, maximumDepth: 30,
     maxHp: 178, stats: Object.freeze({ str: 18, int: 6, agi: 15, dex: 17, luc: 10 }),
     def: 14, attack: 16, experienceReward: 170, dropItemId: "fire_lizard_skin",
     actions: Object.freeze([
@@ -321,7 +321,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "loren_lava", name: "ロレンラヴァ", imageId: "loren_lava",
     level: 27,
-    image: "images/enemies/enemy_16.avif", race: "construct", minimumDepth: 26,
+    image: "images/enemies/enemy_16.avif", race: "construct", minimumDepth: 26, maximumDepth: 30,
     maxHp: 225, stats: Object.freeze({ str: 22, int: 5, agi: 6, dex: 14, luc: 8 }),
     def: 18, attack: 18, experienceReward: 210, dropItemId: "lava_stone_fragment",
     actions: Object.freeze([
@@ -345,7 +345,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "cassowary", name: "ヒクイドリ", imageId: "cassowary",
     level: 29,
-    image: "images/enemies/enemy_17.avif", race: "beast", minimumDepth: 29,
+    image: "images/enemies/enemy_17.avif", race: "beast", minimumDepth: 29, maximumDepth: 30,
     maxHp: 205, stats: Object.freeze({ str: 19, int: 15, agi: 22, dex: 20, luc: 12 }),
     def: 15, attack: 18, experienceReward: 260, dropItemId: "cassowary_feather",
     actions: Object.freeze([
@@ -365,6 +365,102 @@ export const enemies = Object.freeze([
       speed_down: Object.freeze({ resistancePoints: 45, immune: false })
     }),
     escapeRate: 0.35, surpriseRate: 0.26, surpriseRateMaximum: 0.38, isBoss: false
+  }),
+  Object.freeze({
+    id: "ice_spirit", name: "氷の精霊", imageId: "ice_spirit",
+    level: 32,
+    image: "images/enemies/enemy_18.avif", race: "spirit", minimumDepth: 31,
+    maxHp: 230, stats: Object.freeze({ str: 12, int: 22, agi: 20, dex: 19, luc: 14 }),
+    def: 16, attack: 17, experienceReward: 320, dropItemId: "ice_spirit_stone",
+    actions: Object.freeze([
+      Object.freeze({ weight: 45, action: Object.freeze({
+        id: "ice_spirit_attack", name: "攻撃", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 55, action: Object.freeze({
+        id: "eiskugel", name: "アイスクーゲル", actionType: "spell", element: "ice",
+        spellPower: 21, powerMultiplier: 1, unavoidable: true, speedModifier: -1, effects: Object.freeze([])
+      }) })
+    ]),
+    elementMultipliers: Object.freeze({ fire: 1.5, ice: 0 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 50, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 100, immune: true })
+    }),
+    escapeRate: 0.4, surpriseRate: 0.18, surpriseRateMaximum: 0.3, isBoss: false
+  }),
+  Object.freeze({
+    id: "ice_lizard", name: "氷トカゲ", imageId: "ice_lizard",
+    level: 34,
+    image: "images/enemies/enemy_19.avif", race: "beast", minimumDepth: 33,
+    maxHp: 275, stats: Object.freeze({ str: 21, int: 8, agi: 17, dex: 19, luc: 11 }),
+    def: 18, attack: 20, experienceReward: 380, dropItemId: "ice_lizard_skin",
+    actions: Object.freeze([
+      Object.freeze({ weight: 55, action: Object.freeze({
+        id: "ice_lizard_attack", name: "攻撃", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 45, action: Object.freeze({
+        id: "frost_tail_slam", name: "尻尾叩きつけ", actionType: "physicalAttack", element: "ice",
+        hitCount: 1, powerPerHit: 1.3, hitBonus: -0.03, speedModifier: -2, effects: Object.freeze([])
+      }) })
+    ]),
+    elementMultipliers: Object.freeze({ fire: 1.5, ice: 0.5 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 65, immune: false }),
+      action_skip: Object.freeze({ resistancePoints: 40, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 80, immune: false })
+    }),
+    escapeRate: 0.35, surpriseRate: 0.2, surpriseRateMaximum: 0.32, isBoss: false
+  }),
+  Object.freeze({
+    id: "ice_vogel", name: "アイスフォーゲル", imageId: "ice_vogel",
+    level: 37,
+    image: "images/enemies/enemy_20.avif", race: "beast", minimumDepth: 36,
+    maxHp: 260, stats: Object.freeze({ str: 19, int: 12, agi: 25, dex: 23, luc: 15 }),
+    def: 17, attack: 20, experienceReward: 470, dropItemId: "vogel_feather",
+    actions: Object.freeze([
+      Object.freeze({ weight: 50, action: Object.freeze({
+        id: "ice_vogel_attack", name: "攻撃", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 50, action: Object.freeze({
+        id: "federschneide", name: "フェーダーシュナイデ", actionType: "physicalAttack", element: "ice",
+        hitCount: 3, powerPerHit: 0.5, hitBonus: 0.02, speedModifier: 2, effects: Object.freeze([])
+      }) })
+    ]),
+    elementMultipliers: Object.freeze({ fire: 1.5, ice: 0.5 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 50, immune: false }),
+      action_skip: Object.freeze({ resistancePoints: 35, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 65, immune: false })
+    }),
+    escapeRate: 0.3, surpriseRate: 0.28, surpriseRateMaximum: 0.4, isBoss: false
+  }),
+  Object.freeze({
+    id: "ice_bear", name: "氷熊", imageId: "ice_bear",
+    level: 40,
+    image: "images/enemies/enemy_21.avif", race: "beast", minimumDepth: 39,
+    maxHp: 360, stats: Object.freeze({ str: 26, int: 7, agi: 10, dex: 18, luc: 12 }),
+    def: 22, attack: 23, experienceReward: 580, dropItemId: "ice_bear_paw",
+    actions: Object.freeze([
+      Object.freeze({ weight: 60, action: Object.freeze({
+        id: "ice_bear_attack", name: "攻撃", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 40, action: Object.freeze({
+        id: "bear_crush", name: "のしかかり", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1.7, hitBonus: -0.08, speedModifier: -8, effects: Object.freeze([])
+      }) })
+    ]),
+    elementMultipliers: Object.freeze({ fire: 1.5, ice: 0.5 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 55, immune: false }),
+      action_skip: Object.freeze({ resistancePoints: 60, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 70, immune: false })
+    }),
+    escapeRate: 0.35, surpriseRate: 0.1, surpriseRateMaximum: 0.22, isBoss: false
   }),
   Object.freeze({
     id: "mimic", name: "ミミック", imageId: "mimic",

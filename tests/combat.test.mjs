@@ -1669,6 +1669,14 @@ test("The Five Star attacks five times and Musashi Blade is a two-handed two-hit
   assert.equal(musashiAttack.powerPerHit, .65);
 });
 
+test("Glacies Hammer is a warrior-only ice two-handed weapon", () => {
+  const hammer = getWeapon("glacies_hammer");
+  assert.equal(hammer.attack, 22);
+  assert.equal(hammer.element, "ice");
+  assert.equal(hammer.twoHanded, true);
+  assert.deepEqual(hammer.allowedJobs, ["warrior"]);
+});
+
 test("a successful Flash Slash ends remaining hits and requests the shared slash effect", () => {
   const warrior = normalizeCharacter({
     ...createInitialCharacter({ name: "W", job: "warrior" }),

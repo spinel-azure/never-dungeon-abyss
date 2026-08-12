@@ -182,6 +182,11 @@ export const WEAPONS = Object.freeze({
   musashi_blade: Object.freeze({
     id: "musashi_blade", name: "ムサシブレード", type: "dual_blade", attack: 15,
     element: "physical", allowedJobs: Object.freeze(["warrior"]), twoHanded: true, sellPrice: 0
+  }),
+  glacies_hammer: Object.freeze({
+    id: "glacies_hammer", name: "グラキエスハンマー", type: "blunt", attack: 22,
+    element: "ice", allowedJobs: Object.freeze(["warrior"]), twoHanded: true,
+    sellPrice: 6000, buybackPrice: 12000
   })
 });
 

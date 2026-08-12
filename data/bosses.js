@@ -411,6 +411,152 @@ export const BOSSES = Object.freeze({
       remains: "――燃え尽き、朽ちた人型の残骸が転がっている。もう二度と起き上がる事はないだろう…。\n＊Aボタン：次へ"
     })
   }),
+  glacies_event_boss: Object.freeze({
+    id: "glacies_event_boss",
+    name: "グラキエス",
+    level: 42,
+    imageId: "glacies_event_boss",
+    image: "images/bosses/boss_09.avif",
+    race: "giant",
+    maxHp: 1050,
+    stats: Object.freeze({ str: 28, int: 10, agi: 14, dex: 22, luc: 14 }),
+    def: 23,
+    attack: 25,
+    experienceReward: 6500,
+    specialAttack: null,
+    actions: Object.freeze([
+      Object.freeze({ weight: 40, action: Object.freeze({
+        id: "glacies_wide_swing", name: "ぶん回し", actionType: "physicalAttack", element: "ice",
+        hitCount: 1, powerPerHit: 1.15, hitBonus: 0.02, speedModifier: 1, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 35, action: Object.freeze({
+        id: "glacies_overhead_smash", name: "振り下ろし", actionType: "physicalAttack", element: "ice",
+        hitCount: 1, powerPerHit: 1.65, hitBonus: -0.08, speedModifier: -6, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 25, action: Object.freeze({
+        id: "giant_charge", name: "巨人の突進", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1.85, hitBonus: -0.12, speedModifier: -8, effects: Object.freeze([])
+      }) })
+    ]),
+    reward: Object.freeze({ type: "equipment", equipmentId: "glacies_hammer", slot: "rightArmId" }),
+    elementMultipliers: Object.freeze({ fire: 1.5, ice: 0.5, arcane: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      bleeding: Object.freeze({ resistancePoints: 100, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 100, immune: true }),
+      speed_down: Object.freeze({ resistancePoints: 80, immune: false })
+    }),
+    escapeRate: 0,
+    surpriseRate: 0,
+    surpriseRateMaximum: 0,
+    noDrop: true,
+    isBoss: true,
+    bossKind: "event",
+    defeatedFlag: "boss_glacies_event_boss_defeated"
+  }),
+  glacies_event_boss: Object.freeze({
+    id: "glacies_event_boss",
+    name: "グラキエス",
+    level: 42,
+    imageId: "glacies_event_boss",
+    image: "images/bosses/boss_09.avif",
+    race: "giant",
+    maxHp: 1050,
+    stats: Object.freeze({ str: 28, int: 10, agi: 14, dex: 22, luc: 14 }),
+    def: 23,
+    attack: 25,
+    experienceReward: 6500,
+    specialAttack: null,
+    actions: Object.freeze([
+      Object.freeze({ weight: 40, action: Object.freeze({
+        id: "glacies_wide_swing", name: "ぶん回し", actionType: "physicalAttack", element: "ice",
+        hitCount: 1, powerPerHit: 1.15, hitBonus: 0.02, speedModifier: 1, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 35, action: Object.freeze({
+        id: "glacies_overhead_smash", name: "振り下ろし", actionType: "physicalAttack", element: "ice",
+        hitCount: 1, powerPerHit: 1.65, hitBonus: -0.08, speedModifier: -6, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 25, action: Object.freeze({
+        id: "giant_charge", name: "巨人の突進", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1.85, hitBonus: -0.12, speedModifier: -8, effects: Object.freeze([])
+      }) })
+    ]),
+    reward: Object.freeze({ type: "equipment", equipmentId: "glacies_hammer", slot: "rightArmId" }),
+    elementMultipliers: Object.freeze({ fire: 1.5, ice: 0.5, arcane: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      bleeding: Object.freeze({ resistancePoints: 100, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 100, immune: true }),
+      speed_down: Object.freeze({ resistancePoints: 80, immune: false })
+    }),
+    escapeRate: 0,
+    surpriseRate: 0,
+    surpriseRateMaximum: 0,
+    noDrop: true,
+    isBoss: true,
+    bossKind: "event",
+    defeatedFlag: "boss_glacies_event_boss_defeated"
+  }),
+  glacies_event_boss: Object.freeze({
+    id: "glacies_event_boss", name: "グラキエス", level: 42,
+    imageId: "glacies_event_boss", image: "images/bosses/boss_09.avif", race: "giant",
+    maxHp: 1050, stats: Object.freeze({ str: 28, int: 10, agi: 14, dex: 22, luc: 14 }),
+    def: 23, attack: 25, experienceReward: 6500, specialAttack: null,
+    actions: Object.freeze([
+      Object.freeze({ weight: 40, action: Object.freeze({
+        id: "glacies_wide_swing", name: "ぶん回し", actionType: "physicalAttack", element: "ice",
+        hitCount: 1, powerPerHit: 1.15, hitBonus: 0.02, speedModifier: 1, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 35, action: Object.freeze({
+        id: "glacies_overhead_smash", name: "振り下ろし", actionType: "physicalAttack", element: "ice",
+        hitCount: 1, powerPerHit: 1.65, hitBonus: -0.08, speedModifier: -6, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 25, action: Object.freeze({
+        id: "giant_charge", name: "巨人の突進", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1.85, hitBonus: -0.12, speedModifier: -8, effects: Object.freeze([])
+      }) })
+    ]),
+    reward: Object.freeze({ type: "equipment", equipmentId: "glacies_hammer", slot: "rightArmId" }),
+    elementMultipliers: Object.freeze({ fire: 1.5, ice: 0.5, arcane: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      bleeding: Object.freeze({ resistancePoints: 100, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 100, immune: true }),
+      speed_down: Object.freeze({ resistancePoints: 80, immune: false })
+    }),
+    escapeRate: 0, surpriseRate: 0, surpriseRateMaximum: 0, noDrop: true, isBoss: true,
+    bossKind: "event", defeatedFlag: "boss_glacies_event_boss_defeated"
+  }),
+  glacies_event_boss: Object.freeze({
+    id: "glacies_event_boss", name: "グラキエス", level: 42,
+    imageId: "glacies_event_boss", image: "images/bosses/boss_09.avif", race: "giant",
+    maxHp: 1050, stats: Object.freeze({ str: 28, int: 10, agi: 14, dex: 22, luc: 14 }),
+    def: 23, attack: 25, experienceReward: 6500, specialAttack: null,
+    actions: Object.freeze([
+      Object.freeze({ weight: 40, action: Object.freeze({
+        id: "glacies_wide_swing", name: "ぶん回し", actionType: "physicalAttack", element: "ice",
+        hitCount: 1, powerPerHit: 1.15, hitBonus: 0.02, speedModifier: 1, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 35, action: Object.freeze({
+        id: "glacies_overhead_smash", name: "振り下ろし", actionType: "physicalAttack", element: "ice",
+        hitCount: 1, powerPerHit: 1.65, hitBonus: -0.08, speedModifier: -6, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 25, action: Object.freeze({
+        id: "giant_charge", name: "巨人の突進", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1.85, hitBonus: -0.12, speedModifier: -8, effects: Object.freeze([])
+      }) })
+    ]),
+    reward: Object.freeze({ type: "equipment", equipmentId: "glacies_hammer", slot: "rightArmId" }),
+    elementMultipliers: Object.freeze({ fire: 1.5, ice: 0.5, arcane: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      bleeding: Object.freeze({ resistancePoints: 100, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 100, immune: true }),
+      speed_down: Object.freeze({ resistancePoints: 80, immune: false })
+    }),
+    escapeRate: 0, surpriseRate: 0, surpriseRateMaximum: 0, noDrop: true, isBoss: true,
+    bossKind: "event", defeatedFlag: "boss_glacies_event_boss_defeated"
+  }),
   brass_bull_event_boss: Object.freeze({
     id: "brass_bull_event_boss",
     name: "真鍮の雄牛",
