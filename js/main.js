@@ -90,6 +90,7 @@ import { hasUncertainLoot, isHighlightedLotCardRarity, isHighlightedLotEquipment
 import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getActivePlayTimeDelta, normalizeAdventureStats, recordInnStay, recordShopPurchase, recordTempleDonation } from "../data/adventure-stats.js";
+import { getAdventureChronicle } from "../data/adventure-records.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName, grantEquipmentInstance } from "../data/equipment-inventory.js";
 import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
@@ -206,6 +207,8 @@ import {
   const townScreen = document.getElementById("townScreen");
   const levelUpEffect = document.getElementById("levelUpEffect");
   const questCompleteEffect = document.getElementById("questCompleteEffect");
+  const achievementUnlockedEffect = document.getElementById("achievementUnlockedEffect");
+  if (achievementUnlockedEffect) document.body.append(achievementUnlockedEffect);
   const cardGetEffect = document.getElementById("cardGetEffect");
   const cardGetCanvas = document.getElementById("cardGetCanvas");
   const itemGetEffect = document.getElementById("itemGetEffect");
@@ -238,6 +241,9 @@ import {
   let cardGetTimer = 0;
   let itemGetTimer = 0;
   let bonusGetTimer = 0;
+  let knownAchievementIds = null;
+  const achievementNotificationQueue = [];
+  let achievementNotificationRunning = false;
   let trapResultTimer = 0;
   let experienceSettlementCloseCallback = null;
   let pendingLootIdentification = null;
@@ -629,6 +635,7 @@ import {
     state.npcEncounterCounts = player.npcEncounterCounts && typeof player.npcEncounterCounts === "object" ? { ...player.npcEncounterCounts } : {};
     state.stairsPromptDismissed = Boolean(player.stairsPromptDismissed);
     character = normalizeCharacter(save.character);
+    knownAchievementIds = new Set(getAdventureChronicle(character).filter(entry => entry.achieved).map(entry => entry.id));
     const quest007Supply = grantRedDoorInvestigationSupply(character);
     character = quest007Supply.character;
     character.highestDungeonDepthReached = Math.max(
@@ -870,6 +877,11 @@ import {
     };
     updateCharacterUi();
     saveGame();
+    if (result.acceptanceSupplyItemId) {
+      setTimeout(() => showNamedItemGetEffect([
+        `回復薬（大）×${result.acceptanceSupplyAmount}`
+      ], { important: true }), 0);
+    }
     if (questId === FLOOR_SURVEY_QUEST_ID) showQuestTutorial();
     return {
       ...result,
@@ -1053,6 +1065,42 @@ import {
     renderEquipment(character);
     renderDetailStats(character);
     renderExperience(character);
+    detectAchievementUnlocks();
+  }
+
+  function detectAchievementUnlocks() {
+    if (!character) {
+      knownAchievementIds = null;
+      return;
+    }
+    const achieved = getAdventureChronicle(character).filter(entry => entry.achieved);
+    if (knownAchievementIds == null) {
+      knownAchievementIds = new Set(achieved.map(entry => entry.id));
+      return;
+    }
+    const newlyUnlocked = achieved.filter(entry => !knownAchievementIds.has(entry.id));
+    achieved.forEach(entry => knownAchievementIds.add(entry.id));
+    if (!newlyUnlocked.length) return;
+    achievementNotificationQueue.push(...newlyUnlocked);
+    void playNextAchievementNotification();
+  }
+
+  async function playNextAchievementNotification() {
+    if (achievementNotificationRunning || !achievementUnlockedEffect) return;
+    const achievement = achievementNotificationQueue.shift();
+    if (!achievement) return;
+    achievementNotificationRunning = true;
+    achievementUnlockedEffect.textContent = "実績解除";
+    achievementUnlockedEffect.hidden = false;
+    achievementUnlockedEffect.classList.remove("is-active");
+    void achievementUnlockedEffect.offsetWidth;
+    playSe("achievementUnlocked");
+    achievementUnlockedEffect.classList.add("is-active");
+    await wait(2800);
+    achievementUnlockedEffect.classList.remove("is-active");
+    achievementUnlockedEffect.hidden = true;
+    achievementNotificationRunning = false;
+    void playNextAchievementNotification();
   }
 
   function hasMaxVitalBonus(target, key) {

@@ -241,7 +241,9 @@ export function placeStairs(depth = 1) {
   const floor = Math.floor(Number(depth) || 1);
   resetCellTypes();
   cells[startY][startX].type = "stairsUp";
-  cells[startY][startX].portal = [10, 20, 30].includes(floor) ? `transfer_b${floor}f` : null;
+  cells[startY][startX].portal = floor % 10 === 0 && floor >= 10 && floor <= 100
+    ? `transfer_b${floor}f`
+    : null;
   const stairsDown = findFarthestReachableCell(7);
   if (stairsDown) cells[stairsDown.y][stairsDown.x].type = "stairsDown";
 }

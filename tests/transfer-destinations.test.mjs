@@ -13,14 +13,35 @@ test("transfer destinations are data-driven and expose only unlocked floors", ()
   assert.deepEqual(getUnlockedTransferDestinations(character), []);
   character.eventFlags.transfer_portal_b10f_unlocked = true;
   assert.deepEqual(getUnlockedTransferDestinations(character).map(entry => entry.depth), [10]);
-  character.eventFlags.shop_stock_b20f_unlocked = true;
+  character.eventFlags.boss_fallen_mage_b19f_defeated = true;
   assert.deepEqual(getUnlockedTransferDestinations(character).map(entry => entry.depth), [10, 20]);
   assert.equal(isTransferDestinationUnlocked(character, 20), true);
   assert.equal(isTransferDestinationUnlocked(character, 30), false);
-  character.highestDungeonDepthReached = 30;
+  character.eventFlags.boss_iron_maiden_b29f_defeated = true;
   assert.deepEqual(getUnlockedTransferDestinations(character).map(entry => entry.depth), [10, 20, 30]);
   assert.equal(isTransferDestinationUnlocked(character, 30), true);
+  character.eventFlags.boss_wicker_man_b39f_defeated = true;
+  character.eventFlags.boss_b49f_defeated = true;
+  character.eventFlags.boss_b59f_defeated = true;
+  character.eventFlags.boss_b69f_defeated = true;
+  character.eventFlags.boss_b79f_defeated = true;
+  character.eventFlags.boss_b89f_defeated = true;
+  character.eventFlags.boss_b99f_defeated = true;
+  assert.deepEqual(getUnlockedTransferDestinations(character).map(entry => entry.depth), [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
   assert.ok(TRANSFER_DESTINATIONS.every(entry => entry.label === `B${entry.depth}F`));
+});
+
+test("achievement popup uses the k8x12 font and queues newly achieved records", async () => {
+  const [html, css, source] = await Promise.all([
+    readFile(new URL("../index.html", import.meta.url), "utf8"),
+    readFile(new URL("../css/town.css", import.meta.url), "utf8"),
+    readFile(new URL("../js/main.js", import.meta.url), "utf8")
+  ]);
+  assert.match(html, /id="achievementUnlockedEffect"[^>]*>実績解除</);
+  assert.match(css, /\.achievement-unlocked-effect\{[^}]*"PixelFont"/s);
+  assert.match(source, /achievementNotificationQueue\.push\(\.\.\.newlyUnlocked\)/);
+  assert.match(source, /playSe\("achievementUnlocked"\)/);
+  assert.match(source, /document\.body\.append\(achievementUnlockedEffect\)/);
 });
 
 test("transfer destination UI is separate from the six command slots and paginates by five", async () => {

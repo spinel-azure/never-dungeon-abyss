@@ -70,6 +70,13 @@ export function getAdventureChronicle(character) {
     ["b10", "B10Fへ到達した", depth >= 10 || flags.transfer_portal_b10f_unlocked, "奈落の迷宮地下10階へ到達し、転送門を解放した。"],
     ["mage", "堕落した魔術師を撃破した", flags.boss_fallen_mage_b19f_defeated, "B19Fを塞いでいた堕落した魔術師を撃破した。"],
     ["b20", "B20Fへ到達した", depth >= 20, "奈落の迷宮地下20階へ到達した。"],
+    ["jabberwock", "燻り狂うものを撃破した", flags.boss_jabberwock_event_boss_defeated, "ジャバウォックを撃破した。"],
+    ["ironMaiden", "鋼鉄の乙女を撃破した", flags.red_door_b29f_unlocked && flags.boss_iron_maiden_b29f_defeated, "B29Fの赤い扉の奥で鋼鉄の乙女を撃破した。"],
+    ["b30", "B30Fへ到達した", flags.boss_iron_maiden_b29f_defeated && depth >= 30, "鋼鉄の乙女を倒し、B30Fへ到達した。"],
+    ["b35Survey", "B35Fを100マス踏破した", flags.achievement_b35f_100_cells, "途中帰還することなくB35Fを100マス踏破した。"],
+    ["brassBull", "真鍮の雄牛を撃破した", flags.boss_brass_bull_event_boss_defeated, "B36Fの真鍮の雄牛を撃破した。"],
+    ["wickerMan", "ウィッカーマンを撃破した", flags.red_door_b39f_unlocked && flags.boss_wicker_man_b39f_defeated, "B39Fの赤い扉の奥でウィッカーマンを撃破した。"],
+    ["b40", "B40Fへ到達した", flags.boss_wicker_man_b39f_defeated && depth >= 40, "ウィッカーマンを倒し、B40Fへ到達した。"],
     ["marathon42", "深淵への大行軍", flags.b1_b42_marathon_completed, "一度も帰還せず、転送門を使わずにB1FからB42Fへ到達した。", "？？？？？？――地上を忘れし旅人"]
   ];
   return milestones.map(([id, label, achieved, description, hiddenLabel]) => ({

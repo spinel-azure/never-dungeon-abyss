@@ -288,7 +288,7 @@ export const QUESTS = Object.freeze([
     objectiveType: "custom",
     targetDepth: 30,
     requiredCount: 3,
-    objectiveLabel: "赤い扉を開け、鋼鉄の乙女を倒してB30Fへ到達する",
+    objectiveLabel: "赤い扉を開け、中を調査する",
     reward: Object.freeze({
       type: "card", label: "デッキカード×1", amount: 1,
       cardId: "legendary_ability_boost_plus", bonusGold: 3000
@@ -521,6 +521,16 @@ export function recordFloorExploration(character, { depth, explored } = {}) {
     entry.progress = progress;
     updated = true;
   });
+  const b35Completed = Number(depth) === 35
+    && exploredCount >= 100
+    && Boolean(quests.active[B35F_SURVEY_QUEST_ID]);
+  if (b35Completed && !character?.eventFlags?.achievement_b35f_100_cells) {
+    return {
+      ...character,
+      quests,
+      eventFlags: { ...(character.eventFlags || {}), achievement_b35f_100_cells: true }
+    };
+  }
   return updated ? { ...character, quests } : character;
 }
 

@@ -558,8 +558,17 @@ test("quest 013 supplies ten large potions, resets on leaving B35F, and rewards 
   assert.equal(getQuestProgress(character, B35F_SURVEY_QUEST_ID).progress, 0);
   character = recordFloorExploration(character, { depth: 35, explored: fullMap });
   assert.equal(getQuestProgress(character, B35F_SURVEY_QUEST_ID).readyToReport, true);
+  assert.equal(character.eventFlags.achievement_b35f_100_cells, true);
   const report = reportQuest(character, B35F_SURVEY_QUEST_ID);
   assert.equal(report.rewardEquipmentId, "fireproof_boots");
   assert.equal(report.bonusGold, 2000);
   assert.ok(report.character.equipmentInventory.instances.some(entry => entry.equipmentId === "fireproof_boots"));
+});
+
+test("quest 012 hides the Iron Maiden spoiler and quest 013 supply uses an item popup", async () => {
+  assert.equal(getQuestById(THIRD_RED_DOOR_INVESTIGATION_QUEST_ID).objectiveLabel, "赤い扉を開け、中を調査する");
+  const { readFile } = await import("node:fs/promises");
+  const source = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
+  assert.match(source, /result\.acceptanceSupplyItemId[\s\S]*showNamedItemGetEffect/);
+  assert.match(source, /回復薬（大）×\$\{result\.acceptanceSupplyAmount\}/);
 });

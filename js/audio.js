@@ -30,7 +30,8 @@ export const SE = Object.freeze({
   levelUpJingle: "sentou-syouri2.mp3",
   itemGet: "item-get.mp3",
   importantItem: "juuyou-item.mp3",
-  costOver: "boo.wav"
+  costOver: "boo.wav",
+  achievementUnlocked: "item-get.mp3"
 });
 
 const audio = {
@@ -92,6 +93,7 @@ const PLAYBACK_POLICIES = {
   itemGet: { mode: "complete", priority: 2 },
   importantItem: { mode: "complete", priority: 3 },
   costOver: { mode: "restart", priority: 3 },
+  achievementUnlocked: { mode: "complete", priority: 3 },
   enemyDefeated: { mode: "complete", priority: 3 },
   catVoice01: { mode: "complete", priority: 2 },
   catVoice02: { mode: "complete", priority: 2 },

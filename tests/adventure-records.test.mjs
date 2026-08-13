@@ -118,3 +118,21 @@ test("unachieved stable and Otherworldly Wisdom milestones show their hints", ()
   assert.equal(chronicle.find(entry => entry.id === "stable").label, "？？？？？？――朝の目覚め");
   assert.equal(chronicle.find(entry => entry.id === "otherworldlyWisdom").label, "？？？？？？――絶望への挑戦");
 });
+
+test("midgame chronicle includes the seven new boss, floor, and survey achievements", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.highestDungeonDepthReached = 40;
+  Object.assign(character.eventFlags, {
+    boss_jabberwock_event_boss_defeated: true,
+    red_door_b29f_unlocked: true,
+    boss_iron_maiden_b29f_defeated: true,
+    achievement_b35f_100_cells: true,
+    boss_brass_bull_event_boss_defeated: true,
+    red_door_b39f_unlocked: true,
+    boss_wicker_man_b39f_defeated: true
+  });
+  const chronicle = getAdventureChronicle(character);
+  for (const id of ["jabberwock", "ironMaiden", "b30", "b35Survey", "brassBull", "wickerMan", "b40"]) {
+    assert.equal(chronicle.find(entry => entry.id === id)?.achieved, true);
+  }
+});
