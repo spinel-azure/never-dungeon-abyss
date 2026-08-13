@@ -1,4 +1,4 @@
-import { calculateDeckCost, DECK_SLOT_COUNT, setDeckSlot } from "../data/deck.js";
+import { calculateDeckCost, DECK_SLOT_COUNT, getDeckSlotRejectionReason, setDeckSlot } from "../data/deck.js";
 import { getCardById } from "../data/cards.js";
 import { drawCardCanvas } from "./card-canvas.js";
 import { ITEMS, canUseItemIn, getShopItemIdsForCharacter } from "../data/items.js";
@@ -916,7 +916,17 @@ function applyDeckPickerSelection() {
   const currentCardCost = getCardById(menu.deckSlots[menu.deckCursor])?.cost || 0;
   const projectedCost = calculateDeckCost(menu.deckSlots) - currentCardCost + (selectedCard?.cost || 0);
   if (selectedCard && projectedCost > costLimit) {
-    showDeckCostOver();
+    showDeckCostOver("COST OVER");
+    return;
+  }
+  const rejection = getDeckSlotRejectionReason(
+    character?.cards,
+    menu.deckCursor,
+    selectedCardId,
+    costLimit
+  );
+  if (rejection === "exclusiveConflict") {
+    showDeckCostOver("ELEMENT CONFLICT");
     return;
   }
   const next = setDeckSlot(character?.cards, menu.deckCursor, selectedCardId, costLimit);
@@ -925,10 +935,14 @@ function applyDeckPickerSelection() {
   renderDeck();
 }
 
-function showDeckCostOver() {
+function showDeckCostOver(message = "COST OVER") {
   if (!menu.deckCostOverEl) return;
   window.clearTimeout(menu.deckCostOverTimer);
   menu.playSe("costOver");
+  menu.deckCostOverEl.textContent = message;
+  menu.deckCostOverEl.style.fontSize = message === "ELEMENT CONFLICT"
+    ? "clamp(34px, 7vw, 60px)"
+    : "";
   menu.deckCostOverEl.hidden = false;
   menu.deckCostOverEl.style.animation = "none";
   void menu.deckCostOverEl.offsetWidth;

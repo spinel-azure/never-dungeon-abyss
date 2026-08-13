@@ -111,14 +111,15 @@ export function resolveEnemyAmbush({ battle, rng = Math.random } = {}) {
 
 export function createPlayerAction(player, command = {}, enemy = null) {
   if (command.type === "attack") {
+    const action = createNormalAttack({
+      weaponId: player.equipment?.weaponId,
+      weaponEnhancement: player.equipment?.rightArmEnhancement,
+      skillIds: player.skillIds
+    });
     return {
       ok: true,
       spCost: 0,
-      action: createNormalAttack({
-        weaponId: player.equipment?.weaponId,
-        weaponEnhancement: player.equipment?.rightArmEnhancement,
-        skillIds: player.skillIds
-      })
+      action: applyPlayerWeaponElement(player, action)
     };
   }
   if (command.type === "guard") return { ok: true, spCost: 0, action: createGuardAction() };
@@ -182,7 +183,7 @@ export function createPlayerAction(player, command = {}, enemy = null) {
       weaponEnhancement: player.equipment?.rightArmEnhancement
     })
     : { ...skill };
-  return { ok: true, spCost, action };
+  return { ok: true, spCost, action: applyPlayerWeaponElement(player, action) };
 }
 
 export function createEnemyAction(enemy, rng = Math.random) {
@@ -298,6 +299,18 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
             [`${element}DamageReduction`]: Math.max(0, Math.min(0.75, Number(effect.value) || 0))
           }
         ];
+      } else if (effect.id === "weapon_element_imbue") {
+        const element = effect.element === "ice" ? "ice" : "fire";
+        actor.statuses = [
+          ...(actor.statuses || []).filter(status => (status.id || status.statusId) !== "weapon_element_imbue"),
+          {
+            id: "weapon_element_imbue",
+            statusId: "weapon_element_imbue",
+            element,
+            active: true,
+            expiresAfterBattle: true
+          }
+        ];
       }
     }
     battle.log.push(`${actor.name}は${action.item.name}を使った。`);
@@ -310,6 +323,8 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
     if (action.item.id === "holy_water") {
       battle.log.push(`${target.name}は聖なる光により消滅した。`);
     }
+    const imbue = action.item.effects.find(effect => effect.id === "weapon_element_imbue");
+    if (imbue) battle.log.push(`武器に${imbue.element === "ice" ? "氷" : "炎"}の力が宿った！`);
     return;
   }
   if (action.actionType === "wait") {
@@ -510,6 +525,25 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
   for (const applied of applications.filter(item => item.success)) {
     battle.log.push(`${target.name}は${statusName(applied.statusId)}状態になった。`);
   }
+}
+
+export function getPlayerWeaponElement(player, action = {}) {
+  const actionElement = String(action.element || "physical");
+  if (actionElement !== "physical") return actionElement;
+  const oil = (player?.statuses || []).find(status => (
+    (status.id || status.statusId) === "weapon_element_imbue" && status.active !== false
+  ));
+  if (["fire", "ice"].includes(oil?.element)) return oil.element;
+  const weaponElement = String(action.weapon?.element || "physical");
+  if (weaponElement !== "physical") return weaponElement;
+  if (hasCardEffect(player?.cards?.deckSlots, "weapon_fire_imbue")) return "fire";
+  if (hasCardEffect(player?.cards?.deckSlots, "weapon_ice_imbue")) return "ice";
+  return "physical";
+}
+
+function applyPlayerWeaponElement(player, action) {
+  if (action?.actionType !== "physicalAttack") return action;
+  return { ...action, element: getPlayerWeaponElement(player, action) };
 }
 
 export function getCapricornStackCount(battle = {}) {

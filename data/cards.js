@@ -247,6 +247,22 @@ const STANDARD_CARDS = [
     iconId: "vital-heart", maxOwned: 99, maxCopies: 3
   },
   {
+    id: "sr_flame_armament", rarity: "SR", cost: 4,
+    name: "Flame Armament", nameJa: "炎の武装", concept: "物理攻撃に炎属性付与",
+    descriptionJa: "通常攻撃と物理攻撃スキルに炎属性を付与する。武器固有属性と戦闘中の属性油が優先される。",
+    category: "ability", effectId: "weapon_fire_imbue", effectValue: "fire",
+    exclusiveGroup: "weapon_element_imbue", iconId: "flame-sword",
+    maxOwned: 1, maxCopies: 1, sellPrice: 5000, buybackPrice: 50000
+  },
+  {
+    id: "sr_ice_armament", rarity: "SR", cost: 4,
+    name: "Ice Armament", nameJa: "氷の武装", concept: "物理攻撃に氷属性付与",
+    descriptionJa: "通常攻撃と物理攻撃スキルに氷属性を付与する。武器固有属性と戦闘中の属性油が優先される。",
+    category: "ability", effectId: "weapon_ice_imbue", effectValue: "ice",
+    exclusiveGroup: "weapon_element_imbue", iconId: "ice-sword",
+    maxOwned: 1, maxCopies: 1, sellPrice: 5000, buybackPrice: 50000
+  },
+  {
     id: "legendary_unlimited_torch_gauge", rarity: "L", cost: 6,
     name: "UNLIMITED TORCH GAUGE", nameJa: "永久の導き", concept: "たいまつ消費なし",
     category: "exploration", effectId: "unlimited_torch_gauge",

@@ -564,6 +564,8 @@ test("quest 013 supplies ten large potions, resets on leaving B35F, and rewards 
   const report = reportQuest(character, B35F_SURVEY_QUEST_ID);
   assert.equal(report.rewardEquipmentId, "fireproof_boots");
   assert.equal(report.bonusGold, 2000);
+  assert.equal(report.character.eventFlags.weapon_imbue_oils_shop_unlocked, true);
+  assert.equal(report.character.eventFlags.weapon_imbue_oils_shop_unlocked, true);
   assert.ok(report.character.equipmentInventory.instances.some(entry => entry.equipmentId === "fireproof_boots"));
 });
 

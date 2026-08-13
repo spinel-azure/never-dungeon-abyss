@@ -25,6 +25,12 @@ export function getItemUnavailableReason({ character, itemId, context, enemy, to
   if (barrier && (character?.statuses || []).some(status =>
     (status.id || status.statusId) === `${barrier.element}_barrier`
   )) return "alreadyActive";
+  const imbue = item.effects?.find(effect => effect.id === "weapon_element_imbue");
+  if (imbue && (character?.statuses || []).some(status => (
+    (status.id || status.statusId) === "weapon_element_imbue"
+    && status.element === imbue.element
+    && status.active !== false
+  ))) return "alreadyActive";
   return "";
 }
 

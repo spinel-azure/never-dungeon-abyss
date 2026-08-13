@@ -329,6 +329,7 @@ export const QUESTS = Object.freeze([
       "今回は事前に支給品がある。受け取れ。"
     ]),
     prerequisiteQuestIds: Object.freeze([THIRD_RED_DOOR_INVESTIGATION_QUEST_ID]),
+    reportUnlockFlag: "weapon_imbue_oils_shop_unlocked",
     available: true
   }),
   Object.freeze({

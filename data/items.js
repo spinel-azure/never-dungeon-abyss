@@ -202,6 +202,20 @@ export const ITEMS = Object.freeze([
     effects: Object.freeze([{ id: "element_barrier", element: "ice", value: 0.3 }]),
     description: "使用した戦闘中、氷属性ダメージを30％軽減する。重複使用不可。",
     maxOwned: 99, iconId: "holy-water", version: 1
+  }),
+  Object.freeze({
+    number: 33, id: "fire_lizard_oil", name: "火蜥蜴の油", category: "battle",
+    buyPrice: 500, sellPrice: 250, source: "shop", usableIn: Object.freeze(["battle"]),
+    effects: Object.freeze([{ id: "weapon_element_imbue", element: "fire" }]),
+    description: "使用した戦闘中、通常攻撃と物理攻撃スキルに炎属性を付与する。別属性で上書き可能。",
+    maxOwned: 99, iconId: "holy-water", version: 1
+  }),
+  Object.freeze({
+    number: 34, id: "ice_lizard_oil", name: "氷蜥蜴の油", category: "battle",
+    buyPrice: 500, sellPrice: 250, source: "shop", usableIn: Object.freeze(["battle"]),
+    effects: Object.freeze([{ id: "weapon_element_imbue", element: "ice" }]),
+    description: "使用した戦闘中、通常攻撃と物理攻撃スキルに氷属性を付与する。別属性で上書き可能。",
+    maxOwned: 99, iconId: "holy-water", version: 1
   })
 ]);
 
@@ -222,6 +236,7 @@ export function getShopItemIdsForDepth(depth = 1) {
 
 export function getShopItemIdsForCharacter(character) {
   const flags = character?.eventFlags || {};
+  const quest013Reported = character?.quests?.completedQuestIds?.includes("guild_013");
   return [
     "healing_potion",
     ...(flags.transfer_portal_b10f_unlocked ? ["healing_potion_medium"] : []),
@@ -229,6 +244,7 @@ export function getShopItemIdsForCharacter(character) {
     ...(flags.shop_stock_b30f_unlocked && flags.boss_iron_maiden_b29f_defeated ? ["antidote_medium"] : []),
     ...(flags.scorching_barrier_shop_unlocked ? ["scorching_barrier"] : []),
     ...(flags.extreme_cold_barrier_shop_unlocked ? ["extreme_cold_barrier"] : []),
+    ...(flags.weapon_imbue_oils_shop_unlocked || quest013Reported ? ["fire_lizard_oil", "ice_lizard_oil"] : []),
     ...BASE_SHOP_ITEM_IDS.slice(1)
   ];
 }
