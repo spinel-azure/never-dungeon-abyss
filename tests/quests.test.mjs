@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { applyBossVictory } from "../data/bosses.js";
 import { getOwnedCardCount } from "../data/deck.js";
+import { getItemCount } from "../data/inventory.js";
 import {
   MAX_ACTIVE_QUESTS,
   FLOOR_SURVEY_QUEST_ID,
@@ -17,6 +18,7 @@ import {
   SECOND_RED_DOOR_INVESTIGATION_QUEST_ID,
   THIRD_RED_DOOR_INVESTIGATION_QUEST_ID,
   B35F_SURVEY_QUEST_ID,
+  BRASS_BULL_QUEST_ID,
   RED_DOOR_DEFENSE_CARD_FLAG,
   grantRedDoorInvestigationSupply,
   abandonQuest,
@@ -563,6 +565,26 @@ test("quest 013 supplies ten large potions, resets on leaving B35F, and rewards 
   assert.equal(report.rewardEquipmentId, "fireproof_boots");
   assert.equal(report.bonusGold, 2000);
   assert.ok(report.character.equipmentInventory.instances.some(entry => entry.equipmentId === "fireproof_boots"));
+});
+
+test("quest 014 is gated by quest 013, tracks the B36F Brass Bull, and unlocks Scorching Barrier sales", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.quests.completedQuestIds.push(
+    QUEST_ID, SLIME_EXTERMINATION_QUEST_ID, FLOOR_SURVEY_QUEST_ID,
+    THIRD_RED_DOOR_INVESTIGATION_QUEST_ID
+  );
+  assert.equal(isQuestAvailable(character, BRASS_BULL_QUEST_ID), false);
+  character.quests.completedQuestIds.push(B35F_SURVEY_QUEST_ID);
+  assert.equal(isQuestAvailable(character, BRASS_BULL_QUEST_ID), true);
+  character = acceptQuest(character, BRASS_BULL_QUEST_ID).character;
+  character = recordBossDefeat(character, "brass_bull_event_boss", 36);
+  assert.equal(getQuestProgress(character, BRASS_BULL_QUEST_ID).readyToReport, true);
+  const report = reportQuest(character, BRASS_BULL_QUEST_ID);
+  assert.equal(report.rewardItemId, "scorching_barrier");
+  assert.equal(report.rewardItemAmount, 3);
+  assert.equal(report.bonusGold, 5000);
+  assert.equal(getItemCount(report.character.inventory, "scorching_barrier"), 3);
+  assert.equal(report.character.eventFlags.scorching_barrier_shop_unlocked, true);
 });
 
 test("quest 012 hides the Iron Maiden spoiler and quest 013 supply uses an item popup", async () => {

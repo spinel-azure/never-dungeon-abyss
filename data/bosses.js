@@ -566,15 +566,18 @@ export const BOSSES = Object.freeze({
   brass_bull_event_boss: Object.freeze({
     id: "brass_bull_event_boss",
     name: "真鍮の雄牛",
-    level: 30,
+    level: 35,
+    floor: 36,
     imageId: "brass_bull_event_boss",
     image: "images/bosses/boss_08.avif",
+    encounterImageId: "brass_bull_event_b36f",
+    encounterImage: "images/background/dungeon_event_04.avif",
     race: "construct",
     maxHp: 760,
     stats: Object.freeze({ str: 24, int: 18, agi: 13, dex: 20, luc: 12 }),
     def: 20,
     attack: 21,
-    experienceReward: 3500,
+    experienceReward: 5000,
     specialAttack: null,
     actions: Object.freeze([
       Object.freeze({ weight: 25, action: Object.freeze({
@@ -606,6 +609,11 @@ export const BOSSES = Object.freeze({
     noDrop: true,
     isBoss: true,
     bossKind: "event",
+    event: Object.freeze({
+      canCancel: false,
+      prompt: "部屋の中に入ると同時にもの凄い熱気を感じた。\n部屋の中央の台座には真鍮製の雄牛の像が鎮座しており、鼻からは煙が吹き出している。\nそして、こちらに気付いたかの様にその体躯を起こし、襲いかかってきた！\n＊Aボタン：戦闘開始",
+      start: "真鍮の雄牛が襲いかかってきた！"
+    }),
     defeatedFlag: "boss_brass_bull_event_boss_defeated"
   }),
   jabberwock_event_boss: Object.freeze({

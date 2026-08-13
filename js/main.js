@@ -979,6 +979,8 @@ import {
       void showGuildQuestRewardSequence({
         rewardCardId: result.rewardCardId,
         rewardEquipmentId: result.rewardEquipmentId,
+        rewardItemId: result.rewardItemId,
+        rewardItemAmount: result.rewardItemAmount,
         bonusGold: result.bonusGold,
         eventRewardCardId
       });
@@ -989,6 +991,8 @@ import {
   async function showGuildQuestRewardSequence({
     rewardCardId,
     rewardEquipmentId,
+    rewardItemId,
+    rewardItemAmount,
     bonusGold,
     eventRewardCardId
   } = {}) {
@@ -1003,6 +1007,12 @@ import {
     if (rewardEquipmentId) {
       const equipment = getEquipmentItem(rewardEquipmentId, "footId");
       showNamedItemGetEffect([equipment?.name || rewardEquipmentId], { important: true });
+      if (eventRewardCardId) await wait(3400);
+    }
+    if (rewardItemId) {
+      const item = getItem(rewardItemId);
+      const amount = Math.max(1, Math.floor(Number(rewardItemAmount) || 1));
+      showNamedItemGetEffect([`${item?.name || rewardItemId}×${amount}`], { important: true });
       if (eventRewardCardId) await wait(3400);
     }
     if (eventRewardCardId) {

@@ -67,6 +67,15 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
       minimapMarker: "E",
       revealBeforeExploration: true
     })
+  }),
+  36: Object.freeze({
+    content: Object.freeze({
+      type: "eventBoss",
+      bossId: "brass_bull_event_boss",
+      requiredQuestId: "guild_014",
+      minimapMarker: "E",
+      revealBeforeExploration: true
+    })
   })
 });
 

@@ -296,12 +296,13 @@ test("every tenth floor through B100F contains a transfer portal", () => {
   }
 });
 
-test("Brass Bull is an unplaced quest event boss with a guaranteed unique material reward", () => {
+test("Brass Bull is a B36F quest event boss with a guaranteed unique material reward", () => {
   const boss = getBossById("brass_bull_event_boss");
   assert.equal(boss.bossKind, "event");
-  assert.equal(boss.floor, undefined);
-  assert.equal(boss.level, 30);
-  assert.equal(boss.experienceReward, 3500);
+  assert.equal(boss.floor, 36);
+  assert.equal(boss.level, 35);
+  assert.equal(boss.experienceReward, 5000);
+  assert.equal(boss.encounterImage, "images/background/dungeon_event_04.avif");
   assert.deepEqual(boss.reward, { type: "item", itemId: "molten_brass", amount: 1 });
   assert.deepEqual(boss.actions.map(entry => entry.action.name), ["雄牛の咆哮", "雄牛の突進", "火炎吐き"]);
   assert.equal(createBossCombatant(boss).isBoss, true);

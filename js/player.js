@@ -485,7 +485,8 @@ function startSpecialRoomContentEvent(content, fromGX, fromGY) {
     bossId: boss.id,
     imageId: boss.encounterImageId ?? "",
     imageFit: "cover",
-    canCancel: true,
+    canCancel: boss.event?.canCancel !== false,
+    retreatOnCancel: boss.event?.canCancel !== false,
     message: boss.event?.prompt || "部屋に入ると、古ぼけた机の上に所狭しと本が積み上げられている。\n机の中央には、一冊だけ開かれた本がある。調べますか？\n＊Aボタン：はい　Bボタン：いいえ"
   });
 }

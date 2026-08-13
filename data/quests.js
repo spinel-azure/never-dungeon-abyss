@@ -16,6 +16,7 @@ export const SECOND_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_010";
 export const THIRD_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_012";
 export const B35F_SURVEY_QUEST_ID = "guild_013";
 export const B35F_SURVEY_SUPPLY_FLAG = "guild_013_large_potions_received";
+export const BRASS_BULL_QUEST_ID = "guild_014";
 export const QUEEN_SHADOW_PROGRESS_FLAGS = Object.freeze([
   "quest_008_shadow_b10f_found",
   "quest_008_shadow_b11f_found",
@@ -329,6 +330,33 @@ export const QUESTS = Object.freeze([
     ]),
     prerequisiteQuestIds: Object.freeze([THIRD_RED_DOOR_INVESTIGATION_QUEST_ID]),
     available: true
+  }),
+  Object.freeze({
+    id: BRASS_BULL_QUEST_ID,
+    number: "014",
+    title: "燃えさかる雄牛",
+    client: "ギルドマスター",
+    category: "other",
+    objectiveType: "defeatBoss",
+    targetId: "brass_bull_event_boss",
+    targetName: "真鍮の雄牛",
+    targetDepth: 36,
+    requiredCount: 1,
+    objectiveLabel: "赤い扉を開けて中を調査する",
+    reward: Object.freeze({
+      type: "item", label: "消費アイテム×3", amount: 3,
+      itemId: "scorching_barrier", bonusGold: 5000
+    }),
+    descriptionLabel: "目的",
+    description: Object.freeze([
+      "奈落のB36Fの小部屋で雄牛の咆哮が聞こえるという。",
+      "詳しく調べてほしい。"
+    ]),
+    prerequisiteQuestIds: Object.freeze([B35F_SURVEY_QUEST_ID]),
+    persistentProgressFlag: "quest_014_brass_bull_defeated_while_active",
+    completedTargetFlag: "boss_brass_bull_event_boss_defeated",
+    reportUnlockFlag: "scorching_barrier_shop_unlocked",
+    available: true
   })
 ]);
 
@@ -581,6 +609,8 @@ export function reportQuest(character, questId) {
   let next = { ...character, quests };
   let rewardCardId = null;
   let rewardEquipmentId = null;
+  let rewardItemId = null;
+  let rewardItemAmount = 0;
   const bonusGold = Math.max(0, Math.floor(Number(progress.quest.reward?.bonusGold) || 0));
   if (progress.quest.reward?.type === "card") {
     const reward = grantCard(
@@ -603,6 +633,13 @@ export function reportQuest(character, questId) {
       rewardEquipmentId = progress.quest.reward.equipmentId;
     }
   }
+  if (progress.quest.reward?.type === "item" && progress.quest.reward.itemId) {
+    const amount = Math.max(1, Math.floor(Number(progress.quest.reward.amount) || 1));
+    const reward = grantItemWithOverflow(next, progress.quest.reward.itemId, amount);
+    next = reward.character;
+    rewardItemId = progress.quest.reward.itemId;
+    rewardItemAmount = reward.gained + reward.stored;
+  }
   if (bonusGold > 0) {
     next = {
       ...next,
@@ -612,7 +649,15 @@ export function reportQuest(character, questId) {
   if (progress.quest.reportUnlockFlag) {
     next = { ...next, eventFlags: { ...(next.eventFlags || {}), [progress.quest.reportUnlockFlag]: true } };
   }
-  return { character: next, accepted: true, rewardCardId, rewardEquipmentId, bonusGold };
+  return {
+    character: next,
+    accepted: true,
+    rewardCardId,
+    rewardEquipmentId,
+    rewardItemId,
+    rewardItemAmount,
+    bonusGold
+  };
 }
 
 export function hasActiveQuest(character) {
