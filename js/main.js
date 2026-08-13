@@ -128,6 +128,7 @@ import { acknowledgeShopStockAnnouncement, getShopEquipmentOffer, getShopStockSt
 import { getUnreadTavernRumor, markTavernRumorRead } from "../data/tavern-rumors.js";
 import { renameCharacter as applyCharacterRename } from "../data/character-name.js";
 import { isTransferDestinationUnlocked } from "../data/transfer-destinations.js";
+import { selectRevivalGoddessImage } from "../data/revival-presentation.js";
 import { getFireFloorStepDamage, isFireFloorDepth } from "../data/fire-floor.js";
 import {
   invalidateMarathonChallenge,
@@ -1811,6 +1812,7 @@ import {
 
   async function runRevivalPrayer() {
     if (!revivalPrayer || !revivalPrayerText || !revivalGoddess) return;
+    revivalGoddess.src = selectRevivalGoddessImage();
     revivalPrayer.hidden = false;
     revivalGoddess.hidden = true;
     revivalGoddess.classList.remove("is-active");
