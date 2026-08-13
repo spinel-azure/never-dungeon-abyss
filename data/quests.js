@@ -1,4 +1,6 @@
 import { grantCard } from "./deck.js";
+import { grantEquipmentInstance } from "./equipment-inventory.js";
+import { grantItemWithOverflow } from "./inventory.js";
 
 export const MAX_ACTIVE_QUESTS = 3;
 export const GUILD_TRIAL_QUEST_ID = "guild_001_abyss_rat";
@@ -11,6 +13,9 @@ export const RED_DOOR_INVESTIGATION_QUEST_ID = "guild_007";
 export const QUEEN_SHADOW_QUEST_ID = "guild_008";
 export const JABBERWOCK_QUEST_ID = "guild_009";
 export const SECOND_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_010";
+export const THIRD_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_012";
+export const B35F_SURVEY_QUEST_ID = "guild_013";
+export const B35F_SURVEY_SUPPLY_FLAG = "guild_013_large_potions_received";
 export const QUEEN_SHADOW_PROGRESS_FLAGS = Object.freeze([
   "quest_008_shadow_b10f_found",
   "quest_008_shadow_b11f_found",
@@ -273,6 +278,57 @@ export const QUESTS = Object.freeze([
     persistentProgressFlag: "quest_010_fallen_mage_defeated_while_active",
     completedTargetFlag: "boss_fallen_mage_b19f_defeated",
     available: true
+  }),
+  Object.freeze({
+    id: THIRD_RED_DOOR_INVESTIGATION_QUEST_ID,
+    number: "012",
+    title: "赤い扉の調査――その3",
+    client: "ギルドマスター",
+    category: "other",
+    objectiveType: "custom",
+    targetDepth: 30,
+    requiredCount: 3,
+    objectiveLabel: "赤い扉を開け、鋼鉄の乙女を倒してB30Fへ到達する",
+    reward: Object.freeze({
+      type: "card", label: "デッキカード×1", amount: 1,
+      cardId: "legendary_ability_boost_plus", bonusGold: 3000
+    }),
+    descriptionLabel: "目的",
+    description: Object.freeze([
+      "奈落のB29Fにある開かずの赤い扉を開けて",
+      "中を調査してほしい。例によって何があるか",
+      "分からない。十分に注意しろ。"
+    ]),
+    prerequisiteQuestIds: Object.freeze([SECOND_RED_DOOR_INVESTIGATION_QUEST_ID]),
+    persistentProgressFlags: Object.freeze([
+      "red_door_b29f_unlocked",
+      "boss_iron_maiden_b29f_defeated",
+      "shop_stock_b30f_unlocked"
+    ]),
+    available: true
+  }),
+  Object.freeze({
+    id: B35F_SURVEY_QUEST_ID,
+    number: "013",
+    title: "迷宮地下35階の調査",
+    client: "ギルドマスター",
+    category: "other",
+    objectiveType: "exploreFloor",
+    targetDepth: 35,
+    requiredCount: 100,
+    objectiveLabel: "途中で戻ることなくB35Fを100マス踏破する",
+    reward: Object.freeze({
+      type: "equipment", label: "装備品×1", amount: 1,
+      equipmentId: "fireproof_boots", slot: "footId", bonusGold: 2000
+    }),
+    descriptionLabel: "目的",
+    description: Object.freeze([
+      "奈落の灼熱区域を調査してもらいたい。",
+      "途中で戻る事なくB35Fを隅々まで調べてくれ。危険な調査なので",
+      "今回は事前に支給品がある。受け取れ。"
+    ]),
+    prerequisiteQuestIds: Object.freeze([THIRD_RED_DOOR_INVESTIGATION_QUEST_ID]),
+    available: true
   })
 ]);
 
@@ -368,7 +424,18 @@ export function acceptQuest(character, questId) {
     next = supply.character;
     if (supply.gained > 0) acceptanceRewardCardId = RED_DOOR_DEFENSE_CARD_ID;
   }
-  return { ...result(next, true), acceptanceRewardCardId };
+  let acceptanceSupplyItemId = null;
+  let acceptanceSupplyAmount = 0;
+  if (quest.id === B35F_SURVEY_QUEST_ID && !next.eventFlags?.[B35F_SURVEY_SUPPLY_FLAG]) {
+    const supply = grantItemWithOverflow(next, "healing_potion_large", 10);
+    next = {
+      ...supply.character,
+      eventFlags: { ...(supply.character.eventFlags || {}), [B35F_SURVEY_SUPPLY_FLAG]: true }
+    };
+    acceptanceSupplyItemId = "healing_potion_large";
+    acceptanceSupplyAmount = supply.gained + supply.stored;
+  }
+  return { ...result(next, true), acceptanceRewardCardId, acceptanceSupplyItemId, acceptanceSupplyAmount };
 }
 
 export function grantRedDoorInvestigationSupply(character) {
@@ -440,24 +507,21 @@ export function recordBossDefeat(character, bossId, depth = null) {
 
 export function recordFloorExploration(character, { depth, explored } = {}) {
   const quests = normalizeQuestState(character?.quests);
-  const entry = quests.active[FLOOR_SURVEY_QUEST_ID];
-  const quest = getQuestById(FLOOR_SURVEY_QUEST_ID);
-  if (!entry || entry.progress >= quest.requiredCount) return character;
-
-  const progress = Number(depth) === quest.targetDepth
-    ? Math.min(
-      quest.requiredCount,
-      Array.isArray(explored)
-        ? explored.reduce(
-          (total, row) => total + (Array.isArray(row) ? row.filter(Boolean).length : 0),
-          0
-        )
-        : 0
-    )
+  const exploredCount = Array.isArray(explored)
+    ? explored.reduce((total, row) => total + (Array.isArray(row) ? row.filter(Boolean).length : 0), 0)
     : 0;
-  if (entry.progress === progress) return character;
-  entry.progress = progress;
-  return { ...character, quests };
+  let updated = false;
+  Object.entries(quests.active).forEach(([questId, entry]) => {
+    const quest = getQuestById(questId);
+    if (quest?.objectiveType !== "exploreFloor" || entry.progress >= quest.requiredCount) return;
+    const progress = Number(depth) === quest.targetDepth
+      ? Math.min(quest.requiredCount, exploredCount)
+      : 0;
+    if (entry.progress === progress) return;
+    entry.progress = progress;
+    updated = true;
+  });
+  return updated ? { ...character, quests } : character;
 }
 
 export function recordCustomQuestProgress(character, questId, amount = 1) {
@@ -506,6 +570,7 @@ export function reportQuest(character, questId) {
   quests.completedQuestIds = [...new Set([...quests.completedQuestIds, questId])];
   let next = { ...character, quests };
   let rewardCardId = null;
+  let rewardEquipmentId = null;
   const bonusGold = Math.max(0, Math.floor(Number(progress.quest.reward?.bonusGold) || 0));
   if (progress.quest.reward?.type === "card") {
     const reward = grantCard(
@@ -517,6 +582,17 @@ export function reportQuest(character, questId) {
     next = { ...next, cards: reward.cards };
     if (reward.gained > 0) rewardCardId = progress.quest.reward.cardId;
   }
+  if (progress.quest.reward?.type === "equipment" && progress.quest.reward.equipmentId) {
+    const reward = grantEquipmentInstance(
+      next,
+      progress.quest.reward.equipmentId,
+      progress.quest.reward.slot || "rightArmId"
+    );
+    if (reward.accepted) {
+      next = reward.character;
+      rewardEquipmentId = progress.quest.reward.equipmentId;
+    }
+  }
   if (bonusGold > 0) {
     next = {
       ...next,
@@ -526,7 +602,7 @@ export function reportQuest(character, questId) {
   if (progress.quest.reportUnlockFlag) {
     next = { ...next, eventFlags: { ...(next.eventFlags || {}), [progress.quest.reportUnlockFlag]: true } };
   }
-  return { character: next, accepted: true, rewardCardId, bonusGold };
+  return { character: next, accepted: true, rewardCardId, rewardEquipmentId, bonusGold };
 }
 
 export function hasActiveQuest(character) {

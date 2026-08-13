@@ -875,9 +875,13 @@ import {
       character,
       acceptedMessage: result.acceptanceRewardCardId
         ? "ギルドマスター：何が起こるか分からない危険な調査になるだろう。これを持っていけ。"
+        : result.acceptanceSupplyItemId
+          ? "ギルドマスター：危険な調査だ。事前支給品を受け取れ。"
         : "",
       acceptanceRewardMessage: result.acceptanceRewardCardId
         ? "Rカード「防御力上昇」を手に入れた！"
+        : result.acceptanceSupplyItemId
+          ? `「回復薬（大）」を${result.acceptanceSupplyAmount}個受け取った！`
         : ""
     };
   }
@@ -961,6 +965,7 @@ import {
     setTimeout(() => {
       void showGuildQuestRewardSequence({
         rewardCardId: result.rewardCardId,
+        rewardEquipmentId: result.rewardEquipmentId,
         bonusGold: result.bonusGold,
         eventRewardCardId
       });
@@ -970,6 +975,7 @@ import {
 
   async function showGuildQuestRewardSequence({
     rewardCardId,
+    rewardEquipmentId,
     bonusGold,
     eventRewardCardId
   } = {}) {
@@ -979,6 +985,11 @@ import {
     }
     if (rewardCardId) {
       showCardGetEffect(rewardCardId);
+      if (eventRewardCardId || rewardEquipmentId) await wait(3400);
+    }
+    if (rewardEquipmentId) {
+      const equipment = getEquipmentItem(rewardEquipmentId, "footId");
+      showNamedItemGetEffect([equipment?.name || rewardEquipmentId], { important: true });
       if (eventRewardCardId) await wait(3400);
     }
     if (eventRewardCardId) {
@@ -1114,7 +1125,9 @@ import {
     if (!item) return "";
     const bonuses = [];
     if (Number.isFinite(item.attack)) bonuses.push(`ATK +${item.attack}`);
+    if (item.fireFloorDamageImmunity) bonuses.push("火炎床無効");
     bonuses.push(...Object.entries(item.statBonuses || {})
+      .filter(([key]) => !item.hiddenStatBonusKeys?.includes(key))
       .map(([key, value]) => {
         if (key === "actionSkipResistance") {
           return `行動不能耐性${Math.round(Number(value) * 100)}%`;

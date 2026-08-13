@@ -659,7 +659,7 @@ function handleQuestInput(action) {
       town.messageEl.textContent = acceptedMessage;
       renderFacility();
       town.messageEl.textContent = acceptedMessage;
-      if (result.acceptanceRewardCardId) {
+      if (result.acceptanceRewardCardId || result.acceptanceSupplyItemId) {
         town.questAcceptanceRewardMessage = result.acceptanceRewardMessage;
         town.mode = "questAcceptanceReward";
       }

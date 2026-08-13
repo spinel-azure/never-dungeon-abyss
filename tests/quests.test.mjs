@@ -15,6 +15,8 @@ import {
   QUEEN_SHADOW_QUEST_ID,
   JABBERWOCK_QUEST_ID,
   SECOND_RED_DOOR_INVESTIGATION_QUEST_ID,
+  THIRD_RED_DOOR_INVESTIGATION_QUEST_ID,
+  B35F_SURVEY_QUEST_ID,
   RED_DOOR_DEFENSE_CARD_FLAG,
   grantRedDoorInvestigationSupply,
   abandonQuest,
@@ -518,4 +520,46 @@ test("quest 010 rescues saves that already defeated the B19F boss", () => {
   character.eventFlags.boss_fallen_mage_b19f_defeated = true;
   character = acceptQuest(character, SECOND_RED_DOOR_INVESTIGATION_QUEST_ID).character;
   assert.equal(getQuestProgress(character, SECOND_RED_DOOR_INVESTIGATION_QUEST_ID).readyToReport, true);
+});
+
+test("quest 012 tracks the B29F red door, Iron Maiden, and B30F arrival", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.quests.completedQuestIds.push(
+    QUEST_ID, SLIME_EXTERMINATION_QUEST_ID, FLOOR_SURVEY_QUEST_ID,
+    SECOND_RED_DOOR_INVESTIGATION_QUEST_ID
+  );
+  character = acceptQuest(character, THIRD_RED_DOOR_INVESTIGATION_QUEST_ID).character;
+  character.eventFlags.red_door_b29f_unlocked = true;
+  assert.equal(getQuestProgress(character, THIRD_RED_DOOR_INVESTIGATION_QUEST_ID).progress, 1);
+  character.eventFlags.boss_iron_maiden_b29f_defeated = true;
+  assert.equal(getQuestProgress(character, THIRD_RED_DOOR_INVESTIGATION_QUEST_ID).progress, 2);
+  character.eventFlags.shop_stock_b30f_unlocked = true;
+  assert.equal(getQuestProgress(character, THIRD_RED_DOOR_INVESTIGATION_QUEST_ID).readyToReport, true);
+  const report = reportQuest(character, THIRD_RED_DOOR_INVESTIGATION_QUEST_ID);
+  assert.equal(report.rewardCardId, "legendary_ability_boost_plus");
+  assert.equal(report.bonusGold, 3000);
+});
+
+test("quest 013 supplies ten large potions, resets on leaving B35F, and rewards fireproof boots", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "mage" });
+  character.quests.completedQuestIds.push(
+    QUEST_ID, SLIME_EXTERMINATION_QUEST_ID, FLOOR_SURVEY_QUEST_ID,
+    THIRD_RED_DOOR_INVESTIGATION_QUEST_ID
+  );
+  const accepted = acceptQuest(character, B35F_SURVEY_QUEST_ID);
+  character = accepted.character;
+  assert.equal(accepted.acceptanceSupplyItemId, "healing_potion_large");
+  assert.equal(accepted.acceptanceSupplyAmount, 10);
+  const fullMap = Array.from({ length: 10 }, () => Array(10).fill(true));
+  const halfMap = Array.from({ length: 5 }, () => Array(10).fill(true));
+  character = recordFloorExploration(character, { depth: 35, explored: halfMap });
+  assert.equal(getQuestProgress(character, B35F_SURVEY_QUEST_ID).progress, 50);
+  character = recordFloorExploration(character, { depth: 34, explored: [] });
+  assert.equal(getQuestProgress(character, B35F_SURVEY_QUEST_ID).progress, 0);
+  character = recordFloorExploration(character, { depth: 35, explored: fullMap });
+  assert.equal(getQuestProgress(character, B35F_SURVEY_QUEST_ID).readyToReport, true);
+  const report = reportQuest(character, B35F_SURVEY_QUEST_ID);
+  assert.equal(report.rewardEquipmentId, "fireproof_boots");
+  assert.equal(report.bonusGold, 2000);
+  assert.ok(report.character.equipmentInventory.instances.some(entry => entry.equipmentId === "fireproof_boots"));
 });
