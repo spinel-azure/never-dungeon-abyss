@@ -286,6 +286,18 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
         target.experienceReward = 0;
         target.dropItemId = null;
         target.noDrop = true;
+      } else if (effect.id === "element_barrier") {
+        const element = effect.element === "ice" ? "ice" : "fire";
+        actor.statuses = [
+          ...(actor.statuses || []).filter(status => (status.id || status.statusId) !== `${element}_barrier`),
+          {
+            id: `${element}_barrier`,
+            statusId: `${element}_barrier`,
+            active: true,
+            expiresAfterBattle: true,
+            [`${element}DamageReduction`]: Math.max(0, Math.min(0.75, Number(effect.value) || 0))
+          }
+        ];
       }
     }
     battle.log.push(`${actor.name}は${action.item.name}を使った。`);
@@ -592,6 +604,12 @@ function combatStats(combatant) {
       };
     }
   }
+  const statusFireDamageReduction = (combatant.statuses || []).reduce(
+    (total, status) => total + (status.active === false ? 0 : Number(status.fireDamageReduction) || 0), 0
+  );
+  const statusIceDamageReduction = (combatant.statuses || []).reduce(
+    (total, status) => total + (status.active === false ? 0 : Number(status.iceDamageReduction) || 0), 0
+  );
   return {
     ...collected,
     def: Math.floor(collected.def * getDefenseMultiplier(combatant.statuses)),
@@ -600,7 +618,8 @@ function combatStats(combatant) {
     statusResistances,
     elementMultipliers: { ...(combatant.elementMultipliers || {}) },
     magicDamageReduction: collected.magicDamageReduction,
-    fireDamageReduction: collected.fireDamageReduction,
+    fireDamageReduction: Math.min(0.75, collected.fireDamageReduction + statusFireDamageReduction),
+    iceDamageReduction: Math.min(0.75, collected.iceDamageReduction + statusIceDamageReduction),
     nonElementalMagicDamageReduction: collected.nonElementalMagicDamageReduction,
     elementalMagicDamageReduction: collected.elementalMagicDamageReduction,
     fireSpellDamageBonus: collected.fireSpellDamageBonus,

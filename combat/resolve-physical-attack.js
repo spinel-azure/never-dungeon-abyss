@@ -37,7 +37,9 @@ export function resolvePhysicalAttack({
     : Math.max(0, Number(defender.elementMultipliers?.[element] ?? 1));
   const elementalReduction = element === "fire"
     ? Math.max(0, Math.min(0.75, Number(defender.fireDamageReduction) || 0))
-    : 0;
+    : element === "ice"
+      ? Math.max(0, Math.min(0.75, Number(defender.iceDamageReduction) || 0))
+      : 0;
   const hits = [];
   let firstHitEffectsResolved = false;
 

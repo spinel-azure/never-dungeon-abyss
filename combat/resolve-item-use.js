@@ -21,6 +21,10 @@ export function getItemUnavailableReason({ character, itemId, context, enemy, to
     if (enemy?.isBoss) return "bossImmune";
     if (enemy?.race !== "undead") return "undeadOnly";
   }
+  const barrier = item.effects?.find(effect => effect.id === "element_barrier");
+  if (barrier && (character?.statuses || []).some(status =>
+    (status.id || status.statusId) === `${barrier.element}_barrier`
+  )) return "alreadyActive";
   return "";
 }
 

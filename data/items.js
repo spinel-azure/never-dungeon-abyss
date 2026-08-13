@@ -188,6 +188,20 @@ export const ITEMS = Object.freeze([
     effects: Object.freeze([{ id: "cure_poison", value: 1 }, { id: "heal_hp", value: 30 }]),
     description: "毒を治療し、HPを30回復する。毒でなくても使用可能。", maxOwned: 99,
     iconId: "antidote", version: 1, shopUnlockDepth: 30
+  }),
+  Object.freeze({
+    number: 31, id: "scorching_barrier", name: "灼熱障壁", category: "battle",
+    buyPrice: 3000, sellPrice: 1500, source: "shop", usableIn: Object.freeze(["battle"]),
+    effects: Object.freeze([{ id: "element_barrier", element: "fire", value: 0.3 }]),
+    description: "使用した戦闘中、炎属性ダメージを30％軽減する。重複使用不可。",
+    maxOwned: 99, iconId: "holy-water", version: 1
+  }),
+  Object.freeze({
+    number: 32, id: "extreme_cold_barrier", name: "極寒障壁", category: "battle",
+    buyPrice: 3000, sellPrice: 1500, source: "shop", usableIn: Object.freeze(["battle"]),
+    effects: Object.freeze([{ id: "element_barrier", element: "ice", value: 0.3 }]),
+    description: "使用した戦闘中、氷属性ダメージを30％軽減する。重複使用不可。",
+    maxOwned: 99, iconId: "holy-water", version: 1
   })
 ]);
 
@@ -213,6 +227,8 @@ export function getShopItemIdsForCharacter(character) {
     ...(flags.transfer_portal_b10f_unlocked ? ["healing_potion_medium"] : []),
     ...(flags.shop_stock_b20f_unlocked ? ["healing_potion_large"] : []),
     ...(flags.shop_stock_b30f_unlocked && flags.boss_iron_maiden_b29f_defeated ? ["antidote_medium"] : []),
+    ...(flags.scorching_barrier_shop_unlocked ? ["scorching_barrier"] : []),
+    ...(flags.extreme_cold_barrier_shop_unlocked ? ["extreme_cold_barrier"] : []),
     ...BASE_SHOP_ITEM_IDS.slice(1)
   ];
 }

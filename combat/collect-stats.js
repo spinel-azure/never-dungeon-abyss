@@ -62,6 +62,14 @@ export function collectStats(source = {}) {
       0,
       0.75
     ),
+    iceDamageReduction: clamp(
+      numeric(source.iceDamageReduction)
+        + numeric(equipment.iceDamageReduction)
+        + numeric(cards.iceDamageReduction)
+        + numeric(temporary.iceDamageReduction),
+      0,
+      0.75
+    ),
     nonElementalMagicDamageReduction: clamp(
       numeric(source.nonElementalMagicDamageReduction)
         + numeric(equipment.nonElementalMagicDamageReduction)

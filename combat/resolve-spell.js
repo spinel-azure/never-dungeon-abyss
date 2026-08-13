@@ -39,7 +39,9 @@ export function resolveSpell({
       COMBAT_CONFIG.spellVarianceMin,
       COMBAT_CONFIG.spellVarianceMax
     );
-    const elementalReduction = spell.element === "fire" ? numeric(defender.fireDamageReduction) : 0;
+    const elementalReduction = spell.element === "fire"
+      ? numeric(defender.fireDamageReduction)
+      : spell.element === "ice" ? numeric(defender.iceDamageReduction) : 0;
     const nonElementalReduction = isElementalSpell(spell.element)
       ? 0
       : numeric(defender.nonElementalMagicDamageReduction);
