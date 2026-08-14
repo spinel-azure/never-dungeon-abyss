@@ -475,9 +475,11 @@ function startSpecialRoomContentEvent(content, fromGX, fromGY) {
       type: "specialRoomBoss",
       bossId: boss.id,
       imageId: boss.encounterImageId || boss.imageId || "",
+      imageFit: "cover",
       canCancel: false,
       showOverlay: true,
-      awaitingStartConfirmation: Boolean(boss.event.confirmBeforeStart)
+      awaitingStartConfirmation: Boolean(boss.event.confirmBeforeStart),
+      reserveMessageLines: boss.event.reserveMessageLines || 0
     };
     startOverlayEvent(event);
     hooks.say(`${boss.event.start}${event.awaitingStartConfirmation ? "\n＊Aボタン：次へ" : ""}`);
@@ -489,6 +491,7 @@ function startSpecialRoomContentEvent(content, fromGX, fromGY) {
     bossId: boss.id,
     imageId: boss.encounterImageId ?? "",
     imageFit: "cover",
+    reserveMessageLines: boss.event?.reserveMessageLines || 0,
     canCancel: boss.event?.canCancel !== false,
     retreatOnCancel: boss.event?.canCancel !== false,
     message: boss.event?.prompt || "部屋に入ると、古ぼけた机の上に所狭しと本が積み上げられている。\n机の中央には、一冊だけ開かれた本がある。調べますか？\n＊Aボタン：はい　Bボタン：いいえ"
@@ -562,12 +565,15 @@ function confirmSpecialRoomBossEvent() {
 }
 
 function beginSpecialRoomBossBattle(event, boss) {
+  if (boss?.event?.fadeBeforeStart) {
+    event.imageId = "";
+    hooks.say("");
+    hooks.onStateChanged();
+    scheduleSpecialRoomBossBattle(event, boss);
+    return;
+  }
   hooks.say(boss?.event?.start || "本に手を触れようとした瞬間、突然声が響く。「軽々しく、それに触るな！」\n何かが襲ってきた！");
-  event.autoStartTimer = window.setTimeout(() => {
-    if (state.overlayEvent !== event) return;
-    state.overlayEvent = null;
-    hooks.beginBossBattle(event.bossId);
-  }, 1200);
+  scheduleSpecialRoomBossBattle(event, boss);
 }
 
 function scheduleSpecialRoomBossBattle(event, boss) {

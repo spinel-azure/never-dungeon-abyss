@@ -581,8 +581,9 @@ export const BOSSES = Object.freeze({
     statusResistances: Object.freeze({ poison: Object.freeze({ resistancePoints: 65, immune: false }), bleeding: Object.freeze({ resistancePoints: 60, immune: false }), action_skip: Object.freeze({ resistancePoints: 75, immune: false }), speed_down: Object.freeze({ resistancePoints: 70, immune: false }) }),
     escapeRate: 0, surpriseRate: 0, surpriseRateMaximum: 0, noDrop: true, isBoss: true,
     bossKind: "event", defeatedFlag: "boss_thief_leader_event_boss_defeated",
-    event: Object.freeze({ immediateStart: true, confirmBeforeStart: true, autoStartDelay: 2000,
-      start: "扉を開けて中に入ると、石造りの部屋の中央に置かれたテーブルに足を投げ出して椅子に座りながら、女盗賊が酒を飲んでいた。そして背中越しにあなたの姿を見るや、立ち上がり腰の短剣を抜き放つ！" })
+    event: Object.freeze({ immediateStart: true, confirmBeforeStart: true, fadeBeforeStart: true,
+      autoStartDelay: 1000, reserveMessageLines: 5,
+      start: "扉を開けて中に入ると、石造りの部屋の中央に置かれたテーブルに足を投げ出して椅子に座りながら、女盗賊が酒を飲んでいた。\nそして背中越しにあなたの姿を見るや立ち上がり、腰の短剣を抜き放つ！" })
   }),
   brass_bull_event_boss: Object.freeze({
     id: "brass_bull_event_boss",
@@ -632,7 +633,10 @@ export const BOSSES = Object.freeze({
     bossKind: "event",
     event: Object.freeze({
       canCancel: false,
-      prompt: "部屋の中に入ると同時にもの凄い熱気を感じた。\n部屋の中央の台座には真鍮製の雄牛の像が鎮座しており、鼻からは煙が吹き出している。\nそして、こちらに気付いたかの様にその体躯を起こし、襲いかかってきた！\n＊Aボタン：戦闘開始",
+      fadeBeforeStart: true,
+      autoStartDelay: 1000,
+      reserveMessageLines: 5,
+      prompt: "部屋の中に入ると同時にもの凄い熱気を感じた。\n部屋の中央の台座には真鍮製の雄牛の像が鎮座しており、鼻からは煙が吹き出している。\nそして、こちらに気付いたかの様にその体躯を起こし、襲いかかってきた！\n＊Aボタン：次へ",
       start: "真鍮の雄牛が襲いかかってきた！"
     }),
     defeatedFlag: "boss_brass_bull_event_boss_defeated"

@@ -289,6 +289,7 @@ function drawMinimapOverlay() {
 function drawEncounterMessage() {
   const { ctx, W, H, state } = renderer;
   const event = state.overlayEvent;
+  document.body.classList.toggle("event-message-expanded", Number(event?.reserveMessageLines) >= 4);
   if (!event) return;
   const message = event.encounterLabel || (
     event.encounterType === "ambush" ? "AMBUSH!!" : "ENCOUNTER!!"
@@ -719,11 +720,11 @@ export function isSpriteEventCell(cell = {}) {
 }
 
 function drawQuestEvent(ctx, event) {
-  const radius = Math.max(5, event.size * .22);
+  const radius = Math.max(8, event.size * .32);
   ctx.save();
   ctx.globalAlpha = event.alpha;
   ctx.shadowColor = "rgba(110,225,255,.95)";
-  ctx.shadowBlur = radius * 2.4;
+  ctx.shadowBlur = radius * 3.4;
   ctx.fillStyle = "rgba(190,250,255,.92)";
   ctx.beginPath();
   ctx.arc(event.x, event.floorY - radius * 1.4, radius, 0, Math.PI * 2);

@@ -69,8 +69,9 @@ test("Thief Leader uses the requested art and balanced single-element actions", 
   assert.equal(boss.maxHp, 580);
   assert.equal(boss.experienceReward, 3500);
   assert.deepEqual(boss.actions.map(entry => entry.action.element || "physical"), ["physical", "fire", "ice", "physical"]);
-  assert.equal(boss.event.autoStartDelay, 2000);
+  assert.equal(boss.event.autoStartDelay, 1000);
   assert.equal(boss.event.confirmBeforeStart, true);
+  assert.equal(boss.event.fadeBeforeStart, true);
 });
 
 test("boss defeat completes quest 011 and reporting grants only missing unique cards plus 2000G", () => {

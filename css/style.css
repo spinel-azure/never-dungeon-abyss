@@ -216,6 +216,9 @@
       display: block;
       backdrop-filter: blur(4px);
     }
+    body.event-message-expanded .message {
+      min-height: calc(1.35em * 5 + 18px);
+    }
     .controls {
       display: grid;
       grid-template-columns: 1fr auto auto 1fr;

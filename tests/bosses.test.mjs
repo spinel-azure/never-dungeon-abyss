@@ -305,6 +305,9 @@ test("Brass Bull is a B36F quest event boss with a guaranteed unique material re
   assert.equal(boss.encounterImage, "images/background/dungeon_event_04.avif");
   assert.deepEqual(boss.reward, { type: "item", itemId: "molten_brass", amount: 1 });
   assert.deepEqual(boss.actions.map(entry => entry.action.name), ["雄牛の咆哮", "雄牛の突進", "火炎吐き"]);
+  assert.equal(boss.event.autoStartDelay, 1000);
+  assert.equal(boss.event.fadeBeforeStart, true);
+  assert.match(boss.event.prompt, /＊Aボタン：次へ/);
   assert.equal(createBossCombatant(boss).isBoss, true);
 });
 
