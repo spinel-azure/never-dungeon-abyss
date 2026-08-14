@@ -676,6 +676,10 @@ export function drawCellEvents(layer = "all") {
           treasureType: cell.treasure
         });
       }
+      if (cell.questEvent) {
+        if (layer === "floor") continue;
+        events.push({ ...projected, eventKind: "questEvent" });
+      }
     }
   }
 
@@ -688,6 +692,7 @@ export function drawCellEvents(layer = "all") {
       if (event.eventKind === "bossRemains") drawNpcEvent(ctx, event);
       if (event.eventKind === "fountain") drawNpcEvent(ctx, event);
       if (event.eventKind === "treasure") drawTreasureEvent(ctx, event);
+      if (event.eventKind === "questEvent") drawQuestEvent(ctx, event);
     });
 }
 
@@ -710,7 +715,20 @@ function projectCellCenter(cellX, cellY) {
 }
 
 export function isSpriteEventCell(cell = {}) {
-  return Boolean(cell.bossId || cell.bossRemainsId || cell.npc || cell.fountain || cell.treasure);
+  return Boolean(cell.bossId || cell.bossRemainsId || cell.npc || cell.fountain || cell.treasure || cell.questEvent);
+}
+
+function drawQuestEvent(ctx, event) {
+  const radius = Math.max(5, event.size * .22);
+  ctx.save();
+  ctx.globalAlpha = event.alpha;
+  ctx.shadowColor = "rgba(110,225,255,.95)";
+  ctx.shadowBlur = radius * 2.4;
+  ctx.fillStyle = "rgba(190,250,255,.92)";
+  ctx.beginPath();
+  ctx.arc(event.x, event.floorY - radius * 1.4, radius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
 }
 
 function isSpriteCellVisible(cellX, cellY) {

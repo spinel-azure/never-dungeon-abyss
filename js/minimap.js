@@ -68,6 +68,7 @@
       if (shouldDrawSpecialRoomMarker(c.specialRoom, isExplored, state.torchFuel)) {
         drawSpecialRoomMark(ctx, x1, y1, cell, c.specialRoom.content.minimapMarker);
       }
+      if (c.questEvent && isExplored && state.torchFuel > 0) drawQuestEventMark(ctx, x1, y1, cell);
       if (c.treasure && (revealOptions.treasures || treasureDetectionActive)) {
         drawTreasureMark(ctx, x1, y1, cell, c.treasure);
       } else if (c.treasure && state.treasureCompassActive) {
@@ -179,6 +180,18 @@ export function drawSpecialRoomMark(ctx, x, y, size, marker = "E") {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(String(marker).slice(0, 1), x + size / 2, y + size / 2);
+  ctx.restore();
+}
+
+export function drawQuestEventMark(ctx, x, y, size) {
+  ctx.save();
+  ctx.fillStyle = "#bdefff";
+  ctx.shadowColor = "#62d9ff";
+  ctx.shadowBlur = Math.max(2, size * .22);
+  ctx.font = `700 ${Math.max(9, size * .72)}px "Segoe UI Symbol", GameFont, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("✧", x + size / 2, y + size / 2);
   ctx.restore();
 }
 

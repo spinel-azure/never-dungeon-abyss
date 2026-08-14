@@ -28,7 +28,9 @@ import {
   removeTreasureAt,
   discoverTreasureAt,
   getSpecialRoomEntryAt,
-  getSpecialRoomAt
+  getSpecialRoomAt,
+  getQuestEventAt,
+  removeQuestEventAt
 } from "./dungeon.js";
 import { getNpcEncounter } from "../data/npcs.js";
 import { HEALING_FOUNTAIN } from "../data/fountains.js";
@@ -64,6 +66,7 @@ const hooks = {
   onNpcEncountered: () => {},
   isQueenShadowFinaleCompleted: () => false,
   onQueenShadowFinaleComplete: () => false,
+  onQuestEvent: () => "",
   onDungeonStep: () => {},
   onStateChanged: () => {}
 };
@@ -187,8 +190,9 @@ export function updateAnimation(now) {
         const fountain = getFountainAt(state.gridX, state.gridY);
         const treasure = getTreasureAt(state.gridX, state.gridY);
         const specialRoom = getSpecialRoomAt(state.gridX, state.gridY);
+        const questEvent = getQuestEventAt(state.gridX, state.gridY);
         const isStairs = a.cellType === "stairsUp" || a.cellType === "stairsDown";
-        const isSpecialEventCell = Boolean(npc) || Boolean(bossId) || Boolean(bossRemainsId) || Boolean(fountain) || Boolean(treasure) || Boolean(specialRoom?.content) || isStairs;
+        const isSpecialEventCell = Boolean(npc) || Boolean(bossId) || Boolean(bossRemainsId) || Boolean(fountain) || Boolean(treasure) || Boolean(questEvent) || Boolean(specialRoom?.content) || isStairs;
         const encounterTriggered = !isSpecialEventCell && onPlayerStep({ inDarkness: movedInDarkness });
         if (encounterTriggered && state.autoWalkerActive) state.autoReturnPaused = true;
         else if (encounterTriggered) hooks.cancelAutoReturn(false);
@@ -202,6 +206,10 @@ export function updateAnimation(now) {
           startFountainEvent(a.fromGX, a.fromGY);
         } else if (treasure) {
           startTreasureEvent(treasure, a.fromGX, a.fromGY);
+        } else if (questEvent) {
+          const message = hooks.onQuestEvent(questEvent) || "手掛かりを見つけた。";
+          removeQuestEventAt(state.gridX, state.gridY);
+          hooks.say(message);
         } else if (specialRoom?.content) {
           startSpecialRoomContentEvent(specialRoom.content, a.fromGX, a.fromGY);
         } else if (isStairs) {
@@ -468,16 +476,12 @@ function startSpecialRoomContentEvent(content, fromGX, fromGY) {
       bossId: boss.id,
       imageId: boss.encounterImageId || boss.imageId || "",
       canCancel: false,
-      showOverlay: true
+      showOverlay: true,
+      awaitingStartConfirmation: Boolean(boss.event.confirmBeforeStart)
     };
     startOverlayEvent(event);
-    const activeEvent = state.overlayEvent;
-    hooks.say(boss.event.start);
-    activeEvent.autoStartTimer = window.setTimeout(() => {
-      if (state.overlayEvent !== activeEvent) return;
-      state.overlayEvent = null;
-      hooks.beginBossBattle(activeEvent.bossId);
-    }, 1200);
+    hooks.say(`${boss.event.start}${event.awaitingStartConfirmation ? "\n＊Aボタン：次へ" : ""}`);
+    if (!event.awaitingStartConfirmation) scheduleSpecialRoomBossBattle(event, boss);
     return;
   }
   startOverlayEvent({
@@ -536,6 +540,14 @@ function confirmSpecialRoomBossEvent() {
   if (!event || event.type !== "specialRoomBoss") return;
   event.canCancel = false;
   const boss = getBossById(event.bossId);
+  if (event.awaitingStartConfirmation) {
+    event.awaitingStartConfirmation = false;
+    event.imageId = "";
+    hooks.say("");
+    hooks.onStateChanged();
+    scheduleSpecialRoomBossBattle(event, boss);
+    return;
+  }
   if (boss?.event?.treasureOpening) {
     hooks.showTreasure(boss.event.treasureOpening);
     hooks.say("");
@@ -556,6 +568,14 @@ function beginSpecialRoomBossBattle(event, boss) {
     state.overlayEvent = null;
     hooks.beginBossBattle(event.bossId);
   }, 1200);
+}
+
+function scheduleSpecialRoomBossBattle(event, boss) {
+  event.autoStartTimer = window.setTimeout(() => {
+    if (state.overlayEvent !== event) return;
+    state.overlayEvent = null;
+    hooks.beginBossBattle(event.bossId);
+  }, Math.max(0, Number(boss?.event?.autoStartDelay) || 1200));
 }
 
 export function handleOverlayEventInput(action) {

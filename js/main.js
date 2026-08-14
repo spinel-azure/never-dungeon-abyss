@@ -153,6 +153,7 @@ import {
   recordCustomQuestProgress,
   recordFloorExploration,
   recordQueenShadowEncounter,
+  recordThievesClue,
   reportQuest
 } from "../data/quests.js";
 
@@ -404,6 +405,16 @@ import {
       setTimeout(() => showNamedItemGetEffect(["女王のティアラ"]), 0);
       return true;
     },
+    onQuestEvent: event => {
+      const keyItem = getKeyItem(event?.keyItemId);
+      if (!keyItem || !character) return "何も見つからなかった。";
+      const granted = grantKeyItem(character.keyItems, keyItem.id);
+      character = recordThievesClue({ ...character, keyItems: granted.keyItems }, event.flag);
+      updateCharacterUi();
+      saveGame();
+      if (granted.gained) setTimeout(() => showNamedItemGetEffect([keyItem.name], { important: true }), 0);
+      return `貴重品「${keyItem.name}」を手に入れた！`;
+    },
     onDungeonStep: handleDungeonStep,
     onStateChanged: scheduleAutosave
   });
@@ -605,6 +616,7 @@ import {
         if (currentDepth > 4 && !savedCell.eventTreasureId && !(savedCell.treasure === "black" && save.character?.eventFlags?.black_chests_unlocked)) savedCell.treasure = null;
         Object.assign(cells[y][x], savedCell);
         cells[y][x].specialRoom = savedCell.specialRoom || null;
+        cells[y][x].questEvent = savedCell.questEvent || null;
         if (cells[y][x].specialRoom) {
           cells[y][x].specialRoom.content = getSpecialRoomDefinition(currentDepth)?.content ?? null;
         }
@@ -978,10 +990,12 @@ import {
     setTimeout(() => {
       void showGuildQuestRewardSequence({
         rewardCardId: result.rewardCardId,
+        rewardCardIds: result.rewardCardIds,
         rewardEquipmentId: result.rewardEquipmentId,
         rewardItemId: result.rewardItemId,
         rewardItemAmount: result.rewardItemAmount,
         bonusGold: result.bonusGold,
+        presentationOrder: result.presentationOrder,
         eventRewardCardId
       });
     }, 0);
@@ -990,13 +1004,23 @@ import {
 
   async function showGuildQuestRewardSequence({
     rewardCardId,
+    rewardCardIds = [],
     rewardEquipmentId,
     rewardItemId,
     rewardItemAmount,
     bonusGold,
+    presentationOrder,
     eventRewardCardId
   } = {}) {
     await showTimedEffect(questCompleteEffect, "importantItem", 3400);
+    if (presentationOrder === "cardsThenGold") {
+      for (const cardId of rewardCardIds) {
+        showCardGetEffect(cardId);
+        await wait(3400);
+      }
+      if (bonusGold > 0) await showBonusGetEffect(bonusGold);
+      return;
+    }
     if (bonusGold > 0) {
       await showBonusGetEffect(bonusGold);
     }
@@ -2506,7 +2530,9 @@ import {
         active: queenShadowQuest.active,
         completed: queenShadowQuest.completed,
         progress: queenShadowQuest.progress
-      }
+      },
+      activeQuestIds: Object.keys(character?.quests?.active || {}),
+      eventFlags: { ...(character?.eventFlags || {}) }
     };
   }
 

@@ -7,6 +7,18 @@ export const KEY_ITEMS = Object.freeze({
     consumable: false,
     version: 1
   }),
+  thieves_clue_emblem: Object.freeze({
+    id: "thieves_clue_emblem", name: "盗賊団の徽章",
+    description: "盗賊団が仲間の証として使っている徽章。", sellable: false, consumable: false, version: 1
+  }),
+  thieves_clue_ledger: Object.freeze({
+    id: "thieves_clue_ledger", name: "暗号化された取引記録",
+    description: "暗号で記された盗賊団の取引記録。", sellable: false, consumable: false, version: 1
+  }),
+  thieves_clue_map: Object.freeze({
+    id: "thieves_clue_map", name: "隠れ家の地図",
+    description: "盗賊団の隠れ家へ続く道が記された地図。", sellable: false, consumable: false, version: 1
+  }),
   red_rust_key_b9f: Object.freeze({
     id: "red_rust_key_b9f",
     name: "赤錆びた鍵",

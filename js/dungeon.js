@@ -15,6 +15,7 @@ import { rollTreasureTrap } from "../data/traps.js";
 import { floorHasHealingFountain } from "../data/fountains.js";
 import { getSpecialRoomDefinition, getSpecialRoomUnlockRate } from "../data/special-rooms.js";
 import { getFloorBossByDepth } from "../data/bosses.js";
+import { getQuestEventForDepth } from "../data/quest-events.js";
 import {
   DUNGEON_FEATURE_PRIORITIES,
   getTraversalBlockingReservations,
@@ -66,6 +67,7 @@ export function makeCells(w, h) {
       featureApproach: null,
       portal: null,
       specialRoom: null,
+      questEvent: null,
       walls: { N: true, E: true, S: true, W: true },
       doors: { N: null, E: null, S: null, W: null },
       doorKinds: { N: null, E: null, S: null, W: null }
@@ -91,7 +93,7 @@ export function buildBoundaryWallMap(depth = 1, rng = Math.random, progress = {}
   let lastReport = null;
   for (let attempt = 1; attempt <= MAX_DUNGEON_BUILD_ATTEMPTS; attempt += 1) {
     buildBoundaryWallMapAttempt(depth, rng, progress);
-    lastReport = validateDungeonLayout({ depth });
+    lastReport = validateDungeonLayout({ depth, progress });
     lastReport.attempt = attempt;
     if (lastReport.valid) {
       lastDungeonBuildReport = structuredClone(lastReport);
@@ -116,6 +118,7 @@ function buildBoundaryWallMapAttempt(depth = 1, rng = Math.random, progress = {}
   const floorBoss = getFloorBossByDepth(depth);
   if (floorBoss) placeFloorBossRoom(floorBoss, rng, progress);
   placeSpecialRoom(depth, rng);
+  placeQuestEvent(depth, rng, progress);
   placeNpc(depth, progress);
   placeTreasures(depth, rng, progress);
   placeFountain(depth, rng);
@@ -127,7 +130,7 @@ export function getLastDungeonBuildReport() {
   return lastDungeonBuildReport ? structuredClone(lastDungeonBuildReport) : null;
 }
 
-export function validateDungeonLayout({ depth = 1 } = {}) {
+export function validateDungeonLayout({ depth = 1, progress = {} } = {}) {
   const errors = [];
   const blocking = getTraversalBlockingReservations(cells);
   const blocked = new Set(blocking.map(cell => `${cell.x},${cell.y}`));
@@ -170,6 +173,10 @@ export function validateDungeonLayout({ depth = 1 } = {}) {
     if (doorCount !== 1) errors.push(`special room door count ${doorCount}/1 at ${room.x},${room.y}`);
   }
   const normalizedDepth = Math.max(1, Math.floor(Number(depth) || 1));
+  const expectedQuestEvent = getQuestEventForDepth(normalizedDepth, progress);
+  if (expectedQuestEvent && !cells.flat().some(cell => cell.questEvent?.id === expectedQuestEvent.id)) {
+    errors.push(`required quest event missing: ${expectedQuestEvent.id}`);
+  }
   const floorBoss = getFloorBossByDepth(normalizedDepth);
   if (floorBoss && !reservationIds.has(`boss_room_b${normalizedDepth}f`)) {
     errors.push(`required B${normalizedDepth}F boss room missing`);
@@ -229,6 +236,7 @@ export function resetAllWalls() {
       cells[y][x].featureApproach = null;
       cells[y][x].portal = null;
       cells[y][x].specialRoom = null;
+      cells[y][x].questEvent = null;
       cells[y][x].walls = { N: true, E: true, S: true, W: true };
       cells[y][x].doors = { N: null, E: null, S: null, W: null };
       cells[y][x].doorKinds = { N: null, E: null, S: null, W: null };
@@ -460,6 +468,39 @@ export function placeSpecialRoom(depth = 1, rng = Math.random) {
     if (placed) return placed;
   }
   return null;
+}
+
+export function placeQuestEvent(depth = 1, rng = Math.random, progress = {}) {
+  for (const cell of cells.flat()) cell.questEvent = null;
+  const event = getQuestEventForDepth(depth, progress);
+  if (!event) return null;
+  const { x: startX, y: startY } = startPosition;
+  const distances = makeDistanceMap(startX, startY);
+  const candidates = cells.flat().filter(cell =>
+    cell.type === "floor" && !isDungeonFeatureOccupied(cell) && !cell.npc && !cell.fountain && !cell.treasure
+      && distances[cell.y][cell.x] >= 3
+  );
+  const selected = shuffled(candidates, rng)[0];
+  if (!selected) return null;
+  const reservation = reserveDungeonFeature(cells, {
+    featureId: event.id, type: "questEvent", footprint: [selected],
+    priority: DUNGEON_FEATURE_PRIORITIES.questEvent, blocksTraversal: false
+  });
+  if (!reservation.accepted) return null;
+  selected.questEvent = event;
+  return { x: selected.x, y: selected.y, event };
+}
+
+export function getQuestEventAt(x, y) {
+  return inBounds(x, y) ? cells[y][x].questEvent || null : null;
+}
+
+export function removeQuestEventAt(x, y) {
+  if (!inBounds(x, y) || !cells[y][x].questEvent) return false;
+  cells[y][x].questEvent = null;
+  cells[y][x].reserved = null;
+  cells[y][x].featureReservation = null;
+  return true;
 }
 
 export function getSpecialRoomAtDoor(x, y, dirKey) {

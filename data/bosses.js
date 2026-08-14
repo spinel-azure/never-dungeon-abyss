@@ -563,6 +563,27 @@ export const BOSSES = Object.freeze({
     bossKind: "event", defeatedFlag: "boss_glacies_event_boss_defeated"
   }),
   */
+  thief_leader_event_boss: Object.freeze({
+    id: "thief_leader_event_boss", name: "双刃の頭領", level: 32, floor: 27,
+    imageId: "thief_leader_event_boss", image: "images/bosses/boss_04.avif",
+    encounterImageId: "thief_hideout_event_b27f", encounterImage: "images/background/dungeon_event_03.avif",
+    race: "human", maxHp: 580,
+    stats: Object.freeze({ str: 21, int: 12, agi: 22, dex: 23, luc: 16 }),
+    def: 17, attack: 19, experienceReward: 3500, specialAttack: null,
+    actions: Object.freeze([
+      Object.freeze({ weight: 35, action: Object.freeze({ id: "twin_blade_slash", name: "双刃斬り", actionType: "physicalAttack", hitCount: 2, powerPerHit: 0.75, effects: Object.freeze([]) }) }),
+      Object.freeze({ weight: 25, action: Object.freeze({ id: "flame_blade", name: "炎刃", actionType: "physicalAttack", element: "fire", hitCount: 1, powerPerHit: 1.25, effects: Object.freeze([Object.freeze({ statusId: "bleeding", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.2 })]) }) }),
+      Object.freeze({ weight: 25, action: Object.freeze({ id: "ice_blade", name: "氷刃", actionType: "physicalAttack", element: "ice", hitCount: 1, powerPerHit: 1.15, effects: Object.freeze([Object.freeze({ statusId: "action_skip", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.2 })]) }) }),
+      Object.freeze({ weight: 15, action: Object.freeze({ id: "smoke_bomb", name: "煙玉", actionType: "physicalAttack", hitCount: 1, powerPerHit: 0.35, unavoidable: true, effects: Object.freeze([Object.freeze({ statusId: "speed_down", trigger: "perAction", statusKind: "physical", baseRate: 0.8 })]) }) })
+    ]),
+    reward: Object.freeze({ type: "none" }),
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1, arcane: 1 }),
+    statusResistances: Object.freeze({ poison: Object.freeze({ resistancePoints: 65, immune: false }), bleeding: Object.freeze({ resistancePoints: 60, immune: false }), action_skip: Object.freeze({ resistancePoints: 75, immune: false }), speed_down: Object.freeze({ resistancePoints: 70, immune: false }) }),
+    escapeRate: 0, surpriseRate: 0, surpriseRateMaximum: 0, noDrop: true, isBoss: true,
+    bossKind: "event", defeatedFlag: "boss_thief_leader_event_boss_defeated",
+    event: Object.freeze({ immediateStart: true, confirmBeforeStart: true, autoStartDelay: 2000,
+      start: "扉を開けて中に入ると、石造りの部屋の中央に置かれたテーブルに足を投げ出して椅子に座りながら、女盗賊が酒を飲んでいた。そして背中越しにあなたの姿を見るや、立ち上がり腰の短剣を抜き放つ！" })
+  }),
   brass_bull_event_boss: Object.freeze({
     id: "brass_bull_event_boss",
     name: "真鍮の雄牛",

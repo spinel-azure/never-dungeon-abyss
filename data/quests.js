@@ -13,10 +13,14 @@ export const RED_DOOR_INVESTIGATION_QUEST_ID = "guild_007";
 export const QUEEN_SHADOW_QUEST_ID = "guild_008";
 export const JABBERWOCK_QUEST_ID = "guild_009";
 export const SECOND_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_010";
+export const THIEVES_HIDEOUT_QUEST_ID = "guild_011";
 export const THIRD_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_012";
 export const B35F_SURVEY_QUEST_ID = "guild_013";
 export const B35F_SURVEY_SUPPLY_FLAG = "guild_013_large_potions_received";
 export const BRASS_BULL_QUEST_ID = "guild_014";
+export const THIEVES_CLUE_FLAGS = Object.freeze([
+  "quest_011_clue_emblem_found", "quest_011_clue_ledger_found", "quest_011_clue_map_found"
+]);
 export const QUEEN_SHADOW_PROGRESS_FLAGS = Object.freeze([
   "quest_008_shadow_b10f_found",
   "quest_008_shadow_b11f_found",
@@ -281,6 +285,26 @@ export const QUESTS = Object.freeze([
     available: true
   }),
   Object.freeze({
+    id: THIEVES_HIDEOUT_QUEST_ID, number: "011", title: "盗賊の隠れ家",
+    client: "ギルドマスター", category: "other", objectiveType: "defeatBoss",
+    progressMode: "matchedFlags", targetId: "thief_leader_event_boss", targetName: "双刃の頭領",
+    targetDepth: 27, requiredCount: 4,
+    objectiveLabel: "盗賊の手掛かりを集め、頭領を討伐する",
+    reward: Object.freeze({ type: "cards", label: "デッキカード×2",
+      cardIds: Object.freeze(["sr_flame_armament", "sr_ice_armament"]), bonusGold: 2000,
+      presentationOrder: "cardsThenGold" }),
+    descriptionLabel: "目的",
+    description: Object.freeze([
+      "奈落のB20F台を根城にしている盗賊団がいるらしい。",
+      "連中の隠れ家を突き止め、頭領を討伐してくれ。",
+      "まずは迷宮内に残された手掛かりを探すんだ。"
+    ]),
+    prerequisiteQuestIds: Object.freeze([SECOND_RED_DOOR_INVESTIGATION_QUEST_ID]),
+    persistentProgressFlags: Object.freeze([...THIEVES_CLUE_FLAGS, "quest_011_thief_leader_defeated_while_active"]),
+    persistentProgressFlag: "quest_011_thief_leader_defeated_while_active",
+    completedTargetFlag: "boss_thief_leader_event_boss_defeated", available: true
+  }),
+  Object.freeze({
     id: THIRD_RED_DOOR_INVESTIGATION_QUEST_ID,
     number: "012",
     title: "赤い扉の調査――その3",
@@ -300,7 +324,7 @@ export const QUESTS = Object.freeze([
       "中を調査してほしい。例によって何があるか",
       "分からない。十分に注意しろ。"
     ]),
-    prerequisiteQuestIds: Object.freeze([SECOND_RED_DOOR_INVESTIGATION_QUEST_ID]),
+    prerequisiteQuestIds: Object.freeze([THIEVES_HIDEOUT_QUEST_ID]),
     persistentProgressFlags: Object.freeze([
       "red_door_b29f_unlocked",
       "boss_iron_maiden_b29f_defeated",
@@ -394,7 +418,9 @@ export function getQuestProgress(character, questId) {
     && character?.eventFlags?.[quest.completedTargetFlag]
   );
   const persistentProgress = Array.isArray(quest?.persistentProgressFlags)
-    ? countSequentialProgressFlags(character, quest.persistentProgressFlags)
+    ? quest.progressMode === "matchedFlags"
+      ? countMatchedProgressFlags(character, quest.persistentProgressFlags)
+      : countSequentialProgressFlags(character, quest.persistentProgressFlags)
     : 0;
   const progress = targetAlreadyCompleted
     ? quest.requiredCount
@@ -440,7 +466,9 @@ export function acceptQuest(character, questId) {
     quest.completedTargetFlag && character?.eventFlags?.[quest.completedTargetFlag]
   );
   const persistentProgress = Array.isArray(quest.persistentProgressFlags)
-    ? countSequentialProgressFlags(character, quest.persistentProgressFlags)
+    ? quest.progressMode === "matchedFlags"
+      ? countMatchedProgressFlags(character, quest.persistentProgressFlags)
+      : countSequentialProgressFlags(character, quest.persistentProgressFlags)
     : 0;
   quests.active[quest.id] = {
     progress: targetAlreadyCompleted || (persistentProgressFlag && character?.eventFlags?.[persistentProgressFlag])
@@ -522,6 +550,7 @@ export function recordBossDefeat(character, bossId, depth = null) {
     const quest = getQuestById(questId);
     if (quest?.objectiveType !== "defeatBoss" || quest.targetId !== bossId) return;
     if (depth != null && quest.targetDepth != null && Number(depth) !== Number(quest.targetDepth)) return;
+    if (quest.progressMode === "matchedFlags" && countMatchedProgressFlags(character, THIEVES_CLUE_FLAGS) < 3) return;
     if (entry.progress < quest.requiredCount) {
       entry.progress = quest.requiredCount;
       updated = true;
@@ -532,6 +561,16 @@ export function recordBossDefeat(character, bossId, depth = null) {
     }
   });
   return updated ? { ...character, quests, eventFlags } : character;
+}
+
+export function recordThievesClue(character, flag) {
+  if (!THIEVES_CLUE_FLAGS.includes(flag)) return character;
+  const progress = getQuestProgress(character, THIEVES_HIDEOUT_QUEST_ID);
+  if (!progress.active || progress.completed || character?.eventFlags?.[flag]) return character;
+  const next = { ...character, eventFlags: { ...(character.eventFlags || {}), [flag]: true } };
+  const quests = normalizeQuestState(next.quests);
+  quests.active[THIEVES_HIDEOUT_QUEST_ID].progress = countMatchedProgressFlags(next, THIEVES_CLUE_FLAGS);
+  return { ...next, quests };
 }
 
 export function recordFloorExploration(character, { depth, explored } = {}) {
@@ -609,6 +648,7 @@ export function reportQuest(character, questId) {
   quests.completedQuestIds = [...new Set([...quests.completedQuestIds, questId])];
   let next = { ...character, quests };
   let rewardCardId = null;
+  const rewardCardIds = [];
   let rewardEquipmentId = null;
   let rewardItemId = null;
   let rewardItemAmount = 0;
@@ -622,6 +662,13 @@ export function reportQuest(character, questId) {
     );
     next = { ...next, cards: reward.cards };
     if (reward.gained > 0) rewardCardId = progress.quest.reward.cardId;
+  }
+  if (progress.quest.reward?.type === "cards") {
+    for (const cardId of progress.quest.reward.cardIds || []) {
+      const reward = grantCard(next.cards, cardId, 1, next.deckCost);
+      next = { ...next, cards: reward.cards };
+      if (reward.gained > 0) rewardCardIds.push(cardId);
+    }
   }
   if (progress.quest.reward?.type === "equipment" && progress.quest.reward.equipmentId) {
     const reward = grantEquipmentInstance(
@@ -654,9 +701,11 @@ export function reportQuest(character, questId) {
     character: next,
     accepted: true,
     rewardCardId,
+    rewardCardIds,
     rewardEquipmentId,
     rewardItemId,
     rewardItemAmount,
+    presentationOrder: progress.quest.reward?.presentationOrder || "",
     bonusGold
   };
 }
@@ -725,4 +774,8 @@ function countSequentialProgressFlags(character, flags) {
     count += 1;
   }
   return count;
+}
+
+export function countMatchedProgressFlags(character, flags = []) {
+  return flags.reduce((total, flag) => total + (character?.eventFlags?.[flag] ? 1 : 0), 0);
 }

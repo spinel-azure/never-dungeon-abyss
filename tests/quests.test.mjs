@@ -16,6 +16,7 @@ import {
   QUEEN_SHADOW_QUEST_ID,
   JABBERWOCK_QUEST_ID,
   SECOND_RED_DOOR_INVESTIGATION_QUEST_ID,
+  THIEVES_HIDEOUT_QUEST_ID,
   THIRD_RED_DOOR_INVESTIGATION_QUEST_ID,
   B35F_SURVEY_QUEST_ID,
   BRASS_BULL_QUEST_ID,
@@ -528,7 +529,7 @@ test("quest 012 tracks the B29F red door, Iron Maiden, and B30F arrival", () => 
   let character = createInitialCharacter({ name: "TEST", job: "warrior" });
   character.quests.completedQuestIds.push(
     QUEST_ID, SLIME_EXTERMINATION_QUEST_ID, FLOOR_SURVEY_QUEST_ID,
-    SECOND_RED_DOOR_INVESTIGATION_QUEST_ID
+    SECOND_RED_DOOR_INVESTIGATION_QUEST_ID, THIEVES_HIDEOUT_QUEST_ID
   );
   character = acceptQuest(character, THIRD_RED_DOOR_INVESTIGATION_QUEST_ID).character;
   character.eventFlags.red_door_b29f_unlocked = true;

@@ -68,6 +68,13 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
       revealBeforeExploration: true
     })
   }),
+  27: Object.freeze({
+    lock: Object.freeze({ mode: "alwaysSuccess", attempts: 1 }),
+    content: Object.freeze({ type: "eventBoss", bossId: "thief_leader_event_boss",
+      requiredQuestId: "guild_011", requiredProgress: 3,
+      accessBlockedMessage: "壁の一部に不自然な隙間がある。\nだが、隠された仕掛けの開け方が分からない。",
+      minimapMarker: "E", revealBeforeExploration: true })
+  }),
   36: Object.freeze({
     content: Object.freeze({
       type: "eventBoss",
