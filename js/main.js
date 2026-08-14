@@ -28,6 +28,7 @@ import {
   resetPlayer,
   refillTorch,
   setTorchFuelDisabled,
+  setTorchCardEffects,
   setPlayerInputEnabled,
   updateAnimation,
   manualMove,
@@ -1071,6 +1072,10 @@ import {
   }
 
   function updateCharacterUi() {
+    setTorchCardEffects({
+      consumptionDisabled: hasCardEffect(character?.cards?.deckSlots, "torch_consumption_disabled"),
+      effectForced: hasCardEffect(character?.cards?.deckSlots, "force_torch_effect_active")
+    });
     renderCharacterStatus();
     const statusName = document.getElementById("statusName");
     const statusJob = document.getElementById("statusJob");
@@ -1286,13 +1291,13 @@ import {
       enemyBaseRate: enemyData.surpriseRate,
       enemyMaximum: enemyData.surpriseRateMaximum,
       ignoreNormalCap: Boolean(enemyData.ignoreNormalSurpriseCap),
-      forceAmbush: state.torchFuel <= 0
+      forceAmbush: state.torchFuel <= 0 && !state.torchEffectForced
     });
     pendingEncounter = {
       enemyData,
       ambush: surprise.ambush,
       surpriseRate: surprise.rate,
-      concealed: state.torchFuel <= 0
+      concealed: state.torchFuel <= 0 && !state.torchEffectForced
     };
     if (pendingEncounter.ambush) startAmbushEncounterNotice();
     else startRandomEncounterNotice();
@@ -1333,7 +1338,7 @@ import {
     const started = startBattle(createBossCombatant(boss), {
       playStartSe: true,
       ambush: false,
-      concealed: state.torchFuel <= 0
+      concealed: state.torchFuel <= 0 && !state.torchEffectForced
     });
     if (!started) {
       startBgm(selectDungeonBgm());
@@ -1355,7 +1360,7 @@ import {
     const started = startBattle(mimic, {
       playStartSe: true,
       ambush: false,
-      concealed: state.torchFuel <= 0
+      concealed: state.torchFuel <= 0 && !state.torchEffectForced
     });
     if (!started) {
       startBgm(selectDungeonBgm());
@@ -1816,6 +1821,7 @@ import {
   async function completeDungeonDefeat() {
     let lostExperience = 0;
     let preservedExperience = 0;
+    let experienceProtectionName = "女神の恩寵";
     let bag = null;
     let settled = null;
     if (character) {
@@ -1828,6 +1834,10 @@ import {
         character.cards?.deckSlots,
         "preserve_experience_on_defeat"
       );
+      experienceProtectionName = hasCardEffect(
+        character.cards?.deckSlots,
+        "goddess_mercy"
+      ) ? "女神の慈愛" : "女神の恩寵";
       Object.assign(character, resolveDungeonDefeat(character, { preserveExperience }));
       bag = structuredClone(character.lootBag);
       settled = settleLootBag(character);
@@ -1844,7 +1854,7 @@ import {
     setPlayerInputEnabled(false);
     templeRevivalJinglePending = true;
     const experienceMessage = preservedExperience > 0
-      ? `\n女神の恩寵により${preservedExperience}EXPを守った。`
+      ? `\n${experienceProtectionName}により${preservedExperience}EXPを守った。`
       : lostExperience > 0
         ? `\n持ち帰るはずだった${lostExperience}EXPを失った。`
         : "";
@@ -2495,6 +2505,15 @@ import {
         }
       };
     }
+    if (currentDepth === 40 && character) {
+      character = {
+        ...character,
+        eventFlags: {
+          ...(character.eventFlags || {}),
+          transfer_portal_b40f_unlocked: true
+        }
+      };
+    }
     startBgm(selectDungeonBgm());
     setDungeonColors(resolveFloorTheme(currentDepth, getDungeonColors()));
     applyCurrentFloorMist();
@@ -2596,8 +2615,9 @@ import {
     depthEl.textContent = `B${currentDepth}F`;
     stopwatchEl.textContent = formatElapsedTime(performance.now() - runStartedAt);
     drawCompass();
-    torchMeterEl.style.width = `${state.torchFuel}%`;
-    torchMeterEl.parentElement.classList.toggle("is-critical", state.torchFuel <= 20);
+    const displayedTorchFuel = state.torchEffectForced ? 100 : state.torchFuel;
+    torchMeterEl.style.width = `${displayedTorchFuel}%`;
+    torchMeterEl.parentElement.classList.toggle("is-critical", !state.torchEffectForced && state.torchFuel <= 20);
     const presence = getPresence();
     presenceMeterEl.style.setProperty("--presence", `${presence}%`);
     presenceMeterEl.setAttribute("aria-valuenow", String(presence));

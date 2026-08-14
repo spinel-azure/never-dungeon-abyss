@@ -61,7 +61,7 @@ test("settlement breakdown distinguishes normal bonus from Goddess suppression",
     isGoddessGraceEquipped: true
   }));
   assert.match(goddess, /深層帰還ボーナス　適用なし/);
-  assert.match(goddess, /女神の恩寵　　　　装備中/);
+  assert.match(goddess, /女神の恩寵セット中/);
   assert.doesNotMatch(goddess, /－250/);
 });
 

@@ -54,7 +54,8 @@
         if (c.walls.E) line(ctx, x2, y1, x2, y2);
         if (c.walls.S) line(ctx, x1, y2, x2, y2);
       }
-      const torchDetectionActive = state.torchFuel > 0;
+      const effectiveTorchActive = state.torchFuel > 0 || state.torchEffectForced;
+      const torchDetectionActive = effectiveTorchActive;
       const floorDetectionActive = torchDetectionActive && state.floorDetectionActive;
       const stairsDetectionActive = floorDetectionActive || (torchDetectionActive && state.stairsDetectionActive);
       const npcDetectionActive = floorDetectionActive || (torchDetectionActive && state.npcDetectionActive);
@@ -64,11 +65,11 @@
       }
       if (c.npc && (isExplored || revealOptions.npcs || npcDetectionActive)) drawNpcMark(ctx, x1, y1, cell);
       if (c.bossId && isExplored) drawBossMark(ctx, x1, y1, cell);
-      if (c.fountain && state.torchFuel > 0) drawFountainMark(ctx, x1, y1, cell);
-      if (shouldDrawSpecialRoomMarker(c.specialRoom, isExplored, state.torchFuel)) {
+      if (c.fountain && effectiveTorchActive) drawFountainMark(ctx, x1, y1, cell);
+      if (shouldDrawSpecialRoomMarker(c.specialRoom, isExplored, effectiveTorchActive ? 1 : 0)) {
         drawSpecialRoomMark(ctx, x1, y1, cell, c.specialRoom.content.minimapMarker);
       }
-      if (c.questEvent && state.torchFuel > 0) drawQuestEventMark(ctx, x1, y1, cell);
+      if (c.questEvent && effectiveTorchActive) drawQuestEventMark(ctx, x1, y1, cell);
       if (c.treasure && (revealOptions.treasures || treasureDetectionActive)) {
         drawTreasureMark(ctx, x1, y1, cell, c.treasure);
       } else if (c.treasure && state.treasureCompassActive) {

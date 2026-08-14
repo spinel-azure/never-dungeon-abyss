@@ -79,6 +79,7 @@ const DOOR_OPEN_MS = 520;
 const NPC_TYPEWRITER_DELAYS = { slow: 75, normal: 42, fast: 20 };
 const npcTypewriter = { enabled: true, speed: "normal", timer: 0 };
 let torchFuelDisabled = false;
+let torchConsumptionDisabledByCard = false;
 let playerInputEnabled = true;
 
 export const state = createPlayerState(2);
@@ -107,6 +108,7 @@ export function createPlayerState(startDir) {
     shake: 0,
     torch: 0,
     torchFuel: TORCH_FUEL_MAX,
+    torchEffectForced: false,
     treasureCompassActive: false,
     autoReturning: false,
     autoWalkerActive: false,
@@ -149,6 +151,11 @@ export function setTorchFuelDisabled(disabled) {
   if (torchFuelDisabled) refillTorch();
 }
 
+export function setTorchCardEffects({ consumptionDisabled = false, effectForced = false } = {}) {
+  torchConsumptionDisabledByCard = Boolean(consumptionDisabled);
+  state.torchEffectForced = Boolean(effectForced);
+}
+
 export function setPlayerInputEnabled(enabled) {
   playerInputEnabled = Boolean(enabled);
   if (!playerInputEnabled) {
@@ -181,8 +188,10 @@ export function updateAnimation(now) {
         updateNpcAwareness();
       } else {
         markExplored(state.gridX, state.gridY);
-        const movedInDarkness = state.torchFuel <= 0;
-        if (!torchFuelDisabled) state.torchFuel = Math.max(0, state.torchFuel - TORCH_FUEL_STEP);
+        const movedInDarkness = state.torchFuel <= 0 && !state.torchEffectForced;
+        if (!torchFuelDisabled && !torchConsumptionDisabledByCard) {
+          state.torchFuel = Math.max(0, state.torchFuel - TORCH_FUEL_STEP);
+        }
         hooks.onDungeonStep();
         const npc = getNpcAt(state.gridX, state.gridY);
         const bossId = getBossAt(state.gridX, state.gridY);

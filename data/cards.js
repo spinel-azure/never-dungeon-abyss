@@ -1,5 +1,7 @@
 export const CARD_RARITIES = Object.freeze(["C", "R", "SR", "L", "Z"]);
 export const GODDESS_GRACE_CARD_ID = "common_goddess_grace";
+export const GODDESS_MERCY_CARD_ID = "legendary_goddess_mercy";
+export const PERPETUAL_TORCH_CARD_ID = "legendary_unlimited_torch_gauge";
 
 const STANDARD_CARDS = [
   {
@@ -263,9 +265,20 @@ const STANDARD_CARDS = [
     maxOwned: 1, maxCopies: 1, sellPrice: 5000, buybackPrice: 50000
   },
   {
-    id: "legendary_unlimited_torch_gauge", rarity: "L", cost: 6,
-    name: "UNLIMITED TORCH GAUGE", nameJa: "永久の導き", concept: "たいまつ消費なし",
+    id: GODDESS_MERCY_CARD_ID, rarity: "L", cost: 6,
+    name: "Goddess's Mercy", nameJa: "女神の慈愛", concept: "女神の恩寵 / 階層探知",
+    descriptionJa: "戦闘不能時の探索経験値を守り、たいまつ点灯中は下り階段、宝箱、NPCを表示する。深層帰還ボーナスは無効。",
+    category: "exploration", effectId: "goddess_mercy",
+    effectIds: Object.freeze(["preserve_experience_on_defeat", "floor_detection"]),
+    conflictsWith: Object.freeze([GODDESS_GRACE_CARD_ID, "sr_floor_detection"]),
+    iconId: "goddess-silhouette", maxOwned: 1, maxCopies: 1
+  },
+  {
+    id: PERPETUAL_TORCH_CARD_ID, rarity: "L", cost: 6,
+    name: "Perpetual Torch", nameJa: "恒久の灯火", concept: "たいまつ消費なし / 強制点灯",
+    descriptionJa: "たいまつゲージを消費せず、ゲージが0になる階層でもたいまつの効果を発揮する。",
     category: "exploration", effectId: "unlimited_torch_gauge",
+    effectIds: Object.freeze(["torch_consumption_disabled", "force_torch_effect_active"]),
     iconId: "torch", maxOwned: 1, maxCopies: 1
   },
   {
@@ -341,5 +354,8 @@ export function collectCardStatBonuses(deckSlots = []) {
 }
 
 export function hasCardEffect(deckSlots = [], effectId = "") {
-  return deckSlots.some(cardId => getCardById(cardId)?.effectId === effectId);
+  return deckSlots.some(cardId => {
+    const card = getCardById(cardId);
+    return card?.effectId === effectId || card?.effectIds?.includes(effectId);
+  });
 }

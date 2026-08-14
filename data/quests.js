@@ -18,6 +18,7 @@ export const THIRD_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_012";
 export const B35F_SURVEY_QUEST_ID = "guild_013";
 export const B35F_SURVEY_SUPPLY_FLAG = "guild_013_large_potions_received";
 export const BRASS_BULL_QUEST_ID = "guild_014";
+export const FOURTH_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_015";
 export const THIEVES_CLUE_FLAGS = Object.freeze([
   "quest_011_clue_emblem_found", "quest_011_clue_ledger_found", "quest_011_clue_map_found"
 ]);
@@ -381,6 +382,34 @@ export const QUESTS = Object.freeze([
     persistentProgressFlag: "quest_014_brass_bull_defeated_while_active",
     completedTargetFlag: "boss_brass_bull_event_boss_defeated",
     reportUnlockFlag: "scorching_barrier_shop_unlocked",
+    available: true
+  }),
+  Object.freeze({
+    id: FOURTH_RED_DOOR_INVESTIGATION_QUEST_ID,
+    number: "015",
+    title: "赤い扉の調査――その4",
+    client: "ギルドマスター",
+    category: "other",
+    objectiveType: "custom",
+    targetDepth: 40,
+    requiredCount: 3,
+    objectiveLabel: "赤い扉を開け、中を調査する",
+    reward: Object.freeze({
+      type: "card", label: "デッキカード×1", amount: 1,
+      cardId: "legendary_goddess_mercy", bonusGold: 5000
+    }),
+    descriptionLabel: "目的",
+    description: Object.freeze([
+      "奈落のB39Fにある開かずの赤い扉を開けて",
+      "中を調査してほしい。例によって何があるか",
+      "分からない。十分に注意しろ。"
+    ]),
+    prerequisiteQuestIds: Object.freeze([BRASS_BULL_QUEST_ID]),
+    persistentProgressFlags: Object.freeze([
+      "red_door_b39f_unlocked",
+      "boss_wicker_man_b39f_defeated",
+      "transfer_portal_b40f_unlocked"
+    ]),
     available: true
   })
 ]);

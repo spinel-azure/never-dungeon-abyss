@@ -2,6 +2,12 @@ import { getCardById } from "./cards.js";
 
 export const DECK_SLOT_COUNT = 6;
 
+function cardsConflict(left, right) {
+  if (!left || !right) return false;
+  if (left.exclusiveGroup && left.exclusiveGroup === right.exclusiveGroup) return true;
+  return Boolean(left.conflictsWith?.includes(right.id) || right.conflictsWith?.includes(left.id));
+}
+
 export function createInitialCardState() {
   return {
     ownedCardIds: [],
@@ -45,9 +51,7 @@ export function normalizeCardState(candidate, maxCost = 3) {
       const copies = copyCounts.get(card.id) || 0;
       const allowedCopies = Math.min(card.maxCopies, ownedCardCounts[card.id] || 0);
       if (copies >= allowedCopies || cost + card.cost > maxCost) return;
-      if (card.exclusiveGroup && deckSlots.some(existingId => (
-        getCardById(existingId)?.exclusiveGroup === card.exclusiveGroup
-      ))) return;
+      if (deckSlots.some(existingId => cardsConflict(card, getCardById(existingId)))) return;
       deckSlots[index] = card.id;
       copyCounts.set(card.id, copies + 1);
       cost += card.cost;
@@ -81,8 +85,8 @@ export function setDeckSlot(cardState, slotIndex, cardId, maxCost = 3) {
   }
   const card = getCardById(cardId);
   if (!card) return source;
-  if (card.exclusiveGroup && deckSlots.some((existingId, index) => (
-    index !== slotIndex && getCardById(existingId)?.exclusiveGroup === card.exclusiveGroup
+  if (deckSlots.some((existingId, index) => (
+    index !== slotIndex && cardsConflict(card, getCardById(existingId))
   ))) return source;
   const otherCopies = deckSlots.filter((id, index) => index !== slotIndex && id === card.id).length;
   if (otherCopies >= Math.min(card.maxCopies, getOwnedCardCount(source, card.id))) return source;
@@ -96,9 +100,14 @@ export function getDeckSlotRejectionReason(cardState, slotIndex, cardId, maxCost
   const source = normalizeCardState(cardState, maxCost);
   const card = getCardById(cardId);
   if (!card) return cardId ? "unknownCard" : "";
-  if (card.exclusiveGroup && source.deckSlots.some((existingId, index) => (
-    index !== slotIndex && getCardById(existingId)?.exclusiveGroup === card.exclusiveGroup
-  ))) return "exclusiveConflict";
+  const conflictingCard = source.deckSlots
+    .map((existingId, index) => index === slotIndex ? null : getCardById(existingId))
+    .find(existing => cardsConflict(card, existing));
+  if (conflictingCard) {
+    return card.exclusiveGroup && card.exclusiveGroup === conflictingCard.exclusiveGroup
+      ? "exclusiveConflict"
+      : "cardConflict";
+  }
   const currentCost = getCardById(source.deckSlots[slotIndex])?.cost || 0;
   if (calculateDeckCost(source.deckSlots) - currentCost + card.cost > maxCost) return "costOver";
   const otherCopies = source.deckSlots.filter((id, index) => index !== slotIndex && id === card.id).length;

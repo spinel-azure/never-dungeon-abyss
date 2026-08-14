@@ -80,7 +80,7 @@ export function setTorchFlickerEnabled(enabled) {
 }
 
 export function toggleMinimapOverlay() {
-  if (!renderer.state || renderer.state.torchFuel <= 0) {
+  if (!renderer.state || !hasEffectiveTorch(renderer.state)) {
     renderer.minimapOverlayVisible = false;
     return false;
   }
@@ -173,7 +173,7 @@ export function drawScene(now) {
   drawCellEvents("sprite");
   drawMist(now);
   drawDarkness();
-  if (state.torchFuel <= 0) {
+  if (!hasEffectiveTorch(state)) {
     renderer.minimapOverlayVisible = false;
     drawMinimapStatic(now);
   } else {
@@ -206,7 +206,7 @@ function handleCanvasTouchEnd(e) {
 
 function handleCanvasActivation(clientX, clientY) {
   const { canvas, W, H, state } = renderer;
-  if (state.torchFuel <= 0) {
+  if (!hasEffectiveTorch(state)) {
     renderer.minimapOverlayVisible = false;
     return;
   }
@@ -226,6 +226,10 @@ function handleCanvasActivation(clientX, clientY) {
   ) {
     renderer.minimapOverlayVisible = true;
   }
+}
+
+function hasEffectiveTorch(state) {
+  return Number(state?.torchFuel) > 0 || Boolean(state?.torchEffectForced);
 }
 
 function drawMinimapStatic(now) {
@@ -527,7 +531,9 @@ function getDistanceMistAlpha(distance) {
 }
 
 function getDarknessSettings() {
-  const fuel = Number.isFinite(renderer.state?.torchFuel) ? renderer.state.torchFuel : 100;
+  const fuel = renderer.state?.torchEffectForced
+    ? 100
+    : Number.isFinite(renderer.state?.torchFuel) ? renderer.state.torchFuel : 100;
   const remaining = Math.max(0, Math.min(100, fuel));
   if (remaining >= 50) return { strength: 0, intensity: .25, distance: 9 };
   let intensity;

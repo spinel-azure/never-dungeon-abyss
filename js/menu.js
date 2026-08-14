@@ -929,6 +929,10 @@ function applyDeckPickerSelection() {
     showDeckCostOver("ELEMENT CONFLICT");
     return;
   }
+  if (rejection === "cardConflict") {
+    showDeckCostOver("CAN'T SET");
+    return;
+  }
   const next = setDeckSlot(character?.cards, menu.deckCursor, selectedCardId, costLimit);
   menu.onDeckChanged(next);
   menu.deckPickerOpen = false;
