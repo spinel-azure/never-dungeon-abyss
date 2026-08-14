@@ -68,7 +68,7 @@
       if (shouldDrawSpecialRoomMarker(c.specialRoom, isExplored, state.torchFuel)) {
         drawSpecialRoomMark(ctx, x1, y1, cell, c.specialRoom.content.minimapMarker);
       }
-      if (c.questEvent && isExplored && state.torchFuel > 0) drawQuestEventMark(ctx, x1, y1, cell);
+      if (c.questEvent && state.torchFuel > 0) drawQuestEventMark(ctx, x1, y1, cell);
       if (c.treasure && (revealOptions.treasures || treasureDetectionActive)) {
         drawTreasureMark(ctx, x1, y1, cell, c.treasure);
       } else if (c.treasure && state.treasureCompassActive) {
