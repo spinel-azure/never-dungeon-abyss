@@ -2648,6 +2648,10 @@ import {
   }
 
   function dispatchGamepadAction(action) {
+    if (document.body.classList.contains("title-active")) {
+      window.dispatchEvent(new CustomEvent("nda:title-input", { detail: { action } }));
+      return true;
+    }
     recordUserInput();
     if (handleItemOverlayInput(action) || handleSkillOverlayInput(action) || handleBattleInput(action)) return true;
     if (sceneTransitionRunning || handleLootIdentifyInput(action) || handleExperienceSettlementInput(action) || handleTownInput(action)) return true;

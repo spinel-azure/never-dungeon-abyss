@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="css/style.css?v=20260810-2">
   <link rel="stylesheet" href="css/game-menu.css?v=20260813-1">
   <link rel="stylesheet" href="css/card-gallery.css?v=20260810-1">
-  <link rel="stylesheet" href="css/title-screen.css?v=20260806-1">
+  <link rel="stylesheet" href="css/title-screen.css?v=20260815-1">
   <link rel="stylesheet" href="css/town.css?v=20260809-2">
   <link rel="stylesheet" href="css/effects.css?v=20260805-2">
   <link rel="stylesheet" href="css/scene-transition.css?v=20260809-2">
@@ -40,7 +40,17 @@
   </nav>
   <p id="titleSaveFeedback" class="title-save-feedback" aria-live="polite"></p>
     <p class="title-version">MVP1.0</p>
-  <p class="title-updated">LAST UPDATE : 2026-08-14</p>
+  <p class="title-updated">LAST UPDATE : 2026-08-15</p>
+  <section id="prologueScreen" class="prologue-screen" aria-label="物語のプロローグ" hidden>
+    <img id="prologueSilhouette" class="prologue-silhouette" alt="" aria-hidden="true">
+    <div class="prologue-scroll-window" aria-live="off">
+      <div id="prologueText" class="prologue-text"></div>
+    </div>
+    <div class="prologue-dither prologue-dither-top" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <div class="prologue-dither prologue-dither-bottom" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <div id="prologueFlash" class="prologue-flash" aria-hidden="true"></div>
+    <button id="prologueSkip" class="prologue-skip" type="button">A / ENTER：SKIP</button>
+  </section>
   <section id="greetingScreen" class="greeting-screen" aria-label="ゲーム開始前のご案内" hidden>
     <div class="greeting-content">
       <h2>＊NEVER DUNGEON : ABYSSの世界へようこそ！＊</h2>
@@ -374,7 +384,7 @@
     </section>
   </section>
 </main>
-  <script type="module" src="js/main.js?v=20260814-6"></script>
+  <script type="module" src="js/main.js?v=20260815-1"></script>
   <script type="module" src="js/title-screen.js"></script>
 </body>
 </html>

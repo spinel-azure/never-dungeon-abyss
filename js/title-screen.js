@@ -7,6 +7,7 @@ import {
   hasSaveData,
   importSaveArchive
 } from "./save-data.js";
+import { createPrologueController } from "./prologue.js";
 
 const titleScreen = document.getElementById("titleScreen");
 const titleMenu = document.getElementById("titleMenu");
@@ -17,6 +18,15 @@ const importFile = document.getElementById("importSaveFile");
 const feedback = document.getElementById("titleSaveFeedback");
 const greetingScreen = document.getElementById("greetingScreen");
 const greetingGameStart = document.getElementById("greetingGameStart");
+const prologueScreen = document.getElementById("prologueScreen");
+const prologue = createPrologueController({
+  screen: prologueScreen,
+  text: document.getElementById("prologueText"),
+  silhouette: document.getElementById("prologueSilhouette"),
+  flash: document.getElementById("prologueFlash"),
+  skipButton: document.getElementById("prologueSkip"),
+  onComplete: () => openGreeting()
+});
 let titleOpen = true;
 let loadOpen = false;
 let greetingOpen = false;
@@ -111,7 +121,7 @@ function activateTitleAction(action, event) {
     && !window.confirm("現在のセーブデータを残したまま NEW GAME を開始しますか？オートセーブは新しいゲームで更新されます。")
   ) return;
   if (action === "new-game") {
-    openGreeting(event);
+    openPrologue(event);
     return;
   }
   if (action === "option") {
@@ -137,6 +147,7 @@ function startManualLoad(slot, event) {
 function startGame(eventName, detail, event) {
   titleOpen = false;
   greetingOpen = false;
+  prologue.stop(false);
   event?.preventDefault();
   event?.stopImmediatePropagation();
   titleScreen.classList.remove("is-greeting");
@@ -148,6 +159,11 @@ function startGame(eventName, detail, event) {
 function handleTitleKey(event) {
   if (!titleOpen || event.repeat || event.key === "Unidentified") return;
   event.stopImmediatePropagation();
+  if (prologue.isRunning()) {
+    if (["Enter", " ", "x", "X"].includes(event.key)) prologue.handleAction("confirm");
+    else if (["Escape", "z", "Z"].includes(event.key)) prologue.handleAction("cancel");
+    return;
+  }
   if (greetingOpen) {
     if (event.key === "Enter" || event.key === " " || event.key === "x" || event.key === "X") {
       startGame("nda:new-game", {}, event);
@@ -193,6 +209,16 @@ function handleTitleKey(event) {
   }
 }
 
+function openPrologue(event) {
+  event?.preventDefault();
+  event?.stopImmediatePropagation();
+  greetingOpen = false;
+  loadOpen = false;
+  feedback.textContent = "";
+  titleScreen.classList.add("is-prologue");
+  prologue.start();
+}
+
 function openGreeting(event) {
   event?.preventDefault();
   event?.stopImmediatePropagation();
@@ -200,6 +226,7 @@ function openGreeting(event) {
   loadOpen = false;
   feedback.textContent = "";
   titleScreen.classList.add("is-greeting");
+  titleScreen.classList.remove("is-prologue");
   greetingScreen.hidden = false;
   greetingGameStart.focus({ preventScroll: true });
 }
@@ -219,10 +246,6 @@ loadPanel.addEventListener("pointerdown", event => {
     loadOpen = false;
     renderMenu();
   }
-}, true);
-
-greetingGameStart.addEventListener("pointerdown", event => {
-  if (greetingOpen) startGame("nda:new-game", {}, event);
 }, true);
 
 greetingGameStart.addEventListener("pointerdown", event => {
@@ -320,6 +343,44 @@ function fileTimestamp(date) {
 }
 
 window.addEventListener("keydown", handleTitleKey, true);
+window.addEventListener("nda:title-input", event => {
+  if (!titleOpen) return;
+  const action = event.detail?.action;
+  if (prologue.isRunning()) {
+    prologue.handleAction(action);
+    return;
+  }
+  if (greetingOpen) {
+    if (action === "confirm") startGame("nda:new-game", {});
+    return;
+  }
+  if (loadOpen) {
+    const summaries = getSaveSlotSummaries().filter(summary => MANUAL_SAVE_SLOTS.includes(summary.slot));
+    const count = summaries.length + 1;
+    if (action === "up" || action === "down") {
+      loadSelectedIndex = (loadSelectedIndex + (action === "up" ? count - 1 : 1)) % count;
+      renderLoadSlots();
+    } else if (action === "cancel") {
+      loadOpen = false;
+      renderMenu();
+    } else if (action === "confirm") {
+      if (loadSelectedIndex === summaries.length) {
+        loadOpen = false;
+        renderMenu();
+      } else if (summaries[loadSelectedIndex]?.exists) {
+        startManualLoad(summaries[loadSelectedIndex].slot);
+      }
+    }
+    return;
+  }
+  const actions = getActions();
+  if (action === "up" || action === "down") {
+    selectedIndex = (selectedIndex + (action === "up" ? actions.length - 1 : 1)) % actions.length;
+    renderMenu();
+  } else if (action === "confirm") {
+    activateTitleAction(actions[selectedIndex]);
+  }
+});
 window.addEventListener("nda:main-ready", () => {
   mainReady = true;
   feedback.textContent = "";
@@ -332,6 +393,7 @@ window.addEventListener("nda:title-options-closed", () => {
   selectedIndex = Math.max(0, getActions().indexOf("option"));
   titleScreen.hidden = false;
   titleScreen.classList.remove("is-greeting");
+  titleScreen.classList.remove("is-prologue");
   document.body.classList.add("title-active");
   renderMenu();
 });
