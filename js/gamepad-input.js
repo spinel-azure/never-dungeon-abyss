@@ -10,8 +10,32 @@ export function createGamepadInputState({ suppressUntilNeutral = false } = {}) {
   return { buttons: new Map(), direction: "", directionStartedAt: 0, directionRepeatedAt: 0, suppressUntilNeutral };
 }
 
-export function getGamepadActionButtons(gamepad) {
-  return gamepad?.mapping === "standard" ? STANDARD_ACTION_BUTTONS : LEGACY_ACTION_BUTTONS;
+export function normalizeGamepadBindings(bindings) {
+  const defaults = { confirm: null, cancel: null, minimap: null };
+  const used = new Set();
+  for (const action of Object.keys(defaults)) {
+    const rawButton = bindings?.[action];
+    const button = rawButton === null || rawButton === undefined ? NaN : Number(rawButton);
+    if (Number.isInteger(button) && button >= 0 && button <= 3 && !used.has(button)) {
+      defaults[action] = button;
+      used.add(button);
+    }
+  }
+  return defaults;
+}
+
+export function getGamepadActionButtons(gamepad, bindings) {
+  const base = gamepad?.mapping === "standard" ? STANDARD_ACTION_BUTTONS : LEGACY_ACTION_BUTTONS;
+  const normalized = normalizeGamepadBindings(bindings);
+  if (Object.values(normalized).every(button => button === null)) return base;
+  const mapped = { ...base };
+  for (const index of [0, 1, 2, 3]) {
+    if (["confirm", "cancel", "minimap"].includes(mapped[index])) mapped[index] = "unused";
+  }
+  for (const [action, button] of Object.entries(normalized)) {
+    if (button !== null) mapped[button] = action;
+  }
+  return mapped;
 }
 
 export function getGamepadDirection(gamepad, deadZone = GAMEPAD_DEAD_ZONE) {
@@ -24,10 +48,10 @@ export function getGamepadDirection(gamepad, deadZone = GAMEPAD_DEAD_ZONE) {
   return Math.abs(x) > Math.abs(y) ? (x < 0 ? "left" : "right") : (y < 0 ? "up" : "down");
 }
 
-export function pollGamepadActions(gamepad, state, now) {
+export function pollGamepadActions(gamepad, state, now, bindings) {
   const actions = [];
   const direction = getGamepadDirection(gamepad);
-  const actionButtons = getGamepadActionButtons(gamepad);
+  const actionButtons = getGamepadActionButtons(gamepad, bindings);
   if (state.suppressUntilNeutral) {
     const anyButtonPressed = Object.keys(actionButtons).some(index => gamepad?.buttons?.[Number(index)]?.pressed);
     state.direction = direction;
@@ -75,7 +99,7 @@ export function syncGamepadConnections(gamepads, connectedGamepads, { onConnecte
   }
 }
 
-export function configureGamepadInput({ dispatchAction, toggleMinimap, onConnectionChange, isTextInputFocused = defaultTextInputFocused } = {}) {
+export function configureGamepadInput({ dispatchAction, toggleMinimap, onConnectionChange, getBindings = () => null, isTextInputFocused = defaultTextInputFocused } = {}) {
   if (typeof navigator === "undefined" || typeof navigator.getGamepads !== "function") return () => {};
   const states = new Map();
   const connectedGamepads = new Map();
@@ -136,7 +160,7 @@ export function configureGamepadInput({ dispatchAction, toggleMinimap, onConnect
       if (!gamepad) continue;
       const state = states.get(gamepad.index) || createGamepadInputState({ suppressUntilNeutral: true });
       states.set(gamepad.index, state);
-      for (const action of pollGamepadActions(gamepad, state, now)) {
+      for (const action of pollGamepadActions(gamepad, state, now, getBindings())) {
         if (isTextInputFocused()) continue;
         if (action === "minimap") toggleMinimap?.();
         else if (action === "menu") dispatchAction?.("cancel");

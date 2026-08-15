@@ -49,7 +49,7 @@ import { configureInput } from "./input.js";
 import { configureGamepadInput } from "./gamepad-input.js";
 import { configureVirtualStick } from "./virtualStick.js";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, getDungeonMistOptions, setDungeonColors, isMenuOpen, openStatusMenu, openDeckEditor, openQuestHistory, openAdventureRecords, openLibraryCardGallery, openTitleOptions, refreshAdventureRecordsPlayTime, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js";
+import { configureMenu, handleMenuInput, getDungeonColors, getDungeonMistOptions, setDungeonColors, getGamepadBindings, isMenuOpen, openStatusMenu, openDeckEditor, openQuestHistory, openAdventureRecords, openLibraryCardGallery, openTitleOptions, refreshAdventureRecordsPlayTime, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js";
 import { resolveFloorTheme } from "./floorTheme.js";
 import {
   configureAutoReturn,
@@ -2705,6 +2705,7 @@ import {
 
   configureGamepadInput({
     dispatchAction: dispatchGamepadAction,
+    getBindings: getGamepadBindings,
     onConnectionChange: showGamepadConnectionNotification,
     toggleMinimap: () => {
       recordUserInput();

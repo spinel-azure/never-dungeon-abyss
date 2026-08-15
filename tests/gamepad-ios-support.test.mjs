@@ -31,3 +31,15 @@ test("options include the iPhone and iPad reconnection hint", async () => {
   const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
   assert.match(html, /iPhone／iPadで反応しない場合は、Bluetooth接続後にゲーム画面を一度タップ/);
 });
+
+test("options provide persistent gamepad bindings for confirm, cancel, and minimap", async () => {
+  const [html, menu, main] = await Promise.all([
+    readFile(new URL("../index.html", import.meta.url), "utf8"),
+    readFile(new URL("../js/menu.js", import.meta.url), "utf8"),
+    readFile(new URL("../js/main.js", import.meta.url), "utf8")
+  ]);
+  for (const action of ["Confirm", "Cancel", "Minimap"]) assert.match(html, new RegExp(`data-option="gamepad${action}"`));
+  assert.match(menu, /gamepadBindings: menu\.gamepadBindings/);
+  assert.match(menu, /new Set\(values\)\.size === values\.length/);
+  assert.match(main, /getBindings: getGamepadBindings/);
+});

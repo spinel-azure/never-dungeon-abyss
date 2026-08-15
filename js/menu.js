@@ -44,6 +44,7 @@ const menu = {
   floorColor: "default",
   bgmEnabled: true, seEnabled: true,
   npcTypewriterEnabled: true, npcTypewriterSpeed: "normal",
+  gamepadBindings: { confirm: null, cancel: null, minimap: null },
   actionActive: { random: false, autoReturn: false, emergencyEscape: false, torchFull: false, stopwatchReset: false },
   generateRandomDungeon: () => {}, startAutoReturn: () => {}, emergencyEscape: () => {}, refillTorch: () => {},
   setScreenShakeEnabled: () => {}, setTorchFlickerEnabled: () => {}, setTorchFuelDisabled: () => {}, setPresenceDisabled: () => {},
@@ -104,6 +105,7 @@ export function configureMenu(options) {
 }
 
 export function isMenuOpen() { return menu.view !== "dungeon"; }
+export function getGamepadBindings() { return { ...menu.gamepadBindings }; }
 export function getDungeonColors() { return { wall: menu.wallColor, floor: menu.floorColor }; }
 export function getDungeonMistOptions() {
   return { enabled: menu.mistEnabled, intensity: menu.mistIntensity, distance: menu.mistDistance, color: menu.mistColor };
@@ -967,9 +969,9 @@ function handleOptions(action) {
   if (action === "left" || action === "right") { adjustSelectedOption(action === "right" ? 1 : -1); return; }
   if (action === "confirm") { if (menu.optionCursor >= menu.optionItems.length) executeOptionNav(menu.optionNavButtons[menu.optionCursor - menu.optionItems.length]?.dataset.optionNav); else executeOption(menu.optionItems[menu.optionCursor]?.dataset.option); }
 }
-function setOptionPage(page) { if (menu.view !== "options") menu.optionReturnView = "commands"; menu.view = "options"; menu.optionPage = Math.max(0, Math.min(1, page)); menu.optionCursor = 0; updateOptionItems(); updateView(); }
+function setOptionPage(page) { if (menu.view !== "options") menu.optionReturnView = "commands"; menu.view = "options"; menu.optionPage = Math.max(0, Math.min(menu.optionPages.length - 1, page)); menu.optionCursor = 0; updateOptionItems(); updateView(); }
 function updateOptionItems() { menu.optionPages.forEach((page, index) => { page.hidden = index !== menu.optionPage; }); menu.optionItems = [...menu.optionPages[menu.optionPage].querySelectorAll("[data-option]")]; }
-function executeOptionNav(key) { if (key === "back") { if (menu.optionPage === 0) closeOptions(); else setOptionPage(0); } else if (menu.optionPage === 0) setOptionPage(1); else closeOptions(); }
+function executeOptionNav(key) { if (key === "back") { if (menu.optionPage === 0) closeOptions(); else setOptionPage(menu.optionPage - 1); } else if (menu.optionPage < menu.optionPages.length - 1) setOptionPage(menu.optionPage + 1); else closeOptions(); }
 function closeOptions() {
   const returnToTitle = menu.optionReturnView === "title";
   menu.optionReturnView = "commands";
@@ -985,8 +987,23 @@ function executeOption(key) {
   if (key === "torchFlicker") { menu.torchFlickerEnabled = !menu.torchFlickerEnabled; applyRenderOptions(); updateOptionStates(); persistSettings(); }
   if (key === "npcTypewriterEnabled") { menu.npcTypewriterEnabled = !menu.npcTypewriterEnabled; applyNpcTypewriterOptions(); updateOptionStates(); persistSettings(); }
   if (key === "npcTypewriterSpeed" && menu.npcTypewriterEnabled) { cycleNpcTypewriterSpeed(1); }
+  if (key?.startsWith("gamepad")) cycleGamepadBinding(key.slice(7).toLowerCase(), 1);
 }
-function adjustSelectedOption(amount) { if (menu.optionCursor >= menu.optionItems.length) return; const key = menu.optionItems[menu.optionCursor].dataset.option; if (key === "bgmVolume" || key === "seVolume") { const slider = menu.root.querySelector(`#${key}`); slider.value = String(Math.max(0, Math.min(100, Number(slider.value) + amount * 10))); slider.dispatchEvent(new Event("input", { bubbles: true })); if (key === "seVolume") menu.playSe("cursorMove"); } else if (key === "npcTypewriterSpeed" && menu.npcTypewriterEnabled) cycleNpcTypewriterSpeed(amount); else if (key === "screenShake" || key === "torchFlicker" || key === "npcTypewriterEnabled" || key === "bgmEnabled" || key === "seEnabled") executeOption(key); }
+function adjustSelectedOption(amount) { if (menu.optionCursor >= menu.optionItems.length) return; const key = menu.optionItems[menu.optionCursor].dataset.option; if (key === "bgmVolume" || key === "seVolume") { const slider = menu.root.querySelector(`#${key}`); slider.value = String(Math.max(0, Math.min(100, Number(slider.value) + amount * 10))); slider.dispatchEvent(new Event("input", { bubbles: true })); if (key === "seVolume") menu.playSe("cursorMove"); } else if (key === "npcTypewriterSpeed" && menu.npcTypewriterEnabled) cycleNpcTypewriterSpeed(amount); else if (key?.startsWith("gamepad")) cycleGamepadBinding(key.slice(7).toLowerCase(), amount); else if (key === "screenShake" || key === "torchFlicker" || key === "npcTypewriterEnabled" || key === "bgmEnabled" || key === "seEnabled") executeOption(key); }
+
+function cycleGamepadBinding(action, amount) {
+  if (!["confirm", "cancel", "minimap"].includes(action)) return;
+  const defaults = { confirm: 0, cancel: 1, minimap: 3 };
+  const bindings = Object.fromEntries(Object.keys(defaults).map(key => [key, menu.gamepadBindings[key] ?? defaults[key]]));
+  const current = bindings[action];
+  const next = (current + (amount < 0 ? 3 : 1)) % 4;
+  const conflict = Object.keys(bindings).find(key => key !== action && bindings[key] === next);
+  bindings[action] = next;
+  if (conflict) bindings[conflict] = current;
+  menu.gamepadBindings = bindings;
+  updateOptionStates();
+  persistSettings();
+}
 
 function cycleNpcTypewriterSpeed(amount) {
   const speeds = ["slow", "normal", "fast"];
@@ -1301,7 +1318,7 @@ function formatSaveSummary(summary) {
   return `${summary.label}（${summary.name}／Lv${summary.level}／${formatted}）`;
 }
 function updateStatus() { menu.statusPanel.querySelectorAll("[data-status-page]").forEach((page, index) => { page.hidden = index !== menu.statusPage; }); menu.statusPanel.querySelector("[data-status-indicator]").textContent = `${menu.statusPage + 1}/2`; const next = menu.statusPanel.querySelector('[data-status-nav="next"]'); next.textContent = menu.statusPage === 0 ? "NEXT" : "MAIN"; menu.statusPanel.querySelector('[data-status-nav="back"]').classList.toggle("is-selected", menu.statusPage === 0); next.classList.toggle("is-selected", menu.statusPage === 1); }
-function updatePager() { menu.optionsPanel.querySelector("[data-page-indicator]").textContent = `${menu.optionPage + 1}/2`; menu.optionNavButtons.find(button => button.dataset.optionNav === "next").textContent = menu.optionPage === 0 ? "NEXT" : "MAIN"; }
+function updatePager() { menu.optionsPanel.querySelector("[data-page-indicator]").textContent = `${menu.optionPage + 1}/${menu.optionPages.length}`; menu.optionNavButtons.find(button => button.dataset.optionNav === "next").textContent = menu.optionPage < menu.optionPages.length - 1 ? "NEXT" : "MAIN"; }
 function updateDebugPager() { menu.debugPanel.querySelector("[data-debug-indicator]").textContent = `${menu.debugPage + 1}/2`; menu.debugNavButtons.find(button => button.dataset.debugNav === "next").textContent = menu.debugPage === 0 ? "NEXT" : "MAIN"; }
 function updateSelection() { menu.commands.forEach((button, index) => { const unavailable = isCommandUnavailable(button); button.classList.toggle("is-selected", menu.view === "commands" && index === menu.commandIndex); button.classList.toggle("is-unavailable", unavailable); button.setAttribute("aria-disabled", String(unavailable)); }); menu.optionItems.forEach((item, index) => item.classList.toggle("is-selected", menu.view === "options" && index === menu.optionCursor)); menu.optionNavButtons.forEach((button, index) => button.classList.toggle("is-selected", menu.view === "options" && menu.optionCursor === menu.optionItems.length + index)); menu.debugItems.forEach((item, index) => item.classList.toggle("is-selected", menu.view === "debug" && index === menu.debugCursor)); menu.debugNavButtons.forEach((button, index) => button.classList.toggle("is-selected", menu.view === "debug" && menu.debugCursor === menu.debugItems.length + index)); updateOptionStates(); updateDebugStates(); }
 function updateOptionStates() {
@@ -1323,6 +1340,12 @@ function updateOptionStates() {
   if (bgm) bgm.textContent = toggleText(menu.bgmEnabled);
   if (bgmSlider) { bgmSlider.disabled = !menu.bgmEnabled; bgmSlider.parentElement.classList.toggle("is-muted", !menu.bgmEnabled); }
   if (seSlider) { seSlider.disabled = !menu.seEnabled; seSlider.parentElement.classList.toggle("is-muted", !menu.seEnabled); }
+  const gamepadDefaults = { confirm: 0, cancel: 1, minimap: 3 };
+  for (const action of Object.keys(gamepadDefaults)) {
+    const state = menu.root.querySelector(`[data-option-state="gamepad${action[0].toUpperCase()}${action.slice(1)}"]`);
+    const button = menu.gamepadBindings[action] ?? gamepadDefaults[action];
+    if (state) state.textContent = `BUTTON ${button}`;
+  }
 }
 function updateDebugStates() {
   const values = { compass: menu.compassVisible, readout: menu.readoutVisible, torchFuelDisabled: menu.torchFuelDisabled, presenceDisabled: menu.presenceDisabled, stairsDownVisible: menu.stairsDownVisible, npcsVisible: menu.npcsVisible, treasuresVisible: menu.treasuresVisible, mistEnabled: menu.mistEnabled };
@@ -1396,6 +1419,12 @@ function restoreSettings() {
     const booleanKeys = ["compassVisible", "readoutVisible", "screenShakeEnabled", "torchFlickerEnabled", "torchFuelDisabled", "presenceDisabled", "stopwatchVisible", "stairsDownVisible", "npcsVisible", "treasuresVisible", "npcTypewriterEnabled", "mistEnabled", "bgmEnabled", "seEnabled"];
     booleanKeys.forEach(key => { if (typeof saved[key] === "boolean") menu[key] = saved[key]; });
     if (["slow", "normal", "fast"].includes(saved.npcTypewriterSpeed)) menu.npcTypewriterSpeed = saved.npcTypewriterSpeed;
+    if (saved.gamepadBindings && typeof saved.gamepadBindings === "object") {
+      const values = ["confirm", "cancel", "minimap"].map(key => Number(saved.gamepadBindings[key]));
+      if (values.every(value => Number.isInteger(value) && value >= 0 && value <= 3) && new Set(values).size === values.length) {
+        menu.gamepadBindings = { confirm: values[0], cancel: values[1], minimap: values[2] };
+      }
+    }
     if (Number.isFinite(saved.mistIntensity) && saved.mistIntensity >= .25 && saved.mistIntensity <= 2) menu.mistIntensity = saved.mistIntensity;
     else if (Number.isFinite(saved.mistIntensity)) menu.mistIntensity = 1;
     if (Number.isFinite(saved.mistDistance) && saved.mistDistance >= 3 && saved.mistDistance <= 9) menu.mistDistance = saved.mistDistance;
@@ -1437,6 +1466,7 @@ function persistSettings() {
       treasuresVisible: menu.treasuresVisible,
       npcTypewriterEnabled: menu.npcTypewriterEnabled,
       npcTypewriterSpeed: menu.npcTypewriterSpeed,
+      gamepadBindings: menu.gamepadBindings,
       mistEnabled: menu.mistEnabled,
       mistIntensity: menu.mistIntensity,
       mistDistance: menu.mistDistance,

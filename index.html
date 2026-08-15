@@ -355,7 +355,14 @@
           </div>
           <p class="gamepad-help">iPhone／iPadで反応しない場合は、Bluetooth接続後にゲーム画面を一度タップしてからボタンを押してください。</p>
         </div>
-        <div class="option-pager"><button type="button" class="menu-footer" data-option-nav="back">BACK</button><span class="page-indicator" data-page-indicator>1/2</span><button type="button" class="menu-footer" data-option-nav="next">NEXT</button></div>
+        <div class="option-page gamepad-config" data-option-page="2" hidden>
+          <h2>GAMEPAD CONFIG</h2>
+          <button type="button" class="option-item" data-option="gamepadConfirm"><span>・決定</span><b data-option-state="gamepadConfirm">BUTTON 0</b></button>
+          <button type="button" class="option-item" data-option="gamepadCancel"><span>・キャンセル</span><b data-option-state="gamepadCancel">BUTTON 1</b></button>
+          <button type="button" class="option-item" data-option="gamepadMinimap"><span>・ミニマップ</span><b data-option-state="gamepadMinimap">BUTTON 3</b></button>
+          <p>左右または決定で変更<br>重複した割り当ては自動で入れ替わります。</p>
+        </div>
+        <div class="option-pager"><button type="button" class="menu-footer" data-option-nav="back">BACK</button><span class="page-indicator" data-page-indicator>1/3</span><button type="button" class="menu-footer" data-option-nav="next">NEXT</button></div>
       </div>
 
       <div class="menu-panel debug-panel" data-menu-view="debug" hidden>
@@ -388,7 +395,7 @@
     </section>
   </section>
 </main>
-  <script type="module" src="js/main.js?v=20260815-4"></script>
+  <script type="module" src="js/main.js?v=20260815-5"></script>
   <script type="module" src="js/title-screen.js"></script>
 </body>
 </html>
