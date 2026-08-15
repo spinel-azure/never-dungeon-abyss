@@ -78,6 +78,13 @@ export function isBattleActive() {
   return battleUi.active;
 }
 
+export function openBattleItems() {
+  if (!battleUi.active || battleUi.presenting || battleUi.battle?.outcome || battleUi.autoActive) return false;
+  battleUi.playSe("confirm");
+  battleUi.openItems({ character: battleUi.battle.player, enemy: battleUi.battle.enemy, onUse: useBattleItem });
+  return true;
+}
+
 export function handleBattleInput(action) {
   if (!battleUi.active || document.body.classList.contains("menu-open")) return false;
   if (battleUi.autoActive) {

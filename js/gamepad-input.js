@@ -11,7 +11,7 @@ export function createGamepadInputState({ suppressUntilNeutral = false } = {}) {
 }
 
 export function normalizeGamepadBindings(bindings) {
-  const defaults = { confirm: null, cancel: null, minimap: null };
+  const defaults = { confirm: null, cancel: null, minimap: null, items: null };
   const used = new Set();
   for (const action of Object.keys(defaults)) {
     const rawButton = bindings?.[action];
@@ -99,11 +99,13 @@ export function syncGamepadConnections(gamepads, connectedGamepads, { onConnecte
   }
 }
 
-export function configureGamepadInput({ dispatchAction, toggleMinimap, onConnectionChange, getBindings = () => null, isTextInputFocused = defaultTextInputFocused } = {}) {
+export function configureGamepadInput({ dispatchAction, toggleMinimap, onConnectionChange, getBindings = () => null, getCaptureAction = () => "", onBindingCaptured, isTextInputFocused = defaultTextInputFocused } = {}) {
   if (typeof navigator === "undefined" || typeof navigator.getGamepads !== "function") return () => {};
   const states = new Map();
   const connectedGamepads = new Map();
   let frameId = 0;
+  let captureAction = "";
+  let captureArmed = false;
   const announceConnected = info => {
     console.info(`[NDA] Gamepad connected: ${info.id}`);
     onConnectionChange?.({ connected: true, ...info });
@@ -160,9 +162,29 @@ export function configureGamepadInput({ dispatchAction, toggleMinimap, onConnect
       if (!gamepad) continue;
       const state = states.get(gamepad.index) || createGamepadInputState({ suppressUntilNeutral: true });
       states.set(gamepad.index, state);
+      const requestedCapture = String(getCaptureAction() || "");
+      if (requestedCapture) {
+        if (requestedCapture !== captureAction) {
+          captureAction = requestedCapture;
+          captureArmed = false;
+        }
+        const pressedButton = [0, 1, 2, 3].find(index => gamepad?.buttons?.[index]?.pressed);
+        if (!captureArmed) {
+          if (pressedButton === undefined) captureArmed = true;
+        } else if (pressedButton !== undefined) {
+          onBindingCaptured?.(captureAction, pressedButton);
+          captureAction = "";
+          captureArmed = false;
+          resetInputStates();
+        }
+        continue;
+      }
+      captureAction = "";
+      captureArmed = false;
       for (const action of pollGamepadActions(gamepad, state, now, getBindings())) {
         if (isTextInputFocused()) continue;
         if (action === "minimap") toggleMinimap?.();
+        else if (action === "items") dispatchAction?.("items");
         else if (action === "menu") dispatchAction?.("cancel");
         else if (action === "pageLeft") dispatchAction?.("left");
         else if (action === "pageRight") dispatchAction?.("right");

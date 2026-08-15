@@ -53,12 +53,12 @@ test("standard mapping uses the lower button to confirm and right button to canc
 });
 
 test("custom bindings override a controller mapping and keep actions unique", () => {
-  const bindings = { confirm: 1, cancel: 0, minimap: 2 };
+  const bindings = { confirm: 1, cancel: 0, minimap: 2, items: 3 };
   const mapping = getGamepadActionButtons(pad({ mapping: "standard" }), bindings);
   assert.equal(mapping[0], "cancel");
   assert.equal(mapping[1], "confirm");
   assert.equal(mapping[2], "minimap");
-  assert.equal(mapping[3], "unused");
+  assert.equal(mapping[3], "items");
   const state = createGamepadInputState();
   assert.deepEqual(pollGamepadActions(pad({ mapping: "standard", pressed: [0, 1, 2] }), state, 0, bindings), ["cancel", "confirm", "minimap"]);
 });

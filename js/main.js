@@ -49,7 +49,7 @@ import { configureInput } from "./input.js";
 import { configureGamepadInput } from "./gamepad-input.js";
 import { configureVirtualStick } from "./virtualStick.js";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, getDungeonMistOptions, setDungeonColors, getGamepadBindings, isMenuOpen, openStatusMenu, openDeckEditor, openQuestHistory, openAdventureRecords, openLibraryCardGallery, openTitleOptions, refreshAdventureRecordsPlayTime, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js";
+import { configureMenu, handleMenuInput, getDungeonColors, getDungeonMistOptions, setDungeonColors, getGamepadBindings, getGamepadCaptureAction, completeGamepadBinding, isMenuOpen, openItemInventory, openStatusMenu, openDeckEditor, openQuestHistory, openAdventureRecords, openLibraryCardGallery, openTitleOptions, refreshAdventureRecordsPlayTime, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js";
 import { resolveFloorTheme } from "./floorTheme.js";
 import {
   configureAutoReturn,
@@ -97,7 +97,7 @@ import { getEquipmentInstanceDefinition, getEquipmentInstanceName, grantEquipmen
 import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
 import { applyBossVictory, createBossCombatant, getBossById, getFloorBossByDepth, isBossDefeated } from "../data/bosses.js";
 import { consumeKeyItem, getKeyItem, grantKeyItem, hasKeyItem } from "../data/key-items.js";
-import { configureBattle, handleBattleInput, isBattleActive, startBattle } from "./battle.js";
+import { configureBattle, handleBattleInput, isBattleActive, openBattleItems, startBattle } from "./battle.js";
 import { awardBattleExperience, createTempleRevival, getInnStayFee, grantEventItems, resolveDungeonDefeat, resolveInnStableStay, resolveInnStay, resolveTemplePoisonTreatment, unlockGuildRequest } from "./character-services.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { resolveTreasureTrap } from "../combat/resolve-trap.js";
@@ -2672,6 +2672,12 @@ import {
       return true;
     }
     recordUserInput();
+    if (action === "items") {
+      if (!itemOverlay.hidden || !skillOverlay.hidden) return true;
+      if (isBattleActive()) return openBattleItems();
+      if (worldLocation === "dungeon" && !sceneTransitionRunning && !state.overlayEvent) return openItemInventory();
+      return false;
+    }
     if (handleItemOverlayInput(action) || handleSkillOverlayInput(action) || handleBattleInput(action)) return true;
     if (sceneTransitionRunning || handleLootIdentifyInput(action) || handleExperienceSettlementInput(action) || handleTownInput(action)) return true;
     if (["up", "down", "left", "right"].includes(action)) {
@@ -2706,6 +2712,8 @@ import {
   configureGamepadInput({
     dispatchAction: dispatchGamepadAction,
     getBindings: getGamepadBindings,
+    getCaptureAction: getGamepadCaptureAction,
+    onBindingCaptured: completeGamepadBinding,
     onConnectionChange: showGamepadConnectionNotification,
     toggleMinimap: () => {
       recordUserInput();

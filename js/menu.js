@@ -44,7 +44,7 @@ const menu = {
   floorColor: "default",
   bgmEnabled: true, seEnabled: true,
   npcTypewriterEnabled: true, npcTypewriterSpeed: "normal",
-  gamepadBindings: { confirm: null, cancel: null, minimap: null },
+  gamepadBindings: { confirm: null, cancel: null, minimap: null, items: null }, gamepadCaptureAction: "",
   actionActive: { random: false, autoReturn: false, emergencyEscape: false, torchFull: false, stopwatchReset: false },
   generateRandomDungeon: () => {}, startAutoReturn: () => {}, emergencyEscape: () => {}, refillTorch: () => {},
   setScreenShakeEnabled: () => {}, setTorchFlickerEnabled: () => {}, setTorchFuelDisabled: () => {}, setPresenceDisabled: () => {},
@@ -106,6 +106,22 @@ export function configureMenu(options) {
 
 export function isMenuOpen() { return menu.view !== "dungeon"; }
 export function getGamepadBindings() { return { ...menu.gamepadBindings }; }
+export function getGamepadCaptureAction() { return menu.gamepadCaptureAction; }
+export function completeGamepadBinding(action, button) {
+  if (!["confirm", "cancel", "minimap", "items"].includes(action) || !Number.isInteger(button) || button < 0 || button > 3) return false;
+  const defaults = { confirm: 0, cancel: 1, minimap: 3, items: 2 };
+  const bindings = Object.fromEntries(Object.keys(defaults).map(key => [key, menu.gamepadBindings[key] ?? defaults[key]]));
+  const previous = bindings[action];
+  const conflict = Object.keys(bindings).find(key => key !== action && bindings[key] === button);
+  bindings[action] = button;
+  if (conflict) bindings[conflict] = previous;
+  menu.gamepadBindings = bindings;
+  menu.gamepadCaptureAction = "";
+  updateOptionStates();
+  persistSettings();
+  menu.playSe("confirm");
+  return true;
+}
 export function getDungeonColors() { return { wall: menu.wallColor, floor: menu.floorColor }; }
 export function getDungeonMistOptions() {
   return { enabled: menu.mistEnabled, intensity: menu.mistIntensity, distance: menu.mistDistance, color: menu.mistColor };
@@ -237,6 +253,11 @@ export function openTitleOptions() {
 function openInventory() {
   Object.assign(menu, { view: "inventory", inventoryTab: "items", inventoryCursor: 0, inventoryPage: 0, inventoryMode: "list", inventorySlot: null, inventoryFocus: "list", inventoryPurpose: "manage", inventorySaleStage: "list", inventorySaleQuantity: 1 });
   renderInventory(); updateView();
+}
+export function openItemInventory() {
+  if (menu.view !== "dungeon" && menu.view !== "commands") return false;
+  openInventory();
+  return true;
 }
 
 export function openShopSellInventory() {
@@ -963,6 +984,10 @@ function hideDeckCostOver() {
 }
 
 function handleOptions(action) {
+  if (menu.gamepadCaptureAction) {
+    if (action === "cancel") { menu.gamepadCaptureAction = ""; updateOptionStates(); }
+    return;
+  }
   if (action === "cancel") { closeOptions(); return; }
   const count = menu.optionItems.length + menu.optionNavButtons.length;
   if (action === "up" || action === "down") { menu.optionCursor = (menu.optionCursor + (action === "down" ? 1 : count - 1)) % count; updateSelection(); return; }
@@ -971,7 +996,7 @@ function handleOptions(action) {
 }
 function setOptionPage(page) { if (menu.view !== "options") menu.optionReturnView = "commands"; menu.view = "options"; menu.optionPage = Math.max(0, Math.min(menu.optionPages.length - 1, page)); menu.optionCursor = 0; updateOptionItems(); updateView(); }
 function updateOptionItems() { menu.optionPages.forEach((page, index) => { page.hidden = index !== menu.optionPage; }); menu.optionItems = [...menu.optionPages[menu.optionPage].querySelectorAll("[data-option]")]; }
-function executeOptionNav(key) { if (key === "back") { if (menu.optionPage === 0) closeOptions(); else setOptionPage(menu.optionPage - 1); } else if (menu.optionPage < menu.optionPages.length - 1) setOptionPage(menu.optionPage + 1); else closeOptions(); }
+function executeOptionNav(key) { menu.gamepadCaptureAction = ""; if (key === "back") { if (menu.optionPage === 0) closeOptions(); else setOptionPage(menu.optionPage - 1); } else if (menu.optionPage < menu.optionPages.length - 1) setOptionPage(menu.optionPage + 1); else closeOptions(); }
 function closeOptions() {
   const returnToTitle = menu.optionReturnView === "title";
   menu.optionReturnView = "commands";
@@ -987,23 +1012,9 @@ function executeOption(key) {
   if (key === "torchFlicker") { menu.torchFlickerEnabled = !menu.torchFlickerEnabled; applyRenderOptions(); updateOptionStates(); persistSettings(); }
   if (key === "npcTypewriterEnabled") { menu.npcTypewriterEnabled = !menu.npcTypewriterEnabled; applyNpcTypewriterOptions(); updateOptionStates(); persistSettings(); }
   if (key === "npcTypewriterSpeed" && menu.npcTypewriterEnabled) { cycleNpcTypewriterSpeed(1); }
-  if (key?.startsWith("gamepad")) cycleGamepadBinding(key.slice(7).toLowerCase(), 1);
+  if (key?.startsWith("gamepad")) { menu.gamepadCaptureAction = key.slice(7).toLowerCase(); updateOptionStates(); }
 }
-function adjustSelectedOption(amount) { if (menu.optionCursor >= menu.optionItems.length) return; const key = menu.optionItems[menu.optionCursor].dataset.option; if (key === "bgmVolume" || key === "seVolume") { const slider = menu.root.querySelector(`#${key}`); slider.value = String(Math.max(0, Math.min(100, Number(slider.value) + amount * 10))); slider.dispatchEvent(new Event("input", { bubbles: true })); if (key === "seVolume") menu.playSe("cursorMove"); } else if (key === "npcTypewriterSpeed" && menu.npcTypewriterEnabled) cycleNpcTypewriterSpeed(amount); else if (key?.startsWith("gamepad")) cycleGamepadBinding(key.slice(7).toLowerCase(), amount); else if (key === "screenShake" || key === "torchFlicker" || key === "npcTypewriterEnabled" || key === "bgmEnabled" || key === "seEnabled") executeOption(key); }
-
-function cycleGamepadBinding(action, amount) {
-  if (!["confirm", "cancel", "minimap"].includes(action)) return;
-  const defaults = { confirm: 0, cancel: 1, minimap: 3 };
-  const bindings = Object.fromEntries(Object.keys(defaults).map(key => [key, menu.gamepadBindings[key] ?? defaults[key]]));
-  const current = bindings[action];
-  const next = (current + (amount < 0 ? 3 : 1)) % 4;
-  const conflict = Object.keys(bindings).find(key => key !== action && bindings[key] === next);
-  bindings[action] = next;
-  if (conflict) bindings[conflict] = current;
-  menu.gamepadBindings = bindings;
-  updateOptionStates();
-  persistSettings();
-}
+function adjustSelectedOption(amount) { if (menu.optionCursor >= menu.optionItems.length) return; const key = menu.optionItems[menu.optionCursor].dataset.option; if (key === "bgmVolume" || key === "seVolume") { const slider = menu.root.querySelector(`#${key}`); slider.value = String(Math.max(0, Math.min(100, Number(slider.value) + amount * 10))); slider.dispatchEvent(new Event("input", { bubbles: true })); if (key === "seVolume") menu.playSe("cursorMove"); } else if (key === "npcTypewriterSpeed" && menu.npcTypewriterEnabled) cycleNpcTypewriterSpeed(amount); else if (key === "screenShake" || key === "torchFlicker" || key === "npcTypewriterEnabled" || key === "bgmEnabled" || key === "seEnabled") executeOption(key); }
 
 function cycleNpcTypewriterSpeed(amount) {
   const speeds = ["slow", "normal", "fast"];
@@ -1340,11 +1351,11 @@ function updateOptionStates() {
   if (bgm) bgm.textContent = toggleText(menu.bgmEnabled);
   if (bgmSlider) { bgmSlider.disabled = !menu.bgmEnabled; bgmSlider.parentElement.classList.toggle("is-muted", !menu.bgmEnabled); }
   if (seSlider) { seSlider.disabled = !menu.seEnabled; seSlider.parentElement.classList.toggle("is-muted", !menu.seEnabled); }
-  const gamepadDefaults = { confirm: 0, cancel: 1, minimap: 3 };
+  const gamepadDefaults = { confirm: 0, cancel: 1, minimap: 3, items: 2 };
   for (const action of Object.keys(gamepadDefaults)) {
     const state = menu.root.querySelector(`[data-option-state="gamepad${action[0].toUpperCase()}${action.slice(1)}"]`);
     const button = menu.gamepadBindings[action] ?? gamepadDefaults[action];
-    if (state) state.textContent = `BUTTON ${button}`;
+    if (state) state.textContent = menu.gamepadCaptureAction === action ? "PRESS BUTTON..." : `BUTTON ${button}`;
   }
 }
 function updateDebugStates() {
@@ -1420,9 +1431,12 @@ function restoreSettings() {
     booleanKeys.forEach(key => { if (typeof saved[key] === "boolean") menu[key] = saved[key]; });
     if (["slow", "normal", "fast"].includes(saved.npcTypewriterSpeed)) menu.npcTypewriterSpeed = saved.npcTypewriterSpeed;
     if (saved.gamepadBindings && typeof saved.gamepadBindings === "object") {
-      const values = ["confirm", "cancel", "minimap"].map(key => Number(saved.gamepadBindings[key]));
+      const keys = ["confirm", "cancel", "minimap"];
+      const values = keys.map(key => Number(saved.gamepadBindings[key]));
       if (values.every(value => Number.isInteger(value) && value >= 0 && value <= 3) && new Set(values).size === values.length) {
-        menu.gamepadBindings = { confirm: values[0], cancel: values[1], minimap: values[2] };
+        const remaining = [0, 1, 2, 3].find(value => !values.includes(value));
+        const savedItems = Number(saved.gamepadBindings.items);
+        menu.gamepadBindings = { confirm: values[0], cancel: values[1], minimap: values[2], items: Number.isInteger(savedItems) && savedItems >= 0 && savedItems <= 3 && !values.includes(savedItems) ? savedItems : remaining };
       }
     }
     if (Number.isFinite(saved.mistIntensity) && saved.mistIntensity >= .25 && saved.mistIntensity <= 2) menu.mistIntensity = saved.mistIntensity;

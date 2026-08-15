@@ -32,14 +32,20 @@ test("options include the iPhone and iPad reconnection hint", async () => {
   assert.match(html, /iPhone／iPadで反応しない場合は、Bluetooth接続後にゲーム画面を一度タップ/);
 });
 
-test("options provide persistent gamepad bindings for confirm, cancel, and minimap", async () => {
+test("options put press-to-bind gamepad config first and persist four shortcuts", async () => {
   const [html, menu, main] = await Promise.all([
     readFile(new URL("../index.html", import.meta.url), "utf8"),
     readFile(new URL("../js/menu.js", import.meta.url), "utf8"),
     readFile(new URL("../js/main.js", import.meta.url), "utf8")
   ]);
-  for (const action of ["Confirm", "Cancel", "Minimap"]) assert.match(html, new RegExp(`data-option="gamepad${action}"`));
+  for (const action of ["Confirm", "Cancel", "Minimap", "Items"]) assert.match(html, new RegExp(`data-option="gamepad${action}"`));
+  assert.ok(html.indexOf('class="option-page gamepad-config" data-option-page="0"') < html.indexOf('data-option="language"'));
+  assert.match(html, /項目を決定後、割り当てたいボタンを押してください/);
+  assert.match(menu, /PRESS BUTTON\.\.\./);
   assert.match(menu, /gamepadBindings: menu\.gamepadBindings/);
   assert.match(menu, /new Set\(values\)\.size === values\.length/);
   assert.match(main, /getBindings: getGamepadBindings/);
+  assert.match(main, /onBindingCaptured: completeGamepadBinding/);
+  assert.match(main, /openBattleItems\(\)/);
+  assert.match(main, /openItemInventory\(\)/);
 });
