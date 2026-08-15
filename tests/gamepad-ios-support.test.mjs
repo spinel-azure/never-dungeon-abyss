@@ -41,11 +41,17 @@ test("options put press-to-bind gamepad config first and persist four shortcuts"
   for (const action of ["Confirm", "Cancel", "Minimap", "Items"]) assert.match(html, new RegExp(`data-option="gamepad${action}"`));
   assert.ok(html.indexOf('class="option-page gamepad-config" data-option-page="0"') < html.indexOf('data-option="language"'));
   assert.match(html, /項目を決定後、割り当てたいボタンを押してください/);
+  assert.match(html, /ミニマップ（ダンジョン内のみ）/);
+  assert.match(html, /アイテム（ダンジョン内／戦闘中のみ）/);
+  assert.match(html, /data-gamepad-preview[^>]+buttons_config\.avif/);
   assert.match(menu, /PRESS BUTTON\.\.\./);
+  assert.match(menu, /function drawGamepadPreview\(\)/);
+  assert.match(menu, /globalCompositeOperation = "screen"/);
   assert.match(menu, /gamepadBindings: menu\.gamepadBindings/);
   assert.match(menu, /new Set\(values\)\.size === values\.length/);
   assert.match(main, /getBindings: getGamepadBindings/);
   assert.match(main, /onBindingCaptured: completeGamepadBinding/);
+  assert.match(main, /onButtonPreviewChange: setGamepadPressedButtons/);
   assert.match(main, /openBattleItems\(\)/);
   assert.match(main, /openItemInventory\(\)/);
 });

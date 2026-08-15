@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
   <link rel="stylesheet" href="css/style.css?v=20260810-2">
-  <link rel="stylesheet" href="css/game-menu.css?v=20260815-1">
+  <link rel="stylesheet" href="css/game-menu.css?v=20260815-2">
   <link rel="stylesheet" href="css/card-gallery.css?v=20260810-1">
   <link rel="stylesheet" href="css/title-screen.css?v=20260815-2">
   <link rel="stylesheet" href="css/town.css?v=20260809-2">
@@ -344,9 +344,10 @@
           <h2>GAMEPAD CONFIG</h2>
           <button type="button" class="option-item" data-option="gamepadConfirm"><span>・決定</span><b data-option-state="gamepadConfirm">BUTTON 0</b></button>
           <button type="button" class="option-item" data-option="gamepadCancel"><span>・キャンセル</span><b data-option-state="gamepadCancel">BUTTON 1</b></button>
-          <button type="button" class="option-item" data-option="gamepadMinimap"><span>・ミニマップ</span><b data-option-state="gamepadMinimap">BUTTON 3</b></button>
-          <button type="button" class="option-item" data-option="gamepadItems"><span>・アイテム</span><b data-option-state="gamepadItems">BUTTON 2</b></button>
+          <button type="button" class="option-item" data-option="gamepadMinimap"><span>・ミニマップ（ダンジョン内のみ）</span><b data-option-state="gamepadMinimap">BUTTON 3</b></button>
+          <button type="button" class="option-item" data-option="gamepadItems"><span>・アイテム（ダンジョン内／戦闘中のみ）</span><b data-option-state="gamepadItems">BUTTON 2</b></button>
           <p>項目を決定後、割り当てたいボタンを押してください。<br>重複した割り当ては自動で入れ替わります。</p>
+          <canvas class="gamepad-button-preview" data-gamepad-preview data-src="images/screenshots/buttons_config.avif" width="256" height="256" aria-label="ゲームパッドボタン入力プレビュー"></canvas>
         </div>
         <div class="option-page" data-option-page="1" hidden>
           <button type="button" class="option-item option-language is-disabled" data-option="language" disabled aria-disabled="true"><span>・言語選択/LANGUAGE（未実装）</span><span>日本語/JAPANESE 🔘　英語/ENGLISH ⚫</span></button>
@@ -396,7 +397,7 @@
     </section>
   </section>
 </main>
-  <script type="module" src="js/main.js?v=20260815-6"></script>
+  <script type="module" src="js/main.js?v=20260815-7"></script>
   <script type="module" src="js/title-screen.js"></script>
 </body>
 </html>

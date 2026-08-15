@@ -45,6 +45,7 @@ const menu = {
   bgmEnabled: true, seEnabled: true,
   npcTypewriterEnabled: true, npcTypewriterSpeed: "normal",
   gamepadBindings: { confirm: null, cancel: null, minimap: null, items: null }, gamepadCaptureAction: "",
+  gamepadPreviewCanvas: null, gamepadPreviewImage: null, gamepadPressedButtons: [],
   actionActive: { random: false, autoReturn: false, emergencyEscape: false, torchFull: false, stopwatchReset: false },
   generateRandomDungeon: () => {}, startAutoReturn: () => {}, emergencyEscape: () => {}, refillTorch: () => {},
   setScreenShakeEnabled: () => {}, setTorchFlickerEnabled: () => {}, setTorchFuelDisabled: () => {}, setPresenceDisabled: () => {},
@@ -77,6 +78,7 @@ export function configureMenu(options) {
   menu.adventureRecordsPanel = menu.root.querySelector('[data-menu-view="adventureRecords"]');
   menu.cardGalleryPanel = menu.root.querySelector('[data-menu-view="cardGallery"]');
   menu.optionsPanel = menu.root.querySelector('[data-menu-view="options"]');
+  configureGamepadPreview();
   menu.debugPanel = menu.root.querySelector('[data-menu-view="debug"]');
   menu.commands = [...menu.commandRoot.querySelectorAll("[data-command]")];
   menu.commands.forEach(button => {
@@ -107,6 +109,10 @@ export function configureMenu(options) {
 export function isMenuOpen() { return menu.view !== "dungeon"; }
 export function getGamepadBindings() { return { ...menu.gamepadBindings }; }
 export function getGamepadCaptureAction() { return menu.gamepadCaptureAction; }
+export function setGamepadPressedButtons(buttons = []) {
+  menu.gamepadPressedButtons = [...new Set(buttons)].filter(button => Number.isInteger(button) && button >= 0 && button <= 3);
+  drawGamepadPreview();
+}
 export function completeGamepadBinding(action, button) {
   if (!["confirm", "cancel", "minimap", "items"].includes(action) || !Number.isInteger(button) || button < 0 || button > 3) return false;
   const defaults = { confirm: 0, cancel: 1, minimap: 3, items: 2 };
@@ -121,6 +127,59 @@ export function completeGamepadBinding(action, button) {
   persistSettings();
   menu.playSe("confirm");
   return true;
+}
+
+function configureGamepadPreview() {
+  menu.gamepadPreviewCanvas = menu.optionsPanel?.querySelector("[data-gamepad-preview]") || null;
+  if (!menu.gamepadPreviewCanvas) return;
+  const image = new Image();
+  menu.gamepadPreviewImage = image;
+  image.addEventListener("load", () => {
+    menu.gamepadPreviewCanvas.width = image.naturalWidth;
+    menu.gamepadPreviewCanvas.height = image.naturalHeight;
+    drawGamepadPreview();
+  });
+  image.src = menu.gamepadPreviewCanvas.dataset.src;
+}
+
+function drawGamepadPreview() {
+  const canvas = menu.gamepadPreviewCanvas;
+  const image = menu.gamepadPreviewImage;
+  if (!canvas || !image?.complete || !image.naturalWidth) return;
+  const context = canvas.getContext("2d");
+  if (!context) return;
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.drawImage(image, 0, 0, canvas.width, canvas.height);
+  const centers = {
+    0: [.5, .76],
+    1: [.72, .5],
+    2: [.28, .5],
+    3: [.5, .24]
+  };
+  const radius = Math.min(canvas.width, canvas.height) * .155;
+  for (const button of menu.gamepadPressedButtons) {
+    const [ratioX, ratioY] = centers[button];
+    const x = canvas.width * ratioX;
+    const y = canvas.height * ratioY;
+    const glow = context.createRadialGradient(x, y, radius * .28, x, y, radius);
+    glow.addColorStop(0, "rgba(230, 255, 255, .9)");
+    glow.addColorStop(.42, "rgba(90, 235, 255, .68)");
+    glow.addColorStop(1, "rgba(60, 210, 255, 0)");
+    context.save();
+    context.globalCompositeOperation = "screen";
+    context.fillStyle = glow;
+    context.beginPath();
+    context.arc(x, y, radius, 0, Math.PI * 2);
+    context.fill();
+    context.strokeStyle = "rgba(195, 250, 255, .95)";
+    context.lineWidth = Math.max(2, canvas.width * .012);
+    context.shadowColor = "#66eaff";
+    context.shadowBlur = radius * .5;
+    context.beginPath();
+    context.arc(x, y, radius * .58, 0, Math.PI * 2);
+    context.stroke();
+    context.restore();
+  }
 }
 export function getDungeonColors() { return { wall: menu.wallColor, floor: menu.floorColor }; }
 export function getDungeonMistOptions() {

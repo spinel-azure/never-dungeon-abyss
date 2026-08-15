@@ -99,13 +99,14 @@ export function syncGamepadConnections(gamepads, connectedGamepads, { onConnecte
   }
 }
 
-export function configureGamepadInput({ dispatchAction, toggleMinimap, onConnectionChange, getBindings = () => null, getCaptureAction = () => "", onBindingCaptured, isTextInputFocused = defaultTextInputFocused } = {}) {
+export function configureGamepadInput({ dispatchAction, toggleMinimap, onConnectionChange, getBindings = () => null, getCaptureAction = () => "", onBindingCaptured, onButtonPreviewChange, isTextInputFocused = defaultTextInputFocused } = {}) {
   if (typeof navigator === "undefined" || typeof navigator.getGamepads !== "function") return () => {};
   const states = new Map();
   const connectedGamepads = new Map();
   let frameId = 0;
   let captureAction = "";
   let captureArmed = false;
+  let previewSignature = "";
   const announceConnected = info => {
     console.info(`[NDA] Gamepad connected: ${info.id}`);
     onConnectionChange?.({ connected: true, ...info });
@@ -158,6 +159,13 @@ export function configureGamepadInput({ dispatchAction, toggleMinimap, onConnect
   const poll = now => {
     const gamepads = getGamepads();
     syncConnections(gamepads);
+    const previewGamepad = gamepads.find(Boolean);
+    const previewButtons = [0, 1, 2, 3].filter(index => previewGamepad?.buttons?.[index]?.pressed);
+    const nextPreviewSignature = previewButtons.join(",");
+    if (nextPreviewSignature !== previewSignature) {
+      previewSignature = nextPreviewSignature;
+      onButtonPreviewChange?.(previewButtons);
+    }
     for (const gamepad of gamepads) {
       if (!gamepad) continue;
       const state = states.get(gamepad.index) || createGamepadInputState({ suppressUntilNeutral: true });
