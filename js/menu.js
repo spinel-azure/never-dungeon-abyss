@@ -1016,7 +1016,7 @@ function executeDebug(key, amount = 1) {
   if (key === "treasuresVisible") { menu.treasuresVisible = !menu.treasuresVisible; applyMinimapRevealOptions(); updateDebugStates(); persistSettings(); return; }
   if (key === "torchFuelDisabled") { menu.torchFuelDisabled = !menu.torchFuelDisabled; menu.setTorchFuelDisabled(menu.torchFuelDisabled); updateDebugStates(); persistSettings(); return; }
   if (key === "mistEnabled") { menu.mistEnabled = !menu.mistEnabled; applyMistOptions(); updateDebugStates(); persistSettings(); return; }
-  if (key === "mistColor" && menu.mistEnabled) { const colors = ["green", "frost", "poison", "red"]; const index = colors.indexOf(menu.mistColor); menu.mistColor = colors[(Math.max(0, index) + amount + colors.length) % colors.length]; applyMistOptions(); updateDebugStates(); persistSettings(); return; }
+  if (key === "mistColor" && menu.mistEnabled) { const colors = ["green", "frost", "blue", "poison", "red"]; const index = colors.indexOf(menu.mistColor); menu.mistColor = colors[(Math.max(0, index) + amount + colors.length) % colors.length]; applyMistOptions(); updateDebugStates(); persistSettings(); return; }
   if (key === "mistIntensity" && menu.mistEnabled) { menu.mistIntensity = Math.max(.25, Math.min(2, menu.mistIntensity + amount * .25)); applyMistOptions(); updateDebugStates(); persistSettings(); return; }
   if (key === "mistDistance" && menu.mistEnabled) { menu.mistDistance = Math.max(3, Math.min(9, menu.mistDistance + amount)); applyMistOptions(); updateDebugStates(); persistSettings(); return; }
   if (key === "wallColor") { const colors = ["default", "red", "blue", "green", "white", "black"]; const index = colors.indexOf(menu.wallColor); menu.wallColor = colors[(Math.max(0, index) + amount + colors.length) % colors.length]; applyWallColor(); updateDebugStates(); persistSettings(); return; }
@@ -1400,7 +1400,7 @@ function restoreSettings() {
     else if (Number.isFinite(saved.mistIntensity)) menu.mistIntensity = 1;
     if (Number.isFinite(saved.mistDistance) && saved.mistDistance >= 3 && saved.mistDistance <= 9) menu.mistDistance = saved.mistDistance;
     else if (Number.isFinite(saved.mistDistance)) menu.mistDistance = 9;
-    if (["green", "frost", "poison", "red"].includes(saved.mistColor)) menu.mistColor = saved.mistColor;
+    if (["green", "frost", "blue", "poison", "red"].includes(saved.mistColor)) menu.mistColor = saved.mistColor;
     else if (saved.mistColor === "dark") menu.mistColor = "green";
     if (["default", "red", "blue", "green", "white", "black"].includes(saved.wallColor)) menu.wallColor = saved.wallColor;
     if (["default", "red", "blue", "green", "purple", "white"].includes(saved.floorColor)) menu.floorColor = saved.floorColor;

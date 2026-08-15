@@ -132,6 +132,7 @@ import { renameCharacter as applyCharacterRename } from "../data/character-name.
 import { isTransferDestinationUnlocked } from "../data/transfer-destinations.js";
 import { selectRevivalGoddessImage } from "../data/revival-presentation.js";
 import { getFireFloorStepDamage, isFireFloorDepth } from "../data/fire-floor.js";
+import { getColdFloorStepDamage, isColdFloorDepth } from "../data/cold-floor.js";
 import {
   invalidateMarathonChallenge,
   MARATHON_BOSS_FLOORS,
@@ -1422,6 +1423,18 @@ import {
     return damage;
   }
 
+  function applyColdFloorStep() {
+    if (!character || worldLocation !== "dungeon") return 0;
+    const requested = getColdFloorStepDamage(character, currentDepth);
+    const damage = getNonlethalPoisonDamage(character.hp, requested);
+    if (damage <= 0) return 0;
+    character.hp -= damage;
+    character.alive = true;
+    updateCharacterUi();
+    showPoisonStepDamage(damage);
+    return damage;
+  }
+
   function currentCondition(target) {
     return hasCharacterStatus(target, "bleeding") ? "BLEED" : hasCharacterStatus(target, "poison") ? "POISON" : "GOOD";
   }
@@ -1439,6 +1452,7 @@ import {
     applyDungeonPoisonStep();
     applyDungeonBleedingStep();
     applyFireFloorStep();
+    applyColdFloorStep();
     if (!character) return;
     character.condition = hasCharacterStatus(character, "bleeding") ? "BLEED"
       : hasCharacterStatus(character, "poison") ? "POISON" : "GOOD";
@@ -2529,7 +2543,10 @@ import {
 
   function applyCurrentFloorMist() {
     const options = getDungeonMistOptions();
-    setMistOptions({ ...options, color: isFireFloorDepth(currentDepth) ? "red" : options.color });
+    const color = isFireFloorDepth(currentDepth) ? "red"
+      : isColdFloorDepth(currentDepth) ? "blue"
+        : options.color;
+    setMistOptions({ ...options, color });
   }
 
   function getDungeonProgress() {
