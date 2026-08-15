@@ -59,6 +59,11 @@ test("NEW GAMEはプロローグから案内画面へ接続する", async () => 
   assert.match(source, /greetingOpen[\s\S]*nda:new-game/);
 });
 
+test("プロローグは表示後の画面高から本文開始位置を決める", async () => {
+  const source = await readFile(new URL("../js/prologue.js", import.meta.url), "utf8");
+  assert.ok(source.indexOf("screen.hidden = false") < source.indexOf("offset = screen.clientHeight"));
+});
+
 test("プロローグは二段階スキップとゲームパッド入力に対応する", async () => {
   const [controller, title, main] = await Promise.all([
     readFile(new URL("../js/prologue.js", import.meta.url), "utf8"),
@@ -82,4 +87,5 @@ test("プロローグ画面はディザ端処理とモバイル調整を持つ",
   assert.match(css, /repeating-conic-gradient/);
   assert.match(css, /@media\(max-width:420px\)/);
   assert.match(css, /"PixelFont",monospace/);
+  assert.match(css, /\.greeting-description\{[^}]*width:fit-content[^}]*text-align:left/);
 });

@@ -26,6 +26,7 @@ export function createPrologueController({ screen, text, silhouette, flash, skip
     running = true;
     paused = false;
     skipArmed = false;
+    screen.hidden = false;
     offset = screen.clientHeight * 1.04;
     previousTime = performance.now();
     triggeredCues.clear();
@@ -34,7 +35,6 @@ export function createPrologueController({ screen, text, silhouette, flash, skip
     flash.classList.remove("is-active");
     skipButton.classList.remove("is-armed");
     skipButton.textContent = "A / ENTER：SKIP";
-    screen.hidden = false;
     text.style.transform = `translate3d(0,${offset}px,0)`;
     frameId = requestAnimationFrame(tick);
   }
