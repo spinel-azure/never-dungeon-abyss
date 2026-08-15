@@ -94,6 +94,11 @@ export function onPlayerStep({ inDarkness = false, random = Math.random } = {}) 
   return addPresence(amount);
 }
 
+export function onExplorationStep({ autoWalkerActive = false, isSpecialEventCell = false, ...stepOptions } = {}) {
+  if (autoWalkerActive || isSpecialEventCell) return false;
+  return onPlayerStep(stepOptions);
+}
+
 export function triggerEncounter() {
   if (encounterActive) return false;
   encounterActive = true;

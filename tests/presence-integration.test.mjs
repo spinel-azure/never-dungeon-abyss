@@ -4,6 +4,7 @@ import {
   configurePresence,
   getPresence,
   getPresenceSuppressedSteps,
+  onExplorationStep,
   onPlayerStep,
   resetPresence,
   suppressPresence
@@ -31,6 +32,21 @@ test("normal player steps update the same presence observed by the HUD and encou
   assert.equal(encounters, 1);
   walkNormalSteps(5);
   assert.equal(encounters, 1);
+});
+
+test("Auto Walker freezes presence until automatic travel ends", () => {
+  resetPresence();
+  walkNormalSteps(5);
+  assert.equal(getPresence(), 20);
+
+  for (let step = 0; step < 20; step += 1) {
+    assert.equal(onExplorationStep({ autoWalkerActive: true, random: () => 0 }), false);
+  }
+  assert.equal(getPresence(), 20);
+
+  onExplorationStep({ autoWalkerActive: false, random: () => 0 });
+  assert.equal(getPresence(), 24);
+  resetPresence();
 });
 
 test("exorcism talisman suppresses exactly 30 steps and growth resumes on step 31", () => {

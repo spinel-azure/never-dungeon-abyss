@@ -35,7 +35,7 @@ import {
 import { getNpcEncounter } from "../data/npcs.js";
 import { HEALING_FOUNTAIN } from "../data/fountains.js";
 import { getBossById } from "../data/bosses.js";
-import { onPlayerStep, resetPresence } from "./presence.js";
+import { onExplorationStep, resetPresence } from "./presence.js";
 
 const hooks = {
   say: () => {},
@@ -202,9 +202,12 @@ export function updateAnimation(now) {
         const questEvent = getQuestEventAt(state.gridX, state.gridY);
         const isStairs = a.cellType === "stairsUp" || a.cellType === "stairsDown";
         const isSpecialEventCell = Boolean(npc) || Boolean(bossId) || Boolean(bossRemainsId) || Boolean(fountain) || Boolean(treasure) || Boolean(questEvent) || Boolean(specialRoom?.content) || isStairs;
-        const encounterTriggered = !isSpecialEventCell && onPlayerStep({ inDarkness: movedInDarkness });
-        if (encounterTriggered && state.autoWalkerActive) state.autoReturnPaused = true;
-        else if (encounterTriggered) hooks.cancelAutoReturn(false);
+        const encounterTriggered = onExplorationStep({
+          autoWalkerActive: state.autoWalkerActive,
+          isSpecialEventCell,
+          inDarkness: movedInDarkness
+        });
+        if (encounterTriggered) hooks.cancelAutoReturn(false);
         if (bossId) {
           startBossEvent(bossId, a.fromGX, a.fromGY);
         } else if (bossRemainsId) {
