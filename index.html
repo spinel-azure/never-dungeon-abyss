@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
   <link rel="stylesheet" href="css/style.css?v=20260810-2">
-  <link rel="stylesheet" href="css/game-menu.css?v=20260813-1">
+  <link rel="stylesheet" href="css/game-menu.css?v=20260815-1">
   <link rel="stylesheet" href="css/card-gallery.css?v=20260810-1">
   <link rel="stylesheet" href="css/title-screen.css?v=20260815-2">
   <link rel="stylesheet" href="css/town.css?v=20260809-2">
@@ -66,6 +66,9 @@
     </div>
   </section>
 </section>
+<div id="gamepadNotification" class="gamepad-notification" role="status" aria-live="polite" hidden>
+  <strong></strong><span></span>
+</div>
 <main class="shell">
   <section class="game" aria-label="3Dダンジョン">
     <div id="sceneTransition" class="scene-transition" aria-hidden="true" hidden>
@@ -350,6 +353,7 @@
             <button type="button" class="option-item npc-typewriter-speed" data-option="npcTypewriterSpeed"><span data-option-state="npcTypewriterSpeed">SLOW ⚫　NORMAL 🔘　FAST ⚫</span></button>
             <small>NPCの台詞をタイプライターの様に一文字ずつ表示します。<br>ONの場合は表示速度も変更できます。</small>
           </div>
+          <p class="gamepad-help">iPhone／iPadで反応しない場合は、Bluetooth接続後にゲーム画面を一度タップしてからボタンを押してください。</p>
         </div>
         <div class="option-pager"><button type="button" class="menu-footer" data-option-nav="back">BACK</button><span class="page-indicator" data-page-indicator>1/2</span><button type="button" class="menu-footer" data-option-nav="next">NEXT</button></div>
       </div>
@@ -384,7 +388,7 @@
     </section>
   </section>
 </main>
-  <script type="module" src="js/main.js?v=20260815-3"></script>
+  <script type="module" src="js/main.js?v=20260815-4"></script>
   <script type="module" src="js/title-screen.js"></script>
 </body>
 </html>

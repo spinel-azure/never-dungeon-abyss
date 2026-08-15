@@ -205,6 +205,7 @@ import {
   const virtualStickEl = document.getElementById("virtualStick");
   const buttonA = document.getElementById("buttonA");
   const buttonB = document.getElementById("buttonB");
+  const gamepadNotification = document.getElementById("gamepadNotification");
   const menuScreen = document.getElementById("menuScreen");
   const dungeonCommands = document.getElementById("dungeonCommands");
   const townScreen = document.getElementById("townScreen");
@@ -247,6 +248,7 @@ import {
   let knownAchievementIds = null;
   const achievementNotificationQueue = [];
   let achievementNotificationRunning = false;
+  let gamepadNotificationTimer = 0;
   let trapResultTimer = 0;
   let experienceSettlementCloseCallback = null;
   let pendingLootIdentification = null;
@@ -2684,8 +2686,26 @@ import {
     return false;
   }
 
+  function showGamepadConnectionNotification({ connected, id } = {}) {
+    if (!gamepadNotification) return;
+    window.clearTimeout(gamepadNotificationTimer);
+    gamepadNotification.querySelector("strong").textContent = connected
+      ? "GAMEPAD CONNECTED"
+      : "GAMEPAD DISCONNECTED";
+    gamepadNotification.querySelector("span").textContent = String(id || "GAMEPAD");
+    gamepadNotification.hidden = false;
+    gamepadNotification.classList.remove("is-visible");
+    void gamepadNotification.offsetWidth;
+    gamepadNotification.classList.add("is-visible");
+    gamepadNotificationTimer = window.setTimeout(() => {
+      gamepadNotification.classList.remove("is-visible");
+      gamepadNotification.hidden = true;
+    }, 3400);
+  }
+
   configureGamepadInput({
     dispatchAction: dispatchGamepadAction,
+    onConnectionChange: showGamepadConnectionNotification,
     toggleMinimap: () => {
       recordUserInput();
       if (worldLocation !== "dungeon" || isBattleActive() || isMenuOpen()

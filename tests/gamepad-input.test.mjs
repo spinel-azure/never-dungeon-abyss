@@ -2,11 +2,12 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   GAMEPAD_DEAD_ZONE, GAMEPAD_REPEAT_DELAY, GAMEPAD_REPEAT_INTERVAL,
-  createGamepadInputState, getGamepadDirection, pollGamepadActions
+  configureGamepadInput, createGamepadInputState, getGamepadActionButtons,
+  getGamepadDirection, pollGamepadActions, syncGamepadConnections
 } from "../js/gamepad-input.js";
 
-function pad({ axes = [0, 0], pressed = [] } = {}) {
-  return { axes, buttons: Array.from({ length: 16 }, (_, index) => ({ pressed: pressed.includes(index) })) };
+function pad({ axes = [0, 0], pressed = [], mapping = "", index = 0, id = "TEST PAD" } = {}) {
+  return { axes, mapping, index, id, buttons: Array.from({ length: 16 }, (_, buttonIndex) => ({ pressed: pressed.includes(buttonIndex) })) };
 }
 
 test("left stick ignores small drift and resolves cardinal directions", () => {
@@ -39,4 +40,53 @@ test("buttons use rising edges and expose standard mappings", () => {
   assert.deepEqual(pollGamepadActions(pad({ pressed: [0, 3, 9] }), state, 16), []);
   pollGamepadActions(pad(), state, 32);
   assert.deepEqual(pollGamepadActions(pad({ pressed: [1, 4, 5] }), state, 48), ["confirm", "pageLeft", "pageRight"]);
+});
+
+test("standard mapping uses the lower button to confirm and right button to cancel", () => {
+  const mapping = getGamepadActionButtons(pad({ mapping: "standard" }));
+  assert.equal(mapping[0], "confirm");
+  assert.equal(mapping[1], "cancel");
+  const state = createGamepadInputState();
+  assert.deepEqual(pollGamepadActions(pad({ mapping: "standard", pressed: [0] }), state, 0), ["confirm"]);
+  pollGamepadActions(pad({ mapping: "standard" }), state, 16);
+  assert.deepEqual(pollGamepadActions(pad({ mapping: "standard", pressed: [1] }), state, 32), ["cancel"]);
+});
+
+test("resume suppression waits for neutral and prevents a held button burst", () => {
+  const state = createGamepadInputState({ suppressUntilNeutral: true });
+  const held = pad({ mapping: "standard", pressed: [0] });
+  assert.deepEqual(pollGamepadActions(held, state, 0), []);
+  assert.deepEqual(pollGamepadActions(held, state, 16), []);
+  assert.deepEqual(pollGamepadActions(pad({ mapping: "standard" }), state, 32), []);
+  assert.deepEqual(pollGamepadActions(held, state, 48), ["confirm"]);
+});
+
+test("connection polling announces once, removes disconnects, and permits reconnect", () => {
+  const known = new Map();
+  const events = [];
+  const callbacks = {
+    onConnected: info => events.push(`on:${info.index}:${info.id}`),
+    onDisconnected: info => events.push(`off:${info.index}:${info.id}`)
+  };
+  const controller = pad({ mapping: "standard", index: 2, id: "DualSense Wireless Controller" });
+  syncGamepadConnections([controller], known, callbacks);
+  syncGamepadConnections([controller], known, callbacks);
+  assert.deepEqual(events, ["on:2:DualSense Wireless Controller"]);
+  syncGamepadConnections([], known, callbacks);
+  syncGamepadConnections([controller], known, callbacks);
+  assert.deepEqual(events, [
+    "on:2:DualSense Wireless Controller",
+    "off:2:DualSense Wireless Controller",
+    "on:2:DualSense Wireless Controller"
+  ]);
+});
+
+test("Gamepad API unsupported environments return a harmless cleanup", () => {
+  const originalNavigator = globalThis.navigator;
+  try {
+    Object.defineProperty(globalThis, "navigator", { configurable: true, value: {} });
+    assert.doesNotThrow(() => configureGamepadInput()());
+  } finally {
+    Object.defineProperty(globalThis, "navigator", { configurable: true, value: originalNavigator });
+  }
 });
