@@ -30,6 +30,7 @@ import {
   setTorchFuelDisabled,
   setTorchCardEffects,
   setPlayerInputEnabled,
+  isPlayerInputEnabled,
   updateAnimation,
   manualMove,
   manualTurn,
@@ -47,9 +48,9 @@ import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlic
 import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minimap.js";
 import { configureInput } from "./input.js";
 import { configureGamepadInput } from "./gamepad-input.js";
-import { configureVirtualStick } from "./virtualStick.js";
+import { configureFloatingStick } from "./floating-stick.js";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, getDungeonMistOptions, setDungeonColors, getGamepadBindings, getGamepadCaptureAction, completeGamepadBinding, setGamepadPressedButtons, isMenuOpen, openItemInventory, openStatusMenu, openDeckEditor, openQuestHistory, openAdventureRecords, openLibraryCardGallery, openTitleOptions, refreshAdventureRecordsPlayTime, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js";
+import { configureMenu, handleMenuInput, getDungeonColors, getDungeonMistOptions, setDungeonColors, getGamepadBindings, getGamepadCaptureAction, completeGamepadBinding, setGamepadPressedButtons, getTouchControlsMode, isMenuOpen, openItemInventory, openStatusMenu, openDeckEditor, openQuestHistory, openAdventureRecords, openLibraryCardGallery, openTitleOptions, refreshAdventureRecordsPlayTime, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js";
 import { resolveFloorTheme } from "./floorTheme.js";
 import {
   configureAutoReturn,
@@ -203,6 +204,7 @@ import {
   const autoReturnBtn = document.getElementById("autoReturn");
   const randomGenerateBtn = document.getElementById("randomGenerate");
   const virtualStickEl = document.getElementById("virtualStick");
+  const floatingStickZone = document.getElementById("floatingStickZone");
   const buttonA = document.getElementById("buttonA");
   const buttonB = document.getElementById("buttonB");
   const gamepadNotification = document.getElementById("gamepadNotification");
@@ -2750,6 +2752,7 @@ import {
     onUserOperation: recordUserInput,
     handleMenuInput
   });
+  let virtualStickController = null;
   configureMenu({
     root: menuScreen,
     commandRoot: dungeonCommands,
@@ -2790,6 +2793,7 @@ import {
       setNpcTypewriterOptions(options);
       setTownTypewriterOptions(options);
     },
+    setTouchControlsMode: mode => virtualStickController?.setMode(mode),
     setStopwatchVisible,
     resetStopwatch,
     emergencyEscape: () => {
@@ -2819,17 +2823,27 @@ import {
       else resumeDismissedStairsPrompt();
     }
   });
-  configureVirtualStick({
+  virtualStickController = configureFloatingStick({
+    zoneEl: floatingStickZone,
     stickEl: virtualStickEl,
+    mode: getTouchControlsMode(),
+    isInputAllowed: () => Boolean(
+      character
+      && worldLocation === "dungeon"
+      && isPlayerInputEnabled()
+      && !isBattleActive()
+      && !isMenuOpen()
+      && !sceneTransitionRunning
+      && !state.overlayEvent
+      && !state.autoWalkerActive
+      && itemOverlay.hidden
+      && skillOverlay.hidden
+      && !document.body.classList.contains("title-active")
+      && !document.body.classList.contains("town-active")
+    ),
     manualMove,
     manualTurn,
-    handleSkillInput: handleSkillOverlayInput,
-    handleItemInput: handleItemOverlayInput,
-    handleBattleInput,
-    handleTownInput: action => (
-      sceneTransitionRunning || handleExperienceSettlementInput(action) || handleTownInput(action)
-    ),
-    handleMenuInput
+    onUserOperation: recordUserInput
   });
 
   updateAutoReturnButton();

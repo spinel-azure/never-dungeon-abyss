@@ -44,6 +44,7 @@ const menu = {
   floorColor: "default",
   bgmEnabled: true, seEnabled: true,
   npcTypewriterEnabled: true, npcTypewriterSpeed: "normal",
+  touchControlsMode: "auto",
   gamepadBindings: { confirm: null, cancel: null, minimap: null, items: null }, gamepadCaptureAction: "",
   gamepadPreviewCanvas: null, gamepadPreviewImage: null, gamepadPressedButtons: [],
   actionActive: { random: false, autoReturn: false, emergencyEscape: false, torchFull: false, stopwatchReset: false },
@@ -53,6 +54,7 @@ const menu = {
   setBgmOptions: () => {}, setSeOptions: () => {}, playSe: () => {},
   setMinimapRevealOptions: () => {},
   setNpcTypewriterOptions: () => {},
+  setTouchControlsMode: () => {},
   setStopwatchVisible: () => {}, resetStopwatch: () => {},
   saveGame: () => false,
   canManualSave: () => false,
@@ -107,6 +109,7 @@ export function configureMenu(options) {
 }
 
 export function isMenuOpen() { return menu.view !== "dungeon"; }
+export function getTouchControlsMode() { return menu.touchControlsMode; }
 export function getGamepadBindings() { return { ...menu.gamepadBindings }; }
 export function getGamepadCaptureAction() { return menu.gamepadCaptureAction; }
 export function setGamepadPressedButtons(buttons = []) {
@@ -1071,9 +1074,19 @@ function executeOption(key) {
   if (key === "torchFlicker") { menu.torchFlickerEnabled = !menu.torchFlickerEnabled; applyRenderOptions(); updateOptionStates(); persistSettings(); }
   if (key === "npcTypewriterEnabled") { menu.npcTypewriterEnabled = !menu.npcTypewriterEnabled; applyNpcTypewriterOptions(); updateOptionStates(); persistSettings(); }
   if (key === "npcTypewriterSpeed" && menu.npcTypewriterEnabled) { cycleNpcTypewriterSpeed(1); }
+  if (key === "touchControlsMode") { cycleTouchControlsMode(1); }
   if (key?.startsWith("gamepad")) { menu.gamepadCaptureAction = key.slice(7).toLowerCase(); updateOptionStates(); }
 }
-function adjustSelectedOption(amount) { if (menu.optionCursor >= menu.optionItems.length) return; const key = menu.optionItems[menu.optionCursor].dataset.option; if (key === "bgmVolume" || key === "seVolume") { const slider = menu.root.querySelector(`#${key}`); slider.value = String(Math.max(0, Math.min(100, Number(slider.value) + amount * 10))); slider.dispatchEvent(new Event("input", { bubbles: true })); if (key === "seVolume") menu.playSe("cursorMove"); } else if (key === "npcTypewriterSpeed" && menu.npcTypewriterEnabled) cycleNpcTypewriterSpeed(amount); else if (key === "screenShake" || key === "torchFlicker" || key === "npcTypewriterEnabled" || key === "bgmEnabled" || key === "seEnabled") executeOption(key); }
+function adjustSelectedOption(amount) { if (menu.optionCursor >= menu.optionItems.length) return; const key = menu.optionItems[menu.optionCursor].dataset.option; if (key === "bgmVolume" || key === "seVolume") { const slider = menu.root.querySelector(`#${key}`); slider.value = String(Math.max(0, Math.min(100, Number(slider.value) + amount * 10))); slider.dispatchEvent(new Event("input", { bubbles: true })); if (key === "seVolume") menu.playSe("cursorMove"); } else if (key === "npcTypewriterSpeed" && menu.npcTypewriterEnabled) cycleNpcTypewriterSpeed(amount); else if (key === "touchControlsMode") cycleTouchControlsMode(amount); else if (key === "screenShake" || key === "torchFlicker" || key === "npcTypewriterEnabled" || key === "bgmEnabled" || key === "seEnabled") executeOption(key); }
+
+function cycleTouchControlsMode(amount) {
+  const modes = ["auto", "on", "off"];
+  const index = modes.indexOf(menu.touchControlsMode);
+  menu.touchControlsMode = modes[(index + amount + modes.length) % modes.length];
+  menu.setTouchControlsMode(menu.touchControlsMode);
+  updateOptionStates();
+  persistSettings();
+}
 
 function cycleNpcTypewriterSpeed(amount) {
   const speeds = ["slow", "normal", "fast"];
@@ -1399,6 +1412,7 @@ function updateOptionStates() {
   const speedButton = menu.root.querySelector('[data-option="npcTypewriterSpeed"]');
   const se = menu.root.querySelector('[data-option-state="seEnabled"]');
   const bgm = menu.root.querySelector('[data-option-state="bgmEnabled"]');
+  const touchControls = menu.root.querySelector('[data-option-state="touchControlsMode"]');
   const bgmSlider = menu.root.querySelector('#bgmVolume');
   const seSlider = menu.root.querySelector('#seVolume');
   if (shake) shake.textContent = toggleText(menu.screenShakeEnabled);
@@ -1408,6 +1422,7 @@ function updateOptionStates() {
   if (speedButton) speedButton.disabled = !menu.npcTypewriterEnabled;
   if (se) se.textContent = toggleText(menu.seEnabled);
   if (bgm) bgm.textContent = toggleText(menu.bgmEnabled);
+  if (touchControls) touchControls.textContent = ["auto", "on", "off"].map(value => `${value.toUpperCase()} ${menu.touchControlsMode === value ? ON_MARK : OFF_MARK}`).join("　");
   if (bgmSlider) { bgmSlider.disabled = !menu.bgmEnabled; bgmSlider.parentElement.classList.toggle("is-muted", !menu.bgmEnabled); }
   if (seSlider) { seSlider.disabled = !menu.seEnabled; seSlider.parentElement.classList.toggle("is-muted", !menu.seEnabled); }
   const gamepadDefaults = { confirm: 0, cancel: 1, minimap: 3, items: 2 };
@@ -1457,6 +1472,7 @@ function applyDisplayOptions() { document.body.classList.toggle("hide-compass", 
 function applyRenderOptions() { menu.setScreenShakeEnabled(menu.screenShakeEnabled); menu.setTorchFlickerEnabled(menu.torchFlickerEnabled); }
 function applyMinimapRevealOptions() { menu.setMinimapRevealOptions({ stairsDown: menu.stairsDownVisible, npcs: menu.npcsVisible, treasures: menu.treasuresVisible }); }
 function applyNpcTypewriterOptions() { menu.setNpcTypewriterOptions({ enabled: menu.npcTypewriterEnabled, speed: menu.npcTypewriterSpeed }); }
+function applyTouchControlsMode() { menu.setTouchControlsMode(menu.touchControlsMode); }
 function applyMistOptions() { menu.setMistOptions({ enabled: menu.mistEnabled, intensity: menu.mistIntensity, distance: menu.mistDistance, color: menu.mistColor }); }
 function applyWallColor() { menu.setWallColor(menu.wallColor); }
 function applyFloorColor() { menu.setFloorColor(menu.floorColor); }
@@ -1468,6 +1484,7 @@ function applyAllSettings() {
   applyRenderOptions();
   applyMinimapRevealOptions();
   applyNpcTypewriterOptions();
+  applyTouchControlsMode();
   applyMistOptions();
   applyWallColor();
   applyFloorColor();
@@ -1489,6 +1506,7 @@ function restoreSettings() {
     const booleanKeys = ["compassVisible", "readoutVisible", "screenShakeEnabled", "torchFlickerEnabled", "torchFuelDisabled", "presenceDisabled", "stopwatchVisible", "stairsDownVisible", "npcsVisible", "treasuresVisible", "npcTypewriterEnabled", "mistEnabled", "bgmEnabled", "seEnabled"];
     booleanKeys.forEach(key => { if (typeof saved[key] === "boolean") menu[key] = saved[key]; });
     if (["slow", "normal", "fast"].includes(saved.npcTypewriterSpeed)) menu.npcTypewriterSpeed = saved.npcTypewriterSpeed;
+    if (["auto", "on", "off"].includes(saved.touchControlsMode)) menu.touchControlsMode = saved.touchControlsMode;
     if (saved.gamepadBindings && typeof saved.gamepadBindings === "object") {
       const keys = ["confirm", "cancel", "minimap"];
       const values = keys.map(key => Number(saved.gamepadBindings[key]));
@@ -1539,6 +1557,7 @@ function persistSettings() {
       treasuresVisible: menu.treasuresVisible,
       npcTypewriterEnabled: menu.npcTypewriterEnabled,
       npcTypewriterSpeed: menu.npcTypewriterSpeed,
+      touchControlsMode: menu.touchControlsMode,
       gamepadBindings: menu.gamepadBindings,
       mistEnabled: menu.mistEnabled,
       mistIntensity: menu.mistIntensity,

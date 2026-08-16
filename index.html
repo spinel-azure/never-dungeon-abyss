@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
   <link rel="stylesheet" href="css/style.css?v=20260810-2">
-  <link rel="stylesheet" href="css/game-menu.css?v=20260817-2">
+  <link rel="stylesheet" href="css/game-menu.css?v=20260817-3">
   <link rel="stylesheet" href="css/card-gallery.css?v=20260810-1">
   <link rel="stylesheet" href="css/title-screen.css?v=20260815-2">
   <link rel="stylesheet" href="css/town.css?v=20260809-2">
@@ -231,7 +231,9 @@
         <button id="forward" type="button" title="前進">↑</button><button id="left" type="button" title="左旋回">←</button><button id="back" type="button" title="後退">↓</button><button id="right" type="button" title="右旋回">→</button>
         <button id="autoReturn" type="button" title="踏破済みの道だけを通ってスタート地点へ戻る">帰還</button><button id="randomGenerate" type="button" title="新しいランダムダンジョンを生成する">ランダム生成</button>
       </div>
-      <div class="virtual-stick" id="virtualStick" aria-label="移動用バーチャルスティック"><div class="virtual-stick-base"><div class="virtual-stick-knob"></div></div></div>
+      <div class="floating-stick-zone" id="floatingStickZone" aria-label="移動用フローティングスティック操作範囲">
+        <div class="virtual-stick" id="virtualStick" aria-hidden="true"><div class="virtual-stick-base"><div class="virtual-stick-knob"></div></div></div>
+      </div>
       <div class="action-buttons" aria-label="アクションボタン"><button id="buttonB" type="button" class="action-button action-button-b" aria-label="B キャンセル メニュー">B</button><button id="buttonA" type="button" class="action-button action-button-a" aria-label="A 決定">A</button></div>
     </div>
 
@@ -360,6 +362,7 @@
           <div class="option-section"><button type="button" class="option-item" data-option="seEnabled"><span>・SE</span><b data-option-state="seEnabled">ON 🔘　OFF ⚫</b></button><label class="volume-row option-control" data-option="seVolume">Volume <input id="seVolume" type="range" min="0" max="100" step="10" value="10"> <span>10%</span></label></div>
         </div>
         <div class="option-page" data-option-page="2" hidden>
+          <button type="button" class="option-item option-with-description" data-option="touchControlsMode"><span class="option-heading">・タッチ操作 <b data-option-state="touchControlsMode">AUTO 🔘　ON ⚫　OFF ⚫</b></span><small>画面下部のフローティングスティックとA/Bボタンを切り替えます。</small></button>
           <button type="button" class="option-item option-with-description" data-option="screenShake"><span class="option-heading">・画面の揺れ <b data-option-state="screenShake">ON 🔘　OFF ⚫</b></span><small>ダンジョン画面のゆらぎ演出を切り替えます。<br>画面酔いしやすい場合はOFFにしてください。</small></button>
           <button type="button" class="option-item option-with-description" data-option="torchFlicker"><span class="option-heading">・たいまつの揺らぎ <b data-option-state="torchFlicker">ON 🔘　OFF ⚫</b></span><small>たいまつの灯りによる画面の明暗変化を切り替えます。<br>チカチカが気になる場合はOFFにしてください。</small></button>
           <div class="npc-typewriter-option">
@@ -402,7 +405,7 @@
     </section>
   </section>
 </main>
-  <script type="module" src="js/main.js?v=20260815-8"></script>
+  <script type="module" src="js/main.js?v=20260817-1"></script>
   <script type="module" src="js/title-screen.js"></script>
 </body>
 </html>

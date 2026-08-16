@@ -89,3 +89,16 @@ body.inventory-open .game{width:min(96vw,720px)}body.inventory-open .menu-screen
 .quest-history-panel .inventory-description{box-sizing:border-box;height:calc(4.5em + 16px);overflow:hidden}.adventure-records-panel .inventory-description{box-sizing:border-box;height:calc(3em + 16px);overflow:hidden}@media(max-width:540px){.quest-history-panel .inventory-description{height:calc(4.5em + 10px)}.adventure-records-panel .inventory-description{height:calc(3em + 10px)}}
 .inventory-tabs[hidden],.inventory-compare[hidden]{display:none!important}
 .inventory-tabs{grid-template-columns:repeat(3,1fr)}.inventory-tabs.is-sale{grid-template-columns:1fr 1fr}.inventory-tabs button[hidden]{display:none}
+
+/* Touch-only lower-screen floating movement surface. */
+.floating-stick-zone{display:none;position:fixed;z-index:35;left:max(8px,env(safe-area-inset-left));right:max(162px,calc(154px + env(safe-area-inset-right)));bottom:max(8px,env(safe-area-inset-bottom));height:min(220px,28dvh);touch-action:none;-webkit-user-select:none;user-select:none}
+body.touch-controls-enabled .floating-stick-zone{display:block}
+body.menu-open .floating-stick-zone,body.battle-active .floating-stick-zone,body.town-active .floating-stick-zone,body.title-active .floating-stick-zone,body.item-overlay-open .floating-stick-zone,body.skill-overlay-open .floating-stick-zone{display:none!important}
+.floating-stick-zone .virtual-stick{display:none!important;position:absolute!important;z-index:1;left:0;top:0;bottom:auto!important;width:112px!important;height:112px!important;margin:0!important;pointer-events:none!important;transform:translate(-50%,-50%)}
+.floating-stick-zone .virtual-stick.is-active{display:grid!important}
+.floating-stick-zone .virtual-stick-base{width:110px;height:110px;margin:0!important;background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.08) 0 32%,transparent 33%),rgba(55,58,52,.62)}
+.floating-stick-zone .virtual-stick-knob{width:48px;height:48px;margin:-24px 0 0 -24px}
+body.touch-controls-disabled .action-buttons{display:none!important}
+body.touch-controls-enabled.layout-pc .action-buttons,body.touch-controls-enabled.layout-tablet .action-buttons{display:grid;position:fixed;z-index:35;right:max(18px,env(safe-area-inset-right));bottom:calc(24px + env(safe-area-inset-bottom));grid-template-columns:66px 66px;grid-template-rows:66px 66px;gap:12px}
+@media(min-width:681px){.floating-stick-zone{right:max(190px,calc(180px + env(safe-area-inset-right)));width:min(65vw,620px);height:min(220px,30dvh)}}
+@media(max-width:420px){.floating-stick-zone{right:max(162px,calc(154px + env(safe-area-inset-right)));height:min(210px,28dvh)}.floating-stick-zone .virtual-stick{width:108px!important;height:108px!important}.floating-stick-zone .virtual-stick-base{width:106px;height:106px}}

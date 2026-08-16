@@ -166,6 +166,10 @@ export function setPlayerInputEnabled(enabled) {
   }
 }
 
+export function isPlayerInputEnabled() {
+  return playerInputEnabled;
+}
+
 export function updateAnimation(now) {
   if (!state.anim) return;
   const a = state.anim;
