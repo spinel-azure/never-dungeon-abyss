@@ -1,0 +1,18 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+
+const root = new URL("../", import.meta.url);
+
+test("main screen reserves three empty NPC status slots for future party members", async () => {
+  const html = await readFile(new URL("index.html", root), "utf8");
+  const css = await readFile(new URL("css/game-menu.css", root), "utf8");
+
+  assert.match(html, /class="npc-party-status"/);
+  assert.equal((html.match(/class="npc-status-slot"/g) || []).length, 3);
+  assert.match(html, /data-npc-slot="0"/);
+  assert.match(html, /data-npc-slot="1"/);
+  assert.match(html, /data-npc-slot="2"/);
+  assert.match(css, /\.npc-party-status\{[^}]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+  assert.match(css, /body\.menu-open \.quick-status,body\.menu-open \.npc-party-status/);
+});
