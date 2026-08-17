@@ -14,11 +14,17 @@ test("main screen reserves three empty NPC status slots for future party members
   assert.match(html, /data-npc-slot="0"/);
   assert.match(html, /data-npc-slot="1"/);
   assert.match(html, /data-npc-slot="2"/);
+  assert.equal((html.match(/class="npc-charge-gauge"/g) || []).length, 3);
+  assert.equal((html.match(/data-npc-charge-fill/g) || []).length, 3);
   assert.match(css, /\.npc-party-status\{[^}]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+  assert.match(css, /\.npc-charge-gauge\{[^}]*background:#555/);
+  assert.match(css, /\.npc-charge-gauge i\{[^}]*background:linear-gradient\(90deg,#8c1018,#ef3038\)/);
   assert.match(css, /body\.menu-open \.quick-status,body\.menu-open \.npc-party-status/);
   assert.match(ui, /root\.hidden = !NPC_SUPPORT_ENABLED/);
   assert.match(ui, /canHireNpc \? "NPC参加可能" : "――――"/);
   assert.match(ui, /is-unavailable/);
+  assert.match(ui, /export function setNpcPartyCharge/);
+  assert.match(ui, /Math\.max\(0, Math\.min\(100, Number\(charge\) \|\| 0\)\)/);
 });
 
 test("NPC management reserves four rows and follows keyboard selection while scrolling", async () => {

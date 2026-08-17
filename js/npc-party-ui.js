@@ -11,10 +11,27 @@ export function renderNpcPartyStatus(root, character) {
   [...root.querySelectorAll("[data-npc-slot]")].forEach((slot, index) => {
     const npc = getNpcDefinition(activeIds[index]);
     slot.dataset.npcId = npc?.id || "";
-    slot.textContent = npc ? `${npc.name}【${npc.jobShort}】` : canHireNpc ? "NPC参加可能" : "――――";
+    const label = slot.querySelector("[data-npc-slot-label]");
+    if (label) label.textContent = npc ? `${npc.name}【${npc.jobShort}】` : canHireNpc ? "NPC参加可能" : "――――";
+    setNpcChargeGauge(slot, 0);
     slot.classList.toggle("is-empty", !npc);
     slot.classList.toggle("is-unavailable", !npc && !canHireNpc);
   });
+}
+
+export function setNpcPartyCharge(root, npcId, charge) {
+  const slot = root?.querySelector(`[data-npc-id="${String(npcId || "")}"]`);
+  if (!slot) return false;
+  setNpcChargeGauge(slot, charge);
+  return true;
+}
+
+function setNpcChargeGauge(slot, charge) {
+  const normalized = Math.max(0, Math.min(100, Number(charge) || 0));
+  const gauge = slot?.querySelector(".npc-charge-gauge");
+  const fill = slot?.querySelector("[data-npc-charge-fill]");
+  if (gauge) gauge.setAttribute("aria-valuenow", String(normalized));
+  if (fill) fill.style.width = `${normalized}%`;
 }
 
 export function flashNpcPartyStatus(root, npcId) {
