@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { NPC_DEFINITIONS } from "../data/npc-definitions.js";
@@ -72,4 +73,13 @@ test("NPC-free battle remains unchanged and active supports create presentation 
   assert.ok(supported.battle.presentationEvents.some(event => event.npcId === "rebecca"));
   assert.ok(supported.battle.presentationEvents.some(event => event.npcId === "johan"));
   assert.ok(supported.battle.presentationEvents.some(event => event.npcId === "erika"));
+});
+
+test("NPC renewal hides background commands and restores its originating town screen", () => {
+  const source = readFileSync(new URL("../js/town.js", import.meta.url), "utf8");
+  assert.match(source, /npcManagementReturn = \{ mode: town\.mode, subFacilityId: town\.subFacilityId, selectedIndex: town\.selectedIndex \}/);
+  assert.match(source, /town\.commandRoot\.hidden = true;[\s\S]*town\.commerceTitle\.textContent = "雇用更新"/);
+  assert.match(source, /function closeNpcManagement\(\)[\s\S]*town\.commandRoot\.hidden = false;/);
+  assert.match(source, /destination\?\.mode === "dungeonEntrance"[\s\S]*renderDungeonEntrance\(\)/);
+  assert.match(source, /destination\?\.mode === "selection" \|\| destination\?\.mode === "arrival"[\s\S]*showTownArrival\(\)/);
 });

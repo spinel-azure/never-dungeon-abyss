@@ -206,6 +206,7 @@ export function configureTown(options) {
   town.npcManagementItems = [];
   town.npcManagementIndex = 0;
   town.npcManagementConfirm = false;
+  town.npcManagementReturn = null;
   town.transferOverlay = document.querySelector("#transferDestinationOverlay");
   town.transferList = document.querySelector("#transferDestinationList");
   town.transferPager = document.querySelector("#transferDestinationPager");
@@ -1616,6 +1617,7 @@ function openNpcManagement(kind) {
     ? NPC_DEFINITIONS.filter(npc => !registered.has(npc.id))
     : NPC_DEFINITIONS.filter(npc => registered.has(npc.id)).map(npc => ({ ...npc, active: active.has(npc.id) }));
   town.mode = "npcManagement";
+  town.npcManagementReturn = { mode: "facilityMenu", subFacilityId: town.subFacilityId, selectedIndex: town.selectedIndex };
   town.commerceOverlay.hidden = false;
   town.guildQuestOverlay.hidden = true;
   town.commerceTitle.textContent = kind === "search" ? "NPCを探す" : "名簿から雇用";
@@ -1627,12 +1629,16 @@ export function openPendingNpcRenewal() {
   const renewal = town.getCharacter()?.npcSystem?.renewal;
   if (!town.active || !renewal?.pending) return false;
   const pendingIds = (renewal.ids || []).filter(id => !(renewal.completedIds || []).includes(id));
+  if (town.mode !== "npcManagement") {
+    town.npcManagementReturn = { mode: town.mode, subFacilityId: town.subFacilityId, selectedIndex: town.selectedIndex };
+  }
   town.npcManagementKind = "renewal";
   town.npcManagementConfirm = false;
   town.npcManagementIndex = 0;
   town.npcManagementItems = pendingIds.map(getNpcDefinition).filter(Boolean);
   if (!town.npcManagementItems.length) return false;
   town.mode = "npcManagement";
+  town.commandRoot.hidden = true;
   town.commerceOverlay.hidden = false;
   town.guildQuestOverlay.hidden = true;
   town.commerceTitle.textContent = "雇用更新";
@@ -1698,9 +1704,9 @@ function handleNpcManagementInput(action) {
     if (result?.forcedDismissal) {
       town.messageEl.textContent = `雇用費を支払えないため、\n${npc.name}との同行を終了した。`;
       window.setTimeout(() => {
-        if (!openPendingNpcRenewal()) renderFacility();
+        if (!openPendingNpcRenewal()) closeNpcManagement();
       }, 1200);
-    } else if (!openPendingNpcRenewal()) renderFacility();
+    } else if (!openPendingNpcRenewal()) closeNpcManagement();
     return true;
   }
   if (action === "cancel") {
@@ -1710,8 +1716,7 @@ function handleNpcManagementInput(action) {
       renderNpcManagement();
     } else {
       town.playSe("cancel");
-      town.commerceOverlay.hidden = true;
-      renderFacility();
+      closeNpcManagement();
     }
     return true;
   }
@@ -1738,6 +1743,30 @@ function handleNpcManagementInput(action) {
   }
   openNpcManagement(town.npcManagementKind);
   return true;
+}
+
+function closeNpcManagement() {
+  const destination = town.npcManagementReturn;
+  town.npcManagementReturn = null;
+  town.npcManagementKind = "";
+  town.npcManagementItems = [];
+  town.npcManagementConfirm = false;
+  town.commerceOverlay.hidden = true;
+  town.commandRoot.hidden = false;
+  if (destination) {
+    town.subFacilityId = destination.subFacilityId || "";
+    town.selectedIndex = Number.isInteger(destination.selectedIndex) ? destination.selectedIndex : town.selectedIndex;
+  }
+  if (destination?.mode === "dungeonEntrance") {
+    town.mode = "dungeonEntrance";
+    renderDungeonEntrance();
+    return;
+  }
+  if (destination?.mode === "selection" || destination?.mode === "arrival") {
+    showTownArrival();
+    return;
+  }
+  renderFacility();
 }
 
 function openCommerce(kind) {
