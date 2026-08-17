@@ -2576,6 +2576,15 @@ import {
         }
       };
     }
+    if (currentDepth === 50 && character) {
+      character = {
+        ...character,
+        eventFlags: {
+          ...(character.eventFlags || {}),
+          transfer_portal_b50f_unlocked: true
+        }
+      };
+    }
     startBgm(selectDungeonBgm());
     setDungeonColors(resolveFloorTheme(currentDepth, getDungeonColors()));
     applyCurrentFloorMist();

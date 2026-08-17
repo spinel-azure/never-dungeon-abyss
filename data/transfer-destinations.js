@@ -3,7 +3,7 @@ export const TRANSFER_DESTINATIONS = Object.freeze([
   checkpointDestination(20, "boss_fallen_mage_b19f_defeated", "transfer_portal_b20f_unlocked"),
   checkpointDestination(30, "boss_iron_maiden_b29f_defeated", "transfer_portal_b30f_unlocked"),
   checkpointDestination(40, "boss_wicker_man_b39f_defeated", "transfer_portal_b40f_unlocked"),
-  checkpointDestination(50, "boss_b49f_defeated", "transfer_portal_b50f_unlocked"),
+  checkpointDestination(50, "boss_eiskoenigin_b49f_defeated", "transfer_portal_b50f_unlocked"),
   checkpointDestination(60, "boss_b59f_defeated", "transfer_portal_b60f_unlocked"),
   checkpointDestination(70, "boss_b69f_defeated", "transfer_portal_b70f_unlocked"),
   checkpointDestination(80, "boss_b79f_defeated", "transfer_portal_b80f_unlocked"),

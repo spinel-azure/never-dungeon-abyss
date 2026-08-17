@@ -324,7 +324,7 @@ const ZODIAC_CARDS = [
   ["pisces", "PISCES", "パイシーズ", "復活"]
 ].map(([id, name, nameJa, concept]) => ({
   id: `zodiac_${id}`, rarity: "Z", cost: 8, name, nameJa, concept,
-  category: "zodiac", effectId: `zodiac_${id}`,
+  zodiac: id, category: "zodiac", effectId: `zodiac_${id}`,
   maxOwned: 1, maxCopies: 1
 })).map(card => card.id === "zodiac_capricorn" ? {
   ...card,

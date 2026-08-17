@@ -411,6 +411,71 @@ export const BOSSES = Object.freeze({
       remains: "――燃え尽き、朽ちた人型の残骸が転がっている。もう二度と起き上がる事はないだろう…。\n＊Aボタン：次へ"
     })
   }),
+  eiskoenigin_b49f: Object.freeze({
+    id: "eiskoenigin_b49f",
+    name: "エイスケーニギン",
+    level: 55,
+    floor: 49,
+    imageId: "eiskoenigin_b49f",
+    image: "images/bosses/boss_10.avif",
+    encounterImageId: "eiskoenigin_event_b49f",
+    encounterImage: "images/npc/NPC_event_09.avif",
+    defeatedEncounterImageId: "eiskoenigin_remains_b49f",
+    defeatedEncounterImage: "images/npc/NPC_event_10.avif",
+    race: "construct",
+    maxHp: 1350,
+    stats: Object.freeze({ str: 29, int: 27, agi: 17, dex: 23, luc: 18 }),
+    def: 27,
+    attack: 26,
+    experienceReward: 13000,
+    specialAttack: null,
+    actions: Object.freeze([
+      Object.freeze({ weight: 35, action: Object.freeze({
+        id: "ice_queen_scepter_strike", name: "王笏の一撃", actionType: "physicalAttack", element: "ice",
+        hitCount: 1, powerPerHit: 1.2, hitBonus: 0.03, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 30, action: Object.freeze({
+        id: "ice_queen_frozen_lance", name: "凍てつく氷槍", actionType: "spell", element: "ice",
+        spellPower: 34, powerMultiplier: 1, unavoidable: true, speedModifier: -2,
+        effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 25, action: Object.freeze({
+        id: "ice_queen_crystal_storm", name: "氷晶乱舞", actionType: "spell", element: "ice",
+        spellPower: 22, powerMultiplier: 0.75, hitCount: 2, unavoidable: true,
+        effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 10, when: Object.freeze({ hpRateBelow: 0.5 }), action: Object.freeze({
+        id: "ice_queen_absolute_zero", name: "絶対零度", actionType: "spell", element: "ice",
+        spellPower: 46, powerMultiplier: 1.1, unavoidable: true, speedModifier: -7,
+        effects: Object.freeze([])
+      }) })
+    ]),
+    reward: Object.freeze({ type: "none" }),
+    elementMultipliers: Object.freeze({ fire: 1.5, ice: 0, arcane: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      bleeding: Object.freeze({ resistancePoints: 100, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 100, immune: true }),
+      speed_down: Object.freeze({ resistancePoints: 80, immune: false })
+    }),
+    escapeRate: 0,
+    surpriseRate: 0,
+    surpriseRateMaximum: 0,
+    noDrop: true,
+    isBoss: true,
+    bossKind: "floor",
+    defeatedFlag: "boss_eiskoenigin_b49f_defeated",
+    room: Object.freeze({
+      requiresKey: true,
+      keyItemId: "red_rust_key_b49f",
+      unlockFlag: "red_door_b49f_unlocked"
+    }),
+    event: Object.freeze({
+      prompt: "部屋の中央には目を閉じ、王笏を携えた美しい女性の像が立っている。近づいてみますか？\n＊Aボタン：はい　Bボタン：いいえ",
+      start: "その美しさに魅せられて近づこうとした途端、巨大な氷の像は王笏を振りかざして襲いかかってきた！",
+      remains: "――氷の女王の体躯は溶けて、後には王笏とティアラが残るのみ…。\n＊Aボタン：次へ"
+    })
+  }),
   glacies_event_boss: Object.freeze({
     id: "glacies_event_boss",
     name: "グラキエス",

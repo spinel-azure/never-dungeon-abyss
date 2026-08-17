@@ -1165,8 +1165,13 @@ test("common HP and SP cards stack up to six copies and raise maximum vitals", (
 
 test("main card registry contains every rarity and all twelve zodiac cards", () => {
   assert.deepEqual([...new Set(CARDS.map(card => card.rarity))].sort(), ["C", "L", "R", "SR", "Z"]);
-  assert.equal(CARDS.filter(card => card.rarity === "Z").length, 12);
+  const zodiacCards = CARDS.filter(card => card.rarity === "Z");
+  assert.equal(zodiacCards.length, 12);
+  for (const card of zodiacCards) {
+    assert.equal(card.zodiac, card.id.replace(/^zodiac_/, ""), `${card.id} must expose its zodiac mark`);
+  }
   assert.equal(getCardById("zodiac_aries")?.cost, 8);
+  assert.equal(getCardById("zodiac_capricorn")?.zodiac, "capricorn");
 });
 
 test("Capricorn gains one long-battle stage every five turns up to three", () => {

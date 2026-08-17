@@ -5,7 +5,9 @@ import {
   acceptQuest,
   B2F_UNLOCK_QUEST_IDS,
   BRASS_BULL_QUEST_ID,
+  FIFTH_RED_DOOR_INVESTIGATION_QUEST_ID,
   FOURTH_RED_DOOR_INVESTIGATION_QUEST_ID,
+  GUILD_018_QUEST_ID,
   getQuestById,
   getQuestProgress,
   reportQuest
@@ -53,6 +55,26 @@ test("quest 015 follows quest 014 and restores the three B39F/B40F flags", () =>
   const report = reportQuest(character, quest.id);
   assert.equal(report.accepted, true);
   assert.equal(report.rewardCardId, GODDESS_MERCY_CARD_ID);
+  assert.equal(report.bonusGold, 5000);
+});
+
+test("quest 019 is prepared after quest 018 and restores the three B49F/B50F flags", () => {
+  const quest = getQuestById(FIFTH_RED_DOOR_INVESTIGATION_QUEST_ID);
+  assert.equal(quest.number, "019");
+  assert.equal(quest.title, "赤い扉の調査――その5");
+  assert.deepEqual(quest.prerequisiteQuestIds, [GUILD_018_QUEST_ID]);
+  assert.equal(quest.reward.cardId, PERPETUAL_TORCH_CARD_ID);
+
+  let character = questCharacter();
+  character.quests.active[quest.id] = { progress: 0 };
+  for (const [index, flag] of quest.persistentProgressFlags.entries()) {
+    character = { ...character, eventFlags: { ...character.eventFlags, [flag]: true } };
+    assert.equal(getQuestProgress(character, quest.id).progress, index + 1);
+  }
+
+  const report = reportQuest(character, quest.id);
+  assert.equal(report.accepted, true);
+  assert.equal(report.rewardCardId, PERPETUAL_TORCH_CARD_ID);
   assert.equal(report.bonusGold, 5000);
 });
 

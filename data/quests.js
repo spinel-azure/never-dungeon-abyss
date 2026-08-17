@@ -21,6 +21,8 @@ export const BRASS_BULL_QUEST_ID = "guild_014";
 export const FOURTH_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_015";
 export const B45F_SURVEY_QUEST_ID = "guild_017";
 export const B45F_SURVEY_SUPPLY_FLAG = "guild_017_large_potions_received";
+export const GUILD_018_QUEST_ID = "guild_018";
+export const FIFTH_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_019";
 export const THIEVES_CLUE_FLAGS = Object.freeze([
   "quest_011_clue_emblem_found", "quest_011_clue_ledger_found", "quest_011_clue_map_found"
 ]);
@@ -436,6 +438,34 @@ export const QUESTS = Object.freeze([
     ]),
     prerequisiteQuestIds: Object.freeze([FOURTH_RED_DOOR_INVESTIGATION_QUEST_ID]),
     available: true
+  }),
+  Object.freeze({
+    id: FIFTH_RED_DOOR_INVESTIGATION_QUEST_ID,
+    number: "019",
+    title: "赤い扉の調査――その5",
+    client: "ギルドマスター",
+    category: "other",
+    objectiveType: "custom",
+    targetDepth: 50,
+    requiredCount: 3,
+    objectiveLabel: "赤い扉を開け、中を調査する",
+    reward: Object.freeze({
+      type: "card", label: "デッキカード×1", amount: 1,
+      cardId: "legendary_unlimited_torch_gauge", bonusGold: 5000
+    }),
+    descriptionLabel: "目的",
+    description: Object.freeze([
+      "奈落のB49Fにある開かずの赤い扉を開けて",
+      "中を調査してほしい。例によって何があるか",
+      "分からない。十分に注意しろ。"
+    ]),
+    prerequisiteQuestIds: Object.freeze([GUILD_018_QUEST_ID]),
+    persistentProgressFlags: Object.freeze([
+      "red_door_b49f_unlocked",
+      "boss_eiskoenigin_b49f_defeated",
+      "transfer_portal_b50f_unlocked"
+    ]),
+    available: true
   })
 ]);
 
@@ -801,8 +831,8 @@ export function isDungeonDepthUnlocked(character, depth) {
   if (requestedDepth === 40) {
     return Boolean(character?.eventFlags?.boss_wicker_man_b39f_defeated);
   }
-  if (requestedDepth === 40) {
-    return Boolean(character?.eventFlags?.boss_wicker_man_b39f_defeated);
+  if (requestedDepth === 50) {
+    return Boolean(character?.eventFlags?.boss_eiskoenigin_b49f_defeated);
   }
   return true;
 }

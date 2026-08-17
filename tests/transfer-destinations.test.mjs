@@ -21,7 +21,7 @@ test("transfer destinations are data-driven and expose only unlocked floors", ()
   assert.deepEqual(getUnlockedTransferDestinations(character).map(entry => entry.depth), [10, 20, 30]);
   assert.equal(isTransferDestinationUnlocked(character, 30), true);
   character.eventFlags.boss_wicker_man_b39f_defeated = true;
-  character.eventFlags.boss_b49f_defeated = true;
+  character.eventFlags.boss_eiskoenigin_b49f_defeated = true;
   character.eventFlags.boss_b59f_defeated = true;
   character.eventFlags.boss_b69f_defeated = true;
   character.eventFlags.boss_b79f_defeated = true;
