@@ -40,7 +40,8 @@ test("NPC charge skill cut-ins use the four battle assets and a sequential 2.5 s
   for (const image of ["NPC_01.avif", "NPC_02.avif", "NPC_03.avif", "NPC_04.avif"]) {
     assert.match(support, new RegExp(`images/battle_effects/${image}`));
   }
-  assert.match(css, /\.npc-charge-cut-in img\s*\{[\s\S]*height: 70%/);
+  assert.match(html, /<section id="battleScreen"[\s\S]*?<div id="npcChargeCutIn"[\s\S]*?<div class="battle-enemy-stage">/);
+  assert.match(css, /\.npc-charge-cut-in img\s*\{[\s\S]*height: 95%[\s\S]*max-width: 95%/);
   assert.match(css, /animation: npc-charge-cut-in-run 2\.5s/);
   assert.match(css, /prefers-reduced-motion: reduce/);
   assert.match(battle, /event\.type === "npcChargeSkill"[\s\S]*await playNpcChargeCutIn\(event\)/);
