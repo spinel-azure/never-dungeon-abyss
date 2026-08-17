@@ -37,7 +37,8 @@ const battleUi = {
   onEscape: () => {},
   openItems: () => false,
   openSkills: () => false,
-  playSe: () => {}
+  playSe: () => {},
+  onNpcSupport: () => {}
 };
 
 export function configureBattle(options) {
@@ -270,6 +271,7 @@ async function playPresentationEvents() {
   for (const event of events) {
     if (!battleUi.active) return;
     applyPresentationHp(event);
+    if (event.npcId) battleUi.onNpcSupport(event.npcId);
     renderBattleVitals();
     if (event.targetSide === "player") {
       const hp = battleUi.presentationHp?.player ?? battleUi.battle.player.hp;

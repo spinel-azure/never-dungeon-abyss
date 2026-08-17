@@ -25,12 +25,12 @@ test("tavern menu reserves the requested five-command layout", () => {
   }
 });
 
-test("NPC hiring remains disabled while past rumors are available", () => {
+test("NPC hiring opens its implemented submenu while past rumors remain available", () => {
   assert.match(
     townSource,
-    /UNIMPLEMENTED_TAVERN_COMMANDS\s*=\s*Object\.freeze\(new Set\(\["npc-hire"\]\)\)/
+    /npcHire:\s*\[[\s\S]*?"npc-search"[\s\S]*?"npc-roster"[\s\S]*?"npc-hire-return"/
   );
-  assert.match(townSource, /button\.disabled\s*=\s*empty\s*\|\|\s*unimplemented/);
+  assert.match(townSource, /if \(command === "npc-hire"\)/);
   assert.match(townSource, /facilityId === "tavern" && id === "past-rumors"/);
 });
 

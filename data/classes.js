@@ -14,6 +14,7 @@ import { normalizeDepthReturnSettlement } from "./experience-settlement.js";
 import { getLevelUnlockedSkillIds } from "./skills.js";
 import { createInitialKeyItemState, normalizeKeyItemState } from "./key-items.js";
 import { getItem } from "./items.js";
+import { createInitialNpcSystem, normalizeNpcSystem } from "./npc-party.js";
 
 export const STAT_KEYS = Object.freeze(["str", "int", "agi", "dex", "luc"]);
 
@@ -83,6 +84,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     eventFlags: {},
     adventureStats: normalizeAdventureStats(),
     marathonChallenge: createInitialMarathonChallenge(),
+    npcSystem: createInitialNpcSystem(),
     highestDungeonDepthReached: 1,
     gold: 0,
     experience: 0,
@@ -153,6 +155,7 @@ export function normalizeCharacter(character) {
       : {},
     adventureStats: normalizeAdventureStats(character.adventureStats),
     marathonChallenge: normalizeMarathonChallenge(character.marathonChallenge),
+    npcSystem: normalizeNpcSystem(character.npcSystem),
     highestDungeonDepthReached: Math.max(
       inferredDepth,
       Math.floor(Number(character.highestDungeonDepthReached) || 1)

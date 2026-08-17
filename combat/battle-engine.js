@@ -21,6 +21,7 @@ import { getItemUnavailableReason } from "./resolve-item-use.js";
 import { resolvePassiveInstantDeath } from "./passive-instant-death.js";
 import { getCardById, hasCardEffect } from "../data/cards.js";
 import { getEffectiveSpCost } from "./sp-cost.js";
+import { applyNpcAfterPlayerAttack, applyNpcGuardSupport, applyNpcTurnEnd, applyNpcTurnStart } from "./npc-support.js";
 
 export function createBattleState({ character, enemy }) {
   const vorpalSwordEquippedAtStart = character?.equipment?.weaponId === "vorpal_sword";
@@ -52,6 +53,9 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
   next.presentationEvents = [];
   if (playerAction.spCost > 0) next.player.sp -= playerAction.spCost;
 
+  if (playerCommand.type === "guard") applyNpcGuardSupport(next);
+  applyNpcTurnStart(next, rng);
+
   for (const entry of order) {
     if (next.outcome) break;
     const actor = next[entry.side];
@@ -65,6 +69,7 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
       finishAction(next, entry.side);
       continue;
     }
+    const targetHpBefore = target.hp;
     executeAction({
       battle: next,
       action: entry.action,
@@ -76,7 +81,11 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
     });
     finishAction(next, entry.side);
     updateOutcome(next);
+    if (!next.outcome && entry.side === "player" && target.hp < targetHpBefore) {
+      applyNpcAfterPlayerAttack(next);
+    }
   }
+  if (!next.outcome) applyNpcTurnEnd(next);
   if (!next.outcome) {
     next.turn += 1;
     next.phase = "command";

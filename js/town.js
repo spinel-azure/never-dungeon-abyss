@@ -20,6 +20,8 @@ import { getInnStayFee } from "./character-services.js";
 import { getTavernRumorTypewriterParts } from "../data/tavern-rumors.js";
 import { CHARACTER_NAME_MAX_LENGTH, CHARACTER_RENAME_COST, normalizeCharacterName } from "../data/character-name.js";
 import { getUnlockedTransferDestinations } from "../data/transfer-destinations.js";
+import { NPC_DEFINITIONS, NPC_SUPPORT_ENABLED, getNpcDefinition } from "../data/npc-definitions.js";
+import { getNpcHireFee } from "../data/npc-party.js";
 
 const FACILITY_COMMANDS = Object.freeze({
   inn: [
@@ -45,10 +47,14 @@ const FACILITY_COMMANDS = Object.freeze({
   tavern: [
     ["npc-hire", "NPC雇用"], ["rumors", "噂話"], ["past-rumors", "過去の噂話"],
     ["talk", "話す"], ["return", "町に戻る"], ["empty-1", ""]
+  ],
+  npcHire: [
+    ["npc-search", "NPCを探す"], ["npc-roster", "名簿から雇用"], ["npc-hire-return", "戻る"],
+    ["empty-1", ""], ["empty-2", ""], ["empty-3", ""]
   ]
 });
 
-const UNIMPLEMENTED_TAVERN_COMMANDS = Object.freeze(new Set(["npc-hire"]));
+const UNIMPLEMENTED_TAVERN_COMMANDS = Object.freeze(new Set());
 
 const TAVERN_FACILITY = Object.freeze({
   id: "tavern",
@@ -59,6 +65,8 @@ const TAVERN_FACILITY = Object.freeze({
   portraitAlt: "酒場の女主人ローザ",
   background: "images/background/town_07.avif"
 });
+
+const NPC_HIRE_FACILITY = Object.freeze({ ...TAVERN_FACILITY, id: "npcHire", label: "NPC雇用" });
 
 const TOWN_TYPEWRITER_DELAYS = Object.freeze({ slow: 75, normal: 42, fast: 20 });
 const townTypewriter = {
@@ -137,6 +145,9 @@ const town = {
   onEditDeck: () => {},
   onOpenQuestHistory: () => {},
   onOpenRumorHistory: () => {},
+  onRegisterNpc: () => ({ accepted: false }),
+  onHireNpc: () => ({ accepted: false }),
+  onRenewNpc: () => ({ accepted: false }),
   onOpenAdventureRecords: () => {},
   onOpenCardGallery: () => {},
   facilityPreviewCommand: "",
@@ -191,6 +202,10 @@ export function configureTown(options) {
   town.commercePointerArmedIndex = -1;
   town.commerceKind = "";
   town.commerceItems = [];
+  town.npcManagementKind = "";
+  town.npcManagementItems = [];
+  town.npcManagementIndex = 0;
+  town.npcManagementConfirm = false;
   town.transferOverlay = document.querySelector("#transferDestinationOverlay");
   town.transferList = document.querySelector("#transferDestinationList");
   town.transferPager = document.querySelector("#transferDestinationPager");
@@ -207,6 +222,13 @@ export function configureTown(options) {
     const image = new Image();
     image.decoding = "async";
     image.src = TAVERN_FACILITY.image;
+    image.decode().catch(() => {});
+    town.portraitPreloads.push(image);
+  }
+  for (const npc of NPC_DEFINITIONS) {
+    const image = new Image();
+    image.decoding = "async";
+    image.src = npc.image;
     image.decode().catch(() => {});
     town.portraitPreloads.push(image);
   }
@@ -309,6 +331,16 @@ export function configureTown(options) {
     return button;
   });
   town.commerceList.addEventListener("click", event => {
+    if (town.mode === "npcManagement") {
+      const button = event.target.closest("[data-npc-index]");
+      if (!button) return;
+      const index = Number(button.dataset.npcIndex);
+      if (!Number.isInteger(index)) return;
+      town.npcManagementIndex = index;
+      town.npcManagementConfirm = false;
+      renderNpcManagement();
+      return;
+    }
     if (town.mode !== "commerce") return;
     const button = event.target.closest("[data-commerce-index]");
     if (!button) return;
@@ -436,6 +468,7 @@ export function handleTownInput(action) {
   if (town.mode === "commerceQuantity") return handleCommerceQuantityInput(action);
   if (town.mode === "commerceConfirm") return handleCommerceConfirmationInput(action);
   if (town.mode === "commerce") return handleCommerceInput(action);
+  if (town.mode === "npcManagement") return handleNpcManagementInput(action);
   if (town.mode === "tavernRumor") return handleTavernRumorInput(action);
   if (town.mode.startsWith("quest")) return handleQuestInput(action);
   if (town.mode === "registration") return handleRegistrationInput(action);
@@ -964,9 +997,9 @@ function returnFromFacility() {
 }
 
 function currentFacility() {
-  return town.subFacilityId === "tavern"
-    ? TAVERN_FACILITY
-    : TOWN_FACILITIES[town.selectedIndex] || getTownFacility("guild");
+  if (town.subFacilityId === "tavern") return TAVERN_FACILITY;
+  if (town.subFacilityId === "npcHire") return NPC_HIRE_FACILITY;
+  return TOWN_FACILITIES[town.selectedIndex] || getTownFacility("guild");
 }
 
 function startTownNameBanner() {
@@ -1244,6 +1277,8 @@ function showFacilityCommands(facilityId) {
       || (facilityId === "guild" && ["history", "tavern"].includes(id))
       || (facilityId === "library" && id === "records")
       || (facilityId === "library" && id === "cards")
+      || (facilityId === "tavern" && id === "npc-hire" && NPC_SUPPORT_ENABLED)
+      || (facilityId === "npcHire" && ["npc-search", "npc-roster", "npc-hire-return"].includes(id))
       || (facilityId === "tavern" && id === "rumors" && Boolean(town.getUnreadRumor()))
       || (facilityId === "tavern" && id === "past-rumors")
       || (id === "talk" && ["guild", "inn", "temple", "shop", "library", "tavern"].includes(facilityId));
@@ -1310,6 +1345,25 @@ function activateFacilityService(command) {
   }
   if (command === "tavern") {
     if (currentFacility().id !== "guild") return false;
+    town.subFacilityId = "tavern";
+    town.facilityCommandIndex = 0;
+    renderFacility();
+    return true;
+  }
+  if (command === "npc-hire") {
+    if (currentFacility().id !== "tavern" || !NPC_SUPPORT_ENABLED) return false;
+    town.subFacilityId = "npcHire";
+    town.facilityCommandIndex = 0;
+    renderFacility();
+    return true;
+  }
+  if (command === "npc-search" || command === "npc-roster") {
+    if (currentFacility().id !== "npcHire") return false;
+    openNpcManagement(command === "npc-search" ? "search" : "roster");
+    return true;
+  }
+  if (command === "npc-hire-return") {
+    if (currentFacility().id !== "npcHire") return false;
     town.subFacilityId = "tavern";
     town.facilityCommandIndex = 0;
     renderFacility();
@@ -1548,6 +1602,141 @@ function handleInnStayConfirmationInput(action) {
     town.messageEl.textContent = "女将ヨハンナ：そうかい。無理をするんじゃないよ？";
     return true;
   }
+  return true;
+}
+
+function openNpcManagement(kind) {
+  const state = town.getCharacter()?.npcSystem || {};
+  const registered = new Set(state.registeredIds || []);
+  const active = new Set(state.activeIds || []);
+  town.npcManagementKind = kind;
+  town.npcManagementConfirm = false;
+  town.npcManagementIndex = 0;
+  town.npcManagementItems = kind === "search"
+    ? NPC_DEFINITIONS.filter(npc => !registered.has(npc.id))
+    : NPC_DEFINITIONS.filter(npc => registered.has(npc.id)).map(npc => ({ ...npc, active: active.has(npc.id) }));
+  town.mode = "npcManagement";
+  town.commerceOverlay.hidden = false;
+  town.guildQuestOverlay.hidden = true;
+  town.commerceTitle.textContent = kind === "search" ? "NPCを探す" : "名簿から雇用";
+  renderNpcManagement();
+  resetTownViewport();
+}
+
+export function openPendingNpcRenewal() {
+  const renewal = town.getCharacter()?.npcSystem?.renewal;
+  if (!town.active || !renewal?.pending) return false;
+  const pendingIds = (renewal.ids || []).filter(id => !(renewal.completedIds || []).includes(id));
+  town.npcManagementKind = "renewal";
+  town.npcManagementConfirm = false;
+  town.npcManagementIndex = 0;
+  town.npcManagementItems = pendingIds.map(getNpcDefinition).filter(Boolean);
+  if (!town.npcManagementItems.length) return false;
+  town.mode = "npcManagement";
+  town.commerceOverlay.hidden = false;
+  town.guildQuestOverlay.hidden = true;
+  town.commerceTitle.textContent = "雇用更新";
+  renderNpcManagement();
+  return true;
+}
+
+function renderNpcManagement() {
+  const character = town.getCharacter();
+  town.npcManagementIndex = Math.max(0, Math.min(town.npcManagementIndex, town.npcManagementItems.length - 1));
+  town.commerceList.replaceChildren(...town.npcManagementItems.map((npc, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "town-commerce-entry";
+    button.dataset.npcIndex = String(index);
+    button.classList.toggle("is-selected", index === town.npcManagementIndex);
+    const name = document.createElement("span");
+    name.textContent = `${npc.name}【${npc.jobLabel}】`;
+    const state = document.createElement("small");
+    state.textContent = npc.active ? "同行中" : town.npcManagementKind === "search" ? "無料" : `${getNpcHireFee(character)}G`;
+    button.append(name, state);
+    return button;
+  }));
+  if (town.commerceGold) town.commerceGold.textContent = Math.max(0, Number(character?.gold) || 0).toLocaleString("en-US");
+  const npc = town.npcManagementItems[town.npcManagementIndex];
+  if (!npc) {
+    town.portrait.hidden = true;
+    town.messageEl.textContent = town.npcManagementKind === "search"
+      ? "現在、名簿へ登録できるNPCはいません。\n＊Bボタン：戻る"
+      : "名簿に登録されたNPCはいません。\n＊Bボタン：戻る";
+    return;
+  }
+  town.portrait.src = npc.image;
+  town.portrait.alt = `${npc.name}【${npc.jobLabel}】`;
+  town.portrait.hidden = false;
+  town.portraitPlaceholder.hidden = true;
+  const fee = getNpcHireFee(character);
+  if (town.npcManagementKind === "renewal") {
+    town.messageEl.textContent = `${npc.name}を引き続き雇用しますか？\n更新費用：${fee}G　所持金：${character.gold}G\n＊Aボタン：はい　Bボタン：いいえ`;
+  } else if (town.npcManagementConfirm) {
+    town.messageEl.textContent = town.npcManagementKind === "search"
+      ? `${npc.name}【${npc.jobLabel}】を名簿へ登録しますか？\n登録料：無料\n＊Aボタン：はい　Bボタン：いいえ`
+      : `${npc.name}【${npc.jobLabel}】を雇用しますか？\n${npc.supportDescription}\n雇用費：${fee}G　所持金：${character.gold}G\n＊Aボタン：はい　Bボタン：いいえ`;
+  } else {
+    town.messageEl.textContent = `${npc.name}【${npc.jobLabel}】\n${npc.supportDescription}\n＊Aボタン：選択　Bボタン：戻る`;
+  }
+}
+
+function handleNpcManagementInput(action) {
+  if (["up", "down", "left", "right"].includes(action)) {
+    if (!town.npcManagementItems.length || town.npcManagementConfirm || town.npcManagementKind === "renewal") return true;
+    const amount = action === "up" || action === "left" ? -1 : 1;
+    town.npcManagementIndex = (town.npcManagementIndex + amount + town.npcManagementItems.length) % town.npcManagementItems.length;
+    town.playSe("cursorMove");
+    renderNpcManagement();
+    return true;
+  }
+  const npc = town.npcManagementItems[town.npcManagementIndex];
+  if (town.npcManagementKind === "renewal") {
+    if (!npc || !["confirm", "cancel"].includes(action)) return true;
+    const result = town.onRenewNpc(npc.id, action === "confirm");
+    town.playSe(result?.continued ? "confirm" : "cancel");
+    if (result?.forcedDismissal) {
+      town.messageEl.textContent = `雇用費を支払えないため、\n${npc.name}との同行を終了した。`;
+      window.setTimeout(() => {
+        if (!openPendingNpcRenewal()) renderFacility();
+      }, 1200);
+    } else if (!openPendingNpcRenewal()) renderFacility();
+    return true;
+  }
+  if (action === "cancel") {
+    if (town.npcManagementConfirm) {
+      town.npcManagementConfirm = false;
+      town.playSe("cancel");
+      renderNpcManagement();
+    } else {
+      town.playSe("cancel");
+      town.commerceOverlay.hidden = true;
+      renderFacility();
+    }
+    return true;
+  }
+  if (action !== "confirm" || !npc) return true;
+  if (!town.npcManagementConfirm) {
+    if (npc.active) {
+      town.playSe("cursorMove");
+      town.messageEl.textContent = `${npc.name}はすでに同行中です。`;
+      return true;
+    }
+    town.npcManagementConfirm = true;
+    town.playSe("confirm");
+    renderNpcManagement();
+    return true;
+  }
+  const result = town.npcManagementKind === "search" ? town.onRegisterNpc(npc.id) : town.onHireNpc(npc.id);
+  town.playSe(result?.accepted ? "item" : "cursorMove");
+  if (!result?.accepted) {
+    const reason = ({ insufficientGold: "所持金が足りません。", partyFull: "同行枠は3人までです。",
+      duplicateJob: "同じ職業のNPCは同時に雇用できません。", alreadyActive: "すでに同行中です。" })[result?.reason] || "手続きを完了できませんでした。";
+    town.npcManagementConfirm = false;
+    town.messageEl.textContent = reason;
+    return true;
+  }
+  openNpcManagement(town.npcManagementKind);
   return true;
 }
 

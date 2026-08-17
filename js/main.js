@@ -89,8 +89,10 @@ import {
 import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
 import { EffectEngine } from "./effects/effect-engine.js";
 import { hasUncertainLoot, isHighlightedLotCardRarity, isHighlightedLotEquipment } from "./loot-identification.js";
-import { configureTown, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js";
+import { configureTown, openPendingNpcRenewal, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js";
+import { flashNpcPartyStatus, renderNpcPartyStatus } from "./npc-party-ui.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
+import { beginNpcRenewal, hireNpc, recordNpcExpeditionDepth, registerNpc, resolveNpcRenewal } from "../data/npc-party.js";
 import { getActivePlayTimeDelta, normalizeAdventureStats, recordInnStay, recordShopPurchase, recordTempleDonation } from "../data/adventure-stats.js";
 import { getAdventureChronicle } from "../data/adventure-records.js";
 import { getEquipmentItem } from "../data/equipment.js";
@@ -210,6 +212,7 @@ import {
   const gamepadNotification = document.getElementById("gamepadNotification");
   const menuScreen = document.getElementById("menuScreen");
   const dungeonCommands = document.getElementById("dungeonCommands");
+  const npcPartyStatus = document.querySelector(".npc-party-status");
   const townScreen = document.getElementById("townScreen");
   const levelUpEffect = document.getElementById("levelUpEffect");
   const questCompleteEffect = document.getElementById("questCompleteEffect");
@@ -450,6 +453,33 @@ import {
     onEditDeck: openDeckEditor,
     onOpenQuestHistory: openQuestHistory,
     onOpenRumorHistory: openRumorHistory,
+    onRegisterNpc: npcId => {
+      const result = registerNpc(character?.npcSystem, npcId);
+      if (result.accepted) {
+        character = { ...character, npcSystem: result.system };
+        updateCharacterUi();
+        saveGame();
+      }
+      return result;
+    },
+    onHireNpc: npcId => {
+      const result = hireNpc(character, npcId);
+      if (result.accepted) {
+        character = result.character;
+        updateCharacterUi();
+        saveGame();
+      }
+      return result;
+    },
+    onRenewNpc: (npcId, continued) => {
+      const result = resolveNpcRenewal(character, npcId, continued);
+      if (result.accepted) {
+        character = result.character;
+        updateCharacterUi();
+        saveGame();
+      }
+      return result;
+    },
     onOpenAdventureRecords: openAdventureRecords,
     onOpenCardGallery: openLibraryCardGallery,
     getUnreadRumor: () => getUnreadTavernRumor(character, {
@@ -511,7 +541,8 @@ import {
         onUse
       });
     },
-    playSe
+    playSe,
+    onNpcSupport: npcId => flashNpcPartyStatus(npcPartyStatus, npcId)
   });
 
   configureSkillOverlay({
@@ -1083,6 +1114,7 @@ import {
       effectForced: hasCardEffect(character?.cards?.deckSlots, "force_torch_effect_active")
     });
     renderCharacterStatus();
+    renderNpcPartyStatus(npcPartyStatus, character);
     const statusName = document.getElementById("statusName");
     const statusJob = document.getElementById("statusJob");
     const statusLevel = document.getElementById("statusLevel");
@@ -1459,6 +1491,7 @@ import {
     applyFireFloorStep();
     applyColdFloorStep();
     if (!character) return;
+    character = recordNpcExpeditionDepth(character, currentDepth);
     character.condition = hasCharacterStatus(character, "bleeding") ? "BLEED"
       : hasCharacterStatus(character, "poison") ? "POISON" : "GOOD";
     const next = recordFloorExploration(character, { depth: currentDepth, explored });
@@ -1864,6 +1897,7 @@ import {
       lostExperience = preserveExperience ? 0 : carriedExperience;
       preservedExperience = preserveExperience ? carriedExperience : 0;
       character = recordFloorExploration(character, { depth: 0, explored: [] });
+      character = beginNpcRenewal(character, `defeat-${Date.now()}`);
     }
     worldLocation = "town";
     clearPresenceIncreaseReduction();
@@ -1896,6 +1930,7 @@ import {
     await runRevivalPrayer();
     say(`司祭アーヴァイン：おお…！女神の祈りが届いたか…！よくぞ目覚めた…！${experienceMessage}`);
     if (worldLocation === "town" && getTownState().facilityId === "temple") startBgm("temple");
+    window.setTimeout(() => openPendingNpcRenewal(), 0);
   }
 
   async function runDefeatPresentation() {
@@ -2310,6 +2345,7 @@ import {
       settled = settleLootBag(character);
       character = settled.character;
       character = recordFloorExploration(character, { depth: 0, explored: [] });
+      character = beginNpcRenewal(character, `return-${Date.now()}`);
       updateCharacterUi();
     }
     worldLocation = "town";
@@ -2320,7 +2356,9 @@ import {
     setPlayerInputEnabled(false);
     openTown({ registrationRequired: !character, facilityId: "dungeon", mode: "dungeonEntrance" });
     if (character && bagHasLoot(bag)) {
-      showLootIdentification(bag, settled);
+      showLootIdentification(bag, settled, { onClose: () => openPendingNpcRenewal() });
+    } else {
+      window.setTimeout(() => openPendingNpcRenewal(), 0);
     }
     saveGame();
   }
@@ -2496,6 +2534,7 @@ import {
         const reward = grantCard(character.cards, MARATHON_REWARD_CARD_ID, 1, character.deckCost);
         character = { ...character, cards: reward.cards };
       }
+      character = recordNpcExpeditionDepth(character, currentDepth);
     }
     if (currentDepth === 10 && character) {
       character = {
