@@ -206,7 +206,9 @@ export function configureTown(options) {
   town.npcManagementItems = [];
   town.npcManagementIndex = 0;
   town.npcManagementConfirm = false;
+  town.npcManagementPointerArmedIndex = -1;
   town.npcManagementReturn = null;
+  town.questPointerArmedIndex = -1;
   town.transferOverlay = document.querySelector("#transferDestinationOverlay");
   town.transferList = document.querySelector("#transferDestinationList");
   town.transferPager = document.querySelector("#transferDestinationPager");
@@ -337,8 +339,15 @@ export function configureTown(options) {
       if (!button) return;
       const index = Number(button.dataset.npcIndex);
       if (!Number.isInteger(index)) return;
+      if (town.npcManagementPointerArmedIndex === index) {
+        town.npcManagementPointerArmedIndex = -1;
+        handleNpcManagementInput("confirm");
+        return;
+      }
       town.npcManagementIndex = index;
       town.npcManagementConfirm = false;
+      town.npcManagementPointerArmedIndex = index;
+      town.playSe("cursorMove");
       renderNpcManagement();
       return;
     }
@@ -750,6 +759,7 @@ function handleQuestInput(action) {
     town.questIndex = pageIndexes[
       (currentPosition + direction) % pageIndexes.length
     ];
+    town.questPointerArmedIndex = -1;
     renderGuildQuestList();
     return true;
   }
@@ -761,10 +771,12 @@ function handleQuestInput(action) {
     town.playSe("cursorMove");
     town.questPage = (town.questPage + (action === "right" ? 1 : pageCount - 1)) % pageCount;
     town.questIndex = visibleQuestIndexes[town.questPage * pageSize] ?? visibleQuestIndexes[0] ?? 0;
+    town.questPointerArmedIndex = -1;
     renderGuildQuestList();
     return true;
   }
   if (action !== "confirm") return true;
+  town.questPointerArmedIndex = -1;
   activateSelectedQuest();
   return true;
 }
@@ -1613,6 +1625,7 @@ function openNpcManagement(kind) {
   town.npcManagementKind = kind;
   town.npcManagementConfirm = false;
   town.npcManagementIndex = 0;
+  town.npcManagementPointerArmedIndex = -1;
   town.npcManagementItems = kind === "search"
     ? NPC_DEFINITIONS.filter(npc => !registered.has(npc.id))
     : NPC_DEFINITIONS.filter(npc => registered.has(npc.id)).map(npc => ({ ...npc, active: active.has(npc.id) }));
@@ -1636,6 +1649,7 @@ export function openPendingNpcRenewal() {
   town.npcManagementKind = "renewal";
   town.npcManagementConfirm = false;
   town.npcManagementIndex = 0;
+  town.npcManagementPointerArmedIndex = -1;
   town.npcManagementItems = pendingIds.map(getNpcDefinition).filter(Boolean);
   if (!town.npcManagementItems.length) return false;
   town.mode = "npcManagement";
@@ -1695,6 +1709,7 @@ function handleNpcManagementInput(action) {
     if (!town.npcManagementItems.length || town.npcManagementConfirm || town.npcManagementKind === "renewal") return true;
     const amount = action === "up" || action === "left" ? -1 : 1;
     town.npcManagementIndex = (town.npcManagementIndex + amount + town.npcManagementItems.length) % town.npcManagementItems.length;
+    town.npcManagementPointerArmedIndex = -1;
     town.playSe("cursorMove");
     renderNpcManagement();
     return true;
@@ -1754,6 +1769,7 @@ function closeNpcManagement() {
   town.npcManagementKind = "";
   town.npcManagementItems = [];
   town.npcManagementConfirm = false;
+  town.npcManagementPointerArmedIndex = -1;
   town.commerceOverlay.hidden = true;
   town.commerceOverlay.classList.remove("is-npc-management");
   town.commandRoot.hidden = false;
@@ -2125,6 +2141,7 @@ function openGuildQuestList(kind) {
   town.mode = kind === "report" ? "questReportList" : "questAcceptList";
   town.questIndex = getVisibleQuestIndexes()[0] ?? 0;
   town.questPage = 0;
+  town.questPointerArmedIndex = -1;
   town.mosaic.hidden = true;
   town.background.src = "images/background/guild_quest.avif";
   town.background.alt = kind === "report" ? "依頼報告の掲示板" : "依頼受注の掲示板";
@@ -2183,13 +2200,15 @@ function renderGuildQuestList() {
       button.append(`　${progress.progress}/${quest.requiredCount}`);
     }
     button.addEventListener("click", () => {
-      if (town.questIndex !== index) {
-        town.questIndex = index;
-        town.playSe("cursorMove");
-        renderGuildQuestList();
+      if (town.questPointerArmedIndex === index) {
+        town.questPointerArmedIndex = -1;
+        activateSelectedQuest();
         return;
       }
-      activateSelectedQuest();
+      town.questIndex = index;
+      town.questPointerArmedIndex = index;
+      town.playSe("cursorMove");
+      renderGuildQuestList();
     });
     return button;
   }));

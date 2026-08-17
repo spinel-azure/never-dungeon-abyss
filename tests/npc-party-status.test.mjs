@@ -30,3 +30,12 @@ test("NPC management reserves four rows and follows keyboard selection while scr
   assert.match(town, /commerceList\.children\[town\.npcManagementIndex\]\?\.scrollIntoView\?\.\(\{ block: "nearest" \}\)/);
   assert.match(town, /commerceOverlay\.classList\.remove\("is-npc-management"\)/);
 });
+
+test("touch selection requires a second tap for NPC hiring and guild quests", async () => {
+  const town = await readFile(new URL("js/town.js", root), "utf8");
+
+  assert.match(town, /npcManagementPointerArmedIndex === index[\s\S]*handleNpcManagementInput\("confirm"\)/);
+  assert.match(town, /npcManagementPointerArmedIndex = index[\s\S]*renderNpcManagement\(\)/);
+  assert.match(town, /questPointerArmedIndex === index[\s\S]*activateSelectedQuest\(\)/);
+  assert.match(town, /questPointerArmedIndex = index[\s\S]*renderGuildQuestList\(\)/);
+});
