@@ -2880,8 +2880,7 @@ import {
     mode: getTouchControlsMode(),
     isInputAllowed: () => Boolean(
       character
-      && worldLocation === "dungeon"
-      && isPlayerInputEnabled()
+      && ((worldLocation === "dungeon" && isPlayerInputEnabled()) || isTownOpen())
       && !isBattleActive()
       && !isMenuOpen()
       && !sceneTransitionRunning
@@ -2890,10 +2889,9 @@ import {
       && itemOverlay.hidden
       && skillOverlay.hidden
       && !document.body.classList.contains("title-active")
-      && !document.body.classList.contains("town-active")
     ),
-    manualMove,
-    manualTurn,
+    manualMove: amount => dispatchGamepadAction(amount > 0 ? "up" : "down"),
+    manualTurn: amount => dispatchGamepadAction(amount < 0 ? "left" : "right"),
     onUserOperation: recordUserInput
   });
 

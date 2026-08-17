@@ -42,11 +42,13 @@ test("floating touch UI is data-driven, persisted, and restricted to the lower c
   assert.match(html, /data-option="touchControlsMode"/);
   assert.match(menu, /touchControlsMode:\s*"auto"/);
   assert.match(menu, /touchControlsMode:\s*menu\.touchControlsMode/);
-  assert.match(main, /worldLocation === "dungeon"/);
+  assert.match(main, /\(worldLocation === "dungeon" && isPlayerInputEnabled\(\)\) \|\| isTownOpen\(\)/);
+  assert.match(main, /manualMove: amount => dispatchGamepadAction\(amount > 0 \? "up" : "down"\)/);
+  assert.match(main, /manualTurn: amount => dispatchGamepadAction\(amount < 0 \? "left" : "right"\)/);
   assert.match(main, /!isBattleActive\(\)/);
   assert.match(main, /!state\.autoWalkerActive/);
   assert.match(css, /\.floating-stick-zone\{[^}]*position:fixed/);
-  assert.match(css, /body\.town-active \.floating-stick-zone/);
+  assert.doesNotMatch(css, /body\.town-active \.floating-stick-zone/);
   for (const eventName of ["pointercancel", "lostpointercapture", "visibilitychange", "orientationchange", "pageshow", "blur", "resize"]) {
     assert.match(source, new RegExp(eventName));
   }
