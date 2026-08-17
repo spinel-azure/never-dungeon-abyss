@@ -137,10 +137,13 @@ import { selectRevivalGoddessImage } from "../data/revival-presentation.js";
 import { getFireFloorStepDamage, isFireFloorDepth } from "../data/fire-floor.js";
 import { getColdFloorStepDamage, isColdFloorDepth } from "../data/cold-floor.js";
 import {
+  invalidateLongMarchChallenge,
   invalidateMarathonChallenge,
   MARATHON_BOSS_FLOORS,
   MARATHON_REWARD_CARD_ID,
+  recordLongMarchDescent,
   recordMarathonDescent,
+  startLongMarchChallenge,
   startMarathonChallenge
 } from "../data/marathon-challenge.js";
 import {
@@ -1176,7 +1179,7 @@ import {
     void achievementUnlockedEffect.offsetWidth;
     playSe("achievementUnlocked");
     achievementUnlockedEffect.classList.add("is-active");
-    await wait(2800);
+    await wait(4200);
     achievementUnlockedEffect.classList.remove("is-active");
     achievementUnlockedEffect.hidden = true;
     achievementNotificationRunning = false;
@@ -1882,6 +1885,7 @@ import {
     let settled = null;
     if (character) {
       character = invalidateMarathonChallenge(character);
+      character = invalidateLongMarchChallenge(character);
       const carriedExperience = Math.max(
         0,
         Math.floor(Number(character.carriedExperience) || 0)
@@ -2252,6 +2256,7 @@ import {
       onDark: () => {
         currentDepth = 1;
         character = startMarathonChallenge(character);
+        character = startLongMarchChallenge(character);
         setDungeonColors(resolveFloorTheme(currentDepth, getDungeonColors()));
         applyCurrentFloorMist();
         state.treasureCompassActive = false;
@@ -2276,6 +2281,7 @@ import {
       onDark: () => {
         currentDepth = destination;
         character = invalidateMarathonChallenge(character);
+        character = invalidateLongMarchChallenge(character);
         setDungeonColors(resolveFloorTheme(currentDepth, getDungeonColors()));
         applyCurrentFloorMist();
         character.highestDungeonDepthReached = Math.max(
@@ -2341,6 +2347,7 @@ import {
     let settled = null;
     if (character) {
       character = invalidateMarathonChallenge(character);
+      character = invalidateLongMarchChallenge(character);
       character.pendingExperienceSettlement = createDepthReturnSettlement(
         character,
         returnFloor
@@ -2534,6 +2541,10 @@ import {
       });
       character = marathon.character;
       marathonCompleted = marathon.completed;
+      character = recordLongMarchDescent(character, {
+        fromDepth: previousDepth,
+        toDepth: currentDepth
+      }).character;
       if (marathonCompleted) {
         const reward = grantCard(character.cards, MARATHON_REWARD_CARD_ID, 1, character.deckCost);
         character = { ...character, cards: reward.cards };

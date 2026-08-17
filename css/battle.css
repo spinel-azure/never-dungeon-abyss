@@ -181,6 +181,52 @@
     battle-iron-maiden-pendulum 4s ease-in-out infinite;
 }
 
+.battle-eiskoenigin-sparkles {
+  position: absolute;
+  z-index: 3;
+  inset: 12% 23% 17%;
+  display: none;
+  pointer-events: none;
+}
+
+.battle-enemy-stage.is-eiskoenigin .battle-eiskoenigin-sparkles { display: block; }
+
+.battle-eiskoenigin-sparkles i {
+  --spark-delay: 0s;
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  opacity: 0;
+  animation: battle-eiskoenigin-sparkle 2.4s steps(4, end) var(--spark-delay) infinite;
+}
+
+.battle-eiskoenigin-sparkles i::before,
+.battle-eiskoenigin-sparkles i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  border-radius: 2px;
+  background: #fff;
+  box-shadow: 0 0 5px #fff, 0 0 11px #8eeaff, 0 0 18px #48bfff;
+}
+
+.battle-eiskoenigin-sparkles i::before { width: 2px; height: 100%; }
+.battle-eiskoenigin-sparkles i::after { width: 100%; height: 2px; }
+.battle-eiskoenigin-sparkles i:nth-child(1) { left: 31%; top: 12%; --spark-delay: -.2s; }
+.battle-eiskoenigin-sparkles i:nth-child(2) { left: 63%; top: 25%; --spark-delay: -.9s; }
+.battle-eiskoenigin-sparkles i:nth-child(3) { left: 43%; top: 44%; --spark-delay: -1.5s; }
+.battle-eiskoenigin-sparkles i:nth-child(4) { left: 68%; top: 58%; --spark-delay: -2.1s; }
+.battle-eiskoenigin-sparkles i:nth-child(5) { left: 28%; top: 67%; --spark-delay: -1.2s; }
+.battle-eiskoenigin-sparkles i:nth-child(6) { left: 51%; top: 82%; --spark-delay: -2.7s; }
+
+@keyframes battle-eiskoenigin-sparkle {
+  0%, 68%, 100% { opacity: 0; transform: scale(.35) rotate(0deg); }
+  76% { opacity: 1; transform: scale(1.25) rotate(45deg); }
+  84% { opacity: .8; transform: scale(.8) rotate(90deg); }
+  92% { opacity: 0; transform: scale(1.45) rotate(135deg); }
+}
+
 .npc-charge-cut-in {
   position: absolute;
   z-index: 6;
@@ -444,6 +490,11 @@ body.battle-active .viewport > #treasureCanvas {
   .battle-enemy-image.is-iron-maiden.is-hit {
     rotate: none;
     animation: none;
+  }
+
+  .battle-eiskoenigin-sparkles i {
+    animation: none;
+    opacity: .65;
   }
 
   .battle-number {

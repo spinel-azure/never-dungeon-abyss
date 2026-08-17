@@ -42,6 +42,21 @@ test("achievement popup uses the k8x12 font and queues newly achieved records", 
   assert.match(source, /achievementNotificationQueue\.push\(\.\.\.newlyUnlocked\)/);
   assert.match(source, /playSe\("achievementUnlocked"\)/);
   assert.match(source, /document\.body\.append\(achievementUnlockedEffect\)/);
+  assert.match(css, /\.achievement-unlocked-effect\{[^}]*border-radius:15px/s);
+  assert.match(css, /achievement-unlocked-popup 4\.2s/);
+  assert.match(source, /await wait\(4200\)/);
+});
+
+test("Eiskoenigin alone receives a reduced-motion-safe multi-sparkle layer", async () => {
+  const [html, css, battleSource] = await Promise.all([
+    readFile(new URL("../index.html", import.meta.url), "utf8"),
+    readFile(new URL("../css/battle.css", import.meta.url), "utf8"),
+    readFile(new URL("../js/battle.js", import.meta.url), "utf8")
+  ]);
+  assert.match(html, /battle-eiskoenigin-sparkles[^>]*>[\s\S]*?<i><\/i>/);
+  assert.match(battleSource, /is-eiskoenigin[^\n]+eiskoenigin_b49f/);
+  assert.match(css, /@keyframes battle-eiskoenigin-sparkle/);
+  assert.match(css, /prefers-reduced-motion:[\s\S]*battle-eiskoenigin-sparkles/s);
 });
 
 test("transfer destination UI is separate from the six command slots and paginates by five", async () => {

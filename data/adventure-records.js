@@ -77,7 +77,12 @@ export function getAdventureChronicle(character) {
     ["brassBull", "真鍮の雄牛を撃破した", flags.boss_brass_bull_event_boss_defeated, "B36Fの真鍮の雄牛を撃破した。"],
     ["wickerMan", "ウィッカーマンを撃破した", flags.red_door_b39f_unlocked && flags.boss_wicker_man_b39f_defeated, "B39Fの赤い扉の奥でウィッカーマンを撃破した。"],
     ["b40", "B40Fへ到達した", flags.boss_wicker_man_b39f_defeated && depth >= 40, "ウィッカーマンを倒し、B40Fへ到達した。"],
-    ["marathon42", "深淵への大行軍", flags.b1_b42_marathon_completed, "一度も帰還せず、転送門を使わずにB1FからB42Fへ到達した。", "？？？？？？――地上を忘れし旅人"]
+    ["b45Survey", "B45Fを100マス踏破した", flags.achievement_b45f_100_cells, "途中帰還することなくB45Fを100マス踏破した。", "？？？？？？――凍土を踏破する者"],
+    ["glacies", "グラキエスを撃破した", flags.boss_glacies_event_boss_defeated, "氷の巨人グラキエスを撃破した。", "？？？？？？――氷巨人への挑戦"],
+    ["eiskoenigin", "エイスケーニギンを撃破した", flags.boss_eiskoenigin_b49f_defeated, "B49Fの赤い扉の奥でエイスケーニギンを撃破した。", "？？？？？？――凍てつく女王"],
+    ["b50", "B50Fへ到達した", flags.boss_eiskoenigin_b49f_defeated && depth >= 50, "エイスケーニギンを倒し、B50Fへ到達した。", "？？？？？？――極寒の果て"],
+    ["marathon42", "深淵への大行軍", flags.b1_b42_marathon_completed, "一度も帰還せず、転送門を使わずにB1FからB42Fへ到達した。", "？？？？？？――地上を忘れし旅人"],
+    ["longMarch84", "深淵への大行軍再び", flags.b1_b84_long_march_completed, "一度も帰還せず、転送門を使わずにB1FからB84Fへ到達した。", "？？？？？？――さらなる深淵へ"]
   ];
   return milestones.map(([id, label, achieved, description, hiddenLabel]) => ({
     id,

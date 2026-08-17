@@ -590,6 +590,7 @@ test("quest 017 follows quest 015, supplies fifteen large potions, and rewards c
   assert.equal(getQuestProgress(character, B45F_SURVEY_QUEST_ID).progress, 0);
   character = recordFloorExploration(character, { depth: 45, explored: fullMap });
   assert.equal(getQuestProgress(character, B45F_SURVEY_QUEST_ID).readyToReport, true);
+  assert.equal(character.eventFlags.achievement_b45f_100_cells, true);
   const report = reportQuest(character, B45F_SURVEY_QUEST_ID);
   assert.equal(report.rewardEquipmentId, "coldproof_boots");
   assert.equal(report.bonusGold, 4000);

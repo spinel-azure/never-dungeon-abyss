@@ -141,3 +141,29 @@ test("midgame chronicle includes the seven new boss, floor, and survey achieveme
     assert.equal(chronicle.find(entry => entry.id === id)?.achieved, true);
   }
 });
+
+test("deep cold chronicle includes B45F, both ice bosses, B50F, and the second long march", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.highestDungeonDepthReached = 50;
+  Object.assign(character.eventFlags, {
+    achievement_b45f_100_cells: true,
+    boss_glacies_event_boss_defeated: true,
+    boss_eiskoenigin_b49f_defeated: true,
+    b1_b84_long_march_completed: true
+  });
+  const chronicle = getAdventureChronicle(character);
+  for (const id of ["b45Survey", "glacies", "eiskoenigin", "b50", "longMarch84"]) {
+    assert.equal(chronicle.find(entry => entry.id === id)?.achieved, true, id);
+  }
+  assert.equal(chronicle.find(entry => entry.id === "longMarch84")?.label, "深淵への大行軍再び");
+});
+
+test("new deep-cold achievements conceal their names behind hints until achieved", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "mage" });
+  const chronicle = getAdventureChronicle(character);
+  assert.match(chronicle.find(entry => entry.id === "b45Survey")?.label || "", /凍土/);
+  assert.match(chronicle.find(entry => entry.id === "glacies")?.label || "", /氷巨人/);
+  assert.match(chronicle.find(entry => entry.id === "eiskoenigin")?.label || "", /女王/);
+  assert.match(chronicle.find(entry => entry.id === "b50")?.label || "", /極寒/);
+  assert.match(chronicle.find(entry => entry.id === "longMarch84")?.label || "", /深淵/);
+});

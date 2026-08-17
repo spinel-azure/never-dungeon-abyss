@@ -3,9 +3,12 @@ import assert from "node:assert/strict";
 
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import {
+  LONG_MARCH_COMPLETION_FLAG,
   invalidateMarathonChallenge,
   MARATHON_COMPLETION_FLAG,
+  recordLongMarchDescent,
   recordMarathonDescent,
+  startLongMarchChallenge,
   startMarathonChallenge
 } from "../data/marathon-challenge.js";
 
@@ -65,4 +68,25 @@ test("a completed marathon cannot be restarted", () => {
   const initial = createInitialCharacter({ name: "RUNNER", job: "priest" });
   initial.eventFlags[MARATHON_COMPLETION_FLAG] = true;
   assert.equal(startMarathonChallenge(initial).marathonChallenge.active, false);
+});
+
+test("the second long march tracks strict descent from B1F through B84F", () => {
+  let character = startLongMarchChallenge(createInitialCharacter({ name: "RUNNER", job: "thief" }));
+  for (let fromDepth = 1; fromDepth < 84; fromDepth += 1) {
+    const result = recordLongMarchDescent(character, { fromDepth, toDepth: fromDepth + 1 });
+    character = result.character;
+    assert.equal(result.completed, fromDepth === 83);
+  }
+  assert.equal(character.eventFlags[LONG_MARCH_COMPLETION_FLAG], true);
+  assert.deepEqual(character.longMarchChallenge, { active: false, currentDepth: 0 });
+});
+
+test("the second long march survives saves and fails on a skipped floor", () => {
+  let character = startLongMarchChallenge(createInitialCharacter({ name: "RUNNER", job: "priest" }));
+  character = recordLongMarchDescent(character, { fromDepth: 1, toDepth: 2 }).character;
+  character = normalizeCharacter(character);
+  assert.deepEqual(character.longMarchChallenge, { active: true, currentDepth: 2 });
+  const skipped = recordLongMarchDescent(character, { fromDepth: 2, toDepth: 4 });
+  assert.equal(skipped.completed, false);
+  assert.equal(skipped.character.longMarchChallenge.active, false);
 });
