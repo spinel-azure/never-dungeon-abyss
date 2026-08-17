@@ -77,11 +77,11 @@ test("NPC-free battle remains unchanged and active supports create presentation 
 });
 
 test("three NPC supports target roughly one and a half heroes of combined contribution", () => {
-  assert.equal(NPC_SUPPORT_BALANCE.alec.attackRate, 0.55);
-  assert.equal(NPC_SUPPORT_BALANCE.rebecca.hitRate * 2, 0.6);
-  assert.equal(NPC_SUPPORT_BALANCE.johan.spellRate, 0.55);
-  assert.equal(NPC_SUPPORT_BALANCE.erika.healRate, 0.06);
-  assert.equal(NPC_SUPPORT_BALANCE.erika.healRate + NPC_SUPPORT_BALANCE.erika.healPerStage * 10, 0.1);
+  assert.equal(NPC_SUPPORT_BALANCE.alec.attackRate, 0.8);
+  assert.equal(NPC_SUPPORT_BALANCE.rebecca.hitRate * 2, 1);
+  assert.equal(NPC_SUPPORT_BALANCE.johan.spellRate, 0.85);
+  assert.equal(NPC_SUPPORT_BALANCE.erika.healRate, 0.08);
+  assert.equal(NPC_SUPPORT_BALANCE.erika.healRate + NPC_SUPPORT_BALANCE.erika.healPerStage * 10, 0.14);
 
   const character = hero();
   character.hp = 50;
@@ -103,29 +103,32 @@ test("three NPC supports target roughly one and a half heroes of combined contri
   applyNpcAfterPlayerAttack(battle);
   applyNpcGuardSupport(battle);
   applyNpcTurnEnd(battle);
-  assert.equal(battle.enemy.hp, 966);
-  assert.equal(battle.player.hp, 60);
-  assert.equal(battle.player.statuses.find(status => status.id === "npc_alec_guard")?.physicalDamageReduction, 0.25);
+  assert.equal(battle.enemy.hp, 928);
+  assert.equal(battle.player.hp, 64);
+  assert.equal(battle.player.statuses.find(status => status.id === "npc_alec_guard")?.physicalDamageReduction, 0.35);
 });
 
 test("status page three derives each active NPC display from current support balance", () => {
   const character = hero();
   character.npcSystem = normalizeNpcSystem({
-    registeredIds: ["alec", "rebecca", "erika"],
+    registeredIds: ["alec", "rebecca", "erika", "johan"],
     activeIds: ["alec", "rebecca", "erika"],
     records: {
       alec: { maxDepth: 40, growthStage: 4 },
       rebecca: { maxDepth: 40, growthStage: 4 },
-      erika: { maxDepth: 40, growthStage: 4 }
+      erika: { maxDepth: 40, growthStage: 4 },
+      johan: { maxDepth: 40, growthStage: 4 }
     }
   });
   const alec = getNpcSupportStatus(character, "alec");
   const rebecca = getNpcSupportStatus(character, "rebecca");
   const erika = getNpcSupportStatus(character, "erika");
+  const johan = getNpcSupportStatus(character, "johan");
   assert.equal(alec.growth, "■■■■□□□□□□");
-  assert.deepEqual(alec.rows, [["追撃威力", "11"], ["防御援護", "16％"], ["援護特性", "攻撃後に追撃／防御時に物理軽減"]]);
-  assert.deepEqual(rebecca.rows, [["連撃威力", "4×2"], ["弱体成功", "20％"], ["弱体効果", "DEF－20％／2ターン"]]);
-  assert.deepEqual(erika.rows, [["回復量", "最大HPの7.6％"], ["発動条件", "ターン終了時／HP減少中"]]);
+  assert.deepEqual(alec.rows, [["追撃威力", "19"], ["防御援護", "23％"], ["援護特性", "攻撃後に追撃／防御時に物理軽減"]]);
+  assert.deepEqual(rebecca.rows, [["連撃威力", "10×2"], ["弱体成功", "25％"], ["弱体効果", "DEF－25％／2ターン"]]);
+  assert.deepEqual(erika.rows, [["回復量", "最大HPの10.4％"], ["発動条件", "ターン終了時／HP減少中"]]);
+  assert.deepEqual(johan.rows, [["呪文威力", "約20～24"], ["属性", "無属性"], ["発動条件", "ターン開始時"]]);
   assert.equal(erika.maxDepth, 40);
 
   const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
