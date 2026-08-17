@@ -2,6 +2,8 @@ export const TAVERN_RUMOR_001_BASE_READ_FLAG = "tavern_rumor_001_base_read";
 export const TAVERN_RUMOR_001_MIKAN_READ_FLAG = "tavern_rumor_001_mikan_read";
 export const TAVERN_RUMOR_002_BASE_READ_FLAG = "tavern_rumor_002_base_read";
 export const TAVERN_RUMOR_002_GHOST_READ_FLAG = "tavern_rumor_002_ghost_read";
+export const TAVERN_RUMOR_003_BASE_READ_FLAG = "tavern_rumor_003_base_read";
+export const TAVERN_RUMOR_003_WISDOM_READ_FLAG = "tavern_rumor_003_wisdom_read";
 
 export function getTavernRumorTypewriterParts(message) {
   const text = String(message || "");
@@ -53,22 +55,53 @@ export const TAVERN_RUMORS = Object.freeze([
         rosa: "…亡霊ですって。本当にいるのかしら…？まぁ！本当にいたの！？しかも何度も出てくるですって！？恐ろしいわ…！"
       })
     ])
+  }),
+  Object.freeze({
+    id: "rumor_003",
+    verbatimCustomers: true,
+    title: "恐ろしい何かの噂",
+    unlock: context => context.depthReached >= 4,
+    opening: "あなたはカウンターから耳を澄ます……。",
+    customerLead: "奈落の地下4階に恐ろしい何かが出るらしいな？",
+    customerReply: "ああ。しかも生き残ったヤツがほとんどいないらしいぜ…！",
+    phases: Object.freeze([
+      Object.freeze({
+        id: "base",
+        readFlag: TAVERN_RUMOR_003_BASE_READ_FLAG,
+        unlock: context => !context.otherworldlyWisdomDefeated,
+        rosa: "まぁ、そんな恐ろしいものが…？本当にいるのかしら…？"
+      }),
+      Object.freeze({
+        id: "wisdom",
+        readFlag: TAVERN_RUMOR_003_WISDOM_READ_FLAG,
+        unlock: context => context.otherworldlyWisdomDefeated,
+        rosa: "まぁ、そんな恐ろしいものが…？本当にいるのかしら…？",
+        rosaContinuation: "えっ…！本当にいたの？とても強かった！？あなた…よく生きて…。"
+      })
+    ])
   })
 ]);
 
 function buildDialogue(rumor, phase) {
   const opening = rumor.opening || "あなたはカウンターから耳を澄ます………。";
-  return [
+  const dialogue = [
     `${opening}\n客「おい、知ってるか？${rumor.customerLead}」\n＊Aボタンで次へ`,
     `客「ああ。${rumor.customerReply}」\n＊Aボタンで次へ`,
-    `ローザ「${phase.rosa}」\n＊Aボタンで戻る`
+    `ローザ「${phase.rosa}」\n＊Aボタンで${phase.rosaContinuation ? "次へ" : "戻る"}`
   ];
+  if (rumor.verbatimCustomers) {
+    dialogue[0] = dialogue[0].replace("\u304a\u3044\u3001\u77e5\u3063\u3066\u308b\u304b\uff1f", "");
+    dialogue[1] = dialogue[1].replace("\u3042\u3042\u3002", "");
+  }
+  if (phase.rosaContinuation) dialogue.push(`ローザ「${phase.rosaContinuation}」\n＊Aボタンで戻る`);
+  return dialogue;
 }
 
 function normalizeRumorContext(character, context = {}) {
   return {
     mikanEncountered: Boolean(context.mikanEncountered),
     lingeringGhostDefeated: Boolean(context.lingeringGhostDefeated),
+    otherworldlyWisdomDefeated: Boolean(context.otherworldlyWisdomDefeated),
     depthReached: Math.max(1, Math.floor(Number(context.depthReached ?? character?.highestDungeonDepthReached) || 1))
   };
 }
@@ -105,8 +138,9 @@ export function getPastTavernRumors(character, context = {}) {
       description: [
         `客：${rumor.customerLead}`,
         `客：${rumor.customerReply}`,
-        `ローザ：${phase.rosa}`
-      ]
+        `ローザ：${phase.rosa}`,
+        phase.rosaContinuation ? `ローザ：${phase.rosaContinuation}` : ""
+      ].filter(Boolean)
     }];
   });
 }

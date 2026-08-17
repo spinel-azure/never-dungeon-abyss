@@ -488,7 +488,8 @@ import {
           ([npcId, count]) => npcId.startsWith("NPC_01") && Number(count) > 0
         ),
       depthReached: character?.highestDungeonDepthReached,
-      lingeringGhostDefeated: Boolean(character?.eventFlags?.lingering_ghost_b2f_defeated_once)
+      lingeringGhostDefeated: Boolean(character?.eventFlags?.lingering_ghost_b2f_defeated_once),
+      otherworldlyWisdomDefeated: Boolean(character?.eventFlags?.boss_otherworldly_wisdom_b4f_defeated)
     }),
     onCompleteRumor: rumor => {
       character = markTavernRumorRead(character, rumor);
@@ -2804,7 +2805,8 @@ import {
           ([npcId, count]) => npcId.startsWith("NPC_01") && Number(count) > 0
         ),
       depthReached: character?.highestDungeonDepthReached,
-      lingeringGhostDefeated: Boolean(character?.eventFlags?.lingering_ghost_b2f_defeated_once)
+      lingeringGhostDefeated: Boolean(character?.eventFlags?.lingering_ghost_b2f_defeated_once),
+      otherworldlyWisdomDefeated: Boolean(character?.eventFlags?.boss_otherworldly_wisdom_b4f_defeated)
     }),
     getInventoryContext: () => isTownOpen() ? "town" : "dungeon",
     onUseInventoryItem: useFieldItem,

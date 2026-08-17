@@ -88,3 +88,32 @@ test("past rumor descriptions preserve the two customers and Rosa", () => {
   assert.match(entry.description[1], /^客：/);
   assert.match(entry.description[2], /^ローザ：/);
 });
+
+test("B4 unlocks the terrifying presence rumor and Otherworldly Wisdom adds Rosa's follow-up", () => {
+  let character = createInitialCharacter("生還者", "warrior");
+  character = markTavernRumorRead(character, getUnreadTavernRumor(character));
+  character.highestDungeonDepthReached = 4;
+  character = markTavernRumorRead(character, getUnreadTavernRumor(character, { lingeringGhostDefeated: false }));
+
+  const base = getUnreadTavernRumor(character);
+  assert.equal(base.id, "rumor_003_base");
+  assert.equal(base.dialogue[0].includes("\u304a\u3044\u3001\u77e5\u3063\u3066\u308b\u304b\uff1f"), false);
+  assert.equal(base.dialogue[1].includes("\u3042\u3042\u3002\u3042\u3042\u3002"), false);
+  assert.match(base.dialogue[0], /地下4階に恐ろしい何か/);
+  assert.equal(base.dialogue.length, 3);
+  character = markTavernRumorRead(character, base);
+  assert.equal(getUnreadTavernRumor(character), null);
+
+  const updated = getUnreadTavernRumor(character, { otherworldlyWisdomDefeated: true });
+  assert.equal(updated.id, "rumor_003_wisdom");
+  assert.equal(updated.dialogue.length, 4);
+  assert.match(updated.dialogue.at(-1), /あなた…よく生きて/);
+  assert.deepEqual(updated.readFlags, ["tavern_rumor_003_base_read", "tavern_rumor_003_wisdom_read"]);
+  character = markTavernRumorRead(character, updated);
+
+  const history = getPastTavernRumors(character, { otherworldlyWisdomDefeated: true });
+  const rumor = history.find(entry => entry.id === "rumor_003");
+  assert.equal(rumor.number, "003");
+  assert.equal(rumor.title, "恐ろしい何かの噂");
+  assert.equal(rumor.description.length, 4);
+});
