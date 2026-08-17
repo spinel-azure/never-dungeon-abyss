@@ -5,7 +5,7 @@ import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { NPC_DEFINITIONS } from "../data/npc-definitions.js";
 import { beginNpcRenewal, hireNpc, normalizeNpcSystem, recordNpcExpeditionDepth, registerNpc, resolveNpcRenewal } from "../data/npc-party.js";
 import { createBattleState, resolveBattleRound } from "../combat/battle-engine.js";
-import { applyNpcAfterPlayerAttack, applyNpcGuardSupport, applyNpcTurnEnd, applyNpcTurnStart, NPC_SUPPORT_BALANCE } from "../combat/npc-support.js";
+import { applyNpcAfterPlayerAttack, applyNpcGuardSupport, applyNpcTurnEnd, applyNpcTurnStart, getNpcSupportStatus, NPC_SUPPORT_BALANCE } from "../combat/npc-support.js";
 
 function hero(job = "warrior") {
   return { ...createInitialCharacter({ name: "NPC TEST", job }), gold: 10000, level: 40 };
@@ -106,6 +106,32 @@ test("three NPC supports target roughly one and a half heroes of combined contri
   assert.equal(battle.enemy.hp, 966);
   assert.equal(battle.player.hp, 60);
   assert.equal(battle.player.statuses.find(status => status.id === "npc_alec_guard")?.physicalDamageReduction, 0.25);
+});
+
+test("status page three derives each active NPC display from current support balance", () => {
+  const character = hero();
+  character.npcSystem = normalizeNpcSystem({
+    registeredIds: ["alec", "rebecca", "erika"],
+    activeIds: ["alec", "rebecca", "erika"],
+    records: {
+      alec: { maxDepth: 40, growthStage: 4 },
+      rebecca: { maxDepth: 40, growthStage: 4 },
+      erika: { maxDepth: 40, growthStage: 4 }
+    }
+  });
+  const alec = getNpcSupportStatus(character, "alec");
+  const rebecca = getNpcSupportStatus(character, "rebecca");
+  const erika = getNpcSupportStatus(character, "erika");
+  assert.equal(alec.growth, "■■■■□□□□□□");
+  assert.deepEqual(alec.rows, [["追撃威力", "11"], ["防御援護", "16％"], ["援護特性", "攻撃後に追撃／防御時に物理軽減"]]);
+  assert.deepEqual(rebecca.rows, [["連撃威力", "4×2"], ["弱体成功", "20％"], ["弱体効果", "DEF－20％／2ターン"]]);
+  assert.deepEqual(erika.rows, [["回復量", "最大HPの7.6％"], ["発動条件", "ターン終了時／HP減少中"]]);
+  assert.equal(erika.maxDepth, 40);
+
+  const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+  const menuSource = readFileSync(new URL("../js/menu.js", import.meta.url), "utf8");
+  assert.match(html, /data-status-page="2"[\s\S]*data-npc-status-list[\s\S]*data-status-indicator>1\/3/);
+  assert.match(menuSource, /menu\.statusPage < 2[\s\S]*\$\{menu\.statusPage \+ 1\}\/3/);
 });
 
 test("NPC renewal hides background commands and restores its originating town screen", () => {

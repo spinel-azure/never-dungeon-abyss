@@ -90,7 +90,7 @@ import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
 import { EffectEngine } from "./effects/effect-engine.js";
 import { hasUncertainLoot, isHighlightedLotCardRarity, isHighlightedLotEquipment } from "./loot-identification.js";
 import { configureTown, openPendingNpcRenewal, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js";
-import { flashNpcPartyStatus, renderNpcPartyStatus } from "./npc-party-ui.js";
+import { flashNpcPartyStatus, renderNpcPartyStatus, renderNpcStatusPage } from "./npc-party-ui.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { beginNpcRenewal, hireNpc, recordNpcExpeditionDepth, registerNpc, resolveNpcRenewal } from "../data/npc-party.js";
 import { getActivePlayTimeDelta, normalizeAdventureStats, recordInnStay, recordShopPurchase, recordTempleDonation } from "../data/adventure-stats.js";
@@ -1115,6 +1115,7 @@ import {
     });
     renderCharacterStatus();
     renderNpcPartyStatus(npcPartyStatus, character);
+    renderNpcStatusPage(document.querySelector("[data-npc-status-list]"), character);
     const statusName = document.getElementById("statusName");
     const statusJob = document.getElementById("statusJob");
     const statusLevel = document.getElementById("statusLevel");
