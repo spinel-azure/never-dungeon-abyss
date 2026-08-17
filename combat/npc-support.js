@@ -2,10 +2,10 @@ import { NPC_SUPPORT_ENABLED, getNpcDefinition } from "../data/npc-definitions.j
 import { resolveSpell } from "./resolve-spell.js";
 
 export const NPC_SUPPORT_BALANCE = Object.freeze({
-  alec: Object.freeze({ attackRate: 0.3, growthAttack: 2, guardBase: 0.08, guardPerStage: 0.01, guardMaximum: 0.18 }),
-  rebecca: Object.freeze({ hitRate: 0.175, growthAttack: 2, debuffRate: 0.15, debuffTurns: 2, defenseMultiplier: 0.85 }),
-  erika: Object.freeze({ healRate: 0.04, healPerStage: 0.002 }),
-  johan: Object.freeze({ basePower: 8, spellRate: 0.3, growthInt: 3, element: "arcane" })
+  alec: Object.freeze({ attackRate: 0.55, growthAttack: 2, guardBase: 0.1, guardPerStage: 0.015, guardMaximum: 0.25 }),
+  rebecca: Object.freeze({ hitRate: 0.3, growthAttack: 2, debuffRate: 0.2, debuffTurns: 2, defenseMultiplier: 0.8 }),
+  erika: Object.freeze({ healRate: 0.06, healPerStage: 0.004 }),
+  johan: Object.freeze({ basePower: 8, spellRate: 0.55, growthInt: 3, element: "arcane" })
 });
 
 export function canNpcSupport({ battle, npcId, supportType } = {}) {

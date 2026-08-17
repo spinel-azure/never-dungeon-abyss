@@ -5,6 +5,7 @@ import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { NPC_DEFINITIONS } from "../data/npc-definitions.js";
 import { beginNpcRenewal, hireNpc, normalizeNpcSystem, recordNpcExpeditionDepth, registerNpc, resolveNpcRenewal } from "../data/npc-party.js";
 import { createBattleState, resolveBattleRound } from "../combat/battle-engine.js";
+import { applyNpcAfterPlayerAttack, applyNpcGuardSupport, applyNpcTurnEnd, applyNpcTurnStart, NPC_SUPPORT_BALANCE } from "../combat/npc-support.js";
 
 function hero(job = "warrior") {
   return { ...createInitialCharacter({ name: "NPC TEST", job }), gold: 10000, level: 40 };
@@ -73,6 +74,38 @@ test("NPC-free battle remains unchanged and active supports create presentation 
   assert.ok(supported.battle.presentationEvents.some(event => event.npcId === "rebecca"));
   assert.ok(supported.battle.presentationEvents.some(event => event.npcId === "johan"));
   assert.ok(supported.battle.presentationEvents.some(event => event.npcId === "erika"));
+});
+
+test("three NPC supports target roughly one and a half heroes of combined contribution", () => {
+  assert.equal(NPC_SUPPORT_BALANCE.alec.attackRate, 0.55);
+  assert.equal(NPC_SUPPORT_BALANCE.rebecca.hitRate * 2, 0.6);
+  assert.equal(NPC_SUPPORT_BALANCE.johan.spellRate, 0.55);
+  assert.equal(NPC_SUPPORT_BALANCE.erika.healRate, 0.06);
+  assert.equal(NPC_SUPPORT_BALANCE.erika.healRate + NPC_SUPPORT_BALANCE.erika.healPerStage * 10, 0.1);
+
+  const character = hero();
+  character.hp = 50;
+  character.maxHp = 100;
+  character.npcSystem = normalizeNpcSystem({
+    registeredIds: ["alec", "rebecca", "erika", "johan"],
+    activeIds: ["alec", "rebecca", "erika"],
+    records: {
+      alec: { maxDepth: 100, growthStage: 10 },
+      rebecca: { maxDepth: 100, growthStage: 10 },
+      erika: { maxDepth: 100, growthStage: 10 }
+    }
+  });
+  const battle = createBattleState({
+    character,
+    enemy: { id: "dummy", name: "DUMMY", hp: 999, maxHp: 999, attack: 1, def: 0, agi: 1, alive: true, statuses: [] }
+  });
+  applyNpcTurnStart(battle, () => 0.99);
+  applyNpcAfterPlayerAttack(battle);
+  applyNpcGuardSupport(battle);
+  applyNpcTurnEnd(battle);
+  assert.equal(battle.enemy.hp, 966);
+  assert.equal(battle.player.hp, 60);
+  assert.equal(battle.player.statuses.find(status => status.id === "npc_alec_guard")?.physicalDamageReduction, 0.25);
 });
 
 test("NPC renewal hides background commands and restores its originating town screen", () => {
