@@ -450,6 +450,26 @@ body.layout-tablet .battle-boss-hp-meter{flex:0 0 12px;width:min(52%,360px);min-
   transition: opacity 900ms ease-out;
 }
 
+.battle-enemy-name.is-defense-down {
+  color: #36a9ff;
+}
+
+.battle-enemy-name.is-defense-down::after {
+  content: "⏬";
+  display: inline-block;
+  margin-left: .28em;
+  color: #36a9ff;
+  font-family: "GameFont", sans-serif;
+  font-size: .72em;
+  text-shadow:
+    -1px -1px 0 #fff,
+    1px -1px 0 #fff,
+    -1px 1px 0 #fff,
+    1px 1px 0 #fff,
+    0 0 5px #fff;
+  vertical-align: .08em;
+}
+
 .battle-enemy-stage.is-defeated::after,
 .battle-enemy-stage.is-defeated .battle-enemy-name {
   opacity: 0;
@@ -462,12 +482,26 @@ body.layout-tablet .battle-boss-hp-meter{flex:0 0 12px;width:min(52%,360px);min-
 .message.is-npc-charge-skill {
   display: flex;
   align-items: center;
-  white-space: pre-line;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   color: #fff;
   font-family: var(--font-pixel-jp);
-  font-size: clamp(18px, 3.1vw, 28px);
+  font-size: clamp(17px, 2.5vw, 23px);
   line-height: 1.25;
   text-shadow: 0 0 7px rgba(120, 225, 255, .75);
+}
+
+body.layout-pc .message.is-npc-charge-skill {
+  height: 71px;
+  min-height: 71px;
+  max-height: 71px;
+}
+
+body.layout-tablet .message.is-npc-charge-skill,
+body.layout-mobile .message.is-npc-charge-skill {
+  height: 69px;
+  min-height: 69px;
+  max-height: 69px;
 }
 
 body.battle-active .viewport > .status,

@@ -529,7 +529,9 @@ function renderBattle() {
   renderBattleVitals();
   setText("battlePlayerSp", `${battle.player.sp} / ${battle.player.maxSp}`);
   setText("battlePlayerCondition", statusText(battle.player));
+  const enemyName = battleUi.root.querySelector("#battleEnemyName");
   setText("battleEnemyName", battleUi.concealed ? "？？？？？" : battle.enemy.name);
+  enemyName?.classList.toggle("is-defense-down", hasEnemyDefenseDown(battle.enemy));
   setText("battleEnemyCondition", statusText(battle.enemy));
   const image = battleUi.root.querySelector("#battleEnemyImage");
   image.src = battle.enemy.image || "";
@@ -544,6 +546,14 @@ function renderBattle() {
   enemyStage?.classList.toggle("is-defeated", defeated);
   enemyStage?.classList.toggle("is-eiskoenigin", battle.enemy.id === "eiskoenigin_b49f" && !defeated && !battleUi.concealed);
   battleUi.messageEl.textContent = formatBattleMessage(battle);
+}
+
+export function hasEnemyDefenseDown(enemy) {
+  return Boolean(enemy?.statuses?.some(status =>
+    (status?.id === "npc_defense_down" || status?.statusId === "npc_defense_down")
+    && status.active !== false
+    && (!Number.isFinite(Number(status.remainingTurns)) || Number(status.remainingTurns) > 0)
+  ));
 }
 
 function renderBattleVitals() {

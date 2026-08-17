@@ -53,6 +53,20 @@ test("NPC charge skill cut-ins use the four battle assets and a sequential 2.5 s
   assert.match(main, /onNpcCharge: \(npcId, charge\) => setNpcPartyCharge/);
 });
 
+test("Rebecca defense down is visible on the enemy name without expanding the charge message", async () => {
+  const [css, battle] = await Promise.all([
+    readFile(new URL("css/battle.css", root), "utf8"),
+    readFile(new URL("js/battle.js", root), "utf8")
+  ]);
+
+  assert.match(battle, /enemyName\?\.classList\.toggle\("is-defense-down", hasEnemyDefenseDown\(battle\.enemy\)\)/);
+  assert.match(battle, /status\?\.id === "npc_defense_down" \|\| status\?\.statusId === "npc_defense_down"/);
+  assert.match(css, /\.battle-enemy-name\.is-defense-down\s*\{[\s\S]*?color: #36a9ff/);
+  assert.match(css, /\.battle-enemy-name\.is-defense-down::after\s*\{[\s\S]*?content: "⏬"/);
+  assert.match(css, /body\.layout-pc \.message\.is-npc-charge-skill\s*\{[\s\S]*?height: 71px;[\s\S]*?max-height: 71px/);
+  assert.match(css, /\.message\.is-npc-charge-skill\s*\{[\s\S]*?white-space: nowrap/);
+});
+
 test("NPC management reserves four rows and follows keyboard selection while scrolling", async () => {
   const css = await readFile(new URL("css/town.css", root), "utf8");
   const town = await readFile(new URL("js/town.js", root), "utf8");
