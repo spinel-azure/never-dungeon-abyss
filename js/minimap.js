@@ -197,7 +197,7 @@ export function drawQuestEventMark(ctx, x, y, size) {
 }
 
 export function drawTreasureMark(ctx, x, y, size, type) {
-  const color = type === "gold" ? "#f5d35c" : type === "black" ? "#d9dde2" : "#e85a45";
+  const color = type === "gold" ? "#f5d35c" : type === "black" ? "#d9dde2" : type === "purple" ? "#b86cff" : "#e85a45";
   const left = x + size * .22;
   const top = y + size * .29;
   const width = size * .56;

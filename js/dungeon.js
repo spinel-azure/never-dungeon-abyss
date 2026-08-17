@@ -16,6 +16,7 @@ import { floorHasHealingFountain } from "../data/fountains.js";
 import { getSpecialRoomDefinition, getSpecialRoomUnlockRate } from "../data/special-rooms.js";
 import { getFloorBossByDepth } from "../data/bosses.js";
 import { getQuestEventForDepth } from "../data/quest-events.js";
+import { hasPurpleChestLootTable } from "../data/loot.js";
 import {
   DUNGEON_FEATURE_PRIORITIES,
   getTraversalBlockingReservations,
@@ -121,6 +122,7 @@ function buildBoundaryWallMapAttempt(depth = 1, rng = Math.random, progress = {}
   placeQuestEvent(depth, rng, progress);
   placeNpc(depth, progress);
   placeTreasures(depth, rng, progress);
+  placePurpleSpecialRoomTreasure(depth, rng);
   placeFountain(depth, rng);
   if (floorBoss?.room?.requiresKey) placeFloorBossKeyTreasure(floorBoss, rng, progress);
   placeNormalDoors(NORMAL_DOOR_COUNT, false);
@@ -468,6 +470,15 @@ export function placeSpecialRoom(depth = 1, rng = Math.random) {
     if (placed) return placed;
   }
   return null;
+}
+
+export function placePurpleSpecialRoomTreasure(depth = 1, rng = Math.random) {
+  if (!hasPurpleChestLootTable(depth)) return null;
+  const room = cells.flat().find(cell => cell.specialRoom && !cell.specialRoom.content);
+  if (!room) return null;
+  room.treasure = "purple";
+  room.treasureTrapId = rollTreasureTrap("purple", rng);
+  return { x: room.x, y: room.y, treasure: room.treasure };
 }
 
 export function placeQuestEvent(depth = 1, rng = Math.random, progress = {}) {

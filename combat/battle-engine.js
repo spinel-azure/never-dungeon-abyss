@@ -297,6 +297,16 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
         const amount = Math.min(effect.value, actor.maxHp - actor.hp);
         actor.hp += amount;
         healing += amount;
+      } else if (effect.id === "heal_hp_rate") {
+        const requested = Math.max(1, Math.ceil(actor.maxHp * (Number(effect.value) || 0)));
+        const amount = Math.min(requested, actor.maxHp - actor.hp);
+        actor.hp += amount;
+        healing += amount;
+      } else if (effect.id === "heal_hp_rate") {
+        const requested = Math.max(1, Math.ceil(actor.maxHp * (Number(effect.value) || 0)));
+        const amount = Math.min(requested, actor.maxHp - actor.hp);
+        actor.hp += amount;
+        healing += amount;
       } else if (effect.id === "cure_poison") {
         actor.statuses = (actor.statuses || []).filter(status => (status.statusId || status.id) !== "poison");
       } else if (effect.id === "cure_bleeding") {

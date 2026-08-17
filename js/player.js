@@ -642,7 +642,10 @@ export function startAmbushEncounterNotice() {
 }
 
 export function startBattleTreasureEvent(treasureType, trapId, victoryMessage = "") {
-  const typeLabel = treasureType === "red" ? "赤い宝箱" : treasureType === "black" ? "黒い宝箱" : "金色の宝箱";
+  const typeLabel = treasureType === "red" ? "赤い宝箱"
+    : treasureType === "black" ? "黒い宝箱"
+      : treasureType === "purple" ? "紫色の宝箱"
+        : "金色の宝箱";
   startOverlayEvent({
     type: "treasure",
     treasureType,
@@ -898,7 +901,7 @@ function confirmTreasureEvent() {
     state.overlayEvent = null;
     hooks.hideTreasure();
     const trapMessage = trapResult.message ? `${trapResult.message}\n` : "";
-    if (event.treasureType === "red") {
+    if (event.treasureType === "red" || event.treasureType === "purple") {
       const reward = hooks.awardTreasure(event.treasureType, event.eventTreasureId) || {};
       hooks.say(`${trapMessage}${reward.message || "戦利品をロット袋へ入れた。"}`);
     } else if (event.treasureType === "black" && trapResult.trap && !trapResult.disarmed) {

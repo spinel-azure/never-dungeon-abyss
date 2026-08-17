@@ -376,7 +376,7 @@ function availableInventoryTabs() {
 function unavailableItemReason(item, character) {
   const context = menu.getInventoryContext();
   if (!canUseItemIn(item, context)) return context === "town" ? "ダンジョンまたは戦闘中のみ使用可能です。" : "現在は使用できません。";
-  const heals = item.effects?.some(effect => effect.id === "heal_hp");
+  const heals = item.effects?.some(effect => effect.id === "heal_hp" || effect.id === "heal_hp_rate");
   const cures = item.effects?.some(effect => effect.id === "cure_poison");
   if (heals && !cures && character.hp >= character.maxHp) return "HPが最大です。";
   return "";

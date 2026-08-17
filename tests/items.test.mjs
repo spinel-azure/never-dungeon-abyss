@@ -5,9 +5,9 @@ import { grantItem, getItemCount } from "../data/inventory.js";
 import { resolveFieldItemUse } from "../combat/resolve-item-use.js";
 import { createBattleState, resolveBattleRound } from "../combat/battle-engine.js";
 import {
-  clearPresenceIncreaseReduction, configurePresence, getPresence, getPresenceIncreaseReduction,
+  clearPresenceIncreaseReduction, configurePresence, getEffectivePresenceIncreaseReduction, getPresence, getPresenceIncreaseReduction,
   getPresenceSuppressedSteps, onPlayerStep, resetPresence, restorePresence,
-  setPresenceIncreaseReduction, suppressPresence
+  setPassivePresenceIncreaseReduction, setPresenceIncreaseReduction, suppressPresence
 } from "../js/presence.js";
 import { grantEventItems, unlockGuildRequest } from "../js/character-services.js";
 import { purchaseBuybackEquipment, purchaseBuybackItem, purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
@@ -380,6 +380,30 @@ test("shop healing potions unlock permanently by deepest reached floor", () => {
   delete legacyB10Character.highestDungeonDepthReached;
   legacyB10Character.eventFlags.transfer_portal_b10f_unlocked = true;
   assert.equal(normalizeCharacter(legacyB10Character).highestDungeonDepthReached, 10);
+});
+
+test("strong small healing potion unlocks at B50F and heals 30 percent of max HP", () => {
+  const item = getItem("strong_healing_potion_small");
+  assert.equal(item.buyPrice, 200);
+  assert.equal(getShopItemIdsForDepth(49).includes(item.id), false);
+  assert.equal(getShopItemIdsForDepth(50).includes(item.id), true);
+  const character = characterWith(item.id);
+  character.maxHp = 403;
+  character.hp = 100;
+  const field = resolveFieldItemUse({ character, itemId: item.id, context: "dungeon" });
+  assert.equal(field.healing, 121);
+  assert.equal(field.character.hp, 221);
+});
+
+test("Silent Steps passively stacks with Conceal Presence up to full reduction", () => {
+  restorePresence(0);
+  setPassivePresenceIncreaseReduction(0.5);
+  setPresenceIncreaseReduction(0.5);
+  assert.equal(getEffectivePresenceIncreaseReduction(), 1);
+  onPlayerStep({ random: () => 0 });
+  assert.equal(getPresence(), 0);
+  setPassivePresenceIncreaseReduction(0);
+  clearPresenceIncreaseReduction();
 });
 
 test("shop stock uses explicit arrival flags instead of a debug-inflated deepest floor", () => {

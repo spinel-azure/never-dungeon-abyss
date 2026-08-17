@@ -72,7 +72,8 @@ import {
   clearPresenceIncreaseReduction,
   setPresenceIncreaseReduction,
   suppressPresence,
-  setPresenceDisabled
+  setPresenceDisabled,
+  setPassivePresenceIncreaseReduction
 } from "./presence.js";
 import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js";
 import {
@@ -118,13 +119,13 @@ import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from
 import { configureItemOverlay, openItemOverlay, handleItemOverlayInput } from "./item-overlay.js";
 import { resolveFieldItemUse } from "../combat/resolve-item-use.js";
 import { grantCard } from "../data/deck.js";
-import { collectCardStatBonuses, getCardById, hasCardEffect } from "../data/cards.js";
+import { collectCardStatBonuses, getCardById, hasCardEffect, sumCardEffectValues } from "../data/cards.js";
 import { drawCardCanvas } from "./card-canvas.js";
 import { getItem } from "../data/items.js";
 import { isCriticalHp } from "../data/quick-status.js";
 import { purchaseBuybackEquipment, purchaseBuybackItem, purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
 import { addLootCard, addLootEquipment, addLootGold, addLootItem, depositItemInWarehouse, grantItemWithOverflow, settleLootBag, withdrawItemFromWarehouse } from "../data/inventory.js";
-import { rollEnemyDrop, rollRedChestLoot } from "../data/loot.js";
+import { rollEnemyDrop, rollPurpleChestLoot, rollRedChestLoot } from "../data/loot.js";
 import { rollTreasureTrap } from "../data/traps.js";
 import { restAtHealingFountain as restoreAtHealingFountain } from "../data/fountains.js";
 import { getSkill } from "../data/skills.js";
@@ -655,8 +656,13 @@ import {
     for (let y = 0; y < MAP_H; y += 1) {
       for (let x = 0; x < MAP_W; x += 1) {
         const savedCell = structuredClone(dungeon.cells[y][x]);
-        if (savedCell.treasure && currentDepth <= 4) savedCell.treasure = "red";
-        if (currentDepth > 4 && !savedCell.eventTreasureId && !(savedCell.treasure === "black" && save.character?.eventFlags?.black_chests_unlocked)) savedCell.treasure = null;
+        const unusedSpecialRoomPurple = savedCell.treasure === "purple"
+          && Boolean(savedCell.specialRoom)
+          && !getSpecialRoomDefinition(currentDepth)?.content;
+        if (savedCell.treasure && currentDepth <= 4 && savedCell.treasure !== "purple") savedCell.treasure = "red";
+        if (currentDepth > 4 && !savedCell.eventTreasureId
+          && !(savedCell.treasure === "black" && save.character?.eventFlags?.black_chests_unlocked)
+          && !unusedSpecialRoomPurple) savedCell.treasure = null;
         Object.assign(cells[y][x], savedCell);
         cells[y][x].specialRoom = savedCell.specialRoom || null;
         cells[y][x].questEvent = savedCell.questEvent || null;
@@ -1114,6 +1120,10 @@ import {
   }
 
   function updateCharacterUi() {
+    setPassivePresenceIncreaseReduction(sumCardEffectValues(
+      character?.cards?.deckSlots,
+      "presence_gain_reduction"
+    ));
     setTorchCardEffects({
       consumptionDisabled: hasCardEffect(character?.cards?.deckSlots, "torch_consumption_disabled"),
       effectForced: hasCardEffect(character?.cards?.deckSlots, "force_torch_effect_active")
@@ -1550,9 +1560,13 @@ import {
       saveGame();
       return { message: "赤錆びた鍵を手に入れた！" };
     }
-    if (treasureType !== "red" && treasureType !== "black") return { message: "中には何も入っていなかった！" };
+    if (treasureType !== "red" && treasureType !== "black" && treasureType !== "purple") return { message: "中には何も入っていなかった！" };
     const message = addRolledLoot(
-      treasureType === "black" ? rollEnemyDrop({ dropProfile: "blackChest", depth: currentDepth }) : rollRedChestLoot(Math.random, currentDepth)
+      treasureType === "black"
+        ? rollEnemyDrop({ dropProfile: "blackChest", depth: currentDepth })
+        : treasureType === "purple"
+          ? rollPurpleChestLoot(Math.random, currentDepth)
+          : rollRedChestLoot(Math.random, currentDepth)
     );
     updateCharacterUi();
     saveGame();

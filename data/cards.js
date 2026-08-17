@@ -249,6 +249,14 @@ const STANDARD_CARDS = [
     iconId: "vital-heart", maxOwned: 99, maxCopies: 3
   },
   {
+    id: "sr_silent_steps", rarity: "SR", cost: 4,
+    name: "Silent Steps", nameJa: "忍び足", concept: "気配ゲージ上昇量 -25%",
+    descriptionJa: "気配ゲージの上昇量を25％軽減する。盗賊の「気配消し」と重複する。",
+    category: "exploration", effectId: "presence_gain_reduction", effectValue: 0.25,
+    iconId: "alertness", maxOwned: 2, maxCopies: 2,
+    sellPrice: 5000, buybackPrice: 50000, overflowGold: 5000
+  },
+  {
     id: "sr_flame_armament", rarity: "SR", cost: 4,
     name: "Flame Armament", nameJa: "炎の武装", concept: "物理攻撃に炎属性付与",
     descriptionJa: "通常攻撃と物理攻撃スキルに炎属性を付与する。武器固有属性と戦闘中の属性油が優先される。",
@@ -358,4 +366,13 @@ export function hasCardEffect(deckSlots = [], effectId = "") {
     const card = getCardById(cardId);
     return card?.effectId === effectId || card?.effectIds?.includes(effectId);
   });
+}
+
+
+export function sumCardEffectValues(deckSlots = [], effectId = "") {
+  return deckSlots.reduce((total, cardId) => {
+    const card = getCardById(cardId);
+    if (card?.effectId !== effectId) return total;
+    return total + (Number(card.effectValue) || 0);
+  }, 0);
 }

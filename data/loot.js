@@ -108,6 +108,34 @@ export function rollRedChestLoot(rng = Math.random, depth = 1) {
     enhancement: rollEnhancement(STILETTO_ENHANCEMENT_RATES, rng), unidentifiedName: "？短剣" };
 }
 
+export const PURPLE_CHEST_LOOT_TABLES = Object.freeze([
+  Object.freeze({ minDepth: 1, maxDepth: 9 })
+]);
+
+export function hasPurpleChestLootTable(depth = 1) {
+  const floor = Math.max(1, Math.floor(Number(depth) || 1));
+  return PURPLE_CHEST_LOOT_TABLES.some(table => floor >= table.minDepth && floor <= table.maxDepth);
+}
+
+export function rollPurpleChestLoot(rng = Math.random, depth = 1) {
+  if (!hasPurpleChestLootTable(depth)) return { kind: "none" };
+  const roll = normalizedRoll(rng);
+  const cardId = roll < 0.33
+    ? "common_stairs_detection"
+    : roll < 0.66
+      ? "common_person_detection"
+      : roll < 0.99
+        ? "common_treasure_detection"
+        : "sr_silent_steps";
+  return {
+    kind: "card",
+    cardId,
+    amount: 1,
+    unidentifiedName: "？カード",
+    rarity: cardId === "sr_silent_steps" ? "SR" : "C"
+  };
+}
+
 function rollDeepRedChestLoot(roll, depth, rng) {
   if (roll < 0.1) {
     return { kind: "item", itemId: "healing_potion_large", amount: 1, unidentifiedName: "？薬" };

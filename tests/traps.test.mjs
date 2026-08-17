@@ -5,11 +5,13 @@ import { createInitialCharacter } from "../data/classes.js";
 import { rollTreasureTrap } from "../data/traps.js";
 import { getDisarmRate, resolveTreasureTrap } from "../combat/resolve-trap.js";
 
-test("treasure colors use 20, 50, and 80 percent trap rates", () => {
+test("treasure colors use their configured 20, 50, and 80 percent trap rates", () => {
   assert.equal(rollTreasureTrap("red", sequence(0.19, 0)), "falling_stones");
   assert.equal(rollTreasureTrap("red", sequence(0.2, 0)), null);
   assert.equal(rollTreasureTrap("black", sequence(0.49, 0.34)), "crossbow");
   assert.equal(rollTreasureTrap("black", sequence(0.5, 0)), null);
+  assert.equal(rollTreasureTrap("purple", sequence(0.49, 0.34)), "crossbow");
+  assert.equal(rollTreasureTrap("purple", sequence(0.5, 0)), null);
   assert.equal(rollTreasureTrap("gold", sequence(0.79, 0.99)), "poison_needle");
   assert.equal(rollTreasureTrap("gold", sequence(0.8, 0)), null);
 });

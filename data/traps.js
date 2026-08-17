@@ -1,5 +1,6 @@
 export const TREASURE_TRAP_RATES = Object.freeze({
   red: 0.2,
+  purple: 0.5,
   black: 0.5,
   gold: 0.8
 });

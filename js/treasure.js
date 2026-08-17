@@ -8,6 +8,7 @@ const PARTICLE_COUNT = 52;
 
 const TYPES = {
   red: { outer: 0xf52a18, inner: 0x7f211c, glow: 0xffe27a },
+  purple: { outer: 0x8f42d8, inner: 0x42146f, glow: 0xe4a8ff },
   black: { outer: 0x111111, inner: 0x030303, glow: 0xb44cff },
   gold: { outer: 0xd7a72f, inner: 0x795510, glow: 0xfff4b0 }
 };

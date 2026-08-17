@@ -216,6 +216,13 @@ export const ITEMS = Object.freeze([
     effects: Object.freeze([{ id: "weapon_element_imbue", element: "ice" }]),
     description: "使用した戦闘中、通常攻撃と物理攻撃スキルに氷属性を付与する。別属性で上書き可能。",
     maxOwned: 99, iconId: "holy-water", version: 1
+  }),
+  Object.freeze({
+    number: 35, id: "strong_healing_potion_small", name: "強回復薬（小）", category: "recovery",
+    buyPrice: 200, sellPrice: 100, source: "shop", usableIn: Object.freeze(["town", "dungeon", "battle"]),
+    effects: Object.freeze([{ id: "heal_hp_rate", value: 0.3 }]),
+    description: "最大HPの30％を回復する。B50F到達後に商店へ入荷する。", maxOwned: 99,
+    iconId: "healing-potion", version: 1, shopUnlockDepth: 50
   })
 ]);
 
@@ -230,6 +237,7 @@ export function getShopItemIdsForDepth(depth = 1) {
     ...(reached >= 10 ? ["healing_potion_medium"] : []),
     ...(reached >= 20 ? ["healing_potion_large"] : []),
     ...(reached >= 30 ? ["antidote_medium"] : []),
+    ...(reached >= 50 ? ["strong_healing_potion_small"] : []),
     ...BASE_SHOP_ITEM_IDS.slice(1)
   ];
 }
@@ -242,6 +250,7 @@ export function getShopItemIdsForCharacter(character) {
     ...(flags.transfer_portal_b10f_unlocked ? ["healing_potion_medium"] : []),
     ...(flags.shop_stock_b20f_unlocked ? ["healing_potion_large"] : []),
     ...(flags.shop_stock_b30f_unlocked && flags.boss_iron_maiden_b29f_defeated ? ["antidote_medium"] : []),
+    ...(flags.transfer_portal_b50f_unlocked ? ["strong_healing_potion_small"] : []),
     ...(flags.scorching_barrier_shop_unlocked ? ["scorching_barrier"] : []),
     ...(flags.extreme_cold_barrier_shop_unlocked ? ["extreme_cold_barrier"] : []),
     ...(flags.weapon_imbue_oils_shop_unlocked || quest013Reported ? ["fire_lizard_oil", "ice_lizard_oil"] : []),

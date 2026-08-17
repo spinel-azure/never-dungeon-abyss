@@ -147,6 +147,7 @@ export function configureRenderer(options) {
   });
   loadCharacterImage(HEALING_FOUNTAIN.id, HEALING_FOUNTAIN.image);
   ["red", "black", "gold"].forEach(type => loadTreasureImage(type, `images/treasure/treasure-${type}.png`));
+  loadTreasureImage("purple", "images/treasure/treasure-red.png", "#8f42d8");
   renderer.canvas.addEventListener("pointerup", handleCanvasPointerUp);
   renderer.canvas.addEventListener("touchend", handleCanvasTouchEnd, { passive: false });
 }
@@ -704,9 +705,23 @@ export function drawCellEvents(layer = "all") {
     });
 }
 
-function loadTreasureImage(type, src) {
+function loadTreasureImage(type, src, tint = "") {
   if (renderer.treasureImages.has(type)) return;
   const image = new Image();
+  if (tint) {
+    image.addEventListener("load", () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      const context = canvas.getContext("2d");
+      context.drawImage(image, 0, 0);
+      context.globalCompositeOperation = "source-atop";
+      context.fillStyle = tint;
+      context.globalAlpha = .78;
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      renderer.treasureImages.set(type, canvas);
+    }, { once: true });
+  }
   image.src = src;
   renderer.treasureImages.set(type, image);
 }
@@ -930,13 +945,18 @@ function drawTreasureEvent(ctx, event) {
 
   ctx.save();
   ctx.globalAlpha = event.alpha;
-  ctx.shadowColor = event.treasureType === "gold" ? "rgba(255,222,104,.42)" : "rgba(0,0,0,.55)";
+  ctx.shadowColor = event.treasureType === "gold" ? "rgba(255,222,104,.42)"
+    : event.treasureType === "purple" ? "rgba(184,108,255,.5)" : "rgba(0,0,0,.55)";
   ctx.shadowBlur = event.size * .12;
-  if (image && image.complete && image.naturalWidth > 0) {
-    const drawW = drawH * (image.naturalWidth / image.naturalHeight);
+  const imageWidth = Number(image?.naturalWidth || image?.width) || 0;
+  const imageHeight = Number(image?.naturalHeight || image?.height) || 0;
+  if (image && imageWidth > 0 && imageHeight > 0) {
+    const drawW = drawH * (imageWidth / imageHeight);
     ctx.drawImage(image, event.x - drawW / 2, top, drawW, drawH);
   } else {
-    ctx.fillStyle = event.treasureType === "red" ? "#f52a18" : event.treasureType === "gold" ? "#d7a72f" : "#111";
+    ctx.fillStyle = event.treasureType === "red" ? "#f52a18"
+      : event.treasureType === "gold" ? "#d7a72f"
+        : event.treasureType === "purple" ? "#8f42d8" : "#111";
     ctx.fillRect(event.x - fallbackW / 2, top + drawH * .22, fallbackW, drawH * .78);
   }
   ctx.restore();

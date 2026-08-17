@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { rollBlackChestLoot, rollEnemyDrop, rollRedChestLoot } from "../data/loot.js";
+import { hasPurpleChestLootTable, rollBlackChestLoot, rollEnemyDrop, rollPurpleChestLoot, rollRedChestLoot } from "../data/loot.js";
 import { buildBoundaryWallMap, cells } from "../js/dungeon.js";
 import { getWeapon } from "../data/weapons.js";
 import { createInnStableRecovery, getInnStayFee } from "../js/character-services.js";
@@ -11,6 +11,17 @@ const rng = (...values) => {
   let index = 0;
   return () => values[Math.min(index++, values.length - 1)];
 };
+
+test("B1F to B9F purple chests use the card-only 33/33/33/1 table", () => {
+  assert.equal(hasPurpleChestLootTable(1), true);
+  assert.equal(hasPurpleChestLootTable(9), true);
+  assert.equal(hasPurpleChestLootTable(10), false);
+  assert.equal(rollPurpleChestLoot(rng(0.329), 1).cardId, "common_stairs_detection");
+  assert.equal(rollPurpleChestLoot(rng(0.33), 1).cardId, "common_person_detection");
+  assert.equal(rollPurpleChestLoot(rng(0.66), 9).cardId, "common_treasure_detection");
+  assert.equal(rollPurpleChestLoot(rng(0.99), 9).cardId, "sr_silent_steps");
+  assert.equal(rollPurpleChestLoot(rng(0), 10).kind, "none");
+});
 
 test("early enemy drops use 40/55/5 percent bands", () => {
   const enemy = { dropItemId: "rat_tail" };
@@ -155,15 +166,16 @@ test("a duplicate unique C card converts into 100 gold when the loot bag settles
   }]);
 });
 
-test("B1F to B4F place one to three red chests and no black or gold", () => {
+test("B1F to B4F keep one to three red chests alongside eligible purple special-room chests", () => {
   for (const [depth, roll, expected] of [[1, 0, 1], [2, 0.4, 2], [4, 0.99, 3]]) {
     buildBoundaryWallMap(depth, () => roll);
     const treasures = cells.flat().map(cell => cell.treasure).filter(Boolean);
-    assert.equal(treasures.length, expected);
-    assert.ok(treasures.every(type => type === "red"));
+    assert.equal(treasures.filter(type => type === "red").length, expected);
+    assert.equal(treasures.filter(type => type === "purple").length, depth === 1 ? 1 : 0);
+    assert.ok(treasures.every(type => type === "red" || type === "purple"));
   }
   buildBoundaryWallMap(5, () => 0);
-  assert.equal(cells.flat().filter(cell => cell.treasure).length, 0);
+  assert.deepEqual(cells.flat().map(cell => cell.treasure).filter(Boolean), ["purple"]);
 });
 
 test("B11F to B20F place one to three red chests alongside any enabled black chest", () => {

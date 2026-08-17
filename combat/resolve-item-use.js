@@ -10,8 +10,8 @@ export function getItemUnavailableReason({ character, itemId, context, enemy, to
     if (item.usableIn?.includes("dungeon")) return "dungeonOnly";
     return "battleOnly";
   }
-  const healsHp = item.effects?.some(effect => effect.id === "heal_hp");
-  const hasAnotherEffect = item.effects?.some(effect => effect.id !== "heal_hp");
+  const healsHp = item.effects?.some(effect => effect.id === "heal_hp" || effect.id === "heal_hp_rate");
+  const hasAnotherEffect = item.effects?.some(effect => effect.id !== "heal_hp" && effect.id !== "heal_hp_rate");
   if (healsHp && !hasAnotherEffect && character.hp >= character.maxHp) return "fullHp";
   if (itemId === "antidote" && character.hp >= character.maxHp && !hasPoison(character)) return "noEffect";
   if (itemId === "styptic" && character.hp >= character.maxHp && !hasStatus(character, "bleeding")) return "noEffect";
@@ -44,6 +44,10 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
   for (const effect of item.effects) {
     if (effect.id === "heal_hp") {
       healing = Math.min(effect.value, next.maxHp - next.hp);
+      next.hp += healing;
+    } else if (effect.id === "heal_hp_rate") {
+      const amount = Math.max(1, Math.ceil(next.maxHp * (Number(effect.value) || 0)));
+      healing = Math.min(amount, next.maxHp - next.hp);
       next.hp += healing;
     } else if (effect.id === "cure_poison") {
       next.statuses = (next.statuses || []).filter(status => (status.statusId || status.id) !== "poison");

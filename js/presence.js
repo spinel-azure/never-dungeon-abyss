@@ -8,6 +8,7 @@ const ENCOUNTER_MESSAGE = "＊　何者かと遭遇した！　＊";
 let presence = 0;
 let suppressedSteps = 0;
 let increaseReduction = 0;
+let passiveIncreaseReduction = 0;
 let encounterActive = false;
 let presenceDisabled = false;
 const hooks = {
@@ -32,6 +33,15 @@ export function getPresenceIncreaseReduction() {
   return increaseReduction;
 }
 
+export function getEffectivePresenceIncreaseReduction() {
+  return Math.min(1, increaseReduction + passiveIncreaseReduction);
+}
+
+export function setPassivePresenceIncreaseReduction(reduction) {
+  passiveIncreaseReduction = Math.max(0, Math.min(1, Number(reduction) || 0));
+  hooks.onChange(presence);
+}
+
 export function restorePresence(value, suppression = 0, reduction = 0) {
   presence = Math.max(0, Math.min(PRESENCE_MAX, Math.floor(Number(value) || 0)));
   suppressedSteps = Math.max(0, Math.min(30, Math.floor(Number(suppression) || 0)));
@@ -45,7 +55,7 @@ export function restorePresence(value, suppression = 0, reduction = 0) {
 export function addPresence(amount) {
   if (presenceDisabled) return false;
   if (encounterActive) return false;
-  const increase = Math.max(0, Math.floor((Number(amount) || 0) * (1 - increaseReduction)));
+  const increase = Math.max(0, Math.floor((Number(amount) || 0) * (1 - getEffectivePresenceIncreaseReduction())));
   presence = Math.min(PRESENCE_MAX, presence + increase);
   hooks.onChange(presence);
   if (presence < PRESENCE_MAX) return false;

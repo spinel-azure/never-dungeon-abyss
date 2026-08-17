@@ -150,6 +150,23 @@ test("each floor creates at most one sealed one-cell special room with an intern
   }
 });
 
+test("configured empty special rooms contain one purple card chest without replacing fixed events", () => {
+  setStartPosition(0, 0);
+  buildBoundaryWallMap(1, seeded(101), {});
+  const earlyRoom = cells.flat().find(cell => cell.specialRoom);
+  assert.equal(earlyRoom.specialRoom.content, null);
+  assert.equal(earlyRoom.treasure, "purple");
+  assert.ok(earlyRoom.treasureTrapId === null || typeof earlyRoom.treasureTrapId === "string");
+
+  buildBoundaryWallMap(2, seeded(102), {});
+  const fixedEventRoom = cells.flat().find(cell => cell.specialRoom);
+  assert.equal(fixedEventRoom.specialRoom.content.bossId, "lingering_ghost_b2f");
+  assert.equal(fixedEventRoom.treasure, null);
+
+  buildBoundaryWallMap(10, seeded(110), {});
+  assert.equal(cells.flat().find(cell => cell.specialRoom).treasure, null);
+});
+
 test("special-room lock gets three attempts with a lower rate after each failure", () => {
   setStartPosition(0, 0);
   buildBoundaryWallMap(1, seeded(31), {});
