@@ -43,10 +43,12 @@ const FACILITY_COMMANDS = Object.freeze({
     ["records", "冒険記録"], ["talk", "話す"], ["return", "町へ戻る"]
   ],
   tavern: [
-    ["talk", "話す"], ["rumors", "噂話"], ["return", "町に戻る"],
-    ["empty-1", ""], ["empty-2", ""], ["empty-3", ""]
+    ["npc-hire", "NPC雇用"], ["rumors", "噂話"], ["past-rumors", "過去の噂話"],
+    ["talk", "話す"], ["return", "町に戻る"], ["empty-1", ""]
   ]
 });
+
+const UNIMPLEMENTED_TAVERN_COMMANDS = Object.freeze(new Set(["npc-hire", "past-rumors"]));
 
 const TAVERN_FACILITY = Object.freeze({
   id: "tavern",
@@ -857,7 +859,7 @@ function moveSelection(direction) {
 
 function moveFacilityCommandSelection(direction) {
   const validIndices = town.facilityCommandButtons
-    .map((button, index) => button.classList.contains("is-empty") ? -1 : index)
+    .map((button, index) => button.disabled ? -1 : index)
     .filter(index => index >= 0);
   town.facilityCommandIndex = moveGridIndex(
     town.facilityCommandIndex,
@@ -1227,6 +1229,7 @@ function showFacilityCommands(facilityId) {
   town.facilityCommandButtons.forEach((button, index) => {
     const [id, label] = commands[index];
     const empty = !label;
+    const unimplemented = facilityId === "tavern" && UNIMPLEMENTED_TAVERN_COMMANDS.has(id);
     const available = id === "return"
       || id === "stay"
       || id === "heal"
@@ -1244,11 +1247,16 @@ function showFacilityCommands(facilityId) {
       || (id === "talk" && ["guild", "inn", "temple", "shop", "library", "tavern"].includes(facilityId));
     button.dataset.facilityCommand = id;
     button.textContent = label;
-    button.disabled = empty;
+    button.disabled = empty || unimplemented;
     button.classList.toggle("is-empty", empty);
     button.classList.toggle("is-unavailable", !empty && !available);
     button.setAttribute("aria-disabled", String(!empty && !available));
   });
+  if (town.facilityCommandButtons[town.facilityCommandIndex]?.disabled) {
+    town.facilityCommandIndex = town.facilityCommandButtons.findIndex(
+      button => !button.disabled && button.getAttribute("aria-disabled") !== "true"
+    );
+  }
   if (!town.facilityCommandButtons.every(button => button.parentElement === town.commandRoot)) {
     town.commandRoot.replaceChildren(...town.facilityCommandButtons);
   }
