@@ -14,6 +14,10 @@ export const EQUIPMENT = Object.freeze({
     fireFloorDamageImmunity: true,
     hiddenStatBonusKeys: Object.freeze(["fireDamageReduction"])
   }),
+  coldproof_boots: item("coldproof_boots", "防寒ブーツ", "footId", { def: 3, iceDamageReduction: 0.15 }, {
+    coldFloorDamageImmunity: true,
+    hiddenStatBonusKeys: Object.freeze(["iceDamageReduction"])
+  }),
   anti_magic_necklace: item("anti_magic_necklace", "魔除けのネックレス", "accessoryId", {
     magicDamageReduction: 0.15
   }, {

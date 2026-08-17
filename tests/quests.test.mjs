@@ -19,6 +19,7 @@ import {
   THIEVES_HIDEOUT_QUEST_ID,
   THIRD_RED_DOOR_INVESTIGATION_QUEST_ID,
   B35F_SURVEY_QUEST_ID,
+  B45F_SURVEY_QUEST_ID,
   BRASS_BULL_QUEST_ID,
   RED_DOOR_DEFENSE_CARD_FLAG,
   grantRedDoorInvestigationSupply,
@@ -568,6 +569,31 @@ test("quest 013 supplies ten large potions, resets on leaving B35F, and rewards 
   assert.equal(report.character.eventFlags.weapon_imbue_oils_shop_unlocked, true);
   assert.equal(report.character.eventFlags.weapon_imbue_oils_shop_unlocked, true);
   assert.ok(report.character.equipmentInventory.instances.some(entry => entry.equipmentId === "fireproof_boots"));
+});
+
+test("quest 017 follows quest 015, supplies fifteen large potions, and rewards coldproof boots", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "mage" });
+  assert.equal(isQuestAvailable(character, B45F_SURVEY_QUEST_ID), false);
+  character.quests.completedQuestIds.push(
+    QUEST_ID, SLIME_EXTERMINATION_QUEST_ID, FLOOR_SURVEY_QUEST_ID, "guild_015"
+  );
+  assert.equal(isQuestAvailable(character, B45F_SURVEY_QUEST_ID), true);
+  const accepted = acceptQuest(character, B45F_SURVEY_QUEST_ID);
+  character = accepted.character;
+  assert.equal(accepted.acceptanceSupplyItemId, "healing_potion_large");
+  assert.equal(accepted.acceptanceSupplyAmount, 15);
+  const fullMap = Array.from({ length: 10 }, () => Array(10).fill(true));
+  const halfMap = Array.from({ length: 5 }, () => Array(10).fill(true));
+  character = recordFloorExploration(character, { depth: 45, explored: halfMap });
+  assert.equal(getQuestProgress(character, B45F_SURVEY_QUEST_ID).progress, 50);
+  character = recordFloorExploration(character, { depth: 44, explored: [] });
+  assert.equal(getQuestProgress(character, B45F_SURVEY_QUEST_ID).progress, 0);
+  character = recordFloorExploration(character, { depth: 45, explored: fullMap });
+  assert.equal(getQuestProgress(character, B45F_SURVEY_QUEST_ID).readyToReport, true);
+  const report = reportQuest(character, B45F_SURVEY_QUEST_ID);
+  assert.equal(report.rewardEquipmentId, "coldproof_boots");
+  assert.equal(report.bonusGold, 4000);
+  assert.ok(report.character.equipmentInventory.instances.some(entry => entry.equipmentId === "coldproof_boots"));
 });
 
 test("quest 014 is gated by quest 013, tracks the B36F Brass Bull, and unlocks Scorching Barrier sales", () => {

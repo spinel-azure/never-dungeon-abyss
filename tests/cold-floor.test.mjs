@@ -4,6 +4,8 @@ import { readFile } from "node:fs/promises";
 
 import { createInitialCharacter } from "../data/classes.js";
 import { getColdFloorStepDamage, isColdFloorDepth } from "../data/cold-floor.js";
+import { getEquipmentItem } from "../data/equipment.js";
+import { grantEquipmentInstance } from "../data/equipment-inventory.js";
 
 test("only B40F to B49F are damaging cold floors", () => {
   assert.equal(isColdFloorDepth(39), false);
@@ -21,6 +23,22 @@ test("cold floors deal one step damage and use the shared nonlethal path", async
   assert.match(source, /getColdFloorStepDamage/);
   assert.match(source, /applyColdFloorStep\(\)/);
   assert.match(source, /getNonlethalPoisonDamage\(character\.hp, requested\)/);
+});
+
+test("coldproof boots negate cold floor damage and hide their ice resistance", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  const granted = grantEquipmentInstance(character, "coldproof_boots", "footId");
+  character = {
+    ...granted.character,
+    equipment: { ...granted.character.equipment, footId: "coldproof_boots" },
+    equippedInstanceIds: { ...granted.character.equippedInstanceIds, footId: granted.instance.instanceId }
+  };
+  assert.equal(getColdFloorStepDamage(character, 45), 0);
+  const boots = getEquipmentItem("coldproof_boots", "footId");
+  assert.equal(boots?.statBonuses?.def, 3);
+  assert.equal(boots?.statBonuses?.iceDamageReduction, 0.15);
+  assert.equal(boots?.coldFloorDamageImmunity, true);
+  assert.deepEqual(boots?.hiddenStatBonusKeys, ["iceDamageReduction"]);
 });
 
 test("cold area uses a dedicated blue mist palette", async () => {

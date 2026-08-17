@@ -19,6 +19,8 @@ export const B35F_SURVEY_QUEST_ID = "guild_013";
 export const B35F_SURVEY_SUPPLY_FLAG = "guild_013_large_potions_received";
 export const BRASS_BULL_QUEST_ID = "guild_014";
 export const FOURTH_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_015";
+export const B45F_SURVEY_QUEST_ID = "guild_017";
+export const B45F_SURVEY_SUPPLY_FLAG = "guild_017_large_potions_received";
 export const THIEVES_CLUE_FLAGS = Object.freeze([
   "quest_011_clue_emblem_found", "quest_011_clue_ledger_found", "quest_011_clue_map_found"
 ]);
@@ -411,6 +413,29 @@ export const QUESTS = Object.freeze([
       "transfer_portal_b40f_unlocked"
     ]),
     available: true
+  }),
+  Object.freeze({
+    id: B45F_SURVEY_QUEST_ID,
+    number: "017",
+    title: "迷宮地下45階の調査",
+    client: "ギルドマスター",
+    category: "other",
+    objectiveType: "exploreFloor",
+    targetDepth: 45,
+    requiredCount: 100,
+    objectiveLabel: "途中で戻ることなくB45Fを100マス踏破する",
+    reward: Object.freeze({
+      type: "equipment", label: "装備品×1", amount: 1,
+      equipmentId: "coldproof_boots", slot: "footId", bonusGold: 4000
+    }),
+    descriptionLabel: "目的",
+    description: Object.freeze([
+      "奈落の極寒区域を調査してもらいたい。",
+      "途中で戻る事なくB45Fを隅々まで調べてくれ。危険な調査なので",
+      "今回は事前に支給品がある。受け取れ。"
+    ]),
+    prerequisiteQuestIds: Object.freeze([FOURTH_RED_DOOR_INVESTIGATION_QUEST_ID]),
+    available: true
   })
 ]);
 
@@ -517,6 +542,15 @@ export function acceptQuest(character, questId) {
     next = {
       ...supply.character,
       eventFlags: { ...(supply.character.eventFlags || {}), [B35F_SURVEY_SUPPLY_FLAG]: true }
+    };
+    acceptanceSupplyItemId = "healing_potion_large";
+    acceptanceSupplyAmount = supply.gained + supply.stored;
+  }
+  if (quest.id === B45F_SURVEY_QUEST_ID && !next.eventFlags?.[B45F_SURVEY_SUPPLY_FLAG]) {
+    const supply = grantItemWithOverflow(next, "healing_potion_large", 15);
+    next = {
+      ...supply.character,
+      eventFlags: { ...(supply.character.eventFlags || {}), [B45F_SURVEY_SUPPLY_FLAG]: true }
     };
     acceptanceSupplyItemId = "healing_potion_large";
     acceptanceSupplyAmount = supply.gained + supply.stored;

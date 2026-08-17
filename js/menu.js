@@ -1000,6 +1000,7 @@ function equipmentEffectLabels(definition) {
   const labels = [];
   if (Number.isFinite(definition.attack)) labels.push(`ATK +${definition.attack}`);
   if (definition.fireFloorDamageImmunity) labels.push("火炎床無効");
+  if (definition.coldFloorDamageImmunity) labels.push("氷結床無効");
   if (definition.type) labels.push(`${getWeaponType(definition.type).hitCount || 1}回攻撃`);
   if (Number(definition.defensePenetration) > 0) labels.push(`DEF貫通 ${Math.round(definition.defensePenetration * 100)}%`);
   if (Number(definition.poisonChance) > 0) labels.push(`毒付与 ${Math.round(definition.poisonChance * 100)}%`);

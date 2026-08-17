@@ -1255,6 +1255,7 @@ import {
     const bonuses = [];
     if (Number.isFinite(item.attack)) bonuses.push(`ATK +${item.attack}`);
     if (item.fireFloorDamageImmunity) bonuses.push("火炎床無効");
+    if (item.coldFloorDamageImmunity) bonuses.push("氷結床無効");
     bonuses.push(...Object.entries(item.statBonuses || {})
       .filter(([key]) => !item.hiddenStatBonusKeys?.includes(key))
       .map(([key, value]) => {
