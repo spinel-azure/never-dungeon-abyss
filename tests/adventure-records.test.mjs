@@ -9,6 +9,11 @@ test("quest history and adventure record descriptions reserve fixed line counts"
   assert.match(css, /\.quest-history-panel \.inventory-description\{[^}]*height:calc\(4\.5em \+ 16px\)/);
   assert.match(css, /\.adventure-records-panel \.inventory-description\{[^}]*height:calc\(3em \+ 16px\)/);
 });
+
+test("rumor history reserves more lines and scrolls long dialogue", async () => {
+  const css = await readFile(new URL("../css/game-menu.css", import.meta.url), "utf8");
+  assert.match(css, /\.rumor-history-panel \.inventory-description\{[^}]*height:calc\(7\.5em \+ 16px\)[^}]*overflow-y:auto/);
+});
 import { formatPlayTime, getActivePlayTimeDelta, normalizeAdventureStats, PLAY_TIME_ERA, recordInnStay, recordShopPurchase, recordTempleDonation } from "../data/adventure-stats.js";
 import { createInitialCharacter } from "../data/classes.js";
 
