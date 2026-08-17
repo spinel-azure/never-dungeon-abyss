@@ -197,6 +197,7 @@ export function configureTown(options) {
   town.commerceTitle = document.querySelector("#townCommerceTitle");
   town.commerceList = document.querySelector("#townCommerceList");
   town.commerceGold = document.querySelector("#townCommerceGold");
+  town.commerceQuantityControls = document.querySelector("#townCommerceQuantityControls");
   town.commerceIndex = 0;
   town.commerceQuantity = 1;
   town.commercePointerArmedIndex = -1;
@@ -212,6 +213,7 @@ export function configureTown(options) {
   town.transferOverlay = document.querySelector("#transferDestinationOverlay");
   town.transferList = document.querySelector("#transferDestinationList");
   town.transferPager = document.querySelector("#transferDestinationPager");
+  town.transferPointerArmedIndex = -1;
   town.portraitPreloads = TOWN_FACILITIES
     .filter(facility => facility.image)
     .map(facility => {
@@ -366,6 +368,23 @@ export function configureTown(options) {
       town.commercePointerArmedIndex = index;
     }
   });
+  town.commerceQuantityControls?.addEventListener("click", event => {
+    const button = event.target.closest("[data-commerce-step]");
+    if (!button || town.mode !== "commerceQuantity") return;
+    const step = Number(button.dataset.commerceStep);
+    const action = step === -10 ? "left" : step === -1 ? "down" : step === 1 ? "up" : step === 10 ? "right" : "";
+    if (action) handleCommerceQuantityInput(action);
+  });
+  town.root.querySelector("#guildQuestPager")?.addEventListener("click", event => {
+    const button = event.target.closest("[data-quest-page]");
+    if (!button || !town.mode.startsWith("quest")) return;
+    changeQuestPage(Number(button.dataset.questPage));
+  });
+  town.transferPager?.addEventListener("click", event => {
+    const button = event.target.closest("[data-transfer-page]");
+    if (!button || town.mode !== "transferCircle") return;
+    changeTransferPage(Number(button.dataset.transferPage));
+  });
   town.registration.addEventListener("submit", event => {
     event.preventDefault();
     if (town.mode === "templeRenameInput") renameCharacterAtTemple();
@@ -491,18 +510,17 @@ export function handleTownInput(action) {
       town.playSe("cursorMove");
       town.transferIndex = (town.transferIndex + (action === "down" ? 1 : destinations.length - 1)) % destinations.length;
       town.transferPage = Math.floor(town.transferIndex / 5);
+      town.transferPointerArmedIndex = -1;
       renderTransferCircle();
       return true;
     }
     if (["left", "right"].includes(action) && pageCount > 1) {
-      town.playSe("cursorMove");
-      town.transferPage = (town.transferPage + (action === "right" ? 1 : pageCount - 1)) % pageCount;
-      town.transferIndex = Math.min(town.transferPage * 5, destinations.length - 1);
-      renderTransferCircle();
+      changeTransferPage(action === "right" ? 1 : -1);
       return true;
     }
     if (action === "confirm") {
       town.playSe("confirm");
+      town.transferPointerArmedIndex = -1;
       activateTransferSelection(town.transferIndex);
       return true;
     }
@@ -870,6 +888,7 @@ function activateEntranceCommand(command) {
   }
   if (command === "circle") {
     town.mode = "transferCircle";
+    town.transferPointerArmedIndex = -1;
     renderTransferCircle();
     return;
   }
@@ -1234,6 +1253,17 @@ function getTransferDestinations() {
   return getUnlockedTransferDestinations(town.getCharacter?.());
 }
 
+function changeTransferPage(direction) {
+  const destinations = getTransferDestinations();
+  const pageCount = Math.max(1, Math.ceil(destinations.length / 5));
+  if (pageCount <= 1 || !Number.isFinite(direction) || direction === 0) return;
+  town.playSe("cursorMove");
+  town.transferPage = (town.transferPage + (direction > 0 ? 1 : pageCount - 1)) % pageCount;
+  town.transferIndex = Math.min(town.transferPage * 5, destinations.length - 1);
+  town.transferPointerArmedIndex = -1;
+  renderTransferDestinationList(destinations);
+}
+
 function activateTransferSelection(index) {
   const destination = getTransferDestinations()[index];
   if (!destination) return;
@@ -1255,16 +1285,21 @@ function renderTransferDestinationList(destinations = getTransferDestinations())
     button.textContent = destination.label;
     button.classList.toggle("is-selected", index === town.transferIndex);
     button.addEventListener("click", () => {
-      if (town.transferIndex === index) activateTransferSelection(index);
-      else {
-        town.playSe("cursorMove");
-        town.transferIndex = index;
-        renderTransferDestinationList(destinations);
+      if (town.transferPointerArmedIndex === index) {
+        town.transferPointerArmedIndex = -1;
+        activateTransferSelection(index);
+        return;
       }
+      town.playSe("cursorMove");
+      town.transferIndex = index;
+      town.transferPointerArmedIndex = index;
+      renderTransferDestinationList(destinations);
     });
     return button;
   }));
-  town.transferPager.textContent = `◀ ${town.transferPage + 1}/${pageCount} ▶`;
+  const indicator = town.transferPager.querySelector("strong");
+  if (indicator) indicator.textContent = `${town.transferPage + 1}/${pageCount}`;
+  town.transferPager.querySelectorAll("button").forEach(button => { button.disabled = pageCount <= 1; });
 }
 
 function showFacilityCommands(facilityId) {
@@ -1790,6 +1825,7 @@ function closeNpcManagement() {
 }
 
 function openCommerce(kind) {
+  if (town.commerceQuantityControls) town.commerceQuantityControls.hidden = true;
   const buybackEntries = kind === "buybackEquipment" ? (town.getCharacter()?.equipmentBuyback || []) : [];
   const itemBuybackEntries = kind === "buybackEquipment" ? (town.getCharacter()?.itemBuyback || []) : [];
   const ids = kind === "donate"
@@ -1928,6 +1964,7 @@ function requestCommerceConfirmation() {
 function showCommerceConfirmation() {
   const item = town.commerceItems[town.commerceIndex];
   if (!item) return;
+  if (town.commerceQuantityControls) town.commerceQuantityControls.hidden = true;
   town.mode = "commerceConfirm";
   town.messageEl.textContent = town.commerceKind === "donate"
     ? "司祭アーヴァイン：こちらでよろしいですか？\n＊Aボタン：はい　Bボタン：いいえ"
@@ -1968,6 +2005,7 @@ function handleCommerceQuantityInput(action) {
   if (action === "cancel") {
     town.playSe("cancel");
     town.mode = "commerce";
+    if (town.commerceQuantityControls) town.commerceQuantityControls.hidden = true;
     town.messageEl.textContent = "女主人ヘレン：あら、残念。";
     return true;
   }
@@ -1976,6 +2014,7 @@ function handleCommerceQuantityInput(action) {
 
 function renderCommerceQuantity() {
   const item = town.commerceItems[town.commerceIndex];
+  if (town.commerceQuantityControls) town.commerceQuantityControls.hidden = false;
   const owned = Math.max(1, Math.floor(Number(town.getCharacter()?.inventory?.counts?.[item?.id]) || 1));
   town.messageEl.textContent = town.commerceKind === "buy"
     ? `女主人ヘレン：いくつ購入するのかしら？\n購入数 ${town.commerceQuantity}　合計 ${item.buyPrice * town.commerceQuantity}G\n所持数：${inventoryItemCount(item.id)}／${item.maxOwned || 99}　倉庫：${warehouseItemCount(item.id)}\n＊↑↓：1個　←→：10個　Aボタン：決定　Bボタン：戻る`
@@ -2162,6 +2201,11 @@ function openGuildQuestList(kind) {
   resetTownViewport();
 }
 
+function changeQuestPage(direction) {
+  if (!["questAcceptList", "questReportList"].includes(town.mode)) return;
+  handleQuestInput(direction > 0 ? "right" : "left");
+}
+
 function renderGuildQuestList() {
   const reportMode = town.mode === "questReportList";
   const visibleQuestIndexes = getVisibleQuestIndexes();
@@ -2217,6 +2261,7 @@ function renderGuildQuestList() {
     pager.hidden = pageCount <= 1;
     const indicator = pager.querySelector("strong");
     if (indicator) indicator.textContent = `${town.questPage + 1}/${pageCount}`;
+    pager.querySelectorAll("button").forEach(button => { button.disabled = pageCount <= 1; });
   }
 }
 

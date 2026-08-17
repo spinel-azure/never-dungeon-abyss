@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="css/game-menu.css?v=20260817-5">
   <link rel="stylesheet" href="css/card-gallery.css?v=20260810-1">
   <link rel="stylesheet" href="css/title-screen.css?v=20260815-2">
-  <link rel="stylesheet" href="css/town.css?v=20260817-3">
+  <link rel="stylesheet" href="css/town.css?v=20260817-4">
   <link rel="stylesheet" href="css/effects.css?v=20260805-2">
   <link rel="stylesheet" href="css/scene-transition.css?v=20260809-2">
   <link rel="stylesheet" href="css/battle.css?v=20260809-1">
@@ -112,18 +112,24 @@
         <section id="guildQuestOverlay" class="guild-quest-overlay" aria-label="ギルド依頼" hidden>
           <h2 id="guildQuestTitle" class="guild-quest-title">依頼受注</h2>
           <div id="guildQuestList" class="guild-quest-list"></div>
-          <div id="guildQuestPager" class="guild-quest-pager" hidden><span>◀</span><strong>1/1</strong><span>▶</span></div>
+          <div id="guildQuestPager" class="guild-quest-pager" hidden><button type="button" data-quest-page="-1" aria-label="前のページ">◀</button><strong>1/1</strong><button type="button" data-quest-page="1" aria-label="次のページ">▶</button></div>
           <article id="guildQuestDetail" class="guild-quest-detail" hidden></article>
         </section>
         <section id="townCommerceOverlay" class="town-commerce-overlay" aria-label="商品選択" hidden>
           <h2 id="townCommerceTitle" class="town-commerce-title">購入</h2>
           <div id="townCommerceList" class="town-commerce-list"></div>
+          <div id="townCommerceQuantityControls" class="town-commerce-quantity-controls" hidden>
+            <button type="button" data-commerce-step="-10">－10</button>
+            <button type="button" data-commerce-step="-1">－1</button>
+            <button type="button" data-commerce-step="1">＋1</button>
+            <button type="button" data-commerce-step="10">＋10</button>
+          </div>
           <p class="town-commerce-gold">所持金 <strong id="townCommerceGold">0</strong> G</p>
         </section>
         <section id="transferDestinationOverlay" class="transfer-destination-overlay" aria-label="転送先選択" hidden>
           <h2>TRANSFER</h2>
           <div id="transferDestinationList" class="transfer-destination-list"></div>
-          <p id="transferDestinationPager" class="transfer-destination-pager">◀ 1/1 ▶</p>
+          <div id="transferDestinationPager" class="transfer-destination-pager"><button type="button" data-transfer-page="-1" aria-label="前のページ">◀</button><strong>1/1</strong><button type="button" data-transfer-page="1" aria-label="次のページ">▶</button></div>
           <p class="transfer-destination-help">↑↓ 選択　←→ ページ　A 決定　B 戻る</p>
         </section>
         <div id="levelUpEffect" class="level-up-effect" aria-hidden="true" hidden>LEVEL UP!!</div>
@@ -416,7 +422,7 @@
     </section>
   </section>
 </main>
-  <script type="module" src="js/main.js?v=20260817-10"></script>
+  <script type="module" src="js/main.js?v=20260817-11"></script>
   <script type="module" src="js/title-screen.js"></script>
 </body>
 </html>
