@@ -6,12 +6,14 @@ export function renderNpcPartyStatus(root, character) {
   const activeIds = NPC_SUPPORT_ENABLED && Array.isArray(character?.npcSystem?.activeIds)
     ? character.npcSystem.activeIds.slice(0, 3)
     : [];
-  root.hidden = !NPC_SUPPORT_ENABLED || activeIds.length === 0;
+  const canHireNpc = NPC_SUPPORT_ENABLED && Boolean(character?.npcSystem);
+  root.hidden = !NPC_SUPPORT_ENABLED;
   [...root.querySelectorAll("[data-npc-slot]")].forEach((slot, index) => {
     const npc = getNpcDefinition(activeIds[index]);
     slot.dataset.npcId = npc?.id || "";
-    slot.textContent = npc ? `${npc.name}【${npc.jobShort}】` : "―― 空き枠 ――";
+    slot.textContent = npc ? `${npc.name}【${npc.jobShort}】` : canHireNpc ? "NPC参加可能" : "――――";
     slot.classList.toggle("is-empty", !npc);
+    slot.classList.toggle("is-unavailable", !npc && !canHireNpc);
   });
 }
 

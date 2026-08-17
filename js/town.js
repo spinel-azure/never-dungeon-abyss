@@ -1617,6 +1617,7 @@ function openNpcManagement(kind) {
     ? NPC_DEFINITIONS.filter(npc => !registered.has(npc.id))
     : NPC_DEFINITIONS.filter(npc => registered.has(npc.id)).map(npc => ({ ...npc, active: active.has(npc.id) }));
   town.mode = "npcManagement";
+  town.commerceOverlay.classList.add("is-npc-management");
   town.npcManagementReturn = { mode: "facilityMenu", subFacilityId: town.subFacilityId, selectedIndex: town.selectedIndex };
   town.commerceOverlay.hidden = false;
   town.guildQuestOverlay.hidden = true;
@@ -1638,6 +1639,7 @@ export function openPendingNpcRenewal() {
   town.npcManagementItems = pendingIds.map(getNpcDefinition).filter(Boolean);
   if (!town.npcManagementItems.length) return false;
   town.mode = "npcManagement";
+  town.commerceOverlay.classList.add("is-npc-management");
   town.commandRoot.hidden = true;
   town.commerceOverlay.hidden = false;
   town.guildQuestOverlay.hidden = true;
@@ -1662,6 +1664,7 @@ function renderNpcManagement() {
     button.append(name, state);
     return button;
   }));
+  town.commerceList.children[town.npcManagementIndex]?.scrollIntoView?.({ block: "nearest" });
   if (town.commerceGold) town.commerceGold.textContent = Math.max(0, Number(character?.gold) || 0).toLocaleString("en-US");
   const npc = town.npcManagementItems[town.npcManagementIndex];
   if (!npc) {
@@ -1752,6 +1755,7 @@ function closeNpcManagement() {
   town.npcManagementItems = [];
   town.npcManagementConfirm = false;
   town.commerceOverlay.hidden = true;
+  town.commerceOverlay.classList.remove("is-npc-management");
   town.commandRoot.hidden = false;
   if (destination) {
     town.subFacilityId = destination.subFacilityId || "";
