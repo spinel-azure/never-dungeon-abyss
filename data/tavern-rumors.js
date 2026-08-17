@@ -13,6 +13,7 @@ export function getTavernRumorTypewriterParts(message) {
 export const TAVERN_RUMORS = Object.freeze([
   Object.freeze({
     id: "rumor_001",
+    title: "喋る猫の噂",
     unlock: () => true,
     customerLead: "最近、奈落の迷宮に奇妙な猫が現れるらしいな？",
     customerReply: "しかも人間の言葉を話すらしい。驚きだぜ！",
@@ -33,6 +34,7 @@ export const TAVERN_RUMORS = Object.freeze([
   }),
   Object.freeze({
     id: "rumor_002",
+    title: "未練ある亡霊の噂",
     unlock: context => context.depthReached >= 2,
     opening: "あなたはカウンターから耳を澄ます……。",
     customerLead: "奈落の迷宮地下2階に亡霊が出る部屋があるらしいな？",
@@ -63,12 +65,16 @@ function buildDialogue(rumor, phase) {
   ];
 }
 
-export function getUnreadTavernRumor(character, context = {}) {
-  const normalizedContext = {
+function normalizeRumorContext(character, context = {}) {
+  return {
     mikanEncountered: Boolean(context.mikanEncountered),
     lingeringGhostDefeated: Boolean(context.lingeringGhostDefeated),
     depthReached: Math.max(1, Math.floor(Number(context.depthReached ?? character?.highestDungeonDepthReached) || 1))
   };
+}
+
+export function getUnreadTavernRumor(character, context = {}) {
+  const normalizedContext = normalizeRumorContext(character, context);
   const flags = character?.eventFlags || {};
   for (const rumor of TAVERN_RUMORS) {
     if (!rumor.unlock(normalizedContext)) continue;
@@ -83,6 +89,26 @@ export function getUnreadTavernRumor(character, context = {}) {
     };
   }
   return null;
+}
+
+export function getPastTavernRumors(character, context = {}) {
+  const normalizedContext = normalizeRumorContext(character, context);
+  const flags = character?.eventFlags || {};
+  return TAVERN_RUMORS.flatMap((rumor, index) => {
+    if (!rumor.unlock(normalizedContext)) return [];
+    const phase = rumor.phases.filter(candidate => candidate.unlock(normalizedContext)).at(-1);
+    if (!phase || !flags[phase.readFlag]) return [];
+    return [{
+      id: rumor.id,
+      number: String(index + 1).padStart(3, "0"),
+      title: rumor.title,
+      description: [
+        `客：${rumor.customerLead}`,
+        `客：${rumor.customerReply}`,
+        `ローザ：${phase.rosa}`
+      ]
+    }];
+  });
 }
 
 export function markTavernRumorRead(character, rumor) {

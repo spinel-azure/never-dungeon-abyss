@@ -48,7 +48,7 @@ const FACILITY_COMMANDS = Object.freeze({
   ]
 });
 
-const UNIMPLEMENTED_TAVERN_COMMANDS = Object.freeze(new Set(["npc-hire", "past-rumors"]));
+const UNIMPLEMENTED_TAVERN_COMMANDS = Object.freeze(new Set(["npc-hire"]));
 
 const TAVERN_FACILITY = Object.freeze({
   id: "tavern",
@@ -136,6 +136,7 @@ const town = {
   onDepositItem: () => null,
   onEditDeck: () => {},
   onOpenQuestHistory: () => {},
+  onOpenRumorHistory: () => {},
   onOpenAdventureRecords: () => {},
   onOpenCardGallery: () => {},
   facilityPreviewCommand: "",
@@ -1244,6 +1245,7 @@ function showFacilityCommands(facilityId) {
       || (facilityId === "library" && id === "records")
       || (facilityId === "library" && id === "cards")
       || (facilityId === "tavern" && id === "rumors" && Boolean(town.getUnreadRumor()))
+      || (facilityId === "tavern" && id === "past-rumors")
       || (id === "talk" && ["guild", "inn", "temple", "shop", "library", "tavern"].includes(facilityId));
     button.dataset.facilityCommand = id;
     button.textContent = label;
@@ -1287,6 +1289,11 @@ function activateFacilityService(command) {
   if (command === "history") {
     if (currentFacility().id !== "guild") return false;
     town.onOpenQuestHistory();
+    return true;
+  }
+  if (command === "past-rumors") {
+    if (currentFacility().id !== "tavern") return false;
+    town.onOpenRumorHistory();
     return true;
   }
   if (command === "records") {

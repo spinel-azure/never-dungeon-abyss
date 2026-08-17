@@ -22,7 +22,7 @@ const OFF_MARK = "⚫";
 const DECK_PICKER_PAGE_SIZE = 5;
 
 const menu = {
-  root: null, commandRoot: null, statusPanel: null, deckPanel: null, inventoryPanel: null, questHistoryPanel: null, adventureRecordsPanel: null, cardGalleryPanel: null, savePanel: null, optionsPanel: null, debugPanel: null,
+  root: null, commandRoot: null, statusPanel: null, deckPanel: null, inventoryPanel: null, questHistoryPanel: null, rumorHistoryPanel: null, adventureRecordsPanel: null, cardGalleryPanel: null, savePanel: null, optionsPanel: null, debugPanel: null,
   commands: [], enabledCommands: [], commandIndex: 0, statusPage: 0,
   deckCursor: 0, deckSlots: [], deckEditable: false, deckReturnView: "commands",
   deckPickerOpen: false, deckPickerCursor: 0, deckPickerItems: [], deckPickerPage: 0,
@@ -32,6 +32,7 @@ const menu = {
   inventoryTab: "items", inventoryCursor: 0, inventoryPage: 0, inventoryMode: "list", inventorySlot: null, inventoryFocus: "list",
   inventoryPurpose: "manage", inventorySaleStage: "list", inventorySaleQuantity: 1,
   questHistoryCursor: 0, questHistoryPage: 0, questHistoryFocus: "list",
+  rumorHistoryCursor: 0, rumorHistoryPage: 0, rumorHistoryFocus: "list",
   adventureRecordsTab: "statistics", adventureRecordsCursor: 0, adventureRecordsPage: 0, adventureRecordsFocus: "list",
   optionReturnView: "commands",
   optionPages: [], optionItems: [], optionNavButtons: [], optionCursor: 0, optionPage: 0,
@@ -60,6 +61,7 @@ const menu = {
   canManualSave: () => false,
   getSaveSlotSummaries: () => [],
   getCharacter: () => null,
+  getRumorHistory: () => [],
   getInventoryContext: () => "dungeon", onUseInventoryItem: () => ({ accepted: false }), onEquipmentChanged: () => {},
   onSellInventoryItem: () => ({ accepted: false }), onSellInventoryEquipment: () => ({ accepted: false }), onInventorySaleClosed: () => {},
   onPurchaseInventoryItem: () => ({ accepted: false }), onPurchaseInventoryEquipment: () => ({ accepted: false }), onInventoryPurchaseClosed: () => {},
@@ -77,6 +79,7 @@ export function configureMenu(options) {
   menu.savePanel = menu.root.querySelector('[data-menu-view="save"]');
   menu.inventoryPanel = menu.root.querySelector('[data-menu-view="inventory"]');
   menu.questHistoryPanel = menu.root.querySelector('[data-menu-view="questHistory"]');
+  menu.rumorHistoryPanel = menu.root.querySelector('[data-menu-view="rumorHistory"]');
   menu.adventureRecordsPanel = menu.root.querySelector('[data-menu-view="adventureRecords"]');
   menu.cardGalleryPanel = menu.root.querySelector('[data-menu-view="cardGallery"]');
   menu.optionsPanel = menu.root.querySelector('[data-menu-view="options"]');
@@ -104,7 +107,7 @@ export function configureMenu(options) {
       updateView();
     }
   });
-  renderEmptyStats(); bindCommands(); bindStatus(); bindDeck(); bindInventory(); bindQuestHistory(); bindAdventureRecords(); bindManualSave(); bindOptions(); bindDebug();
+  renderEmptyStats(); bindCommands(); bindStatus(); bindDeck(); bindInventory(); bindQuestHistory(); bindRumorHistory(); bindAdventureRecords(); bindManualSave(); bindOptions(); bindDebug();
   updateOptionItems(); updateDebugItems(); applyAllSettings(); updateView();
 }
 
@@ -219,6 +222,15 @@ export function openQuestHistory() {
   renderQuestHistory();
   updateView();
 }
+export function openRumorHistory() {
+  menu.playSe("confirm");
+  menu.view = "rumorHistory";
+  menu.rumorHistoryCursor = 0;
+  menu.rumorHistoryPage = 0;
+  menu.rumorHistoryFocus = "list";
+  renderRumorHistory();
+  updateView();
+}
 export function openAdventureRecords() {
   menu.playSe("confirm");
   menu.view = "adventureRecords";
@@ -271,6 +283,7 @@ export function handleMenuInput(action) {
   else if (menu.view === "deck") handleDeck(action);
   else if (menu.view === "inventory") handleInventory(action);
   else if (menu.view === "questHistory") handleQuestHistory(action);
+  else if (menu.view === "rumorHistory") handleRumorHistory(action);
   else if (menu.view === "adventureRecords") handleAdventureRecords(action);
   else if (menu.view === "cardGallery") handleCardGalleryInput(action);
   else if (menu.view === "save") handleManualSave(action);
@@ -677,6 +690,106 @@ function renderQuestHistory() {
   next.disabled = menu.questHistoryPage >= pages - 1;
   back.classList.toggle("is-selected", menu.questHistoryFocus === "back");
   next.classList.toggle("is-selected", menu.questHistoryFocus === "next");
+}
+
+function handleRumorHistory(action) {
+  const entries = menu.getRumorHistory();
+  const pages = Math.max(1, Math.ceil(entries.length / 10));
+  if (action === "cancel") {
+    menu.view = "dungeon";
+    updateView();
+    return;
+  }
+  if (menu.rumorHistoryFocus !== "list") {
+    if (action === "left" || action === "right") {
+      menu.rumorHistoryFocus = menu.rumorHistoryFocus === "back" ? "next" : "back";
+    } else if (action === "up" || action === "down") {
+      if (entries.length) {
+        const pageStart = menu.rumorHistoryPage * 10;
+        menu.rumorHistoryCursor = action === "up" ? Math.min(entries.length - 1, pageStart + 9) : pageStart;
+        menu.rumorHistoryFocus = "list";
+      }
+    } else if (action === "confirm") {
+      if (menu.rumorHistoryFocus === "back") {
+        if (menu.rumorHistoryPage === 0) {
+          menu.view = "dungeon";
+          updateView();
+          return;
+        }
+        menu.rumorHistoryPage -= 1;
+      } else if (menu.rumorHistoryPage < pages - 1) {
+        menu.rumorHistoryPage += 1;
+      }
+      menu.rumorHistoryCursor = menu.rumorHistoryPage * 10;
+      menu.rumorHistoryFocus = "list";
+    }
+    renderRumorHistory();
+    return;
+  }
+  if (action === "up" || action === "down") {
+    if (!entries.length) return;
+    const pageStart = menu.rumorHistoryPage * 10;
+    const pageEnd = Math.min(entries.length - 1, pageStart + 9);
+    if (action === "up" && menu.rumorHistoryCursor === pageStart) menu.rumorHistoryFocus = "back";
+    else if (action === "down" && menu.rumorHistoryCursor === pageEnd) menu.rumorHistoryFocus = "back";
+    else menu.rumorHistoryCursor += action === "down" ? 1 : -1;
+    renderRumorHistory();
+    return;
+  }
+  if (action === "left" && menu.rumorHistoryPage > 0) {
+    menu.rumorHistoryPage -= 1;
+    menu.rumorHistoryCursor = menu.rumorHistoryPage * 10;
+    renderRumorHistory();
+  } else if (action === "right" && menu.rumorHistoryPage < pages - 1) {
+    menu.rumorHistoryPage += 1;
+    menu.rumorHistoryCursor = menu.rumorHistoryPage * 10;
+    renderRumorHistory();
+  }
+}
+
+function bindRumorHistory() {
+  const panel = menu.rumorHistoryPanel;
+  panel.querySelector('[data-rumor-history-nav="back"]').addEventListener("click", () => {
+    menu.rumorHistoryFocus = "back";
+    handleRumorHistory("confirm");
+  });
+  panel.querySelector('[data-rumor-history-nav="next"]').addEventListener("click", () => {
+    menu.rumorHistoryFocus = "next";
+    handleRumorHistory("confirm");
+  });
+}
+
+function renderRumorHistory() {
+  const panel = menu.rumorHistoryPanel;
+  const entries = menu.getRumorHistory();
+  const pages = Math.max(1, Math.ceil(entries.length / 10));
+  menu.rumorHistoryPage = Math.min(menu.rumorHistoryPage, pages - 1);
+  menu.rumorHistoryCursor = entries.length ? Math.min(menu.rumorHistoryCursor, entries.length - 1) : 0;
+  panel.querySelector("[data-rumor-history-list]").replaceChildren(...entries.slice(menu.rumorHistoryPage * 10, menu.rumorHistoryPage * 10 + 10).map((entry, offset) => {
+    const index = menu.rumorHistoryPage * 10 + offset;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "inventory-entry";
+    button.textContent = `${entry.number} ${entry.title}`;
+    button.classList.toggle("is-selected", menu.rumorHistoryFocus === "list" && menu.rumorHistoryCursor === index);
+    button.addEventListener("click", () => {
+      menu.rumorHistoryCursor = index;
+      menu.rumorHistoryFocus = "list";
+      renderRumorHistory();
+    });
+    return button;
+  }));
+  const selected = entries[menu.rumorHistoryCursor];
+  panel.querySelector("[data-rumor-history-description]").textContent = selected
+    ? selected.description.join("\n")
+    : "過去に聞いた噂話はありません。";
+  panel.querySelector("[data-rumor-history-page]").textContent = `${menu.rumorHistoryPage + 1}/${pages}`;
+  const back = panel.querySelector('[data-rumor-history-nav="back"]');
+  const next = panel.querySelector('[data-rumor-history-nav="next"]');
+  back.textContent = menu.rumorHistoryPage > 0 ? "PREV" : "BACK";
+  next.disabled = menu.rumorHistoryPage >= pages - 1;
+  back.classList.toggle("is-selected", menu.rumorHistoryFocus === "back");
+  next.classList.toggle("is-selected", menu.rumorHistoryFocus === "next");
 }
 
 function handleAdventureRecords(action) {
@@ -1209,12 +1322,12 @@ function bindDebug() {
 function renderEmptyStats() { const rows = ["STR", "INT", "AGI", "DEX", "LUC", "DEF"].map(label => { const row = document.createElement("div"); row.className = "nde-stat-row"; const name = document.createElement("strong"); name.textContent = label; const gauge = document.createElement("span"); gauge.className = "nde-empty-gauge"; for (let index = 0; index < 30; index += 1) gauge.append(document.createElement("i")); const value = document.createElement("output"); value.textContent = "--"; row.append(name, gauge, value); return row; }); menu.root.querySelector("#ndeStatRows").replaceChildren(...rows); }
 
 function updateView() {
-  const screenOpen = ["status", "deck", "inventory", "questHistory", "adventureRecords", "cardGallery", "save", "options", "debug"].includes(menu.view);
+  const screenOpen = ["status", "deck", "inventory", "questHistory", "rumorHistory", "adventureRecords", "cardGallery", "save", "options", "debug"].includes(menu.view);
   document.body.classList.toggle("menu-open", screenOpen); document.body.classList.toggle("command-open", menu.view === "commands");
   document.body.classList.toggle("deck-open", menu.view === "deck");
   document.body.classList.toggle("inventory-open", menu.view === "inventory");
   document.body.classList.toggle("card-gallery-open", menu.view === "cardGallery");
-  menu.root.hidden = !screenOpen; menu.statusPanel.hidden = menu.view !== "status"; menu.deckPanel.hidden = menu.view !== "deck"; menu.inventoryPanel.hidden = menu.view !== "inventory"; menu.questHistoryPanel.hidden = menu.view !== "questHistory"; menu.adventureRecordsPanel.hidden = menu.view !== "adventureRecords"; menu.cardGalleryPanel.hidden = menu.view !== "cardGallery"; menu.savePanel.hidden = menu.view !== "save"; menu.optionsPanel.hidden = menu.view !== "options"; menu.debugPanel.hidden = menu.view !== "debug";
+  menu.root.hidden = !screenOpen; menu.statusPanel.hidden = menu.view !== "status"; menu.deckPanel.hidden = menu.view !== "deck"; menu.inventoryPanel.hidden = menu.view !== "inventory"; menu.questHistoryPanel.hidden = menu.view !== "questHistory"; menu.rumorHistoryPanel.hidden = menu.view !== "rumorHistory"; menu.adventureRecordsPanel.hidden = menu.view !== "adventureRecords"; menu.cardGalleryPanel.hidden = menu.view !== "cardGallery"; menu.savePanel.hidden = menu.view !== "save"; menu.optionsPanel.hidden = menu.view !== "options"; menu.debugPanel.hidden = menu.view !== "debug";
   menu.commandRoot.dataset.active = String(menu.view === "commands");
   const hint = document.querySelector("#commandHint"); if (hint) hint.textContent = menu.view === "commands" ? "＊ Bボタンでメニュー非表示" : "＊ Bボタンでメニュー表示";
   updateStatus(); updatePager(); updateDebugPager(); updateSelection();

@@ -50,7 +50,7 @@ import { configureInput } from "./input.js";
 import { configureGamepadInput } from "./gamepad-input.js";
 import { configureFloatingStick } from "./floating-stick.js";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, getDungeonMistOptions, setDungeonColors, getGamepadBindings, getGamepadCaptureAction, completeGamepadBinding, setGamepadPressedButtons, getTouchControlsMode, isMenuOpen, openItemInventory, openStatusMenu, openDeckEditor, openQuestHistory, openAdventureRecords, openLibraryCardGallery, openTitleOptions, refreshAdventureRecordsPlayTime, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js";
+import { configureMenu, handleMenuInput, getDungeonColors, getDungeonMistOptions, setDungeonColors, getGamepadBindings, getGamepadCaptureAction, completeGamepadBinding, setGamepadPressedButtons, getTouchControlsMode, isMenuOpen, openItemInventory, openStatusMenu, openDeckEditor, openQuestHistory, openRumorHistory, openAdventureRecords, openLibraryCardGallery, openTitleOptions, refreshAdventureRecordsPlayTime, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js";
 import { resolveFloorTheme } from "./floorTheme.js";
 import {
   configureAutoReturn,
@@ -128,7 +128,7 @@ import { restAtHealingFountain as restoreAtHealingFountain } from "../data/fount
 import { getSkill } from "../data/skills.js";
 import { getQuestRequiredSpecialRoomAccess, getSpecialRoomAccessRestriction, getSpecialRoomDefinition } from "../data/special-rooms.js";
 import { acknowledgeShopStockAnnouncement, getShopEquipmentOffer, getShopStockState, markShopCategorySeen } from "../data/shop-stock.js";
-import { getUnreadTavernRumor, markTavernRumorRead } from "../data/tavern-rumors.js";
+import { getPastTavernRumors, getUnreadTavernRumor, markTavernRumorRead } from "../data/tavern-rumors.js";
 import { renameCharacter as applyCharacterRename } from "../data/character-name.js";
 import { isTransferDestinationUnlocked } from "../data/transfer-destinations.js";
 import { selectRevivalGoddessImage } from "../data/revival-presentation.js";
@@ -449,6 +449,7 @@ import {
     onDepositItem: depositTownItem,
     onEditDeck: openDeckEditor,
     onOpenQuestHistory: openQuestHistory,
+    onOpenRumorHistory: openRumorHistory,
     onOpenAdventureRecords: openAdventureRecords,
     onOpenCardGallery: openLibraryCardGallery,
     getUnreadRumor: () => getUnreadTavernRumor(character, {
@@ -2757,6 +2758,14 @@ import {
     root: menuScreen,
     commandRoot: dungeonCommands,
     getCharacter: () => character,
+    getRumorHistory: () => getPastTavernRumors(character, {
+      mikanEncountered: Boolean(character?.eventFlags?.mikan_nyanko_encountered)
+        || Object.entries(state.npcEncounterCounts || {}).some(
+          ([npcId, count]) => npcId.startsWith("NPC_01") && Number(count) > 0
+        ),
+      depthReached: character?.highestDungeonDepthReached,
+      lingeringGhostDefeated: Boolean(character?.eventFlags?.lingering_ghost_b2f_defeated_once)
+    }),
     getInventoryContext: () => isTownOpen() ? "town" : "dungeon",
     onUseInventoryItem: useFieldItem,
     onEquipmentChanged: next => {

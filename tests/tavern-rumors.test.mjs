@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { createInitialCharacter } from "../data/classes.js";
-import { getTavernRumorTypewriterParts, getUnreadTavernRumor, markTavernRumorRead } from "../data/tavern-rumors.js";
+import { getPastTavernRumors, getTavernRumorTypewriterParts, getUnreadTavernRumor, markTavernRumorRead } from "../data/tavern-rumors.js";
 
 test("tavern rumor typewriter isolates only customer and Rosa dialogue", () => {
   assert.deepEqual(
@@ -58,4 +58,33 @@ test("unread tavern rumors are returned in registration order", () => {
   const character = createInitialCharacter("聞き込み屋", "warrior");
   character.highestDungeonDepthReached = 2;
   assert.equal(getUnreadTavernRumor(character).id, "rumor_001_base");
+});
+
+test("past rumors list only heard topics without a current unread update", () => {
+  let character = createInitialCharacter("噂の記録係", "thief");
+  assert.deepEqual(getPastTavernRumors(character), []);
+
+  character = markTavernRumorRead(character, getUnreadTavernRumor(character));
+  assert.deepEqual(
+    getPastTavernRumors(character).map(entry => `${entry.number} ${entry.title}`),
+    ["001 喋る猫の噂"]
+  );
+
+  assert.deepEqual(getPastTavernRumors(character, { mikanEncountered: true }), []);
+  const update = getUnreadTavernRumor(character, { mikanEncountered: true });
+  character = markTavernRumorRead(character, update);
+  const history = getPastTavernRumors(character, { mikanEncountered: true });
+  assert.equal(history.length, 1);
+  assert.equal(history[0].title, "喋る猫の噂");
+  assert.match(history[0].description.at(-1), /みかんにゃんこ/);
+});
+
+test("past rumor descriptions preserve the two customers and Rosa", () => {
+  let character = createInitialCharacter("聞き書き", "priest");
+  character = markTavernRumorRead(character, getUnreadTavernRumor(character));
+  const [entry] = getPastTavernRumors(character);
+  assert.equal(entry.description.length, 3);
+  assert.match(entry.description[0], /^客：/);
+  assert.match(entry.description[1], /^客：/);
+  assert.match(entry.description[2], /^ローザ：/);
 });
