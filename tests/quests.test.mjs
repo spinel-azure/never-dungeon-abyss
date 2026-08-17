@@ -20,6 +20,7 @@ import {
   THIRD_RED_DOOR_INVESTIGATION_QUEST_ID,
   B35F_SURVEY_QUEST_ID,
   B45F_SURVEY_QUEST_ID,
+  GUILD_018_QUEST_ID,
   BRASS_BULL_QUEST_ID,
   RED_DOOR_DEFENSE_CARD_FLAG,
   grantRedDoorInvestigationSupply,
@@ -615,6 +616,26 @@ test("quest 014 is gated by quest 013, tracks the B36F Brass Bull, and unlocks S
   assert.equal(report.bonusGold, 5000);
   assert.equal(getItemCount(report.character.inventory, "scorching_barrier"), 3);
   assert.equal(report.character.eventFlags.scorching_barrier_shop_unlocked, true);
+  assert.equal(getQuestById(BRASS_BULL_QUEST_ID).objectiveLabel, "小部屋の中を調査する");
+});
+
+test("quest 018 follows quest 017, tracks B46F Glacies, and unlocks Extreme Cold Barrier sales", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.quests.completedQuestIds.push(
+    QUEST_ID, SLIME_EXTERMINATION_QUEST_ID, FLOOR_SURVEY_QUEST_ID
+  );
+  assert.equal(isQuestAvailable(character, GUILD_018_QUEST_ID), false);
+  character.quests.completedQuestIds.push(B45F_SURVEY_QUEST_ID);
+  assert.equal(isQuestAvailable(character, GUILD_018_QUEST_ID), true);
+  character = acceptQuest(character, GUILD_018_QUEST_ID).character;
+  character = recordBossDefeat(character, "glacies_event_boss", 46);
+  assert.equal(getQuestProgress(character, GUILD_018_QUEST_ID).readyToReport, true);
+  const report = reportQuest(character, GUILD_018_QUEST_ID);
+  assert.equal(report.rewardItemId, "extreme_cold_barrier");
+  assert.equal(report.rewardItemAmount, 3);
+  assert.equal(report.bonusGold, 5000);
+  assert.equal(getItemCount(report.character.inventory, "extreme_cold_barrier"), 3);
+  assert.equal(report.character.eventFlags.extreme_cold_barrier_shop_unlocked, true);
 });
 
 test("quest 012 hides the Iron Maiden spoiler and quest 013 supply uses an item popup", async () => {

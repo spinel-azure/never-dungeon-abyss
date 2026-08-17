@@ -480,8 +480,11 @@ export const BOSSES = Object.freeze({
     id: "glacies_event_boss",
     name: "グラキエス",
     level: 42,
+    floor: 46,
     imageId: "glacies_event_boss",
     image: "images/bosses/boss_09.avif",
+    encounterImageId: "glacies_event_b46f",
+    encounterImage: "images/background/dungeon_event_05.avif",
     race: "giant",
     maxHp: 1050,
     stats: Object.freeze({ str: 28, int: 10, agi: 14, dex: 22, luc: 14 }),
@@ -517,7 +520,15 @@ export const BOSSES = Object.freeze({
     noDrop: true,
     isBoss: true,
     bossKind: "event",
-    defeatedFlag: "boss_glacies_event_boss_defeated"
+    defeatedFlag: "boss_glacies_event_boss_defeated",
+    event: Object.freeze({
+      immediateStart: true,
+      confirmBeforeStart: true,
+      fadeBeforeStart: true,
+      autoStartDelay: 2000,
+      reserveMessageLines: 5,
+      start: "部屋の中に入ると同時に猛烈な寒さを感じた。\n部屋の中央には大槌を構えた巨人の像が立っており、こちらを見下ろしている。\nそして、ゆっくりと握りしめた大槌を振り上げると、襲いかかってきた！"
+    })
   }),
   /*
   glacies_event_boss: Object.freeze({

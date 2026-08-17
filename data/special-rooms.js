@@ -83,6 +83,15 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
       minimapMarker: "E",
       revealBeforeExploration: true
     })
+  }),
+  46: Object.freeze({
+    content: Object.freeze({
+      type: "eventBoss",
+      bossId: "glacies_event_boss",
+      requiredQuestId: "guild_018",
+      minimapMarker: "E",
+      revealBeforeExploration: true
+    })
   })
 });
 

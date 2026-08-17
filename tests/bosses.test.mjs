@@ -358,12 +358,15 @@ test("Brass Bull is a B36F quest event boss with a guaranteed unique material re
   assert.equal(createBossCombatant(boss).isBoss, true);
 });
 
-test("Glacies is an unplaced quest event boss with a warrior hammer reward", () => {
+test("Glacies is the B46F quest event boss with a warrior hammer reward", () => {
   const boss = getBossById("glacies_event_boss");
   assert.equal(boss.bossKind, "event");
-  assert.equal(boss.floor, undefined);
+  assert.equal(boss.floor, 46);
   assert.equal(boss.level, 42);
   assert.equal(boss.experienceReward, 6500);
+  assert.equal(boss.encounterImage, "images/background/dungeon_event_05.avif");
   assert.deepEqual(boss.reward, { type: "equipment", equipmentId: "glacies_hammer", slot: "rightArmId" });
   assert.deepEqual(boss.actions.map(entry => entry.action.name), ["ぶん回し", "振り下ろし", "巨人の突進"]);
+  assert.equal(boss.event.confirmBeforeStart, true);
+  assert.equal(boss.event.autoStartDelay, 2000);
 });

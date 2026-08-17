@@ -1676,7 +1676,8 @@ test("The Five Star attacks five times and Musashi Blade is a two-handed two-hit
 
 test("Glacies Hammer is a warrior-only ice two-handed weapon", () => {
   const hammer = getWeapon("glacies_hammer");
-  assert.equal(hammer.attack, 22);
+  assert.equal(hammer.attack, 24);
+  assert.equal(hammer.statBonuses.str, 4);
   assert.equal(hammer.element, "ice");
   assert.equal(hammer.twoHanded, true);
   assert.deepEqual(hammer.allowedJobs, ["warrior"]);

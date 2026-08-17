@@ -372,7 +372,7 @@ export const QUESTS = Object.freeze([
     targetName: "真鍮の雄牛",
     targetDepth: 36,
     requiredCount: 1,
-    objectiveLabel: "赤い扉を開けて中を調査する",
+    objectiveLabel: "小部屋の中を調査する",
     reward: Object.freeze({
       type: "item", label: "消費アイテム×3", amount: 3,
       itemId: "scorching_barrier", bonusGold: 5000
@@ -437,6 +437,33 @@ export const QUESTS = Object.freeze([
       "今回は事前に支給品がある。受け取れ。"
     ]),
     prerequisiteQuestIds: Object.freeze([FOURTH_RED_DOOR_INVESTIGATION_QUEST_ID]),
+    available: true
+  }),
+  Object.freeze({
+    id: GUILD_018_QUEST_ID,
+    number: "018",
+    title: "氷の巨人",
+    client: "ギルドマスター",
+    category: "other",
+    objectiveType: "defeatBoss",
+    targetId: "glacies_event_boss",
+    targetName: "グラキエス",
+    targetDepth: 46,
+    requiredCount: 1,
+    objectiveLabel: "小部屋の中を調査する",
+    reward: Object.freeze({
+      type: "item", label: "消費アイテム×3", amount: 3,
+      itemId: "extreme_cold_barrier", bonusGold: 5000
+    }),
+    descriptionLabel: "目的",
+    description: Object.freeze([
+      "奈落のB46Fで氷の巨人を見た者がいるらしい。",
+      "詳しく調べてくれ。念の為、用心は怠るなよ。"
+    ]),
+    prerequisiteQuestIds: Object.freeze([B45F_SURVEY_QUEST_ID]),
+    persistentProgressFlag: "quest_018_glacies_defeated_while_active",
+    completedTargetFlag: "boss_glacies_event_boss_defeated",
+    reportUnlockFlag: "extreme_cold_barrier_shop_unlocked",
     available: true
   }),
   Object.freeze({
