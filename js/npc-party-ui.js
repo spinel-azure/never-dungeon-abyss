@@ -32,6 +32,7 @@ function setNpcChargeGauge(slot, charge) {
   const fill = slot?.querySelector("[data-npc-charge-fill]");
   if (gauge) gauge.setAttribute("aria-valuenow", String(normalized));
   if (fill) fill.style.width = `${normalized}%`;
+  slot?.classList.toggle("is-charged", normalized >= 100);
 }
 
 export function flashNpcPartyStatus(root, npcId) {

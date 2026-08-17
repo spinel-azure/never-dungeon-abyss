@@ -31,7 +31,7 @@ export function applyNpcChargeSkills(battle) {
       skillName: config.name,
       quote: config.quote,
       cutIn: config.cutIn,
-      message: `${getNpcDefinition(npcId)?.name}\n「${config.quote}」`
+      message: `${getNpcDefinition(npcId)?.name}「${config.quote}」`
     });
     if (npcId === "alec") applyAlecChargeSkill(battle, config);
     else if (npcId === "rebecca") applyRebeccaChargeSkill(battle, config);

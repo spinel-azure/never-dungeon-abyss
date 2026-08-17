@@ -26,6 +26,9 @@ test("main screen reserves three empty NPC status slots for future party members
   assert.match(ui, /export function setNpcPartyCharge/);
   assert.match(ui, /Math\.max\(0, Math\.min\(100, Number\(charge\) \|\| 0\)\)/);
   assert.match(ui, /records\?\.\[npc\.id\]\?\.charge/);
+  assert.match(ui, /classList\.toggle\("is-charged", normalized >= 100\)/);
+  assert.match(css, /\.npc-status-slot\.is-charged \.npc-charge-gauge/);
+  assert.match(css, /animation:npc-charge-ready 1s ease-in-out infinite/);
 });
 
 test("NPC charge skill cut-ins use the four battle assets and a sequential 2.5 second presentation", async () => {
@@ -41,7 +44,8 @@ test("NPC charge skill cut-ins use the four battle assets and a sequential 2.5 s
     assert.match(support, new RegExp(`images/battle_effects/${image}`));
   }
   assert.match(html, /<section id="battleScreen"[\s\S]*?<div id="npcChargeCutIn"[\s\S]*?<div class="battle-enemy-stage">/);
-  assert.match(css, /\.npc-charge-cut-in img\s*\{[\s\S]*height: 95%[\s\S]*max-width: 95%/);
+  assert.match(css, /\.npc-charge-cut-in img\s*\{[\s\S]*height: 80%[\s\S]*max-width: 95%/);
+  assert.match(support, /message: `\$\{getNpcDefinition\(npcId\)\?\.name\}「\$\{config\.quote\}」`/);
   assert.match(css, /animation: npc-charge-cut-in-run 2\.5s/);
   assert.match(css, /prefers-reduced-motion: reduce/);
   assert.match(battle, /event\.type === "npcChargeSkill"[\s\S]*await playNpcChargeCutIn\(event\)/);
