@@ -38,7 +38,8 @@ const battleUi = {
   openItems: () => false,
   openSkills: () => false,
   playSe: () => {},
-  onNpcSupport: () => {}
+  onNpcSupport: () => {},
+  onNpcCharge: () => {}
 };
 
 export function configureBattle(options) {
@@ -270,6 +271,16 @@ async function playPresentationEvents() {
   const image = battleUi.root.querySelector("#battleEnemyImage");
   for (const event of events) {
     if (!battleUi.active) return;
+    if (event.type === "npcChargeSkill") {
+      battleUi.onNpcSupport(event.npcId);
+      battleUi.onNpcCharge(event.npcId, 100);
+      battleUi.messageEl.textContent = event.message;
+      battleUi.messageEl.classList.add("is-npc-charge-skill");
+      await playNpcChargeCutIn(event);
+      battleUi.messageEl.classList.remove("is-npc-charge-skill");
+      battleUi.onNpcCharge(event.npcId, 0);
+      continue;
+    }
     applyPresentationHp(event);
     if (event.npcId) battleUi.onNpcSupport(event.npcId);
     renderBattleVitals();
@@ -295,7 +306,7 @@ async function playPresentationEvents() {
       void image.offsetWidth;
       image.classList.add("is-hit");
       battleUi.playSe("attackHit");
-    } else if (event.targetSide === "player" && event.hit) {
+    } else if (event.targetSide === "player" && event.hit && !event.blockedByNpcWall) {
       battleUi.playSe("playerDamage");
     }
     const duration = event.targetSide === "player" && event.hit ? 520 : event.hit ? 360 : 280;
@@ -305,13 +316,28 @@ async function playPresentationEvents() {
   }
 }
 
+async function playNpcChargeCutIn(event) {
+  const cutIn = battleUi.root.querySelector("#npcChargeCutIn");
+  const image = cutIn?.querySelector("img");
+  if (!cutIn || !image || !event.cutIn) return;
+  image.src = event.cutIn;
+  image.alt = `${event.skillName || "NPCチャージスキル"} カットイン`;
+  cutIn.classList.remove("is-active");
+  void cutIn.offsetWidth;
+  cutIn.classList.add("is-active");
+  const reduced = globalThis.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+  await delay(reduced ? 450 : 2500);
+  cutIn.classList.remove("is-active");
+}
+
 function syncFinalPlayerState() {
   battleUi.onCharacterChanged({
     hp: battleUi.battle.player.hp,
     sp: battleUi.battle.player.sp,
     statuses: structuredClone(battleUi.battle.player.statuses),
     inventory: structuredClone(battleUi.battle.player.inventory),
-    alive: battleUi.battle.player.alive
+    alive: battleUi.battle.player.alive,
+    npcSystem: structuredClone(battleUi.battle.player.npcSystem)
   });
 }
 
@@ -362,7 +388,7 @@ export function applyHpPresentationEvent(presentationHp, battle, event) {
 function formatPresentationMessage(event) {
   if (event.type !== "attackHit" || !event.actorName) return event.message;
   const actorName = battleUi.concealed && event.actorSide === "enemy" ? "？？？？？" : event.actorName;
-  return `${actorName}の攻撃！\n${event.message}`;
+  return `${actorName}の${event.actionName || "攻撃"}！\n${event.message}`;
 }
 
 function showBattleNumber(targetSide, amount, kind, hitIndex = null, hitCount = 1) {
@@ -430,7 +456,8 @@ function finishBattle() {
   const outcome = battleUi.battle.outcome;
   battleUi.battle.player.statuses = clearBattleOnlyStatuses(battleUi.battle.player.statuses);
   battleUi.onCharacterChanged({
-    statuses: structuredClone(battleUi.battle.player.statuses)
+    statuses: structuredClone(battleUi.battle.player.statuses),
+    npcSystem: structuredClone(battleUi.battle.player.npcSystem)
   });
   const snapshot = structuredClone(battleUi.battle);
   closeBattle();

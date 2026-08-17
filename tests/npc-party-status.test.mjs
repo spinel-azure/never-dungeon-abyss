@@ -25,6 +25,27 @@ test("main screen reserves three empty NPC status slots for future party members
   assert.match(ui, /is-unavailable/);
   assert.match(ui, /export function setNpcPartyCharge/);
   assert.match(ui, /Math\.max\(0, Math\.min\(100, Number\(charge\) \|\| 0\)\)/);
+  assert.match(ui, /records\?\.\[npc\.id\]\?\.charge/);
+});
+
+test("NPC charge skill cut-ins use the four battle assets and a sequential 2.5 second presentation", async () => {
+  const [html, css, support, battle, main] = await Promise.all([
+    readFile(new URL("index.html", root), "utf8"),
+    readFile(new URL("css/battle.css", root), "utf8"),
+    readFile(new URL("combat/npc-support.js", root), "utf8"),
+    readFile(new URL("js/battle.js", root), "utf8"),
+    readFile(new URL("js/main.js", root), "utf8")
+  ]);
+  assert.match(html, /id="npcChargeCutIn"/);
+  for (const image of ["NPC_01.avif", "NPC_02.avif", "NPC_03.avif", "NPC_04.avif"]) {
+    assert.match(support, new RegExp(`images/battle_effects/${image}`));
+  }
+  assert.match(css, /\.npc-charge-cut-in img\s*\{[\s\S]*height: 70%/);
+  assert.match(css, /animation: npc-charge-cut-in-run 2\.5s/);
+  assert.match(css, /prefers-reduced-motion: reduce/);
+  assert.match(battle, /event\.type === "npcChargeSkill"[\s\S]*await playNpcChargeCutIn\(event\)/);
+  assert.match(battle, /await delay\(reduced \? 450 : 2500\)/);
+  assert.match(main, /onNpcCharge: \(npcId, charge\) => setNpcPartyCharge/);
 });
 
 test("NPC management reserves four rows and follows keyboard selection while scrolling", async () => {

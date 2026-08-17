@@ -181,6 +181,56 @@
     battle-iron-maiden-pendulum 4s ease-in-out infinite;
 }
 
+.npc-charge-cut-in {
+  position: absolute;
+  z-index: 6;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.npc-charge-cut-in img {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: auto;
+  height: 70%;
+  max-width: 78%;
+  object-fit: contain;
+  object-position: left bottom;
+  image-rendering: pixelated;
+  opacity: 0;
+}
+
+.npc-charge-cut-in.is-active {
+  visibility: visible;
+}
+
+.npc-charge-cut-in.is-active img {
+  animation: npc-charge-cut-in-run 2.5s cubic-bezier(.55,.02,.82,.48) both;
+}
+
+@keyframes npc-charge-cut-in-run {
+  0% { opacity: 0; transform: translateX(-115%); }
+  18% { opacity: 1; transform: translateX(-70%); }
+  48% { opacity: 1; transform: translateX(-20%); }
+  72% { opacity: 1; transform: translateX(18%); }
+  84% { opacity: .9; transform: translateX(52%); }
+  100% { opacity: 0; transform: translateX(175%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .npc-charge-cut-in.is-active img {
+    animation: npc-charge-cut-in-reduced .45s ease-out both;
+  }
+  @keyframes npc-charge-cut-in-reduced {
+    0% { opacity: 0; transform: translateX(0); }
+    30% { opacity: 1; transform: translateX(0); }
+    100% { opacity: 0; transform: translateX(0); }
+  }
+}
+
 .battle-slash-fragment {
   position: absolute;
   z-index: 5;
@@ -361,6 +411,17 @@ body.layout-tablet .battle-boss-hp-meter{flex:0 0 12px;width:min(52%,360px);min-
 
 .message.is-skill-description {
   color: #fff;
+}
+
+.message.is-npc-charge-skill {
+  display: flex;
+  align-items: center;
+  white-space: pre-line;
+  color: #fff;
+  font-family: var(--font-pixel-jp);
+  font-size: clamp(18px, 3.1vw, 28px);
+  line-height: 1.25;
+  text-shadow: 0 0 7px rgba(120, 225, 255, .75);
 }
 
 body.battle-active .viewport > .status,

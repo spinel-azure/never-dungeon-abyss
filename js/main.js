@@ -90,7 +90,7 @@ import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
 import { EffectEngine } from "./effects/effect-engine.js";
 import { hasUncertainLoot, isHighlightedLotCardRarity, isHighlightedLotEquipment } from "./loot-identification.js";
 import { configureTown, openPendingNpcRenewal, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js";
-import { flashNpcPartyStatus, renderNpcPartyStatus, renderNpcStatusPage } from "./npc-party-ui.js";
+import { flashNpcPartyStatus, renderNpcPartyStatus, renderNpcStatusPage, setNpcPartyCharge } from "./npc-party-ui.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { beginNpcRenewal, hireNpc, recordNpcExpeditionDepth, registerNpc, resolveNpcRenewal } from "../data/npc-party.js";
 import { getActivePlayTimeDelta, normalizeAdventureStats, recordInnStay, recordShopPurchase, recordTempleDonation } from "../data/adventure-stats.js";
@@ -543,7 +543,8 @@ import {
       });
     },
     playSe,
-    onNpcSupport: npcId => flashNpcPartyStatus(npcPartyStatus, npcId)
+    onNpcSupport: npcId => flashNpcPartyStatus(npcPartyStatus, npcId),
+    onNpcCharge: (npcId, charge) => setNpcPartyCharge(npcPartyStatus, npcId, charge)
   });
 
   configureSkillOverlay({

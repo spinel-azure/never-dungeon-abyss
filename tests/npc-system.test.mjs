@@ -5,7 +5,17 @@ import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { NPC_DEFINITIONS } from "../data/npc-definitions.js";
 import { beginNpcRenewal, hireNpc, normalizeNpcSystem, recordNpcExpeditionDepth, registerNpc, resolveNpcRenewal } from "../data/npc-party.js";
 import { createBattleState, resolveBattleRound } from "../combat/battle-engine.js";
-import { applyNpcAfterPlayerAttack, applyNpcGuardSupport, applyNpcTurnEnd, applyNpcTurnStart, getNpcSupportStatus, NPC_SUPPORT_BALANCE } from "../combat/npc-support.js";
+import {
+  advanceNpcChargeState,
+  applyNpcAfterPlayerAttack,
+  applyNpcChargeSkills,
+  applyNpcGuardSupport,
+  applyNpcTurnEnd,
+  applyNpcTurnStart,
+  getNpcSupportStatus,
+  NPC_CHARGE_SKILLS,
+  NPC_SUPPORT_BALANCE
+} from "../combat/npc-support.js";
 
 function hero(job = "warrior") {
   return { ...createInitialCharacter({ name: "NPC TEST", job }), gold: 10000, level: 40 };
@@ -21,6 +31,22 @@ test("legacy saves normalize to an empty independent NPC system", () => {
   const character = normalizeCharacter({ ...hero(), npcSystem: undefined });
   assert.deepEqual(character.npcSystem.activeIds, []);
   assert.deepEqual(character.npcSystem.registeredIds, []);
+});
+
+test("NPC charge state is backward compatible, clamped and independently persisted", () => {
+  const state = normalizeNpcSystem({
+    registeredIds: ["alec", "rebecca"],
+    activeIds: ["alec", "rebecca"],
+    records: { alec: { maxDepth: 40 }, rebecca: { maxDepth: 40, charge: 140, chargeCooldown: 9 } }
+  });
+  assert.deepEqual(
+    { charge: state.records.alec.charge, cooldown: state.records.alec.chargeCooldown },
+    { charge: 0, cooldown: 0 }
+  );
+  assert.deepEqual(
+    { charge: state.records.rebecca.charge, cooldown: state.records.rebecca.chargeCooldown },
+    { charge: 100, cooldown: 2 }
+  );
 });
 
 test("registration is unique and hiring charges level times ten once", () => {
@@ -106,6 +132,95 @@ test("three NPC supports target roughly one and a half heroes of combined contri
   assert.equal(battle.enemy.hp, 928);
   assert.equal(battle.player.hp, 64);
   assert.equal(battle.player.statuses.find(status => status.id === "npc_alec_guard")?.physicalDamageReduction, 0.35);
+});
+
+test("charge rates follow thief, priest, warrior, mage and cooldown skips one full turn", () => {
+  assert.deepEqual(
+    ["rebecca", "erika", "alec", "johan"].map(id => NPC_CHARGE_SKILLS[id].chargePerTurn),
+    [25, 20, 16, 12]
+  );
+  const character = hero();
+  character.npcSystem = normalizeNpcSystem({
+    registeredIds: ["alec"], activeIds: ["alec"],
+    records: { alec: { maxDepth: 40, charge: 100 } }
+  });
+  const battle = createBattleState({
+    character,
+    enemy: { id: "dummy", name: "DUMMY", hp: 999, maxHp: 999, attack: 1, def: 0, agi: 1, alive: true, statuses: [] }
+  });
+  applyNpcChargeSkills(battle);
+  assert.equal(battle.player.npcSystem.records.alec.charge, 0);
+  assert.equal(battle.player.npcSystem.records.alec.chargeCooldown, 2);
+  advanceNpcChargeState(battle);
+  assert.deepEqual(
+    { charge: battle.player.npcSystem.records.alec.charge, cooldown: battle.player.npcSystem.records.alec.chargeCooldown },
+    { charge: 0, cooldown: 1 }
+  );
+  advanceNpcChargeState(battle);
+  assert.deepEqual(
+    { charge: battle.player.npcSystem.records.alec.charge, cooldown: battle.player.npcSystem.records.alec.chargeCooldown },
+    { charge: 0, cooldown: 0 }
+  );
+  advanceNpcChargeState(battle);
+  assert.equal(battle.player.npcSystem.records.alec.charge, 16);
+});
+
+test("Alec and Rebecca charge skills use the intended physical hit profiles", () => {
+  const enemy = { id: "dummy", name: "DUMMY", hp: 999, maxHp: 999, attack: 1, def: 999, agi: 1, alive: true, statuses: [] };
+  for (const [npcId, expectedHits, expectedDamage] of [["alec", 1, 28], ["rebecca", 4, 9]]) {
+    const character = hero();
+    character.npcSystem = normalizeNpcSystem({
+      registeredIds: [npcId], activeIds: [npcId], records: { [npcId]: { maxDepth: 40, charge: 100 } }
+    });
+    const battle = createBattleState({ character, enemy });
+    applyNpcChargeSkills(battle);
+    const cutIn = battle.presentationEvents.find(event => event.type === "npcChargeSkill");
+    const hits = battle.presentationEvents.filter(event => event.type === "attackHit");
+    assert.equal(cutIn?.quote, npcId === "alec" ? "強撃！" : "双連斬！");
+    assert.equal(hits.length, expectedHits);
+    assert.ok(hits.every(event => event.damage === expectedDamage));
+  }
+});
+
+test("Erika charge skill executes normal undead, preserves EXP and only deals triple damage to undead bosses", () => {
+  const createErikaBattle = isBoss => {
+    const character = hero();
+    character.npcSystem = normalizeNpcSystem({
+      registeredIds: ["erika"], activeIds: ["erika"], records: { erika: { maxDepth: 40, charge: 100 } }
+    });
+    return createBattleState({
+      character,
+      enemy: { id: "undead", name: "UNDEAD", race: "undead", isBoss, hp: 500, maxHp: 500,
+        attack: 1, def: 999, agi: 1, alive: true, statuses: [], experienceReward: 777 }
+    });
+  };
+  const normal = createErikaBattle(false);
+  applyNpcChargeSkills(normal);
+  assert.equal(normal.outcome, "victory");
+  assert.equal(normal.enemy.experienceReward, 777);
+  const boss = createErikaBattle(true);
+  applyNpcChargeSkills(boss);
+  assert.equal(boss.enemy.hp, 410);
+  assert.equal(boss.outcome, null);
+});
+
+test("Johan charge wall blocks low per-hit damage for three turns but lets strong hits through", () => {
+  const character = hero();
+  character.maxHp = 100;
+  character.hp = 100;
+  character.npcSystem = normalizeNpcSystem({
+    registeredIds: ["johan"], activeIds: ["johan"], records: { johan: { maxDepth: 40, charge: 100 } }
+  });
+  const weakEnemy = { id: "weak", name: "WEAK", hp: 999, maxHp: 999, attack: 1, def: 0, agi: 1, alive: true, statuses: [] };
+  const first = resolveBattleRound({ battle: createBattleState({ character, enemy: weakEnemy }), playerCommand: { type: "wait" }, rng: () => 0.5 });
+  assert.equal(first.battle.player.hp, 100);
+  assert.ok(first.battle.presentationEvents.some(event => event.blockedByNpcWall));
+  assert.equal(first.battle.player.statuses.find(status => status.id === "npc_johan_wall")?.npcWallTurns, 2);
+
+  const strongBattle = createBattleState({ character, enemy: { ...weakEnemy, attack: 200 } });
+  applyNpcChargeSkills(strongBattle);
+  const strong = resolveBattleRound({ battle: strongBattle, playerCommand: { type: "wait" }, rng: () => 0.5 });
+  assert.ok(strong.battle.player.hp < 100);
 });
 
 test("status page three derives each active NPC display from current support balance", () => {

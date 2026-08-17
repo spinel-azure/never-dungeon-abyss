@@ -19,7 +19,12 @@ export function normalizeNpcSystem(value) {
   for (const id of registeredIds) {
     const record = source.records?.[id] || {};
     const maxDepth = Math.max(0, Math.min(100, Math.floor(Number(record.maxDepth) || 0)));
-    records[id] = { maxDepth, growthStage: Math.max(0, Math.min(10, Math.floor(maxDepth / 10))) };
+    records[id] = {
+      maxDepth,
+      growthStage: Math.max(0, Math.min(10, Math.floor(maxDepth / 10))),
+      charge: Math.max(0, Math.min(100, Math.floor(Number(record.charge) || 0))),
+      chargeCooldown: Math.max(0, Math.min(2, Math.floor(Number(record.chargeCooldown) || 0)))
+    };
   }
   const renewal = normalizeRenewal(source.renewal, activeIds);
   return {
@@ -89,7 +94,7 @@ export function beginNpcRenewal(character, token) {
   const records = { ...state.records };
   for (const id of state.activeIds) {
     const maxDepth = Math.max(records[id]?.maxDepth || 0, state.expeditionMaxDepth);
-    records[id] = { maxDepth, growthStage: Math.min(10, Math.floor(maxDepth / 10)) };
+    records[id] = { ...records[id], maxDepth, growthStage: Math.min(10, Math.floor(maxDepth / 10)) };
   }
   const renewal = state.activeIds.length
     ? { pending: true, token: String(token), ids: [...state.activeIds], completedIds: [] }

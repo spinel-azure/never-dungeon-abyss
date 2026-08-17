@@ -13,7 +13,7 @@ export function renderNpcPartyStatus(root, character) {
     slot.dataset.npcId = npc?.id || "";
     const label = slot.querySelector("[data-npc-slot-label]");
     if (label) label.textContent = npc ? `${npc.name}【${npc.jobShort}】` : canHireNpc ? "NPC参加可能" : "――――";
-    setNpcChargeGauge(slot, 0);
+    setNpcChargeGauge(slot, npc ? character?.npcSystem?.records?.[npc.id]?.charge : 0);
     slot.classList.toggle("is-empty", !npc);
     slot.classList.toggle("is-unavailable", !npc && !canHireNpc);
   });

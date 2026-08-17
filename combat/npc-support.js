@@ -8,6 +8,64 @@ export const NPC_SUPPORT_BALANCE = Object.freeze({
   johan: Object.freeze({ basePower: 12, spellRate: 0.85, growthInt: 4, element: "arcane" })
 });
 
+export const NPC_CHARGE_SKILLS = Object.freeze({
+  alec: Object.freeze({ chargePerTurn: 16, name: "強撃", quote: "強撃！", cutIn: "images/battle_effects/NPC_01.avif", damageMultiplier: 1.5 }),
+  rebecca: Object.freeze({ chargePerTurn: 25, name: "双連斬", quote: "双連斬！", cutIn: "images/battle_effects/NPC_02.avif", hitCount: 4, damageMultiplier: 0.9 }),
+  erika: Object.freeze({ chargePerTurn: 20, name: "聖なる打撃", quote: "聖なる打撃！", cutIn: "images/battle_effects/NPC_03.avif", basePower: 18, growthPower: 3, undeadBossMultiplier: 3 }),
+  johan: Object.freeze({ chargePerTurn: 12, name: "壁よ、守りを！", quote: "壁よ、守りを！", cutIn: "images/battle_effects/NPC_04.avif", durationTurns: 3, damageThresholdRate: 0.15 })
+});
+
+export function applyNpcChargeSkills(battle) {
+  if (!NPC_SUPPORT_ENABLED || battle?.outcome) return battle;
+  for (const npcId of getActiveNpcIds(battle.player)) {
+    if (battle.outcome) break;
+    const config = NPC_CHARGE_SKILLS[npcId];
+    const record = getNpcChargeRecord(battle.player, npcId);
+    if (!config || !record || record.charge < 100 || record.chargeCooldown > 0) continue;
+    record.charge = 0;
+    record.chargeCooldown = 2;
+    battle.log.push(`${getNpcDefinition(npcId)?.name}のチャージスキルⅠ「${config.name}」！`);
+    battle.presentationEvents.push({
+      type: "npcChargeSkill",
+      npcId,
+      skillName: config.name,
+      quote: config.quote,
+      cutIn: config.cutIn,
+      message: `${getNpcDefinition(npcId)?.name}\n「${config.quote}」`
+    });
+    if (npcId === "alec") applyAlecChargeSkill(battle, config);
+    else if (npcId === "rebecca") applyRebeccaChargeSkill(battle, config);
+    else if (npcId === "erika") applyErikaChargeSkill(battle, config);
+    else if (npcId === "johan") applyJohanChargeSkill(battle, config);
+  }
+  return battle;
+}
+
+export function advanceNpcChargeState(battle, { allowCharge = true } = {}) {
+  if (!NPC_SUPPORT_ENABLED || !battle?.player) return battle;
+  for (const npcId of getActiveNpcIds(battle.player)) {
+    const config = NPC_CHARGE_SKILLS[npcId];
+    const record = getNpcChargeRecord(battle.player, npcId);
+    if (!config || !record) continue;
+    if (record.chargeCooldown > 0) {
+      record.chargeCooldown -= 1;
+      continue;
+    }
+    if (allowCharge) record.charge = Math.min(100, record.charge + config.chargePerTurn);
+  }
+  return battle;
+}
+
+export function advanceNpcWallProtection(battle) {
+  if (!battle?.player?.statuses) return battle;
+  battle.player.statuses = battle.player.statuses.flatMap(status => {
+    if ((status.id || status.statusId) !== "npc_johan_wall" || status.active === false) return [status];
+    const turns = Math.max(0, Math.floor(Number(status.npcWallTurns) || 0) - 1);
+    return turns > 0 ? [{ ...status, npcWallTurns: turns }] : [];
+  });
+  return battle;
+}
+
 export function canNpcSupport({ battle, npcId, supportType } = {}) {
   if (!NPC_SUPPORT_ENABLED || battle?.outcome || !npcId || !supportType) return false;
   return getActiveNpcIds(battle.player).includes(npcId);
@@ -142,14 +200,87 @@ function applyJohanSupport(battle, rng) {
   applyNpcDamage(battle, { npcId: "johan", damage, message: `ヨハンが攻撃呪文を放った！ ${damage}ダメージ！` });
 }
 
-function applyNpcDamage(battle, { npcId, damage, message, hitIndex = 0, hitCount = 1 }) {
+function applyAlecChargeSkill(battle, config) {
+  const stage = getGrowthStage(battle.player, "alec");
+  const support = NPC_SUPPORT_BALANCE.alec;
+  const attack = Number(getNpcDefinition("alec")?.baseStats?.atk) + stage * support.growthAttack;
+  const normalDamage = Math.max(1, Math.floor(attack * support.attackRate));
+  const damage = Math.max(1, Math.floor(normalDamage * config.damageMultiplier));
+  applyNpcDamage(battle, { npcId: "alec", damage, actionName: config.name, message: `強撃！ ${damage}ダメージ！` });
+}
+
+function applyRebeccaChargeSkill(battle, config) {
+  const stage = getGrowthStage(battle.player, "rebecca");
+  const support = NPC_SUPPORT_BALANCE.rebecca;
+  const attack = Number(getNpcDefinition("rebecca")?.baseStats?.atk) + stage * support.growthAttack;
+  const normalHitDamage = Math.max(1, Math.floor(attack * support.hitRate));
+  const damage = Math.max(1, Math.floor(normalHitDamage * config.damageMultiplier));
+  for (let hitIndex = 0; hitIndex < config.hitCount && !battle.outcome; hitIndex += 1) {
+    applyNpcDamage(battle, {
+      npcId: "rebecca",
+      damage,
+      actionName: config.name,
+      message: `${hitIndex + 1}撃目：${damage}ダメージ！`,
+      hitIndex,
+      hitCount: config.hitCount
+    });
+  }
+}
+
+function applyErikaChargeSkill(battle, config) {
+  const stage = getGrowthStage(battle.player, "erika");
+  const baseDamage = Math.max(1, Math.floor(config.basePower + stage * config.growthPower));
+  const isUndead = battle.enemy.race === "undead";
+  const damage = isUndead && !battle.enemy.isBoss
+    ? battle.enemy.hp
+    : Math.max(1, Math.floor(baseDamage * (isUndead ? config.undeadBossMultiplier : 1)));
+  applyNpcDamage(battle, {
+    npcId: "erika",
+    damage,
+    actionName: config.name,
+    message: isUndead && !battle.enemy.isBoss
+      ? `聖なる打撃がアンデッドを浄化した！`
+      : `聖なる打撃！ 防御力を無視して${damage}ダメージ！`
+  });
+}
+
+function applyJohanChargeSkill(battle, config) {
+  battle.player.statuses = [
+    ...(battle.player.statuses || []).filter(status => (status.id || status.statusId) !== "npc_johan_wall"),
+    {
+      id: "npc_johan_wall",
+      statusId: "npc_johan_wall",
+      active: true,
+      expiresAfterBattle: true,
+      npcWallTurns: config.durationTurns,
+      npcWallDamageThresholdRate: config.damageThresholdRate
+    }
+  ];
+  battle.log.push("ヨハンの壁が弱い攻撃を完全に防ぐ！");
+  battle.presentationEvents.push({
+    type: "npcSupport",
+    npcId: "johan",
+    message: "ヨハンの壁が3ターンの間、弱い攻撃を完全に防ぐ！"
+  });
+}
+
+function getNpcChargeRecord(player, npcId) {
+  const records = player?.npcSystem?.records;
+  if (!records || !records[npcId]) return null;
+  const record = records[npcId];
+  record.charge = Math.max(0, Math.min(100, Math.floor(Number(record.charge) || 0)));
+  record.chargeCooldown = Math.max(0, Math.min(2, Math.floor(Number(record.chargeCooldown) || 0)));
+  return record;
+}
+
+function applyNpcDamage(battle, { npcId, damage, actionName = "", message, hitIndex = 0, hitCount = 1 }) {
   if (battle.outcome || battle.enemy.hp <= 0) return 0;
   const actual = Math.min(battle.enemy.hp, Math.max(0, Math.floor(damage)));
   battle.enemy.hp -= actual;
   battle.enemy.alive = battle.enemy.hp > 0;
   battle.log.push(message);
   battle.presentationEvents.push({ type: "attackHit", npcId, actorName: getNpcDefinition(npcId)?.name,
-    actorSide: "npc", targetSide: "enemy", hitIndex, hitCount, hit: true, damage: actual, message });
+    actorSide: "npc", targetSide: "enemy", actionName, hitIndex, hitCount, hit: true, damage: actual, message });
   if (battle.enemy.hp <= 0) setNpcVictory(battle);
   return actual;
 }

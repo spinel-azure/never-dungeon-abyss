@@ -21,7 +21,15 @@ import { getItemUnavailableReason } from "./resolve-item-use.js";
 import { resolvePassiveInstantDeath } from "./passive-instant-death.js";
 import { getCardById, hasCardEffect } from "../data/cards.js";
 import { getEffectiveSpCost } from "./sp-cost.js";
-import { applyNpcAfterPlayerAttack, applyNpcGuardSupport, applyNpcTurnEnd, applyNpcTurnStart } from "./npc-support.js";
+import {
+  advanceNpcChargeState,
+  advanceNpcWallProtection,
+  applyNpcAfterPlayerAttack,
+  applyNpcChargeSkills,
+  applyNpcGuardSupport,
+  applyNpcTurnEnd,
+  applyNpcTurnStart
+} from "./npc-support.js";
 
 export function createBattleState({ character, enemy }) {
   const vorpalSwordEquippedAtStart = character?.equipment?.weaponId === "vorpal_sword";
@@ -51,10 +59,11 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
   ], rng);
   next.log = [];
   next.presentationEvents = [];
-  if (playerAction.spCost > 0) next.player.sp -= playerAction.spCost;
 
-  if (playerCommand.type === "guard") applyNpcGuardSupport(next);
-  applyNpcTurnStart(next, rng);
+  applyNpcChargeSkills(next);
+  if (!next.outcome && playerAction.spCost > 0) next.player.sp -= playerAction.spCost;
+  if (!next.outcome && playerCommand.type === "guard") applyNpcGuardSupport(next);
+  if (!next.outcome) applyNpcTurnStart(next, rng);
 
   for (const entry of order) {
     if (next.outcome) break;
@@ -86,6 +95,8 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
     }
   }
   if (!next.outcome) applyNpcTurnEnd(next);
+  advanceNpcWallProtection(next);
+  advanceNpcChargeState(next, { allowCharge: !next.outcome });
   if (!next.outcome) {
     next.turn += 1;
     next.phase = "command";
@@ -481,6 +492,22 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
     battle.log.push("刃はジャバウォックの首を一閃した！");
   }
   let actualDamage = presentedHits.reduce((total, hit) => total + hit.damage, 0);
+  const npcWall = targetSide === "player"
+    ? target.statuses?.find(status => (status.id || status.statusId) === "npc_johan_wall" && status.active !== false)
+    : null;
+  const npcWallThreshold = npcWall
+    ? Math.max(1, Math.floor(target.maxHp * (Number(npcWall.npcWallDamageThresholdRate) || 0)))
+    : 0;
+  let npcWallBlocked = false;
+  if (npcWallThreshold > 0) {
+    presentedHits = presentedHits.map(hit => {
+      if (!hit.hit || hit.damage <= 0 || hit.damage > npcWallThreshold) return hit;
+      npcWallBlocked = true;
+      return { ...hit, damage: 0, blockedByNpcWall: true };
+    });
+    actualDamage = presentedHits.reduce((total, hit) => total + hit.damage, 0);
+    if (npcWallBlocked) battle.log.push("ヨハンの壁が弱い攻撃を完全に防いだ！");
+  }
   const barrier = action.actionType === "physicalAttack"
     ? findBlockingBarrier(target.statuses, actualDamage)
     : null;
@@ -501,8 +528,10 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
   battle.log.push(`${actor.name}の${action.name || "攻撃"}！`);
   presentedHits.forEach((hit, index) => {
     const prefix = isMultiHit ? `${index + 1}撃目：` : "";
-    const message = hit.hit
-      ? `${prefix}${hit.damage}ダメージ！${hit.critical ? " 会心！" : ""}`
+    const message = hit.blockedByNpcWall
+      ? `${prefix}ヨハンの壁が攻撃を防いだ！`
+      : hit.hit
+        ? `${prefix}${hit.damage}ダメージ！${hit.critical ? " 会心！" : ""}`
       : `${prefix}攻撃は外れた！`;
     battle.log.push(message);
     battle.presentationEvents.push({
@@ -518,11 +547,14 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
       vorpalExecution: Boolean(hit.vorpalExecution),
       slashExecution: Boolean(hit.slashExecution),
       passiveExecutionId: hit.passiveExecutionId || null,
+      blockedByNpcWall: Boolean(hit.blockedByNpcWall),
       message
     });
   });
   if (isMultiHit && hitCount > 0) battle.log.push(`合計${actualDamage}ダメージ！`);
-  const applications = barrier ? [] : [
+  const landedHits = presentedHits.filter(hit => hit.hit);
+  const allLandedHitsBlockedByNpcWall = landedHits.length > 0 && landedHits.every(hit => hit.blockedByNpcWall);
+  const applications = barrier || allLandedHitsBlockedByNpcWall ? [] : [
     ...resolvedHits.flatMap(hit => hit.effects || []),
     ...(result.actionEffects || [])
   ];
