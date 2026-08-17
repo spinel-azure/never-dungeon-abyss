@@ -61,6 +61,14 @@ test("NPC management reserves four rows and follows keyboard selection while scr
   assert.match(town, /commerceOverlay\.classList\.add\("is-npc-management"\)/);
   assert.match(town, /commerceList\.children\[town\.npcManagementIndex\]\?\.scrollIntoView\?\.\(\{ block: "nearest" \}\)/);
   assert.match(town, /commerceOverlay\.classList\.remove\("is-npc-management"\)/);
+  assert.doesNotMatch(town, /を雇用しますか？\\n\$\{npc\.supportDescription\}/);
+  assert.match(town, /を雇用しますか？\\n雇用費：\$\{fee\}G　所持金：\$\{character\.gold\}G\\n/);
+  assert.match(town, /NPC_HIRE_GREETINGS/);
+  assert.match(town, /erika: "あなたに黄金の稲穂の女神が微笑みますように…。"/);
+  assert.match(town, /showNpcHireGreeting\(npc\)/);
+  assert.match(town, /portrait\.classList\.add\("is-hire-greeting"\)/);
+  assert.match(town, /\(\?:：\|「\)/);
+  assert.match(css, /\.town-portrait\.is-hire-greeting\{z-index:5/);
 });
 
 test("touch selection requires a second tap for NPC hiring and guild quests", async () => {

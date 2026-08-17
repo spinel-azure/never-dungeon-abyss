@@ -21,6 +21,7 @@ body.town-active .town-screen.is-town-view .town-cloud-track{animation-play-stat
 @media(prefers-reduced-motion:reduce){.town-cloud-track{animation:none;transform:translateX(0)}.town-name-banner.is-active{top:16%;animation:town-name-reduced 2.4s ease-in-out both}.town-name-banner.is-active img{animation:none}@keyframes town-name-reduced{0%,100%{opacity:0}18%,72%{opacity:1}}}
 .town-mosaic{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;image-rendering:pixelated}
 .town-portrait{position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;image-rendering:auto;transform-origin:center bottom;animation:npc-breath 3.2s ease-in-out infinite}
+.town-portrait.is-hire-greeting{z-index:5;filter:drop-shadow(0 0 14px rgba(135,238,255,.38))}
 @keyframes npc-breath{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 @media(prefers-reduced-motion:reduce){.town-portrait{animation:none}}
 .town-portrait-placeholder{position:absolute;inset:0;z-index:1;display:grid;place-items:center;height:100%;color:#7b786d;font:clamp(28px,8vw,70px) "PixelFont",monospace;text-shadow:0 0 14px #3c675d}

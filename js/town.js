@@ -207,6 +207,7 @@ export function configureTown(options) {
   town.npcManagementItems = [];
   town.npcManagementIndex = 0;
   town.npcManagementConfirm = false;
+  town.npcManagementGreeting = false;
   town.npcManagementPointerArmedIndex = -1;
   town.npcManagementReturn = null;
   town.questPointerArmedIndex = -1;
@@ -638,7 +639,7 @@ function configureTownMessageObserver() {
 }
 
 function isNpcTownMessage(text) {
-  return /^[^\n：]{1,20}：/.test(String(text || ""));
+  return /^[^\n：「]{1,20}(?:：|「)/.test(String(text || ""));
 }
 
 function renderTownTypewriter() {
@@ -1733,13 +1734,22 @@ function renderNpcManagement() {
   } else if (town.npcManagementConfirm) {
     town.messageEl.textContent = town.npcManagementKind === "search"
       ? `${npc.name}【${npc.jobLabel}】を名簿へ登録しますか？\n登録料：無料\n＊Aボタン：はい　Bボタン：いいえ`
-      : `${npc.name}【${npc.jobLabel}】を雇用しますか？\n${npc.supportDescription}\n雇用費：${fee}G　所持金：${character.gold}G\n＊Aボタン：はい　Bボタン：いいえ`;
+      : `${npc.name}【${npc.jobLabel}】を雇用しますか？\n雇用費：${fee}G　所持金：${character.gold}G\n＊Aボタン：はい　Bボタン：いいえ`;
   } else {
     town.messageEl.textContent = `${npc.name}【${npc.jobLabel}】\n${npc.supportDescription}\n＊Aボタン：選択　Bボタン：戻る`;
   }
 }
 
 function handleNpcManagementInput(action) {
+  if (town.npcManagementGreeting) {
+    if (!["confirm", "cancel"].includes(action)) return true;
+    town.npcManagementGreeting = false;
+    town.portrait.classList.remove("is-hire-greeting");
+    town.commerceOverlay.hidden = false;
+    town.playSe(action === "confirm" ? "confirm" : "cancel");
+    openNpcManagement(town.npcManagementKind);
+    return true;
+  }
   if (["up", "down", "left", "right"].includes(action)) {
     if (!town.npcManagementItems.length || town.npcManagementConfirm || town.npcManagementKind === "renewal") return true;
     const amount = action === "up" || action === "left" ? -1 : 1;
@@ -1794,8 +1804,32 @@ function handleNpcManagementInput(action) {
     town.messageEl.textContent = reason;
     return true;
   }
-  openNpcManagement(town.npcManagementKind);
+  if (town.npcManagementKind === "roster") {
+    showNpcHireGreeting(npc);
+  } else {
+    openNpcManagement(town.npcManagementKind);
+  }
   return true;
+}
+
+const NPC_HIRE_GREETINGS = Object.freeze({
+  alec: "よう！よろしく！",
+  rebecca: "…アタシの足を引っ張るなよ？",
+  erika: "あなたに黄金の稲穂の女神が微笑みますように…。",
+  johan: "よろしくな。若造！"
+});
+
+function showNpcHireGreeting(npc) {
+  town.npcManagementConfirm = false;
+  town.npcManagementGreeting = true;
+  town.npcManagementPointerArmedIndex = -1;
+  town.commerceOverlay.hidden = true;
+  town.portrait.src = npc.image;
+  town.portrait.alt = `${npc.name}【${npc.jobLabel}】`;
+  town.portrait.hidden = false;
+  town.portraitPlaceholder.hidden = true;
+  town.portrait.classList.add("is-hire-greeting");
+  town.messageEl.textContent = `${npc.name}「${NPC_HIRE_GREETINGS[npc.id] || "よろしく。"}」`;
 }
 
 function closeNpcManagement() {
@@ -1804,7 +1838,9 @@ function closeNpcManagement() {
   town.npcManagementKind = "";
   town.npcManagementItems = [];
   town.npcManagementConfirm = false;
+  town.npcManagementGreeting = false;
   town.npcManagementPointerArmedIndex = -1;
+  town.portrait.classList.remove("is-hire-greeting");
   town.commerceOverlay.hidden = true;
   town.commerceOverlay.classList.remove("is-npc-management");
   town.commandRoot.hidden = false;
