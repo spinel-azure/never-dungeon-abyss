@@ -153,6 +153,16 @@
   max-height: 96%;
 }
 
+.battle-enemy-image.is-glacies {
+  width: min(76%, 510px);
+  max-height: 95%;
+}
+
+.battle-enemy-image.is-eiskoenigin {
+  width: min(72%, 480px);
+  max-height: 95%;
+}
+
 .battle-enemy-image.is-iron-maiden {
   width: min(70%, 450px);
   max-height: 94%;
@@ -575,6 +585,12 @@ body.battle-active .viewport > #treasureCanvas {
   .battle-enemy-image.is-thief-leader {
     width: min(82%, 420px);
     max-height: 94%;
+  }
+
+  .battle-enemy-image.is-glacies,
+  .battle-enemy-image.is-eiskoenigin {
+    width: min(80%, 390px);
+    max-height: 93%;
   }
 
   .battle-enemy-name {

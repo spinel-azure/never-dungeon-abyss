@@ -638,10 +638,17 @@ test("quest 018 follows quest 017, tracks B46F Glacies, and unlocks Extreme Cold
   assert.equal(report.character.eventFlags.extreme_cold_barrier_shop_unlocked, true);
 });
 
+test("multi-item quest rewards pass their quantity separately to the item popup", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const source = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
+  assert.match(source, /showNamedItemGetEffect\(\[item\?\.name \|\| rewardItemId\],\s*\{ important: true, amounts: \[amount\] \}\)/);
+  assert.doesNotMatch(source, /item\?\.name \|\| rewardItemId\}×\$\{amount\}/);
+});
+
 test("quest 012 hides the Iron Maiden spoiler and quest 013 supply uses an item popup", async () => {
   assert.equal(getQuestById(THIRD_RED_DOOR_INVESTIGATION_QUEST_ID).objectiveLabel, "赤い扉を開け、中を調査する");
   const { readFile } = await import("node:fs/promises");
   const source = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
   assert.match(source, /result\.acceptanceSupplyItemId[\s\S]*showNamedItemGetEffect/);
-  assert.match(source, /回復薬（大）×\$\{result\.acceptanceSupplyAmount\}/);
+  assert.match(source, /\["回復薬（大）"\][\s\S]*amounts: \[result\.acceptanceSupplyAmount\]/);
 });

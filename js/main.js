@@ -836,13 +836,14 @@ import {
     showNamedItemGetEffect(items.map(item => item.name), { important });
   }
 
-  function showNamedItemGetEffect(itemNames, { important = false } = {}) {
+  function showNamedItemGetEffect(itemNames, { important = false, amounts = [] } = {}) {
     if (!itemGetEffect || !itemGetItems || itemNames.length === 0) return;
     window.clearTimeout(itemGetTimer);
     playSe(important ? "importantItem" : "itemGet");
-    itemGetItems.replaceChildren(...itemNames.map(itemName => {
+    itemGetItems.replaceChildren(...itemNames.map((itemName, index) => {
       const row = document.createElement("span");
-      row.textContent = `${itemName} ×1`;
+      const amount = Math.max(1, Math.floor(Number(amounts[index]) || 1));
+      row.textContent = `${itemName} ×${amount}`;
       return row;
     }));
     itemGetEffect.hidden = false;
@@ -939,9 +940,10 @@ import {
     updateCharacterUi();
     saveGame();
     if (result.acceptanceSupplyItemId) {
-      setTimeout(() => showNamedItemGetEffect([
-        `回復薬（大）×${result.acceptanceSupplyAmount}`
-      ], { important: true }), 0);
+      setTimeout(() => showNamedItemGetEffect(
+        ["回復薬（大）"],
+        { important: true, amounts: [result.acceptanceSupplyAmount] }
+      ), 0);
     }
     if (questId === FLOOR_SURVEY_QUEST_ID) showQuestTutorial();
     return {
@@ -1085,7 +1087,7 @@ import {
     if (rewardItemId) {
       const item = getItem(rewardItemId);
       const amount = Math.max(1, Math.floor(Number(rewardItemAmount) || 1));
-      showNamedItemGetEffect([`${item?.name || rewardItemId}×${amount}`], { important: true });
+      showNamedItemGetEffect([item?.name || rewardItemId], { important: true, amounts: [amount] });
       if (eventRewardCardId) await wait(3400);
     }
     if (eventRewardCardId) {

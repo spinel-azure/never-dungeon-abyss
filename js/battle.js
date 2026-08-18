@@ -542,6 +542,8 @@ function renderBattle() {
   image.classList.toggle("is-jabberwock", battle.enemy.id === "jabberwock_event_boss");
   image.classList.toggle("is-iron-maiden", battle.enemy.id === "iron_maiden_b29f");
   image.classList.toggle("is-thief-leader", battle.enemy.id === "thief_leader_event_boss");
+  image.classList.toggle("is-glacies", battle.enemy.id === "glacies_event_boss");
+  image.classList.toggle("is-eiskoenigin", battle.enemy.id === "eiskoenigin_b49f");
   const enemyStage = battleUi.root.querySelector(".battle-enemy-stage");
   enemyStage?.classList.toggle("is-defeated", defeated);
   enemyStage?.classList.toggle("is-eiskoenigin", battle.enemy.id === "eiskoenigin_b49f" && !defeated && !battleUi.concealed);
