@@ -31,7 +31,6 @@ const renderer = {
   lastCanvasTouchAt: 0,
   wallTexture: null,
   forestWallTextures: [],
-  forestFloorTexture: null,
   wallColor: "default",
   floorColor: "default",
   doorTextures: null,
@@ -133,7 +132,6 @@ export function configureRenderer(options) {
   }
   renderer.wallTexture = makeWallTexture();
   loadForestWallTextures();
-  loadForestFloorTexture();
   renderer.doorTextures = {
     normal: makeDoorTexture("normal"),
     boss: makeDoorTexture("boss"),
@@ -422,10 +420,6 @@ export function drawFloor() {
   ctx.fillStyle = floorGrad;
   ctx.fillRect(0, horizon, W, H / 2);
 
-  if (renderer.floorColor === "green" && renderer.forestFloorTexture) {
-    drawForestFloorTexture(horizon);
-  }
-
   ctx.strokeStyle = palette.grid;
   ctx.lineWidth = 1;
   for (let y = horizon + 18; y < H; y += 18) {
@@ -435,26 +429,6 @@ export function drawFloor() {
     ctx.lineTo(W * (0.5 + spread * 0.52), y);
     ctx.stroke();
   }
-}
-
-function drawForestFloorTexture(horizon) {
-  const { ctx, W, H, forestFloorTexture } = renderer;
-  const pattern = ctx.createPattern(forestFloorTexture, "repeat");
-  if (!pattern) return;
-  if (typeof pattern.setTransform === "function" && typeof DOMMatrix === "function") {
-    pattern.setTransform(new DOMMatrix().scale(1.15, 0.6));
-  }
-  ctx.save();
-  ctx.globalAlpha = 0.72;
-  ctx.fillStyle = pattern;
-  ctx.fillRect(0, horizon, W, H - horizon);
-  ctx.restore();
-  const shade = ctx.createLinearGradient(0, horizon, 0, H);
-  shade.addColorStop(0, "rgba(3,12,4,.62)");
-  shade.addColorStop(0.55, "rgba(3,10,3,.24)");
-  shade.addColorStop(1, "rgba(0,4,0,.08)");
-  ctx.fillStyle = shade;
-  ctx.fillRect(0, horizon, W, H - horizon);
 }
 
 export function drawBoundaryWalls() {
@@ -536,28 +510,6 @@ function loadForestWallTextures() {
     }
   }).catch(() => {
     renderer.forestWallTextures = [];
-  });
-}
-
-function loadForestFloorTexture() {
-  const paths = [
-    "images/dungeon_effects/forest_03.webp",
-    "images/dungeon_effects/forest_04.webp"
-  ];
-  Promise.all(paths.map(loadWallTextureImage)).then(textures => {
-    if (textures.some(texture => !texture)) return;
-    const size = 256;
-    const combined = document.createElement("canvas");
-    combined.width = size;
-    combined.height = size;
-    const context = combined.getContext("2d");
-    context.drawImage(textures[0], 0, 0, size, size);
-    context.globalAlpha = 0.35;
-    context.drawImage(textures[1], 0, 0, size, size);
-    context.globalAlpha = 1;
-    renderer.forestFloorTexture = combined;
-  }).catch(() => {
-    renderer.forestFloorTexture = null;
   });
 }
 
