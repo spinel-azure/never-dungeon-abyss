@@ -164,6 +164,13 @@ export function setEquipmentInstanceLocked(character, instanceId, locked) {
   return { accepted: true, character: { ...character, equipmentInventory }, instance };
 }
 
+export function isEquipmentBuybackEligible(instance) {
+  const definition = getEquipmentInstanceDefinition(instance);
+  return Boolean(definition)
+    && (Math.max(0, Math.floor(Number(instance?.enhancement) || 0)) >= 3
+      || (definition.buybackPrice != null && Number.isFinite(Number(definition.buybackPrice))));
+}
+
 export function canEquipInstance(character, instance) {
   const definition = findEquipmentDefinition(instance?.equipmentId, instance?.slot);
   if (!definition) return { accepted: false, reason: "装備品データが見つかりません。" };

@@ -1,6 +1,6 @@
 import { getItem } from "./items.js";
 import { consumeItem, getItemCount, grantItemWithOverflow } from "./inventory.js";
-import { findEquipmentDefinition, getEquipmentInstanceDefinition, grantEquipmentInstance } from "./equipment-inventory.js";
+import { findEquipmentDefinition, getEquipmentInstanceDefinition, grantEquipmentInstance, isEquipmentBuybackEligible } from "./equipment-inventory.js";
 import { getWeapon } from "./weapons.js";
 
 export function purchaseItem(character, itemId, { price, amount = 1 } = {}) {
@@ -69,10 +69,10 @@ export function sellItem(character, itemId, { price, amount = 1 } = {}) {
       ...character,
       gold: Math.max(0, Math.floor(Number(character.gold) || 0)) + value,
       inventory: consumeItem(character.inventory, item.id, quantity).inventory,
-      itemBuyback: item.repurchasable ? [
-        ...(Array.isArray(character.itemBuyback) ? character.itemBuyback : []),
-        { entryId: nextBuybackEntryId(character, "item"), itemId: item.id, amount: quantity, unitPrice: buybackUnitPrice, price: buybackUnitPrice * quantity }
-      ] : (character.itemBuyback || [])
+      equipmentBuyback: item.repurchasable ? [] : (character.equipmentBuyback || []),
+      itemBuyback: item.repurchasable
+        ? [{ entryId: "item:latest", itemId: item.id, amount: quantity, unitPrice: buybackUnitPrice, price: buybackUnitPrice * quantity }]
+        : (character.itemBuyback || [])
     }
   };
 }
@@ -121,10 +121,10 @@ export function sellEquipmentInstance(character, instanceId, { price } = {}) {
         ...character.equipmentInventory,
         instances: character.equipmentInventory.instances.filter(entry => entry.instanceId !== instance.instanceId)
       },
-      equipmentBuyback: [
-        ...(Array.isArray(character.equipmentBuyback) ? character.equipmentBuyback : []),
-        { entryId: `equipment:${instance.instanceId}`, instance: structuredClone(instance), price: Math.max(value * 2, Math.floor(Number(equipment.buybackPrice) || 0)) }
-      ]
+      itemBuyback: isEquipmentBuybackEligible(instance) ? [] : (character.itemBuyback || []),
+      equipmentBuyback: isEquipmentBuybackEligible(instance)
+        ? [{ entryId: `equipment:${instance.instanceId}`, instance: structuredClone(instance), price: Math.max(value * 2, Math.floor(Number(equipment.buybackPrice) || 0)) }]
+        : (character.equipmentBuyback || [])
     }
   };
 }
@@ -147,12 +147,4 @@ export function purchaseBuybackEquipment(character, entryIdOrInstanceId) {
     equipmentInventory: { ...character.equipmentInventory, instances: [...(character.equipmentInventory?.instances || []), structuredClone(entry.instance)] },
     equipmentBuyback: entries.filter(candidate => candidate !== entry)
   } };
-}
-
-function nextBuybackEntryId(character, kind) {
-  const entries = [...(character?.itemBuyback || []), ...(character?.equipmentBuyback || [])];
-  const used = new Set(entries.map(entry => String(entry?.entryId || "")));
-  let sequence = 1;
-  while (used.has(`${kind}:${sequence}`)) sequence += 1;
-  return `${kind}:${sequence}`;
 }

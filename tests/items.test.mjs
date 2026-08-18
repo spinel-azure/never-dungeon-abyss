@@ -12,7 +12,7 @@ import {
 import { grantEventItems, unlockGuildRequest } from "../js/character-services.js";
 import { purchaseBuybackEquipment, purchaseBuybackItem, purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
 import { getItem, getShopItemIdsForCharacter, getShopItemIdsForDepth } from "../data/items.js";
-import { equipInstance, getEquipmentInstanceDefinition, setEquipmentInstanceLocked } from "../data/equipment-inventory.js";
+import { equipInstance, getEquipmentInstanceDefinition, grantEquipmentInstance, setEquipmentInstanceLocked } from "../data/equipment-inventory.js";
 import { getShopEquipmentOffer, getShopEquipmentStock } from "../data/shop-stock.js";
 import { readFile } from "node:fs/promises";
 
@@ -36,30 +36,34 @@ test("Molten Brass is a valuable unique material that can be bought back", () =>
   assert.equal(bought.character.itemBuyback.length, 0);
 });
 
-test("stacked buyback charges the full quantity and restores the selected sale record", () => {
-  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
-  character.gold = 30000;
-  character.itemBuyback = [
-    { entryId: "item:1", itemId: "healing_potion_large", amount: 2, unitPrice: 200, price: 400 },
-    { entryId: "item:2", itemId: "healing_potion_large", amount: 3, unitPrice: 200, price: 600 }
-  ];
-  assert.equal(character.itemBuyback.length, 2);
-  assert.equal(character.itemBuyback[0].price, character.itemBuyback[0].unitPrice * 2);
-  assert.equal(character.itemBuyback[1].price, character.itemBuyback[1].unitPrice * 3);
-  const selectedId = character.itemBuyback[1].entryId;
-  const selectedCost = character.itemBuyback[1].price;
-  const bought = purchaseBuybackItem({ ...character, gold: selectedCost }, selectedId);
-  assert.equal(bought.accepted, true);
-  assert.equal(getItemCount(bought.character.inventory, "healing_potion_large"), 3);
-  assert.equal(bought.character.itemBuyback.length, 1);
-  assert.equal(bought.character.itemBuyback[0].amount, 2);
+test("buyback keeps only the latest eligible item or equipment", () => {
+  let character = sellItem(characterWith("molten_brass"), "molten_brass").character;
+  assert.equal(character.itemBuyback.length, 1);
+  const enhanced = grantEquipmentInstance(character, "stiletto", "rightArmId", { enhancement: 3 });
+  character = sellEquipmentInstance(enhanced.character, enhanced.instance.instanceId).character;
+  assert.equal(character.itemBuyback.length, 0);
+  assert.equal(character.equipmentBuyback.length, 1);
+  assert.equal(character.equipmentBuyback[0].instance.instanceId, enhanced.instance.instanceId);
+});
+
+test("selling ordinary equipment does not erase the single eligible buyback slot", () => {
+  let character = sellItem(characterWith("molten_brass"), "molten_brass").character;
+  const ordinary = grantEquipmentInstance(character, "stiletto", "rightArmId", { enhancement: 2 });
+  character = sellEquipmentInstance(ordinary.character, ordinary.instance.instanceId).character;
+  assert.equal(character.itemBuyback.length, 1);
+  assert.equal(character.itemBuyback[0].itemId, "molten_brass");
+  assert.equal(character.equipmentBuyback.length, 0);
 });
 
 test("legacy buyback records receive stable ids and quantity-correct totals", () => {
   const character = createInitialCharacter({ name: "TEST", job: "warrior" });
-  character.itemBuyback = [{ itemId: "molten_brass", amount: 2, price: 10000 }];
+  character.itemBuyback = [
+    { itemId: "molten_brass", amount: 1, price: 10000 },
+    { itemId: "molten_brass", amount: 2, price: 10000 }
+  ];
   const normalized = normalizeCharacter(character);
-  assert.equal(normalized.itemBuyback[0].entryId, "item:1");
+  assert.equal(normalized.itemBuyback.length, 1);
+  assert.equal(normalized.itemBuyback[0].entryId, "item:latest");
   assert.equal(normalized.itemBuyback[0].unitPrice, 10000);
   assert.equal(normalized.itemBuyback[0].price, 20000);
 });
@@ -262,7 +266,7 @@ test("warrior armor tiers preserve the shield and two-handed defense tradeoff", 
   assert.deepEqual(normalized.equipmentStatBonuses, { def: 12, str: 3 });
 });
 
-test("enhanced warrior armor keeps its tier through sale and buyback", () => {
+test("equipment below plus three is sold without entering buyback", () => {
   let character = createInitialCharacter({ name: "TEST", job: "warrior" });
   character.gold = 750;
   character.highestDungeonDepthReached = 10;
@@ -275,10 +279,10 @@ test("enhanced warrior armor keeps its tier through sale and buyback", () => {
   const sold = sellEquipmentInstance(purchased.character, purchased.instance.instanceId);
   assert.equal(sold.accepted, true);
   assert.equal(sold.value, 250);
-  assert.equal(sold.character.equipmentBuyback[0].price, 500);
+  assert.equal(sold.character.equipmentBuyback.length, 0);
   const boughtBack = purchaseBuybackEquipment(sold.character, purchased.instance.instanceId);
-  assert.equal(boughtBack.accepted, true);
-  assert.equal(boughtBack.instance.enhancement, 2);
+  assert.equal(boughtBack.accepted, false);
+  assert.equal(boughtBack.reason, "notFound");
 });
 
 test("priest armor tiers trade some defense growth for LUC and AGI", () => {
@@ -586,9 +590,9 @@ test("shop sells unequipped equipment instances but rejects equipped ones", () =
 test("sold equipment can be bought back as the same individual instance", () => {
   let character = createInitialCharacter({ name: "TEST", job: "warrior" });
   character.gold = 20000;
-  const purchased = purchaseEquipment(character, "iron_greatsword");
-  character = purchased.character;
-  const instance = character.equipmentInventory.instances.at(-1);
+  const granted = grantEquipmentInstance(character, "iron_greatsword", "rightArmId", { enhancement: 3 });
+  character = granted.character;
+  const instance = granted.instance;
   const sold = sellEquipmentInstance(character, instance.instanceId);
   assert.equal(sold.accepted, true);
   const bought = purchaseBuybackEquipment(sold.character, instance.instanceId);

@@ -6,7 +6,7 @@ import {
   createInitialInventory, createInitialLootBag, createInitialWarehouse,
   normalizeInventory, normalizeLootBag, normalizeWarehouse
 } from "./inventory.js";
-import { collectEquippedInstanceBonuses, normalizeEquipmentInventory } from "./equipment-inventory.js";
+import { collectEquippedInstanceBonuses, isEquipmentBuybackEligible, normalizeEquipmentInventory } from "./equipment-inventory.js";
 import { normalizeQuestState } from "./quests.js";
 import { normalizeAdventureStats } from "./adventure-stats.js";
 import {
@@ -146,6 +146,23 @@ export function normalizeCharacter(character) {
     + Math.max(0, Math.floor(Number(equipmentStatBonuses.maxSp) || 0))
     + Math.max(0, Math.floor(Number(cardStatBonuses.maxSp) || 0));
   const inferredDepth = character.eventFlags?.transfer_portal_b10f_unlocked ? 10 : 1;
+  const normalizedEquipmentBuyback = Array.isArray(character.equipmentBuyback)
+    ? structuredClone(character.equipmentBuyback)
+      .filter(entry => entry?.instance?.instanceId && isEquipmentBuybackEligible(entry.instance))
+      .map(entry => ({ ...entry, entryId: String(entry.entryId || `equipment:${entry.instance.instanceId}`) }))
+    : [];
+  const normalizedItemBuyback = Array.isArray(character.itemBuyback)
+    ? structuredClone(character.itemBuyback)
+      .filter(entry => getItem(entry?.itemId)?.repurchasable && Number(entry?.amount) > 0)
+      .map(entry => {
+        const amount = Math.max(1, Math.floor(Number(entry.amount) || 1));
+        const legacyPrice = Math.max(0, Math.floor(Number(entry.price) || 0));
+        const unitPrice = Math.max(0, Math.floor(Number(entry.unitPrice) || legacyPrice));
+        return { ...entry, entryId: "item:latest", amount, unitPrice, price: entry.unitPrice == null ? unitPrice * amount : legacyPrice };
+      })
+    : [];
+  const latestEquipmentBuyback = normalizedEquipmentBuyback.at(-1);
+  const latestItemBuyback = normalizedItemBuyback.at(-1);
   return {
     ...character,
     job: characterClass.id,
@@ -187,22 +204,8 @@ export function normalizeCharacter(character) {
     def: Math.max(0, Number(character.def) || 0),
     equipment,
     ...equipmentCollection,
-    equipmentBuyback: Array.isArray(character.equipmentBuyback)
-      ? structuredClone(character.equipmentBuyback).filter(entry => entry?.instance?.instanceId).map(entry => ({
-        ...entry,
-        entryId: String(entry.entryId || `equipment:${entry.instance.instanceId}`)
-      }))
-      : [],
-    itemBuyback: Array.isArray(character.itemBuyback)
-      ? structuredClone(character.itemBuyback)
-        .filter(entry => getItem(entry?.itemId)?.repurchasable && Number(entry?.amount) > 0)
-        .map((entry, index) => {
-          const amount = Math.max(1, Math.floor(Number(entry.amount) || 1));
-          const legacyPrice = Math.max(0, Math.floor(Number(entry.price) || 0));
-          const unitPrice = Math.max(0, Math.floor(Number(entry.unitPrice) || legacyPrice));
-          return { ...entry, entryId: String(entry.entryId || `item:${index + 1}`), amount, unitPrice, price: entry.unitPrice == null ? unitPrice * amount : legacyPrice };
-        })
-      : [],
+    equipmentBuyback: latestEquipmentBuyback ? [latestEquipmentBuyback] : [],
+    itemBuyback: latestEquipmentBuyback ? [] : latestItemBuyback ? [latestItemBuyback] : [],
     skillIds: [...new Set([
       ...characterClass.initialSkillIds,
       ...(Array.isArray(character.skillIds) ? character.skillIds : []),
