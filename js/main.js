@@ -2659,11 +2659,13 @@ import {
 
   function applyCurrentFloorMist() {
     const options = getDungeonMistOptions();
-    const color = currentDepth >= 10 && currentDepth <= 19 ? "black"
-      : currentDepth >= 20 && currentDepth <= 29 ? "yellow"
+    const color = currentDepth >= 10 && currentDepth <= 19 ? "slate"
+      : currentDepth >= 20 && currentDepth <= 29 ? "water"
       : isFireFloorDepth(currentDepth) ? "red"
       : isColdFloorDepth(currentDepth) ? "blue"
         : currentDepth >= 50 && currentDepth <= 59 ? "green"
+          : currentDepth >= 60 && currentDepth <= 69 ? "yellow"
+            : currentDepth >= 90 && currentDepth <= 99 ? "black"
           : options.color;
     setMistOptions({ ...options, color });
   }
@@ -2959,14 +2961,7 @@ import {
     mode: getTouchControlsMode(),
     isInputAllowed: () => Boolean(
       character
-      && ((worldLocation === "dungeon" && isPlayerInputEnabled()) || isTownOpen())
-      && !isBattleActive()
-      && !isMenuOpen()
       && !sceneTransitionRunning
-      && !state.overlayEvent
-      && !state.autoWalkerActive
-      && itemOverlay.hidden
-      && skillOverlay.hidden
       && !document.body.classList.contains("title-active")
     ),
     manualMove: amount => dispatchGamepadAction(amount > 0 ? "up" : "down"),

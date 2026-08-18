@@ -99,7 +99,7 @@ body.inventory-open .game{width:min(96vw,720px)}body.inventory-open .menu-screen
 /* Touch-only lower-screen floating movement surface. */
 .floating-stick-zone{display:none;position:fixed;z-index:35;left:max(8px,env(safe-area-inset-left));right:max(162px,calc(154px + env(safe-area-inset-right)));bottom:max(8px,env(safe-area-inset-bottom));height:min(220px,28dvh);touch-action:none;-webkit-user-select:none;user-select:none}
 body.touch-controls-enabled .floating-stick-zone{display:block}
-body.menu-open .floating-stick-zone,body.battle-active .floating-stick-zone,body.title-active .floating-stick-zone,body.item-overlay-open .floating-stick-zone,body.skill-overlay-open .floating-stick-zone{display:none!important}
+body.title-active .floating-stick-zone{display:none!important}
 .floating-stick-zone .virtual-stick{display:none!important;position:absolute!important;z-index:1;left:0;top:0;bottom:auto!important;width:112px!important;height:112px!important;margin:0!important;pointer-events:none!important;transform:translate(-50%,-50%)}
 .floating-stick-zone .virtual-stick.is-active{display:grid!important}
 .floating-stick-zone .virtual-stick-base{width:110px;height:110px;margin:0!important;background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.08) 0 32%,transparent 33%),rgba(55,58,52,.62)}

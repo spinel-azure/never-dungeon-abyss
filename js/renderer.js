@@ -36,6 +36,8 @@ const renderer = {
   iceWallTextures: [],
   darkWallTextures: [],
   desertWallTextures: [],
+  midDungeonWallTextures: [],
+  waterWallTextures: [],
   wallColor: "default",
   floorColor: "default",
   doorTextures: null,
@@ -58,7 +60,9 @@ const MIST_PALETTES = {
   poison: { main: [93, 62, 111], veil: [82, 48, 101], haze: [139, 91, 160], bloom: [174, 112, 199] },
   red: { main: [112, 38, 31], veil: [88, 26, 22], haze: [158, 54, 42], bloom: [224, 105, 66] },
   black: { main: [12, 12, 15], veil: [5, 5, 7], haze: [24, 23, 29], bloom: [72, 66, 82] },
-  yellow: { main: [206, 209, 21], veil: [151, 154, 14], haze: [222, 224, 67], bloom: [244, 226, 116] }
+  yellow: { main: [206, 209, 21], veil: [151, 154, 14], haze: [222, 224, 67], bloom: [244, 226, 116] },
+  slate: { main: [90, 108, 104], veil: [62, 77, 74], haze: [125, 143, 138], bloom: [176, 190, 171] },
+  water: { main: [62, 123, 204], veil: [35, 83, 151], haze: [102, 158, 224], bloom: [142, 199, 244] }
 };
 const WALL_PALETTES = {
   default: { base: "#817667", rows: ["#8b806f", "#716756"], mortar: "rgba(28,26,23,.62)", speckle: "rgba(236,220,181,.12)" },
@@ -67,6 +71,8 @@ const WALL_PALETTES = {
   blue: { base: "#536b78", rows: ["#607f90", "#465d6a"], mortar: "rgba(16,27,35,.68)", speckle: "rgba(202,238,255,.16)" },
   green: { base: "#526b55", rows: ["#607c61", "#435a47"], mortar: "rgba(18,31,20,.68)", speckle: "rgba(203,236,184,.14)" },
   yellow: { base: "#ced115", rows: ["#dadd25", "#a4a711"], mortar: "rgba(61,62,5,.68)", speckle: "rgba(255,250,147,.18)" },
+  slate: { base: "#5a6c68", rows: ["#687b76", "#485a56"], mortar: "rgba(19,28,26,.68)", speckle: "rgba(190,211,204,.14)" },
+  water: { base: "#3e7bcc", rows: ["#4d8bd9", "#3165ab"], mortar: "rgba(12,35,67,.68)", speckle: "rgba(174,220,255,.17)" },
   white: { base: "#aaa79e", rows: ["#c3c0b5", "#918f88"], mortar: "rgba(55,54,51,.52)", speckle: "rgba(255,255,240,.2)" },
   black: { base: "#28282b", rows: ["#35343a", "#1d1d20"], mortar: "rgba(0,0,0,.82)", speckle: "rgba(151,136,165,.12)" }
 };
@@ -76,6 +82,8 @@ const FLOOR_PALETTES = {
   blue: { near: "#071015", mid: "#143448", far: "#24617b", grid: "rgba(174,228,255,.13)" },
   green: { near: "#081109", mid: "#18341b", far: "#315b2d", grid: "rgba(174,226,137,.1)" },
   yellow: { near: "#181902", mid: "#686b0a", far: "#ced115", grid: "rgba(255,252,137,.12)" },
+  slate: { near: "#080b0a", mid: "#273431", far: "#5a6c68", grid: "rgba(185,209,201,.09)" },
+  water: { near: "#050d18", mid: "#183c6c", far: "#3e7bcc", grid: "rgba(171,218,255,.13)" },
   purple: { near: "#110713", mid: "#35143c", far: "#5d2369", grid: "rgba(226,143,244,.12)" },
   white: { near: "#252729", mid: "#767a7c", far: "#c7c9c5", grid: "rgba(255,255,255,.18)" },
   black: { near: "#010102", mid: "#08080a", far: "#111116", grid: "rgba(104,94,118,.06)" }
@@ -149,6 +157,8 @@ export function configureRenderer(options) {
   loadIceWallTextures();
   loadDarkWallTextures();
   loadDesertWallTextures();
+  loadMidDungeonWallTextures();
+  loadWaterWallTextures();
   renderer.doorTextures = {
     normal: makeDoorTexture("normal"),
     boss: makeDoorTexture("boss"),
@@ -523,6 +533,8 @@ function getThemedWallTextures(color) {
   if (color === "green") return renderer.forestWallTextures;
   if (color === "black") return renderer.darkWallTextures;
   if (color === "yellow") return renderer.desertWallTextures;
+  if (color === "slate") return renderer.midDungeonWallTextures;
+  if (color === "water") return renderer.waterWallTextures;
   return [];
 }
 
@@ -565,6 +577,20 @@ function loadDesertWallTextures() {
   loadThemedWallTextures("desertWallTextures", "yellow", [
     "images/dungeon_effects/desert_wall_01.webp",
     "images/dungeon_effects/desert_wall_02.webp"
+  ]);
+}
+
+function loadMidDungeonWallTextures() {
+  loadThemedWallTextures("midDungeonWallTextures", "slate", [
+    "images/dungeon_effects/dungeon_wall_05.webp",
+    "images/dungeon_effects/dungeon_wall_06.webp"
+  ]);
+}
+
+function loadWaterWallTextures() {
+  loadThemedWallTextures("waterWallTextures", "water", [
+    "images/dungeon_effects/watar_wall_01.webp",
+    "images/dungeon_effects/watar_wall_02.webp"
   ]);
 }
 

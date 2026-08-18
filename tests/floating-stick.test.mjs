@@ -30,7 +30,7 @@ test("floating stick applies its dead zone, radius cap, and circular diagonal no
   assert.ok(Math.abs(Math.hypot(diagonal.x, diagonal.y) - 1) < 1e-12);
 });
 
-test("floating touch UI is data-driven, persisted, and restricted to the lower control zone", async () => {
+test("floating touch UI is available across town, dungeon, battle, and menus", async () => {
   const [html, menu, main, css, source] = await Promise.all([
     readFile(new URL("index.html", root), "utf8"),
     readFile(new URL("js/menu.js", root), "utf8"),
@@ -42,13 +42,16 @@ test("floating touch UI is data-driven, persisted, and restricted to the lower c
   assert.match(html, /data-option="touchControlsMode"/);
   assert.match(menu, /touchControlsMode:\s*"auto"/);
   assert.match(menu, /touchControlsMode:\s*menu\.touchControlsMode/);
-  assert.match(main, /\(worldLocation === "dungeon" && isPlayerInputEnabled\(\)\) \|\| isTownOpen\(\)/);
   assert.match(main, /manualMove: amount => dispatchGamepadAction\(amount > 0 \? "up" : "down"\)/);
   assert.match(main, /manualTurn: amount => dispatchGamepadAction\(amount < 0 \? "left" : "right"\)/);
-  assert.match(main, /!isBattleActive\(\)/);
-  assert.match(main, /!state\.autoWalkerActive/);
+  assert.match(main, /character\s*&& !sceneTransitionRunning\s*&& !document\.body\.classList\.contains\("title-active"\)/);
+  assert.doesNotMatch(main, /isInputAllowed:[\s\S]*?&& !isBattleActive\(\)/);
   assert.match(css, /\.floating-stick-zone\{[^}]*position:fixed/);
   assert.doesNotMatch(css, /body\.town-active \.floating-stick-zone/);
+  assert.doesNotMatch(css, /body\.menu-open \.floating-stick-zone/);
+  assert.doesNotMatch(css, /body\.battle-active \.floating-stick-zone/);
+  assert.doesNotMatch(css, /body\.item-overlay-open \.floating-stick-zone/);
+  assert.doesNotMatch(css, /body\.skill-overlay-open \.floating-stick-zone/);
   for (const eventName of ["pointercancel", "lostpointercapture", "visibilitychange", "orientationchange", "pageshow", "blur", "resize"]) {
     assert.match(source, new RegExp(eventName));
   }
