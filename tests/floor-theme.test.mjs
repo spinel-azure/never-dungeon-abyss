@@ -23,5 +23,8 @@ test("forest floors load both dedicated WebP wall textures and green mist", asyn
   ]);
   assert.match(renderer, /images\/dungeon_effects\/forest_01\.webp/);
   assert.match(renderer, /images\/dungeon_effects\/forest_02\.webp/);
+  assert.match(renderer, /images\/dungeon_effects\/forest_03\.webp/);
+  assert.match(renderer, /images\/dungeon_effects\/forest_04\.webp/);
+  assert.match(renderer, /drawForestFloorTexture\(horizon\)/);
   assert.match(main, /currentDepth >= 50 && currentDepth <= 59 \? "green"/);
 });

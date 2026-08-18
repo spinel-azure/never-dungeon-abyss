@@ -31,6 +31,7 @@ const renderer = {
   lastCanvasTouchAt: 0,
   wallTexture: null,
   forestWallTextures: [],
+  forestFloorTexture: null,
   wallColor: "default",
   floorColor: "default",
   doorTextures: null,
@@ -132,6 +133,7 @@ export function configureRenderer(options) {
   }
   renderer.wallTexture = makeWallTexture();
   loadForestWallTextures();
+  loadForestFloorTexture();
   renderer.doorTextures = {
     normal: makeDoorTexture("normal"),
     boss: makeDoorTexture("boss"),
@@ -420,6 +422,10 @@ export function drawFloor() {
   ctx.fillStyle = floorGrad;
   ctx.fillRect(0, horizon, W, H / 2);
 
+  if (renderer.floorColor === "green" && renderer.forestFloorTexture) {
+    drawForestFloorTexture(horizon);
+  }
+
   ctx.strokeStyle = palette.grid;
   ctx.lineWidth = 1;
   for (let y = horizon + 18; y < H; y += 18) {
@@ -429,6 +435,35 @@ export function drawFloor() {
     ctx.lineTo(W * (0.5 + spread * 0.52), y);
     ctx.stroke();
   }
+}
+
+function drawForestFloorTexture(horizon) {
+  const { ctx, W, H, state, forestFloorTexture } = renderer;
+  const bandHeight = 12;
+  const pattern = ctx.createPattern(forestFloorTexture, "repeat");
+  if (!pattern) return;
+  for (let y = horizon; y < H; y += bandHeight) {
+    const progress = Math.max(0.01, (y - horizon) / (H - horizon));
+    const scale = 0.16 + progress * 1.16;
+    if (typeof pattern.setTransform === "function" && typeof DOMMatrix === "function") {
+      const movementX = ((Number(state?.x) || 0) * 43 + (Number(state?.y) || 0) * 29) * scale;
+      const movementY = ((Number(state?.x) || 0) * 19 - (Number(state?.y) || 0) * 37) * scale;
+      pattern.setTransform(new DOMMatrix()
+        .translate(movementX, movementY)
+        .scale(scale, Math.max(0.08, scale * 0.48)));
+    }
+    ctx.save();
+    ctx.globalAlpha = 0.72;
+    ctx.fillStyle = pattern;
+    ctx.fillRect(0, y, W, Math.min(bandHeight + 1, H - y));
+    ctx.restore();
+  }
+  const shade = ctx.createLinearGradient(0, horizon, 0, H);
+  shade.addColorStop(0, "rgba(3,12,4,.62)");
+  shade.addColorStop(0.55, "rgba(3,10,3,.24)");
+  shade.addColorStop(1, "rgba(0,4,0,.08)");
+  ctx.fillStyle = shade;
+  ctx.fillRect(0, horizon, W, H - horizon);
 }
 
 export function drawBoundaryWalls() {
@@ -510,6 +545,28 @@ function loadForestWallTextures() {
     }
   }).catch(() => {
     renderer.forestWallTextures = [];
+  });
+}
+
+function loadForestFloorTexture() {
+  const paths = [
+    "images/dungeon_effects/forest_03.webp",
+    "images/dungeon_effects/forest_04.webp"
+  ];
+  Promise.all(paths.map(loadWallTextureImage)).then(textures => {
+    if (textures.some(texture => !texture)) return;
+    const size = 256;
+    const combined = document.createElement("canvas");
+    combined.width = size * 2;
+    combined.height = size * 2;
+    const context = combined.getContext("2d");
+    context.drawImage(textures[0], 0, 0, size, size);
+    context.drawImage(textures[1], size, 0, size, size);
+    context.drawImage(textures[1], 0, size, size, size);
+    context.drawImage(textures[0], size, size, size, size);
+    renderer.forestFloorTexture = combined;
+  }).catch(() => {
+    renderer.forestFloorTexture = null;
   });
 }
 
