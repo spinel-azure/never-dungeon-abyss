@@ -31,6 +31,8 @@ const renderer = {
   lastCanvasTouchAt: 0,
   wallTexture: null,
   forestWallTextures: [],
+  fireWallTextures: [],
+  iceWallTextures: [],
   wallColor: "default",
   floorColor: "default",
   doorTextures: null,
@@ -98,8 +100,9 @@ export function setWallColor(color) {
   if (!WALL_PALETTES[color]) color = "default";
   if (renderer.wallColor === color && renderer.wallTexture) return;
   renderer.wallColor = color;
-  renderer.wallTexture = color === "green" && renderer.forestWallTextures.length
-    ? renderer.forestWallTextures[0]
+  const themedTextures = getThemedWallTextures(color);
+  renderer.wallTexture = themedTextures.length
+    ? themedTextures[0]
     : makeWallTexture(color);
 }
 
@@ -132,6 +135,8 @@ export function configureRenderer(options) {
   }
   renderer.wallTexture = makeWallTexture();
   loadForestWallTextures();
+  loadFireWallTextures();
+  loadIceWallTextures();
   renderer.doorTextures = {
     normal: makeDoorTexture("normal"),
     boss: makeDoorTexture("boss"),
@@ -493,23 +498,48 @@ export function drawBoundaryWalls() {
 }
 
 function getWallTextureForHit(hit, fallback) {
-  if (renderer.wallColor !== "green" || renderer.forestWallTextures.length === 0) return fallback;
+  const textures = getThemedWallTextures(renderer.wallColor);
+  if (textures.length === 0) return fallback;
   const cellKey = Math.abs((Number(hit.cellX) || 0) + (Number(hit.cellY) || 0));
-  return renderer.forestWallTextures[cellKey % renderer.forestWallTextures.length] || fallback;
+  return textures[cellKey % textures.length] || fallback;
+}
+
+function getThemedWallTextures(color) {
+  if (color === "red") return renderer.fireWallTextures;
+  if (color === "blue") return renderer.iceWallTextures;
+  if (color === "green") return renderer.forestWallTextures;
+  return [];
 }
 
 function loadForestWallTextures() {
-  const paths = [
+  loadThemedWallTextures("forestWallTextures", "green", [
     "images/dungeon_effects/forest_01.webp",
     "images/dungeon_effects/forest_02.webp"
-  ];
+  ]);
+}
+
+function loadFireWallTextures() {
+  loadThemedWallTextures("fireWallTextures", "red", [
+    "images/dungeon_effects/fire_wall_01.webp",
+    "images/dungeon_effects/fire_wall_02.webp"
+  ]);
+}
+
+function loadIceWallTextures() {
+  loadThemedWallTextures("iceWallTextures", "blue", [
+    "images/dungeon_effects/ice_wall_01.webp",
+    "images/dungeon_effects/ice_wall_02.webp"
+  ]);
+}
+
+function loadThemedWallTextures(stateKey, color, paths) {
   Promise.all(paths.map(loadWallTextureImage)).then(textures => {
-    renderer.forestWallTextures = textures.filter(Boolean);
-    if (renderer.wallColor === "green" && renderer.forestWallTextures.length) {
-      renderer.wallTexture = renderer.forestWallTextures[0];
+    renderer[stateKey] = textures.filter(Boolean);
+    if (renderer.wallColor === color && renderer[stateKey].length) {
+      renderer.wallTexture = renderer[stateKey][0];
     }
   }).catch(() => {
-    renderer.forestWallTextures = [];
+    renderer[stateKey] = [];
   });
 }
 

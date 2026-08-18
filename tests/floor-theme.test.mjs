@@ -15,7 +15,7 @@ test("fire, cold, and forest areas use their fixed wall and floor colors", () =>
   }
 });
 
-test("forest floors load both dedicated WebP wall textures and green mist", async () => {
+test("fire, cold, and forest areas load their dedicated WebP wall textures and mist", async () => {
   const { readFile } = await import("node:fs/promises");
   const [renderer, main] = await Promise.all([
     readFile(new URL("../js/renderer.js", import.meta.url), "utf8"),
@@ -23,5 +23,11 @@ test("forest floors load both dedicated WebP wall textures and green mist", asyn
   ]);
   assert.match(renderer, /images\/dungeon_effects\/forest_01\.webp/);
   assert.match(renderer, /images\/dungeon_effects\/forest_02\.webp/);
+  assert.match(renderer, /images\/dungeon_effects\/fire_wall_01\.webp/);
+  assert.match(renderer, /images\/dungeon_effects\/fire_wall_02\.webp/);
+  assert.match(renderer, /images\/dungeon_effects\/ice_wall_01\.webp/);
+  assert.match(renderer, /images\/dungeon_effects\/ice_wall_02\.webp/);
+  assert.match(renderer, /color === "red".*fireWallTextures/s);
+  assert.match(renderer, /color === "blue".*iceWallTextures/s);
   assert.match(main, /currentDepth >= 50 && currentDepth <= 59 \? "green"/);
 });
