@@ -30,6 +30,7 @@ const renderer = {
   minimapOverlayVisible: false,
   lastCanvasTouchAt: 0,
   wallTexture: null,
+  forestWallTextures: [],
   wallColor: "default",
   floorColor: "default",
   doorTextures: null,
@@ -97,7 +98,9 @@ export function setWallColor(color) {
   if (!WALL_PALETTES[color]) color = "default";
   if (renderer.wallColor === color && renderer.wallTexture) return;
   renderer.wallColor = color;
-  renderer.wallTexture = makeWallTexture(color);
+  renderer.wallTexture = color === "green" && renderer.forestWallTextures.length
+    ? renderer.forestWallTextures[0]
+    : makeWallTexture(color);
 }
 
 export function setFloorColor(color) {
@@ -128,6 +131,7 @@ export function configureRenderer(options) {
     });
   }
   renderer.wallTexture = makeWallTexture();
+  loadForestWallTextures();
   renderer.doorTextures = {
     normal: makeDoorTexture("normal"),
     boss: makeDoorTexture("boss"),
@@ -437,13 +441,14 @@ export function drawBoundaryWalls() {
     const wallH = Math.min(H * 1.85, H / hit.corrected);
     const y1 = (H - wallH) / 2;
     const x = Math.floor(i * colW);
-    const wallSampleX = Math.floor(hit.u * wallTexture.width) % wallTexture.width;
+    const activeWallTexture = getWallTextureForHit(hit, wallTexture);
+    const wallSampleX = Math.floor(hit.u * activeWallTexture.width) % activeWallTexture.width;
     const shade = Math.max(0.18, 1 - hit.dist / MAX_DIST);
     const orientationShade = hit.side === 0 ? 0.82 : 0.68;
     const light = Math.min(1.12, shade * orientationShade + 0.13 + state.torch);
     const doorTexture = doorTextures[hit.doorKind] || doorTextures.normal;
 
-    ctx.drawImage(wallTexture, wallSampleX, 0, 1, wallTexture.height, x, y1, Math.ceil(colW) + 1, wallH);
+    ctx.drawImage(activeWallTexture, wallSampleX, 0, 1, activeWallTexture.height, x, y1, Math.ceil(colW) + 1, wallH);
     ctx.fillStyle = `rgba(0,0,0,${1 - light})`;
     ctx.fillRect(x, y1, Math.ceil(colW) + 1, wallH);
 
@@ -485,6 +490,42 @@ export function drawBoundaryWalls() {
       ctx.fillRect(x, y1, Math.ceil(colW) + 1, wallH);
     }
   }
+}
+
+function getWallTextureForHit(hit, fallback) {
+  if (renderer.wallColor !== "green" || renderer.forestWallTextures.length === 0) return fallback;
+  const cellKey = Math.abs((Number(hit.cellX) || 0) + (Number(hit.cellY) || 0));
+  return renderer.forestWallTextures[cellKey % renderer.forestWallTextures.length] || fallback;
+}
+
+function loadForestWallTextures() {
+  const paths = [
+    "images/dungeon_effects/forest_01.webp",
+    "images/dungeon_effects/forest_02.webp"
+  ];
+  Promise.all(paths.map(loadWallTextureImage)).then(textures => {
+    renderer.forestWallTextures = textures.filter(Boolean);
+    if (renderer.wallColor === "green" && renderer.forestWallTextures.length) {
+      renderer.wallTexture = renderer.forestWallTextures[0];
+    }
+  }).catch(() => {
+    renderer.forestWallTextures = [];
+  });
+}
+
+function loadWallTextureImage(path) {
+  return new Promise(resolve => {
+    const image = new Image();
+    image.onload = () => {
+      const texture = document.createElement("canvas");
+      texture.width = image.naturalWidth || 256;
+      texture.height = image.naturalHeight || 256;
+      texture.getContext("2d").drawImage(image, 0, 0, texture.width, texture.height);
+      resolve(texture);
+    };
+    image.onerror = () => resolve(null);
+    image.src = path;
+  });
 }
 
 export function drawMist(now = 0) {

@@ -38,6 +38,9 @@ export function resolveFloorTheme(depth, current = settings.fixed) {
   if (Number(depth) >= 40 && Number(depth) <= 49) {
     return { wall: "blue", floor: "blue", source: "floor" };
   }
+  if (Number(depth) >= 50 && Number(depth) <= 59) {
+    return { wall: "green", floor: "green", source: "floor" };
+  }
   const override = settings.floorOverrides.get(depth);
   if (override) return { ...override, source: "floor" };
   if (settings.mode === FLOOR_THEME_MODES.FIXED) return { ...settings.fixed, source: "fixed" };
