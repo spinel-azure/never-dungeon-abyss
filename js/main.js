@@ -93,7 +93,7 @@ import { hasUncertainLoot, isHighlightedLotCardRarity, isHighlightedLotEquipment
 import { configureTown, openPendingNpcRenewal, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js";
 import { flashNpcPartyStatus, renderNpcPartyStatus, renderNpcStatusPage, setNpcPartyCharge } from "./npc-party-ui.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
-import { beginNpcRenewal, hireNpc, recordNpcExpeditionDepth, registerNpc, resolveNpcRenewal } from "../data/npc-party.js";
+import { applyNpcExplorationPassives, beginNpcRenewal, hireNpc, recordNpcExpeditionDepth, registerNpc, resolveNpcRenewal } from "../data/npc-party.js";
 import { getActivePlayTimeDelta, normalizeAdventureStats, recordInnStay, recordShopPurchase, recordTempleDonation } from "../data/adventure-stats.js";
 import { getAdventureChronicle } from "../data/adventure-records.js";
 import { getEquipmentItem } from "../data/equipment.js";
@@ -795,6 +795,16 @@ import {
     return result;
   }
 
+  function renderPlayerChargeGauge() {
+    const gauge = document.getElementById("playerChargeGauge");
+    const fill = document.getElementById("playerChargeFill");
+    if (!gauge || !fill) return;
+    const value = Math.max(0, Math.min(100, Math.floor(Number(character?.playerCharge?.value) || 0)));
+    fill.style.width = `${value}%`;
+    gauge.setAttribute("aria-valuenow", String(value));
+    gauge.classList.toggle("is-charged", value >= 100 && Number(character?.playerCharge?.cooldown) <= 0);
+  }
+
   function acquireEventCard(flagId, cardId) {
     if (!character || character.eventFlags?.[flagId]) return false;
     const result = grantCard(character.cards, cardId, 1, character.deckCost);
@@ -1131,6 +1141,7 @@ import {
       effectForced: hasCardEffect(character?.cards?.deckSlots, "force_torch_effect_active")
     });
     renderCharacterStatus();
+    renderPlayerChargeGauge();
     renderNpcPartyStatus(npcPartyStatus, character);
     renderNpcStatusPage(document.querySelector("[data-npc-status-list]"), character);
     const statusName = document.getElementById("statusName");
@@ -1511,11 +1522,10 @@ import {
     applyColdFloorStep();
     if (!character) return;
     character = recordNpcExpeditionDepth(character, currentDepth);
+    character = applyNpcExplorationPassives(character);
     character.condition = hasCharacterStatus(character, "bleeding") ? "BLEED"
       : hasCharacterStatus(character, "poison") ? "POISON" : "GOOD";
-    const next = recordFloorExploration(character, { depth: currentDepth, explored });
-    if (next === character) return;
-    character = next;
+    character = recordFloorExploration(character, { depth: currentDepth, explored });
     updateCharacterUi();
   }
 

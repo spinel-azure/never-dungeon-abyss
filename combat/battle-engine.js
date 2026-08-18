@@ -30,6 +30,7 @@ import {
   applyNpcTurnEnd,
   applyNpcTurnStart
 } from "./npc-support.js";
+import { applyPlayerChargeAction, isPlayerChargeReady } from "./player-charge.js";
 
 export function createBattleState({ character, enemy }) {
   const vorpalSwordEquippedAtStart = character?.equipment?.weaponId === "vorpal_sword";
@@ -60,7 +61,8 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
   next.log = [];
   next.presentationEvents = [];
 
-  applyNpcChargeSkills(next);
+  let playerActionExecuted = false;
+  applyNpcChargeSkills(next, rng);
   if (!next.outcome && playerAction.spCost > 0) next.player.sp -= playerAction.spCost;
   if (!next.outcome && playerCommand.type === "guard") applyNpcGuardSupport(next);
   if (!next.outcome) applyNpcTurnStart(next, rng);
@@ -88,11 +90,19 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
       targetSide,
       rng
     });
+    if (entry.side === "player") playerActionExecuted = true;
     finishAction(next, entry.side);
     updateOutcome(next);
     if (!next.outcome && entry.side === "player" && target.hp < targetHpBefore) {
-      applyNpcAfterPlayerAttack(next);
+      applyNpcAfterPlayerAttack(next, rng);
     }
+  }
+  if (playerActionExecuted) {
+    next.player = applyPlayerChargeAction(next.player, {
+      commandType: playerCommand.type,
+      spCost: playerAction.spCost,
+      chargeSkill: Boolean(playerAction.action.chargeSkill)
+    });
   }
   if (!next.outcome) applyNpcTurnEnd(next);
   advanceNpcWallProtection(next);
@@ -183,6 +193,7 @@ export function createPlayerAction(player, command = {}, enemy = null) {
   const skill = getSkill(command.skillId);
   if (!skill || !player.skillIds?.includes(skill.id)) return { ok: false, reason: "unknownSkill" };
   if (skill.actionType === "passive") return { ok: false, reason: "passive" };
+  if (skill.chargeSkill && !isPlayerChargeReady(player)) return { ok: false, reason: "chargeNotReady" };
   if (skill.preventWhileStatusActive && (player.statuses || []).some(status =>
     (status.statusId || status.id) === skill.preventWhileStatusActive && status.active !== false
   )) return { ok: false, reason: "alreadyActive" };
@@ -431,7 +442,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
     : 0;
   let resolvedHits = result.hits;
   let passiveExecution = null;
-  if (actorSide === "player" && action.id === "normal_attack" && action.passiveInstantDeathId) {
+  if (actorSide === "player" && action.passiveInstantDeathId) {
     for (let index = 0; index < resolvedHits.length; index += 1) {
       if (!resolvedHits[index].hit) continue;
       const instantDeath = resolvePassiveInstantDeath({
@@ -557,6 +568,9 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
       vorpalExecution: Boolean(hit.vorpalExecution),
       slashExecution: Boolean(hit.slashExecution),
       passiveExecutionId: hit.passiveExecutionId || null,
+      playerChargePresentationId: actorSide === "player" && action.chargeSkill
+        ? action.presentationId || action.id
+        : null,
       blockedByNpcWall: Boolean(hit.blockedByNpcWall),
       message
     });

@@ -1,5 +1,7 @@
 import { NPC_SUPPORT_ENABLED, getNpcDefinition } from "../data/npc-definitions.js";
 import { resolveSpell } from "./resolve-spell.js";
+import { resolveInstantDeath } from "./resolve-status-effect.js";
+import { getNpcStagePassive } from "../data/npc-passives.js";
 
 export const NPC_SUPPORT_BALANCE = Object.freeze({
   alec: Object.freeze({ attackRate: 0.8, growthAttack: 3, guardBase: 0.15, guardPerStage: 0.02, guardMaximum: 0.35 }),
@@ -15,7 +17,7 @@ export const NPC_CHARGE_SKILLS = Object.freeze({
   johan: Object.freeze({ chargePerTurn: 12, name: "壁よ、守りを！", quote: "壁よ、守りを！", cutIn: "images/battle_effects/NPC_04.avif", durationTurns: 3, damageThresholdRate: 0.15 })
 });
 
-export function applyNpcChargeSkills(battle) {
+export function applyNpcChargeSkills(battle, rng = Math.random) {
   if (!NPC_SUPPORT_ENABLED || battle?.outcome) return battle;
   for (const npcId of getActiveNpcIds(battle.player)) {
     if (battle.outcome) break;
@@ -33,8 +35,8 @@ export function applyNpcChargeSkills(battle) {
       cutIn: config.cutIn,
       message: `${getNpcDefinition(npcId)?.name}「${config.quote}」`
     });
-    if (npcId === "alec") applyAlecChargeSkill(battle, config);
-    else if (npcId === "rebecca") applyRebeccaChargeSkill(battle, config);
+    if (npcId === "alec") applyAlecChargeSkill(battle, config, rng);
+    else if (npcId === "rebecca") applyRebeccaChargeSkill(battle, config, rng);
     else if (npcId === "erika") applyErikaChargeSkill(battle, config);
     else if (npcId === "johan") applyJohanChargeSkill(battle, config);
   }
@@ -124,13 +126,13 @@ export function applyNpcTurnStart(battle, rng = Math.random) {
   return battle;
 }
 
-export function applyNpcAfterPlayerAttack(battle) {
+export function applyNpcAfterPlayerAttack(battle, rng = Math.random) {
   if (!canNpcSupport({ battle, npcId: "alec", supportType: "followUp" })) return battle;
   const stage = getGrowthStage(battle.player, "alec");
   const config = NPC_SUPPORT_BALANCE.alec;
   const attack = Number(getNpcDefinition("alec")?.baseStats?.atk) + stage * config.growthAttack;
   const damage = Math.max(1, Math.floor(attack * config.attackRate));
-  applyNpcDamage(battle, { npcId: "alec", damage, message: `アレクの追撃！ ${damage}ダメージ！` });
+  applyNpcDamage(battle, { npcId: "alec", damage, message: `アレクの追撃！ ${damage}ダメージ！`, rng });
   return battle;
 }
 
@@ -171,7 +173,7 @@ function applyRebeccaSupport(battle, rng) {
   const damage = Math.max(1, Math.floor(attack * config.hitRate));
   battle.log.push("レベッカの連続攻撃！");
   for (let hitIndex = 0; hitIndex < 2 && !battle.outcome; hitIndex += 1) {
-    applyNpcDamage(battle, { npcId: "rebecca", damage, message: `${hitIndex + 1}撃目：${damage}ダメージ！`, hitIndex, hitCount: 2 });
+    applyNpcDamage(battle, { npcId: "rebecca", damage, message: `${hitIndex + 1}撃目：${damage}ダメージ！`, hitIndex, hitCount: 2, rng });
   }
   if (!battle.outcome && Number(rng()) < config.debuffRate) {
     battle.enemy.statuses = [
@@ -200,16 +202,16 @@ function applyJohanSupport(battle, rng) {
   applyNpcDamage(battle, { npcId: "johan", damage, message: `ヨハンが攻撃呪文を放った！ ${damage}ダメージ！` });
 }
 
-function applyAlecChargeSkill(battle, config) {
+function applyAlecChargeSkill(battle, config, rng) {
   const stage = getGrowthStage(battle.player, "alec");
   const support = NPC_SUPPORT_BALANCE.alec;
   const attack = Number(getNpcDefinition("alec")?.baseStats?.atk) + stage * support.growthAttack;
   const normalDamage = Math.max(1, Math.floor(attack * support.attackRate));
   const damage = Math.max(1, Math.floor(normalDamage * config.damageMultiplier));
-  applyNpcDamage(battle, { npcId: "alec", damage, actionName: config.name, message: `強撃！ ${damage}ダメージ！` });
+  applyNpcDamage(battle, { npcId: "alec", damage, actionName: config.name, message: `強撃！ ${damage}ダメージ！`, rng });
 }
 
-function applyRebeccaChargeSkill(battle, config) {
+function applyRebeccaChargeSkill(battle, config, rng) {
   const stage = getGrowthStage(battle.player, "rebecca");
   const support = NPC_SUPPORT_BALANCE.rebecca;
   const attack = Number(getNpcDefinition("rebecca")?.baseStats?.atk) + stage * support.growthAttack;
@@ -222,7 +224,8 @@ function applyRebeccaChargeSkill(battle, config) {
       actionName: config.name,
       message: `${hitIndex + 1}撃目：${damage}ダメージ！`,
       hitIndex,
-      hitCount: config.hitCount
+      hitCount: config.hitCount,
+      rng
     });
   }
 }
@@ -273,14 +276,26 @@ function getNpcChargeRecord(player, npcId) {
   return record;
 }
 
-function applyNpcDamage(battle, { npcId, damage, actionName = "", message, hitIndex = 0, hitCount = 1 }) {
+function applyNpcDamage(battle, { npcId, damage, actionName = "", message, hitIndex = 0, hitCount = 1, rng = Math.random }) {
   if (battle.outcome || battle.enemy.hp <= 0) return 0;
+  const hpBefore = battle.enemy.hp;
   const actual = Math.min(battle.enemy.hp, Math.max(0, Math.floor(damage)));
   battle.enemy.hp -= actual;
+  const stage = getGrowthStage(battle.player, npcId);
+  const passive = getNpcStagePassive(npcId, stage);
+  const instantDeath = battle.enemy.hp > 0 && passive?.instantDeathRate
+    ? resolveInstantDeath({ defender: battle.enemy, baseRate: passive.instantDeathRate,
+      minimumRate: passive.instantDeathRate, maximumRate: passive.instantDeathRate, rng })
+    : { success: false };
+  if (instantDeath.success) battle.enemy.hp = 0;
   battle.enemy.alive = battle.enemy.hp > 0;
-  battle.log.push(message);
+  const resolvedMessage = instantDeath.success ? `${message} ${passive.name}が敵を断ち切った！` : message;
+  battle.log.push(resolvedMessage);
   battle.presentationEvents.push({ type: "attackHit", npcId, actorName: getNpcDefinition(npcId)?.name,
-    actorSide: "npc", targetSide: "enemy", actionName, hitIndex, hitCount, hit: true, damage: actual, message });
+    actorSide: "npc", targetSide: "enemy", actionName, hitIndex, hitCount, hit: true,
+    damage: instantDeath.success ? hpBefore : actual,
+    slashExecution: instantDeath.success, passiveExecutionId: instantDeath.success ? passive.id : null,
+    message: resolvedMessage });
   if (battle.enemy.hp <= 0) setNpcVictory(battle);
   return actual;
 }

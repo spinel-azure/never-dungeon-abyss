@@ -5,6 +5,7 @@ import {
 } from "../combat/battle-engine.js";
 import { getEquipmentAdjustedEscapeRate, resolveEscapeAttempt } from "../combat/resolve-escape.js";
 import { clearBattleOnlyStatuses } from "../combat/status-lifecycle.js";
+import { playPlayerChargePresentation } from "./player-charge-presentation.js";
 
 const COMMANDS = Object.freeze([
   ["attack", "戦う"],
@@ -198,7 +199,8 @@ async function executeCommand(command) {
       noEffect: "毒状態ではない。",
       fieldOnly: "このスキルは探索中のみ使用できる。",
       undeadOnly: "アンデッドにしか効果がない。",
-      bossImmune: "この敵には効かない。"
+      bossImmune: "この敵には効かない。",
+      chargeNotReady: "チャージが満タンではない。"
     };
     battleUi.messageEl.textContent = messages[resolved.reason] || "現在使用できません。";
     return;
@@ -211,6 +213,7 @@ async function executeCommand(command) {
     sp: battleUi.battle.player.sp,
     statuses: structuredClone(battleUi.battle.player.statuses),
     inventory: structuredClone(battleUi.battle.player.inventory),
+    playerCharge: structuredClone(battleUi.battle.player.playerCharge),
     alive: battleUi.presenting ? startingHp.player > 0 : battleUi.battle.player.alive
   });
   if (battleUi.battle.outcome) {
@@ -271,6 +274,13 @@ async function playPresentationEvents() {
   const image = battleUi.root.querySelector("#battleEnemyImage");
   for (const event of events) {
     if (!battleUi.active) return;
+    if (event.playerChargePresentationId && event.hitIndex === 0) {
+      await playPlayerChargePresentation({
+        root: battleUi.root,
+        skillId: event.playerChargePresentationId,
+        playSe: battleUi.playSe
+      });
+    }
     if (event.type === "npcChargeSkill") {
       battleUi.onNpcSupport(event.npcId);
       battleUi.onNpcCharge(event.npcId, 100);
@@ -337,7 +347,8 @@ function syncFinalPlayerState() {
     statuses: structuredClone(battleUi.battle.player.statuses),
     inventory: structuredClone(battleUi.battle.player.inventory),
     alive: battleUi.battle.player.alive,
-    npcSystem: structuredClone(battleUi.battle.player.npcSystem)
+    npcSystem: structuredClone(battleUi.battle.player.npcSystem),
+    playerCharge: structuredClone(battleUi.battle.player.playerCharge)
   });
 }
 

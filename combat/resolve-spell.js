@@ -26,8 +26,11 @@ export function resolveSpell({
     });
   }
 
+  const intelligenceMultiplier = Number.isFinite(Number(spell.intelligenceMultiplier))
+    ? Number(spell.intelligenceMultiplier)
+    : COMBAT_CONFIG.intelligenceMultiplier;
   const spellAttack = numeric(spell.spellPower)
-    + numeric(attacker.int) * COMBAT_CONFIG.intelligenceMultiplier;
+    + numeric(attacker.int) * intelligenceMultiplier;
   const offensiveBonus = spell.element === "fire"
     ? numeric(attacker.fireSpellDamageBonus)
     : spell.element === "ice" ? numeric(attacker.iceSpellDamageBonus) : 0;

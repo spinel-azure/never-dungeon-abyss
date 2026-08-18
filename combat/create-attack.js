@@ -40,7 +40,11 @@ export function createSkillAttack(skill, { weapon, weaponId, weaponEnhancement =
     hitCount: usesWeaponHits ? weaponType.hitCount : skill.hitCount || 1,
     powerPerHit: skill.powerPerHit ?? 1,
     damageDexMultiplier: weaponType.damageDexMultiplier || 0,
-    weapon: resolvedWeapon,
+    weapon: skill.ignoreWeaponAttack ? { ...resolvedWeapon, attack: 0 } : resolvedWeapon,
+    attackStat: skill.attackStat,
+    attackStatMultiplier: skill.attackStatMultiplier,
+    ignoresDefense: Boolean(skill.ignoresDefense),
+    passiveInstantDeathId: skill.passiveInstantDeathId || null,
     defensePenetration:
       (weaponType.defensePenetration || 0)
       + (resolvedWeapon.defensePenetration || 0)

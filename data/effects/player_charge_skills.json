@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "skills": {
+    "falcon_schnitt": { "effect": "standard", "cssClass": "", "durationMs": 0, "image": "", "soundId": "" },
+    "twin_rapid_strike": { "effect": "standard", "cssClass": "", "durationMs": 0, "image": "", "soundId": "" },
+    "twilight_flash": { "effect": "standard", "cssClass": "", "durationMs": 0, "image": "", "soundId": "" },
+    "tunguska": { "effect": "standard", "cssClass": "", "durationMs": 0, "image": "", "soundId": "" }
+  }
+}

@@ -285,6 +285,35 @@ export const SKILLS = Object.freeze({
     damageRate: 0.5,
     effects: Object.freeze([])
   }),
+  falcon_schnitt: Object.freeze({
+    id: "falcon_schnitt", name: "ファルケン・シュニット",
+    description: "チャージ100で発動。敵をV字に切り裂く\n威力150%の2連撃。一閃判定あり。",
+    actionType: "physicalAttack", category: "chargeSkill", spCost: 0, target: "enemy",
+    hitCount: 2, powerPerHit: 1.5, chargeSkill: true, presentationId: "falcon_schnitt", passiveInstantDeathId: "flash_slash",
+    effects: Object.freeze([])
+  }),
+  twin_rapid_strike: Object.freeze({
+    id: "twin_rapid_strike", name: "双連撃",
+    description: "チャージ100で発動。電光石火の\n威力90%・4連撃。暗殺術判定あり。",
+    actionType: "physicalAttack", category: "chargeSkill", spCost: 0, target: "enemy",
+    hitCount: 4, powerPerHit: 0.9, chargeSkill: true, presentationId: "twin_rapid_strike", passiveInstantDeathId: "assassination",
+    effects: Object.freeze([])
+  }),
+  twilight_flash: Object.freeze({
+    id: "twilight_flash", name: "宵闇の一閃",
+    description: "チャージ100で発動。敵のDEFを無視する\n氷属性2連撃。一撃ごとにINT×5。",
+    actionType: "physicalAttack", category: "chargeSkill", spCost: 0, target: "enemy",
+    hitCount: 2, powerPerHit: 1, chargeSkill: true, presentationId: "twilight_flash", attackStat: "int",
+    attackStatMultiplier: 5, ignoresDefense: true, ignoreWeaponAttack: true, element: "ice",
+    effects: Object.freeze([])
+  }),
+  tunguska: Object.freeze({
+    id: "tunguska", name: "ツングースカ",
+    description: "チャージ100で発動。炎属性の大爆発を起こす。\n威力はINT×15。",
+    actionType: "spell", category: "chargeSkill", spCost: 0, target: "enemy",
+    element: "fire", spellPower: 0, intelligenceMultiplier: 15, powerMultiplier: 1,
+    unavoidable: true, chargeSkill: true, presentationId: "tunguska", effects: Object.freeze([])
+  }),
   fireball: SPELLS.fireball,
   ice_bind: SPELLS.ice_bind
 });
@@ -314,7 +343,11 @@ export const LEVEL_SKILL_UNLOCKS = Object.freeze([
   Object.freeze({ job: "priest", level: 5, skillId: "exorcism" }),
   Object.freeze({ job: "priest", level: 7, skillId: "hemostasis" }),
   Object.freeze({ job: "thief", level: 8, skillId: "conceal_presence" }),
-  Object.freeze({ job: "thief", level: 38, skillId: "assassination" })
+  Object.freeze({ job: "thief", level: 38, skillId: "assassination" }),
+  Object.freeze({ job: "warrior", level: 55, skillId: "falcon_schnitt" }),
+  Object.freeze({ job: "thief", level: 55, skillId: "twin_rapid_strike" }),
+  Object.freeze({ job: "priest", level: 55, skillId: "twilight_flash" }),
+  Object.freeze({ job: "mage", level: 55, skillId: "tunguska" })
 ]);
 
 export function getLevelUnlockedSkillIds(job, level) {

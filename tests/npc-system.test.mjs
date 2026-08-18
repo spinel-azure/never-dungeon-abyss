@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { NPC_DEFINITIONS } from "../data/npc-definitions.js";
-import { beginNpcRenewal, hireNpc, normalizeNpcSystem, recordNpcExpeditionDepth, registerNpc, resolveNpcRenewal } from "../data/npc-party.js";
+import { applyNpcExplorationPassives, beginNpcRenewal, hireNpc, normalizeNpcSystem, recordNpcExpeditionDepth, registerNpc, resolveNpcRenewal } from "../data/npc-party.js";
 import { createBattleState, resolveBattleRound } from "../combat/battle-engine.js";
 import {
   advanceNpcChargeState,
@@ -47,6 +47,52 @@ test("NPC charge state is backward compatible, clamped and independently persist
     { charge: state.records.rebecca.charge, cooldown: state.records.rebecca.chargeCooldown },
     { charge: 100, cooldown: 2 }
   );
+});
+
+test("stage six Erika and Johan passives recover one point every five successful steps", () => {
+  let character = hero();
+  character.hp = character.maxHp - 3;
+  character.sp = character.maxSp - 3;
+  character.npcSystem = normalizeNpcSystem({
+    registeredIds: ["erika", "johan"], activeIds: ["erika", "johan"],
+    records: { erika: { maxDepth: 60 }, johan: { maxDepth: 60 } }
+  });
+  for (let step = 0; step < 4; step += 1) character = applyNpcExplorationPassives(character);
+  assert.deepEqual([character.hp, character.sp], [character.maxHp - 3, character.maxSp - 3]);
+  character = applyNpcExplorationPassives(character);
+  assert.deepEqual([character.hp, character.sp], [character.maxHp - 2, character.maxSp - 2]);
+  assert.deepEqual(
+    [character.npcSystem.records.erika.passiveStepCount, character.npcSystem.records.johan.passiveStepCount],
+    [0, 0]
+  );
+});
+
+test("stage five exploration NPCs do not receive stage six passives", () => {
+  let character = hero();
+  character.hp -= 3;
+  character.npcSystem = normalizeNpcSystem({
+    registeredIds: ["erika"], activeIds: ["erika"], records: { erika: { maxDepth: 50 } }
+  });
+  const hp = character.hp;
+  for (let step = 0; step < 5; step += 1) character = applyNpcExplorationPassives(character);
+  assert.equal(character.hp, hp);
+});
+
+test("Rebecca stage six charge skill checks assassination on every hit", () => {
+  const character = hero();
+  character.npcSystem = normalizeNpcSystem({
+    registeredIds: ["rebecca"], activeIds: ["rebecca"], records: { rebecca: { maxDepth: 60, charge: 100 } }
+  });
+  const battle = createBattleState({
+    character,
+    enemy: { id: "dummy", name: "DUMMY", hp: 999, maxHp: 999, attack: 1, def: 0, agi: 1, alive: true, statuses: [] }
+  });
+  const rolls = [0.5, 0.5, 0.5, 0];
+  applyNpcChargeSkills(battle, () => rolls.shift() ?? 0.5);
+  const hits = battle.presentationEvents.filter(event => event.npcId === "rebecca" && event.type === "attackHit");
+  assert.equal(hits.length, 4);
+  assert.equal(hits[3].passiveExecutionId, "npc_assassination");
+  assert.equal(battle.outcome, "victory");
 });
 
 test("registration is unique and hiring charges level times ten once", () => {
@@ -126,7 +172,7 @@ test("three NPC supports target roughly one and a half heroes of combined contri
     enemy: { id: "dummy", name: "DUMMY", hp: 999, maxHp: 999, attack: 1, def: 0, agi: 1, alive: true, statuses: [] }
   });
   applyNpcTurnStart(battle, () => 0.99);
-  applyNpcAfterPlayerAttack(battle);
+  applyNpcAfterPlayerAttack(battle, () => 0.99);
   applyNpcGuardSupport(battle);
   applyNpcTurnEnd(battle);
   assert.equal(battle.enemy.hp, 928);

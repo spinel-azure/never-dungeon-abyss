@@ -1,4 +1,5 @@
 import { getNpcDefinition, NPC_PARTY_LIMIT, NPC_SUPPORT_ENABLED } from "./npc-definitions.js";
+import { getNpcStagePassive } from "./npc-passives.js";
 
 export function createInitialNpcSystem() {
   return { registeredIds: [], activeIds: [], records: {}, renewal: null, expeditionMaxDepth: 0 };
@@ -23,7 +24,8 @@ export function normalizeNpcSystem(value) {
       maxDepth,
       growthStage: Math.max(0, Math.min(10, Math.floor(maxDepth / 10))),
       charge: Math.max(0, Math.min(100, Math.floor(Number(record.charge) || 0))),
-      chargeCooldown: Math.max(0, Math.min(2, Math.floor(Number(record.chargeCooldown) || 0)))
+      chargeCooldown: Math.max(0, Math.min(2, Math.floor(Number(record.chargeCooldown) || 0))),
+      passiveStepCount: Math.max(0, Math.floor(Number(record.passiveStepCount) || 0)) % 5
     };
   }
   const renewal = normalizeRenewal(source.renewal, activeIds);
@@ -34,6 +36,26 @@ export function normalizeNpcSystem(value) {
     renewal,
     expeditionMaxDepth: Math.max(0, Math.min(100, Math.floor(Number(source.expeditionMaxDepth) || 0)))
   };
+}
+
+export function applyNpcExplorationPassives(character) {
+  if (!NPC_SUPPORT_ENABLED || !character) return character;
+  const state = normalizeNpcSystem(character.npcSystem);
+  if (!state.activeIds.length) return { ...character, npcSystem: state };
+  const records = { ...state.records };
+  let hp = character.hp;
+  let sp = character.sp;
+  for (const npcId of state.activeIds) {
+    const record = records[npcId];
+    const passive = getNpcStagePassive(npcId, record?.growthStage);
+    if (!passive?.stepInterval) continue;
+    const passiveStepCount = (record.passiveStepCount + 1) % passive.stepInterval;
+    records[npcId] = { ...record, passiveStepCount };
+    if (passiveStepCount !== 0) continue;
+    if (passive.hpRecovery) hp = Math.min(character.maxHp, hp + passive.hpRecovery);
+    if (passive.spRecovery) sp = Math.min(character.maxSp, sp + passive.spRecovery);
+  }
+  return { ...character, hp, sp, npcSystem: { ...state, records } };
 }
 
 function uniqueKnown(ids) {

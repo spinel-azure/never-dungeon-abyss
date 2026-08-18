@@ -127,7 +127,7 @@ function render() {
     button.className = "skill-overlay-item";
     button.dataset.skillId = skill.id;
     button.disabled = Boolean(unavailableReason(skill, character));
-    button.innerHTML = `<span>${skill.name}</span><small>${skill.actionType === "passive" ? "PASSIVE" : `SP${getEffectiveSpCost(skill, character)}`}</small>`;
+    button.innerHTML = `<span>${skill.name}</span><small>${skill.actionType === "passive" ? "PASSIVE" : skill.chargeSkill ? "CHARGE" : `SP${getEffectiveSpCost(skill, character)}`}</small>`;
     button.addEventListener("click", () => {
       overlay.selectedIndex = index;
       renderSelection();
@@ -157,6 +157,7 @@ function renderSelection() {
 
 function unavailableReason(skill, character) {
   if (skill.actionType === "passive") return "passive";
+  if (skill.chargeSkill && (Number(character?.playerCharge?.value) < 100 || Number(character?.playerCharge?.cooldown) > 0)) return "chargeNotReady";
   if (character.sp < getEffectiveSpCost(skill, character)) return "insufficientSp";
   if (skill.preventWhileStatusActive && (character.statuses || []).some(status =>
     (status.statusId || status.id) === skill.preventWhileStatusActive && status.active !== false
@@ -185,7 +186,8 @@ function showReason(reason) {
     undeadOnly: "アンデッドにしか効果がない。",
     bossImmune: "この敵には効かない。",
     unknownSkill: "現在使用できない。",
-    passive: "このスキルは常時発動している。"
+    passive: "このスキルは常時発動している。",
+    chargeNotReady: "チャージが満タンではない。"
   };
   overlay.messageEl.classList.remove("is-skill-description");
   overlay.messageEl.textContent = messages[reason] || "現在使用できない。";

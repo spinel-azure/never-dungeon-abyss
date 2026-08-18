@@ -20,6 +20,7 @@ import { getLevelUnlockedSkillIds } from "./skills.js";
 import { createInitialKeyItemState, normalizeKeyItemState } from "./key-items.js";
 import { getItem } from "./items.js";
 import { createInitialNpcSystem, normalizeNpcSystem } from "./npc-party.js";
+import { createInitialPlayerCharge, normalizePlayerCharge } from "../combat/player-charge.js";
 
 export const STAT_KEYS = Object.freeze(["str", "int", "agi", "dex", "luc"]);
 
@@ -91,6 +92,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     marathonChallenge: createInitialMarathonChallenge(),
     longMarchChallenge: createInitialLongMarchChallenge(),
     npcSystem: createInitialNpcSystem(),
+    playerCharge: createInitialPlayerCharge(),
     highestDungeonDepthReached: 1,
     gold: 0,
     experience: 0,
@@ -163,6 +165,7 @@ export function normalizeCharacter(character) {
     marathonChallenge: normalizeMarathonChallenge(character.marathonChallenge),
     longMarchChallenge: normalizeLongMarchChallenge(character.longMarchChallenge),
     npcSystem: normalizeNpcSystem(character.npcSystem),
+    playerCharge: normalizePlayerCharge(character.playerCharge),
     highestDungeonDepthReached: Math.max(
       inferredDepth,
       Math.floor(Number(character.highestDungeonDepthReached) || 1)
