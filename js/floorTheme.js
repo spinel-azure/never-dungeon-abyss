@@ -32,6 +32,9 @@ export function clearFloorThemeOverride(depth) {
 }
 
 export function resolveFloorTheme(depth, current = settings.fixed) {
+  if (Number(depth) >= 1 && Number(depth) <= 10) {
+    return { wall: "stone", floor: "default", source: "floor" };
+  }
   if (Number(depth) >= 30 && Number(depth) <= 39) {
     return { wall: "red", floor: "red", source: "floor" };
   }

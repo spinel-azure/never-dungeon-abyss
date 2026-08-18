@@ -30,6 +30,7 @@ const renderer = {
   minimapOverlayVisible: false,
   lastCanvasTouchAt: 0,
   wallTexture: null,
+  starterWallTextures: [],
   forestWallTextures: [],
   fireWallTextures: [],
   iceWallTextures: [],
@@ -57,6 +58,7 @@ const MIST_PALETTES = {
 };
 const WALL_PALETTES = {
   default: { base: "#817667", rows: ["#8b806f", "#716756"], mortar: "rgba(28,26,23,.62)", speckle: "rgba(236,220,181,.12)" },
+  stone: { base: "#817667", rows: ["#8b806f", "#716756"], mortar: "rgba(28,26,23,.62)", speckle: "rgba(236,220,181,.12)" },
   red: { base: "#76504a", rows: ["#8c5a50", "#65413d"], mortar: "rgba(35,18,16,.68)", speckle: "rgba(255,190,146,.14)" },
   blue: { base: "#536b78", rows: ["#607f90", "#465d6a"], mortar: "rgba(16,27,35,.68)", speckle: "rgba(202,238,255,.16)" },
   green: { base: "#526b55", rows: ["#607c61", "#435a47"], mortar: "rgba(18,31,20,.68)", speckle: "rgba(203,236,184,.14)" },
@@ -134,6 +136,7 @@ export function configureRenderer(options) {
     });
   }
   renderer.wallTexture = makeWallTexture();
+  loadStarterWallTextures();
   loadForestWallTextures();
   loadFireWallTextures();
   loadIceWallTextures();
@@ -505,10 +508,18 @@ function getWallTextureForHit(hit, fallback) {
 }
 
 function getThemedWallTextures(color) {
+  if (color === "stone") return renderer.starterWallTextures;
   if (color === "red") return renderer.fireWallTextures;
   if (color === "blue") return renderer.iceWallTextures;
   if (color === "green") return renderer.forestWallTextures;
   return [];
+}
+
+function loadStarterWallTextures() {
+  loadThemedWallTextures("starterWallTextures", "stone", [
+    "images/dungeon_effects/dungeon_wall_03.webp",
+    "images/dungeon_effects/dungeon_wall_04.webp"
+  ]);
 }
 
 function loadForestWallTextures() {
