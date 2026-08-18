@@ -214,7 +214,7 @@ export function normalizeCharacter(character) {
     statuses: normalizeCharacterStatuses(character.statuses),
     bleedingStepCount: Math.max(0, Math.floor(Number(character.bleedingStepCount) || 0)) % 5,
     condition: normalizeCharacterStatuses(character.statuses).some(status => (status.statusId || status.id) === "bleeding") ? "BLEED"
-      : normalizeCharacterStatuses(character.statuses).some(status => (status.statusId || status.id) === "poison") ? "POISON"
+      : normalizeCharacterStatuses(character.statuses).some(status => ["poison", "deadly_poison"].includes(status.statusId || status.id)) ? "POISON"
       : "GOOD",
     alive: character.alive !== false && Number(character.hp) > 0
   };
@@ -223,7 +223,7 @@ export function normalizeCharacter(character) {
 function normalizeCharacterStatuses(statuses) {
   if (!Array.isArray(statuses)) return [];
   return structuredClone(statuses).map(status => {
-    if (!["poison", "bleeding"].includes(status?.statusId || status?.id)) return status;
+    if (!["poison", "deadly_poison", "bleeding"].includes(status?.statusId || status?.id)) return status;
     const persistentPoison = { ...status };
     delete persistentPoison.remainingTurns;
     delete persistentPoison.duration;

@@ -5,6 +5,11 @@ export function applyStatus(statuses = [], application = {}) {
   const definition = getStatusEffect(application.statusId);
   if (!definition) return cloneStatuses(statuses);
   const next = cloneStatuses(statuses);
+  if (definition.id === "poison" && next.some(item => (item.id || item.statusId) === "deadly_poison")) return next;
+  if (definition.id === "deadly_poison") {
+    const poisonIndex = next.findIndex(item => (item.id || item.statusId) === "poison");
+    if (poisonIndex >= 0) next.splice(poisonIndex, 1);
+  }
   const status = {
     ...definition,
     statusId: definition.id,
@@ -58,11 +63,8 @@ export function resolveEndOfAction({ statuses = [], maxHp = 0 } = {}) {
         Math.floor(Number(maxHp) * (Number(status.damageMaxHpRate) || 0)));
     }
     if (id === "deadly_poison") {
-      deadlyPoisonDamage += Math.min(
-        Math.max(1, Number(status.maximumDamage) || Number.MAX_SAFE_INTEGER),
-        Math.max(Number(status.minimumDamage) || 1,
-          Math.floor(Number(maxHp) * (Number(status.damageMaxHpRate) || 0)))
-      );
+      deadlyPoisonDamage += Math.max(Number(status.minimumDamage) || 1,
+        Math.floor(Number(maxHp) * (Number(status.damageMaxHpRate) || 0)));
     }
     if (!Number.isFinite(Number(status.remainingTurns))) {
       next.push(status);
@@ -83,6 +85,11 @@ export function getNonlethalPoisonDamage(currentHp, requestedDamage) {
   const hp = Math.max(0, Math.floor(Number(currentHp) || 0));
   const damage = Math.max(0, Math.floor(Number(requestedDamage) || 0));
   return Math.min(damage, Math.max(0, hp - 1));
+}
+
+export function getDeadlyPoisonStepDamage({ currentHp = 0, maxHp = 0 } = {}) {
+  const requested = Math.max(1, Math.floor(Math.max(1, Number(maxHp) || 1) * 0.01));
+  return getNonlethalPoisonDamage(currentHp, requested);
 }
 
 export function getPhysicalDamageReduction(statuses = []) {

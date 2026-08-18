@@ -439,6 +439,28 @@ test("strong small healing potion unlocks at B50F and heals 30 percent of max HP
   assert.equal(field.character.hp, 221);
 });
 
+test("strong antidote unlocks at B50F and cures poison plus deadly poison while healing 60 HP", () => {
+  const item = getItem("strong_antidote");
+  assert.equal(item.buyPrice, 100);
+  assert.equal(getShopItemIdsForDepth(49).includes(item.id), false);
+  assert.equal(getShopItemIdsForDepth(50).includes(item.id), true);
+  const character = characterWith(item.id);
+  character.maxHp = 200;
+  character.hp = 40;
+  character.statuses = [{ statusId: "poison" }, { statusId: "deadly_poison" }];
+  const result = resolveFieldItemUse({ character, itemId: item.id, context: "dungeon" });
+  assert.equal(result.accepted, true);
+  assert.equal(result.healing, 60);
+  assert.equal(result.character.hp, 100);
+  assert.equal(result.character.statuses.some(status => ["poison", "deadly_poison"].includes(status.statusId)), false);
+  assert.equal(result.character.condition, "GOOD");
+});
+
+test("B50F enemy materials resolve to their registered item data", () => {
+  assert.equal(getItem("abyss_tiger_fur").name, "奈落虎の毛皮");
+  assert.equal(getItem("abyss_mushroom_cap").name, "キノコの傘");
+});
+
 test("Silent Steps passively stacks with Conceal Presence up to full reduction", () => {
   restorePresence(0);
   setPassivePresenceIncreaseReduction(0.5);

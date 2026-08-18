@@ -256,7 +256,9 @@ function unavailableReason(skill, character) {
   if (overlay.context === "field" && !["healing", "cureStatus", "sacrificialCure", "dungeonEffect"].includes(skill.actionType)) return "battleOnly";
   if (overlay.context === "battle" && skill.actionType === "dungeonEffect") return "fieldOnly";
   if (overlay.context === "field" && skill.actionType === "healing" && character.hp >= character.maxHp) return "fullHp";
-  if (skill.actionType === "cureStatus" && !(character.statuses || []).some(status => (status.statusId || status.id) === skill.statusId)) return "noEffect";
+  if (skill.actionType === "cureStatus" && !(character.statuses || []).some(status => (
+    (skill.statusIds || [skill.statusId]).includes(status.statusId || status.id)
+  ))) return "noEffect";
   if (skill.actionType === "sacrificialCure" && !(character.statuses || []).some(status => (status.statusId || status.id) === skill.statusId)) return "noEffect";
   if (overlay.context === "battle" && skill.actionType === "banishUndead") {
     if (overlay.enemy?.isBoss) return "bossImmune";

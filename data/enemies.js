@@ -463,6 +463,61 @@ export const enemies = Object.freeze([
     escapeRate: 0.35, surpriseRate: 0.1, surpriseRateMaximum: 0.22, isBoss: false
   }),
   Object.freeze({
+    id: "abyss_tiger", name: "奈落ティーガー", imageId: "abyss_tiger",
+    level: 43,
+    image: "images/enemies/enemy_22.avif", race: "beast", minimumDepth: 50, maximumDepth: 59,
+    maxHp: 430, stats: Object.freeze({ str: 29, int: 7, agi: 24, dex: 25, luc: 15 }),
+    def: 23, attack: 27, experienceReward: 680, dropItemId: "abyss_tiger_fur",
+    actions: Object.freeze([
+      Object.freeze({ weight: 55, action: Object.freeze({
+        id: "abyss_tiger_attack", name: "攻撃", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 45, action: Object.freeze({
+        id: "killer_bite", name: "キラーバイト", actionType: "physicalAttack", hitCount: 1,
+        powerPerHit: 1.3, hitBonus: -0.02, effects: Object.freeze([Object.freeze({
+          statusId: "bleeding", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.3
+        })])
+      }) })
+    ]),
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 45, immune: false }),
+      deadly_poison: Object.freeze({ resistancePoints: 45, immune: false }),
+      action_skip: Object.freeze({ resistancePoints: 40, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 45, immune: false })
+    }),
+    escapeRate: 0.28, surpriseRate: 0.27, surpriseRateMaximum: 0.4, isBoss: false
+  }),
+  Object.freeze({
+    id: "abyss_mushroom", name: "奈落キノコ", imageId: "abyss_mushroom",
+    level: 42,
+    image: "images/enemies/enemy_23.avif", race: "plant", minimumDepth: 50, maximumDepth: 59,
+    maxHp: 365, stats: Object.freeze({ str: 14, int: 27, agi: 12, dex: 20, luc: 18 }),
+    def: 25, attack: 21, experienceReward: 640, dropItemId: "abyss_mushroom_cap",
+    actions: Object.freeze([
+      Object.freeze({ weight: 55, action: Object.freeze({
+        id: "abyss_mushroom_attack", name: "攻撃", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 45, action: Object.freeze({
+        id: "deadly_poison_spores", name: "猛毒", actionType: "spell", element: "physical",
+        spellPower: 12, powerMultiplier: 0.65, unavoidable: true, speedModifier: -2,
+        effects: Object.freeze([Object.freeze({
+          statusId: "deadly_poison", trigger: "firstHitOnly", statusKind: "magical", baseRate: 0.65
+        })])
+      }) })
+    ]),
+    elementMultipliers: Object.freeze({ fire: 1.5, ice: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      deadly_poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 55, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 65, immune: false })
+    }),
+    escapeRate: 0.38, surpriseRate: 0.12, surpriseRateMaximum: 0.25, isBoss: false
+  }),
+  Object.freeze({
     id: "mimic", name: "ミミック", imageId: "mimic",
     level: 10,
     image: "images/enemies/enemy_05.avif", race: "construct", randomEncounter: false,

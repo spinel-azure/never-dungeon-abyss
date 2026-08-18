@@ -93,7 +93,7 @@ export const STATUS_EFFECTS = Object.freeze({
   }),
   deadly_poison: Object.freeze({
     id: "deadly_poison", name: "猛毒", kind: "ailment",
-    damageMaxHpRate: 0.01, minimumDamage: 1, maximumDamage: 999
+    damageMaxHpRate: 0.01, minimumDamage: 1
   }),
   charge_budding: Object.freeze({
     id: "charge_budding", name: "新緑の芽吹き", kind: "buff", duration: 5,

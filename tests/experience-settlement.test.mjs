@@ -156,12 +156,13 @@ test("normal lodging restores HP and SP without curing poison", () => {
   assert.equal(result.changes.condition, "POISON");
 });
 
-test("temple poison treatment costs 15G and changes neither HP nor SP", () => {
+test("temple treatment costs level times two and cures persistent ailments without changing HP or SP", () => {
   const character = createInitialCharacter({ name: "TEST", job: "priest" });
-  character.gold = 15;
+  character.level = 10;
+  character.gold = 20;
   character.hp = 7;
   character.sp = 2;
-  character.statuses = [{ statusId: "poison" }];
+  character.statuses = [{ statusId: "poison" }, { statusId: "deadly_poison" }, { statusId: "bleeding" }];
   character.condition = "POISON";
   const result = resolveTemplePoisonTreatment(character);
   assert.equal(result.success, true);
@@ -170,7 +171,7 @@ test("temple poison treatment costs 15G and changes neither HP nor SP", () => {
   assert.equal(result.character.sp, 2);
   assert.deepEqual(result.character.statuses, []);
   assert.equal(result.character.condition, "GOOD");
-  const insufficient = resolveTemplePoisonTreatment({ ...character, gold: 14 });
+  const insufficient = resolveTemplePoisonTreatment({ ...character, gold: 19 });
   assert.equal(insufficient.success, false);
   assert.equal(insufficient.reason, "insufficientGold");
 });

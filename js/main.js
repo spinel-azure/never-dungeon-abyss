@@ -112,7 +112,7 @@ import {
   createDepthReturnSettlement,
   formatDepthReturnSettlement
 } from "../data/experience-settlement.js";
-import { getNonlethalPoisonDamage } from "../combat/status-lifecycle.js";
+import { getDeadlyPoisonStepDamage, getNonlethalPoisonDamage } from "../combat/status-lifecycle.js";
 import { getNextLevelExperience, MAX_LEVEL } from "../data/growth.js";
 import { resolveFieldSkill } from "../combat/resolve-field-skill.js";
 import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from "./skill-overlay.js";
@@ -1469,6 +1469,18 @@ import {
     return damage;
   }
 
+  function applyDungeonDeadlyPoisonStep() {
+    if (!character || worldLocation !== "dungeon" || !hasCharacterStatus(character, "deadly_poison")) return 0;
+    const damage = getDeadlyPoisonStepDamage({ currentHp: character.hp, maxHp: character.maxHp });
+    if (damage <= 0) return 0;
+    character.hp -= damage;
+    character.alive = true;
+    character.condition = "POISON";
+    updateCharacterUi();
+    showPoisonStepDamage(damage);
+    return damage;
+  }
+
   function applyDungeonBleedingStep() {
     if (!character || worldLocation !== "dungeon" || !hasCharacterStatus(character, "bleeding")) return 0;
     character.bleedingStepCount = (Math.max(0, Number(character.bleedingStepCount) || 0) + 1) % 5;
@@ -1505,7 +1517,9 @@ import {
   }
 
   function currentCondition(target) {
-    return hasCharacterStatus(target, "bleeding") ? "BLEED" : hasCharacterStatus(target, "poison") ? "POISON" : "GOOD";
+    return hasCharacterStatus(target, "bleeding") ? "BLEED"
+      : ["poison", "deadly_poison"].some(statusId => hasCharacterStatus(target, statusId)) ? "POISON"
+        : "GOOD";
   }
 
   function showPoisonStepDamage(damage) {
@@ -1519,14 +1533,14 @@ import {
 
   function handleDungeonStep() {
     applyDungeonPoisonStep();
+    applyDungeonDeadlyPoisonStep();
     applyDungeonBleedingStep();
     applyFireFloorStep();
     applyColdFloorStep();
     if (!character) return;
     character = recordNpcExpeditionDepth(character, currentDepth);
     character = applyNpcExplorationPassives(character);
-    character.condition = hasCharacterStatus(character, "bleeding") ? "BLEED"
-      : hasCharacterStatus(character, "poison") ? "POISON" : "GOOD";
+    character.condition = currentCondition(character);
     character = recordFloorExploration(character, { depth: currentDepth, explored });
     updateCharacterUi();
   }
@@ -2270,7 +2284,7 @@ import {
         return;
       }
       if (treatment.reason === "insufficientGold") {
-        say(`司祭アーヴァイン：毒を浄めるには${treatment.fee}Gの寄進が必要です。`);
+        say(`司祭アーヴァイン：状態異常を治療するには${treatment.fee}Gの寄進が必要です。`);
         return;
       }
       character = treatment.character;

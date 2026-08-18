@@ -218,7 +218,7 @@ export function createPlayerAction(player, command = {}, enemy = null) {
   const spCost = getEffectiveSpCost(skill, player);
   if (player.sp < spCost) return { ok: false, reason: "insufficientSp" };
   if (["cureStatus", "sacrificialCure"].includes(skill.actionType)
-    && !(player.statuses || []).some(status => (status.statusId || status.id) === skill.statusId)) {
+    && !(player.statuses || []).some(status => getCuredStatusIds(skill).includes(status.statusId || status.id))) {
     return { ok: false, reason: "noEffect" };
   }
   if (skill.actionType === "dungeonEffect") return { ok: false, reason: "fieldOnly" };
@@ -365,6 +365,8 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
         healing += amount;
       } else if (effect.id === "cure_poison") {
         actor.statuses = (actor.statuses || []).filter(status => (status.statusId || status.id) !== "poison");
+      } else if (effect.id === "cure_deadly_poison") {
+        actor.statuses = (actor.statuses || []).filter(status => (status.statusId || status.id) !== "deadly_poison");
       } else if (effect.id === "cure_bleeding") {
         actor.statuses = (actor.statuses || []).filter(status => (status.statusId || status.id) !== "bleeding");
       } else if (effect.id === "banish_undead") {
@@ -450,11 +452,12 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
     return;
   }
   if (action.actionType === "cureStatus") {
-    actor.statuses = (actor.statuses || []).filter(status => (status.statusId || status.id) !== action.statusId);
+    const curedStatusIds = getCuredStatusIds(action);
+    actor.statuses = (actor.statuses || []).filter(status => !curedStatusIds.includes(status.statusId || status.id));
     const bleeding = (actor.statuses || []).some(status => (status.statusId || status.id) === "bleeding");
-    const poison = (actor.statuses || []).some(status => (status.statusId || status.id) === "poison");
+    const poison = (actor.statuses || []).some(status => ["poison", "deadly_poison"].includes(status.statusId || status.id));
     actor.condition = bleeding ? "BLEED" : poison ? "POISON" : "GOOD";
-    battle.log.push(`${actor.name}は${action.name}を唱えた。${action.statusId === "bleeding" ? "出血が止まった。" : "毒が消え去った。"}`);
+    battle.log.push(`${actor.name}は${action.name}を唱えた。${curedStatusIds.includes("bleeding") ? "出血が止まった。" : "毒が消え去った。"}`);
     return;
   }
   if (action.actionType === "sacrificialCure") {
@@ -826,11 +829,18 @@ function cloneCombatant(source) {
   };
 }
 
+function getCuredStatusIds(action = {}) {
+  return Array.isArray(action.statusIds) && action.statusIds.length
+    ? action.statusIds
+    : [action.statusId].filter(Boolean);
+}
+
 function statusName(id) {
   return ({
     armor_break: "DEF低下",
     action_seal: "封技",
     poison: "毒",
+    deadly_poison: "猛毒",
     bleeding: "出血",
     action_skip: "行動不能",
     speed_down: "速度低下"

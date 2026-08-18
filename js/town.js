@@ -1526,7 +1526,8 @@ function activateFacilityService(command) {
 function requestTempleHealing() {
   town.mode = "templeHealConfirm";
   town.playSe("confirm");
-  town.messageEl.textContent = "司祭アーヴァイン：15Gの寄進で治療を行います。よろしいですか？\n＊Aボタン：はい　Bボタン：いいえ";
+  const fee = Math.max(2, Math.floor(Number(town.getCharacter()?.level) || 1) * 2);
+  town.messageEl.textContent = `司祭アーヴァイン：${fee}Gの寄進で治療を行います。よろしいですか？\n＊Aボタン：はい　Bボタン：いいえ`;
 }
 
 function handleTempleHealConfirmationInput(action) {

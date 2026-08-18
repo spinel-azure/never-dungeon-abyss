@@ -13,7 +13,8 @@ export function getItemUnavailableReason({ character, itemId, context, enemy, to
   const healsHp = item.effects?.some(effect => effect.id === "heal_hp" || effect.id === "heal_hp_rate");
   const hasAnotherEffect = item.effects?.some(effect => effect.id !== "heal_hp" && effect.id !== "heal_hp_rate");
   if (healsHp && !hasAnotherEffect && character.hp >= character.maxHp) return "fullHp";
-  if (itemId === "antidote" && character.hp >= character.maxHp && !hasPoison(character)) return "noEffect";
+  if (itemId === "antidote" && character.hp >= character.maxHp && !hasStatus(character, "poison")) return "noEffect";
+  if (itemId === "strong_antidote" && character.hp >= character.maxHp && !hasPoison(character)) return "noEffect";
   if (itemId === "styptic" && character.hp >= character.maxHp && !hasStatus(character, "bleeding")) return "noEffect";
   if (itemId === "guiding_torch" && Number(torchFuel) >= 100) return "fullTorch";
   if (itemId === "treasure_compass" && treasureCompassActive) return "noEffect";
@@ -51,6 +52,8 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
       next.hp += healing;
     } else if (effect.id === "cure_poison") {
       next.statuses = (next.statuses || []).filter(status => (status.statusId || status.id) !== "poison");
+    } else if (effect.id === "cure_deadly_poison") {
+      next.statuses = (next.statuses || []).filter(status => (status.statusId || status.id) !== "deadly_poison");
     } else if (effect.id === "cure_bleeding") {
       next.statuses = (next.statuses || []).filter(status => (status.statusId || status.id) !== "bleeding");
     } else if (effect.id === "restore_torch") {
@@ -80,7 +83,7 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
 }
 
 function hasPoison(character) {
-  return (character?.statuses || []).some(status => (status.statusId || status.id) === "poison");
+  return (character?.statuses || []).some(status => ["poison", "deadly_poison"].includes(status.statusId || status.id));
 }
 
 function hasStatus(character, statusId) {

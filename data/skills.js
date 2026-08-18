@@ -203,6 +203,18 @@ export const SKILLS = Object.freeze({
     speedModifier: 0,
     effects: Object.freeze([])
   }),
+  die_antidote: Object.freeze({
+    id: "die_antidote",
+    name: "ディー・アンチドーテ",
+    description: "毒および猛毒状態を回復する。\nHPは回復しない。",
+    actionType: "cureStatus",
+    category: "miracle",
+    spCost: 5,
+    target: "self",
+    statusIds: Object.freeze(["poison", "deadly_poison"]),
+    speedModifier: 0,
+    effects: Object.freeze([])
+  }),
   hemostasis: Object.freeze({
     id: "hemostasis", name: "ヘモスタシス",
     description: "出血状態を回復する。\nHPは回復しない。",
@@ -443,6 +455,7 @@ export const LEVEL_SKILL_UNLOCKS = Object.freeze([
   Object.freeze({ job: "priest", level: 3, skillId: "antidote" }),
   Object.freeze({ job: "priest", level: 5, skillId: "exorcism" }),
   Object.freeze({ job: "priest", level: 7, skillId: "hemostasis" }),
+  Object.freeze({ job: "priest", level: 25, skillId: "die_antidote" }),
   Object.freeze({ job: "thief", level: 8, skillId: "conceal_presence" }),
   Object.freeze({ job: "thief", level: 38, skillId: "assassination" }),
   Object.freeze({ job: "warrior", level: 55, skillId: "falcon_schnitt" }),

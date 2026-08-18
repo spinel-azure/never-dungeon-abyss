@@ -21,7 +21,8 @@ export function resolveFieldSkill({ character, skillId, torchFuel = 0, presenceI
     return { accepted: false, reason: "fullHp" };
   }
 
-  if (["cureStatus", "sacrificialCure"].includes(skill.actionType) && !hasStatus(character, skill.statusId)) {
+  if (["cureStatus", "sacrificialCure"].includes(skill.actionType)
+    && !getCuredStatusIds(skill).some(statusId => hasStatus(character, statusId))) {
     return { accepted: false, reason: "noEffect" };
   }
 
@@ -35,9 +36,10 @@ export function resolveFieldSkill({ character, skillId, torchFuel = 0, presenceI
   if (skill.actionType === "cureStatus") {
     const nextCharacter = structuredClone(character);
     nextCharacter.sp = Math.max(0, character.sp - spCost);
+    const curedStatusIds = getCuredStatusIds(skill);
     nextCharacter.statuses = (nextCharacter.statuses || [])
-      .filter(status => (status.statusId || status.id) !== skill.statusId);
-    nextCharacter.condition = hasStatus(nextCharacter, "bleeding") ? "BLEED" : hasStatus(nextCharacter, "poison") ? "POISON" : "GOOD";
+      .filter(status => !curedStatusIds.includes(status.statusId || status.id));
+    nextCharacter.condition = getCondition(nextCharacter);
     return { accepted: true, character: nextCharacter, skill, healing: 0 };
   }
 
@@ -80,4 +82,16 @@ export function resolveFieldSkill({ character, skillId, torchFuel = 0, presenceI
 
 function hasStatus(character, statusId) {
   return (character?.statuses || []).some(status => (status.statusId || status.id) === statusId);
+}
+
+function getCuredStatusIds(skill = {}) {
+  return Array.isArray(skill.statusIds) && skill.statusIds.length
+    ? skill.statusIds
+    : [skill.statusId].filter(Boolean);
+}
+
+function getCondition(character) {
+  return hasStatus(character, "bleeding") ? "BLEED"
+    : ["poison", "deadly_poison"].some(statusId => hasStatus(character, statusId)) ? "POISON"
+      : "GOOD";
 }

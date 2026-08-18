@@ -223,6 +223,29 @@ export const ITEMS = Object.freeze([
     effects: Object.freeze([{ id: "heal_hp_rate", value: 0.3 }]),
     description: "最大HPの30％を回復する。B50F到達後に商店へ入荷する。", maxOwned: 99,
     iconId: "healing-potion", version: 1, shopUnlockDepth: 50
+  }),
+  Object.freeze({
+    number: 36, id: "strong_antidote", name: "強解毒剤", category: "recovery",
+    buyPrice: 100, sellPrice: 50, source: "shop", usableIn: Object.freeze(["town", "dungeon", "battle"]),
+    effects: Object.freeze([
+      { id: "cure_poison", value: 1 },
+      { id: "cure_deadly_poison", value: 1 },
+      { id: "heal_hp", value: 60 }
+    ]),
+    description: "毒および猛毒を治療し、HPを60回復する。B50F到達後に商店へ入荷する。",
+    maxOwned: 99, iconId: "antidote", version: 1, shopUnlockDepth: 50
+  }),
+  Object.freeze({
+    number: 37, id: "abyss_tiger_fur", name: "奈落虎の毛皮", category: "material",
+    buyPrice: 0, sellPrice: 380, source: "drop", usableIn: Object.freeze([]), effects: Object.freeze([]),
+    description: "奈落ティーガーから剥ぎ取った強靭な毛皮。売却専用。", maxOwned: 99,
+    repurchasable: false, iconId: "abyss-tiger-fur", version: 1
+  }),
+  Object.freeze({
+    number: 38, id: "abyss_mushroom_cap", name: "キノコの傘", category: "material",
+    buyPrice: 0, sellPrice: 340, source: "drop", usableIn: Object.freeze([]), effects: Object.freeze([]),
+    description: "奈落キノコから採れた毒々しい傘。売却専用。", maxOwned: 99,
+    repurchasable: false, iconId: "abyss-mushroom-cap", version: 1
   })
 ]);
 
@@ -237,7 +260,7 @@ export function getShopItemIdsForDepth(depth = 1) {
     ...(reached >= 10 ? ["healing_potion_medium"] : []),
     ...(reached >= 20 ? ["healing_potion_large"] : []),
     ...(reached >= 30 ? ["antidote_medium"] : []),
-    ...(reached >= 50 ? ["strong_healing_potion_small"] : []),
+    ...(reached >= 50 ? ["strong_healing_potion_small", "strong_antidote"] : []),
     ...BASE_SHOP_ITEM_IDS.slice(1)
   ];
 }
@@ -250,7 +273,7 @@ export function getShopItemIdsForCharacter(character) {
     ...(flags.transfer_portal_b10f_unlocked ? ["healing_potion_medium"] : []),
     ...(flags.shop_stock_b20f_unlocked ? ["healing_potion_large"] : []),
     ...(flags.shop_stock_b30f_unlocked && flags.boss_iron_maiden_b29f_defeated ? ["antidote_medium"] : []),
-    ...(flags.transfer_portal_b50f_unlocked ? ["strong_healing_potion_small"] : []),
+    ...(flags.transfer_portal_b50f_unlocked ? ["strong_healing_potion_small", "strong_antidote"] : []),
     ...(flags.scorching_barrier_shop_unlocked ? ["scorching_barrier"] : []),
     ...(flags.extreme_cold_barrier_shop_unlocked ? ["extreme_cold_barrier"] : []),
     ...(flags.weapon_imbue_oils_shop_unlocked || quest013Reported ? ["fire_lizard_oil", "ice_lizard_oil"] : []),

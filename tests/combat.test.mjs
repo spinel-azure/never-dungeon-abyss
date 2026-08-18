@@ -44,6 +44,7 @@ import {
   applyStatus,
   applyStatusApplications,
   clearBattleOnlyStatuses,
+  getDeadlyPoisonStepDamage,
   getNonlethalPoisonDamage,
   resolveActionOpportunity,
   resolveEndOfAction
@@ -127,6 +128,22 @@ test("B2F adds rabbit, undead and poison slime encounters", () => {
   assert.equal(getEnemyById("abyss_rabbit").minimumDepth, 2);
   assert.equal(getEnemyById("wandering_dead").race, "undead");
   assert.equal(getEnemyById("poison_slime").minimumDepth, 2);
+});
+
+test("B50F to B59F currently encounter only Abyss Tiger and Abyss Mushroom", () => {
+  for (let depth = 50; depth <= 59; depth += 1) {
+    assert.equal(getRandomEnemy({ depth, rng: () => 0 }).id, "abyss_tiger");
+    assert.equal(getRandomEnemy({ depth, rng: () => 0.999 }).id, "abyss_mushroom");
+  }
+  const tiger = createEnemyCombatant(getEnemyById("abyss_tiger"));
+  const killerBite = createEnemyAction(tiger, () => 0.99);
+  assert.equal(killerBite.name, "キラーバイト");
+  assert.equal(tiger.dropItemId, "abyss_tiger_fur");
+  const mushroom = createEnemyCombatant(getEnemyById("abyss_mushroom"));
+  const deadlyPoison = createEnemyAction(mushroom, () => 0.99);
+  assert.equal(deadlyPoison.name, "猛毒");
+  assert.equal(deadlyPoison.effects[0].statusId, "deadly_poison");
+  assert.equal(mushroom.dropItemId, "abyss_mushroom_cap");
 });
 
 test("poison slime sometimes selects an attack that can inflict poison", () => {
@@ -754,6 +771,18 @@ test("poison damage stops at one HP", () => {
   });
   assert.equal(result.battle.player.hp, 1);
   assert.equal(result.battle.player.alive, true);
+});
+
+test("deadly poison deals one percent per action lethally and per step nonlethally", () => {
+  const statuses = applyStatus([], { statusId: "deadly_poison", success: true });
+  assert.equal(resolveEndOfAction({ statuses, maxHp: 999 }).deadlyPoisonDamage, 9);
+  assert.equal(resolveEndOfAction({ statuses, maxHp: 50 }).deadlyPoisonDamage, 1);
+  assert.equal(getDeadlyPoisonStepDamage({ currentHp: 100, maxHp: 999 }), 9);
+  assert.equal(getDeadlyPoisonStepDamage({ currentHp: 5, maxHp: 1000 }), 4);
+  assert.equal(getDeadlyPoisonStepDamage({ currentHp: 1, maxHp: 1000 }), 0);
+  const upgraded = applyStatus([{ statusId: "poison" }], { statusId: "deadly_poison", success: true });
+  assert.deepEqual(upgraded.map(status => status.statusId), ["deadly_poison"]);
+  assert.deepEqual(applyStatus(upgraded, { statusId: "poison", success: true }).map(status => status.statusId), ["deadly_poison"]);
 });
 
 test("same status refreshes instead of stacking", () => {
@@ -1546,6 +1575,21 @@ test("Antidote cures poison for 3 SP without restoring HP", () => {
   assert.equal(result.character.statuses.some(status => status.statusId === "poison"), false);
   assert.equal(result.character.condition, "GOOD");
   assert.equal(resolveFieldSkill({ character: result.character, skillId: "antidote" }).reason, "noEffect");
+});
+
+test("Die Antidote is learned at level 25 and cures poison plus deadly poison for 5 SP", () => {
+  const level24 = normalizeCharacter({ ...createInitialCharacter({ name: "TEST", job: "priest" }), level: 24 });
+  assert.equal(level24.skillIds.includes("die_antidote"), false);
+  const priest = normalizeCharacter({ ...level24, level: 25 });
+  assert.equal(priest.skillIds.includes("die_antidote"), true);
+  priest.statuses = [{ statusId: "poison" }, { statusId: "deadly_poison" }];
+  priest.condition = "POISON";
+  const result = resolveFieldSkill({ character: priest, skillId: "die_antidote" });
+  assert.equal(result.accepted, true);
+  assert.equal(result.character.sp, priest.sp - 5);
+  assert.equal(result.character.statuses.length, 0);
+  assert.equal(result.character.condition, "GOOD");
+  assert.equal(getSkill("die_antidote").name, "ディー・アンチドーテ");
 });
 
 test("the three jobs learn their new dungeon skills at the intended levels", () => {
