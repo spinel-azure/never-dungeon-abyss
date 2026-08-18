@@ -1,5 +1,5 @@
-export const WALL_COLORS = Object.freeze(["default", "red", "blue", "green", "white", "black"]);
-export const FLOOR_COLORS = Object.freeze(["default", "red", "blue", "green", "purple", "white"]);
+export const WALL_COLORS = Object.freeze(["default", "red", "blue", "green", "yellow", "white", "black"]);
+export const FLOOR_COLORS = Object.freeze(["default", "red", "blue", "green", "yellow", "purple", "white", "black"]);
 export const FLOOR_THEME_MODES = Object.freeze({ FIXED: "fixed", RANDOM: "random" });
 
 const settings = {
@@ -32,8 +32,14 @@ export function clearFloorThemeOverride(depth) {
 }
 
 export function resolveFloorTheme(depth, current = settings.fixed) {
-  if (Number(depth) >= 1 && Number(depth) <= 10) {
+  if (Number(depth) >= 1 && Number(depth) <= 9) {
     return { wall: "stone", floor: "default", source: "floor" };
+  }
+  if (Number(depth) >= 10 && Number(depth) <= 19) {
+    return { wall: "black", floor: "black", source: "floor" };
+  }
+  if (Number(depth) >= 20 && Number(depth) <= 29) {
+    return { wall: "yellow", floor: "yellow", source: "floor" };
   }
   if (Number(depth) >= 30 && Number(depth) <= 39) {
     return { wall: "red", floor: "red", source: "floor" };

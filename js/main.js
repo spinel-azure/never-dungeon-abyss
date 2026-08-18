@@ -2659,7 +2659,9 @@ import {
 
   function applyCurrentFloorMist() {
     const options = getDungeonMistOptions();
-    const color = isFireFloorDepth(currentDepth) ? "red"
+    const color = currentDepth >= 10 && currentDepth <= 19 ? "black"
+      : currentDepth >= 20 && currentDepth <= 29 ? "yellow"
+      : isFireFloorDepth(currentDepth) ? "red"
       : isColdFloorDepth(currentDepth) ? "blue"
         : currentDepth >= 50 && currentDepth <= 59 ? "green"
           : options.color;

@@ -34,6 +34,8 @@ const renderer = {
   forestWallTextures: [],
   fireWallTextures: [],
   iceWallTextures: [],
+  darkWallTextures: [],
+  desertWallTextures: [],
   wallColor: "default",
   floorColor: "default",
   doorTextures: null,
@@ -54,7 +56,9 @@ const MIST_PALETTES = {
   frost: { main: [112, 145, 164], veil: [92, 126, 145], haze: [151, 187, 205], bloom: [150, 203, 229] },
   blue: { main: [35, 69, 112], veil: [25, 51, 91], haze: [62, 105, 157], bloom: [97, 166, 226] },
   poison: { main: [93, 62, 111], veil: [82, 48, 101], haze: [139, 91, 160], bloom: [174, 112, 199] },
-  red: { main: [112, 38, 31], veil: [88, 26, 22], haze: [158, 54, 42], bloom: [224, 105, 66] }
+  red: { main: [112, 38, 31], veil: [88, 26, 22], haze: [158, 54, 42], bloom: [224, 105, 66] },
+  black: { main: [12, 12, 15], veil: [5, 5, 7], haze: [24, 23, 29], bloom: [72, 66, 82] },
+  yellow: { main: [206, 209, 21], veil: [151, 154, 14], haze: [222, 224, 67], bloom: [244, 226, 116] }
 };
 const WALL_PALETTES = {
   default: { base: "#817667", rows: ["#8b806f", "#716756"], mortar: "rgba(28,26,23,.62)", speckle: "rgba(236,220,181,.12)" },
@@ -62,6 +66,7 @@ const WALL_PALETTES = {
   red: { base: "#76504a", rows: ["#8c5a50", "#65413d"], mortar: "rgba(35,18,16,.68)", speckle: "rgba(255,190,146,.14)" },
   blue: { base: "#536b78", rows: ["#607f90", "#465d6a"], mortar: "rgba(16,27,35,.68)", speckle: "rgba(202,238,255,.16)" },
   green: { base: "#526b55", rows: ["#607c61", "#435a47"], mortar: "rgba(18,31,20,.68)", speckle: "rgba(203,236,184,.14)" },
+  yellow: { base: "#ced115", rows: ["#dadd25", "#a4a711"], mortar: "rgba(61,62,5,.68)", speckle: "rgba(255,250,147,.18)" },
   white: { base: "#aaa79e", rows: ["#c3c0b5", "#918f88"], mortar: "rgba(55,54,51,.52)", speckle: "rgba(255,255,240,.2)" },
   black: { base: "#28282b", rows: ["#35343a", "#1d1d20"], mortar: "rgba(0,0,0,.82)", speckle: "rgba(151,136,165,.12)" }
 };
@@ -70,8 +75,10 @@ const FLOOR_PALETTES = {
   red: { near: "#130807", mid: "#3b1711", far: "#682417", grid: "rgba(255,145,91,.1)" },
   blue: { near: "#071015", mid: "#143448", far: "#24617b", grid: "rgba(174,228,255,.13)" },
   green: { near: "#081109", mid: "#18341b", far: "#315b2d", grid: "rgba(174,226,137,.1)" },
+  yellow: { near: "#181902", mid: "#686b0a", far: "#ced115", grid: "rgba(255,252,137,.12)" },
   purple: { near: "#110713", mid: "#35143c", far: "#5d2369", grid: "rgba(226,143,244,.12)" },
-  white: { near: "#252729", mid: "#767a7c", far: "#c7c9c5", grid: "rgba(255,255,255,.18)" }
+  white: { near: "#252729", mid: "#767a7c", far: "#c7c9c5", grid: "rgba(255,255,255,.18)" },
+  black: { near: "#010102", mid: "#08080a", far: "#111116", grid: "rgba(104,94,118,.06)" }
 };
 const DISTANCE_MIST_BASE_ALPHA = .8;
 
@@ -140,6 +147,8 @@ export function configureRenderer(options) {
   loadForestWallTextures();
   loadFireWallTextures();
   loadIceWallTextures();
+  loadDarkWallTextures();
+  loadDesertWallTextures();
   renderer.doorTextures = {
     normal: makeDoorTexture("normal"),
     boss: makeDoorTexture("boss"),
@@ -512,6 +521,8 @@ function getThemedWallTextures(color) {
   if (color === "red") return renderer.fireWallTextures;
   if (color === "blue") return renderer.iceWallTextures;
   if (color === "green") return renderer.forestWallTextures;
+  if (color === "black") return renderer.darkWallTextures;
+  if (color === "yellow") return renderer.desertWallTextures;
   return [];
 }
 
@@ -540,6 +551,20 @@ function loadIceWallTextures() {
   loadThemedWallTextures("iceWallTextures", "blue", [
     "images/dungeon_effects/ice_wall_01.webp",
     "images/dungeon_effects/ice_wall_02.webp"
+  ]);
+}
+
+function loadDarkWallTextures() {
+  loadThemedWallTextures("darkWallTextures", "black", [
+    "images/dungeon_effects/dark_wall_01.webp",
+    "images/dungeon_effects/dark_wall_02.webp"
+  ]);
+}
+
+function loadDesertWallTextures() {
+  loadThemedWallTextures("desertWallTextures", "yellow", [
+    "images/dungeon_effects/desert_wall_01.webp",
+    "images/dungeon_effects/desert_wall_02.webp"
   ]);
 }
 
