@@ -632,6 +632,9 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
       playerChargePresentationId: actorSide === "player" && action.chargeSkill
         ? action.presentationId || action.id
         : null,
+      battlePresentationId: actorSide === "player" && !action.chargeSkill
+        ? action.presentationId || null
+        : null,
       blockedByNpcWall: Boolean(hit.blockedByNpcWall),
       message
     });

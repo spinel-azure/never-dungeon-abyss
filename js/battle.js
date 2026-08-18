@@ -6,6 +6,7 @@ import {
 import { getEquipmentAdjustedEscapeRate, resolveEscapeAttempt } from "../combat/resolve-escape.js";
 import { clearBattleOnlyStatuses } from "../combat/status-lifecycle.js";
 import { playPlayerChargePresentation } from "./player-charge-presentation.js";
+import { playBattleSkillPresentation } from "./battle-skill-presentation.js";
 
 const COMMANDS = Object.freeze([
   ["attack", "戦う"],
@@ -299,10 +300,17 @@ async function playPresentationEvents() {
       battleUi.onCharacterChanged({ hp, alive: hp > 0 });
     }
     battleUi.messageEl.textContent = formatPresentationMessage(event);
+    const dedicatedPresentationPlayed = event.targetSide === "enemy" && event.hit
+      ? await playBattleSkillPresentation({
+        root: battleUi.root,
+        presentationId: event.battlePresentationId,
+        damage: event.damage
+      })
+      : false;
     if (event.type === "healing") {
       showBattleNumber(event.targetSide, event.amount, "healing");
       battleUi.playSe("heal");
-    } else if (event.hit || event.type === "damage" || event.type === "poisonDamage" || event.type === "bleedingDamage") {
+    } else if (!dedicatedPresentationPlayed && (event.hit || event.type === "damage" || event.type === "poisonDamage" || event.type === "bleedingDamage")) {
       showBattleNumber(
         event.targetSide,
         event.damage ?? event.amount,
@@ -311,7 +319,7 @@ async function playPresentationEvents() {
         event.hitCount
       );
     }
-    if (event.targetSide === "enemy" && event.hit) {
+    if (event.targetSide === "enemy" && event.hit && !dedicatedPresentationPlayed) {
       image.classList.remove("is-hit");
       void image.offsetWidth;
       image.classList.add("is-hit");
@@ -319,7 +327,7 @@ async function playPresentationEvents() {
     } else if (event.targetSide === "player" && event.hit && !event.blockedByNpcWall) {
       battleUi.playSe("playerDamage");
     }
-    const duration = event.targetSide === "player" && event.hit ? 520 : event.hit ? 360 : 280;
+    const duration = dedicatedPresentationPlayed ? 0 : event.targetSide === "player" && event.hit ? 520 : event.hit ? 360 : 280;
     await delay(duration);
     image.classList.remove("is-hit");
     if (event.slashExecution) await playSlashEffect(image);

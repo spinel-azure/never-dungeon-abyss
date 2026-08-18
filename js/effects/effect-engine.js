@@ -95,6 +95,32 @@ function drawBackdrop(ctx, width, height) {
 }
 
 const DRAWERS = {
+  depthOrb(ctx, p, t, raw) {
+    const points = parsePathPoints(p.pathPoints, p.x, p.y);
+    const position = quadraticPoint(points, t);
+    const scale = p.fromScale + (p.toScale - p.fromScale) * t;
+    const elapsed = raw * p.duration;
+    const remaining = (1 - raw) * p.duration;
+    const alpha = Math.min(1, elapsed / Math.max(1, p.fadeIn), remaining / Math.max(1, p.fadeOut));
+    const radius = Math.max(1, p.radius * scale);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.globalCompositeOperation = "lighter";
+    ctx.shadowColor = p.glowColor;
+    ctx.shadowBlur = Math.max(0, p.glowStrength);
+    const gradient = ctx.createRadialGradient(position.x, position.y, 0, position.x, position.y, radius);
+    gradient.addColorStop(0, "#ffffff");
+    gradient.addColorStop(.22, p.glowColor);
+    gradient.addColorStop(.72, p.color);
+    gradient.addColorStop(1, "rgba(255,0,13,0)");
+    ctx.fillStyle = gradient;
+    ctx.beginPath(); ctx.arc(position.x, position.y, radius, 0, Math.PI * 2); ctx.fill();
+    if (p.outlineWidth > 0) {
+      ctx.strokeStyle = p.color; ctx.lineWidth = p.outlineWidth;
+      ctx.beginPath(); ctx.arc(position.x, position.y, radius * .76, 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.restore();
+  },
   flash(ctx, p, t) {
     ctx.save(); ctx.globalAlpha = Math.sin(t * Math.PI); ctx.strokeStyle = p.color; ctx.lineWidth = p.lineWidth * (1 - t * .55);
     ctx.beginPath(); ctx.arc(p.x, p.y, p.radius * t, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
@@ -183,6 +209,23 @@ const DRAWERS = {
     ctx.save(); ctx.globalAlpha = Math.min(1, t * 5) * (1 - Math.max(0, (t - .75) / .25)); ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.font = `bold ${p.fontSize}px sans-serif`; ctx.lineWidth = Math.max(3, p.fontSize / 12); ctx.strokeStyle = p.outlineColor; ctx.fillStyle = p.color; const y = p.y - p.rise * t; ctx.strokeText(p.text, p.x, y); ctx.fillText(p.text, p.x, y); ctx.restore();
   }
 };
+
+function parsePathPoints(source, fallbackX, fallbackY) {
+  const points = String(source || "").split(";").map(pair => {
+    const [x, y] = pair.split(",").map(Number);
+    return Number.isFinite(x) && Number.isFinite(y) ? { x, y } : null;
+  }).filter(Boolean);
+  if (points.length >= 3) return points.slice(0, 3);
+  return [{ x: fallbackX, y: fallbackY }, { x: fallbackX, y: fallbackY }, { x: fallbackX, y: fallbackY }];
+}
+
+function quadraticPoint(points, t) {
+  const inverse = 1 - t;
+  return {
+    x: inverse * inverse * points[0].x + 2 * inverse * t * points[1].x + t * t * points[2].x,
+    y: inverse * inverse * points[0].y + 2 * inverse * t * points[1].y + t * t * points[2].y
+  };
+}
 
 function drawBoltPath(ctx, points, color, lineWidth) {
   if (points.length < 2) return;

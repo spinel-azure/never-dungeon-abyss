@@ -2,6 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { normalizeEffectDefinition } from "../js/effects/effect-schema.js";
+import { prepareBattleSkillEffect } from "../js/battle-skill-presentation.js";
+import { SPELLS } from "../data/spells.js";
 import { hasUncertainLoot, isHighlightedLotCardRarity, isHighlightedLotEquipment } from "../js/loot-identification.js";
 
 test("lot bag cracker JSON remains compatible with the generic effect schema", async () => {
@@ -11,6 +13,25 @@ test("lot bag cracker JSON remains compatible with the generic effect schema", a
   assert.equal(effect.parts.length, 1);
   assert.equal(effect.parts[0].type, "cracker");
   assert.equal(effect.parts[0].count, 200);
+});
+
+test("fire ball uses its data-driven depth orb timeline and runtime damage popup", async () => {
+  const source = JSON.parse(await readFile(new URL("../data/effects/fire_ball.json", import.meta.url), "utf8"));
+  const effect = normalizeEffectDefinition(prepareBattleSkillEffect(source, 321));
+  assert.equal(effect.version, 3);
+  assert.equal(effect.id, "fire_ball");
+  assert.equal(effect.name, "炎よ、燃やせ！");
+  assert.equal(effect.description, "魔術師向けの炎属性魔法スキル。");
+  assert.equal(effect.duration, 1300);
+  assert.deepEqual(effect.parts.map(part => [part.type, part.start, part.duration]), [
+    ["depthOrb", 0, 600],
+    ["explosion", 600, 300],
+    ["popup", 900, 500],
+    ["shake", 900, 300]
+  ]);
+  assert.equal(effect.parts.find(part => part.type === "popup").text, "321");
+  assert.equal(SPELLS.fireball.name, "炎よ、燃やせ！");
+  assert.equal(SPELLS.fireball.presentationId, "fire_ball");
 });
 
 test("lot bag identification is skipped only when all carried loot is already known", () => {

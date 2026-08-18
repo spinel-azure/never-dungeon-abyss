@@ -1,7 +1,7 @@
 export const SPELLS = Object.freeze({
   fireball: Object.freeze({
     id: "fireball",
-    name: "火球",
+    name: "炎よ、燃やせ！",
     description: "必中する炎属性攻撃（魔法威力10＋INT×0.5）。\n行動速度－5。DEFを無視する。",
     actionType: "spell",
     category: "attackSpell",
@@ -11,6 +11,7 @@ export const SPELLS = Object.freeze({
     spellPower: 10,
     powerMultiplier: 1,
     unavoidable: true,
+    presentationId: "fire_ball",
     speedModifier: -5,
     effects: []
   }),

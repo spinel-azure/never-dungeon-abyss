@@ -428,6 +428,8 @@ test("defense penetration is capped at 75 percent", () => {
 
 test("fireball is unavoidable, immunity is zero and weakness is 1.5x", () => {
   const fireball = getSkill("fireball");
+  assert.equal(fireball.name, "炎よ、燃やせ！");
+  assert.equal(fireball.presentationId, "fire_ball");
   const immune = resolveSpell({
     attacker: { int: 8 },
     defender: { elementMultipliers: { fire: 0 } },
@@ -449,6 +451,16 @@ test("fireball is unavoidable, immunity is zero and weakness is 1.5x", () => {
     rng: fixed(0.5)
   });
   assert.equal(weak.totalDamage, Math.floor(normal.totalDamage * 1.5));
+  const round = resolveBattleRound({
+    battle: createBattleState({
+      character: createInitialCharacter({ name: "M", job: "mage" }),
+      enemy: createEnemyCombatant(getEnemyById("abyss_rat"))
+    }),
+    playerCommand: { type: "skill", skillId: "fireball" },
+    rng: fixed(0.5)
+  });
+  assert.equal(round.accepted, true);
+  assert.equal(round.battle.presentationEvents.find(event => event.actorSide === "player")?.battlePresentationId, "fire_ball");
 });
 
 test("magic damage reduction lowers final spell damage without changing status resistance", () => {
