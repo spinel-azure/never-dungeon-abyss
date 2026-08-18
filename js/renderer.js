@@ -438,26 +438,17 @@ export function drawFloor() {
 }
 
 function drawForestFloorTexture(horizon) {
-  const { ctx, W, H, state, forestFloorTexture } = renderer;
-  const bandHeight = 12;
+  const { ctx, W, H, forestFloorTexture } = renderer;
   const pattern = ctx.createPattern(forestFloorTexture, "repeat");
   if (!pattern) return;
-  for (let y = horizon; y < H; y += bandHeight) {
-    const progress = Math.max(0.01, (y - horizon) / (H - horizon));
-    const scale = 0.16 + progress * 1.16;
-    if (typeof pattern.setTransform === "function" && typeof DOMMatrix === "function") {
-      const movementX = ((Number(state?.x) || 0) * 43 + (Number(state?.y) || 0) * 29) * scale;
-      const movementY = ((Number(state?.x) || 0) * 19 - (Number(state?.y) || 0) * 37) * scale;
-      pattern.setTransform(new DOMMatrix()
-        .translate(movementX, movementY)
-        .scale(scale, Math.max(0.08, scale * 0.48)));
-    }
-    ctx.save();
-    ctx.globalAlpha = 0.72;
-    ctx.fillStyle = pattern;
-    ctx.fillRect(0, y, W, Math.min(bandHeight + 1, H - y));
-    ctx.restore();
+  if (typeof pattern.setTransform === "function" && typeof DOMMatrix === "function") {
+    pattern.setTransform(new DOMMatrix().scale(1.15, 0.6));
   }
+  ctx.save();
+  ctx.globalAlpha = 0.72;
+  ctx.fillStyle = pattern;
+  ctx.fillRect(0, horizon, W, H - horizon);
+  ctx.restore();
   const shade = ctx.createLinearGradient(0, horizon, 0, H);
   shade.addColorStop(0, "rgba(3,12,4,.62)");
   shade.addColorStop(0.55, "rgba(3,10,3,.24)");
@@ -557,13 +548,13 @@ function loadForestFloorTexture() {
     if (textures.some(texture => !texture)) return;
     const size = 256;
     const combined = document.createElement("canvas");
-    combined.width = size * 2;
-    combined.height = size * 2;
+    combined.width = size;
+    combined.height = size;
     const context = combined.getContext("2d");
     context.drawImage(textures[0], 0, 0, size, size);
-    context.drawImage(textures[1], size, 0, size, size);
-    context.drawImage(textures[1], 0, size, size, size);
-    context.drawImage(textures[0], size, size, size, size);
+    context.globalAlpha = 0.35;
+    context.drawImage(textures[1], 0, 0, size, size);
+    context.globalAlpha = 1;
     renderer.forestFloorTexture = combined;
   }).catch(() => {
     renderer.forestFloorTexture = null;
