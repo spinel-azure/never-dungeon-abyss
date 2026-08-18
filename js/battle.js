@@ -451,6 +451,10 @@ function attemptEscape() {
     escapeRate
   });
   if (result.success) {
+    battleUi.battle.player.playerCharge = { value: 0, cooldown: 0 };
+    battleUi.onCharacterChanged({
+      playerCharge: { ...battleUi.battle.player.playerCharge }
+    });
     battleUi.battle.outcome = "escaped";
     battleUi.battle.phase = "complete";
     battleUi.battle.log = ["戦闘から逃げ切った！"];
@@ -563,7 +567,8 @@ function renderBattle() {
 
 export function hasEnemyDefenseDown(enemy) {
   return Boolean(enemy?.statuses?.some(status =>
-    (status?.id === "npc_defense_down" || status?.statusId === "npc_defense_down")
+    ["npc_defense_down", "armor_break", "charge_defense_down_15", "charge_defense_down_25"]
+      .includes(status?.id || status?.statusId)
     && status.active !== false
     && (!Number.isFinite(Number(status.remainingTurns)) || Number(status.remainingTurns) > 0)
   ));

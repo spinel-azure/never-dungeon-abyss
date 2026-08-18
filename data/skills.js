@@ -285,6 +285,62 @@ export const SKILLS = Object.freeze({
     damageRate: 0.5,
     effects: Object.freeze([])
   }),
+  nieder_schlag: Object.freeze({
+    id: "nieder_schlag", name: "ニーダーシュラーク",
+    description: "チャージ100で発動。威力200%の物理攻撃。\n命中時、敵のDEFを5ターン15%低下。",
+    actionType: "physicalAttack", category: "chargeSkill", spCost: 0, target: "enemy",
+    hitCount: 1, powerPerHit: 2, chargeSkill: true, presentationId: "nieder_schlag",
+    effects: Object.freeze([{ statusId: "charge_defense_down_15", trigger: "firstHitOnly", guaranteed: true }])
+  }),
+  blindheit: Object.freeze({
+    id: "blindheit", name: "ブリントハイト",
+    description: "チャージ100で発動。5ターンの間、敵の\n物理命中率を50%低下。ボスは成功率25%。",
+    actionType: "chargeDebuff", category: "chargeSkill", spCost: 0, target: "enemy",
+    chargeSkill: true, presentationId: "blindheit", statusId: "charge_blindness",
+    normalSuccessRate: 1, bossSuccessRate: 0.25, effects: Object.freeze([])
+  }),
+  green_budding: Object.freeze({
+    id: "green_budding", name: "新緑の芽吹き",
+    description: "チャージ100で発動。5ターンの間、\nターン終了時に最大HPの5%を回復。",
+    actionType: "buff", category: "chargeSkill", spCost: 0, target: "self",
+    chargeSkill: true, presentationId: "green_budding",
+    effects: Object.freeze([{ statusId: "charge_budding", trigger: "perAction", guaranteed: true }])
+  }),
+  mana_spring: Object.freeze({
+    id: "mana_spring", name: "マナの泉",
+    description: "チャージ100で発動。5ターンの間、\nチャージ技以外の攻撃呪文の消費SPを0にする。",
+    actionType: "buff", category: "chargeSkill", spCost: 0, target: "self",
+    chargeSkill: true, presentationId: "mana_spring",
+    effects: Object.freeze([{ statusId: "charge_mana_spring", trigger: "perAction", guaranteed: true }])
+  }),
+  auf_schlag: Object.freeze({
+    id: "auf_schlag", name: "アウフシュラーク",
+    description: "チャージ100で発動。威力300%の物理攻撃。\n命中時、敵のDEFを5ターン25%低下。",
+    actionType: "physicalAttack", category: "chargeSkill", spCost: 0, target: "enemy",
+    hitCount: 1, powerPerHit: 3, chargeSkill: true, presentationId: "auf_schlag",
+    effects: Object.freeze([{ statusId: "charge_defense_down_25", trigger: "firstHitOnly", guaranteed: true }])
+  }),
+  todes_gift: Object.freeze({
+    id: "todes_gift", name: "トーデス・ギフト",
+    description: "チャージ100で発動。敵を戦闘終了まで猛毒にする。\n毎ターン最大HPの1%ダメージ（最大999）。",
+    actionType: "chargeDebuff", category: "chargeSkill", spCost: 0, target: "enemy",
+    chargeSkill: true, presentationId: "todes_gift", statusId: "deadly_poison",
+    normalSuccessRate: 1, bossSuccessRate: 1, effects: Object.freeze([])
+  }),
+  green_healing: Object.freeze({
+    id: "green_healing", name: "新緑の癒し",
+    description: "チャージ100で発動。最大HPの70%を回復し、\n5ターンの間、物理ダメージを25%軽減。",
+    actionType: "chargeHealingBuff", category: "chargeSkill", spCost: 0, target: "self",
+    chargeSkill: true, presentationId: "green_healing", healingMaxHpRate: 0.7,
+    statusId: "charge_green_healing_guard", effects: Object.freeze([])
+  }),
+  mana_amplification: Object.freeze({
+    id: "mana_amplification", name: "マナ増幅",
+    description: "チャージ100で発動。戦闘終了まで攻撃呪文の\n威力を1.5倍にする。Lv80奥義は対象外。",
+    actionType: "buff", category: "chargeSkill", spCost: 0, target: "self",
+    chargeSkill: true, presentationId: "mana_amplification",
+    effects: Object.freeze([{ statusId: "charge_mana_amplification", trigger: "perAction", guaranteed: true }])
+  }),
   falcon_schnitt: Object.freeze({
     id: "falcon_schnitt", name: "ファルケン・シュニット",
     description: "チャージ100で発動。敵をV字に切り裂く\n威力150%の2連撃。一閃判定あり。",
@@ -314,6 +370,43 @@ export const SKILLS = Object.freeze({
     element: "fire", spellPower: 0, intelligenceMultiplier: 15, powerMultiplier: 1,
     unavoidable: true, chargeSkill: true, presentationId: "tunguska", effects: Object.freeze([])
   }),
+  drachen_fang: Object.freeze({
+    id: "drachen_fang", name: "ドラッヘン・ファング",
+    description: "チャージ100とSP100で発動。STR×100の\n単体物理攻撃。DEFを50%無視。1戦闘1回。",
+    actionType: "physicalAttack", category: "chargeSkill", spCost: 100, target: "enemy",
+    hitCount: 1, powerPerHit: 1, attackStat: "str", attackStatMultiplier: 100,
+    ignoreSpCostReduction: true,
+    ignoreWeaponAttack: true, defensePenetration: 0.5, chargeSkill: true,
+    ultimateChargeSkill: true, presentationId: "drachen_fang", effects: Object.freeze([])
+  }),
+  acht_streich: Object.freeze({
+    id: "acht_streich", name: "アハト・シュトライヒ",
+    description: "チャージ100とSP100で発動。DEX×12.5の\n8連続物理攻撃。暗殺術なし。1戦闘1回。",
+    actionType: "physicalAttack", category: "chargeSkill", spCost: 100, target: "enemy",
+    hitCount: 8, powerPerHit: 1, attackStat: "dex", attackStatMultiplier: 12.5,
+    ignoreSpCostReduction: true,
+    ignoreWeaponAttack: true, chargeSkill: true, ultimateChargeSkill: true,
+    presentationId: "acht_streich", effects: Object.freeze([])
+  }),
+  call_goddess_name: Object.freeze({
+    id: "call_goddess_name", name: "呼べ、女神の名を",
+    description: "チャージ100とSP100で発動。全体へINT×100の\n聖属性物理攻撃。DEF無視。1戦闘1回。",
+    actionType: "physicalAttack", category: "chargeSkill", spCost: 100, target: "allEnemies",
+    hitCount: 1, powerPerHit: 1, attackStat: "int", attackStatMultiplier: 100,
+    ignoreSpCostReduction: true,
+    ignoreWeaponAttack: true, ignoresDefense: true, element: "holy", unavoidable: true,
+    instantKillNormalUndead: true, raceDamageMultipliers: Object.freeze({ undead: 1.25 }),
+    chargeSkill: true, ultimateChargeSkill: true, presentationId: "call_goddess_name", effects: Object.freeze([])
+  }),
+  apocalypse: Object.freeze({
+    id: "apocalypse", name: "アポカリプス",
+    description: "チャージ100とSP100で発動。全体へINT×100の\n無属性魔法攻撃。魔法耐性無視。1戦闘1回。",
+    actionType: "spell", category: "chargeSkill", spCost: 100, target: "allEnemies",
+    element: "arcane", spellPower: 0, intelligenceMultiplier: 100, powerMultiplier: 1,
+    ignoreSpCostReduction: true,
+    unavoidable: true, ignoresMagicResistance: true, chargeSkill: true,
+    ultimateChargeSkill: true, presentationId: "apocalypse", effects: Object.freeze([])
+  }),
   fireball: SPELLS.fireball,
   ice_bind: SPELLS.ice_bind
 });
@@ -327,6 +420,14 @@ export function getSkills(ids = []) {
 }
 
 export const LEVEL_SKILL_UNLOCKS = Object.freeze([
+  Object.freeze({ job: "warrior", level: 10, skillId: "nieder_schlag" }),
+  Object.freeze({ job: "thief", level: 10, skillId: "blindheit" }),
+  Object.freeze({ job: "priest", level: 10, skillId: "green_budding" }),
+  Object.freeze({ job: "mage", level: 10, skillId: "mana_spring" }),
+  Object.freeze({ job: "warrior", level: 30, skillId: "auf_schlag" }),
+  Object.freeze({ job: "thief", level: 30, skillId: "todes_gift" }),
+  Object.freeze({ job: "priest", level: 30, skillId: "green_healing" }),
+  Object.freeze({ job: "mage", level: 30, skillId: "mana_amplification" }),
   Object.freeze({ job: "thief", level: 22, skillId: "gale_blades" }),
   Object.freeze({ job: "warrior", level: 24, skillId: "crushing_break" }),
   Object.freeze({ job: "priest", level: 24, skillId: "greater_healing" }),
@@ -347,7 +448,11 @@ export const LEVEL_SKILL_UNLOCKS = Object.freeze([
   Object.freeze({ job: "warrior", level: 55, skillId: "falcon_schnitt" }),
   Object.freeze({ job: "thief", level: 55, skillId: "twin_rapid_strike" }),
   Object.freeze({ job: "priest", level: 55, skillId: "twilight_flash" }),
-  Object.freeze({ job: "mage", level: 55, skillId: "tunguska" })
+  Object.freeze({ job: "mage", level: 55, skillId: "tunguska" }),
+  Object.freeze({ job: "warrior", level: 80, skillId: "drachen_fang" }),
+  Object.freeze({ job: "thief", level: 80, skillId: "acht_streich" }),
+  Object.freeze({ job: "priest", level: 80, skillId: "call_goddess_name" }),
+  Object.freeze({ job: "mage", level: 80, skillId: "apocalypse" })
 ]);
 
 export function getLevelUnlockedSkillIds(job, level) {

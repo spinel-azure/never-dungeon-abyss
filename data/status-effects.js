@@ -78,6 +78,41 @@ export const STATUS_EFFECTS = Object.freeze({
     kind: "buff",
     duration: 1,
     physicalDamageReduction: 0.5
+  }),
+  charge_defense_down_15: Object.freeze({
+    id: "charge_defense_down_15", name: "DEF低下", kind: "debuff", duration: 5,
+    defenseMultiplier: 0.85
+  }),
+  charge_defense_down_25: Object.freeze({
+    id: "charge_defense_down_25", name: "DEF低下", kind: "debuff", duration: 5,
+    defenseMultiplier: 0.75
+  }),
+  charge_blindness: Object.freeze({
+    id: "charge_blindness", name: "命中低下", kind: "debuff", duration: 5,
+    physicalHitPenalty: 0.5, physicalHitRateFloor: 0.05
+  }),
+  deadly_poison: Object.freeze({
+    id: "deadly_poison", name: "猛毒", kind: "ailment",
+    damageMaxHpRate: 0.01, minimumDamage: 1, maximumDamage: 999
+  }),
+  charge_budding: Object.freeze({
+    id: "charge_budding", name: "新緑の芽吹き", kind: "buff", duration: 5,
+    turnEndHealMaxHpRate: 0.05
+  }),
+  charge_green_healing_guard: Object.freeze({
+    id: "charge_green_healing_guard", name: "新緑の守り", kind: "buff", duration: 5,
+    physicalDamageReduction: 0.25
+  }),
+  charge_mana_spring: Object.freeze({
+    id: "charge_mana_spring", name: "マナの泉", kind: "buff", duration: 5
+  }),
+  charge_mana_amplification: Object.freeze({
+    id: "charge_mana_amplification", name: "マナ増幅", kind: "buff",
+    attackSpellDamageMultiplier: 1.5, expiresAfterBattle: true
+  }),
+  charge_ultimate_used: Object.freeze({
+    id: "charge_ultimate_used", name: "奥義使用済み", kind: "system",
+    expiresAfterBattle: true
   })
 });
 

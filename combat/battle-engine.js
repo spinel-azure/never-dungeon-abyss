@@ -104,6 +104,7 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
       chargeSkill: Boolean(playerAction.action.chargeSkill)
     });
   }
+  if (!next.outcome) applyPlayerTurnEndChargeEffects(next);
   if (!next.outcome) applyNpcTurnEnd(next);
   advanceNpcWallProtection(next);
   advanceNpcChargeState(next, { allowCharge: !next.outcome });
@@ -112,6 +113,20 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
     next.phase = "command";
   }
   return { battle: next, accepted: true };
+}
+
+function applyPlayerTurnEndChargeEffects(battle) {
+  const player = battle.player;
+  const budding = player.statuses?.find(status =>
+    (status.id || status.statusId) === "charge_budding" && status.active !== false
+  );
+  if (!budding || player.hp <= 0 || player.hp >= player.maxHp) return;
+  const requested = Math.max(1, Math.ceil(player.maxHp * (Number(budding.turnEndHealMaxHpRate) || 0)));
+  const healing = Math.min(requested, player.maxHp - player.hp);
+  player.hp += healing;
+  battle.log.push(`新緑の芽吹きによりHPが${healing}回復した！`);
+  battle.presentationEvents.push({ type: "healing", actorSide: "player", targetSide: "player",
+    amount: healing, message: `HPが${healing}回復した！` });
 }
 
 export function resolveEnemyAmbush({ battle, rng = Math.random } = {}) {
@@ -194,6 +209,9 @@ export function createPlayerAction(player, command = {}, enemy = null) {
   if (!skill || !player.skillIds?.includes(skill.id)) return { ok: false, reason: "unknownSkill" };
   if (skill.actionType === "passive") return { ok: false, reason: "passive" };
   if (skill.chargeSkill && !isPlayerChargeReady(player)) return { ok: false, reason: "chargeNotReady" };
+  if (skill.ultimateChargeSkill && (player.statuses || []).some(status =>
+    (status.id || status.statusId) === "charge_ultimate_used" && status.active !== false
+  )) return { ok: false, reason: "ultimateAlreadyUsed" };
   if (skill.preventWhileStatusActive && (player.statuses || []).some(status =>
     (status.statusId || status.id) === skill.preventWhileStatusActive && status.active !== false
   )) return { ok: false, reason: "alreadyActive" };
@@ -294,6 +312,33 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
       skipInitialDecrement: true
     }]);
     battle.log.push(`${actor.name}は身を守った。`);
+    return;
+  }
+  if (action.actionType === "chargeDebuff") {
+    const successRate = target.isBoss ? Number(action.bossSuccessRate) : Number(action.normalSuccessRate);
+    const success = Number(rng()) < Math.max(0, Math.min(1, successRate || 0));
+    target.statuses = applyStatusApplications(target.statuses, [{
+      statusId: action.statusId, success, skipInitialDecrement: true
+    }]);
+    battle.log.push(success
+      ? `${actor.name}の${action.name}！ ${target.name}は弱体化した！`
+      : `${actor.name}の${action.name}！ しかし効果がなかった！`);
+    markUltimateUsed(actor, action);
+    return;
+  }
+  if (action.actionType === "chargeHealingBuff") {
+    const requested = Math.max(1, Math.ceil(actor.maxHp * (Number(action.healingMaxHpRate) || 0)));
+    const healing = Math.min(requested, actor.maxHp - actor.hp);
+    actor.hp += healing;
+    actor.statuses = applyStatusApplications(actor.statuses, [{
+      statusId: action.statusId, success: true, skipInitialDecrement: true
+    }]);
+    battle.log.push(`${actor.name}の${action.name}！ HPが${healing}回復した！`);
+    if (healing > 0) battle.presentationEvents.push({
+      type: "healing", actorSide, targetSide: actorSide, amount: healing,
+      message: `HPが${healing}回復した！`
+    });
+    markUltimateUsed(actor, action);
     return;
   }
   if (action.actionType === "wait") {
@@ -460,6 +505,10 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
   const magicFocus = action.actionType === "spell" && actorSide === "player"
     ? actor.statuses?.find(status => (status.id || status.statusId) === "magic_focus" && status.active !== false)
     : null;
+  const manaAmplification = action.actionType === "spell" && actorSide === "player" && !action.ultimateChargeSkill
+    ? actor.statuses?.find(status =>
+      (status.id || status.statusId) === "charge_mana_amplification" && status.active !== false
+    ) : null;
   const raceMultiplier = Number(action.raceDamageMultipliers?.[target.race]) || 1;
   let presentedHits = resolvedHits.map((hit, index) => ({
     index,
@@ -471,6 +520,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
         * getCapricornDamageMultiplier(battle, actorSide)
         * getCapricornReceivedDamageMultiplier(battle, targetSide)
         * (magicFocus ? Number(magicFocus.attackSpellDamageMultiplier) || 1 : 1)
+        * (manaAmplification ? Number(manaAmplification.attackSpellDamageMultiplier) || 1 : 1)
         * raceMultiplier
     )) : 0
   }));
@@ -494,6 +544,17 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
     battle.log.push(passiveExecution.passiveId === "flash_slash"
       ? "一閃が敵を断ち切った！"
       : "暗殺術が敵の急所を捉えた！");
+  }
+  if (actorSide === "player" && action.instantKillNormalUndead && target.race === "undead" && !target.isBoss) {
+    const firstLandedIndex = presentedHits.findIndex(hit => hit.hit);
+    if (firstLandedIndex >= 0) {
+      presentedHits = presentedHits.slice(0, firstLandedIndex + 1).map((hit, index) => ({
+        ...hit,
+        damage: index === firstLandedIndex ? target.hp : hit.damage,
+        slashExecution: index === firstLandedIndex
+      }));
+      battle.log.push("女神の聖なる光がアンデッドを浄化した！");
+    }
   }
   const vorpalExecution = actorSide === "player"
     && action.id === "normal_attack"
@@ -590,6 +651,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
   for (const applied of applications.filter(item => item.success)) {
     battle.log.push(`${target.name}は${statusName(applied.statusId)}状態になった。`);
   }
+  markUltimateUsed(actor, action);
 }
 
 export function getPlayerWeaponElement(player, action = {}) {
@@ -669,6 +731,21 @@ function finishAction(battle, side) {
         amount: damage, message: `出血で${damage}ダメージ！` });
     }
   }
+  if (end.deadlyPoisonDamage > 0 && actor.hp > 0) {
+    const damage = Math.min(actor.hp, end.deadlyPoisonDamage);
+    actor.hp -= damage;
+    actor.alive = actor.hp > 0;
+    battle.log.push(`${actor.name}は猛毒で${damage}ダメージ！`);
+    battle.presentationEvents.push({ type: "poisonDamage", actorSide: null, targetSide: side,
+      amount: damage, message: `猛毒で${damage}ダメージ！` });
+  }
+}
+
+function markUltimateUsed(actor, action) {
+  if (!action?.ultimateChargeSkill) return;
+  actor.statuses = applyStatusApplications(actor.statuses, [{
+    statusId: "charge_ultimate_used", success: true
+  }]);
 }
 
 function updateOutcome(battle) {

@@ -1,9 +1,21 @@
 {
   "version": 1,
   "skills": {
+    "nieder_schlag": { "effect": "standard", "cssClass": "", "durationMs": 0, "image": "", "soundId": "" },
+    "blindheit": { "effect": "standard", "cssClass": "", "durationMs": 0, "image": "", "soundId": "" },
+    "green_budding": { "effect": "standard", "cssClass": "", "durationMs": 0, "image": "", "soundId": "" },
+    "mana_spring": { "effect": "standard", "cssClass": "", "durationMs": 0, "image": "", "soundId": "" },
+    "auf_schlag": { "effect": "standard", "cssClass": "", "durationMs": 0, "image": "", "soundId": "" },
+    "todes_gift": { "effect": "standard", "cssClass": "", "durationMs": 0, "image": "", "soundId": "" },
+    "green_healing": { "effect": "standard", "cssClass": "", "durationMs": 0, "image": "", "soundId": "" },
+    "mana_amplification": { "effect": "standard", "cssClass": "", "durationMs": 0, "image": "", "soundId": "" },
     "falcon_schnitt": { "effect": "standard", "cssClass": "", "durationMs": 0, "image": "", "soundId": "" },
     "twin_rapid_strike": { "effect": "standard", "cssClass": "", "durationMs": 0, "image": "", "soundId": "" },
     "twilight_flash": { "effect": "standard", "cssClass": "", "durationMs": 0, "image": "", "soundId": "" },
-    "tunguska": { "effect": "standard", "cssClass": "", "durationMs": 0, "image": "", "soundId": "" }
+    "tunguska": { "effect": "standard", "cssClass": "", "durationMs": 0, "image": "", "soundId": "" },
+    "drachen_fang": { "effect": "standard", "cssClass": "", "durationMs": 0, "image": "", "soundId": "" },
+    "acht_streich": { "effect": "standard", "cssClass": "", "durationMs": 0, "image": "", "soundId": "" },
+    "call_goddess_name": { "effect": "standard", "cssClass": "", "durationMs": 0, "image": "", "soundId": "" },
+    "apocalypse": { "effect": "standard", "cssClass": "", "durationMs": 0, "image": "", "soundId": "" }
   }
 }

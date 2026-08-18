@@ -158,6 +158,9 @@ function renderSelection() {
 function unavailableReason(skill, character) {
   if (skill.actionType === "passive") return "passive";
   if (skill.chargeSkill && (Number(character?.playerCharge?.value) < 100 || Number(character?.playerCharge?.cooldown) > 0)) return "chargeNotReady";
+  if (skill.ultimateChargeSkill && (character.statuses || []).some(status =>
+    (status.id || status.statusId) === "charge_ultimate_used" && status.active !== false
+  )) return "ultimateAlreadyUsed";
   if (character.sp < getEffectiveSpCost(skill, character)) return "insufficientSp";
   if (skill.preventWhileStatusActive && (character.statuses || []).some(status =>
     (status.statusId || status.id) === skill.preventWhileStatusActive && status.active !== false

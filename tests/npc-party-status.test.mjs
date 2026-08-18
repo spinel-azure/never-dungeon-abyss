@@ -60,7 +60,9 @@ test("Rebecca defense down is visible on the enemy name without expanding the ch
   ]);
 
   assert.match(battle, /enemyName\?\.classList\.toggle\("is-defense-down", hasEnemyDefenseDown\(battle\.enemy\)\)/);
-  assert.match(battle, /status\?\.id === "npc_defense_down" \|\| status\?\.statusId === "npc_defense_down"/);
+  assert.match(battle, /"npc_defense_down"/);
+  assert.match(battle, /"charge_defense_down_15"/);
+  assert.match(battle, /"charge_defense_down_25"/);
   assert.match(css, /\.battle-enemy-name\.is-defense-down\s*\{[\s\S]*?color: #36a9ff/);
   assert.match(css, /\.battle-enemy-name\.is-defense-down::after\s*\{[\s\S]*?content: "⏬"/);
   assert.match(css, /body\.layout-pc \.message\.is-npc-charge-skill\s*\{[\s\S]*?height: 71px;[\s\S]*?max-height: 71px/);

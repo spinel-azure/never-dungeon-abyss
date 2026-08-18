@@ -19,7 +19,7 @@ export function resolvePhysicalAttack({
     : Math.max(0, numeric(defender.def))
       * COMBAT_CONFIG.defenseMultiplier
       * (1 - penetration);
-  const attackStat = attack.attackStat === "int" ? "int" : "str";
+  const attackStat = ["int", "dex"].includes(attack.attackStat) ? attack.attackStat : "str";
   const attackStatMultiplier = Number.isFinite(Number(attack.attackStatMultiplier))
     ? Number(attack.attackStatMultiplier)
     : COMBAT_CONFIG.strengthMultiplier;
@@ -114,10 +114,17 @@ export function resolvePhysicalAttack({
 
 export function calculatePhysicalHitRate({ attacker = {}, defender = {}, attack = {} } = {}) {
   const illusion = getActiveStatus(defender, "illusion");
-  const minimum = illusion?.physicalHitRateFloor
+  const accuracyPenaltyStatus = (attacker.statuses || []).find(status =>
+    status.active !== false && Number(status.physicalHitPenalty) > 0
+  );
+  const minimum = accuracyPenaltyStatus?.physicalHitRateFloor
+    ?? illusion?.physicalHitRateFloor
     ?? defender.physicalHitMinimum
     ?? COMBAT_CONFIG.physicalHitMinimum;
-  const penalty = illusion?.physicalHitPenalty || 0;
+  const penalty = Math.max(
+    Number(illusion?.physicalHitPenalty) || 0,
+    Number(accuracyPenaltyStatus?.physicalHitPenalty) || 0
+  );
   return clamp(
     COMBAT_CONFIG.physicalHitBase
       + (numeric(attacker.dex) - numeric(defender.agi)) * COMBAT_CONFIG.physicalHitStatStep
