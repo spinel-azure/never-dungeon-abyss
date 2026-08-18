@@ -2,7 +2,15 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { equipInstance, getEquipmentInstanceDefinition, getEquipmentInstanceName, grantEquipmentInstance, listEquipmentInstances } from "../data/equipment-inventory.js";
-import { depositItemInWarehouse, grantItemWithOverflow, settleLootBag, storeItemInWarehouse, withdrawItemFromWarehouse } from "../data/inventory.js";
+import {
+  depositEquipmentInWarehouse,
+  depositItemInWarehouse,
+  grantItemWithOverflow,
+  settleLootBag,
+  storeItemInWarehouse,
+  withdrawEquipmentFromWarehouse,
+  withdrawItemFromWarehouse
+} from "../data/inventory.js";
 
 test("legacy equipment migrates to stable individual instances", () => {
   const character = normalizeCharacter({
@@ -88,6 +96,43 @@ test("shop warehouse withdraws a selected quantity from a stack", () => {
   assert.equal(result.amount, 5);
   assert.equal(result.character.inventory.counts.healing_potion, 6);
   assert.deepEqual(result.character.warehouse.itemStacks, [{ itemId: "healing_potion", count: 3 }]);
+});
+
+test("shop warehouse preserves an equipment instance while depositing and withdrawing it", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "thief" });
+  const granted = grantEquipmentInstance(character, "stiletto", "rightArmId", {
+    enhancement: 3,
+    identified: true
+  });
+  character = granted.character;
+
+  const deposited = depositEquipmentInWarehouse(character, granted.instance.instanceId);
+  assert.equal(deposited.accepted, true);
+  assert.equal(deposited.character.equipmentInventory.instances.some(
+    instance => instance.instanceId === granted.instance.instanceId
+  ), false);
+  assert.deepEqual(deposited.character.warehouse.equipmentInstances[0], granted.instance);
+
+  const withdrawn = withdrawEquipmentFromWarehouse(deposited.character, granted.instance.instanceId);
+  assert.equal(withdrawn.accepted, true);
+  assert.deepEqual(
+    withdrawn.character.equipmentInventory.instances.find(
+      instance => instance.instanceId === granted.instance.instanceId
+    ),
+    granted.instance
+  );
+  assert.equal(withdrawn.character.warehouse.equipmentInstances.length, 0);
+});
+
+test("shop warehouse refuses to deposit equipped gear", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  const equippedId = character.equippedInstanceIds.rightArmId;
+  const result = depositEquipmentInWarehouse(character, equippedId);
+  assert.equal(result.accepted, false);
+  assert.equal(result.reason, "equipped");
+  assert.equal(result.character.equipmentInventory.instances.some(
+    instance => instance.instanceId === equippedId
+  ), true);
 });
 
 test("inventory overflow and loot settlement retain every acquired item", () => {

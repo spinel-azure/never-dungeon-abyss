@@ -117,6 +117,10 @@
         </section>
         <section id="townCommerceOverlay" class="town-commerce-overlay" aria-label="商品選択" hidden>
           <h2 id="townCommerceTitle" class="town-commerce-title">購入</h2>
+          <nav id="townStorageTabs" class="town-storage-tabs" aria-label="倉庫の分類" hidden>
+            <button type="button" data-storage-tab="items">道具</button>
+            <button type="button" data-storage-tab="equipment">装備品</button>
+          </nav>
           <div id="townCommerceList" class="town-commerce-list"></div>
           <div id="townCommerceQuantityControls" class="town-commerce-quantity-controls" hidden>
             <button type="button" data-commerce-step="-10">－10</button>
@@ -427,7 +431,7 @@
     </section>
   </section>
 </main>
-  <script type="module" src="js/main.js?v=20260818-16"></script>
+  <script type="module" src="js/main.js?v=20260818-17"></script>
   <script type="module" src="js/title-screen.js"></script>
 </body>
 </html>

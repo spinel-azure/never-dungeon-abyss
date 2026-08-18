@@ -146,6 +146,66 @@ export function depositItemInWarehouse(character, itemId, amount = 1) {
   };
 }
 
+export function depositEquipmentInWarehouse(character, instanceId) {
+  if (!character) return { accepted: false, reason: "noCharacter", character };
+  const instances = Array.isArray(character.equipmentInventory?.instances)
+    ? character.equipmentInventory.instances
+    : [];
+  const instance = instances.find(entry => entry?.instanceId === instanceId);
+  if (!instance) return { accepted: false, reason: "notOwned", character };
+  if (Object.values(character.equippedInstanceIds || {}).includes(instance.instanceId)) {
+    return { accepted: false, reason: "equipped", character, instance };
+  }
+  const warehouse = normalizeWarehouse(character.warehouse);
+  return {
+    accepted: true,
+    reason: "",
+    amount: 1,
+    instance,
+    character: {
+      ...character,
+      equipmentInventory: {
+        ...character.equipmentInventory,
+        instances: instances.filter(entry => entry.instanceId !== instance.instanceId)
+      },
+      warehouse: {
+        ...warehouse,
+        equipmentInstances: [...warehouse.equipmentInstances, structuredClone(instance)]
+      }
+    }
+  };
+}
+
+export function withdrawEquipmentFromWarehouse(character, instanceId) {
+  if (!character) return { accepted: false, reason: "noCharacter", character };
+  const warehouse = normalizeWarehouse(character.warehouse);
+  const instance = warehouse.equipmentInstances.find(entry => entry?.instanceId === instanceId);
+  if (!instance) return { accepted: false, reason: "notStored", character };
+  const owned = Array.isArray(character.equipmentInventory?.instances)
+    ? character.equipmentInventory.instances
+    : [];
+  if (owned.some(entry => entry?.instanceId === instance.instanceId)) {
+    return { accepted: false, reason: "duplicateInstance", character, instance };
+  }
+  return {
+    accepted: true,
+    reason: "",
+    amount: 1,
+    instance,
+    character: {
+      ...character,
+      equipmentInventory: {
+        ...(character.equipmentInventory || { nextOrder: 1 }),
+        instances: [...owned, structuredClone(instance)]
+      },
+      warehouse: {
+        ...warehouse,
+        equipmentInstances: warehouse.equipmentInstances.filter(entry => entry.instanceId !== instance.instanceId)
+      }
+    }
+  };
+}
+
 export function grantItemWithOverflow(character, itemId, amount = 1) {
   if (!character) return { character, gained: 0, stored: 0, reason: "noCharacter" };
   const requested = Math.max(0, Math.floor(Number(amount) || 0));

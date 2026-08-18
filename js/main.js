@@ -124,7 +124,7 @@ import { drawCardCanvas } from "./card-canvas.js";
 import { getItem } from "../data/items.js";
 import { isCriticalHp } from "../data/quick-status.js";
 import { purchaseBuybackEquipment, purchaseBuybackItem, purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
-import { addLootCard, addLootEquipment, addLootGold, addLootItem, depositItemInWarehouse, grantItemWithOverflow, settleLootBag, withdrawItemFromWarehouse } from "../data/inventory.js";
+import { addLootCard, addLootEquipment, addLootGold, addLootItem, depositEquipmentInWarehouse, depositItemInWarehouse, grantItemWithOverflow, settleLootBag, withdrawEquipmentFromWarehouse, withdrawItemFromWarehouse } from "../data/inventory.js";
 import { rollEnemyDrop, rollPurpleChestLoot, rollRedChestLoot } from "../data/loot.js";
 import { rollTreasureTrap } from "../data/traps.js";
 import { restAtHealingFountain as restoreAtHealingFountain } from "../data/fountains.js";
@@ -454,6 +454,8 @@ import {
     onViewShopCategory: viewShopCategory,
     onWithdrawItem: withdrawTownItem,
     onDepositItem: depositTownItem,
+    onWithdrawEquipment: withdrawTownEquipment,
+    onDepositEquipment: depositTownEquipment,
     onEditDeck: openDeckEditor,
     onOpenQuestHistory: openQuestHistory,
     onOpenRumorHistory: openRumorHistory,
@@ -1688,6 +1690,24 @@ import {
     const result = depositItemInWarehouse(character, itemId, amount);
     if (!result.accepted) return result;
     character = result.character;
+    updateCharacterUi();
+    saveGame();
+    return { ...result, character };
+  }
+
+  function withdrawTownEquipment(instanceId) {
+    const result = withdrawEquipmentFromWarehouse(character, instanceId);
+    if (!result.accepted) return result;
+    character = normalizeCharacter(result.character);
+    updateCharacterUi();
+    saveGame();
+    return { ...result, character };
+  }
+
+  function depositTownEquipment(instanceId) {
+    const result = depositEquipmentInWarehouse(character, instanceId);
+    if (!result.accepted) return result;
+    character = normalizeCharacter(result.character);
     updateCharacterUi();
     saveGame();
     return { ...result, character };

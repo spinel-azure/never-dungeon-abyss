@@ -142,6 +142,8 @@ const town = {
   onViewShopCategory: () => {},
   onWithdrawItem: () => null,
   onDepositItem: () => null,
+  onWithdrawEquipment: () => null,
+  onDepositEquipment: () => null,
   onEditDeck: () => {},
   onOpenQuestHistory: () => {},
   onOpenRumorHistory: () => {},
@@ -198,6 +200,8 @@ export function configureTown(options) {
   town.commerceList = document.querySelector("#townCommerceList");
   town.commerceGold = document.querySelector("#townCommerceGold");
   town.commerceQuantityControls = document.querySelector("#townCommerceQuantityControls");
+  town.storageTabs = document.querySelector("#townStorageTabs");
+  town.storageCategory = "items";
   town.commerceIndex = 0;
   town.commerceQuantity = 1;
   town.commercePointerArmedIndex = -1;
@@ -375,6 +379,11 @@ export function configureTown(options) {
     const step = Number(button.dataset.commerceStep);
     const action = step === -10 ? "left" : step === -1 ? "down" : step === 1 ? "up" : step === 10 ? "right" : "";
     if (action) handleCommerceQuantityInput(action);
+  });
+  town.storageTabs?.addEventListener("click", event => {
+    const button = event.target.closest("[data-storage-tab]");
+    if (!button || town.mode !== "commerce" || !town.commerceKind.startsWith("storage")) return;
+    setStorageCategory(button.dataset.storageTab);
   });
   town.root.querySelector("#guildQuestPager")?.addEventListener("click", event => {
     const button = event.target.closest("[data-quest-page]");
@@ -1667,6 +1676,7 @@ function openNpcManagement(kind) {
     : NPC_DEFINITIONS.filter(npc => registered.has(npc.id)).map(npc => ({ ...npc, active: active.has(npc.id) }));
   town.mode = "npcManagement";
   town.commerceOverlay.classList.add("is-npc-management");
+  if (town.storageTabs) town.storageTabs.hidden = true;
   town.npcManagementReturn = { mode: "facilityMenu", subFacilityId: town.subFacilityId, selectedIndex: town.selectedIndex };
   town.commerceOverlay.hidden = false;
   town.guildQuestOverlay.hidden = true;
@@ -1690,6 +1700,7 @@ export function openPendingNpcRenewal() {
   if (!town.npcManagementItems.length) return false;
   town.mode = "npcManagement";
   town.commerceOverlay.classList.add("is-npc-management");
+  if (town.storageTabs) town.storageTabs.hidden = true;
   town.commandRoot.hidden = true;
   town.commerceOverlay.hidden = false;
   town.guildQuestOverlay.hidden = true;
@@ -1860,28 +1871,48 @@ function closeNpcManagement() {
   renderFacility();
 }
 
-function openCommerce(kind) {
-  if (town.commerceQuantityControls) town.commerceQuantityControls.hidden = true;
-  const buybackEntries = kind === "buybackEquipment" ? (town.getCharacter()?.equipmentBuyback || []) : [];
-  const itemBuybackEntries = kind === "buybackEquipment" ? (town.getCharacter()?.itemBuyback || []) : [];
+function getStorageEquipmentEntries(kind) {
+  const character = town.getCharacter();
+  const instances = kind === "storageWithdraw"
+    ? character?.warehouse?.equipmentInstances || []
+    : character?.equipmentInventory?.instances || [];
+  const equippedIds = new Set(Object.values(character?.equippedInstanceIds || {}));
+  return instances.map(instance => {
+    const definition = getEquipmentInstanceDefinition(instance);
+    return definition ? {
+      ...definition,
+      id: instance.instanceId,
+      name: getEquipmentInstanceName(instance),
+      instance,
+      storageEquipment: true,
+      equipped: kind === "storageDeposit" && equippedIds.has(instance.instanceId)
+    } : null;
+  }).filter(Boolean);
+}
+
+function buildCommerceItems(kind) {
+  const character = town.getCharacter();
+  if (kind.startsWith("storage") && town.storageCategory === "equipment") {
+    return getStorageEquipmentEntries(kind);
+  }
+  const buybackEntries = kind === "buybackEquipment" ? (character?.equipmentBuyback || []) : [];
+  const itemBuybackEntries = kind === "buybackEquipment" ? (character?.itemBuyback || []) : [];
   const ids = kind === "donate"
     ? ["exorcism_talisman", "holy_water"]
     : kind === "storageWithdraw"
-      ? [...new Set((town.getCharacter()?.warehouse?.itemStacks || []).map(stack => stack.itemId))]
+      ? [...new Set((character?.warehouse?.itemStacks || []).map(stack => stack.itemId))]
     : kind === "storageDeposit"
-      ? Object.keys(town.getCharacter()?.inventory?.counts || {})
+      ? Object.keys(character?.inventory?.counts || {})
     : kind === "sell"
-      ? Object.keys(town.getCharacter()?.inventory?.counts || {}).filter(id => getItem(id)?.sellPrice > 0)
+      ? Object.keys(character?.inventory?.counts || {}).filter(id => getItem(id)?.sellPrice > 0)
       : kind === "buyEquipment"
         ? []
-        : getShopItemIdsForCharacter(town.getCharacter());
-  town.mode = "commerce";
-  town.commerceKind = kind;
-  town.commerceItems = kind === "buybackEquipment"
+        : getShopItemIdsForCharacter(character);
+  return kind === "buybackEquipment"
     ? [
       ...buybackEntries.map(entry => {
-      const definition = getEquipmentInstanceDefinition(entry.instance);
-      return definition ? { ...definition, id: entry.instance.instanceId, name: getEquipmentInstanceName(entry.instance), buyPrice: entry.price, buybackKind: "equipment" } : null;
+        const definition = getEquipmentInstanceDefinition(entry.instance);
+        return definition ? { ...definition, id: entry.instance.instanceId, name: getEquipmentInstanceName(entry.instance), buyPrice: entry.price, buybackKind: "equipment" } : null;
       }),
       ...itemBuybackEntries.map(entry => {
         const definition = getItem(entry.itemId);
@@ -1889,12 +1920,46 @@ function openCommerce(kind) {
       })
     ].filter(Boolean)
     : kind === "buyEquipment"
-      ? getShopEquipmentStock(town.getCharacter())
+      ? getShopEquipmentStock(character)
       : ids.map(getItem).filter(Boolean);
+}
+
+function renderStorageTabs() {
+  const visible = town.commerceKind.startsWith("storage");
+  if (!town.storageTabs) return;
+  town.storageTabs.hidden = !visible;
+  town.storageTabs.querySelectorAll("[data-storage-tab]").forEach(button => {
+    button.classList.toggle("is-selected", button.dataset.storageTab === town.storageCategory);
+  });
+}
+
+function setStorageCategory(category) {
+  if (!town.commerceKind.startsWith("storage") || !["items", "equipment"].includes(category)) return;
+  if (town.storageCategory !== category) town.playSe("cursorMove");
+  town.storageCategory = category;
+  town.commerceItems = buildCommerceItems(town.commerceKind);
+  town.commerceIndex = 0;
+  town.commercePointerArmedIndex = -1;
+  renderStorageTabs();
+  renderCommerce({ showDescription: false });
+  const action = town.commerceKind === "storageWithdraw" ? "取り出せる" : "預けられる";
+  const categoryLabel = category === "equipment" ? "装備品" : "道具";
+  town.messageEl.textContent = town.commerceItems.length
+    ? `女主人ヘレン：${action}${categoryLabel}を選んで。`
+    : `女主人ヘレン：${action}${categoryLabel}はないようね。`;
+}
+
+function openCommerce(kind) {
+  if (town.commerceQuantityControls) town.commerceQuantityControls.hidden = true;
+  town.mode = "commerce";
+  town.commerceKind = kind;
+  if (kind.startsWith("storage")) town.storageCategory = "items";
+  town.commerceItems = buildCommerceItems(kind);
   town.commerceIndex = 0;
   town.commercePointerArmedIndex = -1;
   town.commerceTitle.textContent = kind === "donate" ? "寄進" : kind === "sell" ? "売却" : kind.startsWith("storage") ? "倉庫" : "購入";
   town.commerceOverlay.hidden = false;
+  renderStorageTabs();
   town.guildQuestOverlay.hidden = true;
   town.messageEl.textContent = kind === "donate"
     ? "司祭アーヴァイン：いずれを女神へ寄進されますか？\n＊Aボタン：決定　Bボタン：戻る"
@@ -1956,6 +2021,10 @@ function handleCommerceInput(action) {
     else renderFacility();
     return true;
   }
+  if (town.commerceKind.startsWith("storage") && ["left", "right"].includes(action)) {
+    setStorageCategory(town.storageCategory === "items" ? "equipment" : "items");
+    return true;
+  }
   if (["up", "down", "left", "right"].includes(action)) {
     if (!town.commerceItems.length) return true;
     town.playSe("cursorMove");
@@ -1977,6 +2046,11 @@ function handleCommerceInput(action) {
 function requestCommerceConfirmation() {
   const item = town.commerceItems[town.commerceIndex];
   if (!item) return;
+  if (item.storageEquipment && item.equipped) {
+    town.playSe("cursorMove");
+    town.messageEl.textContent = "女主人ヘレン：装備中の品は預かれないわ。先に装備を外してね。";
+    return;
+  }
   if (town.commerceKind === "buy") {
     town.commerceQuantity = 1;
     town.mode = "commerceQuantity";
@@ -2002,7 +2076,11 @@ function showCommerceConfirmation() {
   if (!item) return;
   if (town.commerceQuantityControls) town.commerceQuantityControls.hidden = true;
   town.mode = "commerceConfirm";
-  town.messageEl.textContent = town.commerceKind === "donate"
+  town.messageEl.textContent = item.storageEquipment && town.commerceKind === "storageWithdraw"
+    ? `女主人ヘレン：${item.name}を取り出すのね？\n＊Aボタン：はい　Bボタン：いいえ`
+    : item.storageEquipment && town.commerceKind === "storageDeposit"
+      ? `女主人ヘレン：${item.name}を預かればいいのね？\n＊Aボタン：はい　Bボタン：いいえ`
+    : town.commerceKind === "donate"
     ? "司祭アーヴァイン：こちらでよろしいですか？\n＊Aボタン：はい　Bボタン：いいえ"
     : town.commerceKind === "storageWithdraw"
       ? `女主人ヘレン：${item.name}を${town.commerceQuantity || 1}個取り出すのね？\n＊Aボタン：はい　Bボタン：いいえ`
@@ -2084,9 +2162,13 @@ function purchaseSelectedCommerceItem() {
   const withdrawing = town.commerceKind === "storageWithdraw";
   const depositing = town.commerceKind === "storageDeposit";
   const result = withdrawing
-    ? town.onWithdrawItem(item.id, town.commerceQuantity || 1)
+    ? item.storageEquipment
+      ? town.onWithdrawEquipment(item.instance.instanceId)
+      : town.onWithdrawItem(item.id, town.commerceQuantity || 1)
     : depositing
-      ? town.onDepositItem(item.id, town.commerceQuantity || 1)
+      ? item.storageEquipment
+        ? town.onDepositEquipment(item.instance.instanceId)
+        : town.onDepositItem(item.id, town.commerceQuantity || 1)
     : selling
     ? town.onSellItem(item.id, town.commerceQuantity || 1)
     : town.commerceKind === "buyEquipment"
@@ -2109,9 +2191,13 @@ function purchaseSelectedCommerceItem() {
   town.messageEl.textContent = town.commerceKind === "donate"
     ? `${keeper}：女神のご加護を。${item.name}を授けましょう。`
     : withdrawing
-      ? `${keeper}：${item.name}を${result.amount}個、倉庫から取り出したわ。`
+      ? item.storageEquipment
+        ? `${keeper}：${item.name}を倉庫から取り出したわ。`
+        : `${keeper}：${item.name}を${result.amount}個、倉庫から取り出したわ。`
     : depositing
-      ? `${keeper}：${item.name}を${result.amount}個、倉庫で預かったわ。`
+      ? item.storageEquipment
+        ? `${keeper}：${item.name}を倉庫で預かったわ。`
+        : `${keeper}：${item.name}を${result.amount}個、倉庫で預かったわ。`
     : selling
       ? `${keeper}：${item.name}を${result.quantity}個、${result.value}Gで買い取ったわ。`
     : result.stored > 0
@@ -2120,7 +2206,8 @@ function purchaseSelectedCommerceItem() {
         ? `${keeper}：${item.name}を${result.quantity}個ね。はい、どうぞ。`
         : `${keeper}：はい、どうぞ。`;
   town.mode = "commerce";
-  if (((selling || depositing) && Number(town.getCharacter()?.inventory?.counts?.[item.id] || 0) <= 0)
+  if (item.storageEquipment
+    || ((selling || depositing) && Number(town.getCharacter()?.inventory?.counts?.[item.id] || 0) <= 0)
     || (withdrawing && warehouseItemCount(item.id) <= 0)
     || town.commerceKind === "buybackEquipment") {
     town.commerceItems.splice(town.commerceIndex, 1);
@@ -2141,7 +2228,9 @@ function renderCommerce({ showDescription = true } = {}) {
     const name = document.createElement("span");
     name.textContent = item.name;
     const price = document.createElement("small");
-    price.textContent = town.commerceKind === "storageWithdraw"
+    price.textContent = item.storageEquipment
+      ? item.equipped ? "［装備中］" : "×1"
+      : town.commerceKind === "storageWithdraw"
       ? `×${warehouseItemCount(item.id)}`
       : town.commerceKind === "storageDeposit"
         ? `×${town.getCharacter()?.inventory?.counts?.[item.id] || 0}`
@@ -2151,6 +2240,7 @@ function renderCommerce({ showDescription = true } = {}) {
           ? `${item.buyPrice}G　所持×${inventoryItemCount(item.id)}`
           : `${item.buyPrice}G`;
     button.append(name, price);
+    button.classList.toggle("is-unavailable", Boolean(item.equipped));
     return button;
   }));
   if (town.commerceGold) {
@@ -2208,7 +2298,12 @@ function renderCommerceSelection({ showDescription = true } = {}) {
     const ownership = town.commerceKind === "buy"
       ? `\n所持数：${inventoryItemCount(item.id)}／${item.maxOwned || 99}　倉庫：${warehouseItemCount(item.id)}`
       : "";
-    town.messageEl.textContent = `${item.description}${ownership}\n＊Aボタン：決定　Bボタン：戻る`;
+    const description = item.storageEquipment
+      ? item.equipped
+        ? `${item.description || "装備品"}\n装備中のため預けられません。`
+        : item.description || "装備品"
+      : item.description;
+    town.messageEl.textContent = `${description}${ownership}\n＊Aボタン：決定　Bボタン：戻る`;
   }
 }
 
