@@ -979,13 +979,18 @@ function renderInventory() {
   else { const definition = getEquipmentInstanceDefinition(selected.instance); const requirements = Object.entries(definition?.requirements || {}).map(([key, value]) => `${key.toUpperCase()} ${value}以上`).join(" / "); const effects = equipmentEffectLabels(definition); description.textContent = `${EQUIPMENT_SLOT_LABELS[selected.instance.slot]} / ${effects.join(" / ")}${effects.length ? " / " : ""}${requirements ? `装備条件：${requirements}` : "装備条件なし"}${selected.instance.locked ? " / ロック中" : ""}${selected.instance.curseKnown ? " / 呪われているため外せません。" : ""}`; }
   renderInventoryComparison(panel.querySelector("[data-inventory-compare]"), selected?.instance || null);
   const lockButton = panel.querySelector("[data-inventory-lock]");
+  const lockControls = panel.querySelector("[data-inventory-lock-controls]");
+  const lockHelp = panel.querySelector("[data-inventory-lock-help]");
   const lockVisible = Boolean(selected?.instance) && menu.inventoryMode === "list" && menu.inventoryPurpose !== "buy";
-  lockButton.hidden = !lockVisible;
+  lockControls.hidden = !lockVisible;
   if (lockVisible) {
     lockButton.textContent = selected.instance.locked ? "🔓" : "🔒";
     lockButton.title = selected.instance.locked ? "ロック解除（アイテムボタン／Lキー）" : "ロック（アイテムボタン／Lキー）";
     lockButton.setAttribute("aria-label", lockButton.title);
     lockButton.classList.toggle("is-locked", selected.instance.locked);
+    lockHelp.textContent = selected.instance.locked
+      ? "Lキー／アイテムボタン／🔓タップで解除"
+      : "Lキー／アイテムボタン／🔒タップでロック";
   }
   panel.querySelector("[data-inventory-page]").textContent = `${menu.inventoryPage + 1}/${pages}`;
   const backButton = panel.querySelector('[data-inventory-nav="back"]');
