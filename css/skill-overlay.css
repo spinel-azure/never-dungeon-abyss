@@ -53,6 +53,25 @@
   color: #777;
 }
 
+.skill-overlay-item.is-charge-ready {
+  color: #ffe95b;
+  text-shadow: 0 0 4px rgba(255, 231, 65, .7), 0 0 9px rgba(255, 193, 35, .32);
+}
+
+.skill-overlay.is-battle-skills .skill-overlay-list {
+  grid-template: repeat(6, minmax(0, 1fr)) / repeat(2, minmax(0, 1fr));
+  grid-auto-flow: column;
+  gap: clamp(3px, .7vh, 7px) clamp(8px, 2vw, 20px);
+  width: min(82%, 760px);
+  height: min(68%, 370px);
+  margin: 1.5% auto 0;
+  overflow: hidden;
+}
+
+.skill-overlay.is-battle-skills .skill-overlay-item {
+  font-size: clamp(14px, 2.15vw, 22px);
+}
+
 .skill-overlay-back {
   position: absolute;
   left: 8%;
@@ -67,6 +86,19 @@
   transform: translateX(-50%);
   font-size: clamp(17px, 2.6vw, 27px);
 }
+
+.skill-overlay-page-button {
+  position: absolute;
+  bottom: 3.5%;
+  border: 0;
+  color: #fff36a;
+  background: transparent;
+  font: inherit;
+  font-size: clamp(18px, 3vw, 28px);
+}
+
+.skill-overlay-prev { left: 42%; }
+.skill-overlay-next { right: 42%; }
 
 .skill-overlay.is-field-inventory{box-sizing:border-box;padding:clamp(14px,3vw,26px);background:#020405}.skill-overlay.is-field-inventory .skill-overlay-title{margin:0 0 10px;font-family:"PixelFont",monospace;font-size:clamp(28px,5vw,44px)}.skill-overlay.is-field-inventory .skill-overlay-list{display:grid;grid-template-rows:repeat(8,minmax(30px,1fr));width:min(88%,620px);max-height:70%;margin:0 auto;gap:3px}.skill-overlay.is-field-inventory .skill-overlay-item{min-height:0;padding:4px 10px;border:1px solid #31434b;border-radius:0;background:#050708;font-size:clamp(13px,2.4vw,18px)}.skill-overlay.is-field-inventory .skill-overlay-item.is-selected{border-color:#aef6ff;background:rgba(32,190,255,.12);box-shadow:0 0 10px rgba(95,226,255,.65),inset 0 0 7px rgba(135,238,255,.2)}.skill-overlay.is-field-inventory .skill-overlay-back{left:6%;bottom:4%;padding:7px 18px;border:1px solid #31434b;background:#050708;font-size:clamp(13px,2.4vw,18px)}
 
@@ -83,4 +115,15 @@
     min-height: 34px;
     font-size: clamp(14px, 4vw, 20px);
   }
+  .skill-overlay.is-battle-skills .skill-overlay-list {
+    width: 92%;
+    height: 58%;
+    max-height: none;
+    overflow: hidden;
+  }
+  .skill-overlay.is-battle-skills .skill-overlay-item {
+    font-size: clamp(12px, 3.2vw, 17px);
+  }
+  .skill-overlay-prev { left: 36%; }
+  .skill-overlay-next { right: 36%; }
 }

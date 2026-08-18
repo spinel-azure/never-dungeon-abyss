@@ -1,15 +1,21 @@
 import { getSkills } from "../data/skills.js";
 import { getEffectiveSpCost } from "../combat/sp-cost.js";
 
+const BATTLE_SKILLS_PER_COLUMN = 6;
+const BATTLE_SKILLS_PER_PAGE = BATTLE_SKILLS_PER_COLUMN * 2;
+
 const overlay = {
   root: null,
   list: null,
   messageEl: null,
   pageEl: null,
+  prevButton: null,
+  nextButton: null,
   backButton: null,
   active: false,
   context: "field",
   selectedIndex: 0,
+  page: 0,
   skills: [],
   enemy: null,
   getCharacter: () => null,
@@ -23,8 +29,12 @@ export function configureSkillOverlay(options) {
   Object.assign(overlay, options);
   overlay.list = overlay.root.querySelector("[data-skill-list]");
   overlay.pageEl = overlay.root.querySelector("[data-skill-page]");
+  overlay.prevButton = overlay.root.querySelector("[data-skill-prev]");
+  overlay.nextButton = overlay.root.querySelector("[data-skill-next]");
   overlay.backButton = overlay.root.querySelector("[data-skill-back]");
   overlay.backButton.addEventListener("click", closeSkillOverlay);
+  overlay.prevButton?.addEventListener("click", () => changePage(-1));
+  overlay.nextButton?.addEventListener("click", () => changePage(1));
 }
 
 export function openSkillOverlay({ context = "field", character, enemy = null, onUse, onClose } = {}) {
@@ -32,13 +42,15 @@ export function openSkillOverlay({ context = "field", character, enemy = null, o
   overlay.active = true;
   overlay.context = context;
   overlay.selectedIndex = 0;
-  overlay.skills = getSkills(character.skillIds);
+  overlay.page = 0;
+  overlay.skills = getSkills(character.skillIds).filter(skill => context !== "battle" || skill.actionType !== "passive");
   overlay.enemy = enemy;
   overlay.getCharacter = () => character;
   if (onUse) overlay.onUse = onUse;
   overlay.onClose = onClose || (() => {});
   overlay.previousMessage = overlay.messageEl.textContent;
   overlay.root.classList.toggle("is-field-inventory", context === "field");
+  overlay.root.classList.toggle("is-battle-skills", context === "battle");
   overlay.root.hidden = false;
   document.body.classList.add("skill-overlay-open");
   render();
@@ -50,6 +62,7 @@ export function closeSkillOverlay({ restoreMessage = true } = {}) {
   overlay.active = false;
   overlay.root.hidden = true;
   overlay.root.classList.remove("is-field-inventory");
+  overlay.root.classList.remove("is-battle-skills");
   document.body.classList.remove("skill-overlay-open");
   overlay.messageEl.classList.remove("is-skill-description");
   if (restoreMessage) overlay.messageEl.textContent = overlay.previousMessage;
@@ -68,12 +81,20 @@ export function handleSkillOverlayInput(action) {
     closeSkillOverlay();
     return true;
   }
-  if (action === "up" || action === "left") {
-    moveSelection(-1);
+  if (action === "up") {
+    moveVertical(-1);
     return true;
   }
-  if (action === "down" || action === "right") {
-    moveSelection(1);
+  if (action === "down") {
+    moveVertical(1);
+    return true;
+  }
+  if (action === "left") {
+    moveHorizontal(-1);
+    return true;
+  }
+  if (action === "right") {
+    moveHorizontal(1);
     return true;
   }
   if (action === "confirm") {
@@ -83,11 +104,70 @@ export function handleSkillOverlayInput(action) {
   return true;
 }
 
-function moveSelection(amount) {
+function moveVertical(amount) {
+  if (overlay.context !== "battle") return moveLinear(amount);
+  const { start, items } = getCurrentPage();
+  if (!items.length) return selectBack();
+  if (overlay.selectedIndex === overlay.skills.length) {
+    overlay.selectedIndex = amount < 0 ? start + items.length - 1 : start;
+  } else {
+    const local = overlay.selectedIndex - start;
+    const columnStart = Math.floor(local / BATTLE_SKILLS_PER_COLUMN) * BATTLE_SKILLS_PER_COLUMN;
+    const columnLength = Math.min(BATTLE_SKILLS_PER_COLUMN, items.length - columnStart);
+    const row = local - columnStart;
+    const nextRow = row + amount;
+    overlay.selectedIndex = nextRow >= 0 && nextRow < columnLength
+      ? start + columnStart + nextRow
+      : overlay.skills.length;
+  }
+  overlay.playSe("cursorMove");
+  renderSelection();
+}
+
+function moveHorizontal(amount) {
+  if (overlay.context !== "battle") return moveLinear(amount);
+  const { start, items } = getCurrentPage();
+  if (overlay.selectedIndex === overlay.skills.length) return changePage(amount);
+  const local = overlay.selectedIndex - start;
+  const targetLocal = local + amount * BATTLE_SKILLS_PER_COLUMN;
+  if (targetLocal >= 0 && targetLocal < items.length) {
+    overlay.selectedIndex = start + targetLocal;
+    overlay.playSe("cursorMove");
+    renderSelection();
+    return;
+  }
+  changePage(amount, local % BATTLE_SKILLS_PER_COLUMN);
+}
+
+function moveLinear(amount) {
   const itemCount = overlay.skills.length + 1;
   overlay.selectedIndex = (overlay.selectedIndex + amount + itemCount) % itemCount;
   overlay.playSe("cursorMove");
   renderSelection();
+}
+
+function selectBack() {
+  overlay.selectedIndex = overlay.skills.length;
+  overlay.playSe("cursorMove");
+  renderSelection();
+}
+
+function changePage(amount, preferredRow = 0) {
+  if (overlay.context !== "battle") return false;
+  const pageCount = Math.max(1, Math.ceil(overlay.skills.length / BATTLE_SKILLS_PER_PAGE));
+  if (pageCount <= 1) return false;
+  overlay.page = (overlay.page + amount + pageCount) % pageCount;
+  const { start, items } = getCurrentPage();
+  overlay.selectedIndex = items.length ? start + Math.min(preferredRow, items.length - 1) : overlay.skills.length;
+  overlay.playSe("cursorMove");
+  render();
+  return true;
+}
+
+function getCurrentPage() {
+  const pageSize = overlay.context === "battle" ? BATTLE_SKILLS_PER_PAGE : Math.max(1, overlay.skills.length);
+  const start = overlay.page * pageSize;
+  return { start, items: overlay.skills.slice(start, start + pageSize) };
 }
 
 async function activateSelected() {
@@ -121,13 +201,17 @@ async function activateSelected() {
 
 function render() {
   const character = overlay.getCharacter();
-  const buttons = overlay.skills.map((skill, index) => {
+  const { start, items } = getCurrentPage();
+  const buttons = items.map((skill, localIndex) => {
+    const index = start + localIndex;
     const button = document.createElement("button");
     button.type = "button";
     button.className = "skill-overlay-item";
     button.dataset.skillId = skill.id;
-    button.disabled = Boolean(unavailableReason(skill, character));
-    button.innerHTML = `<span>${skill.name}</span><small>${skill.actionType === "passive" ? "PASSIVE" : skill.chargeSkill ? "CHARGE" : `SP${getEffectiveSpCost(skill, character)}`}</small>`;
+    const reason = unavailableReason(skill, character);
+    button.disabled = Boolean(reason);
+    button.classList.toggle("is-charge-ready", Boolean(skill.chargeSkill && !reason));
+    button.innerHTML = `<span>${skill.name}</span><small>${skill.chargeSkill ? "CHARGE" : `SP${getEffectiveSpCost(skill, character)}`}</small>`;
     button.addEventListener("click", () => {
       overlay.selectedIndex = index;
       renderSelection();
@@ -136,16 +220,20 @@ function render() {
     return button;
   });
   overlay.list.replaceChildren(...buttons);
-  overlay.pageEl.textContent = "1/1";
+  const pageCount = overlay.context === "battle" ? Math.max(1, Math.ceil(overlay.skills.length / BATTLE_SKILLS_PER_PAGE)) : 1;
+  overlay.pageEl.textContent = `${overlay.page + 1}/${pageCount}`;
+  if (overlay.prevButton) overlay.prevButton.hidden = overlay.context !== "battle" || pageCount <= 1;
+  if (overlay.nextButton) overlay.nextButton.hidden = overlay.context !== "battle" || pageCount <= 1;
   renderSelection();
 }
 
 function renderSelection() {
   const buttons = [...overlay.list.children];
+  const { start } = getCurrentPage();
   buttons.forEach((button, index) => {
-    button.classList.toggle("is-selected", index === overlay.selectedIndex);
+    button.classList.toggle("is-selected", start + index === overlay.selectedIndex);
   });
-  buttons[overlay.selectedIndex]?.scrollIntoView?.({ block: "nearest" });
+  buttons[overlay.selectedIndex - start]?.scrollIntoView?.({ block: "nearest" });
   const backSelected = overlay.selectedIndex === overlay.skills.length;
   overlay.backButton.classList.toggle("is-selected", backSelected);
   const skill = overlay.skills[overlay.selectedIndex];

@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="css/effects.css?v=20260805-2">
   <link rel="stylesheet" href="css/scene-transition.css?v=20260809-2">
   <link rel="stylesheet" href="css/battle.css?v=20260809-1">
-  <link rel="stylesheet" href="css/skill-overlay.css?v=20260809-1">
+  <link rel="stylesheet" href="css/skill-overlay.css?v=20260818-1">
   <link rel="preload" as="image" href="images/npc/NPC_10.avif" type="image/avif">
   <link rel="preload" as="image" href="images/npc/NPC_11.avif" type="image/avif">
   <link rel="preload" as="image" href="images/npc/NPC_12.avif" type="image/avif">
@@ -195,7 +195,9 @@
         <h2 class="skill-overlay-title">スキル</h2>
         <div class="skill-overlay-list" data-skill-list></div>
         <button type="button" class="skill-overlay-back" data-skill-back>戻る</button>
+        <button type="button" class="skill-overlay-page-button skill-overlay-prev" data-skill-prev aria-label="前のページ">◀</button>
         <p class="skill-overlay-page" data-skill-page>1/1</p>
+        <button type="button" class="skill-overlay-page-button skill-overlay-next" data-skill-next aria-label="次のページ">▶</button>
       </section>
       <section id="itemOverlay" class="skill-overlay item-overlay" aria-label="アイテム選択" hidden>
         <h2 class="skill-overlay-title">アイテム</h2>
@@ -425,7 +427,7 @@
     </section>
   </section>
 </main>
-  <script type="module" src="js/main.js?v=20260818-13"></script>
+  <script type="module" src="js/main.js?v=20260818-14"></script>
   <script type="module" src="js/title-screen.js"></script>
 </body>
 </html>
