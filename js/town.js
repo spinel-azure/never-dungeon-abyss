@@ -1473,15 +1473,15 @@ function activateFacilityService(command) {
   if (command === "storage-withdraw") { openCommerce("storageWithdraw"); return true; }
   if (command === "storage-return") { renderFacility(); return true; }
   if (command === "shop-items") {
-    town.onViewShopCategory("items");
+    const newStockIds = town.onViewShopCategory("items") || [];
     town.messageEl.textContent = "女主人ヘレン：道具を選んでちょうだい。";
-    town.onOpenPurchaseInventory("items");
+    town.onOpenPurchaseInventory("items", newStockIds);
     return true;
   }
   if (command === "shop-equipment") {
-    town.onViewShopCategory("equipment");
+    const newStockIds = town.onViewShopCategory("equipment") || [];
     town.messageEl.textContent = "女主人ヘレン：装備品を選んでちょうだい。";
-    town.onOpenPurchaseInventory("equipment");
+    town.onOpenPurchaseInventory("equipment", newStockIds);
     return true;
   }
   if (command === "shop-return") {
@@ -1882,7 +1882,7 @@ function getStorageEquipmentEntries(kind) {
     return definition ? {
       ...definition,
       id: instance.instanceId,
-      name: getEquipmentInstanceName(instance),
+      name: `${getEquipmentInstanceName(instance)}${instance.locked ? "［LOCK］" : ""}`,
       instance,
       storageEquipment: true,
       equipped: kind === "storageDeposit" && equippedIds.has(instance.instanceId)
@@ -1912,11 +1912,12 @@ function buildCommerceItems(kind) {
     ? [
       ...buybackEntries.map(entry => {
         const definition = getEquipmentInstanceDefinition(entry.instance);
-        return definition ? { ...definition, id: entry.instance.instanceId, name: getEquipmentInstanceName(entry.instance), buyPrice: entry.price, buybackKind: "equipment" } : null;
+        return definition ? { ...definition, id: entry.instance.instanceId, buybackEntryId: entry.entryId || entry.instance.instanceId, name: getEquipmentInstanceName(entry.instance), buyPrice: entry.price, buybackKind: "equipment" } : null;
       }),
       ...itemBuybackEntries.map(entry => {
         const definition = getItem(entry.itemId);
-        return definition ? { ...definition, buyPrice: entry.price, buybackKind: "item" } : null;
+        const amount = Math.max(1, Math.floor(Number(entry.amount) || 1));
+        return definition ? { ...definition, buybackEntryId: entry.entryId || entry.itemId, name: `${definition.name}${amount > 1 ? ` ×${amount}` : ""}`, buyPrice: entry.price, buybackKind: "item" } : null;
       })
     ].filter(Boolean)
     : kind === "buyEquipment"
@@ -2173,8 +2174,10 @@ function purchaseSelectedCommerceItem() {
     ? town.onSellItem(item.id, town.commerceQuantity || 1)
     : town.commerceKind === "buyEquipment"
       ? town.onPurchaseEquipment(item.id)
-      : town.commerceKind === "buybackEquipment"
-        ? item.buybackKind === "item" ? town.onBuybackItem(item.id) : town.onBuybackEquipment(item.id)
+    : town.commerceKind === "buybackEquipment"
+        ? item.buybackKind === "item"
+          ? town.onBuybackItem(item.buybackEntryId || item.id)
+          : town.onBuybackEquipment(item.buybackEntryId || item.id)
       : town.onPurchaseItem(item.id, town.commerceQuantity || 1);
   if (!result?.accepted) {
     town.playSe("cursorMove");

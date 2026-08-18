@@ -102,7 +102,8 @@ test("shop warehouse preserves an equipment instance while depositing and withdr
   let character = createInitialCharacter({ name: "TEST", job: "thief" });
   const granted = grantEquipmentInstance(character, "stiletto", "rightArmId", {
     enhancement: 3,
-    identified: true
+    identified: true,
+    locked: true
   });
   character = granted.character;
 

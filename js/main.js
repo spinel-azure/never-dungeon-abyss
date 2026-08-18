@@ -1663,8 +1663,10 @@ import {
   }
 
   function viewShopCategory(category) {
+    const newStockIds = getShopStockState(character).newStockIds?.[category] || [];
     character = markShopCategorySeen(character, category);
     saveGame();
+    return newStockIds;
   }
 
   function buybackTownEquipment(instanceId) {
@@ -2880,6 +2882,11 @@ import {
     getInventoryContext: () => isTownOpen() ? "town" : "dungeon",
     onUseInventoryItem: useFieldItem,
     onEquipmentChanged: next => {
+      character = next;
+      updateCharacterUi();
+      saveGame();
+    },
+    onEquipmentLockChanged: next => {
       character = next;
       updateCharacterUi();
       saveGame();

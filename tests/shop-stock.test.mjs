@@ -23,6 +23,7 @@ test("B10F creates one shop announcement and an unseen item badge", () => {
   const before = getShopStockState(character);
   assert.equal(before.announcementPending, true);
   assert.equal(before.newCategories.items, true);
+  assert.ok(before.newStockIds.items.length > 0);
   assert.equal(before.newCategories.equipment, false);
 
   const announced = acknowledgeShopStockAnnouncement(character);
@@ -47,6 +48,7 @@ test("opening a shop category clears only that category's badge", () => {
   assert.equal(getShopStockState(character).newCategories.items, true);
   const viewed = markShopCategorySeen(character, "items");
   assert.equal(getShopStockState(viewed).newCategories.items, false);
+  assert.deepEqual(getShopStockState(viewed).newStockIds.items, []);
 });
 
 test("legacy B10F saves receive the stock notice once", () => {

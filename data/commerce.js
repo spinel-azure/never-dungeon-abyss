@@ -59,6 +59,7 @@ export function sellItem(character, itemId, { price, amount = 1 } = {}) {
   const unitValue = Math.max(0, Math.floor(Number(price ?? item.sellPrice ?? item.buyPrice / 2) || 0));
   if (unitValue <= 0) return { accepted: false, reason: "notSellable", character, item };
   const value = unitValue * quantity;
+  const buybackUnitPrice = Math.max(unitValue * 2, Math.floor(Number(item.buybackPrice) || 0));
   return {
     accepted: true,
     reason: "",
@@ -70,17 +71,19 @@ export function sellItem(character, itemId, { price, amount = 1 } = {}) {
       inventory: consumeItem(character.inventory, item.id, quantity).inventory,
       itemBuyback: item.repurchasable ? [
         ...(Array.isArray(character.itemBuyback) ? character.itemBuyback : []),
-        { itemId: item.id, amount: quantity, price: Math.max(unitValue * 2, Math.floor(Number(item.buybackPrice) || 0)) }
+        { entryId: nextBuybackEntryId(character, "item"), itemId: item.id, amount: quantity, unitPrice: buybackUnitPrice, price: buybackUnitPrice * quantity }
       ] : (character.itemBuyback || [])
     }
   };
 }
 
-export function purchaseBuybackItem(character, itemId) {
+export function purchaseBuybackItem(character, entryIdOrItemId) {
   if (!character) return { accepted: false, reason: "noCharacter", character };
   const entries = Array.isArray(character.itemBuyback) ? character.itemBuyback : [];
-  const entry = entries.find(candidate => candidate?.itemId === itemId);
+  const entry = entries.find(candidate => candidate?.entryId === entryIdOrItemId)
+    || entries.find(candidate => candidate?.itemId === entryIdOrItemId);
   if (!entry) return { accepted: false, reason: "notFound", character };
+  const itemId = entry.itemId;
   const item = getItem(itemId);
   const cost = Math.max(0, Math.floor(Number(entry.price) || 0));
   const gold = Math.max(0, Math.floor(Number(character.gold) || 0));
@@ -100,6 +103,7 @@ export function sellEquipmentInstance(character, instanceId, { price } = {}) {
   if (Object.values(character.equippedInstanceIds || {}).includes(instance.instanceId)) {
     return { accepted: false, reason: "equipped", character, instance };
   }
+  if (instance.locked) return { accepted: false, reason: "locked", character, instance };
   const equipment = getEquipmentInstanceDefinition(instance);
   if (!equipment) return { accepted: false, reason: "unknownEquipment", character, instance };
   const value = Math.max(0, Math.floor(Number(price ?? equipment.sellPrice ?? equipment.buyPrice / 2) || 0));
@@ -119,24 +123,36 @@ export function sellEquipmentInstance(character, instanceId, { price } = {}) {
       },
       equipmentBuyback: [
         ...(Array.isArray(character.equipmentBuyback) ? character.equipmentBuyback : []),
-        { instance: structuredClone(instance), price: Math.max(value * 2, Math.floor(Number(equipment.buybackPrice) || 0)) }
+        { entryId: `equipment:${instance.instanceId}`, instance: structuredClone(instance), price: Math.max(value * 2, Math.floor(Number(equipment.buybackPrice) || 0)) }
       ]
     }
   };
 }
 
-export function purchaseBuybackEquipment(character, instanceId) {
+export function purchaseBuybackEquipment(character, entryIdOrInstanceId) {
   if (!character) return { accepted: false, reason: "noCharacter", character };
   const entries = Array.isArray(character.equipmentBuyback) ? character.equipmentBuyback : [];
-  const entry = entries.find(candidate => candidate?.instance?.instanceId === instanceId);
+  const entry = entries.find(candidate => candidate?.entryId === entryIdOrInstanceId)
+    || entries.find(candidate => candidate?.instance?.instanceId === entryIdOrInstanceId);
   if (!entry) return { accepted: false, reason: "notFound", character };
   const cost = Math.max(0, Math.floor(Number(entry.price) || 0));
   const gold = Math.max(0, Math.floor(Number(character.gold) || 0));
   if (gold < cost) return { accepted: false, reason: "insufficientGold", character, cost };
+  if ((character.equipmentInventory?.instances || []).some(instance => instance.instanceId === entry.instance.instanceId)) {
+    return { accepted: false, reason: "duplicateInstance", character, cost };
+  }
   return { accepted: true, reason: "", instance: entry.instance, cost, character: {
     ...character,
     gold: gold - cost,
     equipmentInventory: { ...character.equipmentInventory, instances: [...(character.equipmentInventory?.instances || []), structuredClone(entry.instance)] },
     equipmentBuyback: entries.filter(candidate => candidate !== entry)
   } };
+}
+
+function nextBuybackEntryId(character, kind) {
+  const entries = [...(character?.itemBuyback || []), ...(character?.equipmentBuyback || [])];
+  const used = new Set(entries.map(entry => String(entry?.entryId || "")));
+  let sequence = 1;
+  while (used.has(`${kind}:${sequence}`)) sequence += 1;
+  return `${kind}:${sequence}`;
 }

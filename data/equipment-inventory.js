@@ -29,7 +29,8 @@ export function normalizeEquipmentInventory(source, equipment, equippedInstanceI
       acquiredOrder,
       enhancement: Math.max(0, Math.floor(Number(raw?.enhancement) || 0)),
       identified: raw?.identified !== false,
-      curseKnown: raw?.curseKnown === true
+      curseKnown: raw?.curseKnown === true,
+      locked: raw?.locked === true
     });
   }
 
@@ -48,7 +49,7 @@ export function normalizeEquipmentInventory(source, equipment, equippedInstanceI
       if (!definition) { slotInstances[slot] = null; continue; }
       const instanceId = uniqueInstanceId(null, usedIds, nextOrder);
       usedIds.add(instanceId);
-      instance = { instanceId, equipmentId, slot, acquiredOrder: nextOrder++, enhancement: 0, identified: true, curseKnown: false };
+      instance = { instanceId, equipmentId, slot, acquiredOrder: nextOrder++, enhancement: 0, identified: true, curseKnown: false, locked: false };
       instances.push(instance);
     }
     slotInstances[slot] = instance.instanceId;
@@ -141,7 +142,8 @@ export function grantEquipmentInstance(character, equipmentId, slot, options = {
     acquiredOrder,
     enhancement: definition.cursed ? 0 : Math.max(0, Math.floor(Number(options.enhancement) || 0)),
     identified: options.identified !== false,
-    curseKnown: options.curseKnown === true
+    curseKnown: options.curseKnown === true,
+    locked: options.locked === true
   };
   equipmentInventory.instances.push(instance);
   equipmentInventory.nextOrder += 1;
@@ -151,6 +153,15 @@ export function grantEquipmentInstance(character, equipmentId, slot, options = {
     instance,
     character: { ...character, ...normalized, equipmentInventory }
   };
+}
+
+export function setEquipmentInstanceLocked(character, instanceId, locked) {
+  if (!character) return { accepted: false, character, reason: "noCharacter" };
+  const equipmentInventory = structuredClone(character.equipmentInventory || { instances: [], nextOrder: 1 });
+  const instance = equipmentInventory.instances.find(entry => entry.instanceId === instanceId);
+  if (!instance) return { accepted: false, character, reason: "notOwned" };
+  instance.locked = locked === true;
+  return { accepted: true, character: { ...character, equipmentInventory }, instance };
 }
 
 export function canEquipInstance(character, instance) {

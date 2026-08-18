@@ -188,10 +188,20 @@ export function normalizeCharacter(character) {
     equipment,
     ...equipmentCollection,
     equipmentBuyback: Array.isArray(character.equipmentBuyback)
-      ? structuredClone(character.equipmentBuyback).filter(entry => entry?.instance?.instanceId)
+      ? structuredClone(character.equipmentBuyback).filter(entry => entry?.instance?.instanceId).map(entry => ({
+        ...entry,
+        entryId: String(entry.entryId || `equipment:${entry.instance.instanceId}`)
+      }))
       : [],
     itemBuyback: Array.isArray(character.itemBuyback)
-      ? structuredClone(character.itemBuyback).filter(entry => getItem(entry?.itemId)?.repurchasable && Number(entry?.amount) > 0)
+      ? structuredClone(character.itemBuyback)
+        .filter(entry => getItem(entry?.itemId)?.repurchasable && Number(entry?.amount) > 0)
+        .map((entry, index) => {
+          const amount = Math.max(1, Math.floor(Number(entry.amount) || 1));
+          const legacyPrice = Math.max(0, Math.floor(Number(entry.price) || 0));
+          const unitPrice = Math.max(0, Math.floor(Number(entry.unitPrice) || legacyPrice));
+          return { ...entry, entryId: String(entry.entryId || `item:${index + 1}`), amount, unitPrice, price: entry.unitPrice == null ? unitPrice * amount : legacyPrice };
+        })
       : [],
     skillIds: [...new Set([
       ...characterClass.initialSkillIds,

@@ -12,7 +12,7 @@ import {
 import { grantEventItems, unlockGuildRequest } from "../js/character-services.js";
 import { purchaseBuybackEquipment, purchaseBuybackItem, purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
 import { getItem, getShopItemIdsForCharacter, getShopItemIdsForDepth } from "../data/items.js";
-import { equipInstance, getEquipmentInstanceDefinition } from "../data/equipment-inventory.js";
+import { equipInstance, getEquipmentInstanceDefinition, setEquipmentInstanceLocked } from "../data/equipment-inventory.js";
 import { getShopEquipmentOffer, getShopEquipmentStock } from "../data/shop-stock.js";
 import { readFile } from "node:fs/promises";
 
@@ -34,6 +34,46 @@ test("Molten Brass is a valuable unique material that can be bought back", () =>
   assert.equal(bought.accepted, true);
   assert.equal(getItemCount(bought.character.inventory, item.id), 1);
   assert.equal(bought.character.itemBuyback.length, 0);
+});
+
+test("stacked buyback charges the full quantity and restores the selected sale record", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.gold = 30000;
+  character.itemBuyback = [
+    { entryId: "item:1", itemId: "healing_potion_large", amount: 2, unitPrice: 200, price: 400 },
+    { entryId: "item:2", itemId: "healing_potion_large", amount: 3, unitPrice: 200, price: 600 }
+  ];
+  assert.equal(character.itemBuyback.length, 2);
+  assert.equal(character.itemBuyback[0].price, character.itemBuyback[0].unitPrice * 2);
+  assert.equal(character.itemBuyback[1].price, character.itemBuyback[1].unitPrice * 3);
+  const selectedId = character.itemBuyback[1].entryId;
+  const selectedCost = character.itemBuyback[1].price;
+  const bought = purchaseBuybackItem({ ...character, gold: selectedCost }, selectedId);
+  assert.equal(bought.accepted, true);
+  assert.equal(getItemCount(bought.character.inventory, "healing_potion_large"), 3);
+  assert.equal(bought.character.itemBuyback.length, 1);
+  assert.equal(bought.character.itemBuyback[0].amount, 2);
+});
+
+test("legacy buyback records receive stable ids and quantity-correct totals", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.itemBuyback = [{ itemId: "molten_brass", amount: 2, price: 10000 }];
+  const normalized = normalizeCharacter(character);
+  assert.equal(normalized.itemBuyback[0].entryId, "item:1");
+  assert.equal(normalized.itemBuyback[0].unitPrice, 10000);
+  assert.equal(normalized.itemBuyback[0].price, 20000);
+});
+
+test("locked equipment cannot be sold and retains its lock through normalization", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.gold = 100;
+  const purchased = purchaseEquipment(character, "iron_greatsword");
+  const locked = setEquipmentInstanceLocked(purchased.character, purchased.instance.instanceId, true);
+  assert.equal(locked.accepted, true);
+  assert.equal(normalizeCharacter(locked.character).equipmentInventory.instances.find(entry => entry.instanceId === purchased.instance.instanceId).locked, true);
+  const sold = sellEquipmentInstance(locked.character, purchased.instance.instanceId);
+  assert.equal(sold.accepted, false);
+  assert.equal(sold.reason, "locked");
 });
 
 test("legacy characters receive an empty normalized inventory", () => {

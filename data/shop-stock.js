@@ -87,11 +87,22 @@ export function getShopStockState(character) {
     category,
     depth > SHOP_BASELINE_DEPTH && depth > normalizeSeenDepth(seen[category])
   ]));
+  const newStockIds = {
+    equipment: getShopEquipmentStock(character)
+      .filter(item => normalizeDepth(item.shopUnlockDepth) > normalizeSeenDepth(seen.equipment))
+      .map(item => item.id),
+    items: getShopItemIdsForCharacter(character)
+      .map(getItem)
+      .filter(Boolean)
+      .filter(item => normalizeDepth(item.shopUnlockDepth) > normalizeSeenDepth(seen.items))
+      .map(item => item.id)
+  };
   const latestDepth = Math.max(...Object.values(categoryDepths));
   return {
     reached,
     categoryDepths,
     newCategories,
+    newStockIds,
     latestDepth,
     announcementPending: latestDepth > SHOP_BASELINE_DEPTH
       && latestDepth > normalizeSeenDepth(eventFlags.shopStockAnnouncementDepth)
