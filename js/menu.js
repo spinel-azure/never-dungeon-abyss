@@ -428,6 +428,10 @@ function handleInventory(action) {
     renderInventory(); return;
   }
   const entries = inventoryEntries();
+  if (action === "lock") {
+    toggleSelectedEquipmentLock(entries);
+    return;
+  }
   if ((action === "up" || action === "down") && !entries.length) {
     menu.inventoryFocus = "back"; renderInventory(); return;
   }
@@ -458,6 +462,18 @@ function handleInventory(action) {
   const candidates = inventoryEntries();
   const selectedIndex = candidates.findIndex(candidate => candidate.instance?.instanceId === entry.instance.instanceId);
   menu.inventoryCursor = Math.max(0, selectedIndex); menu.inventoryPage = Math.floor(menu.inventoryCursor / 10); renderInventory();
+}
+
+function toggleSelectedEquipmentLock(entries = inventoryEntries()) {
+  if (menu.inventoryFocus !== "list" || menu.inventorySaleStage !== "list") return false;
+  if (menu.inventoryPurpose === "buy" || menu.inventoryMode !== "list" || menu.inventoryTab !== "equipment") return false;
+  const entry = entries[menu.inventoryCursor];
+  if (!entry?.instance) return false;
+  const result = setEquipmentInstanceLocked(menu.getCharacter(), entry.instance.instanceId, !entry.instance.locked);
+  if (!result.accepted) return false;
+  menu.onEquipmentLockChanged(normalizeCharacter(result.character));
+  renderInventory();
+  return true;
 }
 
 function applyEquipmentCandidate(entry) {
@@ -921,12 +937,7 @@ function bindInventory() {
     if (menu.inventoryPage < pages - 1) { menu.inventoryPage += 1; menu.inventoryCursor = menu.inventoryPage * 10; renderInventory(); }
   });
   menu.inventoryPanel.querySelector("[data-inventory-lock]")?.addEventListener("click", () => {
-    const entry = inventoryEntries()[menu.inventoryCursor];
-    if (!entry?.instance) return;
-    const result = setEquipmentInstanceLocked(menu.getCharacter(), entry.instance.instanceId, !entry.instance.locked);
-    if (!result.accepted) return;
-    menu.onEquipmentLockChanged(normalizeCharacter(result.character));
-    renderInventory();
+    toggleSelectedEquipmentLock();
   });
 }
 
@@ -949,7 +960,7 @@ function renderInventory() {
     if (entry.item) { const badge = menu.inventoryPurpose === "buy" && menu.inventoryNewStockIds.has(entry.item.id) ? '<em class="shop-entry-new">NEW</em>' : ""; button.innerHTML = `<span>${entry.item.name}</span><strong>${badge}${menu.inventoryPurpose === "buy" ? `${entry.item.buyPrice}G` : `×${entry.count}`}</strong>`; button.classList.toggle("is-unavailable", menu.inventoryPurpose === "manage" && Boolean(unavailableItemReason(entry.item, character))); }
     else if (entry.shopEquipment) { const badge = menu.inventoryNewStockIds.has(entry.shopEquipment.id) ? '<em class="shop-entry-new">NEW</em>' : ""; button.innerHTML = `<span>${entry.shopEquipment.name}</span><strong>${badge}${entry.shopEquipment.buyPrice}G</strong>`; }
     else if (entry.keyItem) button.innerHTML = `<span>${entry.keyItem.name}</span><strong></strong>`;
-    else if (entry.instance) { button.innerHTML = `<span>${getEquipmentInstanceName(entry.instance)}</span><strong>${entry.instance.locked ? "［LOCK］" : ""}${equippedIds.has(entry.instance.instanceId) ? "［E］" : ""}${entry.instance.curseKnown ? "［C］" : ""}</strong>`; button.classList.toggle("is-unavailable", menu.inventoryPurpose === "sell" ? Boolean(inventoryEquipmentSaleReason(entry.instance, character)) : menu.inventoryMode === "list" && !canEquipInstance(character, entry.instance).accepted); }
+    else if (entry.instance) { button.innerHTML = `<span>${getEquipmentInstanceName(entry.instance)}</span><strong>${entry.instance.locked ? "🔒" : ""}${equippedIds.has(entry.instance.instanceId) ? "［E］" : ""}${entry.instance.curseKnown ? "［C］" : ""}</strong>`; button.classList.toggle("is-unavailable", menu.inventoryPurpose === "sell" ? Boolean(inventoryEquipmentSaleReason(entry.instance, character)) : menu.inventoryMode === "list" && !canEquipInstance(character, entry.instance).accepted); }
     else button.textContent = entry.label;
     button.classList.toggle("is-selected", menu.inventoryFocus === "list" && index === menu.inventoryCursor);
     button.addEventListener("click", () => {
@@ -971,7 +982,9 @@ function renderInventory() {
   const lockVisible = Boolean(selected?.instance) && menu.inventoryMode === "list" && menu.inventoryPurpose !== "buy";
   lockButton.hidden = !lockVisible;
   if (lockVisible) {
-    lockButton.textContent = selected.instance.locked ? "UNLOCK" : "LOCK";
+    lockButton.textContent = selected.instance.locked ? "🔓" : "🔒";
+    lockButton.title = selected.instance.locked ? "ロック解除（アイテムボタン／Lキー）" : "ロック（アイテムボタン／Lキー）";
+    lockButton.setAttribute("aria-label", lockButton.title);
     lockButton.classList.toggle("is-locked", selected.instance.locked);
   }
   panel.querySelector("[data-inventory-page]").textContent = `${menu.inventoryPage + 1}/${pages}`;

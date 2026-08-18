@@ -55,3 +55,17 @@ test("options put press-to-bind gamepad config first and persist four shortcuts"
   assert.match(main, /openBattleItems\(\)/);
   assert.match(main, /openItemInventory\(\)/);
 });
+
+test("equipment lock is available without a mouse through keyboard and configured item button", async () => {
+  const [input, main, menu, html] = await Promise.all([
+    readFile(new URL("../js/input.js", import.meta.url), "utf8"),
+    readFile(new URL("../js/main.js", import.meta.url), "utf8"),
+    readFile(new URL("../js/menu.js", import.meta.url), "utf8"),
+    readFile(new URL("../index.html", import.meta.url), "utf8")
+  ]);
+  assert.match(input, /KeyL[^\n]+handleMenuInput\("lock"\)/);
+  assert.match(main, /action === "items"[\s\S]{0,120}handleMenuInput\("lock"\)/);
+  assert.match(menu, /action === "lock"[\s\S]{0,120}toggleSelectedEquipmentLock/);
+  assert.match(menu, /instance\.locked \? "🔒"/);
+  assert.match(html, /data-inventory-lock[^>]*>🔒<\/button>/);
+});

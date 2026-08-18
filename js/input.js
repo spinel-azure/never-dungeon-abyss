@@ -45,6 +45,7 @@
     if (e.key === "ArrowDown" && handleMenuInput("down")) { e.preventDefault(); return; }
     if (e.key === "ArrowLeft" && handleMenuInput("left")) { e.preventDefault(); return; }
     if (e.key === "ArrowRight" && handleMenuInput("right")) { e.preventDefault(); return; }
+    if (e.code === "KeyL" && handleMenuInput("lock")) { e.preventDefault(); return; }
     if (e.code === "KeyX" && (handleOverlayInput("confirm") || handleMenuInput("confirm") || handleDoorInput())) { e.preventDefault(); return; }
     if (e.code === "KeyZ" && (handleOverlayInput("cancel") || handleMenuInput("cancel"))) { e.preventDefault(); return; }
     if (e.key === "ArrowUp") { e.preventDefault(); manualMove(1); }

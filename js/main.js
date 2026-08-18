@@ -2788,6 +2788,7 @@ import {
     }
     recordUserInput();
     if (action === "items") {
+      if (handleMenuInput("lock")) return true;
       if (!itemOverlay.hidden || !skillOverlay.hidden) return true;
       if (isBattleActive()) return openBattleItems();
       if (worldLocation === "dungeon" && !sceneTransitionRunning && !state.overlayEvent) return openItemInventory();
