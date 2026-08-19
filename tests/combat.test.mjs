@@ -130,15 +130,22 @@ test("B2F adds rabbit, undead and poison slime encounters", () => {
   assert.equal(getEnemyById("poison_slime").minimumDepth, 2);
 });
 
-test("B50F to B59F currently encounter only Abyss Tiger and Abyss Mushroom", () => {
+test("B50F to B59F encounter Abyss Tiger, Abyss Panther, and Abyss Mushroom", () => {
   for (let depth = 50; depth <= 59; depth += 1) {
     assert.equal(getRandomEnemy({ depth, rng: () => 0 }).id, "abyss_tiger");
+    assert.equal(getRandomEnemy({ depth, rng: () => 0.5 }).id, "abyss_panther");
     assert.equal(getRandomEnemy({ depth, rng: () => 0.999 }).id, "abyss_mushroom");
   }
   const tiger = createEnemyCombatant(getEnemyById("abyss_tiger"));
   const killerBite = createEnemyAction(tiger, () => 0.99);
   assert.equal(killerBite.name, "キラーバイト");
   assert.equal(tiger.dropItemId, "abyss_tiger_fur");
+  const panther = createEnemyCombatant(getEnemyById("abyss_panther"));
+  const repeatedAttack = createEnemyAction(panther, () => 0);
+  const rendingClaws = createEnemyAction(panther, () => 0.99);
+  assert.deepEqual([repeatedAttack.hitCount, repeatedAttack.powerPerHit], [2, 0.55]);
+  assert.deepEqual([rendingClaws.name, rendingClaws.hitCount, rendingClaws.powerPerHit], ["乱れ爪", 4, 0.35]);
+  assert.equal(panther.dropGold, 100);
   const mushroom = createEnemyCombatant(getEnemyById("abyss_mushroom"));
   const deadlyPoison = createEnemyAction(mushroom, () => 0.99);
   assert.equal(deadlyPoison.name, "猛毒");

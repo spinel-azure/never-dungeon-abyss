@@ -490,6 +490,31 @@ export const enemies = Object.freeze([
     escapeRate: 0.28, surpriseRate: 0.27, surpriseRateMaximum: 0.4, isBoss: false
   }),
   Object.freeze({
+    id: "abyss_panther", name: "奈落パンター", imageId: "abyss_panther",
+    level: 43,
+    image: "images/enemies/enemy_24.avif", race: "beast", minimumDepth: 50, maximumDepth: 59,
+    maxHp: 340, stats: Object.freeze({ str: 24, int: 6, agi: 28, dex: 27, luc: 16 }),
+    def: 20, attack: 24, experienceReward: 660, dropGold: 100,
+    actions: Object.freeze([
+      Object.freeze({ weight: 60, action: Object.freeze({
+        id: "abyss_panther_attack", name: "連続攻撃", actionType: "physicalAttack",
+        hitCount: 2, powerPerHit: 0.55, hitBonus: 0.02, speedModifier: 2, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 40, action: Object.freeze({
+        id: "rending_claws", name: "乱れ爪", actionType: "physicalAttack",
+        hitCount: 4, powerPerHit: 0.35, hitBonus: 0.01, speedModifier: 4, effects: Object.freeze([])
+      }) })
+    ]),
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 40, immune: false }),
+      deadly_poison: Object.freeze({ resistancePoints: 40, immune: false }),
+      action_skip: Object.freeze({ resistancePoints: 35, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 55, immune: false })
+    }),
+    escapeRate: 0.25, surpriseRate: 0.3, surpriseRateMaximum: 0.42, isBoss: false
+  }),
+  Object.freeze({
     id: "abyss_mushroom", name: "奈落キノコ", imageId: "abyss_mushroom",
     level: 42,
     image: "images/enemies/enemy_23.avif", race: "plant", minimumDepth: 50, maximumDepth: 59,
