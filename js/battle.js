@@ -111,6 +111,7 @@ export function handleBattleInput(action) {
       battleUi.mode = "commands";
       battleUi.selectedIndex = 0;
       showCommandButtons();
+      renderEnemyPartySelection();
       battleUi.playSe("cancel");
     }
     return true;
@@ -167,6 +168,7 @@ function moveSelection(action) {
   battleUi.selectedIndex = next;
   battleUi.playSe("cursorMove");
   renderSelection();
+  renderEnemyPartySelection();
 }
 
 function activateSelected() {
@@ -244,6 +246,7 @@ function showTargetButtons(command) {
     button.disabled = !targetAvailability[index];
   });
   mountButtons("攻撃対象");
+  renderEnemyPartySelection();
   battleUi.messageEl.textContent = "攻撃する相手を選んでください。\n＊Bボタンで戻る";
 }
 
@@ -690,7 +693,8 @@ function renderEnemyParty(battle) {
   }
   [...party.children].forEach((member, index) => {
     const enemy = battle.enemies[index];
-    member.classList.toggle("is-selected", index === battle.targetIndex && enemy.alive);
+    const selectedIndex = battleUi.mode === "targets" ? battleUi.selectedIndex : battle.targetIndex;
+    member.classList.toggle("is-selected", index === selectedIndex && enemy.alive);
     member.classList.toggle("is-defeated", !enemy.alive);
     member.disabled = !enemy.alive;
     member.querySelector(".battle-enemy-member-name").textContent = battleUi.concealed ? "？？？？？" : enemy.name;
@@ -698,6 +702,16 @@ function renderEnemyParty(battle) {
     img.src = enemy.image || "";
     img.alt = battleUi.concealed ? "正体不明の敵" : enemy.name;
     member.querySelector(".battle-enemy-member-hp > i").style.width = `${getBattleHpPercent(enemy)}%`;
+  });
+}
+
+function renderEnemyPartySelection() {
+  const battle = battleUi.battle;
+  if (!battle?.enemies) return;
+  const selectedIndex = battleUi.mode === "targets" ? battleUi.selectedIndex : battle.targetIndex;
+  const party = battleUi.root.querySelector("#battleEnemyParty");
+  [...(party?.children || [])].forEach((member, index) => {
+    member.classList.toggle("is-selected", index === selectedIndex && battle.enemies[index]?.alive);
   });
 }
 

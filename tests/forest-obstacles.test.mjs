@@ -82,3 +82,9 @@ test("the hidden legacy enemy stage cannot appear behind a multi-enemy formation
   const css = await readFile(new URL("../css/battle.css", import.meta.url), "utf8");
   assert.match(css, /\.battle-enemy-stage\[hidden\]\s*\{\s*display:\s*none;/);
 });
+
+test("the formation highlight follows the target-selection cursor", async () => {
+  const source = await readFile(new URL("../js/battle.js", import.meta.url), "utf8");
+  assert.match(source, /battleUi\.mode === "targets" \? battleUi\.selectedIndex : battle\.targetIndex/);
+  assert.match(source, /renderSelection\(\);\s*renderEnemyPartySelection\(\);/);
+});
