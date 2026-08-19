@@ -23,7 +23,10 @@ test("B50F through B58F place five giant vines until Fleischfresser is defeated"
 test("giant vines and Fleischfresser use their dedicated confirmed artwork and escape rules", () => {
   const vine = getBossById("giant_vine_obstacle");
   assert.equal(vine.encounterImage, "images/npc/NPC_event_11.avif");
+  assert.equal(vine.maxHp, 500);
   assert.equal(vine.def, 60);
+  assert.equal(vine.physicalDamageReduction, 0.9);
+  assert.equal(vine.magicDamageReduction, 0.75);
   assert.equal(vine.escapeRate, 1);
   const boss = getBossById("fleischfresser_b59f");
   assert.equal(boss.image, "images/bosses/boss_11.avif");

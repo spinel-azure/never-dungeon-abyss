@@ -482,9 +482,9 @@ export const BOSSES = Object.freeze({
     id: "giant_vine_obstacle", name: "巨大蔓", floor: 50, level: 55,
     imageId: "giant_vine_obstacle", image: "images/npc/NPC_event_11.avif",
     encounterImageId: "giant_vine_obstacle", encounterImage: "images/npc/NPC_event_11.avif",
-    race: "plant", maxHp: 400,
+    race: "plant", maxHp: 500,
     stats: Object.freeze({ str: 4, int: 1, agi: 1, dex: 5, luc: 1 }),
-    def: 60, attack: 3, magicDamageReduction: 0.75, experienceReward: 0,
+    def: 60, attack: 3, physicalDamageReduction: 0.9, magicDamageReduction: 0.75, experienceReward: 0,
     actions: Object.freeze([
       Object.freeze({ weight: 45, action: Object.freeze({ id: "vine_sway", name: "蔓を揺らしている……", actionType: "wait", waitMessage: "巨大蔓は蔓を揺らしている……。" }) }),
       Object.freeze({ weight: 35, action: Object.freeze({ id: "vine_root", name: "根を張っている……", actionType: "wait", waitMessage: "巨大蔓は地面へ深く根を張っている……。" }) }),

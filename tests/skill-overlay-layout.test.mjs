@@ -31,3 +31,17 @@ test("item and skill overlays remember the last used selection separately by con
     assert.match(source, /\{ id: .*\.id, index: overlay\.selectedIndex \}/);
   }
 });
+
+test("battle items paginate as two columns of six without vertical scrolling", async () => {
+  const [source, styles, html] = await Promise.all([
+    readFile(new URL("../js/item-overlay.js", import.meta.url), "utf8"),
+    readFile(new URL("../css/skill-overlay.css", import.meta.url), "utf8"),
+    readFile(new URL("../index.html", import.meta.url), "utf8")
+  ]);
+  assert.match(source, /BATTLE_ITEMS_PER_COLUMN = 6/);
+  assert.match(source, /BATTLE_ITEMS_PER_PAGE = BATTLE_ITEMS_PER_COLUMN \* 2/);
+  assert.match(source, /Math\.ceil\(overlay\.items\.length \/ BATTLE_ITEMS_PER_PAGE\)/);
+  assert.match(styles, /\.skill-overlay\.is-battle-items \.skill-overlay-list[\s\S]*repeat\(6,[\s\S]*repeat\(2,/);
+  assert.match(html, /data-item-prev/);
+  assert.match(html, /data-item-next/);
+});

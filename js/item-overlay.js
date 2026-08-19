@@ -2,9 +2,12 @@ import { ITEMS } from "../data/items.js";
 import { getItemCount } from "../data/inventory.js";
 import { getItemUnavailableReason } from "../combat/resolve-item-use.js";
 
+const BATTLE_ITEMS_PER_COLUMN = 6;
+const BATTLE_ITEMS_PER_PAGE = BATTLE_ITEMS_PER_COLUMN * 2;
+
 const overlay = {
-  root: null, list: null, pageEl: null, backButton: null, messageEl: null,
-  active: false, selectedIndex: 0, items: [], character: null, context: "dungeon",
+  root: null, list: null, pageEl: null, prevButton: null, nextButton: null, backButton: null, messageEl: null,
+  active: false, selectedIndex: 0, page: 0, items: [], character: null, context: "dungeon",
   lastSelectionByContext: {},
   enemy: null, torchFuel: 0, treasureCompassActive: false, onUse: async () => ({ accepted: false }),
   onClose: () => {}, playSe: () => {}, previousMessage: ""
@@ -14,8 +17,12 @@ export function configureItemOverlay(options) {
   Object.assign(overlay, options);
   overlay.list = overlay.root.querySelector("[data-item-list]");
   overlay.pageEl = overlay.root.querySelector("[data-item-page]");
+  overlay.prevButton = overlay.root.querySelector("[data-item-prev]");
+  overlay.nextButton = overlay.root.querySelector("[data-item-next]");
   overlay.backButton = overlay.root.querySelector("[data-item-back]");
   overlay.backButton.addEventListener("click", () => closeItemOverlay());
+  overlay.prevButton?.addEventListener("click", () => changePage(-1));
+  overlay.nextButton?.addEventListener("click", () => changePage(1));
 }
 
 export function openItemOverlay({ context = "dungeon", character, enemy = null, torchFuel = 0, treasureCompassActive = false, onUse, onClose } = {}) {
@@ -30,9 +37,11 @@ export function openItemOverlay({ context = "dungeon", character, enemy = null, 
     getItemCount(character.inventory, item.id) > 0 && item.usableIn?.includes(context)
   );
   overlay.selectedIndex = restoreSelectedIndex(overlay.items, overlay.lastSelectionByContext[context]);
+  overlay.page = context === "battle" ? Math.floor(overlay.selectedIndex / BATTLE_ITEMS_PER_PAGE) : 0;
   overlay.onUse = onUse || overlay.onUse;
   overlay.onClose = onClose || (() => {});
   overlay.previousMessage = overlay.messageEl.textContent;
+  overlay.root.classList.toggle("is-battle-items", context === "battle");
   overlay.root.hidden = false;
   document.body.classList.add("item-overlay-open");
   render();
@@ -43,6 +52,7 @@ export function closeItemOverlay({ restoreMessage = true } = {}) {
   if (!overlay.active) return false;
   overlay.active = false;
   overlay.root.hidden = true;
+  overlay.root.classList.remove("is-battle-items");
   document.body.classList.remove("item-overlay-open");
   overlay.messageEl.classList.remove("is-skill-description");
   if (restoreMessage) overlay.messageEl.textContent = overlay.previousMessage;
@@ -55,21 +65,84 @@ export function handleItemOverlayInput(action) {
   if (action === "cancel") {
     overlay.playSe("cancel");
     closeItemOverlay();
-  } else if (action === "up" || action === "left") {
-    move(-1);
-  } else if (action === "down" || action === "right") {
-    move(1);
+  } else if (action === "up") {
+    moveVertical(-1);
+  } else if (action === "down") {
+    moveVertical(1);
+  } else if (action === "left") {
+    moveHorizontal(-1);
+  } else if (action === "right") {
+    moveHorizontal(1);
   } else if (action === "confirm") {
     activate();
   }
   return true;
 }
 
-function move(amount) {
+function moveLinear(amount) {
   const count = overlay.items.length + 1;
   overlay.selectedIndex = (overlay.selectedIndex + amount + count) % count;
   overlay.playSe("cursorMove");
   renderSelection();
+}
+
+function moveVertical(amount) {
+  if (overlay.context !== "battle") return moveLinear(amount);
+  const { start, items } = getCurrentPage();
+  if (!items.length) return selectBack();
+  if (overlay.selectedIndex === overlay.items.length) {
+    overlay.selectedIndex = amount < 0 ? start + items.length - 1 : start;
+  } else {
+    const local = overlay.selectedIndex - start;
+    const columnStart = Math.floor(local / BATTLE_ITEMS_PER_COLUMN) * BATTLE_ITEMS_PER_COLUMN;
+    const columnLength = Math.min(BATTLE_ITEMS_PER_COLUMN, items.length - columnStart);
+    const row = local - columnStart;
+    const nextRow = row + amount;
+    overlay.selectedIndex = nextRow >= 0 && nextRow < columnLength
+      ? start + columnStart + nextRow
+      : overlay.items.length;
+  }
+  overlay.playSe("cursorMove");
+  renderSelection();
+}
+
+function moveHorizontal(amount) {
+  if (overlay.context !== "battle") return moveLinear(amount);
+  const { start, items } = getCurrentPage();
+  if (overlay.selectedIndex === overlay.items.length) return changePage(amount);
+  const local = overlay.selectedIndex - start;
+  const targetLocal = local + amount * BATTLE_ITEMS_PER_COLUMN;
+  if (targetLocal >= 0 && targetLocal < items.length) {
+    overlay.selectedIndex = start + targetLocal;
+    overlay.playSe("cursorMove");
+    renderSelection();
+    return;
+  }
+  changePage(amount, local % BATTLE_ITEMS_PER_COLUMN);
+}
+
+function selectBack() {
+  overlay.selectedIndex = overlay.items.length;
+  overlay.playSe("cursorMove");
+  renderSelection();
+}
+
+function changePage(amount, preferredRow = 0) {
+  if (overlay.context !== "battle") return false;
+  const pageCount = Math.max(1, Math.ceil(overlay.items.length / BATTLE_ITEMS_PER_PAGE));
+  if (pageCount <= 1) return false;
+  overlay.page = (overlay.page + amount + pageCount) % pageCount;
+  const { start, items } = getCurrentPage();
+  overlay.selectedIndex = items.length ? start + Math.min(preferredRow, items.length - 1) : overlay.items.length;
+  overlay.playSe("cursorMove");
+  render();
+  return true;
+}
+
+function getCurrentPage() {
+  const pageSize = overlay.context === "battle" ? BATTLE_ITEMS_PER_PAGE : Math.max(1, overlay.items.length);
+  const start = overlay.page * pageSize;
+  return { start, items: overlay.items.slice(start, start + pageSize) };
 }
 
 async function activate() {
@@ -105,7 +178,9 @@ function restoreSelectedIndex(items, remembered) {
 }
 
 function render() {
-  const buttons = overlay.items.map((item, index) => {
+  const { start, items } = getCurrentPage();
+  const buttons = items.map((item, localIndex) => {
+    const index = start + localIndex;
     const button = document.createElement("button");
     button.type = "button";
     button.className = "skill-overlay-item";
@@ -119,12 +194,16 @@ function render() {
     return button;
   });
   overlay.list.replaceChildren(...buttons);
-  overlay.pageEl.textContent = "1/1";
+  const pageCount = overlay.context === "battle" ? Math.max(1, Math.ceil(overlay.items.length / BATTLE_ITEMS_PER_PAGE)) : 1;
+  overlay.pageEl.textContent = `${overlay.page + 1}/${pageCount}`;
+  if (overlay.prevButton) overlay.prevButton.hidden = overlay.context !== "battle" || pageCount <= 1;
+  if (overlay.nextButton) overlay.nextButton.hidden = overlay.context !== "battle" || pageCount <= 1;
   renderSelection();
 }
 
 function renderSelection() {
-  [...overlay.list.children].forEach((button, index) => button.classList.toggle("is-selected", index === overlay.selectedIndex));
+  const { start } = getCurrentPage();
+  [...overlay.list.children].forEach((button, index) => button.classList.toggle("is-selected", start + index === overlay.selectedIndex));
   const backSelected = overlay.selectedIndex === overlay.items.length;
   overlay.backButton.classList.toggle("is-selected", backSelected);
   const item = overlay.items[overlay.selectedIndex];

@@ -501,7 +501,10 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
     ? resolveSpell({ attacker: actorStats, defender: targetStats, spell: action, rng })
     : resolvePhysicalAttack({ attacker: actorStats, defender: targetStats, attack: action, rng });
   const reduction = action.actionType === "physicalAttack"
-    ? getPhysicalDamageReduction(target.statuses)
+    ? Math.max(
+      getPhysicalDamageReduction(target.statuses),
+      Math.max(0, Math.min(0.95, Number(target.physicalDamageReduction) || 0))
+    )
     : 0;
   let resolvedHits = result.hits;
   let passiveExecution = null;
