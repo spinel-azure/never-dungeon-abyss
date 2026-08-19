@@ -572,6 +572,7 @@ function renderBattle() {
   image.classList.toggle("is-thief-leader", battle.enemy.id === "thief_leader_event_boss");
   image.classList.toggle("is-glacies", battle.enemy.id === "glacies_event_boss");
   image.classList.toggle("is-eiskoenigin", battle.enemy.id === "eiskoenigin_b49f");
+  image.classList.toggle("is-fleischfresser", battle.enemy.id === "fleischfresser_b59f");
   const enemyStage = battleUi.root.querySelector(".battle-enemy-stage");
   enemyStage?.classList.toggle("is-defeated", defeated);
   enemyStage?.classList.toggle("is-eiskoenigin", battle.enemy.id === "eiskoenigin_b49f" && !defeated && !battleUi.concealed);

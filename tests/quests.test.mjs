@@ -685,3 +685,9 @@ test("quest supplies use their actual item names in the item popup", async () =>
   assert.match(source, /\[supplyItemName\][\s\S]*amounts: \[result\.acceptanceSupplyAmount\]/);
   assert.doesNotMatch(source, /showNamedItemGetEffect\(\s*\["回復薬（大）"\]/);
 });
+
+test("Helen's herbicide reward uses the important item popup", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const source = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
+  assert.match(source, /strong_herbicide_shop_reward_pending[\s\S]*showNamedItemGetEffect\([\s\S]*getItem\("strong_herbicide"\)[\s\S]*important: true[\s\S]*amounts: \[herbicideAmount\]/);
+});

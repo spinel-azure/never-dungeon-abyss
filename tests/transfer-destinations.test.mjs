@@ -70,6 +70,15 @@ test("Glacies and Eiskoenigin use dedicated large boss image sizes", async () =>
   assert.match(css, /battle-enemy-image\.is-eiskoenigin\s*\{[^}]*width:\s*min\(72%,\s*480px\)/s);
 });
 
+test("Fleischfresser uses its dedicated large battle image size", async () => {
+  const [css, battleSource] = await Promise.all([
+    readFile(new URL("../css/battle.css", import.meta.url), "utf8"),
+    readFile(new URL("../js/battle.js", import.meta.url), "utf8")
+  ]);
+  assert.match(battleSource, /is-fleischfresser[^\n]+fleischfresser_b59f/);
+  assert.match(css, /battle-enemy-image\.is-fleischfresser\s*\{[^}]*width:\s*min\(90%,\s*600px\)/s);
+});
+
 test("transfer destination UI is separate from the six command slots and paginates by five", async () => {
   const [html, source] = await Promise.all([
     readFile(new URL("../index.html", import.meta.url), "utf8"),

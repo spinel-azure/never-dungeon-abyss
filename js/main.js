@@ -1730,6 +1730,11 @@ import {
       };
       updateCharacterUi();
       saveGame();
+      const herbicideAmount = Math.max(0, (Number(granted.gained) || 0) + (Number(granted.stored) || 0));
+      if (herbicideAmount > 0) setTimeout(() => showNamedItemGetEffect(
+        [getItem("strong_herbicide")?.name || "強力除草剤"],
+        { important: true, amounts: [herbicideAmount] }
+      ), 0);
       return { message: "ヘレン：依頼を受けてくれてありがと。助かったわ。これを受け取って。\n「強力除草剤」×10個を手に入れた！" };
     }
     const result = acknowledgeShopStockAnnouncement(character);

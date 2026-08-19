@@ -490,6 +490,8 @@ function startSpecialRoomContentEvent(content, fromGX, fromGY) {
     const event = {
       type: "specialRoomBoss",
       bossId: boss.id,
+      fromGX,
+      fromGY,
       imageId: boss.encounterImageId || boss.imageId || "",
       imageFit: "cover",
       canCancel: false,
@@ -505,6 +507,8 @@ function startSpecialRoomContentEvent(content, fromGX, fromGY) {
   startOverlayEvent({
     type: "specialRoomBoss",
     bossId: boss.id,
+    fromGX,
+    fromGY,
     imageId: boss.encounterImageId ?? "",
     imageFit: "cover",
     reserveMessageLines: boss.event?.reserveMessageLines || 0,
@@ -731,7 +735,7 @@ function confirmBossEvent() {
     if (state.overlayEvent !== event) return;
     state.overlayEvent = null;
     hooks.beginBossBattle(event.bossId);
-  }, 1000);
+  }, Math.max(0, Number(boss?.event?.autoStartDelay) || 1000));
   event.autoStartTimer = timer;
 }
 
@@ -982,7 +986,7 @@ function cancelOverlayEvent() {
     hooks.hideTreasure();
   }
   hooks.onStateChanged();
-  if (event.retreatOnCancel) startNpcRetreat(event);
+  if (event.retreatOnCancel && Number.isInteger(event.fromGX) && Number.isInteger(event.fromGY)) startNpcRetreat(event);
   resumeAutoReturnAfterTransientTreasure(event);
 }
 

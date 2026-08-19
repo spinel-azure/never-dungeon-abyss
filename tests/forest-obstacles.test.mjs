@@ -34,6 +34,7 @@ test("giant vines and Fleischfresser use their dedicated confirmed artwork and e
   assert.equal(boss.defeatedEncounterImage, "images/npc/NPC_event_12.avif");
   assert.equal(boss.regainRate, 0.05);
   assert.equal(boss.event.autoStartDelay, 2000);
+  assert.equal(boss.event.prompt.split("\n").length, 3);
   assert.equal(boss.escapeRate, 1);
 });
 

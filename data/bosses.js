@@ -516,7 +516,7 @@ export const BOSSES = Object.freeze({
     defeatedFlag: "boss_fleischfresser_b59f_defeated", transferUnlockFlag: "transfer_portal_b60f_unlocked",
     room: Object.freeze({ requiresKey: true, keyItemId: "red_rust_key_b59f", unlockFlag: "red_door_b59f_unlocked" }),
     event: Object.freeze({
-      prompt: "部屋の中央には、巨大な植物が生い茂っていた。閉じた花弁の根元から伸びる無数の太い蔓が禍々しい。\nその一方で、花から漂う甘く誘うような香りに、思わず引き寄せられる……。\nもっと近づきますか？\n＊Aボタン：はい　Bボタン：いいえ",
+      prompt: "巨大な植物が生い茂り、閉じた花弁から無数の太い蔓が蠢いている。\n花から漂う甘い香りに誘われる……。もっと近づきますか？\n＊Aボタン：はい　Bボタン：いいえ",
       start: "あなたが近づくと――\n閉じていた花弁が、ゆっくりと……ゆっくりと開いてゆく。\n\nそして、その中から現れたのは――――！",
       autoStartDelay: 2000,
       remains: "花弁は枯れて朽ち果て、蔓も力なく垂れ下がっている。\n\nもう二度と、花開くことはないだろう……。\n＊Aボタン：次へ"

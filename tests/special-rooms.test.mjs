@@ -119,6 +119,13 @@ test("B4 special room warns before entering the one-time superboss event", () =>
   assert.equal(shouldDrawSpecialRoomMarker(room, false, 100), true);
 });
 
+test("declining a special-room boss keeps valid retreat coordinates", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const source = await readFile(new URL("../js/player.js", import.meta.url), "utf8");
+  assert.match(source, /type: "specialRoomBoss",\s*bossId: boss\.id,\s*fromGX,\s*fromGY,/);
+  assert.match(source, /event\.retreatOnCancel && Number\.isInteger\(event\.fromGX\) && Number\.isInteger\(event\.fromGY\)/);
+});
+
 test("forced encounters block special-room unlocking without exposing a rate", () => {
   assert.deepEqual(getSpecialRoomAccessRestriction({ forcedEnemyId: "cave_slime" }), {
     blocked: true,
