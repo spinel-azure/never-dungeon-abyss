@@ -176,3 +176,33 @@ test("priest recovery achievement keeps its hidden hint until quest 016 is repor
   entry = getAdventureChronicle(character).find(candidate => candidate.id === "priestBackRecovery");
   assert.equal(entry.label, "司祭のぎっくり腰を治療した");
 });
+
+test("jungle achievements follow the requested order and preserve the musk hint", () => {
+  const character = createInitialCharacter("密林踏破者", "thief");
+  character.highestDungeonDepthReached = 60;
+  character.quests.completedQuestIds.push("guild_020", "guild_021");
+  Object.assign(character.eventFlags, {
+    boss_wicker_man_b39f_defeated: true,
+    red_door_b39f_unlocked: true,
+    b1_b42_marathon_completed: true,
+    achievement_b45f_100_cells: true,
+    achievement_priest_back_recovered: true,
+    boss_fleischfresser_b59f_defeated: true
+  });
+  const chronicle = getAdventureChronicle(character);
+  const ids = chronicle.map(entry => entry.id);
+  assert.ok(ids.indexOf("b40") < ids.indexOf("marathon42"));
+  assert.ok(ids.indexOf("marathon42") < ids.indexOf("b45Survey"));
+  assert.deepEqual(
+    ids.slice(ids.indexOf("priestBackRecovery") + 1, ids.indexOf("priestBackRecovery") + 5),
+    ["jungleWeeder", "abyssMusk", "fleischfresser", "b60"]
+  );
+  for (const id of ["jungleWeeder", "abyssMusk", "fleischfresser", "b60"]) {
+    assert.equal(chronicle.find(entry => entry.id === id)?.achieved, true, id);
+  }
+  const hiddenCharacter = createInitialCharacter("未達成", "mage");
+  assert.equal(
+    getAdventureChronicle(hiddenCharacter).find(entry => entry.id === "abyssMusk")?.label,
+    "？？？？？？――淑女の悩み"
+  );
+});

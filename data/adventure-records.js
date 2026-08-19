@@ -58,6 +58,7 @@ export function getAdventureRecords(character) {
 
 export function getAdventureChronicle(character) {
   const flags = character?.eventFlags || {};
+  const completedQuestIds = character?.quests?.completedQuestIds || [];
   const depth = Math.max(1, Math.floor(Number(character?.highestDungeonDepthReached) || 1));
   const milestones = [
     ["registered", "冒険者として登録した", true, "ギルドで冒険者としての第一歩を踏み出した。"],
@@ -77,12 +78,16 @@ export function getAdventureChronicle(character) {
     ["brassBull", "真鍮の雄牛を撃破した", flags.boss_brass_bull_event_boss_defeated, "B36Fの真鍮の雄牛を撃破した。"],
     ["wickerMan", "ウィッカーマンを撃破した", flags.red_door_b39f_unlocked && flags.boss_wicker_man_b39f_defeated, "B39Fの赤い扉の奥でウィッカーマンを撃破した。"],
     ["b40", "B40Fへ到達した", flags.boss_wicker_man_b39f_defeated && depth >= 40, "ウィッカーマンを倒し、B40Fへ到達した。"],
+    ["marathon42", "深淵への大行軍", flags.b1_b42_marathon_completed, "一度も帰還せず、転送門を使わずにB1FからB42Fへ到達した。", "？？？？？？――地上を忘れし旅人"],
     ["b45Survey", "B45Fを100マス踏破した", flags.achievement_b45f_100_cells, "途中帰還することなくB45Fを100マス踏破した。", "？？？？？？――凍土を踏破する者"],
     ["glacies", "グラキエスを撃破した", flags.boss_glacies_event_boss_defeated, "氷の巨人グラキエスを撃破した。", "？？？？？？――氷巨人への挑戦"],
     ["eiskoenigin", "エイスケーニギンを撃破した", flags.boss_eiskoenigin_b49f_defeated, "B49Fの赤い扉の奥でエイスケーニギンを撃破した。", "？？？？？？――凍てつく女王"],
     ["b50", "B50Fへ到達した", flags.boss_eiskoenigin_b49f_defeated && depth >= 50, "エイスケーニギンを倒し、B50Fへ到達した。", "？？？？？？――極寒の果て"],
     ["priestBackRecovery", "司祭のぎっくり腰を治療した", flags.achievement_priest_back_recovered, "密林区域で特効薬の素材を集め、司祭アーヴァインのぎっくり腰を治療した。", "？？？？？？――魔女の一撃"],
-    ["marathon42", "深淵への大行軍", flags.b1_b42_marathon_completed, "一度も帰還せず、転送門を使わずにB1FからB42Fへ到達した。", "？？？？？？――地上を忘れし旅人"],
+    ["jungleWeeder", "密林除草作業員", completedQuestIds.includes("guild_020"), "密林区域で強力除草剤の試供品を散布した。"],
+    ["abyssMusk", "奈落麝香の材料を入手した", completedQuestIds.includes("guild_021"), "ムスクビーストを倒し、奈落麝香の材料となる芳香嚢を入手した。", "？？？？？？――淑女の悩み"],
+    ["fleischfresser", "フライシュフレッサーを倒した", flags.boss_fleischfresser_b59f_defeated, "B59Fの赤い扉の奥でフライシュフレッサーを倒した。"],
+    ["b60", "B60Fへ到達した", depth >= 60 || flags.transfer_portal_b60f_unlocked, "奈落の迷宮地下60階へ到達し、転送門を解放した。"],
     ["longMarch84", "深淵への大行軍再び", flags.b1_b84_long_march_completed, "一度も帰還せず、転送門を使わずにB1FからB84Fへ到達した。", "？？？？？？――さらなる深淵へ"]
   ];
   return milestones.map(([id, label, achieved, description, hiddenLabel]) => ({

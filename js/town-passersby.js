@@ -56,6 +56,8 @@ const PASSERBY_CONFIGS = Object.freeze([
   Object.freeze({
     id: "shopkeeper",
     src: "images/npc/NPC_13b.avif",
+    alternateSrc: "images/npc/NPC_13g.avif",
+    alternateFlag: "helen_hidden_event_seen",
     speed: 27,
     bobAmplitude: 1,
     walkPeriod: 750,
@@ -96,6 +98,7 @@ const PASSERBY_CONFIGS = Object.freeze([
     id: "priest",
     src: "images/npc/NPC_12b.avif",
     alternateSrc: "images/npc/NPC_12e.avif",
+    alternateFlag: "tavern_rumor_004_base_read",
     speed: 10,
     bobAmplitude: 1,
     walkPeriod: 1240,
@@ -193,7 +196,7 @@ export function configureTownPassersby({ canvas, root, getCharacter = () => null
           deltaSeconds,
           now,
           allowedToSpawn.has(passerby),
-          Boolean(getCharacter()?.eventFlags?.tavern_rumor_004_base_read)
+          Boolean(getCharacter()?.eventFlags?.[passerby.config.alternateFlag])
         );
       });
     }
@@ -276,4 +279,12 @@ function updateAndDrawPasserby(passerby, context, width, height, deltaSeconds, n
 
 function randomBetween(minimum, maximum) {
   return Math.round(minimum + Math.random() * (maximum - minimum));
+}
+
+export function getTownPasserbyImageSource(id, character) {
+  const config = PASSERBY_CONFIGS.find(entry => entry.id === id);
+  if (!config) return "";
+  return config.alternateSrc && character?.eventFlags?.[config.alternateFlag]
+    ? config.alternateSrc
+    : config.src;
 }
