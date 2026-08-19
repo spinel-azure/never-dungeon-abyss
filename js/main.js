@@ -100,7 +100,7 @@ import { getAdventureChronicle } from "../data/adventure-records.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName, grantEquipmentInstance } from "../data/equipment-inventory.js";
 import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
-import { applyBossVictory, createBossCombatant, getBossById, getFloorBossByDepth, isBossDefeated } from "../data/bosses.js";
+import { applyBossVictory, bossLeavesRemains, createBossCombatant, getBossById, getFloorBossByDepth, isBossDefeated } from "../data/bosses.js";
 import { consumeKeyItem, getKeyItem, grantKeyItem, hasKeyItem } from "../data/key-items.js";
 import { configureBattle, handleBattleInput, isBattleActive, openBattleItems, startBattle } from "./battle.js";
 import { awardBattleExperience, createTempleRevival, getInnStayFee, grantEventItems, resolveDungeonDefeat, resolveInnStableStay, resolveInnStay, resolveTemplePoisonTreatment, unlockGuildRequest } from "./character-services.js";
@@ -687,6 +687,9 @@ import {
     for (let y = 0; y < MAP_H; y += 1) {
       for (let x = 0; x < MAP_W; x += 1) {
         const savedCell = structuredClone(dungeon.cells[y][x]);
+        if (savedCell.bossRemainsId && !bossLeavesRemains(savedCell.bossRemainsId)) {
+          savedCell.bossRemainsId = null;
+        }
         const unusedSpecialRoomPurple = savedCell.treasure === "purple"
           && Boolean(savedCell.specialRoom)
           && !getSpecialRoomDefinition(currentDepth)?.content;
@@ -1956,7 +1959,8 @@ import {
       if (victory.accepted) {
         character = victory.character;
         character = recordBossDefeat(character, battle.enemy.id, currentDepth);
-        markBossDefeatedAt(state.gridX, state.gridY, battle.enemy.id);
+        if (bossLeavesRemains(battle.enemy)) markBossDefeatedAt(state.gridX, state.gridY, battle.enemy.id);
+        else removeBossAt(state.gridX, state.gridY);
         if (victory.reward?.type === "routeCard" && battle.enemy.id === "jabberwock_event_boss") {
           const usedVorpalSword = Boolean(battle.vorpalSwordEquippedAtStart);
           const cardId = usedVorpalSword ? "legendary_spirit_surge" : "legendary_vital_surge";

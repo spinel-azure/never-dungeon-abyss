@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   applyBossVictory,
+  bossLeavesRemains,
   createBossCombatant,
   getBossById,
   isBossDefeated
@@ -28,6 +29,11 @@ test("B9 strange statue boss data is isolated and balance-adjustable", () => {
   assert.equal(combatant.isBoss, true);
   assert.equal(combatant.noDrop, true);
   assert.equal(combatant.escapeRate, 0);
+});
+
+test("only bosses with dedicated remains content leave a dungeon remnant", () => {
+  assert.equal(bossLeavesRemains("strange_knight_statue_b9f"), true);
+  assert.equal(bossLeavesRemains("musk_beast_b56f"), false);
 });
 
 test("boss victory persists independently from its future reward", () => {

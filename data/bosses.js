@@ -943,6 +943,11 @@ export function getBossById(id) {
   return BOSSES[String(id || "")] || null;
 }
 
+export function bossLeavesRemains(bossOrId) {
+  const boss = typeof bossOrId === "string" ? getBossById(bossOrId) : bossOrId;
+  return Boolean(boss?.defeatedEncounterImage || boss?.event?.remains);
+}
+
 export function getFloorBossByDepth(depth) {
   const normalizedDepth = Math.max(1, Math.floor(Number(depth) || 1));
   return Object.values(BOSSES).find(boss => boss.bossKind === "floor" && boss.floor === normalizedDepth) || null;
