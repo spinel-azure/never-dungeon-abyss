@@ -1046,7 +1046,7 @@ function equipmentEffectLabels(definition) {
       continue;
     }
     const percentLabels = {
-      magicDamageReduction: "魔法耐性",
+      magicDamageReduction: "呪文耐性",
       nonElementalMagicDamageReduction: "無属性呪文耐性",
       elementalMagicDamageReduction: "属性呪文耐性",
       fireSpellDamageBonus: "炎魔法威力",

@@ -79,6 +79,15 @@ test("Fleischfresser uses its dedicated large battle image size", async () => {
   assert.match(css, /battle-enemy-image\.is-fleischfresser\s*\{[^}]*width:\s*min\(90%,\s*600px\)/s);
 });
 
+test("Otherworldly Wisdom uses its dedicated large battle image size", async () => {
+  const [css, battleSource] = await Promise.all([
+    readFile(new URL("../css/battle.css", import.meta.url), "utf8"),
+    readFile(new URL("../js/battle.js", import.meta.url), "utf8")
+  ]);
+  assert.match(battleSource, /is-otherworldly-wisdom[^\n]+otherworldly_wisdom_b4f/);
+  assert.match(css, /battle-enemy-image\.is-otherworldly-wisdom\s*\{[^}]*width:\s*min\(84%,\s*560px\)/s);
+});
+
 test("transfer destination UI is separate from the six command slots and paginates by five", async () => {
   const [html, source] = await Promise.all([
     readFile(new URL("../index.html", import.meta.url), "utf8"),

@@ -136,6 +136,7 @@ export function rollRedChestLoot(rng = Math.random, depth = 1) {
   if (floor >= 11 && floor <= 30) return rollMidRedChestLoot(roll, floor, rng);
   if (floor >= 31 && floor <= 40) return rollDeepRedChestLoot(roll, floor, rng);
   if (floor >= 50 && floor <= 59) return rollForestRedChestLoot(roll, floor, rng);
+  if (floor >= 60 && floor <= 69) return rollDesertRedChestLoot(roll, rng);
   const earlyFloor = Number(depth) >= 1 && Number(depth) <= 9;
   if (earlyFloor && roll < 0.4) return { kind: "gold", amount: rollRedChestGold(rng) };
   if (earlyFloor && roll < 0.6) return { kind: "item", itemId: "healing_potion", amount: 1, unidentifiedName: "？薬" };
@@ -233,6 +234,22 @@ function rollForestRedChestLoot(roll, depth, rng) {
     slot: slots[slotIndex],
     enhancement: rollEnhancement(DEEP_RED_CHEST_ARMOR_ENHANCEMENT_RATES, rng) + 1,
     unidentifiedName: slotIndex === 0 && family === families[3] ? "？魔導書" : "？防具"
+  };
+}
+
+function rollDesertRedChestLoot(roll, rng) {
+  if (roll < 0.1) {
+    return { kind: "item", itemId: "strong_healing_potion_small", amount: 1, unidentifiedName: "？薬" };
+  }
+  if (roll < 0.2) {
+    return { kind: "item", itemId: "strong_antidote", amount: 1, unidentifiedName: "？薬" };
+  }
+  return {
+    kind: "equipment",
+    equipmentId: "spell_sealing_talisman",
+    slot: "accessoryId",
+    enhancement: rollEnhancement(DEEP_RED_CHEST_ARMOR_ENHANCEMENT_RATES, rng) + 1,
+    unidentifiedName: "？装備"
   };
 }
 

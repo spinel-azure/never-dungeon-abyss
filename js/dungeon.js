@@ -398,7 +398,7 @@ export function placeTreasures(depth = 1, rng = Math.random, progress = {}) {
   resetTreasures();
   const floor = Math.floor(Number(depth) || 1);
   const blackChestEnabled = Boolean(progress.blackChestsUnlocked) && floor >= 6 && floor % 10 !== 9;
-  const redChestsEnabled = (floor >= 11 && floor <= 40) || (floor >= 50 && floor <= 59);
+  const redChestsEnabled = (floor >= 11 && floor <= 40) || (floor >= 50 && floor <= 69);
   if (floor > 4 && !blackChestEnabled && !redChestsEnabled) return;
   const { x: startX, y: startY } = startPosition;
   const distances = makeDistanceMap(startX, startY);

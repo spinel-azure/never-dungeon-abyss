@@ -157,6 +157,25 @@ test("the anti-magic necklace unlocks after B10 and the strange statue victory",
   assert.equal(character.equipmentStatBonuses.magicDamageReduction, 0.15);
 });
 
+test("Spell-Sealing Talisman unlocks at B50 and scales spell resistance through plus three", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "thief" });
+  character.highestDungeonDepthReached = 50;
+  character.eventFlags.transfer_portal_b50f_unlocked = true;
+  assert.equal(getShopEquipmentOffer(character, "shop_spell_sealing_talisman"), null);
+  character.eventFlags.boss_eiskoenigin_b49f_defeated = true;
+  const offer = getShopEquipmentOffer(character, "shop_spell_sealing_talisman");
+  assert.equal(offer.buyPrice, 10000);
+  assert.deepEqual(
+    [0, 1, 2, 3].map(enhancement => {
+      const definition = getEquipmentInstanceDefinition({
+        equipmentId: "spell_sealing_talisman", slot: "accessoryId", enhancement
+      });
+      return [definition.statBonuses.def, definition.statBonuses.magicDamageReduction];
+    }),
+    [[2, 0.1], [2, 0.15], [2, 0.2], [3, 0.25]]
+  );
+});
+
 test("Rebellious Choker unlocks with the large healing potion and grants action-skip resistance", () => {
   let character = createInitialCharacter({ name: "TEST", job: "warrior" });
   const initialEquipmentDef = character.equipmentStatBonuses.def;

@@ -177,6 +177,17 @@ test("B50F to B59F red chests cycle the new class armor with 70/25/5 enhancement
   assert.equal(rollRedChestLoot(rng(0.2, 0.95), 54).enhancement, 3);
 });
 
+test("B60F to B69F red chests feature enhanced Spell-Sealing Talismans", () => {
+  assert.equal(rollRedChestLoot(rng(0.099), 60).itemId, "strong_healing_potion_small");
+  assert.equal(rollRedChestLoot(rng(0.1), 60).itemId, "strong_antidote");
+  assert.equal(rollRedChestLoot(rng(0.2, 0), 60).equipmentId, "spell_sealing_talisman");
+  assert.equal(rollRedChestLoot(rng(0.8, 0), 69).slot, "accessoryId");
+  assert.equal(rollRedChestLoot(rng(0.8, 0), 69).unidentifiedName, "？装備");
+  assert.equal(rollRedChestLoot(rng(0.2, 0.699), 64).enhancement, 1);
+  assert.equal(rollRedChestLoot(rng(0.2, 0.7), 64).enhancement, 2);
+  assert.equal(rollRedChestLoot(rng(0.2, 0.95), 64).enhancement, 3);
+});
+
 test("B6F to B10F black chests use the potion, R-card and SR-card bands", () => {
   assert.equal(rollBlackChestLoot(rng(0.429), 6).itemId, "healing_potion_medium");
   assert.equal(rollBlackChestLoot(rng(0.43, 0), 6).cardId, "rare_strength_up_plus");
@@ -284,6 +295,15 @@ test("B50F to B59F place one to three red chests and keep B59F free of black che
     const treasures = cells.flat().map(cell => cell.treasure).filter(Boolean);
     assert.equal(treasures.filter(type => type === "red").length, 2);
     assert.equal(treasures.filter(type => type === "black").length, depth === 59 ? 0 : 1);
+  }
+});
+
+test("B60F to B69F place one to three red chests", () => {
+  for (const depth of [60, 61, 68, 69]) {
+    buildBoundaryWallMap(depth, () => 0.5, { blackChestsUnlocked: true });
+    const treasures = cells.flat().map(cell => cell.treasure).filter(Boolean);
+    assert.equal(treasures.filter(type => type === "red").length, 2);
+    assert.equal(treasures.filter(type => type === "black").length, depth === 69 ? 0 : 1);
   }
 });
 

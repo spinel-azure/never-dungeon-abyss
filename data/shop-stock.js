@@ -47,6 +47,13 @@ export const SHOP_ACCESSORY_STOCK = Object.freeze([
     enhancement: 0,
     shopUnlockDepth: 20,
     requiredFlags: Object.freeze(["shop_stock_b20f_unlocked"])
+  }),
+  Object.freeze({
+    id: "shop_spell_sealing_talisman",
+    equipmentId: "spell_sealing_talisman",
+    enhancement: 0,
+    shopUnlockDepth: 50,
+    requiredFlags: Object.freeze(["transfer_portal_b50f_unlocked", "boss_eiskoenigin_b49f_defeated"])
   })
 ]);
 
@@ -184,7 +191,7 @@ function toEquipmentOffer(entry) {
 function describeBonuses(bonuses = {}) {
   return Object.entries(bonuses)
     .map(([key, value]) => key === "magicDamageReduction"
-      ? `魔法ダメージ-${Math.round(Number(value) * 100)}%`
+      ? `呪文耐性+${Math.round(Number(value) * 100)}%`
       : key === "actionSkipResistance"
         ? `行動不能耐性+${Math.round(Number(value) * 100)}%`
       : `${key === "def" ? "DEF" : key.toUpperCase()}+${value}`)
