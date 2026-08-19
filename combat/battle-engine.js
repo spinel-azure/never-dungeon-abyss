@@ -51,6 +51,7 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     ...(enemyParty ? { enemies: enemyParty, targetIndex: selectedTargetIndex, lastPlayerTargetIndex: selectedTargetIndex } : {}),
     vorpalSwordEquippedAtStart,
     capricornActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_capricorn"),
+    libraActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_libra"),
     vorpalExecution: false,
     slashExecution: null,
     log: [enemyParty ? `${enemyParty.map(member => member.name).join("、")}が現れた！` : `${enemy.name}が現れた！`],
@@ -668,6 +669,8 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
         * (1 - reduction)
         * getCapricornDamageMultiplier(battle, actorSide)
         * getCapricornReceivedDamageMultiplier(battle, targetSide)
+        * getLibraDamageMultiplier(battle, actorSide, actor, target)
+        * getLibraReceivedDamageMultiplier(battle, targetSide, actor, target)
         * (magicFocus ? Number(magicFocus.attackSpellDamageMultiplier) || 1 : 1)
         * (manaAmplification ? Number(manaAmplification.attackSpellDamageMultiplier) || 1 : 1)
         * raceMultiplier
@@ -843,6 +846,24 @@ function getCapricornReceivedDamageMultiplier(battle, targetSide) {
   if (targetSide !== "player") return 1;
   const card = getCardById("zodiac_capricorn");
   return Math.max(0, 1 - getCapricornStackCount(battle) * (Number(card?.longBattleReductionPerStack) || 0));
+}
+
+function isLibraTarget(player, enemy) {
+  if (!enemy) return false;
+  if (enemy.isBoss) return true;
+  const playerLevel = Number(player?.level);
+  const enemyLevel = Number(enemy.level);
+  return Number.isFinite(playerLevel) && Number.isFinite(enemyLevel) && enemyLevel > playerLevel;
+}
+
+function getLibraDamageMultiplier(battle, actorSide, actor, target) {
+  if (!battle.libraActiveAtStart || actorSide !== "player" || !isLibraTarget(actor, target)) return 1;
+  return Number(getCardById("zodiac_libra")?.strongerEnemyDamageMultiplier) || 1;
+}
+
+function getLibraReceivedDamageMultiplier(battle, targetSide, actor, target) {
+  if (!battle.libraActiveAtStart || targetSide !== "player" || !isLibraTarget(target, actor)) return 1;
+  return Number(getCardById("zodiac_libra")?.strongerEnemyReceivedDamageMultiplier) || 1;
 }
 
 function findBlockingBarrier(statuses = [], damage = 0) {

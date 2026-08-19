@@ -375,6 +375,12 @@ const ZODIAC_CARDS = [
   longBattleMaximumStacks: 3,
   longBattleDamagePerStack: 0.05,
   longBattleReductionPerStack: 0.05
+} : card.id === "zodiac_libra" ? {
+  ...card,
+  concept: "強敵への与ダメージ＋30％／被ダメージ－30％",
+  descriptionJa: "ボス、または自分より内部レベルが高い敵に与えるダメージが30％上昇し、その敵から受けるダメージが30％減少する。",
+  strongerEnemyDamageMultiplier: 1.3,
+  strongerEnemyReceivedDamageMultiplier: 0.7
 } : card);
 
 export const CARDS = Object.freeze(

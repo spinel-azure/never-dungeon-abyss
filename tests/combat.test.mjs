@@ -1348,6 +1348,41 @@ test("Capricorn raises dealt damage and reduces received damage in a long battle
   assert.ok(received(capricorn) < received(ordinary));
 });
 
+test("Libra grants thirty percent offense and defense only against bosses or higher-level enemies", () => {
+  const card = getCardById("zodiac_libra");
+  assert.equal(card?.strongerEnemyDamageMultiplier, 1.3);
+  assert.equal(card?.strongerEnemyReceivedDamageMultiplier, 0.7);
+  assert.match(card?.descriptionJa, /30％/);
+
+  const character = createInitialCharacter({ name: "LIBRA", job: "warrior" });
+  character.level = 65;
+  character.maxHp = 1000;
+  character.hp = 1000;
+  character.baseStats = { str: 30, int: 2, agi: 10, dex: 30, luc: 4 };
+  character.cards.deckSlots[0] = "zodiac_libra";
+  const baseEnemy = {
+    id: "libra_target", name: "TARGET", level: 66, hp: 1000, maxHp: 1000,
+    sp: 0, maxSp: 0, stats: { str: 30, int: 1, agi: 5, dex: 30, luc: 1 },
+    def: 0, attack: 30, statuses: [], equipment: {}, elementMultipliers: {},
+    statusResistances: {}, isBoss: false, alive: true
+  };
+  const fight = enemy => resolveBattleRound({
+    battle: createBattleState({ character, enemy }),
+    playerCommand: { type: "attack" },
+    rng: fixed(0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5)
+  }).battle;
+  const dealt = battle => battle.presentationEvents.find(event => event.actorSide === "player")?.damage;
+  const received = battle => battle.presentationEvents.find(event => event.actorSide === "enemy")?.damage;
+
+  const equalLevel = fight({ ...baseEnemy, level: 65 });
+  const higherLevel = fight(baseEnemy);
+  const lowerLevelBoss = fight({ ...baseEnemy, level: 1, isBoss: true });
+  assert.ok(dealt(higherLevel) > dealt(equalLevel));
+  assert.ok(received(higherLevel) < received(equalLevel));
+  assert.equal(dealt(lowerLevelBoss), dealt(higherLevel));
+  assert.equal(received(lowerLevelBoss), received(higherLevel));
+});
+
 test("Ability Boost is a six-copy SR card that raises all five abilities", () => {
   const card = getCardById("sr_ability_boost");
   assert.equal(card.rarity, "SR");
