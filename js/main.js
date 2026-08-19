@@ -1575,6 +1575,16 @@ import {
     popup.addEventListener("animationend", () => popup.remove(), { once: true });
   }
 
+  function showStepHpRecovery(amount) {
+    const layer = document.getElementById("poisonStepDamage");
+    if (!layer || amount <= 0) return;
+    const popup = document.createElement("i");
+    popup.className = "is-healing";
+    popup.textContent = `＋${amount}`;
+    layer.append(popup);
+    popup.addEventListener("animationend", () => popup.remove(), { once: true });
+  }
+
   function handleDungeonStep() {
     applyDungeonPoisonStep();
     applyDungeonDeadlyPoisonStep();
@@ -1582,6 +1592,7 @@ import {
     applyFireFloorStep();
     applyColdFloorStep();
     if (!character) return;
+    const hpBeforePassives = character.hp;
     character = recordNpcExpeditionDepth(character, currentDepth);
     character = applyNpcExplorationPassives(character);
     character.cardPassiveStepCount = (Math.max(0, Math.floor(Number(character.cardPassiveStepCount) || 0)) + 1) % 5;
@@ -1589,6 +1600,7 @@ import {
       if (hasCardEffect(character.cards?.deckSlots, "step_hp_recovery")) character.hp = Math.min(character.maxHp, character.hp + 1);
       if (hasCardEffect(character.cards?.deckSlots, "step_sp_recovery")) character.sp = Math.min(character.maxSp, character.sp + 1);
     }
+    showStepHpRecovery(character.hp - hpBeforePassives);
     character.condition = currentCondition(character);
     character = recordFloorExploration(character, { depth: currentDepth, explored });
     updateCharacterUi();

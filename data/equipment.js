@@ -19,7 +19,7 @@ export const EQUIPMENT = Object.freeze({
     hiddenStatBonusKeys: Object.freeze(["iceDamageReduction"])
   }),
   anti_magic_necklace: item("anti_magic_necklace", "魔除けのネックレス", "accessoryId", {
-    magicDamageReduction: 0.15
+    magicDamageReduction: 0.05
   }, {
     buyPrice: 1500,
     sellPrice: 750

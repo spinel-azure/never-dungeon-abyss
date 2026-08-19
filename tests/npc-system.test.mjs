@@ -292,6 +292,19 @@ test("status page three derives each active NPC display from current support bal
   assert.deepEqual(johan.rows, [["呪文威力", "約20～24"], ["属性", "無属性"], ["発動条件", "ターン開始時"]]);
   assert.equal(erika.maxDepth, 40);
 
+  character.npcSystem = normalizeNpcSystem({
+    registeredIds: ["alec", "rebecca", "erika", "johan"],
+    activeIds: ["alec", "rebecca", "erika"],
+    records: {
+      alec: { maxDepth: 60 }, rebecca: { maxDepth: 60 },
+      erika: { maxDepth: 60 }, johan: { maxDepth: 60 }
+    }
+  });
+  assert.deepEqual(
+    ["alec", "rebecca", "erika", "johan"].map(id => getNpcSupportStatus(character, id).rows.at(-1)),
+    [["パッシブ", "一閃"], ["パッシブ", "暗殺術"], ["パッシブ", "女神の息吹"], ["パッシブ", "マナ活性化"]]
+  );
+
   const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
   const menuSource = readFileSync(new URL("../js/menu.js", import.meta.url), "utf8");
   assert.match(html, /data-status-page="2"[\s\S]*data-npc-status-list[\s\S]*data-status-indicator>1\/3/);

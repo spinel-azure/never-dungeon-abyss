@@ -79,6 +79,8 @@ export function getNpcSupportStatus(character, npcId) {
   const stage = getGrowthStage(character, npcId);
   const maxDepth = Math.max(0, Math.floor(Number(character?.npcSystem?.records?.[npcId]?.maxDepth) || 0));
   const growth = `${"■".repeat(stage)}${"□".repeat(10 - stage)}`;
+  const passive = getNpcStagePassive(npcId, stage);
+  const passiveRow = passive ? [["パッシブ", passive.name]] : [];
   const common = { id: npcId, name: definition.name, jobLabel: definition.jobLabel, stage, maxDepth, growth };
   if (npcId === "alec") {
     const config = NPC_SUPPORT_BALANCE.alec;
@@ -86,7 +88,8 @@ export function getNpcSupportStatus(character, npcId) {
     return { ...common, rows: [
       ["追撃威力", String(Math.max(1, Math.floor(attack * config.attackRate)))],
       ["防御援護", `${formatPercent(Math.min(config.guardMaximum, config.guardBase + stage * config.guardPerStage))}％`],
-      ["援護特性", "攻撃後に追撃／防御時に物理軽減"]
+      ["援護特性", "攻撃後に追撃／防御時に物理軽減"],
+      ...passiveRow
     ] };
   }
   if (npcId === "rebecca") {
@@ -95,14 +98,16 @@ export function getNpcSupportStatus(character, npcId) {
     return { ...common, rows: [
       ["連撃威力", `${Math.max(1, Math.floor(attack * config.hitRate))}×2`],
       ["弱体成功", `${formatPercent(config.debuffRate)}％`],
-      ["弱体効果", `DEF－${formatPercent(1 - config.defenseMultiplier)}％／${config.debuffTurns}ターン`]
+      ["弱体効果", `DEF－${formatPercent(1 - config.defenseMultiplier)}％／${config.debuffTurns}ターン`],
+      ...passiveRow
     ] };
   }
   if (npcId === "erika") {
     const config = NPC_SUPPORT_BALANCE.erika;
     return { ...common, rows: [
       ["回復量", `最大HPの${formatPercent(config.healRate + stage * config.healPerStage)}％`],
-      ["発動条件", "ターン終了時／HP減少中"]
+      ["発動条件", "ターン終了時／HP減少中"],
+      ...passiveRow
     ] };
   }
   const config = NPC_SUPPORT_BALANCE.johan;
@@ -111,7 +116,8 @@ export function getNpcSupportStatus(character, npcId) {
   return { ...common, rows: [
     ["呪文威力", `約${Math.max(1, Math.floor(baseDamage * 0.9))}～${Math.max(1, Math.floor(baseDamage * 1.1))}`],
     ["属性", "無属性"],
-    ["発動条件", "ターン開始時"]
+    ["発動条件", "ターン開始時"],
+    ...passiveRow
   ] };
 }
 

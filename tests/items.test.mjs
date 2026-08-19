@@ -147,14 +147,14 @@ test("the anti-magic necklace unlocks after B10 and the strange statue victory",
   const offer = getShopEquipmentOffer(character, "shop_anti_magic_necklace");
   assert.equal(offer?.slot, "accessoryId");
   assert.equal(offer?.buyPrice, 1500);
-  assert.equal(offer?.statBonuses.magicDamageReduction, 0.15);
+  assert.equal(offer?.statBonuses.magicDamageReduction, 0.05);
 
   const purchased = purchaseEquipment(character, offer);
   assert.equal(purchased.accepted, true);
   character = equipInstance(purchased.character, "accessoryId", purchased.instance.instanceId).character;
   character = normalizeCharacter(character);
   assert.equal(character.equipment.accessoryId, "anti_magic_necklace");
-  assert.equal(character.equipmentStatBonuses.magicDamageReduction, 0.15);
+  assert.equal(character.equipmentStatBonuses.magicDamageReduction, 0.05);
 });
 
 test("Spell-Sealing Talisman unlocks at B50 and scales spell resistance through plus three", () => {
