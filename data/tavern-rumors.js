@@ -6,6 +6,8 @@ export const TAVERN_RUMOR_003_BASE_READ_FLAG = "tavern_rumor_003_base_read";
 export const TAVERN_RUMOR_003_WISDOM_READ_FLAG = "tavern_rumor_003_wisdom_read";
 export const TAVERN_RUMOR_004_BASE_READ_FLAG = "tavern_rumor_004_base_read";
 export const TAVERN_RUMOR_004_MEDICINE_READ_FLAG = "tavern_rumor_004_medicine_read";
+export const TAVERN_RUMOR_005_BASE_READ_FLAG = "tavern_rumor_005_base_read";
+export const TAVERN_RUMOR_005_OUTFIT_READ_FLAG = "tavern_rumor_005_outfit_read";
 
 export function getTavernRumorTypewriterParts(message) {
   const text = String(message || "");
@@ -103,6 +105,28 @@ export const TAVERN_RUMORS = Object.freeze([
         rosaContinuation: "えっ？あなたが特効薬の材料を集めたの？これで司祭様の具合も良くなるといいわね。"
       })
     ])
+  }),
+  Object.freeze({
+    id: "rumor_005",
+    title: "助祭の噂",
+    unlock: context => context.priestRumorCompleted && context.templeDonationCount >= 500,
+    customerLead: "寺院の助祭、ずいぶんと大胆な格好をしているな。",
+    customerReply: "でもあれは祝祭で着る特別な衣装のはずだが…？",
+    phases: Object.freeze([
+      Object.freeze({
+        id: "base",
+        readFlag: TAVERN_RUMOR_005_BASE_READ_FLAG,
+        unlock: context => !context.anastasiaOutfitEventSeen,
+        rosa: "まぁ、どんな格好なのかしら…。あなたも興味あるわよね？"
+      }),
+      Object.freeze({
+        id: "outfit",
+        readFlag: TAVERN_RUMOR_005_OUTFIT_READ_FLAG,
+        unlock: context => context.anastasiaOutfitEventSeen,
+        rosa: "まぁ、どんな格好なのかしら…。あなたも興味あるわよね？",
+        rosaContinuation: "えっ！？とても大胆な格好だった、ですって！？そんな娘には見えないけれど…。"
+      })
+    ])
   })
 ]);
 
@@ -130,7 +154,9 @@ function normalizeRumorContext(character, context = {}) {
     depthReached: Math.max(1, Math.floor(Number(context.depthReached ?? character?.highestDungeonDepthReached) || 1)),
     templeDonationCount: Math.max(0, Math.floor(Number(context.templeDonationCount ?? character?.adventureStats?.templeDonationCount) || 0)),
     quest019Completed: Boolean(context.quest019Completed ?? completedQuestIds.includes("guild_019")),
-    quest016Completed: Boolean(context.quest016Completed ?? completedQuestIds.includes("guild_016"))
+    quest016Completed: Boolean(context.quest016Completed ?? completedQuestIds.includes("guild_016")),
+    anastasiaOutfitEventSeen: Boolean(context.anastasiaOutfitEventSeen ?? character?.eventFlags?.anastasia_festival_outfit_unlocked),
+    priestRumorCompleted: Boolean(context.priestRumorCompleted ?? character?.eventFlags?.tavern_rumor_004_medicine_read)
   };
 }
 

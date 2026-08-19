@@ -22,6 +22,13 @@ import { CHARACTER_NAME_MAX_LENGTH, CHARACTER_RENAME_COST, normalizeCharacterNam
 import { getUnlockedTransferDestinations } from "../data/transfer-destinations.js";
 import { NPC_DEFINITIONS, NPC_SUPPORT_ENABLED, getNpcDefinition } from "../data/npc-definitions.js";
 import { getNpcHireFee } from "../data/npc-party.js";
+import {
+  ANASTASIA_OUTFIT_EVENT_FLAG,
+  isAnastasiaAssigned,
+  isAnastasiaFestivalSunday,
+  isAnastasiaOutfitEventPending,
+  shouldUseAnastasiaFestivalPortrait
+} from "../data/anastasia-event.js";
 
 const FACILITY_COMMANDS = Object.freeze({
   inn: [
@@ -112,6 +119,7 @@ const town = {
   facilityTalkDialogue: [],
   facilityTalkDialogueIndex: 0,
   facilityTalkCompletionFlag: "",
+  suppressFestivalPortraitUntilTempleExit: false,
   questAcceptanceRewardMessage: "",
   entranceIndex: 0,
   transferIndex: 0,
@@ -237,6 +245,13 @@ export function configureTown(options) {
     const image = new Image();
     image.decoding = "async";
     image.src = TAVERN_FACILITY.image;
+    image.decode().catch(() => {});
+    town.portraitPreloads.push(image);
+  }
+  {
+    const image = new Image();
+    image.decoding = "async";
+    image.src = "images/npc/NPC_12d.avif";
     image.decode().catch(() => {});
     town.portraitPreloads.push(image);
   }
@@ -642,6 +657,9 @@ function handleFacilityTalkInput(action) {
     town.messageEl.textContent = town.facilityTalkDialogue[town.facilityTalkDialogueIndex];
     return true;
   }
+  if (town.facilityTalkCompletionFlag === ANASTASIA_OUTFIT_EVENT_FLAG) {
+    town.suppressFestivalPortraitUntilTempleExit = true;
+  }
   if (town.facilityTalkCompletionFlag) town.onCompleteFacilityTalk(town.facilityTalkCompletionFlag);
   town.facilityTalkDialogue = [];
   town.facilityTalkDialogueIndex = 0;
@@ -1044,6 +1062,7 @@ function previewLibraryCommand(command) {
 }
 
 function beginFacilitySelection() {
+  town.suppressFestivalPortraitUntilTempleExit = false;
   town.subFacilityId = "";
   town.mode = "selection";
   town.selectedIndex = nearestSelectableIndex(town.selectedIndex, 1);
@@ -1053,6 +1072,7 @@ function beginFacilitySelection() {
 export function showTownArrival({ playNameBanner = false, firstVisit = false } = {}) {
   if (!town.active || town.registrationRequired) return false;
   town.mode = "selection";
+  town.suppressFestivalPortraitUntilTempleExit = false;
   town.subFacilityId = "";
   town.arrivalMessage = firstVisit ? "firstVisit" : "normal";
   town.selectedIndex = TOWN_FACILITIES.findIndex(facility => facility.id === "inn");
@@ -1072,21 +1092,22 @@ function currentFacility() {
   if (town.subFacilityId === "tavern") return TAVERN_FACILITY;
   if (town.subFacilityId === "npcHire") return NPC_HIRE_FACILITY;
   const facility = TOWN_FACILITIES[town.selectedIndex] || getTownFacility("guild");
-  if (facility.id !== "temple" || !isAnastasiaAssigned()) return facility;
+  const character = town.getCharacter();
+  if (facility.id !== "temple" || !isAnastasiaAssigned(character)) return facility;
+  const festivalPortrait = isAnastasiaOutfitEventPending(character)
+    || (!town.suppressFestivalPortraitUntilTempleExit && shouldUseAnastasiaFestivalPortrait(character));
   return {
     ...facility,
     keeper: "助祭アナスタシア",
-    image: "images/npc/NPC_12c.avif",
-    greeting: "さぁ、女神様に祈りを捧げましょう。"
+    image: festivalPortrait ? "images/npc/NPC_12d.avif" : "images/npc/NPC_12c.avif",
+    greeting: !town.suppressFestivalPortraitUntilTempleExit && isAnastasiaFestivalSunday(character)
+      ? "きょ、今日はルミナ様に祈りを捧げる特別な日なので…。"
+      : "さぁ、女神様に祈りを捧げましょう。"
   };
 }
 
-function isAnastasiaAssigned() {
-  return Boolean(town.getCharacter()?.eventFlags?.tavern_rumor_004_base_read);
-}
-
 function templeKeeper() {
-  return isAnastasiaAssigned() ? "助祭アナスタシア" : "司祭アーヴァイン";
+  return isAnastasiaAssigned(town.getCharacter()) ? "助祭アナスタシア" : "司祭アーヴァイン";
 }
 
 function startTownNameBanner() {
@@ -1223,6 +1244,15 @@ function renderFacility() {
   } else {
     town.mode = "facilityMenu";
     showFacilityCommands(facility.id);
+  }
+  if (facility.id === "temple" && isAnastasiaOutfitEventPending(town.getCharacter())) {
+    town.facilityTalkDialogue = [
+      "助祭アナスタシア：こっ、これは……黄金の稲穂の女神、ルミナ様に特別な祈りを捧げる祝祭の儀礼で着用する衣装なんです……。\nその……あなたに、見ていただきたくて……。\n＊Aボタンで次へ"
+    ];
+    town.facilityTalkDialogueIndex = 0;
+    town.facilityTalkCompletionFlag = ANASTASIA_OUTFIT_EVENT_FLAG;
+    town.messageEl.textContent = town.facilityTalkDialogue[0];
+    town.mode = "facilityTalk";
   }
   town.root.classList.toggle("is-registering", showRegistration);
   updateRegistrationJobDescription();

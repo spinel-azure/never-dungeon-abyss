@@ -146,3 +146,43 @@ test("priest rumor requires quest 019 plus one hundred donations and updates aft
   character = markTavernRumorRead(character, update);
   assert.equal(getPastTavernRumors(character).find(entry => entry.id === "rumor_004")?.description.length, 4);
 });
+
+
+test("acolyte rumor unlocks at five hundred donations and continues after the hidden temple event", () => {
+  let character = createInitialCharacter("祝祭見物", "mage");
+  character.eventFlags = {
+    tavern_rumor_001_base_read: true,
+    tavern_rumor_002_base_read: true,
+    tavern_rumor_003_base_read: true,
+    tavern_rumor_004_medicine_read: true
+  };
+  character.adventureStats.templeDonationCount = 499;
+  assert.equal(getUnreadTavernRumor(character), null);
+  character.adventureStats.templeDonationCount = 500;
+  const base = getUnreadTavernRumor(character);
+  assert.equal(base.id, "rumor_005_base");
+  assert.match(base.dialogue[0], /大胆な格好/);
+  character = markTavernRumorRead(character, base);
+  assert.equal(getPastTavernRumors(character).find(entry => entry.id === "rumor_005")?.title, "助祭の噂");
+
+  character.eventFlags.anastasia_festival_outfit_unlocked = true;
+  assert.equal(getPastTavernRumors(character).some(entry => entry.id === "rumor_005"), false);
+  const update = getUnreadTavernRumor(character);
+  assert.equal(update.id, "rumor_005_outfit");
+  assert.match(update.dialogue.at(-1), /とても大胆な格好だった/);
+  character = markTavernRumorRead(character, update);
+  assert.equal(getPastTavernRumors(character).find(entry => entry.id === "rumor_005")?.description.length, 4);
+});
+
+test("acolyte rumor stays hidden at five hundred donations until the priest rumor is complete", () => {
+  const character = createInitialCharacter("先行寄進者", "priest");
+  character.eventFlags = {
+    tavern_rumor_001_base_read: true,
+    tavern_rumor_002_base_read: true,
+    tavern_rumor_003_base_read: true
+  };
+  character.adventureStats.templeDonationCount = 500;
+  assert.equal(getUnreadTavernRumor(character), null);
+  character.eventFlags.tavern_rumor_004_medicine_read = true;
+  assert.equal(getUnreadTavernRumor(character)?.id, "rumor_005_base");
+});

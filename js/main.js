@@ -135,6 +135,7 @@ import { getPastTavernRumors, getUnreadTavernRumor, markTavernRumorRead } from "
 import { renameCharacter as applyCharacterRename } from "../data/character-name.js";
 import { isTransferDestinationUnlocked } from "../data/transfer-destinations.js";
 import { selectRevivalGoddessImage } from "../data/revival-presentation.js";
+import { ANASTASIA_OUTFIT_EVENT_FLAG } from "../data/anastasia-event.js";
 import { getFireFloorStepDamage, isFireFloorDepth } from "../data/fire-floor.js";
 import { getColdFloorStepDamage, isColdFloorDepth } from "../data/cold-floor.js";
 import {
@@ -516,6 +517,7 @@ import {
       };
       updateCharacterUi();
       saveGame();
+      if (flag === ANASTASIA_OUTFIT_EVENT_FLAG) void runSceneTransition();
     },
     onTalk: talkAtFacility,
     onAcceptRequest: acceptGuildRequest,

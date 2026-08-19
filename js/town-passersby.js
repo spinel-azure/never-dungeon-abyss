@@ -1,3 +1,5 @@
+import { isAnastasiaFestivalSunday } from "../data/anastasia-event.js";
+
 const PASSERBY_CONFIGS = Object.freeze([
   Object.freeze({
     id: "energeticTownGirl",
@@ -157,7 +159,13 @@ export function configureTownPassersby({ canvas, root, getCharacter = () => null
     previousTime = now;
     context.clearRect(0, 0, canvas.width, canvas.height);
     if (visible) {
+      const hideAnastasia = isAnastasiaFestivalSunday(getCharacter());
       passersby.forEach(passerby => {
+        if (hideAnastasia && passerby.config.id === "priest") {
+          passerby.active = false;
+          passerby.nextSpawnAt = now + randomBetween(...passerby.config.spawnInterval);
+          return;
+        }
         if (!passerby.initialized) {
           passerby.initialized = true;
           passerby.nextSpawnAt = now + passerby.config.initialDelay;
@@ -168,6 +176,7 @@ export function configureTownPassersby({ canvas, root, getCharacter = () => null
       const spawnCandidates = passersby
         .filter(passerby => (
           !passerby.active
+          && !(hideAnastasia && passerby.config.id === "priest")
           && passerby.image.complete
           && passerby.image.naturalWidth > 0
           && now >= passerby.nextSpawnAt
