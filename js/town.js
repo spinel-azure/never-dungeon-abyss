@@ -665,6 +665,7 @@ function handleFacilityTalkInput(action) {
   town.facilityTalkDialogue = [];
   town.facilityTalkDialogueIndex = 0;
   town.facilityTalkCompletionFlag = "";
+  town.mode = "facilityMenu";
   renderFacility();
   return true;
 }
