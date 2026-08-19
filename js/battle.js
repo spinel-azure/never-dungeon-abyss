@@ -480,7 +480,19 @@ function applyPresentationHp(event) {
 export function applyHpPresentationEvent(presentationHp, battle, event) {
   if (!presentationHp || !["player", "enemy"].includes(event?.targetSide)) return presentationHp;
   const next = { ...presentationHp };
+  if (Array.isArray(presentationHp.enemies)) next.enemies = [...presentationHp.enemies];
   const amount = Math.max(0, Math.floor(Number(event.damage ?? event.amount) || 0));
+  if (event.targetSide === "enemy" && Array.isArray(next.enemies) && battle?.enemies) {
+    const targetIndex = Number.isInteger(event.targetIndex) ? event.targetIndex : battle.targetIndex;
+    const enemy = battle.enemies[targetIndex];
+    if (!enemy || !Number.isFinite(next.enemies[targetIndex])) return next;
+    if (event.type === "healing") {
+      next.enemies[targetIndex] = Math.min(enemy.maxHp, next.enemies[targetIndex] + amount);
+    } else if (event.hit || ["damage", "poisonDamage", "bleedingDamage"].includes(event.type)) {
+      next.enemies[targetIndex] = Math.max(0, next.enemies[targetIndex] - amount);
+    }
+    return next;
+  }
   if (event.type === "healing") {
     const maximum = battle?.[event.targetSide]?.maxHp ?? Number.MAX_SAFE_INTEGER;
     next[event.targetSide] = Math.min(maximum, next[event.targetSide] + amount);
@@ -693,6 +705,8 @@ function renderEnemyParty(battle) {
   }
   [...party.children].forEach((member, index) => {
     const enemy = battle.enemies[index];
+    const presentedHp = battleUi.presentationHp?.enemies?.[index];
+    const displayEnemy = Number.isFinite(presentedHp) ? { ...enemy, hp: presentedHp } : enemy;
     const selectedIndex = battleUi.mode === "targets" ? battleUi.selectedIndex : battle.targetIndex;
     member.classList.toggle("is-selected", index === selectedIndex && enemy.alive);
     member.classList.toggle("is-defeated", !enemy.alive);
@@ -701,7 +715,7 @@ function renderEnemyParty(battle) {
     const img = member.querySelector("img");
     img.src = enemy.image || "";
     img.alt = battleUi.concealed ? "正体不明の敵" : enemy.name;
-    member.querySelector(".battle-enemy-member-hp > i").style.width = `${getBattleHpPercent(enemy)}%`;
+    member.querySelector(".battle-enemy-member-hp > i").style.width = `${getBattleHpPercent(displayEnemy)}%`;
   });
 }
 
@@ -732,6 +746,7 @@ function renderBattleVitals() {
   setText("battlePlayerHp", `${playerHp} / ${battle.player.maxHp}`);
   setText("battleEnemyHp", `${enemyHp} / ${battle.enemy.maxHp}`);
   renderBossHpMeter({ ...battle.enemy, hp: enemyHp });
+  if (battle.enemies) renderEnemyParty(battle);
 }
 
 function renderBossHpMeter(enemy) {

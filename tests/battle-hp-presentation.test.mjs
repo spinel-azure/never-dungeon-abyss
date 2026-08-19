@@ -45,3 +45,22 @@ test("quick-status HP can follow every player presentation event through zero HP
     assert.equal(quickHpCurrent, expectedHp, `${label}: quick-status final HP`);
   }
 });
+
+test("multi-enemy HP presentation updates only the event target in real time", () => {
+  const battle = {
+    enemy: { maxHp: 2000 },
+    enemies: [
+      { hp: 500, maxHp: 500 },
+      { hp: 1900, maxHp: 2000 },
+      { hp: 500, maxHp: 500 }
+    ],
+    targetIndex: 1
+  };
+  const result = applyHpPresentationEvent(
+    { player: 100, enemy: 2000, enemies: [500, 2000, 500] },
+    battle,
+    { type: "poisonDamage", targetSide: "enemy", targetIndex: 1, amount: 100 }
+  );
+  assert.deepEqual(result.enemies, [500, 1900, 500]);
+  assert.equal(result.enemy, 2000);
+});
