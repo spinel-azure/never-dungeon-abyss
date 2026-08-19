@@ -5,6 +5,7 @@ import { getItemUnavailableReason } from "../combat/resolve-item-use.js";
 const overlay = {
   root: null, list: null, pageEl: null, backButton: null, messageEl: null,
   active: false, selectedIndex: 0, items: [], character: null, context: "dungeon",
+  lastSelectionByContext: {},
   enemy: null, torchFuel: 0, treasureCompassActive: false, onUse: async () => ({ accepted: false }),
   onClose: () => {}, playSe: () => {}, previousMessage: ""
 };
@@ -28,7 +29,7 @@ export function openItemOverlay({ context = "dungeon", character, enemy = null, 
   overlay.items = ITEMS.filter(item =>
     getItemCount(character.inventory, item.id) > 0 && item.usableIn?.includes(context)
   );
-  overlay.selectedIndex = 0;
+  overlay.selectedIndex = restoreSelectedIndex(overlay.items, overlay.lastSelectionByContext[context]);
   overlay.onUse = onUse || overlay.onUse;
   overlay.onClose = onClose || (() => {});
   overlay.previousMessage = overlay.messageEl.textContent;
@@ -85,6 +86,7 @@ async function activate() {
     return;
   }
   overlay.playSe("confirm");
+  overlay.lastSelectionByContext[overlay.context] = { id: item.id, index: overlay.selectedIndex };
   if (overlay.context === "battle") closeItemOverlay();
   const result = await overlay.onUse(item.id);
   if (!result?.accepted) {
@@ -93,6 +95,13 @@ async function activate() {
     return;
   }
   if (overlay.active) closeItemOverlay({ restoreMessage: false });
+}
+
+function restoreSelectedIndex(items, remembered) {
+  if (!items.length) return 0;
+  const matchingIndex = items.findIndex(item => item.id === remembered?.id);
+  if (matchingIndex >= 0) return matchingIndex;
+  return Math.min(Math.max(0, Math.floor(Number(remembered?.index) || 0)), items.length - 1);
 }
 
 function render() {

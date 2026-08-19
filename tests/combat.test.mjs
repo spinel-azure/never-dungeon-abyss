@@ -151,6 +151,9 @@ test("B50F to B59F encounter Abyss Tiger, Abyss Panther, and Abyss Mushroom", ()
   assert.equal(deadlyPoison.name, "猛毒");
   assert.equal(deadlyPoison.effects[0].statusId, "deadly_poison");
   assert.equal(mushroom.dropItemId, "abyss_mushroom_cap");
+  for (const enemyId of ["abyss_tiger", "abyss_panther", "abyss_mushroom"]) {
+    assert.deepEqual(getEnemyById(enemyId).elementMultipliers, { fire: 1.5, ice: 1 });
+  }
 });
 
 test("poison slime sometimes selects an attack that can inflict poison", () => {
@@ -1816,4 +1819,16 @@ test("a successful Flash Slash ends remaining hits and requests the shared slash
   assert.equal(result.battle.outcome, "victory");
   assert.equal(result.battle.slashExecution, "flash_slash");
   assert.equal(result.battle.presentationEvents.some(event => event.slashExecution), true);
+});
+
+
+test("B50F black-chest weapons retain their job roles through plus three", () => {
+  const warrior = getWeapon("blacksteel_longsword", 3);
+  const thief = getWeapon("abyss_fang", 3);
+  const priest = getWeapon("sacred_tree_mace", 3);
+  const mage = getWeapon("ancient_tree_staff", 3);
+  assert.deepEqual([warrior.attack, warrior.statBonuses.str, warrior.twoHanded], [21, 6, undefined]);
+  assert.deepEqual([thief.attack, thief.statBonuses.dex], [15, 6]);
+  assert.deepEqual([priest.attack, priest.statBonuses.luc], [19, 5]);
+  assert.deepEqual([mage.statBonuses.int, mage.twoHanded], [11, true]);
 });

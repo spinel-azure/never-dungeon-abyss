@@ -179,3 +179,23 @@ test("final shop armor keeps its class identity and enhancement stat profiles", 
     { int: 8 }
   );
 });
+
+
+test("B50F armor enhancements improve defense and preserve each class identity", () => {
+  assert.deepEqual(
+    getEquipmentInstanceDefinition({ equipmentId: "blacksteel_heavy_armor", enhancement: 3 }).statBonuses,
+    { def: 12, str: 6 }
+  );
+  assert.deepEqual(
+    getEquipmentInstanceDefinition({ equipmentId: "abyss_tiger_boots", enhancement: 3 }).statBonuses,
+    { def: 9, agi: 8 }
+  );
+  assert.deepEqual(
+    getEquipmentInstanceDefinition({ equipmentId: "sacred_tree_mitre", enhancement: 3 }).statBonuses,
+    { def: 10, luc: 7 }
+  );
+  assert.deepEqual(
+    getEquipmentInstanceDefinition({ equipmentId: "abyss_grimoire", enhancement: 3 }).statBonuses,
+    { int: 13 }
+  );
+});

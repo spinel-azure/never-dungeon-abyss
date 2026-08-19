@@ -115,6 +115,22 @@ test("B31F to B40F red chests use floor-fixed class armor and 70/25/5 enhancemen
   assert.equal(rollRedChestLoot(rng(0.2, 0.95), 31).enhancement, 3);
 });
 
+test("B50F to B59F red chests cycle the new class armor with 70/25/5 enhancements", () => {
+  assert.equal(rollRedChestLoot(rng(0.099), 50).itemId, "strong_healing_potion_small");
+  assert.equal(rollRedChestLoot(rng(0.1), 50).itemId, "strong_antidote");
+  assert.deepEqual(
+    [50, 51, 52, 53].map(depth => rollRedChestLoot(rng(0.2, 0), depth).equipmentId),
+    ["blacksteel_greatshield", "abyss_tiger_buckler", "sacred_tree_shield", "abyss_grimoire"]
+  );
+  assert.deepEqual(
+    [0.2, 0.4, 0.6, 0.8].map(roll => rollRedChestLoot(rng(roll, 0), 57).slot),
+    ["leftArmId", "headId", "bodyId", "footId"]
+  );
+  assert.equal(rollRedChestLoot(rng(0.2, 0.699), 54).enhancement, 1);
+  assert.equal(rollRedChestLoot(rng(0.2, 0.7), 54).enhancement, 2);
+  assert.equal(rollRedChestLoot(rng(0.2, 0.95), 54).enhancement, 3);
+});
+
 test("B6F to B10F black chests use the potion, R-card and SR-card bands", () => {
   assert.equal(rollBlackChestLoot(rng(0.429), 6).itemId, "healing_potion_medium");
   assert.equal(rollBlackChestLoot(rng(0.43, 0), 6).cardId, "rare_strength_up_plus");
@@ -139,6 +155,17 @@ test("B11F to B20F black chests use SP cards, magic resistance, and enhanced ele
     kind: "equipment", equipmentId: "ice_lizard_staff", slot: "rightArmId",
     enhancement: 3, unidentifiedName: "？両手杖"
   });
+});
+
+test("B50F to B59F black chests cycle job weapons with 70/25/5 enhancements", () => {
+  assert.deepEqual(
+    [50, 51, 52, 53].map(depth => rollBlackChestLoot(rng(0, 0), depth).equipmentId),
+    ["blacksteel_longsword", "abyss_fang", "sacred_tree_mace", "ancient_tree_staff"]
+  );
+  assert.equal(rollBlackChestLoot(rng(0, 0.699), 54).enhancement, 1);
+  assert.equal(rollBlackChestLoot(rng(0, 0.7), 54).enhancement, 2);
+  assert.equal(rollBlackChestLoot(rng(0, 0.95), 54).enhancement, 3);
+  assert.equal(rollBlackChestLoot(rng(0, 0), 57).unidentifiedName, "？両手杖");
 });
 
 test("unidentified card loot settles into the card collection", () => {
@@ -202,6 +229,15 @@ test("B31F to B40F place red chests and keep B39F free of black chests", () => {
     const treasures = cells.flat().map(cell => cell.treasure).filter(Boolean);
     assert.equal(treasures.filter(type => type === "red").length, 2);
     assert.equal(treasures.filter(type => type === "black").length, depth === 39 ? 0 : 1);
+  }
+});
+
+test("B50F to B59F place one to three red chests and keep B59F free of black chests", () => {
+  for (const depth of [50, 51, 58, 59]) {
+    buildBoundaryWallMap(depth, () => 0.5, { blackChestsUnlocked: true });
+    const treasures = cells.flat().map(cell => cell.treasure).filter(Boolean);
+    assert.equal(treasures.filter(type => type === "red").length, 2);
+    assert.equal(treasures.filter(type => type === "black").length, depth === 59 ? 0 : 1);
   }
 });
 

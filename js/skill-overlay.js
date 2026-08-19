@@ -17,6 +17,7 @@ const overlay = {
   selectedIndex: 0,
   page: 0,
   skills: [],
+  lastSelectionByContext: {},
   enemy: null,
   getCharacter: () => null,
   onUse: async () => ({ accepted: false }),
@@ -41,9 +42,9 @@ export function openSkillOverlay({ context = "field", character, enemy = null, o
   if (overlay.active || !character) return false;
   overlay.active = true;
   overlay.context = context;
-  overlay.selectedIndex = 0;
-  overlay.page = 0;
   overlay.skills = getSkills(character.skillIds).filter(skill => context !== "battle" || skill.actionType !== "passive");
+  overlay.selectedIndex = restoreSelectedIndex(overlay.skills, overlay.lastSelectionByContext[context]);
+  overlay.page = context === "battle" ? Math.floor(overlay.selectedIndex / BATTLE_SKILLS_PER_PAGE) : 0;
   overlay.enemy = enemy;
   overlay.getCharacter = () => character;
   if (onUse) overlay.onUse = onUse;
@@ -186,6 +187,7 @@ async function activateSelected() {
     return;
   }
   overlay.playSe("confirm");
+  overlay.lastSelectionByContext[overlay.context] = { id: skill.id, index: overlay.selectedIndex };
   if (overlay.context === "battle") {
     closeSkillOverlay();
     return overlay.onUse(skill.id);
@@ -197,6 +199,13 @@ async function activateSelected() {
     return;
   }
   closeSkillOverlay({ restoreMessage: false });
+}
+
+function restoreSelectedIndex(skills, remembered) {
+  if (!skills.length) return 0;
+  const matchingIndex = skills.findIndex(skill => skill.id === remembered?.id);
+  if (matchingIndex >= 0) return matchingIndex;
+  return Math.min(Math.max(0, Math.floor(Number(remembered?.index) || 0)), skills.length - 1);
 }
 
 function render() {

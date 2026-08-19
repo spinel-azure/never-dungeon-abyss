@@ -32,25 +32,57 @@ export const EQUIPMENT = Object.freeze({
     sellPrice: 1000
   }),
 
-  blacksteel_greatshield: item("blacksteel_greatshield", "黒鋼の大盾", "leftArmId", { def: 8, dex: 4 }, deepArmor("warrior")),
-  blacksteel_helmet: item("blacksteel_helmet", "黒鋼の兜", "headId", { def: 10 }, deepArmor("warrior")),
-  blacksteel_heavy_armor: item("blacksteel_heavy_armor", "黒鋼の重鎧", "bodyId", { def: 9, str: 4 }, deepArmor("warrior")),
-  blacksteel_greaves: item("blacksteel_greaves", "黒鋼の脚甲", "footId", { def: 8, str: 4 }, deepArmor("warrior")),
+  blacksteel_greatshield: item("blacksteel_greatshield", "黒鋼の大盾", "leftArmId", { def: 8, dex: 4 }, deepArmor("warrior", {
+    1: { def: 9, dex: 4 }, 2: { def: 10, dex: 5 }, 3: { def: 11, dex: 6 }
+  })),
+  blacksteel_helmet: item("blacksteel_helmet", "黒鋼の兜", "headId", { def: 10 }, deepArmor("warrior", {
+    1: { def: 11 }, 2: { def: 12 }, 3: { def: 13 }
+  })),
+  blacksteel_heavy_armor: item("blacksteel_heavy_armor", "黒鋼の重鎧", "bodyId", { def: 9, str: 4 }, deepArmor("warrior", {
+    1: { def: 10, str: 4 }, 2: { def: 11, str: 5 }, 3: { def: 12, str: 6 }
+  })),
+  blacksteel_greaves: item("blacksteel_greaves", "黒鋼の脚甲", "footId", { def: 8, str: 4 }, deepArmor("warrior", {
+    1: { def: 9, str: 4 }, 2: { def: 10, str: 5 }, 3: { def: 11, str: 6 }
+  })),
 
-  abyss_tiger_buckler: item("abyss_tiger_buckler", "奈落虎のバックラー", "leftArmId", { def: 8 }, deepArmor("thief")),
-  abyss_tiger_hood: item("abyss_tiger_hood", "奈落虎の軽兜", "headId", { def: 7, dex: 4 }, deepArmor("thief")),
-  abyss_tiger_light_armor: item("abyss_tiger_light_armor", "奈落虎の軽鎧", "bodyId", { def: 8, dex: 4 }, deepArmor("thief")),
-  abyss_tiger_boots: item("abyss_tiger_boots", "奈落虎のブーツ", "footId", { def: 6, agi: 6 }, deepArmor("thief")),
+  abyss_tiger_buckler: item("abyss_tiger_buckler", "奈落虎のバックラー", "leftArmId", { def: 8 }, deepArmor("thief", {
+    1: { def: 9 }, 2: { def: 10 }, 3: { def: 11 }
+  })),
+  abyss_tiger_hood: item("abyss_tiger_hood", "奈落虎の軽兜", "headId", { def: 7, dex: 4 }, deepArmor("thief", {
+    1: { def: 8, dex: 4 }, 2: { def: 9, dex: 5 }, 3: { def: 10, dex: 6 }
+  })),
+  abyss_tiger_light_armor: item("abyss_tiger_light_armor", "奈落虎の軽鎧", "bodyId", { def: 8, dex: 4 }, deepArmor("thief", {
+    1: { def: 9, dex: 4 }, 2: { def: 10, dex: 5 }, 3: { def: 11, dex: 6 }
+  })),
+  abyss_tiger_boots: item("abyss_tiger_boots", "奈落虎のブーツ", "footId", { def: 6, agi: 6 }, deepArmor("thief", {
+    1: { def: 7, agi: 6 }, 2: { def: 8, agi: 7 }, 3: { def: 9, agi: 8 }
+  })),
 
-  sacred_tree_shield: item("sacred_tree_shield", "聖樹の盾", "leftArmId", { def: 8 }, deepArmor("priest")),
-  sacred_tree_mitre: item("sacred_tree_mitre", "聖樹のミトラ", "headId", { def: 7, luc: 5 }, deepArmor("priest")),
-  sacred_tree_vestment: item("sacred_tree_vestment", "聖樹の祭服", "bodyId", { def: 8, luc: 4 }, deepArmor("priest")),
-  sacred_tree_shoes: item("sacred_tree_shoes", "聖樹の靴", "footId", { def: 7, agi: 6 }, deepArmor("priest")),
+  sacred_tree_shield: item("sacred_tree_shield", "聖樹の盾", "leftArmId", { def: 8 }, deepArmor("priest", {
+    1: { def: 9 }, 2: { def: 10 }, 3: { def: 11 }
+  })),
+  sacred_tree_mitre: item("sacred_tree_mitre", "聖樹のミトラ", "headId", { def: 7, luc: 5 }, deepArmor("priest", {
+    1: { def: 8, luc: 5 }, 2: { def: 9, luc: 6 }, 3: { def: 10, luc: 7 }
+  })),
+  sacred_tree_vestment: item("sacred_tree_vestment", "聖樹の祭服", "bodyId", { def: 8, luc: 4 }, deepArmor("priest", {
+    1: { def: 9, luc: 4 }, 2: { def: 10, luc: 5 }, 3: { def: 11, luc: 6 }
+  })),
+  sacred_tree_shoes: item("sacred_tree_shoes", "聖樹の靴", "footId", { def: 7, agi: 6 }, deepArmor("priest", {
+    1: { def: 8, agi: 6 }, 2: { def: 9, agi: 7 }, 3: { def: 10, agi: 8 }
+  })),
 
-  abyss_grimoire: item("abyss_grimoire", "深淵の魔導書", "leftArmId", { int: 10 }, deepArmor("mage")),
-  abyss_hat: item("abyss_hat", "深淵の帽子", "headId", { def: 8 }, deepArmor("mage")),
-  abyss_robe: item("abyss_robe", "深淵のローブ", "bodyId", { def: 8, int: 3 }, deepArmor("mage")),
-  abyss_shoes: item("abyss_shoes", "深淵の靴", "footId", { def: 8, agi: 6 }, deepArmor("mage")),
+  abyss_grimoire: item("abyss_grimoire", "深淵の魔導書", "leftArmId", { int: 10 }, deepArmor("mage", {
+    1: { int: 11 }, 2: { int: 12 }, 3: { int: 13 }
+  })),
+  abyss_hat: item("abyss_hat", "深淵の帽子", "headId", { def: 8 }, deepArmor("mage", {
+    1: { def: 9 }, 2: { def: 10 }, 3: { def: 11 }
+  })),
+  abyss_robe: item("abyss_robe", "深淵のローブ", "bodyId", { def: 8, int: 3 }, deepArmor("mage", {
+    1: { def: 9, int: 3 }, 2: { def: 10, int: 4 }, 3: { def: 11, int: 5 }
+  })),
+  abyss_shoes: item("abyss_shoes", "深淵の靴", "footId", { def: 8, agi: 6 }, deepArmor("mage", {
+    1: { def: 9, agi: 6 }, 2: { def: 10, agi: 7 }, 3: { def: 11, agi: 8 }
+  })),
 
   steel_shield: item("steel_shield", "鋼の盾", "leftArmId", { def: 4, dex: 2 }, finalArmor("warrior", {
     1: { def: 5, dex: 2 }, 2: { def: 5, dex: 3 }, 3: { def: 6, dex: 4 }
@@ -234,12 +266,19 @@ function finalArmor(job, statBonusesByEnhancement) {
   };
 }
 
-function deepArmor(job) {
+function deepArmor(job, statBonusesByEnhancement) {
   return {
     allowedJobs: Object.freeze([job]),
     buyPrice: 6000,
     sellPrice: 3000,
-    shopUnlockDepth: 50
+    shopUnlockDepth: 50,
+    statBonusesByEnhancement: Object.freeze(Object.fromEntries(
+      Object.entries(statBonusesByEnhancement).map(([level, bonuses]) => [
+        level,
+        Object.freeze({ ...bonuses })
+      ])
+    )),
+    sellPriceByEnhancement: Object.freeze({ 0: 3000, 1: 3600, 2: 4500, 3: 6000 })
   };
 }
 

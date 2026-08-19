@@ -26,6 +26,17 @@ export function rollEnemyDrop(enemy, rng = Math.random) {
 export function rollBlackChestLoot(rng = Math.random, depth = 6) {
   const table = getBlackChestLootTable(depth);
   const roll = normalizedRoll(rng);
+  if (Number(depth) >= 50 && Number(depth) <= 59) {
+    const weaponIds = ["blacksteel_longsword", "abyss_fang", "sacred_tree_mace", "ancient_tree_staff"];
+    const equipmentId = weaponIds[(Math.floor(Number(depth)) - 50) % weaponIds.length];
+    return {
+      kind: "equipment",
+      equipmentId,
+      slot: "rightArmId",
+      enhancement: rollEnhancement(MID_RED_CHEST_WEAPON_ENHANCEMENT_RATES, rng) + 1,
+      unidentifiedName: equipmentId === "ancient_tree_staff" ? "？両手杖" : "？武器"
+    };
+  }
   if (Number(depth) >= 6 && Number(depth) <= 10) {
     if (roll < 0.43) {
       return { kind: "item", itemId: "healing_potion_medium", amount: 1, unidentifiedName: "？薬" };
@@ -86,6 +97,7 @@ export function rollRedChestLoot(rng = Math.random, depth = 1) {
   const floor = Math.max(1, Math.floor(Number(depth) || 1));
   if (floor >= 11 && floor <= 30) return rollMidRedChestLoot(roll, floor, rng);
   if (floor >= 31 && floor <= 40) return rollDeepRedChestLoot(roll, floor, rng);
+  if (floor >= 50 && floor <= 59) return rollForestRedChestLoot(roll, floor, rng);
   const earlyFloor = Number(depth) >= 1 && Number(depth) <= 9;
   if (earlyFloor && roll < 0.4) return { kind: "gold", amount: rollRedChestGold(rng) };
   if (earlyFloor && roll < 0.6) return { kind: "item", itemId: "healing_potion", amount: 1, unidentifiedName: "？薬" };
@@ -158,6 +170,31 @@ function rollDeepRedChestLoot(roll, depth, rng) {
     slot: slots[slotIndex],
     enhancement: rollEnhancement(DEEP_RED_CHEST_ARMOR_ENHANCEMENT_RATES, rng) + 1,
     unidentifiedName: slotIndex === 0 && depth >= 39 ? "？魔導書" : "？防具"
+  };
+}
+
+function rollForestRedChestLoot(roll, depth, rng) {
+  if (roll < 0.1) {
+    return { kind: "item", itemId: "strong_healing_potion_small", amount: 1, unidentifiedName: "？薬" };
+  }
+  if (roll < 0.2) {
+    return { kind: "item", itemId: "strong_antidote", amount: 1, unidentifiedName: "？薬" };
+  }
+  const families = [
+    ["blacksteel_greatshield", "blacksteel_helmet", "blacksteel_heavy_armor", "blacksteel_greaves"],
+    ["abyss_tiger_buckler", "abyss_tiger_hood", "abyss_tiger_light_armor", "abyss_tiger_boots"],
+    ["sacred_tree_shield", "sacred_tree_mitre", "sacred_tree_vestment", "sacred_tree_shoes"],
+    ["abyss_grimoire", "abyss_hat", "abyss_robe", "abyss_shoes"]
+  ];
+  const family = families[(depth - 50) % families.length];
+  const slotIndex = roll < 0.4 ? 0 : roll < 0.6 ? 1 : roll < 0.8 ? 2 : 3;
+  const slots = ["leftArmId", "headId", "bodyId", "footId"];
+  return {
+    kind: "equipment",
+    equipmentId: family[slotIndex],
+    slot: slots[slotIndex],
+    enhancement: rollEnhancement(DEEP_RED_CHEST_ARMOR_ENHANCEMENT_RATES, rng) + 1,
+    unidentifiedName: slotIndex === 0 && family === families[3] ? "？魔導書" : "？防具"
   };
 }
 

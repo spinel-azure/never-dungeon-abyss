@@ -18,3 +18,16 @@ test("battle skills hide passives and paginate as two columns of six", async () 
   assert.match(html, /data-skill-prev/);
   assert.match(html, /data-skill-next/);
 });
+
+
+test("item and skill overlays remember the last used selection separately by context", async () => {
+  const [items, skills] = await Promise.all([
+    readFile(new URL("../js/item-overlay.js", import.meta.url), "utf8"),
+    readFile(new URL("../js/skill-overlay.js", import.meta.url), "utf8")
+  ]);
+  for (const source of [items, skills]) {
+    assert.match(source, /lastSelectionByContext/);
+    assert.match(source, /restoreSelectedIndex/);
+    assert.match(source, /\{ id: .*\.id, index: overlay\.selectedIndex \}/);
+  }
+});

@@ -165,6 +165,46 @@ export const WEAPONS = Object.freeze({
     buyPrice: 1200, sellPrice: 600, shopUnlockDepth: 10,
     shopRequiredFlags: Object.freeze(["transfer_portal_b10f_unlocked", "boss_strange_knight_statue_b9f_defeated"])
   }),
+  blacksteel_longsword: Object.freeze({
+    id: "blacksteel_longsword", name: "黒鋼の長剣", type: "longsword", attack: 17,
+    attackByEnhancement: Object.freeze([17, 18, 19, 21]),
+    statBonuses: Object.freeze({ str: 4 }),
+    statBonusesByEnhancement: Object.freeze([
+      Object.freeze({ str: 4 }), Object.freeze({ str: 4 }), Object.freeze({ str: 5 }), Object.freeze({ str: 6 })
+    ]),
+    element: "physical", allowedJobs: Object.freeze(["warrior"]), sellPrice: 3000,
+    sellPriceByEnhancement: Object.freeze([3000, 3600, 4500, 6000])
+  }),
+  abyss_fang: Object.freeze({
+    id: "abyss_fang", name: "奈落の牙", type: "dagger", attack: 12,
+    attackByEnhancement: Object.freeze([12, 13, 14, 15]),
+    statBonuses: Object.freeze({ dex: 4 }),
+    statBonusesByEnhancement: Object.freeze([
+      Object.freeze({ dex: 4 }), Object.freeze({ dex: 4 }), Object.freeze({ dex: 5 }), Object.freeze({ dex: 6 })
+    ]),
+    element: "physical", allowedJobs: Object.freeze(["thief"]), sellPrice: 3000,
+    sellPriceByEnhancement: Object.freeze([3000, 3600, 4500, 6000])
+  }),
+  sacred_tree_mace: Object.freeze({
+    id: "sacred_tree_mace", name: "聖樹のメイス", type: "blunt", attack: 15,
+    attackByEnhancement: Object.freeze([15, 16, 17, 19]),
+    statBonuses: Object.freeze({ luc: 3 }),
+    statBonusesByEnhancement: Object.freeze([
+      Object.freeze({ luc: 3 }), Object.freeze({ luc: 3 }), Object.freeze({ luc: 4 }), Object.freeze({ luc: 5 })
+    ]),
+    element: "physical", allowedJobs: Object.freeze(["priest"]), sellPrice: 3000,
+    sellPriceByEnhancement: Object.freeze([3000, 3600, 4500, 6000])
+  }),
+  ancient_tree_staff: Object.freeze({
+    id: "ancient_tree_staff", name: "古樹の杖", type: "staff", attack: 5,
+    attackByEnhancement: Object.freeze([5, 5, 5, 5]),
+    statBonuses: Object.freeze({ int: 8 }),
+    statBonusesByEnhancement: Object.freeze([
+      Object.freeze({ int: 8 }), Object.freeze({ int: 9 }), Object.freeze({ int: 10 }), Object.freeze({ int: 11 })
+    ]),
+    element: "physical", allowedJobs: Object.freeze(["mage"]), twoHanded: true, sellPrice: 3000,
+    sellPriceByEnhancement: Object.freeze([3000, 3600, 4500, 6000])
+  }),
   stiletto: Object.freeze({
     id: "stiletto", name: "スティレット", type: "dagger", attack: 7,
     element: "physical", allowedJobs: Object.freeze(["thief"]), sellPrice: 75,
