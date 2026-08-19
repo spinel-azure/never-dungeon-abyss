@@ -1,6 +1,6 @@
 import { ITEMS } from "../data/items.js";
 import { getItemCount } from "../data/inventory.js";
-import { getItemUnavailableReason } from "../combat/resolve-item-use.js";
+import { getItemUnavailableReason, getItemUnavailableReasonForEnemies } from "../combat/resolve-item-use.js";
 
 const BATTLE_ITEMS_PER_COLUMN = 6;
 const BATTLE_ITEMS_PER_PAGE = BATTLE_ITEMS_PER_COLUMN * 2;
@@ -9,7 +9,7 @@ const overlay = {
   root: null, list: null, pageEl: null, prevButton: null, nextButton: null, backButton: null, messageEl: null,
   active: false, selectedIndex: 0, page: 0, items: [], character: null, context: "dungeon",
   lastSelectionByContext: {},
-  enemy: null, torchFuel: 0, treasureCompassActive: false, onUse: async () => ({ accepted: false }),
+  enemy: null, enemies: null, torchFuel: 0, treasureCompassActive: false, onUse: async () => ({ accepted: false }),
   onClose: () => {}, playSe: () => {}, previousMessage: ""
 };
 
@@ -25,12 +25,13 @@ export function configureItemOverlay(options) {
   overlay.nextButton?.addEventListener("click", () => changePage(1));
 }
 
-export function openItemOverlay({ context = "dungeon", character, enemy = null, torchFuel = 0, treasureCompassActive = false, onUse, onClose } = {}) {
+export function openItemOverlay({ context = "dungeon", character, enemy = null, enemies = null, torchFuel = 0, treasureCompassActive = false, onUse, onClose } = {}) {
   if (overlay.active || !character) return false;
   overlay.active = true;
   overlay.context = context;
   overlay.character = character;
   overlay.enemy = enemy;
+  overlay.enemies = enemies;
   overlay.torchFuel = torchFuel;
   overlay.treasureCompassActive = Boolean(treasureCompassActive);
   overlay.items = ITEMS.filter(item =>
@@ -214,11 +215,14 @@ function renderSelection() {
 }
 
 function unavailableReason(item) {
-  return getItemUnavailableReason({
+  const options = {
     character: overlay.character, itemId: item.id, context: overlay.context,
     enemy: overlay.enemy, torchFuel: overlay.torchFuel,
     treasureCompassActive: overlay.treasureCompassActive
-  });
+  };
+  return overlay.context === "battle" && overlay.enemies?.length
+    ? getItemUnavailableReasonForEnemies({ ...options, enemies: overlay.enemies })
+    : getItemUnavailableReason(options);
 }
 
 function showReason(reason) {

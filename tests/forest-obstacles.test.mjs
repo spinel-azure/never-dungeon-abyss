@@ -5,7 +5,11 @@ import { getBossById } from "../data/bosses.js";
 import { getCardById } from "../data/cards.js";
 import { getItem } from "../data/items.js";
 import { getQuestById } from "../data/quests.js";
+import { createInitialCharacter } from "../data/classes.js";
+import { grantItem } from "../data/inventory.js";
+import { getItemUnavailableReasonForEnemies } from "../combat/resolve-item-use.js";
 import { buildBoundaryWallMap, cells } from "../js/dungeon.js";
+import { readFile } from "node:fs/promises";
 
 const fixedRng = () => 0.5;
 
@@ -53,4 +57,28 @@ test("herbicide quests, items, and legendary step-recovery cards keep their cont
   assert.equal(quest023.reward.cardId, "legendary_goddess_breath");
   assert.equal(getCardById("legendary_mana_activation").effectId, "step_sp_recovery");
   assert.equal(getCardById("legendary_goddess_breath").effectId, "step_hp_recovery");
+});
+
+test("strong herbicide is available immediately when any living battle target is a giant vine", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.inventory = grantItem(character.inventory, "strong_herbicide", 1).inventory;
+  const muskBeast = { id: "musk_beast_b56f", hp: 100, alive: true };
+  const vine = { ...getBossById("giant_vine_obstacle"), hp: 500, alive: true };
+  assert.equal(getItemUnavailableReasonForEnemies({
+    character,
+    itemId: "strong_herbicide",
+    context: "battle",
+    enemies: [vine, muskBeast, vine]
+  }), "");
+  assert.equal(getItemUnavailableReasonForEnemies({
+    character,
+    itemId: "strong_herbicide",
+    context: "battle",
+    enemies: [muskBeast]
+  }), "plantOnly");
+});
+
+test("the hidden legacy enemy stage cannot appear behind a multi-enemy formation", async () => {
+  const css = await readFile(new URL("../css/battle.css", import.meta.url), "utf8");
+  assert.match(css, /\.battle-enemy-stage\[hidden\]\s*\{\s*display:\s*none;/);
 });

@@ -37,6 +37,14 @@ export function getItemUnavailableReason({ character, itemId, context, enemy, to
   return "";
 }
 
+export function getItemUnavailableReasonForEnemies({ enemies, ...options } = {}) {
+  const livingEnemies = (Array.isArray(enemies) ? enemies : [])
+    .filter(enemy => enemy?.alive !== false && Number(enemy?.hp) > 0);
+  if (!livingEnemies.length) return getItemUnavailableReason(options);
+  const reasons = livingEnemies.map(enemy => getItemUnavailableReason({ ...options, enemy }));
+  return reasons.some(reason => !reason) ? "" : reasons[0];
+}
+
 export function resolveFieldItemUse({ character, itemId, context = "dungeon", torchFuel = 0, treasureCompassActive = false } = {}) {
   const reason = getItemUnavailableReason({ character, itemId, context, torchFuel, treasureCompassActive });
   if (reason) return { accepted: false, reason };

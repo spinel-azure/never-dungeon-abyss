@@ -9,6 +9,7 @@ import { playPlayerChargePresentation } from "./player-charge-presentation.js";
 import { playBattleSkillPresentation } from "./battle-skill-presentation.js";
 import { getSkill } from "../data/skills.js";
 import { getItem } from "../data/items.js";
+import { getItemUnavailableReason } from "../combat/resolve-item-use.js";
 
 const COMMANDS = Object.freeze([
   ["attack", "戦う"],
@@ -89,7 +90,7 @@ export function isBattleActive() {
 export function openBattleItems() {
   if (!battleUi.active || battleUi.presenting || battleUi.battle?.outcome || battleUi.autoActive) return false;
   battleUi.playSe("confirm");
-  battleUi.openItems({ character: battleUi.battle.player, enemy: battleUi.battle.enemy, onUse: useBattleItem });
+  battleUi.openItems({ character: battleUi.battle.player, enemy: battleUi.battle.enemy, enemies: battleUi.battle.enemies, onUse: useBattleItem });
   return true;
 }
 
@@ -193,6 +194,7 @@ function activateSelected() {
     battleUi.openItems({
       character: battleUi.battle.player,
       enemy: battleUi.battle.enemy,
+      enemies: battleUi.battle.enemies,
       onUse: useBattleItem
     });
     return;
@@ -229,16 +231,31 @@ function executeOrSelectTarget(command) {
 function showTargetButtons(command) {
   battleUi.pendingCommand = command;
   battleUi.mode = "targets";
-  battleUi.selectedIndex = Math.max(0, battleUi.battle.targetIndex || 0);
+  const targetAvailability = battleUi.battle.enemies.map(enemy => isCommandTargetAvailable(command, enemy));
+  const currentTargetIndex = Math.max(0, battleUi.battle.targetIndex || 0);
+  battleUi.selectedIndex = targetAvailability[currentTargetIndex]
+    ? currentTargetIndex
+    : Math.max(0, targetAvailability.findIndex(Boolean));
   battleUi.battleButtons.forEach((button, index) => {
     const enemy = battleUi.battle.enemies[index];
     button.dataset.battleCommand = `target-${index}`;
     button.dataset.targetIndex = String(index);
     button.textContent = enemy?.alive ? enemy.name : "";
-    button.disabled = !enemy?.alive;
+    button.disabled = !targetAvailability[index];
   });
   mountButtons("攻撃対象");
   battleUi.messageEl.textContent = "攻撃する相手を選んでください。\n＊Bボタンで戻る";
+}
+
+function isCommandTargetAvailable(command, enemy) {
+  if (!enemy?.alive || Number(enemy.hp) <= 0) return false;
+  if (command?.type !== "item") return true;
+  return !getItemUnavailableReason({
+    character: battleUi.battle.player,
+    itemId: command.itemId,
+    context: "battle",
+    enemy
+  });
 }
 
 async function executeCommand(command) {

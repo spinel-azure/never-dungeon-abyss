@@ -22,6 +22,10 @@
   justify-content: center;
 }
 
+.battle-enemy-stage[hidden] {
+  display: none;
+}
+
 .battle-number-layer {
   position: absolute;
   z-index: 6;

@@ -567,12 +567,13 @@ import {
       enemy,
       onUse
     }),
-    openItems: ({ character: battleCharacter, enemy, onUse }) => {
+    openItems: ({ character: battleCharacter, enemy, enemies, onUse }) => {
       viewportEl.append(itemOverlay);
       return openItemOverlay({
         context: "battle",
         character: battleCharacter,
         enemy,
+        enemies,
         onUse
       });
     },
