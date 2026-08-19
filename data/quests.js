@@ -345,7 +345,7 @@ export const QUESTS = Object.freeze([
   Object.freeze({
     id: B35F_SURVEY_QUEST_ID,
     number: "013",
-    title: "迷宮地下35階の調査",
+    title: "特効薬の素材集め",
     client: "ギルドマスター",
     category: "other",
     objectiveType: "exploreFloor",
@@ -424,7 +424,7 @@ export const QUESTS = Object.freeze([
   Object.freeze({
     id: SPECIAL_MEDICINE_QUEST_ID,
     number: "016",
-    title: "迷宮地下35階の調査",
+    title: "特効薬の素材集め",
     client: "アナスタシア",
     category: "other",
     objectiveType: "custom",
