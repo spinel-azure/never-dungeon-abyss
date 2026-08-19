@@ -22,6 +22,19 @@ test("legacy equipment migrates to stable individual instances", () => {
   assert.ok(listEquipmentInstances(character).slice(0, 5).every(instance => Object.values(character.equippedInstanceIds).includes(instance.instanceId)));
 });
 
+test("unique romance weapons reject duplicate grants and remain warehouse compatible", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "priest" });
+  const granted = grantEquipmentInstance(character, "sylvan_emera", "rightArmId", { enhancement: 3, locked: true });
+  assert.equal(granted.accepted, true);
+  assert.equal(granted.instance.enhancement, 0);
+  character = granted.character;
+  assert.equal(grantEquipmentInstance(character, "sylvan_emera", "rightArmId").reason, "alreadyOwned");
+  const deposited = depositEquipmentInWarehouse(character, granted.instance.instanceId);
+  assert.equal(deposited.accepted, true);
+  assert.equal(deposited.character.warehouse.equipmentInstances[0].locked, true);
+  assert.equal(grantEquipmentInstance(deposited.character, "sylvan_emera", "rightArmId").reason, "alreadyOwned");
+});
+
 test("equipment preview can be normalized without mutating current HP", () => {
   const character = createInitialCharacter({ name: "TEST", job: "warrior" });
   character.hp = 12;

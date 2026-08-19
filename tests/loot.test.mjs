@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { hasPurpleChestLootTable, rollBlackChestLoot, rollEnemyDrop, rollPurpleChestLoot, rollRedChestLoot } from "../data/loot.js";
+import { getGoldChestWeaponId, hasGoldChestWeapon, hasPurpleChestLootTable, rollBlackChestLoot, rollEnemyDrop, rollGoldChestLoot, rollPurpleChestLoot, rollRedChestLoot } from "../data/loot.js";
 import { buildBoundaryWallMap, cells } from "../js/dungeon.js";
 import { getWeapon } from "../data/weapons.js";
 import { createInnStableRecovery, getInnStayFee } from "../js/character-services.js";
@@ -11,6 +11,52 @@ const rng = (...values) => {
   let index = 0;
   return () => values[Math.min(index++, values.length - 1)];
 };
+
+test("gold chests grant the player job's unique unenhanced romance weapon", () => {
+  const expected = {
+    warrior: "musashi_blade",
+    thief: "the_five_star",
+    priest: "sylvan_emera",
+    mage: "comet_booster"
+  };
+  for (const [job, equipmentId] of Object.entries(expected)) {
+    const character = createInitialCharacter({ name: "TEST", job });
+    assert.equal(getGoldChestWeaponId(job), equipmentId);
+    assert.deepEqual(rollGoldChestLoot(character), {
+      kind: "equipment", equipmentId, slot: "rightArmId", enhancement: 0,
+      unidentifiedName: "？武器"
+    });
+  }
+});
+
+test("gold chest romance weapons cannot be obtained twice across storage locations", () => {
+  for (const location of ["equipmentInventory", "warehouse", "lootBag"]) {
+    const character = createInitialCharacter({ name: "TEST", job: "mage" });
+    const instance = { equipmentId: "comet_booster", slot: "rightArmId" };
+    if (location === "equipmentInventory") character.equipmentInventory.instances.push(instance);
+    if (location === "warehouse") character.warehouse.equipmentInstances.push(instance);
+    if (location === "lootBag") character.lootBag.equipmentInstances.push(instance);
+    assert.equal(hasGoldChestWeapon(character), true);
+    assert.equal(rollGoldChestLoot(character).reason, "alreadyOwned");
+  }
+});
+
+test("B50F to B58F replace the black chest with a gold chest on the one-percent roll", () => {
+  buildBoundaryWallMap(50, () => 0, { blackChestsUnlocked: true, goldWeaponEligible: true });
+  let treasures = cells.flat().map(cell => cell.treasure).filter(Boolean);
+  assert.equal(treasures.filter(type => type === "gold").length, 1);
+  assert.equal(treasures.includes("black"), false);
+
+  buildBoundaryWallMap(50, () => 0.01, { blackChestsUnlocked: true, goldWeaponEligible: true });
+  treasures = cells.flat().map(cell => cell.treasure).filter(Boolean);
+  assert.equal(treasures.filter(type => type === "black").length, 1);
+  assert.equal(treasures.includes("gold"), false);
+
+  buildBoundaryWallMap(59, () => 0, { blackChestsUnlocked: true, goldWeaponEligible: true });
+  treasures = cells.flat().map(cell => cell.treasure).filter(Boolean);
+  assert.equal(treasures.includes("gold"), false);
+  assert.equal(treasures.includes("black"), false);
+});
 
 test("B1F to B9F purple chests use the card-only 33/33/33/1 table", () => {
   assert.equal(hasPurpleChestLootTable(1), true);

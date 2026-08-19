@@ -126,6 +126,9 @@ export function grantEquipmentInstance(character, equipmentId, slot, options = {
   if (!character) return { accepted: false, character, reason: "noCharacter" };
   const definition = findEquipmentDefinition(equipmentId, slot);
   if (!definition) return { accepted: false, character, reason: "unknownEquipment" };
+  if (definition.unique && characterOwnsEquipment(character, definition.id)) {
+    return { accepted: false, character, reason: "alreadyOwned" };
+  }
   const normalized = normalizeEquipmentInventory(
     character.equipmentInventory,
     character.equipment,
@@ -140,7 +143,7 @@ export function grantEquipmentInstance(character, equipmentId, slot, options = {
     equipmentId: definition.id,
     slot: definition.slot,
     acquiredOrder,
-    enhancement: definition.cursed ? 0 : Math.max(0, Math.floor(Number(options.enhancement) || 0)),
+    enhancement: definition.cursed || definition.unique ? 0 : Math.max(0, Math.floor(Number(options.enhancement) || 0)),
     identified: options.identified !== false,
     curseKnown: options.curseKnown === true,
     locked: options.locked === true
@@ -153,6 +156,15 @@ export function grantEquipmentInstance(character, equipmentId, slot, options = {
     instance,
     character: { ...character, ...normalized, equipmentInventory }
   };
+}
+
+function characterOwnsEquipment(character, equipmentId) {
+  return [
+    ...(character?.equipmentInventory?.instances || []),
+    ...(character?.warehouse?.equipmentInstances || []),
+    ...(character?.lootBag?.equipmentInstances || [])
+  ].some(instance => instance?.equipmentId === equipmentId)
+    || Object.values(character?.equipment || {}).includes(equipmentId);
 }
 
 export function setEquipmentInstanceLocked(character, instanceId, locked) {

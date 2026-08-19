@@ -419,6 +419,13 @@ export const SKILLS = Object.freeze({
     unavoidable: true, ignoresMagicResistance: true, chargeSkill: true,
     ultimateChargeSkill: true, presentationId: "apocalypse", effects: Object.freeze([])
   }),
+  fall_the_meteor: Object.freeze({
+    id: "fall_the_meteor", name: "フォール・ザ・ミーティア",
+    description: "コメットブースター装備中のみ使用可能。\n敵全体へINT×10の無属性魔法攻撃。",
+    actionType: "spell", category: "spell", spCost: 45, target: "allEnemies",
+    element: "arcane", spellPower: 0, intelligenceMultiplier: 10, powerMultiplier: 1,
+    unavoidable: true, equipmentGranted: true, effects: Object.freeze([])
+  }),
   fireball: SPELLS.fireball,
   ice_bind: SPELLS.ice_bind
 });

@@ -58,6 +58,8 @@ test("B4 otherworldly wisdom is a one-time superboss with Libra reward", () => {
   assert.equal(boss.name, "異界の叡智");
   assert.equal(boss.floor, 4);
   assert.equal(boss.image, "images/bosses/boss_00.avif");
+  assert.equal(boss.encounterImageId, "otherworldly_wisdom_event_b4f");
+  assert.equal(boss.encounterImage, "images/background/dungeon_event_06.avif");
   assert.equal(boss.maxHp, 3000);
   assert.equal(boss.experienceReward, 100000);
   assert.equal(boss.actions.length, 4);

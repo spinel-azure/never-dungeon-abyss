@@ -613,6 +613,48 @@ test("healing uses no RNG and cannot overheal", () => {
   assert.equal(calls, 0);
 });
 
+test("Sylvan Emera multiplies DEF and healing miracles by 1.5", () => {
+  const weapon = getWeapon("sylvan_emera");
+  assert.equal(weapon.twoHanded, true);
+  const stats = collectStats({
+    def: 20,
+    equipmentBonuses: { def: 10, defenseMultiplier: 1.5, healingMiracleMultiplier: 1.5 }
+  });
+  assert.equal(stats.def, 45);
+  assert.equal(stats.healingMiracleMultiplier, 1.5);
+  const result = resolveHealing({
+    caster: { int: 20, healingMiracleMultiplier: stats.healingMiracleMultiplier },
+    target: { hp: 1, maxHp: 999 },
+    healing: { id: "test", baseHealing: 5, intelligenceMultiplier: 0.5 }
+  });
+  assert.equal(result.calculatedHealing, 22);
+});
+
+test("Comet Booster grants Fall the Meteor only while equipped", () => {
+  const mage = createInitialCharacter({ name: "TEST", job: "mage" });
+  mage.equipment.rightArmId = "comet_booster";
+  mage.equipment.weaponId = "comet_booster";
+  const equippedBattle = createBattleState({ character: mage, enemy: getEnemyById("abyss_rat") });
+  assert.ok(equippedBattle.player.skillIds.includes("fall_the_meteor"));
+  const spell = getSkill("fall_the_meteor");
+  assert.equal(spell.spCost, 45);
+  assert.equal(spell.intelligenceMultiplier, 10);
+  assert.equal(spell.target, "allEnemies");
+  const impact = resolveSpell({
+    attacker: { int: 10 },
+    defender: { magicDamageReduction: 0, elementMultipliers: {} },
+    spell,
+    rng: fixed(0)
+  });
+  assert.equal(impact.spellAttack, 100);
+  assert.equal(impact.totalDamage, 90);
+
+  mage.equipment.rightArmId = "beginner_staff";
+  mage.equipment.weaponId = "beginner_staff";
+  const unequippedBattle = createBattleState({ character: mage, enemy: getEnemyById("abyss_rat") });
+  assert.equal(unequippedBattle.player.skillIds.includes("fall_the_meteor"), false);
+});
+
 test("ice immunity does not prevent ice bind status roll", () => {
   const result = resolveSpell({
     attacker: { int: 30 },

@@ -4,6 +4,12 @@ export const BLACK_CHEST_STILETTO_ENHANCEMENT_RATES = Object.freeze([0.45, 0.35,
 export const MID_RED_CHEST_WEAPON_ENHANCEMENT_RATES = Object.freeze([0.7, 0.25, 0.05]);
 export const DEEP_RED_CHEST_ARMOR_ENHANCEMENT_RATES = Object.freeze([0.7, 0.25, 0.05]);
 export const MID_BLACK_CHEST_STAFF_ENHANCEMENT_RATES = Object.freeze([0.7, 0.25, 0.05]);
+export const GOLD_CHEST_WEAPONS_BY_JOB = Object.freeze({
+  warrior: "musashi_blade",
+  thief: "the_five_star",
+  priest: "sylvan_emera",
+  mage: "comet_booster"
+});
 export const BLACK_CHEST_LOOT_TABLES = Object.freeze([
   Object.freeze({ minDepth: 6, maxDepth: 10, gold: [60, 80, 100], potionId: "healing_potion_medium" }),
   Object.freeze({ minDepth: 11, maxDepth: 19, gold: [100, 140, 180], potionId: "healing_potion_medium" }),
@@ -21,6 +27,38 @@ export function rollEnemyDrop(enemy, rng = Math.random) {
     return { kind: "none" };
   }
   return { kind: "redChest" };
+}
+
+export function getGoldChestWeaponId(job) {
+  return GOLD_CHEST_WEAPONS_BY_JOB[String(job || "")] || null;
+}
+
+export function hasGoldChestWeapon(character) {
+  const equipmentId = getGoldChestWeaponId(character?.job);
+  if (!equipmentId) return false;
+  return [
+    ...(character?.equipmentInventory?.instances || []),
+    ...(character?.warehouse?.equipmentInstances || []),
+    ...(character?.lootBag?.equipmentInstances || [])
+  ].some(instance => instance?.equipmentId === equipmentId)
+    || Object.values(character?.equipment || {}).includes(equipmentId);
+}
+
+export function isGoldChestWeaponEligible(character) {
+  return Boolean(getGoldChestWeaponId(character?.job)) && !hasGoldChestWeapon(character);
+}
+
+export function rollGoldChestLoot(character) {
+  const equipmentId = getGoldChestWeaponId(character?.job);
+  if (!equipmentId) return { kind: "none", reason: "unsupportedJob" };
+  if (hasGoldChestWeapon(character)) return { kind: "none", reason: "alreadyOwned" };
+  return {
+    kind: "equipment",
+    equipmentId,
+    slot: "rightArmId",
+    enhancement: 0,
+    unidentifiedName: "？武器"
+  };
 }
 
 export function rollBlackChestLoot(rng = Math.random, depth = 6) {

@@ -20,14 +20,15 @@ export function collectStats(source = {}) {
   return {
     ...stats,
     def: clamp(
-      numeric(source.def ?? source.defense)
+      (numeric(source.def ?? source.defense)
         + numeric(equipment.def)
         + numeric(cards.def)
-        + numeric(temporary.def),
+        + numeric(temporary.def)) * positiveMultiplier(equipment.defenseMultiplier),
       0,
       source.job ? COMBAT_CONFIG.defenseMaximum : Number.POSITIVE_INFINITY
     ),
     hitBonus: numeric(source.hitBonus),
+    healingMiracleMultiplier: positiveMultiplier(equipment.healingMiracleMultiplier),
     evasionBonus: numeric(source.evasionBonus),
     physicalHitMinimum: Number.isFinite(Number(source.physicalHitMinimum))
       ? Number(source.physicalHitMinimum)
@@ -112,4 +113,9 @@ export function collectStats(source = {}) {
 function numeric(value) {
   const number = Number(value);
   return Number.isFinite(number) ? number : 0;
+}
+
+function positiveMultiplier(value) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number : 1;
 }

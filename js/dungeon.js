@@ -397,8 +397,12 @@ export function placeTreasures(depth = 1, rng = Math.random, progress = {}) {
   const redChestCount = floor <= 4 || redChestsEnabled
     ? 1 + Math.floor(Math.max(0, Math.min(0.999999, Number(rng()) || 0)) * 3)
     : 0;
+  const goldChestEnabled = blackChestEnabled
+    && Boolean(progress.goldWeaponEligible)
+    && floor >= 50 && floor <= 59
+    && Math.max(0, Math.min(0.999999, Number(rng()) || 0)) < 0.01;
   const treasureTypes = [
-    ...(blackChestEnabled ? ["black"] : []),
+    ...(blackChestEnabled ? [goldChestEnabled ? "gold" : "black"] : []),
     ...Array.from({ length: redChestCount }, () => "red")
   ];
   for (const type of treasureTypes) {

@@ -40,6 +40,8 @@ export const BOSSES = Object.freeze({
     floor: 4,
     imageId: "otherworldly_wisdom_b4f",
     image: "images/bosses/boss_00.avif",
+    encounterImageId: "otherworldly_wisdom_event_b4f",
+    encounterImage: "images/background/dungeon_event_06.avif",
     race: "aberration",
     maxHp: 3000,
     stats: Object.freeze({ str: 30, int: 30, agi: 28, dex: 28, luc: 30 }),

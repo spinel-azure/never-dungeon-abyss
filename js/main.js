@@ -89,7 +89,7 @@ import {
 } from "./audio.js";
 import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
 import { EffectEngine } from "./effects/effect-engine.js";
-import { hasUncertainLoot, isHighlightedLotCardRarity, isHighlightedLotEquipment } from "./loot-identification.js";
+import { getLotEquipmentHighlightClass, hasUncertainLoot, isHighlightedLotCardRarity } from "./loot-identification.js";
 import { configureTown, openPendingNpcRenewal, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js";
 import { flashNpcPartyStatus, renderNpcPartyStatus, renderNpcStatusPage, setNpcPartyCharge } from "./npc-party-ui.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
@@ -125,7 +125,7 @@ import { getItem } from "../data/items.js";
 import { isCriticalHp } from "../data/quick-status.js";
 import { purchaseBuybackEquipment, purchaseBuybackItem, purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
 import { addLootCard, addLootEquipment, addLootGold, addLootItem, depositEquipmentInWarehouse, depositItemInWarehouse, grantItemWithOverflow, settleLootBag, withdrawEquipmentFromWarehouse, withdrawItemFromWarehouse } from "../data/inventory.js";
-import { rollEnemyDrop, rollPurpleChestLoot, rollRedChestLoot } from "../data/loot.js";
+import { isGoldChestWeaponEligible, rollEnemyDrop, rollGoldChestLoot, rollPurpleChestLoot, rollRedChestLoot } from "../data/loot.js";
 import { rollTreasureTrap } from "../data/traps.js";
 import { restAtHealingFountain as restoreAtHealingFountain } from "../data/fountains.js";
 import { getSkill } from "../data/skills.js";
@@ -1623,17 +1623,19 @@ import {
       saveGame();
       return { message: "赤錆びた鍵を手に入れた！" };
     }
-    if (treasureType !== "red" && treasureType !== "black" && treasureType !== "purple") return { message: "中には何も入っていなかった！" };
+    if (treasureType !== "red" && treasureType !== "black" && treasureType !== "purple" && treasureType !== "gold") return { message: "中には何も入っていなかった！" };
     const message = addRolledLoot(
       treasureType === "black"
         ? rollEnemyDrop({ dropProfile: "blackChest", depth: currentDepth })
+        : treasureType === "gold"
+          ? rollGoldChestLoot(character)
         : treasureType === "purple"
           ? rollPurpleChestLoot(Math.random, currentDepth)
           : rollRedChestLoot(Math.random, currentDepth)
     );
     updateCharacterUi();
     saveGame();
-    return { message };
+    return { message: message || (treasureType === "gold" ? "金色の宝箱は空だった。" : message) };
   }
 
   function showTrapResultEffect(disarmed) {
@@ -2500,7 +2502,7 @@ import {
     for (const instance of bag.equipmentInstances || []) unknown.push({
       label: instance.unidentifiedName || "？装備",
       count: "×1",
-      className: isHighlightedLotEquipment(instance) ? "is-super-rare" : ""
+      className: getLotEquipmentHighlightClass(instance, getEquipmentItem(instance.equipmentId, instance.slot))
     });
     renderLootIdentificationRows(unknown);
     lootIdentifyTitle.textContent = "LOT BAG";
@@ -2567,7 +2569,7 @@ import {
       lines.push({
         label: getEquipmentInstanceName(instance),
         count: "→ インベントリ",
-        className: isHighlightedLotEquipment(instance) ? "is-super-rare" : ""
+        className: getLotEquipmentHighlightClass(instance, getEquipmentItem(instance.equipmentId, instance.slot))
       });
     }
     return lines;
@@ -2732,6 +2734,7 @@ import {
         quest_mimic_b6f: isBossDefeated(character, "quest_mimic_b6f")
       },
       blackChestsUnlocked: Boolean(character?.eventFlags?.black_chests_unlocked),
+      goldWeaponEligible: isGoldChestWeaponEligible(character),
       redDoorUnlocked: Boolean(room.unlockFlag && character?.eventFlags?.[room.unlockFlag]),
       hasRedKey: Boolean(room.keyItemId && hasKeyItem(character?.keyItems, room.keyItemId)),
       queenShadowQuest: {

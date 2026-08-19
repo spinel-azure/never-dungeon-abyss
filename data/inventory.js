@@ -1,6 +1,7 @@
 import { getItem } from "./items.js";
 import { getCardById } from "./cards.js";
 import { grantCard } from "./deck.js";
+import { getEquipmentItem } from "./equipment.js";
 
 export function createInitialInventory() {
   return { counts: {} };
@@ -283,13 +284,17 @@ export function settleLootBag(character) {
   const equipmentInventory = structuredClone(next.equipmentInventory || { instances: [], nextOrder: 1 });
   const equipmentResults = [];
   for (const raw of bag.equipmentInstances) {
+    const definition = getEquipmentItem(raw.equipmentId, raw.slot || "rightArmId");
+    const alreadyOwned = equipmentInventory.instances.some(entry => entry.equipmentId === raw.equipmentId)
+      || next.warehouse.equipmentInstances.some(entry => entry.equipmentId === raw.equipmentId);
+    if (definition?.unique && alreadyOwned) continue;
     const acquiredOrder = Math.max(1, Math.floor(Number(equipmentInventory.nextOrder) || 1));
     const instance = {
       instanceId: `eq-${String(acquiredOrder).padStart(6, "0")}`,
       equipmentId: raw.equipmentId,
       slot: raw.slot || "rightArmId",
       acquiredOrder,
-      enhancement: Math.max(0, Math.min(3, Math.floor(Number(raw.enhancement) || 0))),
+      enhancement: definition?.unique ? 0 : Math.max(0, Math.min(3, Math.floor(Number(raw.enhancement) || 0))),
       identified: true,
       curseKnown: false
     };

@@ -8,8 +8,9 @@ export function resolveHealing({
   const calculatedHealing = Math.max(
     0,
     Math.floor(
-      numeric(healing.baseHealing)
-      + numeric(caster.int) * numericOr(healing.intelligenceMultiplier, COMBAT_CONFIG.intelligenceMultiplier)
+      (numeric(healing.baseHealing)
+      + numeric(caster.int) * numericOr(healing.intelligenceMultiplier, COMBAT_CONFIG.intelligenceMultiplier))
+      * numericOr(caster.healingMiracleMultiplier, 1)
     )
   );
   const missingHp = Math.max(0, numeric(target.maxHp) - numeric(target.hp));

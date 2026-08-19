@@ -217,17 +217,37 @@ export const WEAPONS = Object.freeze({
   }),
   the_five_star: Object.freeze({
     id: "the_five_star", name: "ザ・ファイブスター", type: "five_hit_dagger", attack: 1,
-    element: "physical", allowedJobs: Object.freeze(["thief"]), sellPrice: 0
+    element: "physical", allowedJobs: Object.freeze(["thief"]), unique: true,
+    lotBagHighlight: "orange", sellPrice: 0
   }),
   musashi_blade: Object.freeze({
     id: "musashi_blade", name: "ムサシブレード", type: "dual_blade", attack: 15,
-    element: "physical", allowedJobs: Object.freeze(["warrior"]), twoHanded: true, sellPrice: 0
+    element: "physical", allowedJobs: Object.freeze(["warrior"]), twoHanded: true, unique: true,
+    lotBagHighlight: "orange", sellPrice: 0
   }),
   glacies_hammer: Object.freeze({
     id: "glacies_hammer", name: "グラキエスハンマー", type: "blunt", attack: 24,
     element: "ice", allowedJobs: Object.freeze(["warrior"]), twoHanded: true,
     statBonuses: Object.freeze({ str: 4 }),
     sellPrice: 6000, buybackPrice: 12000
+  }),
+  sylvan_emera: Object.freeze({
+    id: "sylvan_emera", name: "シルワンエメラ", type: "staff", attack: 18,
+    element: "physical", allowedJobs: Object.freeze(["priest"]), twoHanded: true,
+    statBonuses: Object.freeze({ luc: 6, healingMiracleMultiplier: 1.5, defenseMultiplier: 1.5 }),
+    hiddenStatBonusKeys: Object.freeze(["healingMiracleMultiplier", "defenseMultiplier"]),
+    unique: true,
+    lotBagHighlight: "orange",
+    sellPrice: 0
+  }),
+  comet_booster: Object.freeze({
+    id: "comet_booster", name: "コメットブースター", type: "staff", attack: 1,
+    element: "physical", allowedJobs: Object.freeze(["mage"]), twoHanded: true,
+    statBonuses: Object.freeze({ int: 10 }),
+    grantedSkillIds: Object.freeze(["fall_the_meteor"]),
+    unique: true,
+    lotBagHighlight: "orange",
+    sellPrice: 0
   })
 });
 

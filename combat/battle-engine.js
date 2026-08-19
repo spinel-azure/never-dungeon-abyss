@@ -31,6 +31,7 @@ import {
   applyNpcTurnStart
 } from "./npc-support.js";
 import { applyPlayerChargeAction, isPlayerChargeReady } from "./player-charge.js";
+import { getWeapon } from "../data/weapons.js";
 
 export function createBattleState({ character, enemy }) {
   const vorpalSwordEquippedAtStart = character?.equipment?.weaponId === "vorpal_sword";
@@ -816,6 +817,11 @@ function combatStats(combatant) {
 }
 
 function cloneCombatant(source) {
+  const equipment = {
+    weaponId: source.equipment?.weaponId || "iron_longsword",
+    ...(source.equipment || {})
+  };
+  const weapon = getWeapon(equipment.rightArmId || equipment.weaponId, equipment.rightArmEnhancement || 0);
   return {
     ...structuredClone(source),
     name: source.name || "UNKNOWN",
@@ -824,10 +830,8 @@ function cloneCombatant(source) {
     sp: Math.max(0, Number(source.sp) || 0),
     maxSp: Math.max(0, Number(source.maxSp) || 0),
     statuses: structuredClone(source.statuses || []),
-    equipment: {
-      weaponId: source.equipment?.weaponId || "iron_longsword",
-      ...(source.equipment || {})
-    },
+    skillIds: [...new Set([...(source.skillIds || []), ...(weapon.grantedSkillIds || [])])],
+    equipment,
     alive: source.alive !== false && Number(source.hp) > 0
   };
 }
