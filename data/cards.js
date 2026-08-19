@@ -3,6 +3,8 @@ export const GODDESS_GRACE_CARD_ID = "common_goddess_grace";
 export const GODDESS_MERCY_CARD_ID = "legendary_goddess_mercy";
 export const PERPETUAL_TORCH_CARD_ID = "legendary_unlimited_torch_gauge";
 export const DEADLY_POISON_IMMUNITY_CARD_ID = "legendary_deadly_poison_immunity";
+export const MANA_ACTIVATION_CARD_ID = "legendary_mana_activation";
+export const GODDESS_BREATH_CARD_ID = "legendary_goddess_breath";
 
 const STANDARD_CARDS = [
   {
@@ -289,6 +291,20 @@ const STANDARD_CARDS = [
     category: "exploration", effectId: "unlimited_torch_gauge",
     effectIds: Object.freeze(["torch_consumption_disabled", "force_torch_effect_active"]),
     iconId: "torch", maxOwned: 1, maxCopies: 1
+  },
+  {
+    id: MANA_ACTIVATION_CARD_ID, rarity: "L", cost: 6,
+    name: "Mana Activation", nameJa: "マナ活性化", concept: "5歩ごとにSP1回復",
+    descriptionJa: "ダンジョンを5歩進むごとにSPを1回復する。ヨハンのマナ活性化と重複する。",
+    category: "exploration", effectId: "step_sp_recovery", effectValue: 1,
+    iconId: "knowledge", maxOwned: 1, maxCopies: 1
+  },
+  {
+    id: GODDESS_BREATH_CARD_ID, rarity: "L", cost: 6,
+    name: "Goddess's Breath", nameJa: "女神の息吹", concept: "5歩ごとにHP1回復",
+    descriptionJa: "ダンジョンを5歩進むごとにHPを1回復する。エリカの女神の息吹と重複する。",
+    category: "exploration", effectId: "step_hp_recovery", effectValue: 1,
+    iconId: "goddess-silhouette", maxOwned: 1, maxCopies: 1
   },
   {
     id: DEADLY_POISON_IMMUNITY_CARD_ID, rarity: "L", cost: 6,

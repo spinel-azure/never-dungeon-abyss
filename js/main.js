@@ -19,6 +19,7 @@ import {
   getSpecialRoomLockInfo,
   attemptSpecialRoomUnlock,
   markBossDefeatedAt,
+  removeBossAt,
   setStartPosition,
   randomizeStartPosition
 } from "./dungeon.js";
@@ -1486,7 +1487,12 @@ import {
 
   function updateCharacterFromBattle(changes) {
     if (!character) return;
+    const previousHerbicideUses = Math.max(0, Math.floor(Number(character.herbicideTrialUses) || 0));
     Object.assign(character, changes);
+    const nextHerbicideUses = Math.max(previousHerbicideUses, Math.floor(Number(character.herbicideTrialUses) || 0));
+    if (nextHerbicideUses > previousHerbicideUses) {
+      character = recordCustomQuestProgress(character, "guild_020", nextHerbicideUses - previousHerbicideUses);
+    }
     character.condition = currentCondition(character);
     updateCharacterUi();
     scheduleAutosave();
@@ -1575,6 +1581,11 @@ import {
     if (!character) return;
     character = recordNpcExpeditionDepth(character, currentDepth);
     character = applyNpcExplorationPassives(character);
+    character.cardPassiveStepCount = (Math.max(0, Math.floor(Number(character.cardPassiveStepCount) || 0)) + 1) % 5;
+    if (character.cardPassiveStepCount === 0) {
+      if (hasCardEffect(character.cards?.deckSlots, "step_hp_recovery")) character.hp = Math.min(character.maxHp, character.hp + 1);
+      if (hasCardEffect(character.cards?.deckSlots, "step_sp_recovery")) character.sp = Math.min(character.maxSp, character.sp + 1);
+    }
     character.condition = currentCondition(character);
     character = recordFloorExploration(character, { depth: currentDepth, explored });
     updateCharacterUi();
@@ -1708,6 +1719,16 @@ import {
   }
 
   function enterShop() {
+    if (character?.eventFlags?.strong_herbicide_shop_reward_pending) {
+      const granted = grantItemWithOverflow(character, "strong_herbicide", 10);
+      character = {
+        ...granted.character,
+        eventFlags: { ...(granted.character.eventFlags || {}), strong_herbicide_shop_reward_pending: false }
+      };
+      updateCharacterUi();
+      saveGame();
+      return { message: "ヘレン：依頼を受けてくれてありがと。助かったわ。これを受け取って。\n「強力除草剤」×10個を手に入れた！" };
+    }
     const result = acknowledgeShopStockAnnouncement(character);
     if (!result.announced) return null;
     character = result.character;
@@ -1866,7 +1887,9 @@ import {
     startBgm(selectDungeonBgm());
     const reward = Math.max(0, Math.floor(Number(battle?.enemy?.experienceReward) || 0));
     let bossRewardMessage = "";
-    if (character && battle?.enemy?.isBoss) {
+    if (character && battle?.enemy?.isDungeonObstacle) {
+      removeBossAt(state.gridX, state.gridY);
+    } else if (character && battle?.enemy?.isBoss) {
       if (battle.enemy.id === "lingering_ghost_b2f") {
         character = {
           ...character,
@@ -2113,6 +2136,13 @@ import {
     startBgm(selectDungeonBgm());
     resetPresence();
     setPlayerInputEnabled(true);
+    const cellBossId = cells[state.gridY]?.[state.gridX]?.bossId;
+    if (["giant_vine_obstacle", "fleischfresser_b59f"].includes(cellBossId) && state.bossEncounterOrigin) {
+      state.gridX = state.bossEncounterOrigin.x;
+      state.gridY = state.bossEncounterOrigin.y;
+      state.x = state.gridX + 0.5;
+      state.y = state.gridY + 0.5;
+    }
     state.autoReturnPaused = false;
     if (state.autoWalkerActive) window.setTimeout(continueAutoReturn, 0);
     say("戦闘から逃げ切った。");
@@ -2695,6 +2725,12 @@ import {
           ...(character.eventFlags || {}),
           transfer_portal_b50f_unlocked: true
         }
+      };
+    }
+    if (currentDepth === 60 && character) {
+      character = {
+        ...character,
+        eventFlags: { ...(character.eventFlags || {}), transfer_portal_b60f_unlocked: true }
       };
     }
     startBgm(selectDungeonBgm());

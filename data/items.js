@@ -246,6 +246,20 @@ export const ITEMS = Object.freeze([
     buyPrice: 0, sellPrice: 340, source: "drop", usableIn: Object.freeze([]), effects: Object.freeze([]),
     description: "奈落キノコから採れた毒々しい傘。売却専用。", maxOwned: 99,
     repurchasable: false, iconId: "abyss-mushroom-cap", version: 1
+  }),
+  Object.freeze({
+    number: 39, id: "strong_herbicide_trial", name: "強力除草剤（試供品）", category: "battle",
+    buyPrice: 0, sellPrice: 0, source: "quest", usableIn: Object.freeze(["battle"]),
+    effects: Object.freeze([{ id: "strong_herbicide", value: 500 }]),
+    description: "密林区域の巨大蔓へ散布すると一撃で枯らす試供品。売却できない。",
+    maxOwned: 5, iconId: "antidote", version: 1, repurchasable: false
+  }),
+  Object.freeze({
+    number: 40, id: "strong_herbicide", name: "強力除草剤", category: "battle",
+    buyPrice: 100, sellPrice: 50, source: "shop", usableIn: Object.freeze(["battle"]),
+    effects: Object.freeze([{ id: "strong_herbicide", value: 500 }]),
+    description: "巨大蔓を一撃で枯らす。フライシュフレッサーには固定ダメージを与え、再生を5ターン停止する。",
+    maxOwned: 99, iconId: "antidote", version: 1
   })
 ]);
 
@@ -277,6 +291,7 @@ export function getShopItemIdsForCharacter(character) {
     ...(flags.scorching_barrier_shop_unlocked ? ["scorching_barrier"] : []),
     ...(flags.extreme_cold_barrier_shop_unlocked ? ["extreme_cold_barrier"] : []),
     ...(flags.weapon_imbue_oils_shop_unlocked || quest013Reported ? ["fire_lizard_oil", "ice_lizard_oil"] : []),
+    ...(flags.strong_herbicide_shop_unlocked ? ["strong_herbicide"] : []),
     ...BASE_SHOP_ITEM_IDS.slice(1)
   ];
 }

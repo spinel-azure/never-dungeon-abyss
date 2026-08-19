@@ -201,6 +201,8 @@ async function executeCommand(command) {
       fieldOnly: "このスキルは探索中のみ使用できる。",
       undeadOnly: "アンデッドにしか効果がない。",
       bossImmune: "この敵には効かない。",
+      plantOnly: "植物型の障害物にしか効果がない。",
+      plantOnly: "植物型の障害物にしか効果がない。",
       chargeNotReady: "チャージが満タンではない。"
     };
     battleUi.messageEl.textContent = messages[resolved.reason] || "現在使用できません。";
@@ -214,6 +216,7 @@ async function executeCommand(command) {
     sp: battleUi.battle.player.sp,
     statuses: structuredClone(battleUi.battle.player.statuses),
     inventory: structuredClone(battleUi.battle.player.inventory),
+    herbicideTrialUses: Number(battleUi.battle.player.herbicideTrialUses) || 0,
     playerCharge: structuredClone(battleUi.battle.player.playerCharge),
     alive: battleUi.presenting ? startingHp.player > 0 : battleUi.battle.player.alive
   });
@@ -258,6 +261,7 @@ async function executeAmbushOpening() {
     sp: battleUi.battle.player.sp,
     statuses: structuredClone(battleUi.battle.player.statuses),
     inventory: structuredClone(battleUi.battle.player.inventory),
+    herbicideTrialUses: Number(battleUi.battle.player.herbicideTrialUses) || 0,
     alive: startingHp.player > 0
   });
   renderBattle();
@@ -354,6 +358,7 @@ function syncFinalPlayerState() {
     sp: battleUi.battle.player.sp,
     statuses: structuredClone(battleUi.battle.player.statuses),
     inventory: structuredClone(battleUi.battle.player.inventory),
+    herbicideTrialUses: Number(battleUi.battle.player.herbicideTrialUses) || 0,
     alive: battleUi.battle.player.alive,
     npcSystem: structuredClone(battleUi.battle.player.npcSystem),
     playerCharge: structuredClone(battleUi.battle.player.playerCharge)

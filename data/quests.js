@@ -25,6 +25,9 @@ export const B45F_SURVEY_QUEST_ID = "guild_017";
 export const B45F_SURVEY_SUPPLY_FLAG = "guild_017_large_potions_received";
 export const GUILD_018_QUEST_ID = "guild_018";
 export const FIFTH_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_019";
+export const HERBICIDE_TRIAL_QUEST_ID = "guild_020";
+export const SIXTH_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_023";
+export const HERBICIDE_TRIAL_SUPPLY_FLAG = "guild_020_trial_herbicide_received";
 export const SPECIAL_MEDICINE_INGREDIENT_FLAGS = Object.freeze(
   Array.from({ length: 8 }, (_, index) => `quest_016_ingredient_b${index + 51}f_found`)
 );
@@ -532,6 +535,48 @@ export const QUESTS = Object.freeze([
       "transfer_portal_b50f_unlocked"
     ]),
     available: true
+  }),
+  Object.freeze({
+    id: HERBICIDE_TRIAL_QUEST_ID,
+    number: "020",
+    title: "除草剤散布作業者募集",
+    client: "ヘレン",
+    category: "other",
+    objectiveType: "custom",
+    targetDepth: 58,
+    requiredCount: 5,
+    objectiveHeading: "内容",
+    objectiveLabel: "支給された強力除草剤を試す",
+    reward: Object.freeze({ type: "card", label: "デッキカード×1", amount: 1, cardId: "legendary_mana_activation", bonusGold: 20000 }),
+    descriptionLabel: "目的",
+    description: Object.freeze([
+      "強力除草剤の試供品を入荷したんだけど、試しに密林区域で使って",
+      "貰いたいの。もしも効き目があるなら店で正式に取り扱う",
+      "つもりよ。よろしく頼むわね。"
+    ]),
+    prerequisiteQuestIds: Object.freeze([FIFTH_RED_DOOR_INVESTIGATION_QUEST_ID]),
+    reportUnlockFlags: Object.freeze(["strong_herbicide_shop_unlocked", "strong_herbicide_shop_reward_pending"]),
+    available: true
+  }),
+  Object.freeze({
+    id: SIXTH_RED_DOOR_INVESTIGATION_QUEST_ID,
+    number: "023",
+    title: "赤い扉の調査――その6",
+    client: "ギルドマスター",
+    category: "other",
+    objectiveType: "custom",
+    targetDepth: 60,
+    requiredCount: 3,
+    objectiveLabel: "赤い扉を開け、中を調査する",
+    reward: Object.freeze({ type: "card", label: "デッキカード×1", amount: 1, cardId: "legendary_goddess_breath", bonusGold: 20000 }),
+    descriptionLabel: "目的",
+    description: Object.freeze([
+      "B59Fにある赤い扉を開けて中を調べて欲しい。",
+      "また手強い何かがいるはずだ。事前準備と用心は怠るな。"
+    ]),
+    prerequisiteQuestIds: Object.freeze([HERBICIDE_TRIAL_QUEST_ID]),
+    persistentProgressFlags: Object.freeze(["red_door_b59f_unlocked", "boss_fleischfresser_b59f_defeated", "transfer_portal_b60f_unlocked"]),
+    available: true
   })
 ]);
 
@@ -650,6 +695,15 @@ export function acceptQuest(character, questId) {
       eventFlags: { ...(supply.character.eventFlags || {}), [B45F_SURVEY_SUPPLY_FLAG]: true }
     };
     acceptanceSupplyItemId = "healing_potion_large";
+    acceptanceSupplyAmount = supply.gained + supply.stored;
+  }
+  if (quest.id === HERBICIDE_TRIAL_QUEST_ID && !next.eventFlags?.[HERBICIDE_TRIAL_SUPPLY_FLAG]) {
+    const supply = grantItemWithOverflow(next, "strong_herbicide_trial", 5);
+    next = {
+      ...supply.character,
+      eventFlags: { ...(supply.character.eventFlags || {}), [HERBICIDE_TRIAL_SUPPLY_FLAG]: true }
+    };
+    acceptanceSupplyItemId = "strong_herbicide_trial";
     acceptanceSupplyAmount = supply.gained + supply.stored;
   }
   return { ...result(next, true), acceptanceRewardCardId, acceptanceSupplyItemId, acceptanceSupplyAmount };
@@ -933,6 +987,12 @@ export function isDungeonDepthUnlocked(character, depth) {
   }
   if (requestedDepth === 50) {
     return Boolean(character?.eventFlags?.boss_eiskoenigin_b49f_defeated);
+  }
+  if (requestedDepth === 60) {
+    return Boolean(character?.eventFlags?.boss_fleischfresser_b59f_defeated);
+  }
+  if (requestedDepth === 60) {
+    return Boolean(character?.eventFlags?.boss_fleischfresser_b59f_defeated);
   }
   return true;
 }

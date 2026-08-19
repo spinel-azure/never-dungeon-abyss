@@ -708,6 +708,7 @@ function startStairsPrompt(cellType) {
 
 function startBossEvent(bossId, fromGX, fromGY) {
   const boss = getBossById(bossId);
+  state.bossEncounterOrigin = { x: fromGX, y: fromGY };
   startOverlayEvent({
     type: "bossPrompt",
     bossId,

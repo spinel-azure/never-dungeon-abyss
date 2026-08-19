@@ -54,8 +54,8 @@ test("B50F to B58F replace the black chest with a gold chest on the one-percent 
 
   buildBoundaryWallMap(59, () => 0, { blackChestsUnlocked: true, goldWeaponEligible: true });
   treasures = cells.flat().map(cell => cell.treasure).filter(Boolean);
-  assert.equal(treasures.includes("gold"), false);
   assert.equal(treasures.includes("black"), false);
+  assert.equal(cells.flat().filter(cell => cell.treasure === "gold" && cell.eventTreasureId === "red_rust_key_b59f_chest").length, 1);
 });
 
 test("B1F to B9F purple chests use the card-only 33/33/33/1 table", () => {

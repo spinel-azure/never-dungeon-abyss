@@ -64,7 +64,9 @@
         drawStairsMark(ctx, x1, y1, cell, c.type, c.portal);
       }
       if (c.npc && (isExplored || revealOptions.npcs || npcDetectionActive)) drawNpcMark(ctx, x1, y1, cell);
-      if (c.bossId && isExplored) drawBossMark(ctx, x1, y1, cell);
+      if (c.bossId && isExplored) c.bossId === "giant_vine_obstacle"
+        ? drawTextMark(ctx, "🌿", x1, y1, cell)
+        : drawBossMark(ctx, x1, y1, cell);
       if (c.fountain && effectiveTorchActive) drawFountainMark(ctx, x1, y1, cell);
       if (shouldDrawSpecialRoomMarker(c.specialRoom, isExplored, effectiveTorchActive ? 1 : 0)) {
         drawSpecialRoomMark(ctx, x1, y1, cell, c.specialRoom.content.minimapMarker);
@@ -145,6 +147,15 @@ export function drawBossMark(ctx, x, y, size) {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText("♟", x + size / 2, y + size / 2);
+  ctx.restore();
+}
+
+export function drawTextMark(ctx, label, x, y, size) {
+  ctx.save();
+  ctx.font = `${Math.max(9, size * .72)}px sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(label, x + size / 2, y + size / 2);
   ctx.restore();
 }
 

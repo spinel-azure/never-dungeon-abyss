@@ -478,6 +478,50 @@ export const BOSSES = Object.freeze({
       remains: "――氷の女王の体躯は溶けて、後には王笏とティアラが残るのみ…。\n＊Aボタン：次へ"
     })
   }),
+  giant_vine_obstacle: Object.freeze({
+    id: "giant_vine_obstacle", name: "巨大蔓", floor: 50, level: 55,
+    imageId: "giant_vine_obstacle", image: "images/npc/NPC_event_11.avif",
+    encounterImageId: "giant_vine_obstacle", encounterImage: "images/npc/NPC_event_11.avif",
+    race: "plant", maxHp: 400,
+    stats: Object.freeze({ str: 4, int: 1, agi: 1, dex: 5, luc: 1 }),
+    def: 60, attack: 3, magicDamageReduction: 0.75, experienceReward: 0,
+    actions: Object.freeze([
+      Object.freeze({ weight: 45, action: Object.freeze({ id: "vine_sway", name: "蔓を揺らしている……", actionType: "wait", waitMessage: "巨大蔓は蔓を揺らしている……。" }) }),
+      Object.freeze({ weight: 35, action: Object.freeze({ id: "vine_root", name: "根を張っている……", actionType: "wait", waitMessage: "巨大蔓は地面へ深く根を張っている……。" }) }),
+      Object.freeze({ weight: 12, action: Object.freeze({ id: "vine_swing", name: "蔓を振り回した！", actionType: "physicalAttack", hitCount: 1, powerPerHit: 0.35, effects: Object.freeze([Object.freeze({ statusId: "deadly_poison", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.2 })]) }) }),
+      Object.freeze({ weight: 8, action: Object.freeze({ id: "vine_spores", name: "胞子をまき散らした！", actionType: "spell", element: "arcane", spellPower: 0, powerMultiplier: 0, unavoidable: true, effects: Object.freeze([Object.freeze({ statusId: "action_skip", trigger: "perAction", statusKind: "magical", baseRate: 0.25 })]) }) })
+    ]),
+    reward: Object.freeze({ type: "none" }), elementMultipliers: Object.freeze({ fire: 1.5, ice: 1, arcane: 1 }),
+    statusResistances: Object.freeze({ poison: Object.freeze({ resistancePoints: 100, immune: true }), deadly_poison: Object.freeze({ resistancePoints: 100, immune: true }), action_skip: Object.freeze({ resistancePoints: 100, immune: true }) }),
+    escapeRate: 1, surpriseRate: 0, surpriseRateMaximum: 0, noDrop: true,
+    isBoss: true, bossKind: "obstacle", isDungeonObstacle: true,
+    event: Object.freeze({ prompt: "巨大な蔓が行く手を塞いでいる。近づきますか？\n＊Aボタン：はい　Bボタン：いいえ", start: "巨大蔓がうごめき、襲いかかってきた！" })
+  }),
+  fleischfresser_b59f: Object.freeze({
+    id: "fleischfresser_b59f", name: "フライシュフレッサー", level: 65, floor: 59,
+    imageId: "fleischfresser_b59f", image: "images/bosses/boss_11.avif",
+    encounterImageId: "fleischfresser_event_b59f", encounterImage: "images/npc/NPC_event_11b.avif",
+    defeatedEncounterImageId: "fleischfresser_remains_b59f", defeatedEncounterImage: "images/npc/NPC_event_12.avif",
+    race: "plant", maxHp: 10000,
+    stats: Object.freeze({ str: 31, int: 28, agi: 10, dex: 25, luc: 22 }),
+    def: 34, attack: 30, experienceReward: 20000, regainRate: 0.05,
+    actions: Object.freeze([
+      Object.freeze({ weight: 45, action: Object.freeze({ id: "flesh_vine", name: "捕食蔓", actionType: "physicalAttack", hitCount: 2, powerPerHit: 0.85, effects: Object.freeze([]) }) }),
+      Object.freeze({ weight: 30, action: Object.freeze({ id: "flesh_poison", name: "猛毒花粉", actionType: "spell", element: "arcane", spellPower: 18, unavoidable: true, effects: Object.freeze([Object.freeze({ statusId: "deadly_poison", trigger: "perAction", statusKind: "magical", baseRate: 0.35 })]) }) }),
+      Object.freeze({ weight: 25, action: Object.freeze({ id: "flesh_spore", name: "麻痺胞子", actionType: "spell", element: "arcane", spellPower: 12, unavoidable: true, effects: Object.freeze([Object.freeze({ statusId: "action_skip", trigger: "perAction", statusKind: "magical", baseRate: 0.3 })]) }) })
+    ]),
+    reward: Object.freeze({ type: "none" }), elementMultipliers: Object.freeze({ fire: 1.5, ice: 1, arcane: 1 }),
+    statusResistances: Object.freeze({ poison: Object.freeze({ resistancePoints: 100, immune: true }), deadly_poison: Object.freeze({ resistancePoints: 100, immune: true }), action_skip: Object.freeze({ resistancePoints: 85, immune: false }) }),
+    escapeRate: 1, surpriseRate: 0, surpriseRateMaximum: 0, noDrop: true, isBoss: true, bossKind: "floor",
+    defeatedFlag: "boss_fleischfresser_b59f_defeated", transferUnlockFlag: "transfer_portal_b60f_unlocked",
+    room: Object.freeze({ requiresKey: true, keyItemId: "red_rust_key_b59f", unlockFlag: "red_door_b59f_unlocked" }),
+    event: Object.freeze({
+      prompt: "部屋の中央には、巨大な植物が生い茂っていた。閉じた花弁の根元から伸びる無数の太い蔓が禍々しい。\nその一方で、花から漂う甘く誘うような香りに、思わず引き寄せられる……。\nもっと近づきますか？\n＊Aボタン：はい　Bボタン：いいえ",
+      start: "あなたが近づくと――\n閉じていた花弁が、ゆっくりと……ゆっくりと開いてゆく。\n\nそして、その中から現れたのは――――！",
+      autoStartDelay: 2000,
+      remains: "花弁は枯れて朽ち果て、蔓も力なく垂れ下がっている。\n\nもう二度と、花開くことはないだろう……。\n＊Aボタン：次へ"
+    })
+  }),
   glacies_event_boss: Object.freeze({
     id: "glacies_event_boss",
     name: "グラキエス",

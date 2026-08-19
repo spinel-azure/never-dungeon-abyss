@@ -22,7 +22,7 @@ test("transfer destinations are data-driven and expose only unlocked floors", ()
   assert.equal(isTransferDestinationUnlocked(character, 30), true);
   character.eventFlags.boss_wicker_man_b39f_defeated = true;
   character.eventFlags.boss_eiskoenigin_b49f_defeated = true;
-  character.eventFlags.boss_b59f_defeated = true;
+  character.eventFlags.boss_fleischfresser_b59f_defeated = true;
   character.eventFlags.boss_b69f_defeated = true;
   character.eventFlags.boss_b79f_defeated = true;
   character.eventFlags.boss_b89f_defeated = true;

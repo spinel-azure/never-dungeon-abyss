@@ -93,6 +93,10 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     longMarchChallenge: createInitialLongMarchChallenge(),
     npcSystem: createInitialNpcSystem(),
     playerCharge: createInitialPlayerCharge(),
+    herbicideTrialUses: 0,
+    cardPassiveStepCount: 0,
+    herbicideTrialUses: 0,
+    cardPassiveStepCount: 0,
     highestDungeonDepthReached: 1,
     gold: 0,
     experience: 0,
@@ -183,6 +187,10 @@ export function normalizeCharacter(character) {
     longMarchChallenge: normalizeLongMarchChallenge(character.longMarchChallenge),
     npcSystem: normalizeNpcSystem(character.npcSystem),
     playerCharge: normalizePlayerCharge(character.playerCharge),
+    herbicideTrialUses: Math.max(0, Math.min(5, Math.floor(Number(character.herbicideTrialUses) || 0))),
+    cardPassiveStepCount: Math.max(0, Math.floor(Number(character.cardPassiveStepCount) || 0)) % 5,
+    herbicideTrialUses: Math.max(0, Math.min(5, Math.floor(Number(character.herbicideTrialUses) || 0))),
+    cardPassiveStepCount: Math.max(0, Math.floor(Number(character.cardPassiveStepCount) || 0)) % 5,
     highestDungeonDepthReached: Math.max(
       inferredDepth,
       Math.floor(Number(character.highestDungeonDepthReached) || 1)

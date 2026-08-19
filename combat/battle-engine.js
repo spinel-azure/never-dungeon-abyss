@@ -343,7 +343,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
     return;
   }
   if (action.actionType === "wait") {
-    battle.log.push(`${actor.name}は隙を見せた。`);
+    battle.log.push(action.waitMessage || `${actor.name}は隙を見せた。`);
     return;
   }
   if (action.actionType === "item") {
@@ -400,6 +400,20 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
             expiresAfterBattle: true
           }
         ];
+      } else if (effect.id === "strong_herbicide") {
+        if (target.id === "giant_vine_obstacle") {
+          target.hp = 0;
+          target.alive = false;
+          battle.log.push("強力除草剤を巨大蔓へ散布した！ 巨大蔓は見る見るうちに枯れていった！");
+          if (action.item.id === "strong_herbicide_trial") actor.herbicideTrialUses = (Number(actor.herbicideTrialUses) || 0) + 1;
+        } else if (target.id === "fleischfresser_b59f") {
+          const alreadySuppressed = Number(target.regainSuppressedTurns) > 0;
+          if (!alreadySuppressed) target.hp = Math.max(1, target.hp - Math.max(0, Math.floor(Number(effect.value) || 500)));
+          target.regainSuppressedTurns = 5;
+          battle.log.push(alreadySuppressed
+            ? "フライシュフレッサーの再生停止時間が延長された！"
+            : "フライシュフレッサーの表皮が焼けただれ、再生能力が停止した！");
+        }
       }
     }
     battle.log.push(`${actor.name}は${action.item.name}を使った。`);
@@ -745,6 +759,19 @@ function finishAction(battle, side) {
     battle.log.push(`${actor.name}は猛毒で${damage}ダメージ！`);
     battle.presentationEvents.push({ type: "poisonDamage", actorSide: null, targetSide: side,
       amount: damage, message: `猛毒で${damage}ダメージ！` });
+  }
+  if (side === "enemy" && actor.hp > 0 && Number(actor.regainRate) > 0) {
+    if (Number(actor.regainSuppressedTurns) > 0) {
+      actor.regainSuppressedTurns -= 1;
+      if (actor.regainSuppressedTurns === 0) battle.log.push(`${actor.name}の再生能力が戻った！`);
+    } else {
+      const amount = Math.min(actor.maxHp - actor.hp, Math.max(1, Math.floor(actor.maxHp * actor.regainRate)));
+      actor.hp += amount;
+      if (amount > 0) {
+        battle.log.push(`${actor.name}は${amount}HPを再生した！`);
+        battle.presentationEvents.push({ type: "healing", actorSide: "enemy", targetSide: "enemy", amount, message: `${amount}HP再生！` });
+      }
+    }
   }
 }
 

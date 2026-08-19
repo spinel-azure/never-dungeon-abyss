@@ -125,7 +125,22 @@ function buildBoundaryWallMapAttempt(depth = 1, rng = Math.random, progress = {}
   placePurpleSpecialRoomTreasure(depth, rng);
   placeFountain(depth, rng);
   if (floorBoss?.room?.requiresKey) placeFloorBossKeyTreasure(floorBoss, rng, progress);
+  placeForestVines(depth, rng, progress);
   placeNormalDoors(NORMAL_DOOR_COUNT, false);
+}
+
+export function placeForestVines(depth = 1, rng = Math.random, progress = {}) {
+  const floor = Math.floor(Number(depth) || 1);
+  if (floor < 50 || floor > 58 || progress.eventFlags?.boss_fleischfresser_b59f_defeated) return [];
+  const candidates = cells.flat().filter(cell => (
+    cell.type === "floor"
+    && !(cell.x === startPosition.x && cell.y === startPosition.y)
+    && !isDungeonFeatureOccupied(cell)
+    && !cell.npc && !cell.fountain && !cell.treasure && !cell.questEvent
+  ));
+  const placed = shuffled(candidates, rng).slice(0, 5);
+  for (const cell of placed) cell.bossId = "giant_vine_obstacle";
+  return placed.map(cell => ({ x: cell.x, y: cell.y }));
 }
 
 export function getLastDungeonBuildReport() {
