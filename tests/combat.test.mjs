@@ -288,6 +288,14 @@ test("collected main stats are capped at 30", () => {
   for (const key of ["str", "int", "agi", "dex", "luc"]) assert.ok(stats[key] <= 30);
 });
 
+test("DEF is capped independently at 60", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.def = 20;
+  character.equipmentStatBonuses = { def: 50 };
+  assert.equal(collectStats(character).def, 60);
+  assert.equal(collectStats({ def: 75 }).def, 75);
+});
+
 test("fixed RNG reproduces physical attack results", () => {
   const args = {
     attacker: { str: 8, dex: 5 },

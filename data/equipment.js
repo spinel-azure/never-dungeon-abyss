@@ -32,6 +32,26 @@ export const EQUIPMENT = Object.freeze({
     sellPrice: 1000
   }),
 
+  blacksteel_greatshield: item("blacksteel_greatshield", "黒鋼の大盾", "leftArmId", { def: 8, dex: 4 }, deepArmor("warrior")),
+  blacksteel_helmet: item("blacksteel_helmet", "黒鋼の兜", "headId", { def: 10 }, deepArmor("warrior")),
+  blacksteel_heavy_armor: item("blacksteel_heavy_armor", "黒鋼の重鎧", "bodyId", { def: 9, str: 4 }, deepArmor("warrior")),
+  blacksteel_greaves: item("blacksteel_greaves", "黒鋼の脚甲", "footId", { def: 8, str: 4 }, deepArmor("warrior")),
+
+  abyss_tiger_buckler: item("abyss_tiger_buckler", "奈落虎のバックラー", "leftArmId", { def: 8 }, deepArmor("thief")),
+  abyss_tiger_hood: item("abyss_tiger_hood", "奈落虎の軽兜", "headId", { def: 7, dex: 4 }, deepArmor("thief")),
+  abyss_tiger_light_armor: item("abyss_tiger_light_armor", "奈落虎の軽鎧", "bodyId", { def: 8, dex: 4 }, deepArmor("thief")),
+  abyss_tiger_boots: item("abyss_tiger_boots", "奈落虎のブーツ", "footId", { def: 6, agi: 6 }, deepArmor("thief")),
+
+  sacred_tree_shield: item("sacred_tree_shield", "聖樹の盾", "leftArmId", { def: 8 }, deepArmor("priest")),
+  sacred_tree_mitre: item("sacred_tree_mitre", "聖樹のミトラ", "headId", { def: 7, luc: 5 }, deepArmor("priest")),
+  sacred_tree_vestment: item("sacred_tree_vestment", "聖樹の祭服", "bodyId", { def: 8, luc: 4 }, deepArmor("priest")),
+  sacred_tree_shoes: item("sacred_tree_shoes", "聖樹の靴", "footId", { def: 7, agi: 6 }, deepArmor("priest")),
+
+  abyss_grimoire: item("abyss_grimoire", "深淵の魔導書", "leftArmId", { int: 10 }, deepArmor("mage")),
+  abyss_hat: item("abyss_hat", "深淵の帽子", "headId", { def: 8 }, deepArmor("mage")),
+  abyss_robe: item("abyss_robe", "深淵のローブ", "bodyId", { def: 8, int: 3 }, deepArmor("mage")),
+  abyss_shoes: item("abyss_shoes", "深淵の靴", "footId", { def: 8, agi: 6 }, deepArmor("mage")),
+
   steel_shield: item("steel_shield", "鋼の盾", "leftArmId", { def: 4, dex: 2 }, finalArmor("warrior", {
     1: { def: 5, dex: 2 }, 2: { def: 5, dex: 3 }, 3: { def: 6, dex: 4 }
   })),
@@ -211,6 +231,15 @@ function finalArmor(job, statBonusesByEnhancement) {
       ])
     )),
     sellPriceByEnhancement: Object.freeze({ 0: 1500, 1: 1800, 2: 2250, 3: 3000 })
+  };
+}
+
+function deepArmor(job) {
+  return {
+    allowedJobs: Object.freeze([job]),
+    buyPrice: 6000,
+    sellPrice: 3000,
+    shopUnlockDepth: 50
   };
 }
 

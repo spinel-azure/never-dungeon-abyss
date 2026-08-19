@@ -1262,7 +1262,8 @@ import {
       ) || 0));
       const equipment = Math.max(0, Math.floor(Number(target?.equipmentStatBonuses?.[key]) || 0));
       const cards = Math.floor(Number(target?.cardStatBonuses?.[key]) || 0);
-      const totalBeforePenalty = Math.min(30, base + equipment + Math.max(0, cards));
+      const maximum = key === "def" ? 60 : 30;
+      const totalBeforePenalty = Math.min(maximum, base + equipment + Math.max(0, cards));
       const total = key === "def"
         ? Math.max(0, totalBeforePenalty + Math.min(0, cards))
         : Math.max(1, totalBeforePenalty + Math.min(0, cards));
@@ -1272,17 +1273,18 @@ import {
       name.textContent = label;
       const gauge = document.createElement("span");
       gauge.className = "nde-empty-gauge";
-      gauge.setAttribute("aria-label", `${label} ${total}/30`);
+      gauge.setAttribute("aria-label", `${label} ${total}/${maximum}`);
       for (let index = 0; index < 30; index += 1) {
         const cell = document.createElement("i");
-        if (index >= total && index < totalBeforePenalty) cell.className = "is-penalty";
+        if (total > 30 && index < total - 30) cell.className = `is-overcap${total >= 60 ? " is-maximum" : ""}`;
+        else if (index >= total && index < totalBeforePenalty) cell.className = "is-penalty";
         else if (index < Math.min(base, total)) cell.className = "is-base";
         else if (index < Math.min(base + equipment, total)) cell.className = "is-equipment";
         else if (index < total) cell.className = "is-card";
         gauge.append(cell);
       }
       const value = document.createElement("output");
-      value.textContent = String(total).padStart(2, "0");
+      value.textContent = `${total} / ${maximum}`;
       row.append(name, gauge, value);
       return row;
     }));

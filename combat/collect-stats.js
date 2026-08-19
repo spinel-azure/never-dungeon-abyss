@@ -19,12 +19,13 @@ export function collectStats(source = {}) {
   }
   return {
     ...stats,
-    def: Math.max(
-      0,
+    def: clamp(
       numeric(source.def ?? source.defense)
         + numeric(equipment.def)
         + numeric(cards.def)
-        + numeric(temporary.def)
+        + numeric(temporary.def),
+      0,
+      source.job ? COMBAT_CONFIG.defenseMaximum : Number.POSITIVE_INFINITY
     ),
     hitBonus: numeric(source.hitBonus),
     evasionBonus: numeric(source.evasionBonus),

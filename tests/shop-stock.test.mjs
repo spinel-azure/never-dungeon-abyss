@@ -15,6 +15,7 @@ function characterAt(depth) {
   if (depth >= 10) character.eventFlags.transfer_portal_b10f_unlocked = true;
   if (depth >= 20) character.eventFlags.shop_stock_b20f_unlocked = true;
   if (depth >= 30) character.eventFlags.shop_stock_b30f_unlocked = true;
+  if (depth >= 50) character.eventFlags.transfer_portal_b50f_unlocked = true;
   return character;
 }
 
@@ -41,6 +42,35 @@ test("final shop armor requires B30F arrival and the Iron Maiden victory", () =>
     "steel_shield", "steel_helmet", "steel_surcoat", "steel_greaves"
   ]);
   assert.ok(finalOffers.every(entry => entry.enhancement === 0 && entry.buyPrice === 3000));
+});
+
+test("B50F shop armor provides one full job-specific set after the transfer portal unlock", () => {
+  const expected = {
+    warrior: ["blacksteel_greatshield", "blacksteel_helmet", "blacksteel_heavy_armor", "blacksteel_greaves"],
+    thief: ["abyss_tiger_buckler", "abyss_tiger_hood", "abyss_tiger_light_armor", "abyss_tiger_boots"],
+    priest: ["sacred_tree_shield", "sacred_tree_mitre", "sacred_tree_vestment", "sacred_tree_shoes"],
+    mage: ["abyss_grimoire", "abyss_hat", "abyss_robe", "abyss_shoes"]
+  };
+  const expectedTotals = {
+    warrior: { def: 35, dex: 4, str: 8 },
+    thief: { def: 29, dex: 8, agi: 6 },
+    priest: { def: 30, luc: 9, agi: 6 },
+    mage: { int: 13, def: 24, agi: 6 }
+  };
+  for (const [job, ids] of Object.entries(expected)) {
+    const character = createInitialCharacter({ name: "TEST", job });
+    character.highestDungeonDepthReached = 50;
+    assert.equal(getShopEquipmentStock(character).some(entry => entry.shopUnlockDepth === 50), false);
+    character.eventFlags.transfer_portal_b50f_unlocked = true;
+    const offers = getShopEquipmentStock(character).filter(entry => entry.shopUnlockDepth === 50);
+    assert.deepEqual(offers.map(entry => entry.equipmentId), ids);
+    assert.ok(offers.every(entry => entry.buyPrice === 6000 && entry.sellPrice === 3000));
+    const totals = offers.reduce((result, entry) => {
+      for (const [key, value] of Object.entries(entry.statBonuses)) result[key] = (result[key] || 0) + value;
+      return result;
+    }, {});
+    assert.deepEqual(totals, expectedTotals[job]);
+  }
 });
 
 test("opening a shop category clears only that category's badge", () => {

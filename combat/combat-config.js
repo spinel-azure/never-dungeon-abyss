@@ -1,5 +1,6 @@
 export const COMBAT_CONFIG = Object.freeze({
   statMaximum: 30,
+  defenseMaximum: 60,
   strengthMultiplier: 0.5,
   intelligenceMultiplier: 0.5,
   defenseMultiplier: 0.5,

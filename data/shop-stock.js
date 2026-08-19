@@ -18,11 +18,19 @@ export const FINAL_ARMOR_FAMILIES = Object.freeze([
   Object.freeze(["intermediate_grimoire", "tudor_hat", "mage_tunic", "leather_poulaines"])
 ]);
 
+export const DEEP_ARMOR_FAMILIES = Object.freeze([
+  Object.freeze(["blacksteel_greatshield", "blacksteel_helmet", "blacksteel_heavy_armor", "blacksteel_greaves"]),
+  Object.freeze(["abyss_tiger_buckler", "abyss_tiger_hood", "abyss_tiger_light_armor", "abyss_tiger_boots"]),
+  Object.freeze(["sacred_tree_shield", "sacred_tree_mitre", "sacred_tree_vestment", "sacred_tree_shoes"]),
+  Object.freeze(["abyss_grimoire", "abyss_hat", "abyss_robe", "abyss_shoes"])
+]);
+
 export const SHOP_ARMOR_STOCK = Object.freeze([
   ...armorTier(1, 1, []),
   ...armorTier(2, 10, ["transfer_portal_b10f_unlocked", "boss_strange_knight_statue_b9f_defeated"]),
   ...armorTier(3, 20, ["shop_stock_b20f_unlocked", "boss_fallen_mage_b19f_defeated"]),
-  ...finalArmorStock()
+  ...finalArmorStock(),
+  ...deepArmorStock()
 ]);
 
 export const SHOP_ACCESSORY_STOCK = Object.freeze([
@@ -147,6 +155,16 @@ function finalArmorStock() {
     enhancement: 0,
     shopUnlockDepth: 30,
     requiredFlags: Object.freeze(["shop_stock_b30f_unlocked", "boss_iron_maiden_b29f_defeated"])
+  }));
+}
+
+function deepArmorStock() {
+  return DEEP_ARMOR_FAMILIES.flatMap(family => family).map(equipmentId => Object.freeze({
+    id: `shop_${equipmentId}`,
+    equipmentId,
+    enhancement: 0,
+    shopUnlockDepth: 50,
+    requiredFlags: Object.freeze(["transfer_portal_b50f_unlocked"])
   }));
 }
 

@@ -49,6 +49,7 @@ const QUEST_ID = "guild_001_abyss_rat";
 
 test("quest 016 unlocks after its rumor, consumes eight ingredients, and unlocks Loretta", () => {
   let character = createInitialCharacter("薬草採集", "priest");
+  assert.equal(getQuestById(B35F_SURVEY_QUEST_ID).title, "迷宮地下35階の調査");
   assert.equal(getQuestById(SPECIAL_MEDICINE_QUEST_ID).title, "特効薬の素材集め");
   character.quests.completedQuestIds.push(
     QUEST_ID, SLIME_EXTERMINATION_QUEST_ID, FLOOR_SURVEY_QUEST_ID, "guild_019"
