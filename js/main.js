@@ -986,8 +986,9 @@ import {
     updateCharacterUi();
     saveGame();
     if (result.acceptanceSupplyItemId) {
+      const supplyItemName = getItem(result.acceptanceSupplyItemId)?.name || result.acceptanceSupplyItemId;
       setTimeout(() => showNamedItemGetEffect(
-        ["回復薬（大）"],
+        [supplyItemName],
         { important: true, amounts: [result.acceptanceSupplyAmount] }
       ), 0);
     }
@@ -995,7 +996,9 @@ import {
     return {
       ...result,
       character,
-      acceptedMessage: result.acceptanceRewardCardId
+      acceptedMessage: questId === "guild_020"
+        ? "ギルドマスター：これがヘレンから預かった除草剤の試供品だ。持っていけ。"
+        : result.acceptanceRewardCardId
         ? "ギルドマスター：何が起こるか分からない危険な調査になるだろう。これを持っていけ。"
         : result.acceptanceSupplyItemId
           ? "ギルドマスター：危険な調査だ。事前支給品を受け取れ。"
@@ -1003,7 +1006,7 @@ import {
       acceptanceRewardMessage: result.acceptanceRewardCardId
         ? "Rカード「防御力上昇」を手に入れた！"
         : result.acceptanceSupplyItemId
-          ? `「回復薬（大）」を${result.acceptanceSupplyAmount}個受け取った！`
+          ? `「${getItem(result.acceptanceSupplyItemId)?.name || result.acceptanceSupplyItemId}」を${result.acceptanceSupplyAmount}個受け取った！`
         : ""
     };
   }

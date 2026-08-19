@@ -676,10 +676,12 @@ test("multi-item quest rewards pass their quantity separately to the item popup"
   assert.doesNotMatch(source, /item\?\.name \|\| rewardItemId\}×\$\{amount\}/);
 });
 
-test("quest 012 hides the Iron Maiden spoiler and quest 013 supply uses an item popup", async () => {
+test("quest supplies use their actual item names in the item popup", async () => {
   assert.equal(getQuestById(THIRD_RED_DOOR_INVESTIGATION_QUEST_ID).objectiveLabel, "赤い扉を開け、中を調査する");
   const { readFile } = await import("node:fs/promises");
   const source = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
   assert.match(source, /result\.acceptanceSupplyItemId[\s\S]*showNamedItemGetEffect/);
-  assert.match(source, /\["回復薬（大）"\][\s\S]*amounts: \[result\.acceptanceSupplyAmount\]/);
+  assert.match(source, /const supplyItemName = getItem\(result\.acceptanceSupplyItemId\)\?\.name/);
+  assert.match(source, /\[supplyItemName\][\s\S]*amounts: \[result\.acceptanceSupplyAmount\]/);
+  assert.doesNotMatch(source, /showNamedItemGetEffect\(\s*\["回復薬（大）"\]/);
 });
