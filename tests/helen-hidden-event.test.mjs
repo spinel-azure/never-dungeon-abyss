@@ -10,7 +10,8 @@ import { getUnreadTavernRumor, markTavernRumorRead } from "../data/tavern-rumors
 import { acceptQuest, getQuestById, isQuestAvailable, recordBossDefeat, reportQuest } from "../data/quests.js";
 import { getKeyItemCount, grantKeyItem } from "../data/key-items.js";
 import { getOwnedCardCount } from "../data/deck.js";
-import { purchaseItem, sellItem } from "../data/commerce.js";
+import { purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
+import { grantEquipmentInstance } from "../data/equipment-inventory.js";
 
 function rumorReadyCharacter() {
   const character = createInitialCharacter("香料採集者", "thief");
@@ -79,6 +80,27 @@ test("Discount Pass halves ordinary purchases and prevents resale profit", () =>
   const sold = sellItem(bought.character, "healing_potion", { amount: 1 });
   assert.equal(sold.accepted, true);
   assert.ok(sold.unitValue <= bought.unitCost);
+});
+
+test("Discount Pass preserves resale values for drop-only items and equipment", () => {
+  let character = createInitialCharacter("素材商", "priest");
+  character.keyItems = grantKeyItem(character.keyItems, "discount_pass").keyItems;
+  character = grantItemWithOverflow(character, "slime_jelly", 1).character;
+
+  const soldMaterial = sellItem(character, "slime_jelly", { amount: 1 });
+  assert.equal(soldMaterial.accepted, true);
+  assert.equal(soldMaterial.unitValue, 5);
+
+  const grantedEquipment = grantEquipmentInstance(
+    soldMaterial.character,
+    "sacred_tree_mace",
+    "rightArmId",
+    { enhancement: 1 }
+  );
+  assert.equal(grantedEquipment.accepted, true);
+  const soldEquipment = sellEquipmentInstance(grantedEquipment.character, grantedEquipment.instance.instanceId);
+  assert.equal(soldEquipment.accepted, true);
+  assert.equal(soldEquipment.value, 3600);
 });
 
 test("facility dialogue completion restores the facility menu after granting the Discount Pass", async () => {

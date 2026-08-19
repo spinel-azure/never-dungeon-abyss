@@ -15,5 +15,7 @@ export function getShopBuyPrice(character, price) {
 export function getShopSellPrice(character, definition) {
   const normal = Math.max(0, Math.floor(Number(definition?.sellPrice ?? definition?.buyPrice / 2) || 0));
   if (!hasShopDiscount(character)) return normal;
-  return Math.min(normal, getShopBuyPrice(character, definition?.buyPrice));
+  const shopBuyPrice = Number(definition?.buyPrice);
+  if (!Number.isFinite(shopBuyPrice) || shopBuyPrice <= 0) return normal;
+  return Math.min(normal, getShopBuyPrice(character, shopBuyPrice));
 }
