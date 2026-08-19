@@ -29,6 +29,7 @@ import {
   isAnastasiaOutfitEventPending,
   shouldUseAnastasiaFestivalPortrait
 } from "../data/anastasia-event.js";
+import { HELEN_HIDDEN_EVENT_PORTRAIT, shouldUseHelenHiddenPortrait } from "../data/helen-event.js";
 
 const FACILITY_COMMANDS = Object.freeze({
   inn: [
@@ -1093,6 +1094,9 @@ function currentFacility() {
   if (town.subFacilityId === "npcHire") return NPC_HIRE_FACILITY;
   const facility = TOWN_FACILITIES[town.selectedIndex] || getTownFacility("guild");
   const character = town.getCharacter();
+  if (facility.id === "shop" && shouldUseHelenHiddenPortrait(character)) {
+    return { ...facility, image: HELEN_HIDDEN_EVENT_PORTRAIT };
+  }
   if (facility.id !== "temple" || !isAnastasiaAssigned(character)) return facility;
   const festivalPortrait = isAnastasiaOutfitEventPending(character)
     || (!town.suppressFestivalPortraitUntilTempleExit && shouldUseAnastasiaFestivalPortrait(character));
@@ -1225,6 +1229,14 @@ function renderFacility() {
   if (facility.id === "shop") {
     const notice = town.onEnterShop();
     if (notice?.message) town.messageEl.textContent = notice.message;
+    const dialogue = Array.isArray(notice?.dialogue) ? notice.dialogue.filter(Boolean) : [];
+    if (dialogue.length) {
+      town.facilityTalkDialogue = dialogue;
+      town.facilityTalkDialogueIndex = 0;
+      town.facilityTalkCompletionFlag = notice.completionFlag || "";
+      town.messageEl.textContent = dialogue[0];
+      town.mode = "facilityTalk";
+    }
   }
   town.portrait.hidden = !facility.image;
   town.portraitPlaceholder.hidden = Boolean(facility.image);
@@ -1241,7 +1253,7 @@ function renderFacility() {
     town.registrationIndex = 0;
     updateRegistrationLanguage();
     showTownCommands();
-  } else {
+  } else if (town.mode !== "facilityTalk") {
     town.mode = "facilityMenu";
     showFacilityCommands(facility.id);
   }

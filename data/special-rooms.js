@@ -92,6 +92,16 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
       minimapMarker: "E",
       revealBeforeExploration: true
     })
+  }),
+  56: Object.freeze({
+    lock: Object.freeze({ mode: "alwaysSuccess", attempts: 1 }),
+    content: Object.freeze({
+      type: "multiEnemyBoss",
+      bossId: "musk_beast_b56f",
+      requiredQuestId: "guild_021",
+      minimapMarker: "E",
+      revealBeforeExploration: true
+    })
   })
 });
 

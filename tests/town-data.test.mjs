@@ -16,7 +16,8 @@ test("shop greeting and guild quest client names stay synchronized", () => {
   assert.equal(getTownFacility("shop").greeting, "あら、いらっしゃい。");
   const specialClients = new Map([
     ["guild_016", "アナスタシア"],
-    ["guild_020", "ヘレン"]
+    ["guild_020", "ヘレン"],
+    ["guild_021", "ヘレン"]
   ]);
   assert.ok(QUESTS.every(quest => quest.client === (specialClients.get(quest.id) || "ギルドマスター")));
 });

@@ -9,6 +9,7 @@ import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { getWeapon, getWeaponType } from "../data/weapons.js";
 import { listOwnedKeyItems } from "../data/key-items.js";
 import { getShopEquipmentStock } from "../data/shop-stock.js";
+import { getShopBuyPrice, getShopSellPrice } from "../data/shop-discount.js";
 import { getQuestHistory } from "../data/quests.js";
 import { getAdventureChronicle, getAdventureRecords } from "../data/adventure-records.js";
 import { closeCardGallery, configureCardGallery, handleCardGalleryInput, openCardGallery } from "./card-gallery.js";
@@ -485,7 +486,15 @@ function applyEquipmentCandidate(entry) {
 
 function equipmentSalePrice(instance) {
   const definition = getEquipmentInstanceDefinition(instance);
-  return Math.max(0, Math.floor(Number(definition?.sellPrice ?? definition?.buyPrice / 2) || 0));
+  return getShopSellPrice(menu.getCharacter(), definition);
+}
+
+function itemSalePrice(item) {
+  return getShopSellPrice(menu.getCharacter(), item);
+}
+
+function inventoryBuyPrice(entry) {
+  return getShopBuyPrice(menu.getCharacter(), entry?.item?.buyPrice ?? entry?.shopEquipment?.buyPrice);
 }
 
 function inventoryEquipmentSaleReason(instance, character) {
@@ -496,7 +505,7 @@ function inventoryEquipmentSaleReason(instance, character) {
 }
 
 function inventorySaleDescription(entry, character) {
-  if (entry.item) return `${entry.item.description} / 売却価格 ${entry.item.sellPrice}G / Aボタン：売却`;
+  if (entry.item) return `${entry.item.description} / 売却価格 ${itemSalePrice(entry.item)}G / Aボタン：売却`;
   const reason = inventoryEquipmentSaleReason(entry.instance, character);
   if (reason) return reason;
   const definition = getEquipmentInstanceDefinition(entry.instance);
@@ -559,7 +568,7 @@ function renderInventorySalePrompt() {
   const entry = inventoryEntries()[menu.inventoryCursor];
   if (!entry) return;
   const name = entry.item?.name || getEquipmentInstanceName(entry.instance);
-  const unitPrice = entry.item?.sellPrice || equipmentSalePrice(entry.instance);
+  const unitPrice = entry.item ? itemSalePrice(entry.item) : equipmentSalePrice(entry.instance);
   const quantity = entry.item ? menu.inventorySaleQuantity : 1;
   const description = menu.inventoryPanel.querySelector("[data-inventory-description]");
   description.textContent = menu.inventorySaleStage === "quantity"
@@ -571,7 +580,7 @@ function renderInventoryTradePrompt() {
   const entry = inventoryEntries()[menu.inventoryCursor];
   if (!entry) return;
   const name = entry.item?.name || entry.shopEquipment?.name;
-  const price = entry.item?.buyPrice ?? entry.shopEquipment?.buyPrice ?? 0;
+  const price = inventoryBuyPrice(entry);
   const quantity = entry.item ? menu.inventorySaleQuantity : 1;
   const ownership = entry.item ? `\n所持数：${inventoryOwnedItemCount(entry.item.id)}／${entry.item.maxOwned || 99}　倉庫：${inventoryWarehouseItemCount(entry.item.id)}` : "";
   menu.inventoryPanel.querySelector("[data-inventory-description]").textContent = menu.inventorySaleStage === "quantity"
@@ -957,8 +966,8 @@ function renderInventory() {
   const equippedIds = new Set(Object.values(character?.equippedInstanceIds || {}));
   panel.querySelector("[data-inventory-list]").replaceChildren(...entries.slice(menu.inventoryPage * 10, menu.inventoryPage * 10 + 10).map((entry, offset) => {
     const index = menu.inventoryPage * 10 + offset, button = document.createElement("button"); button.type = "button"; button.className = "inventory-entry";
-    if (entry.item) { const badge = menu.inventoryPurpose === "buy" && menu.inventoryNewStockIds.has(entry.item.id) ? '<em class="shop-entry-new">NEW</em>' : ""; button.innerHTML = `<span>${entry.item.name}</span><strong>${badge}${menu.inventoryPurpose === "buy" ? `${entry.item.buyPrice}G` : `×${entry.count}`}</strong>`; button.classList.toggle("is-unavailable", menu.inventoryPurpose === "manage" && Boolean(unavailableItemReason(entry.item, character))); }
-    else if (entry.shopEquipment) { const badge = menu.inventoryNewStockIds.has(entry.shopEquipment.id) ? '<em class="shop-entry-new">NEW</em>' : ""; button.innerHTML = `<span>${entry.shopEquipment.name}</span><strong>${badge}${entry.shopEquipment.buyPrice}G</strong>`; }
+    if (entry.item) { const badge = menu.inventoryPurpose === "buy" && menu.inventoryNewStockIds.has(entry.item.id) ? '<em class="shop-entry-new">NEW</em>' : ""; button.innerHTML = `<span>${entry.item.name}</span><strong>${badge}${menu.inventoryPurpose === "buy" ? `${inventoryBuyPrice(entry)}G` : `×${entry.count}`}</strong>`; button.classList.toggle("is-unavailable", menu.inventoryPurpose === "manage" && Boolean(unavailableItemReason(entry.item, character))); }
+    else if (entry.shopEquipment) { const badge = menu.inventoryNewStockIds.has(entry.shopEquipment.id) ? '<em class="shop-entry-new">NEW</em>' : ""; button.innerHTML = `<span>${entry.shopEquipment.name}</span><strong>${badge}${inventoryBuyPrice(entry)}G</strong>`; }
     else if (entry.keyItem) button.innerHTML = `<span>${entry.keyItem.name}</span><strong>${entry.keyItem.count > 1 ? `×${entry.keyItem.count}` : ""}</strong>`;
     else if (entry.instance) { button.innerHTML = `<span>${getEquipmentInstanceName(entry.instance)}</span><strong>${entry.instance.locked ? "🔒" : ""}${equippedIds.has(entry.instance.instanceId) ? "［E］" : ""}${entry.instance.curseKnown ? "［C］" : ""}</strong>`; button.classList.toggle("is-unavailable", menu.inventoryPurpose === "sell" ? Boolean(inventoryEquipmentSaleReason(entry.instance, character)) : menu.inventoryMode === "list" && !canEquipInstance(character, entry.instance).accepted); }
     else button.textContent = entry.label;
@@ -972,7 +981,7 @@ function renderInventory() {
   const selected = entries[menu.inventoryCursor], description = panel.querySelector("[data-inventory-description]");
   if (!selected) description.textContent = menu.inventoryPurpose === "sell" ? "売却できる所持品がありません。" : menu.inventoryTab === "keyItems" ? "貴重品を所持していません。" : "所持品がありません。";
   else if (menu.inventoryPurpose === "sell") description.textContent = inventorySaleDescription(selected, character);
-  else if (menu.inventoryPurpose === "buy") description.textContent = selected.item ? `${selected.item.description} / 購入価格 ${selected.item.buyPrice}G / 所持数 ${inventoryOwnedItemCount(selected.item.id)}／${selected.item.maxOwned || 99} / 倉庫 ${inventoryWarehouseItemCount(selected.item.id)} / Aボタン：購入` : `${equipmentEffectLabels(selected.shopEquipment).join(" / ")} / 購入価格 ${selected.shopEquipment.buyPrice}G / Aボタン：購入`;
+  else if (menu.inventoryPurpose === "buy") description.textContent = selected.item ? `${selected.item.description} / 購入価格 ${inventoryBuyPrice(selected)}G / 所持数 ${inventoryOwnedItemCount(selected.item.id)}／${selected.item.maxOwned || 99} / 倉庫 ${inventoryWarehouseItemCount(selected.item.id)} / Aボタン：購入` : `${equipmentEffectLabels(selected.shopEquipment).join(" / ")} / 購入価格 ${inventoryBuyPrice(selected)}G / Aボタン：購入`;
   else if (selected.item) description.textContent = unavailableItemReason(selected.item, character) || selected.item.description;
   else if (selected.keyItem) description.textContent = selected.keyItem.description || "大切な貴重品です。";
   else if (!selected.instance) description.textContent = "この装備部位を空にします。";

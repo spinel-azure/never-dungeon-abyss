@@ -24,6 +24,16 @@ export const KEY_ITEMS = Object.freeze({
     description: "密林区域で見つけた、腰痛の特効薬に必要な素材。", sellable: false,
     consumable: true, stackable: true, maximumOwned: 8, version: 1
   }),
+  scent_gland: Object.freeze({
+    id: "scent_gland", name: "芳香嚢",
+    description: "ムスクビーストから採取した、奈落麝香の精製に必要な芳香嚢。",
+    sellable: false, consumable: true, version: 1
+  }),
+  discount_pass: Object.freeze({
+    id: "discount_pass", name: "ディスカウントパス",
+    description: "ヘレンから贈られた特別なパス。商店の通常商品と店頭装備を半額で購入できる。",
+    sellable: false, consumable: false, version: 1
+  }),
   red_rust_key_b9f: Object.freeze({
     id: "red_rust_key_b9f",
     name: "赤錆びた鍵",

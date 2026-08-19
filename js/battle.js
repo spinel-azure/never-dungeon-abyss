@@ -7,6 +7,8 @@ import { getEquipmentAdjustedEscapeRate, resolveEscapeAttempt } from "../combat/
 import { clearBattleOnlyStatuses } from "../combat/status-lifecycle.js";
 import { playPlayerChargePresentation } from "./player-charge-presentation.js";
 import { playBattleSkillPresentation } from "./battle-skill-presentation.js";
+import { getSkill } from "../data/skills.js";
+import { getItem } from "../data/items.js";
 
 const COMMANDS = Object.freeze([
   ["attack", "戦う"],
@@ -32,6 +34,7 @@ const battleUi = {
   autoTimer: 0,
   presenting: false,
   presentationHp: null,
+  pendingCommand: null,
   getCharacter: () => null,
   onCharacterChanged: () => {},
   onVictory: () => {},
@@ -59,7 +62,7 @@ export function configureBattle(options) {
   });
 }
 
-export function startBattle(enemy, { playStartSe = true, ambush = false, concealed = false } = {}) {
+export function startBattle(enemy, { playStartSe = true, ambush = false, concealed = false, enemies = null, targetIndex = 0 } = {}) {
   const character = battleUi.getCharacter();
   if (!character || battleUi.active) return false;
   battleUi.active = true;
@@ -68,7 +71,8 @@ export function startBattle(enemy, { playStartSe = true, ambush = false, conceal
   battleUi.autoActive = false;
   battleUi.concealed = Boolean(concealed);
   clearAutoTimer();
-  battleUi.battle = createBattleState({ character, enemy });
+  battleUi.battle = createBattleState({ character, enemy, enemies, targetIndex });
+  battleUi.battle.encounterBossId = enemy.id;
   battleUi.root.hidden = false;
   document.body.classList.add("battle-active");
   showCommandButtons();
@@ -100,7 +104,16 @@ export function handleBattleInput(action) {
     if (action === "confirm") finishBattle();
     return true;
   }
-  if (action === "cancel") return true;
+  if (action === "cancel") {
+    if (battleUi.mode === "targets") {
+      battleUi.pendingCommand = null;
+      battleUi.mode = "commands";
+      battleUi.selectedIndex = 0;
+      showCommandButtons();
+      battleUi.playSe("cancel");
+    }
+    return true;
+  }
   if (["up", "down", "left", "right"].includes(action)) {
     moveSelection(action);
     return true;
@@ -121,6 +134,16 @@ function selectByPointer(id) {
   battleUi.selectedIndex = index;
   renderSelection();
   activateSelected();
+}
+
+function selectEnemyTarget(index) {
+  if (!battleUi.battle?.enemies || battleUi.presenting || battleUi.battle.outcome) return;
+  const enemy = battleUi.battle.enemies[index];
+  if (!enemy?.alive) return;
+  battleUi.battle.targetIndex = index;
+  battleUi.battle.enemy = enemy;
+  battleUi.playSe("cursorMove");
+  renderBattle();
 }
 
 function moveSelection(action) {
@@ -149,6 +172,14 @@ function activateSelected() {
   const button = battleUi.battleButtons[battleUi.selectedIndex];
   if (!button || button.disabled) return;
   battleUi.playSe("confirm");
+  if (battleUi.mode === "targets") {
+    const targetIndex = Number(button.dataset.targetIndex);
+    const command = { ...(battleUi.pendingCommand || {}), targetIndex };
+    battleUi.pendingCommand = null;
+    battleUi.mode = "commands";
+    executeCommand(command);
+    return;
+  }
   const command = button.dataset.battleCommand;
   if (command === "skills") {
     battleUi.openSkills({
@@ -166,7 +197,7 @@ function activateSelected() {
     });
     return;
   }
-  if (command === "attack") executeCommand({ type: "attack" });
+  if (command === "attack") executeOrSelectTarget({ type: "attack" });
   else if (command === "guard") executeCommand({ type: "guard" });
   else if (command === "auto") startAutoBattle();
   else if (command === "escape") attemptEscape();
@@ -176,19 +207,45 @@ function activateSelected() {
 }
 
 async function useBattleSkill(skillId) {
-  await executeCommand({ type: "skill", skillId });
+  const skill = getSkill(skillId);
+  if (battleUi.battle?.enemies && skill?.target === "enemy") showTargetButtons({ type: "skill", skillId });
+  else await executeCommand({ type: "skill", skillId, targetIndex: battleUi.battle.targetIndex });
   return { accepted: true };
 }
 
 async function useBattleItem(itemId) {
-  await executeCommand({ type: "item", itemId });
+  const item = getItem(itemId);
+  const targetsEnemy = item?.effects?.some(effect => effect.id === "strong_herbicide");
+  if (battleUi.battle?.enemies && targetsEnemy) showTargetButtons({ type: "item", itemId });
+  else await executeCommand({ type: "item", itemId, targetIndex: battleUi.battle.targetIndex });
   return { accepted: true };
+}
+
+function executeOrSelectTarget(command) {
+  if (battleUi.battle?.enemies) showTargetButtons(command);
+  else executeCommand({ ...command, targetIndex: battleUi.battle?.targetIndex });
+}
+
+function showTargetButtons(command) {
+  battleUi.pendingCommand = command;
+  battleUi.mode = "targets";
+  battleUi.selectedIndex = Math.max(0, battleUi.battle.targetIndex || 0);
+  battleUi.battleButtons.forEach((button, index) => {
+    const enemy = battleUi.battle.enemies[index];
+    button.dataset.battleCommand = `target-${index}`;
+    button.dataset.targetIndex = String(index);
+    button.textContent = enemy?.alive ? enemy.name : "";
+    button.disabled = !enemy?.alive;
+  });
+  mountButtons("攻撃対象");
+  battleUi.messageEl.textContent = "攻撃する相手を選んでください。\n＊Bボタンで戻る";
 }
 
 async function executeCommand(command) {
   const startingHp = {
     player: battleUi.battle.player.hp,
-    enemy: battleUi.battle.enemy.hp
+    enemy: battleUi.battle.enemy.hp,
+    enemies: battleUi.battle.enemies?.map(enemy => enemy.hp) || null
   };
   const resolved = resolveBattleRound({
     battle: battleUi.battle,
@@ -320,21 +377,25 @@ async function playPresentationEvents() {
         event.damage ?? event.amount,
         event.type === "poisonDamage" ? "poison" : "damage",
         event.hitIndex,
-        event.hitCount
+        event.hitCount,
+        event.targetIndex
       );
     }
+    const targetImage = event.targetSide === "enemy" && battleUi.battle.enemies
+      ? battleUi.root.querySelector(`.battle-enemy-member[data-index="${event.targetIndex ?? battleUi.battle.targetIndex}"] img`)
+      : image;
     if (event.targetSide === "enemy" && event.hit && !dedicatedPresentationPlayed) {
-      image.classList.remove("is-hit");
-      void image.offsetWidth;
-      image.classList.add("is-hit");
+      targetImage?.classList.remove("is-hit");
+      if (targetImage) void targetImage.offsetWidth;
+      targetImage?.classList.add("is-hit");
       battleUi.playSe("attackHit");
     } else if (event.targetSide === "player" && event.hit && !event.blockedByNpcWall) {
       battleUi.playSe("playerDamage");
     }
     const duration = dedicatedPresentationPlayed ? 0 : event.targetSide === "player" && event.hit ? 520 : event.hit ? 360 : 280;
     await delay(duration);
-    image.classList.remove("is-hit");
-    if (event.slashExecution) await playSlashEffect(image);
+    targetImage?.classList.remove("is-hit");
+    if (event.slashExecution) await playSlashEffect(targetImage);
   }
 }
 
@@ -415,11 +476,13 @@ function formatPresentationMessage(event) {
   return `${actorName}の${event.actionName || "攻撃"}！\n${event.message}`;
 }
 
-function showBattleNumber(targetSide, amount, kind, hitIndex = null, hitCount = 1) {
+function showBattleNumber(targetSide, amount, kind, hitIndex = null, hitCount = 1, targetIndex = null) {
   const value = Math.max(0, Math.floor(Number(amount) || 0));
   if (value <= 0) return;
   const layerId = targetSide === "enemy" ? "battleEnemyNumbers" : "battlePlayerNumbers";
-  const layer = document.getElementById(layerId);
+  const layer = targetSide === "enemy" && battleUi.battle?.enemies
+    ? battleUi.root.querySelector(`.battle-enemy-member[data-index="${targetIndex ?? battleUi.battle.targetIndex}"] .battle-number-layer`)
+    : document.getElementById(layerId);
   if (!layer) return;
   const number = document.createElement("span");
   const multiLevel = hitCount > 1
@@ -488,6 +551,13 @@ function finishBattle() {
     npcSystem: structuredClone(battleUi.battle.player.npcSystem)
   });
   const snapshot = structuredClone(battleUi.battle);
+  if (snapshot.enemies) {
+    snapshot.enemy = snapshot.enemies.find(enemy => enemy.id === snapshot.encounterBossId) || snapshot.enemy;
+    snapshot.enemy.experienceReward = snapshot.enemies.reduce(
+      (sum, enemy) => sum + Math.max(0, Math.floor(Number(enemy.experienceReward) || 0)),
+      0
+    );
+  }
   closeBattle();
   if (outcome === "victory") battleUi.onVictory(snapshot);
   else if (outcome === "defeat") battleUi.onDefeat(snapshot);
@@ -511,10 +581,12 @@ function closeBattle() {
 
 function showCommandButtons() {
   battleUi.messageEl.classList.remove("is-skill-description");
+  battleUi.pendingCommand = null;
   battleUi.battleButtons.forEach((button, index) => {
     const [id, label] = COMMANDS[index];
     button.dataset.battleCommand = id;
     delete button.dataset.skillId;
+    delete button.dataset.targetIndex;
     button.textContent = label;
     button.disabled = false;
     button.classList.remove("is-unavailable");
@@ -557,6 +629,9 @@ function renderBattle() {
   renderBattleVitals();
   setText("battlePlayerSp", `${battle.player.sp} / ${battle.player.maxSp}`);
   setText("battlePlayerCondition", statusText(battle.player));
+  const party = battleUi.root.querySelector("#battleEnemyParty");
+  if (battle.enemies) renderEnemyParty(battle);
+  else if (party) party.hidden = true;
   const enemyName = battleUi.root.querySelector("#battleEnemyName");
   setText("battleEnemyName", battleUi.concealed ? "？？？？？" : battle.enemy.name);
   enemyName?.classList.toggle("is-defense-down", hasEnemyDefenseDown(battle.enemy));
@@ -575,9 +650,38 @@ function renderBattle() {
   image.classList.toggle("is-fleischfresser", battle.enemy.id === "fleischfresser_b59f");
   image.classList.toggle("is-otherworldly-wisdom", battle.enemy.id === "otherworldly_wisdom_b4f");
   const enemyStage = battleUi.root.querySelector(".battle-enemy-stage");
+  enemyStage.hidden = Boolean(battle.enemies);
   enemyStage?.classList.toggle("is-defeated", defeated);
   enemyStage?.classList.toggle("is-eiskoenigin", battle.enemy.id === "eiskoenigin_b49f" && !defeated && !battleUi.concealed);
   battleUi.messageEl.textContent = formatBattleMessage(battle);
+}
+
+function renderEnemyParty(battle) {
+  const party = battleUi.root.querySelector("#battleEnemyParty");
+  if (!party) return;
+  party.hidden = false;
+  if (party.children.length !== battle.enemies.length) {
+    party.replaceChildren(...battle.enemies.map((enemy, index) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "battle-enemy-member";
+      button.dataset.index = String(index);
+      button.innerHTML = '<strong class="battle-enemy-member-name"></strong><img alt=""><span class="battle-enemy-member-hp"><i></i></span><span class="battle-number-layer" aria-hidden="true"></span>';
+      button.addEventListener("click", () => selectEnemyTarget(index));
+      return button;
+    }));
+  }
+  [...party.children].forEach((member, index) => {
+    const enemy = battle.enemies[index];
+    member.classList.toggle("is-selected", index === battle.targetIndex && enemy.alive);
+    member.classList.toggle("is-defeated", !enemy.alive);
+    member.disabled = !enemy.alive;
+    member.querySelector(".battle-enemy-member-name").textContent = battleUi.concealed ? "？？？？？" : enemy.name;
+    const img = member.querySelector("img");
+    img.src = enemy.image || "";
+    img.alt = battleUi.concealed ? "正体不明の敵" : enemy.name;
+    member.querySelector(".battle-enemy-member-hp > i").style.width = `${getBattleHpPercent(enemy)}%`;
+  });
 }
 
 export function hasEnemyDefenseDown(enemy) {

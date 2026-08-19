@@ -26,6 +26,7 @@ export const B45F_SURVEY_SUPPLY_FLAG = "guild_017_large_potions_received";
 export const GUILD_018_QUEST_ID = "guild_018";
 export const FIFTH_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_019";
 export const HERBICIDE_TRIAL_QUEST_ID = "guild_020";
+export const ABYSS_MUSK_QUEST_ID = "guild_021";
 export const SIXTH_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_023";
 export const HERBICIDE_TRIAL_SUPPLY_FLAG = "guild_020_trial_herbicide_received";
 export const SPECIAL_MEDICINE_INGREDIENT_FLAGS = Object.freeze(
@@ -539,7 +540,7 @@ export const QUESTS = Object.freeze([
   Object.freeze({
     id: HERBICIDE_TRIAL_QUEST_ID,
     number: "020",
-    title: "除草剤散布作業者募集",
+    title: "除草剤散布作業員募集",
     client: "ヘレン",
     category: "other",
     objectiveType: "custom",
@@ -556,6 +557,39 @@ export const QUESTS = Object.freeze([
     ]),
     prerequisiteQuestIds: Object.freeze([FIFTH_RED_DOOR_INVESTIGATION_QUEST_ID]),
     reportUnlockFlags: Object.freeze(["strong_herbicide_shop_unlocked", "strong_herbicide_shop_reward_pending"]),
+    available: true
+  }),
+  Object.freeze({
+    id: ABYSS_MUSK_QUEST_ID,
+    number: "021",
+    title: "奈落麝香の材料入手",
+    client: "ヘレン",
+    category: "other",
+    objectiveType: "defeatBoss",
+    targetId: "musk_beast_b56f",
+    targetName: "ムスクビースト",
+    targetDepth: 56,
+    requiredCount: 1,
+    objectiveHeading: "内容",
+    objectiveLabel: "とても希少な《芳香嚢》を手に入れてほしい",
+    reward: Object.freeze({
+      type: "card", label: "デッキカード×1", amount: 1,
+      cardId: "legendary_mana_barrier", bonusGold: 20000
+    }),
+    descriptionLabel: "目的",
+    description: Object.freeze([
+      "ムスクビーストという獣から《芳香嚢》を採取してほしいの。",
+      "B56Fのどこかにある泉でよく見かけると聞いたことがあるわ。",
+      "念の為、強力除草剤も用意していくといいわよ。"
+    ]),
+    prerequisiteQuestIds: Object.freeze([HERBICIDE_TRIAL_QUEST_ID]),
+    availableFlag: "tavern_rumor_006_base_read",
+    persistentProgressFlag: "quest_021_musk_beast_defeated_while_active",
+    completedTargetFlag: "boss_musk_beast_b56f_defeated",
+    requiredKeyItemId: "scent_gland",
+    requiredKeyItemCount: 1,
+    reportUnlockFlag: "helen_hidden_event_pending",
+    reportMessage: "ギルドマスター：そう言えば、店に寄ってくれとヘレンが言ってたぜ。顔出してやれ。",
     available: true
   }),
   Object.freeze({

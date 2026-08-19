@@ -478,6 +478,55 @@ export const BOSSES = Object.freeze({
       remains: "――氷の女王の体躯は溶けて、後には王笏とティアラが残るのみ…。\n＊Aボタン：次へ"
     })
   }),
+  musk_beast_b56f: Object.freeze({
+    id: "musk_beast_b56f", name: "ムスクビースト", level: 56, floor: 56,
+    imageId: "musk_beast_b56f", image: "images/bosses/boss_12.avif",
+    encounterImageId: "musk_beast_event_b56f", encounterImage: "images/background/dungeon_event_07.avif",
+    race: "beast", maxHp: 2000,
+    stats: Object.freeze({ str: 28, int: 14, agi: 24, dex: 27, luc: 18 }),
+    def: 29, attack: 27, experienceReward: 9000,
+    actions: Object.freeze([
+      Object.freeze({ weight: 35, action: Object.freeze({
+        id: "musk_beast_attack", name: "爪撃", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 30, action: Object.freeze({
+        id: "musk_beast_charge", name: "突進", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1.45, hitBonus: -0.05, speedModifier: -3, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 23, action: Object.freeze({
+        id: "musk_beast_toss", name: "突き上げ", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1.15, effects: Object.freeze([Object.freeze({
+          statusId: "action_skip", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.25
+        })])
+      }) }),
+      Object.freeze({ weight: 12, action: Object.freeze({
+        id: "musk_beast_fragrance", name: "芳香", actionType: "spell", element: "arcane",
+        spellPower: 0, powerMultiplier: 0, unavoidable: true,
+        effects: Object.freeze([Object.freeze({
+          statusId: "speed_down", trigger: "perAction", statusKind: "magical", baseRate: 0.8
+        })])
+      }) })
+    ]),
+    reward: Object.freeze({ type: "keyItem", keyItemId: "scent_gland", amount: 1 }),
+    elementMultipliers: Object.freeze({ fire: 1.5, ice: 1, arcane: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 70, immune: false }),
+      deadly_poison: Object.freeze({ resistancePoints: 70, immune: false }),
+      bleeding: Object.freeze({ resistancePoints: 65, immune: false }),
+      action_skip: Object.freeze({ resistancePoints: 80, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 75, immune: false })
+    }),
+    escapeRate: 1, surpriseRate: 0, surpriseRateMaximum: 0, noDrop: true,
+    isBoss: true, bossKind: "event", defeatedFlag: "boss_musk_beast_b56f_defeated",
+    questProgressId: "guild_021",
+    encounterEnemyIds: Object.freeze(["giant_vine_obstacle", "musk_beast_b56f", "giant_vine_obstacle"]),
+    event: Object.freeze({
+      prompt: "刺々しい巨大な蔓に囲まれた泉で一頭の獣が静かに水を飲んでいた。辺りには甘く、粉っぽい匂いが立ちこめる。\nそのどこか官能的な香りに思わず引き寄せられる……。もっと近づきますか？\n＊Aボタン：はい　Bボタン：いいえ",
+      start: "ムスクビーストと二体の巨大蔓が襲いかかってきた！",
+      autoStartDelay: 1200
+    })
+  }),
   giant_vine_obstacle: Object.freeze({
     id: "giant_vine_obstacle", name: "巨大蔓", floor: 50, level: 55,
     imageId: "giant_vine_obstacle", image: "images/npc/NPC_event_11.avif",

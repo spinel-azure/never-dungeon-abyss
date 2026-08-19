@@ -8,6 +8,8 @@ export const TAVERN_RUMOR_004_BASE_READ_FLAG = "tavern_rumor_004_base_read";
 export const TAVERN_RUMOR_004_MEDICINE_READ_FLAG = "tavern_rumor_004_medicine_read";
 export const TAVERN_RUMOR_005_BASE_READ_FLAG = "tavern_rumor_005_base_read";
 export const TAVERN_RUMOR_005_OUTFIT_READ_FLAG = "tavern_rumor_005_outfit_read";
+export const TAVERN_RUMOR_006_BASE_READ_FLAG = "tavern_rumor_006_base_read";
+export const TAVERN_RUMOR_006_PERFUME_READ_FLAG = "tavern_rumor_006_perfume_read";
 
 export function getTavernRumorTypewriterParts(message) {
   const text = String(message || "");
@@ -127,6 +129,28 @@ export const TAVERN_RUMORS = Object.freeze([
         rosaContinuation: "えっ！？とても大胆な格好だった、ですって！？そんな娘には見えないけれど…。"
       })
     ])
+  }),
+  Object.freeze({
+    id: "rumor_006",
+    title: "商店の女店主の噂",
+    unlock: context => context.quest020Completed && context.shopPurchaseCount >= 500,
+    customerLead: "最近、ヘレンの様子がおかしいんだってよ。",
+    customerReply: "買い物に行っても、心ここにあらずって感じだったぜ。",
+    phases: Object.freeze([
+      Object.freeze({
+        id: "base",
+        readFlag: TAVERN_RUMOR_006_BASE_READ_FLAG,
+        unlock: context => !context.helenHiddenEventSeen,
+        rosa: "まぁ…！ヘレンったら、何か悩みでも抱えているのかしら？"
+      }),
+      Object.freeze({
+        id: "perfume",
+        readFlag: TAVERN_RUMOR_006_PERFUME_READ_FLAG,
+        unlock: context => context.helenHiddenEventSeen,
+        rosa: "まぁ…！ヘレンったら、何か悩みでも抱えているのかしら？",
+        rosaContinuation: "えっ！？香水の材料を欲しがっていたの？でも、悩むほどの事なのかしらね…？"
+      })
+    ])
   })
 ]);
 
@@ -153,10 +177,13 @@ function normalizeRumorContext(character, context = {}) {
     otherworldlyWisdomDefeated: Boolean(context.otherworldlyWisdomDefeated),
     depthReached: Math.max(1, Math.floor(Number(context.depthReached ?? character?.highestDungeonDepthReached) || 1)),
     templeDonationCount: Math.max(0, Math.floor(Number(context.templeDonationCount ?? character?.adventureStats?.templeDonationCount) || 0)),
+    shopPurchaseCount: Math.max(0, Math.floor(Number(context.shopPurchaseCount ?? character?.adventureStats?.shopPurchaseCount) || 0)),
     quest019Completed: Boolean(context.quest019Completed ?? completedQuestIds.includes("guild_019")),
     quest016Completed: Boolean(context.quest016Completed ?? completedQuestIds.includes("guild_016")),
+    quest020Completed: Boolean(context.quest020Completed ?? completedQuestIds.includes("guild_020")),
     anastasiaOutfitEventSeen: Boolean(context.anastasiaOutfitEventSeen ?? character?.eventFlags?.anastasia_festival_outfit_unlocked),
-    priestRumorCompleted: Boolean(context.priestRumorCompleted ?? character?.eventFlags?.tavern_rumor_004_medicine_read)
+    priestRumorCompleted: Boolean(context.priestRumorCompleted ?? character?.eventFlags?.tavern_rumor_004_medicine_read),
+    helenHiddenEventSeen: Boolean(context.helenHiddenEventSeen ?? character?.eventFlags?.helen_hidden_event_seen)
   };
 }
 

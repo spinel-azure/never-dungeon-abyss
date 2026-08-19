@@ -297,8 +297,10 @@ function applyNpcDamage(battle, { npcId, damage, actionName = "", message, hitIn
   battle.enemy.alive = battle.enemy.hp > 0;
   const resolvedMessage = instantDeath.success ? `${message} ${passive.name}が敵を断ち切った！` : message;
   battle.log.push(resolvedMessage);
+  const targetIndex = Array.isArray(battle.enemies) ? battle.enemies.indexOf(battle.enemy) : -1;
   battle.presentationEvents.push({ type: "attackHit", npcId, actorName: getNpcDefinition(npcId)?.name,
     actorSide: "npc", targetSide: "enemy", actionName, hitIndex, hitCount, hit: true,
+    ...(targetIndex < 0 ? {} : { targetIndex }),
     damage: instantDeath.success ? hpBefore : actual,
     slashExecution: instantDeath.success, passiveExecutionId: instantDeath.success ? passive.id : null,
     message: resolvedMessage });
@@ -309,6 +311,7 @@ function applyNpcDamage(battle, { npcId, damage, actionName = "", message, hitIn
 function setNpcVictory(battle) {
   battle.enemy.hp = 0;
   battle.enemy.alive = false;
+  if (Array.isArray(battle.enemies) && battle.enemies.some(enemy => enemy.alive && enemy.hp > 0)) return;
   battle.outcome = "victory";
   battle.phase = "complete";
   battle.log.push(`${battle.enemy.name}を倒した！`);

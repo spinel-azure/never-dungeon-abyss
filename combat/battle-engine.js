@@ -33,24 +33,33 @@ import {
 import { applyPlayerChargeAction, isPlayerChargeReady } from "./player-charge.js";
 import { getWeapon } from "../data/weapons.js";
 
-export function createBattleState({ character, enemy }) {
+export function createBattleState({ character, enemy, enemies = null, targetIndex = 0 }) {
   const vorpalSwordEquippedAtStart = character?.equipment?.weaponId === "vorpal_sword";
+  const enemyParty = Array.isArray(enemies) && enemies.length
+    ? enemies.map(cloneCombatant)
+    : null;
+  const selectedTargetIndex = enemyParty
+    ? normalizeLivingTargetIndex(enemyParty, targetIndex)
+    : 0;
+  const selectedEnemy = enemyParty ? enemyParty[selectedTargetIndex] : cloneCombatant(enemy);
   return {
     turn: 1,
     phase: "command",
     outcome: null,
     player: cloneCombatant(character),
-    enemy: cloneCombatant(enemy),
+    enemy: selectedEnemy,
+    ...(enemyParty ? { enemies: enemyParty, targetIndex: selectedTargetIndex, lastPlayerTargetIndex: selectedTargetIndex } : {}),
     vorpalSwordEquippedAtStart,
     capricornActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_capricorn"),
     vorpalExecution: false,
     slashExecution: null,
-    log: [`${enemy.name}が現れた！`],
+    log: [enemyParty ? `${enemyParty.map(member => member.name).join("、")}が現れた！` : `${enemy.name}が現れた！`],
     presentationEvents: []
   };
 }
 
 export function resolveBattleRound({ battle, playerCommand, rng = Math.random } = {}) {
+  if (Array.isArray(battle?.enemies)) return resolveMultiBattleRound({ battle, playerCommand, rng });
   const next = structuredClone(battle);
   const playerAction = createPlayerAction(next.player, playerCommand, next.enemy);
   if (!playerAction.ok) return { battle: next, accepted: false, reason: playerAction.reason };
@@ -114,6 +123,125 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
     next.phase = "command";
   }
   return { battle: next, accepted: true };
+}
+
+export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.random } = {}) {
+  const next = structuredClone(battle);
+  next.targetIndex = normalizeLivingTargetIndex(next.enemies, playerCommand?.targetIndex ?? next.targetIndex);
+  next.enemy = next.enemies[next.targetIndex];
+  const playerAction = createPlayerAction(next.player, playerCommand, next.enemy);
+  if (!playerAction.ok) return { battle: next, accepted: false, reason: playerAction.reason };
+  const orderEntries = [{ side: "player", actor: combatStats(next.player), action: playerAction.action }];
+  next.enemies.forEach((member, partyIndex) => {
+    if (!member.alive || member.hp <= 0) return;
+    orderEntries.push({ side: "enemy", partyIndex, actor: combatStats(member), action: createEnemyAction(member, rng) });
+  });
+  const order = resolveTurnOrder(orderEntries, rng);
+  next.log = [];
+  next.presentationEvents = [];
+
+  let playerActionExecuted = false;
+  setNpcTarget(next, lowestHpRatioTargetIndex(next.enemies));
+  applyNpcChargeSkills(next, rng);
+  updateMultiOutcome(next);
+  if (!next.outcome && playerAction.spCost > 0) next.player.sp -= playerAction.spCost;
+  if (!next.outcome && playerCommand.type === "guard") applyNpcGuardSupport(next);
+  if (!next.outcome) {
+    setNpcTarget(next, lowestHpRatioTargetIndex(next.enemies));
+    applyNpcTurnStart(next, rng);
+    updateMultiOutcome(next);
+  }
+
+  for (const entry of order) {
+    if (next.outcome) break;
+    const actor = entry.side === "player" ? next.player : next.enemies[entry.partyIndex];
+    if (!actor?.alive || actor.hp <= 0) continue;
+    const opportunity = resolveActionOpportunity(actor.statuses);
+    actor.statuses = opportunity.statuses;
+    if (opportunity.skipped) {
+      next.log.push(`${actor.name}は動けない！`);
+      finishCombatantAction(next, actor, entry.side, entry.partyIndex);
+      updateMultiOutcome(next);
+      continue;
+    }
+    if (entry.side === "player") {
+      const targetIndexes = entry.action.target === "allEnemies"
+        ? livingEnemyIndexes(next.enemies)
+        : [normalizeLivingTargetIndex(next.enemies, next.targetIndex)];
+      for (const targetIndex of targetIndexes) {
+        const target = next.enemies[targetIndex];
+        if (!target?.alive || target.hp <= 0) continue;
+        executeTargetedAction({ battle: next, action: entry.action, actor, actorSide: "player",
+          target, targetSide: "enemy", targetIndex, rng });
+      }
+      playerActionExecuted = true;
+      next.lastPlayerTargetIndex = normalizeLivingTargetIndex(next.enemies, next.targetIndex, { allowDefeated: true });
+      finishCombatantAction(next, actor, "player");
+      updateMultiOutcome(next);
+      if (!next.outcome) {
+        setNpcTarget(next, normalizeLivingTargetIndex(next.enemies, next.lastPlayerTargetIndex));
+        applyNpcAfterPlayerAttack(next, rng);
+        updateMultiOutcome(next);
+      }
+    } else {
+      executeTargetedAction({ battle: next, action: entry.action, actor, actorSide: "enemy",
+        target: next.player, targetSide: "player", targetIndex: null, rng });
+      finishCombatantAction(next, actor, "enemy", entry.partyIndex);
+      updateMultiOutcome(next);
+    }
+  }
+  if (playerActionExecuted) {
+    next.player = applyPlayerChargeAction(next.player, {
+      commandType: playerCommand.type,
+      spCost: playerAction.spCost,
+      chargeSkill: Boolean(playerAction.action.chargeSkill)
+    });
+  }
+  if (!next.outcome) applyPlayerTurnEndChargeEffects(next);
+  if (!next.outcome) applyNpcTurnEnd(next);
+  advanceNpcWallProtection(next);
+  advanceNpcChargeState(next, { allowCharge: !next.outcome });
+  if (!next.outcome) {
+    next.turn += 1;
+    next.phase = "command";
+  }
+  next.targetIndex = normalizeLivingTargetIndex(next.enemies, next.targetIndex);
+  next.enemy = next.enemies[next.targetIndex];
+  return { battle: next, accepted: true };
+}
+
+function executeTargetedAction(options) {
+  const start = options.battle.presentationEvents.length;
+  executeAction(options);
+  if (options.targetSide !== "enemy" || options.targetIndex == null) return;
+  for (let index = start; index < options.battle.presentationEvents.length; index += 1) {
+    const event = options.battle.presentationEvents[index];
+    if (event.targetSide === "enemy") event.targetIndex = options.targetIndex;
+  }
+}
+
+function setNpcTarget(battle, targetIndex) {
+  const normalized = normalizeLivingTargetIndex(battle.enemies, targetIndex);
+  battle.enemy = battle.enemies[normalized];
+  battle.npcTargetIndex = normalized;
+}
+
+function livingEnemyIndexes(enemies = []) {
+  return enemies.map((enemy, index) => enemy?.alive && enemy.hp > 0 ? index : -1).filter(index => index >= 0);
+}
+
+function lowestHpRatioTargetIndex(enemies = []) {
+  return livingEnemyIndexes(enemies).sort((left, right) => {
+    const leftRate = enemies[left].hp / Math.max(1, enemies[left].maxHp);
+    const rightRate = enemies[right].hp / Math.max(1, enemies[right].maxHp);
+    return leftRate - rightRate || left - right;
+  })[0] ?? 0;
+}
+
+function normalizeLivingTargetIndex(enemies = [], requested = 0, { allowDefeated = false } = {}) {
+  const index = Math.max(0, Math.min(enemies.length - 1, Math.floor(Number(requested) || 0)));
+  if (allowDefeated || (enemies[index]?.alive && enemies[index]?.hp > 0)) return index;
+  return livingEnemyIndexes(enemies)[0] ?? index;
 }
 
 function applyPlayerTurnEndChargeEffects(battle) {
@@ -728,6 +856,10 @@ function findBlockingBarrier(statuses = [], damage = 0) {
 
 function finishAction(battle, side) {
   const actor = battle[side];
+  finishCombatantAction(battle, actor, side);
+}
+
+function finishCombatantAction(battle, actor, side, targetIndex = null) {
   const end = resolveEndOfAction({ statuses: actor.statuses, maxHp: actor.maxHp });
   actor.statuses = end.statuses;
   if (end.poisonDamage > 0 && actor.hp > 0) {
@@ -740,6 +872,7 @@ function finishAction(battle, side) {
         type: "poisonDamage",
         actorSide: null,
         targetSide: side,
+        ...(targetIndex == null ? {} : { targetIndex }),
         amount: actualPoisonDamage,
         message: `毒で${actualPoisonDamage}ダメージ！`
       });
@@ -752,6 +885,7 @@ function finishAction(battle, side) {
     if (damage > 0) {
       battle.log.push(`${actor.name}は出血で${damage}ダメージ。`);
       battle.presentationEvents.push({ type: "bleedingDamage", actorSide: null, targetSide: side,
+        ...(targetIndex == null ? {} : { targetIndex }),
         amount: damage, message: `出血で${damage}ダメージ！` });
     }
   }
@@ -761,6 +895,7 @@ function finishAction(battle, side) {
     actor.alive = actor.hp > 0;
     battle.log.push(`${actor.name}は猛毒で${damage}ダメージ！`);
     battle.presentationEvents.push({ type: "poisonDamage", actorSide: null, targetSide: side,
+      ...(targetIndex == null ? {} : { targetIndex }),
       amount: damage, message: `猛毒で${damage}ダメージ！` });
   }
   if (side === "enemy" && actor.hp > 0 && Number(actor.regainRate) > 0) {
@@ -776,6 +911,20 @@ function finishAction(battle, side) {
       }
     }
   }
+}
+
+function updateMultiOutcome(battle) {
+  if (battle.player.hp <= 0) {
+    battle.player.alive = false;
+    battle.outcome = "defeat";
+    battle.phase = "complete";
+    battle.log.push(`${battle.player.name}は倒れた……`);
+    return;
+  }
+  if (livingEnemyIndexes(battle.enemies).length > 0) return;
+  battle.outcome = "victory";
+  battle.phase = "complete";
+  battle.log.push("敵の一団を倒した！");
 }
 
 function markUltimateUsed(actor, action) {

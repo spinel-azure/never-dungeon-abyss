@@ -315,6 +315,15 @@ const STANDARD_CARDS = [
     maxOwned: 1, maxCopies: 1
   },
   {
+    id: "legendary_mana_barrier", rarity: "L", cost: 6,
+    name: "Mana Barrier", nameJa: "マナ障壁", concept: "呪文耐性 50%",
+    descriptionJa: "受ける呪文ダメージを50％軽減する。軽減率の上限は75％。",
+    category: "resistance", effectId: "magic_damage_reduction", effectValue: 0.5,
+    statBonus: Object.freeze({ magicDamageReduction: 0.5 }),
+    iconId: "quartered-shield", maxOwned: 1, maxCopies: 1,
+    sellPrice: 5000, buybackPrice: 50000, overflowGold: 5000
+  },
+  {
     id: "legendary_ability_boost_plus", rarity: "L", cost: 6,
     name: "Ability Boost +", nameJa: "能力向上＋", concept: "STR / INT / AGI / DEX / LUC +5",
     descriptionJa: "STR、INT、AGI、DEX、LUCがそれぞれ5上昇する。",

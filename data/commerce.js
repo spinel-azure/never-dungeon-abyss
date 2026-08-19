@@ -2,13 +2,16 @@ import { getItem } from "./items.js";
 import { consumeItem, getItemCount, grantItemWithOverflow } from "./inventory.js";
 import { findEquipmentDefinition, getEquipmentInstanceDefinition, grantEquipmentInstance, isEquipmentBuybackEligible } from "./equipment-inventory.js";
 import { getWeapon } from "./weapons.js";
+import { getShopBuyPrice, getShopSellPrice } from "./shop-discount.js";
 
 export function purchaseItem(character, itemId, { price, amount = 1 } = {}) {
   if (!character) return { accepted: false, reason: "noCharacter", character };
   const item = getItem(itemId);
   if (!item) return { accepted: false, reason: "unknownItem", character };
   const quantity = Math.max(1, Math.floor(Number(amount) || 1));
-  const unitCost = Math.max(0, Math.floor(Number(price ?? item.buyPrice) || 0));
+  const unitCost = price == null
+    ? getShopBuyPrice(character, item.buyPrice)
+    : Math.max(0, Math.floor(Number(price) || 0));
   const cost = unitCost * quantity;
   const gold = Math.max(0, Math.floor(Number(character.gold) || 0));
   if (gold < cost) return { accepted: false, reason: "insufficientGold", character, item, cost };
@@ -32,14 +35,15 @@ export function purchaseEquipment(character, equipmentOrId) {
   const slot = offer?.slot || "rightArmId";
   const enhancement = Math.max(0, Math.floor(Number(offer?.enhancement) || 0));
   const equipment = offer || findEquipmentDefinition(equipmentId, slot) || getWeapon(equipmentId);
-  const buyPrice = Number(equipment?.buyPrice);
-  if (!equipment || !Number.isFinite(buyPrice)) {
+  const listedBuyPrice = Number(equipment?.buyPrice);
+  if (!equipment || !Number.isFinite(listedBuyPrice)) {
     return { accepted: false, reason: "unknownEquipment", character };
   }
   if (equipment.allowedJobs?.length && !equipment.allowedJobs.includes(character.job)) {
     return { accepted: false, reason: "jobRestricted", character, equipment };
   }
   const gold = Math.max(0, Math.floor(Number(character.gold) || 0));
+  const buyPrice = getShopBuyPrice(character, listedBuyPrice);
   if (gold < buyPrice) return { accepted: false, reason: "insufficientGold", character, equipment };
   const granted = grantEquipmentInstance(character, equipmentId, slot, { enhancement });
   if (!granted.accepted) return { ...granted, equipment };
@@ -56,7 +60,9 @@ export function sellItem(character, itemId, { price, amount = 1 } = {}) {
   const owned = getItemCount(character.inventory, item.id);
   if (owned <= 0) return { accepted: false, reason: "notOwned", character, item };
   const quantity = Math.min(owned, Math.max(1, Math.floor(Number(amount) || 1)));
-  const unitValue = Math.max(0, Math.floor(Number(price ?? item.sellPrice ?? item.buyPrice / 2) || 0));
+  const unitValue = price == null
+    ? getShopSellPrice(character, item)
+    : Math.max(0, Math.floor(Number(price) || 0));
   if (unitValue <= 0) return { accepted: false, reason: "notSellable", character, item };
   const value = unitValue * quantity;
   const buybackUnitPrice = Math.max(unitValue * 2, Math.floor(Number(item.buybackPrice) || 0));
@@ -106,7 +112,9 @@ export function sellEquipmentInstance(character, instanceId, { price } = {}) {
   if (instance.locked) return { accepted: false, reason: "locked", character, instance };
   const equipment = getEquipmentInstanceDefinition(instance);
   if (!equipment) return { accepted: false, reason: "unknownEquipment", character, instance };
-  const value = Math.max(0, Math.floor(Number(price ?? equipment.sellPrice ?? equipment.buyPrice / 2) || 0));
+  const value = price == null
+    ? getShopSellPrice(character, equipment)
+    : Math.max(0, Math.floor(Number(price) || 0));
   if (value <= 0) return { accepted: false, reason: "notSellable", character, instance, equipment };
   return {
     accepted: true,

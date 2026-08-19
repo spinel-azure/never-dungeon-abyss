@@ -137,6 +137,7 @@ import { renameCharacter as applyCharacterRename } from "../data/character-name.
 import { isTransferDestinationUnlocked } from "../data/transfer-destinations.js";
 import { selectRevivalGoddessImage } from "../data/revival-presentation.js";
 import { ANASTASIA_OUTFIT_EVENT_FLAG } from "../data/anastasia-event.js";
+import { HELEN_HIDDEN_EVENT_PENDING_FLAG, HELEN_HIDDEN_EVENT_SEEN_FLAG, isHelenHiddenEventPending } from "../data/helen-event.js";
 import { getFireFloorStepDamage, isFireFloorDepth } from "../data/fire-floor.js";
 import { getColdFloorStepDamage, isColdFloorDepth } from "../data/cold-floor.js";
 import {
@@ -514,8 +515,17 @@ import {
       if (!flag || !character) return;
       character = {
         ...character,
-        eventFlags: { ...(character.eventFlags || {}), [flag]: true }
+        eventFlags: {
+          ...(character.eventFlags || {}),
+          [flag]: true,
+          ...(flag === HELEN_HIDDEN_EVENT_SEEN_FLAG ? { [HELEN_HIDDEN_EVENT_PENDING_FLAG]: false } : {})
+        }
       };
+      if (flag === HELEN_HIDDEN_EVENT_SEEN_FLAG) {
+        const granted = grantKeyItem(character.keyItems, "discount_pass");
+        character = { ...character, keyItems: granted.keyItems };
+        if (granted.gained > 0) setTimeout(() => showNamedItemGetEffect(["ディスカウントパス"], { important: true }), 0);
+      }
       updateCharacterUi();
       saveGame();
       if (flag === ANASTASIA_OUTFIT_EVENT_FLAG) void runSceneTransition();
@@ -1444,10 +1454,21 @@ import {
     setPlayerInputEnabled(false);
     pendingEncounter = null;
     startBgm(selectBattleBgm(boss));
-    const started = startBattle(createBossCombatant(boss), {
+    const bossCombatant = createBossCombatant(boss);
+    const encounterEnemies = Array.isArray(boss.encounterEnemyIds)
+      ? boss.encounterEnemyIds.map((enemyId, index) => {
+        const definition = getBossById(enemyId) || getEnemyById(enemyId);
+        const combatant = getBossById(enemyId) ? createBossCombatant(definition) : createEnemyCombatant(definition);
+        combatant.formationIndex = index;
+        return combatant;
+      })
+      : null;
+    const started = startBattle(bossCombatant, {
       playStartSe: true,
       ambush: false,
-      concealed: state.torchFuel <= 0 && !state.torchEffectForced
+      concealed: state.torchFuel <= 0 && !state.torchEffectForced,
+      enemies: encounterEnemies,
+      targetIndex: encounterEnemies ? Math.max(0, encounterEnemies.findIndex(enemy => enemy.id === bossId)) : 0
     });
     if (!started) {
       startBgm(selectDungeonBgm());
@@ -1734,6 +1755,17 @@ import {
   }
 
   function enterShop() {
+    if (isHelenHiddenEventPending(character)) {
+      return {
+        dialogue: [
+          "ヘレン：依頼を引き受けてくれてありがと。この間の件もそうだけど、あなたが引き受けてくれてよかった…。\n＊Aボタンで次へ",
+          "ヘレン：今回手に入れてもらった素材はね《奈落麝香》を精製する為に必要なの。…え？麝香って何かって？\n＊Aボタンで次へ",
+          "ヘレン：《奈落麝香》は香水の原料になるのだけれど、希少でなかなか手に入らないのよ。でも、どうしても欲しかった。\nあたし、他の人よりも匂いがキツくて…。これまで色々な香水を試してはみたの。でも、どれもイマイチだった…。\n＊Aボタンで次へ",
+          "ヘレン：そんな時《奈落麝香》の噂を聞いて、どうしても欲しくなったのよ。…とにかくありがとう。また何かあったら\nあなたにお願いするわ。これ、あたしの気持ちよ。"
+        ],
+        completionFlag: HELEN_HIDDEN_EVENT_SEEN_FLAG
+      };
+    }
     if (character?.eventFlags?.strong_herbicide_shop_reward_pending) {
       const granted = grantItemWithOverflow(character, "strong_herbicide", 10);
       character = {
@@ -1969,6 +2001,14 @@ import {
           character = granted.character;
           const item = getItem(victory.reward.itemId);
           bossRewardMessage = `\n${item?.name || victory.reward.itemId}を手に入れた！`;
+        } else if (victory.reward?.type === "keyItem" && victory.reward.keyItemId) {
+          const granted = grantKeyItem(character.keyItems, victory.reward.keyItemId);
+          character = { ...character, keyItems: granted.keyItems };
+          const keyItem = getKeyItem(victory.reward.keyItemId);
+          bossRewardMessage = granted.gained > 0
+            ? `\n${keyItem?.name || victory.reward.keyItemId}を手に入れた！`
+            : "";
+          if (granted.gained > 0) setTimeout(() => showNamedItemGetEffect([keyItem?.name || victory.reward.keyItemId], { important: true }), 0);
         }
         if (battle.enemy.questProgressId) {
           character = recordCustomQuestProgress(character, battle.enemy.questProgressId, 1);

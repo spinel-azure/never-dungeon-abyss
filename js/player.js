@@ -483,7 +483,7 @@ function startSpecialRoomContentEvent(content, fromGX, fromGY) {
     });
     return;
   }
-  if (!["repeatableBoss", "eventBoss"].includes(content?.type)) return;
+  if (!["repeatableBoss", "eventBoss", "multiEnemyBoss"].includes(content?.type)) return;
   const boss = getBossById(content.bossId);
   if (!boss || hooks.isBossDefeated(boss.id)) return;
   if (boss.event?.immediateStart) {
