@@ -543,6 +543,91 @@ export const enemies = Object.freeze([
     escapeRate: 0.38, surpriseRate: 0.12, surpriseRateMaximum: 0.25, isBoss: false
   }),
   Object.freeze({
+    id: "abyss_lizard", name: "奈落トカゲ", imageId: "abyss_lizard",
+    level: 58,
+    image: "images/enemies/enemy_25.avif", race: "beast", minimumDepth: 60, maximumDepth: 69,
+    encounterCountRange: Object.freeze([1, 3]),
+    maxHp: 260, stats: Object.freeze({ str: 20, int: 8, agi: 25, dex: 23, luc: 14 }),
+    def: 22, attack: 20, experienceReward: 360,
+    actions: Object.freeze([
+      Object.freeze({ weight: 60, action: Object.freeze({
+        id: "abyss_lizard_attack", name: "攻撃", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 0.9, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 40, action: Object.freeze({
+        id: "abyss_lizard_deadly_poison", name: "猛毒", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 0.8, hitBonus: 0.03, effects: Object.freeze([Object.freeze({
+          statusId: "deadly_poison", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.35
+        })])
+      }) })
+    ]),
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 55, immune: false }),
+      deadly_poison: Object.freeze({ resistancePoints: 55, immune: false }),
+      action_skip: Object.freeze({ resistancePoints: 45, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 55, immune: false })
+    }),
+    escapeRate: 0.3, surpriseRate: 0.2, surpriseRateMaximum: 0.32, isBoss: false
+  }),
+  Object.freeze({
+    id: "abyss_giant_scorpion", name: "奈落オオサソリ", imageId: "abyss_giant_scorpion",
+    level: 62,
+    image: "images/enemies/enemy_26.avif", race: "insect", minimumDepth: 60, maximumDepth: 69,
+    maxHp: 720, stats: Object.freeze({ str: 31, int: 7, agi: 17, dex: 28, luc: 18 }),
+    def: 31, attack: 31, experienceReward: 1180,
+    actions: Object.freeze([
+      Object.freeze({ weight: 40, action: Object.freeze({
+        id: "abyss_scorpion_deadly_poison", name: "猛毒", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 0.9, hitBonus: 0.04, effects: Object.freeze([Object.freeze({
+          statusId: "deadly_poison", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.45
+        })])
+      }) }),
+      Object.freeze({ weight: 60, action: Object.freeze({
+        id: "pincer_crush", name: "挟み込み", actionType: "physicalAttack",
+        hitCount: 2, powerPerHit: 0.7, hitBonus: -0.02, effects: Object.freeze([])
+      }) })
+    ]),
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 75, immune: false }),
+      deadly_poison: Object.freeze({ resistancePoints: 75, immune: false }),
+      action_skip: Object.freeze({ resistancePoints: 65, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 70, immune: false })
+    }),
+    escapeRate: 0.24, surpriseRate: 0.18, surpriseRateMaximum: 0.3, isBoss: false
+  }),
+  Object.freeze({
+    id: "cobra_gator", name: "コブラゲーター", imageId: "cobra_gator",
+    level: 64,
+    image: "images/enemies/enemy_27.avif", race: "beast", minimumDepth: 60, maximumDepth: 69,
+    maxHp: 820, stats: Object.freeze({ str: 34, int: 9, agi: 20, dex: 27, luc: 19 }),
+    def: 29, attack: 34, experienceReward: 1320,
+    actions: Object.freeze([
+      Object.freeze({ weight: 45, action: Object.freeze({
+        id: "cobra_gator_deadly_poison", name: "猛毒", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 0.95, effects: Object.freeze([Object.freeze({
+          statusId: "deadly_poison", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.4
+        })])
+      }) }),
+      Object.freeze({ weight: 55, action: Object.freeze({
+        id: "cobra_gator_tail_slam", name: "尻尾叩き", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1.4, hitBonus: -0.05, speedModifier: -1,
+        effects: Object.freeze([Object.freeze({
+          statusId: "action_skip", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.2
+        })])
+      }) })
+    ]),
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 65, immune: false }),
+      deadly_poison: Object.freeze({ resistancePoints: 65, immune: false }),
+      action_skip: Object.freeze({ resistancePoints: 60, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 60, immune: false })
+    }),
+    escapeRate: 0.22, surpriseRate: 0.22, surpriseRateMaximum: 0.34, isBoss: false
+  }),
+  Object.freeze({
     id: "mimic", name: "ミミック", imageId: "mimic",
     level: 10,
     image: "images/enemies/enemy_05.avif", race: "construct", randomEncounter: false,
@@ -569,6 +654,14 @@ export const enemies = Object.freeze([
 
 export function getEnemyById(id) {
   return enemies.find(enemy => enemy.id === id) || null;
+}
+
+export function getEnemyEncounterCount(enemyOrId, rng = Math.random) {
+  const enemy = typeof enemyOrId === "string" ? getEnemyById(enemyOrId) : enemyOrId;
+  const [minimum = 1, maximum = minimum] = enemy?.encounterCountRange || [1, 1];
+  const min = Math.max(1, Math.floor(Number(minimum) || 1));
+  const max = Math.max(min, Math.floor(Number(maximum) || min));
+  return min + Math.min(max - min, Math.floor(Math.max(0, Number(rng()) || 0) * (max - min + 1)));
 }
 
 export function getRandomEnemy({ depth = 1, rng = Math.random } = {}) {
@@ -608,6 +701,7 @@ export function createEnemyCombatant(enemy) {
     escapeRate: enemy.escapeRate,
     surpriseRate: enemy.surpriseRate,
     surpriseRateMaximum: enemy.surpriseRateMaximum,
+    encounterCountRange: enemy.encounterCountRange ? [...enemy.encounterCountRange] : null,
     ignoreNormalSurpriseCap: Boolean(enemy.ignoreNormalSurpriseCap),
     statuses: [],
     elementMultipliers: { ...(enemy.elementMultipliers || {}) },

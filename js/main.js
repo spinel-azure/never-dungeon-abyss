@@ -99,7 +99,7 @@ import { getActivePlayTimeDelta, normalizeAdventureStats, recordInnStay, recordS
 import { getAdventureChronicle } from "../data/adventure-records.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName, grantEquipmentInstance } from "../data/equipment-inventory.js";
-import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
+import { createEnemyCombatant, getEnemyById, getEnemyEncounterCount, getRandomEnemy } from "../data/enemies.js";
 import { applyBossVictory, bossLeavesRemains, createBossCombatant, getBossById, getFloorBossByDepth, isBossDefeated } from "../data/bosses.js";
 import { consumeKeyItem, getKeyItem, grantKeyItem, hasKeyItem } from "../data/key-items.js";
 import { configureBattle, handleBattleInput, isBattleActive, openBattleItems, startBattle } from "./battle.js";
@@ -1418,6 +1418,7 @@ import {
     });
     pendingEncounter = {
       enemyData,
+      enemyCount: getEnemyEncounterCount(enemyData),
       ambush: surprise.ambush,
       surpriseRate: surprise.rate,
       concealed: state.torchFuel <= 0 && !state.torchEffectForced
@@ -1434,12 +1435,18 @@ import {
     const encounter = pendingEncounter;
     pendingEncounter = null;
     const enemyData = encounter?.enemyData || getRandomEncounterEnemyData();
-    const enemy = createEnemyCombatant(enemyData);
+    const enemyCount = Math.max(1, Number(encounter?.enemyCount) || getEnemyEncounterCount(enemyData));
+    const encounterEnemies = enemyCount > 1
+      ? Array.from({ length: enemyCount }, (_, index) => ({ ...createEnemyCombatant(enemyData), formationIndex: index }))
+      : null;
+    const enemy = encounterEnemies?.[0] || createEnemyCombatant(enemyData);
     startBgm(selectBattleBgm(enemyData));
     const started = startBattle(enemy, {
       playStartSe: false,
       ambush: Boolean(encounter?.ambush),
-      concealed: Boolean(encounter?.concealed)
+      concealed: Boolean(encounter?.concealed),
+      enemies: encounterEnemies,
+      targetIndex: 0
     });
     if (!started) {
       startBgm(selectDungeonBgm());
@@ -1941,7 +1948,11 @@ import {
 
   function finishBattleVictory(battle) {
     startBgm(selectDungeonBgm());
-    const reward = Math.max(0, Math.floor(Number(battle?.enemy?.experienceReward) || 0));
+    const rewardEnemies = Array.isArray(battle?.enemies) ? battle.enemies : [battle?.enemy];
+    const reward = rewardEnemies.reduce(
+      (total, enemy) => total + Math.max(0, Math.floor(Number(enemy?.experienceReward) || 0)),
+      0
+    );
     let bossRewardMessage = "";
     if (character && battle?.enemy?.isDungeonObstacle) {
       removeBossAt(state.gridX, state.gridY);
@@ -2021,7 +2032,10 @@ import {
       }
     }
     if (character && battle?.enemy?.id) {
-      character = recordEnemyDefeat(character, battle.enemy.id, currentDepth);
+      const defeatedEnemies = battle.enemy.isBoss ? [battle.enemy] : rewardEnemies;
+      for (const defeatedEnemy of defeatedEnemies) {
+        if (defeatedEnemy?.id) character = recordEnemyDefeat(character, defeatedEnemy.id, currentDepth);
+      }
     }
     if (character && reward > 0) Object.assign(character, awardBattleExperience(character, reward));
     const drop = rollEnemyDrop(battle?.enemy);

@@ -35,7 +35,7 @@ import {
 } from "../combat/battle-engine.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { CHARACTER_JOBS } from "../data/town.js";
-import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
+import { createEnemyCombatant, getEnemyById, getEnemyEncounterCount, getRandomEnemy } from "../data/enemies.js";
 import { createBossCombatant, getBossById } from "../data/bosses.js";
 import { CARDS, collectCardStatBonuses, getCardById, hasCardEffect } from "../data/cards.js";
 import { calculateDeckCost, DECK_SLOT_COUNT, grantCard, normalizeCardState, setDeckSlot } from "../data/deck.js";
@@ -154,6 +154,22 @@ test("B50F to B59F encounter Abyss Tiger, Abyss Panther, and Abyss Mushroom", ()
   for (const enemyId of ["abyss_tiger", "abyss_panther", "abyss_mushroom"]) {
     assert.deepEqual(getEnemyById(enemyId).elementMultipliers, { fire: 1.5, ice: 1 });
   }
+});
+
+test("B60F to B69F encounter the three desert enemies and only Abyss Lizards form groups", () => {
+  for (let depth = 60; depth <= 69; depth += 1) {
+    assert.equal(getRandomEnemy({ depth, rng: () => 0 }).id, "abyss_lizard");
+    assert.equal(getRandomEnemy({ depth, rng: () => 0.5 }).id, "abyss_giant_scorpion");
+    assert.equal(getRandomEnemy({ depth, rng: () => 0.999 }).id, "cobra_gator");
+  }
+  const lizard = createEnemyCombatant(getEnemyById("abyss_lizard"));
+  assert.deepEqual([getEnemyEncounterCount(lizard, () => 0), getEnemyEncounterCount(lizard, () => 0.5), getEnemyEncounterCount(lizard, () => 0.999)], [1, 2, 3]);
+  assert.equal(createEnemyAction(lizard, () => 0.999).effects[0].statusId, "deadly_poison");
+  const scorpion = createEnemyCombatant(getEnemyById("abyss_giant_scorpion"));
+  assert.deepEqual([getEnemyEncounterCount(scorpion, () => 0.999), createEnemyAction(scorpion, () => 0.999).hitCount], [1, 2]);
+  const gator = createEnemyCombatant(getEnemyById("cobra_gator"));
+  const tailSlam = createEnemyAction(gator, () => 0.999);
+  assert.deepEqual([getEnemyEncounterCount(gator, () => 0.999), tailSlam.name, tailSlam.effects[0].statusId], [1, "尻尾叩き", "action_skip"]);
 });
 
 test("poison slime sometimes selects an attack that can inflict poison", () => {
