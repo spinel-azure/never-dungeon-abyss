@@ -2,6 +2,7 @@ export const CARD_RARITIES = Object.freeze(["C", "R", "SR", "L", "Z"]);
 export const GODDESS_GRACE_CARD_ID = "common_goddess_grace";
 export const GODDESS_MERCY_CARD_ID = "legendary_goddess_mercy";
 export const PERPETUAL_TORCH_CARD_ID = "legendary_unlimited_torch_gauge";
+export const DEADLY_POISON_IMMUNITY_CARD_ID = "legendary_deadly_poison_immunity";
 
 const STANDARD_CARDS = [
   {
@@ -288,6 +289,14 @@ const STANDARD_CARDS = [
     category: "exploration", effectId: "unlimited_torch_gauge",
     effectIds: Object.freeze(["torch_consumption_disabled", "force_torch_effect_active"]),
     iconId: "torch", maxOwned: 1, maxCopies: 1
+  },
+  {
+    id: DEADLY_POISON_IMMUNITY_CARD_ID, rarity: "L", cost: 6,
+    name: "Deadly Poison Immunity", nameJa: "猛毒無効", concept: "猛毒耐性 100%",
+    descriptionJa: "猛毒状態になるのを完全に防ぐ。",
+    category: "resistance", effectId: "deadly_poison_immunity",
+    statBonus: Object.freeze({ deadlyPoisonResistance: 1 }), iconId: "alertness",
+    maxOwned: 1, maxCopies: 1
   },
   {
     id: "legendary_ability_boost_plus", rarity: "L", cost: 6,

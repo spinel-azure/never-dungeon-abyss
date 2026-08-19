@@ -422,7 +422,13 @@ import {
       const keyItem = getKeyItem(event?.keyItemId);
       if (!keyItem || !character) return "何も見つからなかった。";
       const granted = grantKeyItem(character.keyItems, keyItem.id);
-      character = recordThievesClue({ ...character, keyItems: granted.keyItems }, event.flag);
+      const withItem = { ...character, keyItems: granted.keyItems };
+      character = event.questId === "guild_011"
+        ? recordThievesClue(withItem, event.flag)
+        : recordCustomQuestProgress({
+          ...withItem,
+          eventFlags: { ...(withItem.eventFlags || {}), [event.flag]: true }
+        }, event.questId, 1);
       updateCharacterUi();
       saveGame();
       if (granted.gained) setTimeout(() => showNamedItemGetEffect([keyItem.name], { important: true }), 0);
@@ -499,6 +505,15 @@ import {
     }),
     onCompleteRumor: rumor => {
       character = markTavernRumorRead(character, rumor);
+      updateCharacterUi();
+      saveGame();
+    },
+    onCompleteFacilityTalk: flag => {
+      if (!flag || !character) return;
+      character = {
+        ...character,
+        eventFlags: { ...(character.eventFlags || {}), [flag]: true }
+      };
       updateCharacterUi();
       saveGame();
     },
@@ -868,6 +883,10 @@ import {
     }, 3400);
   }
 
+  function templeKeeperName() {
+    return character?.eventFlags?.tavern_rumor_004_base_read ? "助祭アナスタシア" : "司祭アーヴァイン";
+  }
+
   function talkAtFacility(facilityId) {
     if (facilityId === "guild" && character?.eventFlags?.guild_registration_card) {
       const unlock = unlockGuildRequest(character);
@@ -887,6 +906,18 @@ import {
         return "ギルドマスター：仕事の話だ。依頼受注を選んでくれ。";
       }
       return "ギルドマスター：これを持っていけ。ついでに町を見て回ったらどうだ？一通り回ったら、また戻ってこい。";
+    }
+    if (facilityId === "temple" && character?.eventFlags?.tavern_rumor_004_base_read) {
+      if (!character.eventFlags?.anastasia_first_talk_completed) {
+        return {
+          dialogue: [
+            "助祭アナスタシア：黄金の稲穂の女神様に祈りを捧げにいらしたのですか？えっ？わたくしはアナスタシアと申します。\n＊Aボタンで次へ",
+            "助祭アナスタシア：アーヴァイン様は腰を痛められてご静養なさっております。ですので、その間わたくしが代わりを務めております。\n＊Aボタンで戻る"
+          ],
+          completionFlag: "anastasia_first_talk_completed"
+        };
+      }
+      return "助祭アナスタシア：さぁ、女神様に祈りを捧げましょう。";
     }
     const rewards = {
       guild: {
@@ -1062,7 +1093,7 @@ import {
         eventRewardCardId
       });
     }, 0);
-    return { ...result, character, eventRewardCardId };
+    return { ...result, character, eventRewardCardId, message: result.reportMessage };
   }
 
   async function showGuildQuestRewardSequence({
@@ -1615,12 +1646,14 @@ import {
     }, 1700);
   }
 
-  function purchaseTownItem(itemId, amount = 1) {
+  function purchaseTownItem(itemId, amount = 1, { donation = false } = {}) {
     if (!character) return { accepted: false, reason: "noCharacter" };
     const result = purchaseItem(character, itemId, { amount });
     if (!result.accepted) return result;
     character = result.character;
-    character.adventureStats = recordShopPurchase(character.adventureStats, result.cost);
+    character.adventureStats = donation
+      ? recordTempleDonation(character.adventureStats, result.cost)
+      : recordShopPurchase(character.adventureStats, result.cost);
     updateCharacterUi();
     saveGame();
     return { ...result, character };
@@ -2280,17 +2313,17 @@ import {
     if (character.alive && character.hp > 0) {
       const treatment = resolveTemplePoisonTreatment(character);
       if (treatment.reason === "notPoisoned") {
-        say("司祭アーヴァイン：治療の必要はないようですね。");
+        say(`${templeKeeperName()}：治療の必要はないようですね。`);
         return;
       }
       if (treatment.reason === "insufficientGold") {
-        say(`司祭アーヴァイン：状態異常を治療するには${treatment.fee}Gの寄進が必要です。`);
+        say(`${templeKeeperName()}：状態異常を治療するには${treatment.fee}Gの寄進が必要です。`);
         return;
       }
       character = treatment.character;
       character.adventureStats = recordTempleDonation(character.adventureStats, treatment.fee);
       updateCharacterUi();
-      say(`司祭アーヴァイン：${treatment.fee}Gの寄進を受け取りました。傷と穢れは癒やされました。`);
+      say(`${templeKeeperName()}：${treatment.fee}Gの寄進を受け取りました。傷と穢れは癒やされました。`);
       playSe("heal");
       saveGame();
       return;
@@ -2298,7 +2331,7 @@ import {
     stopBgm();
     Object.assign(character, createTempleRevival(character));
     updateCharacterUi();
-    say("司祭アーヴァイン：おお…！女神へ祈りが届いたか…！迷える魂よ、今一度目覚めよ！");
+    say(`${templeKeeperName()}：女神様へ祈りが届きました…！迷える魂よ、今一度目覚めてください！`);
     saveGame();
     await playSeSequence("revival", 1);
     if (worldLocation === "town" && getTownState().facilityId === "temple") {

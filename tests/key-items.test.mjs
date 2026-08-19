@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
-import { createInitialKeyItemState, getKeyItem, grantKeyItem, hasKeyItem, normalizeKeyItemState } from "../data/key-items.js";
+import { consumeKeyItem, createInitialKeyItemState, getKeyItem, getKeyItemCount, grantKeyItem, hasKeyItem, listOwnedKeyItems, normalizeKeyItemState } from "../data/key-items.js";
 
 test("new and legacy characters have an independent empty key-item collection", () => {
   assert.deepEqual(createInitialCharacter({ name: "TEST", job: "thief" }).keyItems, createInitialKeyItemState());
@@ -29,4 +29,14 @@ test("the queen's tiara is a permanent unsellable key item", () => {
   const granted = grantKeyItem(null, tiara.id, 1);
   assert.equal(granted.gained, true);
   assert.equal(hasKeyItem(granted.keyItems, tiara.id), true);
+});
+
+test("special medicine ingredients share one key-item slot and can be consumed together", () => {
+  let state = createInitialKeyItemState();
+  for (let count = 0; count < 8; count += 1) state = grantKeyItem(state, "special_medicine_ingredient").keyItems;
+  assert.equal(getKeyItemCount(state, "special_medicine_ingredient"), 8);
+  assert.equal(listOwnedKeyItems(state).filter(item => item.id === "special_medicine_ingredient").length, 1);
+  const consumed = consumeKeyItem(state, "special_medicine_ingredient", 8);
+  assert.equal(consumed.consumed, true);
+  assert.equal(hasKeyItem(consumed.keyItems, "special_medicine_ingredient"), false);
 });

@@ -4,6 +4,8 @@ export const TAVERN_RUMOR_002_BASE_READ_FLAG = "tavern_rumor_002_base_read";
 export const TAVERN_RUMOR_002_GHOST_READ_FLAG = "tavern_rumor_002_ghost_read";
 export const TAVERN_RUMOR_003_BASE_READ_FLAG = "tavern_rumor_003_base_read";
 export const TAVERN_RUMOR_003_WISDOM_READ_FLAG = "tavern_rumor_003_wisdom_read";
+export const TAVERN_RUMOR_004_BASE_READ_FLAG = "tavern_rumor_004_base_read";
+export const TAVERN_RUMOR_004_MEDICINE_READ_FLAG = "tavern_rumor_004_medicine_read";
 
 export function getTavernRumorTypewriterParts(message) {
   const text = String(message || "");
@@ -79,6 +81,28 @@ export const TAVERN_RUMORS = Object.freeze([
         rosaContinuation: "えっ…！本当にいたの？とても強かった！？あなた…よく生きて…。"
       })
     ])
+  }),
+  Object.freeze({
+    id: "rumor_004",
+    title: "司祭様の噂",
+    unlock: context => context.quest019Completed && context.templeDonationCount >= 100,
+    customerLead: "司祭様が腰を痛められて、ご静養なさっているらしい。",
+    customerReply: "代わりを務める若い助祭が派遣されてきたな。",
+    phases: Object.freeze([
+      Object.freeze({
+        id: "base",
+        readFlag: TAVERN_RUMOR_004_BASE_READ_FLAG,
+        unlock: context => !context.quest016Completed,
+        rosa: "まぁ…！司祭様が…。とても心配だわ…。"
+      }),
+      Object.freeze({
+        id: "medicine",
+        readFlag: TAVERN_RUMOR_004_MEDICINE_READ_FLAG,
+        unlock: context => context.quest016Completed,
+        rosa: "まぁ…！司祭様が…。とても心配だわ…。",
+        rosaContinuation: "えっ？あなたが特効薬の材料を集めたの？これで司祭様の具合も良くなるといいわね。"
+      })
+    ])
   })
 ]);
 
@@ -98,11 +122,15 @@ function buildDialogue(rumor, phase) {
 }
 
 function normalizeRumorContext(character, context = {}) {
+  const completedQuestIds = character?.quests?.completedQuestIds || [];
   return {
     mikanEncountered: Boolean(context.mikanEncountered),
     lingeringGhostDefeated: Boolean(context.lingeringGhostDefeated),
     otherworldlyWisdomDefeated: Boolean(context.otherworldlyWisdomDefeated),
-    depthReached: Math.max(1, Math.floor(Number(context.depthReached ?? character?.highestDungeonDepthReached) || 1))
+    depthReached: Math.max(1, Math.floor(Number(context.depthReached ?? character?.highestDungeonDepthReached) || 1)),
+    templeDonationCount: Math.max(0, Math.floor(Number(context.templeDonationCount ?? character?.adventureStats?.templeDonationCount) || 0)),
+    quest019Completed: Boolean(context.quest019Completed ?? completedQuestIds.includes("guild_019")),
+    quest016Completed: Boolean(context.quest016Completed ?? completedQuestIds.includes("guild_016"))
   };
 }
 

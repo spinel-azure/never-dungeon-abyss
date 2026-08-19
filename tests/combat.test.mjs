@@ -773,16 +773,26 @@ test("poison damage stops at one HP", () => {
   assert.equal(result.battle.player.alive, true);
 });
 
-test("deadly poison deals one percent per action lethally and per step nonlethally", () => {
+test("deadly poison deals five percent per action lethally and per step nonlethally", () => {
   const statuses = applyStatus([], { statusId: "deadly_poison", success: true });
-  assert.equal(resolveEndOfAction({ statuses, maxHp: 999 }).deadlyPoisonDamage, 9);
-  assert.equal(resolveEndOfAction({ statuses, maxHp: 50 }).deadlyPoisonDamage, 1);
-  assert.equal(getDeadlyPoisonStepDamage({ currentHp: 100, maxHp: 999 }), 9);
+  assert.equal(resolveEndOfAction({ statuses, maxHp: 999 }).deadlyPoisonDamage, 49);
+  assert.equal(resolveEndOfAction({ statuses, maxHp: 50 }).deadlyPoisonDamage, 2);
+  assert.equal(getDeadlyPoisonStepDamage({ currentHp: 100, maxHp: 999 }), 49);
   assert.equal(getDeadlyPoisonStepDamage({ currentHp: 5, maxHp: 1000 }), 4);
   assert.equal(getDeadlyPoisonStepDamage({ currentHp: 1, maxHp: 1000 }), 0);
   const upgraded = applyStatus([{ statusId: "poison" }], { statusId: "deadly_poison", success: true });
   assert.deepEqual(upgraded.map(status => status.statusId), ["deadly_poison"]);
   assert.deepEqual(applyStatus(upgraded, { statusId: "poison", success: true }).map(status => status.statusId), ["deadly_poison"]);
+});
+
+test("Deadly Poison Immunity is a unique legendary card with full resistance", () => {
+  const card = getCardById("legendary_deadly_poison_immunity");
+  assert.equal(card.nameJa, "猛毒無効");
+  assert.equal(card.rarity, "L");
+  assert.equal(card.cost, 6);
+  assert.equal(card.maxOwned, 1);
+  assert.equal(card.maxCopies, 1);
+  assert.equal(collectCardStatBonuses([card.id]).deadlyPoisonResistance, 1);
 });
 
 test("same status refreshes instead of stacking", () => {

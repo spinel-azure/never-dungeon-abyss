@@ -5,6 +5,7 @@ import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { applyBossVictory } from "../data/bosses.js";
 import { getOwnedCardCount } from "../data/deck.js";
 import { getItemCount } from "../data/inventory.js";
+import { getKeyItemCount, grantKeyItem } from "../data/key-items.js";
 import {
   MAX_ACTIVE_QUESTS,
   FLOOR_SURVEY_QUEST_ID,
@@ -22,6 +23,8 @@ import {
   B45F_SURVEY_QUEST_ID,
   GUILD_018_QUEST_ID,
   BRASS_BULL_QUEST_ID,
+  SPECIAL_MEDICINE_QUEST_ID,
+  SPECIAL_MEDICINE_INGREDIENT_FLAGS,
   RED_DOOR_DEFENSE_CARD_FLAG,
   grantRedDoorInvestigationSupply,
   abandonQuest,
@@ -43,6 +46,32 @@ import {
 } from "../data/quests.js";
 
 const QUEST_ID = "guild_001_abyss_rat";
+
+test("quest 016 unlocks after its rumor, consumes eight ingredients, and unlocks Loretta", () => {
+  let character = createInitialCharacter("薬草採集", "priest");
+  character.quests.completedQuestIds.push(
+    QUEST_ID, SLIME_EXTERMINATION_QUEST_ID, FLOOR_SURVEY_QUEST_ID, "guild_019"
+  );
+  character.adventureStats.templeDonationCount = 100;
+  assert.equal(isQuestAvailable(character, SPECIAL_MEDICINE_QUEST_ID), false);
+  character.eventFlags.tavern_rumor_004_base_read = true;
+  assert.equal(isQuestAvailable(character, SPECIAL_MEDICINE_QUEST_ID), true);
+  character = acceptQuest(character, SPECIAL_MEDICINE_QUEST_ID).character;
+  for (const flag of SPECIAL_MEDICINE_INGREDIENT_FLAGS) {
+    character.eventFlags[flag] = true;
+    character.keyItems = grantKeyItem(character.keyItems, "special_medicine_ingredient").keyItems;
+  }
+  assert.equal(getQuestProgress(character, SPECIAL_MEDICINE_QUEST_ID).readyToReport, true);
+  assert.equal(getKeyItemCount(character.keyItems, "special_medicine_ingredient"), 8);
+  const report = reportQuest(character, SPECIAL_MEDICINE_QUEST_ID);
+  assert.equal(report.accepted, true);
+  assert.equal(getKeyItemCount(report.character.keyItems, "special_medicine_ingredient"), 0);
+  assert.equal(getOwnedCardCount(report.character.cards, "legendary_deadly_poison_immunity"), 1);
+  assert.equal(report.bonusGold, 10000);
+  assert.equal(report.character.eventFlags.achievement_priest_back_recovered, true);
+  assert.equal(report.character.eventFlags.support_npc_loretta_join_unlocked, true);
+  assert.match(report.reportMessage, /素材は俺が預かろう/);
+});
 
 test("quest history lists reportable, active, then completed requests", () => {
   const character = createInitialCharacter("履歴確認", "warrior");

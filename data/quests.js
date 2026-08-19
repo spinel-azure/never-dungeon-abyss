@@ -1,6 +1,7 @@
 import { grantCard } from "./deck.js";
 import { grantEquipmentInstance } from "./equipment-inventory.js";
 import { grantItemWithOverflow } from "./inventory.js";
+import { consumeKeyItem, getKeyItemCount } from "./key-items.js";
 
 export const MAX_ACTIVE_QUESTS = 3;
 export const GUILD_TRIAL_QUEST_ID = "guild_001_abyss_rat";
@@ -19,10 +20,14 @@ export const B35F_SURVEY_QUEST_ID = "guild_013";
 export const B35F_SURVEY_SUPPLY_FLAG = "guild_013_large_potions_received";
 export const BRASS_BULL_QUEST_ID = "guild_014";
 export const FOURTH_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_015";
+export const SPECIAL_MEDICINE_QUEST_ID = "guild_016";
 export const B45F_SURVEY_QUEST_ID = "guild_017";
 export const B45F_SURVEY_SUPPLY_FLAG = "guild_017_large_potions_received";
 export const GUILD_018_QUEST_ID = "guild_018";
 export const FIFTH_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_019";
+export const SPECIAL_MEDICINE_INGREDIENT_FLAGS = Object.freeze(
+  Array.from({ length: 8 }, (_, index) => `quest_016_ingredient_b${index + 51}f_found`)
+);
 export const THIEVES_CLUE_FLAGS = Object.freeze([
   "quest_011_clue_emblem_found", "quest_011_clue_ledger_found", "quest_011_clue_map_found"
 ]);
@@ -417,6 +422,40 @@ export const QUESTS = Object.freeze([
     available: true
   }),
   Object.freeze({
+    id: SPECIAL_MEDICINE_QUEST_ID,
+    number: "016",
+    title: "迷宮地下35階の調査",
+    client: "アナスタシア",
+    category: "other",
+    objectiveType: "custom",
+    targetDepth: 58,
+    requiredCount: 8,
+    objectiveHeading: "内容",
+    objectiveLabel: "腰痛の特効薬の素材集め",
+    reward: Object.freeze({
+      type: "card", label: "デッキカード×1", amount: 1,
+      cardId: "legendary_deadly_poison_immunity", bonusGold: 10000
+    }),
+    descriptionLabel: "目的",
+    description: Object.freeze([
+      "司祭アーヴァイン様が腰を痛められてしまいました。",
+      "特効薬に必要な素材は密林区域でしか手に入らないとか。",
+      "どうか集めてくださいませ。"
+    ]),
+    prerequisiteQuestIds: Object.freeze([FIFTH_RED_DOOR_INVESTIGATION_QUEST_ID]),
+    availableFlag: "tavern_rumor_004_base_read",
+    persistentProgressFlags: SPECIAL_MEDICINE_INGREDIENT_FLAGS,
+    progressMode: "matchedFlags",
+    requiredKeyItemId: "special_medicine_ingredient",
+    requiredKeyItemCount: 8,
+    reportUnlockFlags: Object.freeze([
+      "achievement_priest_back_recovered",
+      "support_npc_loretta_join_unlocked"
+    ]),
+    reportMessage: "ギルドマスター：集めた素材は俺が預かろう。",
+    available: true
+  }),
+  Object.freeze({
     id: B45F_SURVEY_QUEST_ID,
     number: "017",
     title: "迷宮地下45階の調査",
@@ -548,6 +587,7 @@ export function getQuestProgress(character, questId) {
 export function isQuestAvailable(character, questOrId) {
   const quest = typeof questOrId === "string" ? getQuestById(questOrId) : questOrId;
   if (!quest?.available) return false;
+  if (quest.availableFlag && !character?.eventFlags?.[quest.availableFlag]) return false;
   const initialQuestGate = B2F_UNLOCK_QUEST_IDS.includes(quest.id)
     ? []
     : B2F_UNLOCK_QUEST_IDS;
@@ -773,10 +813,23 @@ export function completeQueenShadowInvestigation(character) {
 export function reportQuest(character, questId) {
   const progress = getQuestProgress(character, questId);
   if (!progress.readyToReport) return result(character, false, "notReady");
+  if (progress.quest.requiredKeyItemId
+    && getKeyItemCount(character.keyItems, progress.quest.requiredKeyItemId) < progress.quest.requiredKeyItemCount) {
+    return result(character, false, "notReady");
+  }
   const quests = normalizeQuestState(character.quests);
   delete quests.active[questId];
   quests.completedQuestIds = [...new Set([...quests.completedQuestIds, questId])];
   let next = { ...character, quests };
+  if (progress.quest.requiredKeyItemId) {
+    const consumed = consumeKeyItem(
+      next.keyItems,
+      progress.quest.requiredKeyItemId,
+      progress.quest.requiredKeyItemCount
+    );
+    if (!consumed.consumed) return result(character, false, "notReady");
+    next = { ...next, keyItems: consumed.keyItems };
+  }
   let rewardCardId = null;
   const rewardCardIds = [];
   let rewardEquipmentId = null;
@@ -827,6 +880,15 @@ export function reportQuest(character, questId) {
   if (progress.quest.reportUnlockFlag) {
     next = { ...next, eventFlags: { ...(next.eventFlags || {}), [progress.quest.reportUnlockFlag]: true } };
   }
+  if (Array.isArray(progress.quest.reportUnlockFlags)) {
+    next = {
+      ...next,
+      eventFlags: {
+        ...(next.eventFlags || {}),
+        ...Object.fromEntries(progress.quest.reportUnlockFlags.map(flag => [flag, true]))
+      }
+    };
+  }
   return {
     character: next,
     accepted: true,
@@ -836,6 +898,7 @@ export function reportQuest(character, questId) {
     rewardItemId,
     rewardItemAmount,
     presentationOrder: progress.quest.reward?.presentationOrder || "",
+    reportMessage: progress.quest.reportMessage || "",
     bonusGold
   };
 }

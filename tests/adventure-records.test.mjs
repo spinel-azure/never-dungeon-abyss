@@ -167,3 +167,12 @@ test("new deep-cold achievements conceal their names behind hints until achieved
   assert.match(chronicle.find(entry => entry.id === "b50")?.label || "", /極寒/);
   assert.match(chronicle.find(entry => entry.id === "longMarch84")?.label || "", /深淵/);
 });
+
+test("priest recovery achievement keeps its hidden hint until quest 016 is reported", () => {
+  const character = createInitialCharacter("治療者", "priest");
+  let entry = getAdventureChronicle(character).find(candidate => candidate.id === "priestBackRecovery");
+  assert.equal(entry.label, "？？？？？？――魔女の一撃");
+  character.eventFlags.achievement_priest_back_recovered = true;
+  entry = getAdventureChronicle(character).find(candidate => candidate.id === "priestBackRecovery");
+  assert.equal(entry.label, "司祭のぎっくり腰を治療した");
+});

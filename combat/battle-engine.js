@@ -771,6 +771,9 @@ function updateOutcome(battle) {
 function combatStats(combatant) {
   const collected = collectStats(combatant);
   const statusResistances = structuredClone(combatant.statusResistances || {});
+  if ((Number(collected.deadlyPoisonResistance) || 0) >= 1) {
+    statusResistances.deadly_poison = { resistancePoints: 100, immune: true };
+  }
   const bleeding = statusResistances.bleeding || {};
   statusResistances.bleeding = { ...bleeding,
     resistancePoints: (Number(bleeding.resistancePoints) || 0) + collected.bleedingResistance * 100 };

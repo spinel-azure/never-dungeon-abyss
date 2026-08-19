@@ -19,6 +19,11 @@ export const KEY_ITEMS = Object.freeze({
     id: "thieves_clue_map", name: "隠れ家の地図",
     description: "盗賊団の隠れ家へ続く道が記された地図。", sellable: false, consumable: false, version: 1
   }),
+  special_medicine_ingredient: Object.freeze({
+    id: "special_medicine_ingredient", name: "特効薬の素材",
+    description: "密林区域で見つけた、腰痛の特効薬に必要な素材。", sellable: false,
+    consumable: true, stackable: true, maximumOwned: 8, version: 1
+  }),
   red_rust_key_b9f: Object.freeze({
     id: "red_rust_key_b9f",
     name: "赤錆びた鍵",
@@ -82,7 +87,12 @@ export function normalizeKeyItemState(state) {
   for (const [rawId, rawRecord] of Object.entries(state?.owned || {})) {
     const id = normalizeKeyItemId(rawId);
     if (!id || owned[id]) continue;
-    owned[id] = { acquiredAt: Math.max(0, Math.floor(Number(rawRecord?.acquiredAt) || 0)) };
+    const item = getKeyItem(id);
+    const maximum = item?.stackable ? Math.max(1, Math.floor(Number(item.maximumOwned) || 99)) : 1;
+    owned[id] = {
+      acquiredAt: Math.max(0, Math.floor(Number(rawRecord?.acquiredAt) || 0)),
+      count: Math.min(maximum, Math.max(1, Math.floor(Number(rawRecord?.count) || 1)))
+    };
   }
   const acquisitionOrder = [];
   for (const rawId of state?.acquisitionOrder || []) {
@@ -99,37 +109,56 @@ export function hasKeyItem(state, keyItemId) {
   return Boolean(normalizeKeyItemState(state).owned[normalizeKeyItemId(keyItemId)]);
 }
 
-export function grantKeyItem(state, keyItemId, acquiredAt = Date.now()) {
+export function getKeyItemCount(state, keyItemId) {
+  return Math.max(0, Math.floor(Number(normalizeKeyItemState(state).owned[normalizeKeyItemId(keyItemId)]?.count) || 0));
+}
+
+export function grantKeyItem(state, keyItemId, acquiredAt = Date.now(), amount = 1) {
   const source = normalizeKeyItemState(state);
   const item = getKeyItem(keyItemId);
   if (!item) return { keyItems: source, gained: false, reason: "unknownKeyItem" };
-  if (source.owned[item.id]) return { keyItems: source, gained: false, reason: "alreadyOwned" };
+  const current = getKeyItemCount(source, item.id);
+  const maximum = item.stackable ? Math.max(1, Math.floor(Number(item.maximumOwned) || 99)) : 1;
+  const nextCount = Math.min(maximum, current + Math.max(1, Math.floor(Number(amount) || 1)));
+  if (nextCount <= current) return { keyItems: source, gained: false, amount: 0, reason: "alreadyOwned" };
   return {
     keyItems: {
-      owned: { ...source.owned, [item.id]: { acquiredAt: Math.max(0, Math.floor(Number(acquiredAt) || 0)) } },
-      acquisitionOrder: [...source.acquisitionOrder, item.id]
+      owned: { ...source.owned, [item.id]: {
+        acquiredAt: source.owned[item.id]?.acquiredAt ?? Math.max(0, Math.floor(Number(acquiredAt) || 0)),
+        count: nextCount
+      } },
+      acquisitionOrder: source.acquisitionOrder.includes(item.id) ? source.acquisitionOrder : [...source.acquisitionOrder, item.id]
     },
     gained: true,
+    amount: nextCount - current,
     reason: ""
   };
 }
 
-export function consumeKeyItem(state, keyItemId) {
+export function consumeKeyItem(state, keyItemId, amount = 1) {
   const source = normalizeKeyItemState(state);
   const id = normalizeKeyItemId(keyItemId);
   if (!source.owned[id]) return { keyItems: source, consumed: false, reason: "notOwned" };
+  const requested = Math.max(1, Math.floor(Number(amount) || 1));
+  const current = getKeyItemCount(source, id);
+  if (current < requested) return { keyItems: source, consumed: false, amount: 0, reason: "notEnough" };
   const owned = { ...source.owned };
-  delete owned[id];
+  if (current === requested) delete owned[id];
+  else owned[id] = { ...owned[id], count: current - requested };
   return {
-    keyItems: { owned, acquisitionOrder: source.acquisitionOrder.filter(ownedId => ownedId !== id) },
+    keyItems: { owned, acquisitionOrder: current === requested ? source.acquisitionOrder.filter(ownedId => ownedId !== id) : source.acquisitionOrder },
     consumed: true,
+    amount: requested,
     reason: ""
   };
 }
 
 export function listOwnedKeyItems(state) {
   const source = normalizeKeyItemState(state);
-  return source.acquisitionOrder.map(id => getKeyItem(id)).filter(Boolean);
+  return source.acquisitionOrder.map(id => {
+    const item = getKeyItem(id);
+    return item ? { ...item, count: getKeyItemCount(source, id) } : null;
+  }).filter(Boolean);
 }
 
 function normalizeKeyItemId(value) {

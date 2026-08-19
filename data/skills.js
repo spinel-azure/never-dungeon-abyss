@@ -334,7 +334,7 @@ export const SKILLS = Object.freeze({
   }),
   todes_gift: Object.freeze({
     id: "todes_gift", name: "トーデス・ギフト",
-    description: "チャージ100で発動。敵を戦闘終了まで猛毒にする。\n毎ターン最大HPの1%ダメージ（最大999）。",
+    description: "チャージ100で発動。敵を戦闘終了まで猛毒にする。\n毎ターン最大HPの5%ダメージ。",
     actionType: "chargeDebuff", category: "chargeSkill", spCost: 0, target: "enemy",
     chargeSkill: true, presentationId: "todes_gift", statusId: "deadly_poison",
     normalSuccessRate: 1, bossSuccessRate: 1, effects: Object.freeze([])

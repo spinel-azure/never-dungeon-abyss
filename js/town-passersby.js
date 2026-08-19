@@ -93,6 +93,7 @@ const PASSERBY_CONFIGS = Object.freeze([
   Object.freeze({
     id: "priest",
     src: "images/npc/NPC_12b.avif",
+    alternateSrc: "images/npc/NPC_12e.avif",
     speed: 10,
     bobAmplitude: 1,
     walkPeriod: 1240,
@@ -121,7 +122,7 @@ const PASSERBY_CONFIGS = Object.freeze([
 
 const MAX_VISIBLE_PASSERSBY = 4;
 
-export function configureTownPassersby({ canvas, root }) {
+export function configureTownPassersby({ canvas, root, getCharacter = () => null }) {
   if (!canvas || !root) return () => {};
   const context = canvas.getContext("2d");
   context.imageSmoothingEnabled = false;
@@ -182,7 +183,8 @@ export function configureTownPassersby({ canvas, root }) {
           canvas.height,
           deltaSeconds,
           now,
-          allowedToSpawn.has(passerby)
+          allowedToSpawn.has(passerby),
+          Boolean(getCharacter()?.eventFlags?.tavern_rumor_004_base_read)
         );
       });
     }
@@ -202,9 +204,16 @@ function createPasserby(config) {
   image.decoding = "async";
   image.src = config.src;
   image.decode().catch(() => {});
+  const alternateImage = config.alternateSrc ? new Image() : null;
+  if (alternateImage) {
+    alternateImage.decoding = "async";
+    alternateImage.src = config.alternateSrc;
+    alternateImage.decode().catch(() => {});
+  }
   return {
     config,
     image,
+    alternateImage,
     initialized: false,
     active: false,
     direction: config.initialDirection,
@@ -213,8 +222,9 @@ function createPasserby(config) {
   };
 }
 
-function updateAndDrawPasserby(passerby, context, width, height, deltaSeconds, now, allowSpawn) {
-  const { config, image } = passerby;
+function updateAndDrawPasserby(passerby, context, width, height, deltaSeconds, now, allowSpawn, useAlternate) {
+  const { config } = passerby;
+  const image = useAlternate && passerby.alternateImage ? passerby.alternateImage : passerby.image;
   if (!image.complete || !image.naturalWidth || !image.naturalHeight) return;
   const drawHeight = Math.max(1, Math.round(height * config.heightRatio));
   const drawWidth = Math.max(1, Math.round(drawHeight * image.naturalWidth / image.naturalHeight));

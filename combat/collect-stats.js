@@ -46,6 +46,14 @@ export function collectStats(source = {}) {
       0,
       1
     ),
+    deadlyPoisonResistance: clamp(
+      numeric(source.deadlyPoisonResistance)
+        + numeric(equipment.deadlyPoisonResistance)
+        + numeric(cards.deadlyPoisonResistance)
+        + numeric(temporary.deadlyPoisonResistance),
+      0,
+      1
+    ),
     magicDamageReduction: clamp(
       numeric(source.magicDamageReduction)
         + numeric(equipment.magicDamageReduction)

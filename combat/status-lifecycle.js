@@ -88,7 +88,11 @@ export function getNonlethalPoisonDamage(currentHp, requestedDamage) {
 }
 
 export function getDeadlyPoisonStepDamage({ currentHp = 0, maxHp = 0 } = {}) {
-  const requested = Math.max(1, Math.floor(Math.max(1, Number(maxHp) || 1) * 0.01));
+  const definition = getStatusEffect("deadly_poison");
+  const requested = Math.max(
+    Number(definition?.minimumDamage) || 1,
+    Math.floor(Math.max(1, Number(maxHp) || 1) * (Number(definition?.damageMaxHpRate) || 0))
+  );
   return getNonlethalPoisonDamage(currentHp, requested);
 }
 

@@ -14,5 +14,5 @@ test("town facilities use the formal character names", () => {
 
 test("shop greeting and guild quest client names stay synchronized", () => {
   assert.equal(getTownFacility("shop").greeting, "あら、いらっしゃい。");
-  assert.ok(QUESTS.every(quest => quest.client === "ギルドマスター"));
+  assert.ok(QUESTS.every(quest => quest.id === "guild_016" ? quest.client === "アナスタシア" : quest.client === "ギルドマスター"));
 });

@@ -109,6 +109,9 @@ const town = {
   rumorDialogue: [],
   rumorDialogueIndex: 0,
   activeRumor: null,
+  facilityTalkDialogue: [],
+  facilityTalkDialogueIndex: 0,
+  facilityTalkCompletionFlag: "",
   questAcceptanceRewardMessage: "",
   entranceIndex: 0,
   transferIndex: 0,
@@ -155,6 +158,7 @@ const town = {
   facilityPreviewCommand: "",
   getUnreadRumor: () => null,
   onCompleteRumor: () => {},
+  onCompleteFacilityTalk: () => {},
   onTalk: () => "",
   onAcceptRequest: () => "",
   onAbandonRequest: () => null,
@@ -177,7 +181,8 @@ export function configureTown(options) {
   town.disposePassersby?.();
   town.disposePassersby = configureTownPassersby({
     canvas: town.passersbyCanvas,
-    root: town.root
+    root: town.root,
+    getCharacter: town.getCharacter
   });
   town.mosaic = town.root.querySelector("#townMosaic");
   town.portrait = town.root.querySelector("#townPortrait");
@@ -232,6 +237,13 @@ export function configureTown(options) {
     const image = new Image();
     image.decoding = "async";
     image.src = TAVERN_FACILITY.image;
+    image.decode().catch(() => {});
+    town.portraitPreloads.push(image);
+  }
+  {
+    const image = new Image();
+    image.decoding = "async";
+    image.src = "images/npc/NPC_12c.avif";
     image.decode().catch(() => {});
     town.portraitPreloads.push(image);
   }
@@ -509,6 +521,7 @@ export function handleTownInput(action) {
   if (town.mode === "commerce") return handleCommerceInput(action);
   if (town.mode === "npcManagement") return handleNpcManagementInput(action);
   if (town.mode === "tavernRumor") return handleTavernRumorInput(action);
+  if (town.mode === "facilityTalk") return handleFacilityTalkInput(action);
   if (town.mode.startsWith("quest")) return handleQuestInput(action);
   if (town.mode === "registration") return handleRegistrationInput(action);
   if (town.mode === "dungeonEntrance") return handleEntranceInput(action);
@@ -616,6 +629,23 @@ function handleTavernRumorInput(action) {
   town.activeRumor = null;
   town.rumorDialogue = [];
   town.rumorDialogueIndex = 0;
+  renderFacility();
+  return true;
+}
+
+function handleFacilityTalkInput(action) {
+  if (action === "cancel") return true;
+  if (action !== "confirm") return true;
+  town.playSe("confirm");
+  town.facilityTalkDialogueIndex += 1;
+  if (town.facilityTalkDialogueIndex < town.facilityTalkDialogue.length) {
+    town.messageEl.textContent = town.facilityTalkDialogue[town.facilityTalkDialogueIndex];
+    return true;
+  }
+  if (town.facilityTalkCompletionFlag) town.onCompleteFacilityTalk(town.facilityTalkCompletionFlag);
+  town.facilityTalkDialogue = [];
+  town.facilityTalkDialogueIndex = 0;
+  town.facilityTalkCompletionFlag = "";
   renderFacility();
   return true;
 }
@@ -752,11 +782,11 @@ function handleQuestInput(action) {
     if (result?.accepted) {
       town.mode = "facilityMenu";
       renderFacility();
-      town.messageEl.textContent = result.eventRewardCardId
+      town.messageEl.textContent = result.message || (result.eventRewardCardId
         ? "ギルドマスター：三つの依頼、すべてよくやってくれた。これは俺からの餞別だ。女神の恩寵がお前を守ってくれるだろう。"
         : quest?.id === "guild_001_abyss_rat"
           ? "ギルドマスター：よくやってくれた！これなら先に進んでも大丈夫だろう。もっとも、生き残れるかはお前次第、だがな。"
-          : "ギルドマスター：依頼達成、よくやってくれた！また頼むぜ。";
+          : "ギルドマスター：依頼達成、よくやってくれた！また頼むぜ。");
     } else {
       openGuildQuestList("report");
       town.messageEl.textContent = "ギルドマスター：まだ達成条件を満たしていないようだな。";
@@ -1041,7 +1071,22 @@ function returnFromFacility() {
 function currentFacility() {
   if (town.subFacilityId === "tavern") return TAVERN_FACILITY;
   if (town.subFacilityId === "npcHire") return NPC_HIRE_FACILITY;
-  return TOWN_FACILITIES[town.selectedIndex] || getTownFacility("guild");
+  const facility = TOWN_FACILITIES[town.selectedIndex] || getTownFacility("guild");
+  if (facility.id !== "temple" || !isAnastasiaAssigned()) return facility;
+  return {
+    ...facility,
+    keeper: "助祭アナスタシア",
+    image: "images/npc/NPC_12c.avif",
+    greeting: "さぁ、女神様に祈りを捧げましょう。"
+  };
+}
+
+function isAnastasiaAssigned() {
+  return Boolean(town.getCharacter()?.eventFlags?.tavern_rumor_004_base_read);
+}
+
+function templeKeeper() {
+  return isAnastasiaAssigned() ? "助祭アナスタシア" : "司祭アーヴァイン";
 }
 
 function startTownNameBanner() {
@@ -1492,9 +1537,16 @@ function activateFacilityService(command) {
     const facility = currentFacility();
     if (!["guild", "inn", "temple", "shop", "library", "tavern"].includes(facility?.id)) return false;
     const result = town.onTalk(facility?.id);
-    const message = typeof result === "string" ? result : result?.message;
+    const dialogue = Array.isArray(result?.dialogue) ? result.dialogue.filter(Boolean) : [];
+    const message = dialogue[0] || (typeof result === "string" ? result : result?.message);
     town.pendingVoiceFacility = facility.id === "inn" ? "inn" : "";
     if (message) town.messageEl.textContent = message;
+    if (dialogue.length) {
+      town.facilityTalkDialogue = dialogue;
+      town.facilityTalkDialogueIndex = 0;
+      town.facilityTalkCompletionFlag = result.completionFlag || "";
+      town.mode = "facilityTalk";
+    }
     if (result?.focusCommand) {
       showFacilityCommands(facility.id);
       const index = town.facilityCommandButtons.findIndex(
@@ -1527,7 +1579,7 @@ function requestTempleHealing() {
   town.mode = "templeHealConfirm";
   town.playSe("confirm");
   const fee = Math.max(2, Math.floor(Number(town.getCharacter()?.level) || 1) * 2);
-  town.messageEl.textContent = `司祭アーヴァイン：${fee}Gの寄進で治療を行います。よろしいですか？\n＊Aボタン：はい　Bボタン：いいえ`;
+  town.messageEl.textContent = `${templeKeeper()}：${fee}Gの寄進で治療を行います。よろしいですか？\n＊Aボタン：はい　Bボタン：いいえ`;
 }
 
 function handleTempleHealConfirmationInput(action) {
@@ -1541,7 +1593,7 @@ function handleTempleHealConfirmationInput(action) {
   if (action === "cancel") {
     town.playSe("cancel");
     town.mode = "facilityMenu";
-    town.messageEl.textContent = "司祭アーヴァイン：承知しました。必要な時はいつでもお申し付けください。";
+    town.messageEl.textContent = `${templeKeeper()}：承知しました。必要な時はいつでもお申し付けください。`;
     return true;
   }
   return true;
@@ -1550,7 +1602,7 @@ function handleTempleHealConfirmationInput(action) {
 function requestTempleRename() {
   town.mode = "templeRenameConfirm";
   town.playSe("confirm");
-  town.messageEl.textContent = `司祭アーヴァイン：魂と紐付けられた名前を変えるのです。それなりの額を寄進していただく必要がありますな…。\n${CHARACTER_RENAME_COST.toLocaleString("ja-JP")}G寄進しますか？\n＊Aボタン：はい　Bボタン：いいえ`;
+  town.messageEl.textContent = `${templeKeeper()}：魂と紐付けられた名前を変えるには、女神様への寄進が必要です。\n${CHARACTER_RENAME_COST.toLocaleString("ja-JP")}G寄進しますか？\n＊Aボタン：はい　Bボタン：いいえ`;
 }
 
 function handleTempleRenameConfirmationInput(action) {
@@ -1565,10 +1617,10 @@ function handleTempleRenameConfirmationInput(action) {
   const gold = Math.max(0, Math.floor(Number(town.getCharacter()?.gold) || 0));
   if (gold < CHARACTER_RENAME_COST) {
     town.mode = "facilityMenu";
-    town.messageEl.textContent = "司祭アーヴァイン：申し訳ありませんが、魂の名を書き換えるには10,000Gの寄進が必要なのです。";
+    town.messageEl.textContent = `${templeKeeper()}：申し訳ありませんが、魂の名を書き換えるには10,000Gの寄進が必要なのです。`;
     return true;
   }
-  town.messageEl.textContent = "司祭アーヴァイン：では、女神様の前で新たな魂の名前を口にするのです…！";
+  town.messageEl.textContent = `${templeKeeper()}：では、女神様の前で新たな魂の名前を口にしてください…！`;
   openTempleRenameInput();
   return true;
 }
@@ -1591,7 +1643,7 @@ function handleTempleRenameInput(action) {
   if (action === "cancel") {
     town.playSe("cancel");
     closeTempleRenameInput();
-    town.messageEl.textContent = "司祭アーヴァイン：承知しました。魂の名はそのままといたしましょう。";
+    town.messageEl.textContent = `${templeKeeper()}：承知しました。魂の名はそのままといたしましょう。`;
     return true;
   }
   if (action === "confirm") {
@@ -1617,7 +1669,7 @@ function renameCharacterAtTemple() {
   }
   closeTempleRenameInput();
   renderCharacterStatus();
-  town.messageEl.textContent = "司祭アーヴァイン：……確かに承りました。これより、その名こそがあなたの魂の名です。";
+  town.messageEl.textContent = `${templeKeeper()}：……確かに承りました。これより、その名こそがあなたの魂の名です。`;
   town.onStateChanged();
   return true;
 }
@@ -1964,7 +2016,7 @@ function openCommerce(kind) {
   renderStorageTabs();
   town.guildQuestOverlay.hidden = true;
   town.messageEl.textContent = kind === "donate"
-    ? "司祭アーヴァイン：いずれを女神へ寄進されますか？\n＊Aボタン：決定　Bボタン：戻る"
+    ? `${templeKeeper()}：いずれを女神へ寄進されますか？\n＊Aボタン：決定　Bボタン：戻る`
     : kind === "storageWithdraw"
       ? town.commerceItems.length ? "女主人ヘレン：取り出すものを選んで。" : "女主人ヘレン：倉庫は空よ。"
     : kind === "storageDeposit"
@@ -2083,7 +2135,7 @@ function showCommerceConfirmation() {
     : item.storageEquipment && town.commerceKind === "storageDeposit"
       ? `女主人ヘレン：${item.name}を預かればいいのね？\n＊Aボタン：はい　Bボタン：いいえ`
     : town.commerceKind === "donate"
-    ? "司祭アーヴァイン：こちらでよろしいですか？\n＊Aボタン：はい　Bボタン：いいえ"
+    ? `${templeKeeper()}：こちらでよろしいですか？\n＊Aボタン：はい　Bボタン：いいえ`
     : town.commerceKind === "storageWithdraw"
       ? `女主人ヘレン：${item.name}を${town.commerceQuantity || 1}個取り出すのね？\n＊Aボタン：はい　Bボタン：いいえ`
     : town.commerceKind === "storageDeposit"
@@ -2150,7 +2202,7 @@ function handleCommerceConfirmationInput(action) {
     town.playSe("cancel");
     town.mode = "commerce";
     town.messageEl.textContent = town.commerceKind === "donate"
-      ? "司祭アーヴァイン：承知しました。"
+      ? `${templeKeeper()}：承知しました。`
       : town.commerceKind === "sell" ? "女主人ヘレン：あら、残念。" : "女主人ヘレン：あら、残念。";
     return true;
   }
@@ -2179,19 +2231,19 @@ function purchaseSelectedCommerceItem() {
         ? item.buybackKind === "item"
           ? town.onBuybackItem(item.buybackEntryId || item.id)
           : town.onBuybackEquipment(item.buybackEntryId || item.id)
-      : town.onPurchaseItem(item.id, town.commerceQuantity || 1);
+      : town.onPurchaseItem(item.id, town.commerceQuantity || 1, { donation: town.commerceKind === "donate" });
   if (!result?.accepted) {
     town.playSe("cursorMove");
     town.messageEl.textContent = result?.reason === "insufficientGold"
       ? (town.commerceKind === "donate"
-        ? "司祭アーヴァイン：ゴールドが足りません。"
+        ? `${templeKeeper()}：ゴールドが足りません。`
         : "女主人ヘレン：あら、お金が足りないわ。")
-      : `${town.commerceKind === "donate" ? "司祭アーヴァイン" : "女主人ヘレン"}：これ以上は持てないようですね。`;
+      : `${town.commerceKind === "donate" ? templeKeeper() : "女主人ヘレン"}：これ以上は持てないようですね。`;
     town.mode = "commerce";
     return;
   }
   town.playSe("item");
-  const keeper = town.commerceKind === "donate" ? "司祭アーヴァイン" : "女主人ヘレン";
+  const keeper = town.commerceKind === "donate" ? templeKeeper() : "女主人ヘレン";
   town.messageEl.textContent = town.commerceKind === "donate"
     ? `${keeper}：女神のご加護を。${item.name}を授けましょう。`
     : withdrawing
@@ -2406,6 +2458,7 @@ function getVisibleQuestIndexes() {
   return QUESTS
     .map((quest, index) => ({ index, progress: getQuestProgress(town.getCharacter(), quest.id) }))
     .filter(({ index }) => initialTrialComplete || index < 3)
+    .filter(({ index, progress }) => QUESTS[index].id !== "guild_016" || progress.active || isQuestAvailable(character, QUESTS[index]))
     .filter(({ progress }) => !progress.completed)
     .map(({ index }) => index);
 }
@@ -2454,7 +2507,7 @@ function renderQuestDetail(quest, progress) {
     detailBlock("依頼人", quest.client),
     divider(),
     detailBlock(
-      quest.objectiveType === "exploreFloor" ? "目的" : "討伐数",
+      quest.objectiveHeading || (quest.objectiveType === "exploreFloor" ? "目的" : "討伐数"),
       quest.objectiveLabel || `${quest.targetName}を${quest.requiredCount}匹退治する。`
     ),
     divider(),

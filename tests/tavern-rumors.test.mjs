@@ -117,3 +117,32 @@ test("B4 unlocks the terrifying presence rumor and Otherworldly Wisdom adds Rosa
   assert.equal(rumor.title, "恐ろしい何かの噂");
   assert.equal(rumor.description.length, 4);
 });
+
+test("priest rumor requires quest 019 plus one hundred donations and updates after quest 016", () => {
+  let character = createInitialCharacter("寄進者", "priest");
+  character.eventFlags = {
+    tavern_rumor_001_base_read: true,
+    tavern_rumor_002_base_read: true,
+    tavern_rumor_003_base_read: true
+  };
+  character.highestDungeonDepthReached = 50;
+  character.adventureStats.templeDonationCount = 100;
+  assert.equal(getUnreadTavernRumor(character), null);
+
+  character.quests.completedQuestIds.push("guild_019");
+  const base = getUnreadTavernRumor(character);
+  assert.equal(base.id, "rumor_004_base");
+  assert.match(base.dialogue[0], /司祭様が腰を痛められて/);
+  assert.match(base.dialogue[1], /若い助祭/);
+  character = markTavernRumorRead(character, base);
+  assert.equal(character.eventFlags.tavern_rumor_004_base_read, true);
+  assert.equal(getPastTavernRumors(character).find(entry => entry.id === "rumor_004")?.title, "司祭様の噂");
+
+  character.quests.completedQuestIds.push("guild_016");
+  assert.equal(getPastTavernRumors(character).some(entry => entry.id === "rumor_004"), false);
+  const update = getUnreadTavernRumor(character);
+  assert.equal(update.id, "rumor_004_medicine");
+  assert.match(update.dialogue.at(-1), /特効薬の材料/);
+  character = markTavernRumorRead(character, update);
+  assert.equal(getPastTavernRumors(character).find(entry => entry.id === "rumor_004")?.description.length, 4);
+});
