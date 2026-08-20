@@ -55,7 +55,7 @@ export const SHOP_ACCESSORY_STOCK = Object.freeze([
     shopUnlockDepth: 50,
     requiredFlags: Object.freeze(["transfer_portal_b50f_unlocked", "boss_eiskoenigin_b49f_defeated"])
   }),
-  ...["mana_amplifier", "masters_necklace", "poison_mask"].map(equipmentId => Object.freeze({
+  ...["mana_amplifier", "masters_necklace", "poison_mask", "grain_choker"].map(equipmentId => Object.freeze({
     id: `shop_${equipmentId}`,
     equipmentId,
     enhancement: 0,
@@ -203,6 +203,8 @@ function describeBonuses(bonuses = {}) {
         ? `行動不能耐性+${Math.round(Number(value) * 100)}%`
       : key === "attackSpellDamageBonus"
         ? `攻撃呪文威力+${Math.round(Number(value) * 100)}%`
+      : key === "healingMiracleBonus"
+        ? `回復奇蹟威力+${Math.round(Number(value) * 100)}%`
       : key === "passiveInstantDeathRateBonus"
         ? `一閃・暗殺術+${Math.round(Number(value) * 100)}%`
       : key === "poisonResistance"

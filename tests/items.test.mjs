@@ -176,25 +176,27 @@ test("Spell-Sealing Talisman unlocks at B50 and scales spell resistance through 
   );
 });
 
-test("B60 shop unlocks the three new base accessories and their plus-three profiles", () => {
+test("B60 shop unlocks four new base accessories and their plus-three profiles", () => {
   const character = createInitialCharacter({ name: "TEST", job: "mage" });
   character.highestDungeonDepthReached = 60;
   assert.equal(getShopEquipmentOffer(character, "shop_mana_amplifier"), null);
   character.eventFlags.transfer_portal_b60f_unlocked = true;
-  const offers = ["mana_amplifier", "masters_necklace", "poison_mask"]
+  const offers = ["mana_amplifier", "masters_necklace", "poison_mask", "grain_choker"]
     .map(id => getShopEquipmentOffer(character, `shop_${id}`));
-  assert.deepEqual(offers.map(offer => offer.buyPrice), [15000, 10000, 10000]);
+  assert.deepEqual(offers.map(offer => offer.buyPrice), [15000, 10000, 10000, 10000]);
   assert.deepEqual(
     offers.map(offer => offer.statBonuses),
-    [{ attackSpellDamageBonus: 0.05 }, { passiveInstantDeathRateBonus: 0.01 }, { poisonResistance: 0.15 }]
+    [{ attackSpellDamageBonus: 0.05 }, { passiveInstantDeathRateBonus: 0.01 },
+      { poisonResistance: 0.15 }, { healingMiracleBonus: 0.05 }]
   );
   assert.deepEqual(
-    ["mana_amplifier", "masters_necklace", "poison_mask"].map(equipmentId =>
+    ["mana_amplifier", "masters_necklace", "poison_mask", "grain_choker"].map(equipmentId =>
       getEquipmentInstanceDefinition({ equipmentId, slot: "accessoryId", enhancement: 3 }).statBonuses),
     [
       { int: 3, attackSpellDamageBonus: 0.2 },
       { luc: 3, passiveInstantDeathRateBonus: 0.04 },
-      { def: 3, poisonResistance: 0.3 }
+      { def: 3, poisonResistance: 0.3 },
+      { luc: 3, healingMiracleBonus: 0.2 }
     ]
   );
 });
@@ -483,7 +485,8 @@ test("strong small healing potion unlocks at B50F and heals 30 percent of max HP
 
 test("strong antidote unlocks at B50F and cures poison plus deadly poison while healing 60 HP", () => {
   const item = getItem("strong_antidote");
-  assert.equal(item.buyPrice, 100);
+  assert.equal(item.buyPrice, 150);
+  assert.equal(item.sellPrice, 75);
   assert.equal(getShopItemIdsForDepth(49).includes(item.id), false);
   assert.equal(getShopItemIdsForDepth(50).includes(item.id), true);
   const character = characterWith(item.id);

@@ -23,7 +23,7 @@ export function rollEnemyDrop(enemy, rng = Math.random) {
       ? { kind: "card", cardId: "sr_golden_beetle", amount: 1, unidentifiedName: "？カード", rarity: "SR" }
       : { kind: "none" };
   }
-  if (enemy?.dropProfile === "blackChest") return rollBlackChestLoot(rng, enemy.depth);
+  if (enemy?.dropProfile === "blackChest") return rollBlackChestLoot(rng, enemy.depth, enemy.job);
   const roll = normalizedRoll(rng);
   if (roll < 0.4) return { kind: "none" };
   if (roll < 0.95) {
@@ -66,13 +66,21 @@ export function rollGoldChestLoot(character) {
   };
 }
 
-export function rollBlackChestLoot(rng = Math.random, depth = 6) {
+export function rollBlackChestLoot(rng = Math.random, depth = 6, job = null) {
   const table = getBlackChestLootTable(depth);
   const roll = normalizedRoll(rng);
   if (Number(depth) >= 50 && Number(depth) <= 69) {
     const weaponIds = ["blacksteel_longsword", "abyss_fang", "sacred_tree_mace", "ancient_tree_staff"];
     const bandFloor = (Math.floor(Number(depth)) - 50) % 10;
-    const equipmentId = weaponIds[bandFloor % weaponIds.length];
+    const jobWeaponIds = {
+      warrior: "blacksteel_longsword",
+      thief: "abyss_fang",
+      priest: "sacred_tree_mace",
+      mage: "ancient_tree_staff"
+    };
+    const equipmentId = Number(depth) === 68 && jobWeaponIds[job]
+      ? jobWeaponIds[job]
+      : weaponIds[bandFloor % weaponIds.length];
     return {
       kind: "equipment",
       equipmentId,
@@ -251,7 +259,7 @@ function rollDesertRedChestLoot(roll, rng) {
     return { kind: "item", itemId: "strong_antidote", amount: 1, unidentifiedName: "？薬" };
   }
   const equipmentId = rollFromList([
-    "spell_sealing_talisman", "mana_amplifier", "masters_necklace", "poison_mask"
+    "spell_sealing_talisman", "mana_amplifier", "masters_necklace", "poison_mask", "grain_choker"
   ], rng);
   return {
     kind: "equipment",

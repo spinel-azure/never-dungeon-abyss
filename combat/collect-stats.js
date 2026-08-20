@@ -28,7 +28,8 @@ export function collectStats(source = {}) {
       source.job ? COMBAT_CONFIG.defenseMaximum : Number.POSITIVE_INFINITY
     ),
     hitBonus: numeric(source.hitBonus),
-    healingMiracleMultiplier: positiveMultiplier(equipment.healingMiracleMultiplier),
+    healingMiracleMultiplier: positiveMultiplier(equipment.healingMiracleMultiplier)
+      * (1 + numeric(equipment.healingMiracleBonus)),
     evasionBonus: numeric(source.evasionBonus),
     physicalHitMinimum: Number.isFinite(Number(source.physicalHitMinimum))
       ? Number(source.physicalHitMinimum)

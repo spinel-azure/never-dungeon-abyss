@@ -1352,6 +1352,7 @@ import {
           fireDamageTakenBonus: "被炎ダメージ",
           iceDamageTakenBonus: "被氷ダメージ",
           attackSpellDamageBonus: "攻撃呪文威力",
+          healingMiracleBonus: "回復奇蹟威力",
           passiveInstantDeathRateBonus: "一閃・暗殺術",
           poisonResistance: "毒・猛毒耐性"
         };
@@ -1687,7 +1688,7 @@ import {
     if (treasureType !== "red" && treasureType !== "black" && treasureType !== "purple" && treasureType !== "gold") return { message: "中には何も入っていなかった！" };
     const message = addRolledLoot(
       treasureType === "black"
-        ? rollEnemyDrop({ dropProfile: "blackChest", depth: currentDepth })
+        ? rollEnemyDrop({ dropProfile: "blackChest", depth: currentDepth, job: character?.job })
         : treasureType === "gold"
           ? rollGoldChestLoot(character)
         : treasureType === "purple"

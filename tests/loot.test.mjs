@@ -186,13 +186,13 @@ test("B50F to B59F red chests cycle the new class armor with 70/25/5 enhancement
   assert.equal(rollRedChestLoot(rng(0.2, 0.95), 54).enhancement, 3);
 });
 
-test("B60F to B69F red chests feature all four enhanced accessory series", () => {
+test("B60F to B69F red chests feature all five enhanced accessory series", () => {
   assert.equal(rollRedChestLoot(rng(0.099), 60).itemId, "strong_healing_potion_small");
   assert.equal(rollRedChestLoot(rng(0.1), 60).itemId, "strong_antidote");
   assert.equal(rollRedChestLoot(rng(0.2, 0), 60).equipmentId, "spell_sealing_talisman");
   assert.deepEqual(
-    [0, 0.25, 0.5, 0.75].map(accessoryRoll => rollRedChestLoot(rng(0.2, accessoryRoll, 0), 60).equipmentId),
-    ["spell_sealing_talisman", "mana_amplifier", "masters_necklace", "poison_mask"]
+    [0, 0.2, 0.4, 0.6, 0.8].map(accessoryRoll => rollRedChestLoot(rng(0.2, accessoryRoll, 0), 60).equipmentId),
+    ["spell_sealing_talisman", "mana_amplifier", "masters_necklace", "poison_mask", "grain_choker"]
   );
   assert.equal(rollRedChestLoot(rng(0.8, 0), 69).slot, "accessoryId");
   assert.equal(rollRedChestLoot(rng(0.8, 0), 69).unidentifiedName, "？装備");
@@ -247,6 +247,11 @@ test("B60F to B69F black chests repeat the B50F deep weapon table", () => {
   assert.equal(rollBlackChestLoot(rng(0, 0.7), 65).enhancement, 2);
   assert.equal(rollBlackChestLoot(rng(0, 0.95), 68).enhancement, 3);
   assert.equal(rollBlackChestLoot(rng(0, 0), 67).unidentifiedName, "？両手杖");
+  assert.deepEqual(
+    ["warrior", "thief", "priest", "mage"].map(job =>
+      rollBlackChestLoot(rng(0, 0), 68, job).equipmentId),
+    ["blacksteel_longsword", "abyss_fang", "sacred_tree_mace", "ancient_tree_staff"]
+  );
 });
 
 test("unidentified card loot settles into the card collection", () => {

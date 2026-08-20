@@ -1063,6 +1063,7 @@ function equipmentEffectLabels(definition) {
       fireDamageTakenBonus: "被炎ダメージ",
       iceDamageTakenBonus: "被氷ダメージ",
       attackSpellDamageBonus: "攻撃呪文威力",
+      healingMiracleBonus: "回復奇蹟威力",
       passiveInstantDeathRateBonus: "一閃・暗殺術",
       poisonResistance: "毒・猛毒耐性"
     };

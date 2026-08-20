@@ -684,6 +684,14 @@ test("Sylvan Emera multiplies DEF and healing miracles by 1.5", () => {
   assert.equal(result.calculatedHealing, 22);
 });
 
+test("Grain Choker healing bonus multiplies with Sylvan Emera", () => {
+  const stats = collectStats({
+    job: "priest",
+    equipmentBonuses: { healingMiracleMultiplier: 1.5, healingMiracleBonus: 0.2 }
+  });
+  assert.ok(Math.abs(stats.healingMiracleMultiplier - 1.8) < 1e-9);
+});
+
 test("Comet Booster grants Fall the Meteor only while equipped", () => {
   const mage = createInitialCharacter({ name: "TEST", job: "mage" });
   mage.equipment.rightArmId = "comet_booster";

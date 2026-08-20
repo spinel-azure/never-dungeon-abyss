@@ -226,7 +226,7 @@ export const ITEMS = Object.freeze([
   }),
   Object.freeze({
     number: 36, id: "strong_antidote", name: "強解毒剤", category: "recovery",
-    buyPrice: 100, sellPrice: 50, source: "shop", usableIn: Object.freeze(["town", "dungeon", "battle"]),
+    buyPrice: 150, sellPrice: 75, source: "shop", usableIn: Object.freeze(["town", "dungeon", "battle"]),
     effects: Object.freeze([
       { id: "cure_poison", value: 1 },
       { id: "cure_deadly_poison", value: 1 },

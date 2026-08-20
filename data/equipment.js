@@ -72,6 +72,15 @@ export const EQUIPMENT = Object.freeze({
     }),
     sellPriceByEnhancement: Object.freeze({ 0: 5000, 1: 6000, 2: 7500, 3: 10000 })
   }),
+  grain_choker: item("grain_choker", "稲穂のチョーカー", "accessoryId", { healingMiracleBonus: 0.05 }, {
+    buyPrice: 10000, sellPrice: 5000, shopUnlockDepth: 60,
+    statBonusesByEnhancement: Object.freeze({
+      1: Object.freeze({ healingMiracleBonus: 0.1 }),
+      2: Object.freeze({ healingMiracleBonus: 0.15 }),
+      3: Object.freeze({ luc: 3, healingMiracleBonus: 0.2 })
+    }),
+    sellPriceByEnhancement: Object.freeze({ 0: 5000, 1: 6000, 2: 7500, 3: 10000 })
+  }),
   blacksteel_greatshield: item("blacksteel_greatshield", "黒鋼の大盾", "leftArmId", { def: 8, dex: 4 }, deepArmor("warrior", {
     1: { def: 9, dex: 4 }, 2: { def: 10, dex: 5 }, 3: { def: 11, dex: 6 }
   })),
