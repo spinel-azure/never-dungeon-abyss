@@ -229,6 +229,17 @@ test("B50F to B59F black chests cycle job weapons with 70/25/5 enhancements", ()
   assert.equal(rollBlackChestLoot(rng(0, 0), 57).unidentifiedName, "？両手杖");
 });
 
+test("B60F to B69F black chests repeat the B50F deep weapon table", () => {
+  assert.deepEqual(
+    [60, 61, 62, 63].map(depth => rollBlackChestLoot(rng(0, 0), depth).equipmentId),
+    ["blacksteel_longsword", "abyss_fang", "sacred_tree_mace", "ancient_tree_staff"]
+  );
+  assert.equal(rollBlackChestLoot(rng(0, 0.699), 64).enhancement, 1);
+  assert.equal(rollBlackChestLoot(rng(0, 0.7), 65).enhancement, 2);
+  assert.equal(rollBlackChestLoot(rng(0, 0.95), 68).enhancement, 3);
+  assert.equal(rollBlackChestLoot(rng(0, 0), 67).unidentifiedName, "？両手杖");
+});
+
 test("unidentified card loot settles into the card collection", () => {
   const character = createInitialCharacter({ name: "TEST", job: "thief" });
   character.lootBag = addLootCard(character.lootBag, "rare_strength_up_plus", 2).lootBag;

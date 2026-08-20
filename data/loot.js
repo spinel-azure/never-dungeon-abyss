@@ -64,9 +64,10 @@ export function rollGoldChestLoot(character) {
 export function rollBlackChestLoot(rng = Math.random, depth = 6) {
   const table = getBlackChestLootTable(depth);
   const roll = normalizedRoll(rng);
-  if (Number(depth) >= 50 && Number(depth) <= 59) {
+  if (Number(depth) >= 50 && Number(depth) <= 69) {
     const weaponIds = ["blacksteel_longsword", "abyss_fang", "sacred_tree_mace", "ancient_tree_staff"];
-    const equipmentId = weaponIds[(Math.floor(Number(depth)) - 50) % weaponIds.length];
+    const bandFloor = (Math.floor(Number(depth)) - 50) % 10;
+    const equipmentId = weaponIds[bandFloor % weaponIds.length];
     return {
       kind: "equipment",
       equipmentId,
