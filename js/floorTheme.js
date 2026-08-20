@@ -2,6 +2,11 @@ export const WALL_COLORS = Object.freeze(["default", "red", "blue", "green", "ye
 export const FLOOR_COLORS = Object.freeze(["default", "red", "blue", "green", "yellow", "slate", "water", "purple", "white", "black"]);
 export const FLOOR_THEME_MODES = Object.freeze({ FIXED: "fixed", RANDOM: "random" });
 
+export function isForcedTorchZeroFloor(depth) {
+  const floor = Math.floor(Number(depth) || 0);
+  return floor >= 90 && floor <= 99;
+}
+
 const settings = {
   mode: FLOOR_THEME_MODES.FIXED,
   fixed: { wall: "default", floor: "default" },

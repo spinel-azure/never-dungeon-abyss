@@ -108,6 +108,11 @@ test("Perpetual Torch exposes consumption suppression and forced torch effects",
 
   const playerSource = await readFile(new URL("../js/player.js", import.meta.url), "utf8");
   const rendererSource = await readFile(new URL("../js/renderer.js", import.meta.url), "utf8");
+  const minimapSource = await readFile(new URL("../js/minimap.js", import.meta.url), "utf8");
+  const mainSource = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
   assert.match(playerSource, /!torchFuelDisabled && !torchConsumptionDisabledByCard/);
   assert.match(rendererSource, /torchEffectForced[\s\S]*?torchFuel/);
+  assert.match(minimapSource, /state\.torchFuel > 0 \|\| state\.torchEffectForced/);
+  assert.match(mainSource, /isForcedTorchZeroFloor\(currentDepth\)[\s\S]*?displayedTorchFuel/);
+  assert.match(mainSource, /state\.torchEffectForced[\s\S]*?100[\s\S]*?state\.torchFuel/);
 });

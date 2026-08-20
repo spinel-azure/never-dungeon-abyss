@@ -52,7 +52,7 @@ import { configureGamepadInput } from "./gamepad-input.js";
 import { configureFloatingStick } from "./floating-stick.js";
 import { configureCompass, drawCompass } from "./compass.js";
 import { configureMenu, handleMenuInput, getDungeonColors, getDungeonMistOptions, setDungeonColors, getGamepadBindings, getGamepadCaptureAction, completeGamepadBinding, setGamepadPressedButtons, getTouchControlsMode, isMenuOpen, openItemInventory, openStatusMenu, openDeckEditor, openQuestHistory, openRumorHistory, openAdventureRecords, openLibraryCardGallery, openTitleOptions, refreshAdventureRecordsPlayTime, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js";
-import { resolveFloorTheme } from "./floorTheme.js";
+import { isForcedTorchZeroFloor, resolveFloorTheme } from "./floorTheme.js";
 import {
   configureAutoReturn,
   startAutoReturn,
@@ -1860,6 +1860,10 @@ import {
   }
 
   async function useFieldSkill(skillId) {
+    if (skillId === "staff_light" && isForcedTorchZeroFloor(currentDepth)) {
+      say("この区域では、たいまつの光を補充できない。");
+      return { accepted: false, reason: "forcedTorchZero" };
+    }
     const result = resolveFieldSkill({
       character,
       skillId,
@@ -1903,6 +1907,10 @@ import {
 
   async function useFieldItem(itemId) {
     const context = isTownOpen() ? "town" : "dungeon";
+    if (context === "dungeon" && itemId === "guiding_torch" && isForcedTorchZeroFloor(currentDepth)) {
+      say("この区域では、たいまつの光を補充できない。");
+      return { accepted: false, reason: "forcedTorchZero" };
+    }
     if (itemId === "auto_walker") {
       const availability = getAutoReturnAvailability();
       if (!availability.accepted) {
@@ -2924,13 +2932,19 @@ import {
   }
 
   function updateHud() {
+    if (isForcedTorchZeroFloor(currentDepth)) state.torchFuel = 0;
     posEl.textContent = `X:${state.gridX} Y:${state.gridY}`;
     depthEl.textContent = `B${currentDepth}F`;
     stopwatchEl.textContent = formatElapsedTime(performance.now() - runStartedAt);
     drawCompass();
-    const displayedTorchFuel = state.torchEffectForced ? 100 : state.torchFuel;
+    const displayedTorchFuel = isForcedTorchZeroFloor(currentDepth)
+      ? 0
+      : state.torchEffectForced ? 100 : state.torchFuel;
     torchMeterEl.style.width = `${displayedTorchFuel}%`;
-    torchMeterEl.parentElement.classList.toggle("is-critical", !state.torchEffectForced && state.torchFuel <= 20);
+    torchMeterEl.parentElement.classList.toggle(
+      "is-critical",
+      isForcedTorchZeroFloor(currentDepth) || (!state.torchEffectForced && state.torchFuel <= 20)
+    );
     const presence = getPresence();
     presenceMeterEl.style.setProperty("--presence", `${presence}%`);
     presenceMeterEl.setAttribute("aria-valuenow", String(presence));

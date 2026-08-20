@@ -1,6 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { resolveFloorTheme } from "../js/floorTheme.js";
+import { isForcedTorchZeroFloor, resolveFloorTheme } from "../js/floorTheme.js";
+
+test("only B90F to B99F force the torch gauge to zero", () => {
+  assert.equal(isForcedTorchZeroFloor(89), false);
+  assert.equal(isForcedTorchZeroFloor(90), true);
+  assert.equal(isForcedTorchZeroFloor(99), true);
+  assert.equal(isForcedTorchZeroFloor(100), false);
+});
 
 test("all themed dungeon areas use their fixed wall and floor colors", () => {
   for (let depth = 1; depth <= 200; depth += 1) {
