@@ -384,6 +384,13 @@ const ZODIAC_CARDS = [
   longBattleMaximumStacks: 3,
   longBattleDamagePerStack: 0.1,
   longBattleReductionPerStack: 0.1
+} : card.id === "zodiac_aries" ? {
+  ...card,
+  concept: "必ず先制／初回攻撃必中・威力2倍・DEF50％貫通",
+  descriptionJa: "戦闘開始時に必ず先制する。最初に行う攻撃は全Hitが必ず命中し、与えるダメージが2倍になり、DEFを50％貫通する。",
+  openingDamageMultiplier: 2,
+  openingDefensePenetration: 0.5,
+  openingUnavoidable: true
 } : card.id === "zodiac_libra" ? {
   ...card,
   concept: "強敵への与ダメージ＋30％／被ダメージ－30％",

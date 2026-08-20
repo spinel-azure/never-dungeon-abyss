@@ -1420,10 +1420,11 @@ import {
       ignoreNormalCap: Boolean(enemyData.ignoreNormalSurpriseCap),
       forceAmbush: state.torchFuel <= 0 && !state.torchEffectForced
     });
+    const ariesActive = hasCardEffect(character?.cards?.deckSlots, "zodiac_aries");
     pendingEncounter = {
       enemyData,
       enemyCount: getEnemyEncounterCount(enemyData),
-      ambush: surprise.ambush,
+      ambush: surprise.ambush && !ariesActive,
       surpriseRate: surprise.rate,
       concealed: state.torchFuel <= 0 && !state.torchEffectForced
     };

@@ -1347,6 +1347,92 @@ test("main card registry contains every rarity and all twelve zodiac cards", () 
   assert.equal(getCardById("zodiac_capricorn")?.zodiac, "capricorn");
 });
 
+test("Aries stores the complete opening-strike contract", () => {
+  const card = getCardById("zodiac_aries");
+  assert.equal(card?.cost, 8);
+  assert.equal(card?.openingDamageMultiplier, 2);
+  assert.equal(card?.openingDefensePenetration, 0.5);
+  assert.equal(card?.openingUnavoidable, true);
+  assert.match(card?.descriptionJa, /必ず先制/);
+  assert.match(card?.descriptionJa, /全Hit/);
+});
+
+test("Aries prevents an enemy ambush and preserves the player's command phase", () => {
+  const character = createInitialCharacter({ name: "ARIES", job: "thief" });
+  character.cards.deckSlots[0] = "zodiac_aries";
+  const battle = createBattleState({ character, enemy: createEnemyCombatant(getEnemyById("abyss_rat")) });
+  const resolved = resolveEnemyAmbush({ battle, rng: () => 0 });
+  assert.equal(resolved.prevented, true);
+  assert.equal(resolved.battle.player.hp, battle.player.hp);
+  assert.equal(resolved.battle.phase, "command");
+  assert.match(resolved.battle.log[0], /不意打ちを打ち消した/);
+});
+
+test("Aries makes every hit of the first attack unavoidable and then expires", () => {
+  const character = createInitialCharacter({ name: "ARIES", job: "thief" });
+  character.cards.deckSlots[0] = "zodiac_aries";
+  const enemy = createEnemyCombatant({
+    ...getEnemyById("maikaefer"), hp: 9999, maxHp: 9999, evasionBonus: 100
+  });
+  const first = resolveBattleRound({
+    battle: createBattleState({ character, enemy }),
+    playerCommand: { type: "attack" },
+    rng: () => 0.999
+  });
+  const openingHits = first.battle.presentationEvents.filter(event => event.actorSide === "player");
+  assert.equal(openingHits.length, 2);
+  assert.equal(openingHits.every(event => event.hit), true);
+  assert.equal(first.battle.ariesOpeningAttackAvailable, false);
+  const second = resolveBattleRound({ battle: first.battle, playerCommand: { type: "attack" }, rng: () => 0.999 });
+  const laterHits = second.battle.presentationEvents.filter(event => event.actorSide === "player");
+  assert.equal(laterHits.some(event => !event.hit), true);
+});
+
+test("Aries keeps its opening attack after guard and defeats Maikaefer before escape", () => {
+  const character = createInitialCharacter({ name: "ARIES", job: "warrior" });
+  character.baseStats.str = 30;
+  character.cards.deckSlots[0] = "zodiac_aries";
+  const durableEnemy = createEnemyCombatant({ ...getEnemyById("abyss_rat"), hp: 9999, maxHp: 9999 });
+  const guarded = resolveBattleRound({
+    battle: createBattleState({ character, enemy: durableEnemy }),
+    playerCommand: { type: "guard" },
+    rng: () => 0.5
+  }).battle;
+  assert.equal(guarded.ariesOpeningAttackAvailable, true);
+
+  const beetle = createEnemyCombatant({ ...getEnemyById("maikaefer"), hp: 8, maxHp: 8 });
+  const hunted = resolveBattleRound({
+    battle: createBattleState({ character, enemy: beetle }),
+    playerCommand: { type: "attack" },
+    rng: () => 0
+  }).battle;
+  assert.equal(hunted.outcome, "victory");
+  assert.equal(hunted.enemy.escaped, undefined);
+  assert.equal(hunted.presentationEvents.some(event => event.actorSide === "enemy"), false);
+});
+
+test("Aries doubles the first attack spell without affecting later spells", () => {
+  const makeMage = withAries => {
+    const character = createInitialCharacter({ name: "ARIES_MAGE", job: "mage" });
+    if (withAries) character.cards.deckSlots[0] = "zodiac_aries";
+    return character;
+  };
+  const makeEnemy = () => createEnemyCombatant({
+    ...getEnemyById("abyss_rat"), hp: 9999, maxHp: 9999, stats: { str: 1, int: 1, agi: 1, dex: 1, luc: 1 }
+  });
+  const cast = battle => resolveBattleRound({
+    battle,
+    playerCommand: { type: "skill", skillId: "fireball" },
+    rng: () => 0.5
+  }).battle;
+  const ordinary = cast(createBattleState({ character: makeMage(false), enemy: makeEnemy() }));
+  const first = cast(createBattleState({ character: makeMage(true), enemy: makeEnemy() }));
+  const second = cast(first);
+  const playerDamage = battle => battle.presentationEvents.find(event => event.actorSide === "player")?.damage;
+  assert.equal(playerDamage(first), playerDamage(ordinary) * 2);
+  assert.equal(playerDamage(second), playerDamage(ordinary));
+});
+
 test("Capricorn gains one long-battle stage every five turns up to three", () => {
   const card = getCardById("zodiac_capricorn");
   assert.equal(card?.cost, 8);

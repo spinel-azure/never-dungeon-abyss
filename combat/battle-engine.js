@@ -53,6 +53,8 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     enemy: selectedEnemy,
     ...(enemyParty ? { enemies: enemyParty, targetIndex: selectedTargetIndex, lastPlayerTargetIndex: selectedTargetIndex } : {}),
     vorpalSwordEquippedAtStart,
+    ariesActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_aries"),
+    ariesOpeningAttackAvailable: hasCardEffect(character?.cards?.deckSlots, "zodiac_aries"),
     capricornActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_capricorn"),
     libraActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_libra"),
     vorpalExecution: false,
@@ -68,10 +70,10 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
   const playerAction = createPlayerAction(next.player, playerCommand, next.enemy);
   if (!playerAction.ok) return { battle: next, accepted: false, reason: playerAction.reason };
   const enemyAction = createEnemyAction(next.enemy, rng);
-  const order = resolveTurnOrder([
+  const order = applyAriesOpeningPriority(next, resolveTurnOrder([
     { side: "player", actor: combatStats(next.player), action: playerAction.action },
     { side: "enemy", actor: combatStats(next.enemy), action: enemyAction }
-  ], rng);
+  ], rng));
   next.log = [];
   next.presentationEvents = [];
 
@@ -96,9 +98,10 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
       continue;
     }
     const targetHpBefore = target.hp;
+    const action = applyAriesOpeningAttack(next, entry.action, entry.side);
     executeAction({
       battle: next,
-      action: entry.action,
+      action,
       actor,
       actorSide: entry.side,
       target,
@@ -141,7 +144,7 @@ export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.rand
     if (!member.alive || member.hp <= 0) return;
     orderEntries.push({ side: "enemy", partyIndex, actor: combatStats(member), action: createEnemyAction(member, rng) });
   });
-  const order = resolveTurnOrder(orderEntries, rng);
+  const order = applyAriesOpeningPriority(next, resolveTurnOrder(orderEntries, rng));
   next.log = [];
   next.presentationEvents = [];
 
@@ -171,13 +174,14 @@ export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.rand
       continue;
     }
     if (entry.side === "player") {
+      const action = applyAriesOpeningAttack(next, entry.action, "player");
       const targetIndexes = entry.action.target === "allEnemies"
         ? livingEnemyIndexes(next.enemies)
         : [normalizeLivingTargetIndex(next.enemies, next.targetIndex)];
       for (const targetIndex of targetIndexes) {
         const target = next.enemies[targetIndex];
         if (!target?.alive || target.hp <= 0) continue;
-        executeTargetedAction({ battle: next, action: entry.action, actor, actorSide: "player",
+        executeTargetedAction({ battle: next, action, actor, actorSide: "player",
           target, targetSide: "enemy", targetIndex, rng });
       }
       playerActionExecuted = true;
@@ -266,6 +270,12 @@ function applyPlayerTurnEndChargeEffects(battle) {
 
 export function resolveEnemyAmbush({ battle, rng = Math.random } = {}) {
   const next = structuredClone(battle);
+  if (next.ariesActiveAtStart) {
+    next.log = ["エアリーズの力が敵の不意打ちを打ち消した！"];
+    next.presentationEvents = [];
+    next.phase = "command";
+    return { battle: next, accepted: true, prevented: true };
+  }
   const opportunity = resolveActionOpportunity(next.enemy.statuses);
   next.enemy.statuses = opportunity.statuses;
   next.log = [];
@@ -688,6 +698,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
         * getCapricornReceivedDamageMultiplier(battle, targetSide)
         * getLibraDamageMultiplier(battle, actorSide, actor, target)
         * getLibraReceivedDamageMultiplier(battle, targetSide, actor, target)
+        * (Number(action.ariesOpeningDamageMultiplier) || 1)
         * (magicFocus ? Number(magicFocus.attackSpellDamageMultiplier) || 1 : 1)
         * (manaAmplification ? Number(manaAmplification.attackSpellDamageMultiplier) || 1 : 1)
         * raceMultiplier
@@ -857,6 +868,29 @@ export function getPlayerWeaponElement(player, action = {}) {
 function applyPlayerWeaponElement(player, action) {
   if (action?.actionType !== "physicalAttack") return action;
   return { ...action, element: getPlayerWeaponElement(player, action) };
+}
+
+function applyAriesOpeningPriority(battle, order) {
+  if (!battle?.ariesActiveAtStart || Number(battle.turn) !== 1) return order;
+  return [...order].sort((left, right) => {
+    if (left.side === right.side) return 0;
+    return left.side === "player" ? -1 : 1;
+  });
+}
+
+function applyAriesOpeningAttack(battle, action, actorSide) {
+  if (actorSide !== "player" || !battle?.ariesOpeningAttackAvailable) return action;
+  if (!["physicalAttack", "spell"].includes(action?.actionType)) return action;
+  const card = getCardById("zodiac_aries");
+  battle.ariesOpeningAttackAvailable = false;
+  battle.log.push("エアリーズの力が最初の攻撃を増幅した！");
+  return {
+    ...action,
+    unavoidable: card?.openingUnavoidable !== false,
+    defensePenetration: (Number(action.defensePenetration) || 0)
+      + Math.max(0, Number(card?.openingDefensePenetration) || 0),
+    ariesOpeningDamageMultiplier: Math.max(1, Number(card?.openingDamageMultiplier) || 1)
+  };
 }
 
 export function getCapricornStackCount(battle = {}) {
