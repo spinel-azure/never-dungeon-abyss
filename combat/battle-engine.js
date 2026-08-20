@@ -25,8 +25,10 @@ import {
   advanceNpcChargeState,
   advanceNpcWallProtection,
   applyNpcAfterPlayerAttack,
+  applyNpcBattleStart,
   applyNpcChargeSkills,
   applyNpcGuardSupport,
+  applyNpcLethalProtection,
   applyNpcTurnEnd,
   applyNpcTurnStart
 } from "./npc-support.js";
@@ -73,6 +75,7 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
   next.presentationEvents = [];
 
   let playerActionExecuted = false;
+  applyNpcBattleStart(next, rng);
   applyNpcChargeSkills(next, rng);
   if (!next.outcome && playerAction.spCost > 0) next.player.sp -= playerAction.spCost;
   if (!next.outcome && playerCommand.type === "guard") applyNpcGuardSupport(next);
@@ -116,7 +119,7 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
     });
   }
   if (!next.outcome) applyPlayerTurnEndChargeEffects(next);
-  if (!next.outcome) applyNpcTurnEnd(next);
+  if (!next.outcome) applyNpcTurnEnd(next, rng);
   advanceNpcWallProtection(next);
   advanceNpcChargeState(next, { allowCharge: !next.outcome });
   if (!next.outcome) {
@@ -142,6 +145,7 @@ export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.rand
   next.presentationEvents = [];
 
   let playerActionExecuted = false;
+  applyNpcBattleStart(next, rng);
   setNpcTarget(next, lowestHpRatioTargetIndex(next.enemies));
   applyNpcChargeSkills(next, rng);
   updateMultiOutcome(next);
@@ -199,7 +203,7 @@ export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.rand
     });
   }
   if (!next.outcome) applyPlayerTurnEndChargeEffects(next);
-  if (!next.outcome) applyNpcTurnEnd(next);
+  if (!next.outcome) applyNpcTurnEnd(next, rng);
   advanceNpcWallProtection(next);
   advanceNpcChargeState(next, { allowCharge: !next.outcome });
   if (!next.outcome) {
@@ -936,6 +940,7 @@ function finishCombatantAction(battle, actor, side, targetIndex = null) {
 
 function updateMultiOutcome(battle) {
   if (battle.player.hp <= 0) {
+    if (applyNpcLethalProtection(battle)) return;
     battle.player.alive = false;
     battle.outcome = "defeat";
     battle.phase = "complete";
@@ -962,6 +967,7 @@ function updateOutcome(battle) {
     battle.phase = "complete";
     battle.log.push(`${battle.enemy.name}を倒した！`);
   } else if (battle.player.hp <= 0) {
+    if (applyNpcLethalProtection(battle)) return;
     battle.player.alive = false;
     battle.outcome = "defeat";
     battle.phase = "complete";

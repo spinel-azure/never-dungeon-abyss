@@ -1,5 +1,5 @@
 import { getNpcDefinition, NPC_PARTY_LIMIT, NPC_SUPPORT_ENABLED } from "./npc-definitions.js";
-import { getNpcStagePassive } from "./npc-passives.js";
+import { getNpcStagePassive, NPC_ADVANCED_GROWTH } from "./npc-passives.js";
 
 export function createInitialNpcSystem() {
   return { registeredIds: [], activeIds: [], records: {}, renewal: null, expeditionMaxDepth: 0 };
@@ -52,7 +52,10 @@ export function applyNpcExplorationPassives(character) {
     const passiveStepCount = (record.passiveStepCount + 1) % passive.stepInterval;
     records[npcId] = { ...record, passiveStepCount };
     if (passiveStepCount !== 0) continue;
-    if (passive.hpRecovery) hp = Math.min(character.maxHp, hp + passive.hpRecovery);
+    const hpRecovery = npcId === "erika" && Number(record?.growthStage) >= 9
+      ? NPC_ADVANCED_GROWTH.erika.stage9.hpRecovery
+      : passive.hpRecovery;
+    if (hpRecovery) hp = Math.min(character.maxHp, hp + hpRecovery);
     if (passive.spRecovery) sp = Math.min(character.maxSp, sp + passive.spRecovery);
   }
   return { ...character, hp, sp, npcSystem: { ...state, records } };

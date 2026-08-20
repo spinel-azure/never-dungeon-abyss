@@ -8,8 +8,10 @@ import { createBattleState, resolveBattleRound } from "../combat/battle-engine.j
 import {
   advanceNpcChargeState,
   applyNpcAfterPlayerAttack,
+  applyNpcBattleStart,
   applyNpcChargeSkills,
   applyNpcGuardSupport,
+  applyNpcLethalProtection,
   applyNpcTurnEnd,
   applyNpcTurnStart,
   getNpcSupportStatus,
@@ -175,9 +177,110 @@ test("three NPC supports target roughly one and a half heroes of combined contri
   applyNpcAfterPlayerAttack(battle, () => 0.99);
   applyNpcGuardSupport(battle);
   applyNpcTurnEnd(battle);
-  assert.equal(battle.enemy.hp, 928);
+  assert.equal(battle.enemy.hp, 923);
   assert.equal(battle.player.hp, 64);
   assert.equal(battle.player.statuses.find(status => status.id === "npc_alec_guard")?.physicalDamageReduction, 0.35);
+});
+
+test("NPC stages seven and eight upgrade support, charge attacks and Erika recovery", () => {
+  const character = hero();
+  character.maxHp = 200;
+  character.hp = 80;
+  character.statuses = [{ id: "deadly_poison", statusId: "deadly_poison", active: true }];
+  character.npcSystem = normalizeNpcSystem({
+    registeredIds: ["alec", "rebecca", "erika"], activeIds: ["alec", "rebecca", "erika"],
+    records: {
+      alec: { maxDepth: 80, charge: 100 }, rebecca: { maxDepth: 80, charge: 100 },
+      erika: { maxDepth: 80, charge: 100 }
+    }
+  });
+  const battle = createBattleState({ character,
+    enemy: { id: "dummy", name: "DUMMY", hp: 2000, maxHp: 2000, attack: 1, def: 999, agi: 1, alive: true, statuses: [] } });
+  applyNpcChargeSkills(battle, () => 0.99);
+  assert.ok(battle.presentationEvents.some(event => event.actionName === "強撃・改" && event.damage === 66));
+  assert.equal(battle.enemy.statuses.find(status => status.id === "npc_alec_defense_down")?.defenseMultiplier, 0.85);
+  assert.equal(battle.presentationEvents.filter(event => event.actionName === "双連斬・改").length, 4);
+  assert.equal(battle.player.hp, 140);
+  assert.equal(battle.player.statuses.some(status => status.id === "deadly_poison"), false);
+
+  const stage7 = hero();
+  stage7.maxHp = 100;
+  stage7.hp = 50;
+  stage7.statuses = [{ id: "bleeding", statusId: "bleeding", active: true }];
+  stage7.npcSystem = normalizeNpcSystem({ registeredIds: ["erika"], activeIds: ["erika"], records: { erika: { maxDepth: 70 } } });
+  const prayer = createBattleState({ character: stage7,
+    enemy: { id: "dummy", name: "DUMMY", hp: 999, maxHp: 999, attack: 1, def: 0, agi: 1, alive: true, statuses: [] } });
+  applyNpcTurnEnd(prayer, () => 0);
+  assert.equal(prayer.player.statuses.some(status => status.id === "bleeding"), false);
+});
+
+test("stage nine advanced passives damage instant-death-immune bosses and improve Goddess Breath", () => {
+  const alec = hero();
+  alec.npcSystem = normalizeNpcSystem({ registeredIds: ["alec"], activeIds: ["alec"], records: { alec: { maxDepth: 90 } } });
+  const alecBattle = createBattleState({ character: alec,
+    enemy: { id: "boss", name: "BOSS", isBoss: true, hp: 20000, maxHp: 20000, attack: 1, def: 0, agi: 1, alive: true, statuses: [] } });
+  applyNpcAfterPlayerAttack(alecBattle, () => 0);
+  assert.equal(alecBattle.presentationEvents.at(-1).damage, 52);
+  assert.equal(alecBattle.presentationEvents.at(-1).passiveExecutionId, "npc_flash_slash_advanced");
+
+  const rebecca = hero();
+  rebecca.npcSystem = normalizeNpcSystem({ registeredIds: ["rebecca"], activeIds: ["rebecca"], records: { rebecca: { maxDepth: 90 } } });
+  const rebeccaBattle = createBattleState({ character: rebecca,
+    enemy: { id: "boss", name: "BOSS", isBoss: true, hp: 20000, maxHp: 20000, attack: 1, def: 0, agi: 1, alive: true, statuses: [] } });
+  const rolls = [0, 0.99, 0.99];
+  applyNpcTurnStart(rebeccaBattle, () => rolls.shift() ?? 0.99);
+  assert.equal(rebeccaBattle.presentationEvents[0].damage, 517);
+  assert.equal(rebeccaBattle.presentationEvents[0].passiveExecutionId, "npc_assassination_advanced");
+
+  let erika = hero();
+  erika.hp -= 5;
+  erika.npcSystem = normalizeNpcSystem({ registeredIds: ["erika"], activeIds: ["erika"], records: { erika: { maxDepth: 90 } } });
+  for (let step = 0; step < 5; step += 1) erika = applyNpcExplorationPassives(erika);
+  assert.equal(erika.hp, erika.maxHp - 3);
+});
+
+test("stage ten capstones provide Vandervalke, Siegfried and Golden Wheat once per battle", () => {
+  const rebecca = hero();
+  rebecca.npcSystem = normalizeNpcSystem({ registeredIds: ["rebecca"], activeIds: ["rebecca"], records: { rebecca: { maxDepth: 100 } } });
+  const enemies = [0, 1, 2].map(index => ({ id: `enemy_${index}`, name: `ENEMY ${index}`, hp: 100, maxHp: 100,
+    attack: 1, def: 0, agi: 1, alive: true, statuses: [] }));
+  const opening = createBattleState({ character: rebecca, enemy: enemies[0], enemies });
+  applyNpcBattleStart(opening, () => 0.99);
+  assert.deepEqual(opening.enemies.map(enemy => enemy.hp), [81, 81, 81]);
+  assert.equal(opening.presentationEvents.filter(event => event.actionName === "ヴァンダーファルケ").length, 4);
+  applyNpcBattleStart(opening, () => 0.99);
+  assert.deepEqual(opening.enemies.map(enemy => enemy.hp), [81, 81, 81]);
+
+  const alec = hero();
+  alec.hp = 0;
+  alec.alive = false;
+  alec.npcSystem = normalizeNpcSystem({ registeredIds: ["alec"], activeIds: ["alec"], records: { alec: { maxDepth: 100 } } });
+  const shield = createBattleState({ character: { ...alec, hp: 1, alive: true }, enemy: enemies[0] });
+  shield.player.hp = 0;
+  shield.player.alive = false;
+  assert.equal(applyNpcLethalProtection(shield), true);
+  assert.equal(shield.player.hp, 1);
+  assert.ok(shield.presentationEvents.some(event => event.actionName === "ジークフリート" && event.type === "healing"));
+  shield.player.hp = 0;
+  assert.equal(applyNpcLethalProtection(shield), false);
+
+  const lethalRound = createBattleState({ character: { ...alec, hp: 10, alive: true },
+    enemy: { id: "lethal", name: "LETHAL", hp: 999, maxHp: 999, attack: 999, def: 0, agi: 999, alive: true, statuses: [] } });
+  const protectedRound = resolveBattleRound({ battle: lethalRound, playerCommand: { type: "wait" }, rng: () => 0.5 }).battle;
+  assert.equal(protectedRound.player.hp, 1);
+  assert.equal(protectedRound.outcome, null);
+  assert.equal(protectedRound.npcSiegfriedUsed, true);
+
+  const erika = hero();
+  erika.maxHp = 200;
+  erika.hp = 40;
+  erika.statuses = ["poison", "deadly_poison", "bleeding", "action_skip"].map(id => ({ id, statusId: id, active: true }));
+  erika.npcSystem = normalizeNpcSystem({ registeredIds: ["erika"], activeIds: ["erika"], records: { erika: { maxDepth: 100 } } });
+  const wheat = createBattleState({ character: erika, enemy: enemies[0] });
+  applyNpcTurnEnd(wheat);
+  assert.equal(wheat.player.hp, 200);
+  assert.deepEqual(wheat.player.statuses, []);
+  assert.equal(wheat.npcGoldenWheatUsed, true);
 });
 
 test("charge rates follow thief, priest, warrior, mage and cooldown skips one full turn", () => {
@@ -305,10 +408,20 @@ test("status page three derives each active NPC display from current support bal
     [["パッシブ", "一閃"], ["パッシブ", "暗殺術"], ["パッシブ", "女神の息吹"], ["パッシブ", "マナ活性化"]]
   );
 
+  character.npcSystem = normalizeNpcSystem({
+    registeredIds: ["alec", "rebecca", "erika"], activeIds: ["alec", "rebecca", "erika"],
+    records: { alec: { maxDepth: 100 }, rebecca: { maxDepth: 100 }, erika: { maxDepth: 100 } }
+  });
+  assert.ok(getNpcSupportStatus(character, "alec").rows.some(row => row[1] === "ジークフリート"));
+  assert.ok(getNpcSupportStatus(character, "rebecca").rows.some(row => row[1] === "ヴァンダーファルケ"));
+  assert.ok(getNpcSupportStatus(character, "erika").rows.some(row => row[1] === "黄金の稲穂"));
+
   const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
   const menuSource = readFileSync(new URL("../js/menu.js", import.meta.url), "utf8");
+  const menuCss = readFileSync(new URL("../css/game-menu.css", import.meta.url), "utf8");
   assert.match(html, /data-status-page="2"[\s\S]*data-npc-status-list[\s\S]*data-status-indicator>1\/3/);
   assert.match(menuSource, /menu\.statusPage < 2[\s\S]*\$\{menu\.statusPage \+ 1\}\/3/);
+  assert.match(menuCss, /\.nde-stat-row output\{font-size:14px\}/);
 });
 
 test("NPC renewal hides background commands and restores its originating town screen", () => {

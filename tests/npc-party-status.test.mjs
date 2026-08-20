@@ -45,7 +45,7 @@ test("NPC charge skill cut-ins use the four battle assets and a sequential 2.5 s
   }
   assert.match(html, /<section id="battleScreen"[\s\S]*?<div id="npcChargeCutIn"[\s\S]*?<div class="battle-enemy-stage">/);
   assert.match(css, /\.npc-charge-cut-in img\s*\{[\s\S]*height: 80%[\s\S]*max-width: 95%/);
-  assert.match(support, /message: `\$\{getNpcDefinition\(npcId\)\?\.name\}「\$\{config\.quote\}」`/);
+  assert.match(support, /message: `\$\{getNpcDefinition\(npcId\)\?\.name\}「\$\{upgradedName \|\| config\.quote\}」`/);
   assert.match(css, /animation: npc-charge-cut-in-run 2\.5s/);
   assert.match(css, /prefers-reduced-motion: reduce/);
   assert.match(battle, /event\.type === "npcChargeSkill"[\s\S]*await playNpcChargeCutIn\(event\)/);

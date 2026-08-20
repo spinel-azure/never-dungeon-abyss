@@ -1,7 +1,7 @@
 import { NPC_SUPPORT_ENABLED, getNpcDefinition } from "../data/npc-definitions.js";
 import { resolveSpell } from "./resolve-spell.js";
 import { resolveInstantDeath } from "./resolve-status-effect.js";
-import { getNpcStagePassive } from "../data/npc-passives.js";
+import { getNpcStagePassive, NPC_ADVANCED_GROWTH } from "../data/npc-passives.js";
 
 export const NPC_SUPPORT_BALANCE = Object.freeze({
   alec: Object.freeze({ attackRate: 0.8, growthAttack: 3, guardBase: 0.15, guardPerStage: 0.02, guardMaximum: 0.35 }),
@@ -24,16 +24,24 @@ export function applyNpcChargeSkills(battle, rng = Math.random) {
     const config = NPC_CHARGE_SKILLS[npcId];
     const record = getNpcChargeRecord(battle.player, npcId);
     if (!config || !record || record.charge < 100 || record.chargeCooldown > 0) continue;
+    const stage = getGrowthStage(battle.player, npcId);
+    const erikaHealReady = npcId === "erika"
+      && battle.player.hp > 0
+      && battle.player.hp <= battle.player.maxHp * NPC_ADVANCED_GROWTH.erika.stage8.hpThresholdRate;
+    const upgradedName = stage >= 8 && (npcId !== "erika" || erikaHealReady)
+      ? NPC_ADVANCED_GROWTH[npcId]?.stage8?.name
+      : null;
+    const resolvedName = upgradedName || config.name;
     record.charge = 0;
     record.chargeCooldown = 2;
-    battle.log.push(`${getNpcDefinition(npcId)?.name}のチャージスキルⅠ「${config.name}」！`);
+    battle.log.push(`${getNpcDefinition(npcId)?.name}のチャージスキルⅠ「${resolvedName}」！`);
     battle.presentationEvents.push({
       type: "npcChargeSkill",
       npcId,
-      skillName: config.name,
-      quote: config.quote,
+      skillName: resolvedName,
+      quote: upgradedName || config.quote,
       cutIn: config.cutIn,
-      message: `${getNpcDefinition(npcId)?.name}「${config.quote}」`
+      message: `${getNpcDefinition(npcId)?.name}「${upgradedName || config.quote}」`
     });
     if (npcId === "alec") applyAlecChargeSkill(battle, config, rng);
     else if (npcId === "rebecca") applyRebeccaChargeSkill(battle, config, rng);
@@ -73,6 +81,48 @@ export function canNpcSupport({ battle, npcId, supportType } = {}) {
   return getActiveNpcIds(battle.player).includes(npcId);
 }
 
+export function applyNpcBattleStart(battle, rng = Math.random) {
+  if (!battle || battle.npcOpeningSupportApplied) return battle;
+  battle.npcOpeningSupportApplied = true;
+  if (!canNpcSupport({ battle, npcId: "rebecca", supportType: "openingAttack" })
+    || getGrowthStage(battle.player, "rebecca") < 10) return battle;
+  const upgrade = NPC_ADVANCED_GROWTH.rebecca.stage10;
+  const support = NPC_SUPPORT_BALANCE.rebecca;
+  const attack = Number(getNpcDefinition("rebecca")?.baseStats?.atk) + 10 * support.growthAttack;
+  const damage = Math.max(1, Math.floor(attack * support.hitRate));
+  battle.log.push(`レベッカの「${upgrade.name}」！`);
+  battle.presentationEvents.push({ type: "npcSupport", npcId: "rebecca", actionName: upgrade.name,
+    message: `レベッカ「${upgrade.name}！」` });
+  if (!Array.isArray(battle.enemies)) {
+    applyNpcDamage(battle, { npcId: "rebecca", damage, actionName: upgrade.name,
+      message: `${upgrade.name}！ ${damage}ダメージ！`, rng });
+    return battle;
+  }
+  const selected = battle.enemy;
+  for (const enemy of battle.enemies) {
+    if (!enemy?.alive || enemy.hp <= 0 || battle.outcome) continue;
+    battle.enemy = enemy;
+    applyNpcDamage(battle, { npcId: "rebecca", damage, actionName: upgrade.name,
+      message: `${upgrade.name}！ ${damage}ダメージ！`, rng });
+  }
+  if (!battle.outcome) battle.enemy = selected?.alive ? selected : battle.enemies.find(enemy => enemy.alive) || selected;
+  return battle;
+}
+
+export function applyNpcLethalProtection(battle) {
+  if (!battle?.player || battle.player.hp > 0 || battle.npcSiegfriedUsed
+    || !canNpcSupport({ battle, npcId: "alec", supportType: "lethalProtection" })
+    || getGrowthStage(battle.player, "alec") < 10) return false;
+  const name = NPC_ADVANCED_GROWTH.alec.stage10.name;
+  battle.npcSiegfriedUsed = true;
+  battle.player.hp = 1;
+  battle.player.alive = true;
+  battle.log.push(`アレクの「${name}」！ 致命の一撃を受け止めた！`);
+  battle.presentationEvents.push({ type: "healing", npcId: "alec", actorSide: "npc", targetSide: "player",
+    amount: 1, actionName: name, message: `アレクが致命の一撃を受け止めた！` });
+  return true;
+}
+
 export function getNpcSupportStatus(character, npcId) {
   const definition = getNpcDefinition(npcId);
   if (!definition) return null;
@@ -85,21 +135,30 @@ export function getNpcSupportStatus(character, npcId) {
   if (npcId === "alec") {
     const config = NPC_SUPPORT_BALANCE.alec;
     const attack = Number(definition.baseStats.atk) + stage * config.growthAttack;
+    const stage7 = stage >= 7 ? NPC_ADVANCED_GROWTH.alec.stage7 : null;
+    const advancedRows = [
+      ...(stage >= 8 ? [["チャージ", NPC_ADVANCED_GROWTH.alec.stage8.name]] : []),
+      ...(stage >= 10 ? [["奥義", NPC_ADVANCED_GROWTH.alec.stage10.name]] : [])
+    ];
     return { ...common, rows: [
-      ["追撃威力", String(Math.max(1, Math.floor(attack * config.attackRate)))],
-      ["防御援護", `${formatPercent(Math.min(config.guardMaximum, config.guardBase + stage * config.guardPerStage))}％`],
+      ["追撃威力", String(Math.max(1, Math.floor(attack * config.attackRate * (stage7?.attackMultiplier || 1))))],
+      ["防御援護", `${formatPercent(Math.min(config.guardMaximum, config.guardBase + stage * config.guardPerStage + (stage7?.guardBonus || 0)))}％`],
       ["援護特性", "攻撃後に追撃／防御時に物理軽減"],
-      ...passiveRow
+      ...(passive ? [["パッシブ", stage >= 9 ? NPC_ADVANCED_GROWTH.alec.stage9.name : passive.name]] : []),
+      ...advancedRows
     ] };
   }
   if (npcId === "rebecca") {
     const config = NPC_SUPPORT_BALANCE.rebecca;
     const attack = Number(definition.baseStats.atk) + stage * config.growthAttack;
+    const stage7 = stage >= 7 ? NPC_ADVANCED_GROWTH.rebecca.stage7 : null;
     return { ...common, rows: [
       ["連撃威力", `${Math.max(1, Math.floor(attack * config.hitRate))}×2`],
-      ["弱体成功", `${formatPercent(config.debuffRate)}％`],
-      ["弱体効果", `DEF－${formatPercent(1 - config.defenseMultiplier)}％／${config.debuffTurns}ターン`],
-      ...passiveRow
+      ["弱体成功", `${formatPercent(stage7?.debuffRate ?? config.debuffRate)}％`],
+      ["弱体効果", `DEF－${formatPercent(1 - config.defenseMultiplier)}％／${stage7?.debuffTurns ?? config.debuffTurns}ターン`],
+      ...(passive ? [["パッシブ", stage >= 9 ? NPC_ADVANCED_GROWTH.rebecca.stage9.name : passive.name]] : []),
+      ...(stage >= 8 ? [["チャージ", NPC_ADVANCED_GROWTH.rebecca.stage8.name]] : []),
+      ...(stage >= 10 ? [["奥義", NPC_ADVANCED_GROWTH.rebecca.stage10.name]] : [])
     ] };
   }
   if (npcId === "erika") {
@@ -107,7 +166,9 @@ export function getNpcSupportStatus(character, npcId) {
     return { ...common, rows: [
       ["回復量", `最大HPの${formatPercent(config.healRate + stage * config.healPerStage)}％`],
       ["発動条件", "ターン終了時／HP減少中"],
-      ...passiveRow
+      ...(passive ? [["パッシブ", stage >= 9 ? NPC_ADVANCED_GROWTH.erika.stage9.name : passive.name]] : []),
+      ...(stage >= 8 ? [["チャージ", NPC_ADVANCED_GROWTH.erika.stage8.name]] : []),
+      ...(stage >= 10 ? [["奥義", NPC_ADVANCED_GROWTH.erika.stage10.name]] : [])
     ] };
   }
   const config = NPC_SUPPORT_BALANCE.johan;
@@ -137,7 +198,8 @@ export function applyNpcAfterPlayerAttack(battle, rng = Math.random) {
   const stage = getGrowthStage(battle.player, "alec");
   const config = NPC_SUPPORT_BALANCE.alec;
   const attack = Number(getNpcDefinition("alec")?.baseStats?.atk) + stage * config.growthAttack;
-  const damage = Math.max(1, Math.floor(attack * config.attackRate));
+  const stage7 = stage >= 7 ? NPC_ADVANCED_GROWTH.alec.stage7 : null;
+  const damage = Math.max(1, Math.floor(attack * config.attackRate * (stage7?.attackMultiplier || 1)));
   applyNpcDamage(battle, { npcId: "alec", damage, message: `アレクの追撃！ ${damage}ダメージ！`, rng });
   return battle;
 }
@@ -146,7 +208,8 @@ export function applyNpcGuardSupport(battle) {
   if (!canNpcSupport({ battle, npcId: "alec", supportType: "guard" })) return battle;
   const stage = getGrowthStage(battle.player, "alec");
   const config = NPC_SUPPORT_BALANCE.alec;
-  const reduction = Math.min(config.guardMaximum, config.guardBase + stage * config.guardPerStage);
+  const stage7 = stage >= 7 ? NPC_ADVANCED_GROWTH.alec.stage7 : null;
+  const reduction = Math.min(config.guardMaximum, config.guardBase + stage * config.guardPerStage + (stage7?.guardBonus || 0));
   battle.player.statuses = [
     ...(battle.player.statuses || []).filter(status => (status.id || status.statusId) !== "npc_alec_guard"),
     { id: "npc_alec_guard", statusId: "npc_alec_guard", active: true, remainingTurns: 1,
@@ -157,10 +220,24 @@ export function applyNpcGuardSupport(battle) {
   return battle;
 }
 
-export function applyNpcTurnEnd(battle) {
+export function applyNpcTurnEnd(battle, rng = Math.random) {
   if (!canNpcSupport({ battle, npcId: "erika", supportType: "turnEndHeal" })) return battle;
   if (battle.player.hp <= 0 || battle.player.hp >= battle.player.maxHp) return battle;
   const stage = getGrowthStage(battle.player, "erika");
+  const stage10 = NPC_ADVANCED_GROWTH.erika.stage10;
+  if (stage >= 10 && !battle.npcGoldenWheatUsed && battle.player.hp <= battle.player.maxHp * stage10.hpThresholdRate) {
+    battle.npcGoldenWheatUsed = true;
+    const amount = Math.min(battle.player.maxHp - battle.player.hp,
+      Math.max(1, Math.floor(battle.player.maxHp * stage10.healMaxHpRate)));
+    battle.player.hp += amount;
+    battle.player.statuses = cureNpcPrayerStatuses(battle.player.statuses, { all: true });
+    battle.player.condition = getNpcCondition(battle.player.statuses);
+    const message = `エリカの「${stage10.name}」！ HPが${amount}回復し、状態異常が消え去った！`;
+    battle.log.push(message);
+    battle.presentationEvents.push({ type: "healing", npcId: "erika", actorSide: "npc", targetSide: "player",
+      amount, actionName: stage10.name, message });
+    return battle;
+  }
   const config = NPC_SUPPORT_BALANCE.erika;
   const requested = Math.max(1, Math.floor(battle.player.maxHp * (config.healRate + stage * config.healPerStage)));
   const amount = Math.min(requested, battle.player.maxHp - battle.player.hp);
@@ -168,6 +245,15 @@ export function applyNpcTurnEnd(battle) {
   const message = `エリカの祈り！ HPが${amount}回復した！`;
   battle.log.push(message);
   battle.presentationEvents.push({ type: "healing", npcId: "erika", actorSide: "npc", targetSide: "player", amount, message });
+  if (stage >= 7 && Number(rng()) < NPC_ADVANCED_GROWTH.erika.stage7.cureRate) {
+    const before = battle.player.statuses?.length || 0;
+    battle.player.statuses = cureNpcPrayerStatuses(battle.player.statuses);
+    if ((battle.player.statuses?.length || 0) < before) {
+      battle.player.condition = getNpcCondition(battle.player.statuses);
+      battle.log.push("エリカの祈りが状態異常を浄化した！");
+      battle.presentationEvents.push({ type: "npcSupport", npcId: "erika", message: "状態異常が浄化された！" });
+    }
+  }
   return battle;
 }
 
@@ -175,17 +261,18 @@ function applyRebeccaSupport(battle, rng) {
   const stage = getGrowthStage(battle.player, "rebecca");
   const definition = getNpcDefinition("rebecca");
   const config = NPC_SUPPORT_BALANCE.rebecca;
+  const stage7 = stage >= 7 ? NPC_ADVANCED_GROWTH.rebecca.stage7 : null;
   const attack = Number(definition?.baseStats?.atk) + stage * config.growthAttack;
   const damage = Math.max(1, Math.floor(attack * config.hitRate));
   battle.log.push("レベッカの連続攻撃！");
   for (let hitIndex = 0; hitIndex < 2 && !battle.outcome; hitIndex += 1) {
     applyNpcDamage(battle, { npcId: "rebecca", damage, message: `${hitIndex + 1}撃目：${damage}ダメージ！`, hitIndex, hitCount: 2, rng });
   }
-  if (!battle.outcome && Number(rng()) < config.debuffRate) {
+  if (!battle.outcome && Number(rng()) < (stage7?.debuffRate ?? config.debuffRate)) {
     battle.enemy.statuses = [
       ...(battle.enemy.statuses || []).filter(status => (status.id || status.statusId) !== "npc_defense_down"),
       { id: "npc_defense_down", statusId: "npc_defense_down", active: true,
-        remainingTurns: config.debuffTurns, skipInitialDecrement: true,
+        remainingTurns: stage7?.debuffTurns ?? config.debuffTurns, skipInitialDecrement: true,
         defenseMultiplier: config.defenseMultiplier, expiresAfterBattle: true }
     ];
     battle.log.push("敵の防御力が低下した！");
@@ -212,22 +299,36 @@ function applyAlecChargeSkill(battle, config, rng) {
   const stage = getGrowthStage(battle.player, "alec");
   const support = NPC_SUPPORT_BALANCE.alec;
   const attack = Number(getNpcDefinition("alec")?.baseStats?.atk) + stage * support.growthAttack;
-  const normalDamage = Math.max(1, Math.floor(attack * support.attackRate));
-  const damage = Math.max(1, Math.floor(normalDamage * config.damageMultiplier));
-  applyNpcDamage(battle, { npcId: "alec", damage, actionName: config.name, message: `強撃！ ${damage}ダメージ！`, rng });
+  const stage7 = stage >= 7 ? NPC_ADVANCED_GROWTH.alec.stage7 : null;
+  const upgrade = stage >= 8 ? NPC_ADVANCED_GROWTH.alec.stage8 : null;
+  const normalDamage = Math.max(1, Math.floor(attack * support.attackRate * (stage7?.attackMultiplier || 1)));
+  const damage = Math.max(1, Math.floor(normalDamage * (upgrade?.damageMultiplier || config.damageMultiplier)));
+  const actionName = upgrade?.name || config.name;
+  applyNpcDamage(battle, { npcId: "alec", damage, actionName, message: `${actionName}！ ${damage}ダメージ！`, rng });
+  if (upgrade && !battle.outcome) {
+    battle.enemy.statuses = [
+      ...(battle.enemy.statuses || []).filter(status => (status.id || status.statusId) !== "npc_alec_defense_down"),
+      { id: "npc_alec_defense_down", statusId: "npc_alec_defense_down", active: true,
+        remainingTurns: upgrade.defenseDownTurns, skipInitialDecrement: true,
+        defenseMultiplier: upgrade.defenseMultiplier, expiresAfterBattle: true }
+    ];
+    battle.log.push("敵の防御力が低下した！");
+  }
 }
 
 function applyRebeccaChargeSkill(battle, config, rng) {
   const stage = getGrowthStage(battle.player, "rebecca");
   const support = NPC_SUPPORT_BALANCE.rebecca;
+  const upgrade = stage >= 8 ? NPC_ADVANCED_GROWTH.rebecca.stage8 : null;
   const attack = Number(getNpcDefinition("rebecca")?.baseStats?.atk) + stage * support.growthAttack;
   const normalHitDamage = Math.max(1, Math.floor(attack * support.hitRate));
-  const damage = Math.max(1, Math.floor(normalHitDamage * config.damageMultiplier));
+  const damage = Math.max(1, Math.floor(normalHitDamage * config.damageMultiplier * (upgrade?.defensePierceDamageMultiplier || 1)));
+  const actionName = upgrade?.name || config.name;
   for (let hitIndex = 0; hitIndex < config.hitCount && !battle.outcome; hitIndex += 1) {
     applyNpcDamage(battle, {
       npcId: "rebecca",
       damage,
-      actionName: config.name,
+      actionName,
       message: `${hitIndex + 1}撃目：${damage}ダメージ！`,
       hitIndex,
       hitCount: config.hitCount,
@@ -238,6 +339,19 @@ function applyRebeccaChargeSkill(battle, config, rng) {
 
 function applyErikaChargeSkill(battle, config) {
   const stage = getGrowthStage(battle.player, "erika");
+  const upgrade = stage >= 8 ? NPC_ADVANCED_GROWTH.erika.stage8 : null;
+  if (upgrade && battle.player.hp > 0 && battle.player.hp <= battle.player.maxHp * upgrade.hpThresholdRate) {
+    const amount = Math.min(battle.player.maxHp - battle.player.hp,
+      Math.max(1, Math.floor(battle.player.maxHp * upgrade.healMaxHpRate)));
+    battle.player.hp += amount;
+    battle.player.statuses = cureNpcPrayerStatuses(battle.player.statuses, { all: true, chargeCure: true });
+    battle.player.condition = getNpcCondition(battle.player.statuses);
+    const message = `エリカの「${upgrade.name}」！ HPが${amount}回復した！`;
+    battle.log.push(message);
+    battle.presentationEvents.push({ type: "healing", npcId: "erika", actorSide: "npc", targetSide: "player",
+      amount, actionName: upgrade.name, message });
+    return;
+  }
   const baseDamage = Math.max(1, Math.floor(config.basePower + stage * config.growthPower));
   const isUndead = battle.enemy.race === "undead";
   const damage = isUndead && !battle.enemy.isBoss
@@ -293,16 +407,35 @@ function applyNpcDamage(battle, { npcId, damage, actionName = "", message, hitIn
     ? resolveInstantDeath({ defender: battle.enemy, baseRate: passive.instantDeathRate,
       minimumRate: passive.instantDeathRate, maximumRate: passive.instantDeathRate, rng })
     : { success: false };
+  let advancedDamage = 0;
+  let advancedMessage = "";
+  if (battle.enemy.hp > 0 && instantDeath.immune && stage >= 9 && Number(rng()) < passive.instantDeathRate) {
+    if (npcId === "alec") {
+      advancedDamage = Math.min(battle.enemy.hp,
+        Math.max(1, Math.floor(actual * (NPC_ADVANCED_GROWTH.alec.stage9.immuneDamageMultiplier - 1))));
+      advancedMessage = `${NPC_ADVANCED_GROWTH.alec.stage9.name}が敵を深く斬り裂いた！`;
+    } else if (npcId === "rebecca") {
+      const upgrade = NPC_ADVANCED_GROWTH.rebecca.stage9;
+      const requested = Math.max(1, Math.floor(battle.enemy.hp * upgrade.immuneCurrentHpDamageRate));
+      advancedDamage = Math.min(battle.enemy.hp, battle.enemy.isBoss
+        ? Math.min(requested, upgrade.bossDamageMaximum)
+        : requested);
+      advancedMessage = `${upgrade.name}が敵の急所を抉った！`;
+    }
+    battle.enemy.hp -= advancedDamage;
+  }
   if (instantDeath.success) battle.enemy.hp = 0;
   battle.enemy.alive = battle.enemy.hp > 0;
-  const resolvedMessage = instantDeath.success ? `${message} ${passive.name}が敵を断ち切った！` : message;
+  const resolvedMessage = instantDeath.success
+    ? `${message} ${passive.name}が敵を断ち切った！`
+    : advancedDamage > 0 ? `${message} ${advancedMessage} 追加${advancedDamage}ダメージ！` : message;
   battle.log.push(resolvedMessage);
   const targetIndex = Array.isArray(battle.enemies) ? battle.enemies.indexOf(battle.enemy) : -1;
   battle.presentationEvents.push({ type: "attackHit", npcId, actorName: getNpcDefinition(npcId)?.name,
     actorSide: "npc", targetSide: "enemy", actionName, hitIndex, hitCount, hit: true,
     ...(targetIndex < 0 ? {} : { targetIndex }),
-    damage: instantDeath.success ? hpBefore : actual,
-    slashExecution: instantDeath.success, passiveExecutionId: instantDeath.success ? passive.id : null,
+    damage: instantDeath.success ? hpBefore : actual + advancedDamage,
+    slashExecution: instantDeath.success, passiveExecutionId: instantDeath.success ? passive.id : advancedDamage > 0 ? `${passive.id}_advanced` : null,
     message: resolvedMessage });
   if (battle.enemy.hp <= 0) setNpcVictory(battle);
   return actual;
@@ -328,4 +461,21 @@ function getGrowthStage(player, npcId) {
 function formatPercent(rate) {
   const value = Math.round(Number(rate) * 1000) / 10;
   return Number.isInteger(value) ? String(value) : value.toFixed(1);
+}
+
+function cureNpcPrayerStatuses(statuses = [], { all = false, chargeCure = false } = {}) {
+  const curable = new Set(["poison", "deadly_poison", "bleeding", ...(all && !chargeCure ? ["action_skip"] : [])]);
+  let cured = false;
+  return (statuses || []).filter(status => {
+    const matches = curable.has(status.id || status.statusId);
+    if (!matches || (!all && cured)) return true;
+    cured = true;
+    return false;
+  });
+}
+
+function getNpcCondition(statuses = []) {
+  if (statuses.some(status => (status.id || status.statusId) === "bleeding")) return "BLEED";
+  if (statuses.some(status => ["poison", "deadly_poison"].includes(status.id || status.statusId))) return "POISON";
+  return "GOOD";
 }
