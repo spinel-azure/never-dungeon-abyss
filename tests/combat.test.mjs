@@ -1342,8 +1342,8 @@ test("main card registry contains every rarity and all twelve zodiac cards", () 
 test("Capricorn gains one long-battle stage every five turns up to three", () => {
   const card = getCardById("zodiac_capricorn");
   assert.equal(card?.cost, 8);
-  assert.equal(card?.longBattleDamagePerStack, 0.05);
-  assert.equal(card?.longBattleReductionPerStack, 0.05);
+  assert.equal(card?.longBattleDamagePerStack, 0.1);
+  assert.equal(card?.longBattleReductionPerStack, 0.1);
   assert.equal(getCapricornStackCount({ capricornActiveAtStart: false, turn: 99 }), 0);
   assert.equal(getCapricornStackCount({ capricornActiveAtStart: true, turn: 4 }), 0);
   assert.equal(getCapricornStackCount({ capricornActiveAtStart: true, turn: 5 }), 1);
