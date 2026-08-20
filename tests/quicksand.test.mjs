@@ -73,6 +73,9 @@ test("quicksand contact shows its image then uses a short fade transition", asyn
     readFile(new URL("../js/minimap.js", import.meta.url), "utf8")
   ]);
   assert.match(playerSource, /足元の砂が崩れ、流砂へ呑み込まれた！/);
+  assert.match(playerSource, /const activeEvent = startOverlayEvent\(event\)/);
+  assert.match(playerSource, /if \(state\.overlayEvent !== activeEvent\) return/);
+  assert.doesNotMatch(playerSource, /if \(state\.overlayEvent !== event\) return;[\s\S]{0,500}runQuicksandTransitionWithFallback/);
   assert.match(playerSource, /state\.gridX = quicksand\.targetX/);
   assert.match(playerSource, /runQuicksandTransitionWithFallback/);
   assert.match(mainSource, /darkenMs: 650/);

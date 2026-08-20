@@ -897,12 +897,12 @@ function startQuicksandEvent(quicksand) {
     message: "足元の砂が崩れ、流砂へ呑み込まれた！",
     canCancel: false
   };
-  startOverlayEvent(event);
-  event.autoStartTimer = window.setTimeout(async () => {
-    if (state.overlayEvent !== event) return;
+  const activeEvent = startOverlayEvent(event);
+  activeEvent.autoStartTimer = window.setTimeout(async () => {
+    if (state.overlayEvent !== activeEvent) return;
     let moved = false;
     const moveToDestination = () => {
-      if (moved || state.overlayEvent !== event) return;
+      if (moved || state.overlayEvent !== activeEvent) return;
       moved = true;
       state.gridX = quicksand.targetX;
       state.gridY = quicksand.targetY;
@@ -1067,6 +1067,7 @@ export function startOverlayEvent(event) {
   state.npcAwarenessShown = false;
   hooks.cancelAutoReturn(false);
   if (state.overlayEvent.message) hooks.say(state.overlayEvent.message);
+  return state.overlayEvent;
 }
 
 function cancelOverlayEvent() {
