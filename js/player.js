@@ -33,7 +33,7 @@ import {
   removeQuestEventAt
 } from "./dungeon.js";
 import { getNpcEncounter } from "../data/npcs.js";
-import { HEALING_FOUNTAIN } from "../data/fountains.js";
+import { DESERT_OASIS, DESERT_OASIS_MIRAGE, getFountainById } from "../data/fountains.js";
 import { getBossById } from "../data/bosses.js";
 import { onExplorationStep, resetPresence } from "./presence.js";
 
@@ -220,7 +220,7 @@ export function updateAnimation(now) {
         } else if (npc) {
           startNpcTalkEvent(npc, a.fromGX, a.fromGY);
         } else if (fountain) {
-          startFountainEvent(a.fromGX, a.fromGY);
+          startFountainEvent(fountain, a.fromGX, a.fromGY);
         } else if (treasure) {
           startTreasureEvent(treasure, a.fromGX, a.fromGY);
         } else if (questEvent) {
@@ -864,16 +864,21 @@ function startNpcTalkEvent(npc, fromGX, fromGY) {
   });
 }
 
-function startFountainEvent(fromGX, fromGY) {
+function startFountainEvent(fountainId, fromGX, fromGY) {
+  const fountain = getFountainById(fountainId);
+  const oasis = [DESERT_OASIS.id, DESERT_OASIS_MIRAGE.id].includes(fountain.id);
   startOverlayEvent({
     type: "fountain",
-    imageId: HEALING_FOUNTAIN.id,
+    imageId: fountain.id,
+    fountainId: fountain.id,
     phase: "prompt",
     fromGX,
     fromGY,
     fountainGX: state.gridX,
     fountainGY: state.gridY,
-    message: "癒やしの噴水がある。ここで休息できそうだ。休みますか？\n＊Aボタン：はい　Bボタン：いいえ",
+    message: oasis
+      ? "オアシスがある。ここで休んでいけそうだ。休みますか？\n＊Aボタン：はい　Bボタン：いいえ"
+      : "癒やしの噴水がある。ここで休息できそうだ。休みますか？\n＊Aボタン：はい　Bボタン：いいえ",
     canCancel: true,
     retreatOnCancel: true
   });
@@ -882,6 +887,20 @@ function startFountainEvent(fromGX, fromGY) {
 function confirmFountainEvent() {
   const event = state.overlayEvent;
   if (!event || event.phase !== "prompt") return;
+  if (event.fountainId === DESERT_OASIS_MIRAGE.id) {
+    event.phase = "mirageFading";
+    event.canCancel = false;
+    event.mirageFadeStartedAt = performance.now();
+    hooks.say("ひと休みしようと更に近づいたところ、\nオアシスはゆらゆらと陽炎のごとく消え去った……。");
+    window.setTimeout(() => {
+      if (state.overlayEvent !== event) return;
+      removeFountainAt(event.fountainGX, event.fountainGY);
+      state.overlayEvent = null;
+      updateNpcAwareness();
+      hooks.onStateChanged();
+    }, 1500);
+    return;
+  }
   event.phase = "resting";
   event.canCancel = false;
   hooks.say("");
@@ -895,7 +914,9 @@ function confirmFountainEvent() {
     }
     removeFountainAt(event.fountainGX, event.fountainGY);
     state.overlayEvent = null;
-    hooks.say("癒やしの噴水で休息した。HPとSP、たいまつゲージが全回復した。");
+    hooks.say(event.fountainId === DESERT_OASIS.id
+      ? "オアシスで休息した。HPとSP、たいまつゲージが全回復した。"
+      : "癒やしの噴水で休息した。HPとSP、たいまつゲージが全回復した。");
     updateNpcAwareness();
     hooks.onStateChanged();
   });

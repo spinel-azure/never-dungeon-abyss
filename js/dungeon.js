@@ -12,7 +12,13 @@
 } from "./config.js";
 import { getNpcById } from "../data/npcs.js";
 import { rollTreasureTrap } from "../data/traps.js";
-import { floorHasHealingFountain } from "../data/fountains.js";
+import {
+  DESERT_OASIS,
+  DESERT_OASIS_MIRAGE,
+  floorHasHealingFountain,
+  HEALING_FOUNTAIN,
+  isDesertOasisFloor
+} from "../data/fountains.js";
 import { getSpecialRoomDefinition, getSpecialRoomUnlockRate, rollMaikaeferNestContent } from "../data/special-rooms.js";
 import { getFloorBossByDepth } from "../data/bosses.js";
 import { getQuestEventForDepth } from "../data/quest-events.js";
@@ -657,9 +663,19 @@ export function placeFountain(depth = 1, rng = Math.random) {
       candidates.push({ x, y });
     }
   }
-  const selected = shuffled(candidates, rng)[0];
-  if (!selected) return null;
-  cells[selected.y][selected.x].fountain = "healing_fountain";
+  const placementCount = isDesertOasisFloor(depth) ? 3 : 1;
+  const selected = shuffled(candidates, rng).slice(0, placementCount);
+  if (selected.length < placementCount) return null;
+  if (!isDesertOasisFloor(depth)) {
+    cells[selected[0].y][selected[0].x].fountain = HEALING_FOUNTAIN.id;
+    return selected[0];
+  }
+  const realIndex = Math.min(selected.length - 1, Math.floor(Math.max(0, Number(rng()) || 0) * selected.length));
+  selected.forEach((position, index) => {
+    cells[position.y][position.x].fountain = index === realIndex
+      ? DESERT_OASIS.id
+      : DESERT_OASIS_MIRAGE.id;
+  });
   return selected;
 }
 

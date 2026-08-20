@@ -4,7 +4,7 @@
   MAX_DIST
 } from "./config.js";
 import { npcs, getNpcById } from "../data/npcs.js";
-import { HEALING_FOUNTAIN } from "../data/fountains.js";
+import { DESERT_OASIS, DESERT_OASIS_MIRAGE, getFountainById, HEALING_FOUNTAIN } from "../data/fountains.js";
 import { BOSSES, getBossById } from "../data/bosses.js";
 
 const renderer = {
@@ -177,6 +177,8 @@ export function configureRenderer(options) {
     }
   });
   loadCharacterImage(HEALING_FOUNTAIN.id, HEALING_FOUNTAIN.image);
+  loadCharacterImage(DESERT_OASIS.id, DESERT_OASIS.image);
+  loadCharacterImage(DESERT_OASIS_MIRAGE.id, DESERT_OASIS_MIRAGE.image);
   loadCharacterImage("maikaefer_nest_event", "images/background/dungeon_event_08.avif");
   ["red", "black", "gold"].forEach(type => loadTreasureImage(type, `images/treasure/treasure-${type}.png`));
   loadTreasureImage("purple", "images/treasure/treasure-red.png", "#8f42d8");
@@ -390,6 +392,15 @@ function drawOverlayEvent() {
   ctx.fillRect(0, 0, W, H);
 
   if (image && image.complete && image.naturalWidth > 0) {
+    const mirageProgress = event.type === "fountain" && event.phase === "mirageFading"
+      ? Math.max(0, Math.min(1, (performance.now() - Number(event.mirageFadeStartedAt || 0)) / 1500))
+      : 0;
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (mirageProgress > 0) {
+      ctx.globalAlpha = Math.max(0, 1 - mirageProgress);
+      ctx.filter = `blur(${Math.floor(mirageProgress * 5)}px)`;
+      if (!reducedMotion) ctx.translate(Math.sin(mirageProgress * Math.PI * 12) * (3 + mirageProgress * 15), 0);
+    }
     if (event.imageFit === "cover") {
       const scale = Math.max(W / image.naturalWidth, H / image.naturalHeight);
       const drawW = image.naturalWidth * scale;
@@ -814,7 +825,7 @@ export function drawCellEvents(layer = "all") {
         events.push({
           ...projected,
           eventKind: "fountain",
-          npc: { imageId: HEALING_FOUNTAIN.id }
+          npc: { imageId: getFountainById(cell.fountain).id }
         });
       }
       if (cell.treasure) {
