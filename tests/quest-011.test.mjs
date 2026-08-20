@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { createInitialCharacter } from "../data/classes.js";
+import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getBossById } from "../data/bosses.js";
 import { getOwnedCardCount } from "../data/deck.js";
 import { grantKeyItem, hasKeyItem } from "../data/key-items.js";
@@ -63,6 +63,7 @@ test("B27 hideout requires an active quest and all three clues", () => {
 
 test("Thief Leader uses the requested art and balanced single-element actions", () => {
   const boss = getBossById("thief_leader_event_boss");
+  assert.equal(boss.name, "悪意に満ちた頭目");
   assert.equal(boss.image, "images/bosses/boss_04.avif");
   assert.equal(boss.encounterImage, "images/background/dungeon_event_03.avif");
   assert.equal(boss.level, 32);
@@ -92,5 +93,14 @@ test("boss defeat completes quest 011 and reporting grants only missing unique c
   assert.equal(getOwnedCardCount(report.character.cards, "sr_flame_armament"), 1);
   assert.equal(getOwnedCardCount(report.character.cards, "sr_ice_armament"), 1);
   assert.equal(report.bonusGold, 2000);
+  assert.equal(report.character.eventFlags.support_npc_malicious_join_unlocked, true);
   assert.equal(reportQuest(report.character, THIEVES_HIDEOUT_QUEST_ID).accepted, false);
+});
+
+test("legacy completed quest 011 saves receive the Malicious recruitment unlock", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "thief" });
+  character.quests.completedQuestIds.push(THIEVES_HIDEOUT_QUEST_ID);
+  delete character.eventFlags.support_npc_malicious_join_unlocked;
+  const normalized = normalizeCharacter(character);
+  assert.equal(normalized.eventFlags.support_npc_malicious_join_unlocked, true);
 });

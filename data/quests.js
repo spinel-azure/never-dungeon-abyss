@@ -301,7 +301,7 @@ export const QUESTS = Object.freeze([
   Object.freeze({
     id: THIEVES_HIDEOUT_QUEST_ID, number: "011", title: "盗賊の隠れ家",
     client: "ギルドマスター", category: "other", objectiveType: "defeatBoss",
-    progressMode: "matchedFlags", targetId: "thief_leader_event_boss", targetName: "双刃の頭領",
+    progressMode: "matchedFlags", targetId: "thief_leader_event_boss", targetName: "悪意に満ちた頭目",
     targetDepth: 27, requiredCount: 4,
     objectiveLabel: "盗賊の手掛かりを集め、頭領を討伐する",
     reward: Object.freeze({ type: "cards", label: "デッキカード×2",
@@ -314,6 +314,7 @@ export const QUESTS = Object.freeze([
       "まずは迷宮内に残された手掛かりを探すんだ。"
     ]),
     prerequisiteQuestIds: Object.freeze([SECOND_RED_DOOR_INVESTIGATION_QUEST_ID]),
+    reportUnlockFlags: Object.freeze(["support_npc_malicious_join_unlocked"]),
     persistentProgressFlags: Object.freeze([...THIEVES_CLUE_FLAGS, "quest_011_thief_leader_defeated_while_active"]),
     persistentProgressFlag: "quest_011_thief_leader_defeated_while_active",
     completedTargetFlag: "boss_thief_leader_event_boss_defeated", available: true

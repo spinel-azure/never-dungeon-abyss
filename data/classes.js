@@ -167,6 +167,13 @@ export function normalizeCharacter(character) {
     : [];
   const latestEquipmentBuyback = normalizedEquipmentBuyback.at(-1);
   const latestItemBuyback = normalizedItemBuyback.at(-1);
+  const quests = normalizeQuestState(character.quests);
+  const eventFlags = character.eventFlags && typeof character.eventFlags === "object"
+    ? { ...character.eventFlags }
+    : {};
+  if (quests.completedQuestIds.includes("guild_011")) {
+    eventFlags.support_npc_malicious_join_unlocked = true;
+  }
   return {
     ...character,
     job: characterClass.id,
@@ -178,10 +185,8 @@ export function normalizeCharacter(character) {
     keyItems: normalizeKeyItemState(character.keyItems),
     warehouse: normalizeWarehouse(character.warehouse),
     lootBag: normalizeLootBag(character.lootBag),
-    quests: normalizeQuestState(character.quests),
-    eventFlags: character.eventFlags && typeof character.eventFlags === "object"
-      ? { ...character.eventFlags }
-      : {},
+    quests,
+    eventFlags,
     adventureStats: normalizeAdventureStats(character.adventureStats),
     marathonChallenge: normalizeMarathonChallenge(character.marathonChallenge),
     longMarchChallenge: normalizeLongMarchChallenge(character.longMarchChallenge),

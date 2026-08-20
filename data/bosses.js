@@ -735,7 +735,7 @@ export const BOSSES = Object.freeze({
   }),
   */
   thief_leader_event_boss: Object.freeze({
-    id: "thief_leader_event_boss", name: "双刃の頭領", level: 32, floor: 27,
+    id: "thief_leader_event_boss", name: "悪意に満ちた頭目", level: 32, floor: 27,
     imageId: "thief_leader_event_boss", image: "images/bosses/boss_04.avif",
     encounterImageId: "thief_hideout_event_b27f", encounterImage: "images/background/dungeon_event_03.avif",
     race: "human", maxHp: 580,
