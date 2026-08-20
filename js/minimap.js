@@ -68,6 +68,7 @@
         ? drawTextMark(ctx, "🌿", x1, y1, cell)
         : drawBossMark(ctx, x1, y1, cell);
       if (c.fountain && effectiveTorchActive) drawFountainMark(ctx, x1, y1, cell);
+      if (c.quicksand && isExplored) drawTextMark(ctx, "≋", x1, y1, cell);
       if (shouldDrawSpecialRoomMarker(c.specialRoom, isExplored, effectiveTorchActive ? 1 : 0)) {
         drawSpecialRoomMark(ctx, x1, y1, cell, c.specialRoom.content.minimapMarker);
       }

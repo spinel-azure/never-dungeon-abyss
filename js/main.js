@@ -382,6 +382,12 @@ import {
       playAudio: () => playSeSequence("stairs", 3),
       onDark
     }),
+    runQuicksandTransition: (onDark) => runSceneTransition({
+      onDark,
+      darkenMs: 650,
+      holdMs: 100,
+      revealMs: 550
+    }),
     showTreasure,
     playTreasureOpening,
     hideTreasure,
@@ -709,6 +715,7 @@ import {
         cells[y][x].featureReservation = savedCell.featureReservation || null;
         cells[y][x].featureApproach = savedCell.featureApproach || null;
         cells[y][x].treasureTrapId = savedCell.treasureTrapId || null;
+        cells[y][x].quicksand = savedCell.quicksand || null;
         explored[y][x] = Boolean(dungeon.explored[y][x]);
       }
     }
@@ -2567,7 +2574,10 @@ import {
   async function runSceneTransition({
     showEnteringTitle = false,
     playAudio = () => Promise.resolve(),
-    onDark = () => {}
+    onDark = () => {},
+    darkenMs = 2700,
+    holdMs = 120,
+    revealMs = 700
   } = {}) {
     if (sceneTransitionRunning) return false;
     sceneTransitionRunning = true;
@@ -2580,14 +2590,14 @@ import {
 
     const audioPromise = Promise.resolve().then(playAudio).catch(() => false);
     requestAnimationFrame(() => sceneTransition.classList.add("is-black"));
-    await Promise.all([wait(2700), audioPromise]);
+    await Promise.all([wait(darkenMs), audioPromise]);
     await onDark();
-    await wait(120);
+    await wait(holdMs);
 
     sceneTransitionTitle.hidden = true;
     sceneTransition.classList.add("is-revealing");
     sceneTransition.classList.remove("is-black");
-    await wait(700);
+    await wait(revealMs);
     sceneTransition.classList.remove("is-running", "is-revealing");
     sceneTransition.hidden = true;
     document.body.classList.remove("scene-transition-active");

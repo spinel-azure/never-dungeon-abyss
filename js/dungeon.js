@@ -22,6 +22,7 @@ import {
 import { getSpecialRoomDefinition, getSpecialRoomUnlockRate, rollMaikaeferNestContent } from "../data/special-rooms.js";
 import { getFloorBossByDepth } from "../data/bosses.js";
 import { getQuestEventForDepth } from "../data/quest-events.js";
+import { DESERT_QUICKSAND, floorHasQuicksand, QUICKSAND_COUNT } from "../data/quicksand.js";
 import { hasPurpleChestLootTable } from "../data/loot.js";
 import {
   DUNGEON_FEATURE_PRIORITIES,
@@ -63,6 +64,7 @@ export function makeCells(w, h) {
       type: "floor",
       npc: null,
       fountain: null,
+      quicksand: null,
       treasure: null,
       treasureTrapId: null,
       treasureDiscovered: false,
@@ -130,6 +132,7 @@ function buildBoundaryWallMapAttempt(depth = 1, rng = Math.random, progress = {}
   placeTreasures(depth, rng, progress);
   placePurpleSpecialRoomTreasure(depth, rng);
   placeFountain(depth, rng);
+  placeQuicksands(depth, rng);
   if (floorBoss?.room?.requiresKey) placeFloorBossKeyTreasure(floorBoss, rng, progress);
   placeForestVines(depth, rng, progress);
   placeNormalDoors(NORMAL_DOOR_COUNT, false);
@@ -248,6 +251,7 @@ export function resetAllWalls() {
       cells[y][x].type = "floor";
       cells[y][x].npc = null;
       cells[y][x].fountain = null;
+      cells[y][x].quicksand = null;
       cells[y][x].treasure = null;
       cells[y][x].treasureTrapId = null;
       cells[y][x].treasureDiscovered = false;
@@ -340,6 +344,11 @@ export function removeNpcAt(x, y) {
 export function getFountainAt(x, y) {
   if (!inBounds(x, y)) return null;
   return cells[y][x].fountain || null;
+}
+
+export function getQuicksandAt(x, y) {
+  if (!inBounds(x, y)) return null;
+  return cells[y][x].quicksand || null;
 }
 
 export function getBossAt(x, y) {
@@ -677,6 +686,35 @@ export function placeFountain(depth = 1, rng = Math.random) {
       : DESERT_OASIS_MIRAGE.id;
   });
   return selected;
+}
+
+export function placeQuicksands(depth = 1, rng = Math.random) {
+  for (const cell of cells.flat()) cell.quicksand = null;
+  if (!floorHasQuicksand(depth)) return [];
+  const { x: startX, y: startY } = startPosition;
+  const distances = makeDistanceMap(startX, startY);
+  const blocked = [
+    ...getTraversalBlockingReservations(cells),
+    ...cells.flat().filter(cell => cell.npc).map(cell => ({ x: cell.x, y: cell.y }))
+  ];
+  const candidates = cells.flat().filter(cell => {
+    if (cell.type !== "floor" || cell.x === startX && cell.y === startY) return false;
+    if (isDungeonFeatureOccupied(cell) || cell.npc || cell.fountain || cell.treasure || cell.questEvent || cell.quicksand) return false;
+    if (distances[cell.y][cell.x] < 3) return false;
+    const nextBlocked = [...blocked, { x: cell.x, y: cell.y }];
+    return countReachableCells(startX, startY, nextBlocked) === MAP_W * MAP_H - nextBlocked.length;
+  });
+  const selected = shuffled(candidates, rng).slice(0, QUICKSAND_COUNT);
+  if (selected.length < QUICKSAND_COUNT) return [];
+  selected.forEach((cell, index) => {
+    const target = selected[(index + 1) % selected.length];
+    cells[cell.y][cell.x].quicksand = {
+      id: DESERT_QUICKSAND.id,
+      targetX: target.x,
+      targetY: target.y
+    };
+  });
+  return selected.map(cell => ({ x: cell.x, y: cell.y }));
 }
 
 export function placeNormalDoors(count = NORMAL_DOOR_COUNT, reset = true) {

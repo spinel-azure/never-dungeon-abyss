@@ -21,6 +21,7 @@ import {
   getBossRemainsAt,
   removeNpcAt,
   getFountainAt,
+  getQuicksandAt,
   removeFountainAt,
   getTreasureAt,
   getTreasureTrapAt,
@@ -47,6 +48,7 @@ const hooks = {
   playSe: () => {},
   playStairsSequence: () => Promise.resolve(),
   runStairsTransition: (onDark) => Promise.resolve().then(onDark),
+  runQuicksandTransition: (onDark) => Promise.resolve().then(onDark),
   showTreasure: () => {},
   playTreasureOpening: (_type, onComplete) => onComplete(),
   hideTreasure: () => {},
@@ -202,11 +204,12 @@ export function updateAnimation(now) {
         const bossId = getBossAt(state.gridX, state.gridY);
         const bossRemainsId = getBossRemainsAt(state.gridX, state.gridY);
         const fountain = getFountainAt(state.gridX, state.gridY);
+        const quicksand = getQuicksandAt(state.gridX, state.gridY);
         const treasure = getTreasureAt(state.gridX, state.gridY);
         const specialRoom = getSpecialRoomAt(state.gridX, state.gridY);
         const questEvent = getQuestEventAt(state.gridX, state.gridY);
         const isStairs = a.cellType === "stairsUp" || a.cellType === "stairsDown";
-        const isSpecialEventCell = Boolean(npc) || Boolean(bossId) || Boolean(bossRemainsId) || Boolean(fountain) || Boolean(treasure) || Boolean(questEvent) || Boolean(specialRoom?.content) || isStairs;
+        const isSpecialEventCell = Boolean(npc) || Boolean(bossId) || Boolean(bossRemainsId) || Boolean(fountain) || Boolean(quicksand) || Boolean(treasure) || Boolean(questEvent) || Boolean(specialRoom?.content) || isStairs;
         const encounterTriggered = onExplorationStep({
           autoWalkerActive: state.autoWalkerActive,
           isSpecialEventCell,
@@ -221,6 +224,8 @@ export function updateAnimation(now) {
           startNpcTalkEvent(npc, a.fromGX, a.fromGY);
         } else if (fountain) {
           startFountainEvent(fountain, a.fromGX, a.fromGY);
+        } else if (quicksand) {
+          startQuicksandEvent(quicksand);
         } else if (treasure) {
           startTreasureEvent(treasure, a.fromGX, a.fromGY);
         } else if (questEvent) {
@@ -882,6 +887,31 @@ function startFountainEvent(fountainId, fromGX, fromGY) {
     canCancel: true,
     retreatOnCancel: true
   });
+}
+
+function startQuicksandEvent(quicksand) {
+  const event = {
+    type: "quicksand",
+    imageId: "desert_quicksand",
+    phase: "sinking",
+    message: "足元の砂が崩れ、流砂へ呑み込まれた！",
+    canCancel: false
+  };
+  startOverlayEvent(event);
+  event.autoStartTimer = window.setTimeout(async () => {
+    if (state.overlayEvent !== event) return;
+    await hooks.runQuicksandTransition(() => {
+      state.gridX = quicksand.targetX;
+      state.gridY = quicksand.targetY;
+      state.x = state.gridX + .5;
+      state.y = state.gridY + .5;
+      markExplored(state.gridX, state.gridY);
+      state.overlayEvent = null;
+      hooks.say("流砂に押し流され、別の場所へ辿り着いた。");
+      updateNpcAwareness();
+      hooks.onStateChanged();
+    });
+  }, 900);
 }
 
 function confirmFountainEvent() {

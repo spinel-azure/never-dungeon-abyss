@@ -6,6 +6,7 @@
 import { npcs, getNpcById } from "../data/npcs.js";
 import { DESERT_OASIS, DESERT_OASIS_MIRAGE, getFountainById, HEALING_FOUNTAIN } from "../data/fountains.js";
 import { BOSSES, getBossById } from "../data/bosses.js";
+import { DESERT_QUICKSAND } from "../data/quicksand.js";
 
 const renderer = {
   canvas: null,
@@ -179,6 +180,7 @@ export function configureRenderer(options) {
   loadCharacterImage(HEALING_FOUNTAIN.id, HEALING_FOUNTAIN.image);
   loadCharacterImage(DESERT_OASIS.id, DESERT_OASIS.image);
   loadCharacterImage(DESERT_OASIS_MIRAGE.id, DESERT_OASIS_MIRAGE.image);
+  loadCharacterImage(DESERT_QUICKSAND.id, DESERT_QUICKSAND.image);
   loadCharacterImage("maikaefer_nest_event", "images/background/dungeon_event_08.avif");
   ["red", "black", "gold"].forEach(type => loadTreasureImage(type, `images/treasure/treasure-${type}.png`));
   loadTreasureImage("purple", "images/treasure/treasure-red.png", "#8f42d8");
@@ -828,6 +830,14 @@ export function drawCellEvents(layer = "all") {
           npc: { imageId: getFountainById(cell.fountain).id }
         });
       }
+      if (cell.quicksand) {
+        if (layer === "floor") continue;
+        events.push({
+          ...projected,
+          eventKind: "quicksand",
+          npc: { imageId: DESERT_QUICKSAND.id }
+        });
+      }
       if (cell.treasure) {
         if (layer === "floor") continue;
         events.push({
@@ -851,6 +861,7 @@ export function drawCellEvents(layer = "all") {
       if (event.eventKind === "boss") drawNpcEvent(ctx, event);
       if (event.eventKind === "bossRemains") drawNpcEvent(ctx, event);
       if (event.eventKind === "fountain") drawNpcEvent(ctx, event);
+      if (event.eventKind === "quicksand") drawNpcEvent(ctx, event);
       if (event.eventKind === "treasure") drawTreasureEvent(ctx, event);
       if (event.eventKind === "questEvent") drawQuestEvent(ctx, event);
     });
@@ -889,7 +900,7 @@ function projectCellCenter(cellX, cellY) {
 }
 
 export function isSpriteEventCell(cell = {}) {
-  return Boolean(cell.bossId || cell.bossRemainsId || cell.npc || cell.fountain || cell.treasure || cell.questEvent);
+  return Boolean(cell.bossId || cell.bossRemainsId || cell.npc || cell.fountain || cell.quicksand || cell.treasure || cell.questEvent);
 }
 
 function drawQuestEvent(ctx, event) {
