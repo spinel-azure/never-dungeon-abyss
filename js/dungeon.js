@@ -13,7 +13,7 @@
 import { getNpcById } from "../data/npcs.js";
 import { rollTreasureTrap } from "../data/traps.js";
 import { floorHasHealingFountain } from "../data/fountains.js";
-import { getSpecialRoomDefinition, getSpecialRoomUnlockRate } from "../data/special-rooms.js";
+import { getSpecialRoomDefinition, getSpecialRoomUnlockRate, rollMaikaeferNestContent } from "../data/special-rooms.js";
 import { getFloorBossByDepth } from "../data/bosses.js";
 import { getQuestEventForDepth } from "../data/quest-events.js";
 import { hasPurpleChestLootTable } from "../data/loot.js";
@@ -118,7 +118,7 @@ function buildBoundaryWallMapAttempt(depth = 1, rng = Math.random, progress = {}
   placeStairs(depth);
   const floorBoss = getFloorBossByDepth(depth);
   if (floorBoss) placeFloorBossRoom(floorBoss, rng, progress);
-  placeSpecialRoom(depth, rng);
+  placeSpecialRoom(depth, rng, progress);
   placeQuestEvent(depth, rng, progress);
   placeNpc(depth, progress);
   placeTreasures(depth, rng, progress);
@@ -440,9 +440,14 @@ export function placeTreasures(depth = 1, rng = Math.random, progress = {}) {
   }
 }
 
-export function placeSpecialRoom(depth = 1, rng = Math.random) {
+export function placeSpecialRoom(depth = 1, rng = Math.random, progress = {}) {
   const definition = getSpecialRoomDefinition(depth);
   if (!definition) return null;
+  const rareContent = rollMaikaeferNestContent({
+    room: definition,
+    forcedEnemyId: progress.forcedEnemyId,
+    roll: progress.maikaeferNestRoll
+  });
   const { x: startX, y: startY } = startPosition;
   const distances = makeDistanceMap(startX, startY);
   const existingReserved = getTraversalBlockingReservations(cells);
@@ -481,6 +486,7 @@ export function placeSpecialRoom(depth = 1, rng = Math.random) {
       const room = cells[candidate.room.y][candidate.room.x];
       room.specialRoom = {
         ...structuredClone(definition),
+        content: structuredClone(definition.content || rareContent),
         attemptsRemaining: Math.max(1, Math.floor(Number(definition.lock?.attempts) || 3)),
         unlocked: false
       };

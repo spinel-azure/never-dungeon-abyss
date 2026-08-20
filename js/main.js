@@ -321,6 +321,7 @@ import {
     activateLootIdentifyAction();
   });
   let pendingEncounter = null;
+  let activeRareRoomEncounterId = null;
   configureDevice();
   configureEvents({ messageEl: msgEl });
   configurePresence({
@@ -394,6 +395,7 @@ import {
     restAtFountain: restAtHealingFountain,
     returnToTown,
     beginBattle: beginRandomBattle,
+    beginRareEnemyBattle,
     beginBossBattle,
     beginMimicBattle,
     playNpcVoice: playSe,
@@ -701,7 +703,8 @@ import {
         cells[y][x].specialRoom = savedCell.specialRoom || null;
         cells[y][x].questEvent = savedCell.questEvent || null;
         if (cells[y][x].specialRoom) {
-          cells[y][x].specialRoom.content = getSpecialRoomDefinition(currentDepth)?.content ?? null;
+          const fixedContent = getSpecialRoomDefinition(currentDepth)?.content;
+          cells[y][x].specialRoom.content = fixedContent ?? savedCell.specialRoom?.content ?? null;
         }
         cells[y][x].featureReservation = savedCell.featureReservation || null;
         cells[y][x].featureApproach = savedCell.featureApproach || null;
@@ -1462,6 +1465,32 @@ import {
     return started;
   }
 
+  function beginRareEnemyBattle(enemyId) {
+    if (!character || worldLocation !== "dungeon" || isBattleActive()) return false;
+    const baseEnemy = getEnemyById(enemyId);
+    if (!baseEnemy) return false;
+    cancelAutoReturn(false);
+    setPlayerInputEnabled(false);
+    pendingEncounter = null;
+    const enemyData = enemyId === "maikaefer"
+      ? { ...baseEnemy, level: currentDepth, experienceReward: currentDepth * 1000 }
+      : baseEnemy;
+    const enemy = createEnemyCombatant(enemyData);
+    activeRareRoomEncounterId = enemyId;
+    startBgm(selectBattleBgm(enemyData));
+    const started = startBattle(enemy, {
+      playStartSe: true,
+      ambush: false,
+      concealed: state.torchFuel <= 0 && !state.torchEffectForced
+    });
+    if (!started) {
+      activeRareRoomEncounterId = null;
+      startBgm(selectDungeonBgm());
+      setPlayerInputEnabled(true);
+    }
+    return started;
+  }
+
   function beginBossBattle(bossId) {
     if (!character || worldLocation !== "dungeon" || isBattleActive()) return false;
     const boss = getBossById(bossId);
@@ -1960,6 +1989,7 @@ import {
   }
 
   function finishBattleVictory(battle) {
+    activeRareRoomEncounterId = null;
     startBgm(selectDungeonBgm());
     const rewardEnemies = Array.isArray(battle?.enemies) ? battle.enemies : [battle?.enemy];
     const baseReward = rewardEnemies.reduce(
@@ -2069,6 +2099,7 @@ import {
   }
 
   async function finishBattleDefeat(battle) {
+    activeRareRoomEncounterId = null;
     const recovery = resolveDefeatRecovery({
       character,
       battle,
@@ -2226,6 +2257,9 @@ import {
   }
 
   function finishBattleEscape(battle) {
+    const escapedRareRoomEnemy = battle?.outcome === "enemyEscaped"
+      && activeRareRoomEncounterId === battle.enemy?.id;
+    activeRareRoomEncounterId = null;
     startBgm(selectDungeonBgm());
     resetPresence();
     setPlayerInputEnabled(true);
@@ -2239,7 +2273,9 @@ import {
     state.autoReturnPaused = false;
     if (state.autoWalkerActive) window.setTimeout(continueAutoReturn, 0);
     say(battle?.outcome === "enemyEscaped"
-      ? `${battle.enemy?.name || "敵"}は逃げ去った。`
+      ? escapedRareRoomEnemy
+        ? "マイケーファーは勝ち誇るように羽音を響かせ、闇へ消えた……。"
+        : `${battle.enemy?.name || "敵"}は逃げ去った。`
       : "戦闘から逃げ切った。");
     updateCharacterUi();
     saveGame();
@@ -2874,6 +2910,8 @@ import {
         progress: queenShadowQuest.progress
       },
       activeQuestIds: Object.keys(character?.quests?.active || {}),
+      forcedEnemyId: getForcedEnemyId(character, { depth: currentDepth }),
+      maikaeferNestRoll: Math.random(),
       eventFlags: { ...(character?.eventFlags || {}) }
     };
   }

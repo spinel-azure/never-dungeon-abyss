@@ -177,6 +177,7 @@ export function configureRenderer(options) {
     }
   });
   loadCharacterImage(HEALING_FOUNTAIN.id, HEALING_FOUNTAIN.image);
+  loadCharacterImage("maikaefer_nest_event", "images/background/dungeon_event_08.avif");
   ["red", "black", "gold"].forEach(type => loadTreasureImage(type, `images/treasure/treasure-${type}.png`));
   loadTreasureImage("purple", "images/treasure/treasure-red.png", "#8f42d8");
   renderer.canvas.addEventListener("pointerup", handleCanvasPointerUp);

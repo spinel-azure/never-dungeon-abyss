@@ -12,7 +12,9 @@ import {
   getQuestRequiredSpecialRoomAccess,
   getSpecialRoomAccessRestriction,
   getSpecialRoomDefinition,
-  getSpecialRoomUnlockRate
+  getSpecialRoomUnlockRate,
+  MAIKAEFER_NEST_RATE,
+  rollMaikaeferNestContent
 } from "../data/special-rooms.js";
 import { shouldDrawSpecialRoomMarker } from "../js/minimap.js";
 
@@ -172,6 +174,40 @@ test("configured empty special rooms contain one purple card chest without repla
 
   buildBoundaryWallMap(10, seeded(110), {});
   assert.equal(cells.flat().find(cell => cell.specialRoom).treasure, null);
+});
+
+test("an eligible empty special room can become a Maikaefer nest instead of a purple chest", () => {
+  assert.equal(MAIKAEFER_NEST_RATE, 0.02);
+  setStartPosition(0, 0);
+  buildBoundaryWallMap(1, seeded(201), { maikaeferNestRoll: 0 });
+  const room = cells.flat().find(cell => cell.specialRoom);
+  assert.equal(room.specialRoom.content.type, "rareEnemy");
+  assert.equal(room.specialRoom.content.enemyId, "maikaefer");
+  assert.equal(room.specialRoom.content.image, "images/background/dungeon_event_08.avif");
+  assert.equal(room.treasure, null);
+});
+
+test("Maikaefer nests never replace fixed or forced-quest special rooms", () => {
+  const fixed = getSpecialRoomDefinition(2);
+  assert.equal(rollMaikaeferNestContent({ room: fixed, roll: 0 }), null);
+  buildBoundaryWallMap(2, seeded(202), { maikaeferNestRoll: 0 });
+  assert.equal(cells.flat().find(cell => cell.specialRoom).specialRoom.content.bossId, "lingering_ghost_b2f");
+
+  setStartPosition(0, 0);
+  buildBoundaryWallMap(1, seeded(203), { maikaeferNestRoll: 0, forcedEnemyId: "quest_enemy" });
+  const forcedRoom = cells.flat().find(cell => cell.specialRoom);
+  assert.equal(forcedRoom.specialRoom.content, null);
+  assert.equal(forcedRoom.treasure, "purple");
+});
+
+test("the Maikaefer nest event is consumed before battle and keeps its escape flavor", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const playerSource = await readFile(new URL("../js/player.js", import.meta.url), "utf8");
+  const mainSource = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
+  assert.match(playerSource, /金色の甲虫が、こちらに気づいて飛び上がった！/);
+  assert.match(playerSource, /event\.content\.consumed = true;[\s\S]*hooks\.beginRareEnemyBattle/);
+  assert.match(mainSource, /マイケーファーは勝ち誇るように羽音を響かせ、闇へ消えた……。/);
+  assert.match(mainSource, /fixedContent \?\? savedCell\.specialRoom\?\.content \?\? null/);
 });
 
 test("special-room lock gets three attempts with a lower rate after each failure", () => {

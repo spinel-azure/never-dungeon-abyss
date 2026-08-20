@@ -62,6 +62,7 @@ const hooks = {
   restAtFountain: () => Promise.resolve(false),
   returnToTown: () => {},
   beginBattle: () => {},
+  beginRareEnemyBattle: () => false,
   playNpcVoice: () => {},
   onNpcEncountered: () => {},
   isQueenShadowFinaleCompleted: () => false,
@@ -468,6 +469,21 @@ function confirmSpecialRoomWarningEvent() {
 }
 
 function startSpecialRoomContentEvent(content, fromGX, fromGY) {
+  if (content?.type === "rareEnemy") {
+    if (content.consumed) return;
+    startOverlayEvent({
+      type: "rareEnemyRoom",
+      content,
+      fromGX,
+      fromGY,
+      imageId: content.imageId || "",
+      imageFit: "cover",
+      showOverlay: true,
+      canCancel: false,
+      message: "金色の甲虫が、こちらに気づいて飛び上がった！\n＊Aボタン：次へ"
+    });
+    return;
+  }
   if (content?.type === "queenShadowFinale") {
     if (hooks.isQueenShadowFinaleCompleted()) return;
     startOverlayEvent({
@@ -516,6 +532,16 @@ function startSpecialRoomContentEvent(content, fromGX, fromGY) {
     retreatOnCancel: boss.event?.canCancel !== false,
     message: boss.event?.prompt || "部屋に入ると、古ぼけた机の上に所狭しと本が積み上げられている。\n机の中央には、一冊だけ開かれた本がある。調べますか？\n＊Aボタン：はい　Bボタン：いいえ"
   });
+}
+
+function confirmRareEnemyRoomEvent() {
+  const event = state.overlayEvent;
+  if (!event || event.type !== "rareEnemyRoom") return;
+  event.content.consumed = true;
+  state.overlayEvent = null;
+  hooks.say("");
+  hooks.onStateChanged();
+  hooks.beginRareEnemyBattle(event.content.enemyId);
 }
 
 function advanceQueenShadowFinaleEvent() {
@@ -626,6 +652,7 @@ export function handleOverlayEventInput(action) {
     else if (state.overlayEvent.type === "specialDoorLock") confirmSpecialDoorLockEvent();
     else if (state.overlayEvent.type === "specialRoomWarning") confirmSpecialRoomWarningEvent();
     else if (state.overlayEvent.type === "specialRoomBoss") confirmSpecialRoomBossEvent();
+    else if (state.overlayEvent.type === "rareEnemyRoom") confirmRareEnemyRoomEvent();
     else if (state.overlayEvent.type === "queenShadowFinale") advanceQueenShadowFinaleEvent();
     else if (state.overlayEvent.type === "npcContact") {
       state.overlayEvent = null;

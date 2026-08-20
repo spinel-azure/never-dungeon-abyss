@@ -24,6 +24,16 @@ export const DEFAULT_SPECIAL_ROOM_LOCK = Object.freeze({
   retryMultipliers: Object.freeze([1, 0.8, 0.6])
 });
 
+export const MAIKAEFER_NEST_RATE = 0.02;
+export const MAIKAEFER_NEST_CONTENT = Object.freeze({
+  type: "rareEnemy",
+  enemyId: "maikaefer",
+  imageId: "maikaefer_nest_event",
+  image: "images/background/dungeon_event_08.avif",
+  minimapMarker: "E",
+  revealBeforeExploration: false
+});
+
 // Add only differences here when a floor receives an event, treasure or boss.
 export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
   2: Object.freeze({
@@ -122,6 +132,13 @@ export function getSpecialRoomDefinition(depth) {
       ...structuredClone(override.lock || {})
     }
   };
+}
+
+export function rollMaikaeferNestContent({ room = null, forcedEnemyId = null, roll = 1 } = {}) {
+  if (!room || room.content || forcedEnemyId) return null;
+  return Math.max(0, Number(roll) || 0) < MAIKAEFER_NEST_RATE
+    ? structuredClone(MAIKAEFER_NEST_CONTENT)
+    : null;
 }
 
 export function getSpecialRoomAccessRestriction({ forcedEnemyId = null } = {}) {
