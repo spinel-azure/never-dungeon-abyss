@@ -649,8 +649,40 @@ export const enemies = Object.freeze([
       speed_down: Object.freeze({ resistancePoints: 25, immune: false })
     }),
     escapeRate: 0.5, surpriseRate: 0, surpriseRateMaximum: 0, isBoss: false
+  }),
+  Object.freeze({
+    id: "maikaefer", name: "マイケーファー", imageId: "maikaefer",
+    level: 1,
+    image: "images/enemies/enemy_28.avif", race: "insect", randomEncounter: false,
+    maxHp: 8, stats: Object.freeze({ str: 1, int: 1, agi: 30, dex: 8, luc: 20 }),
+    def: 60, attack: 1, experienceReward: 1000, dropProfile: "goldenBeetle",
+    evasionBonus: 0.25,
+    actions: Object.freeze([
+      Object.freeze({ weight: 70, action: Object.freeze({
+        id: "maikaefer_escape", name: "逃走", actionType: "enemyEscape", speedModifier: 20
+      }) }),
+      Object.freeze({ weight: 20, action: Object.freeze({
+        id: "maikaefer_watch", name: "様子を見る", actionType: "wait",
+        waitMessage: "マイケーファーはこちらの様子をうかがっている。"
+      }) }),
+      Object.freeze({ weight: 10, action: Object.freeze({
+        id: "maikaefer_attack", name: "攻撃", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 0.5, effects: Object.freeze([])
+      }) })
+    ]),
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      deadly_poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      bleeding: Object.freeze({ resistancePoints: 100, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 80, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 80, immune: false })
+    }),
+    escapeRate: 1, surpriseRate: 0, surpriseRateMaximum: 0, isBoss: false
   })
 ]);
+
+export const MAIKAEFER_ENCOUNTER_RATE = 0.015;
 
 export function getEnemyById(id) {
   return enemies.find(enemy => enemy.id === id) || null;
@@ -675,6 +707,14 @@ export function getRandomEnemy({ depth = 1, rng = Math.random } = {}) {
     Math.floor(Math.max(0, Number(rng()) || 0) * available.length)
   );
   return available[index] || enemies[0];
+}
+
+export function getRandomEncounterEnemy({ depth = 1, rng = Math.random, allowRare = true } = {}) {
+  const floor = Math.max(1, Math.floor(Number(depth) || 1));
+  if (allowRare && Math.max(0, Number(rng()) || 0) < MAIKAEFER_ENCOUNTER_RATE) {
+    return { ...getEnemyById("maikaefer"), level: floor, experienceReward: floor * 1000 };
+  }
+  return getRandomEnemy({ depth: floor, rng });
 }
 
 export function createEnemyCombatant(enemy) {
@@ -703,6 +743,7 @@ export function createEnemyCombatant(enemy) {
     surpriseRateMaximum: enemy.surpriseRateMaximum,
     encounterCountRange: enemy.encounterCountRange ? [...enemy.encounterCountRange] : null,
     ignoreNormalSurpriseCap: Boolean(enemy.ignoreNormalSurpriseCap),
+    evasionBonus: Number(enemy.evasionBonus) || 0,
     statuses: [],
     elementMultipliers: { ...(enemy.elementMultipliers || {}) },
     statusResistances: structuredClone(enemy.statusResistances || {}),

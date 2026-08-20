@@ -9,6 +9,7 @@ import {
   normalizeDepthReturnSettlement
 } from "../data/experience-settlement.js";
 import { getLevelUnlockedSkillIds } from "../data/skills.js";
+import { hasCardEffect } from "../data/cards.js";
 
 export const TOWN_INTRODUCTION_FLAGS = Object.freeze([
   "inn_first_talk_card",
@@ -35,6 +36,15 @@ export function awardBattleExperience(character, amount) {
     carriedExperience: Math.max(0, Math.floor(Number(character.carriedExperience) || 0)) + reward,
     pendingExperienceSettlement: null
   };
+}
+
+export function calculateBattleExperienceReward(character, amount) {
+  const baseReward = Math.max(0, Math.floor(Number(amount) || 0));
+  const multiplier = hasCardEffect(
+    character?.cards?.deckSlots,
+    "experience_gain_bonus"
+  ) ? 1.25 : 1;
+  return Math.floor(baseReward * multiplier);
 }
 
 export function resolveInnStay(character) {

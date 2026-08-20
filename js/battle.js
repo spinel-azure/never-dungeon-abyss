@@ -671,7 +671,7 @@ function renderBattle() {
   const image = battleUi.root.querySelector("#battleEnemyImage");
   image.src = battle.enemy.image || "";
   image.alt = battleUi.concealed ? "正体不明の敵" : battle.enemy.name;
-  const defeated = battle.outcome === "victory" && !battleUi.presenting;
+  const defeated = ["victory", "enemyEscaped"].includes(battle.outcome) && !battleUi.presenting;
   image.classList.toggle("is-defeated", defeated);
   image.classList.toggle("is-concealed", battleUi.concealed);
   image.classList.toggle("is-jabberwock", battle.enemy.id === "jabberwock_event_boss");

@@ -12,6 +12,15 @@ const rng = (...values) => {
   return () => values[Math.min(index++, values.length - 1)];
 };
 
+test("Maikaefer drops the Golden Beetle card at one percent", () => {
+  const enemy = { dropProfile: "goldenBeetle" };
+  assert.deepEqual(rollEnemyDrop(enemy, () => 0.00999), {
+    kind: "card", cardId: "sr_golden_beetle", amount: 1,
+    unidentifiedName: "？カード", rarity: "SR"
+  });
+  assert.deepEqual(rollEnemyDrop(enemy, () => 0.01), { kind: "none" });
+});
+
 test("gold chests grant the player job's unique unenhanced romance weapon", () => {
   const expected = {
     warrior: "musashi_blade",

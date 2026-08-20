@@ -440,6 +440,18 @@ function buildEnemyAction(action, normalAttack) {
 function executeAction({ battle, action, actor, actorSide, target, targetSide, rng }) {
   const actorStats = combatStats(actor);
   const targetStats = combatStats(target);
+  if (action.actionType === "enemyEscape" && actorSide === "enemy") {
+    actor.alive = false;
+    actor.escaped = true;
+    actor.experienceReward = 0;
+    actor.dropItemId = null;
+    actor.dropGold = 0;
+    actor.noDrop = true;
+    battle.outcome = "enemyEscaped";
+    battle.phase = "complete";
+    battle.log.push(`${actor.name}は逃げ出した！`);
+    return;
+  }
   if (action.actionType === "guard") {
     actor.statuses = applyStatusApplications(actor.statuses, [{
       statusId: "guard",

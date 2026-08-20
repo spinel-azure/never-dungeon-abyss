@@ -18,6 +18,11 @@ export const BLACK_CHEST_LOOT_TABLES = Object.freeze([
 
 export function rollEnemyDrop(enemy, rng = Math.random) {
   if (enemy?.noDrop) return { kind: "none" };
+  if (enemy?.dropProfile === "goldenBeetle") {
+    return normalizedRoll(rng) < 0.01
+      ? { kind: "card", cardId: "sr_golden_beetle", amount: 1, unidentifiedName: "？カード", rarity: "SR" }
+      : { kind: "none" };
+  }
   if (enemy?.dropProfile === "blackChest") return rollBlackChestLoot(rng, enemy.depth);
   const roll = normalizedRoll(rng);
   if (roll < 0.4) return { kind: "none" };

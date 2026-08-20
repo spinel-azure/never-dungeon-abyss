@@ -99,11 +99,11 @@ import { getActivePlayTimeDelta, normalizeAdventureStats, recordInnStay, recordS
 import { getAdventureChronicle } from "../data/adventure-records.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName, grantEquipmentInstance } from "../data/equipment-inventory.js";
-import { createEnemyCombatant, getEnemyById, getEnemyEncounterCount, getRandomEnemy } from "../data/enemies.js";
+import { createEnemyCombatant, getEnemyById, getEnemyEncounterCount, getRandomEncounterEnemy } from "../data/enemies.js";
 import { applyBossVictory, bossLeavesRemains, createBossCombatant, getBossById, getFloorBossByDepth, isBossDefeated } from "../data/bosses.js";
 import { consumeKeyItem, getKeyItem, grantKeyItem, hasKeyItem } from "../data/key-items.js";
 import { configureBattle, handleBattleInput, isBattleActive, openBattleItems, startBattle } from "./battle.js";
-import { awardBattleExperience, createTempleRevival, getInnStayFee, grantEventItems, resolveDungeonDefeat, resolveInnStableStay, resolveInnStay, resolveTemplePoisonTreatment, unlockGuildRequest } from "./character-services.js";
+import { awardBattleExperience, calculateBattleExperienceReward, createTempleRevival, getInnStayFee, grantEventItems, resolveDungeonDefeat, resolveInnStableStay, resolveInnStay, resolveTemplePoisonTreatment, unlockGuildRequest } from "./character-services.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { resolveTreasureTrap } from "../combat/resolve-trap.js";
 import { collectStats } from "../combat/collect-stats.js";
@@ -1406,7 +1406,7 @@ import {
     const forcedEnemyId = getForcedEnemyId(character, { depth: currentDepth });
     return forcedEnemyId
       ? getEnemyById(forcedEnemyId)
-      : getRandomEnemy({ depth: currentDepth });
+      : getRandomEncounterEnemy({ depth: currentDepth });
   }
 
   function prepareRandomEncounter() {
@@ -1952,10 +1952,11 @@ import {
   function finishBattleVictory(battle) {
     startBgm(selectDungeonBgm());
     const rewardEnemies = Array.isArray(battle?.enemies) ? battle.enemies : [battle?.enemy];
-    const reward = rewardEnemies.reduce(
+    const baseReward = rewardEnemies.reduce(
       (total, enemy) => total + Math.max(0, Math.floor(Number(enemy?.experienceReward) || 0)),
       0
     );
+    const reward = calculateBattleExperienceReward(character, baseReward);
     let bossRewardMessage = "";
     if (character && battle?.enemy?.isDungeonObstacle) {
       removeBossAt(state.gridX, state.gridY);
@@ -2214,7 +2215,7 @@ import {
     document.body.classList.add("scene-transition-active");
   }
 
-  function finishBattleEscape() {
+  function finishBattleEscape(battle) {
     startBgm(selectDungeonBgm());
     resetPresence();
     setPlayerInputEnabled(true);
@@ -2227,7 +2228,9 @@ import {
     }
     state.autoReturnPaused = false;
     if (state.autoWalkerActive) window.setTimeout(continueAutoReturn, 0);
-    say("戦闘から逃げ切った。");
+    say(battle?.outcome === "enemyEscaped"
+      ? `${battle.enemy?.name || "敵"}は逃げ去った。`
+      : "戦闘から逃げ切った。");
     updateCharacterUi();
     saveGame();
   }

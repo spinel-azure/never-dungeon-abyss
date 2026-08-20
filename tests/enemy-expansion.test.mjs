@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { createEnemyCombatant, getEnemyById, getRandomEnemy } from "../data/enemies.js";
+import { MAIKAEFER_ENCOUNTER_RATE, createEnemyCombatant, getEnemyById, getRandomEncounterEnemy, getRandomEnemy } from "../data/enemies.js";
 import { getItem } from "../data/items.js";
 import { rollBlackChestLoot, rollEnemyDrop } from "../data/loot.js";
 
@@ -18,6 +18,31 @@ test("mimic is excluded from random encounters and uses the black chest reward p
   assert.equal(getRandomEnemy({ depth: 49, rng: () => 0.999 }).id, "ice_bear");
   assert.equal(createEnemyCombatant(mimic).dropProfile, "blackChest");
   assert.deepEqual(rollEnemyDrop(createEnemyCombatant(mimic), sequence(0, 0)), rollBlackChestLoot(sequence(0, 0)));
+});
+
+test("Maikaefer is a 1.5 percent all-floor rare encounter with floor-scaled experience", () => {
+  assert.equal(MAIKAEFER_ENCOUNTER_RATE, 0.015);
+  const firstFloor = getRandomEncounterEnemy({ depth: 1, rng: () => 0 });
+  const deepFloor = getRandomEncounterEnemy({ depth: 60, rng: () => 0 });
+  assert.equal(firstFloor.id, "maikaefer");
+  assert.equal(firstFloor.experienceReward, 1000);
+  assert.equal(deepFloor.id, "maikaefer");
+  assert.equal(deepFloor.level, 60);
+  assert.equal(deepFloor.experienceReward, 60000);
+  assert.notEqual(getRandomEncounterEnemy({ depth: 60, rng: () => 0, allowRare: false }).id, "maikaefer");
+  assert.notEqual(getRandomEncounterEnemy({ depth: 60, rng: () => MAIKAEFER_ENCOUNTER_RATE }).id, "maikaefer");
+  assert.notEqual(getRandomEnemy({ depth: 60, rng: () => 0 }).id, "maikaefer");
+});
+
+test("Maikaefer is frail, evasive, poison-proof, and highly resistant to action lock", () => {
+  const enemy = createEnemyCombatant(getEnemyById("maikaefer"));
+  assert.equal(enemy.image, "images/enemies/enemy_28.avif");
+  assert.equal(enemy.maxHp, 8);
+  assert.equal(enemy.evasionBonus, 0.25);
+  assert.equal(enemy.statusResistances.poison.immune, true);
+  assert.equal(enemy.statusResistances.deadly_poison.immune, true);
+  assert.equal(enemy.statusResistances.bleeding.immune, true);
+  assert.equal(enemy.statusResistances.action_skip.resistancePoints, 80);
 });
 
 test("viper and vampire bat materials are sell-only drops and bouncing coin carries 40G", () => {

@@ -51,11 +51,46 @@ import {
 } from "../combat/status-lifecycle.js";
 import {
   awardBattleExperience,
+  calculateBattleExperienceReward,
   createInnRecovery,
   createTempleRevival,
   resolveDungeonDefeat,
   resolveInnStay
 } from "../js/character-services.js";
+
+test("Golden Beetle increases battle experience by 25 percent", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "thief" });
+  assert.equal(calculateBattleExperienceReward(character, 1000), 1000);
+  character.cards.ownedCardIds.push("sr_golden_beetle");
+  character.cards.ownedCardCounts.sr_golden_beetle = 1;
+  character.cards.deckSlots[0] = "sr_golden_beetle";
+  assert.equal(calculateBattleExperienceReward(character, 1000), 1250);
+  const card = getCardById("sr_golden_beetle");
+  assert.equal(card.rarity, "SR");
+  assert.equal(card.cost, 4);
+  assert.equal(card.maxOwned, 1);
+  assert.equal(card.maxCopies, 1);
+});
+
+test("Maikaefer usually escapes and leaves no battle reward", () => {
+  const enemy = createEnemyCombatant({
+    ...getEnemyById("maikaefer"), level: 60, experienceReward: 60000
+  });
+  assert.equal(createEnemyAction(enemy, () => 0).actionType, "enemyEscape");
+  assert.equal(createEnemyAction(enemy, () => 0.7).actionType, "wait");
+  assert.equal(createEnemyAction(enemy, () => 0.9).actionType, "physicalAttack");
+
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  const result = resolveBattleRound({
+    battle: createBattleState({ character, enemy }),
+    playerCommand: { type: "wait" },
+    rng: () => 0
+  });
+  assert.equal(result.battle.outcome, "enemyEscaped");
+  assert.equal(result.battle.enemy.experienceReward, 0);
+  assert.equal(result.battle.enemy.noDrop, true);
+  assert.equal(result.battle.enemy.escaped, true);
+});
 import {
   getExperienceForLevel,
   getDeckCostAtLevel,
