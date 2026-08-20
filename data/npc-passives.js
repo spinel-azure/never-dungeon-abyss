@@ -25,6 +25,14 @@ export const NPC_ADVANCED_GROWTH = Object.freeze({
     stage8: Object.freeze({ name: "女神よ、癒やしを！", hpThresholdRate: 0.5, healMaxHpRate: 0.3 }),
     stage9: Object.freeze({ name: "女神の息吹・極", hpRecovery: 2 }),
     stage10: Object.freeze({ name: "黄金の稲穂", hpThresholdRate: 0.25, healMaxHpRate: 0.8 })
+  }),
+  johan: Object.freeze({
+    stage7: Object.freeze({ name: "マナ励起", spellDamageMultiplier: 1.2, debuffRate: 0.2,
+      magicDamageTakenBonus: 0.15, debuffTurns: 2 }),
+    stage8: Object.freeze({ name: "壁よ、拒め！", damageThresholdRate: 0.2, strongDamageReduction: 0.2 }),
+    stage9: Object.freeze({ name: "マナ活性化・極", spRecovery: 2 }),
+    stage10: Object.freeze({ name: "デア・ツァウバーシルト", triggerDamageMaxHpRate: 0.3,
+      damageReduction: 0.5, spRecoveryMaxSpRate: 0.1 })
   })
 });
 

@@ -28,6 +28,7 @@ import {
   applyNpcBattleStart,
   applyNpcChargeSkills,
   applyNpcGuardSupport,
+  applyNpcLargeDamageProtection,
   applyNpcLethalProtection,
   applyNpcTurnEnd,
   applyNpcTurnStart
@@ -737,14 +738,22 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
     ? Math.max(1, Math.floor(target.maxHp * (Number(npcWall.npcWallDamageThresholdRate) || 0)))
     : 0;
   let npcWallBlocked = false;
+  let npcWallReduced = false;
   if (npcWallThreshold > 0) {
     presentedHits = presentedHits.map(hit => {
-      if (!hit.hit || hit.damage <= 0 || hit.damage > npcWallThreshold) return hit;
-      npcWallBlocked = true;
-      return { ...hit, damage: 0, blockedByNpcWall: true };
+      if (!hit.hit || hit.damage <= 0) return hit;
+      if (hit.damage <= npcWallThreshold) {
+        npcWallBlocked = true;
+        return { ...hit, damage: 0, blockedByNpcWall: true };
+      }
+      const strongReduction = Math.max(0, Math.min(0.95, Number(npcWall.npcWallStrongDamageReduction) || 0));
+      if (strongReduction <= 0) return hit;
+      npcWallReduced = true;
+      return { ...hit, damage: Math.max(0, Math.floor(hit.damage * (1 - strongReduction))), reducedByNpcWall: true };
     });
     actualDamage = presentedHits.reduce((total, hit) => total + hit.damage, 0);
     if (npcWallBlocked) battle.log.push("ヨハンの壁が弱い攻撃を完全に防いだ！");
+    if (npcWallReduced) battle.log.push("ヨハンの壁が強い攻撃を軽減した！");
   }
   const barrier = action.actionType === "physicalAttack"
     ? findBlockingBarrier(target.statuses, actualDamage)
@@ -758,6 +767,11 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
       ? target.statuses
       : target.statuses.filter(status => status !== barrier);
     battle.log.push(`魔力の壁が攻撃を防いだ！ 残り${remaining}回`);
+  }
+  if (targetSide === "player" && actualDamage > 0) {
+    const protectedDamage = applyNpcLargeDamageProtection(battle, { presentedHits, actualDamage });
+    presentedHits = protectedDamage.presentedHits;
+    actualDamage = protectedDamage.actualDamage;
   }
   target.hp = Math.max(0, target.hp - actualDamage);
   target.alive = target.hp > 0;
@@ -792,6 +806,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
         ? action.presentationId || null
         : null,
       blockedByNpcWall: Boolean(hit.blockedByNpcWall),
+      reducedByNpcWall: Boolean(hit.reducedByNpcWall),
       message
     });
   });
@@ -1002,6 +1017,9 @@ function combatStats(combatant) {
   const statusIceDamageReduction = (combatant.statuses || []).reduce(
     (total, status) => total + (status.active === false ? 0 : Number(status.iceDamageReduction) || 0), 0
   );
+  const statusMagicDamageTakenBonus = (combatant.statuses || []).reduce(
+    (total, status) => total + (status.active === false ? 0 : Number(status.magicDamageTakenBonus) || 0), 0
+  );
   return {
     ...collected,
     def: Math.floor(collected.def * getDefenseMultiplier(combatant.statuses)),
@@ -1018,6 +1036,7 @@ function combatStats(combatant) {
     iceSpellDamageBonus: collected.iceSpellDamageBonus,
     fireDamageTakenBonus: collected.fireDamageTakenBonus,
     iceDamageTakenBonus: collected.iceDamageTakenBonus,
+    magicDamageTakenBonus: statusMagicDamageTakenBonus,
     isBoss: Boolean(combatant.isBoss)
   };
 }

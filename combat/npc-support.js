@@ -123,6 +123,28 @@ export function applyNpcLethalProtection(battle) {
   return true;
 }
 
+export function applyNpcLargeDamageProtection(battle, { presentedHits = [], actualDamage = 0 } = {}) {
+  const upgrade = NPC_ADVANCED_GROWTH.johan.stage10;
+  if (!battle?.player || battle.npcZauberschildUsed || actualDamage <= 0
+    || actualDamage < Math.max(1, Math.floor(battle.player.maxHp * upgrade.triggerDamageMaxHpRate))
+    || !canNpcSupport({ battle, npcId: "johan", supportType: "largeDamageProtection" })
+    || getGrowthStage(battle.player, "johan") < 10) return { presentedHits, actualDamage, activated: false };
+  battle.npcZauberschildUsed = true;
+  const reducedHits = presentedHits.map(hit => ({
+    ...hit,
+    damage: hit.hit ? Math.max(0, Math.floor(hit.damage * (1 - upgrade.damageReduction))) : hit.damage
+  }));
+  const reducedDamage = reducedHits.reduce((total, hit) => total + (Number(hit.damage) || 0), 0);
+  const spRecovery = Math.min(battle.player.maxSp - battle.player.sp,
+    Math.max(1, Math.floor(battle.player.maxSp * upgrade.spRecoveryMaxSpRate)));
+  battle.player.sp += Math.max(0, spRecovery);
+  battle.log.push(`ヨハンの「${upgrade.name}」！ 巨大な魔力障壁が致命の一撃を歪めた！`);
+  if (spRecovery > 0) battle.log.push(`SPが${spRecovery}回復した！`);
+  battle.presentationEvents.push({ type: "npcSupport", npcId: "johan", actionName: upgrade.name,
+    spRecovery, message: `ヨハンの「${upgrade.name}」が大ダメージを軽減した！` });
+  return { presentedHits: reducedHits, actualDamage: reducedDamage, activated: true };
+}
+
 export function getNpcSupportStatus(character, npcId) {
   const definition = getNpcDefinition(npcId);
   if (!definition) return null;
@@ -173,12 +195,15 @@ export function getNpcSupportStatus(character, npcId) {
   }
   const config = NPC_SUPPORT_BALANCE.johan;
   const intelligence = Number(definition.baseStats.int) + stage * config.growthInt;
-  const baseDamage = (config.basePower + intelligence * 0.5) * config.spellRate;
+  const stage7 = stage >= 7 ? NPC_ADVANCED_GROWTH.johan.stage7 : null;
+  const baseDamage = (config.basePower + intelligence * 0.5) * config.spellRate * (stage7?.spellDamageMultiplier || 1);
   return { ...common, rows: [
     ["呪文威力", `約${Math.max(1, Math.floor(baseDamage * 0.9))}～${Math.max(1, Math.floor(baseDamage * 1.1))}`],
     ["属性", "無属性"],
     ["発動条件", "ターン開始時"],
-    ...passiveRow
+    ...(passive ? [["パッシブ", stage >= 9 ? NPC_ADVANCED_GROWTH.johan.stage9.name : passive.name]] : []),
+    ...(stage >= 8 ? [["チャージ", NPC_ADVANCED_GROWTH.johan.stage8.name]] : []),
+    ...(stage >= 10 ? [["奥義", NPC_ADVANCED_GROWTH.johan.stage10.name]] : [])
   ] };
 }
 
@@ -284,15 +309,27 @@ function applyJohanSupport(battle, rng) {
   const stage = getGrowthStage(battle.player, "johan");
   const definition = getNpcDefinition("johan");
   const config = NPC_SUPPORT_BALANCE.johan;
+  const stage7 = stage >= 7 ? NPC_ADVANCED_GROWTH.johan.stage7 : null;
   const intelligence = Number(definition?.baseStats?.int) + stage * config.growthInt;
   const result = resolveSpell({
     attacker: { int: intelligence },
     defender: battle.enemy,
-    spell: { id: "npc_johan_arcane", element: config.element, spellPower: config.basePower, powerMultiplier: config.spellRate },
+    spell: { id: "npc_johan_arcane", element: config.element, spellPower: config.basePower,
+      powerMultiplier: config.spellRate * (stage7?.spellDamageMultiplier || 1) },
     rng
   });
   const damage = Math.max(0, Math.floor(result.totalDamage || result.hits?.[0]?.damage || 0));
   applyNpcDamage(battle, { npcId: "johan", damage, message: `ヨハンが攻撃呪文を放った！ ${damage}ダメージ！` });
+  if (stage7 && !battle.outcome && Number(rng()) < stage7.debuffRate) {
+    battle.enemy.statuses = [
+      ...(battle.enemy.statuses || []).filter(status => (status.id || status.statusId) !== "npc_johan_magic_exposure"),
+      { id: "npc_johan_magic_exposure", statusId: "npc_johan_magic_exposure", active: true,
+        remainingTurns: stage7.debuffTurns, skipInitialDecrement: true,
+        magicDamageTakenBonus: stage7.magicDamageTakenBonus, expiresAfterBattle: true }
+    ];
+    battle.log.push("敵の呪文耐性が低下した！");
+    battle.presentationEvents.push({ type: "npcSupport", npcId: "johan", message: "敵の呪文耐性が低下した！" });
+  }
 }
 
 function applyAlecChargeSkill(battle, config, rng) {
@@ -368,6 +405,8 @@ function applyErikaChargeSkill(battle, config) {
 }
 
 function applyJohanChargeSkill(battle, config) {
+  const stage = getGrowthStage(battle.player, "johan");
+  const upgrade = stage >= 8 ? NPC_ADVANCED_GROWTH.johan.stage8 : null;
   battle.player.statuses = [
     ...(battle.player.statuses || []).filter(status => (status.id || status.statusId) !== "npc_johan_wall"),
     {
@@ -376,14 +415,17 @@ function applyJohanChargeSkill(battle, config) {
       active: true,
       expiresAfterBattle: true,
       npcWallTurns: config.durationTurns,
-      npcWallDamageThresholdRate: config.damageThresholdRate
+      npcWallDamageThresholdRate: upgrade?.damageThresholdRate || config.damageThresholdRate,
+      npcWallStrongDamageReduction: upgrade?.strongDamageReduction || 0
     }
   ];
   battle.log.push("ヨハンの壁が弱い攻撃を完全に防ぐ！");
   battle.presentationEvents.push({
     type: "npcSupport",
     npcId: "johan",
-    message: "ヨハンの壁が3ターンの間、弱い攻撃を完全に防ぐ！"
+    message: upgrade
+      ? "ヨハンの壁が3ターンの間、弱い攻撃を完全に防ぎ、強い攻撃も軽減する！"
+      : "ヨハンの壁が3ターンの間、弱い攻撃を完全に防ぐ！"
   });
 }
 

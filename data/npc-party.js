@@ -56,7 +56,10 @@ export function applyNpcExplorationPassives(character) {
       ? NPC_ADVANCED_GROWTH.erika.stage9.hpRecovery
       : passive.hpRecovery;
     if (hpRecovery) hp = Math.min(character.maxHp, hp + hpRecovery);
-    if (passive.spRecovery) sp = Math.min(character.maxSp, sp + passive.spRecovery);
+    const spRecovery = npcId === "johan" && Number(record?.growthStage) >= 9
+      ? NPC_ADVANCED_GROWTH.johan.stage9.spRecovery
+      : passive.spRecovery;
+    if (spRecovery) sp = Math.min(character.maxSp, sp + spRecovery);
   }
   return { ...character, hp, sp, npcSystem: { ...state, records } };
 }

@@ -283,6 +283,58 @@ test("stage ten capstones provide Vandervalke, Siegfried and Golden Wheat once p
   assert.equal(wheat.npcGoldenWheatUsed, true);
 });
 
+test("Johan stages seven through nine strengthen magic support, the wall and Mana Activation", () => {
+  const character = hero("mage");
+  character.maxHp = 100;
+  character.hp = 100;
+  character.npcSystem = normalizeNpcSystem({ registeredIds: ["johan"], activeIds: ["johan"],
+    records: { johan: { maxDepth: 80, charge: 100 } } });
+  const battle = createBattleState({ character,
+    enemy: { id: "dummy", name: "DUMMY", hp: 999, maxHp: 999, attack: 200, def: 0, agi: 999,
+      alive: true, statuses: [] } });
+  const rolls = [0.5, 0];
+  applyNpcChargeSkills(battle, () => 0.99);
+  applyNpcTurnStart(battle, () => rolls.shift() ?? 0.99);
+  assert.ok(battle.presentationEvents.some(event => event.skillName === "壁よ、拒め！"));
+  assert.equal(battle.player.statuses.find(status => status.id === "npc_johan_wall")?.npcWallDamageThresholdRate, 0.2);
+  assert.equal(battle.player.statuses.find(status => status.id === "npc_johan_wall")?.npcWallStrongDamageReduction, 0.2);
+  assert.equal(battle.enemy.statuses.find(status => status.id === "npc_johan_magic_exposure")?.magicDamageTakenBonus, 0.15);
+
+  const protectedRound = resolveBattleRound({ battle, playerCommand: { type: "wait" }, rng: () => 0.5 }).battle;
+  assert.ok(protectedRound.presentationEvents.some(event => event.targetSide === "player" && event.reducedByNpcWall));
+
+  let explorer = hero("mage");
+  explorer.sp -= 5;
+  explorer.npcSystem = normalizeNpcSystem({ registeredIds: ["johan"], activeIds: ["johan"], records: { johan: { maxDepth: 90 } } });
+  for (let step = 0; step < 5; step += 1) explorer = applyNpcExplorationPassives(explorer);
+  assert.equal(explorer.sp, explorer.maxSp - 3);
+  assert.ok(getNpcSupportStatus(explorer, "johan").rows.some(row => row[1] === "マナ活性化・極"));
+});
+
+test("Der Zauberschild reduces a large hit before Siegfried and restores ten percent SP", () => {
+  const character = hero("mage");
+  character.maxHp = 100;
+  character.hp = 100;
+  character.maxSp = 100;
+  character.sp = 0;
+  character.npcSystem = normalizeNpcSystem({
+    registeredIds: ["alec", "johan"], activeIds: ["alec", "johan"],
+    records: { alec: { maxDepth: 100 }, johan: { maxDepth: 100 } }
+  });
+  const battle = createBattleState({ character,
+    enemy: { id: "lethal", name: "LETHAL", hp: 9999, maxHp: 9999, attack: 999, def: 0, agi: 999,
+      alive: true, statuses: [] } });
+  const resolved = resolveBattleRound({ battle, playerCommand: { type: "wait" }, rng: () => 0.5 }).battle;
+  assert.equal(resolved.npcZauberschildUsed, true);
+  assert.equal(resolved.npcSiegfriedUsed, true);
+  assert.equal(resolved.player.hp, 1);
+  assert.equal(resolved.player.sp, 10);
+  const shieldLog = resolved.log.findIndex(line => line.includes("デア・ツァウバーシルト"));
+  const siegfriedLog = resolved.log.findIndex(line => line.includes("ジークフリート"));
+  assert.ok(shieldLog >= 0 && siegfriedLog > shieldLog);
+  assert.ok(getNpcSupportStatus(character, "johan").rows.some(row => row[1] === "デア・ツァウバーシルト"));
+});
+
 test("charge rates follow thief, priest, warrior, mage and cooldown skips one full turn", () => {
   assert.deepEqual(
     ["rebecca", "erika", "alec", "johan"].map(id => NPC_CHARGE_SKILLS[id].chargePerTurn),

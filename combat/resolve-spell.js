@@ -59,7 +59,8 @@ export function resolveSpell({
     const damageTakenBonus = spell.element === "fire"
       ? numeric(defender.fireDamageTakenBonus)
       : spell.element === "ice" ? numeric(defender.iceDamageTakenBonus) : 0;
-    damage = Math.max(1, Math.floor(baseDamage * multiplier * variance * (1 - damageReduction) * (1 + damageTakenBonus)));
+    damage = Math.max(1, Math.floor(baseDamage * multiplier * variance * (1 - damageReduction)
+      * (1 + damageTakenBonus + numeric(defender.magicDamageTakenBonus))));
   }
   const actionEffects = resolveEffects({
     effects: spell.effects,
