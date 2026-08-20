@@ -34,7 +34,8 @@ export function resolveSpell({
   const offensiveBonus = spell.element === "fire"
     ? numeric(attacker.fireSpellDamageBonus)
     : spell.element === "ice" ? numeric(attacker.iceSpellDamageBonus) : 0;
-  const baseDamage = spellAttack * numericOr(spell.powerMultiplier, 1) * (1 + offensiveBonus);
+  const baseDamage = spellAttack * numericOr(spell.powerMultiplier, 1)
+    * (1 + offensiveBonus + numeric(attacker.attackSpellDamageBonus));
   let damage = 0;
   if (multiplier !== 0) {
     const variance = randomBetween(

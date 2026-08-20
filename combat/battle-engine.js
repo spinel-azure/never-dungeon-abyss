@@ -996,6 +996,13 @@ function combatStats(combatant) {
   if ((Number(collected.deadlyPoisonResistance) || 0) >= 1) {
     statusResistances.deadly_poison = { resistancePoints: 100, immune: true };
   }
+  for (const statusId of ["poison", "deadly_poison"]) {
+    const resistance = statusResistances[statusId] || {};
+    statusResistances[statusId] = {
+      ...resistance,
+      resistancePoints: (Number(resistance.resistancePoints) || 0) + collected.poisonResistance * 100
+    };
+  }
   const bleeding = statusResistances.bleeding || {};
   statusResistances.bleeding = { ...bleeding,
     resistancePoints: (Number(bleeding.resistancePoints) || 0) + collected.bleedingResistance * 100 };
@@ -1034,6 +1041,8 @@ function combatStats(combatant) {
     elementalMagicDamageReduction: collected.elementalMagicDamageReduction,
     fireSpellDamageBonus: collected.fireSpellDamageBonus,
     iceSpellDamageBonus: collected.iceSpellDamageBonus,
+    attackSpellDamageBonus: collected.attackSpellDamageBonus,
+    passiveInstantDeathRateBonus: collected.passiveInstantDeathRateBonus,
     fireDamageTakenBonus: collected.fireDamageTakenBonus,
     iceDamageTakenBonus: collected.iceDamageTakenBonus,
     magicDamageTakenBonus: statusMagicDamageTakenBonus,

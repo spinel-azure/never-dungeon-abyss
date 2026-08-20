@@ -244,9 +244,12 @@ function rollDesertRedChestLoot(roll, rng) {
   if (roll < 0.2) {
     return { kind: "item", itemId: "strong_antidote", amount: 1, unidentifiedName: "？薬" };
   }
+  const equipmentId = rollFromList([
+    "spell_sealing_talisman", "mana_amplifier", "masters_necklace", "poison_mask"
+  ], rng);
   return {
     kind: "equipment",
-    equipmentId: "spell_sealing_talisman",
+    equipmentId,
     slot: "accessoryId",
     enhancement: rollEnhancement(DEEP_RED_CHEST_ARMOR_ENHANCEMENT_RATES, rng) + 1,
     unidentifiedName: "？装備"

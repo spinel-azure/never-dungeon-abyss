@@ -1061,7 +1061,10 @@ function equipmentEffectLabels(definition) {
       fireSpellDamageBonus: "炎魔法威力",
       iceSpellDamageBonus: "氷魔法威力",
       fireDamageTakenBonus: "被炎ダメージ",
-      iceDamageTakenBonus: "被氷ダメージ"
+      iceDamageTakenBonus: "被氷ダメージ",
+      attackSpellDamageBonus: "攻撃呪文威力",
+      passiveInstantDeathRateBonus: "一閃・暗殺術",
+      poisonResistance: "毒・猛毒耐性"
     };
     labels.push(percentLabels[key]
       ? `${percentLabels[key]} ${value >= 0 ? "+" : ""}${Math.round(Number(value) * 100)}%`

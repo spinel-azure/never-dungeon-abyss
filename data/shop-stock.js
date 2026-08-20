@@ -54,7 +54,14 @@ export const SHOP_ACCESSORY_STOCK = Object.freeze([
     enhancement: 0,
     shopUnlockDepth: 50,
     requiredFlags: Object.freeze(["transfer_portal_b50f_unlocked", "boss_eiskoenigin_b49f_defeated"])
-  })
+  }),
+  ...["mana_amplifier", "masters_necklace", "poison_mask"].map(equipmentId => Object.freeze({
+    id: `shop_${equipmentId}`,
+    equipmentId,
+    enhancement: 0,
+    shopUnlockDepth: 60,
+    requiredFlags: Object.freeze(["transfer_portal_b60f_unlocked"])
+  }))
 ]);
 
 export function getShopEquipmentIdsForDepth(depth = 1) {
@@ -194,6 +201,12 @@ function describeBonuses(bonuses = {}) {
       ? `呪文耐性+${Math.round(Number(value) * 100)}%`
       : key === "actionSkipResistance"
         ? `行動不能耐性+${Math.round(Number(value) * 100)}%`
+      : key === "attackSpellDamageBonus"
+        ? `攻撃呪文威力+${Math.round(Number(value) * 100)}%`
+      : key === "passiveInstantDeathRateBonus"
+        ? `一閃・暗殺術+${Math.round(Number(value) * 100)}%`
+      : key === "poisonResistance"
+        ? `毒・猛毒耐性+${Math.round(Number(value) * 100)}%`
       : `${key === "def" ? "DEF" : key.toUpperCase()}+${value}`)
     .join(" / ");
 }

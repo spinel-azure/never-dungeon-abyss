@@ -11,7 +11,8 @@ export function calculatePassiveInstantDeathRate(passiveId, attacker = {}) {
   if (!config) return 0;
   const primary = clamp(Number(attacker[config.primaryStat]) || 0, 1, 30);
   const inverse = clamp(Number(attacker[config.inverseStat]) || 0, 1, 30);
-  return clamp(0.01 + (primary - 1) * 0.0035 + (30 - inverse) * 0.0014, 0.01, 0.15);
+  const baseRate = clamp(0.01 + (primary - 1) * 0.0035 + (30 - inverse) * 0.0014, 0.01, 0.15);
+  return clamp(baseRate + (Number(attacker.passiveInstantDeathRateBonus) || 0), 0.01, 0.2);
 }
 
 export function resolvePassiveInstantDeath({ passiveId, attacker, defender, rng = Math.random } = {}) {
@@ -19,7 +20,7 @@ export function resolvePassiveInstantDeath({ passiveId, attacker, defender, rng 
     defender,
     baseRate: calculatePassiveInstantDeathRate(passiveId, attacker),
     minimumRate: 0.01,
-    maximumRate: 0.15,
+    maximumRate: 0.2,
     rng
   });
 }

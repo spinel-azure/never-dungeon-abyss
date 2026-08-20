@@ -1839,6 +1839,34 @@ test("passive instant death reaches fifteen percent only with the intended extre
   }).immune, true);
 });
 
+test("Mana Amplifier boosts attack spells and Master's Necklace raises passives only to twenty percent", () => {
+  const spell = { id: "test_spell", spellPower: 100, intelligenceMultiplier: 0, powerMultiplier: 1, element: "arcane" };
+  const normal = resolveSpell({ attacker: {}, defender: {}, spell, rng: fixed(0.5) });
+  const amplified = resolveSpell({ attacker: { attackSpellDamageBonus: 0.2 }, defender: {}, spell, rng: fixed(0.5) });
+  assert.equal(amplified.totalDamage, Math.floor(normal.totalDamage * 1.2));
+  assert.equal(calculatePassiveInstantDeathRate("flash_slash", {
+    str: 30, agi: 1, passiveInstantDeathRateBonus: 0.04
+  }), 0.19);
+  assert.equal(calculatePassiveInstantDeathRate("flash_slash", {
+    str: 30, agi: 1, passiveInstantDeathRateBonus: 1
+  }), 0.2);
+});
+
+test("Poison Mask contributes equal poison and deadly-poison application resistance", () => {
+  const stats = collectStats({ equipmentStatBonuses: { poisonResistance: 0.3 } });
+  assert.equal(stats.poisonResistance, 0.3);
+  const poison = resolveStatusEffect({
+    defender: { statusResistances: { poison: { resistancePoints: stats.poisonResistance * 100 } } },
+    effect: { statusId: "poison", baseRate: 0.5 }, rng: fixed(0.25)
+  });
+  const deadly = resolveStatusEffect({
+    defender: { statusResistances: { deadly_poison: { resistancePoints: stats.poisonResistance * 100 } } },
+    effect: { statusId: "deadly_poison", baseRate: 0.5 }, rng: fixed(0.25)
+  });
+  assert.equal(poison.success, false);
+  assert.equal(deadly.success, false);
+});
+
 test("The Five Star attacks five times and Musashi Blade is a two-handed two-hit warrior weapon", () => {
   const fiveStar = getWeapon("the_five_star");
   const fiveStarAttack = createNormalAttack({ weapon: fiveStar, skillIds: ["assassination"] });

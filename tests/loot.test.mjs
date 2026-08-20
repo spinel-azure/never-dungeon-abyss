@@ -177,10 +177,14 @@ test("B50F to B59F red chests cycle the new class armor with 70/25/5 enhancement
   assert.equal(rollRedChestLoot(rng(0.2, 0.95), 54).enhancement, 3);
 });
 
-test("B60F to B69F red chests feature enhanced Spell-Sealing Talismans", () => {
+test("B60F to B69F red chests feature all four enhanced accessory series", () => {
   assert.equal(rollRedChestLoot(rng(0.099), 60).itemId, "strong_healing_potion_small");
   assert.equal(rollRedChestLoot(rng(0.1), 60).itemId, "strong_antidote");
   assert.equal(rollRedChestLoot(rng(0.2, 0), 60).equipmentId, "spell_sealing_talisman");
+  assert.deepEqual(
+    [0, 0.25, 0.5, 0.75].map(accessoryRoll => rollRedChestLoot(rng(0.2, accessoryRoll, 0), 60).equipmentId),
+    ["spell_sealing_talisman", "mana_amplifier", "masters_necklace", "poison_mask"]
+  );
   assert.equal(rollRedChestLoot(rng(0.8, 0), 69).slot, "accessoryId");
   assert.equal(rollRedChestLoot(rng(0.8, 0), 69).unidentifiedName, "？装備");
   assert.equal(rollRedChestLoot(rng(0.2, 0.699), 64).enhancement, 1);
