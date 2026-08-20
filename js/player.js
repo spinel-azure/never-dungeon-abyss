@@ -900,7 +900,10 @@ function startQuicksandEvent(quicksand) {
   startOverlayEvent(event);
   event.autoStartTimer = window.setTimeout(async () => {
     if (state.overlayEvent !== event) return;
-    await hooks.runQuicksandTransition(() => {
+    let moved = false;
+    const moveToDestination = () => {
+      if (moved || state.overlayEvent !== event) return;
+      moved = true;
       state.gridX = quicksand.targetX;
       state.gridY = quicksand.targetY;
       state.x = state.gridX + .5;
@@ -910,8 +913,22 @@ function startQuicksandEvent(quicksand) {
       hooks.say("流砂に押し流され、別の場所へ辿り着いた。");
       updateNpcAwareness();
       hooks.onStateChanged();
-    });
+    };
+    await runQuicksandTransitionWithFallback(
+      hooks.runQuicksandTransition,
+      moveToDestination
+    );
   }, 900);
+}
+
+export async function runQuicksandTransitionWithFallback(runTransition, moveToDestination) {
+  try {
+    const transitioned = await runTransition(moveToDestination);
+    if (transitioned === false) moveToDestination();
+  } catch (error) {
+    console.error("Quicksand transition failed:", error);
+    moveToDestination();
+  }
 }
 
 function confirmFountainEvent() {

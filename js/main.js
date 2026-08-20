@@ -2581,28 +2581,35 @@ import {
   } = {}) {
     if (sceneTransitionRunning) return false;
     sceneTransitionRunning = true;
-    sceneTransition.hidden = false;
-    sceneTransition.classList.remove("is-black", "is-revealing", "is-inn-stay", "is-defeat");
-    sceneTransition.classList.add("is-running");
-    document.body.classList.add("scene-transition-active");
-    sceneTransitionTitle.hidden = !showEnteringTitle;
-    void sceneTransition.offsetWidth;
+    try {
+      sceneTransition.hidden = false;
+      sceneTransition.classList.remove("is-black", "is-revealing", "is-inn-stay", "is-defeat");
+      sceneTransition.classList.add("is-running");
+      sceneTransition.style.transitionDuration = `${darkenMs}ms`;
+      document.body.classList.add("scene-transition-active");
+      sceneTransitionTitle.hidden = !showEnteringTitle;
+      void sceneTransition.offsetWidth;
 
-    const audioPromise = Promise.resolve().then(playAudio).catch(() => false);
-    requestAnimationFrame(() => sceneTransition.classList.add("is-black"));
-    await Promise.all([wait(darkenMs), audioPromise]);
-    await onDark();
-    await wait(holdMs);
+      const audioPromise = Promise.resolve().then(playAudio).catch(() => false);
+      requestAnimationFrame(() => sceneTransition.classList.add("is-black"));
+      await Promise.all([wait(darkenMs), audioPromise]);
+      await onDark();
+      await wait(holdMs);
 
-    sceneTransitionTitle.hidden = true;
-    sceneTransition.classList.add("is-revealing");
-    sceneTransition.classList.remove("is-black");
-    await wait(revealMs);
-    sceneTransition.classList.remove("is-running", "is-revealing");
-    sceneTransition.hidden = true;
-    document.body.classList.remove("scene-transition-active");
-    sceneTransitionRunning = false;
-    return true;
+      sceneTransitionTitle.hidden = true;
+      sceneTransition.style.transitionDuration = `${revealMs}ms`;
+      sceneTransition.classList.add("is-revealing");
+      sceneTransition.classList.remove("is-black");
+      await wait(revealMs);
+      return true;
+    } finally {
+      sceneTransitionTitle.hidden = true;
+      sceneTransition.classList.remove("is-black", "is-running", "is-revealing");
+      sceneTransition.style.removeProperty("transition-duration");
+      sceneTransition.hidden = true;
+      document.body.classList.remove("scene-transition-active");
+      sceneTransitionRunning = false;
+    }
   }
 
   function wait(milliseconds) {

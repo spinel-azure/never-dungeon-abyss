@@ -3,6 +3,7 @@ import test from "node:test";
 import { readFile } from "node:fs/promises";
 
 import { buildBoundaryWallMap, cells } from "../js/dungeon.js";
+import { runQuicksandTransitionWithFallback } from "../js/player.js";
 import {
   DESERT_QUICKSAND,
   floorHasQuicksand,
@@ -46,6 +47,24 @@ test("desert floors contain three cyclic quicksand points without feature overla
   assert.equal(cells.flat().filter(cell => cell.quicksand).length, 0);
 });
 
+test("quicksand transition completes once on success, pre-fade rejection, and failure", async () => {
+  for (const runTransition of [
+    async onDark => { onDark(); return true; },
+    async () => false,
+    async () => { throw new Error("transition failed before fade"); }
+  ]) {
+    let moves = 0;
+    const originalError = console.error;
+    console.error = () => {};
+    try {
+      await runQuicksandTransitionWithFallback(runTransition, () => { moves += 1; });
+    } finally {
+      console.error = originalError;
+    }
+    assert.equal(moves, 1);
+  }
+});
+
 test("quicksand contact shows its image then uses a short fade transition", async () => {
   const [playerSource, mainSource, rendererSource, minimapSource] = await Promise.all([
     readFile(new URL("../js/player.js", import.meta.url), "utf8"),
@@ -55,7 +74,10 @@ test("quicksand contact shows its image then uses a short fade transition", asyn
   ]);
   assert.match(playerSource, /足元の砂が崩れ、流砂へ呑み込まれた！/);
   assert.match(playerSource, /state\.gridX = quicksand\.targetX/);
+  assert.match(playerSource, /runQuicksandTransitionWithFallback/);
   assert.match(mainSource, /darkenMs: 650/);
+  assert.match(mainSource, /finally \{[\s\S]*scene-transition-active[\s\S]*sceneTransitionRunning = false/);
+  assert.match(mainSource, /style\.transitionDuration = `\$\{darkenMs\}ms`/);
   assert.match(mainSource, /cells\[y\]\[x\]\.quicksand = savedCell\.quicksand \|\| null/);
   assert.match(rendererSource, /NPC_event_15\.avif|DESERT_QUICKSAND\.image/);
   assert.match(minimapSource, /c\.quicksand && isExplored/);
