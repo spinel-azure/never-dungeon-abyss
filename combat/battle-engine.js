@@ -984,6 +984,15 @@ function finishCombatantAction(battle, actor, side, targetIndex = null) {
       ...(targetIndex == null ? {} : { targetIndex }),
       amount: damage, message: `猛毒で${damage}ダメージ！` });
   }
+  if (end.deathPoisonDamage > 0 && actor.hp > 0) {
+    const damage = Math.min(actor.hp, end.deathPoisonDamage);
+    actor.hp -= damage;
+    actor.alive = actor.hp > 0;
+    battle.log.push(`${actor.name}は死毒で${damage}ダメージ！`);
+    battle.presentationEvents.push({ type: "poisonDamage", actorSide: null, targetSide: side,
+      ...(targetIndex == null ? {} : { targetIndex }),
+      amount: damage, message: `死毒で${damage}ダメージ！` });
+  }
   if (side === "enemy" && actor.hp > 0 && Number(actor.regainRate) > 0) {
     if (Number(actor.regainSuppressedTurns) > 0) {
       actor.regainSuppressedTurns -= 1;

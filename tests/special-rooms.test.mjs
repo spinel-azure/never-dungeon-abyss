@@ -109,6 +109,28 @@ test("B46 Glacies room is gated by quest 018", () => {
   assert.equal(getQuestRequiredSpecialRoomAccess(room, { active: true, completed: false }).blocked, false);
 });
 
+test("B64 is reserved for the Zodiac-gated Todes Scorpio event", () => {
+  const room = getSpecialRoomDefinition(64);
+  assert.equal(room.lock.mode, "alwaysSuccess");
+  assert.equal(room.content.type, "eventBoss");
+  assert.equal(room.content.bossId, "todes_scorpio_b64f");
+  assert.equal(room.content.requiredZodiacCount, 2);
+  assert.match(room.content.accessBlockedMessage, /12星座の紋様/);
+  assert.match(room.content.accessConfirmMessage, /恐ろしい死の予感/);
+});
+
+test("B64 checks owned Zodiac cards and enters only after confirmation", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const [mainSource, playerSource] = await Promise.all([
+    readFile(new URL("../js/main.js", import.meta.url), "utf8"),
+    readFile(new URL("../js/player.js", import.meta.url), "utf8")
+  ]);
+  assert.match(mainSource, /CARDS\.filter\(card => card\.category === "zodiac"\)/);
+  assert.match(mainSource, /ownedCounts\[card\.id\]/);
+  assert.match(playerSource, /type: "specialDoorAccessConfirm"/);
+  assert.match(playerSource, /a\.enterAfterOpening[\s\S]*tryMove\(a\.entryMoveAmount/);
+});
+
 test("B4 special room warns before entering the one-time superboss event", () => {
   const room = getSpecialRoomDefinition(4);
   assert.equal(room.dangerWarning, true);

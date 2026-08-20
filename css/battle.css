@@ -177,6 +177,11 @@
   max-height: 98%;
 }
 
+.battle-enemy-image.is-todes-scorpio {
+  width: min(88%, 590px);
+  max-height: 100%;
+}
+
 .battle-enemy-image.is-iron-maiden {
   width: min(70%, 450px);
   max-height: 94%;
@@ -604,7 +609,8 @@ body.battle-active .viewport > #treasureCanvas {
   .battle-enemy-image.is-glacies,
   .battle-enemy-image.is-eiskoenigin,
   .battle-enemy-image.is-fleischfresser,
-  .battle-enemy-image.is-otherworldly-wisdom {
+  .battle-enemy-image.is-otherworldly-wisdom,
+  .battle-enemy-image.is-todes-scorpio {
     width: min(80%, 390px);
     max-height: 93%;
   }

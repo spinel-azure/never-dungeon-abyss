@@ -478,6 +478,55 @@ export const BOSSES = Object.freeze({
       remains: "――氷の女王の体躯は溶けて、後には王笏とティアラが残るのみ…。\n＊Aボタン：次へ"
     })
   }),
+  todes_scorpio_b64f: Object.freeze({
+    id: "todes_scorpio_b64f", name: "トーデス・スコルピオ", level: 85, floor: 64,
+    imageId: "todes_scorpio_b64f", image: "images/bosses/boss_14.avif",
+    encounterImageId: "todes_scorpio_event_b64f", encounterImage: "images/background/dungeon_event_09.avif",
+    race: "insect", maxHp: 25000,
+    stats: Object.freeze({ str: 46, int: 24, agi: 30, dex: 42, luc: 36 }),
+    def: 48, attack: 44, experienceReward: 50000, regainRate: 0.01,
+    actions: Object.freeze([
+      Object.freeze({ weight: 28, action: Object.freeze({
+        id: "todes_scorpio_giant_claw", name: "巨大鋏", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1.45, hitBonus: 0.06, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 26, action: Object.freeze({
+        id: "todes_scorpio_double_crush", name: "連続挟撃", actionType: "physicalAttack",
+        hitCount: 2, powerPerHit: 0.92, hitBonus: 0.03, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 20, action: Object.freeze({
+        id: "todes_scorpio_tail_smash", name: "尾針叩き", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1.6, hitBonus: -0.04, speedModifier: -4,
+        effects: Object.freeze([Object.freeze({
+          statusId: "action_skip", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.35
+        })])
+      }) }),
+      Object.freeze({ weight: 26, action: Object.freeze({
+        id: "todes_stich", name: "トーデス・シュティッヒ", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1.15, hitBonus: 0.08,
+        effects: Object.freeze([Object.freeze({
+          statusId: "death_poison", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.55
+        })])
+      }) })
+    ]),
+    reward: Object.freeze({ type: "none" }),
+    elementMultipliers: Object.freeze({ fire: 1.5, ice: 1, arcane: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      deadly_poison: Object.freeze({ resistancePoints: 65, immune: false }),
+      death_poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      bleeding: Object.freeze({ resistancePoints: 100, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 90, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 85, immune: false })
+    }),
+    escapeRate: 1, surpriseRate: 0, surpriseRateMaximum: 0, noDrop: true,
+    isBoss: true, bossKind: "event", defeatedFlag: "boss_todes_scorpio_b64f_defeated",
+    event: Object.freeze({
+      immediateStart: true,
+      start: "部屋に入ると巨大なサソリが静かに体躯を起こし、ハサミを振りかざしてきた！",
+      autoStartDelay: 2000
+    })
+  }),
   musk_beast_b56f: Object.freeze({
     id: "musk_beast_b56f", name: "ムスクビースト", level: 56, floor: 56,
     imageId: "musk_beast_b56f", image: "images/bosses/boss_12.avif",

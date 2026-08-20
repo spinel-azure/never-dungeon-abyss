@@ -235,13 +235,15 @@ export function normalizeCharacter(character) {
 
 function normalizeCharacterStatuses(statuses) {
   if (!Array.isArray(statuses)) return [];
-  return structuredClone(statuses).map(status => {
+  return structuredClone(statuses)
+    .filter(status => (status?.statusId || status?.id) !== "death_poison" && status?.expiresAfterBattle !== true)
+    .map(status => {
     if (!["poison", "deadly_poison", "bleeding"].includes(status?.statusId || status?.id)) return status;
     const persistentPoison = { ...status };
     delete persistentPoison.remainingTurns;
     delete persistentPoison.duration;
     return persistentPoison;
-  });
+    });
 }
 
 function normalizeEquipment(equipment, job) {

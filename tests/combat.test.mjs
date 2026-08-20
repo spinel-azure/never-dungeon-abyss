@@ -907,6 +907,33 @@ test("deadly poison deals five percent per action lethally and per step nonletha
   assert.deepEqual(applyStatus(upgraded, { statusId: "poison", success: true }).map(status => status.statusId), ["deadly_poison"]);
 });
 
+test("death poison deals ten percent lethally and is cleared after battle", () => {
+  const statuses = applyStatus([], { statusId: "death_poison", success: true });
+  assert.equal(statuses[0].name, "死毒");
+  assert.equal(resolveEndOfAction({ statuses, maxHp: 999 }).deathPoisonDamage, 99);
+  assert.deepEqual(clearBattleOnlyStatuses(statuses), []);
+  const strongAntidote = getSkill("die_antidote");
+  assert.equal(strongAntidote.statusIds.includes("death_poison"), false);
+  const character = createInitialCharacter("mage");
+  character.statuses = statuses;
+  assert.equal(normalizeCharacter(character).statuses.some(status => status.statusId === "death_poison"), false);
+});
+
+test("Todes Scorpio is the level 85 B64 optional superboss that inflicts death poison", () => {
+  const boss = getBossById("todes_scorpio_b64f");
+  assert.equal(boss.floor, 64);
+  assert.equal(boss.level, 85);
+  assert.equal(boss.maxHp, 25000);
+  assert.equal(boss.experienceReward, 50000);
+  assert.equal(boss.escapeRate, 1);
+  assert.equal(boss.reward.type, "none");
+  assert.equal(boss.image, "images/bosses/boss_14.avif");
+  assert.equal(boss.encounterImage, "images/background/dungeon_event_09.avif");
+  const sting = boss.actions.find(entry => entry.action.id === "todes_stich")?.action;
+  assert.equal(sting.effects[0].statusId, "death_poison");
+  assert.equal(boss.statusResistances.deadly_poison.immune, false);
+});
+
 test("Deadly Poison Immunity is a unique legendary card with full resistance", () => {
   const card = getCardById("legendary_deadly_poison_immunity");
   assert.equal(card.nameJa, "猛毒無効");

@@ -681,6 +681,7 @@ function renderBattle() {
   image.classList.toggle("is-eiskoenigin", battle.enemy.id === "eiskoenigin_b49f");
   image.classList.toggle("is-fleischfresser", battle.enemy.id === "fleischfresser_b59f");
   image.classList.toggle("is-otherworldly-wisdom", battle.enemy.id === "otherworldly_wisdom_b4f");
+  image.classList.toggle("is-todes-scorpio", battle.enemy.id === "todes_scorpio_b64f");
   const enemyStage = battleUi.root.querySelector(".battle-enemy-stage");
   enemyStage.hidden = Boolean(battle.enemies);
   enemyStage?.classList.toggle("is-defeated", defeated);

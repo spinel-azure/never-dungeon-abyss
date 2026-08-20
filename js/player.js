@@ -259,6 +259,10 @@ export function updateAnimation(now) {
     }
     state.anim = null;
     hooks.onStateChanged();
+    if (a.type === "door" && a.enterAfterOpening) {
+      tryMove(a.entryMoveAmount || 1, false, true);
+      return;
+    }
     if (state.autoReturning) hooks.continueAutoReturn();
   }
 }
@@ -420,6 +424,18 @@ function startSpecialDoorLockEvent(x, y, dirKey) {
     hooks.say(access.message || "今はこの扉を開けられないようだ。");
     return;
   }
+  if (access.confirmMessage) {
+    startOverlayEvent({
+      type: "specialDoorAccessConfirm",
+      showOverlay: false,
+      x,
+      y,
+      dirKey,
+      canCancel: true,
+      message: access.confirmMessage
+    });
+    return;
+  }
   const info = hooks.getSpecialDoorLockInfo({ x, y, dirKey }) || {};
   startOverlayEvent({
     type: "specialDoorLock",
@@ -430,6 +446,17 @@ function startSpecialDoorLockEvent(x, y, dirKey) {
     canCancel: true,
     message: specialDoorPrompt(info)
   });
+}
+
+function confirmSpecialDoorAccessEvent() {
+  const event = state.overlayEvent;
+  if (!event || event.type !== "specialDoorAccessConfirm") return;
+  state.overlayEvent = null;
+  setDoor(event.x, event.y, event.dirKey, "closed", "specialUnlocked");
+  startDoorOpening(event.x, event.y, event.dirKey, "12星座の紋様が妖しく輝いた。\nギィ……");
+  state.anim.enterAfterOpening = true;
+  state.anim.entryMoveAmount = event.dirKey === DIRS[state.dir].key ? 1 : -1;
+  hooks.onStateChanged();
 }
 
 function specialDoorPrompt(info, failed = false) {
@@ -655,6 +682,7 @@ export function handleOverlayEventInput(action) {
     else if (state.overlayEvent.type === "stairsPrompt") confirmStairsPrompt();
     else if (state.overlayEvent.type === "treasure") confirmTreasureEvent();
     else if (state.overlayEvent.type === "specialDoorLock") confirmSpecialDoorLockEvent();
+    else if (state.overlayEvent.type === "specialDoorAccessConfirm") confirmSpecialDoorAccessEvent();
     else if (state.overlayEvent.type === "specialRoomWarning") confirmSpecialRoomWarningEvent();
     else if (state.overlayEvent.type === "specialRoomBoss") confirmSpecialRoomBossEvent();
     else if (state.overlayEvent.type === "rareEnemyRoom") confirmRareEnemyRoomEvent();

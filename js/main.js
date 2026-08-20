@@ -120,7 +120,7 @@ import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from
 import { configureItemOverlay, openItemOverlay, handleItemOverlayInput } from "./item-overlay.js";
 import { resolveFieldItemUse } from "../combat/resolve-item-use.js";
 import { grantCard } from "../data/deck.js";
-import { collectCardStatBonuses, getCardById, hasCardEffect, sumCardEffectValues } from "../data/cards.js";
+import { CARDS, collectCardStatBonuses, getCardById, hasCardEffect, sumCardEffectValues } from "../data/cards.js";
 import { drawCardCanvas } from "./card-canvas.js";
 import { getItem } from "../data/items.js";
 import { isCriticalHp } from "../data/quick-status.js";
@@ -1634,7 +1634,8 @@ import {
   }
 
   function currentCondition(target) {
-    return hasCharacterStatus(target, "bleeding") ? "BLEED"
+    return hasCharacterStatus(target, "death_poison") ? "DEATH POISON"
+      : hasCharacterStatus(target, "bleeding") ? "BLEED"
       : ["poison", "deadly_poison"].some(statusId => hasCharacterStatus(target, statusId)) ? "POISON"
         : "GOOD";
   }
@@ -2944,14 +2945,26 @@ import {
 
   function getCurrentSpecialDoorAccessBlock() {
     const room = getSpecialRoomDefinition(currentDepth);
+    const forcedAccess = getSpecialRoomAccessRestriction({
+      forcedEnemyId: getForcedEnemyId(character, { depth: currentDepth })
+    });
+    if (forcedAccess.blocked) return forcedAccess;
+    if (room?.content?.requiredZodiacCount) {
+      const required = Math.max(1, Math.floor(Number(room.content.requiredZodiacCount) || 1));
+      const ownedCounts = character?.cards?.ownedCardCounts || {};
+      const owned = CARDS.filter(card => card.category === "zodiac")
+        .reduce((count, card) => count + (Math.max(0, Number(ownedCounts[card.id]) || 0) > 0 ? 1 : 0), 0);
+      if (owned < required) {
+        return { blocked: true, reason: "zodiacCardsRequired", message: room.content.accessBlockedMessage };
+      }
+      return { blocked: false, reason: "", message: "", confirmMessage: room.content.accessConfirmMessage };
+    }
     if (room?.content?.requiredQuestId) {
       const progress = getQuestProgress(character, room.content.requiredQuestId);
       const questAccess = getQuestRequiredSpecialRoomAccess(room, progress);
       if (questAccess.blocked) return questAccess;
     }
-    return getSpecialRoomAccessRestriction({
-      forcedEnemyId: getForcedEnemyId(character, { depth: currentDepth })
-    });
+    return forcedAccess;
   }
 
   function attemptCurrentSpecialDoorUnlock({ x, y, dirKey } = {}) {
