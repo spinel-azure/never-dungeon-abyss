@@ -89,6 +89,66 @@ export const npcs = [
     ],
     canCancel: true,
     retreatOnCancel: true
+  },
+  {
+    id: "NPC_01_b60_desert",
+    name: "みかんにゃんこ",
+    imageId: "NPC_01",
+    image: "images/npc/NPC_01.avif",
+    interactionType: "talk",
+    greeting: "",
+    voiceSe: ["catVoice01", "catVoice02", "catVoice03"],
+    encounters: [{
+      dialogue: ["砂に足を取られると、どこかに流されるにゃあ…！何度も何度も、流されるにゃあ…！"],
+      leaveAfterTalk: true
+    }],
+    canCancel: true,
+    retreatOnCancel: true
+  },
+  {
+    id: "NPC_01_b65_oasis",
+    name: "みかんにゃんこ",
+    imageId: "NPC_01",
+    image: "images/npc/NPC_01.avif",
+    interactionType: "talk",
+    greeting: "",
+    voiceSe: ["catVoice01", "catVoice02", "catVoice03"],
+    encounters: [{
+      dialogue: ["オアシスでお昼寝したいのに、消えちゃうにゃん。どうなっているにゃあ…？"],
+      leaveAfterTalk: true
+    }],
+    canCancel: true,
+    retreatOnCancel: true
+  },
+  {
+    id: "NPC_01_desert_hot",
+    name: "みかんにゃんこ",
+    imageId: "NPC_01",
+    image: "images/npc/NPC_01.avif",
+    interactionType: "talk",
+    greeting: "",
+    voiceSe: ["catVoice01", "catVoice02", "catVoice03"],
+    encounters: [{
+      dialogue: ["暑いにゃあ…。暑いにゃあ…。涼しい所に行きたいにゃん…。"],
+      leaveAfterTalk: true
+    }],
+    canCancel: true,
+    retreatOnCancel: true
+  },
+  {
+    id: "NPC_01_b69_riddle",
+    name: "みかんにゃんこ",
+    imageId: "NPC_01",
+    image: "images/npc/NPC_01.avif",
+    interactionType: "talk",
+    greeting: "",
+    voiceSe: ["catVoice01", "catVoice02", "catVoice03"],
+    encounters: [{
+      dialogue: ["なくしたものをみっけ…みつけるのが得意…にゃあ？よく、分からないにゃん…。"],
+      leaveAfterTalk: true
+    }],
+    canCancel: true,
+    retreatOnCancel: true
   }
 ];
 

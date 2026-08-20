@@ -41,6 +41,23 @@ test("B9F Mikan Nyanko guides the player to the red-door key", () => {
   assert.equal(cells.flat().filter(cell => cell.npc === npc.id).length, 1);
 });
 
+test("Mikan Nyanko gives floor-specific guidance throughout the desert region", () => {
+  const expectations = [
+    [60, "NPC_01_b60_desert", "砂に足を取られると、どこかに流されるにゃあ…！何度も何度も、流されるにゃあ…！"],
+    [64, "NPC_01_b60_desert", "砂に足を取られると、どこかに流されるにゃあ…！何度も何度も、流されるにゃあ…！"],
+    [65, "NPC_01_b65_oasis", "オアシスでお昼寝したいのに、消えちゃうにゃん。どうなっているにゃあ…？"],
+    [66, "NPC_01_desert_hot", "暑いにゃあ…。暑いにゃあ…。涼しい所に行きたいにゃん…。"],
+    [68, "NPC_01_desert_hot", "暑いにゃあ…。暑いにゃあ…。涼しい所に行きたいにゃん…。"],
+    [69, "NPC_01_b69_riddle", "なくしたものをみっけ…みつけるのが得意…にゃあ？よく、分からないにゃん…。"]
+  ];
+  for (const [depth, npcId, dialogue] of expectations) {
+    const npc = getNpcById(npcId);
+    assert.deepEqual(getNpcEncounter(npc, 0).dialogue, [dialogue]);
+    buildBoundaryWallMap(depth, () => .5, {});
+    assert.equal(cells.flat().filter(cell => cell.npc === npcId).length, 1, `B${depth}F`);
+  }
+});
+
 test("quest 008 replaces Mikan with the queen shadow in strict floor order", () => {
   const active = { active: true, completed: false, progress: 0 };
   buildBoundaryWallMap(10, () => .5, { queenShadowQuest: active });
