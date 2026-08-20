@@ -28,3 +28,13 @@ test("the unlocked outfit and walking-picture suppression apply only on real Sun
   assert.equal(shouldUseAnastasiaFestivalPortrait(character, new Date("2026-08-23T12:00:00")), true);
   assert.equal(shouldUseAnastasiaFestivalPortrait(character, new Date("2026-08-24T12:00:00")), false);
 });
+
+test("Anastasia changes back only while the outfit event blackout is opaque", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const [town, css] = await Promise.all([
+    readFile(new URL("../js/town.js", import.meta.url), "utf8"),
+    readFile(new URL("../css/town.css", import.meta.url), "utf8")
+  ]);
+  assert.match(town, /classList\.add\("is-anastasia-outfit-blackout"\)[\s\S]*?onCompleteFacilityTalk\(ANASTASIA_OUTFIT_EVENT_FLAG\)[\s\S]*?suppressFestivalPortraitUntilTempleExit = true/);
+  assert.match(css, /\.town-screen\.is-anastasia-outfit-blackout::after\{opacity:1\}/);
+});

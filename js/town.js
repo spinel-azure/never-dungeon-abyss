@@ -659,7 +659,8 @@ function handleFacilityTalkInput(action) {
     return true;
   }
   if (town.facilityTalkCompletionFlag === ANASTASIA_OUTFIT_EVENT_FLAG) {
-    town.suppressFestivalPortraitUntilTempleExit = true;
+    beginAnastasiaOutfitBlackout();
+    return true;
   }
   if (town.facilityTalkCompletionFlag) town.onCompleteFacilityTalk(town.facilityTalkCompletionFlag);
   town.facilityTalkDialogue = [];
@@ -668,6 +669,24 @@ function handleFacilityTalkInput(action) {
   town.mode = "facilityMenu";
   renderFacility();
   return true;
+}
+
+function beginAnastasiaOutfitBlackout() {
+  town.transitioning = true;
+  town.root.classList.add("is-anastasia-outfit-blackout");
+  window.setTimeout(() => {
+    town.onCompleteFacilityTalk(ANASTASIA_OUTFIT_EVENT_FLAG);
+    town.suppressFestivalPortraitUntilTempleExit = true;
+    town.facilityTalkDialogue = [];
+    town.facilityTalkDialogueIndex = 0;
+    town.facilityTalkCompletionFlag = "";
+    town.mode = "facilityMenu";
+    renderFacility();
+    window.setTimeout(() => {
+      town.root.classList.remove("is-anastasia-outfit-blackout");
+      window.setTimeout(() => { town.transitioning = false; }, 360);
+    }, 120);
+  }, 360);
 }
 
 function configureTownMessageObserver() {

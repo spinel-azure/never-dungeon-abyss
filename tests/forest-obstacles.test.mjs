@@ -88,3 +88,8 @@ test("the formation highlight follows the target-selection cursor", async () => 
   assert.match(source, /battleUi\.mode === "targets" \? battleUi\.selectedIndex : battle\.targetIndex/);
   assert.match(source, /renderSelection\(\);\s*renderEnemyPartySelection\(\);/);
 });
+
+test("multi-enemy names use the k8x12 pixel font", async () => {
+  const css = await readFile(new URL("../css/battle.css", import.meta.url), "utf8");
+  assert.match(css, /\.battle-enemy-member-name\s*\{[^}]*font-family:\s*"PixelFont"/);
+});

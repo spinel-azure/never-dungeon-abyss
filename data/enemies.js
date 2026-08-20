@@ -548,7 +548,7 @@ export const enemies = Object.freeze([
     image: "images/enemies/enemy_25.avif", race: "beast", minimumDepth: 60, maximumDepth: 69,
     encounterCountRange: Object.freeze([1, 3]),
     maxHp: 260, stats: Object.freeze({ str: 20, int: 8, agi: 25, dex: 23, luc: 14 }),
-    def: 22, attack: 20, experienceReward: 360,
+    def: 22, attack: 20, experienceReward: 360, dropItemId: "abyss_lizard_hide",
     actions: Object.freeze([
       Object.freeze({ weight: 60, action: Object.freeze({
         id: "abyss_lizard_attack", name: "攻撃", actionType: "physicalAttack",
@@ -575,7 +575,7 @@ export const enemies = Object.freeze([
     level: 62,
     image: "images/enemies/enemy_26.avif", race: "insect", minimumDepth: 60, maximumDepth: 69,
     maxHp: 720, stats: Object.freeze({ str: 31, int: 7, agi: 17, dex: 28, luc: 18 }),
-    def: 31, attack: 31, experienceReward: 1180,
+    def: 31, attack: 31, experienceReward: 1180, dropItemId: "abyss_scorpion_tail",
     actions: Object.freeze([
       Object.freeze({ weight: 40, action: Object.freeze({
         id: "abyss_scorpion_deadly_poison", name: "猛毒", actionType: "physicalAttack",
@@ -602,7 +602,7 @@ export const enemies = Object.freeze([
     level: 64,
     image: "images/enemies/enemy_27.avif", race: "beast", minimumDepth: 60, maximumDepth: 69,
     maxHp: 820, stats: Object.freeze({ str: 34, int: 9, agi: 20, dex: 27, luc: 19 }),
-    def: 29, attack: 34, experienceReward: 1320,
+    def: 29, attack: 34, experienceReward: 1320, dropItemId: "cobra_gator_hide",
     actions: Object.freeze([
       Object.freeze({ weight: 45, action: Object.freeze({
         id: "cobra_gator_deadly_poison", name: "猛毒", actionType: "physicalAttack",

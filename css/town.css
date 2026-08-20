@@ -1,4 +1,5 @@
 .town-screen{display:block;width:100%;margin:0;color:#f7fbff;font-family:"GameFont",sans-serif}
+.town-screen::after{content:"";position:absolute;inset:0;z-index:30;background:#000;opacity:0;pointer-events:none;transition:opacity .35s linear}.town-screen.is-anastasia-outfit-blackout::after{opacity:1}
 .dungeon-commands[data-facility-active="true"] button{position:relative}.shop-new-badge{position:absolute;right:clamp(7px,2vw,16px);top:50%;color:#00ffff;font:400 clamp(18px,4vw,30px)/1 "PixelFont",monospace;text-shadow:0 0 7px rgba(0,255,255,.85);transform:translateY(-50%)}
 .town-screen[hidden]{display:none}
 .town-background[hidden],.town-cloud-layer[hidden],.town-name-banner[hidden],.town-mosaic[hidden],.town-portrait[hidden],.town-portrait-placeholder[hidden],.guild-registration[hidden],.card-get-effect[hidden],.guild-quest-overlay[hidden],.guild-quest-list[hidden],.guild-quest-detail[hidden],.town-commerce-overlay[hidden],.transfer-destination-overlay[hidden]{display:none}

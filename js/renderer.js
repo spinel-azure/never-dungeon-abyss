@@ -420,9 +420,15 @@ function drawOverlayEvent() {
 export function drawCeiling() {
   const { ctx, W, H } = renderer;
   const g = ctx.createLinearGradient(0, 0, 0, H * 0.52);
-  g.addColorStop(0, "#151918");
-  g.addColorStop(0.58, "#0d1010");
-  g.addColorStop(1, "#050606");
+  if (renderer.floorColor === "yellow") {
+    g.addColorStop(0, "rgb(38, 111, 176)");
+    g.addColorStop(0.58, "rgb(25, 75, 122)");
+    g.addColorStop(1, "rgb(8, 27, 46)");
+  } else {
+    g.addColorStop(0, "#151918");
+    g.addColorStop(0.58, "#0d1010");
+    g.addColorStop(1, "#050606");
+  }
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, H / 2);
 

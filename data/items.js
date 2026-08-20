@@ -260,6 +260,24 @@ export const ITEMS = Object.freeze([
     effects: Object.freeze([{ id: "strong_herbicide", value: 500 }]),
     description: "巨大蔓を一撃で枯らす。フライシュフレッサーには固定ダメージを与え、再生を5ターン停止する。",
     maxOwned: 99, iconId: "antidote", version: 1
+  }),
+  Object.freeze({
+    number: 41, id: "abyss_lizard_hide", name: "トカゲの硬皮", category: "material",
+    buyPrice: 0, sellPrice: 420, source: "drop", usableIn: Object.freeze([]), effects: Object.freeze([]),
+    description: "奈落トカゲから剥ぎ取った硬い皮。売却専用。", maxOwned: 99,
+    repurchasable: false, iconId: "abyss-lizard-hide", version: 1
+  }),
+  Object.freeze({
+    number: 42, id: "abyss_scorpion_tail", name: "奈落サソリの尻尾", category: "material",
+    buyPrice: 0, sellPrice: 720, source: "drop", usableIn: Object.freeze([]), effects: Object.freeze([]),
+    description: "奈落オオサソリから切り取った猛毒の尾。売却専用。", maxOwned: 99,
+    repurchasable: false, iconId: "abyss-scorpion-tail", version: 1
+  }),
+  Object.freeze({
+    number: 43, id: "cobra_gator_hide", name: "コブラゲーターの皮", category: "material",
+    buyPrice: 0, sellPrice: 820, source: "drop", usableIn: Object.freeze([]), effects: Object.freeze([]),
+    description: "コブラゲーターから剥ぎ取った頑丈な皮。売却専用。", maxOwned: 99,
+    repurchasable: false, iconId: "cobra-gator-hide", version: 1
   })
 ]);
 

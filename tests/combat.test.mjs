@@ -170,6 +170,9 @@ test("B60F to B69F encounter the three desert enemies and only Abyss Lizards for
   const gator = createEnemyCombatant(getEnemyById("cobra_gator"));
   const tailSlam = createEnemyAction(gator, () => 0.999);
   assert.deepEqual([getEnemyEncounterCount(gator, () => 0.999), tailSlam.name, tailSlam.effects[0].statusId], [1, "尻尾叩き", "action_skip"]);
+  assert.equal(lizard.dropItemId, "abyss_lizard_hide");
+  assert.equal(scorpion.dropItemId, "abyss_scorpion_tail");
+  assert.equal(gator.dropItemId, "cobra_gator_hide");
 });
 
 test("poison slime sometimes selects an attack that can inflict poison", () => {
