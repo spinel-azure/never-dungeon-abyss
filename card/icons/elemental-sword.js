@@ -1,6 +1,7 @@
 const THEMES = Object.freeze({
   fire: Object.freeze({ pale: "#fff5b0", bright: "#ffb21c", deep: "#e62f14", glow: "rgba(255, 80, 20, .8)" }),
-  ice: Object.freeze({ pale: "#f4ffff", bright: "#72ddff", deep: "#287bd9", glow: "rgba(90, 220, 255, .8)" })
+  ice: Object.freeze({ pale: "#f4ffff", bright: "#72ddff", deep: "#287bd9", glow: "rgba(90, 220, 255, .8)" }),
+  lightning: Object.freeze({ pale: "#fffbd0", bright: "#ffe84d", deep: "#d89000", glow: "rgba(255, 232, 77, .9)" })
 });
 
 function drawElementalSword(context, centerX, centerY, size, element, options = {}) {
@@ -80,4 +81,8 @@ export function drawFlameSwordIcon(context, centerX, centerY, size, options = {}
 
 export function drawIceSwordIcon(context, centerX, centerY, size, options = {}) {
   drawElementalSword(context, centerX, centerY, size, "ice", options);
+}
+
+export function drawLightningSwordIcon(context, centerX, centerY, size, options = {}) {
+  drawElementalSword(context, centerX, centerY, size, "lightning", options);
 }

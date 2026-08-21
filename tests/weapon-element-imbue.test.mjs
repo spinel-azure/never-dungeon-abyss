@@ -25,7 +25,7 @@ function enemy() {
 }
 
 test("elemental oils cost 500G and unlock together after quest 013 reporting", () => {
-  for (const itemId of ["fire_lizard_oil", "ice_lizard_oil"]) {
+  for (const itemId of ["fire_lizard_oil", "ice_lizard_oil", "lightning_lizard_oil"]) {
     const item = getItem(itemId);
     assert.equal(item.buyPrice, 500);
     assert.deepEqual(item.usableIn, ["battle"]);
@@ -37,6 +37,8 @@ test("elemental oils cost 500G and unlock together after quest 013 reporting", (
   const legacyStock = getShopItemIdsForCharacter({ quests: { completedQuestIds: ["guild_013"] } });
   assert.equal(legacyStock.includes("fire_lizard_oil"), true);
   assert.equal(legacyStock.includes("ice_lizard_oil"), true);
+  assert.equal(getShopItemIdsForCharacter({ eventFlags: {} }).includes("lightning_lizard_oil"), false);
+  assert.equal(getShopItemIdsForCharacter({ eventFlags: { transfer_portal_b70f_unlocked: true } }).includes("lightning_lizard_oil"), true);
 });
 
 test("elemental armament cards are exclusive SR cost-four cards with future sale values", () => {

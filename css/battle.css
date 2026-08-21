@@ -231,6 +231,11 @@
   max-height: 98%;
 }
 
+.battle-enemy-image.is-jirene {
+  width: min(76%, 510px);
+  max-height: 96%;
+}
+
 .battle-enemy-image.is-iron-maiden {
   width: min(70%, 450px);
   max-height: 94%;
@@ -659,7 +664,8 @@ body.battle-active .viewport > #treasureCanvas {
   .battle-enemy-image.is-fleischfresser,
   .battle-enemy-image.is-otherworldly-wisdom,
   .battle-enemy-image.is-todes-scorpio,
-  .battle-enemy-image.is-sphinx {
+  .battle-enemy-image.is-sphinx,
+  .battle-enemy-image.is-jirene {
     width: min(80%, 390px);
     max-height: 93%;
   }

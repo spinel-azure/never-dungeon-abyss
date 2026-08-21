@@ -16,7 +16,7 @@ import { drawPowerPoseIcon } from "./icons/power-pose.js";
 import { drawStairsDetectionIcon } from "./icons/stairs-detection.js";
 import { drawPersonDetectionIcon } from "./icons/person-detection.js";
 import { drawTreasureDetectionIcon } from "./icons/treasure-detection.js";
-import { drawFlameSwordIcon, drawIceSwordIcon } from "./icons/elemental-sword.js";
+import { drawFlameSwordIcon, drawIceSwordIcon, drawLightningSwordIcon } from "./icons/elemental-sword.js";
 
 const iconDrawers = new Map([
   ["strength", drawStrengthIcon],
@@ -38,6 +38,7 @@ const iconDrawers = new Map([
   ["treasure-detection", drawTreasureDetectionIcon],
   ["flame-sword", drawFlameSwordIcon],
   ["ice-sword", drawIceSwordIcon],
+  ["lightning-sword", drawLightningSwordIcon],
   ["unknown", drawUnknownIcon],
 ]);
 

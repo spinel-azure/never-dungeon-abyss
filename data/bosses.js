@@ -729,7 +729,7 @@ export const BOSSES = Object.freeze({
       prompt: "パルテノペー「何も知らずにのこのことやって来たのね…。うふふ…。」\n＊Aボタンで次へ",
       start: "ジレーネ「妾はジレーネ。奈落の深淵に踏み込もうとしているお前をこれ以上先に行かせる訳にはいかないのよ。\nさぁ、妾の歌声を聞いて身も、心も！妾に捧げよ！」",
       autoStartDelay: 3000,
-      remains: "静寂を取り戻した水辺に、ジレーネの姿はもうない。\n＊Aボタン：次へ"
+      remains: "もうこの水辺に歌声が響くことはないだろう…。\n＊Aボタン：次へ"
     })
   }),
   glacies_event_boss: Object.freeze({

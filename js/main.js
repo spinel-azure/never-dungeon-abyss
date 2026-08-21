@@ -126,6 +126,7 @@ import { CARDS, collectCardStatBonuses, getCardById, hasCardEffect, sumCardEffec
 import { drawCardCanvas } from "./card-canvas.js";
 import { getItem } from "../data/items.js";
 import { isCriticalHp } from "../data/quick-status.js";
+import { scaleBlackChestMimic } from "../data/mimic-scaling.js";
 import { purchaseBuybackEquipment, purchaseBuybackItem, purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
 import { addLootCard, addLootEquipment, addLootGold, addLootItem, depositEquipmentInWarehouse, depositItemInWarehouse, grantItemWithOverflow, settleLootBag, withdrawEquipmentFromWarehouse, withdrawItemFromWarehouse } from "../data/inventory.js";
 import { isGoldChestWeaponEligible, rollEnemyDrop, rollGoldChestLoot, rollPurpleChestLoot, rollRedChestLoot } from "../data/loot.js";
@@ -419,6 +420,12 @@ import {
     getBossEncounterImageId: boss => boss?.id === "jirene_b79f" && character?.eventFlags?.jirene_scripted_defeat_seen
       ? boss.event?.transformationImageId
       : boss?.encounterImageId || boss?.imageId || "",
+    getBossEncounterPrompt: boss => boss?.id === "jirene_b79f" && character?.eventFlags?.jirene_scripted_defeat_seen
+      ? "ジレーネ「ああ…！また来たのね…。また、私…いえ、妾の歌を…聴きたいのね…！」\n＊Aボタンで次へ"
+      : boss?.event?.prompt,
+    getBossStartMessage: boss => boss?.id === "jirene_b79f" && character?.eventFlags?.jirene_scripted_defeat_seen
+      ? "ジレーネが歌声を響かせる。しかし、蜜蝋の耳栓が魔性の響きを遮った！"
+      : boss?.event?.start,
     hasSphinxAnswer: () => hasKeyItem(character?.keyItems, "johanna_calico_cat"),
     onSphinxRiddleHeard: () => {
       if (!character) return false;
@@ -1450,6 +1457,7 @@ import {
         : Math.max(1, totalBeforePenalty + Math.min(0, cards));
       const row = document.createElement("div");
       row.className = "nde-stat-row";
+      if (key === "def" && total > 30) row.classList.add(total >= 60 ? "is-def-maximum" : "is-def-overcap");
       const name = document.createElement("strong");
       name.textContent = label;
       const gauge = document.createElement("span");
@@ -1457,7 +1465,14 @@ import {
       gauge.setAttribute("aria-label", `${label} ${total}/${maximum}`);
       for (let index = 0; index < 30; index += 1) {
         const cell = document.createElement("i");
-        if (total > 30 && index < total - 30) cell.className = `is-overcap${total >= 60 ? " is-maximum" : ""}`;
+        if (total > 30 && index < total - 30) {
+          cell.className = `is-overcap${total >= 60 ? " is-maximum" : ""}`;
+          cell.style.borderColor = total >= 60 ? "#fff0a0" : "#3f9f63";
+          cell.style.background = total >= 60 ? "#e6bd35" : "#43d86f";
+          cell.style.boxShadow = total >= 60
+            ? "0 0 7px rgba(255,218,75,.9)"
+            : "0 0 4px rgba(81,255,137,.55)";
+        }
         else if (index >= total && index < totalBeforePenalty) cell.className = "is-penalty";
         else if (index < Math.min(base, total)) cell.className = "is-base";
         else if (index < Math.min(base + equipment, total)) cell.className = "is-equipment";
@@ -1718,8 +1733,7 @@ import {
     setPlayerInputEnabled(false);
     pendingEncounter = null;
     startBgm(selectBattleBgm(enemyData));
-    const mimic = createEnemyCombatant(enemyData);
-    mimic.depth = currentDepth;
+    const mimic = createEnemyCombatant(scaleBlackChestMimic(enemyData, currentDepth));
     const started = startBattle(mimic, {
       playStartSe: true,
       ambush: false,
@@ -2264,6 +2278,9 @@ import {
             character = granted.character;
             const equipment = getEquipmentInstanceDefinition(granted.instance);
             bossRewardMessage = `\n${equipment?.name || victory.reward.equipmentId}を手に入れた！`;
+            if (battle.enemy.id === "jirene_b79f") {
+              setTimeout(() => showNamedItemGetEffect([equipment?.name || victory.reward.equipmentId], { important: true }), 0);
+            }
           }
         } else if (victory.reward?.type === "item" && victory.reward.itemId) {
           const amount = Math.max(1, Math.floor(Number(victory.reward.amount) || 1));

@@ -50,10 +50,12 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     ? Math.max(1, Math.ceil(Math.max(1, Number(character?.maxHp) || 1) * sphinxBarrierRate))
     : 0;
   const player = cloneCombatant(character);
-  const manaBoosterRecovery = hasCardEffect(character?.cards?.deckSlots, "mana_booster")
+  const manaBoosterRecoveryPotential = hasCardEffect(character?.cards?.deckSlots, "mana_booster")
     ? Math.ceil(player.maxSp * 0.05)
     : 0;
-  if (manaBoosterRecovery > 0) player.sp = Math.min(player.maxSp, player.sp + manaBoosterRecovery);
+  const spBeforeManaBooster = player.sp;
+  if (manaBoosterRecoveryPotential > 0) player.sp = Math.min(player.maxSp, player.sp + manaBoosterRecoveryPotential);
+  const manaBoosterRecovery = Math.max(0, player.sp - spBeforeManaBooster);
   return {
     turn: 1,
     phase: "command",
@@ -69,6 +71,7 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     sphinxWisdomActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "sphinx_weakness_insight"),
     sphinxBarrier,
     sphinxBarrierMax: sphinxBarrier,
+    manaBoosterRecovery,
     vorpalExecution: false,
     slashExecution: null,
     log: [
@@ -665,7 +668,10 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
       battle.log.push(`${target.name}は聖なる光により消滅した。`);
     }
     const imbue = action.item.effects.find(effect => effect.id === "weapon_element_imbue");
-    if (imbue) battle.log.push(`武器に${imbue.element === "ice" ? "氷" : "炎"}の力が宿った！`);
+    if (imbue) {
+      const elementLabel = { fire: "炎", ice: "氷", lightning: "雷" }[imbue.element] || "属性";
+      battle.log.push(`武器に${elementLabel}の力が宿った！`);
+    }
     return;
   }
   if (action.actionType === "wait") {
@@ -958,7 +964,7 @@ export function getPlayerWeaponElement(player, action = {}) {
   const oil = (player?.statuses || []).find(status => (
     (status.id || status.statusId) === "weapon_element_imbue" && status.active !== false
   ));
-  if (["fire", "ice"].includes(oil?.element)) return oil.element;
+  if (["fire", "ice", "lightning"].includes(oil?.element)) return oil.element;
   const weaponElement = String(action.weapon?.element || "physical");
   if (weaponElement !== "physical") return weaponElement;
   if (hasCardEffect(player?.cards?.deckSlots, "weapon_fire_imbue")) return "fire";

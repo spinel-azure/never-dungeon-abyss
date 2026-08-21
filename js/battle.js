@@ -90,6 +90,15 @@ export function startBattle(enemy, { playStartSe = true, ambush = false, conceal
   showCommandButtons();
   if (playStartSe) battleUi.playSe("battleStart");
   renderBattle();
+  if (battleUi.battle.manaBoosterRecovery > 0) {
+    battleUi.onCharacterChanged({ sp: battleUi.battle.player.sp });
+    const openingBattle = battleUi.battle;
+    window.setTimeout(() => {
+      if (battleUi.active && battleUi.battle === openingBattle) {
+        showBattleNumber("player", openingBattle.manaBoosterRecovery, "healing");
+      }
+    }, 300);
+  }
   if (scriptedBattleType === "jirene_first_encounter") scheduleJireneScriptedRound(900);
   else if (ambush) void executeAmbushOpening();
   return true;
@@ -740,6 +749,7 @@ function renderBattle() {
   image.classList.toggle("is-otherworldly-wisdom", battle.enemy.id === "otherworldly_wisdom_b4f");
   image.classList.toggle("is-todes-scorpio", battle.enemy.id === "todes_scorpio_b64f");
   image.classList.toggle("is-sphinx", battle.enemy.id === "sphinx_b69f");
+  image.classList.toggle("is-jirene", battle.enemy.id === "jirene_b79f");
   const enemyStage = battleUi.root.querySelector(".battle-enemy-stage");
   enemyStage.hidden = Boolean(battle.enemies);
   enemyStage?.classList.toggle("is-defeated", defeated);

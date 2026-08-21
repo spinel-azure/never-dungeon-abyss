@@ -285,6 +285,13 @@ export const ITEMS = Object.freeze([
     effects: Object.freeze([{ id: "battle_overheal_flat", value: 100 }]),
     description: "戦闘中にHPを100回復し、最大HPを100まで超えて回復できる。1戦闘に1回だけ使用可能。",
     maxOwned: 99, iconId: "healing-potion", version: 1
+  }),
+  Object.freeze({
+    number: 45, id: "lightning_lizard_oil", name: "雷蜥蜴の油", category: "battle",
+    buyPrice: 500, sellPrice: 250, source: "shop", usableIn: Object.freeze(["battle"]),
+    effects: Object.freeze([{ id: "weapon_element_imbue", element: "lightning" }]),
+    description: "使用した戦闘中、通常攻撃と物理攻撃スキルに雷属性を付与する。別属性で上書き可能。",
+    maxOwned: 99, iconId: "holy-water", version: 1
   })
 ]);
 
@@ -316,6 +323,7 @@ export function getShopItemIdsForCharacter(character) {
     ...(flags.scorching_barrier_shop_unlocked ? ["scorching_barrier"] : []),
     ...(flags.extreme_cold_barrier_shop_unlocked ? ["extreme_cold_barrier"] : []),
     ...(flags.weapon_imbue_oils_shop_unlocked || quest013Reported ? ["fire_lizard_oil", "ice_lizard_oil"] : []),
+    ...(flags.transfer_portal_b70f_unlocked ? ["lightning_lizard_oil"] : []),
     ...(flags.strong_herbicide_shop_unlocked ? ["strong_herbicide"] : []),
     ...(flags.active_healing_potion_small_shop_unlocked ? ["active_healing_potion_small"] : []),
     ...BASE_SHOP_ITEM_IDS.slice(1)

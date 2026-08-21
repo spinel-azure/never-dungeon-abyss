@@ -668,6 +668,7 @@ export const QUESTS = Object.freeze([
     persistentProgressFlags: Object.freeze([
       "jirene_scripted_defeat_seen", "boss_jirene_b79f_defeated", "floor_b80_reached"
     ]),
+    reportUnlockFlags: Object.freeze(["transfer_portal_b80f_unlocked"]),
     available: true
   }),
   Object.freeze({

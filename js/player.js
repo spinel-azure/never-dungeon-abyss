@@ -67,6 +67,8 @@ const hooks = {
   isBossDefeated: () => false,
   isBossRetryBlocked: () => false,
   getBossEncounterImageId: boss => boss?.encounterImageId || boss?.imageId || "",
+  getBossEncounterPrompt: boss => boss?.event?.prompt,
+  getBossStartMessage: boss => boss?.event?.start,
   hasSphinxAnswer: () => false,
   onSphinxRiddleHeard: () => false,
   onSphinxPeaceResolved: () => ({ accepted: false }),
@@ -931,7 +933,7 @@ function startBossEvent(bossId, fromGX, fromGY) {
     phase: hasSphinxAnswer ? "sphinxAnswer" : boss?.event?.sphinxChoice ? "sphinxIntro" : "prompt",
     message: hasSphinxAnswer
       ? "スピンクス「ふむ。正解だ。知恵ある者よこれを授けよう。そして以後、自由にここを通るがよい。」\n＊Aボタン：次へ"
-      : boss?.event?.prompt || "部屋の中央に騎士の彫像がある。まるで行く手を遮っているようだ。調べてみますか？\n＊Aボタン：はい　Bボタン：いいえ",
+      : hooks.getBossEncounterPrompt(boss) || "部屋の中央に騎士の彫像がある。まるで行く手を遮っているようだ。調べてみますか？\n＊Aボタン：はい　Bボタン：いいえ",
     canCancel: !boss?.event?.sphinxChoice || hasSphinxAnswer,
     retreatOnCancel: true
   });
@@ -983,7 +985,7 @@ function confirmBossEvent() {
       return;
     }
   }
-  hooks.say(boss?.event?.start || "あなたが近づいた途端、彫像が動き出した！こちらに向かってくる！");
+  hooks.say(hooks.getBossStartMessage(boss) || "あなたが近づいた途端、彫像が動き出した！こちらに向かってくる！");
   const timer = window.setTimeout(() => {
     if (state.overlayEvent !== event) return;
     state.overlayEvent = null;
