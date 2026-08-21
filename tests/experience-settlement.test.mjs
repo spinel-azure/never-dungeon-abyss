@@ -6,7 +6,7 @@ import {
   createDepthReturnSettlement,
   formatDepthReturnSettlement
 } from "../data/experience-settlement.js";
-import { GODDESS_GRACE_CARD_ID } from "../data/cards.js";
+import { DEEP_FLOOR_PROOF_CARD_ID, GODDESS_GRACE_CARD_ID } from "../data/cards.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { grantCard, setDeckSlot } from "../data/deck.js";
 import { resolveInnStableStay, resolveInnStay, resolveTemplePoisonTreatment } from "../js/character-services.js";
@@ -81,6 +81,26 @@ test("owning Goddess's Grace does not disable the bonus unless it is in the deck
   };
   assert.equal(createDepthReturnSettlement(equipped, 100).finalSettlementExp, 1000);
   assert.equal(createDepthReturnSettlement(equipped, 100).isGoddessGraceEquipped, true);
+});
+
+test("Deep Floor Proof adds ten points unless Goddess protection suppresses the depth bonus", () => {
+  const initial = { ...createInitialCharacter({ name: "TEST", job: "priest" }), deckCost: 20 };
+  const granted = grantCard(initial.cards, DEEP_FLOOR_PROOF_CARD_ID, 1, initial.deckCost);
+  const equipped = {
+    ...initial,
+    carriedExperience: 1000,
+    cards: setDeckSlot(granted.cards, 0, DEEP_FLOOR_PROOF_CARD_ID, initial.deckCost)
+  };
+  const boosted = createDepthReturnSettlement(equipped, 70);
+  assert.equal(boosted.depthBonusRate, 0.45);
+  assert.equal(boosted.finalSettlementExp, 1450);
+
+  const grace = grantCard(equipped.cards, GODDESS_GRACE_CARD_ID, 1, equipped.deckCost);
+  const protectedCharacter = {
+    ...equipped,
+    cards: setDeckSlot(grace.cards, 1, GODDESS_GRACE_CARD_ID, equipped.deckCost)
+  };
+  assert.equal(createDepthReturnSettlement(protectedCharacter, 70).depthBonusRate, 0);
 });
 
 test("Goddess's Grace settlement effect is locked when returning from the dungeon", () => {

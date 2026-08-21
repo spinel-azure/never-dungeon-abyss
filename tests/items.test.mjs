@@ -735,6 +735,38 @@ test("holy water only banishes a non-boss undead and awards no experience", () =
   assert.equal(getItemCount(result.battle.player.inventory, "holy_water"), 0);
 });
 
+test("Active Healing Potion Small overheals by one hundred once per battle", () => {
+  const character = characterWith("active_healing_potion_small", 2);
+  const enemy = {
+    id: "test_dummy", name: "DUMMY", race: "beast", hp: 9999, maxHp: 9999,
+    sp: 0, maxSp: 0, stats: { str: 1, int: 1, agi: 1, dex: 1, luc: 1 },
+    def: 0, attack: 0, actions: [{ id: "wait", name: "待機", actionType: "wait", weight: 1 }],
+    experienceReward: 0, statuses: [], equipment: {}, elementMultipliers: {},
+    statusResistances: {}, isBoss: false, alive: true
+  };
+  const first = resolveBattleRound({
+    battle: createBattleState({ character, enemy }),
+    playerCommand: { type: "item", itemId: "active_healing_potion_small" },
+    rng: () => 0.5
+  });
+  assert.equal(first.accepted, true);
+  assert.equal(first.battle.player.hp, first.battle.player.maxHp + 100);
+  assert.equal(getItemCount(first.battle.player.inventory, "active_healing_potion_small"), 1);
+
+  const second = resolveBattleRound({
+    battle: first.battle,
+    playerCommand: { type: "item", itemId: "active_healing_potion_small" },
+    rng: () => 0.5
+  });
+  assert.equal(second.accepted, false);
+  assert.equal(second.reason, "oncePerBattle");
+  assert.equal(resolveFieldItemUse({
+    character: characterWith("active_healing_potion_small"),
+    itemId: "active_healing_potion_small",
+    context: "dungeon"
+  }).reason, "battleOnly");
+});
+
 test("presence reset clears a lingering talisman suppression", () => {
   restorePresence(0);
   suppressPresence(30);

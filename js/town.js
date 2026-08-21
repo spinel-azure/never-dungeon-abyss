@@ -150,6 +150,7 @@ const town = {
   onOpenSellInventory: () => {},
   onOpenPurchaseInventory: () => {},
   onEnterShop: () => null,
+  onEnterInn: () => null,
   getShopStockState: () => ({ newCategories: {} }),
   onViewShopCategory: () => {},
   onWithdrawItem: () => null,
@@ -1214,6 +1215,7 @@ function renderTownView() {
 function renderFacility() {
   stopTownNameBanner();
   const facility = currentFacility();
+  const innNotice = facility.id === "inn" ? town.onEnterInn() : null;
   town.onAmbienceChanged(false);
   town.onBgmChanged(
     facility.id === "guild" && town.registrationRequired
@@ -1239,7 +1241,9 @@ function renderFacility() {
   town.background.alt = `${facility.label}の背景`;
   town.background.hidden = false;
   town.pendingVoiceFacility = facility.id === "inn" ? "inn" : "";
-  if (facility.id === "inn" && !town.getCharacter()?.eventFlags?.inn_visited) {
+  if (innNotice?.message) {
+    town.messageEl.textContent = innNotice.message;
+  } else if (facility.id === "inn" && !town.getCharacter()?.eventFlags?.inn_visited) {
     const visitor = town.getCharacter();
     visitor.eventFlags = { ...(visitor.eventFlags || {}), inn_visited: true };
     town.messageEl.textContent = "女将ヨハンナ：おや？初めて見る顔だね？どこから来たんだい？";
@@ -1258,10 +1262,13 @@ function renderFacility() {
       town.mode = "facilityTalk";
     }
   }
-  town.portrait.hidden = !facility.image;
-  town.portraitPlaceholder.hidden = Boolean(facility.image);
-  if (facility.image) {
-    town.portrait.src = facility.image;
+  const portraitImage = facility.id === "inn" && hasBorrowedJohannaCat(town.getCharacter())
+    ? "images/npc/NPC_11c.avif"
+    : facility.image;
+  town.portrait.hidden = !portraitImage;
+  town.portraitPlaceholder.hidden = Boolean(portraitImage);
+  if (portraitImage) {
+    town.portrait.src = portraitImage;
     town.portrait.alt = facility.portraitAlt || facility.keeper;
   } else {
     town.portrait.removeAttribute("src");
@@ -1299,6 +1306,10 @@ function renderFacility() {
     });
   }
   town.onStateChanged();
+}
+
+function hasBorrowedJohannaCat(character) {
+  return Boolean(character?.keyItems?.owned?.johanna_calico_cat);
 }
 
 function renderDungeonEntrance() {

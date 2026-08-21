@@ -16,6 +16,7 @@ export function getItemUnavailableReason({ character, itemId, context, enemy, to
   if (itemId === "antidote" && character.hp >= character.maxHp && !hasStatus(character, "poison")) return "noEffect";
   if (itemId === "strong_antidote" && character.hp >= character.maxHp && !hasPoison(character)) return "noEffect";
   if (itemId === "styptic" && character.hp >= character.maxHp && !hasStatus(character, "bleeding")) return "noEffect";
+  if (itemId === "active_healing_potion_small" && hasStatus(character, "active_healing_potion_small_used")) return "oncePerBattle";
   if (itemId === "guiding_torch" && Number(torchFuel) >= 100) return "fullTorch";
   if (itemId === "treasure_compass" && treasureCompassActive) return "noEffect";
   if (itemId === "holy_water") {
@@ -60,6 +61,8 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
       const amount = Math.max(1, Math.ceil(next.maxHp * (Number(effect.value) || 0)));
       healing = Math.min(amount, next.maxHp - next.hp);
       next.hp += healing;
+    } else if (effect.id === "battle_overheal_flat") {
+      return { accepted: false, reason: "battleOnly" };
     } else if (effect.id === "cure_poison") {
       next.statuses = (next.statuses || []).filter(status => (status.statusId || status.id) !== "poison");
     } else if (effect.id === "cure_deadly_poison") {

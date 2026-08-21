@@ -1,4 +1,4 @@
-import { GODDESS_GRACE_CARD_ID, GODDESS_MERCY_CARD_ID } from "./cards.js";
+import { DEEP_FLOOR_PROOF_CARD_ID, GODDESS_GRACE_CARD_ID, GODDESS_MERCY_CARD_ID } from "./cards.js";
 
 export const DEPTH_BONUS_DIVISOR = 200;
 
@@ -6,18 +6,23 @@ export function calculateDepthReturnSettlement({
   baseSettlementExp = 0,
   returnFloor = 0,
   isGoddessGraceEquipped = false,
-  goddessProtectionName = ""
+  goddessProtectionName = "",
+  depthBonusPoints = 0
 } = {}) {
   const base = nonnegativeInteger(baseSettlementExp);
   const floor = nonnegativeInteger(returnFloor);
   const goddessEquipped = Boolean(isGoddessGraceEquipped);
+  const bonusPoints = goddessEquipped ? 0 : Math.max(0, Number(depthBonusPoints) || 0);
+  const depthBonusRate = goddessEquipped
+    ? 0
+    : Math.round((floor / DEPTH_BONUS_DIVISOR + bonusPoints) * 10000) / 10000;
   const depthBonusExp = goddessEquipped
     ? 0
-    : Math.floor(base * floor / DEPTH_BONUS_DIVISOR);
+    : Math.floor(base * depthBonusRate);
   return {
     baseSettlementExp: base,
     returnFloor: floor,
-    depthBonusRate: goddessEquipped ? 0 : floor / DEPTH_BONUS_DIVISOR,
+    depthBonusRate,
     depthBonusExp,
     finalSettlementExp: base + depthBonusExp,
     isGoddessGraceEquipped: goddessEquipped,
@@ -34,7 +39,8 @@ export function createDepthReturnSettlement(character, returnFloor) {
     baseSettlementExp: character?.carriedExperience,
     returnFloor,
     isGoddessGraceEquipped: deckSlots.includes(GODDESS_GRACE_CARD_ID) || mercyEquipped,
-    goddessProtectionName: mercyEquipped ? "女神の慈愛" : ""
+    goddessProtectionName: mercyEquipped ? "女神の慈愛" : "",
+    depthBonusPoints: deckSlots.includes(DEEP_FLOOR_PROOF_CARD_ID) ? 0.1 : 0
   });
 }
 
@@ -57,10 +63,8 @@ export function formatDepthReturnSettlement(settlement) {
       ? "女神の慈愛セット中"
       : "女神の恩寵セット中");
   } else {
-    const floor = nonnegativeInteger(settlement.returnFloor);
-    const percent = floor % 2 === 0
-      ? String(floor / 2)
-      : (floor / 2).toFixed(1);
+    const percentValue = Math.max(0, Number(settlement.depthBonusRate) || 0) * 100;
+    const percent = Number.isInteger(percentValue) ? String(percentValue) : percentValue.toFixed(1);
     lines.push(
       `深層帰還ボーナス　＋${percent}％`,
       `ボーナス経験値　　${value(settlement.depthBonusExp)}`

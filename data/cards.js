@@ -7,6 +7,7 @@ export const MANA_ACTIVATION_CARD_ID = "legendary_mana_activation";
 export const GODDESS_BREATH_CARD_ID = "legendary_goddess_breath";
 export const SPHINX_WISDOM_CARD_ID = "legendary_sphinx_wisdom";
 export const SPHINX_MAJESTY_CARD_ID = "legendary_sphinx_majesty";
+export const DEEP_FLOOR_PROOF_CARD_ID = "legendary_deep_floor_proof";
 
 const STANDARD_CARDS = [
   {
@@ -347,6 +348,13 @@ const STANDARD_CARDS = [
     descriptionJa: "戦闘開始時、最大HPの15％分の障壁を展開する。障壁は直接ダメージを肩代わりし、戦闘ごとに再生成される。",
     category: "battle", effectId: "sphinx_battle_barrier", effectValue: 0.15,
     iconId: "quartered-shield", maxOwned: 1, maxCopies: 1
+  },
+  {
+    id: DEEP_FLOOR_PROOF_CARD_ID, rarity: "L", cost: 6,
+    name: "Proof of Deep Exploration", nameJa: "深層踏破の証", concept: "深層帰還ボーナス +10ポイント",
+    descriptionJa: "深層への到達をギルドから認められた証。帰還時の深層帰還ボーナスに10ポイント加算する。",
+    category: "exploration", effectId: "depth_return_bonus_points", effectValue: 0.1,
+    iconId: "knowledge", maxOwned: 1, maxCopies: 1
   },
   {
     id: "legendary_ability_boost_plus", rarity: "L", cost: 6,

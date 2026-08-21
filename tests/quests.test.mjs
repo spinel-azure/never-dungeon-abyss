@@ -246,6 +246,14 @@ test("B40F remains locked until the B39 checkpoint boss is defeated", () => {
   assert.equal(isDungeonDepthUnlocked(character, 40), true);
 });
 
+test("B70F remains locked until Sphinx is defeated or answered", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  assert.equal(isDungeonDepthUnlocked(character, 69), true);
+  assert.equal(isDungeonDepthUnlocked(character, 70), false);
+  character.eventFlags.boss_b69f_defeated = true;
+  assert.equal(isDungeonDepthUnlocked(character, 70), true);
+});
+
 test("quest 003 tracks B1F explored cells and resets before completion", () => {
   let character = acceptQuest(
     createInitialCharacter({ name: "TEST", job: "mage" }),

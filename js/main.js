@@ -398,6 +398,36 @@ import {
     getSpecialDoorAccessBlock: getCurrentSpecialDoorAccessBlock,
     attemptSpecialDoorUnlock: attemptCurrentSpecialDoorUnlock,
     isBossDefeated: bossId => isBossDefeated(character, bossId),
+    hasSphinxAnswer: () => hasKeyItem(character?.keyItems, "johanna_calico_cat"),
+    onSphinxRiddleHeard: () => {
+      if (!character) return false;
+      character = {
+        ...character,
+        eventFlags: { ...(character.eventFlags || {}), sphinx_b69f_riddle_heard: true }
+      };
+      updateCharacterUi();
+      saveGame();
+      return true;
+    },
+    onSphinxPeaceResolved: () => {
+      if (!character || !hasKeyItem(character.keyItems, "johanna_calico_cat")) return { accepted: false };
+      const reward = grantCard(character.cards, "legendary_sphinx_wisdom", 1, character.deckCost);
+      character = {
+        ...character,
+        cards: reward.cards,
+        eventFlags: {
+          ...(character.eventFlags || {}),
+          boss_b69f_defeated: true,
+          sphinx_b69f_peaceful: true,
+          sphinx_b69f_route_fixed: true
+        }
+      };
+      markBossDefeatedAt(state.gridX, state.gridY, "sphinx_sleeping_b69f");
+      if (reward.gained > 0) setTimeout(() => showCardGetEffect("legendary_sphinx_wisdom", { seId: "itemGet" }), 0);
+      updateCharacterUi();
+      saveGame();
+      return { accepted: true, gained: reward.gained };
+    },
     restAtFountain: restAtHealingFountain,
     returnToTown,
     beginBattle: beginRandomBattle,
@@ -467,6 +497,7 @@ import {
     onOpenSellInventory: openShopSellInventory,
     onOpenPurchaseInventory: openShopPurchaseInventory,
     onEnterShop: enterShop,
+    onEnterInn: enterInn,
     getShopStockState: () => getShopStockState(character),
     onViewShopCategory: viewShopCategory,
     onWithdrawItem: withdrawTownItem,
@@ -914,7 +945,39 @@ import {
     return character?.eventFlags?.tavern_rumor_004_base_read ? "助祭アナスタシア" : "司祭アーヴァイン";
   }
 
+  function enterInn() {
+    if (!character?.eventFlags?.johanna_cat_return_pending) return null;
+    if (!hasKeyItem(character.keyItems, "johanna_calico_cat")) {
+      character = {
+        ...character,
+        eventFlags: { ...(character.eventFlags || {}), johanna_cat_return_pending: false }
+      };
+      saveGame();
+      return null;
+    }
+    const returned = consumeKeyItem(character.keyItems, "johanna_calico_cat");
+    character = {
+      ...character,
+      keyItems: returned.keyItems,
+      eventFlags: { ...(character.eventFlags || {}), johanna_cat_return_pending: false }
+    };
+    updateCharacterUi();
+    saveGame();
+    return { message: "女将ヨハンナ：あらまあ、おかえり。危ない目には遭わなかったかい？" };
+  }
+
   function talkAtFacility(facilityId) {
+    if (facilityId === "inn"
+      && character?.eventFlags?.sphinx_b69f_riddle_heard
+      && !character?.eventFlags?.sphinx_b69f_route_fixed
+      && !hasKeyItem(character.keyItems, "johanna_calico_cat")) {
+      const granted = grantKeyItem(character.keyItems, "johanna_calico_cat");
+      character = { ...character, keyItems: granted.keyItems };
+      updateCharacterUi();
+      saveGame();
+      if (granted.gained > 0) setTimeout(() => showNamedItemGetEffect(["ヨハンナの愛猫"], { important: true }), 0);
+      return "女将ヨハンナ：おや？一体どうしたんだい？この子を見つめて。えっ？ちょっとこの子を貸して欲しいって？\nどこへ連れて行くつもりだい？危ない目には遭わせないでおくれよ？";
+    }
     if (facilityId === "guild" && character?.eventFlags?.guild_registration_card) {
       const unlock = unlockGuildRequest(character);
       if (unlock.unlocked) {
@@ -2022,9 +2085,26 @@ import {
       if (victory.accepted) {
         character = victory.character;
         character = recordBossDefeat(character, battle.enemy.id, currentDepth);
+        if (battle.enemy.id === "sphinx_b69f") {
+          character = {
+            ...character,
+            eventFlags: {
+              ...(character.eventFlags || {}),
+              sphinx_b69f_defeated: true,
+              sphinx_b69f_route_fixed: true
+            }
+          };
+        }
         if (bossLeavesRemains(battle.enemy)) markBossDefeatedAt(state.gridX, state.gridY, battle.enemy.id);
         else removeBossAt(state.gridX, state.gridY);
-        if (victory.reward?.type === "routeCard" && battle.enemy.id === "jabberwock_event_boss") {
+        if (victory.reward?.type === "routeCard" && battle.enemy.id === "sphinx_b69f") {
+          const cardId = "legendary_sphinx_majesty";
+          const cardReward = grantCard(character.cards, cardId, 1, character.deckCost);
+          character = { ...character, cards: cardReward.cards };
+          const card = getCardById(cardId);
+          if (cardReward.gained > 0) setTimeout(() => showCardGetEffect(cardId, { seId: "itemGet" }), 0);
+          bossRewardMessage = `\nスピンクス「小さき者よ…。力にのみ頼るか…。愚かな…！」\nLカード「${card?.nameJa || cardId}」を手に入れた！`;
+        } else if (victory.reward?.type === "routeCard" && battle.enemy.id === "jabberwock_event_boss") {
           const usedVorpalSword = Boolean(battle.vorpalSwordEquippedAtStart);
           const cardId = usedVorpalSword ? "legendary_spirit_surge" : "legendary_vital_surge";
           const cardReward = grantCard(character.cards, cardId, 1, character.deckCost);
@@ -2882,6 +2962,12 @@ import {
         eventFlags: { ...(character.eventFlags || {}), transfer_portal_b60f_unlocked: true }
       };
     }
+    if (currentDepth === 70 && character) {
+      character = {
+        ...character,
+        eventFlags: { ...(character.eventFlags || {}), transfer_portal_b70f_unlocked: true }
+      };
+    }
     startBgm(selectDungeonBgm());
     setDungeonColors(resolveFloorTheme(currentDepth, getDungeonColors()));
     applyCurrentFloorMist();
@@ -2918,6 +3004,15 @@ import {
         ...(floorBoss ? { [floorBoss.id]: isBossDefeated(character, floorBoss) } : {}),
         quest_mimic_b6f: isBossDefeated(character, "quest_mimic_b6f")
       },
+      bossRemainsById: floorBoss?.id === "sphinx_b69f"
+        ? {
+            sphinx_b69f: character?.eventFlags?.sphinx_b69f_peaceful
+              ? "sphinx_sleeping_b69f"
+              : character?.eventFlags?.sphinx_b69f_defeated
+                ? "sphinx_b69f"
+                : null
+          }
+        : {},
       blackChestsUnlocked: Boolean(character?.eventFlags?.black_chests_unlocked),
       goldWeaponEligible: isGoldChestWeaponEligible(character),
       redDoorUnlocked: Boolean(room.unlockFlag && character?.eventFlags?.[room.unlockFlag]),

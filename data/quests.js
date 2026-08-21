@@ -28,6 +28,7 @@ export const FIFTH_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_019";
 export const HERBICIDE_TRIAL_QUEST_ID = "guild_020";
 export const ABYSS_MUSK_QUEST_ID = "guild_021";
 export const SIXTH_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_023";
+export const SEVENTH_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_027";
 export const HERBICIDE_TRIAL_SUPPLY_FLAG = "guild_020_trial_herbicide_received";
 export const SPECIAL_MEDICINE_INGREDIENT_FLAGS = Object.freeze(
   Array.from({ length: 8 }, (_, index) => `quest_016_ingredient_b${index + 51}f_found`)
@@ -612,6 +613,35 @@ export const QUESTS = Object.freeze([
     prerequisiteQuestIds: Object.freeze([HERBICIDE_TRIAL_QUEST_ID]),
     persistentProgressFlags: Object.freeze(["red_door_b59f_unlocked", "boss_fleischfresser_b59f_defeated", "transfer_portal_b60f_unlocked"]),
     available: true
+  }),
+  Object.freeze({
+    id: SEVENTH_RED_DOOR_INVESTIGATION_QUEST_ID,
+    number: "027",
+    title: "赤い扉の調査――その7",
+    client: "ギルドマスター",
+    category: "other",
+    objectiveType: "custom",
+    targetDepth: 70,
+    requiredCount: 3,
+    objectiveLabel: "赤い扉を開け、中を調査する",
+    reward: Object.freeze({
+      type: "card", label: "デッキカード×1", amount: 1,
+      cardId: "legendary_deep_floor_proof", bonusGold: 40000
+    }),
+    descriptionLabel: "目的",
+    description: Object.freeze([
+      "B69Fにある赤い扉を開けて中を調べて欲しい。",
+      "また手強い何かがいるはずだ。事前準備と用心は怠るな。"
+    ]),
+    prerequisiteQuestIds: Object.freeze([SIXTH_RED_DOOR_INVESTIGATION_QUEST_ID]),
+    persistentProgressFlags: Object.freeze([
+      "red_door_b69f_unlocked", "boss_b69f_defeated", "transfer_portal_b70f_unlocked"
+    ]),
+    reportUnlockFlags: Object.freeze([
+      "active_healing_potion_small_shop_unlocked", "johanna_cat_return_pending"
+    ]),
+    reportMessage: "ギルドマスター：赤い扉の先を調べ、ついにB70Fまで辿り着いたか。お前も今や、誰もが認める深層冒険者だ。\nこれはギルドからの正式な認定証だ。受け取れ。",
+    available: true
   })
 ]);
 
@@ -1023,11 +1053,8 @@ export function isDungeonDepthUnlocked(character, depth) {
   if (requestedDepth === 50) {
     return Boolean(character?.eventFlags?.boss_eiskoenigin_b49f_defeated);
   }
-  if (requestedDepth === 60) {
-    return Boolean(character?.eventFlags?.boss_fleischfresser_b59f_defeated);
-  }
-  if (requestedDepth === 60) {
-    return Boolean(character?.eventFlags?.boss_fleischfresser_b59f_defeated);
+  if (requestedDepth === 70) {
+    return Boolean(character?.eventFlags?.boss_b69f_defeated);
   }
   return true;
 }

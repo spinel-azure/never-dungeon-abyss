@@ -281,8 +281,8 @@ async function executeCommand(command) {
       undeadOnly: "アンデッドにしか効果がない。",
       bossImmune: "この敵には効かない。",
       plantOnly: "植物型の障害物にしか効果がない。",
-      plantOnly: "植物型の障害物にしか効果がない。",
-      chargeNotReady: "チャージが満タンではない。"
+      chargeNotReady: "チャージが満タンではない。",
+      oncePerBattle: "活性回復薬（小）は1戦闘に1回だけ使用できる。"
     };
     battleUi.messageEl.textContent = messages[resolved.reason] || "現在使用できません。";
     return;
@@ -584,8 +584,11 @@ function attemptEscape() {
 
 function finishBattle() {
   const outcome = battleUi.battle.outcome;
+  battleUi.battle.player.hp = Math.min(battleUi.battle.player.maxHp, battleUi.battle.player.hp);
   battleUi.battle.player.statuses = clearBattleOnlyStatuses(battleUi.battle.player.statuses);
   battleUi.onCharacterChanged({
+    hp: battleUi.battle.player.hp,
+    alive: battleUi.battle.player.hp > 0,
     statuses: structuredClone(battleUi.battle.player.statuses),
     npcSystem: structuredClone(battleUi.battle.player.npcSystem)
   });

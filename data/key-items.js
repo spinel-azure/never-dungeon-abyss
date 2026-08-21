@@ -34,6 +34,11 @@ export const KEY_ITEMS = Object.freeze({
     description: "ヘレンから贈られた特別なパス。商店の通常商品と店頭装備を半額で購入できる。",
     sellable: false, consumable: false, version: 1
   }),
+  johanna_calico_cat: Object.freeze({
+    id: "johanna_calico_cat", name: "ヨハンナの愛猫",
+    description: "失せ物を見つけるのが得意だという、宿屋の女将ヨハンナの三毛猫。",
+    sellable: false, consumable: true, version: 1
+  }),
   red_rust_key_b9f: Object.freeze({
     id: "red_rust_key_b9f",
     name: "赤錆びた鍵",
@@ -78,6 +83,14 @@ export const KEY_ITEMS = Object.freeze({
     id: "red_rust_key_b59f",
     name: "赤錆びた鍵",
     description: "B59Fで見つけた赤錆びた鍵。赤い扉を開けられそうだ。",
+    sellable: false,
+    consumable: true,
+    version: 1
+  }),
+  red_rust_key_b69f: Object.freeze({
+    id: "red_rust_key_b69f",
+    name: "赤錆びた鍵",
+    description: "B69Fで見つけた赤錆びた鍵。赤い扉を開けられそうだ。",
     sellable: false,
     consumable: true,
     version: 1

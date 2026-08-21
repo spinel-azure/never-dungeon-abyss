@@ -278,6 +278,13 @@ export const ITEMS = Object.freeze([
     buyPrice: 0, sellPrice: 820, source: "drop", usableIn: Object.freeze([]), effects: Object.freeze([]),
     description: "コブラゲーターから剥ぎ取った頑丈な皮。売却専用。", maxOwned: 99,
     repurchasable: false, iconId: "cobra-gator-hide", version: 1
+  }),
+  Object.freeze({
+    number: 44, id: "active_healing_potion_small", name: "活性回復薬（小）", category: "recovery",
+    buyPrice: 1000, sellPrice: 500, source: "shop", usableIn: Object.freeze(["battle"]),
+    effects: Object.freeze([{ id: "battle_overheal_flat", value: 100 }]),
+    description: "戦闘中にHPを100回復し、最大HPを100まで超えて回復できる。1戦闘に1回だけ使用可能。",
+    maxOwned: 99, iconId: "healing-potion", version: 1
   })
 ]);
 
@@ -310,6 +317,7 @@ export function getShopItemIdsForCharacter(character) {
     ...(flags.extreme_cold_barrier_shop_unlocked ? ["extreme_cold_barrier"] : []),
     ...(flags.weapon_imbue_oils_shop_unlocked || quest013Reported ? ["fire_lizard_oil", "ice_lizard_oil"] : []),
     ...(flags.strong_herbicide_shop_unlocked ? ["strong_herbicide"] : []),
+    ...(flags.active_healing_potion_small_shop_unlocked ? ["active_healing_potion_small"] : []),
     ...BASE_SHOP_ITEM_IDS.slice(1)
   ];
 }

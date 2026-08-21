@@ -620,6 +620,61 @@ export const BOSSES = Object.freeze({
       remains: "花弁は枯れて朽ち果て、蔓も力なく垂れ下がっている。\n\nもう二度と、花開くことはないだろう……。\n＊Aボタン：次へ"
     })
   }),
+  sphinx_b69f: Object.freeze({
+    id: "sphinx_b69f", name: "スピンクス", level: 72, floor: 69,
+    imageId: "sphinx_b69f", image: "images/bosses/boss_13.avif",
+    encounterImageId: "sphinx_event_b69f", encounterImage: "images/npc/NPC_event_13.avif",
+    defeatedEncounterImageId: "sphinx_remains_b69f", defeatedEncounterImage: "images/npc/NPC_event_14.avif",
+    race: "beast", maxHp: 4200,
+    stats: Object.freeze({ str: 36, int: 34, agi: 25, dex: 33, luc: 30 }),
+    def: 36, attack: 35, experienceReward: 28000,
+    actions: Object.freeze([
+      Object.freeze({ weight: 30, action: Object.freeze({
+        id: "sphinx_claw", name: "獅子の爪", actionType: "physicalAttack",
+        hitCount: 2, powerPerHit: 0.78, hitBonus: 0.03, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 25, action: Object.freeze({
+        id: "sphinx_wing_gale", name: "鷲翼の烈風", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1.35, speedModifier: 2,
+        effects: Object.freeze([Object.freeze({ statusId: "speed_down", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.35 })])
+      }) }),
+      Object.freeze({ weight: 25, action: Object.freeze({
+        id: "sphinx_dark_riddle", name: "冥府の問い", actionType: "spell", element: "dark",
+        spellPower: 54, powerMultiplier: 1, unavoidable: true,
+        effects: Object.freeze([Object.freeze({ statusId: "action_skip", trigger: "perAction", statusKind: "magical", baseRate: 0.3 })])
+      }) }),
+      Object.freeze({ weight: 20, when: Object.freeze({ hpRateBelow: 0.5 }), action: Object.freeze({
+        id: "sphinx_serpent_tail", name: "蛇尾の断罪", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1.7, hitBonus: -0.04, speedModifier: -5,
+        effects: Object.freeze([Object.freeze({ statusId: "deadly_poison", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.3 })])
+      }) })
+    ]),
+    reward: Object.freeze({ type: "routeCard", cardId: "legendary_sphinx_majesty" }),
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1, lightning: 1.5, holy: 1.5, dark: 0.5, arcane: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 90, immune: false }),
+      deadly_poison: Object.freeze({ resistancePoints: 90, immune: false }),
+      bleeding: Object.freeze({ resistancePoints: 85, immune: false }),
+      action_skip: Object.freeze({ resistancePoints: 100, immune: true }),
+      speed_down: Object.freeze({ resistancePoints: 85, immune: false })
+    }),
+    escapeRate: 0, surpriseRate: 0, surpriseRateMaximum: 0, noDrop: true,
+    isBoss: true, bossKind: "floor", defeatedFlag: "boss_b69f_defeated",
+    transferUnlockFlag: "transfer_portal_b70f_unlocked",
+    room: Object.freeze({ requiresKey: true, keyItemId: "red_rust_key_b69f", unlockFlag: "red_door_b69f_unlocked" }),
+    event: Object.freeze({
+      sphinxChoice: true,
+      prompt: "部屋に入ると獅子の体躯に鷲の翼、そして蛇の尻尾を持つ美しい女性の顔をした魔物が静かに眠っていた。\nあなたの気配を感じたのか、静かに目を開けて語りかけてくる。\nスピンクス「…小さき者よ。妾の問いに答えよ。見事答える事が出来たならば、ここを通してやろう。」\n＊問いに答えますか？\nAボタン：はい　Bボタン：いいえ",
+      start: "スピンクス「…愚かな。その小さき身体を引き裂いてくれよう！」",
+      autoStartDelay: 2000,
+      remains: "力尽きたスピンクスの亡骸が横たわっている。果たしてこれでよかったのだろうか…？\n＊Aボタン：次へ"
+    })
+  }),
+  sphinx_sleeping_b69f: Object.freeze({
+    id: "sphinx_sleeping_b69f", name: "スピンクス", floor: 69,
+    encounterImageId: "sphinx_event_b69f", encounterImage: "images/npc/NPC_event_13.avif",
+    event: Object.freeze({ remains: "スピンクスは目を閉じて静かに眠っている。どうやら通り抜けてもよさそうだ。\n＊Aボタン：次へ" })
+  }),
   glacies_event_boss: Object.freeze({
     id: "glacies_event_boss",
     name: "グラキエス",

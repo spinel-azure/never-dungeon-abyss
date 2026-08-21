@@ -804,9 +804,12 @@ export function placeFloorBossRoom(bossDefinition, rng = Math.random, progress =
       setDoor(candidate.approach.x, candidate.approach.y, candidate.dir.key, "closed", doorUnlocked ? "bossUnlocked" : "boss");
       const [blank, boss, stairs] = candidate.room.map(cell => cells[cell.y][cell.x]);
       boss.bossId = bossDefeated ? null : floorBoss.id;
-      boss.bossRemainsId = bossDefeated && (floorBoss.defeatedEncounterImage || floorBoss.event?.remains)
-        ? floorBoss.id
-        : null;
+      const resolvedDisplayId = progress.bossRemainsById?.[floorBoss.id];
+      boss.bossRemainsId = bossDefeated && resolvedDisplayId
+        ? resolvedDisplayId
+        : bossDefeated && (floorBoss.defeatedEncounterImage || floorBoss.event?.remains)
+          ? floorBoss.id
+          : null;
       stairs.type = "stairsDown";
       for (const target of [blank, boss, stairs]) {
         target.npc = null; target.fountain = null; target.treasure = null; target.eventTreasureId = null;

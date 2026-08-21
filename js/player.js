@@ -59,6 +59,9 @@ const hooks = {
   getSpecialDoorAccessBlock: () => ({ blocked: false }),
   attemptSpecialDoorUnlock: () => ({ accepted: false }),
   isBossDefeated: () => false,
+  hasSphinxAnswer: () => false,
+  onSphinxRiddleHeard: () => false,
+  onSphinxPeaceResolved: () => ({ accepted: false }),
   beginBossBattle: () => false,
   beginMimicBattle: () => false,
   restAtFountain: () => Promise.resolve(false),
@@ -773,13 +776,17 @@ function startStairsPrompt(cellType) {
 function startBossEvent(bossId, fromGX, fromGY) {
   const boss = getBossById(bossId);
   state.bossEncounterOrigin = { x: fromGX, y: fromGY };
+  const hasSphinxAnswer = boss?.event?.sphinxChoice && hooks.hasSphinxAnswer();
   startOverlayEvent({
     type: "bossPrompt",
     bossId,
     imageId: boss?.encounterImageId ?? "",
     fromGX,
     fromGY,
-    message: boss?.event?.prompt || "部屋の中央に騎士の彫像がある。まるで行く手を遮っているようだ。調べてみますか？\n＊Aボタン：はい　Bボタン：いいえ",
+    phase: hasSphinxAnswer ? "sphinxAnswer" : "prompt",
+    message: hasSphinxAnswer
+      ? "スピンクス「ふむ。正解だ。知恵ある者よこれを授けよう。そして以後、自由にここを通るがよい。」\n＊Aボタン：次へ"
+      : boss?.event?.prompt || "部屋の中央に騎士の彫像がある。まるで行く手を遮っているようだ。調べてみますか？\n＊Aボタン：はい　Bボタン：いいえ",
     canCancel: true,
     retreatOnCancel: true
   });
@@ -790,6 +797,40 @@ function confirmBossEvent() {
   if (!event || event.type !== "bossPrompt") return;
   event.canCancel = false;
   const boss = getBossById(event.bossId);
+  if (boss?.event?.sphinxChoice) {
+    if (event.phase === "sphinxAnswer") {
+      hooks.onSphinxPeaceResolved();
+      state.overlayEvent = null;
+      hooks.say("");
+      hooks.onStateChanged();
+      return;
+    }
+    if (event.phase === "prompt") {
+      hooks.onSphinxRiddleHeard();
+      event.phase = "sphinxRiddle";
+      event.canCancel = false;
+      hooks.say("スピンクス「失せ物をすぐに見つける事ができるものがいるという。ここに連れてくるがよい。」\n＊Aボタン：次へ");
+      hooks.onStateChanged();
+      return;
+    }
+    if (event.phase === "sphinxRiddle") {
+      state.overlayEvent = null;
+      hooks.say("");
+      hooks.onStateChanged();
+      if (Number.isInteger(event.fromGX) && Number.isInteger(event.fromGY)) startNpcRetreat(event);
+      return;
+    }
+    if (event.phase === "sphinxFightConfirm") {
+      event.canCancel = false;
+      hooks.say(boss.event.start);
+      event.autoStartTimer = window.setTimeout(() => {
+        if (state.overlayEvent !== event) return;
+        state.overlayEvent = null;
+        hooks.beginBossBattle(event.bossId);
+      }, Math.max(0, Number(boss.event.autoStartDelay) || 2000));
+      return;
+    }
+  }
   hooks.say(boss?.event?.start || "あなたが近づいた途端、彫像が動き出した！こちらに向かってくる！");
   const timer = window.setTimeout(() => {
     if (state.overlayEvent !== event) return;
@@ -1101,6 +1142,13 @@ export function startOverlayEvent(event) {
 function cancelOverlayEvent() {
   const event = state.overlayEvent;
   if (!event?.canCancel) return;
+  if (event.type === "bossPrompt" && event.bossId === "sphinx_b69f" && event.phase === "prompt") {
+    event.phase = "sphinxFightConfirm";
+    event.canCancel = true;
+    hooks.say("スピンクス「ふむ。妾に刃を向けるつもりか？」\nAボタン：はい　Bボタン：いいえ");
+    hooks.onStateChanged();
+    return;
+  }
   stopNpcTypewriter();
   if (event.type === "stairsPrompt") state.stairsPromptDismissed = true;
   state.overlayEvent = null;

@@ -525,6 +525,16 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
         const amount = Math.min(requested, actor.maxHp - actor.hp);
         actor.hp += amount;
         healing += amount;
+      } else if (effect.id === "battle_overheal_flat") {
+        const requested = Math.max(1, Math.floor(Number(effect.value) || 0));
+        const limit = actor.maxHp + requested;
+        const amount = Math.min(requested, Math.max(0, limit - actor.hp));
+        actor.hp += amount;
+        healing += amount;
+        actor.statuses = [
+          ...(actor.statuses || []).filter(status => (status.id || status.statusId) !== "active_healing_potion_small_used"),
+          { id: "active_healing_potion_small_used", statusId: "active_healing_potion_small_used", expiresAfterBattle: true }
+        ];
       } else if (effect.id === "heal_hp_rate") {
         const requested = Math.max(1, Math.ceil(actor.maxHp * (Number(effect.value) || 0)));
         const amount = Math.min(requested, actor.maxHp - actor.hp);
