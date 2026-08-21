@@ -510,7 +510,7 @@ export const BOSSES = Object.freeze({
       }) })
     ]),
     reward: Object.freeze({ type: "none" }),
-    elementMultipliers: Object.freeze({ fire: 1.5, ice: 1, arcane: 1 }),
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1.5, arcane: 1 }),
     statusResistances: Object.freeze({
       poison: Object.freeze({ resistancePoints: 100, immune: true }),
       deadly_poison: Object.freeze({ resistancePoints: 65, immune: false }),

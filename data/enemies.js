@@ -561,7 +561,7 @@ export const enemies = Object.freeze([
         })])
       }) })
     ]),
-    elementMultipliers: Object.freeze({ fire: 1, ice: 1 }),
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1.25 }),
     statusResistances: Object.freeze({
       poison: Object.freeze({ resistancePoints: 55, immune: false }),
       deadly_poison: Object.freeze({ resistancePoints: 55, immune: false }),
@@ -588,7 +588,7 @@ export const enemies = Object.freeze([
         hitCount: 2, powerPerHit: 0.7, hitBonus: -0.02, effects: Object.freeze([])
       }) })
     ]),
-    elementMultipliers: Object.freeze({ fire: 1, ice: 1 }),
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1.5 }),
     statusResistances: Object.freeze({
       poison: Object.freeze({ resistancePoints: 75, immune: false }),
       deadly_poison: Object.freeze({ resistancePoints: 75, immune: false }),
@@ -618,7 +618,7 @@ export const enemies = Object.freeze([
         })])
       }) })
     ]),
-    elementMultipliers: Object.freeze({ fire: 1, ice: 1 }),
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1.5 }),
     statusResistances: Object.freeze({
       poison: Object.freeze({ resistancePoints: 65, immune: false }),
       deadly_poison: Object.freeze({ resistancePoints: 65, immune: false }),

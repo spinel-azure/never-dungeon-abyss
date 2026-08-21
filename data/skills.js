@@ -362,9 +362,10 @@ export const SKILLS = Object.freeze({
   }),
   twin_rapid_strike: Object.freeze({
     id: "twin_rapid_strike", name: "双連撃",
-    description: "チャージ100で発動。電光石火の\n威力90%・4連撃。暗殺術判定あり。",
+    description: "チャージ100で発動。敵のDEFを50％無視する\n威力90%・4連撃。暗殺術判定あり。",
     actionType: "physicalAttack", category: "chargeSkill", spCost: 0, target: "enemy",
-    hitCount: 4, powerPerHit: 0.9, chargeSkill: true, presentationId: "twin_rapid_strike", passiveInstantDeathId: "assassination",
+    hitCount: 4, powerPerHit: 0.9, defensePenetration: 0.5,
+    chargeSkill: true, presentationId: "twin_rapid_strike", passiveInstantDeathId: "assassination",
     effects: Object.freeze([])
   }),
   twilight_flash: Object.freeze({

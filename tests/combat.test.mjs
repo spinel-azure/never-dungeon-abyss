@@ -208,6 +208,9 @@ test("B60F to B69F encounter the three desert enemies and only Abyss Lizards for
   assert.equal(lizard.dropItemId, "abyss_lizard_hide");
   assert.equal(scorpion.dropItemId, "abyss_scorpion_tail");
   assert.equal(gator.dropItemId, "cobra_gator_hide");
+  assert.deepEqual(lizard.elementMultipliers, { fire: 1, ice: 1.25 });
+  assert.deepEqual(scorpion.elementMultipliers, { fire: 1, ice: 1.5 });
+  assert.deepEqual(gator.elementMultipliers, { fire: 1, ice: 1.5 });
 });
 
 test("poison slime sometimes selects an attack that can inflict poison", () => {
@@ -954,6 +957,7 @@ test("Todes Scorpio is the level 85 B64 optional superboss that inflicts death p
   assert.equal(boss.reward.type, "none");
   assert.equal(boss.image, "images/bosses/boss_14.avif");
   assert.equal(boss.encounterImage, "images/background/dungeon_event_09.avif");
+  assert.deepEqual(boss.elementMultipliers, { fire: 1, ice: 1.5, arcane: 1 });
   const sting = boss.actions.find(entry => entry.action.id === "todes_stich")?.action;
   assert.equal(sting.effects[0].statusId, "death_poison");
   assert.equal(boss.statusResistances.deadly_poison.immune, false);

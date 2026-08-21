@@ -59,7 +59,7 @@ test("charge skills expose their intended hit, element and passive profiles", ()
   const priest = getSkill("twilight_flash");
   const mage = getSkill("tunguska");
   assert.deepEqual([warrior.hitCount, warrior.powerPerHit, warrior.passiveInstantDeathId], [2, 1.5, "flash_slash"]);
-  assert.deepEqual([thief.hitCount, thief.powerPerHit, thief.passiveInstantDeathId], [4, 0.9, "assassination"]);
+  assert.deepEqual([thief.hitCount, thief.powerPerHit, thief.defensePenetration, thief.passiveInstantDeathId], [4, 0.9, 0.5, "assassination"]);
   assert.deepEqual([priest.hitCount, priest.attackStat, priest.attackStatMultiplier, priest.ignoresDefense, priest.element], [2, "int", 5, true, "ice"]);
   assert.deepEqual([mage.intelligenceMultiplier, mage.element], [15, "fire"]);
 });
