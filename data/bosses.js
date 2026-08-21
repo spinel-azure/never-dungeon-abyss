@@ -482,9 +482,9 @@ export const BOSSES = Object.freeze({
     id: "todes_scorpio_b64f", name: "トーデス・スコルピオ", level: 85, floor: 64,
     imageId: "todes_scorpio_b64f", image: "images/bosses/boss_14.avif",
     encounterImageId: "todes_scorpio_event_b64f", encounterImage: "images/background/dungeon_event_09.avif",
-    race: "insect", maxHp: 25000,
+    race: "insect", maxHp: 40000,
     stats: Object.freeze({ str: 46, int: 24, agi: 30, dex: 42, luc: 36 }),
-    def: 48, attack: 44, experienceReward: 50000, regainRate: 0.01,
+    def: 48, attack: 44, experienceReward: 50000, regainRate: 0.02,
     actions: Object.freeze([
       Object.freeze({ weight: 28, action: Object.freeze({
         id: "todes_scorpio_giant_claw", name: "巨大鋏", actionType: "physicalAttack",

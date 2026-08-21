@@ -947,7 +947,8 @@ test("Todes Scorpio is the level 85 B64 optional superboss that inflicts death p
   const boss = getBossById("todes_scorpio_b64f");
   assert.equal(boss.floor, 64);
   assert.equal(boss.level, 85);
-  assert.equal(boss.maxHp, 25000);
+  assert.equal(boss.maxHp, 40000);
+  assert.equal(boss.regainRate, 0.02);
   assert.equal(boss.experienceReward, 50000);
   assert.equal(boss.escapeRate, 1);
   assert.equal(boss.reward.type, "none");

@@ -131,6 +131,22 @@ test("B64 checks owned Zodiac cards and enters only after confirmation", async (
   assert.match(playerSource, /a\.enterAfterOpening[\s\S]*tryMove\(a\.entryMoveAmount/);
 });
 
+test("escaping Todes Scorpio blocks a rematch until the next exploration", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const [mainSource, playerSource] = await Promise.all([
+    readFile(new URL("../js/main.js", import.meta.url), "utf8"),
+    readFile(new URL("../js/player.js", import.meta.url), "utf8")
+  ]);
+  assert.match(mainSource, /battle\?\.outcome === "escaped" && battle\.enemy\?\.id === "todes_scorpio_b64f"/);
+  assert.match(mainSource, /escapedSpecialBossesThisExploration\.add\(battle\.enemy\.id\)/);
+  assert.match(mainSource, /isBossRetryBlocked: bossId => escapedSpecialBossesThisExploration\.has\(bossId\)/);
+  assert.match(mainSource, /enterDungeonFromTown[\s\S]*escapedSpecialBossesThisExploration\.clear\(\)/);
+  assert.match(mainSource, /enterFloorFromTransfer[\s\S]*escapedSpecialBossesThisExploration\.clear\(\)/);
+  assert.match(mainSource, /function returnToTown\(\) \{\s*escapedSpecialBossesThisExploration\.clear\(\)/);
+  assert.match(playerSource, /hooks\.isBossRetryBlocked\(boss\.id\)[\s\S]*今は開けるのをやめておこう…。/);
+  assert.match(playerSource, /state\.gridX = fromGX;[\s\S]*state\.gridY = fromGY;/);
+});
+
 test("B4 special room warns before entering the one-time superboss event", () => {
   const room = getSpecialRoomDefinition(4);
   assert.equal(room.dangerWarning, true);

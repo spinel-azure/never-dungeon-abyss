@@ -59,6 +59,7 @@ const hooks = {
   getSpecialDoorAccessBlock: () => ({ blocked: false }),
   attemptSpecialDoorUnlock: () => ({ accepted: false }),
   isBossDefeated: () => false,
+  isBossRetryBlocked: () => false,
   hasSphinxAnswer: () => false,
   onSphinxRiddleHeard: () => false,
   onSphinxPeaceResolved: () => ({ accepted: false }),
@@ -537,6 +538,16 @@ function startSpecialRoomContentEvent(content, fromGX, fromGY) {
   if (!["repeatableBoss", "eventBoss", "multiEnemyBoss"].includes(content?.type)) return;
   const boss = getBossById(content.bossId);
   if (!boss || hooks.isBossDefeated(boss.id)) return;
+  if (hooks.isBossRetryBlocked(boss.id)) {
+    state.gridX = fromGX;
+    state.gridY = fromGY;
+    state.x = fromGX + 0.5;
+    state.y = fromGY + 0.5;
+    hooks.playSe("blocked");
+    hooks.say("今は開けるのをやめておこう…。");
+    hooks.onStateChanged();
+    return;
+  }
   if (boss.event?.immediateStart) {
     const event = {
       type: "specialRoomBoss",

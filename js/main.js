@@ -322,6 +322,7 @@ import {
   });
   let pendingEncounter = null;
   let activeRareRoomEncounterId = null;
+  const escapedSpecialBossesThisExploration = new Set();
   configureDevice();
   configureEvents({ messageEl: msgEl });
   configurePresence({
@@ -398,6 +399,7 @@ import {
     getSpecialDoorAccessBlock: getCurrentSpecialDoorAccessBlock,
     attemptSpecialDoorUnlock: attemptCurrentSpecialDoorUnlock,
     isBossDefeated: bossId => isBossDefeated(character, bossId),
+    isBossRetryBlocked: bossId => escapedSpecialBossesThisExploration.has(bossId),
     hasSphinxAnswer: () => hasKeyItem(character?.keyItems, "johanna_calico_cat"),
     onSphinxRiddleHeard: () => {
       if (!character) return false;
@@ -2348,6 +2350,9 @@ import {
     const escapedRareRoomEnemy = battle?.outcome === "enemyEscaped"
       && activeRareRoomEncounterId === battle.enemy?.id;
     activeRareRoomEncounterId = null;
+    if (battle?.outcome === "escaped" && battle.enemy?.id === "todes_scorpio_b64f") {
+      escapedSpecialBossesThisExploration.add(battle.enemy.id);
+    }
     startBgm(selectDungeonBgm());
     resetPresence();
     setPlayerInputEnabled(true);
@@ -2604,6 +2609,7 @@ import {
       showEnteringTitle: true,
       playAudio: () => playSeSequence("stairs", 3),
       onDark: () => {
+        escapedSpecialBossesThisExploration.clear();
         currentDepth = 1;
         character = startMarathonChallenge(character);
         character = startLongMarchChallenge(character);
@@ -2629,6 +2635,7 @@ import {
     await runSceneTransition({
       playAudio: () => playSeSequence("stairs", 3),
       onDark: () => {
+        escapedSpecialBossesThisExploration.clear();
         currentDepth = destination;
         character = invalidateMarathonChallenge(character);
         character = invalidateLongMarchChallenge(character);
@@ -2702,6 +2709,7 @@ import {
   }
 
   function returnToTown() {
+    escapedSpecialBossesThisExploration.clear();
     const returnFloor = currentDepth;
     let bag = null;
     let settled = null;
