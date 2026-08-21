@@ -29,6 +29,9 @@ export const HERBICIDE_TRIAL_QUEST_ID = "guild_020";
 export const ABYSS_MUSK_QUEST_ID = "guild_021";
 export const SIXTH_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_023";
 export const SEVENTH_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_027";
+export const JIRENE_SONG_INVESTIGATION_QUEST_ID = "guild_028";
+export const BEESWAX_COLLECTION_QUEST_ID = "guild_029";
+export const BEESWAX_REQUIRED_COUNT = 15;
 export const HERBICIDE_TRIAL_SUPPLY_FLAG = "guild_020_trial_herbicide_received";
 export const SPECIAL_MEDICINE_INGREDIENT_FLAGS = Object.freeze(
   Array.from({ length: 8 }, (_, index) => `quest_016_ingredient_b${index + 51}f_found`)
@@ -642,8 +645,78 @@ export const QUESTS = Object.freeze([
     ]),
     reportMessage: "ギルドマスター：赤い扉の先を調べ、ついにB70Fまで辿り着いたか。お前も今や、誰もが認める深層冒険者だ。\nこれはギルドからの正式な認定証だ。受け取れ。\nLカード「深層踏破の証」を手に入れた！",
     available: true
+  }),
+  Object.freeze({
+    id: JIRENE_SONG_INVESTIGATION_QUEST_ID,
+    number: "028",
+    title: "歌声の調査",
+    client: "パルテノペー",
+    category: "other",
+    objectiveType: "custom",
+    targetDepth: 80,
+    requiredCount: 3,
+    objectiveLabel: "歌声のする場所を調べる",
+    reward: Object.freeze({ type: "card", label: "デッキカード×1", amount: 1, cardId: "legendary_mana_booster" }),
+    descriptionLabel: "内容",
+    description: Object.freeze([
+      "奈落のB79Fの奥にある赤い扉の向こうから",
+      "歌声が聞こえてくるんです。まるで何かを誘う",
+      "ような…。誰が歌っているのか調べてください。",
+      ""
+    ]),
+    prerequisiteQuestIds: Object.freeze([SEVENTH_RED_DOOR_INVESTIGATION_QUEST_ID]),
+    persistentProgressFlags: Object.freeze([
+      "jirene_scripted_defeat_seen", "boss_jirene_b79f_defeated", "floor_b80_reached"
+    ]),
+    available: true
+  }),
+  Object.freeze({
+    id: BEESWAX_COLLECTION_QUEST_ID,
+    number: "029",
+    title: "蜜蝋の採取",
+    client: "キルケ",
+    category: "other",
+    objectiveType: "custom",
+    targetDepth: 58,
+    requiredCount: BEESWAX_REQUIRED_COUNT + 1,
+    displayRequiredCount: BEESWAX_REQUIRED_COUNT,
+    objectiveLabel: "密林区域で蜜蝋を15個採取する",
+    reward: Object.freeze({ type: "card", label: "デッキカード×1", amount: 1, cardId: "sr_lightning_armament", bonusGold: 30000 }),
+    descriptionLabel: "内容",
+    description: Object.freeze([
+      "あたしゃ、キルケっていう魔女だよ。",
+      "薬を作るのに必要な蜜蝋を切らしちまってね、",
+      "代わりに15個ほど集めてほしいのさ。",
+      "B58Fにあるあたしの家まで届けておくれ。"
+    ]),
+    availableFlag: "jirene_scripted_defeat_seen",
+    available: true
   })
 ]);
+
+export function recordQuestBeeswax(character, amount = 1) {
+  const progress = getQuestProgress(character, BEESWAX_COLLECTION_QUEST_ID);
+  if (!progress.active || progress.completed || character?.eventFlags?.quest_029_beeswax_delivered) return character;
+  const remaining = Math.max(0, BEESWAX_REQUIRED_COUNT - Math.min(BEESWAX_REQUIRED_COUNT, progress.progress));
+  return remaining > 0
+    ? recordCustomQuestProgress(character, BEESWAX_COLLECTION_QUEST_ID, Math.min(remaining, Math.max(0, Math.floor(Number(amount) || 0))))
+    : character;
+}
+
+export function deliverQuestBeeswax(character) {
+  const progress = getQuestProgress(character, BEESWAX_COLLECTION_QUEST_ID);
+  if (!progress.active || progress.completed || progress.progress < BEESWAX_REQUIRED_COUNT
+    || character?.eventFlags?.quest_029_beeswax_delivered) return result(character, false, "notReady");
+  const withDelivery = {
+    ...character,
+    eventFlags: {
+      ...(character.eventFlags || {}),
+      quest_029_beeswax_delivered: true,
+      jirene_countermeasure_obtained: true
+    }
+  };
+  return result(recordCustomQuestProgress(withDelivery, BEESWAX_COLLECTION_QUEST_ID, 1), true);
+}
 
 export function getQuestById(questId) {
   return QUESTS.find(quest => quest.id === questId) || null;

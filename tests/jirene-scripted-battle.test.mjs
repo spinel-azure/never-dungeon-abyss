@@ -13,7 +13,7 @@ import {
   resolveJireneScriptedRound
 } from "../combat/battle-engine.js";
 
-test("Jirene is the keyed B79F checkpoint boss with supplied artwork and future reward left empty", async () => {
+test("Jirene is the keyed B79F checkpoint boss and drops Musa's Crown", async () => {
   const boss = getBossById("jirene_b79f");
   assert.equal(boss.name, "ジレーネ");
   assert.equal(boss.level, 90);
@@ -24,11 +24,12 @@ test("Jirene is the keyed B79F checkpoint boss with supplied artwork and future 
   assert.equal(boss.elementMultipliers.ice, 0.75);
   assert.equal(boss.room.keyItemId, "red_rust_key_b79f");
   assert.equal(boss.room.unlockFlag, "red_door_b79f_unlocked");
-  assert.deepEqual(boss.reward, { type: "none" });
+  assert.deepEqual(boss.reward, { type: "equipment", equipmentId: "musa_crown", slot: "accessoryId" });
   assert.equal(getKeyItem("red_rust_key_b79f").sellable, false);
   await Promise.all([
     access(new URL("../images/bosses/boss_15.avif", import.meta.url)),
     access(new URL("../images/npc/NPC_event_17.avif", import.meta.url)),
+    access(new URL("../images/npc/NPC_event_17b.avif", import.meta.url)),
     access(new URL("../images/npc/NPC_event_18.avif", import.meta.url))
   ]);
 });
@@ -94,11 +95,11 @@ test("the scripted battle blocks saving, returns to B79F stairs, and prevents un
     readFile(new URL("../js/battle.js", import.meta.url), "utf8")
   ]);
   assert.match(mainSource, /if \(isJireneScriptedBattleActive\(\)\) return false/);
-  assert.match(mainSource, /jirene_scripted_defeat_seen && !flags\.jirene_countermeasure_obtained/);
+  assert.match(mainSource, /jirene_scripted_defeat_seen && !hasKeyItem\(character\?\.keyItems, "beeswax_earplugs"\)/);
   assert.match(mainSource, /cells\.flat\(\)\.find\(cell => cell\.type === "stairsUp"\)/);
   assert.match(mainSource, /finishJireneScriptedDefeat[\s\S]*?finally\s*\{[\s\S]*?setPlayerInputEnabled\(true\)/);
   assert.match(mainSource, /今はこれ以上進むべきではない…/);
-  assert.match(mainSource, /……ここは…？確か、歌声が聞こえて…その後の記憶がない。/);
+  assert.match(mainSource, /ここは…。確か、パルテノペーが…歌声が…よく思い出せない…/);
   assert.match(playerSource, /getBossRoomEntryBlock/);
   assert.match(battleSource, /jireneScriptedDefeat/);
 });

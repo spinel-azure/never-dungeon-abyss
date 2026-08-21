@@ -78,6 +78,14 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
       revealBeforeExploration: true
     })
   }),
+  20: Object.freeze({
+    lock: Object.freeze({ mode: "alwaysSuccess", attempts: 1 }),
+    content: Object.freeze({
+      type: "waspHive", imageId: "giant_wasp_hive_b20f",
+      image: "images/background/dungeon_event_10.avif",
+      minimapMarker: "E", revealBeforeExploration: true
+    })
+  }),
   27: Object.freeze({
     lock: Object.freeze({ mode: "alwaysSuccess", attempts: 1 }),
     content: Object.freeze({ type: "eventBoss", bossId: "thief_leader_event_boss",
@@ -111,6 +119,15 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
       requiredQuestId: "guild_021",
       minimapMarker: "E",
       revealBeforeExploration: true
+    })
+  }),
+  58: Object.freeze({
+    lock: Object.freeze({ mode: "alwaysSuccess", attempts: 1 }),
+    content: Object.freeze({
+      type: "kirkeHouse", imageId: "kirke_house_b58f",
+      image: "images/background/dungeon_event_11.avif",
+      portraitId: "NPC_23", portrait: "images/npc/NPC_23.avif",
+      minimapMarker: "E", revealBeforeExploration: true
     })
   }),
   64: Object.freeze({

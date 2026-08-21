@@ -10,6 +10,8 @@ export const TAVERN_RUMOR_005_BASE_READ_FLAG = "tavern_rumor_005_base_read";
 export const TAVERN_RUMOR_005_OUTFIT_READ_FLAG = "tavern_rumor_005_outfit_read";
 export const TAVERN_RUMOR_006_BASE_READ_FLAG = "tavern_rumor_006_base_read";
 export const TAVERN_RUMOR_006_PERFUME_READ_FLAG = "tavern_rumor_006_perfume_read";
+export const TAVERN_RUMOR_007_BASE_READ_FLAG = "tavern_rumor_007_base_read";
+export const TAVERN_RUMOR_007_DELIVERED_READ_FLAG = "tavern_rumor_007_delivered_read";
 
 export function getTavernRumorTypewriterParts(message) {
   const text = String(message || "");
@@ -151,6 +153,27 @@ export const TAVERN_RUMORS = Object.freeze([
         rosaContinuation: "えっ！？香水の材料を欲しがっていたの？でも、悩むほどの事なのかしらね…？"
       })
     ])
+  }),
+  Object.freeze({
+    id: "rumor_007",
+    verbatimCustomers: true,
+    title: "巨大な蜂の巣の噂",
+    unlock: context => context.quest029Active || context.quest029Completed,
+    customerLead: "おい、知ってるか？奈落のB20Fに巨大な蜂の巣があるんだってな。",
+    customerReply: "ああ。ワスプが大量に発生して刺されたヤツが結構いるらしい。",
+    phases: Object.freeze([
+      Object.freeze({
+        id: "base", readFlag: TAVERN_RUMOR_007_BASE_READ_FLAG,
+        unlock: context => !context.quest029BeeswaxDelivered,
+        rosa: "まぁ、あんな場所で蜂に刺されたら大変ね…。"
+      }),
+      Object.freeze({
+        id: "delivered", readFlag: TAVERN_RUMOR_007_DELIVERED_READ_FLAG,
+        unlock: context => context.quest029BeeswaxDelivered,
+        rosa: "まぁ、あんな場所で蜂に刺されたら大変ね…。",
+        rosaContinuation: "えっ！あなたも刺されたの！？大丈夫…？ちゃんと治療しないとダメよ？"
+      })
+    ])
   })
 ]);
 
@@ -181,6 +204,9 @@ function normalizeRumorContext(character, context = {}) {
     quest019Completed: Boolean(context.quest019Completed ?? completedQuestIds.includes("guild_019")),
     quest016Completed: Boolean(context.quest016Completed ?? completedQuestIds.includes("guild_016")),
     quest020Completed: Boolean(context.quest020Completed ?? completedQuestIds.includes("guild_020")),
+    quest029Active: Boolean(context.quest029Active ?? character?.quests?.active?.guild_029),
+    quest029Completed: Boolean(context.quest029Completed ?? completedQuestIds.includes("guild_029")),
+    quest029BeeswaxDelivered: Boolean(context.quest029BeeswaxDelivered ?? character?.eventFlags?.quest_029_beeswax_delivered),
     anastasiaOutfitEventSeen: Boolean(context.anastasiaOutfitEventSeen ?? character?.eventFlags?.anastasia_festival_outfit_unlocked),
     priestRumorCompleted: Boolean(context.priestRumorCompleted ?? character?.eventFlags?.tavern_rumor_004_medicine_read),
     helenHiddenEventSeen: Boolean(context.helenHiddenEventSeen ?? character?.eventFlags?.helen_hidden_event_seen)

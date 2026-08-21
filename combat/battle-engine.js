@@ -49,11 +49,16 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
   const sphinxBarrier = sphinxBarrierRate > 0
     ? Math.max(1, Math.ceil(Math.max(1, Number(character?.maxHp) || 1) * sphinxBarrierRate))
     : 0;
+  const player = cloneCombatant(character);
+  const manaBoosterRecovery = hasCardEffect(character?.cards?.deckSlots, "mana_booster")
+    ? Math.ceil(player.maxSp * 0.05)
+    : 0;
+  if (manaBoosterRecovery > 0) player.sp = Math.min(player.maxSp, player.sp + manaBoosterRecovery);
   return {
     turn: 1,
     phase: "command",
     outcome: null,
-    player: cloneCombatant(character),
+    player,
     enemy: selectedEnemy,
     ...(enemyParty ? { enemies: enemyParty, targetIndex: selectedTargetIndex, lastPlayerTargetIndex: selectedTargetIndex } : {}),
     vorpalSwordEquippedAtStart,
@@ -68,7 +73,8 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     slashExecution: null,
     log: [
       enemyParty ? `${enemyParty.map(member => member.name).join("、")}が現れた！` : `${enemy.name}が現れた！`,
-      ...(sphinxBarrier > 0 ? ["スピンクスの威容が障壁を展開した！"] : [])
+      ...(sphinxBarrier > 0 ? ["スピンクスの威容が障壁を展開した！"] : []),
+      ...(manaBoosterRecovery > 0 ? [`マナブースターがSPを${manaBoosterRecovery}回復した！`] : [])
     ],
     presentationEvents: []
   };
@@ -957,6 +963,7 @@ export function getPlayerWeaponElement(player, action = {}) {
   if (weaponElement !== "physical") return weaponElement;
   if (hasCardEffect(player?.cards?.deckSlots, "weapon_fire_imbue")) return "fire";
   if (hasCardEffect(player?.cards?.deckSlots, "weapon_ice_imbue")) return "ice";
+  if (hasCardEffect(player?.cards?.deckSlots, "weapon_lightning_imbue")) return "lightning";
   return "physical";
 }
 

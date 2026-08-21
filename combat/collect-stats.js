@@ -69,6 +69,14 @@ export function collectStats(source = {}) {
       0,
       1
     ),
+    temptationResistance: clamp(
+      numeric(source.temptationResistance)
+        + numeric(equipment.temptationResistance)
+        + numeric(cards.temptationResistance)
+        + numeric(temporary.temptationResistance),
+      0,
+      1
+    ),
     magicDamageReduction: clamp(
       numeric(source.magicDamageReduction)
         + numeric(equipment.magicDamageReduction)

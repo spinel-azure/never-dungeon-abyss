@@ -117,7 +117,7 @@ export const ITEMS = Object.freeze([
     repurchasable: false, iconId: "spider-silk", version: 1
   }),
   Object.freeze({
-    number: 19, id: "beeswax", name: "蜂ロウ", category: "material",
+    number: 19, id: "beeswax", name: "蜜蝋", category: "material",
     buyPrice: 0, sellPrice: 50, source: "drop", usableIn: Object.freeze([]),
     effects: Object.freeze([]), description: "ワスプの巣から採れるロウ。売却専用。", maxOwned: 99,
     repurchasable: false, iconId: "beeswax", version: 1

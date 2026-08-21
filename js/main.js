@@ -166,6 +166,8 @@ import {
   recordBossDefeat,
   recordCustomQuestProgress,
   recordFloorExploration,
+  recordQuestBeeswax,
+  deliverQuestBeeswax,
   recordQueenShadowEncounter,
   recordThievesClue,
   reportQuest
@@ -402,8 +404,10 @@ import {
     getBossRoomEntryBlock: ({ toX, toY }) => {
       const enteringBossRoom = cells[toY]?.[toX]?.reserved === "bossRoom";
       const flags = character?.eventFlags || {};
+      const investigation = getQuestProgress(character, "guild_028");
       return enteringBossRoom && currentDepth === 79
-        && flags.jirene_scripted_defeat_seen && !flags.jirene_countermeasure_obtained
+        && ((!flags.jirene_scripted_defeat_seen && !investigation.active)
+          || (flags.jirene_scripted_defeat_seen && !hasKeyItem(character?.keyItems, "beeswax_earplugs")))
         ? { blocked: true, message: "今はこれ以上進むべきではない…。" }
         : { blocked: false };
     },
@@ -412,6 +416,9 @@ import {
     attemptSpecialDoorUnlock: attemptCurrentSpecialDoorUnlock,
     isBossDefeated: bossId => isBossDefeated(character, bossId),
     isBossRetryBlocked: bossId => escapedSpecialBossesThisExploration.has(bossId),
+    getBossEncounterImageId: boss => boss?.id === "jirene_b79f" && character?.eventFlags?.jirene_scripted_defeat_seen
+      ? boss.event?.transformationImageId
+      : boss?.encounterImageId || boss?.imageId || "",
     hasSphinxAnswer: () => hasKeyItem(character?.keyItems, "johanna_calico_cat"),
     onSphinxRiddleHeard: () => {
       if (!character) return false;
@@ -446,6 +453,37 @@ import {
     returnToTown,
     beginBattle: beginRandomBattle,
     beginRareEnemyBattle,
+    beginQuestEnemyBattle,
+    inspectWaspHive: () => {
+      const progress = getQuestProgress(character, "guild_029");
+      if (!progress.active) return {
+        canBattle: false,
+        message: "巨大な蜂の巣がある。無数の羽音が聞こえる。今は近づかない方がよさそうだ。"
+      };
+      if (progress.progress >= 15) return {
+        canBattle: false,
+        message: "依頼に必要な蜜蝋は集まった。キルケの家へ届けよう。"
+      };
+      return { canBattle: true, message: "巨大な蜂の巣からワスプの群れが飛び出してきた！" };
+    },
+    visitKirkeHouse: () => {
+      const progress = getQuestProgress(character, "guild_029");
+      const delivered = Boolean(character?.eventFlags?.quest_029_beeswax_delivered);
+      if (delivered) return { portraitVisible: false, message: "ここは魔女キルケの家だ。" };
+      const introduction = "巨大な蔓に囲まれて今にも朽ちそうな家が建っている。こんな所に人が住んでいるのだろうか…？";
+      if (!progress.active || progress.progress < 15) return { portraitVisible: false, message: introduction };
+      const delivery = deliverQuestBeeswax(character);
+      if (!delivery.accepted) return { portraitVisible: false, message: introduction };
+      const earplugs = grantKeyItem(delivery.character.keyItems, "beeswax_earplugs");
+      character = { ...delivery.character, keyItems: earplugs.keyItems };
+      updateCharacterUi();
+      saveGame();
+      if (earplugs.gained) setTimeout(() => showNamedItemGetEffect(["蜜蝋の耳栓"], { important: true }), 0);
+      return {
+        portraitVisible: true,
+        message: "キルケ「わざわざこんな所まで届けさせて悪かったね。あたしも歳だからね。足を悪くして遠出は厳しいのさ。\nお礼にコイツをあげるよ。今のアンタにちょうどいいんじゃないかねぇ…？ひっひっひ…。」\n「蜜蝋の耳栓」を手に入れた！"
+      };
+    },
     beginBossBattle,
     beginMimicBattle,
     playNpcVoice: playSe,
@@ -1124,6 +1162,15 @@ import {
     return {
       ...result,
       character,
+      ...(questId === "guild_028" ? {
+        clientName: "パルテノペー",
+        clientPortrait: "images/npc/NPC_22.avif",
+        clientDialogue: [
+          "ギルドマスター：依頼人が来ている。お前に直接話したいそうだ。\n＊Aボタンで次へ",
+          "パルテノペー「…あ、あなたが依頼を受けてくれた…人？まるで何かを誘うような歌声がずっと聞こえてくるの…。\n誰が歌っているのか気になって…。よかったら調べてほしいの。お願い…。」\n＊Aボタンで次へ",
+          "それだけ言い残すと、上目遣いでこちらを見つめていた女性は去って行った…。\n＊Aボタンで次へ"
+        ]
+      } : {}),
       acceptedMessage: questId === "guild_020"
         ? "ギルドマスター：これがヘレンから預かった除草剤の試供品だ。持っていけ。"
         : result.acceptanceRewardCardId
@@ -1599,6 +1646,26 @@ import {
       ambush: false,
       concealed: state.torchFuel <= 0 && !state.torchEffectForced
     });
+    if (!started) {
+      activeRareRoomEncounterId = null;
+      startBgm(selectDungeonBgm());
+      setPlayerInputEnabled(true);
+    }
+    return started;
+  }
+
+  function beginQuestEnemyBattle(enemyId, count = 1) {
+    if (!character || worldLocation !== "dungeon" || isBattleActive()) return false;
+    const enemyData = getEnemyById(enemyId);
+    if (!enemyData) return false;
+    cancelAutoReturn(false);
+    setPlayerInputEnabled(false);
+    const enemies = Array.from({ length: Math.max(1, count) }, (_, index) => ({
+      ...createEnemyCombatant(enemyData), formationIndex: index
+    }));
+    activeRareRoomEncounterId = "quest_029_wasp_hive";
+    startBgm(selectBattleBgm(enemyData));
+    const started = startBattle(enemies[0], { playStartSe: true, enemies, targetIndex: 0 });
     if (!started) {
       activeRareRoomEncounterId = null;
       startBgm(selectDungeonBgm());
@@ -2109,6 +2176,7 @@ import {
   }
 
   function finishBattleVictory(battle) {
+    const questWaspHiveVictory = activeRareRoomEncounterId === "quest_029_wasp_hive";
     activeRareRoomEncounterId = null;
     startBgm(selectDungeonBgm());
     const rewardEnemies = Array.isArray(battle?.enemies) ? battle.enemies : [battle?.enemy];
@@ -2221,10 +2289,17 @@ import {
         if (defeatedEnemy?.id) character = recordEnemyDefeat(character, defeatedEnemy.id, currentDepth);
       }
     }
+    let questCollectionMessage = "";
+    if (character && questWaspHiveVictory) {
+      const before = Math.min(15, getQuestProgress(character, "guild_029").progress);
+      character = recordQuestBeeswax(character, rewardEnemies.filter(enemy => enemy?.id === "wasp" && enemy.hp <= 0).length);
+      const after = Math.min(15, getQuestProgress(character, "guild_029").progress);
+      if (after > before) questCollectionMessage = `\n依頼用の蜜蝋を${after - before}個採取した。（${after}/15）`;
+    }
     if (character && reward > 0) Object.assign(character, awardBattleExperience(character, reward));
     const drop = rollEnemyDrop(battle?.enemy);
     const dropMessage = drop.kind === "redChest" ? "" : addRolledLoot(drop);
-    const victoryMessage = `${reward > 0 ? `戦闘に勝利した。${reward}EXPを獲得した。` : "戦闘に勝利した。"}${bossRewardMessage}${dropMessage ? `\n${dropMessage}` : ""}`;
+    const victoryMessage = `${reward > 0 ? `戦闘に勝利した。${reward}EXPを獲得した。` : "戦闘に勝利した。"}${bossRewardMessage}${questCollectionMessage}${dropMessage ? `\n${dropMessage}` : ""}`;
     resetPresence();
     setPlayerInputEnabled(true);
     if (drop.kind === "redChest") {
@@ -2300,7 +2375,7 @@ import {
         imageId: "jirene_after_b79f",
         imageFit: "cover",
         showOverlay: true,
-        message: "……ここは…？確か、歌声が聞こえて…その後の記憶がない。\n＊Aボタン：次へ"
+        message: "ここは…。確か、パルテノペーが…歌声が…よく思い出せない…。ひとまず町に帰って、酒場でゆっくりするか…。\n＊Aボタン：次へ"
       });
     } finally {
       startBgm(selectDungeonBgm());
@@ -2996,6 +3071,9 @@ import {
     currentDepth += 1;
     let marathonCompleted = false;
     if (character) {
+      if (currentDepth === 80) {
+        character = { ...character, eventFlags: { ...(character.eventFlags || {}), floor_b80_reached: true } };
+      }
       character.highestDungeonDepthReached = Math.max(
         character.highestDungeonDepthReached || 1,
         currentDepth

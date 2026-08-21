@@ -39,6 +39,11 @@ export const KEY_ITEMS = Object.freeze({
     description: "失せ物を見つけるのが得意だという、宿屋の女将ヨハンナの三毛猫。",
     sellable: false, consumable: true, version: 1
   }),
+  beeswax_earplugs: Object.freeze({
+    id: "beeswax_earplugs", name: "蜜蝋の耳栓",
+    description: "魔女キルケが作った耳栓。ジレーネの魔性の歌声を遮る。",
+    sellable: false, consumable: false, version: 1
+  }),
   red_rust_key_b9f: Object.freeze({
     id: "red_rust_key_b9f",
     name: "赤錆びた鍵",

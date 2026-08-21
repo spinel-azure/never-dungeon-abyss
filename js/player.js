@@ -66,6 +66,7 @@ const hooks = {
   attemptSpecialDoorUnlock: () => ({ accepted: false }),
   isBossDefeated: () => false,
   isBossRetryBlocked: () => false,
+  getBossEncounterImageId: boss => boss?.encounterImageId || boss?.imageId || "",
   hasSphinxAnswer: () => false,
   onSphinxRiddleHeard: () => false,
   onSphinxPeaceResolved: () => ({ accepted: false }),
@@ -75,6 +76,9 @@ const hooks = {
   returnToTown: () => {},
   beginBattle: () => {},
   beginRareEnemyBattle: () => false,
+  beginQuestEnemyBattle: () => false,
+  inspectWaspHive: () => ({ canBattle: false, message: "巨大な蜂の巣がある。" }),
+  visitKirkeHouse: () => ({ message: "巨大な蔓に囲まれた家が建っている。" }),
   playNpcVoice: () => {},
   onNpcEncountered: () => {},
   isQueenShadowFinaleCompleted: () => false,
@@ -556,6 +560,24 @@ function confirmSpecialRoomWarningEvent() {
 }
 
 function startSpecialRoomContentEvent(content, fromGX, fromGY) {
+  if (content?.type === "waspHive") {
+    const result = hooks.inspectWaspHive();
+    startOverlayEvent({
+      type: "waspHive", content, canBattle: Boolean(result?.canBattle),
+      imageId: content.imageId || "", imageFit: "cover", showOverlay: true, canCancel: false,
+      message: `${result?.message || "巨大な蜂の巣がある。"}\n＊Aボタン：${result?.canBattle ? "次へ" : "戻る"}`
+    });
+    return;
+  }
+  if (content?.type === "kirkeHouse") {
+    const result = hooks.visitKirkeHouse();
+    startOverlayEvent({
+      type: "kirkeHouse", imageId: result?.portraitVisible ? content.portraitId : content.imageId,
+      imageFit: "cover", showOverlay: true, canCancel: false,
+      message: `${result?.message || "巨大な蔓に囲まれて今にも朽ちそうな家が建っている。"}\n＊Aボタン：戻る`
+    });
+    return;
+  }
   if (content?.type === "rareEnemy") {
     if (content.consumed) return;
     startOverlayEvent({
@@ -605,7 +627,7 @@ function startSpecialRoomContentEvent(content, fromGX, fromGY) {
       bossId: boss.id,
       fromGX,
       fromGY,
-      imageId: boss.encounterImageId || boss.imageId || "",
+      imageId: hooks.getBossEncounterImageId(boss),
       imageFit: "cover",
       canCancel: false,
       showOverlay: true,
@@ -622,7 +644,7 @@ function startSpecialRoomContentEvent(content, fromGX, fromGY) {
     bossId: boss.id,
     fromGX,
     fromGY,
-    imageId: boss.encounterImageId ?? "",
+    imageId: hooks.getBossEncounterImageId(boss),
     imageFit: "cover",
     reserveMessageLines: boss.event?.reserveMessageLines || 0,
     canCancel: boss.event?.canCancel !== false,
@@ -686,6 +708,36 @@ function confirmSpecialRoomBossEvent() {
   if (!event || event.type !== "specialRoomBoss") return;
   event.canCancel = false;
   const boss = getBossById(event.bossId);
+  if (boss?.event?.transformationImageId && event.imageId !== boss.event.transformationImageId && !event.transformationCompleted) {
+    event.transformationCompleted = true;
+    event.canCancel = false;
+    hooks.say("");
+    const reducedMotion = globalThis.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (reducedMotion) {
+      event.imageId = boss.event.transformationImageId;
+      beginSpecialRoomBossBattle(event, boss);
+      return;
+    }
+    const originalImageId = event.imageId;
+    const pulses = [700, 600, 520, 450, 380, 350];
+    let elapsed = 0;
+    pulses.forEach((duration, index) => {
+      elapsed += duration;
+      window.setTimeout(() => {
+        if (state.overlayEvent !== event) return;
+        event.imageId = index === pulses.length - 1 || index % 2 === 0
+          ? boss.event.transformationImageId
+          : originalImageId;
+        hooks.onStateChanged();
+      }, elapsed);
+    });
+    window.setTimeout(() => {
+      if (state.overlayEvent !== event) return;
+      event.imageId = boss.event.transformationImageId;
+      beginSpecialRoomBossBattle(event, boss);
+    }, elapsed + 180);
+    return;
+  }
   if (event.awaitingStartConfirmation) {
     event.awaitingStartConfirmation = false;
     event.imageId = "";
@@ -751,6 +803,18 @@ export function handleOverlayEventInput(action) {
     else if (state.overlayEvent.type === "specialRoomWarning") confirmSpecialRoomWarningEvent();
     else if (state.overlayEvent.type === "specialRoomBoss") confirmSpecialRoomBossEvent();
     else if (state.overlayEvent.type === "rareEnemyRoom") confirmRareEnemyRoomEvent();
+    else if (state.overlayEvent.type === "waspHive") {
+      const event = state.overlayEvent;
+      state.overlayEvent = null;
+      hooks.say("");
+      if (event.canBattle) hooks.beginQuestEnemyBattle("wasp", 3);
+      else hooks.onStateChanged();
+    }
+    else if (state.overlayEvent.type === "kirkeHouse") {
+      state.overlayEvent = null;
+      hooks.say("");
+      hooks.onStateChanged();
+    }
     else if (state.overlayEvent.type === "queenShadowFinale") advanceQueenShadowFinaleEvent();
     else if (state.overlayEvent.type === "jireneAwakening") {
       state.overlayEvent = null;

@@ -177,6 +177,9 @@ export function configureRenderer(options) {
     if (boss.defeatedEncounterImageId && boss.defeatedEncounterImage) {
       loadCharacterImage(boss.defeatedEncounterImageId, boss.defeatedEncounterImage);
     }
+    if (boss.event?.transformationImageId && boss.event?.transformationImage) {
+      loadCharacterImage(boss.event.transformationImageId, boss.event.transformationImage);
+    }
   });
   loadCharacterImage(HEALING_FOUNTAIN.id, HEALING_FOUNTAIN.image);
   loadCharacterImage(DESERT_OASIS.id, DESERT_OASIS.image);
@@ -184,6 +187,9 @@ export function configureRenderer(options) {
   loadCharacterImage(DESERT_QUICKSAND.id, DESERT_QUICKSAND.image);
   loadCharacterImage(RAPID_CURRENT.imageId, RAPID_CURRENT.image);
   loadCharacterImage("maikaefer_nest_event", "images/background/dungeon_event_08.avif");
+  loadCharacterImage("giant_wasp_hive_b20f", "images/background/dungeon_event_10.avif");
+  loadCharacterImage("kirke_house_b58f", "images/background/dungeon_event_11.avif");
+  loadCharacterImage("NPC_23", "images/npc/NPC_23.avif");
   ["red", "black", "gold"].forEach(type => loadTreasureImage(type, `images/treasure/treasure-${type}.png`));
   loadTreasureImage("purple", "images/treasure/treasure-red.png", "#8f42d8");
   renderer.canvas.addEventListener("pointerup", handleCanvasPointerUp);

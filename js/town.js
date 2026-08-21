@@ -118,6 +118,8 @@ const town = {
   questPage: 0,
   rumorDialogue: [],
   rumorDialogueIndex: 0,
+  questClientDialogue: [],
+  questClientDialogueIndex: 0,
   activeRumor: null,
   facilityTalkDialogue: [],
   facilityTalkDialogueIndex: 0,
@@ -789,6 +791,18 @@ function playPendingFacilityVoice() {
 }
 
 function handleQuestInput(action) {
+  if (town.mode === "questClientDialogue") {
+    if (action !== "confirm") return true;
+    town.questClientDialogueIndex += 1;
+    if (town.questClientDialogueIndex < town.questClientDialogue.length) {
+      town.messageEl.textContent = town.questClientDialogue[town.questClientDialogueIndex];
+      return true;
+    }
+    town.questClientDialogue = [];
+    town.questClientDialogueIndex = 0;
+    renderFacility();
+    return true;
+  }
   if (town.mode === "questAcceptanceReward") {
     if (action !== "confirm") return true;
     town.playSe("itemGet");
@@ -832,6 +846,16 @@ function handleQuestInput(action) {
       if (result.acceptanceRewardCardId || result.acceptanceSupplyItemId) {
         town.questAcceptanceRewardMessage = result.acceptanceRewardMessage;
         town.mode = "questAcceptanceReward";
+      }
+      if (result.clientDialogue?.length) {
+        town.mode = "questClientDialogue";
+        town.questClientDialogue = result.clientDialogue;
+        town.questClientDialogueIndex = 0;
+        town.portrait.src = result.clientPortrait;
+        town.portrait.alt = result.clientName || quest.client;
+        town.portrait.hidden = false;
+        town.portraitPlaceholder.hidden = true;
+        town.messageEl.textContent = town.questClientDialogue[0];
       }
     } else {
       town.playSe("cursorMove");
@@ -2538,7 +2562,7 @@ function renderGuildQuestList() {
     }
     button.append(`${quest.number}:${quest.title}`);
     if (reportMode && progress.active) {
-      button.append(`　${progress.progress}/${quest.requiredCount}`);
+      button.append(`　${Math.min(progress.progress, quest.displayRequiredCount || quest.requiredCount)}/${quest.displayRequiredCount || quest.requiredCount}`);
     }
     button.addEventListener("click", () => {
       if (town.questPointerArmedIndex === index) {
@@ -2628,7 +2652,7 @@ function renderQuestDetail(quest, progress) {
   if (progress.active) {
     const current = document.createElement("p");
     current.className = "guild-quest-progress";
-    current.textContent = `現在 ${progress.progress}/${quest.requiredCount}`;
+    current.textContent = `現在 ${Math.min(progress.progress, quest.displayRequiredCount || quest.requiredCount)}/${quest.displayRequiredCount || quest.requiredCount}`;
     town.guildQuestDetail.append(current);
   }
 }

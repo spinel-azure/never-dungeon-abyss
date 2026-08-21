@@ -8,6 +8,7 @@ export const GODDESS_BREATH_CARD_ID = "legendary_goddess_breath";
 export const SPHINX_WISDOM_CARD_ID = "legendary_sphinx_wisdom";
 export const SPHINX_MAJESTY_CARD_ID = "legendary_sphinx_majesty";
 export const DEEP_FLOOR_PROOF_CARD_ID = "legendary_deep_floor_proof";
+export const MANA_BOOSTER_CARD_ID = "legendary_mana_booster";
 
 const STANDARD_CARDS = [
   {
@@ -355,6 +356,21 @@ const STANDARD_CARDS = [
     descriptionJa: "深層への到達をギルドから認められた証。帰還時の深層帰還ボーナスに10ポイント加算する。",
     category: "exploration", effectId: "depth_return_bonus_points", effectValue: 0.1,
     iconId: "knowledge", maxOwned: 1, maxCopies: 1
+  },
+  {
+    id: MANA_BOOSTER_CARD_ID, rarity: "L", cost: 6,
+    name: "Mana Booster", nameJa: "マナブースター", concept: "MAX SP +20% / 開幕SP回復",
+    descriptionJa: "最大SPを20％増加し、戦闘開始時に最大SPの5％を回復する。",
+    category: "ability", effectId: "mana_booster", effectValue: 0.2,
+    battleStartRecoveryRate: 0.05, iconId: "mana-core", maxOwned: 1, maxCopies: 1
+  },
+  {
+    id: "sr_lightning_armament", rarity: "SR", cost: 4,
+    name: "Lightning Armament", nameJa: "雷の武装", concept: "物理攻撃に雷属性付与",
+    descriptionJa: "通常攻撃と物理攻撃スキルに雷属性を付与する。武器固有属性と戦闘中の属性油が優先される。",
+    category: "ability", effectId: "weapon_lightning_imbue", effectValue: "lightning",
+    exclusiveGroup: "weapon_element_imbue", iconId: "lightning-sword",
+    maxOwned: 1, maxCopies: 1, sellPrice: 5000, buybackPrice: 50000
   },
   {
     id: "legendary_ability_boost_plus", rarity: "L", cost: 6,

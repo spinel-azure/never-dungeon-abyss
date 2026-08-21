@@ -680,7 +680,7 @@ export const BOSSES = Object.freeze({
   jirene_b79f: Object.freeze({
     id: "jirene_b79f", name: "ジレーネ", level: 90, floor: 79,
     imageId: "jirene_b79f", image: "images/bosses/boss_15.avif",
-    encounterImageId: "jirene_event_b79f", encounterImage: "images/npc/NPC_event_17.avif",
+    encounterImageId: "parthenope_event_b79f", encounterImage: "images/npc/NPC_event_17b.avif",
     defeatedEncounterImageId: "jirene_after_b79f", defeatedEncounterImage: "images/npc/NPC_event_18.avif",
     race: "beast", maxHp: 7000,
     stats: Object.freeze({ str: 36, int: 48, agi: 38, dex: 40, luc: 42 }),
@@ -709,7 +709,7 @@ export const BOSSES = Object.freeze({
         spellPower: 76, powerMultiplier: 1.15, unavoidable: true, speedModifier: -6, effects: Object.freeze([])
       }) })
     ]),
-    reward: Object.freeze({ type: "none" }),
+    reward: Object.freeze({ type: "equipment", equipmentId: "musa_crown", slot: "accessoryId" }),
     elementMultipliers: Object.freeze({ fire: 1, ice: 0.75, lightning: 1.5, holy: 1, dark: 1, arcane: 1 }),
     statusResistances: Object.freeze({
       instant_death: Object.freeze({ resistancePoints: 100, immune: true }),
@@ -724,9 +724,11 @@ export const BOSSES = Object.freeze({
     room: Object.freeze({ requiresKey: true, keyItemId: "red_rust_key_b79f", unlockFlag: "red_door_b79f_unlocked" }),
     event: Object.freeze({
       jireneScriptedFirstEncounter: true,
-      prompt: "赤い扉の奥では、美しい女の姿をした魔物が静かに歌っている。\n甘い歌声が頭の奥へ染み込み、身体から力が抜けていく……。\n＊Aボタンで次へ",
-      start: "ジレーネ「ふふ……可愛い迷い子。さあ、もっと近くへいらっしゃい」",
-      autoStartDelay: 1600,
+      transformationImageId: "jirene_event_b79f",
+      transformationImage: "images/npc/NPC_event_17.avif",
+      prompt: "パルテノペー「何も知らずにのこのことやって来たのね…。うふふ…。」\n＊Aボタンで次へ",
+      start: "ジレーネ「妾はジレーネ。奈落の深淵に踏み込もうとしているお前をこれ以上先に行かせる訳にはいかないのよ。\nさぁ、妾の歌声を聞いて身も、心も！妾に捧げよ！」",
+      autoStartDelay: 3000,
       remains: "静寂を取り戻した水辺に、ジレーネの姿はもうない。\n＊Aボタン：次へ"
     })
   }),

@@ -10,6 +10,11 @@ export const EQUIPMENT_SLOTS = Object.freeze([
 ]);
 
 export const EQUIPMENT = Object.freeze({
+  musa_crown: item("musa_crown", "ムーサの冠", "accessoryId", { def: 6, temptationResistance: 1 }, {
+    sellPrice: 0,
+    hiddenStatBonusKeys: Object.freeze(["temptationResistance"]),
+    unique: true
+  }),
   fireproof_boots: item("fireproof_boots", "耐火ブーツ", "footId", { def: 3, fireDamageReduction: 0.15 }, {
     fireFloorDamageImmunity: true,
     hiddenStatBonusKeys: Object.freeze(["fireDamageReduction"])

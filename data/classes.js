@@ -146,9 +146,12 @@ export function normalizeCharacter(character) {
   const maxHp = growth.hp
     + Math.max(0, Math.floor(Number(equipmentStatBonuses.maxHp) || 0))
     + Math.max(0, Math.floor(Number(cardStatBonuses.maxHp) || 0));
-  const maxSp = growth.sp
+  const maxSpBeforeManaBooster = growth.sp
     + Math.max(0, Math.floor(Number(equipmentStatBonuses.maxSp) || 0))
     + Math.max(0, Math.floor(Number(cardStatBonuses.maxSp) || 0));
+  const maxSp = cards.deckSlots.includes("legendary_mana_booster")
+    ? Math.ceil(maxSpBeforeManaBooster * 1.2)
+    : maxSpBeforeManaBooster;
   const inferredDepth = character.eventFlags?.transfer_portal_b10f_unlocked ? 10 : 1;
   const normalizedEquipmentBuyback = Array.isArray(character.equipmentBuyback)
     ? structuredClone(character.equipmentBuyback)

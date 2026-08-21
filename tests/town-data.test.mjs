@@ -17,7 +17,9 @@ test("shop greeting and guild quest client names stay synchronized", () => {
   const specialClients = new Map([
     ["guild_016", "アナスタシア"],
     ["guild_020", "ヘレン"],
-    ["guild_021", "ヘレン"]
+    ["guild_021", "ヘレン"],
+    ["guild_028", "パルテノペー"],
+    ["guild_029", "キルケ"]
   ]);
   assert.ok(QUESTS.every(quest => quest.client === (specialClients.get(quest.id) || "ギルドマスター")));
 });

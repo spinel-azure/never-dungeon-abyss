@@ -42,7 +42,8 @@ test("elemental oils cost 500G and unlock together after quest 013 reporting", (
 test("elemental armament cards are exclusive SR cost-four cards with future sale values", () => {
   const fire = getCardById("sr_flame_armament");
   const ice = getCardById("sr_ice_armament");
-  for (const card of [fire, ice]) {
+  const lightning = getCardById("sr_lightning_armament");
+  for (const card of [fire, ice, lightning]) {
     assert.equal(card.rarity, "SR");
     assert.equal(card.cost, 4);
     assert.equal(card.maxOwned, 1);
