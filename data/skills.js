@@ -427,7 +427,8 @@ export const SKILLS = Object.freeze({
     unavoidable: true, equipmentGranted: true, effects: Object.freeze([])
   }),
   fireball: SPELLS.fireball,
-  ice_bind: SPELLS.ice_bind
+  ice_bind: SPELLS.ice_bind,
+  lightning_pierce: SPELLS.lightning_pierce
 });
 
 export function getSkill(id) {
@@ -439,6 +440,7 @@ export function getSkills(ids = []) {
 }
 
 export const LEVEL_SKILL_UNLOCKS = Object.freeze([
+  Object.freeze({ job: "mage", level: 8, skillId: "lightning_pierce" }),
   Object.freeze({ job: "warrior", level: 10, skillId: "nieder_schlag" }),
   Object.freeze({ job: "thief", level: 10, skillId: "blindheit" }),
   Object.freeze({ job: "priest", level: 10, skillId: "green_budding" }),

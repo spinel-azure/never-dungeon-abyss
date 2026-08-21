@@ -2,10 +2,10 @@ export const SPELLS = Object.freeze({
   fireball: Object.freeze({
     id: "fireball",
     name: "炎よ、燃やせ！",
-    description: "必中する炎属性攻撃（魔法威力10＋INT×0.5）。\n行動速度－5。DEFを無視する。",
+    description: "必中する小威力の火属性攻撃。\n自身の行動順－5。DEFを無視する。",
     actionType: "spell",
     category: "attackSpell",
-    spCost: 5,
+    spCost: 3,
     target: "enemy",
     element: "fire",
     spellPower: 10,
@@ -17,11 +17,11 @@ export const SPELLS = Object.freeze({
   }),
   ice_bind: Object.freeze({
     id: "ice_bind",
-    name: "氷縛",
-    description: "必中の氷属性攻撃（魔法威力8＋INT×0.5）×0.8。\n行動速度－5。70%で速度－20（3ターン）。",
+    name: "氷よ、貫け！",
+    description: "必中する小威力の氷属性攻撃。\n自身の行動順－5。DEFを無視する。\n70％の確率で敵の行動順－20（3ターン持続）。",
     actionType: "spell",
     category: "attackSpell",
-    spCost: 8,
+    spCost: 5,
     target: "enemy",
     element: "ice",
     spellPower: 8,
@@ -33,6 +33,26 @@ export const SPELLS = Object.freeze({
       trigger: "perAction",
       statusKind: "magical",
       baseRate: 0.7
+    }])
+  }),
+  lightning_pierce: Object.freeze({
+    id: "lightning_pierce",
+    name: "雷よ、穿て！",
+    description: "必中する小威力の雷属性攻撃。\n自身の行動順－5。DEFを無視する。\n30％の確率で敵を感電させる。",
+    actionType: "spell",
+    category: "attackSpell",
+    spCost: 7,
+    target: "enemy",
+    element: "lightning",
+    spellPower: 8,
+    powerMultiplier: 0.8,
+    unavoidable: true,
+    speedModifier: -5,
+    effects: Object.freeze([{
+      statusId: "electrified",
+      trigger: "perAction",
+      statusKind: "magical",
+      baseRate: 0.3
     }])
   }),
   healing_prayer: Object.freeze({

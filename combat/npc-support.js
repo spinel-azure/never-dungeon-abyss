@@ -506,7 +506,7 @@ function formatPercent(rate) {
 }
 
 function cureNpcPrayerStatuses(statuses = [], { all = false, chargeCure = false } = {}) {
-  const curable = new Set(["poison", "deadly_poison", "bleeding", ...(all && !chargeCure ? ["action_skip"] : [])]);
+  const curable = new Set(["poison", "deadly_poison", "bleeding", ...(all && !chargeCure ? ["action_skip", "electrified"] : [])]);
   let cured = false;
   return (statuses || []).filter(status => {
     const matches = curable.has(status.id || status.statusId);

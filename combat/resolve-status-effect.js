@@ -55,7 +55,8 @@ export function resolveInstantDeath({
 }
 
 function getResistance(defender, statusId) {
-  const resistance = defender.statusResistances?.[statusId];
+  const resistance = defender.statusResistances?.[statusId]
+    ?? (statusId === "electrified" ? defender.statusResistances?.action_skip : undefined);
   if (typeof resistance === "number") {
     return { resistancePoints: resistance / 100, immune: false };
   }

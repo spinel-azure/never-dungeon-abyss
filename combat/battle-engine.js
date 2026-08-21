@@ -1183,6 +1183,7 @@ function statusName(id) {
     deadly_poison: "猛毒",
     bleeding: "出血",
     action_skip: "行動不能",
+    electrified: "感電",
     speed_down: "速度低下"
   })[id] || id;
 }

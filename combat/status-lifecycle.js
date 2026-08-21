@@ -29,18 +29,13 @@ export function applyStatusApplications(statuses = [], applications = []) {
 
 export function resolveActionOpportunity(statuses = []) {
   const next = cloneStatuses(statuses);
-  const skip = next.find(status =>
-    (status.id || status.statusId) === "action_skip"
-    && Number(status.actionSkips) > 0
-  );
-  if (!skip) return { skipped: false, statuses: next };
-  skip.actionSkips -= 1;
+  const skipIndex = next.findIndex(status => Number(status.actionSkips) > 0);
+  if (skipIndex < 0) return { skipped: false, statuses: next };
+  next[skipIndex].actionSkips -= 1;
+  if (Number(next[skipIndex].actionSkips) <= 0) next.splice(skipIndex, 1);
   return {
     skipped: true,
-    statuses: next.filter(status =>
-      (status.id || status.statusId) !== "action_skip"
-      || Number(status.actionSkips) > 0
-    )
+    statuses: next
   };
 }
 

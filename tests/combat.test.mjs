@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { CHARACTER_CLASSES, createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getWeapon } from "../data/weapons.js";
 import { collectEquipmentBonuses, getEquipmentItem } from "../data/equipment.js";
-import { getSkill } from "../data/skills.js";
+import { getLevelUnlockedSkillIds, getSkill } from "../data/skills.js";
 import { collectStats } from "../combat/collect-stats.js";
 import { createNormalAttack, createSkillAttack } from "../combat/create-attack.js";
 import {
@@ -518,6 +518,8 @@ test("defense penetration is capped at 75 percent", () => {
 test("fireball is unavoidable, immunity is zero and weakness is 1.5x", () => {
   const fireball = getSkill("fireball");
   assert.equal(fireball.name, "炎よ、燃やせ！");
+  assert.match(fireball.description, /必中する小威力の火属性攻撃/);
+  assert.match(fireball.description, /自身の行動順－5/);
   assert.equal(fireball.presentationId, "fire_ball");
   const immune = resolveSpell({
     attacker: { int: 8 },
@@ -550,6 +552,28 @@ test("fireball is unavoidable, immunity is zero and weakness is 1.5x", () => {
   });
   assert.equal(round.accepted, true);
   assert.equal(round.battle.presentationEvents.find(event => event.actorSide === "player")?.battlePresentationId, "fire_ball");
+});
+
+test("Ice, Pierce uses explicit self and enemy turn-order wording", () => {
+  const ice = getSkill("ice_bind");
+  assert.equal(ice.name, "氷よ、貫け！");
+  assert.equal(ice.spCost, 5);
+  assert.match(ice.description, /自身の行動順－5/);
+  assert.match(ice.description, /敵の行動順－20（3ターン持続）/);
+});
+
+test("the three basic elemental spells use their revised costs and Lightning, Pierce unlocks at level 8", () => {
+  assert.equal(getSkill("fireball").spCost, 3);
+  const lightning = getSkill("lightning_pierce");
+  assert.equal(lightning.name, "雷よ、穿て！");
+  assert.equal(lightning.spCost, 7);
+  assert.equal(lightning.element, "lightning");
+  assert.equal(lightning.unavoidable, true);
+  assert.equal(lightning.speedModifier, -5);
+  assert.equal(lightning.effects[0].statusId, "electrified");
+  assert.equal(lightning.effects[0].baseRate, 0.3);
+  assert.equal(getLevelUnlockedSkillIds("mage", 7).includes(lightning.id), false);
+  assert.equal(getLevelUnlockedSkillIds("mage", 8).includes(lightning.id), true);
 });
 
 test("magic damage reduction lowers final spell damage without changing status resistance", () => {
@@ -959,6 +983,36 @@ test("action skip consumes one opportunity and is removed", () => {
   assert.equal(result.statuses.length, 0);
 });
 
+test("electrified skips the next action and uses LUC plus action-disable resistance", () => {
+  const spell = getSkill("lightning_pierce");
+  const effect = spell.effects[0];
+  const application = resolveStatusEffect({
+    attacker: { int: 20 },
+    defender: {
+      luc: 10,
+      statusResistances: { action_skip: { resistancePoints: 20, immune: false } }
+    },
+    effect,
+    rng: () => 0.19
+  });
+  assert.equal(application.rate, 0.2);
+  assert.equal(application.success, true);
+  const statuses = applyStatusApplications([], [application]);
+  assert.equal(statuses[0].name, "感電");
+  const skipped = resolveActionOpportunity(statuses);
+  assert.equal(skipped.skipped, true);
+  assert.equal(skipped.statuses.length, 0);
+
+  const immune = resolveStatusEffect({
+    attacker: { int: 99 },
+    defender: { luc: 0, statusResistances: { action_skip: { resistancePoints: 100, immune: true } } },
+    effect,
+    rng: () => 0
+  });
+  assert.equal(immune.immune, true);
+  assert.equal(immune.success, false);
+});
+
 test("turn order uses AGI, speed modifier and raw AGI tie-break", () => {
   const ordered = resolveTurnOrder([
     { id: "slow", actor: { agi: 5 }, action: { speedModifier: 0 } },
@@ -997,14 +1051,14 @@ test("initial character receives class vitals and starting skills", () => {
   assert.equal(priest.skillIds.length, 3);
 });
 
-test("every initial skill has a display description", () => {
+test("every initial skill has a display description of up to three lines", () => {
   for (const jobId of ["warrior", "thief", "priest", "mage"]) {
     const character = createInitialCharacter({ name: "TEST", job: jobId });
     for (const skillId of character.skillIds) {
       const skill = getSkill(skillId);
       assert.equal(typeof skill.description, "string");
       assert.ok(skill.description.length > 0);
-      assert.ok(skill.description.split("\n").length <= 2);
+      assert.ok(skill.description.split("\n").length <= 3);
     }
   }
 });

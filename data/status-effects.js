@@ -49,6 +49,13 @@ export const STATUS_EFFECTS = Object.freeze({
     kind: "ailment",
     actionSkips: 1
   }),
+  electrified: Object.freeze({
+    id: "electrified",
+    name: "感電",
+    kind: "ailment",
+    actionSkips: 1,
+    expiresAfterBattle: true
+  }),
   guardian_prayer: Object.freeze({
     id: "guardian_prayer",
     name: "守護",
