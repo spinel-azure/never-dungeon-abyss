@@ -23,6 +23,7 @@ import { getSpecialRoomDefinition, getSpecialRoomUnlockRate, rollMaikaeferNestCo
 import { getFloorBossByDepth } from "../data/bosses.js";
 import { getQuestEventForDepth } from "../data/quest-events.js";
 import { DESERT_QUICKSAND, floorHasQuicksand, QUICKSAND_COUNT } from "../data/quicksand.js";
+import { floorHasRapidCurrents, getRapidCurrentTargetCount, RAPID_CURRENT, RAPID_CURRENT_DIRECTIONS } from "../data/rapid-currents.js";
 import { hasPurpleChestLootTable } from "../data/loot.js";
 import {
   DUNGEON_FEATURE_PRIORITIES,
@@ -65,6 +66,8 @@ export function makeCells(w, h) {
       npc: null,
       fountain: null,
       quicksand: null,
+      rapidCurrent: null,
+      rapidCurrentDiscovered: false,
       treasure: null,
       treasureTrapId: null,
       treasureDiscovered: false,
@@ -136,6 +139,7 @@ function buildBoundaryWallMapAttempt(depth = 1, rng = Math.random, progress = {}
   if (floorBoss?.room?.requiresKey) placeFloorBossKeyTreasure(floorBoss, rng, progress);
   placeForestVines(depth, rng, progress);
   placeNormalDoors(NORMAL_DOOR_COUNT, false);
+  placeRapidCurrents(depth, rng);
 }
 
 export function placeForestVines(depth = 1, rng = Math.random, progress = {}) {
@@ -252,6 +256,8 @@ export function resetAllWalls() {
       cells[y][x].npc = null;
       cells[y][x].fountain = null;
       cells[y][x].quicksand = null;
+      cells[y][x].rapidCurrent = null;
+      cells[y][x].rapidCurrentDiscovered = false;
       cells[y][x].treasure = null;
       cells[y][x].treasureTrapId = null;
       cells[y][x].treasureDiscovered = false;
@@ -355,6 +361,21 @@ export function getFountainAt(x, y) {
 export function getQuicksandAt(x, y) {
   if (!inBounds(x, y)) return null;
   return cells[y][x].quicksand || null;
+}
+
+export function getRapidCurrentAt(x, y) {
+  if (!inBounds(x, y)) return null;
+  return cells[y][x].rapidCurrent || null;
+}
+
+export function discoverRapidCurrent(streamId) {
+  let changed = false;
+  for (const cell of cells.flat()) {
+    if (cell.rapidCurrent?.streamId !== streamId || cell.rapidCurrentDiscovered) continue;
+    cell.rapidCurrentDiscovered = true;
+    changed = true;
+  }
+  return changed;
 }
 
 export function getBossAt(x, y) {
@@ -721,6 +742,132 @@ export function placeQuicksands(depth = 1, rng = Math.random) {
     };
   });
   return selected.map(cell => ({ x: cell.x, y: cell.y }));
+}
+
+export function placeRapidCurrents(depth = 1, rng = Math.random) {
+  for (const cell of cells.flat()) {
+    cell.rapidCurrent = null;
+    cell.rapidCurrentDiscovered = false;
+  }
+  if (!floorHasRapidCurrents(depth)) return [];
+  const targetCount = getRapidCurrentTargetCount(depth);
+  const occupied = new Set();
+  const placed = [];
+  for (let streamIndex = 0; streamIndex < targetCount; streamIndex += 1) {
+    let accepted = null;
+    for (const length of [4, 3, 2]) {
+      const candidates = shuffled(makeRapidCurrentCandidates(length, occupied), rng);
+      for (const candidate of candidates) {
+        applyRapidCurrentCandidate(candidate, `rapid_current_${streamIndex + 1}`);
+        const blocked = new Set(cells.flat().filter(cell => cell.rapidCurrent).map(cell => `${cell.x},${cell.y}`));
+        if (validateRapidCurrentReachability(blocked)) {
+          accepted = candidate;
+          break;
+        }
+        clearRapidCurrentCandidate(candidate);
+      }
+      if (accepted) break;
+    }
+    if (!accepted) break;
+    placed.push(accepted);
+    for (const point of [accepted.entry, ...accepted.currentCells, accepted.shore]) {
+      for (let dy = -1; dy <= 1; dy += 1) {
+        for (let dx = -1; dx <= 1; dx += 1) occupied.add(`${point.x + dx},${point.y + dy}`);
+      }
+    }
+  }
+  return placed.map(candidate => ({
+    direction: candidate.direction.key,
+    length: candidate.currentCells.length,
+    entry: { ...candidate.entry },
+    shore: { ...candidate.shore },
+    cells: candidate.currentCells.map(cell => ({ ...cell }))
+  }));
+}
+
+function makeRapidCurrentCandidates(length, occupied) {
+  const protectedCells = getRapidCurrentProtectedKeys();
+  const candidates = [];
+  for (const entry of cells.flat()) {
+    for (const direction of Object.values(RAPID_CURRENT_DIRECTIONS)) {
+      const currentCells = Array.from({ length }, (_, index) => ({
+        x: entry.x + direction.dx * (index + 1),
+        y: entry.y + direction.dy * (index + 1)
+      }));
+      const shore = { x: entry.x + direction.dx * (length + 1), y: entry.y + direction.dy * (length + 1) };
+      const points = [{ x: entry.x, y: entry.y }, ...currentCells, shore];
+      if (!points.every(point => inBounds(point.x, point.y))) continue;
+      if (points.some(point => occupied.has(`${point.x},${point.y}`) || protectedCells.has(`${point.x},${point.y}`))) continue;
+      if (!points.every(point => isPlainRapidCurrentFloor(cells[point.y][point.x]))) continue;
+      let open = true;
+      for (let index = 0; index < points.length - 1; index += 1) {
+        const from = points[index];
+        if (cells[from.y][from.x].walls[direction.key] || cells[from.y][from.x].doors[direction.key]) {
+          open = false;
+          break;
+        }
+      }
+      if (open) candidates.push({ entry: points[0], currentCells, shore, direction });
+    }
+  }
+  return candidates;
+}
+
+function isPlainRapidCurrentFloor(cell) {
+  return cell.type === "floor" && !isDungeonFeatureOccupied(cell)
+    && !cell.npc && !cell.fountain && !cell.treasure && !cell.questEvent
+    && !cell.quicksand && !cell.bossId && !cell.bossRemainsId && !cell.specialRoom;
+}
+
+function getRapidCurrentProtectedKeys() {
+  const keys = new Set();
+  const protectedOrigins = cells.flat().filter(cell =>
+    cell.type === "stairsUp" || cell.type === "stairsDown" || cell.portal
+    || cell.featureReservation || cell.featureApproach || cell.npc || cell.fountain
+    || cell.treasure || cell.questEvent || cell.quicksand || cell.bossId || cell.bossRemainsId
+  );
+  for (const origin of protectedOrigins) {
+    for (let dy = -2; dy <= 2; dy += 1) {
+      for (let dx = -2; dx <= 2; dx += 1) {
+        if (Math.abs(dx) + Math.abs(dy) <= 2) keys.add(`${origin.x + dx},${origin.y + dy}`);
+      }
+    }
+  }
+  keys.add(`${startPosition.x},${startPosition.y}`);
+  return keys;
+}
+
+function applyRapidCurrentCandidate(candidate, streamId) {
+  candidate.currentCells.forEach((point, segmentIndex) => {
+    cells[point.y][point.x].rapidCurrent = {
+      id: RAPID_CURRENT.id,
+      streamId,
+      direction: candidate.direction.key,
+      segmentIndex,
+      segmentCount: candidate.currentCells.length,
+      shoreX: candidate.shore.x,
+      shoreY: candidate.shore.y
+    };
+  });
+}
+
+function clearRapidCurrentCandidate(candidate) {
+  for (const point of candidate.currentCells) {
+    cells[point.y][point.x].rapidCurrent = null;
+    cells[point.y][point.x].rapidCurrentDiscovered = false;
+  }
+}
+
+export function validateRapidCurrentReachability(blocked = new Set(cells.flat().filter(cell => cell.rapidCurrent).map(cell => `${cell.x},${cell.y}`))) {
+  const reserved = getTraversalBlockingReservations(cells);
+  for (const cell of reserved) blocked.add(`${cell.x},${cell.y}`);
+  for (const cell of cells.flat()) if (cell.npc) blocked.add(`${cell.x},${cell.y}`);
+  const reachable = validationReachableCellKeys(startPosition.x, startPosition.y, blocked);
+  for (const cell of cells.flat()) {
+    if (blocked.has(`${cell.x},${cell.y}`)) continue;
+    if (!reachable.has(`${cell.x},${cell.y}`)) return false;
+  }
+  return true;
 }
 
 export function placeNormalDoors(count = NORMAL_DOOR_COUNT, reset = true) {

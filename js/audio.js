@@ -31,7 +31,9 @@ export const SE = Object.freeze({
   itemGet: "item-get.mp3",
   importantItem: "juuyou-item.mp3",
   costOver: "boo.wav",
-  achievementUnlocked: "item-get.mp3"
+  achievementUnlocked: "item-get.mp3",
+  rapidCurrentSplash: "minamo.mp3",
+  rapidCurrentFlow: "suiryuu.mp3"
 });
 
 const audio = {
@@ -97,7 +99,9 @@ const PLAYBACK_POLICIES = {
   enemyDefeated: { mode: "complete", priority: 3 },
   catVoice01: { mode: "complete", priority: 2 },
   catVoice02: { mode: "complete", priority: 2 },
-  catVoice03: { mode: "complete", priority: 2 }
+  catVoice03: { mode: "complete", priority: 2 },
+  rapidCurrentSplash: { mode: "restart", priority: 3 },
+  rapidCurrentFlow: { mode: "restart", priority: 2 }
 };
 const DEFAULT_POLICY = { mode: "drop", priority: 2 };
 

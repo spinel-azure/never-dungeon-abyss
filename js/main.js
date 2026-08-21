@@ -43,7 +43,8 @@ import {
   startAmbushEncounterNotice,
   startBattleTreasureEvent,
   startFloorLapNotice,
-  setNpcTypewriterOptions
+  setNpcTypewriterOptions,
+  cancelRapidCurrentTransition
 } from "./player.js";
 import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setMistOptions, setWallColor, setFloorColor, toggleMinimapOverlay } from "./renderer.js";
 import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minimap.js";
@@ -389,6 +390,8 @@ import {
       holdMs: 100,
       revealMs: 550
     }),
+    startRapidCurrentFlow: startLoopSe,
+    stopRapidCurrentFlow: stopLoopSe,
     showTreasure,
     playTreasureOpening,
     hideTreasure,
@@ -679,6 +682,7 @@ import {
 
   function saveGame({ announce = false, slot = "auto" } = {}) {
     if (!saveEnabled) return false;
+    if (state.rapidCurrentTransitionActive) return false;
     accruePlayTime();
     const isManualSave = /^manual[1-3]$/.test(slot);
     if (isManualSave && worldLocation !== "town") return false;
@@ -728,6 +732,7 @@ import {
   }
 
   function restoreGame(save) {
+    cancelRapidCurrentTransition();
     const dungeon = save?.dungeon;
     const player = save?.player;
     if (!dungeon || !player || dungeon.cells.length !== MAP_H || dungeon.explored.length !== MAP_H) return false;
@@ -760,6 +765,8 @@ import {
         cells[y][x].featureApproach = savedCell.featureApproach || null;
         cells[y][x].treasureTrapId = savedCell.treasureTrapId || null;
         cells[y][x].quicksand = savedCell.quicksand || null;
+        cells[y][x].rapidCurrent = savedCell.rapidCurrent || null;
+        cells[y][x].rapidCurrentDiscovered = Boolean(savedCell.rapidCurrentDiscovered);
         explored[y][x] = Boolean(dungeon.explored[y][x]);
       }
     }
@@ -2739,6 +2746,7 @@ import {
 
   function returnToTown() {
     escapedSpecialBossesThisExploration.clear();
+    cancelRapidCurrentTransition();
     const returnFloor = currentDepth;
     let bag = null;
     let settled = null;

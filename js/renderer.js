@@ -7,6 +7,7 @@ import { npcs, getNpcById } from "../data/npcs.js";
 import { DESERT_OASIS, DESERT_OASIS_MIRAGE, getFountainById, HEALING_FOUNTAIN } from "../data/fountains.js";
 import { BOSSES, getBossById } from "../data/bosses.js";
 import { DESERT_QUICKSAND } from "../data/quicksand.js";
+import { RAPID_CURRENT } from "../data/rapid-currents.js";
 
 const renderer = {
   canvas: null,
@@ -181,6 +182,7 @@ export function configureRenderer(options) {
   loadCharacterImage(DESERT_OASIS.id, DESERT_OASIS.image);
   loadCharacterImage(DESERT_OASIS_MIRAGE.id, DESERT_OASIS_MIRAGE.image);
   loadCharacterImage(DESERT_QUICKSAND.id, DESERT_QUICKSAND.image);
+  loadCharacterImage(RAPID_CURRENT.imageId, RAPID_CURRENT.image);
   loadCharacterImage("maikaefer_nest_event", "images/background/dungeon_event_08.avif");
   ["red", "black", "gold"].forEach(type => loadTreasureImage(type, `images/treasure/treasure-${type}.png`));
   loadTreasureImage("purple", "images/treasure/treasure-red.png", "#8f42d8");
@@ -206,6 +208,7 @@ export function drawScene(now) {
 
   drawCeiling();
   drawFloor();
+  drawRapidCurrentMotion(now);
   drawCellEvents("floor");
   drawBoundaryWalls();
   drawCellEvents("sprite");
@@ -476,6 +479,43 @@ export function drawFloor() {
     ctx.lineTo(W * (0.5 + spread * 0.52), y);
     ctx.stroke();
   }
+}
+
+function drawRapidCurrentMotion(now) {
+  const { ctx, W, H, state } = renderer;
+  if (!state.rapidCurrentTransitionActive || state.overlayEvent?.type === "rapidCurrent") return;
+  const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+  const elapsed = Math.max(0, now - Number(state.rapidCurrentMotionStartedAt || now));
+  const speed = reducedMotion ? 0.004 : 0.009;
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, H / 2, W, H / 2);
+  ctx.clip();
+  ctx.strokeStyle = reducedMotion ? "rgba(151,215,255,.24)" : "rgba(174,229,255,.42)";
+  ctx.lineWidth = reducedMotion ? 2 : 3;
+  for (let row = 0; row < 7; row += 1) {
+    const y = H * (0.56 + row * 0.065);
+    const offset = (elapsed * speed * W + row * 47) % (W + 120) - 60;
+    ctx.beginPath();
+    for (let x = -120; x <= W + 120; x += 40) {
+      const px = x + offset;
+      const py = y + Math.sin((x + elapsed * 0.25) * 0.045) * (reducedMotion ? 1 : 4);
+      if (x === -120) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+  }
+  if (!reducedMotion) {
+    ctx.fillStyle = "rgba(215,246,255,.55)";
+    for (let index = 0; index < 12; index += 1) {
+      const x = (index * 83 + elapsed * 0.18) % W;
+      const y = H * 0.72 + Math.sin(index * 2.1 + elapsed * 0.008) * H * 0.12;
+      ctx.beginPath();
+      ctx.arc(x, y, 1.5 + index % 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  ctx.restore();
 }
 
 export function drawBoundaryWalls() {

@@ -22,6 +22,8 @@ import {
   removeNpcAt,
   getFountainAt,
   getQuicksandAt,
+  getRapidCurrentAt,
+  discoverRapidCurrent,
   removeFountainAt,
   getTreasureAt,
   getTreasureTrapAt,
@@ -37,6 +39,7 @@ import { getNpcEncounter } from "../data/npcs.js";
 import { DESERT_OASIS, DESERT_OASIS_MIRAGE, getFountainById } from "../data/fountains.js";
 import { getBossById } from "../data/bosses.js";
 import { onExplorationStep, resetPresence } from "./presence.js";
+import { getRapidCurrentForcedPath, RAPID_CURRENT, RAPID_CURRENT_DIRECTIONS } from "../data/rapid-currents.js";
 
 const hooks = {
   say: () => {},
@@ -49,6 +52,8 @@ const hooks = {
   playStairsSequence: () => Promise.resolve(),
   runStairsTransition: (onDark) => Promise.resolve().then(onDark),
   runQuicksandTransition: (onDark) => Promise.resolve().then(onDark),
+  startRapidCurrentFlow: () => {},
+  stopRapidCurrentFlow: () => {},
   showTreasure: () => {},
   playTreasureOpening: (_type, onComplete) => onComplete(),
   hideTreasure: () => {},
@@ -88,6 +93,9 @@ const npcTypewriter = { enabled: true, speed: "normal", timer: 0 };
 let torchFuelDisabled = false;
 let torchConsumptionDisabledByCard = false;
 let playerInputEnabled = true;
+let rapidCurrentTransitionToken = 0;
+const rapidCurrentTimers = new Set();
+let rapidCurrentRejectUntil = 0;
 
 export const state = createPlayerState(2);
 
@@ -124,11 +132,14 @@ export function createPlayerState(startDir) {
     overlayEvent: null,
     npcAwarenessShown: false,
     npcEncounterCounts: {},
-    stairsPromptDismissed: false
+    stairsPromptDismissed: false,
+    rapidCurrentTransitionActive: false,
+    rapidCurrentMotionStartedAt: 0
   };
 }
 
 export function resetPlayer(startDir) {
+  cancelRapidCurrentTransition();
   stopNpcTypewriter();
   const start = getStartPosition();
   state.anim = null;
@@ -209,11 +220,12 @@ export function updateAnimation(now) {
         const bossRemainsId = getBossRemainsAt(state.gridX, state.gridY);
         const fountain = getFountainAt(state.gridX, state.gridY);
         const quicksand = getQuicksandAt(state.gridX, state.gridY);
+        const rapidCurrent = getRapidCurrentAt(state.gridX, state.gridY);
         const treasure = getTreasureAt(state.gridX, state.gridY);
         const specialRoom = getSpecialRoomAt(state.gridX, state.gridY);
         const questEvent = getQuestEventAt(state.gridX, state.gridY);
         const isStairs = a.cellType === "stairsUp" || a.cellType === "stairsDown";
-        const isSpecialEventCell = Boolean(npc) || Boolean(bossId) || Boolean(bossRemainsId) || Boolean(fountain) || Boolean(quicksand) || Boolean(treasure) || Boolean(questEvent) || Boolean(specialRoom?.content) || isStairs;
+        const isSpecialEventCell = Boolean(npc) || Boolean(bossId) || Boolean(bossRemainsId) || Boolean(fountain) || Boolean(quicksand) || Boolean(rapidCurrent) || Boolean(treasure) || Boolean(questEvent) || Boolean(specialRoom?.content) || isStairs;
         const encounterTriggered = onExplorationStep({
           autoWalkerActive: state.autoWalkerActive,
           isSpecialEventCell,
@@ -230,6 +242,8 @@ export function updateAnimation(now) {
           startFountainEvent(fountain, a.fromGX, a.fromGY);
         } else if (quicksand) {
           startQuicksandEvent(quicksand);
+        } else if (rapidCurrent) {
+          startRapidCurrentEvent(rapidCurrent, a.fromGX, a.fromGY);
         } else if (treasure) {
           startTreasureEvent(treasure, a.fromGX, a.fromGY);
         } else if (questEvent) {
@@ -310,6 +324,16 @@ export function tryMove(amount, automated = false, specialEntryConfirmed = false
     hooks.playSe("blocked");
     state.shake = amount > 0 ? -7 : 5;
     hooks.say("外周の向こうは闇に閉ざされている。");
+    return;
+  }
+  const destinationCurrent = getRapidCurrentAt(nx, ny);
+  if (destinationCurrent && destinationCurrent.direction !== currentDir.key) {
+    if (performance.now() >= rapidCurrentRejectUntil) {
+      rapidCurrentRejectUntil = performance.now() + 650;
+      hooks.playSe("blocked");
+      hooks.say("流れが激しく、こちらから進むことはできない。");
+    }
+    if (automated) hooks.cancelAutoReturn(false);
     return;
   }
   const specialRoomEntry = openDoorOnCell(state.gridX, state.gridY, currentDir.key)
@@ -1025,6 +1049,114 @@ function startQuicksandEvent(quicksand) {
       moveToDestination
     );
   }, 900);
+}
+
+function startRapidCurrentEvent(rapidCurrent, safeX, safeY) {
+  if (state.rapidCurrentTransitionActive) return false;
+  const direction = RAPID_CURRENT_DIRECTIONS[rapidCurrent.direction];
+  if (!direction) return false;
+  const token = ++rapidCurrentTransitionToken;
+  state.rapidCurrentTransitionActive = true;
+  state.rapidCurrentMotionStartedAt = performance.now();
+  discoverRapidCurrent(rapidCurrent.streamId);
+  hooks.cancelAutoReturn(false);
+  setPlayerInputEnabled(false);
+  const event = startOverlayEvent({
+    type: "rapidCurrent",
+    imageId: RAPID_CURRENT.imageId,
+    phase: "starting",
+    message: "足元を激流に掬われた！",
+    canCancel: false
+  });
+  hooks.playSe(RAPID_CURRENT.startSeId);
+  void runRapidCurrentTransition({ rapidCurrent, direction, event, token, safeX, safeY });
+  return true;
+}
+
+async function runRapidCurrentTransition({ rapidCurrent, direction, event, token, safeX, safeY }) {
+  try {
+    await rapidCurrentWait(650, token);
+    assertRapidCurrentToken(token);
+    if (state.overlayEvent === event) state.overlayEvent = null;
+    hooks.startRapidCurrentFlow(RAPID_CURRENT.movementSeId);
+    const path = getRapidCurrentForcedPath({ x: state.gridX, y: state.gridY, rapidCurrent });
+    for (const point of path) {
+      await rapidCurrentWait(prefersReducedMotion() ? 90 : 165, token);
+      assertRapidCurrentToken(token);
+      state.gridX = point.x;
+      state.gridY = point.y;
+      state.x = state.gridX + .5;
+      state.y = state.gridY + .5;
+      state.dir = DIRS.findIndex(item => item.key === direction.key);
+      state.angle = DIRS[state.dir].angle;
+      markExplored(state.gridX, state.gridY);
+    }
+    hooks.stopRapidCurrentFlow(RAPID_CURRENT.movementSeId);
+    hooks.playSe(RAPID_CURRENT.startSeId);
+    state.overlayEvent = {
+      type: "rapidCurrent",
+      imageId: RAPID_CURRENT.imageId,
+      phase: "arrived",
+      message: "激流に押し流され、安全な岸へ辿り着いた。",
+      canCancel: false,
+      showOverlay: true
+    };
+    hooks.say(state.overlayEvent.message);
+    hooks.onStateChanged();
+    await rapidCurrentWait(750, token);
+  } catch (error) {
+    if (error?.message !== "rapid-current-cancelled") {
+      console.error("Rapid current transition failed:", error);
+      state.gridX = safeX;
+      state.gridY = safeY;
+      state.x = safeX + .5;
+      state.y = safeY + .5;
+    }
+  } finally {
+    if (token === rapidCurrentTransitionToken) finishRapidCurrentTransition(true);
+  }
+}
+
+function rapidCurrentWait(delay, token) {
+  return new Promise((resolve, reject) => {
+    const timer = window.setTimeout(() => {
+      rapidCurrentTimers.delete(timer);
+      if (token !== rapidCurrentTransitionToken) reject(new Error("rapid-current-cancelled"));
+      else resolve();
+    }, delay);
+    rapidCurrentTimers.add(timer);
+  });
+}
+
+function assertRapidCurrentToken(token) {
+  if (token !== rapidCurrentTransitionToken) throw new Error("rapid-current-cancelled");
+}
+
+function prefersReducedMotion() {
+  return Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches);
+}
+
+function finishRapidCurrentTransition(restoreInput) {
+  hooks.stopRapidCurrentFlow(RAPID_CURRENT.movementSeId);
+  for (const timer of rapidCurrentTimers) window.clearTimeout(timer);
+  rapidCurrentTimers.clear();
+  state.rapidCurrentTransitionActive = false;
+  state.rapidCurrentMotionStartedAt = 0;
+  if (state.overlayEvent?.type === "rapidCurrent") state.overlayEvent = null;
+  if (restoreInput) setPlayerInputEnabled(true);
+  updateNpcAwareness();
+  hooks.onStateChanged();
+}
+
+export function cancelRapidCurrentTransition({ restoreInput = false } = {}) {
+  const active = state.rapidCurrentTransitionActive || rapidCurrentTimers.size > 0 || state.overlayEvent?.type === "rapidCurrent";
+  rapidCurrentTransitionToken += 1;
+  if (!active) {
+    hooks.stopRapidCurrentFlow(RAPID_CURRENT.movementSeId);
+    return false;
+  }
+  finishRapidCurrentTransition(restoreInput);
+  return true;
 }
 
 export async function runQuicksandTransitionWithFallback(runTransition, moveToDestination) {
