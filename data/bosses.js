@@ -624,6 +624,7 @@ export const BOSSES = Object.freeze({
     id: "sphinx_b69f", name: "スピンクス", level: 72, floor: 69,
     imageId: "sphinx_b69f", image: "images/bosses/boss_13.avif",
     encounterImageId: "sphinx_event_b69f", encounterImage: "images/npc/NPC_event_13.avif",
+    renderScale: 1.18,
     defeatedEncounterImageId: "sphinx_remains_b69f", defeatedEncounterImage: "images/npc/NPC_event_14.avif",
     race: "beast", maxHp: 4200,
     stats: Object.freeze({ str: 36, int: 34, agi: 25, dex: 33, luc: 30 }),
@@ -664,7 +665,7 @@ export const BOSSES = Object.freeze({
     room: Object.freeze({ requiresKey: true, keyItemId: "red_rust_key_b69f", unlockFlag: "red_door_b69f_unlocked" }),
     event: Object.freeze({
       sphinxChoice: true,
-      prompt: "部屋に入ると獅子の体躯に鷲の翼、そして蛇の尻尾を持つ美しい女性の顔をした魔物が静かに眠っていた。\nあなたの気配を感じたのか、静かに目を開けて語りかけてくる。\nスピンクス「…小さき者よ。妾の問いに答えよ。見事答える事が出来たならば、ここを通してやろう。」\n＊問いに答えますか？\nAボタン：はい　Bボタン：いいえ",
+      prompt: "部屋に入ると獅子の体躯に鷲の翼、そして蛇の尻尾を持つ美しい女性の顔をした魔物が静かに眠っていた。\nあなたの気配を感じたのか、静かに目を開けて語りかけてくる。\n＊Aボタンで次へ",
       start: "スピンクス「…愚かな。その小さき身体を引き裂いてくれよう！」",
       autoStartDelay: 2000,
       remains: "力尽きたスピンクスの亡骸が横たわっている。果たしてこれでよかったのだろうか…？\n＊Aボタン：次へ"

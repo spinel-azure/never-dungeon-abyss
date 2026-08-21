@@ -156,7 +156,13 @@ test("B49 Eiskoenigin is an ice checkpoint boss stronger than Glacies", () => {
 });
 
 test("peacefully resolved Sphinx reuses the pre-battle event image while sleeping", () => {
+  const boss = getBossById("sphinx_b69f");
   const sleeping = getBossById("sphinx_sleeping_b69f");
+  assert.equal(boss.renderScale, 1.18);
+  assert.match(boss.event.prompt, /静かに目を開けて語りかけてくる。/);
+  assert.match(boss.event.prompt, /＊Aボタンで次へ$/);
+  assert.doesNotMatch(boss.event.prompt, /問いに答えますか/);
+  assert.equal(sleeping.renderScale, undefined);
   assert.equal(sleeping.encounterImageId, "sphinx_event_b69f");
   assert.equal(sleeping.encounterImage, "images/npc/NPC_event_13.avif");
   assert.equal(sleeping.defeatedEncounterImageId, "sphinx_event_b69f");

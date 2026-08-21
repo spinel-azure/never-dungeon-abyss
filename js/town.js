@@ -77,6 +77,8 @@ const TAVERN_FACILITY = Object.freeze({
 const NPC_HIRE_FACILITY = Object.freeze({ ...TAVERN_FACILITY, id: "npcHire", label: "NPC雇用" });
 
 const TOWN_TYPEWRITER_DELAYS = Object.freeze({ slow: 75, normal: 42, fast: 20 });
+const JOHANNA_CAT_BORROW_TRANSITION_FLAG = "johanna_cat_borrow_transition";
+const JOHANNA_CAT_RETURN_TRANSITION_FLAG = "johanna_cat_return_transition";
 const townTypewriter = {
   enabled: true,
   speed: "normal",
@@ -663,6 +665,11 @@ function handleFacilityTalkInput(action) {
     beginAnastasiaOutfitBlackout();
     return true;
   }
+  if (town.facilityTalkCompletionFlag === JOHANNA_CAT_BORROW_TRANSITION_FLAG
+    || town.facilityTalkCompletionFlag === JOHANNA_CAT_RETURN_TRANSITION_FLAG) {
+    beginJohannaCatBlackout(town.facilityTalkCompletionFlag);
+    return true;
+  }
   if (town.facilityTalkCompletionFlag) town.onCompleteFacilityTalk(town.facilityTalkCompletionFlag);
   town.facilityTalkDialogue = [];
   town.facilityTalkDialogueIndex = 0;
@@ -688,6 +695,25 @@ function beginAnastasiaOutfitBlackout() {
       window.setTimeout(() => { town.transitioning = false; }, 360);
     }, 120);
   }, 360);
+}
+
+function beginJohannaCatBlackout(completionFlag, delayMs = 0) {
+  town.transitioning = true;
+  window.setTimeout(() => {
+    town.root.classList.add("is-inn-cat-blackout");
+    window.setTimeout(() => {
+      town.onCompleteFacilityTalk(completionFlag);
+      town.facilityTalkDialogue = [];
+      town.facilityTalkDialogueIndex = 0;
+      town.facilityTalkCompletionFlag = "";
+      town.mode = "facilityMenu";
+      renderFacility();
+      window.setTimeout(() => {
+        town.root.classList.remove("is-inn-cat-blackout");
+        window.setTimeout(() => { town.transitioning = false; }, 360);
+      }, 120);
+    }, 360);
+  }, Math.max(0, Number(delayMs) || 0));
 }
 
 function configureTownMessageObserver() {
@@ -1250,6 +1276,14 @@ function renderFacility() {
   } else {
     town.messageEl.textContent = facility.keeper ? `${facility.keeper}：${facility.greeting}` : facility.greeting;
   }
+  const innDialogue = Array.isArray(innNotice?.dialogue) ? innNotice.dialogue.filter(Boolean) : [];
+  if (facility.id === "inn" && innDialogue.length) {
+    town.facilityTalkDialogue = innDialogue;
+    town.facilityTalkDialogueIndex = 0;
+    town.facilityTalkCompletionFlag = innNotice.completionFlag || "";
+    town.messageEl.textContent = innDialogue[0];
+    town.mode = "facilityTalk";
+  }
   if (facility.id === "shop") {
     const notice = town.onEnterShop();
     if (notice?.message) town.messageEl.textContent = notice.message;
@@ -1619,6 +1653,9 @@ function activateFacilityService(command) {
       town.facilityTalkDialogueIndex = 0;
       town.facilityTalkCompletionFlag = result.completionFlag || "";
       town.mode = "facilityTalk";
+      if (result.autoCompleteAfterMs != null) {
+        beginJohannaCatBlackout(result.completionFlag, result.autoCompleteAfterMs);
+      }
     }
     if (result?.focusCommand) {
       showFacilityCommands(facility.id);

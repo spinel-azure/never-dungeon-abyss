@@ -805,7 +805,11 @@ export function drawCellEvents(layer = "all") {
       if (cell.bossId) {
         if (layer === "floor") continue;
         const boss = getBossById(cell.bossId);
-        if (boss) events.push({ ...projected, eventKind: "boss", npc: { imageId: boss.encounterImageId } });
+        if (boss) events.push({
+          ...projected,
+          eventKind: "boss",
+          npc: { imageId: boss.encounterImageId, renderScale: boss.renderScale }
+        });
       }
       if (cell.bossRemainsId) {
         if (layer === "floor") continue;

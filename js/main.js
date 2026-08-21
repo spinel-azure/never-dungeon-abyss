@@ -425,7 +425,7 @@ import {
         }
       };
       markBossDefeatedAt(state.gridX, state.gridY, "sphinx_sleeping_b69f");
-      if (reward.gained > 0) setTimeout(() => showCardGetEffect("legendary_sphinx_wisdom", { seId: "itemGet" }), 0);
+      if (reward.gained > 0) setTimeout(() => showCardGetEffect("legendary_sphinx_wisdom", { seId: "itemGet" }), 120);
       updateCharacterUi();
       saveGame();
       return { accepted: true, gained: reward.gained };
@@ -554,6 +554,17 @@ import {
     },
     onCompleteFacilityTalk: flag => {
       if (!flag || !character) return;
+      if (flag === "johanna_cat_return_transition") {
+        const returned = consumeKeyItem(character.keyItems, "johanna_calico_cat");
+        character = {
+          ...character,
+          keyItems: returned.keyItems,
+          eventFlags: { ...(character.eventFlags || {}), johanna_cat_return_pending: false }
+        };
+        updateCharacterUi();
+        saveGame();
+        return;
+      }
       character = {
         ...character,
         eventFlags: {
@@ -957,15 +968,12 @@ import {
       saveGame();
       return null;
     }
-    const returned = consumeKeyItem(character.keyItems, "johanna_calico_cat");
-    character = {
-      ...character,
-      keyItems: returned.keyItems,
-      eventFlags: { ...(character.eventFlags || {}), johanna_cat_return_pending: false }
+    const message = "女将ヨハンナ：あらまあ、おかえり。危ない目には遭わなかったかい？";
+    return {
+      message,
+      dialogue: [message],
+      completionFlag: "johanna_cat_return_transition"
     };
-    updateCharacterUi();
-    saveGame();
-    return { message: "女将ヨハンナ：あらまあ、おかえり。危ない目には遭わなかったかい？" };
   }
 
   function talkAtFacility(facilityId) {
@@ -978,7 +986,12 @@ import {
       updateCharacterUi();
       saveGame();
       if (granted.gained > 0) setTimeout(() => showNamedItemGetEffect(["ヨハンナの愛猫"], { important: true }), 0);
-      return "女将ヨハンナ：おや？一体どうしたんだい？この子を見つめて。えっ？ちょっとこの子を貸して欲しいって？\nどこへ連れて行くつもりだい？危ない目には遭わせないでおくれよ？";
+      const message = "女将ヨハンナ：おや？一体どうしたんだい？この子を見つめて。えっ？ちょっとこの子を貸して欲しいって？\nどこへ連れて行くつもりだい？危ない目には遭わせないでおくれよ？";
+      return {
+        dialogue: [message],
+        completionFlag: "johanna_cat_borrow_transition",
+        autoCompleteAfterMs: 2000
+      };
     }
     if (facilityId === "guild" && character?.eventFlags?.guild_registration_card) {
       const unlock = unlockGuildRequest(character);

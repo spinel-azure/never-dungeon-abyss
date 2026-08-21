@@ -794,11 +794,11 @@ function startBossEvent(bossId, fromGX, fromGY) {
     imageId: boss?.encounterImageId ?? "",
     fromGX,
     fromGY,
-    phase: hasSphinxAnswer ? "sphinxAnswer" : "prompt",
+    phase: hasSphinxAnswer ? "sphinxAnswer" : boss?.event?.sphinxChoice ? "sphinxIntro" : "prompt",
     message: hasSphinxAnswer
       ? "スピンクス「ふむ。正解だ。知恵ある者よこれを授けよう。そして以後、自由にここを通るがよい。」\n＊Aボタン：次へ"
       : boss?.event?.prompt || "部屋の中央に騎士の彫像がある。まるで行く手を遮っているようだ。調べてみますか？\n＊Aボタン：はい　Bボタン：いいえ",
-    canCancel: true,
+    canCancel: !boss?.event?.sphinxChoice || hasSphinxAnswer,
     retreatOnCancel: true
   });
 }
@@ -813,6 +813,13 @@ function confirmBossEvent() {
       hooks.onSphinxPeaceResolved();
       state.overlayEvent = null;
       hooks.say("");
+      hooks.onStateChanged();
+      return;
+    }
+    if (event.phase === "sphinxIntro") {
+      event.phase = "prompt";
+      event.canCancel = true;
+      hooks.say("スピンクス「…小さき者よ。妾の問いに答えよ。見事答える事が出来たならば、ここを通してやろう。」\n＊問いに答えますか？\nAボタン：はい　Bボタン：いいえ");
       hooks.onStateChanged();
       return;
     }
