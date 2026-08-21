@@ -246,6 +246,15 @@ test("B40F remains locked until the B39 checkpoint boss is defeated", () => {
   assert.equal(isDungeonDepthUnlocked(character, 40), true);
 });
 
+test("B60F remains locked until Fleischfresser is defeated", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  assert.equal(isDungeonDepthUnlocked(character, 59), true);
+  assert.equal(isDungeonDepthUnlocked(character, 60), false);
+  character.eventFlags.boss_fleischfresser_b59f_defeated = true;
+  assert.equal(isDungeonDepthUnlocked(character, 60), true);
+  assert.equal(isDungeonDepthUnlocked(character, 61), true);
+});
+
 test("B70F remains locked until Sphinx is defeated or answered", () => {
   const character = createInitialCharacter({ name: "TEST", job: "warrior" });
   assert.equal(isDungeonDepthUnlocked(character, 69), true);

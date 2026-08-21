@@ -673,6 +673,7 @@ export const BOSSES = Object.freeze({
   sphinx_sleeping_b69f: Object.freeze({
     id: "sphinx_sleeping_b69f", name: "スピンクス", floor: 69,
     encounterImageId: "sphinx_event_b69f", encounterImage: "images/npc/NPC_event_13.avif",
+    defeatedEncounterImageId: "sphinx_event_b69f", defeatedEncounterImage: "images/npc/NPC_event_13.avif",
     event: Object.freeze({ remains: "スピンクスは目を閉じて静かに眠っている。どうやら通り抜けてもよさそうだ。\n＊Aボタン：次へ" })
   }),
   glacies_event_boss: Object.freeze({

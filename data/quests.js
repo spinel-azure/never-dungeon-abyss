@@ -1053,6 +1053,9 @@ export function isDungeonDepthUnlocked(character, depth) {
   if (requestedDepth === 50) {
     return Boolean(character?.eventFlags?.boss_eiskoenigin_b49f_defeated);
   }
+  if (requestedDepth === 60) {
+    return Boolean(character?.eventFlags?.boss_fleischfresser_b59f_defeated);
+  }
   if (requestedDepth === 70) {
     return Boolean(character?.eventFlags?.boss_b69f_defeated);
   }

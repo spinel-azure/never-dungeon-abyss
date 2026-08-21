@@ -155,6 +155,14 @@ test("B49 Eiskoenigin is an ice checkpoint boss stronger than Glacies", () => {
   assert.match(boss.event.remains, /王笏とティアラ/);
 });
 
+test("peacefully resolved Sphinx reuses the pre-battle event image while sleeping", () => {
+  const sleeping = getBossById("sphinx_sleeping_b69f");
+  assert.equal(sleeping.encounterImageId, "sphinx_event_b69f");
+  assert.equal(sleeping.encounterImage, "images/npc/NPC_event_13.avif");
+  assert.equal(sleeping.defeatedEncounterImageId, "sphinx_event_b69f");
+  assert.equal(sleeping.defeatedEncounterImage, "images/npc/NPC_event_13.avif");
+});
+
 test("B16 Jabberwock is a one-time high-difficulty event boss", () => {
   const boss = getBossById("jabberwock_event_boss");
   assert.equal(boss.name, "ジャバウォック");
