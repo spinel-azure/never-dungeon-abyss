@@ -35,6 +35,7 @@ const battleUi = {
   autoTimer: 0,
   presenting: false,
   presentationHp: null,
+  presentationBarrier: null,
   pendingCommand: null,
   getCharacter: () => null,
   onCharacterChanged: () => {},
@@ -267,6 +268,7 @@ async function executeCommand(command) {
     enemy: battleUi.battle.enemy.hp,
     enemies: battleUi.battle.enemies?.map(enemy => enemy.hp) || null
   };
+  const startingBarrier = Math.max(0, Math.floor(Number(battleUi.battle.sphinxBarrier) || 0));
   const resolved = resolveBattleRound({
     battle: battleUi.battle,
     playerCommand: command
@@ -288,6 +290,7 @@ async function executeCommand(command) {
   battleUi.battle = resolved.battle;
   battleUi.presenting = battleUi.battle.presentationEvents?.length > 0;
   battleUi.presentationHp = battleUi.presenting ? startingHp : null;
+  battleUi.presentationBarrier = battleUi.presenting ? startingBarrier : null;
   battleUi.onCharacterChanged({
     hp: battleUi.presenting ? startingHp.player : battleUi.battle.player.hp,
     sp: battleUi.battle.player.sp,
@@ -320,6 +323,7 @@ async function executeCommand(command) {
   ) battleUi.playSe("heal");
   battleUi.presenting = false;
   battleUi.presentationHp = null;
+  battleUi.presentationBarrier = null;
   renderBattle();
   if (battleUi.autoActive && !battleUi.battle.outcome) scheduleAutoRound();
 }
@@ -374,6 +378,7 @@ async function playPresentationEvents() {
       continue;
     }
     applyPresentationHp(event);
+    if (event.type === "barrierDamage") battleUi.presentationBarrier = Math.max(0, Number(event.remaining) || 0);
     if (event.npcId) battleUi.onNpcSupport(event.npcId);
     renderBattleVitals();
     if (event.targetSide === "player") {
@@ -391,6 +396,8 @@ async function playPresentationEvents() {
     if (event.type === "healing") {
       showBattleNumber(event.targetSide, event.amount, "healing");
       battleUi.playSe("heal");
+    } else if (event.type === "barrierDamage") {
+      showBattleNumber("player", event.amount, "barrier");
     } else if (!dedicatedPresentationPlayed && (event.hit || event.type === "damage" || event.type === "poisonDamage" || event.type === "bleedingDamage")) {
       showBattleNumber(
         event.targetSide,
@@ -402,14 +409,14 @@ async function playPresentationEvents() {
       );
     }
     const targetImage = event.targetSide === "enemy" && battleUi.battle.enemies
-      ? battleUi.root.querySelector(`.battle-enemy-member[data-index="${event.targetIndex ?? battleUi.battle.targetIndex}"] img`)
+      ? battleUi.root.querySelector(`.battle-enemy-member[data-index="${event.targetIndex ?? battleUi.battle.targetIndex}"] .battle-enemy-member-image`)
       : image;
     if (event.targetSide === "enemy" && event.hit && !dedicatedPresentationPlayed) {
       targetImage?.classList.remove("is-hit");
       if (targetImage) void targetImage.offsetWidth;
       targetImage?.classList.add("is-hit");
       battleUi.playSe("attackHit");
-    } else if (event.targetSide === "player" && event.hit && !event.blockedByNpcWall) {
+    } else if (event.targetSide === "player" && event.hit && Number(event.damage) > 0 && !event.blockedByNpcWall) {
       battleUi.playSe("playerDamage");
     }
     const duration = dedicatedPresentationPlayed ? 0 : event.targetSide === "player" && event.hit ? 520 : event.hit ? 360 : 280;
@@ -601,6 +608,7 @@ function closeBattle() {
   battleUi.autoActive = false;
   battleUi.presenting = false;
   battleUi.presentationHp = null;
+  battleUi.presentationBarrier = null;
   battleUi.active = false;
   battleUi.root.hidden = true;
   document.body.classList.remove("battle-active");
@@ -609,6 +617,8 @@ function closeBattle() {
   delete battleUi.commandRoot.dataset.battleComplete;
   battleUi.messageEl.classList.remove("is-skill-description");
   battleUi.battle = null;
+  const barrier = document.getElementById("sphinxBarrierStatus");
+  if (barrier) barrier.hidden = true;
 }
 
 function showCommandButtons() {
@@ -666,6 +676,7 @@ function renderBattle() {
   else if (party) party.hidden = true;
   const enemyName = battleUi.root.querySelector("#battleEnemyName");
   setText("battleEnemyName", battleUi.concealed ? "？？？？？" : battle.enemy.name);
+  renderEnemyWeakness(battle.enemy);
   enemyName?.classList.toggle("is-defense-down", hasEnemyDefenseDown(battle.enemy));
   setText("battleEnemyCondition", statusText(battle.enemy));
   const image = battleUi.root.querySelector("#battleEnemyImage");
@@ -699,7 +710,7 @@ function renderEnemyParty(battle) {
       button.type = "button";
       button.className = "battle-enemy-member";
       button.dataset.index = String(index);
-      button.innerHTML = '<strong class="battle-enemy-member-name"></strong><img alt=""><span class="battle-enemy-member-hp"><i></i></span><span class="battle-number-layer" aria-hidden="true"></span>';
+      button.innerHTML = '<strong class="battle-enemy-member-name"></strong><span class="battle-enemy-member-weakness"></span><img class="battle-enemy-member-image" alt=""><span class="battle-enemy-member-hp"><i></i></span><span class="battle-number-layer" aria-hidden="true"></span>';
       button.addEventListener("click", () => selectEnemyTarget(index));
       return button;
     }));
@@ -713,7 +724,8 @@ function renderEnemyParty(battle) {
     member.classList.toggle("is-defeated", !enemy.alive);
     member.disabled = !enemy.alive;
     member.querySelector(".battle-enemy-member-name").textContent = battleUi.concealed ? "？？？？？" : enemy.name;
-    const img = member.querySelector("img");
+    renderWeaknessIcons(member.querySelector(".battle-enemy-member-weakness"), enemy);
+    const img = member.querySelector(".battle-enemy-member-image");
     img.src = enemy.image || "";
     img.alt = battleUi.concealed ? "正体不明の敵" : enemy.name;
     member.querySelector(".battle-enemy-member-hp > i").style.width = `${getBattleHpPercent(displayEnemy)}%`;
@@ -745,9 +757,56 @@ function renderBattleVitals() {
   const playerHp = battleUi.presentationHp?.player ?? battle.player.hp;
   const enemyHp = battleUi.presentationHp?.enemy ?? battle.enemy.hp;
   setText("battlePlayerHp", `${playerHp} / ${battle.player.maxHp}`);
+  renderSphinxBarrier();
   setText("battleEnemyHp", `${enemyHp} / ${battle.enemy.maxHp}`);
   renderBossHpMeter({ ...battle.enemy, hp: enemyHp });
   if (battle.enemies) renderEnemyParty(battle);
+}
+
+const WEAKNESS_ICONS = Object.freeze({
+  fire: "images/ui/effect_01.webp",
+  ice: "images/ui/effect_02.webp",
+  lightning: "images/ui/effect_03.webp",
+  holy: "images/ui/effect_04.webp",
+  dark: "images/ui/effect_05.webp"
+});
+
+function getVisibleWeaknesses(enemy) {
+  if (!battleUi.battle?.sphinxWisdomActiveAtStart || battleUi.concealed) return [];
+  return Object.entries(enemy?.elementMultipliers || {})
+    .filter(([element, multiplier]) => WEAKNESS_ICONS[element] && Number(multiplier) > 1)
+    .map(([element]) => element);
+}
+
+function renderWeaknessIcons(root, enemy) {
+  if (!root) return;
+  const elements = getVisibleWeaknesses(enemy);
+  root.replaceChildren(...elements.map(element => {
+    const image = document.createElement("img");
+    image.src = WEAKNESS_ICONS[element];
+    image.alt = element;
+    return image;
+  }));
+  root.hidden = elements.length === 0;
+}
+
+function renderEnemyWeakness(enemy) {
+  const root = battleUi.root.querySelector("#battleEnemyWeakness");
+  const icons = root?.querySelector("span");
+  if (!root || !icons) return;
+  renderWeaknessIcons(icons, enemy);
+  root.hidden = icons.hidden;
+}
+
+function renderSphinxBarrier() {
+  const root = document.getElementById("sphinxBarrierStatus");
+  if (!root) return;
+  const amount = Math.max(0, Math.floor(Number(
+    battleUi.presentationBarrier ?? battleUi.battle?.sphinxBarrier
+  ) || 0));
+  root.hidden = amount <= 0;
+  const output = root.querySelector("output");
+  if (output) output.textContent = String(amount);
 }
 
 function renderBossHpMeter(enemy) {

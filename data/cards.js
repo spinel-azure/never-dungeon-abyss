@@ -5,6 +5,8 @@ export const PERPETUAL_TORCH_CARD_ID = "legendary_unlimited_torch_gauge";
 export const DEADLY_POISON_IMMUNITY_CARD_ID = "legendary_deadly_poison_immunity";
 export const MANA_ACTIVATION_CARD_ID = "legendary_mana_activation";
 export const GODDESS_BREATH_CARD_ID = "legendary_goddess_breath";
+export const SPHINX_WISDOM_CARD_ID = "legendary_sphinx_wisdom";
+export const SPHINX_MAJESTY_CARD_ID = "legendary_sphinx_majesty";
 
 const STANDARD_CARDS = [
   {
@@ -331,6 +333,20 @@ const STANDARD_CARDS = [
     statBonus: Object.freeze({ magicDamageReduction: 0.5 }),
     iconId: "quartered-shield", maxOwned: 1, maxCopies: 1,
     sellPrice: 5000, buybackPrice: 50000, overflowGold: 5000
+  },
+  {
+    id: SPHINX_WISDOM_CARD_ID, rarity: "L", cost: 6,
+    name: "Sphinx's Wisdom", nameJa: "スピンクスの叡智", concept: "弱点表示 / 弱点ダメージ +15%",
+    descriptionJa: "敵の弱点属性を表示し、弱点属性で与えるダメージを15％増加させる。",
+    category: "battle", effectId: "sphinx_weakness_insight", effectValue: 0.15,
+    iconId: "knowledge", maxOwned: 1, maxCopies: 1
+  },
+  {
+    id: SPHINX_MAJESTY_CARD_ID, rarity: "L", cost: 6,
+    name: "Sphinx's Majesty", nameJa: "スピンクスの威容", concept: "戦闘開始時 MAX HP15%障壁",
+    descriptionJa: "戦闘開始時、最大HPの15％分の障壁を展開する。障壁は直接ダメージを肩代わりし、戦闘ごとに再生成される。",
+    category: "battle", effectId: "sphinx_battle_barrier", effectValue: 0.15,
+    iconId: "quartered-shield", maxOwned: 1, maxCopies: 1
   },
   {
     id: "legendary_ability_boost_plus", rarity: "L", cost: 6,

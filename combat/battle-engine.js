@@ -19,7 +19,7 @@ import { getItem } from "../data/items.js";
 import { consumeItem } from "../data/inventory.js";
 import { getItemUnavailableReason } from "./resolve-item-use.js";
 import { resolvePassiveInstantDeath } from "./passive-instant-death.js";
-import { getCardById, hasCardEffect } from "../data/cards.js";
+import { getCardById, hasCardEffect, sumCardEffectValues } from "../data/cards.js";
 import { getEffectiveSpCost } from "./sp-cost.js";
 import {
   advanceNpcChargeState,
@@ -45,6 +45,10 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     ? normalizeLivingTargetIndex(enemyParty, targetIndex)
     : 0;
   const selectedEnemy = enemyParty ? enemyParty[selectedTargetIndex] : cloneCombatant(enemy);
+  const sphinxBarrierRate = Math.max(0, sumCardEffectValues(character?.cards?.deckSlots, "sphinx_battle_barrier"));
+  const sphinxBarrier = sphinxBarrierRate > 0
+    ? Math.max(1, Math.ceil(Math.max(1, Number(character?.maxHp) || 1) * sphinxBarrierRate))
+    : 0;
   return {
     turn: 1,
     phase: "command",
@@ -57,9 +61,15 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     ariesOpeningAttackAvailable: hasCardEffect(character?.cards?.deckSlots, "zodiac_aries"),
     capricornActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_capricorn"),
     libraActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_libra"),
+    sphinxWisdomActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "sphinx_weakness_insight"),
+    sphinxBarrier,
+    sphinxBarrierMax: sphinxBarrier,
     vorpalExecution: false,
     slashExecution: null,
-    log: [enemyParty ? `${enemyParty.map(member => member.name).join("、")}が現れた！` : `${enemy.name}が現れた！`],
+    log: [
+      enemyParty ? `${enemyParty.map(member => member.name).join("、")}が現れた！` : `${enemy.name}が現れた！`,
+      ...(sphinxBarrier > 0 ? ["スピンクスの威容が障壁を展開した！"] : [])
+    ],
     presentationEvents: []
   };
 }
@@ -698,6 +708,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
         * getCapricornReceivedDamageMultiplier(battle, targetSide)
         * getLibraDamageMultiplier(battle, actorSide, actor, target)
         * getLibraReceivedDamageMultiplier(battle, targetSide, actor, target)
+        * getSphinxWeaknessDamageMultiplier(battle, actorSide, result.elementMultiplier)
         * (Number(action.ariesOpeningDamageMultiplier) || 1)
         * (magicFocus ? Number(magicFocus.attackSpellDamageMultiplier) || 1 : 1)
         * (manaAmplification ? Number(manaAmplification.attackSpellDamageMultiplier) || 1 : 1)
@@ -796,6 +807,23 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
     presentedHits = protectedDamage.presentedHits;
     actualDamage = protectedDamage.actualDamage;
   }
+  if (targetSide === "player" && actualDamage > 0 && Number(battle.sphinxBarrier) > 0) {
+    const absorbed = Math.min(actualDamage, Math.max(0, Math.floor(Number(battle.sphinxBarrier) || 0)));
+    let remainingAbsorption = absorbed;
+    presentedHits = presentedHits.map(hit => {
+      if (!hit.hit || hit.damage <= 0 || remainingAbsorption <= 0) return hit;
+      const hitAbsorbed = Math.min(hit.damage, remainingAbsorption);
+      remainingAbsorption -= hitAbsorbed;
+      return { ...hit, damage: hit.damage - hitAbsorbed, sphinxBarrierAbsorbed: hitAbsorbed };
+    });
+    battle.sphinxBarrier -= absorbed;
+    actualDamage -= absorbed;
+    battle.log.push(`障壁が${absorbed}ダメージを防いだ！`);
+    battle.presentationEvents.push({ type: "barrierDamage", actorSide, targetSide: "player",
+      amount: absorbed, remaining: battle.sphinxBarrier,
+      message: battle.sphinxBarrier > 0 ? `障壁 −${absorbed}` : `障壁 −${absorbed}\n障壁が砕け散った！` });
+    if (battle.sphinxBarrier <= 0) battle.log.push("障壁が砕け散った！");
+  }
   target.hp = Math.max(0, target.hp - actualDamage);
   target.alive = target.hp > 0;
   const hitCount = presentedHits.filter(hit => hit.hit).length;
@@ -830,6 +858,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
         : null,
       blockedByNpcWall: Boolean(hit.blockedByNpcWall),
       reducedByNpcWall: Boolean(hit.reducedByNpcWall),
+      sphinxBarrierAbsorbed: Math.max(0, Number(hit.sphinxBarrierAbsorbed) || 0),
       message
     });
   });
@@ -929,6 +958,11 @@ function getLibraDamageMultiplier(battle, actorSide, actor, target) {
 function getLibraReceivedDamageMultiplier(battle, targetSide, actor, target) {
   if (!battle.libraActiveAtStart || targetSide !== "player" || !isLibraTarget(target, actor)) return 1;
   return Number(getCardById("zodiac_libra")?.strongerEnemyReceivedDamageMultiplier) || 1;
+}
+
+function getSphinxWeaknessDamageMultiplier(battle, actorSide, elementMultiplier) {
+  if (!battle.sphinxWisdomActiveAtStart || actorSide !== "player" || Number(elementMultiplier) <= 1) return 1;
+  return 1 + Math.max(0, Number(getCardById("legendary_sphinx_wisdom")?.effectValue) || 0);
 }
 
 function findBlockingBarrier(statuses = [], damage = 0) {
