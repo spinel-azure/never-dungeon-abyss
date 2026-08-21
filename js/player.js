@@ -78,7 +78,8 @@ const hooks = {
   beginRareEnemyBattle: () => false,
   beginQuestEnemyBattle: () => false,
   inspectWaspHive: () => ({ canBattle: false, message: "巨大な蜂の巣がある。" }),
-  visitKirkeHouse: () => ({ message: "巨大な蔓に囲まれた家が建っている。" }),
+  inspectKirkeHouse: () => ({ canDeliver: false, message: "巨大な蔓に囲まれた家が建っている。" }),
+  deliverBeeswaxToKirke: () => ({ accepted: false, message: "" }),
   playNpcVoice: () => {},
   onNpcEncountered: () => {},
   isQueenShadowFinaleCompleted: () => false,
@@ -570,11 +571,12 @@ function startSpecialRoomContentEvent(content, fromGX, fromGY) {
     return;
   }
   if (content?.type === "kirkeHouse") {
-    const result = hooks.visitKirkeHouse();
+    const result = hooks.inspectKirkeHouse();
     startOverlayEvent({
-      type: "kirkeHouse", imageId: result?.portraitVisible ? content.portraitId : content.imageId,
+      type: "kirkeHouse", content, canDeliver: Boolean(result?.canDeliver), phase: "house",
+      imageId: content.imageId,
       imageFit: "cover", showOverlay: true, canCancel: false,
-      message: `${result?.message || "巨大な蔓に囲まれて今にも朽ちそうな家が建っている。"}\n＊Aボタン：戻る`
+      message: `${result?.message || "巨大な蔓に囲まれて今にも朽ちそうな家が建っている。"}\n＊Aボタン：${result?.canDeliver ? "次へ" : "戻る"}`
     });
     return;
   }
@@ -811,6 +813,18 @@ export function handleOverlayEventInput(action) {
       else hooks.onStateChanged();
     }
     else if (state.overlayEvent.type === "kirkeHouse") {
+      const event = state.overlayEvent;
+      if (event.phase === "house" && event.canDeliver) {
+        const result = hooks.deliverBeeswaxToKirke();
+        if (result?.accepted) {
+          event.phase = "kirke";
+          event.canDeliver = false;
+          event.imageId = event.content.portraitId;
+          hooks.say(`${result.message}\n＊Aボタン：戻る`);
+          hooks.onStateChanged();
+          return true;
+        }
+      }
       state.overlayEvent = null;
       hooks.say("");
       hooks.onStateChanged();

@@ -135,4 +135,7 @@ test("quest presentation and safe Jirene transformation remain wired outside exp
   assert.match(town, /questClientDialogue/);
   assert.match(player, /prefers-reduced-motion/);
   assert.match(player, /transformationImageId/);
+  assert.match(main, /type: "jireneAwakening",[\s\S]*?imageId: "",[\s\S]*?showOverlay: false/);
+  assert.match(player, /type: "kirkeHouse", content, canDeliver:[\s\S]*?imageId: content\.imageId/);
+  assert.match(player, /event\.phase === "house" && event\.canDeliver[\s\S]*?event\.imageId = event\.content\.portraitId/);
 });

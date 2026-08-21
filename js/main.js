@@ -466,21 +466,23 @@ import {
       };
       return { canBattle: true, message: "巨大な蜂の巣からワスプの群れが飛び出してきた！" };
     },
-    visitKirkeHouse: () => {
+    inspectKirkeHouse: () => {
       const progress = getQuestProgress(character, "guild_029");
       const delivered = Boolean(character?.eventFlags?.quest_029_beeswax_delivered);
-      if (delivered) return { portraitVisible: false, message: "ここは魔女キルケの家だ。" };
+      if (delivered) return { canDeliver: false, message: "ここは魔女キルケの家だ。" };
       const introduction = "巨大な蔓に囲まれて今にも朽ちそうな家が建っている。こんな所に人が住んでいるのだろうか…？";
-      if (!progress.active || progress.progress < 15) return { portraitVisible: false, message: introduction };
+      return { canDeliver: Boolean(progress.active && progress.progress >= 15), message: introduction };
+    },
+    deliverBeeswaxToKirke: () => {
       const delivery = deliverQuestBeeswax(character);
-      if (!delivery.accepted) return { portraitVisible: false, message: introduction };
+      if (!delivery.accepted) return { accepted: false, message: "" };
       const earplugs = grantKeyItem(delivery.character.keyItems, "beeswax_earplugs");
       character = { ...delivery.character, keyItems: earplugs.keyItems };
       updateCharacterUi();
       saveGame();
       if (earplugs.gained) setTimeout(() => showNamedItemGetEffect(["蜜蝋の耳栓"], { important: true }), 0);
       return {
-        portraitVisible: true,
+        accepted: true,
         message: "キルケ「わざわざこんな所まで届けさせて悪かったね。あたしも歳だからね。足を悪くして遠出は厳しいのさ。\nお礼にコイツをあげるよ。今のアンタにちょうどいいんじゃないかねぇ…？ひっひっひ…。」\n「蜜蝋の耳栓」を手に入れた！"
       };
     },
@@ -2372,9 +2374,8 @@ import {
       });
       startOverlayEvent({
         type: "jireneAwakening",
-        imageId: "jirene_after_b79f",
-        imageFit: "cover",
-        showOverlay: true,
+        imageId: "",
+        showOverlay: false,
         message: "ここは…。確か、パルテノペーが…歌声が…よく思い出せない…。ひとまず町に帰って、酒場でゆっくりするか…。\n＊Aボタン：次へ"
       });
     } finally {
