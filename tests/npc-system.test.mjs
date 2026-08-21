@@ -308,7 +308,7 @@ test("Johan stages seven through nine strengthen magic support, the wall and Man
   explorer.npcSystem = normalizeNpcSystem({ registeredIds: ["johan"], activeIds: ["johan"], records: { johan: { maxDepth: 90 } } });
   for (let step = 0; step < 5; step += 1) explorer = applyNpcExplorationPassives(explorer);
   assert.equal(explorer.sp, explorer.maxSp - 3);
-  assert.ok(getNpcSupportStatus(explorer, "johan").rows.some(row => row[1] === "マナ活性化・極"));
+  assert.ok(getNpcSupportStatus(explorer, "johan").rows.some(row => row[1] === "マナ活性化・極（5歩ごとにSP2回復）"));
 });
 
 test("Der Zauberschild reduces a large hit before Siegfried and restores ten percent SP", () => {
@@ -457,7 +457,18 @@ test("status page three derives each active NPC display from current support bal
   });
   assert.deepEqual(
     ["alec", "rebecca", "erika", "johan"].map(id => getNpcSupportStatus(character, id).rows.at(-1)),
-    [["パッシブ", "一閃"], ["パッシブ", "暗殺術"], ["パッシブ", "女神の息吹"], ["パッシブ", "マナ活性化"]]
+    [["パッシブ", "一閃（追撃時8％で一撃死）"], ["パッシブ", "暗殺術（連撃時各Hit4％で一撃死）"],
+      ["パッシブ", "女神の息吹（5歩ごとにHP1回復）"], ["パッシブ", "マナ活性化（5歩ごとにSP1回復）"]]
+  );
+
+  character.npcSystem = normalizeNpcSystem({
+    registeredIds: ["alec", "rebecca", "erika", "johan"], activeIds: ["alec", "rebecca", "erika"],
+    records: { alec: { maxDepth: 90 }, rebecca: { maxDepth: 90 }, erika: { maxDepth: 90 }, johan: { maxDepth: 90 } }
+  });
+  assert.deepEqual(
+    ["alec", "rebecca", "erika", "johan"].map(id => getNpcSupportStatus(character, id).rows.find(row => row[0] === "パッシブ")?.[1]),
+    ["一閃・極（一撃死無効時に追撃威力1.5倍）", "暗殺術・極（一撃死無効時に現HP5％ダメージ／ボス上限500）",
+      "女神の息吹・極（5歩ごとにHP2回復）", "マナ活性化・極（5歩ごとにSP2回復）"]
   );
 
   character.npcSystem = normalizeNpcSystem({

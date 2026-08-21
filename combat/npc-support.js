@@ -152,7 +152,10 @@ export function getNpcSupportStatus(character, npcId) {
   const maxDepth = Math.max(0, Math.floor(Number(character?.npcSystem?.records?.[npcId]?.maxDepth) || 0));
   const growth = `${"■".repeat(stage)}${"□".repeat(10 - stage)}`;
   const passive = getNpcStagePassive(npcId, stage);
-  const passiveRow = passive ? [["パッシブ", passive.name]] : [];
+  const passiveText = advanced => {
+    const current = advanced || passive;
+    return current ? `${current.name}（${current.description}）` : "";
+  };
   const common = { id: npcId, name: definition.name, jobLabel: definition.jobLabel, stage, maxDepth, growth };
   if (npcId === "alec") {
     const config = NPC_SUPPORT_BALANCE.alec;
@@ -166,7 +169,7 @@ export function getNpcSupportStatus(character, npcId) {
       ["追撃威力", String(Math.max(1, Math.floor(attack * config.attackRate * (stage7?.attackMultiplier || 1))))],
       ["防御援護", `${formatPercent(Math.min(config.guardMaximum, config.guardBase + stage * config.guardPerStage + (stage7?.guardBonus || 0)))}％`],
       ["援護特性", "攻撃後に追撃／防御時に物理軽減"],
-      ...(passive ? [["パッシブ", stage >= 9 ? NPC_ADVANCED_GROWTH.alec.stage9.name : passive.name]] : []),
+      ...(passive ? [["パッシブ", passiveText(stage >= 9 ? NPC_ADVANCED_GROWTH.alec.stage9 : null)]] : []),
       ...advancedRows
     ] };
   }
@@ -178,7 +181,7 @@ export function getNpcSupportStatus(character, npcId) {
       ["連撃威力", `${Math.max(1, Math.floor(attack * config.hitRate))}×2`],
       ["弱体成功", `${formatPercent(stage7?.debuffRate ?? config.debuffRate)}％`],
       ["弱体効果", `DEF－${formatPercent(1 - config.defenseMultiplier)}％／${stage7?.debuffTurns ?? config.debuffTurns}ターン`],
-      ...(passive ? [["パッシブ", stage >= 9 ? NPC_ADVANCED_GROWTH.rebecca.stage9.name : passive.name]] : []),
+      ...(passive ? [["パッシブ", passiveText(stage >= 9 ? NPC_ADVANCED_GROWTH.rebecca.stage9 : null)]] : []),
       ...(stage >= 8 ? [["チャージ", NPC_ADVANCED_GROWTH.rebecca.stage8.name]] : []),
       ...(stage >= 10 ? [["奥義", NPC_ADVANCED_GROWTH.rebecca.stage10.name]] : [])
     ] };
@@ -188,7 +191,7 @@ export function getNpcSupportStatus(character, npcId) {
     return { ...common, rows: [
       ["回復量", `最大HPの${formatPercent(config.healRate + stage * config.healPerStage)}％`],
       ["発動条件", "ターン終了時／HP減少中"],
-      ...(passive ? [["パッシブ", stage >= 9 ? NPC_ADVANCED_GROWTH.erika.stage9.name : passive.name]] : []),
+      ...(passive ? [["パッシブ", passiveText(stage >= 9 ? NPC_ADVANCED_GROWTH.erika.stage9 : null)]] : []),
       ...(stage >= 8 ? [["チャージ", NPC_ADVANCED_GROWTH.erika.stage8.name]] : []),
       ...(stage >= 10 ? [["奥義", NPC_ADVANCED_GROWTH.erika.stage10.name]] : [])
     ] };
@@ -201,7 +204,7 @@ export function getNpcSupportStatus(character, npcId) {
     ["呪文威力", `約${Math.max(1, Math.floor(baseDamage * 0.9))}～${Math.max(1, Math.floor(baseDamage * 1.1))}`],
     ["属性", "無属性"],
     ["発動条件", "ターン開始時"],
-    ...(passive ? [["パッシブ", stage >= 9 ? NPC_ADVANCED_GROWTH.johan.stage9.name : passive.name]] : []),
+    ...(passive ? [["パッシブ", passiveText(stage >= 9 ? NPC_ADVANCED_GROWTH.johan.stage9 : null)]] : []),
     ...(stage >= 8 ? [["チャージ", NPC_ADVANCED_GROWTH.johan.stage8.name]] : []),
     ...(stage >= 10 ? [["奥義", NPC_ADVANCED_GROWTH.johan.stage10.name]] : [])
   ] };
