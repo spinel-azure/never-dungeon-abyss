@@ -26,6 +26,18 @@
   display: none;
 }
 
+.battle-enemy-heading {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  max-width: 100%;
+  margin-bottom: 8px;
+  white-space: nowrap;
+}
+
 .battle-enemy-weakness,
 .battle-enemy-member-weakness {
   display: flex;
@@ -497,7 +509,6 @@ body.layout-tablet .battle-boss-hp-meter{flex:0 0 12px;width:min(52%,360px);min-
 .battle-enemy-name {
   position: relative;
   z-index: 2;
-  margin-bottom: 8px;
   color: #000;
   font: clamp(20px, 4vw, 34px)/1 "PixelFont", monospace;
   font-weight: 400;
@@ -648,8 +659,12 @@ body.battle-active .viewport > #treasureCanvas {
   }
 
   .battle-enemy-name {
-    margin-bottom: 5px;
     font-size: clamp(17px, 5vw, 25px);
+  }
+
+  .battle-enemy-heading {
+    gap: 5px;
+    margin-bottom: 5px;
   }
 
   .dungeon-commands[data-battle-active="true"] button {

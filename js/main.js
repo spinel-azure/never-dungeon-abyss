@@ -3073,7 +3073,9 @@ import {
       if (owned < required) {
         return { blocked: true, reason: "zodiacCardsRequired", message: room.content.accessBlockedMessage };
       }
-      return { blocked: false, reason: "", message: "", confirmMessage: room.content.accessConfirmMessage };
+      return room.content.confirmAfterUnlock
+        ? { blocked: false, reason: "", message: "", confirmAfterUnlock: true }
+        : { blocked: false, reason: "", message: "", confirmMessage: room.content.accessConfirmMessage };
     }
     if (room?.content?.requiredQuestId) {
       const progress = getQuestProgress(character, room.content.requiredQuestId);

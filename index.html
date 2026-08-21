@@ -187,8 +187,10 @@
         <canvas id="battleSkillEffectCanvas" class="battle-skill-effect-canvas" width="960" height="540" aria-hidden="true" hidden></canvas>
         <div id="npcChargeCutIn" class="npc-charge-cut-in" aria-hidden="true"><img alt=""></div>
         <div class="battle-enemy-stage">
-          <strong id="battleEnemyName" class="battle-enemy-name">ENEMY</strong>
-          <span id="battleEnemyWeakness" class="battle-enemy-weakness" hidden><b>弱点：</b><span></span></span>
+          <div class="battle-enemy-heading">
+            <strong id="battleEnemyName" class="battle-enemy-name">ENEMY</strong>
+            <span id="battleEnemyWeakness" class="battle-enemy-weakness" hidden><b>弱点：</b><span></span></span>
+          </div>
           <img id="battleEnemyImage" class="battle-enemy-image" alt="">
           <span class="battle-eiskoenigin-sparkles" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
           <div id="battleBossHpMeter" class="battle-boss-hp-meter" role="progressbar" aria-label="ボスHP" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" hidden>
@@ -441,7 +443,7 @@
     </section>
   </section>
 </main>
-  <script type="module" src="js/main.js?v=20260821-11"></script>
+  <script type="module" src="js/main.js?v=20260821-12"></script>
   <script type="module" src="js/title-screen.js"></script>
 </body>
 </html>

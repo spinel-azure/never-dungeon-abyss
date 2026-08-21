@@ -121,6 +121,7 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
       requiredZodiacCount: 2,
       accessBlockedMessage: "扉は固く閉ざされている。12星座の紋様が刻まれているが、何を意味するのだろうか…？",
       accessConfirmMessage: "とてつもなく恐ろしい死の予感がする。中にはいりますか？\n＊Aボタン：はい　Bボタン：いいえ",
+      confirmAfterUnlock: true,
       minimapMarker: "E",
       revealBeforeExploration: true
     })

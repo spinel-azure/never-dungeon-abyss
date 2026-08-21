@@ -315,13 +315,17 @@ export function tryMove(amount, automated = false, specialEntryConfirmed = false
   const specialRoomEntry = openDoorOnCell(state.gridX, state.gridY, currentDir.key)
     ? getSpecialRoomEntryAt(state.gridX, state.gridY, currentDir.key)
     : null;
-  if (amount > 0 && specialRoomEntry?.dangerWarning && !specialEntryConfirmed) {
+  const specialRoomWarningMessage = specialRoomEntry?.content?.accessConfirmMessage
+    || (specialRoomEntry?.dangerWarning
+      ? "扉の向こうから、身の毛もよだつような気配を感じる。\nそれでも中へ入りますか？\n＊Aボタン：入る　Bボタン：立ち去る"
+      : "");
+  if (amount > 0 && specialRoomWarningMessage && !specialEntryConfirmed) {
     startOverlayEvent({
       type: "specialRoomWarning",
       showOverlay: false,
       moveAmount: amount,
       canCancel: true,
-      message: "扉の向こうから、身の毛もよだつような気配を感じる。\nそれでも中へ入りますか？\n＊Aボタン：入る　Bボタン：立ち去る"
+      message: specialRoomWarningMessage
     });
     return;
   }
@@ -426,6 +430,17 @@ function startSpecialDoorLockEvent(x, y, dirKey) {
   if (access.blocked) {
     hooks.playSe("blocked");
     hooks.say(access.message || "今はこの扉を開けられないようだ。");
+    return;
+  }
+  if (access.confirmAfterUnlock) {
+    const result = hooks.attemptSpecialDoorUnlock({ x, y, dirKey }) || {};
+    if (result.unlocked) {
+      startDoorOpening(x, y, dirKey, "12星座の紋様が妖しく輝いた。\nギィ……");
+      hooks.onStateChanged();
+      return;
+    }
+    hooks.playSe("blocked");
+    hooks.say("扉は固く閉ざされている。");
     return;
   }
   if (access.confirmMessage) {

@@ -117,9 +117,10 @@ test("B64 is reserved for the Zodiac-gated Todes Scorpio event", () => {
   assert.equal(room.content.requiredZodiacCount, 2);
   assert.match(room.content.accessBlockedMessage, /12星座の紋様/);
   assert.match(room.content.accessConfirmMessage, /恐ろしい死の予感/);
+  assert.equal(room.content.confirmAfterUnlock, true);
 });
 
-test("B64 checks owned Zodiac cards and enters only after confirmation", async () => {
+test("B64 opens first, then asks for confirmation when entering", async () => {
   const { readFile } = await import("node:fs/promises");
   const [mainSource, playerSource] = await Promise.all([
     readFile(new URL("../js/main.js", import.meta.url), "utf8"),
@@ -127,8 +128,10 @@ test("B64 checks owned Zodiac cards and enters only after confirmation", async (
   ]);
   assert.match(mainSource, /CARDS\.filter\(card => card\.category === "zodiac"\)/);
   assert.match(mainSource, /ownedCounts\[card\.id\]/);
-  assert.match(playerSource, /type: "specialDoorAccessConfirm"/);
-  assert.match(playerSource, /a\.enterAfterOpening[\s\S]*tryMove\(a\.entryMoveAmount/);
+  assert.match(mainSource, /room\.content\.confirmAfterUnlock/);
+  assert.match(playerSource, /if \(access\.confirmAfterUnlock\)[\s\S]*attemptSpecialDoorUnlock/);
+  assert.match(playerSource, /specialRoomEntry\?\.content\?\.accessConfirmMessage/);
+  assert.match(playerSource, /type: "specialRoomWarning"/);
 });
 
 test("escaping Todes Scorpio blocks a rematch until the next exploration", async () => {

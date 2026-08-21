@@ -80,6 +80,7 @@ test("battle UI exposes weakness icons and the effect_06 barrier indicator", asy
     readFile(new URL("../index.html", import.meta.url), "utf8"),
     readFile(new URL("../js/battle.js", import.meta.url), "utf8")
   ]);
+  assert.match(html, /class="battle-enemy-heading"[\s\S]*id="battleEnemyName"[\s\S]*id="battleEnemyWeakness"/);
   assert.match(html, /id="battleEnemyWeakness"/);
   assert.match(html, /id="sphinxBarrierStatus"[\s\S]*effect_06\.webp/);
   for (let index = 1; index <= 5; index += 1) assert.match(source, new RegExp(`effect_0${index}\\.webp`));
