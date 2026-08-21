@@ -16,6 +16,7 @@ import {
   RAPID_CURRENT,
   RAPID_CURRENT_DIRECTIONS
 } from "../data/rapid-currents.js";
+import { drawRapidCurrentMark } from "../js/minimap.js";
 
 const sequence = (...values) => {
   let index = 0;
@@ -99,4 +100,23 @@ test("rapid-current presentation uses the supplied image and MP3 files", async (
   assert.match(mainSource, /if \(state\.rapidCurrentTransitionActive\) return false/);
   assert.match(minimapSource, /rapidCurrentDiscovered/);
   assert.match(rendererSource, /drawRapidCurrentMotion/);
+});
+
+test("discovered rapid currents use visible vector direction arrows on the minimap", () => {
+  const points = [];
+  const styles = {};
+  const ctx = {
+    save() {}, restore() {}, beginPath() {}, stroke() {},
+    moveTo(x, y) { points.push(["move", x, y]); },
+    lineTo(x, y) { points.push(["line", x, y]); },
+    set strokeStyle(value) { styles.strokeStyle = value; },
+    set lineWidth(value) { styles.lineWidth = value; },
+    set lineCap(value) { styles.lineCap = value; },
+    set lineJoin(value) { styles.lineJoin = value; }
+  };
+  drawRapidCurrentMark(ctx, 0, 0, 10, "N");
+  assert.equal(styles.strokeStyle, "#74dcff");
+  assert.ok(styles.lineWidth >= 1.5);
+  assert.deepEqual(points[1], ["line", 5, 2]);
+  assert.equal(points.filter(([kind]) => kind === "line").length, 3);
 });

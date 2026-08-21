@@ -18,7 +18,7 @@ export const NPC_CHARGE_SKILLS = Object.freeze({
 });
 
 export function applyNpcChargeSkills(battle, rng = Math.random) {
-  if (!NPC_SUPPORT_ENABLED || battle?.outcome) return battle;
+  if (!NPC_SUPPORT_ENABLED || battle?.outcome || battle?.npcSupportSuppressed) return battle;
   for (const npcId of getActiveNpcIds(battle.player)) {
     if (battle.outcome) break;
     const config = NPC_CHARGE_SKILLS[npcId];
@@ -52,7 +52,7 @@ export function applyNpcChargeSkills(battle, rng = Math.random) {
 }
 
 export function advanceNpcChargeState(battle, { allowCharge = true } = {}) {
-  if (!NPC_SUPPORT_ENABLED || !battle?.player) return battle;
+  if (!NPC_SUPPORT_ENABLED || !battle?.player || battle?.npcSupportSuppressed) return battle;
   for (const npcId of getActiveNpcIds(battle.player)) {
     const config = NPC_CHARGE_SKILLS[npcId];
     const record = getNpcChargeRecord(battle.player, npcId);
@@ -67,7 +67,7 @@ export function advanceNpcChargeState(battle, { allowCharge = true } = {}) {
 }
 
 export function advanceNpcWallProtection(battle) {
-  if (!battle?.player?.statuses) return battle;
+  if (!battle?.player?.statuses || battle?.npcSupportSuppressed) return battle;
   battle.player.statuses = battle.player.statuses.flatMap(status => {
     if ((status.id || status.statusId) !== "npc_johan_wall" || status.active === false) return [status];
     const turns = Math.max(0, Math.floor(Number(status.npcWallTurns) || 0) - 1);
@@ -77,7 +77,7 @@ export function advanceNpcWallProtection(battle) {
 }
 
 export function canNpcSupport({ battle, npcId, supportType } = {}) {
-  if (!NPC_SUPPORT_ENABLED || battle?.outcome || !npcId || !supportType) return false;
+  if (!NPC_SUPPORT_ENABLED || battle?.outcome || battle?.npcSupportSuppressed || !npcId || !supportType) return false;
   return getActiveNpcIds(battle.player).includes(npcId);
 }
 

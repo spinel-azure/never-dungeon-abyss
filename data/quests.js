@@ -1059,6 +1059,9 @@ export function isDungeonDepthUnlocked(character, depth) {
   if (requestedDepth === 70) {
     return Boolean(character?.eventFlags?.boss_b69f_defeated);
   }
+  if (requestedDepth === 80) {
+    return Boolean(character?.eventFlags?.boss_jirene_b79f_defeated);
+  }
   return true;
 }
 

@@ -677,6 +677,59 @@ export const BOSSES = Object.freeze({
     defeatedEncounterImageId: "sphinx_event_b69f", defeatedEncounterImage: "images/npc/NPC_event_13.avif",
     event: Object.freeze({ remains: "スピンクスは目を閉じて静かに眠っている。どうやら通り抜けてもよさそうだ。\n＊Aボタン：次へ" })
   }),
+  jirene_b79f: Object.freeze({
+    id: "jirene_b79f", name: "ジレーネ", level: 90, floor: 79,
+    imageId: "jirene_b79f", image: "images/bosses/boss_15.avif",
+    encounterImageId: "jirene_event_b79f", encounterImage: "images/npc/NPC_event_17.avif",
+    defeatedEncounterImageId: "jirene_after_b79f", defeatedEncounterImage: "images/npc/NPC_event_18.avif",
+    race: "beast", maxHp: 7000,
+    stats: Object.freeze({ str: 36, int: 48, agi: 38, dex: 40, luc: 42 }),
+    def: 38, attack: 42, experienceReward: 40000,
+    actions: Object.freeze([
+      Object.freeze({ weight: 28, action: Object.freeze({
+        id: "jirene_claw", name: "鋭い爪", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1.15, hitBonus: 0.04, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 24, action: Object.freeze({
+        id: "jirene_water_magic", name: "水流魔術", actionType: "spell", element: "arcane",
+        spellPower: 60, powerMultiplier: 1, unavoidable: true, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 20, action: Object.freeze({
+        id: "jirene_temptation_song", name: "誘惑の歌", actionType: "spell", element: "arcane",
+        spellPower: 42, powerMultiplier: 0.8, unavoidable: true,
+        effects: Object.freeze([Object.freeze({ statusId: "action_skip", trigger: "perAction", statusKind: "magical", baseRate: 0.32 })])
+      }) }),
+      Object.freeze({ weight: 18, action: Object.freeze({
+        id: "jirene_sinking_melody", name: "沈みゆく旋律", actionType: "spell", element: "arcane",
+        spellPower: 48, powerMultiplier: 0.9, unavoidable: true,
+        effects: Object.freeze([Object.freeze({ statusId: "speed_down", trigger: "perAction", statusKind: "magical", baseRate: 0.45 })])
+      }) }),
+      Object.freeze({ weight: 10, when: Object.freeze({ hpRateBelow: 0.5 }), action: Object.freeze({
+        id: "jirene_soul_shriek", name: "魂を震わせる高音", actionType: "spell", element: "arcane",
+        spellPower: 76, powerMultiplier: 1.15, unavoidable: true, speedModifier: -6, effects: Object.freeze([])
+      }) })
+    ]),
+    reward: Object.freeze({ type: "none" }),
+    elementMultipliers: Object.freeze({ fire: 1, ice: 0.75, lightning: 1.5, holy: 1, dark: 1, arcane: 1 }),
+    statusResistances: Object.freeze({
+      instant_death: Object.freeze({ resistancePoints: 100, immune: true }),
+      poison: Object.freeze({ resistancePoints: 80, immune: false }),
+      deadly_poison: Object.freeze({ resistancePoints: 90, immune: false }),
+      bleeding: Object.freeze({ resistancePoints: 80, immune: false }),
+      action_skip: Object.freeze({ resistancePoints: 95, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 80, immune: false })
+    }),
+    escapeRate: 0, surpriseRate: 0, surpriseRateMaximum: 0, noDrop: true,
+    isBoss: true, bossKind: "floor", defeatedFlag: "boss_jirene_b79f_defeated",
+    room: Object.freeze({ requiresKey: true, keyItemId: "red_rust_key_b79f", unlockFlag: "red_door_b79f_unlocked" }),
+    event: Object.freeze({
+      jireneScriptedFirstEncounter: true,
+      prompt: "赤い扉の奥では、美しい女の姿をした魔物が静かに歌っている。\n甘い歌声が頭の奥へ染み込み、身体から力が抜けていく……。\n＊Aボタンで次へ",
+      start: "ジレーネ「ふふ……可愛い迷い子。さあ、もっと近くへいらっしゃい」",
+      autoStartDelay: 1600,
+      remains: "静寂を取り戻した水辺に、ジレーネの姿はもうない。\n＊Aボタン：次へ"
+    })
+  }),
   glacies_event_boss: Object.freeze({
     id: "glacies_event_boss",
     name: "グラキエス",

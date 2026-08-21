@@ -43,6 +43,7 @@ import {
   startAmbushEncounterNotice,
   startBattleTreasureEvent,
   startFloorLapNotice,
+  startOverlayEvent,
   setNpcTypewriterOptions,
   cancelRapidCurrentTransition
 } from "./player.js";
@@ -103,7 +104,7 @@ import { getEquipmentInstanceDefinition, getEquipmentInstanceName, grantEquipmen
 import { createEnemyCombatant, getEnemyById, getEnemyEncounterCount, getRandomEncounterEnemy, getWaterRegionEncounterFormation } from "../data/enemies.js";
 import { applyBossVictory, bossLeavesRemains, createBossCombatant, getBossById, getFloorBossByDepth, isBossDefeated } from "../data/bosses.js";
 import { consumeKeyItem, getKeyItem, grantKeyItem, hasKeyItem } from "../data/key-items.js";
-import { configureBattle, handleBattleInput, isBattleActive, openBattleItems, startBattle } from "./battle.js";
+import { configureBattle, handleBattleInput, isBattleActive, isJireneScriptedBattleActive, openBattleItems, startBattle } from "./battle.js";
 import { awardBattleExperience, calculateBattleExperienceReward, createTempleRevival, getInnStayFee, grantEventItems, resolveDungeonDefeat, resolveInnStableStay, resolveInnStay, resolveTemplePoisonTreatment, unlockGuildRequest } from "./character-services.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { resolveTreasureTrap } from "../combat/resolve-trap.js";
@@ -398,6 +399,14 @@ import {
     resolveTreasureTrap: resolveCurrentTreasureTrap,
     awardTreasure: awardTreasureLoot,
     unlockBossDoor: unlockCurrentBossDoor,
+    getBossRoomEntryBlock: ({ toX, toY }) => {
+      const enteringBossRoom = cells[toY]?.[toX]?.reserved === "bossRoom";
+      const flags = character?.eventFlags || {};
+      return enteringBossRoom && currentDepth === 79
+        && flags.jirene_scripted_defeat_seen && !flags.jirene_countermeasure_obtained
+        ? { blocked: true, message: "今はこれ以上進むべきではない…。" }
+        : { blocked: false };
+    },
     getSpecialDoorLockInfo: getCurrentSpecialDoorLockInfo,
     getSpecialDoorAccessBlock: getCurrentSpecialDoorAccessBlock,
     attemptSpecialDoorUnlock: attemptCurrentSpecialDoorUnlock,
@@ -616,6 +625,7 @@ import {
     onVictory: finishBattleVictory,
     onDefeat: finishBattleDefeat,
     onEscape: finishBattleEscape,
+    onScriptedDefeat: finishJireneScriptedDefeat,
     openSkills: ({ character: battleCharacter, enemy, onUse }) => openSkillOverlay({
       context: "battle",
       character: battleCharacter,
@@ -683,6 +693,7 @@ import {
   function saveGame({ announce = false, slot = "auto" } = {}) {
     if (!saveEnabled) return false;
     if (state.rapidCurrentTransitionActive) return false;
+    if (isJireneScriptedBattleActive()) return false;
     accruePlayTime();
     const isManualSave = /^manual[1-3]$/.test(slot);
     if (isManualSave && worldLocation !== "town") return false;
@@ -1618,7 +1629,10 @@ import {
       ambush: false,
       concealed: state.torchFuel <= 0 && !state.torchEffectForced,
       enemies: encounterEnemies,
-      targetIndex: encounterEnemies ? Math.max(0, encounterEnemies.findIndex(enemy => enemy.id === bossId)) : 0
+      targetIndex: encounterEnemies ? Math.max(0, encounterEnemies.findIndex(enemy => enemy.id === bossId)) : 0,
+      scriptedBattleType: bossId === "jirene_b79f" && !character?.eventFlags?.jirene_scripted_defeat_seen
+        ? "jirene_first_encounter"
+        : ""
     });
     if (!started) {
       startBgm(selectDungeonBgm());
@@ -2242,6 +2256,56 @@ import {
     stopBgm();
     await runDefeatPresentation();
     await completeDungeonDefeat();
+  }
+
+  async function finishJireneScriptedDefeat() {
+    activeRareRoomEncounterId = null;
+    stopBgm();
+    cancelAutoReturn(false);
+    setPlayerInputEnabled(false);
+    try {
+      await runSceneTransition({
+        darkenMs: 900,
+        holdMs: 500,
+        revealMs: 900,
+        onDark: () => {
+          const stairsUp = cells.flat().find(cell => cell.type === "stairsUp");
+          if (stairsUp) {
+            state.gridX = stairsUp.x;
+            state.gridY = stairsUp.y;
+            state.x = stairsUp.x + 0.5;
+            state.y = stairsUp.y + 0.5;
+            explored[stairsUp.y][stairsUp.x] = true;
+          }
+          state.anim = null;
+          state.autoReturnPaused = false;
+          state.bossEncounterOrigin = null;
+          character = {
+            ...character,
+            alive: true,
+            eventFlags: {
+              ...(character?.eventFlags || {}),
+              jirene_encountered: true,
+              jirene_scripted_defeat_seen: true
+            }
+          };
+          resetPresence();
+          updateCharacterUi();
+          updateHud();
+          saveGame();
+        }
+      });
+      startOverlayEvent({
+        type: "jireneAwakening",
+        imageId: "jirene_after_b79f",
+        imageFit: "cover",
+        showOverlay: true,
+        message: "……ここは…？確か、歌声が聞こえて…その後の記憶がない。\n＊Aボタン：次へ"
+      });
+    } finally {
+      startBgm(selectDungeonBgm());
+      setPlayerInputEnabled(true);
+    }
   }
 
   function getDefeatRecoveryResolvers() {

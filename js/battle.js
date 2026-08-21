@@ -1,5 +1,6 @@
 import {
   createBattleState,
+  resolveJireneScriptedRound,
   resolveBattleRound,
   resolveEnemyAmbush
 } from "../combat/battle-engine.js";
@@ -42,6 +43,7 @@ const battleUi = {
   onVictory: () => {},
   onDefeat: () => {},
   onEscape: () => {},
+  onScriptedDefeat: () => {},
   openItems: () => false,
   openSkills: () => false,
   playSe: () => {},
@@ -64,7 +66,7 @@ export function configureBattle(options) {
   });
 }
 
-export function startBattle(enemy, { playStartSe = true, ambush = false, concealed = false, enemies = null, targetIndex = 0 } = {}) {
+export function startBattle(enemy, { playStartSe = true, ambush = false, concealed = false, enemies = null, targetIndex = 0, scriptedBattleType = "" } = {}) {
   const character = battleUi.getCharacter();
   if (!character || battleUi.active) return false;
   battleUi.active = true;
@@ -74,18 +76,31 @@ export function startBattle(enemy, { playStartSe = true, ambush = false, conceal
   battleUi.concealed = Boolean(concealed);
   clearAutoTimer();
   battleUi.battle = createBattleState({ character, enemy, enemies, targetIndex });
+  if (scriptedBattleType) {
+    battleUi.battle.scriptedBattleType = scriptedBattleType;
+    battleUi.battle.scriptedTurn = 1;
+    battleUi.battle.scriptedNonlethal = true;
+    battleUi.battle.npcSupportSuppressed = true;
+    battleUi.battle.scriptedInitialPlayerCharge = structuredClone(battleUi.battle.player.playerCharge);
+    battleUi.battle.log = ["甘い歌声に意識を絡め取られた！", "仲間たちは魅了され、身体を動かすことができない！"];
+  }
   battleUi.battle.encounterBossId = enemy.id;
   battleUi.root.hidden = false;
   document.body.classList.add("battle-active");
   showCommandButtons();
   if (playStartSe) battleUi.playSe("battleStart");
   renderBattle();
-  if (ambush) void executeAmbushOpening();
+  if (scriptedBattleType === "jirene_first_encounter") scheduleJireneScriptedRound(900);
+  else if (ambush) void executeAmbushOpening();
   return true;
 }
 
 export function isBattleActive() {
   return battleUi.active;
+}
+
+export function isJireneScriptedBattleActive() {
+  return Boolean(battleUi.active && battleUi.battle?.scriptedBattleType === "jirene_first_encounter");
 }
 
 export function openBattleItems() {
@@ -269,10 +284,9 @@ async function executeCommand(command) {
     enemies: battleUi.battle.enemies?.map(enemy => enemy.hp) || null
   };
   const startingBarrier = Math.max(0, Math.floor(Number(battleUi.battle.sphinxBarrier) || 0));
-  const resolved = resolveBattleRound({
-    battle: battleUi.battle,
-    playerCommand: command
-  });
+  const resolved = battleUi.battle.scriptedBattleType === "jirene_first_encounter"
+    ? resolveJireneScriptedRound({ battle: battleUi.battle })
+    : resolveBattleRound({ battle: battleUi.battle, playerCommand: command });
   if (!resolved.accepted) {
     const messages = {
       insufficientSp: "SPが足りない。",
@@ -326,6 +340,19 @@ async function executeCommand(command) {
   battleUi.presentationBarrier = null;
   renderBattle();
   if (battleUi.autoActive && !battleUi.battle.outcome) scheduleAutoRound();
+  else if (battleUi.battle.scriptedBattleType === "jirene_first_encounter" && !battleUi.battle.outcome) {
+    scheduleJireneScriptedRound(700);
+  }
+}
+
+function scheduleJireneScriptedRound(delayMs = 700) {
+  clearAutoTimer();
+  battleUi.autoTimer = window.setTimeout(() => {
+    battleUi.autoTimer = 0;
+    if (!battleUi.active || battleUi.presenting || battleUi.battle?.outcome
+      || battleUi.battle?.scriptedBattleType !== "jirene_first_encounter") return;
+    void executeCommand({ type: "wait" });
+  }, delayMs);
 }
 
 async function executeAmbushOpening() {
@@ -504,7 +531,8 @@ export function applyHpPresentationEvent(presentationHp, battle, event) {
     const maximum = battle?.[event.targetSide]?.maxHp ?? Number.MAX_SAFE_INTEGER;
     next[event.targetSide] = Math.min(maximum, next[event.targetSide] + amount);
   } else if (event.hit || ["damage", "poisonDamage", "bleedingDamage"].includes(event.type)) {
-    next[event.targetSide] = Math.max(0, next[event.targetSide] - amount);
+    const minimum = battle?.scriptedNonlethal ? 1 : 0;
+    next[event.targetSide] = Math.max(minimum, next[event.targetSide] - amount);
   }
   return next;
 }
@@ -584,6 +612,11 @@ function attemptEscape() {
 
 function finishBattle() {
   const outcome = battleUi.battle.outcome;
+  if (outcome === "jireneScriptedDefeat") {
+    battleUi.battle.player.playerCharge = structuredClone(
+      battleUi.battle.scriptedInitialPlayerCharge || { value: 0, cooldown: 0 }
+    );
+  }
   battleUi.battle.player.hp = Math.min(battleUi.battle.player.maxHp, battleUi.battle.player.hp);
   battleUi.battle.player.statuses = clearBattleOnlyStatuses(battleUi.battle.player.statuses);
   battleUi.onCharacterChanged({
@@ -603,6 +636,7 @@ function finishBattle() {
   closeBattle();
   if (outcome === "victory") battleUi.onVictory(snapshot);
   else if (outcome === "defeat") battleUi.onDefeat(snapshot);
+  else if (outcome === "jireneScriptedDefeat") battleUi.onScriptedDefeat(snapshot);
   else battleUi.onEscape(snapshot);
 }
 
@@ -627,6 +661,11 @@ function closeBattle() {
 function showCommandButtons() {
   battleUi.messageEl.classList.remove("is-skill-description");
   battleUi.pendingCommand = null;
+  if (battleUi.battle?.scriptedBattleType === "jirene_first_encounter") {
+    hideBattleCommands();
+    battleUi.messageEl.textContent = formatBattleMessage(battleUi.battle);
+    return;
+  }
   battleUi.battleButtons.forEach((button, index) => {
     const [id, label] = COMMANDS[index];
     button.dataset.battleCommand = id;

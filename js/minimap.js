@@ -70,7 +70,7 @@
       if (c.fountain && effectiveTorchActive) drawFountainMark(ctx, x1, y1, cell);
       if (c.quicksand && isExplored) drawTextMark(ctx, "≋", x1, y1, cell);
       if (c.rapidCurrent && c.rapidCurrentDiscovered) {
-        drawTextMark(ctx, { N: "↑", E: "→", S: "↓", W: "←" }[c.rapidCurrent.direction] || "≋", x1, y1, cell);
+        drawRapidCurrentMark(ctx, x1, y1, cell, c.rapidCurrent.direction);
       }
       if (shouldDrawSpecialRoomMarker(c.specialRoom, isExplored, effectiveTorchActive ? 1 : 0)) {
         drawSpecialRoomMark(ctx, x1, y1, cell, c.specialRoom.content.minimapMarker);
@@ -160,6 +160,37 @@ export function drawTextMark(ctx, label, x, y, size) {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(label, x + size / 2, y + size / 2);
+  ctx.restore();
+}
+
+export function drawRapidCurrentMark(ctx, x, y, size, direction) {
+  const vectors = {
+    N: { dx: 0, dy: -1, px: 1, py: 0 },
+    E: { dx: 1, dy: 0, px: 0, py: 1 },
+    S: { dx: 0, dy: 1, px: -1, py: 0 },
+    W: { dx: -1, dy: 0, px: 0, py: -1 }
+  };
+  const vector = vectors[direction];
+  if (!vector) return;
+  const cx = x + size / 2;
+  const cy = y + size / 2;
+  const shaft = Math.max(2.5, size * .3);
+  const head = Math.max(2, size * .2);
+  const tipX = cx + vector.dx * shaft;
+  const tipY = cy + vector.dy * shaft;
+  ctx.save();
+  ctx.strokeStyle = "#74dcff";
+  ctx.lineWidth = Math.max(1.5, size * .14);
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.beginPath();
+  ctx.moveTo(cx - vector.dx * shaft, cy - vector.dy * shaft);
+  ctx.lineTo(tipX, tipY);
+  ctx.moveTo(tipX, tipY);
+  ctx.lineTo(tipX - vector.dx * head + vector.px * head, tipY - vector.dy * head + vector.py * head);
+  ctx.moveTo(tipX, tipY);
+  ctx.lineTo(tipX - vector.dx * head - vector.px * head, tipY - vector.dy * head - vector.py * head);
+  ctx.stroke();
   ctx.restore();
 }
 

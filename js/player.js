@@ -60,6 +60,7 @@ const hooks = {
   resolveTreasureTrap: () => ({ message: "" }),
   awardTreasure: () => ({ message: "中には何も入っていなかった！" }),
   unlockBossDoor: () => ({ accepted: false, message: "鍵がかかっている。" }),
+  getBossRoomEntryBlock: () => ({ blocked: false }),
   getSpecialDoorLockInfo: () => null,
   getSpecialDoorAccessBlock: () => ({ blocked: false }),
   attemptSpecialDoorUnlock: () => ({ accepted: false }),
@@ -333,6 +334,13 @@ export function tryMove(amount, automated = false, specialEntryConfirmed = false
       hooks.playSe("blocked");
       hooks.say("流れが激しく、こちらから進むことはできない。");
     }
+    if (automated) hooks.cancelAutoReturn(false);
+    return;
+  }
+  const bossRoomBlock = hooks.getBossRoomEntryBlock({ fromX: state.gridX, fromY: state.gridY, toX: nx, toY: ny }) || {};
+  if (bossRoomBlock.blocked) {
+    hooks.playSe("blocked");
+    hooks.say(bossRoomBlock.message || "今はこれ以上進むべきではない…。");
     if (automated) hooks.cancelAutoReturn(false);
     return;
   }
@@ -744,6 +752,11 @@ export function handleOverlayEventInput(action) {
     else if (state.overlayEvent.type === "specialRoomBoss") confirmSpecialRoomBossEvent();
     else if (state.overlayEvent.type === "rareEnemyRoom") confirmRareEnemyRoomEvent();
     else if (state.overlayEvent.type === "queenShadowFinale") advanceQueenShadowFinaleEvent();
+    else if (state.overlayEvent.type === "jireneAwakening") {
+      state.overlayEvent = null;
+      hooks.say("");
+      hooks.onStateChanged();
+    }
     else if (state.overlayEvent.type === "npcContact") {
       state.overlayEvent = null;
       hooks.say("");

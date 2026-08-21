@@ -143,6 +143,59 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
   return { battle: next, accepted: true };
 }
 
+export function getJireneScriptedCommand(battle, rng = Math.random) {
+  const player = battle?.player;
+  const skills = (player?.skillIds || []).map(getSkill).filter(skill => (
+    skill
+    && skill.target === "enemy"
+    && ["physicalAttack", "spell"].includes(skill.actionType)
+    && getEffectiveSpCost(skill, player) <= Math.max(0, Number(player?.sp) || 0)
+  ));
+  const roll = Math.max(0, Math.min(0.999999, Number(rng()) || 0));
+  if (roll < 0.4 || skills.length === 0 && roll >= 0.55) return { type: "attack" };
+  if (roll < 0.55) return { type: "guard" };
+  const skill = skills[Math.min(skills.length - 1, Math.floor((Number(rng()) || 0) * skills.length))];
+  return { type: "skill", skillId: skill.id };
+}
+
+export function resolveJireneScriptedRound({ battle, rng = Math.random } = {}) {
+  if (battle?.scriptedBattleType !== "jirene_first_encounter" || battle.outcome) {
+    return { battle: structuredClone(battle), accepted: false, reason: "notJireneScriptedBattle" };
+  }
+  const currentTurn = Math.max(1, Math.floor(Number(battle.scriptedTurn) || 1));
+  const command = getJireneScriptedCommand(battle, rng);
+  const scriptedEnemyAction = currentTurn >= 3
+    ? { id: "jirene_scripted_sleep", name: "もう、お眠りなさい", actionType: "wait", speedModifier: -999,
+        waitMessage: "ジレーネ「ふふ……もう、お眠りなさい」" }
+    : { id: "jirene_scripted_watch", name: "甘い歌声", actionType: "wait", speedModifier: -999,
+        waitMessage: currentTurn === 1 ? "ジレーネは愉しげに微笑んでいる……。" : "ジレーネは甘い歌を奏で続けている……。" };
+  const prepared = structuredClone(battle);
+  prepared.enemy.actions = [{ weight: 1, action: scriptedEnemyAction }];
+  prepared.scriptedNonlethal = true;
+  prepared.npcSupportSuppressed = true;
+  const resolved = resolveBattleRound({ battle: prepared, playerCommand: command, rng });
+  if (!resolved.accepted) return resolved;
+  const next = resolved.battle;
+  next.enemy.actions = structuredClone(battle.enemy.actions);
+  next.player.hp = Math.max(1, next.player.hp);
+  next.player.alive = true;
+  next.enemy.hp = Math.max(1, next.enemy.hp);
+  next.enemy.alive = true;
+  next.scriptedTurn = currentTurn + 1;
+  next.lastScriptedCommand = command;
+  if (currentTurn >= 3) {
+    next.outcome = "jireneScriptedDefeat";
+    next.phase = "complete";
+    next.log = [
+      "身体が意思に反して動く。斬りかかり、術を放ち、必死に抗う――。",
+      "しかし、そのすべてをジレーネは愉しげに眺めていた。",
+      "ジレーネ「ふふ……もう、お眠りなさい」",
+      "甘い歌声が意識を塗り潰していく――。"
+    ];
+  }
+  return { battle: next, accepted: true, command };
+}
+
 export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.random } = {}) {
   const next = structuredClone(battle);
   next.targetIndex = normalizeLivingTargetIndex(next.enemies, playerCommand?.targetIndex ?? next.targetIndex);
@@ -1078,6 +1131,14 @@ function markUltimateUsed(actor, action) {
 }
 
 function updateOutcome(battle) {
+  if (battle.scriptedNonlethal) {
+    battle.player.hp = Math.max(1, battle.player.hp);
+    battle.player.alive = true;
+    battle.enemy.hp = Math.max(1, battle.enemy.hp);
+    battle.enemy.alive = true;
+    battle.outcome = null;
+    return;
+  }
   if (battle.enemy.hp <= 0) {
     battle.enemy.alive = false;
     battle.outcome = "victory";
