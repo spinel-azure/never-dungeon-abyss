@@ -1,3 +1,5 @@
+import { getWaterRegionFormationIds, waterRegionEnemies } from "./water-region-enemies.js";
+
 export const enemies = Object.freeze([
   Object.freeze({
     id: "abyss_rat",
@@ -627,6 +629,7 @@ export const enemies = Object.freeze([
     }),
     escapeRate: 0.22, surpriseRate: 0.22, surpriseRateMaximum: 0.34, isBoss: false
   }),
+  ...waterRegionEnemies,
   Object.freeze({
     id: "mimic", name: "ミミック", imageId: "mimic",
     level: 10,
@@ -715,6 +718,10 @@ export function getRandomEncounterEnemy({ depth = 1, rng = Math.random, allowRar
     return { ...getEnemyById("maikaefer"), level: floor, experienceReward: floor * 1000 };
   }
   return getRandomEnemy({ depth: floor, rng });
+}
+
+export function getWaterRegionEncounterFormation({ depth = 70, rng = Math.random } = {}) {
+  return getWaterRegionFormationIds({ depth, rng }).map(getEnemyById).filter(Boolean);
 }
 
 export function createEnemyCombatant(enemy) {

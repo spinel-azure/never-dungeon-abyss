@@ -99,7 +99,7 @@ import { getActivePlayTimeDelta, normalizeAdventureStats, recordInnStay, recordS
 import { getAdventureChronicle } from "../data/adventure-records.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName, grantEquipmentInstance } from "../data/equipment-inventory.js";
-import { createEnemyCombatant, getEnemyById, getEnemyEncounterCount, getRandomEncounterEnemy } from "../data/enemies.js";
+import { createEnemyCombatant, getEnemyById, getEnemyEncounterCount, getRandomEncounterEnemy, getWaterRegionEncounterFormation } from "../data/enemies.js";
 import { applyBossVictory, bossLeavesRemains, createBossCombatant, getBossById, getFloorBossByDepth, isBossDefeated } from "../data/bosses.js";
 import { consumeKeyItem, getKeyItem, grantKeyItem, hasKeyItem } from "../data/key-items.js";
 import { configureBattle, handleBattleInput, isBattleActive, openBattleItems, startBattle } from "./battle.js";
@@ -1499,16 +1499,21 @@ import {
     element.replaceChildren(settled, carriedElement, remainder);
   }
 
-  function getRandomEncounterEnemyData() {
+  function getRandomEncounterEnemyPartyData() {
     const forcedEnemyId = getForcedEnemyId(character, { depth: currentDepth });
-    return forcedEnemyId
-      ? getEnemyById(forcedEnemyId)
-      : getRandomEncounterEnemy({ depth: currentDepth });
+    if (forcedEnemyId) return [getEnemyById(forcedEnemyId)].filter(Boolean);
+    const enemyData = getRandomEncounterEnemy({ depth: currentDepth });
+    if (enemyData.id === "maikaefer") return [enemyData];
+    if (currentDepth >= 70 && currentDepth <= 79) {
+      return getWaterRegionEncounterFormation({ depth: currentDepth });
+    }
+    return Array.from({ length: getEnemyEncounterCount(enemyData) }, () => enemyData);
   }
 
   function prepareRandomEncounter() {
     if (!character || worldLocation !== "dungeon" || isBattleActive()) return false;
-    const enemyData = getRandomEncounterEnemyData();
+    const enemyPartyData = getRandomEncounterEnemyPartyData();
+    const enemyData = enemyPartyData[0];
     const surprise = resolveSurprise({
       player: collectStats(character),
       enemyBaseRate: enemyData.surpriseRate,
@@ -1519,7 +1524,7 @@ import {
     const ariesActive = hasCardEffect(character?.cards?.deckSlots, "zodiac_aries");
     pendingEncounter = {
       enemyData,
-      enemyCount: getEnemyEncounterCount(enemyData),
+      enemyPartyData,
       ambush: surprise.ambush && !ariesActive,
       surpriseRate: surprise.rate,
       concealed: state.torchFuel <= 0 && !state.torchEffectForced
@@ -1535,10 +1540,10 @@ import {
     setPlayerInputEnabled(false);
     const encounter = pendingEncounter;
     pendingEncounter = null;
-    const enemyData = encounter?.enemyData || getRandomEncounterEnemyData();
-    const enemyCount = Math.max(1, Number(encounter?.enemyCount) || getEnemyEncounterCount(enemyData));
-    const encounterEnemies = enemyCount > 1
-      ? Array.from({ length: enemyCount }, (_, index) => ({ ...createEnemyCombatant(enemyData), formationIndex: index }))
+    const enemyPartyData = encounter?.enemyPartyData || getRandomEncounterEnemyPartyData();
+    const enemyData = encounter?.enemyData || enemyPartyData[0];
+    const encounterEnemies = enemyPartyData.length > 1
+      ? enemyPartyData.map((member, index) => ({ ...createEnemyCombatant(member), formationIndex: index }))
       : null;
     const enemy = encounterEnemies?.[0] || createEnemyCombatant(enemyData);
     startBgm(selectBattleBgm(enemyData));
