@@ -671,6 +671,10 @@ function renderBattle() {
   if (battle.outcome) hideBattleCommands();
   battleUi.messageEl.classList.remove("is-skill-description");
   setText("battlePlayerName", `${battle.player.name} [${battle.player.jobLabel || battle.player.job}]`);
+  battleUi.root.querySelector("#battlePlayerName")?.classList.toggle(
+    "condition-poison",
+    ["POISON", "DEATH POISON"].includes(statusText(battle.player))
+  );
   renderBattleVitals();
   setText("battlePlayerSp", `${battle.player.sp} / ${battle.player.maxSp}`);
   setText("battlePlayerCondition", statusText(battle.player));
@@ -696,6 +700,7 @@ function renderBattle() {
   image.classList.toggle("is-fleischfresser", battle.enemy.id === "fleischfresser_b59f");
   image.classList.toggle("is-otherworldly-wisdom", battle.enemy.id === "otherworldly_wisdom_b4f");
   image.classList.toggle("is-todes-scorpio", battle.enemy.id === "todes_scorpio_b64f");
+  image.classList.toggle("is-sphinx", battle.enemy.id === "sphinx_b69f");
   const enemyStage = battleUi.root.querySelector(".battle-enemy-stage");
   enemyStage.hidden = Boolean(battle.enemies);
   enemyStage?.classList.toggle("is-defeated", defeated);

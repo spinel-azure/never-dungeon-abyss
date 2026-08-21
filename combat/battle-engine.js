@@ -515,6 +515,8 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
   if (action.actionType === "item") {
     actor.inventory = consumeItem(actor.inventory, action.item.id).inventory;
     let healing = 0;
+    const deathPoisonUnaffected = ["antidote", "strong_antidote"].includes(action.item.id)
+      && (actor.statuses || []).some(status => (status.statusId || status.id) === "death_poison");
     for (const effect of action.item.effects) {
       if (effect.id === "heal_hp") {
         const amount = Math.min(effect.value, actor.maxHp - actor.hp);
@@ -593,6 +595,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
       }
     }
     battle.log.push(`${actor.name}は${action.item.name}を使った。`);
+    if (deathPoisonUnaffected) battle.log.push("死毒は治療する事が出来ない！");
     if (healing > 0) {
       battle.presentationEvents.push({
         type: "healing", actorSide, targetSide: actorSide, amount: healing,

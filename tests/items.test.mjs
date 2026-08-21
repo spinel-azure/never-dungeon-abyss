@@ -501,6 +501,20 @@ test("strong antidote unlocks at B50F and cures poison plus deadly poison while 
   assert.equal(result.character.condition, "GOOD");
 });
 
+test("antidotes heal normally but explicitly cannot cure death poison", () => {
+  for (const itemId of ["antidote", "strong_antidote"]) {
+    const character = characterWith(itemId);
+    character.maxHp = 200;
+    character.hp = 40;
+    character.statuses = [{ statusId: "death_poison" }];
+    const result = resolveFieldItemUse({ character, itemId, context: "dungeon" });
+    assert.equal(result.accepted, true);
+    assert.equal(result.character.statuses.some(status => status.statusId === "death_poison"), true);
+    assert.equal(result.character.condition, "DEATH POISON");
+    assert.match(result.message, /死毒は治療する事が出来ない！/);
+  }
+});
+
 test("B50F enemy materials resolve to their registered item data", () => {
   assert.equal(getItem("abyss_tiger_fur").name, "奈落虎の毛皮");
   assert.equal(getItem("abyss_mushroom_cap").name, "キノコの傘");

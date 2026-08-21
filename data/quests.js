@@ -640,7 +640,7 @@ export const QUESTS = Object.freeze([
     reportUnlockFlags: Object.freeze([
       "active_healing_potion_small_shop_unlocked", "johanna_cat_return_pending"
     ]),
-    reportMessage: "ギルドマスター：赤い扉の先を調べ、ついにB70Fまで辿り着いたか。お前も今や、誰もが認める深層冒険者だ。\nこれはギルドからの正式な認定証だ。受け取れ。",
+    reportMessage: "ギルドマスター：赤い扉の先を調べ、ついにB70Fまで辿り着いたか。お前も今や、誰もが認める深層冒険者だ。\nこれはギルドからの正式な認定証だ。受け取れ。\nLカード「深層踏破の証」を手に入れた！",
     available: true
   })
 ]);

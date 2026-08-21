@@ -22,3 +22,9 @@ test("returning Johanna's cat waits for her dialogue and removes it during black
 test("the peaceful Sphinx reward displays its card popup after state settlement", () => {
   assert.match(mainSource, /showCardGetEffect\("legendary_sphinx_wisdom", \{ seId: "itemGet" \}\), 120/);
 });
+
+test("battle-earned cards move the popup into the dungeon viewport and Sphinx waits for settlement", () => {
+  assert.match(mainSource, /townScreen\?\.hidden && viewport[\s\S]*viewport\.append\(cardGetEffect\)/);
+  assert.match(mainSource, /showCardGetEffect\(cardId, \{ seId: "itemGet" \}\), 120/);
+  assert.match(mainSource, /showCardGetEffect\(victory\.reward\.cardId, \{ seId: "itemGet" \}\), 120/);
+});

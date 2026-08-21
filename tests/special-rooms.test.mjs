@@ -132,6 +132,8 @@ test("B64 opens first, then asks for confirmation when entering", async () => {
   assert.match(playerSource, /if \(access\.confirmAfterUnlock\)[\s\S]*attemptSpecialDoorUnlock/);
   assert.match(playerSource, /specialRoomEntry\?\.content\?\.accessConfirmMessage/);
   assert.match(playerSource, /type: "specialRoomWarning"/);
+  assert.match(playerSource, /specialRoomBossDefeated[\s\S]*hooks\.isBossDefeated\(specialRoomEntry\.content\.bossId\)/);
+  assert.match(playerSource, /specialRoomWarningMessage = !specialRoomBossDefeated/);
 });
 
 test("escaping Todes Scorpio blocks a rematch until the next exploration", async () => {

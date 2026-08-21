@@ -95,6 +95,8 @@ test("Todes Scorpio uses a dedicated superboss image size", async () => {
   ]);
   assert.match(battleSource, /is-todes-scorpio[^\n]+todes_scorpio_b64f/);
   assert.match(css, /battle-enemy-image\.is-todes-scorpio\s*\{[^}]*width:\s*min\(88%,\s*590px\)/s);
+  assert.match(css, /battle-enemy-image\.is-sphinx\s*\{[^}]*width:\s*min\(82%,\s*550px\)/s);
+  assert.match(battleSource, /is-sphinx[^\n]+sphinx_b69f/);
 });
 
 test("transfer destination UI is separate from the six command slots and paginates by five", async () => {

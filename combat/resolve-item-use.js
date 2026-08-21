@@ -53,6 +53,8 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
   const next = structuredClone(character);
   const environment = {};
   let healing = 0;
+  const deathPoisonUnaffected = ["antidote", "strong_antidote"].includes(itemId)
+    && hasStatus(next, "death_poison");
   for (const effect of item.effects) {
     if (effect.id === "heal_hp") {
       healing = Math.min(effect.value, next.maxHp - next.hp);
@@ -83,7 +85,9 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
       environment.emergencyEscape = true;
     }
   }
-  next.condition = hasStatus(next, "bleeding") ? "BLEED" : hasPoison(next) ? "POISON" : "GOOD";
+  next.condition = hasStatus(next, "death_poison") ? "DEATH POISON"
+    : hasStatus(next, "bleeding") ? "BLEED"
+      : hasPoison(next) ? "POISON" : "GOOD";
   next.inventory = consumeItem(next.inventory, itemId).inventory;
   return {
     accepted: true,
@@ -91,7 +95,7 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
     character: next,
     environment,
     healing,
-    message: healing > 0 ? `${item.name}を使った。HPが${healing}回復した。` : `${item.name}を使った。`
+    message: `${healing > 0 ? `${item.name}を使った。HPが${healing}回復した。` : `${item.name}を使った。`}${deathPoisonUnaffected ? "\n死毒は治療する事が出来ない！" : ""}`
   };
 }
 

@@ -954,7 +954,7 @@ test("Todes Scorpio is the level 85 B64 optional superboss that inflicts death p
   assert.equal(boss.regainRate, 0.02);
   assert.equal(boss.experienceReward, 50000);
   assert.equal(boss.escapeRate, 1);
-  assert.equal(boss.reward.type, "none");
+  assert.deepEqual(boss.reward, { type: "card", cardId: "zodiac_scorpio", amount: 1 });
   assert.equal(boss.image, "images/bosses/boss_14.avif");
   assert.equal(boss.encounterImage, "images/background/dungeon_event_09.avif");
   assert.deepEqual(boss.elementMultipliers, { fire: 1, ice: 1.5, arcane: 1 });

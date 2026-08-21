@@ -315,10 +315,14 @@ export function tryMove(amount, automated = false, specialEntryConfirmed = false
   const specialRoomEntry = openDoorOnCell(state.gridX, state.gridY, currentDir.key)
     ? getSpecialRoomEntryAt(state.gridX, state.gridY, currentDir.key)
     : null;
-  const specialRoomWarningMessage = specialRoomEntry?.content?.accessConfirmMessage
+  const specialRoomBossDefeated = Boolean(
+    specialRoomEntry?.content?.bossId
+    && hooks.isBossDefeated(specialRoomEntry.content.bossId)
+  );
+  const specialRoomWarningMessage = !specialRoomBossDefeated && (specialRoomEntry?.content?.accessConfirmMessage
     || (specialRoomEntry?.dangerWarning
       ? "扉の向こうから、身の毛もよだつような気配を感じる。\nそれでも中へ入りますか？\n＊Aボタン：入る　Bボタン：立ち去る"
-      : "");
+      : ""));
   if (amount > 0 && specialRoomWarningMessage && !specialEntryConfirmed) {
     startOverlayEvent({
       type: "specialRoomWarning",

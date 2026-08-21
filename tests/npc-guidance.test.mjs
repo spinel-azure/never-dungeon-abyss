@@ -14,6 +14,8 @@ test("B4F Mikan Nyanko warns the player away from the superboss room", () => {
   randomizeStartPosition();
   buildBoundaryWallMap(4, () => .5, {});
   assert.equal(cells.flat().filter(cell => cell.npc === npc.id).length, 1);
+  buildBoundaryWallMap(4, () => .5, { bossDefeatedById: { otherworldly_wisdom_b4f: true } });
+  assert.equal(cells.flat().filter(cell => cell.npc === "NPC_01").length, 1);
 });
 
 test("B5F Mikan Nyanko guides the player to the fountain", () => {
@@ -44,7 +46,7 @@ test("B9F Mikan Nyanko guides the player to the red-door key", () => {
 test("Mikan Nyanko gives floor-specific guidance throughout the desert region", () => {
   const expectations = [
     [60, "NPC_01_b60_desert", "砂に足を取られると、どこかに流されるにゃあ…！何度も何度も、流されるにゃあ…！"],
-    [64, "NPC_01_b60_desert", "砂に足を取られると、どこかに流されるにゃあ…！何度も何度も、流されるにゃあ…！"],
+    [64, "NPC_01_b64_todes", "怖いにゃ…。ここ、なにか恐ろしいものがいるにゃあ…。近寄っちゃダメにゃ…。"],
     [65, "NPC_01_b65_oasis", "オアシスでお昼寝したいのに、消えちゃうにゃん。どうなっているにゃあ…？"],
     [66, "NPC_01_desert_hot", "暑いにゃあ…。暑いにゃあ…。涼しい所に行きたいにゃん…。"],
     [68, "NPC_01_desert_hot", "暑いにゃあ…。暑いにゃあ…。涼しい所に行きたいにゃん…。"],
@@ -56,6 +58,8 @@ test("Mikan Nyanko gives floor-specific guidance throughout the desert region", 
     buildBoundaryWallMap(depth, () => .5, {});
     assert.equal(cells.flat().filter(cell => cell.npc === npcId).length, 1, `B${depth}F`);
   }
+  buildBoundaryWallMap(64, () => .5, { bossDefeatedById: { todes_scorpio_b64f: true } });
+  assert.equal(cells.flat().filter(cell => cell.npc === "NPC_01_b60_desert").length, 1);
 });
 
 test("quest 008 replaces Mikan with the queen shadow in strict floor order", () => {

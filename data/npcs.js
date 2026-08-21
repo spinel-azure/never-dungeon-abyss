@@ -106,6 +106,21 @@ export const npcs = [
     retreatOnCancel: true
   },
   {
+    id: "NPC_01_b64_todes",
+    name: "みかんにゃんこ",
+    imageId: "NPC_01",
+    image: "images/npc/NPC_01.avif",
+    interactionType: "talk",
+    greeting: "",
+    voiceSe: ["catVoice01", "catVoice02", "catVoice03"],
+    encounters: [{
+      dialogue: ["怖いにゃ…。ここ、なにか恐ろしいものがいるにゃあ…。近寄っちゃダメにゃ…。"],
+      leaveAfterTalk: true
+    }],
+    canCancel: true,
+    retreatOnCancel: true
+  },
+  {
     id: "NPC_01_b65_oasis",
     name: "みかんにゃんこ",
     imageId: "NPC_01",

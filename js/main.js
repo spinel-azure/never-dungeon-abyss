@@ -907,6 +907,11 @@ import {
     const card = getCardById(cardId);
     if (!cardGetEffect || !cardGetCanvas || !card) return;
     window.clearTimeout(cardGetTimer);
+    const townPortraitFrame = townScreen?.querySelector(".town-portrait-frame");
+    const viewport = document.querySelector(".viewport");
+    if (townScreen?.hidden && viewport && cardGetEffect.parentElement !== viewport) {
+      viewport.append(cardGetEffect);
+    }
     playSe(seId);
     drawCardCanvas(cardGetCanvas, card);
     cardGetEffect.hidden = false;
@@ -916,6 +921,9 @@ import {
     cardGetTimer = window.setTimeout(() => {
       cardGetEffect.classList.remove("is-active");
       cardGetEffect.hidden = true;
+      if (townPortraitFrame && cardGetEffect.parentElement !== townPortraitFrame) {
+        townPortraitFrame.append(cardGetEffect);
+      }
     }, 3400);
   }
 
@@ -1294,7 +1302,7 @@ import {
     if (statusJob) statusJob.textContent = character?.jobLabel || "UNKNOWN";
     if (statusLevel) statusLevel.textContent = character ? String(character.level).padStart(3, "0") : "---";
     if (statusCondition) statusCondition.textContent = character?.condition || "----";
-    statusCondition?.classList.toggle("condition-poison", character?.condition === "POISON");
+    statusCondition?.classList.toggle("condition-poison", ["POISON", "DEATH POISON"].includes(character?.condition));
     statusCondition?.classList.toggle("condition-bleeding", character?.condition === "BLEED");
     if (statusGold) statusGold.textContent = String(Math.max(0, Math.floor(Number(character?.gold) || 0)));
     const vitals = document.querySelector(".nde-status-vitals");
@@ -2117,7 +2125,7 @@ import {
           const cardReward = grantCard(character.cards, cardId, 1, character.deckCost);
           character = { ...character, cards: cardReward.cards };
           const card = getCardById(cardId);
-          if (cardReward.gained > 0) setTimeout(() => showCardGetEffect(cardId, { seId: "itemGet" }), 0);
+          if (cardReward.gained > 0) setTimeout(() => showCardGetEffect(cardId, { seId: "itemGet" }), 120);
           bossRewardMessage = `\nスピンクス「小さき者よ…。力にのみ頼るか…。愚かな…！」\nLカード「${card?.nameJa || cardId}」を手に入れた！`;
         } else if (victory.reward?.type === "routeCard" && battle.enemy.id === "jabberwock_event_boss") {
           const usedVorpalSword = Boolean(battle.vorpalSwordEquippedAtStart);
@@ -2148,6 +2156,9 @@ import {
           );
           character = { ...character, cards: cardReward.cards };
           const card = getCardById(victory.reward.cardId);
+          if (cardReward.gained > 0) {
+            setTimeout(() => showCardGetEffect(victory.reward.cardId, { seId: "itemGet" }), 120);
+          }
           bossRewardMessage = cardReward.gained > 0
             ? `\nZカード「${card?.nameJa || victory.reward.cardId}」を手に入れた！`
             : `\nZカード「${card?.nameJa || victory.reward.cardId}」はすでに所持している。`;
@@ -3023,7 +3034,9 @@ import {
       bossDefeated: isBossDefeated(character, "strange_knight_statue_b9f"),
       bossDefeatedById: {
         ...(floorBoss ? { [floorBoss.id]: isBossDefeated(character, floorBoss) } : {}),
-        quest_mimic_b6f: isBossDefeated(character, "quest_mimic_b6f")
+        quest_mimic_b6f: isBossDefeated(character, "quest_mimic_b6f"),
+        otherworldly_wisdom_b4f: isBossDefeated(character, "otherworldly_wisdom_b4f"),
+        todes_scorpio_b64f: isBossDefeated(character, "todes_scorpio_b64f")
       },
       bossRemainsById: floorBoss?.id === "sphinx_b69f"
         ? {

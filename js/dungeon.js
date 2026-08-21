@@ -318,11 +318,12 @@ export function placeNpc(depth = 1, progress = {}) {
   if (selected) {
     cells[selected.y][selected.x].npc = placeQueenShadow ? "queen_shadow"
       : normalizedDepth === 2 ? "NPC_01_b2"
-      : normalizedDepth === 4 ? "NPC_01_b4"
+      : normalizedDepth === 4 ? (progress.bossDefeatedById?.otherworldly_wisdom_b4f ? "NPC_01" : "NPC_01_b4")
       : normalizedDepth === 5 ? "NPC_01_b5"
       : normalizedDepth === 6 ? (progress.bossDefeatedById?.quest_mimic_b6f ? "NPC_01_b6_after" : "NPC_01_b6")
       : normalizedDepth === 9 ? "NPC_01_b9"
-      : normalizedDepth >= 60 && normalizedDepth <= 64 ? "NPC_01_b60_desert"
+      : normalizedDepth >= 60 && normalizedDepth <= 63 ? "NPC_01_b60_desert"
+      : normalizedDepth === 64 ? (progress.bossDefeatedById?.todes_scorpio_b64f ? "NPC_01_b60_desert" : "NPC_01_b64_todes")
       : normalizedDepth === 65 ? "NPC_01_b65_oasis"
       : normalizedDepth >= 66 && normalizedDepth <= 68 ? "NPC_01_desert_hot"
       : normalizedDepth === 69 ? "NPC_01_b69_riddle"

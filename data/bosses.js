@@ -509,7 +509,7 @@ export const BOSSES = Object.freeze({
         })])
       }) })
     ]),
-    reward: Object.freeze({ type: "none" }),
+    reward: Object.freeze({ type: "card", cardId: "zodiac_scorpio", amount: 1 }),
     elementMultipliers: Object.freeze({ fire: 1, ice: 1.5, arcane: 1 }),
     statusResistances: Object.freeze({
       poison: Object.freeze({ resistancePoints: 100, immune: true }),

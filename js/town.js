@@ -2793,8 +2793,8 @@ export function renderCharacterStatus() {
   hpMax?.classList.toggle("vital-max-bonus", hasMaxVitalBonus(character, "maxHp"));
   hpCurrent?.classList.toggle("vital-critical", isCriticalHp(character?.hp, character?.maxHp));
   spMax?.classList.toggle("vital-max-bonus", hasMaxVitalBonus(character, "maxSp"));
-  quickNameElement?.classList.toggle("condition-poison", character?.condition === "POISON");
-  quickNameCompact?.classList.toggle("condition-poison", character?.condition === "POISON");
+  quickNameElement?.classList.toggle("condition-poison", ["POISON", "DEATH POISON"].includes(character?.condition));
+  quickNameCompact?.classList.toggle("condition-poison", ["POISON", "DEATH POISON"].includes(character?.condition));
   quickNameElement?.classList.toggle("condition-bleeding", character?.condition === "BLEED");
   quickNameCompact?.classList.toggle("condition-bleeding", character?.condition === "BLEED");
 }
