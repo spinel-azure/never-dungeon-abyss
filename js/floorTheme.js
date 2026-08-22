@@ -61,6 +61,9 @@ export function resolveFloorTheme(depth, current = settings.fixed) {
   if (Number(depth) >= 70 && Number(depth) <= 79) {
     return { wall: "water", floor: "water", source: "floor" };
   }
+  if (Number(depth) >= 80 && Number(depth) <= 89) {
+    return { wall: "white", floor: "white", source: "floor" };
+  }
   if (Number(depth) >= 90 && Number(depth) <= 99) {
     return { wall: "black", floor: "black", source: "floor" };
   }

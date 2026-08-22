@@ -27,6 +27,8 @@ test("all themed dungeon areas use their fixed wall and floor colors", () => {
           ? { wall: "yellow", floor: "yellow", source: "floor" }
         : depth >= 70 && depth <= 79
           ? { wall: "water", floor: "water", source: "floor" }
+        : depth >= 80 && depth <= 89
+          ? { wall: "white", floor: "white", source: "floor" }
         : depth >= 90 && depth <= 99
           ? { wall: "black", floor: "black", source: "floor" }
       : { wall: "default", floor: "default", source: "fixed" };
@@ -57,9 +59,13 @@ test("all themed dungeon areas load their dedicated WebP wall textures and mist"
   assert.match(renderer, /images\/dungeon_effects\/dungeon_wall_06\.webp/);
   assert.match(renderer, /images\/dungeon_effects\/watar_wall_01\.webp/);
   assert.match(renderer, /images\/dungeon_effects\/watar_wall_02\.webp/);
+  assert.match(renderer, /images\/dungeon_effects\/marble_wall_01\.webp/);
+  assert.match(renderer, /images\/dungeon_effects\/marble_wall_02\.webp/);
   assert.match(renderer, /yellow: \{ main: \[206, 209, 21\]/);
   assert.match(renderer, /slate: \{ main: \[90, 108, 104\]/);
   assert.match(renderer, /water: \{ main: \[62, 123, 204\]/);
+  assert.match(renderer, /white: \{ main: \[235, 235, 235\]/);
+  assert.match(renderer, /renderer\.floorColor === "white"[\s\S]*?rgb\(235, 235, 235\)/);
   assert.match(renderer, /renderer\.floorColor === "yellow"[\s\S]*?rgb\(38, 111, 176\)/);
   assert.match(renderer, /color === "red".*fireWallTextures/s);
   assert.match(renderer, /color === "blue".*iceWallTextures/s);
@@ -68,10 +74,12 @@ test("all themed dungeon areas load their dedicated WebP wall textures and mist"
   assert.match(renderer, /color === "yellow".*desertWallTextures/s);
   assert.match(renderer, /color === "slate".*midDungeonWallTextures/s);
   assert.match(renderer, /color === "water".*waterWallTextures/s);
+  assert.match(renderer, /color === "white".*marbleWallTextures/s);
   assert.match(menu, /\["default", "stone", "red", "blue", "green", "yellow", "slate", "water", "white", "black"\]\.includes\(wall\)/);
   assert.match(main, /currentDepth >= 50 && currentDepth <= 59 \? "green"/);
   assert.match(main, /currentDepth >= 1 && currentDepth <= 29 \? "slate"/);
   assert.match(main, /currentDepth >= 60 && currentDepth <= 69 \? "yellow"/);
   assert.match(main, /currentDepth >= 70 && currentDepth <= 79 \? "water"/);
+  assert.match(main, /currentDepth >= 80 && currentDepth <= 89 \? "white"/);
   assert.match(main, /currentDepth >= 90 && currentDepth <= 99 \? "black"/);
 });

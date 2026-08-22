@@ -40,6 +40,7 @@ const renderer = {
   desertWallTextures: [],
   midDungeonWallTextures: [],
   waterWallTextures: [],
+  marbleWallTextures: [],
   wallColor: "default",
   floorColor: "default",
   doorTextures: null,
@@ -64,7 +65,8 @@ const MIST_PALETTES = {
   black: { main: [12, 12, 15], veil: [5, 5, 7], haze: [24, 23, 29], bloom: [72, 66, 82] },
   yellow: { main: [206, 209, 21], veil: [151, 154, 14], haze: [222, 224, 67], bloom: [244, 226, 116] },
   slate: { main: [90, 108, 104], veil: [62, 77, 74], haze: [125, 143, 138], bloom: [176, 190, 171] },
-  water: { main: [62, 123, 204], veil: [35, 83, 151], haze: [102, 158, 224], bloom: [142, 199, 244] }
+  water: { main: [62, 123, 204], veil: [35, 83, 151], haze: [102, 158, 224], bloom: [142, 199, 244] },
+  white: { main: [235, 235, 235], veil: [210, 210, 210], haze: [245, 245, 245], bloom: [255, 255, 255] }
 };
 const WALL_PALETTES = {
   default: { base: "#817667", rows: ["#8b806f", "#716756"], mortar: "rgba(28,26,23,.62)", speckle: "rgba(236,220,181,.12)" },
@@ -87,7 +89,7 @@ const FLOOR_PALETTES = {
   slate: { near: "#080b0a", mid: "#273431", far: "#5a6c68", grid: "rgba(185,209,201,.09)" },
   water: { near: "#050d18", mid: "#183c6c", far: "#3e7bcc", grid: "rgba(171,218,255,.13)" },
   purple: { near: "#110713", mid: "#35143c", far: "#5d2369", grid: "rgba(226,143,244,.12)" },
-  white: { near: "#252729", mid: "#767a7c", far: "#c7c9c5", grid: "rgba(255,255,255,.18)" },
+  white: { near: "rgb(170, 170, 170)", mid: "rgb(210, 210, 210)", far: "rgb(235, 235, 235)", grid: "rgba(255,255,255,.2)" },
   black: { near: "#010102", mid: "#08080a", far: "#111116", grid: "rgba(104,94,118,.06)" }
 };
 const DISTANCE_MIST_BASE_ALPHA = .8;
@@ -161,6 +163,7 @@ export function configureRenderer(options) {
   loadDesertWallTextures();
   loadMidDungeonWallTextures();
   loadWaterWallTextures();
+  loadMarbleWallTextures();
   renderer.doorTextures = {
     normal: makeDoorTexture("normal"),
     boss: makeDoorTexture("boss"),
@@ -447,6 +450,10 @@ export function drawCeiling() {
     g.addColorStop(0, "rgb(38, 111, 176)");
     g.addColorStop(0.58, "rgb(25, 75, 122)");
     g.addColorStop(1, "rgb(8, 27, 46)");
+  } else if (renderer.floorColor === "white") {
+    g.addColorStop(0, "rgb(235, 235, 235)");
+    g.addColorStop(0.58, "rgb(210, 210, 210)");
+    g.addColorStop(1, "rgb(170, 170, 170)");
   } else {
     g.addColorStop(0, "#151918");
     g.addColorStop(0.58, "#0d1010");
@@ -601,6 +608,7 @@ function getThemedWallTextures(color) {
   if (color === "yellow") return renderer.desertWallTextures;
   if (color === "slate") return renderer.midDungeonWallTextures;
   if (color === "water") return renderer.waterWallTextures;
+  if (color === "white") return renderer.marbleWallTextures;
   return [];
 }
 
@@ -657,6 +665,13 @@ function loadWaterWallTextures() {
   loadThemedWallTextures("waterWallTextures", "water", [
     "images/dungeon_effects/watar_wall_01.webp",
     "images/dungeon_effects/watar_wall_02.webp"
+  ]);
+}
+
+function loadMarbleWallTextures() {
+  loadThemedWallTextures("marbleWallTextures", "white", [
+    "images/dungeon_effects/marble_wall_01.webp",
+    "images/dungeon_effects/marble_wall_02.webp"
   ]);
 }
 
