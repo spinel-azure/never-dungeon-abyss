@@ -65,7 +65,7 @@ test("all themed dungeon areas load their dedicated WebP wall textures and mist"
   assert.match(renderer, /slate: \{ main: \[90, 108, 104\]/);
   assert.match(renderer, /water: \{ main: \[62, 123, 204\]/);
   assert.match(renderer, /white: \{ main: \[235, 235, 235\]/);
-  assert.match(renderer, /renderer\.floorColor === "white"[\s\S]*?rgb\(235, 235, 235\)/);
+  assert.match(renderer, /renderer\.floorColor === "white"[\s\S]*?rgb\(185, 185, 185\)[\s\S]*?rgb\(125, 125, 125\)/);
   assert.match(renderer, /renderer\.floorColor === "yellow"[\s\S]*?rgb\(38, 111, 176\)/);
   assert.match(renderer, /color === "red".*fireWallTextures/s);
   assert.match(renderer, /color === "blue".*iceWallTextures/s);
