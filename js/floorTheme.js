@@ -1,5 +1,5 @@
-export const WALL_COLORS = Object.freeze(["default", "red", "blue", "green", "yellow", "slate", "water", "crystal", "white", "black"]);
-export const FLOOR_COLORS = Object.freeze(["default", "red", "blue", "green", "yellow", "slate", "water", "purple", "crystal", "white", "black"]);
+export const WALL_COLORS = Object.freeze(["default", "red", "blue", "green", "yellow", "slate", "water", "crystal", "acacia", "white", "black"]);
+export const FLOOR_COLORS = Object.freeze(["default", "red", "blue", "green", "yellow", "slate", "water", "purple", "crystal", "acacia", "white", "black"]);
 export const FLOOR_THEME_MODES = Object.freeze({ FIXED: "fixed", RANDOM: "random" });
 
 export function isForcedTorchZeroFloor(depth) {
@@ -68,7 +68,7 @@ export function resolveFloorTheme(depth, current = settings.fixed) {
     return { wall: "black", floor: "black", source: "floor" };
   }
   if (Number(depth) === 100) {
-    return { wall: "white", floor: "white", source: "floor" };
+    return { wall: "acacia", floor: "acacia", source: "floor" };
   }
   const override = settings.floorOverrides.get(depth);
   if (override) return { ...override, source: "floor" };

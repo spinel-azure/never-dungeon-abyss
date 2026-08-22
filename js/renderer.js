@@ -1,4 +1,4 @@
-﻿import {
+import {
   FOV,
   RAYS,
   MAX_DIST
@@ -41,6 +41,7 @@ const renderer = {
   midDungeonWallTextures: [],
   waterWallTextures: [],
   crystalWallTextures: [],
+  acaciaWallTextures: [],
   marbleWallTextures: [],
   wallColor: "default",
   floorColor: "default",
@@ -68,6 +69,7 @@ const MIST_PALETTES = {
   slate: { main: [90, 108, 104], veil: [62, 77, 74], haze: [125, 143, 138], bloom: [176, 190, 171] },
   water: { main: [62, 123, 204], veil: [35, 83, 151], haze: [102, 158, 224], bloom: [142, 199, 244] },
   crystal: { main: [116, 24, 114], veil: [78, 18, 91], haze: [158, 62, 170], bloom: [221, 143, 244] },
+  acacia: { main: [169, 163, 51], veil: [145, 139, 40], haze: [194, 187, 61], bloom: [232, 224, 111] },
   white: { main: [235, 235, 235], veil: [210, 210, 210], haze: [245, 245, 245], bloom: [255, 255, 255] }
 };
 const WALL_PALETTES = {
@@ -80,6 +82,7 @@ const WALL_PALETTES = {
   slate: { base: "#5a6c68", rows: ["#687b76", "#485a56"], mortar: "rgba(19,28,26,.68)", speckle: "rgba(190,211,204,.14)" },
   water: { base: "#3e7bcc", rows: ["#4d8bd9", "#3165ab"], mortar: "rgba(12,35,67,.68)", speckle: "rgba(174,220,255,.17)" },
   crystal: { base: "rgb(116, 24, 114)", rows: ["rgb(138, 39, 145)", "rgb(82, 18, 96)"], mortar: "rgba(35,8,45,.76)", speckle: "rgba(235,177,255,.22)" },
+  acacia: { base: "rgb(169, 163, 51)", rows: ["rgb(194, 186, 66)", "rgb(139, 133, 38)"], mortar: "rgba(61,57,14,.66)", speckle: "rgba(255,247,158,.22)" },
   white: { base: "#aaa79e", rows: ["#c3c0b5", "#918f88"], mortar: "rgba(55,54,51,.52)", speckle: "rgba(255,255,240,.2)" },
   black: { base: "#28282b", rows: ["#35343a", "#1d1d20"], mortar: "rgba(0,0,0,.82)", speckle: "rgba(151,136,165,.12)" }
 };
@@ -93,6 +96,7 @@ const FLOOR_PALETTES = {
   water: { near: "#050d18", mid: "#183c6c", far: "#3e7bcc", grid: "rgba(171,218,255,.13)" },
   purple: { near: "#110713", mid: "#35143c", far: "#5d2369", grid: "rgba(226,143,244,.12)" },
   crystal: { near: "rgb(28, 6, 35)", mid: "rgb(70, 15, 82)", far: "rgb(116, 24, 114)", grid: "rgba(230,159,255,.16)" },
+  acacia: { near: "rgb(92, 87, 25)", mid: "rgb(158, 151, 45)", far: "rgb(215, 207, 71)", grid: "rgba(255,247,158,.18)" },
   white: { near: "rgb(170, 170, 170)", mid: "rgb(210, 210, 210)", far: "rgb(235, 235, 235)", grid: "rgba(255,255,255,.2)" },
   black: { near: "#010102", mid: "#08080a", far: "#111116", grid: "rgba(104,94,118,.06)" }
 };
@@ -168,6 +172,7 @@ export function configureRenderer(options) {
   loadMidDungeonWallTextures();
   loadWaterWallTextures();
   loadCrystalWallTextures();
+  loadAcaciaWallTextures();
   loadMarbleWallTextures();
   renderer.doorTextures = {
     normal: makeDoorTexture("normal"),
@@ -463,6 +468,10 @@ export function drawCeiling() {
     g.addColorStop(0, "rgb(63, 20, 77)");
     g.addColorStop(0.58, "rgb(43, 13, 56)");
     g.addColorStop(1, "rgb(23, 7, 32)");
+  } else if (renderer.floorColor === "acacia") {
+    g.addColorStop(0, "rgb(123, 118, 31)");
+    g.addColorStop(0.58, "rgb(92, 88, 23)");
+    g.addColorStop(1, "rgb(61, 58, 15)");
   } else {
     g.addColorStop(0, "#151918");
     g.addColorStop(0.58, "#0d1010");
@@ -618,6 +627,7 @@ function getThemedWallTextures(color) {
   if (color === "slate") return renderer.midDungeonWallTextures;
   if (color === "water") return renderer.waterWallTextures;
   if (color === "crystal") return renderer.crystalWallTextures;
+  if (color === "acacia") return renderer.acaciaWallTextures;
   if (color === "white") return renderer.marbleWallTextures;
   return [];
 }
@@ -682,6 +692,13 @@ function loadCrystalWallTextures() {
   loadThemedWallTextures("crystalWallTextures", "crystal", [
     "images/dungeon_effects/crystal_wall_01.webp",
     "images/dungeon_effects/crystal_wall_02.webp"
+  ]);
+}
+
+function loadAcaciaWallTextures() {
+  loadThemedWallTextures("acaciaWallTextures", "acacia", [
+    "images/dungeon_effects/acacia_wall_01.webp",
+    "images/dungeon_effects/acacia_wall_02.webp"
   ]);
 }
 

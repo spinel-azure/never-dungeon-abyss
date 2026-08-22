@@ -194,8 +194,7 @@ export function configureGamepadInput({ dispatchAction, toggleMinimap, onConnect
         if (action === "minimap") toggleMinimap?.();
         else if (action === "items") dispatchAction?.("items");
         else if (action === "menu") dispatchAction?.("cancel");
-        else if (action === "pageLeft") dispatchAction?.("left");
-        else if (action === "pageRight") dispatchAction?.("right");
+        else if (action === "pageLeft" || action === "pageRight") dispatchAction?.(action);
         else if (!action.startsWith("unused")) dispatchAction?.(action);
       }
     }

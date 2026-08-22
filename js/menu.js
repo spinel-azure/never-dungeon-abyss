@@ -194,8 +194,8 @@ export function getDungeonMistOptions() {
   return { enabled: menu.mistEnabled, intensity: menu.mistIntensity, distance: menu.mistDistance, color: menu.mistColor };
 }
 export function setDungeonColors({ wall, floor } = {}, { save = false } = {}) {
-  if (["default", "stone", "red", "blue", "green", "yellow", "slate", "water", "crystal", "white", "black"].includes(wall)) menu.wallColor = wall;
-  if (["default", "red", "blue", "green", "yellow", "slate", "water", "purple", "crystal", "white", "black"].includes(floor)) menu.floorColor = floor;
+  if (["default", "stone", "red", "blue", "green", "yellow", "slate", "water", "crystal", "acacia", "white", "black"].includes(wall)) menu.wallColor = wall;
+  if (["default", "red", "blue", "green", "yellow", "slate", "water", "purple", "crystal", "acacia", "white", "black"].includes(floor)) menu.floorColor = floor;
   applyWallColor();
   applyFloorColor();
   updateDebugStates();
@@ -274,10 +274,13 @@ export function handleMenuInput(action) {
     menu.recentConfirms = []; menu.debugArmed = false;
     return false;
   }
+  if (menu.view !== "inventory" && (action === "pageLeft" || action === "pageRight")) {
+    action = action === "pageLeft" ? "left" : "right";
+  }
   const adjustsSeVolume = menu.view === "options"
     && (action === "left" || action === "right")
     && menu.optionItems[menu.optionCursor]?.dataset.option === "seVolume";
-  if ((action === "up" || action === "down" || action === "left" || action === "right") && !adjustsSeVolume) menu.playSe("cursorMove");
+  if (["up", "down", "left", "right", "pageLeft", "pageRight"].includes(action) && !adjustsSeVolume) menu.playSe("cursorMove");
   else if (action === "confirm" && !(menu.view === "commands" && isCommandUnavailable(menu.commands[menu.commandIndex]))) menu.playSe("confirm");
   else if (action === "cancel") menu.playSe("cancel");
   if (menu.view === "commands") handleCommands(action);
@@ -395,52 +398,85 @@ function handleInventory(action) {
     else { menu.view = "commands"; updateView(); return; }
     renderInventory(); return;
   }
-  if (menu.inventoryFocus !== "list") {
+
+  const entries = inventoryEntries();
+  const pages = Math.max(1, Math.ceil(entries.length / 10));
+  const switchTab = offset => {
+    if (menu.inventoryMode !== "list") return false;
+    const tabs = availableInventoryTabs();
+    const current = Math.max(0, tabs.indexOf(menu.inventoryTab));
+    Object.assign(menu, {
+      inventoryTab: tabs[(current + offset + tabs.length) % tabs.length],
+      inventoryCursor: 0,
+      inventoryPage: 0,
+      inventoryFocus: "tabs"
+    });
+    renderInventory();
+    return true;
+  };
+  const movePage = offset => {
+    const nextPage = Math.max(0, Math.min(pages - 1, menu.inventoryPage + offset));
+    if (nextPage === menu.inventoryPage) return false;
+    menu.inventoryPage = nextPage;
+    menu.inventoryCursor = nextPage * 10;
+    menu.inventoryFocus = "list";
+    renderInventory();
+    return true;
+  };
+
+  if (action === "pageLeft" || action === "pageRight") {
+    switchTab(action === "pageRight" ? 1 : -1);
+    return;
+  }
+  if (menu.inventoryFocus === "tabs") {
+    if (action === "left" || action === "right") switchTab(action === "right" ? 1 : -1);
+    else if (action === "down") {
+      menu.inventoryFocus = entries.length ? "list" : "back";
+      menu.inventoryCursor = menu.inventoryPage * 10;
+      renderInventory();
+    } else if (action === "up") {
+      menu.inventoryFocus = "back";
+      renderInventory();
+    }
+    return;
+  }
+  if (menu.inventoryFocus === "back" || menu.inventoryFocus === "next") {
     if (action === "left" || action === "right") {
       menu.inventoryFocus = menu.inventoryFocus === "back" ? "next" : "back";
       renderInventory(); return;
     }
-    if (action === "up" || action === "down") {
-      const entries = inventoryEntries();
+    if (action === "up") {
       if (entries.length) {
-        const pageStart = menu.inventoryPage * 10;
-        const pageEnd = Math.min(entries.length - 1, pageStart + 9);
-        menu.inventoryCursor = action === "up" ? pageEnd : pageStart;
+        menu.inventoryCursor = Math.min(entries.length - 1, menu.inventoryPage * 10 + 9);
         menu.inventoryFocus = "list";
-      }
+      } else if (menu.inventoryMode === "list") menu.inventoryFocus = "tabs";
       renderInventory(); return;
     }
-    if (action === "confirm") {
-      if (menu.inventoryFocus === "back") {
-        if (menu.inventoryPage > 0) { menu.inventoryPage -= 1; menu.inventoryCursor = menu.inventoryPage * 10; menu.inventoryFocus = "list"; renderInventory(); }
-        else handleInventory("cancel");
-      } else {
-        const pages = Math.max(1, Math.ceil(inventoryEntries().length / 10));
-        if (menu.inventoryPage < pages - 1) { menu.inventoryPage += 1; menu.inventoryCursor = menu.inventoryPage * 10; menu.inventoryFocus = "list"; renderInventory(); }
-      }
-      return;
+    if (action === "down" && menu.inventoryMode === "list") {
+      menu.inventoryFocus = "tabs";
+      renderInventory(); return;
     }
+    if (action === "confirm") movePage(menu.inventoryFocus === "next" ? 1 : -1);
+    return;
   }
-  if (menu.inventoryMode === "list" && (action === "left" || action === "right")) {
-    const tabs = availableInventoryTabs();
-    const current = Math.max(0, tabs.indexOf(menu.inventoryTab));
-    const offset = action === "right" ? 1 : -1;
-    Object.assign(menu, { inventoryTab: tabs[(current + offset + tabs.length) % tabs.length], inventoryCursor: 0, inventoryPage: 0 });
-    renderInventory(); return;
+
+  if (action === "left" || action === "right") {
+    movePage(action === "right" ? 1 : -1);
+    return;
   }
-  const entries = inventoryEntries();
   if (action === "lock") {
     toggleSelectedEquipmentLock(entries);
     return;
   }
   if ((action === "up" || action === "down") && !entries.length) {
-    menu.inventoryFocus = "back"; renderInventory(); return;
+    menu.inventoryFocus = menu.inventoryMode === "list" && action === "up" ? "tabs" : "back";
+    renderInventory(); return;
   }
   if ((action === "up" || action === "down") && entries.length) {
     const pageStart = menu.inventoryPage * 10;
     const pageEnd = Math.min(entries.length - 1, pageStart + 9);
-    const atBoundary = action === "up" ? menu.inventoryCursor === pageStart : menu.inventoryCursor === pageEnd;
-    if (atBoundary) menu.inventoryFocus = "back";
+    if (action === "up" && menu.inventoryCursor === pageStart) menu.inventoryFocus = menu.inventoryMode === "list" ? "tabs" : "back";
+    else if (action === "down" && menu.inventoryCursor === pageEnd) menu.inventoryFocus = "back";
     else menu.inventoryCursor += action === "down" ? 1 : -1;
     renderInventory(); return;
   }
@@ -464,7 +500,6 @@ function handleInventory(action) {
   const selectedIndex = candidates.findIndex(candidate => candidate.instance?.instanceId === entry.instance.instanceId);
   menu.inventoryCursor = Math.max(0, selectedIndex); menu.inventoryPage = Math.floor(menu.inventoryCursor / 10); renderInventory();
 }
-
 function toggleSelectedEquipmentLock(entries = inventoryEntries()) {
   if (menu.inventoryFocus !== "list" || menu.inventorySaleStage !== "list") return false;
   if (menu.inventoryPurpose === "buy" || menu.inventoryMode !== "list" || menu.inventoryTab !== "equipment") return false;
@@ -933,12 +968,11 @@ export function refreshAdventureRecordsPlayTime() {
 
 function bindInventory() {
   menu.inventoryPanel.querySelectorAll("[data-inventory-tab]").forEach(button => button.addEventListener("click", () => {
-    Object.assign(menu, { inventoryTab: button.dataset.inventoryTab, inventoryMode: "list", inventoryCursor: 0, inventoryPage: 0, inventoryFocus: "list", inventorySaleStage: "list", inventorySaleQuantity: 1 }); renderInventory();
+    Object.assign(menu, { inventoryTab: button.dataset.inventoryTab, inventoryMode: "list", inventoryCursor: 0, inventoryPage: 0, inventoryFocus: "tabs", inventorySaleStage: "list", inventorySaleQuantity: 1 }); renderInventory();
   }));
   menu.inventoryPanel.querySelector('[data-inventory-nav="back"]').addEventListener("click", () => {
     menu.inventoryFocus = "back";
-    if (menu.inventoryPage > 0) { menu.inventoryPage -= 1; menu.inventoryCursor = menu.inventoryPage * 10; renderInventory(); }
-    else handleInventory("cancel");
+    if (menu.inventoryPage > 0) { menu.inventoryPage -= 1; menu.inventoryCursor = menu.inventoryPage * 10; menu.inventoryFocus = "list"; renderInventory(); }
   });
   menu.inventoryPanel.querySelector('[data-inventory-nav="next"]').addEventListener("click", () => {
     menu.inventoryFocus = "next";
@@ -961,6 +995,7 @@ function renderInventory() {
   panel.querySelectorAll("[data-inventory-tab]").forEach(button => {
     button.hidden = (menu.inventoryPurpose === "sell" || menu.inventoryPurpose === "buy") && button.dataset.inventoryTab === "keyItems";
     button.classList.toggle("is-selected", button.dataset.inventoryTab === menu.inventoryTab);
+    button.classList.toggle("is-cursor", menu.inventoryFocus === "tabs" && button.dataset.inventoryTab === menu.inventoryTab);
     if (button.dataset.inventoryTab === "items") button.textContent = menu.inventoryPurpose === "sell" || menu.inventoryPurpose === "buy" ? "道具" : "アイテム";
   });
   const equippedIds = new Set(Object.values(character?.equippedInstanceIds || {}));
@@ -1004,7 +1039,8 @@ function renderInventory() {
   panel.querySelector("[data-inventory-page]").textContent = `${menu.inventoryPage + 1}/${pages}`;
   const backButton = panel.querySelector('[data-inventory-nav="back"]');
   const nextButton = panel.querySelector('[data-inventory-nav="next"]');
-  backButton.textContent = menu.inventoryPage > 0 ? "PREV" : "BACK";
+  backButton.textContent = "BACK";
+  backButton.disabled = menu.inventoryPage <= 0;
   nextButton.disabled = menu.inventoryPage >= pages - 1;
   backButton.classList.toggle("is-selected", menu.inventoryFocus === "back");
   nextButton.classList.toggle("is-selected", menu.inventoryFocus === "next");

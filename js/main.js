@@ -55,6 +55,7 @@ import { configureFloatingStick } from "./floating-stick.js";
 import { configureCompass, drawCompass } from "./compass.js";
 import { configureMenu, handleMenuInput, getDungeonColors, getDungeonMistOptions, setDungeonColors, getGamepadBindings, getGamepadCaptureAction, completeGamepadBinding, setGamepadPressedButtons, getTouchControlsMode, isMenuOpen, openItemInventory, openStatusMenu, openDeckEditor, openQuestHistory, openRumorHistory, openAdventureRecords, openLibraryCardGallery, openTitleOptions, refreshAdventureRecordsPlayTime, openShopSellInventory, openShopPurchaseInventory, closeCampMenu } from "./menu.js";
 import { isForcedTorchZeroFloor, resolveFloorTheme } from "./floorTheme.js";
+import { applyCrystalFloorSpStep } from "../data/crystal-floor.js";
 import {
   configureAutoReturn,
   startAutoReturn,
@@ -1836,6 +1837,17 @@ import {
     return damage;
   }
 
+  function applyCrystalFloorStep() {
+    if (!character || worldLocation !== "dungeon") return 0;
+    const result = applyCrystalFloorSpStep(character, currentDepth);
+    character = result.character;
+    if (result.drained > 0) {
+      updateCharacterUi();
+      showStepSpDamage(result.drained);
+    }
+    return result.drained;
+  }
+
   function applyColdFloorStep() {
     if (!character || worldLocation !== "dungeon") return 0;
     const requested = getColdFloorStepDamage(character, currentDepth);
@@ -1864,6 +1876,16 @@ import {
     popup.addEventListener("animationend", () => popup.remove(), { once: true });
   }
 
+  function showStepSpDamage(amount) {
+    const layer = document.getElementById("crystalStepSpDamage");
+    if (!layer || amount <= 0) return;
+    const popup = document.createElement("i");
+    popup.className = "is-sp-damage";
+    popup.textContent = `SP－${amount}`;
+    layer.append(popup);
+    popup.addEventListener("animationend", () => popup.remove(), { once: true });
+  }
+
   function showStepHpRecovery(amount) {
     const layer = document.getElementById("poisonStepDamage");
     if (!layer || amount <= 0) return;
@@ -1873,13 +1895,13 @@ import {
     layer.append(popup);
     popup.addEventListener("animationend", () => popup.remove(), { once: true });
   }
-
   function handleDungeonStep() {
     applyDungeonPoisonStep();
     applyDungeonDeadlyPoisonStep();
     applyDungeonBleedingStep();
     applyFireFloorStep();
     applyColdFloorStep();
+    applyCrystalFloorStep();
     if (!character) return;
     const hpBeforePassives = character.hp;
     character = recordNpcExpeditionDepth(character, currentDepth);
@@ -3231,7 +3253,7 @@ import {
             : currentDepth >= 70 && currentDepth <= 79 ? "water"
             : currentDepth >= 80 && currentDepth <= 89 ? "crystal"
             : currentDepth >= 90 && currentDepth <= 99 ? "black"
-            : currentDepth === 100 ? "white"
+            : currentDepth === 100 ? "acacia"
           : options.color;
     setMistOptions({ ...options, color });
   }
@@ -3398,6 +3420,9 @@ import {
       if (worldLocation === "dungeon" && !sceneTransitionRunning && !state.overlayEvent) return openItemInventory();
       return false;
     }
+    if ((action === "pageLeft" || action === "pageRight") && handleMenuInput(action)) return true;
+    if (action === "pageLeft") action = "left";
+    if (action === "pageRight") action = "right";
     if (handleItemOverlayInput(action) || handleSkillOverlayInput(action) || handleBattleInput(action)) return true;
     if (sceneTransitionRunning || handleLootIdentifyInput(action) || handleExperienceSettlementInput(action) || handleTownInput(action)) return true;
     if (["up", "down", "left", "right"].includes(action)) {
