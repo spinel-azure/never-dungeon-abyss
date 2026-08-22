@@ -95,7 +95,7 @@ export function startBattle(enemy, { playStartSe = true, ambush = false, conceal
     const openingBattle = battleUi.battle;
     window.setTimeout(() => {
       if (battleUi.active && battleUi.battle === openingBattle) {
-        showBattleNumber("player", openingBattle.manaBoosterRecovery, "healing");
+        showBattleNumber("player", openingBattle.manaBoosterRecovery, "sp-healing");
       }
     }, 300);
   }
@@ -555,7 +555,9 @@ function formatPresentationMessage(event) {
 function showBattleNumber(targetSide, amount, kind, hitIndex = null, hitCount = 1, targetIndex = null) {
   const value = Math.max(0, Math.floor(Number(amount) || 0));
   if (value <= 0) return;
-  const layerId = targetSide === "enemy" ? "battleEnemyNumbers" : "battlePlayerNumbers";
+  const layerId = targetSide === "enemy"
+    ? "battleEnemyNumbers"
+    : kind === "sp-healing" ? "battlePlayerSpNumbers" : "battlePlayerNumbers";
   const layer = targetSide === "enemy" && battleUi.battle?.enemies
     ? battleUi.root.querySelector(`.battle-enemy-member[data-index="${targetIndex ?? battleUi.battle.targetIndex}"] .battle-number-layer`)
     : document.getElementById(layerId);

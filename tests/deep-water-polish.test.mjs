@@ -27,7 +27,7 @@ test("quest 028 reporting unlocks the B80 transfer portal", () => {
 });
 
 test("Mana Booster and DEF overcap presentation are visible", () => {
-  assert.match(battleSource, /showBattleNumber\("player", openingBattle\.manaBoosterRecovery, "healing"\)/);
+  assert.match(battleSource, /showBattleNumber\("player", openingBattle\.manaBoosterRecovery, "sp-healing"\)/);
   assert.match(mainSource, /key === "def" && total > 30/);
   assert.match(mainSource, /#43d86f/);
   assert.match(mainSource, /#e6bd35/);

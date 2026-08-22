@@ -68,7 +68,7 @@
         ? drawTextMark(ctx, "🌿", x1, y1, cell)
         : drawBossMark(ctx, x1, y1, cell);
       if (c.fountain && effectiveTorchActive) drawFountainMark(ctx, x1, y1, cell);
-      if (c.quicksand && isExplored) drawTextMark(ctx, "≋", x1, y1, cell);
+      if (c.quicksand && isExplored) drawQuicksandMark(ctx, x1, y1, cell);
       if (c.rapidCurrent && c.rapidCurrentDiscovered) {
         drawRapidCurrentMark(ctx, x1, y1, cell, c.rapidCurrent.direction);
       }
@@ -191,6 +191,18 @@ export function drawRapidCurrentMark(ctx, x, y, size, direction) {
   ctx.moveTo(tipX, tipY);
   ctx.lineTo(tipX - vector.dx * head - vector.px * head, tipY - vector.dy * head - vector.py * head);
   ctx.stroke();
+  ctx.restore();
+}
+
+export function drawQuicksandMark(ctx, x, y, size) {
+  ctx.save();
+  ctx.fillStyle = "#f0cf72";
+  ctx.shadowColor = "rgba(255, 215, 105, .8)";
+  ctx.shadowBlur = Math.max(1.5, size * .16);
+  ctx.font = `700 ${Math.max(9, size * .72)}px "Segoe UI Symbol", GameFont, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("≋", x + size / 2, y + size / 2);
   ctx.restore();
 }
 

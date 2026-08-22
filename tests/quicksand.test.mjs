@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 
 import { buildBoundaryWallMap, cells } from "../js/dungeon.js";
 import { runQuicksandTransitionWithFallback } from "../js/player.js";
+import { drawQuicksandMark } from "../js/minimap.js";
 import {
   DESERT_QUICKSAND,
   floorHasQuicksand,
@@ -16,6 +17,25 @@ test("desert quicksand is limited to B60F through B68F", () => {
   assert.equal(floorHasQuicksand(65), true);
   assert.equal(floorHasQuicksand(68), true);
   assert.equal(floorHasQuicksand(69), false);
+});
+
+test("explored quicksand uses a visible sand-colored minimap marker", () => {
+  const styles = {};
+  const labels = [];
+  const ctx = {
+    save() {}, restore() {},
+    fillText(label, x, y) { labels.push([label, x, y]); },
+    set fillStyle(value) { styles.fillStyle = value; },
+    set shadowColor(value) { styles.shadowColor = value; },
+    set shadowBlur(value) { styles.shadowBlur = value; },
+    set font(value) { styles.font = value; },
+    set textAlign(value) { styles.textAlign = value; },
+    set textBaseline(value) { styles.textBaseline = value; }
+  };
+  drawQuicksandMark(ctx, 0, 0, 10);
+  assert.equal(styles.fillStyle, "#f0cf72");
+  assert.equal(labels[0][0], DESERT_QUICKSAND.minimapMark);
+  assert.deepEqual(labels[0].slice(1), [5, 5]);
 });
 
 test("desert floors contain three cyclic quicksand points without feature overlap", () => {
