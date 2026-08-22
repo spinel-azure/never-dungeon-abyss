@@ -431,6 +431,11 @@ const ZODIAC_CARDS = [
   openingDamageMultiplier: 2,
   openingDefensePenetration: 0.5,
   openingUnavoidable: true
+} : card.id === "zodiac_taurus" ? {
+  ...card,
+  concept: "最大HP＋50％／深層ほどDEF上昇",
+  descriptionJa: "最大HPが50％上昇する。\n迷宮を深く潜るほどDEFが上昇する。",
+  maxHpMultiplier: 1.5
 } : card.id === "zodiac_libra" ? {
   ...card,
   concept: "強敵への与ダメージ＋30％／被ダメージ－30％",

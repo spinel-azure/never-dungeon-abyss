@@ -126,6 +126,7 @@ import { CARDS, collectCardStatBonuses, getCardById, hasCardEffect, sumCardEffec
 import { drawCardCanvas } from "./card-canvas.js";
 import { getItem } from "../data/items.js";
 import { isCriticalHp } from "../data/quick-status.js";
+import { applyTaurusDepthBonus } from "../data/taurus.js";
 import { scaleBlackChestMimic } from "../data/mimic-scaling.js";
 import { purchaseBuybackEquipment, purchaseBuybackItem, purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
 import { addLootCard, addLootEquipment, addLootGold, addLootItem, depositEquipmentInWarehouse, depositItemInWarehouse, grantItemWithOverflow, settleLootBag, withdrawEquipmentFromWarehouse, withdrawItemFromWarehouse } from "../data/inventory.js";
@@ -189,6 +190,12 @@ import {
   let worldLocation = "dungeon";
   let character = null;
   let currentDepth = 1;
+  function getContextualCharacter() {
+    return applyTaurusDepthBonus(character, {
+      location: worldLocation,
+      depth: currentDepth
+    });
+  }
   let playTimeLastTick = performance.now();
   let lastUserOperationAt = playTimeLastTick;
   const PLAY_TIME_IDLE_LIMIT_MS = 5 * 60 * 1000;
@@ -543,7 +550,7 @@ import {
     root: townScreen,
     messageEl: msgEl,
     commandRoot: dungeonCommands,
-    getCharacter: () => character,
+    getCharacter: () => getContextualCharacter(),
     onRegister: registerCharacter,
     onEnterDungeon: enterDungeonFromTown,
     onUseTransfer: enterFloorFromTransfer,
@@ -667,7 +674,7 @@ import {
     root: battleScreen,
     commandRoot: dungeonCommands,
     messageEl: msgEl,
-    getCharacter: () => character,
+    getCharacter: () => getContextualCharacter(),
     onCharacterChanged: updateCharacterFromBattle,
     onVictory: finishBattleVictory,
     onDefeat: finishBattleDefeat,
@@ -1355,6 +1362,7 @@ import {
   }
 
   function updateCharacterUi() {
+    const statusCharacter = getContextualCharacter();
     setPassivePresenceIncreaseReduction(sumCardEffectValues(
       character?.cards?.deckSlots,
       "presence_gain_reduction"
@@ -1363,7 +1371,7 @@ import {
       consumptionDisabled: hasCardEffect(character?.cards?.deckSlots, "torch_consumption_disabled"),
       effectForced: hasCardEffect(character?.cards?.deckSlots, "force_torch_effect_active")
     });
-    renderCharacterStatus();
+    renderCharacterStatus(statusCharacter);
     renderPlayerChargeGauge();
     renderNpcPartyStatus(npcPartyStatus, character);
     renderNpcStatusPage(document.querySelector("[data-npc-status-list]"), character);
@@ -1390,10 +1398,10 @@ import {
         vitals.innerHTML = "<span>HP ---- / ----</span><span>SP ---- / ----</span><span>DECK COST : --</span>";
       }
     }
-    renderStatusGauges(character);
-    renderEquipment(character);
-    renderDetailStats(character);
-    renderExperience(character);
+    renderStatusGauges(statusCharacter);
+    renderEquipment(statusCharacter);
+    renderDetailStats(statusCharacter);
+    renderExperience(statusCharacter);
     detectAchievementUnlocks();
   }
 
@@ -1434,7 +1442,8 @@ import {
 
   function hasMaxVitalBonus(target, key) {
     return Number(target?.equipmentStatBonuses?.[key]) > 0
-      || Number(target?.cardStatBonuses?.[key]) > 0;
+      || Number(target?.cardStatBonuses?.[key]) > 0
+      || (key === "maxHp" && target?.cards?.deckSlots?.includes("zodiac_taurus"));
   }
 
   function renderStatusGauges(target) {
@@ -1597,7 +1606,7 @@ import {
     const enemyPartyData = getRandomEncounterEnemyPartyData();
     const enemyData = enemyPartyData[0];
     const surprise = resolveSurprise({
-      player: collectStats(character),
+      player: collectStats(getContextualCharacter()),
       enemyBaseRate: enemyData.surpriseRate,
       enemyMaximum: enemyData.surpriseRateMaximum,
       ignoreNormalCap: Boolean(enemyData.ignoreNormalSurpriseCap),
@@ -1877,7 +1886,7 @@ import {
 
   function resolveCurrentTreasureTrap(treasureType, trapId) {
     if (!character) return { message: "" };
-    const result = resolveTreasureTrap({ character, treasureType, trapId });
+    const result = resolveTreasureTrap({ character: getContextualCharacter(), treasureType, trapId });
     character = result.character;
     updateCharacterUi();
     if (result.trap) showTrapResultEffect(result.disarmed);
@@ -3241,7 +3250,7 @@ import {
       x,
       y,
       dirKey,
-      dex: collectStats(character).dex
+      dex: collectStats(getContextualCharacter()).dex
     });
   }
 
@@ -3276,7 +3285,7 @@ import {
       x,
       y,
       dirKey,
-      dex: collectStats(character).dex
+      dex: collectStats(getContextualCharacter()).dex
     });
     scheduleAutosave();
     return result;
@@ -3554,13 +3563,3 @@ import {
     else playTimeLastTick = performance.now();
   });
 })();
-
-
-
-
-
-
-
-
-
-

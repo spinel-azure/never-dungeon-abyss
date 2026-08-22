@@ -2825,7 +2825,8 @@ export function renderCharacterStatus() {
 
 function hasMaxVitalBonus(character, key) {
   return Number(character?.equipmentStatBonuses?.[key]) > 0
-    || Number(character?.cardStatBonuses?.[key]) > 0;
+    || Number(character?.cardStatBonuses?.[key]) > 0
+    || (key === "maxHp" && character?.cards?.deckSlots?.includes("zodiac_taurus"));
 }
 
 function showTownCommands() {

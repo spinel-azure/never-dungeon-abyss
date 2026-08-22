@@ -143,9 +143,12 @@ export function normalizeCharacter(character) {
   );
   const cards = normalizeCardState(character.cards, growth.deckCost);
   const cardStatBonuses = collectCardStatBonuses(cards.deckSlots);
-  const maxHp = growth.hp
+  const maxHpBeforeTaurus = growth.hp
     + Math.max(0, Math.floor(Number(equipmentStatBonuses.maxHp) || 0))
     + Math.max(0, Math.floor(Number(cardStatBonuses.maxHp) || 0));
+  const maxHp = cards.deckSlots.includes("zodiac_taurus")
+    ? Math.ceil(maxHpBeforeTaurus * 1.5)
+    : maxHpBeforeTaurus;
   const maxSpBeforeManaBooster = growth.sp
     + Math.max(0, Math.floor(Number(equipmentStatBonuses.maxSp) || 0))
     + Math.max(0, Math.floor(Number(cardStatBonuses.maxSp) || 0));
