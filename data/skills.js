@@ -394,11 +394,11 @@ export const SKILLS = Object.freeze({
   }),
   acht_streich: Object.freeze({
     id: "acht_streich", name: "アハト・シュトライヒ",
-    description: "チャージ100とSP100で発動。DEX×12.5の\n8連続物理攻撃。暗殺術なし。1戦闘1回。",
+    description: "チャージ100とSP100で発動。敵へランダムに\nDEX×12.5の8連撃。暗殺術なし。1戦闘1回。",
     actionType: "physicalAttack", category: "chargeSkill", spCost: 100, target: "enemy",
     hitCount: 8, powerPerHit: 1, attackStat: "dex", attackStatMultiplier: 12.5,
     ignoreSpCostReduction: true,
-    ignoreWeaponAttack: true, chargeSkill: true, ultimateChargeSkill: true,
+    ignoreWeaponAttack: true, chargeSkill: true, ultimateChargeSkill: true, randomlyDistributeHits: true,
     presentationId: "acht_streich", effects: Object.freeze([])
   }),
   call_goddess_name: Object.freeze({

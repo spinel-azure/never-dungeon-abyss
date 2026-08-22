@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getLevelUnlockedSkillIds, getSkill } from "../data/skills.js";
-import { createBattleState, createPlayerAction, resolveBattleRound } from "../combat/battle-engine.js";
+import { createBattleState, createPlayerAction, resolveBattleRound, resolveMultiBattleRound } from "../combat/battle-engine.js";
 import { getEffectiveSpCost } from "../combat/sp-cost.js";
 import { calculatePhysicalHitRate } from "../combat/resolve-physical-attack.js";
 import {
@@ -154,4 +154,30 @@ test("level 80 priest and mage expose holy execution and resistance bypass rules
   const mage = getSkill("apocalypse");
   assert.deepEqual([mage.target, mage.element, mage.intelligenceMultiplier, mage.ignoresMagicResistance],
     ["allEnemies", "arcane", 100, true]);
+});
+
+test("Acht Streich randomly distributes its eight hits and retargets after a defeat", () => {
+  const thief = createInitialCharacter({ name: "ACHT", job: "thief" });
+  thief.skillIds.push("acht_streich");
+  thief.sp = thief.maxSp = 200;
+  thief.dex = 30;
+  thief.agi = 99;
+  thief.playerCharge = { value: 100, cooldown: 0 };
+  const enemies = [0, 1, 2].map(index => ({
+    id: `dummy_${index}`, name: `DUMMY ${index}`, hp: 1, maxHp: 1,
+    str: 1, int: 1, agi: 1, dex: 1, luc: 1, def: 0, attack: 1,
+    alive: true, statuses: [], statusResistances: {}
+  }));
+  const battle = createBattleState({ character: thief, enemy: enemies[0], enemies });
+  const result = resolveMultiBattleRound({
+    battle,
+    playerCommand: { type: "skill", skillId: "acht_streich", targetIndex: 0 },
+    rng: () => 0.5
+  });
+  const hits = result.battle.presentationEvents.filter(event => event.type === "attackHit" && event.actorSide === "player");
+  assert.equal(result.accepted, true);
+  assert.deepEqual(hits.map(event => event.targetIndex), [1, 2, 0]);
+  assert.deepEqual(hits.map(event => event.hitIndex), [0, 1, 2]);
+  assert.ok(hits.every(event => event.hitCount === 8));
+  assert.equal(result.battle.outcome, "victory");
 });

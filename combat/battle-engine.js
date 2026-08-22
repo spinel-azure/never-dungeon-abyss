@@ -247,14 +247,18 @@ export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.rand
     }
     if (entry.side === "player") {
       const action = applyAriesOpeningAttack(next, entry.action, "player");
-      const targetIndexes = entry.action.target === "allEnemies"
-        ? livingEnemyIndexes(next.enemies)
-        : [normalizeLivingTargetIndex(next.enemies, next.targetIndex)];
-      for (const targetIndex of targetIndexes) {
-        const target = next.enemies[targetIndex];
-        if (!target?.alive || target.hp <= 0) continue;
-        executeTargetedAction({ battle: next, action, actor, actorSide: "player",
-          target, targetSide: "enemy", targetIndex, rng });
+      if (action.randomlyDistributeHits) {
+        executeRandomlyDistributedHits({ battle: next, action, actor, rng });
+      } else {
+        const targetIndexes = entry.action.target === "allEnemies"
+          ? livingEnemyIndexes(next.enemies)
+          : [normalizeLivingTargetIndex(next.enemies, next.targetIndex)];
+        for (const targetIndex of targetIndexes) {
+          const target = next.enemies[targetIndex];
+          if (!target?.alive || target.hp <= 0) continue;
+          executeTargetedAction({ battle: next, action, actor, actorSide: "player",
+            target, targetSide: "enemy", targetIndex, rng });
+        }
       }
       playerActionExecuted = true;
       next.lastPlayerTargetIndex = normalizeLivingTargetIndex(next.enemies, next.targetIndex, { allowDefeated: true });
@@ -299,6 +303,34 @@ function executeTargetedAction(options) {
   for (let index = start; index < options.battle.presentationEvents.length; index += 1) {
     const event = options.battle.presentationEvents[index];
     if (event.targetSide === "enemy") event.targetIndex = options.targetIndex;
+  }
+}
+
+function executeRandomlyDistributedHits({ battle, action, actor, rng }) {
+  const hitCount = Math.max(1, Math.floor(Number(action.hitCount) || 1));
+  for (let hitIndex = 0; hitIndex < hitCount; hitIndex += 1) {
+    const living = livingEnemyIndexes(battle.enemies);
+    if (living.length === 0) break;
+    const roll = Math.max(0, Math.min(0.999999, Number(rng()) || 0));
+    const targetIndex = living.length === 1 ? living[0] : living[Math.floor(roll * living.length)];
+    const target = battle.enemies[targetIndex];
+    const eventStart = battle.presentationEvents.length;
+    executeTargetedAction({
+      battle,
+      action: { ...action, hitCount: 1 },
+      actor,
+      actorSide: "player",
+      target,
+      targetSide: "enemy",
+      targetIndex,
+      rng
+    });
+    for (let index = eventStart; index < battle.presentationEvents.length; index += 1) {
+      const event = battle.presentationEvents[index];
+      if (event.type !== "attackHit" || event.actorSide !== "player") continue;
+      event.hitIndex = hitIndex;
+      event.hitCount = hitCount;
+    }
   }
 }
 
