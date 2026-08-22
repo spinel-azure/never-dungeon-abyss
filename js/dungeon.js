@@ -213,8 +213,9 @@ export function validateDungeonLayout({ depth = 1, progress = {} } = {}) {
   }
   const stairsUp = cells.flat().filter(cell => cell.type === "stairsUp");
   const stairsDown = cells.flat().filter(cell => cell.type === "stairsDown");
+  const expectedStairsDown = normalizedDepth === 100 ? 0 : 1;
   if (stairsUp.length !== 1) errors.push(`stairs up count ${stairsUp.length}/1`);
-  if (stairsDown.length !== 1) errors.push(`stairs down count ${stairsDown.length}/1`);
+  if (stairsDown.length !== expectedStairsDown) errors.push(`stairs down count ${stairsDown.length}/${expectedStairsDown}`);
   for (const stairs of [...stairsUp, ...stairsDown]) {
     if (!reachableAfterUnlock.has(`${stairs.x},${stairs.y}`)) errors.push(`stairs unreachable after unlock: ${stairs.x},${stairs.y}`);
   }
@@ -285,8 +286,10 @@ export function placeStairs(depth = 1) {
   cells[startY][startX].portal = floor % 10 === 0 && floor >= 10 && floor <= 100
     ? `transfer_b${floor}f`
     : null;
-  const stairsDown = findFarthestReachableCell(7);
-  if (stairsDown) cells[stairsDown.y][stairsDown.x].type = "stairsDown";
+  if (floor !== 100) {
+    const stairsDown = findFarthestReachableCell(7);
+    if (stairsDown) cells[stairsDown.y][stairsDown.x].type = "stairsDown";
+  }
 }
 
 export function placeNpc(depth = 1, progress = {}) {

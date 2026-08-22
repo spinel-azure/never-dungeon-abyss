@@ -3229,8 +3229,9 @@ import {
         : currentDepth >= 50 && currentDepth <= 59 ? "green"
           : currentDepth >= 60 && currentDepth <= 69 ? "yellow"
             : currentDepth >= 70 && currentDepth <= 79 ? "water"
-            : currentDepth >= 80 && currentDepth <= 89 ? "white"
+            : currentDepth >= 80 && currentDepth <= 89 ? "crystal"
             : currentDepth >= 90 && currentDepth <= 99 ? "black"
+            : currentDepth === 100 ? "white"
           : options.color;
     setMistOptions({ ...options, color });
   }
