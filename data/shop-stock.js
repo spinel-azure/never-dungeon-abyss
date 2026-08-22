@@ -25,12 +25,19 @@ export const DEEP_ARMOR_FAMILIES = Object.freeze([
   Object.freeze(["abyss_grimoire", "abyss_hat", "abyss_robe", "abyss_shoes"])
 ]);
 
+export const CRYSTAL_ARMOR_FAMILIES = Object.freeze([
+  Object.freeze(["amethyst_aegis", "amethyst_helmet", "amethyst_plate", "amethyst_greaves"]),
+  Object.freeze(["phantom_crystal_buckler", "phantom_crystal_hood", "phantom_crystal_armor", "phantom_crystal_boots"]),
+  Object.freeze(["white_crystal_shield", "white_crystal_mitre", "white_crystal_vestment", "white_crystal_shoes"]),
+  Object.freeze(["astral_crystal_grimoire", "astral_crystal_hat", "astral_crystal_robe", "astral_crystal_shoes"])
+]);
 export const SHOP_ARMOR_STOCK = Object.freeze([
   ...armorTier(1, 1, []),
   ...armorTier(2, 10, ["transfer_portal_b10f_unlocked", "boss_strange_knight_statue_b9f_defeated"]),
   ...armorTier(3, 20, ["shop_stock_b20f_unlocked", "boss_fallen_mage_b19f_defeated"]),
   ...finalArmorStock(),
-  ...deepArmorStock()
+  ...deepArmorStock(),
+  ...crystalArmorStock()
 ]);
 
 export const SHOP_ACCESSORY_STOCK = Object.freeze([
@@ -182,6 +189,15 @@ function deepArmorStock() {
   }));
 }
 
+function crystalArmorStock() {
+  return CRYSTAL_ARMOR_FAMILIES.flatMap(family => family).map(equipmentId => Object.freeze({
+    id: `shop_${equipmentId}`,
+    equipmentId,
+    enhancement: 0,
+    shopUnlockDepth: 80,
+    requiredFlags: Object.freeze(["transfer_portal_b80f_unlocked"])
+  }));
+}
 function toEquipmentOffer(entry) {
   const instance = { equipmentId: entry.equipmentId, enhancement: entry.enhancement };
   const definition = getEquipmentInstanceDefinition(instance);
@@ -209,6 +225,10 @@ function describeBonuses(bonuses = {}) {
         ? `一閃・暗殺術+${Math.round(Number(value) * 100)}%`
       : key === "poisonResistance"
         ? `毒・猛毒耐性+${Math.round(Number(value) * 100)}%`
+      : key === "maxSp"
+        ? `最大SP+${value}`
+      : key === "surpriseResistance"
+        ? `奇襲耐性+${Math.round(Number(value) * 100)}%`
       : `${key === "def" ? "DEF" : key.toUpperCase()}+${value}`)
     .join(" / ");
 }

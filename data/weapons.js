@@ -205,7 +205,38 @@ export const WEAPONS = Object.freeze({
     element: "physical", allowedJobs: Object.freeze(["mage"]), twoHanded: true, sellPrice: 3000,
     sellPriceByEnhancement: Object.freeze([3000, 3600, 4500, 6000])
   }),
-  stiletto: Object.freeze({
+  crystal_warhammer: Object.freeze({
+    id: "crystal_warhammer", name: "砕晶の戦槌", type: "greatsword", physicalDamageType: "blunt", attack: 26,
+    attackByEnhancement: Object.freeze([26, 28, 30, 33]),
+    statBonuses: Object.freeze({ str: 6 }),
+    statBonusesByEnhancement: Object.freeze([Object.freeze({ str: 6 }), Object.freeze({ str: 6 }), Object.freeze({ str: 7 }), Object.freeze({ str: 8 })]),
+    element: "physical", allowedJobs: Object.freeze(["warrior"]), twoHanded: true, sellPrice: 7500,
+    sellPriceByEnhancement: Object.freeze([7500, 9000, 11250, 15000])
+  }),
+  resonant_katar: Object.freeze({
+    id: "resonant_katar", name: "震晶のカタール", type: "dagger", physicalDamageType: "blunt", attack: 16,
+    attackByEnhancement: Object.freeze([16, 17, 18, 20]),
+    statBonuses: Object.freeze({ dex: 6 }),
+    statBonusesByEnhancement: Object.freeze([Object.freeze({ dex: 6 }), Object.freeze({ dex: 6 }), Object.freeze({ dex: 7 }), Object.freeze({ dex: 8 })]),
+    element: "physical", allowedJobs: Object.freeze(["thief"]), sellPrice: 7500,
+    sellPriceByEnhancement: Object.freeze([7500, 9000, 11250, 15000])
+  }),
+  amethyst_flail: Object.freeze({
+    id: "amethyst_flail", name: "アメジストフレイル", type: "blunt", physicalDamageType: "blunt", attack: 22,
+    attackByEnhancement: Object.freeze([22, 23, 25, 27]),
+    statBonuses: Object.freeze({ luc: 6, healingMiracleBonus: 0.05 }),
+    statBonusesByEnhancement: Object.freeze([Object.freeze({ luc: 6, healingMiracleBonus: 0.05 }), Object.freeze({ luc: 6, healingMiracleBonus: 0.05 }), Object.freeze({ luc: 7, healingMiracleBonus: 0.07 }), Object.freeze({ luc: 8, healingMiracleBonus: 0.1 })]),
+    element: "physical", allowedJobs: Object.freeze(["priest"]), sellPrice: 7500,
+    sellPriceByEnhancement: Object.freeze([7500, 9000, 11250, 15000])
+  }),
+  resonance_staff: Object.freeze({
+    id: "resonance_staff", name: "共鳴の大杖", type: "staff", physicalDamageType: "blunt", attack: 8,
+    attackByEnhancement: Object.freeze([8, 8, 9, 10]),
+    statBonuses: Object.freeze({ int: 13, maxSp: 15 }),
+    statBonusesByEnhancement: Object.freeze([Object.freeze({ int: 13, maxSp: 15 }), Object.freeze({ int: 14, maxSp: 15 }), Object.freeze({ int: 15, maxSp: 20 }), Object.freeze({ int: 17, maxSp: 25 })]),
+    element: "physical", allowedJobs: Object.freeze(["mage"]), twoHanded: true, sellPrice: 7500,
+    sellPriceByEnhancement: Object.freeze([7500, 9000, 11250, 15000])
+  }),  stiletto: Object.freeze({
     id: "stiletto", name: "スティレット", type: "dagger", attack: 7,
     element: "physical", allowedJobs: Object.freeze(["thief"]), sellPrice: 75,
     penetrationByEnhancement: Object.freeze([0.2, 0.25, 0.3, 0.35])

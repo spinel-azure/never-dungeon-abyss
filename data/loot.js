@@ -69,7 +69,20 @@ export function rollGoldChestLoot(character) {
 export function rollBlackChestLoot(rng = Math.random, depth = 6, job = null) {
   const table = getBlackChestLootTable(depth);
   const roll = normalizedRoll(rng);
-  if (Number(depth) >= 50 && Number(depth) <= 69) {
+  if (Number(depth) >= 80 && Number(depth) <= 88) {
+    const weaponIds = ["crystal_warhammer", "resonant_katar", "amethyst_flail", "resonance_staff"];
+    const jobWeaponIds = {
+      warrior: "crystal_warhammer", thief: "resonant_katar", priest: "amethyst_flail", mage: "resonance_staff"
+    };
+    const equipmentId = Number(depth) === 88 && jobWeaponIds[job]
+      ? jobWeaponIds[job]
+      : weaponIds[(Math.floor(Number(depth)) - 80) % weaponIds.length];
+    return {
+      kind: "equipment", equipmentId, slot: "rightArmId",
+      enhancement: rollEnhancement(MID_RED_CHEST_WEAPON_ENHANCEMENT_RATES, rng) + 1,
+      unidentifiedName: equipmentId === "resonance_staff" ? "？両手杖" : "？武器"
+    };
+  }  if (Number(depth) >= 50 && Number(depth) <= 69) {
     const weaponIds = ["blacksteel_longsword", "abyss_fang", "sacred_tree_mace", "ancient_tree_staff"];
     const bandFloor = (Math.floor(Number(depth)) - 50) % 10;
     const jobWeaponIds = {
@@ -151,6 +164,7 @@ export function rollRedChestLoot(rng = Math.random, depth = 1) {
   if (floor >= 31 && floor <= 40) return rollDeepRedChestLoot(roll, floor, rng);
   if (floor >= 50 && floor <= 59) return rollForestRedChestLoot(roll, floor, rng);
   if (floor >= 60 && floor <= 69) return rollDesertRedChestLoot(roll, rng);
+  if (floor >= 80 && floor <= 89) return rollCrystalRedChestLoot(roll, floor, rng);
   const earlyFloor = Number(depth) >= 1 && Number(depth) <= 9;
   if (earlyFloor && roll < 0.4) return { kind: "gold", amount: rollRedChestGold(rng) };
   if (earlyFloor && roll < 0.6) return { kind: "item", itemId: "healing_potion", amount: 1, unidentifiedName: "？薬" };
@@ -270,6 +284,24 @@ function rollDesertRedChestLoot(roll, rng) {
   };
 }
 
+function rollCrystalRedChestLoot(roll, depth, rng) {
+  if (roll < 0.1) return { kind: "item", itemId: "strong_healing_potion_small", amount: 1, unidentifiedName: "？薬" };
+  if (roll < 0.2) return { kind: "item", itemId: "strong_antidote", amount: 1, unidentifiedName: "？薬" };
+  const families = [
+    ["amethyst_aegis", "amethyst_helmet", "amethyst_plate", "amethyst_greaves"],
+    ["phantom_crystal_buckler", "phantom_crystal_hood", "phantom_crystal_armor", "phantom_crystal_boots"],
+    ["white_crystal_shield", "white_crystal_mitre", "white_crystal_vestment", "white_crystal_shoes"],
+    ["astral_crystal_grimoire", "astral_crystal_hat", "astral_crystal_robe", "astral_crystal_shoes"]
+  ];
+  const family = families[(depth - 80) % families.length];
+  const slotIndex = roll < 0.4 ? 0 : roll < 0.6 ? 1 : roll < 0.8 ? 2 : 3;
+  return {
+    kind: "equipment", equipmentId: family[slotIndex],
+    slot: ["leftArmId", "headId", "bodyId", "footId"][slotIndex],
+    enhancement: rollEnhancement(DEEP_RED_CHEST_ARMOR_ENHANCEMENT_RATES, rng) + 1,
+    unidentifiedName: slotIndex === 0 && family === families[3] ? "？魔導書" : "？防具"
+  };
+}
 function rollMidRedChestLoot(roll, depth, rng) {
   if (roll < 0.5) {
     if (normalizedRoll(rng) < 0.5) return { kind: "gold", amount: rollMidRedChestGold(rng) };

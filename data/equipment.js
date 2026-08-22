@@ -138,6 +138,57 @@ export const EQUIPMENT = Object.freeze({
     1: { def: 9, agi: 6 }, 2: { def: 10, agi: 7 }, 3: { def: 11, agi: 8 }
   })),
 
+  amethyst_aegis: item("amethyst_aegis", "紫晶の大盾", "leftArmId", { def: 10, dex: 5, magicDamageReduction: 0.03 }, crystalArmor("warrior", {
+    1: { def: 11, dex: 5, magicDamageReduction: 0.03 }, 2: { def: 12, dex: 6, magicDamageReduction: 0.04 }, 3: { def: 13, dex: 7, magicDamageReduction: 0.05 }
+  })),
+  amethyst_helmet: item("amethyst_helmet", "紫晶の兜", "headId", { def: 12, actionSkipResistance: 0.05 }, crystalArmor("warrior", {
+    1: { def: 13, actionSkipResistance: 0.05 }, 2: { def: 14, actionSkipResistance: 0.07 }, 3: { def: 15, actionSkipResistance: 0.1 }
+  })),
+  amethyst_plate: item("amethyst_plate", "紫晶の重鎧", "bodyId", { def: 12, str: 5, magicDamageReduction: 0.05 }, crystalArmor("warrior", {
+    1: { def: 13, str: 5, magicDamageReduction: 0.05 }, 2: { def: 14, str: 6, magicDamageReduction: 0.07 }, 3: { def: 15, str: 7, magicDamageReduction: 0.1 }
+  })),
+  amethyst_greaves: item("amethyst_greaves", "紫晶の脚甲", "footId", { def: 10, str: 5 }, crystalArmor("warrior", {
+    1: { def: 11, str: 5 }, 2: { def: 12, str: 6 }, 3: { def: 13, str: 7 }
+  })),
+
+  phantom_crystal_buckler: item("phantom_crystal_buckler", "幻晶のバックラー", "leftArmId", { def: 9, dex: 5 }, crystalArmor("thief", {
+    1: { def: 10, dex: 5 }, 2: { def: 11, dex: 6 }, 3: { def: 12, dex: 7 }
+  })),
+  phantom_crystal_hood: item("phantom_crystal_hood", "幻晶のフード", "headId", { def: 9, dex: 5, actionSkipResistance: 0.04 }, crystalArmor("thief", {
+    1: { def: 10, dex: 5, actionSkipResistance: 0.04 }, 2: { def: 11, dex: 6, actionSkipResistance: 0.06 }, 3: { def: 12, dex: 7, actionSkipResistance: 0.08 }
+  })),
+  phantom_crystal_armor: item("phantom_crystal_armor", "幻晶の軽鎧", "bodyId", { def: 10, dex: 5, magicDamageReduction: 0.04 }, crystalArmor("thief", {
+    1: { def: 11, dex: 5, magicDamageReduction: 0.04 }, 2: { def: 12, dex: 6, magicDamageReduction: 0.06 }, 3: { def: 13, dex: 7, magicDamageReduction: 0.08 }
+  })),
+  phantom_crystal_boots: item("phantom_crystal_boots", "幻晶のブーツ", "footId", { def: 8, agi: 7, surpriseResistance: 0.03 }, crystalArmor("thief", {
+    1: { def: 9, agi: 7, surpriseResistance: 0.03 }, 2: { def: 10, agi: 8, surpriseResistance: 0.04 }, 3: { def: 11, agi: 9, surpriseResistance: 0.05 }
+  })),
+
+  white_crystal_shield: item("white_crystal_shield", "白晶の聖盾", "leftArmId", { def: 9, magicDamageReduction: 0.04 }, crystalArmor("priest", {
+    1: { def: 10, magicDamageReduction: 0.04 }, 2: { def: 11, magicDamageReduction: 0.06 }, 3: { def: 12, magicDamageReduction: 0.08 }
+  })),
+  white_crystal_mitre: item("white_crystal_mitre", "白晶のミトラ", "headId", { def: 9, luc: 6, maxSp: 8 }, crystalArmor("priest", {
+    1: { def: 10, luc: 6, maxSp: 8 }, 2: { def: 11, luc: 7, maxSp: 10 }, 3: { def: 12, luc: 8, maxSp: 12 }
+  })),
+  white_crystal_vestment: item("white_crystal_vestment", "白晶の祭服", "bodyId", { def: 10, luc: 5, healingMiracleBonus: 0.05 }, crystalArmor("priest", {
+    1: { def: 11, luc: 5, healingMiracleBonus: 0.05 }, 2: { def: 12, luc: 6, healingMiracleBonus: 0.07 }, 3: { def: 13, luc: 7, healingMiracleBonus: 0.1 }
+  })),
+  white_crystal_shoes: item("white_crystal_shoes", "白晶の聖靴", "footId", { def: 8, agi: 7, maxSp: 8 }, crystalArmor("priest", {
+    1: { def: 9, agi: 7, maxSp: 8 }, 2: { def: 10, agi: 8, maxSp: 10 }, 3: { def: 11, agi: 9, maxSp: 12 }
+  })),
+
+  astral_crystal_grimoire: item("astral_crystal_grimoire", "星晶の魔導書", "leftArmId", { int: 12, maxSp: 16 }, crystalArmor("mage", {
+    1: { int: 13, maxSp: 16 }, 2: { int: 14, maxSp: 20 }, 3: { int: 15, maxSp: 24 }
+  })),
+  astral_crystal_hat: item("astral_crystal_hat", "星晶の帽子", "headId", { def: 9, maxSp: 10 }, crystalArmor("mage", {
+    1: { def: 10, maxSp: 10 }, 2: { def: 11, maxSp: 12 }, 3: { def: 12, maxSp: 15 }
+  })),
+  astral_crystal_robe: item("astral_crystal_robe", "星晶のローブ", "bodyId", { def: 10, int: 4, magicDamageReduction: 0.06 }, crystalArmor("mage", {
+    1: { def: 11, int: 4, magicDamageReduction: 0.06 }, 2: { def: 12, int: 5, magicDamageReduction: 0.08 }, 3: { def: 13, int: 6, magicDamageReduction: 0.1 }
+  })),
+  astral_crystal_shoes: item("astral_crystal_shoes", "星晶の靴", "footId", { def: 8, agi: 7, maxSp: 10 }, crystalArmor("mage", {
+    1: { def: 9, agi: 7, maxSp: 10 }, 2: { def: 10, agi: 8, maxSp: 12 }, 3: { def: 11, agi: 9, maxSp: 15 }
+  })),
   steel_shield: item("steel_shield", "鋼の盾", "leftArmId", { def: 4, dex: 2 }, finalArmor("warrior", {
     1: { def: 5, dex: 2 }, 2: { def: 5, dex: 3 }, 3: { def: 6, dex: 4 }
   })),
@@ -336,6 +387,18 @@ function deepArmor(job, statBonusesByEnhancement) {
   };
 }
 
+function crystalArmor(job, statBonusesByEnhancement) {
+  return {
+    allowedJobs: Object.freeze([job]),
+    buyPrice: 12000,
+    sellPrice: 6000,
+    shopUnlockDepth: 80,
+    statBonusesByEnhancement: Object.freeze(Object.fromEntries(
+      Object.entries(statBonusesByEnhancement).map(([level, bonuses]) => [level, Object.freeze({ ...bonuses })])
+    )),
+    sellPriceByEnhancement: Object.freeze({ 0: 6000, 1: 7200, 2: 9000, 3: 12000 })
+  };
+}
 function loadout(rightArmId, leftArmId, headId, bodyId, footId) {
   return Object.freeze({
     weaponId: rightArmId,

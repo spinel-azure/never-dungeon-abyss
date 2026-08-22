@@ -799,7 +799,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
         * getLibraDamageMultiplier(battle, actorSide, actor, target)
         * getLibraReceivedDamageMultiplier(battle, targetSide, actor, target)
         * getSphinxWeaknessDamageMultiplier(battle, actorSide, result.elementMultiplier)
-        * (actorSide === "player" && action.actionType === "physicalAttack" ? Number(target.physicalTypeMultipliers?.[action.weapon?.type]) || 1 : 1)
+        * (actorSide === "player" && action.actionType === "physicalAttack" ? Number(target.physicalTypeMultipliers?.[action.weapon?.physicalDamageType || action.weapon?.type]) || 1 : 1)
         * (Number(action.ariesOpeningDamageMultiplier) || 1)
         * (magicFocus ? Number(magicFocus.attackSpellDamageMultiplier) || 1 : 1)
         * (manaAmplification ? Number(manaAmplification.attackSpellDamageMultiplier) || 1 : 1)
@@ -970,7 +970,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
   }
   if (actorSide === "player" && actualDamage > 0 && action.actionType === "physicalAttack" && target.crackTrait) {
     const alreadyCracked = target.statuses.some(status => (status.id || status.statusId) === target.crackTrait.statusId);
-    const rate = action.weapon?.type === "blunt" ? Number(target.crackTrait.bluntRate) : Number(target.crackTrait.baseRate);
+    const rate = (action.weapon?.physicalDamageType || action.weapon?.type) === "blunt" ? Number(target.crackTrait.bluntRate) : Number(target.crackTrait.baseRate);
     if (!alreadyCracked && Number(rng()) < Math.max(0, Math.min(1, rate || 0))) {
       target.statuses = applyStatusApplications(target.statuses, [{ statusId: target.crackTrait.statusId, success: true, skipInitialDecrement: true }]);
       battle.log.push(`${target.name}の水晶装甲にひびが入った！`);
