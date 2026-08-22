@@ -147,6 +147,7 @@ import { getColdFloorStepDamage, isColdFloorDepth } from "../data/cold-floor.js"
 import {
   invalidateLongMarchChallenge,
   invalidateMarathonChallenge,
+  LONG_MARCH_REWARD_CARD_ID,
   MARATHON_BOSS_FLOORS,
   MARATHON_REWARD_CARD_ID,
   recordLongMarchDescent,
@@ -856,6 +857,12 @@ import {
     state.npcEncounterCounts = player.npcEncounterCounts && typeof player.npcEncounterCounts === "object" ? { ...player.npcEncounterCounts } : {};
     state.stairsPromptDismissed = Boolean(player.stairsPromptDismissed);
     character = normalizeCharacter(save.character);
+    let restoredLongMarchReward = false;
+    if (character?.eventFlags?.b1_b84_long_march_completed) {
+      const reward = grantCard(character.cards, LONG_MARCH_REWARD_CARD_ID, 1, character.deckCost);
+      character = { ...character, cards: reward.cards };
+      restoredLongMarchReward = reward.gained > 0;
+    }
     knownAchievementIds = new Set(getAdventureChronicle(character).filter(entry => entry.achieved).map(entry => entry.id));
     const quest007Supply = grantRedDoorInvestigationSupply(character);
     character = quest007Supply.character;
@@ -904,6 +911,10 @@ import {
       setPlayerInputEnabled(true);
       closeTown();
       say("冒険を再開しました。");
+    }
+    if (restoredLongMarchReward) {
+      setTimeout(() => showCardGetEffect(LONG_MARCH_REWARD_CARD_ID, { seId: "itemGet" }), 120);
+      scheduleAutosave();
     }
     return true;
   }
@@ -3097,6 +3108,8 @@ import {
     const previousDepth = currentDepth;
     currentDepth += 1;
     let marathonCompleted = false;
+    let longMarchCompleted = false;
+    let longMarchRewardGained = false;
     if (character) {
       if (currentDepth === 80) {
         character = { ...character, eventFlags: { ...(character.eventFlags || {}), floor_b80_reached: true } };
@@ -3115,13 +3128,20 @@ import {
       });
       character = marathon.character;
       marathonCompleted = marathon.completed;
-      character = recordLongMarchDescent(character, {
+      const longMarch = recordLongMarchDescent(character, {
         fromDepth: previousDepth,
         toDepth: currentDepth
-      }).character;
+      });
+      character = longMarch.character;
+      longMarchCompleted = longMarch.completed;
       if (marathonCompleted) {
         const reward = grantCard(character.cards, MARATHON_REWARD_CARD_ID, 1, character.deckCost);
         character = { ...character, cards: reward.cards };
+      }
+      if (longMarchCompleted) {
+        const reward = grantCard(character.cards, LONG_MARCH_REWARD_CARD_ID, 1, character.deckCost);
+        character = { ...character, cards: reward.cards };
+        longMarchRewardGained = reward.gained > 0;
       }
       character = recordNpcExpeditionDepth(character, currentDepth);
     }
@@ -3191,6 +3211,12 @@ import {
     if (marathonCompleted) {
       say("――長い、長い旅路の果てに、\nあなたは一度も地上へ戻ることなくB42Fへ到達した。\n\nZカード「カプリコーン」を手に入れた！");
       setTimeout(() => showCardGetEffect(MARATHON_REWARD_CARD_ID, { seId: "itemGet" }), 0);
+    }
+    if (longMarchCompleted) {
+      say("――長き道の果てに、あなたはB84Fへ到達した。\n\nZカード「トーラス」を手に入れた！");
+      if (longMarchRewardGained) {
+        setTimeout(() => showCardGetEffect(LONG_MARCH_REWARD_CARD_ID, { seId: "itemGet" }), 4300);
+      }
     }
     scheduleAutosave();
   }

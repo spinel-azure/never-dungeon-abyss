@@ -12,6 +12,7 @@ import { normalizeAdventureStats } from "./adventure-stats.js";
 import {
   createInitialLongMarchChallenge,
   createInitialMarathonChallenge,
+  LONG_MARCH_REQUIRED_TRANSFER_FLAG,
   normalizeLongMarchChallenge,
   normalizeMarathonChallenge
 } from "./marathon-challenge.js";
@@ -195,7 +196,9 @@ export function normalizeCharacter(character) {
     eventFlags,
     adventureStats: normalizeAdventureStats(character.adventureStats),
     marathonChallenge: normalizeMarathonChallenge(character.marathonChallenge),
-    longMarchChallenge: normalizeLongMarchChallenge(character.longMarchChallenge),
+    longMarchChallenge: eventFlags[LONG_MARCH_REQUIRED_TRANSFER_FLAG]
+      ? normalizeLongMarchChallenge(character.longMarchChallenge)
+      : createInitialLongMarchChallenge(),
     npcSystem: normalizeNpcSystem(character.npcSystem),
     playerCharge: normalizePlayerCharge(character.playerCharge),
     herbicideTrialUses: Math.max(0, Math.min(5, Math.floor(Number(character.herbicideTrialUses) || 0))),

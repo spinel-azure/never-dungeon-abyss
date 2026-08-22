@@ -1,9 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
 
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import {
   LONG_MARCH_COMPLETION_FLAG,
+  LONG_MARCH_REQUIRED_TRANSFER_FLAG,
+  LONG_MARCH_REWARD_CARD_ID,
   invalidateMarathonChallenge,
   MARATHON_COMPLETION_FLAG,
   recordLongMarchDescent,
@@ -71,7 +74,9 @@ test("a completed marathon cannot be restarted", () => {
 });
 
 test("the second long march tracks strict descent from B1F through B84F", () => {
-  let character = startLongMarchChallenge(createInitialCharacter({ name: "RUNNER", job: "thief" }));
+  let character = createInitialCharacter({ name: "RUNNER", job: "thief" });
+  character.eventFlags[LONG_MARCH_REQUIRED_TRANSFER_FLAG] = true;
+  character = startLongMarchChallenge(character);
   for (let fromDepth = 1; fromDepth < 84; fromDepth += 1) {
     const result = recordLongMarchDescent(character, { fromDepth, toDepth: fromDepth + 1 });
     character = result.character;
@@ -82,11 +87,33 @@ test("the second long march tracks strict descent from B1F through B84F", () => 
 });
 
 test("the second long march survives saves and fails on a skipped floor", () => {
-  let character = startLongMarchChallenge(createInitialCharacter({ name: "RUNNER", job: "priest" }));
+  let character = createInitialCharacter({ name: "RUNNER", job: "priest" });
+  character.eventFlags[LONG_MARCH_REQUIRED_TRANSFER_FLAG] = true;
+  character = startLongMarchChallenge(character);
   character = recordLongMarchDescent(character, { fromDepth: 1, toDepth: 2 }).character;
   character = normalizeCharacter(character);
   assert.deepEqual(character.longMarchChallenge, { active: true, currentDepth: 2 });
   const skipped = recordLongMarchDescent(character, { fromDepth: 2, toDepth: 4 });
   assert.equal(skipped.completed, false);
   assert.equal(skipped.character.longMarchChallenge.active, false);
+});
+
+test("the B84F long march starts only after the B80F transfer portal is unlocked", () => {
+  const locked = createInitialCharacter({ name: "RUNNER", job: "warrior" });
+  assert.equal(startLongMarchChallenge(locked).longMarchChallenge.active, false);
+
+  locked.longMarchChallenge = { active: true, currentDepth: 40 };
+  assert.equal(normalizeCharacter(locked).longMarchChallenge.active, false);
+
+  locked.eventFlags[LONG_MARCH_REQUIRED_TRANSFER_FLAG] = true;
+  assert.deepEqual(startLongMarchChallenge(locked).longMarchChallenge, { active: true, currentDepth: 1 });
+  assert.equal(LONG_MARCH_REWARD_CARD_ID, "zodiac_taurus");
+});
+
+test("main grants Taurus after the B84F achievement presentation", () => {
+  const source = fs.readFileSync(new URL("../js/main.js", import.meta.url), "utf8");
+  assert.match(source, /grantCard\(character\.cards, LONG_MARCH_REWARD_CARD_ID/);
+  assert.match(source, /showCardGetEffect\(LONG_MARCH_REWARD_CARD_ID, \{ seId: "itemGet" \}\), 4300/);
+  assert.match(source, /character\?\.eventFlags\?\.b1_b84_long_march_completed/);
+  assert.match(source, /if \(restoredLongMarchReward\)/);
 });

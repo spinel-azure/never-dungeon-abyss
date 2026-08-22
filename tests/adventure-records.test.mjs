@@ -165,7 +165,7 @@ test("new deep-cold achievements conceal their names behind hints until achieved
   assert.match(chronicle.find(entry => entry.id === "glacies")?.label || "", /氷巨人/);
   assert.match(chronicle.find(entry => entry.id === "eiskoenigin")?.label || "", /女王/);
   assert.match(chronicle.find(entry => entry.id === "b50")?.label || "", /極寒/);
-  assert.match(chronicle.find(entry => entry.id === "longMarch84")?.label || "", /深淵/);
+  assert.equal(chronicle.find(entry => entry.id === "longMarch84")?.label, "？？？？？？――タフすぎて損はない");
 });
 
 test("priest recovery achievement keeps its hidden hint until quest 016 is reported", () => {

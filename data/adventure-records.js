@@ -88,7 +88,7 @@ export function getAdventureChronicle(character) {
     ["abyssMusk", "奈落麝香の材料を入手した", completedQuestIds.includes("guild_021"), "ムスクビーストを倒し、奈落麝香の材料となる芳香嚢を入手した。", "？？？？？？――淑女の悩み"],
     ["fleischfresser", "フライシュフレッサーを倒した", flags.boss_fleischfresser_b59f_defeated, "B59Fの赤い扉の奥でフライシュフレッサーを倒した。"],
     ["b60", "B60Fへ到達した", depth >= 60 || flags.transfer_portal_b60f_unlocked, "奈落の迷宮地下60階へ到達し、転送門を解放した。"],
-    ["longMarch84", "深淵への大行軍再び", flags.b1_b84_long_march_completed, "一度も帰還せず、転送門を使わずにB1FからB84Fへ到達した。", "？？？？？？――さらなる深淵へ"]
+    ["longMarch84", "深淵への大行軍再び", flags.b1_b84_long_march_completed, "一度も帰還せず、転送門を使わずにB1FからB84Fへ到達した。", "？？？？？？――タフすぎて損はない"]
   ];
   return milestones.map(([id, label, achieved, description, hiddenLabel]) => ({
     id,

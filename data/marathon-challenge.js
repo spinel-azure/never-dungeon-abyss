@@ -5,6 +5,8 @@ export const MARATHON_REWARD_CARD_ID = "zodiac_capricorn";
 export const MARATHON_COMPLETION_FLAG = "b1_b42_marathon_completed";
 export const LONG_MARCH_GOAL_DEPTH = 84;
 export const LONG_MARCH_COMPLETION_FLAG = "b1_b84_long_march_completed";
+export const LONG_MARCH_REQUIRED_TRANSFER_FLAG = "transfer_portal_b80f_unlocked";
+export const LONG_MARCH_REWARD_CARD_ID = "zodiac_taurus";
 
 export function createInitialMarathonChallenge() {
   return { active: false, currentDepth: 0 };
@@ -45,7 +47,9 @@ export function startMarathonChallenge(character) {
 }
 
 export function startLongMarchChallenge(character) {
-  if (!character || character.eventFlags?.[LONG_MARCH_COMPLETION_FLAG]) return character;
+  if (!character
+    || character.eventFlags?.[LONG_MARCH_COMPLETION_FLAG]
+    || !character.eventFlags?.[LONG_MARCH_REQUIRED_TRANSFER_FLAG]) return character;
   return {
     ...character,
     longMarchChallenge: { active: true, currentDepth: MARATHON_START_DEPTH }
