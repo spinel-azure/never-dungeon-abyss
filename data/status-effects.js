@@ -14,6 +14,14 @@ export const STATUS_EFFECTS = Object.freeze({
     duration: 3,
     defenseMultiplier: 0.75
   }),
+  crystal_cracked: Object.freeze({ id: "crystal_cracked", name: "ひび割れ", kind: "debuff", duration: 3, defenseMultiplier: 0.7 }),
+  resonance_collapse: Object.freeze({ id: "resonance_collapse", name: "共鳴崩壊", kind: "debuff", duration: 2, defenseMultiplier: 0.45 }),
+  crystal_defense: Object.freeze({ id: "crystal_defense", name: "結晶防御", kind: "buff", duration: 2, defenseMultiplier: 1.25 }),
+  crystal_accuracy_down: Object.freeze({ id: "crystal_accuracy_down", name: "命中低下", kind: "debuff", duration: 3, physicalHitPenalty: 0.2, physicalHitRateFloor: 0.35 }),
+  crystal_cracked: Object.freeze({ id: "crystal_cracked", name: "ひび割れ", kind: "debuff", duration: 3, defenseMultiplier: 0.7 }),
+  resonance_collapse: Object.freeze({ id: "resonance_collapse", name: "共鳴崩壊", kind: "debuff", duration: 2, defenseMultiplier: 0.45 }),
+  crystal_defense: Object.freeze({ id: "crystal_defense", name: "結晶防御", kind: "buff", duration: 2, defenseMultiplier: 1.25 }),
+  crystal_accuracy_down: Object.freeze({ id: "crystal_accuracy_down", name: "命中低下", kind: "debuff", duration: 3, physicalHitPenalty: 0.2, physicalHitRateFloor: 0.35 }),
   unyielding_stance: Object.freeze({
     id: "unyielding_stance",
     name: "不屈",

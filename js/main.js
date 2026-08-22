@@ -102,7 +102,7 @@ import { getActivePlayTimeDelta, normalizeAdventureStats, recordInnStay, recordS
 import { getAdventureChronicle } from "../data/adventure-records.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName, grantEquipmentInstance } from "../data/equipment-inventory.js";
-import { createEnemyCombatant, getEnemyById, getEnemyEncounterCount, getRandomEncounterEnemy, getWaterRegionEncounterFormation } from "../data/enemies.js";
+import { createEnemyCombatant, getEnemyById, getEnemyEncounterCount, getRandomEncounterEnemy, getWaterRegionEncounterFormation, getCrystalRegionEncounterFormation } from "../data/enemies.js";
 import { applyBossVictory, bossLeavesRemains, createBossCombatant, getBossById, getFloorBossByDepth, isBossDefeated } from "../data/bosses.js";
 import { consumeKeyItem, getKeyItem, grantKeyItem, hasKeyItem } from "../data/key-items.js";
 import { configureBattle, handleBattleInput, isBattleActive, isJireneScriptedBattleActive, openBattleItems, startBattle } from "./battle.js";
@@ -1609,6 +1609,12 @@ import {
     if (enemyData.id === "maikaefer") return [enemyData];
     if (currentDepth >= 70 && currentDepth <= 79) {
       return getWaterRegionEncounterFormation({ depth: currentDepth });
+    }
+    if (currentDepth >= 80 && currentDepth <= 88) {
+      return getCrystalRegionEncounterFormation({ depth: currentDepth });
+    }
+    if (currentDepth >= 80 && currentDepth <= 88) {
+      return getCrystalRegionEncounterFormation({ depth: currentDepth });
     }
     return Array.from({ length: getEnemyEncounterCount(enemyData) }, () => enemyData);
   }

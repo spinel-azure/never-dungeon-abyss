@@ -114,10 +114,10 @@ export function getStatusResistanceBonus(statuses = []) {
 }
 
 export function getDefenseMultiplier(statuses = []) {
-  return statuses
-    .filter(status => status.active !== false)
-    .reduce((minimum, status) =>
-      Math.min(minimum, Number(status.defenseMultiplier) || 1), 1);
+  const active = statuses.filter(status => status.active !== false);
+  const debuff = active.reduce((minimum, status) => Math.min(minimum, Number(status.defenseMultiplier) || 1), 1);
+  const buff = active.reduce((maximum, status) => Math.max(maximum, Number(status.defenseMultiplier) || 1), 1);
+  return debuff * buff;
 }
 
 function cloneStatuses(statuses) {

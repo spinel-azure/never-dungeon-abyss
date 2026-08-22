@@ -534,6 +534,13 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
     battle.log.push(`${actor.name}は逃げ出した！`);
     return;
   }
+  if (action.actionType === "spDrain") {
+    const drained = Math.min(Math.max(0, Math.floor(Number(action.spDamage) || 0)), Math.max(0, Number(target.sp) || 0));
+    target.sp = Math.max(0, target.sp - drained);
+    battle.log.push(`${actor.name}の${action.name}！ ${target.name}のSPが${drained}減少した！`);
+    if (drained > 0) battle.presentationEvents.push({ type: "spDamage", actorSide, targetSide, amount: drained, message: `SP－${drained}` });
+    return;
+  }
   if (action.actionType === "guard") {
     actor.statuses = applyStatusApplications(actor.statuses, [{
       statusId: "guard",
@@ -741,6 +748,11 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
     battle.log.push(`${actor.name}は${action.name}を唱えた。${target.name}は聖なる光により消滅した。`);
     return;
   }
+  if (Array.isArray(action.hitCountRange)) {
+    const minimum = Math.max(1, Math.floor(Number(action.hitCountRange[0]) || 1));
+    const maximum = Math.max(minimum, Math.floor(Number(action.hitCountRange[1]) || minimum));
+    action = { ...action, hitCount: minimum + Math.floor(Math.max(0, Math.min(0.999999, Number(rng()) || 0)) * (maximum - minimum + 1)) };
+  }
   const result = action.actionType === "spell"
     ? resolveSpell({ attacker: actorStats, defender: targetStats, spell: action, rng })
     : resolvePhysicalAttack({ attacker: actorStats, defender: targetStats, attack: action, rng });
@@ -787,6 +799,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
         * getLibraDamageMultiplier(battle, actorSide, actor, target)
         * getLibraReceivedDamageMultiplier(battle, targetSide, actor, target)
         * getSphinxWeaknessDamageMultiplier(battle, actorSide, result.elementMultiplier)
+        * (actorSide === "player" && action.actionType === "physicalAttack" ? Number(target.physicalTypeMultipliers?.[action.weapon?.type]) || 1 : 1)
         * (Number(action.ariesOpeningDamageMultiplier) || 1)
         * (magicFocus ? Number(magicFocus.attackSpellDamageMultiplier) || 1 : 1)
         * (manaAmplification ? Number(manaAmplification.attackSpellDamageMultiplier) || 1 : 1)
@@ -954,6 +967,22 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
   )));
   for (const applied of applications.filter(item => item.success)) {
     battle.log.push(`${target.name}は${statusName(applied.statusId)}状態になった。`);
+  }
+  if (actorSide === "player" && actualDamage > 0 && action.actionType === "physicalAttack" && target.crackTrait) {
+    const alreadyCracked = target.statuses.some(status => (status.id || status.statusId) === target.crackTrait.statusId);
+    const rate = action.weapon?.type === "blunt" ? Number(target.crackTrait.bluntRate) : Number(target.crackTrait.baseRate);
+    if (!alreadyCracked && Number(rng()) < Math.max(0, Math.min(1, rate || 0))) {
+      target.statuses = applyStatusApplications(target.statuses, [{ statusId: target.crackTrait.statusId, success: true, skipInitialDecrement: true }]);
+      battle.log.push(`${target.name}の水晶装甲にひびが入った！`);
+    }
+  }
+  if (actorSide === "player" && actualDamage > 0 && target.resonanceTrait && result.element === target.resonanceTrait.element) {
+    const active = target.statuses.some(status => (status.id || status.statusId) === target.resonanceTrait.statusId);
+    if (!active && Number(rng()) < Math.max(0, Math.min(1, Number(target.resonanceTrait.rate) || 0))) {
+      target.statuses = applyStatusApplications(target.statuses, [{ statusId: target.resonanceTrait.statusId, success: true, skipInitialDecrement: true }]);
+      battle.log.push("雷撃によって水晶の身体が激しく共鳴した！");
+      battle.log.push(`${target.name}の装甲が崩れた！`);
+    }
   }
   markUltimateUsed(actor, action);
 }
@@ -1255,6 +1284,9 @@ function getCuredStatusIds(action = {}) {
 function statusName(id) {
   return ({
     armor_break: "DEF低下",
+    crystal_cracked: "ひび割れ",
+    resonance_collapse: "共鳴崩壊",
+    crystal_accuracy_down: "命中低下",
     action_seal: "封技",
     poison: "毒",
     deadly_poison: "猛毒",

@@ -1,4 +1,5 @@
 import { getWaterRegionFormationIds, waterRegionEnemies } from "./water-region-enemies.js";
+import { crystalRegionEnemies, getCrystalRegionFormationIds } from "./crystal-region-enemies.js";
 
 export const enemies = Object.freeze([
   Object.freeze({
@@ -630,6 +631,7 @@ export const enemies = Object.freeze([
     escapeRate: 0.22, surpriseRate: 0.22, surpriseRateMaximum: 0.34, isBoss: false
   }),
   ...waterRegionEnemies,
+  ...crystalRegionEnemies,
   Object.freeze({
     id: "mimic", name: "ミミック", imageId: "mimic",
     level: 10,
@@ -724,6 +726,10 @@ export function getWaterRegionEncounterFormation({ depth = 70, rng = Math.random
   return getWaterRegionFormationIds({ depth, rng }).map(getEnemyById).filter(Boolean);
 }
 
+export function getCrystalRegionEncounterFormation({ depth = 80, rng = Math.random } = {}) {
+  return getCrystalRegionFormationIds({ depth, rng }).map(getEnemyById).filter(Boolean);
+}
+
 export function createEnemyCombatant(enemy) {
   return {
     id: enemy.id,
@@ -754,6 +760,9 @@ export function createEnemyCombatant(enemy) {
     statuses: [],
     elementMultipliers: { ...(enemy.elementMultipliers || {}) },
     statusResistances: structuredClone(enemy.statusResistances || {}),
+    physicalTypeMultipliers: { ...(enemy.physicalTypeMultipliers || {}) },
+    crackTrait: structuredClone(enemy.crackTrait || null),
+    resonanceTrait: structuredClone(enemy.resonanceTrait || null),
     isBoss: Boolean(enemy.isBoss),
     alive: true
   };

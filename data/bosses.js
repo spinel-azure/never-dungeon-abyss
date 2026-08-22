@@ -677,7 +677,57 @@ export const BOSSES = Object.freeze({
     defeatedEncounterImageId: "sphinx_event_b69f", defeatedEncounterImage: "images/npc/NPC_event_13.avif",
     event: Object.freeze({ remains: "スピンクスは目を閉じて静かに眠っている。どうやら通り抜けてもよさそうだ。\n＊Aボタン：次へ" })
   }),
-  jirene_b79f: Object.freeze({
+  amethyst_drache_b89f: Object.freeze({
+    id: "amethyst_drache_b89f", name: "アメティストドラッヘ", level: 98, floor: 89,
+    imageId: "amethyst_drache_b89f", image: "images/bosses/boss_16.avif",
+    encounterImageId: "amethyst_drache_b89f", encounterImage: "images/bosses/boss_16.avif",
+    race: "dragon", maxHp: 14000,
+    stats: Object.freeze({ str: 54, int: 50, agi: 30, dex: 44, luc: 38 }),
+    def: 52, attack: 55, experienceReward: 65000,
+    actions: Object.freeze([
+      Object.freeze({ weight: 28, action: Object.freeze({
+        id: "amethyst_drache_claw", name: "紫晶爪", actionType: "physicalAttack",
+        hitCount: 2, powerPerHit: 0.8, hitBonus: 0.03, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 24, action: Object.freeze({
+        id: "amethyst_drache_tail", name: "結晶尾撃", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1.45, hitBonus: -0.05, speedModifier: -5,
+        effects: Object.freeze([Object.freeze({ statusId: "speed_down", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.35 })])
+      }) }),
+      Object.freeze({ weight: 22, action: Object.freeze({
+        id: "amethyst_drache_breath", name: "紫晶の吐息", actionType: "spell", element: "arcane",
+        spellPower: 72, powerMultiplier: 1.05, unavoidable: true,
+        effects: Object.freeze([Object.freeze({ statusId: "crystal_accuracy_down", trigger: "perAction", statusKind: "magical", baseRate: 0.4 })])
+      }) }),
+      Object.freeze({ weight: 16, action: Object.freeze({
+        id: "amethyst_drache_mana_break", name: "魔晶吸収", actionType: "spDrain", spDamage: 18
+      }) }),
+      Object.freeze({ weight: 10, when: Object.freeze({ hpRateBelow: 0.5 }), action: Object.freeze({
+        id: "amethyst_drache_resonance", name: "破滅の共鳴", actionType: "spell", element: "arcane",
+        spellPower: 90, powerMultiplier: 1.15, unavoidable: true, speedModifier: -7, effects: Object.freeze([])
+      }) })
+    ]),
+    resonanceTrait: Object.freeze({ element: "lightning", rate: 0.3, statusId: "resonance_collapse" }),
+    elementMultipliers: Object.freeze({ fire: 1, ice: 0.75, lightning: 1.35, holy: 1, dark: 1, arcane: 0.8 }),
+    statusResistances: Object.freeze({
+      instant_death: Object.freeze({ resistancePoints: 100, immune: true }),
+      poison: Object.freeze({ resistancePoints: 90, immune: false }),
+      deadly_poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      bleeding: Object.freeze({ resistancePoints: 90, immune: false }),
+      action_skip: Object.freeze({ resistancePoints: 100, immune: true }),
+      speed_down: Object.freeze({ resistancePoints: 85, immune: false })
+    }),
+    escapeRate: 0, surpriseRate: 0, surpriseRateMaximum: 0, noDrop: true,
+    isBoss: true, bossKind: "floor", defeatedFlag: "boss_b89f_defeated",
+    transferUnlockFlag: "transfer_portal_b90f_unlocked",
+    room: Object.freeze({ doorStartsUnlocked: true }),
+    event: Object.freeze({
+      prompt: "巨大な紫水晶の竜が、地鳴りのような共鳴音とともに目を覚ました。\n＊Aボタンで次へ",
+      start: "アメティストドラッヘが咆哮した！ 水晶洞窟全体が激しく震えている！",
+      autoStartDelay: 2000,
+      remains: "砕けた紫水晶の欠片が、静かな光を放っている。\n＊Aボタン：次へ"
+    })
+  }),  jirene_b79f: Object.freeze({
     id: "jirene_b79f", name: "ジレーネ", level: 90, floor: 79,
     imageId: "jirene_b79f", image: "images/bosses/boss_15.avif",
     encounterImageId: "parthenope_event_b79f", encounterImage: "images/npc/NPC_event_17b.avif",
