@@ -30,6 +30,7 @@ export const ABYSS_MUSK_QUEST_ID = "guild_021";
 export const SIXTH_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_023";
 export const SEVENTH_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_027";
 export const JIRENE_SONG_INVESTIGATION_QUEST_ID = "guild_028";
+export const JIRENE_SONG_INVESTIGATION_ACCEPTED_FLAG = "guild_028_accepted_once";
 export const BEESWAX_COLLECTION_QUEST_ID = "guild_029";
 export const BEESWAX_REQUIRED_COUNT = 15;
 export const HERBICIDE_TRIAL_SUPPLY_FLAG = "guild_020_trial_herbicide_received";
@@ -810,6 +811,15 @@ export function acceptQuest(character, questId) {
       ? quest.requiredCount : Math.min(quest.requiredCount, persistentProgress)
   };
   let next = { ...character, quests };
+  if (quest.id === JIRENE_SONG_INVESTIGATION_QUEST_ID) {
+    next = {
+      ...next,
+      eventFlags: {
+        ...(next.eventFlags || {}),
+        [JIRENE_SONG_INVESTIGATION_ACCEPTED_FLAG]: true
+      }
+    };
+  }
   let acceptanceRewardCardId = null;
   if (quest.id === RED_DOOR_INVESTIGATION_QUEST_ID) {
     const supply = grantRedDoorInvestigationSupply(next);

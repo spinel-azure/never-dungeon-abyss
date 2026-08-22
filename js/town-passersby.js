@@ -1,4 +1,9 @@
 import { isAnastasiaFestivalSunday } from "../data/anastasia-event.js";
+import {
+  getQuestProgress,
+  JIRENE_SONG_INVESTIGATION_ACCEPTED_FLAG,
+  JIRENE_SONG_INVESTIGATION_QUEST_ID
+} from "../data/quests.js";
 
 const PASSERBY_CONFIGS = Object.freeze([
   Object.freeze({
@@ -17,6 +22,7 @@ const PASSERBY_CONFIGS = Object.freeze([
   Object.freeze({
     id: "quietTownGirl",
     src: "images/npc/NPC_16.avif",
+    hiddenAfterFlag: JIRENE_SONG_INVESTIGATION_ACCEPTED_FLAG,
     speed: 34,
     bobAmplitude: 1,
     walkPeriod: 660,
@@ -162,9 +168,11 @@ export function configureTownPassersby({ canvas, root, getCharacter = () => null
     previousTime = now;
     context.clearRect(0, 0, canvas.width, canvas.height);
     if (visible) {
-      const hideAnastasia = isAnastasiaFestivalSunday(getCharacter());
+      const character = getCharacter();
+      const hideAnastasia = isAnastasiaFestivalSunday(character);
       passersby.forEach(passerby => {
-        if (hideAnastasia && passerby.config.id === "priest") {
+        if ((hideAnastasia && passerby.config.id === "priest")
+          || !isTownPasserbyVisible(passerby.config.id, character)) {
           passerby.active = false;
           passerby.nextSpawnAt = now + randomBetween(...passerby.config.spawnInterval);
           return;
@@ -180,6 +188,7 @@ export function configureTownPassersby({ canvas, root, getCharacter = () => null
         .filter(passerby => (
           !passerby.active
           && !(hideAnastasia && passerby.config.id === "priest")
+          && isTownPasserbyVisible(passerby.config.id, character)
           && passerby.image.complete
           && passerby.image.naturalWidth > 0
           && now >= passerby.nextSpawnAt
@@ -196,7 +205,7 @@ export function configureTownPassersby({ canvas, root, getCharacter = () => null
           deltaSeconds,
           now,
           allowedToSpawn.has(passerby),
-          Boolean(getCharacter()?.eventFlags?.[passerby.config.alternateFlag])
+          Boolean(character?.eventFlags?.[passerby.config.alternateFlag])
         );
       });
     }
@@ -287,4 +296,12 @@ export function getTownPasserbyImageSource(id, character) {
   return config.alternateSrc && character?.eventFlags?.[config.alternateFlag]
     ? config.alternateSrc
     : config.src;
+}
+
+export function isTownPasserbyVisible(id, character) {
+  const config = PASSERBY_CONFIGS.find(entry => entry.id === id);
+  if (!config) return false;
+  if (!config.hiddenAfterFlag) return true;
+  const quest = getQuestProgress(character, JIRENE_SONG_INVESTIGATION_QUEST_ID);
+  return !character?.eventFlags?.[config.hiddenAfterFlag] && !quest.active && !quest.completed;
 }
