@@ -14,7 +14,12 @@ test("lot bag tutorial highlights the action after a three second lock", () => {
   const main = fs.readFileSync(new URL("../js/main.js", import.meta.url), "utf8");
   assert.match(html, /id="lootBagTutorial"/);
   assert.match(html, /「次へ」もしくは「鑑定する」を押してください。/);
+  assert.match(html, /class="loot-bag-tutorial-card">？カード/);
+  assert.match(html, /class="loot-bag-tutorial-weapon">？武器/);
   assert.match(css, /background:rgba\(0,0,0,\.6\)/);
+  assert.match(css, /loot-bag-tutorial-card\{display:inline;color:#ffe45c/);
+  assert.match(css, /loot-bag-tutorial-weapon\{display:inline;color:#ff9d2e/);
+  assert.match(css, /loot-bag-tutorial-content p\{[^}]*"GameFont"/);
   assert.match(main, /lootIdentifyAction\.disabled = true/);
   assert.match(main, /lootBagTutorialTimer = window\.setTimeout\([\s\S]*?3000\)/);
   assert.match(main, /lootBagTutorialSeen: true/);

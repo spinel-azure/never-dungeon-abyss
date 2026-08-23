@@ -21,6 +21,7 @@ test("guild quest list keeps pager controls and clips rows inside the notice", a
   ]);
   assert.match(html, /id="guildQuestPager"[\s\S]*data-quest-page="-1"[\s\S]*◀[\s\S]*data-quest-page="1"[\s\S]*▶/);
   assert.match(css, /\.guild-quest-list\{[^}]*overflow:hidden/);
+  assert.match(css, /\.guild-quest-pager\{[^}]*bottom:4%/);
   assert.match(townSource, /pager\.hidden = pageCount <= 1/);
   assert.match(townSource, /window\.addEventListener\("resize"[\s\S]*renderGuildQuestList/);
 });

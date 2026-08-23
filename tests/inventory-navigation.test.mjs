@@ -21,4 +21,5 @@ test("inventory separates page navigation from tab navigation", async () => {
   assert.match(css, /prefers-reduced-motion:reduce[^}]*inventory-tabs button\.is-cursor/);
   assert.match(menu, /装備可能職：\$\{allowedJobs\.map/);
   assert.match(menu, /allowedJobs\.includes\(character\?\.job\)/);
+  assert.match(menu, /result\.reason\}\$\{incompatibleEquipmentJobLabel\(definition, character\)\}/);
 });

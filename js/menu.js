@@ -1058,7 +1058,11 @@ function renderInventoryComparison(root, candidate) {
   root.hidden = !visible; if (root.hidden) return;
   const slot = menu.inventoryMode === "equip" ? menu.inventorySlot : candidate.slot;
   const character = menu.getCharacter(), result = equipInstance(character, slot, candidate?.instanceId || null);
-  if (!result.accepted) { root.textContent = result.reason; return; }
+  if (!result.accepted) {
+    const definition = getEquipmentInstanceDefinition(candidate);
+    root.textContent = `${result.reason}${incompatibleEquipmentJobLabel(definition, character)}`;
+    return;
+  }
   const preview = normalizeCharacter(result.character);
   const beforeStats = collectStats(character), afterStats = collectStats(preview);
   const beforeCombat = equipmentCombatValues(character), afterCombat = equipmentCombatValues(preview);
