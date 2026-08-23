@@ -94,6 +94,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     longMarchChallenge: createInitialLongMarchChallenge(),
     npcSystem: createInitialNpcSystem(),
     playerCharge: createInitialPlayerCharge(),
+    firstDungeonTutorialSeen: false,
     crystalFloorStepCount: 0,
     herbicideTrialUses: 0,
     cardPassiveStepCount: 0,
@@ -202,6 +203,9 @@ export function normalizeCharacter(character) {
       : createInitialLongMarchChallenge(),
     npcSystem: normalizeNpcSystem(character.npcSystem),
     playerCharge: normalizePlayerCharge(character.playerCharge),
+    firstDungeonTutorialSeen: typeof character.firstDungeonTutorialSeen === "boolean"
+      ? character.firstDungeonTutorialSeen
+      : true,
     crystalFloorStepCount: Math.max(0, Math.floor(Number(character.crystalFloorStepCount) || 0)) % 3,
     herbicideTrialUses: Math.max(0, Math.min(5, Math.floor(Number(character.herbicideTrialUses) || 0))),
     cardPassiveStepCount: Math.max(0, Math.floor(Number(character.cardPassiveStepCount) || 0)) % 5,

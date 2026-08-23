@@ -161,7 +161,6 @@ import {
   acceptQuest,
   completeQueenShadowInvestigation,
   grantRedDoorInvestigationSupply,
-  FLOOR_SURVEY_QUEST_ID,
   getForcedEnemyId,
   getQuestProgress,
   hasActiveQuest,
@@ -214,6 +213,8 @@ import {
   const depthEl = document.getElementById("depth");
   const msgEl = document.getElementById("message");
   const itemOverlay = document.getElementById("itemOverlay");
+  const firstDungeonTutorial = document.getElementById("firstDungeonTutorial");
+  const firstDungeonTutorialPrompt = document.getElementById("firstDungeonTutorialPrompt");
   const viewportEl = document.querySelector(".viewport");
   const townPortraitFrame = document.querySelector(".town-portrait-frame");
   const torchMeterEl = document.getElementById("torchMeter");
@@ -265,7 +266,6 @@ import {
   const revivalPrayer = document.getElementById("revivalPrayer");
   const revivalPrayerText = document.getElementById("revivalPrayerText");
   const revivalGoddess = document.getElementById("revivalGoddess");
-  const questTutorialOverlay = document.getElementById("questTutorialOverlay");
   let sceneTransitionRunning = false;
   let templeRevivalJinglePending = false;
   let cardGetTimer = 0;
@@ -278,6 +278,10 @@ import {
   let trapResultTimer = 0;
   let experienceSettlementCloseCallback = null;
   let pendingLootIdentification = null;
+  let firstDungeonTutorialActive = false;
+  let firstDungeonTutorialReady = false;
+  let firstDungeonTutorialTimer = 0;
+  let resolveFirstDungeonTutorial = null;
 
   let lootIdentifyTouchHandled = false;
 
@@ -334,6 +338,54 @@ import {
     }
     activateLootIdentifyAction();
   });
+  function finishFirstDungeonTutorial() {
+    if (!firstDungeonTutorialActive || !firstDungeonTutorialReady) return false;
+    window.clearTimeout(firstDungeonTutorialTimer);
+    firstDungeonTutorialActive = false;
+    firstDungeonTutorialReady = false;
+    firstDungeonTutorial.hidden = true;
+    firstDungeonTutorialPrompt.hidden = true;
+    if (character) character.firstDungeonTutorialSeen = true;
+    saveGame();
+    setPlayerInputEnabled(true);
+    const resolve = resolveFirstDungeonTutorial;
+    resolveFirstDungeonTutorial = null;
+    resolve?.();
+    return true;
+  }
+
+  function handleFirstDungeonTutorialInput(action) {
+    if (!firstDungeonTutorialActive) return false;
+    if (action === "confirm") finishFirstDungeonTutorial();
+    return true;
+  }
+
+  function showFirstDungeonTutorial() {
+    if (!firstDungeonTutorial || !firstDungeonTutorialPrompt) {
+      setPlayerInputEnabled(true);
+      return Promise.resolve();
+    }
+    setPlayerInputEnabled(false);
+    firstDungeonTutorialActive = true;
+    firstDungeonTutorialReady = false;
+    firstDungeonTutorialPrompt.hidden = true;
+    firstDungeonTutorial.hidden = false;
+    window.clearTimeout(firstDungeonTutorialTimer);
+    firstDungeonTutorialTimer = window.setTimeout(() => {
+      if (!firstDungeonTutorialActive) return;
+      firstDungeonTutorialReady = true;
+      firstDungeonTutorialPrompt.hidden = false;
+    }, 3000);
+    return new Promise(resolve => {
+      resolveFirstDungeonTutorial = resolve;
+    });
+  }
+
+  firstDungeonTutorial?.addEventListener("pointerdown", event => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (firstDungeonTutorialReady) finishFirstDungeonTutorial();
+  });
   let pendingEncounter = null;
   let activeRareRoomEncounterId = null;
   const escapedSpecialBossesThisExploration = new Set();
@@ -358,7 +410,7 @@ import {
     getDoorState,
     getDoorKind,
     inBounds,
-    handleOverlayInput: handleOverlayEventInput,
+    handleOverlayInput: action => handleFirstDungeonTutorialInput(action) || handleOverlayEventInput(action),
     updateAnimation,
     updateHud,
     drawMinimap,
@@ -1187,7 +1239,6 @@ import {
         { important: true, amounts: [result.acceptanceSupplyAmount] }
       ), 0);
     }
-    if (questId === FLOOR_SURVEY_QUEST_ID) showQuestTutorial();
     return {
       ...result,
       character,
@@ -1214,33 +1265,6 @@ import {
         : ""
     };
   }
-
-  function showQuestTutorial() {
-    if (questTutorialOverlay) questTutorialOverlay.hidden = false;
-  }
-
-  function hideQuestTutorial() {
-    if (!questTutorialOverlay || questTutorialOverlay.hidden) return false;
-    questTutorialOverlay.hidden = true;
-    return true;
-  }
-
-  questTutorialOverlay?.addEventListener("click", hideQuestTutorial);
-  window.addEventListener("keydown", event => {
-    if (questTutorialOverlay?.hidden || !["KeyX", "KeyZ", "Enter", "Escape"].includes(event.code)) return;
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    hideQuestTutorial();
-  }, { capture: true });
-  const dismissTutorialFromControl = event => {
-    if (!hideQuestTutorial()) return;
-    event.preventDefault();
-    event.stopImmediatePropagation();
-  };
-  ["click", "touchend"].forEach(type => {
-    buttonA?.addEventListener(type, dismissTutorialFromControl, { capture: true });
-    buttonB?.addEventListener(type, dismissTutorialFromControl, { capture: true });
-  });
 
   function abandonGuildRequest(questId) {
     const result = abandonQuest(character, questId);
@@ -2869,7 +2893,8 @@ import {
         saveGame();
       }
     });
-    setPlayerInputEnabled(true);
+    if (!character.firstDungeonTutorialSeen) await showFirstDungeonTutorial();
+    else setPlayerInputEnabled(true);
   }
 
   async function enterFloorFromTransfer(depth = 10) {
@@ -3421,6 +3446,7 @@ import {
       window.dispatchEvent(new CustomEvent("nda:title-input", { detail: { action } }));
       return true;
     }
+    if (handleFirstDungeonTutorialInput(action)) return true;
     recordUserInput();
     if (action === "items") {
       if (handleMenuInput("lock")) return true;
@@ -3472,6 +3498,7 @@ import {
     onButtonPreviewChange: setGamepadPressedButtons,
     onConnectionChange: showGamepadConnectionNotification,
     toggleMinimap: () => {
+      if (handleFirstDungeonTutorialInput("dismiss")) return true;
       recordUserInput();
       if (worldLocation !== "dungeon" || isBattleActive() || isMenuOpen()
         || sceneTransitionRunning || state.overlayEvent) return false;
@@ -3493,13 +3520,16 @@ import {
     buttonA,
     buttonB,
     commandRoot: dungeonCommands,
-    openStatusMenu,
-    handleSkillInput: handleSkillOverlayInput,
-    handleItemInput: handleItemOverlayInput,
-    handleOverlayInput: handleOverlayEventInput,
-    handleBattleInput,
+    openStatusMenu: () => {
+      if (handleFirstDungeonTutorialInput("dismiss")) return true;
+      return openStatusMenu();
+    },
+    handleSkillInput: action => handleFirstDungeonTutorialInput(action) || handleSkillOverlayInput(action),
+    handleItemInput: action => handleFirstDungeonTutorialInput(action) || handleItemOverlayInput(action),
+    handleOverlayInput: action => handleFirstDungeonTutorialInput(action) || handleOverlayEventInput(action),
+    handleBattleInput: action => handleFirstDungeonTutorialInput(action) || handleBattleInput(action),
     handleTownInput: action => (
-      sceneTransitionRunning || handleLootIdentifyInput(action) || handleExperienceSettlementInput(action) || handleTownInput(action)
+      handleFirstDungeonTutorialInput(action) || sceneTransitionRunning || handleLootIdentifyInput(action) || handleExperienceSettlementInput(action) || handleTownInput(action)
     ),
     handleDoorInput: openDoorAhead,
     onUserOperation: recordUserInput,

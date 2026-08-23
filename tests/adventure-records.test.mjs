@@ -102,19 +102,28 @@ test("chronicle restores achieved milestones from existing progress flags", () =
   character.eventFlags.boss_otherworldly_wisdom_b4f_defeated = true;
   character.eventFlags.inn_stable_stayed = true;
   const chronicle = getAdventureChronicle(character);
-  assert.deepEqual(chronicle.slice(0, 3).map(entry => entry.id), ["registered", "stable", "b2"]);
+  assert.deepEqual(chronicle.slice(0, 4).map(entry => entry.id), ["registered", "stable", "b1Survey", "b2"]);
   assert.equal(chronicle.find(entry => entry.id === "stable").achieved, true);
   assert.equal(chronicle.find(entry => entry.id === "ghost").achieved, true);
   assert.equal(chronicle.find(entry => entry.id === "otherworldlyWisdom").achieved, true);
   assert.equal(chronicle.find(entry => entry.id === "otherworldlyWisdom").label, "異界の叡智を撃破した");
   assert.equal(chronicle.find(entry => entry.id === "b10").achieved, true);
   assert.equal(chronicle.find(entry => entry.id === "stable").label, "馬小屋に宿泊した");
+  assert.equal(chronicle.find(entry => entry.id === "b1Survey").achieved, false);
   assert.equal(chronicle.find(entry => entry.id === "mage").label, "？？？？？？？");
   assert.equal(chronicle.find(entry => entry.id === "marathon42").label, "？？？？？？――地上を忘れし旅人");
   character.eventFlags.b1_b42_marathon_completed = true;
   const completed = getAdventureChronicle(character).find(entry => entry.id === "marathon42");
   assert.equal(completed.label, "深淵への大行軍");
   assert.equal(completed.achieved, true);
+});
+
+test("B1F survey achievement follows quest 003's one-hundred-cell flag", () => {
+  const character = createInitialCharacter({ name: "新人調査員", job: "thief" });
+  character.eventFlags.achievement_b1f_100_cells = true;
+  const entry = getAdventureChronicle(character).find(candidate => candidate.id === "b1Survey");
+  assert.equal(entry.achieved, true);
+  assert.equal(entry.label, "B1Fを100マス踏破した");
 });
 
 test("unachieved stable and Otherworldly Wisdom milestones show their hints", () => {

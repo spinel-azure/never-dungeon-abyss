@@ -134,7 +134,7 @@ const PASSERBY_CONFIGS = Object.freeze([
     src: "images/npc/NPC_18b.avif",
     speed: 38,
     bobAmplitude: 3,
-    walkPeriod: 520,
+    walkPeriod: 880,
     spawnInterval: Object.freeze([45000, 85000]),
     initialDelay: 18000,
     initialPhase: 0,
@@ -281,7 +281,7 @@ function updateAndDrawPasserby(passerby, context, width, height, deltaSeconds, n
 
   const walkStep = Math.floor((now + config.initialPhase) / (config.walkPeriod / 8)) % 8;
   const bobPattern = config.gait === "trot"
-    ? [0, -3, -1, -2, 0, -3, -1, -2]
+    ? [0, -1, -2, -3, -3, -2, -1, 0]
     : config.bobAmplitude >= 2
     ? [0, -1, -2, -1, 0, -1, -2, -1]
     : [0, -1, -1, 0, 0, -1, -1, 0];

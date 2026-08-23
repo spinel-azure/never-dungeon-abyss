@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { applyBossVictory } from "../data/bosses.js";
@@ -273,6 +274,7 @@ test("quest 003 tracks B1F explored cells and resets before completion", () => {
   explored[0][1] = true;
   character = recordFloorExploration(character, { depth: 1, explored });
   assert.equal(getQuestProgress(character, FLOOR_SURVEY_QUEST_ID).progress, 2);
+  assert.equal(character.eventFlags.achievement_b1f_100_cells, undefined);
   character = recordFloorExploration(character, { depth: 0, explored: [] });
   assert.equal(getQuestProgress(character, FLOOR_SURVEY_QUEST_ID).progress, 0);
 });
@@ -284,12 +286,22 @@ test("quest 003 completion survives return and grants an SP card and 200G", () =
   ).character;
   const explored = Array.from({ length: 10 }, () => Array(10).fill(true));
   character = recordFloorExploration(character, { depth: 1, explored });
+  assert.equal(character.eventFlags.achievement_b1f_100_cells, true);
   character = recordFloorExploration(character, { depth: 0, explored: [] });
   assert.equal(getQuestProgress(character, FLOOR_SURVEY_QUEST_ID).readyToReport, true);
   const report = reportQuest(character, FLOOR_SURVEY_QUEST_ID);
   assert.equal(report.rewardCardId, "common_sp_up");
   assert.equal(report.bonusGold, 200);
   assert.equal(getOwnedCardCount(report.character.cards, "common_sp_up"), 1);
+});
+
+test("quest 003 no longer installs or opens the obsolete tutorial overlay", () => {
+  const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+  const css = readFileSync(new URL("../css/style.css", import.meta.url), "utf8");
+  const main = readFileSync(new URL("../js/main.js", import.meta.url), "utf8");
+  assert.doesNotMatch(html, /questTutorialOverlay|tutorial_01\.avif/);
+  assert.doesNotMatch(css, /quest-tutorial-overlay/);
+  assert.doesNotMatch(main, /questTutorialOverlay|showQuestTutorial|hideQuestTutorial/);
 });
 
 test("quest 004 unlocks with B2F and forces abyss rabbits until 15 defeats", () => {

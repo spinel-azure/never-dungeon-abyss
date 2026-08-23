@@ -952,6 +952,16 @@ export function recordFloorExploration(character, { depth, explored } = {}) {
     entry.progress = progress;
     updated = true;
   });
+  const b1Completed = Number(depth) === 1
+    && exploredCount >= 100
+    && Boolean(quests.active[FLOOR_SURVEY_QUEST_ID]);
+  if (b1Completed && !character?.eventFlags?.achievement_b1f_100_cells) {
+    return {
+      ...character,
+      quests,
+      eventFlags: { ...(character.eventFlags || {}), achievement_b1f_100_cells: true }
+    };
+  }
   const b35Completed = Number(depth) === 35
     && exploredCount >= 100
     && Boolean(quests.active[B35F_SURVEY_QUEST_ID]);
