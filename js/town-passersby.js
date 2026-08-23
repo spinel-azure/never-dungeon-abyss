@@ -143,6 +143,21 @@ const PASSERBY_CONFIGS = Object.freeze([
     heightRatio: 0.76,
     sourceFacing: "left",
     gait: "trot"
+  }),
+  Object.freeze({
+    id: "malicious",
+    src: "images/npc/NPC_24.avif",
+    speed: 78,
+    bobAmplitude: 1,
+    walkPeriod: 360,
+    spawnInterval: Object.freeze([62000, 108000]),
+    initialDelay: 26000,
+    initialPhase: 90,
+    initialDirection: -1,
+    heightRatio: 0.78,
+    drawOrder: 0.9,
+    sourceFacing: "left",
+    gait: "skulk"
   })
 ]);
 
@@ -283,6 +298,8 @@ function updateAndDrawPasserby(passerby, context, width, height, deltaSeconds, n
   const walkStep = Math.floor((now + config.initialPhase) / (config.walkPeriod / 8)) % 8;
   const bobPattern = config.gait === "trot"
     ? [0, -1, -2, -3, -3, -2, -1, 0]
+    : config.gait === "skulk"
+    ? [0, 0, -1, -1, 0, 0, -1, -1]
     : config.bobAmplitude >= 2
     ? [0, -1, -2, -1, 0, -1, -2, -1]
     : [0, -1, -1, 0, 0, -1, -1, 0];

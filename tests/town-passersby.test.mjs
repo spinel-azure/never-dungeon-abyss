@@ -46,3 +46,12 @@ test("Loretta is enlarged and drawn immediately in front of the priest", () => {
   assert.match(source, /id: "rareTownVisitor"[\s\S]*?heightRatio: 0\.86[\s\S]*?drawOrder: 0\.5/);
   assert.match(source, /\(left\.config\.drawOrder \?\? 1\) - \(right\.config\.drawOrder \?\? 1\)/);
 });
+
+test("Malicious hurries through town immediately behind the horse layer", () => {
+  const source = readFileSync(new URL("../js/town-passersby.js", import.meta.url), "utf8");
+  assert.equal(getTownPasserbyImageSource("malicious", null), "images/npc/NPC_24.avif");
+  assert.equal(existsSync(new URL("../images/npc/NPC_24.avif", import.meta.url)), true);
+  assert.match(source, /id: "malicious"[\s\S]*?speed: 78[\s\S]*?walkPeriod: 360/);
+  assert.match(source, /id: "malicious"[\s\S]*?drawOrder: 0\.9[\s\S]*?gait: "skulk"/);
+  assert.match(source, /config\.gait === "skulk"[\s\S]*?\[0, 0, -1, -1, 0, 0, -1, -1\]/);
+});
