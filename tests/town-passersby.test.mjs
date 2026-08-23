@@ -35,4 +35,6 @@ test("the horse and chicken walk through town more often than the rare visitor",
   assert.match(source, /id: "horseAndChicken"[\s\S]*?spawnInterval: Object\.freeze\(\[45000, 85000\]\)/);
   assert.match(source, /id: "rareTownVisitor"[\s\S]*?spawnInterval: Object\.freeze\(\[240000, 480000\]\)/);
   assert.match(source, /config\.gait === "trot"[\s\S]*?\[0, -3, -1, -2, 0, -3, -1, -2\]/);
+  assert.match(source, /const bottomOverscan = Math\.max\(0, -Math\.min\(\.\.\.bobPattern\)\)/);
+  assert.match(source, /height - drawHeight \+ bottomOverscan \+ bobOffset/);
 });

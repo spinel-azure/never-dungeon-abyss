@@ -286,8 +286,9 @@ function updateAndDrawPasserby(passerby, context, width, height, deltaSeconds, n
     ? [0, -1, -2, -1, 0, -1, -2, -1]
     : [0, -1, -1, 0, 0, -1, -1, 0];
   const bobOffset = bobPattern[walkStep];
+  const bottomOverscan = Math.max(0, -Math.min(...bobPattern));
   const drawX = Math.round(passerby.x);
-  const drawY = Math.round(height - drawHeight + bobOffset);
+  const drawY = Math.round(height - drawHeight + bottomOverscan + bobOffset);
   const facesRight = config.sourceFacing === "left" && passerby.direction > 0;
 
   context.save();
