@@ -1919,7 +1919,7 @@ function renderNpcManagement() {
     const name = document.createElement("span");
     name.textContent = `${npc.name}【${npc.jobLabel}】`;
     const state = document.createElement("small");
-    state.textContent = npc.active ? "同行中" : town.npcManagementKind === "search" ? "無料" : `${getNpcHireFee(character)}G`;
+    state.textContent = npc.active ? "同行中" : town.npcManagementKind === "search" ? "無料" : `${getNpcHireFee(character, npc.id)}G`;
     button.append(name, state);
     return button;
   }));
@@ -1937,7 +1937,7 @@ function renderNpcManagement() {
   town.portrait.alt = `${npc.name}【${npc.jobLabel}】`;
   town.portrait.hidden = false;
   town.portraitPlaceholder.hidden = true;
-  const fee = getNpcHireFee(character);
+  const fee = getNpcHireFee(character, npc.id);
   if (town.npcManagementKind === "renewal") {
     town.messageEl.textContent = `${npc.name}を引き続き雇用しますか？\n更新費用：${fee}G　所持金：${character.gold}G\n＊Aボタン：はい　Bボタン：いいえ`;
   } else if (town.npcManagementConfirm) {

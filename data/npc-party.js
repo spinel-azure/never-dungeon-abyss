@@ -84,14 +84,17 @@ export function registerNpc(system, npcId) {
   return { accepted: true, fee: 0, system: normalizeNpcSystem({ ...state, registeredIds: [...state.registeredIds, npcId] }) };
 }
 
-export function getNpcHireFee(character) {
-  return Math.max(1, Math.floor(Number(character?.level) || 1)) * 10;
+export function getNpcHireFee(character, npcId) {
+  const level = Math.max(1, Math.floor(Number(character?.level) || 1));
+  const state = normalizeNpcSystem(character?.npcSystem);
+  const growthStage = Math.max(0, Math.min(10, Math.floor(Number(state.records?.[npcId]?.growthStage) || 0)));
+  return level * 5 * (growthStage + 1);
 }
 
 export function hireNpc(character, npcId) {
   const state = normalizeNpcSystem(character?.npcSystem);
   const npc = getNpcDefinition(npcId);
-  const fee = getNpcHireFee(character);
+  const fee = getNpcHireFee(character, npcId);
   if (!NPC_SUPPORT_ENABLED) return failure(character, state, "disabled", fee);
   if (!npc || !state.registeredIds.includes(npcId)) return failure(character, state, "notRegistered", fee);
   if (state.activeIds.includes(npcId)) return failure(character, state, "alreadyActive", fee);
@@ -134,7 +137,7 @@ export function resolveNpcRenewal(character, npcId, continueHire) {
   const state = normalizeNpcSystem(character?.npcSystem);
   const renewal = state.renewal;
   if (!renewal?.pending || renewal.completedIds.includes(npcId) || !renewal.ids.includes(npcId)) return { accepted: false, reason: "notPending", character };
-  const fee = getNpcHireFee(character);
+  const fee = getNpcHireFee(character, npcId);
   const canPay = continueHire && character.gold >= fee;
   const activeIds = canPay ? state.activeIds : state.activeIds.filter(id => id !== npcId);
   const completedIds = [...renewal.completedIds, npcId];

@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { NPC_DEFINITIONS } from "../data/npc-definitions.js";
-import { applyNpcExplorationPassives, beginNpcRenewal, hireNpc, normalizeNpcSystem, recordNpcExpeditionDepth, registerNpc, resolveNpcRenewal } from "../data/npc-party.js";
+import { applyNpcExplorationPassives, beginNpcRenewal, getNpcHireFee, hireNpc, normalizeNpcSystem, recordNpcExpeditionDepth, registerNpc, resolveNpcRenewal } from "../data/npc-party.js";
 import { createBattleState, resolveBattleRound } from "../combat/battle-engine.js";
 import {
   advanceNpcChargeState,
@@ -97,7 +97,7 @@ test("Rebecca stage six charge skill checks assassination on every hit", () => {
   assert.equal(battle.outcome, "victory");
 });
 
-test("registration is unique and hiring charges level times ten once", () => {
+test("registration is unique and hiring charges level times five at growth stage zero", () => {
   let character = hero();
   const registered = registerNpc(character.npcSystem, "alec");
   assert.equal(registered.accepted, true);
@@ -105,9 +105,19 @@ test("registration is unique and hiring charges level times ten once", () => {
   character = { ...character, npcSystem: registered.system };
   const hired = hireNpc(character, "alec");
   assert.equal(hired.accepted, true);
-  assert.equal(hired.fee, 400);
-  assert.equal(hired.character.gold, 9600);
-  assert.equal(hireNpc(hired.character, "alec").character.gold, 9600);
+  assert.equal(hired.fee, 200);
+  assert.equal(hired.character.gold, 9800);
+  assert.equal(hireNpc(hired.character, "alec").character.gold, 9800);
+});
+
+test("NPC hiring fee scales with that NPC's growth stage through stage ten", () => {
+  const character = hero();
+  character.npcSystem = normalizeNpcSystem({
+    registeredIds: ["alec", "erika"],
+    records: { alec: { maxDepth: 40 }, erika: { maxDepth: 100 } }
+  });
+  assert.equal(getNpcHireFee(character, "alec"), 40 * 5 * 5);
+  assert.equal(getNpcHireFee(character, "erika"), 40 * 5 * 11);
 });
 
 test("party normalization enforces three slots, unique NPCs and unique NPC jobs", () => {
@@ -130,6 +140,7 @@ test("expedition growth is confirmed on return and renewal preserves the roster"
   character = beginNpcRenewal(character, "return-1");
   assert.equal(character.npcSystem.records.alec.growthStage, 4);
   const continued = resolveNpcRenewal(character, "alec", true);
+  assert.equal(continued.fee, 40 * 5 * 5);
   assert.equal(continued.continued, true);
   const dismissed = resolveNpcRenewal(continued.character, "erika", false);
   assert.deepEqual(dismissed.character.npcSystem.activeIds, ["alec"]);

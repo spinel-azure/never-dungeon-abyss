@@ -128,6 +128,20 @@ const PASSERBY_CONFIGS = Object.freeze([
     initialDirection: -1,
     heightRatio: 0.76,
     sourceFacing: "left"
+  }),
+  Object.freeze({
+    id: "horseAndChicken",
+    src: "images/npc/NPC_18b.avif",
+    speed: 38,
+    bobAmplitude: 3,
+    walkPeriod: 520,
+    spawnInterval: Object.freeze([45000, 85000]),
+    initialDelay: 18000,
+    initialPhase: 0,
+    initialDirection: 1,
+    heightRatio: 0.76,
+    sourceFacing: "left",
+    gait: "trot"
   })
 ]);
 
@@ -266,7 +280,9 @@ function updateAndDrawPasserby(passerby, context, width, height, deltaSeconds, n
   }
 
   const walkStep = Math.floor((now + config.initialPhase) / (config.walkPeriod / 8)) % 8;
-  const bobPattern = config.bobAmplitude >= 2
+  const bobPattern = config.gait === "trot"
+    ? [0, -3, -1, -2, 0, -3, -1, -2]
+    : config.bobAmplitude >= 2
     ? [0, -1, -2, -1, 0, -1, -2, -1]
     : [0, -1, -1, 0, 0, -1, -1, 0];
   const bobOffset = bobPattern[walkStep];

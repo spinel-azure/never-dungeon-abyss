@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { existsSync, readFileSync } from "node:fs";
 
 import { createInitialCharacter } from "../data/classes.js";
 import { acceptQuest } from "../data/quests.js";
@@ -25,4 +26,13 @@ test("Parthenope stops walking through town permanently after quest 028 is accep
 
   delete accepted.character.quests.active.guild_028;
   assert.equal(isTownPasserbyVisible("quietTownGirl", accepted.character), false);
+});
+
+test("the horse and chicken walk through town more often than the rare visitor", () => {
+  const source = readFileSync(new URL("../js/town-passersby.js", import.meta.url), "utf8");
+  assert.equal(getTownPasserbyImageSource("horseAndChicken", null), "images/npc/NPC_18b.avif");
+  assert.equal(existsSync(new URL("../images/npc/NPC_18b.avif", import.meta.url)), true);
+  assert.match(source, /id: "horseAndChicken"[\s\S]*?spawnInterval: Object\.freeze\(\[45000, 85000\]\)/);
+  assert.match(source, /id: "rareTownVisitor"[\s\S]*?spawnInterval: Object\.freeze\(\[240000, 480000\]\)/);
+  assert.match(source, /config\.gait === "trot"[\s\S]*?\[0, -3, -1, -2, 0, -3, -1, -2\]/);
 });
