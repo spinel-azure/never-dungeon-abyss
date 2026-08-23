@@ -122,6 +122,12 @@
             <button type="button" data-storage-tab="equipment">装備品</button>
           </nav>
           <div id="townCommerceList" class="town-commerce-list"></div>
+          <div id="townStorageDescription" class="town-storage-description" aria-live="polite" hidden></div>
+          <nav id="townStoragePager" class="town-storage-pager" aria-label="倉庫ページ操作" hidden>
+            <button type="button" data-storage-nav="back">BACK</button>
+            <span id="townStoragePage">1/1</span>
+            <button type="button" data-storage-nav="next">NEXT</button>
+          </nav>
           <div id="townCommerceQuantityControls" class="town-commerce-quantity-controls" hidden>
             <button type="button" data-commerce-step="-10">－10</button>
             <button type="button" data-commerce-step="-1">－1</button>
@@ -443,7 +449,7 @@
     </section>
   </section>
 </main>
-  <script type="module" src="js/main.js?v=20260823-9"></script>
+  <script type="module" src="js/main.js?v=20260823-10"></script>
   <script type="module" src="js/title-screen.js"></script>
 </body>
 </html>

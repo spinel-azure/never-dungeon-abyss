@@ -3429,6 +3429,7 @@ import {
       if (worldLocation === "dungeon" && !sceneTransitionRunning && !state.overlayEvent) return openItemInventory();
       return false;
     }
+    if ((action === "pageLeft" || action === "pageRight") && worldLocation === "town" && handleTownInput(action)) return true;
     if ((action === "pageLeft" || action === "pageRight") && handleMenuInput(action)) return true;
     if (action === "pageLeft") action = "left";
     if (action === "pageRight") action = "right";

@@ -220,7 +220,12 @@ export function configureTown(options) {
   town.commerceGold = document.querySelector("#townCommerceGold");
   town.commerceQuantityControls = document.querySelector("#townCommerceQuantityControls");
   town.storageTabs = document.querySelector("#townStorageTabs");
+  town.storageDescription = document.querySelector("#townStorageDescription");
+  town.storagePager = document.querySelector("#townStoragePager");
+  town.storagePageEl = document.querySelector("#townStoragePage");
   town.storageCategory = "items";
+  town.storagePage = 0;
+  town.storageFocus = "list";
   town.commerceIndex = 0;
   town.commerceQuantity = 1;
   town.commercePointerArmedIndex = -1;
@@ -398,6 +403,7 @@ export function configureTown(options) {
     if (!Number.isInteger(index)) return;
     town.playSe("cursorMove");
     town.commerceIndex = index;
+    if (town.commerceKind.startsWith("storage")) town.storageFocus = "list";
     renderCommerceSelection({ showDescription: true });
     if (town.commercePointerArmedIndex === index) {
       town.commercePointerArmedIndex = -1;
@@ -417,6 +423,11 @@ export function configureTown(options) {
     const button = event.target.closest("[data-storage-tab]");
     if (!button || town.mode !== "commerce" || !town.commerceKind.startsWith("storage")) return;
     setStorageCategory(button.dataset.storageTab);
+  });
+  town.storagePager?.addEventListener("click", event => {
+    const button = event.target.closest("[data-storage-nav]");
+    if (!button || town.mode !== "commerce" || !town.commerceKind.startsWith("storage")) return;
+    changeStoragePage(button.dataset.storageNav === "back" ? -1 : 1);
   });
   town.root.querySelector("#guildQuestPager")?.addEventListener("click", event => {
     const button = event.target.closest("[data-quest-page]");
@@ -2118,6 +2129,7 @@ function renderStorageTabs() {
   town.storageTabs.hidden = !visible;
   town.storageTabs.querySelectorAll("[data-storage-tab]").forEach(button => {
     button.classList.toggle("is-selected", button.dataset.storageTab === town.storageCategory);
+    button.classList.toggle("is-cursor", town.storageFocus === "tabs" && button.dataset.storageTab === town.storageCategory);
   });
 }
 
@@ -2125,6 +2137,8 @@ function setStorageCategory(category) {
   if (!town.commerceKind.startsWith("storage") || !["items", "equipment"].includes(category)) return;
   if (town.storageCategory !== category) town.playSe("cursorMove");
   town.storageCategory = category;
+  town.storagePage = 0;
+  town.storageFocus = "tabs";
   town.commerceItems = buildCommerceItems(town.commerceKind);
   town.commerceIndex = 0;
   town.commercePointerArmedIndex = -1;
@@ -2141,11 +2155,16 @@ function openCommerce(kind) {
   if (town.commerceQuantityControls) town.commerceQuantityControls.hidden = true;
   town.mode = "commerce";
   town.commerceKind = kind;
-  if (kind.startsWith("storage")) town.storageCategory = "items";
+  town.commerceOverlay.classList.toggle("is-storage", kind.startsWith("storage"));
+  if (kind.startsWith("storage")) {
+    town.storageCategory = "items";
+    town.storagePage = 0;
+    town.storageFocus = "list";
+  }
   town.commerceItems = buildCommerceItems(kind);
   town.commerceIndex = 0;
   town.commercePointerArmedIndex = -1;
-  town.commerceTitle.textContent = kind === "donate" ? "寄進" : kind === "sell" ? "売却" : kind.startsWith("storage") ? "倉庫" : "購入";
+  town.commerceTitle.textContent = kind === "donate" ? "寄進" : kind === "sell" ? "売却" : kind === "storageDeposit" ? "倉庫：預ける" : kind === "storageWithdraw" ? "倉庫：取り出す" : "購入";
   town.commerceOverlay.hidden = false;
   renderStorageTabs();
   town.guildQuestOverlay.hidden = true;
@@ -2200,17 +2219,100 @@ function handleShopCategoryInput(action) {
   return handleFacilityMenuInput(action);
 }
 
+function storagePageCount() {
+  return Math.max(1, Math.ceil(town.commerceItems.length / 10));
+}
+
+function changeStoragePage(direction) {
+  const nextPage = Math.max(0, Math.min(storagePageCount() - 1, town.storagePage + direction));
+  if (nextPage === town.storagePage) return;
+  town.playSe("cursorMove");
+  town.storagePage = nextPage;
+  town.storageFocus = "list";
+  town.commerceIndex = Math.min(town.commerceItems.length - 1, town.storagePage * 10);
+  town.commercePointerArmedIndex = -1;
+  renderCommerce({ showDescription: true });
+}
+
+function handleStorageCommerceInput(action) {
+  if (action === "cancel") {
+    town.playSe("cancel");
+    town.commercePointerArmedIndex = -1;
+    showStorageCommands();
+    return true;
+  }
+  if (action === "pageLeft" || action === "pageRight") {
+    setStorageCategory(town.storageCategory === "items" ? "equipment" : "items");
+    return true;
+  }
+  if (town.storageFocus === "tabs") {
+    if (action === "left" || action === "right") setStorageCategory(town.storageCategory === "items" ? "equipment" : "items");
+    else if (action === "down") {
+      town.storageFocus = town.commerceItems.length ? "list" : "back";
+      town.commerceIndex = Math.min(town.commerceItems.length - 1, town.storagePage * 10);
+      town.playSe("cursorMove");
+      renderCommerce({ showDescription: true });
+    } else if (action === "up") {
+      town.storageFocus = "back";
+      town.playSe("cursorMove");
+      renderCommerce({ showDescription: true });
+    }
+    return true;
+  }
+  if (town.storageFocus === "back" || town.storageFocus === "next") {
+    if (action === "left" || action === "right") {
+      town.storageFocus = town.storageFocus === "back" ? "next" : "back";
+      town.playSe("cursorMove");
+      renderCommerce({ showDescription: true });
+    } else if (action === "up") {
+      if (town.commerceItems.length) {
+        const first = town.storagePage * 10;
+        town.commerceIndex = Math.min(town.commerceItems.length - 1, first + 9);
+        town.storageFocus = "list";
+      } else town.storageFocus = "tabs";
+      town.playSe("cursorMove");
+      renderCommerce({ showDescription: true });
+    } else if (action === "down") {
+      town.storageFocus = "tabs";
+      town.playSe("cursorMove");
+      renderCommerce({ showDescription: true });
+    } else if (action === "confirm") changeStoragePage(town.storageFocus === "next" ? 1 : -1);
+    return true;
+  }
+  if (action === "left" || action === "right") {
+    changeStoragePage(action === "left" ? -1 : 1);
+    return true;
+  }
+  if (action === "up" || action === "down") {
+    if (!town.commerceItems.length) {
+      town.storageFocus = action === "up" ? "tabs" : "back";
+      renderCommerce({ showDescription: true });
+      return true;
+    }
+    const first = town.storagePage * 10;
+    const last = Math.min(town.commerceItems.length - 1, first + 9);
+    if (action === "up" && town.commerceIndex <= first) town.storageFocus = "tabs";
+    else if (action === "down" && town.commerceIndex >= last) town.storageFocus = "back";
+    else town.commerceIndex += action === "up" ? -1 : 1;
+    town.playSe("cursorMove");
+    town.commercePointerArmedIndex = -1;
+    renderCommerce({ showDescription: true });
+    return true;
+  }
+  if (action === "confirm") {
+    requestCommerceConfirmation();
+    return true;
+  }
+  return true;
+}
+
 function handleCommerceInput(action) {
+  if (town.commerceKind.startsWith("storage")) return handleStorageCommerceInput(action);
   if (action === "cancel") {
     town.playSe("cancel");
     town.commercePointerArmedIndex = -1;
     if (town.commerceKind === "buy" || town.commerceKind === "buyEquipment") showShopCategoryCommands();
-    else if (town.commerceKind.startsWith("storage")) showStorageCommands();
     else renderFacility();
-    return true;
-  }
-  if (town.commerceKind.startsWith("storage") && ["left", "right"].includes(action)) {
-    setStorageCategory(town.storageCategory === "items" ? "equipment" : "items");
     return true;
   }
   if (["up", "down", "left", "right"].includes(action)) {
@@ -2410,7 +2512,21 @@ function purchaseSelectedCommerceItem() {
 }
 
 function renderCommerce({ showDescription = true } = {}) {
-  town.commerceList.replaceChildren(...town.commerceItems.map((item, index) => {
+  const storage = town.commerceKind.startsWith("storage");
+  if (storage) {
+    town.storagePage = Math.max(0, Math.min(storagePageCount() - 1, town.storagePage));
+    if (town.commerceItems.length) {
+      const first = town.storagePage * 10;
+      const last = Math.min(town.commerceItems.length - 1, first + 9);
+      town.commerceIndex = Math.max(first, Math.min(last, town.commerceIndex));
+    } else town.commerceIndex = 0;
+  }
+  const visibleItems = storage
+    ? town.commerceItems.slice(town.storagePage * 10, town.storagePage * 10 + 10)
+    : town.commerceItems;
+  const offset = storage ? town.storagePage * 10 : 0;
+  town.commerceList.replaceChildren(...visibleItems.map((item, visibleIndex) => {
+    const index = offset + visibleIndex;
     const button = document.createElement("button");
     button.type = "button";
     button.className = "town-commerce-entry";
@@ -2434,11 +2550,24 @@ function renderCommerce({ showDescription = true } = {}) {
     return button;
   }));
   if (town.commerceGold) {
-    town.commerceGold.textContent = Math.max(
-      0,
-      Math.floor(Number(town.getCharacter()?.gold) || 0)
-    ).toLocaleString("en-US");
+    town.commerceGold.textContent = Math.max(0, Math.floor(Number(town.getCharacter()?.gold) || 0)).toLocaleString("en-US");
+    town.commerceGold.parentElement.hidden = storage;
   }
+  if (town.storageDescription) town.storageDescription.hidden = !storage;
+  if (town.storagePager) {
+    town.storagePager.hidden = !storage;
+    if (storage) {
+      const pages = storagePageCount();
+      town.storagePageEl.textContent = `${town.storagePage + 1}/${pages}`;
+      const back = town.storagePager.querySelector('[data-storage-nav="back"]');
+      const next = town.storagePager.querySelector('[data-storage-nav="next"]');
+      back.disabled = town.storagePage <= 0;
+      next.disabled = town.storagePage >= pages - 1;
+      back.classList.toggle("is-selected", town.storageFocus === "back");
+      next.classList.toggle("is-selected", town.storageFocus === "next");
+    }
+  }
+  renderStorageTabs();
   renderCommerceSelection({ showDescription });
 }
 
@@ -2463,6 +2592,7 @@ function showStorageCommands() {
   ];
   town.mode = "shopCategory";
   town.commerceOverlay.hidden = true;
+  town.commerceOverlay.classList.remove("is-storage");
   town.facilityCommandIndex = 0;
   town.facilityCommandButtons.forEach((button, index) => {
     const [id, label] = commands[index];
@@ -2479,11 +2609,27 @@ function showStorageCommands() {
 
 function renderCommerceSelection({ showDescription = true } = {}) {
   const buttons = [...town.commerceList.children];
-  buttons.forEach((button, index) => {
-    button.classList.toggle("is-selected", index === town.commerceIndex);
+  buttons.forEach(button => {
+    const index = Number(button.dataset.commerceIndex);
+    const listFocused = !town.commerceKind.startsWith("storage") || town.storageFocus === "list";
+    button.classList.toggle("is-selected", listFocused && index === town.commerceIndex);
   });
-  buttons[town.commerceIndex]?.scrollIntoView?.({ block: "nearest" });
+  buttons.find(button => Number(button.dataset.commerceIndex) === town.commerceIndex)?.scrollIntoView?.({ block: "nearest" });
+  renderStorageTabs();
   const item = town.commerceItems[town.commerceIndex];
+  if (town.commerceKind.startsWith("storage") && town.storageDescription) {
+    const description = item?.storageEquipment
+      ? item.equipped
+        ? `${item.description || "装備品"} / 装備中のため預けられません。`
+        : item.description || "装備品"
+      : item?.description || "保管品がありません。";
+    const count = item
+      ? town.commerceKind === "storageWithdraw"
+        ? `倉庫：${item.storageEquipment ? 1 : warehouseItemCount(item.id)}`
+        : `所持数：${item.storageEquipment ? 1 : inventoryItemCount(item.id)}`
+      : "";
+    town.storageDescription.textContent = `${description}${count ? ` / ${count}` : ""}`;
+  }
   if (showDescription && item) {
     const ownership = town.commerceKind === "buy"
       ? `\n所持数：${inventoryItemCount(item.id)}／${item.maxOwned || 99}　倉庫：${warehouseItemCount(item.id)}`
@@ -2493,7 +2639,9 @@ function renderCommerceSelection({ showDescription = true } = {}) {
         ? `${item.description || "装備品"}\n装備中のため預けられません。`
         : item.description || "装備品"
       : item.description;
-    town.messageEl.textContent = `${description}${ownership}\n＊Aボタン：決定　Bボタン：戻る`;
+    town.messageEl.textContent = town.commerceKind.startsWith("storage")
+      ? `女主人ヘレン：${town.commerceKind === "storageWithdraw" ? "取り出す" : "預ける"}ものを選んで。\n＊Aボタン：決定　Bボタン：戻る`
+      : `${description}${ownership}\n＊Aボタン：決定　Bボタン：戻る`;
   }
 }
 
