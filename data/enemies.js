@@ -1,5 +1,6 @@
 import { getWaterRegionFormationIds, waterRegionEnemies } from "./water-region-enemies.js";
 import { crystalRegionEnemies, getCrystalRegionFormationIds } from "./crystal-region-enemies.js";
+import { darkRegionEnemies, getDarkRegionFormationIds } from "./dark-region-enemies.js";
 
 export const enemies = Object.freeze([
   Object.freeze({
@@ -632,6 +633,7 @@ export const enemies = Object.freeze([
   }),
   ...waterRegionEnemies,
   ...crystalRegionEnemies,
+  ...darkRegionEnemies,
   Object.freeze({
     id: "mimic", name: "ミミック", imageId: "mimic",
     level: 10,
@@ -728,6 +730,10 @@ export function getWaterRegionEncounterFormation({ depth = 70, rng = Math.random
 
 export function getCrystalRegionEncounterFormation({ depth = 80, rng = Math.random } = {}) {
   return getCrystalRegionFormationIds({ depth, rng }).map(getEnemyById).filter(Boolean);
+}
+
+export function getDarkRegionEncounterFormation({ depth = 90, rng = Math.random } = {}) {
+  return getDarkRegionFormationIds({ depth, rng }).map(getEnemyById).filter(Boolean);
 }
 
 export function createEnemyCombatant(enemy) {

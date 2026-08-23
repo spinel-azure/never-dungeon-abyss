@@ -102,7 +102,7 @@ import { getActivePlayTimeDelta, normalizeAdventureStats, recordInnStay, recordS
 import { getAdventureChronicle } from "../data/adventure-records.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName, grantEquipmentInstance } from "../data/equipment-inventory.js";
-import { createEnemyCombatant, getEnemyById, getEnemyEncounterCount, getRandomEncounterEnemy, getWaterRegionEncounterFormation, getCrystalRegionEncounterFormation } from "../data/enemies.js";
+import { createEnemyCombatant, getEnemyById, getEnemyEncounterCount, getRandomEncounterEnemy, getWaterRegionEncounterFormation, getCrystalRegionEncounterFormation, getDarkRegionEncounterFormation } from "../data/enemies.js";
 import { applyBossVictory, bossLeavesRemains, createBossCombatant, getBossById, getFloorBossByDepth, isBossDefeated } from "../data/bosses.js";
 import { consumeKeyItem, getKeyItem, grantKeyItem, hasKeyItem } from "../data/key-items.js";
 import { configureBattle, handleBattleInput, isBattleActive, isJireneScriptedBattleActive, openBattleItems, startBattle } from "./battle.js";
@@ -1613,8 +1613,8 @@ import {
     if (currentDepth >= 80 && currentDepth <= 88) {
       return getCrystalRegionEncounterFormation({ depth: currentDepth });
     }
-    if (currentDepth >= 80 && currentDepth <= 88) {
-      return getCrystalRegionEncounterFormation({ depth: currentDepth });
+    if (currentDepth >= 90 && currentDepth <= 99) {
+      return getDarkRegionEncounterFormation({ depth: currentDepth });
     }
     return Array.from({ length: getEnemyEncounterCount(enemyData) }, () => enemyData);
   }
