@@ -17,6 +17,7 @@ import { getEquipmentInstanceDefinition, getEquipmentInstanceName } from "../dat
 import { getShopEquipmentStock } from "../data/shop-stock.js";
 import { configureTownPassersby } from "./town-passersby.js";
 import { getInnStayFee } from "./character-services.js";
+import { getGuildQuestPageSize } from "./guild-quest-pagination.js";
 import { getTavernRumorTypewriterParts } from "../data/tavern-rumors.js";
 import { CHARACTER_NAME_MAX_LENGTH, CHARACTER_RENAME_COST, normalizeCharacterName } from "../data/character-name.js";
 import { getUnlockedTransferDestinations } from "../data/transfer-destinations.js";
@@ -433,6 +434,9 @@ export function configureTown(options) {
     const button = event.target.closest("[data-quest-page]");
     if (!button || !town.mode.startsWith("quest")) return;
     changeQuestPage(Number(button.dataset.questPage));
+  });
+  window.addEventListener("resize", () => {
+    if (["questAcceptList", "questReportList"].includes(town.mode)) renderGuildQuestList();
   });
   town.transferPager?.addEventListener("click", event => {
     const button = event.target.closest("[data-transfer-page]");
@@ -2746,9 +2750,16 @@ function getVisibleQuestIndexes() {
 }
 
 function getQuestPageSize() {
-  if (document.body.classList.contains("layout-mobile")) return 3;
-  if (document.body.classList.contains("layout-tablet")) return 6;
-  return Number.MAX_SAFE_INTEGER;
+  const layout = document.body.classList.contains("layout-mobile")
+    ? "mobile"
+    : document.body.classList.contains("layout-tablet")
+      ? "tablet"
+      : "desktop";
+  return getGuildQuestPageSize({
+    width: window.innerWidth,
+    height: window.innerHeight,
+    layout
+  });
 }
 
 function activateSelectedQuest() {
