@@ -95,6 +95,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     npcSystem: createInitialNpcSystem(),
     playerCharge: createInitialPlayerCharge(),
     firstDungeonTutorialSeen: false,
+    deckTutorialSeen: false,
     crystalFloorStepCount: 0,
     herbicideTrialUses: 0,
     cardPassiveStepCount: 0,
@@ -206,6 +207,9 @@ export function normalizeCharacter(character) {
     firstDungeonTutorialSeen: typeof character.firstDungeonTutorialSeen === "boolean"
       ? character.firstDungeonTutorialSeen
       : true,
+    deckTutorialSeen: typeof character.deckTutorialSeen === "boolean"
+      ? character.deckTutorialSeen
+      : Boolean(eventFlags.inn_first_talk_card),
     crystalFloorStepCount: Math.max(0, Math.floor(Number(character.crystalFloorStepCount) || 0)) % 3,
     herbicideTrialUses: Math.max(0, Math.min(5, Math.floor(Number(character.herbicideTrialUses) || 0))),
     cardPassiveStepCount: Math.max(0, Math.floor(Number(character.cardPassiveStepCount) || 0)) % 5,

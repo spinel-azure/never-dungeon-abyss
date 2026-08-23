@@ -261,6 +261,21 @@
       <button type="button" data-command="options">オプション</button>
     </section>
     <p id="commandHint" class="command-hint">＊ Bボタンでメニュー表示</p>
+    <section id="deckTutorial" class="deck-tutorial" aria-label="カードデッキチュートリアル" hidden>
+      <span class="deck-tutorial-shade deck-tutorial-shade-top" aria-hidden="true"></span>
+      <span class="deck-tutorial-shade deck-tutorial-shade-bottom" aria-hidden="true"></span>
+      <span class="deck-tutorial-shade deck-tutorial-shade-left" aria-hidden="true"></span>
+      <span class="deck-tutorial-shade deck-tutorial-shade-right" aria-hidden="true"></span>
+      <span class="deck-tutorial-highlight" aria-hidden="true"></span>
+      <div class="deck-tutorial-content">
+        <h2>TUTORIAL</h2>
+        <p>手に入れたカードは宿屋にある「デッキ編成」で<br>
+          デッキにセットする事ができる。カードには種類<br>
+          によって「コスト」があり、デッキコスト以内の<br>
+          カードしかセット出来ない。なお、宿屋以外では<br>
+          デッキの変更ができないので注意！！</p>
+      </div>
+    </section>
     <form id="guildRegistration" class="guild-registration" hidden>
       <label>NAME<input id="characterName" type="text" maxlength="12" autocomplete="off" required></label>
       <label>JOB<select id="characterJob"></select></label>
@@ -462,7 +477,7 @@
     </section>
   </section>
 </main>
-  <script type="module" src="js/main.js?v=20260823-16"></script>
+  <script type="module" src="js/main.js?v=20260823-17"></script>
   <script type="module" src="js/title-screen.js"></script>
 </body>
 </html>

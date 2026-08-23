@@ -214,6 +214,7 @@ import {
   const msgEl = document.getElementById("message");
   const itemOverlay = document.getElementById("itemOverlay");
   const firstDungeonTutorial = document.getElementById("firstDungeonTutorial");
+  const deckTutorial = document.getElementById("deckTutorial");
   const viewportEl = document.querySelector(".viewport");
   const townPortraitFrame = document.querySelector(".town-portrait-frame");
   const torchMeterEl = document.getElementById("torchMeter");
@@ -281,6 +282,10 @@ import {
   let firstDungeonTutorialReady = false;
   let firstDungeonTutorialTimer = 0;
   let resolveFirstDungeonTutorial = null;
+  let deckTutorialActive = false;
+  let deckTutorialReady = false;
+  let deckTutorialTimer = 0;
+  let deckTutorialReturnMessage = "";
 
   let lootIdentifyTouchHandled = false;
 
@@ -379,11 +384,66 @@ import {
     });
   }
 
+  function updateDeckTutorialTarget() {
+    if (!deckTutorialActive || !deckTutorial || !dungeonCommands) return;
+    const deckButton = dungeonCommands.querySelector('[data-facility-command="deck"]');
+    if (!deckButton) return;
+    const tutorialRect = deckTutorial.getBoundingClientRect();
+    const buttonRect = deckButton.getBoundingClientRect();
+    const padding = 5;
+    deckTutorial.style.setProperty("--deck-hole-left", `${Math.max(0, buttonRect.left - tutorialRect.left - padding)}px`);
+    deckTutorial.style.setProperty("--deck-hole-top", `${Math.max(0, buttonRect.top - tutorialRect.top - padding)}px`);
+    deckTutorial.style.setProperty("--deck-hole-width", `${Math.min(tutorialRect.width, buttonRect.width + padding * 2)}px`);
+    deckTutorial.style.setProperty("--deck-hole-height", `${Math.min(tutorialRect.height, buttonRect.height + padding * 2)}px`);
+  }
+
+  function finishDeckTutorial() {
+    if (!deckTutorialActive || !deckTutorialReady) return false;
+    window.clearTimeout(deckTutorialTimer);
+    deckTutorialActive = false;
+    deckTutorialReady = false;
+    deckTutorial.hidden = true;
+    if (character) character.deckTutorialSeen = true;
+    say(deckTutorialReturnMessage);
+    deckTutorialReturnMessage = "";
+    saveGame();
+    setPlayerInputEnabled(true);
+    return true;
+  }
+
+  function showDeckTutorial(returnMessage = "") {
+    if (!deckTutorial || character?.deckTutorialSeen) return;
+    setPlayerInputEnabled(false);
+    deckTutorialReturnMessage = returnMessage || msgEl?.textContent || "";
+    deckTutorialActive = true;
+    deckTutorialReady = false;
+    deckTutorial.hidden = false;
+    updateDeckTutorialTarget();
+    window.clearTimeout(deckTutorialTimer);
+    deckTutorialTimer = window.setTimeout(() => {
+      if (!deckTutorialActive) return;
+      deckTutorialReady = true;
+      say("＊Aボタンで次へ");
+    }, 3000);
+  }
+
+  function handleBlockingTutorialInput(action) {
+    if (firstDungeonTutorialActive) return handleFirstDungeonTutorialInput(action);
+    if (!deckTutorialActive) return false;
+    if (action === "confirm") finishDeckTutorial();
+    return true;
+  }
   firstDungeonTutorial?.addEventListener("pointerdown", event => {
     event.preventDefault();
     event.stopPropagation();
     if (firstDungeonTutorialReady) finishFirstDungeonTutorial();
   });
+  deckTutorial?.addEventListener("pointerdown", event => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (deckTutorialReady) finishDeckTutorial();
+  });
+  window.addEventListener("resize", updateDeckTutorialTarget);
   let pendingEncounter = null;
   let activeRareRoomEncounterId = null;
   const escapedSpecialBossesThisExploration = new Set();
@@ -408,7 +468,7 @@ import {
     getDoorState,
     getDoorKind,
     inBounds,
-    handleOverlayInput: action => handleFirstDungeonTutorialInput(action) || handleOverlayEventInput(action),
+    handleOverlayInput: action => handleBlockingTutorialInput(action) || handleOverlayEventInput(action),
     updateAnimation,
     updateHud,
     drawMinimap,
@@ -1213,6 +1273,9 @@ import {
     if (gained) {
       updateCharacterUi();
       saveGame();
+    }
+    if (gained && facilityId === "inn" && !character?.deckTutorialSeen) {
+      window.setTimeout(() => showDeckTutorial(reward.first), 0);
     }
     return gained ? reward.first : reward.repeat;
   }
@@ -3444,7 +3507,7 @@ import {
       window.dispatchEvent(new CustomEvent("nda:title-input", { detail: { action } }));
       return true;
     }
-    if (handleFirstDungeonTutorialInput(action)) return true;
+    if (handleBlockingTutorialInput(action)) return true;
     recordUserInput();
     if (action === "items") {
       if (handleMenuInput("lock")) return true;
@@ -3496,7 +3559,7 @@ import {
     onButtonPreviewChange: setGamepadPressedButtons,
     onConnectionChange: showGamepadConnectionNotification,
     toggleMinimap: () => {
-      if (handleFirstDungeonTutorialInput("dismiss")) return true;
+      if (handleBlockingTutorialInput("dismiss")) return true;
       recordUserInput();
       if (worldLocation !== "dungeon" || isBattleActive() || isMenuOpen()
         || sceneTransitionRunning || state.overlayEvent) return false;
@@ -3519,15 +3582,15 @@ import {
     buttonB,
     commandRoot: dungeonCommands,
     openStatusMenu: () => {
-      if (handleFirstDungeonTutorialInput("dismiss")) return true;
+      if (handleBlockingTutorialInput("dismiss")) return true;
       return openStatusMenu();
     },
-    handleSkillInput: action => handleFirstDungeonTutorialInput(action) || handleSkillOverlayInput(action),
-    handleItemInput: action => handleFirstDungeonTutorialInput(action) || handleItemOverlayInput(action),
-    handleOverlayInput: action => handleFirstDungeonTutorialInput(action) || handleOverlayEventInput(action),
-    handleBattleInput: action => handleFirstDungeonTutorialInput(action) || handleBattleInput(action),
+    handleSkillInput: action => handleBlockingTutorialInput(action) || handleSkillOverlayInput(action),
+    handleItemInput: action => handleBlockingTutorialInput(action) || handleItemOverlayInput(action),
+    handleOverlayInput: action => handleBlockingTutorialInput(action) || handleOverlayEventInput(action),
+    handleBattleInput: action => handleBlockingTutorialInput(action) || handleBattleInput(action),
     handleTownInput: action => (
-      handleFirstDungeonTutorialInput(action) || sceneTransitionRunning || handleLootIdentifyInput(action) || handleExperienceSettlementInput(action) || handleTownInput(action)
+      handleBlockingTutorialInput(action) || sceneTransitionRunning || handleLootIdentifyInput(action) || handleExperienceSettlementInput(action) || handleTownInput(action)
     ),
     handleDoorInput: openDoorAhead,
     onUserOperation: recordUserInput,
