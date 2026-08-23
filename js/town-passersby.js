@@ -126,7 +126,8 @@ const PASSERBY_CONFIGS = Object.freeze([
     initialDelay: 90000,
     initialPhase: 540,
     initialDirection: -1,
-    heightRatio: 0.76,
+    heightRatio: 0.86,
+    drawOrder: 0.5,
     sourceFacing: "left"
   }),
   Object.freeze({

@@ -39,3 +39,10 @@ test("the horse and chicken walk through town more often than the rare visitor",
   assert.match(source, /const bottomOverscan = Math\.max\(0, -Math\.min\(\.\.\.bobPattern\)\)/);
   assert.match(source, /height - drawHeight \+ bottomOverscan \+ bobOffset/);
 });
+
+test("Loretta is enlarged and drawn immediately in front of the priest", () => {
+  const source = readFileSync(new URL("../js/town-passersby.js", import.meta.url), "utf8");
+  assert.match(source, /id: "priest"[\s\S]*?drawOrder: 0/);
+  assert.match(source, /id: "rareTownVisitor"[\s\S]*?heightRatio: 0\.86[\s\S]*?drawOrder: 0\.5/);
+  assert.match(source, /\(left\.config\.drawOrder \?\? 1\) - \(right\.config\.drawOrder \?\? 1\)/);
+});
