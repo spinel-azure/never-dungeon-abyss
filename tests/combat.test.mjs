@@ -147,13 +147,14 @@ test("early enemies use the MVP difficulty profile", () => {
   const slime = getEnemyById("cave_slime");
   assert.deepEqual(
     { maxHp: rat.maxHp, def: rat.def, attack: rat.attack },
-    { maxHp: 20, def: 4, attack: 4 }
+    { maxHp: 12, def: 4, attack: 4 }
   );
   assert.deepEqual(
     { maxHp: slime.maxHp, def: slime.def, attack: slime.attack },
-    { maxHp: 24, def: 5, attack: 3 }
+    { maxHp: 18, def: 5, attack: 3 }
   );
   assert.equal(rat.experienceReward, 4);
+  assert.equal(getEnemyById("abyss_rabbit").maxHp, 21);
   assert.equal(slime.experienceReward, 6);
 });
 

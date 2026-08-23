@@ -21,6 +21,7 @@ const SETTINGS_KEY = "nde-settings-v1";
 const ON_MARK = "🔘";
 const OFF_MARK = "⚫";
 const DECK_PICKER_PAGE_SIZE = 5;
+const EQUIPMENT_JOB_LABELS = Object.freeze({ warrior: "戦士", thief: "盗賊", priest: "僧侶", mage: "魔術師" });
 
 const menu = {
   root: null, commandRoot: null, statusPanel: null, deckPanel: null, inventoryPanel: null, questHistoryPanel: null, rumorHistoryPanel: null, adventureRecordsPanel: null, cardGalleryPanel: null, savePanel: null, optionsPanel: null, debugPanel: null,
@@ -1016,11 +1017,11 @@ function renderInventory() {
   const selected = entries[menu.inventoryCursor], description = panel.querySelector("[data-inventory-description]");
   if (!selected) description.textContent = menu.inventoryPurpose === "sell" ? "売却できる所持品がありません。" : menu.inventoryTab === "keyItems" ? "貴重品を所持していません。" : "所持品がありません。";
   else if (menu.inventoryPurpose === "sell") description.textContent = inventorySaleDescription(selected, character);
-  else if (menu.inventoryPurpose === "buy") description.textContent = selected.item ? `${selected.item.description} / 購入価格 ${inventoryBuyPrice(selected)}G / 所持数 ${inventoryOwnedItemCount(selected.item.id)}／${selected.item.maxOwned || 99} / 倉庫 ${inventoryWarehouseItemCount(selected.item.id)} / Aボタン：購入` : `${equipmentEffectLabels(selected.shopEquipment).join(" / ")} / 購入価格 ${inventoryBuyPrice(selected)}G / Aボタン：購入`;
+  else if (menu.inventoryPurpose === "buy") description.textContent = selected.item ? `${selected.item.description} / 購入価格 ${inventoryBuyPrice(selected)}G / 所持数 ${inventoryOwnedItemCount(selected.item.id)}／${selected.item.maxOwned || 99} / 倉庫 ${inventoryWarehouseItemCount(selected.item.id)} / Aボタン：購入` : `${equipmentEffectLabels(selected.shopEquipment).join(" / ")}${incompatibleEquipmentJobLabel(selected.shopEquipment, character)} / 購入価格 ${inventoryBuyPrice(selected)}G / Aボタン：購入`;
   else if (selected.item) description.textContent = unavailableItemReason(selected.item, character) || selected.item.description;
   else if (selected.keyItem) description.textContent = selected.keyItem.description || "大切な貴重品です。";
   else if (!selected.instance) description.textContent = "この装備部位を空にします。";
-  else { const definition = getEquipmentInstanceDefinition(selected.instance); const requirements = Object.entries(definition?.requirements || {}).map(([key, value]) => `${key.toUpperCase()} ${value}以上`).join(" / "); const effects = equipmentEffectLabels(definition); description.textContent = `${EQUIPMENT_SLOT_LABELS[selected.instance.slot]} / ${effects.join(" / ")}${effects.length ? " / " : ""}${requirements ? `装備条件：${requirements}` : "装備条件なし"}${selected.instance.locked ? " / ロック中" : ""}${selected.instance.curseKnown ? " / 呪われているため外せません。" : ""}`; }
+  else { const definition = getEquipmentInstanceDefinition(selected.instance); const requirements = Object.entries(definition?.requirements || {}).map(([key, value]) => `${key.toUpperCase()} ${value}以上`).join(" / "); const effects = equipmentEffectLabels(definition); description.textContent = `${EQUIPMENT_SLOT_LABELS[selected.instance.slot]} / ${effects.join(" / ")}${effects.length ? " / " : ""}${requirements ? `装備条件：${requirements}` : "装備条件なし"}${incompatibleEquipmentJobLabel(definition, character)}${selected.instance.locked ? " / ロック中" : ""}${selected.instance.curseKnown ? " / 呪われているため外せません。" : ""}`; }
   renderInventoryComparison(panel.querySelector("[data-inventory-compare]"), selected?.instance || null);
   const lockButton = panel.querySelector("[data-inventory-lock]");
   const lockControls = panel.querySelector("[data-inventory-lock-controls]");
@@ -1044,6 +1045,12 @@ function renderInventory() {
   nextButton.disabled = menu.inventoryPage >= pages - 1;
   backButton.classList.toggle("is-selected", menu.inventoryFocus === "back");
   nextButton.classList.toggle("is-selected", menu.inventoryFocus === "next");
+}
+
+function incompatibleEquipmentJobLabel(definition, character) {
+  const allowedJobs = Array.isArray(definition?.allowedJobs) ? definition.allowedJobs : [];
+  if (!allowedJobs.length || allowedJobs.includes(character?.job)) return "";
+  return ` / 装備可能職：${allowedJobs.map(job => EQUIPMENT_JOB_LABELS[job] || job).join("・")}`;
 }
 
 function renderInventoryComparison(root, candidate) {
@@ -1669,6 +1676,20 @@ function toggleText(enabled) { return enabled ? `ON ${ON_MARK}　OFF ${OFF_MARK}
 function applyDisplayOptions() { document.body.classList.toggle("hide-compass", !menu.compassVisible); document.body.classList.toggle("show-readout", menu.readoutVisible); }
 function applyRenderOptions() { menu.setScreenShakeEnabled(menu.screenShakeEnabled); menu.setTorchFlickerEnabled(menu.torchFlickerEnabled); }
 function applyMinimapRevealOptions() { menu.setMinimapRevealOptions({ stairsDown: menu.stairsDownVisible, npcs: menu.npcsVisible, treasures: menu.treasuresVisible }); }
+export function resetDebugSettingsForNewGame() {
+  menu.torchFuelDisabled = false;
+  menu.presenceDisabled = false;
+  menu.stairsDownVisible = false;
+  menu.npcsVisible = false;
+  menu.treasuresVisible = false;
+  Object.keys(menu.actionActive).forEach(key => { menu.actionActive[key] = false; });
+  menu.setTorchFuelDisabled(false);
+  menu.setPresenceDisabled(false);
+  applyMinimapRevealOptions();
+  updateDebugStates();
+  persistSettings();
+}
+
 function applyNpcTypewriterOptions() { menu.setNpcTypewriterOptions({ enabled: menu.npcTypewriterEnabled, speed: menu.npcTypewriterSpeed }); }
 function applyTouchControlsMode() { menu.setTouchControlsMode(menu.touchControlsMode); }
 function applyMistOptions() { menu.setMistOptions({ enabled: menu.mistEnabled, intensity: menu.mistIntensity, distance: menu.mistDistance, color: menu.mistColor }); }

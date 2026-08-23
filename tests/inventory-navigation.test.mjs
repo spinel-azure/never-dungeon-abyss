@@ -17,4 +17,8 @@ test("inventory separates page navigation from tab navigation", async () => {
   assert.match(gamepad, /pageLeft" \|\| action === "pageRight"\) dispatchAction\?\.\(action\)/);
   assert.match(main, /pageLeft" \|\| action === "pageRight"\)[\s\S]*?handleMenuInput\(action\)/);
   assert.match(css, /inventory-tabs button\.is-cursor/);
+  assert.match(css, /inventory-tab-cursor-glow/);
+  assert.match(css, /prefers-reduced-motion:reduce[^}]*inventory-tabs button\.is-cursor/);
+  assert.match(menu, /装備可能職：\$\{allowedJobs\.map/);
+  assert.match(menu, /allowedJobs\.includes\(character\?\.job\)/);
 });

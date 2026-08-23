@@ -717,6 +717,9 @@ body.battle-active .viewport > #treasureCanvas {
   background: transparent;
   color: #fff;
   font: inherit;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 900ms ease-out, visibility 0s linear;
 }
 
 .battle-enemy-member.is-selected {
@@ -726,7 +729,14 @@ body.battle-active .viewport > #treasureCanvas {
 
 .battle-enemy-member-name { display: block; font-family: "PixelFont", monospace; font-weight: 400; text-shadow: 2px 2px #000; }
 .battle-enemy-member .battle-enemy-member-image { width: 100%; height: 75%; object-fit: contain; filter: drop-shadow(0 0 5px #000); }
-.battle-enemy-member.is-defeated { visibility: hidden; pointer-events: none; }
+.battle-enemy-member .battle-enemy-member-image.is-concealed { filter: brightness(0) drop-shadow(0 8px 8px rgba(0, 0, 0, .72)) !important; }
+.battle-enemy-member .battle-enemy-member-image.is-hit { animation: battle-enemy-hit 260ms steps(2, end); }
+.battle-enemy-member.is-defeated { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 900ms ease-out, visibility 0s linear 900ms; }
 .battle-enemy-member-hp { display: none; width: 90%; height: 8px; margin: 0 auto; border: 1px solid #b8d7e3; background: #071017; }
 .battle-enemy-member-hp > i { display: block; height: 100%; background: #e4253d; }
 .battle-enemy-member .battle-number-layer { inset: 38% 0 auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .battle-enemy-member,
+  .battle-enemy-member.is-defeated { transition-duration: 1ms, 0s; transition-delay: 0s; }
+}

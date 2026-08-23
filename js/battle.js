@@ -779,15 +779,17 @@ function renderEnemyParty(battle) {
     const presentedHp = battleUi.presentationHp?.enemies?.[index];
     const displayEnemy = Number.isFinite(presentedHp) ? { ...enemy, hp: presentedHp } : enemy;
     const selectedIndex = battleUi.mode === "targets" ? battleUi.selectedIndex : battle.targetIndex;
+    const visuallyDefeated = Number.isFinite(presentedHp) ? presentedHp <= 0 : !enemy.alive;
     member.classList.toggle("is-selected", index === selectedIndex && enemy.alive);
-    member.classList.toggle("is-defeated", !enemy.alive);
-    member.setAttribute("aria-hidden", enemy.alive ? "false" : "true");
+    member.classList.toggle("is-defeated", visuallyDefeated);
+    member.setAttribute("aria-hidden", visuallyDefeated ? "true" : "false");
     member.disabled = !enemy.alive;
     member.querySelector(".battle-enemy-member-name").textContent = battleUi.concealed ? "？？？？？" : enemy.name;
     renderWeaknessIcons(member.querySelector(".battle-enemy-member-weakness"), enemy);
     const img = member.querySelector(".battle-enemy-member-image");
     img.src = enemy.image || "";
     img.alt = battleUi.concealed ? "正体不明の敵" : enemy.name;
+    img.classList.toggle("is-concealed", battleUi.concealed);
     member.querySelector(".battle-enemy-member-hp > i").style.width = `${getBattleHpPercent(displayEnemy)}%`;
   });
 }

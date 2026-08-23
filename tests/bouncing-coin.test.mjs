@@ -5,7 +5,8 @@ import fs from "node:fs";
 import { createInitialCharacter } from "../data/classes.js";
 import { createEnemyCombatant, getEnemyById } from "../data/enemies.js";
 import { calculateFixedGoldPerDefeat } from "../data/loot.js";
-import { createBattleState, createEnemyAction, resolveBattleRound } from "../combat/battle-engine.js";
+import { createBattleState, createEnemyAction, resolveBattleRound, resolveMultiBattleRound } from "../combat/battle-engine.js";
+import { calculatePhysicalHitRate } from "../combat/resolve-physical-attack.js";
 
 const alwaysLast = () => 0.999999;
 
@@ -37,6 +38,8 @@ test("Bouncing Coin is the B1F-B4F one-to-three enemy with fixed per-unit reward
   assert.equal(coin.fixedGoldPerDefeat, true);
   assert.deepEqual(coin.actions.map(entry => entry.weight), [55, 35, 10]);
   assert.deepEqual(coin.actions[0].action.hitCountRange, [1, 5]);
+  assert.equal(coin.actions[0].action.hitBonus, -0.65);
+  assert.equal(coin.actions[0].action.physicalHitRateFloor, 0.2);
 });
 
 test("Bouncing Coin only calls one ally at a time and stops after two reinforcements", () => {
@@ -78,8 +81,45 @@ test("fixed coin gold counts every defeated initial or summoned unit and ignores
 test("multi-enemy UI hides HP bars and preserves defeated layout slots invisibly", () => {
   const css = fs.readFileSync(new URL("../css/battle.css", import.meta.url), "utf8");
   const battleUi = fs.readFileSync(new URL("../js/battle.js", import.meta.url), "utf8");
-  assert.match(css, /battle-enemy-member\.is-defeated\s*\{[^}]*visibility:\s*hidden/);
+  assert.match(css, /battle-enemy-member\.is-defeated\s*\{[^}]*opacity:\s*0[^}]*visibility:\s*hidden[^}]*900ms/);
   assert.match(css, /battle-enemy-member-hp\s*\{[^}]*display:\s*none/);
   assert.match(battleUi, /member\.disabled = !enemy\.alive/);
-  assert.match(battleUi, /aria-hidden.*enemy\.alive/);
+  assert.match(battleUi, /visuallyDefeated.*presentedHp[^;]*presentedHp <= 0/);
+  assert.match(battleUi, /aria-hidden.*visuallyDefeated/);
+  assert.match(battleUi, /img\.classList\.toggle\("is-concealed", battleUi\.concealed\)/);
+  assert.match(css, /battle-enemy-member-image\.is-concealed/);
+  assert.match(css, /battle-enemy-member-image\.is-hit/);
+});
+test("Bouncing Coin multi-hit accuracy averages only one or two hits out of five", () => {
+  const coin = createEnemyCombatant(getEnemyById("bouncing_coin"));
+  const action = createEnemyAction(coin, () => 0);
+  const hitRate = calculatePhysicalHitRate({
+    attacker: coin.stats,
+    defender: { agi: 1 },
+    attack: action
+  });
+  assert.ok(hitRate >= 0.2 && hitRate <= 0.35, `unexpected hit rate: ${hitRate}`);
+});
+
+test("a multi-battle enemy defeated before its queued turn cannot attack", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "warrior", jobLabel: "戦士" });
+  Object.assign(character.baseStats, { str: 30, agi: 30, dex: 30, luc: 30 });
+  const doomed = createEnemyCombatant(getEnemyById("bouncing_coin"));
+  doomed.name = "行動前撃破対象";
+  doomed.hp = 1;
+  doomed.maxHp = 1;
+  const survivor = createEnemyCombatant(getEnemyById("bouncing_coin"));
+  survivor.name = "生存対象";
+  survivor.maxHp = 999;
+  survivor.hp = 999;
+  const battle = createBattleState({ character, enemy: doomed, enemies: [doomed, survivor] });
+  const result = resolveMultiBattleRound({
+    battle,
+    playerCommand: { type: "attack", targetIndex: 0 },
+    rng: () => 0
+  });
+  assert.equal(result.battle.enemies[0].alive, false);
+  assert.equal(result.battle.presentationEvents.some(event =>
+    event.actorSide === "enemy" && event.actorName === "行動前撃破対象"
+  ), false);
 });

@@ -117,7 +117,9 @@ export function calculatePhysicalHitRate({ attacker = {}, defender = {}, attack 
   const accuracyPenaltyStatus = (attacker.statuses || []).find(status =>
     status.active !== false && Number(status.physicalHitPenalty) > 0
   );
-  const minimum = accuracyPenaltyStatus?.physicalHitRateFloor
+  const minimum = attack.physicalHitRateFloor
+    ?? attacker.physicalHitRateFloor
+    ?? accuracyPenaltyStatus?.physicalHitRateFloor
     ?? illusion?.physicalHitRateFloor
     ?? defender.physicalHitMinimum
     ?? COMBAT_CONFIG.physicalHitMinimum;
