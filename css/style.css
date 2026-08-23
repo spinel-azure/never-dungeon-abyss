@@ -1168,8 +1168,9 @@
   position: absolute;
   z-index: 2;
   top: 8%;
-  left: 9%;
-  width: 70%;
+  left: 50%;
+  width: 68%;
+  transform: translateX(-50%);
   text-align: left;
   text-shadow: 2px 2px 0 #000, -1px -1px 0 #000;
 }
@@ -1187,13 +1188,6 @@
   line-height: 1.75;
 }
 
-.first-dungeon-tutorial-prompt {
-  margin-top: 2% !important;
-  color: #f4f4f4;
-  text-align: right;
-}
-
-.first-dungeon-tutorial[hidden],
-.first-dungeon-tutorial-prompt[hidden] {
+.first-dungeon-tutorial[hidden] {
   display: none !important;
 }

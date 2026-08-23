@@ -214,7 +214,6 @@ import {
   const msgEl = document.getElementById("message");
   const itemOverlay = document.getElementById("itemOverlay");
   const firstDungeonTutorial = document.getElementById("firstDungeonTutorial");
-  const firstDungeonTutorialPrompt = document.getElementById("firstDungeonTutorialPrompt");
   const viewportEl = document.querySelector(".viewport");
   const townPortraitFrame = document.querySelector(".town-portrait-frame");
   const torchMeterEl = document.getElementById("torchMeter");
@@ -344,8 +343,8 @@ import {
     firstDungeonTutorialActive = false;
     firstDungeonTutorialReady = false;
     firstDungeonTutorial.hidden = true;
-    firstDungeonTutorialPrompt.hidden = true;
     if (character) character.firstDungeonTutorialSeen = true;
+    say("奈落へ足を踏み入れた。");
     saveGame();
     setPlayerInputEnabled(true);
     const resolve = resolveFirstDungeonTutorial;
@@ -361,20 +360,19 @@ import {
   }
 
   function showFirstDungeonTutorial() {
-    if (!firstDungeonTutorial || !firstDungeonTutorialPrompt) {
+    if (!firstDungeonTutorial) {
       setPlayerInputEnabled(true);
       return Promise.resolve();
     }
     setPlayerInputEnabled(false);
     firstDungeonTutorialActive = true;
     firstDungeonTutorialReady = false;
-    firstDungeonTutorialPrompt.hidden = true;
     firstDungeonTutorial.hidden = false;
     window.clearTimeout(firstDungeonTutorialTimer);
     firstDungeonTutorialTimer = window.setTimeout(() => {
       if (!firstDungeonTutorialActive) return;
       firstDungeonTutorialReady = true;
-      firstDungeonTutorialPrompt.hidden = false;
+      say("＊Aボタンで次へ");
     }, 3000);
     return new Promise(resolve => {
       resolveFirstDungeonTutorial = resolve;

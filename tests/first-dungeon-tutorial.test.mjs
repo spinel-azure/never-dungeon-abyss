@@ -28,8 +28,10 @@ test("the tutorial exposes the minimap and torch meter through labeled windows",
 
 test("the first dungeon tutorial locks input and enables confirmation after three seconds", () => {
   assert.match(main, /function showFirstDungeonTutorial\(\)[\s\S]*?setPlayerInputEnabled\(false\)/);
-  assert.match(main, /firstDungeonTutorialTimer = window\.setTimeout\([\s\S]*?firstDungeonTutorialReady = true;[\s\S]*?3000\)/);
+  assert.match(main, /firstDungeonTutorialTimer = window\.setTimeout\([\s\S]*?firstDungeonTutorialReady = true;[\s\S]*?say\("＊Aボタンで次へ"\);[\s\S]*?3000\)/);
   assert.match(main, /function handleFirstDungeonTutorialInput\(action\)[\s\S]*?action === "confirm"/);
   assert.match(main, /if \(!character\.firstDungeonTutorialSeen\) await showFirstDungeonTutorial\(\)/);
   assert.match(main, /character\.firstDungeonTutorialSeen = true;[\s\S]*?setPlayerInputEnabled\(true\)/);
+  assert.doesNotMatch(html, /firstDungeonTutorialPrompt/);
+  assert.match(css, /first-dungeon-tutorial-content[\s\S]*?left: 50%;[\s\S]*?transform: translateX\(-50%\)/);
 });
