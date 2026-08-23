@@ -59,17 +59,26 @@ export const waterRegionEnemies = Object.freeze([
   })
 ]);
 
-const formations = Object.freeze({
-  early: Object.freeze([["abyss_piranha"], ["abyss_piranha", "abyss_piranha"]].map(Object.freeze)),
-  crab: Object.freeze([["abyss_piranha"], ["abyss_piranha", "abyss_piranha"], ["abyss_piranha", "abyss_piranha", "abyss_piranha"], ["abgrund_krabbe"]].map(Object.freeze)),
-  eel: Object.freeze([["abyss_piranha", "abyss_piranha"], ["abyss_piranha", "abyss_piranha", "abyss_piranha"], ["abgrund_aal"], ["abgrund_krabbe"]].map(Object.freeze)),
-  deep: Object.freeze([["abyss_piranha"], ["abyss_piranha", "abyss_piranha"], ["abyss_piranha", "abyss_piranha", "abyss_piranha"], ["abgrund_aal"], ["abgrund_krabbe"], ["abyss_giant_catfish"]].map(Object.freeze)),
-  mixed: Object.freeze([["abyss_piranha"], ["abgrund_aal"], ["abgrund_krabbe"], ["abyss_giant_catfish"], ["abyss_piranha", "abyss_piranha", "abgrund_aal"], ["abyss_piranha", "abyss_piranha", "abgrund_krabbe"]].map(Object.freeze))
-});
+import { defineEncounterFormation, selectEncounterFormationIds } from "./encounter-formations.js";
 
-export function getWaterRegionFormationIds({ depth = 70, rng = Math.random } = {}) {
-  const floor = Math.max(70, Math.min(79, Math.floor(Number(depth) || 70)));
-  const pool = floor <= 71 ? formations.early : floor <= 73 ? formations.crab : floor <= 75 ? formations.eel : floor === 78 ? formations.mixed : formations.deep;
-  const index = Math.min(pool.length - 1, Math.floor(Math.max(0, Number(rng()) || 0) * pool.length));
-  return [...pool[index]];
+const formation = defineEncounterFormation;
+const formations = Object.freeze([
+  formation(["abyss_piranha"], { minimumDepth: 70, maximumDepth: 71 }),
+  formation(["abyss_piranha", "abyss_piranha"], { minimumDepth: 70, maximumDepth: 71 }),
+  formation(["abyss_piranha"], { minimumDepth: 72, maximumDepth: 73 }),
+  formation(["abyss_piranha", "abyss_piranha"], { minimumDepth: 72, maximumDepth: 73 }),
+  formation(["abyss_piranha", "abyss_piranha", "abyss_piranha"], { minimumDepth: 72, maximumDepth: 73 }),
+  formation(["abgrund_krabbe"], { minimumDepth: 72, maximumDepth: 73 }),
+  formation(["abyss_piranha", "abyss_piranha"], { minimumDepth: 74, maximumDepth: 75 }),
+  formation(["abyss_piranha", "abyss_piranha", "abyss_piranha"], { minimumDepth: 74, maximumDepth: 75 }),
+  formation(["abgrund_aal"], { minimumDepth: 74, maximumDepth: 75 }),
+  formation(["abgrund_krabbe"], { minimumDepth: 74, maximumDepth: 75 }),
+  ...[["abyss_piranha"], ["abyss_piranha", "abyss_piranha"], ["abyss_piranha", "abyss_piranha", "abyss_piranha"], ["abgrund_aal"], ["abgrund_krabbe"], ["abyss_giant_catfish"]]
+    .map(members => formation(members, { exactDepths: [76, 77, 79] })),
+  ...[["abyss_piranha"], ["abgrund_aal"], ["abgrund_krabbe"], ["abyss_giant_catfish"], ["abyss_piranha", "abyss_piranha", "abgrund_aal"], ["abyss_piranha", "abyss_piranha", "abgrund_krabbe"]]
+    .map(members => formation(members, { exactDepths: [78] }))
+]);
+
+export function getWaterRegionFormationIds({ depth = 70, flags = {}, rng = Math.random } = {}) {
+  return selectEncounterFormationIds(formations, { depth, flags, rng });
 }

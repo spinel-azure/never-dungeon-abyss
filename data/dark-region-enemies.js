@@ -66,6 +66,8 @@ export const darkRegionEnemies = Object.freeze([
   })
 ]);
 
+import { defineEncounterFormation, selectEncounterFormationIds } from "./encounter-formations.js";
+
 const formations = Object.freeze([
   ["sensenmann"],
   ["sensenmann", "sensenmann"],
@@ -74,11 +76,8 @@ const formations = Object.freeze([
   ["will_o_wisp", "will_o_wisp"],
   ["will_o_wisp", "will_o_wisp", "will_o_wisp"],
   ["schleipnir"]
-].map(formation => Object.freeze(formation)));
+].map(members => defineEncounterFormation(members, { minimumDepth: 90, maximumDepth: 99 })));
 
-export function getDarkRegionFormationIds({ depth = 90, rng = Math.random } = {}) {
-  const floor = Math.floor(Number(depth) || 90);
-  if (floor < 90 || floor > 99) return [];
-  const index = Math.min(formations.length - 1, Math.floor(Math.max(0, Number(rng()) || 0) * formations.length));
-  return [...formations[index]];
+export function getDarkRegionFormationIds({ depth = 90, flags = {}, rng = Math.random } = {}) {
+  return selectEncounterFormationIds(formations, { depth, flags, rng });
 }

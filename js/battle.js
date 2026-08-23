@@ -781,6 +781,7 @@ function renderEnemyParty(battle) {
     const selectedIndex = battleUi.mode === "targets" ? battleUi.selectedIndex : battle.targetIndex;
     member.classList.toggle("is-selected", index === selectedIndex && enemy.alive);
     member.classList.toggle("is-defeated", !enemy.alive);
+    member.setAttribute("aria-hidden", enemy.alive ? "false" : "true");
     member.disabled = !enemy.alive;
     member.querySelector(".battle-enemy-member-name").textContent = battleUi.concealed ? "？？？？？" : enemy.name;
     renderWeaknessIcons(member.querySelector(".battle-enemy-member-weakness"), enemy);

@@ -131,7 +131,7 @@ import { applyTaurusDepthBonus } from "../data/taurus.js";
 import { scaleBlackChestMimic } from "../data/mimic-scaling.js";
 import { purchaseBuybackEquipment, purchaseBuybackItem, purchaseEquipment, purchaseItem, sellEquipmentInstance, sellItem } from "../data/commerce.js";
 import { addLootCard, addLootEquipment, addLootGold, addLootItem, depositEquipmentInWarehouse, depositItemInWarehouse, grantItemWithOverflow, settleLootBag, withdrawEquipmentFromWarehouse, withdrawItemFromWarehouse } from "../data/inventory.js";
-import { isGoldChestWeaponEligible, rollEnemyDrop, rollGoldChestLoot, rollPurpleChestLoot, rollRedChestLoot } from "../data/loot.js";
+import { calculateFixedGoldPerDefeat, isGoldChestWeaponEligible, rollEnemyDrop, rollGoldChestLoot, rollPurpleChestLoot, rollRedChestLoot } from "../data/loot.js";
 import { rollTreasureTrap } from "../data/traps.js";
 import { restAtHealingFountain as restoreAtHealingFountain } from "../data/fountains.js";
 import { getSkill } from "../data/skills.js";
@@ -1608,13 +1608,13 @@ import {
     const enemyData = getRandomEncounterEnemy({ depth: currentDepth });
     if (enemyData.id === "maikaefer") return [enemyData];
     if (currentDepth >= 70 && currentDepth <= 79) {
-      return getWaterRegionEncounterFormation({ depth: currentDepth });
+      return getWaterRegionEncounterFormation({ depth: currentDepth, flags: character?.eventFlags });
     }
     if (currentDepth >= 80 && currentDepth <= 88) {
-      return getCrystalRegionEncounterFormation({ depth: currentDepth });
+      return getCrystalRegionEncounterFormation({ depth: currentDepth, flags: character?.eventFlags });
     }
     if (currentDepth >= 90 && currentDepth <= 99) {
-      return getDarkRegionEncounterFormation({ depth: currentDepth });
+      return getDarkRegionEncounterFormation({ depth: currentDepth, flags: character?.eventFlags });
     }
     return Array.from({ length: getEnemyEncounterCount(enemyData) }, () => enemyData);
   }
@@ -2364,7 +2364,9 @@ import {
       if (after > before) questCollectionMessage = `\n依頼用の蜜蝋を${after - before}個採取した。（${after}/15）`;
     }
     if (character && reward > 0) Object.assign(character, awardBattleExperience(character, reward));
-    const drop = rollEnemyDrop(battle?.enemy);
+    const fixedGoldPerDefeat = calculateFixedGoldPerDefeat(rewardEnemies);
+
+    const drop = fixedGoldPerDefeat > 0 ? { kind: "gold", amount: fixedGoldPerDefeat } : rollEnemyDrop(battle?.enemy);
     const dropMessage = drop.kind === "redChest" ? "" : addRolledLoot(drop);
     const victoryMessage = `${reward > 0 ? `戦闘に勝利した。${reward}EXPを獲得した。` : "戦闘に勝利した。"}${bossRewardMessage}${questCollectionMessage}${dropMessage ? `\n${dropMessage}` : ""}`;
     resetPresence();

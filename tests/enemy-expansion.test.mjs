@@ -6,8 +6,8 @@ import { getItem } from "../data/items.js";
 import { rollBlackChestLoot, rollEnemyDrop } from "../data/loot.js";
 
 test("new enemies follow the B3F to B5F encounter progression", () => {
-  assert.equal(getRandomEnemy({ depth: 2, rng: () => 0.999 }).id, "poison_slime");
-  assert.equal(getRandomEnemy({ depth: 3, rng: () => 0.999 }).id, "vampire_bat");
+  assert.equal(getRandomEnemy({ depth: 2, rng: () => 0.8 }).id, "poison_slime");
+  assert.equal(getRandomEnemy({ depth: 3, rng: () => 0.8 }).id, "vampire_bat");
   assert.equal(getRandomEnemy({ depth: 4, rng: () => 0.999 }).id, "bouncing_coin");
   assert.equal(getRandomEnemy({ depth: 5, rng: () => 0.999 }).id, "viper");
 });
@@ -45,7 +45,7 @@ test("Maikaefer is frail, evasive, poison-proof, and highly resistant to action 
   assert.equal(enemy.statusResistances.action_skip.resistancePoints, 80);
 });
 
-test("viper and vampire bat materials are sell-only drops and bouncing coin carries 40G", () => {
+test("viper and vampire bat materials are sell-only drops and bouncing coin carries 20G", () => {
   const snakeSkin = getItem("snake_skin");
   const batWing = getItem("bat_wing");
   assert.equal(snakeSkin.sellPrice, 30);
@@ -54,7 +54,7 @@ test("viper and vampire bat materials are sell-only drops and bouncing coin carr
   assert.equal(batWing.repurchasable, false);
   assert.deepEqual(rollEnemyDrop(createEnemyCombatant(getEnemyById("bouncing_coin")), () => 0.5), {
     kind: "gold",
-    amount: 40
+    amount: 20
   });
 });
 

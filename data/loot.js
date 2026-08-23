@@ -16,6 +16,13 @@ export const BLACK_CHEST_LOOT_TABLES = Object.freeze([
   Object.freeze({ minDepth: 20, maxDepth: Infinity, gold: [180, 240, 300], potionId: "healing_potion_large" })
 ]);
 
+export function calculateFixedGoldPerDefeat(enemies = []) {
+  return (Array.isArray(enemies) ? enemies : []).reduce((total, enemy) => (
+    total + (enemy?.fixedGoldPerDefeat && Number(enemy?.hp) <= 0
+      ? Math.max(0, Math.floor(Number(enemy?.dropGold) || 0))
+      : 0)
+  ), 0);
+}
 export function rollEnemyDrop(enemy, rng = Math.random) {
   if (enemy?.noDrop) return { kind: "none" };
   if (enemy?.dropProfile === "goldenBeetle") {

@@ -159,11 +159,20 @@ export const enemies = Object.freeze([
   }),
   Object.freeze({
     id: "bouncing_coin", name: "跳ねるコイン", imageId: "bouncing_coin",
-    level: 6,
-    image: "images/enemies/enemy_08.avif", race: "construct", minimumDepth: 4,
-    maximumDepth: 10,
-    maxHp: 34, stats: Object.freeze({ str: 6, int: 3, agi: 8, dex: 7, luc: 10 }),
-    def: 8, attack: 5, experienceReward: 12, dropGold: 40,
+    level: 1, regionStrength: 1,
+    image: "images/enemies/enemy_08.avif", race: "construct", minimumDepth: 1,
+    maximumDepth: 4, encounterCountRange: Object.freeze([1, 3]), allowMixedFormation: false,
+    maxHp: 10, stats: Object.freeze({ str: 1, int: 1, agi: 8, dex: 1, luc: 5 }),
+    def: 0, attack: 1, experienceReward: 2, dropGold: 20, fixedGoldPerDefeat: true,
+    actions: Object.freeze([
+      Object.freeze({ weight: 55, action: Object.freeze({ id: "coin_multi_attack", name: "攻撃", actionType: "physicalAttack", hitCountRange: Object.freeze([1, 5]) }) }),
+      Object.freeze({ weight: 35, action: Object.freeze({ id: "coin_wait", name: "様子を見る", actionType: "wait", waitMessage: "跳ねるコインはその場で跳ねている。" }) }),
+      Object.freeze({
+        weight: 10,
+        when: Object.freeze({ livingEnemyCountAtMost: 1, summonsUsedBelow: 2 }),
+        action: Object.freeze({ id: "coin_call_companion", name: "仲間呼び", actionType: "summonAlly", maximumLivingEnemies: 3, summonLimit: 2, summonCount: 1, summonMessage: "跳ねるコインは仲間を呼んだ！" })
+      })
+    ]),
     elementMultipliers: Object.freeze({ fire: 1, ice: 1 }),
     statusResistances: Object.freeze({
       poison: Object.freeze({ resistancePoints: 0, immune: true }),
@@ -724,16 +733,16 @@ export function getRandomEncounterEnemy({ depth = 1, rng = Math.random, allowRar
   return getRandomEnemy({ depth: floor, rng });
 }
 
-export function getWaterRegionEncounterFormation({ depth = 70, rng = Math.random } = {}) {
-  return getWaterRegionFormationIds({ depth, rng }).map(getEnemyById).filter(Boolean);
+export function getWaterRegionEncounterFormation({ depth = 70, flags = {}, rng = Math.random } = {}) {
+  return getWaterRegionFormationIds({ depth, flags, rng }).map(getEnemyById).filter(Boolean);
 }
 
-export function getCrystalRegionEncounterFormation({ depth = 80, rng = Math.random } = {}) {
-  return getCrystalRegionFormationIds({ depth, rng }).map(getEnemyById).filter(Boolean);
+export function getCrystalRegionEncounterFormation({ depth = 80, flags = {}, rng = Math.random } = {}) {
+  return getCrystalRegionFormationIds({ depth, flags, rng }).map(getEnemyById).filter(Boolean);
 }
 
-export function getDarkRegionEncounterFormation({ depth = 90, rng = Math.random } = {}) {
-  return getDarkRegionFormationIds({ depth, rng }).map(getEnemyById).filter(Boolean);
+export function getDarkRegionEncounterFormation({ depth = 90, flags = {}, rng = Math.random } = {}) {
+  return getDarkRegionFormationIds({ depth, flags, rng }).map(getEnemyById).filter(Boolean);
 }
 
 export function createEnemyCombatant(enemy) {
@@ -756,6 +765,7 @@ export function createEnemyCombatant(enemy) {
     experienceReward: enemy.experienceReward,
     dropItemId: enemy.dropItemId || null,
     dropGold: Math.max(0, Math.floor(Number(enemy.dropGold) || 0)),
+    fixedGoldPerDefeat: Boolean(enemy.fixedGoldPerDefeat),
     dropProfile: enemy.dropProfile || "",
     escapeRate: enemy.escapeRate,
     surpriseRate: enemy.surpriseRate,

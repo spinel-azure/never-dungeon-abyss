@@ -65,16 +65,20 @@ export const crystalRegionEnemies = Object.freeze([
   })
 ]);
 
-const formations = Object.freeze({
-  early: Object.freeze([["abyss_crystal_beetle"], ["abyss_crystal_beetle", "abyss_crystal_beetle"], ["abyss_crystal_beetle", "abyss_crystal_beetle", "abyss_crystal_beetle"]].map(Object.freeze)),
-  middle: Object.freeze([["abyss_crystal_beetle"], ["abyss_crystal_beetle", "abyss_crystal_beetle"], ["prism_moth"], ["abyss_crystal_beetle", "abyss_crystal_beetle", "prism_moth"]].map(Object.freeze)),
-  deep: Object.freeze([["abyss_crystal_beetle", "abyss_crystal_beetle"], ["prism_moth"], ["amethyst_golem"], ["amethyst_golem", "prism_moth"], ["abyss_crystal_beetle", "amethyst_golem"]].map(Object.freeze)),
-  final: Object.freeze([["abyss_crystal_beetle", "abyss_crystal_beetle", "prism_moth"], ["prism_moth", "prism_moth"], ["amethyst_golem"], ["crystal_mimic"], ["abyss_crystal_beetle", "abyss_crystal_beetle", "crystal_mimic"], ["amethyst_golem", "abyss_crystal_beetle", "abyss_crystal_beetle"]].map(Object.freeze))
-});
+import { defineEncounterFormation, selectEncounterFormationIds } from "./encounter-formations.js";
 
-export function getCrystalRegionFormationIds({ depth = 80, rng = Math.random } = {}) {
-  const floor = Math.max(80, Math.min(88, Math.floor(Number(depth) || 80)));
-  const pool = floor <= 81 ? formations.early : floor <= 83 ? formations.middle : floor <= 85 ? formations.deep : formations.final;
-  const index = Math.min(pool.length - 1, Math.floor(Math.max(0, Number(rng()) || 0) * pool.length));
-  return [...pool[index]];
+const formation = defineEncounterFormation;
+const formations = Object.freeze([
+  ...[["abyss_crystal_beetle"], ["abyss_crystal_beetle", "abyss_crystal_beetle"], ["abyss_crystal_beetle", "abyss_crystal_beetle", "abyss_crystal_beetle"]]
+    .map(members => formation(members, { minimumDepth: 80, maximumDepth: 81 })),
+  ...[["abyss_crystal_beetle"], ["abyss_crystal_beetle", "abyss_crystal_beetle"], ["prism_moth"], ["abyss_crystal_beetle", "abyss_crystal_beetle", "prism_moth"]]
+    .map(members => formation(members, { minimumDepth: 82, maximumDepth: 83 })),
+  ...[["abyss_crystal_beetle", "abyss_crystal_beetle"], ["prism_moth"], ["amethyst_golem"], ["amethyst_golem", "prism_moth"], ["abyss_crystal_beetle", "amethyst_golem"]]
+    .map(members => formation(members, { minimumDepth: 84, maximumDepth: 85 })),
+  ...[["abyss_crystal_beetle", "abyss_crystal_beetle", "prism_moth"], ["prism_moth", "prism_moth"], ["amethyst_golem"], ["crystal_mimic"], ["abyss_crystal_beetle", "abyss_crystal_beetle", "crystal_mimic"], ["amethyst_golem", "abyss_crystal_beetle", "abyss_crystal_beetle"]]
+    .map(members => formation(members, { minimumDepth: 86, maximumDepth: 88 }))
+]);
+
+export function getCrystalRegionFormationIds({ depth = 80, flags = {}, rng = Math.random } = {}) {
+  return selectEncounterFormationIds(formations, { depth, flags, rng });
 }

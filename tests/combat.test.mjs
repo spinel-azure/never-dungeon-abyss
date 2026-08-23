@@ -158,8 +158,8 @@ test("early enemies use the MVP difficulty profile", () => {
 });
 
 test("B2F adds rabbit, undead and poison slime encounters", () => {
-  assert.ok(["abyss_rat", "cave_slime"].includes(getRandomEnemy({ depth: 1, rng: () => 0.99 }).id));
-  assert.equal(getRandomEnemy({ depth: 2, rng: () => 0.99 }).id, "poison_slime");
+  assert.ok(["abyss_rat", "cave_slime", "bouncing_coin"].includes(getRandomEnemy({ depth: 1, rng: () => 0.99 }).id));
+  assert.equal(getRandomEnemy({ depth: 2, rng: () => 0.8 }).id, "poison_slime");
   assert.equal(getEnemyById("abyss_rabbit").minimumDepth, 2);
   assert.equal(getEnemyById("wandering_dead").race, "undead");
   assert.equal(getEnemyById("poison_slime").minimumDepth, 2);

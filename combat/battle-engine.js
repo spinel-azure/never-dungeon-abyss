@@ -88,7 +88,7 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
   const next = structuredClone(battle);
   const playerAction = createPlayerAction(next.player, playerCommand, next.enemy);
   if (!playerAction.ok) return { battle: next, accepted: false, reason: playerAction.reason };
-  const enemyAction = createEnemyAction(next.enemy, rng);
+  const enemyAction = createEnemyAction(next.enemy, rng, { battle: next });
   const order = applyAriesOpeningPriority(next, resolveTurnOrder([
     { side: "player", actor: combatStats(next.player), action: playerAction.action },
     { side: "enemy", actor: combatStats(next.enemy), action: enemyAction }
@@ -214,7 +214,7 @@ export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.rand
   const orderEntries = [{ side: "player", actor: combatStats(next.player), action: playerAction.action }];
   next.enemies.forEach((member, partyIndex) => {
     if (!member.alive || member.hp <= 0) return;
-    orderEntries.push({ side: "enemy", partyIndex, actor: combatStats(member), action: createEnemyAction(member, rng) });
+    orderEntries.push({ side: "enemy", partyIndex, actor: combatStats(member), action: createEnemyAction(member, rng, { battle: next }) });
   });
   const order = applyAriesOpeningPriority(next, resolveTurnOrder(orderEntries, rng));
   next.log = [];
@@ -389,7 +389,7 @@ export function resolveEnemyAmbush({ battle, rng = Math.random } = {}) {
   } else {
     executeAction({
       battle: next,
-      action: createEnemyAction(next.enemy, rng),
+      action: createEnemyAction(next.enemy, rng, { battle: next }),
       actor: next.enemy,
       actorSide: "enemy",
       target: next.player,
@@ -484,7 +484,7 @@ export function createPlayerAction(player, command = {}, enemy = null) {
   return { ok: true, spCost, action: applyPlayerWeaponElement(player, action) };
 }
 
-export function createEnemyAction(enemy, rng = Math.random) {
+export function createEnemyAction(enemy, rng = Math.random, context = {}) {
   const attack = createNormalAttack({
     weapon: {
       id: `${enemy.id}_attack`,
@@ -500,7 +500,7 @@ export function createEnemyAction(enemy, rng = Math.random) {
   );
   if (actionSealed) return attack;
   if (actionTable.length > 0) {
-    const selected = selectWeightedEnemyAction(actionTable, enemy, rng);
+    const selected = selectWeightedEnemyAction(actionTable, enemy, rng, context);
     if (selected) return buildEnemyAction(selected, attack);
   }
   const special = enemy.specialAttack;
@@ -515,9 +515,9 @@ export function createEnemyAction(enemy, rng = Math.random) {
   };
 }
 
-function selectWeightedEnemyAction(actionTable, enemy, rng) {
+function selectWeightedEnemyAction(actionTable, enemy, rng, context) {
   const weighted = actionTable
-    .filter(entry => actionConditionMatches(entry?.when, enemy))
+    .filter(entry => actionConditionMatches(entry?.when, enemy, context))
     .map(entry => ({
       action: entry?.action || entry,
       weight: Math.max(0, Number(entry?.weight) || 0)
@@ -533,10 +533,16 @@ function selectWeightedEnemyAction(actionTable, enemy, rng) {
   return weighted.at(-1)?.action || null;
 }
 
-function actionConditionMatches(condition, enemy) {
+function actionConditionMatches(condition, enemy, context = {}) {
   if (!condition) return true;
   const rate = Number(enemy?.maxHp) > 0 ? Number(enemy.hp) / Number(enemy.maxHp) : 1;
   if (Number.isFinite(Number(condition.hpRateBelow)) && !(rate < Number(condition.hpRateBelow))) return false;
+  const battle = context?.battle;
+  const enemies = Array.isArray(battle?.enemies) ? battle.enemies : [battle?.enemy || enemy];
+  const livingEnemyCount = enemies.filter(member => member?.alive !== false && Number(member?.hp) > 0).length;
+  if (Number.isFinite(Number(condition.livingEnemyCountAtMost)) && livingEnemyCount > Number(condition.livingEnemyCountAtMost)) return false;
+  if (Number.isFinite(Number(condition.summonsUsedBelow))
+    && Math.max(0, Number(battle?.enemySummonsUsed) || 0) >= Number(condition.summonsUsedBelow)) return false;
   return true;
 }
 
@@ -564,6 +570,31 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
     battle.outcome = "enemyEscaped";
     battle.phase = "complete";
     battle.log.push(`${actor.name}は逃げ出した！`);
+    return;
+  }
+  if (action.actionType === "summonAlly" && actorSide === "enemy") {
+    const enemies = Array.isArray(battle.enemies) ? battle.enemies : [battle.enemy];
+    const livingCount = enemies.filter(member => member?.alive !== false && Number(member?.hp) > 0).length;
+    const summonLimit = Math.max(0, Math.floor(Number(action.summonLimit) || 0));
+    const maximumLiving = Math.max(1, Math.floor(Number(action.maximumLivingEnemies) || enemies.length));
+    const used = Math.max(0, Math.floor(Number(battle.enemySummonsUsed) || 0));
+    const requested = Math.max(1, Math.floor(Number(action.summonCount) || 1));
+    const summonCount = Math.min(requested, Math.max(0, maximumLiving - livingCount), Math.max(0, summonLimit - used));
+    if (summonCount <= 0) return;
+    for (let index = 0; index < summonCount; index += 1) {
+      const summoned = cloneCombatant(actor);
+      summoned.hp = summoned.maxHp;
+      summoned.alive = true;
+      summoned.escaped = false;
+      summoned.statuses = [];
+      summoned.summonedInBattle = true;
+      enemies.push(summoned);
+    }
+    battle.enemies = enemies;
+    battle.enemySummonsUsed = used + summonCount;
+    if (!Number.isFinite(Number(battle.targetIndex))) battle.targetIndex = 0;
+    battle.log.push(action.summonMessage || `${actor.name}は仲間を呼んだ！`);
+    battle.presentationEvents.push({ type: "enemySummoned", actorSide, count: summonCount });
     return;
   }
   if (action.actionType === "spDrain") {
