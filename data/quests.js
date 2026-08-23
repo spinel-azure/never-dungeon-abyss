@@ -905,6 +905,31 @@ export function recordEnemyDefeat(character, enemyId, depth = null) {
   return updated ? { ...character, quests } : character;
 }
 
+export function getActiveDefeatQuestProgress(character) {
+  const quests = normalizeQuestState(character?.quests);
+  return Object.keys(quests.active).flatMap(questId => {
+    const quest = getQuestById(questId);
+    if (quest?.objectiveType !== "defeatEnemy") return [];
+    const progress = getQuestProgress(character, questId).progress;
+    return [{
+      questId,
+      targetName: quest.targetName || quest.title,
+      progress,
+      requiredCount: quest.requiredCount
+    }];
+  });
+}
+
+export function formatDefeatQuestProgressUpdates(beforeEntries, afterEntries) {
+  const beforeById = new Map((beforeEntries || []).map(entry => [entry.questId, entry]));
+  return (afterEntries || []).flatMap(entry => {
+    const before = beforeById.get(entry.questId);
+    if (!before || entry.progress <= before.progress) return [];
+    const width = String(entry.requiredCount).length;
+    return [`${entry.targetName}討伐${String(entry.progress).padStart(width, "0")}/${entry.requiredCount}`];
+  });
+}
+
 export function recordBossDefeat(character, bossId, depth = null) {
   const quests = normalizeQuestState(character?.quests);
   let eventFlags = character?.eventFlags || {};

@@ -255,6 +255,18 @@ export const SKILLS = Object.freeze({
     effectValue: 50,
     effects: Object.freeze([])
   }),
+  grain_glow: Object.freeze({
+    id: "grain_glow",
+    name: "稲穂の輝き",
+    description: "たいまつゲージを50％回復する。",
+    actionType: "dungeonEffect",
+    category: "miracle",
+    spCost: 4,
+    target: "self",
+    environmentEffect: "restoreTorch",
+    effectValue: 50,
+    effects: Object.freeze([])
+  }),
   wisdom_to_power: Object.freeze({
     id: "wisdom_to_power",
     name: "知恵よ、力を！",
@@ -459,6 +471,7 @@ export const LEVEL_SKILL_UNLOCKS = Object.freeze([
   Object.freeze({ job: "priest", level: 34, skillId: "holy_light" }),
   Object.freeze({ job: "mage", level: 34, skillId: "magic_focus" }),
   Object.freeze({ job: "mage", level: 4, skillId: "staff_light" }),
+  Object.freeze({ job: "priest", level: 4, skillId: "grain_glow" }),
   Object.freeze({ job: "mage", level: 25, skillId: "wisdom_to_power" }),
   Object.freeze({ job: "warrior", level: 5, skillId: "survival_instinct" }),
   Object.freeze({ job: "warrior", level: 38, skillId: "flash_slash" }),

@@ -96,6 +96,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     playerCharge: createInitialPlayerCharge(),
     firstDungeonTutorialSeen: false,
     deckTutorialSeen: false,
+    lootBagTutorialSeen: false,
     crystalFloorStepCount: 0,
     herbicideTrialUses: 0,
     cardPassiveStepCount: 0,
@@ -210,6 +211,9 @@ export function normalizeCharacter(character) {
     deckTutorialSeen: typeof character.deckTutorialSeen === "boolean"
       ? character.deckTutorialSeen
       : Boolean(eventFlags.inn_first_talk_card),
+    lootBagTutorialSeen: typeof character.lootBagTutorialSeen === "boolean"
+      ? character.lootBagTutorialSeen
+      : true,
     crystalFloorStepCount: Math.max(0, Math.floor(Number(character.crystalFloorStepCount) || 0)) % 3,
     herbicideTrialUses: Math.max(0, Math.min(5, Math.floor(Number(character.herbicideTrialUses) || 0))),
     cardPassiveStepCount: Math.max(0, Math.floor(Number(character.cardPassiveStepCount) || 0)) % 5,

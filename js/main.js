@@ -162,6 +162,8 @@ import {
   completeQueenShadowInvestigation,
   grantRedDoorInvestigationSupply,
   getForcedEnemyId,
+  getActiveDefeatQuestProgress,
+  formatDefeatQuestProgressUpdates,
   getQuestProgress,
   hasActiveQuest,
   isDungeonDepthUnlocked,
@@ -254,6 +256,8 @@ import {
   const lootIdentifyTitle = document.getElementById("lootIdentifyTitle");
   const lootIdentifyEffectCanvas = document.getElementById("lootIdentifyEffectCanvas");
   const lootIdentifyEffectText = document.getElementById("lootIdentifyEffectText");
+  const lootBagTutorial = document.getElementById("lootBagTutorial");
+  const lootBagTutorialPrompt = document.getElementById("lootBagTutorialPrompt");
   const lootIdentifyEffectEngine = lootIdentifyEffectCanvas
     ? new EffectEngine(lootIdentifyEffectCanvas, { transparent: true, backdrop: false })
     : null;
@@ -286,10 +290,17 @@ import {
   let deckTutorialReady = false;
   let deckTutorialTimer = 0;
   let deckTutorialReturnMessage = "";
+  let lootBagTutorialActive = false;
+  let lootBagTutorialReady = false;
+  let lootBagTutorialTimer = 0;
 
   let lootIdentifyTouchHandled = false;
 
   function activateLootIdentifyAction() {
+    if (lootBagTutorialActive) {
+      if (!lootBagTutorialReady) return;
+      finishLootBagTutorial();
+    }
     if (!pendingLootIdentification || pendingLootIdentification.identifying) return;
     if (!pendingLootIdentification.identified) {
       const identification = pendingLootIdentification;
@@ -2228,7 +2239,7 @@ import {
   }
 
   async function useFieldSkill(skillId) {
-    if (skillId === "staff_light" && isForcedTorchZeroFloor(currentDepth)) {
+    if (["staff_light", "grain_glow"].includes(skillId) && isForcedTorchZeroFloor(currentDepth)) {
       say("この区域では、たいまつの光を補充できない。");
       return { accepted: false, reason: "forcedTorchZero" };
     }
@@ -2436,12 +2447,17 @@ import {
         }
       }
     }
+    const defeatQuestProgressBefore = character ? getActiveDefeatQuestProgress(character) : [];
     if (character && battle?.enemy?.id) {
       const defeatedEnemies = battle.enemy.isBoss ? [battle.enemy] : rewardEnemies;
       for (const defeatedEnemy of defeatedEnemies) {
         if (defeatedEnemy?.id) character = recordEnemyDefeat(character, defeatedEnemy.id, currentDepth);
       }
     }
+    const defeatQuestProgressMessage = character
+      ? formatDefeatQuestProgressUpdates(defeatQuestProgressBefore, getActiveDefeatQuestProgress(character))
+        .map(line => `\n${line}`).join("")
+      : "";
     let questCollectionMessage = "";
     if (character && questWaspHiveVictory) {
       const before = Math.min(15, getQuestProgress(character, "guild_029").progress);
@@ -2454,7 +2470,7 @@ import {
 
     const drop = fixedGoldPerDefeat > 0 ? { kind: "gold", amount: fixedGoldPerDefeat } : rollEnemyDrop(battle?.enemy);
     const dropMessage = drop.kind === "redChest" ? "" : addRolledLoot(drop);
-    const victoryMessage = `${reward > 0 ? `戦闘に勝利した。${reward}EXPを獲得した。` : "戦闘に勝利した。"}${bossRewardMessage}${questCollectionMessage}${dropMessage ? `\n${dropMessage}` : ""}`;
+    const victoryMessage = `${reward > 0 ? `戦闘に勝利した。${reward}EXPを獲得した。` : "戦闘に勝利した。"}${bossRewardMessage}${questCollectionMessage}${dropMessage ? `\n${dropMessage}` : ""}${defeatQuestProgressMessage}`;
     resetPresence();
     setPlayerInputEnabled(true);
     if (drop.kind === "redChest") {
@@ -3112,7 +3128,49 @@ import {
     lootIdentifyOverlay.hidden = false;
     document.body.classList.add("loot-identify-open");
     if (playBgm) startBgm("lotBag");
+    if (!character?.lootBagTutorialSeen) startLootBagTutorial();
   }
+
+  function updateLootBagTutorialTarget() {
+    if (!lootBagTutorialActive || !lootBagTutorial || !lootIdentifyAction) return;
+    const rootRect = lootIdentifyOverlay.getBoundingClientRect();
+    const targetRect = lootIdentifyAction.getBoundingClientRect();
+    const padding = 8;
+    lootBagTutorial.style.setProperty("--loot-hole-left", `${targetRect.left - rootRect.left - padding}px`);
+    lootBagTutorial.style.setProperty("--loot-hole-top", `${targetRect.top - rootRect.top - padding}px`);
+    lootBagTutorial.style.setProperty("--loot-hole-width", `${targetRect.width + padding * 2}px`);
+    lootBagTutorial.style.setProperty("--loot-hole-height", `${targetRect.height + padding * 2}px`);
+  }
+
+  function startLootBagTutorial() {
+    if (!lootBagTutorial || !lootBagTutorialPrompt || !lootIdentifyAction) return;
+    window.clearTimeout(lootBagTutorialTimer);
+    lootBagTutorialActive = true;
+    lootBagTutorialReady = false;
+    lootBagTutorialPrompt.hidden = true;
+    lootIdentifyAction.disabled = true;
+    lootBagTutorial.hidden = false;
+    requestAnimationFrame(updateLootBagTutorialTarget);
+    lootBagTutorialTimer = window.setTimeout(() => {
+      if (!lootBagTutorialActive) return;
+      lootBagTutorialReady = true;
+      lootBagTutorialPrompt.hidden = false;
+      lootIdentifyAction.disabled = false;
+    }, 3000);
+  }
+
+  function finishLootBagTutorial() {
+    if (!lootBagTutorialActive || !lootBagTutorialReady) return false;
+    window.clearTimeout(lootBagTutorialTimer);
+    lootBagTutorialActive = false;
+    lootBagTutorialReady = false;
+    lootBagTutorial.hidden = true;
+    character = { ...character, lootBagTutorialSeen: true };
+    saveGame();
+    return true;
+  }
+
+  window.addEventListener("resize", updateLootBagTutorialTarget);
 
   function prepareLootIdentifyEffect() {
     if (!lootIdentifyEffectEngine) return Promise.resolve(false);
@@ -3188,6 +3246,8 @@ import {
 
   function handleLootIdentifyInput(action) {
     if (!lootIdentifyOverlay || lootIdentifyOverlay.hidden) return false;
+    if (lootBagTutorialActive && !lootBagTutorialReady) return true;
+    if (lootBagTutorialActive && action === "cancel") return true;
     if (action === "confirm" || action === "cancel") lootIdentifyAction.click();
     return true;
   }

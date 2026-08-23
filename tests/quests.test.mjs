@@ -33,6 +33,8 @@ import {
   getQuestById,
   getQuestHistory,
   getQuestProgress,
+  getActiveDefeatQuestProgress,
+  formatDefeatQuestProgressUpdates,
   isDungeonDepthUnlocked,
   isQuestAvailable,
   normalizeQuestState,
@@ -147,6 +149,15 @@ test("rat defeats advance only quest 001 and stop at 15", () => {
   const progress = getQuestProgress(character, QUEST_ID);
   assert.equal(progress.progress, 15);
   assert.equal(progress.readyToReport, true);
+});
+
+test("defeat quest progress messages include the updated count", () => {
+  let character = acceptQuest(createInitialCharacter({ name: "TEST", job: "warrior" }), QUEST_ID).character;
+  const before = getActiveDefeatQuestProgress(character);
+  character = recordEnemyDefeat(character, "abyss_rat", 1);
+  const after = getActiveDefeatQuestProgress(character);
+  assert.deepEqual(formatDefeatQuestProgressUpdates(before, after), ["奈落ネズミ討伐01/15"]);
+  assert.deepEqual(formatDefeatQuestProgressUpdates(after, after), []);
 });
 
 test("B1F forces rats only until the active quest reaches its target", () => {

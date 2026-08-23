@@ -1898,7 +1898,7 @@ test("priests learn Antidote at level 3 and Exorcism at level 5", () => {
   const lodging = { ...priest, level: 2, experience: getExperienceForLevel(2) };
   lodging.carriedExperience = getExperienceForLevel(5) - lodging.experience;
   const stayed = resolveInnStay(lodging);
-  assert.deepEqual(stayed.learnedSkillIds, ["antidote", "exorcism"]);
+  assert.deepEqual(stayed.learnedSkillIds, ["grain_glow", "antidote", "exorcism"]);
   assert.equal(stayed.changes.skillIds.includes("antidote"), true);
   assert.equal(stayed.changes.skillIds.includes("exorcism"), true);
 });
@@ -1935,6 +1935,7 @@ test("Die Antidote is learned at level 25 and cures poison plus deadly poison fo
 test("the three jobs learn their new dungeon skills at the intended levels", () => {
   assert.equal(normalizeCharacter({ ...createInitialCharacter({ name: "W", job: "warrior" }), level: 5 }).skillIds.includes("survival_instinct"), true);
   assert.equal(normalizeCharacter({ ...createInitialCharacter({ name: "M", job: "mage" }), level: 4 }).skillIds.includes("staff_light"), true);
+  assert.equal(normalizeCharacter({ ...createInitialCharacter({ name: "P", job: "priest" }), level: 4 }).skillIds.includes("grain_glow"), true);
   assert.equal(normalizeCharacter({ ...createInitialCharacter({ name: "T", job: "thief" }), level: 8 }).skillIds.includes("conceal_presence"), true);
 });
 
@@ -1954,6 +1955,11 @@ test("Staff Light restores fifty torch points and Conceal Presence cannot stack"
   assert.equal(light.environment.torchFuel, 85);
   assert.equal(light.character.sp, mage.sp - 4);
   assert.equal(resolveFieldSkill({ character: light.character, skillId: "staff_light", torchFuel: 100 }).reason, "fullTorch");
+  const priest = normalizeCharacter({ ...createInitialCharacter({ name: "P", job: "priest" }), level: 4 });
+  const grainGlow = resolveFieldSkill({ character: priest, skillId: "grain_glow", torchFuel: 35 });
+  assert.equal(grainGlow.accepted, true);
+  assert.equal(grainGlow.environment.torchFuel, 85);
+  assert.equal(grainGlow.character.sp, priest.sp - 4);
 
   const thief = normalizeCharacter({ ...createInitialCharacter({ name: "T", job: "thief" }), level: 8 });
   const conceal = resolveFieldSkill({ character: thief, skillId: "conceal_presence" });
