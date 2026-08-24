@@ -78,10 +78,10 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
       revealBeforeExploration: true
     })
   }),
-  20: Object.freeze({
+  18: Object.freeze({
     lock: Object.freeze({ mode: "alwaysSuccess", attempts: 1 }),
     content: Object.freeze({
-      type: "waspHive", imageId: "giant_wasp_hive_b20f",
+      type: "waspHive", imageId: "giant_wasp_hive_b18f",
       image: "images/background/dungeon_event_10.avif",
       minimapMarker: "E", revealBeforeExploration: true
     })

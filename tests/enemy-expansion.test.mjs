@@ -64,15 +64,15 @@ test("viper has poison and vampire bat reserves its future drain attack id", () 
   assert.equal(getEnemyById("vampire_bat").futureSpecialAttackId, "life_drain");
 });
 
-test("B11F to B29F enemies replace the early encounter pool and remain through B29F", () => {
+test("B11F to B19F enemies give way to the torture-region pool on B20F", () => {
   assert.equal(getRandomEnemy({ depth: 10, rng: () => 0.999 }).id, "viper");
   assert.equal(getRandomEnemy({ depth: 11, rng: () => 0.999 }).id, "giant_spider");
   assert.equal(getRandomEnemy({ depth: 13, rng: () => 0.999 }).id, "wasp");
   assert.equal(getRandomEnemy({ depth: 16, rng: () => 0.999 }).id, "poison_toad");
   assert.equal(getRandomEnemy({ depth: 19, rng: () => 0.999 }).id, "banshee");
-  assert.equal(getRandomEnemy({ depth: 20, rng: () => 0 }).id, "giant_spider");
-  assert.equal(getRandomEnemy({ depth: 21, rng: () => 0.999 }).id, "banshee");
-  assert.equal(getRandomEnemy({ depth: 29, rng: () => 0.999 }).id, "banshee");
+  assert.equal(getRandomEnemy({ depth: 20, rng: () => 0 }).id, "morgenstern");
+  assert.equal(getRandomEnemy({ depth: 22, rng: () => 0.999 }).id, "folterzange");
+  assert.equal(getRandomEnemy({ depth: 29, rng: () => 0.999 }).id, "folterpanzer");
 });
 
 test("B11F to B20F enemies carry their intended attacks, rewards and materials", () => {

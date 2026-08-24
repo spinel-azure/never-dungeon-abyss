@@ -1,6 +1,7 @@
 import { getWaterRegionFormationIds, waterRegionEnemies } from "./water-region-enemies.js";
 import { crystalRegionEnemies, getCrystalRegionFormationIds } from "./crystal-region-enemies.js";
 import { darkRegionEnemies, getDarkRegionFormationIds } from "./dark-region-enemies.js";
+import { getTortureRegionFormationIds, tortureRegionEnemies } from "./torture-region-enemies.js";
 
 export const enemies = Object.freeze([
   Object.freeze({
@@ -205,7 +206,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "giant_spider", name: "ジャイアントスパイダー", imageId: "giant_spider",
     level: 12,
-    image: "images/enemies/enemy_10.avif", race: "beast", minimumDepth: 11, maximumDepth: 29,
+    image: "images/enemies/enemy_10.avif", race: "beast", minimumDepth: 11, maximumDepth: 19,
     maxHp: 72, stats: Object.freeze({ str: 11, int: 3, agi: 13, dex: 12, luc: 6 }),
     def: 8, attack: 10, experienceReward: 40, dropItemId: "spider_silk",
     specialAttack: Object.freeze({
@@ -225,7 +226,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "wasp", name: "ワスプ", imageId: "wasp",
     level: 15,
-    image: "images/enemies/enemy_11.avif", race: "beast", minimumDepth: 13, maximumDepth: 29,
+    image: "images/enemies/enemy_11.avif", race: "beast", minimumDepth: 13, maximumDepth: 19,
     maxHp: 68, stats: Object.freeze({ str: 11, int: 3, agi: 17, dex: 15, luc: 8 }),
     def: 8, attack: 10, experienceReward: 55, dropItemId: "beeswax",
     actions: Object.freeze([Object.freeze({
@@ -246,7 +247,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "poison_toad", name: "ポイズントード", imageId: "poison_toad",
     level: 18,
-    image: "images/enemies/enemy_12.avif", race: "beast", minimumDepth: 16, maximumDepth: 29,
+    image: "images/enemies/enemy_12.avif", race: "beast", minimumDepth: 16, maximumDepth: 19,
     maxHp: 108, stats: Object.freeze({ str: 14, int: 5, agi: 7, dex: 12, luc: 7 }),
     def: 11, attack: 13, experienceReward: 75, dropItemId: "poison_toad_skin",
     specialAttack: Object.freeze({
@@ -266,7 +267,7 @@ export const enemies = Object.freeze([
   Object.freeze({
     id: "banshee", name: "バンシー", imageId: "banshee",
     level: 20,
-    image: "images/enemies/enemy_13.avif", race: "undead", minimumDepth: 19, maximumDepth: 29,
+    image: "images/enemies/enemy_13.avif", race: "undead", minimumDepth: 19, maximumDepth: 19,
     maxHp: 128, stats: Object.freeze({ str: 12, int: 15, agi: 14, dex: 14, luc: 10 }),
     def: 12, attack: 14, experienceReward: 100,
     specialAttack: Object.freeze({
@@ -640,6 +641,7 @@ export const enemies = Object.freeze([
     }),
     escapeRate: 0.22, surpriseRate: 0.22, surpriseRateMaximum: 0.34, isBoss: false
   }),
+  ...tortureRegionEnemies,
   ...waterRegionEnemies,
   ...crystalRegionEnemies,
   ...darkRegionEnemies,
@@ -731,6 +733,10 @@ export function getRandomEncounterEnemy({ depth = 1, rng = Math.random, allowRar
     return { ...getEnemyById("maikaefer"), level: floor, experienceReward: floor * 1000 };
   }
   return getRandomEnemy({ depth: floor, rng });
+}
+
+export function getTortureRegionEncounterFormation({ depth = 20, flags = {}, rng = Math.random } = {}) {
+  return getTortureRegionFormationIds({ depth, flags, rng }).map(getEnemyById).filter(Boolean);
 }
 
 export function getWaterRegionEncounterFormation({ depth = 70, flags = {}, rng = Math.random } = {}) {

@@ -101,8 +101,8 @@ test("Musa's Crown exposes DEF while retaining hidden future temptation immunity
   assert.equal(collectStats({ equipmentStatBonuses: crown.statBonuses }).temptationResistance, 1);
 });
 
-test("B20 hive and B58 Kirke house use the supplied event art", async () => {
-  assert.equal(getSpecialRoomDefinition(20).content.type, "waspHive");
+test("B18 hive and B58 Kirke house use the supplied event art", async () => {
+  assert.equal(getSpecialRoomDefinition(18).content.type, "waspHive");
   assert.equal(getSpecialRoomDefinition(58).content.type, "kirkeHouse");
   await Promise.all([
     access(new URL("../images/background/dungeon_event_10.avif", import.meta.url)),
@@ -120,7 +120,10 @@ test("the giant hive rumor follows quest 029 and delivery state", () => {
     tavern_rumor_002_base_read: true,
     tavern_rumor_003_base_read: true
   });
-  assert.equal(getUnreadTavernRumor(character)?.id, "rumor_007_base");
+  const hiveRumor = getUnreadTavernRumor(character);
+  assert.equal(hiveRumor?.id, "rumor_007_base");
+  assert.match(hiveRumor.customerLead, /B18F/);
+  assert.doesNotMatch(hiveRumor.customerLead, /B20F/);
   character.eventFlags.quest_029_beeswax_delivered = true;
   assert.equal(getUnreadTavernRumor(character)?.id, "rumor_007_delivered");
 });

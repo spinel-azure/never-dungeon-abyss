@@ -159,7 +159,7 @@ export const TAVERN_RUMORS = Object.freeze([
     verbatimCustomers: true,
     title: "巨大な蜂の巣の噂",
     unlock: context => context.quest029Active || context.quest029Completed,
-    customerLead: "おい、知ってるか？奈落のB20Fに巨大な蜂の巣があるんだってな。",
+    customerLead: "おい、知ってるか？奈落のB18Fに巨大な蜂の巣があるんだってな。",
     customerReply: "ああ。ワスプが大量に発生して刺されたヤツが結構いるらしい。",
     phases: Object.freeze([
       Object.freeze({
