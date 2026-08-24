@@ -122,8 +122,8 @@ test("the giant hive rumor follows quest 029 and delivery state", () => {
   });
   const hiveRumor = getUnreadTavernRumor(character);
   assert.equal(hiveRumor?.id, "rumor_007_base");
-  assert.match(hiveRumor.customerLead, /B18F/);
-  assert.doesNotMatch(hiveRumor.customerLead, /B20F/);
+  assert.match(hiveRumor.dialogue[0], /B18F/);
+  assert.doesNotMatch(hiveRumor.dialogue[0], /B20F/);
   character.eventFlags.quest_029_beeswax_delivered = true;
   assert.equal(getUnreadTavernRumor(character)?.id, "rumor_007_delivered");
 });
