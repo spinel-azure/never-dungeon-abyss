@@ -69,6 +69,7 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     capricornActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_capricorn"),
     libraActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_libra"),
     sphinxWisdomActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "sphinx_weakness_insight"),
+    throwingItemGuaranteedHitAtStart: hasCardEffect(character?.cards?.deckSlots, "throwing_item_guaranteed_hit"),
     sphinxBarrier,
     sphinxBarrierMax: sphinxBarrier,
     manaBoosterRecovery,
@@ -726,7 +727,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
         }
       } else if (effect.id === "thrown_fixed_damage") {
         const hitRate = calculatePhysicalHitRate({ attacker: actor, defender: target, attack: {} });
-        if (Number(rng()) < hitRate) {
+        if (battle.throwingItemGuaranteedHitAtStart || Number(rng()) < hitRate) {
           const damage = Math.min(Math.max(0, Number(target.hp) || 0), Math.max(0, Math.floor(Number(effect.value) || 0)));
           target.hp = Math.max(0, target.hp - damage);
           if (target.hp <= 0) target.alive = false;

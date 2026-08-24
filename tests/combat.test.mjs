@@ -1692,6 +1692,18 @@ test("early detection cards are unique C cards with individual minimap effects",
   }
 });
 
+test("Search and Destroy is a unique R card with guaranteed thrown-item accuracy", () => {
+  const card = getCardById("rare_search_and_destroy");
+  assert.equal(card.rarity, "R");
+  assert.equal(card.cost, 2);
+  assert.equal(card.maxOwned, 1);
+  assert.equal(card.maxCopies, 1);
+  assert.equal(card.sellPrice, 1000);
+  assert.equal(card.overflowGold, 1000);
+  assert.equal(hasCardEffect([card.id], "throwing_item_guaranteed_hit"), true);
+  assert.equal(card.descriptionJa, "サーチ・アンド・デストロイ。投擲アイテムの命中率を100％にする。");
+});
+
 test("Vorpal Sword raises normal encounter escape rate to 85 percent without affecting bosses", () => {
   assert.equal(getEquipmentAdjustedEscapeRate({ escapeRate: .45, weaponId: "vorpal_sword" }), .85);
   assert.equal(getEquipmentAdjustedEscapeRate({ escapeRate: .9, weaponId: "vorpal_sword" }), .9);

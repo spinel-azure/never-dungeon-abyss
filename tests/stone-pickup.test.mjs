@@ -15,6 +15,13 @@ function characterWithStone() {
   return character;
 }
 
+function characterWithStoneAndSearchDestroy() {
+  const character = characterWithStone();
+  character.cards.deckSlots = ["rare_search_and_destroy"];
+  character.cards.ownedCardCounts.rare_search_and_destroy = 1;
+  return character;
+}
+
 test("B1F creates one to three stone pickup circles and no later floor does", () => {
   setStartPosition(0, 0);
   buildBoundaryWallMap(1, () => 0.5, {});
@@ -75,4 +82,21 @@ test("the dungeon pickup handler adds stones to the loot bag", async () => {
   const source = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
   assert.match(source, /event\?\.type === "lootPickup"[\s\S]*?addLootItem\(character\.lootBag, item\.id/);
   assert.match(source, /石ころ|item\.name/);
+});
+
+test("Search and Destroy makes thrown items hit even the Maikaefer at the maximum miss roll", () => {
+  const maikaefer = structuredClone(getEnemyById("maikaefer"));
+  maikaefer.hp = maikaefer.maxHp;
+  maikaefer.alive = true;
+  maikaefer.actions = [{ weight: 1, action: { id: "wait", name: "待機", actionType: "wait" } }];
+  const result = resolveBattleRound({
+    battle: createBattleState({ character: characterWithStoneAndSearchDestroy(), enemy: maikaefer }),
+    playerCommand: { type: "item", itemId: "stone" },
+    rng: () => 0.999999
+  });
+  assert.equal(result.accepted, true);
+  assert.equal(result.battle.throwingItemGuaranteedHitAtStart, true);
+  assert.equal(result.battle.outcome, "victory");
+  assert.equal(result.battle.enemy.hp, 0);
+  assert.doesNotMatch(result.battle.log.join("\n"), /当たらなかった/);
 });

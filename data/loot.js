@@ -206,19 +206,21 @@ export function hasPurpleChestLootTable(depth = 1) {
 export function rollPurpleChestLoot(rng = Math.random, depth = 1) {
   if (!hasPurpleChestLootTable(depth)) return { kind: "none" };
   const roll = normalizedRoll(rng);
-  const cardId = roll < 0.33
+  const cardId = roll < 0.3
     ? "common_stairs_detection"
-    : roll < 0.66
+    : roll < 0.6
       ? "common_person_detection"
-      : roll < 0.99
+      : roll < 0.9
         ? "common_treasure_detection"
-        : "sr_silent_steps";
+        : roll < 0.99
+          ? "rare_search_and_destroy"
+          : "sr_silent_steps";
   return {
     kind: "card",
     cardId,
     amount: 1,
     unidentifiedName: "？カード",
-    rarity: cardId === "sr_silent_steps" ? "SR" : "C"
+    rarity: cardId === "sr_silent_steps" ? "SR" : cardId === "rare_search_and_destroy" ? "R" : "C"
   };
 }
 

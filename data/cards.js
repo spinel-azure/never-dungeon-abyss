@@ -114,6 +114,13 @@ const STANDARD_CARDS = [
     maxOwned: 1, maxCopies: 1, sellPrice: 100, buybackPrice: 1000, overflowGold: 100
   },
   {
+    id: "rare_search_and_destroy", rarity: "R", cost: 2,
+    name: "Search and Destroy", nameJa: "必敵必殺", concept: "投擲アイテム必中",
+    descriptionJa: "サーチ・アンド・デストロイ。投擲アイテムの命中率を100％にする。",
+    category: "battle", effectId: "throwing_item_guaranteed_hit", iconId: "dexterity",
+    maxOwned: 1, maxCopies: 1, sellPrice: 1000, buybackPrice: 10000, overflowGold: 1000
+  },
+  {
     id: "common_first_aid", rarity: "R", cost: 2,
     name: "First Aid", nameJa: "応急措置", concept: "出血耐性 +30%",
     descriptionJa: "出血状態になる確率を30％軽減する。",

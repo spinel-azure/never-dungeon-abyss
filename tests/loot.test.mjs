@@ -67,13 +67,15 @@ test("B50F to B58F replace the black chest with a gold chest on the one-percent 
   assert.equal(cells.flat().filter(cell => cell.treasure === "gold" && cell.eventTreasureId === "red_rust_key_b59f_chest").length, 1);
 });
 
-test("B1F to B9F purple chests use the card-only 33/33/33/1 table", () => {
+test("B1F to B9F purple chests use the card-only 30/30/30/9/1 table", () => {
   assert.equal(hasPurpleChestLootTable(1), true);
   assert.equal(hasPurpleChestLootTable(9), true);
   assert.equal(hasPurpleChestLootTable(10), false);
-  assert.equal(rollPurpleChestLoot(rng(0.329), 1).cardId, "common_stairs_detection");
-  assert.equal(rollPurpleChestLoot(rng(0.33), 1).cardId, "common_person_detection");
-  assert.equal(rollPurpleChestLoot(rng(0.66), 9).cardId, "common_treasure_detection");
+  assert.equal(rollPurpleChestLoot(rng(0.299), 1).cardId, "common_stairs_detection");
+  assert.equal(rollPurpleChestLoot(rng(0.3), 1).cardId, "common_person_detection");
+  assert.equal(rollPurpleChestLoot(rng(0.6), 9).cardId, "common_treasure_detection");
+  assert.equal(rollPurpleChestLoot(rng(0.9), 9).cardId, "rare_search_and_destroy");
+  assert.equal(rollPurpleChestLoot(rng(0.9), 9).rarity, "R");
   assert.equal(rollPurpleChestLoot(rng(0.99), 9).cardId, "sr_silent_steps");
   assert.equal(rollPurpleChestLoot(rng(0), 10).kind, "none");
 });
@@ -276,6 +278,20 @@ test("a duplicate unique C card converts into 100 gold when the loot bag settles
   assert.equal(settled.gold, 100);
   assert.deepEqual(settled.cardResults, [{
     cardId: "common_stairs_detection", count: 1, gained: 0, discarded: 1, convertedGold: 100
+  }]);
+});
+
+test("a duplicate Search and Destroy card converts into 1000 gold", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "thief" });
+  character.lootBag = addLootCard(character.lootBag, "rare_search_and_destroy", 1).lootBag;
+  character = settleLootBag(character).character;
+  const goldBefore = character.gold;
+  character.lootBag = addLootCard(character.lootBag, "rare_search_and_destroy", 1).lootBag;
+  const settled = settleLootBag(character);
+  assert.equal(settled.character.cards.ownedCardCounts.rare_search_and_destroy, 1);
+  assert.equal(settled.character.gold, goldBefore + 1000);
+  assert.deepEqual(settled.cardResults, [{
+    cardId: "rare_search_and_destroy", count: 1, gained: 0, discarded: 1, convertedGold: 1000
   }]);
 });
 
