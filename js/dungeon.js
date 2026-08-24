@@ -140,6 +140,38 @@ function buildBoundaryWallMapAttempt(depth = 1, rng = Math.random, progress = {}
   placeForestVines(depth, rng, progress);
   placeNormalDoors(NORMAL_DOOR_COUNT, false);
   placeRapidCurrents(depth, rng);
+  placeFloorLootPickups(depth, rng);
+}
+
+export function placeFloorLootPickups(depth = 1, rng = Math.random) {
+  if (Math.floor(Number(depth) || 0) !== 1) return [];
+  const count = 1 + Math.floor(Math.max(0, Math.min(0.999999999999, Number(rng()) || 0)) * 3);
+  const { x: startX, y: startY } = startPosition;
+  const distances = makeDistanceMap(startX, startY);
+  const candidates = shuffled(cells.flat().filter(cell =>
+    cell.type === "floor" && !isDungeonFeatureOccupied(cell) && !cell.npc && !cell.fountain
+      && !cell.treasure && !cell.questEvent && distances[cell.y][cell.x] >= 2
+  ), rng);
+  const placed = [];
+  for (const cell of candidates) {
+    if (placed.length >= count) break;
+    const index = placed.length + 1;
+    const event = Object.freeze({
+      id: `stone_pickup_b1f_${index}`,
+      type: "lootPickup",
+      itemId: "stone",
+      amount: 1
+    });
+    const reservation = reserveDungeonFeature(cells, {
+      featureId: event.id, type: "lootPickup", footprint: [cell],
+      priority: DUNGEON_FEATURE_PRIORITIES.questEvent, blocksTraversal: false
+    });
+    if (!reservation.accepted) continue;
+    cell.reserved = null;
+    cell.questEvent = event;
+    placed.push({ x: cell.x, y: cell.y, event: structuredClone(event) });
+  }
+  return placed;
 }
 
 export function placeForestVines(depth = 1, rng = Math.random, progress = {}) {

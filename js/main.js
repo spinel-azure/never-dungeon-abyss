@@ -651,6 +651,15 @@ import {
       return true;
     },
     onQuestEvent: event => {
+      if (event?.type === "lootPickup" && event.itemId && character) {
+        const item = getItem(event.itemId);
+        if (!item) return "何も見つからなかった。";
+        const gained = addLootItem(character.lootBag, item.id, event.amount || 1);
+        character = { ...character, lootBag: gained.lootBag };
+        updateCharacterUi();
+        saveGame();
+        return `${item.name}を拾い、ロット袋へ入れた。`;
+      }
       const keyItem = getKeyItem(event?.keyItemId);
       if (!keyItem || !character) return "何も見つからなかった。";
       const granted = grantKeyItem(character.keyItems, keyItem.id);

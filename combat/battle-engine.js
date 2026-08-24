@@ -1,6 +1,6 @@
 import { collectStats } from "./collect-stats.js";
 import { createNormalAttack, createSkillAttack } from "./create-attack.js";
-import { resolvePhysicalAttack } from "./resolve-physical-attack.js";
+import { calculatePhysicalHitRate, resolvePhysicalAttack } from "./resolve-physical-attack.js";
 import { resolveSpell } from "./resolve-spell.js";
 import { resolveHealing } from "./resolve-healing.js";
 import { resolveEffects } from "./resolve-effects.js";
@@ -723,6 +723,17 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
           battle.log.push(alreadySuppressed
             ? "フライシュフレッサーの再生停止時間が延長された！"
             : "フライシュフレッサーの表皮が焼けただれ、再生能力が停止した！");
+        }
+      } else if (effect.id === "thrown_fixed_damage") {
+        const hitRate = calculatePhysicalHitRate({ attacker: actor, defender: target, attack: {} });
+        if (Number(rng()) < hitRate) {
+          const damage = Math.min(Math.max(0, Number(target.hp) || 0), Math.max(0, Math.floor(Number(effect.value) || 0)));
+          target.hp = Math.max(0, target.hp - damage);
+          if (target.hp <= 0) target.alive = false;
+          battle.log.push(`${action.item.name}が${target.name}に命中した！ ${damage}のダメージ！`);
+          battle.presentationEvents.push({ type: "damage", actorSide, targetSide, amount: damage, message: `${damage} DAMAGE` });
+        } else {
+          battle.log.push(`${action.item.name}は${target.name}に当たらなかった！`);
         }
       }
     }

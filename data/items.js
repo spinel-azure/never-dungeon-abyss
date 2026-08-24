@@ -292,6 +292,13 @@ export const ITEMS = Object.freeze([
     effects: Object.freeze([{ id: "weapon_element_imbue", element: "lightning" }]),
     description: "使用した戦闘中、通常攻撃と物理攻撃スキルに雷属性を付与する。別属性で上書き可能。",
     maxOwned: 99, iconId: "holy-water", version: 1
+  }),
+  Object.freeze({
+    number: 46, id: "stone", name: "石ころ", category: "battle",
+    buyPrice: 0, sellPrice: 1, source: "dungeon", usableIn: Object.freeze(["battle"]),
+    effects: Object.freeze([{ id: "thrown_fixed_damage", value: 9 }]),
+    description: "ただの石ころ。", maxOwned: 99,
+    repurchasable: false, iconId: "stone", version: 1
   })
 ]);
 

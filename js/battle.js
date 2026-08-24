@@ -244,7 +244,7 @@ async function useBattleSkill(skillId) {
 
 async function useBattleItem(itemId) {
   const item = getItem(itemId);
-  const targetsEnemy = item?.effects?.some(effect => effect.id === "strong_herbicide");
+  const targetsEnemy = item?.effects?.some(effect => ["strong_herbicide", "thrown_fixed_damage"].includes(effect.id));
   if (battleUi.battle?.enemies && targetsEnemy) showTargetButtons({ type: "item", itemId });
   else await executeCommand({ type: "item", itemId, targetIndex: battleUi.battle.targetIndex });
   return { accepted: true };
