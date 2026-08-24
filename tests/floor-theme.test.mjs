@@ -79,7 +79,7 @@ test("all themed dungeon areas load their dedicated WebP wall textures and mist"
   assert.match(renderer, /renderer\.floorColor === "white"[\s\S]*?rgb\(185, 185, 185\)[\s\S]*?rgb\(125, 125, 125\)/);
   assert.match(renderer, /renderer\.floorColor === "crystal"[\s\S]*?rgb\(63, 20, 77\)[\s\S]*?rgb\(23, 7, 32\)/);
   assert.match(renderer, /renderer\.floorColor === "acacia"[\s\S]*?rgb\(123, 118, 31\)[\s\S]*?rgb\(61, 58, 15\)/);
-  assert.match(renderer, /renderer\.floorColor === "torture"[\s\S]*?rgb\(83, 80, 62\)[\s\S]*?rgb\(41, 40, 31\)/);
+  assert.match(renderer, /renderer\.floorColor === "torture"[\s\S]*?rgb\(21, 20, 14\)[\s\S]*?rgb\(10, 10, 7\)/);
   assert.match(renderer, /torture: \{ near: "rgb\(18, 17, 13\)", mid: "rgb\(36, 35, 27\)", far: "rgb\(54, 52, 41\)"/);
   assert.match(renderer, /acacia: \{ near: "rgb\(92, 87, 25\)", mid: "rgb\(158, 151, 45\)", far: "rgb\(215, 207, 71\)"/);
   assert.match(renderer, /renderer\.floorColor === "yellow"[\s\S]*?rgb\(38, 111, 176\)/);

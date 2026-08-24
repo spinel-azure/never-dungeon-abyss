@@ -478,9 +478,9 @@ export function drawCeiling() {
     g.addColorStop(0.58, "rgb(92, 88, 23)");
     g.addColorStop(1, "rgb(61, 58, 15)");
   } else if (renderer.floorColor === "torture") {
-    g.addColorStop(0, "rgb(83, 80, 62)");
-    g.addColorStop(0.58, "rgb(62, 60, 47)");
-    g.addColorStop(1, "rgb(41, 40, 31)");
+    g.addColorStop(0, "rgb(21, 20, 14)");
+    g.addColorStop(0.58, "rgb(16, 15, 11)");
+    g.addColorStop(1, "rgb(10, 10, 7)");
   } else {
     g.addColorStop(0, "#151918");
     g.addColorStop(0.58, "#0d1010");
