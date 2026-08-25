@@ -195,8 +195,8 @@ export function getDungeonMistOptions() {
   return { enabled: menu.mistEnabled, intensity: menu.mistIntensity, distance: menu.mistDistance, color: menu.mistColor };
 }
 export function setDungeonColors({ wall, floor } = {}, { save = false } = {}) {
-  if (["default", "stone", "red", "blue", "green", "yellow", "slate", "torture", "water", "crystal", "acacia", "white", "black"].includes(wall)) menu.wallColor = wall;
-  if (["default", "red", "blue", "green", "yellow", "slate", "torture", "water", "purple", "crystal", "acacia", "white", "black"].includes(floor)) menu.floorColor = floor;
+  if (["default", "stone", "red", "blue", "green", "yellow", "slate", "magic", "torture", "water", "crystal", "acacia", "white", "black"].includes(wall)) menu.wallColor = wall;
+  if (["default", "red", "blue", "green", "yellow", "slate", "magic", "torture", "water", "purple", "crystal", "acacia", "white", "black"].includes(floor)) menu.floorColor = floor;
   applyWallColor();
   applyFloorColor();
   updateDebugStates();

@@ -1,6 +1,7 @@
 import { getWaterRegionFormationIds, waterRegionEnemies } from "./water-region-enemies.js";
 import { crystalRegionEnemies, getCrystalRegionFormationIds } from "./crystal-region-enemies.js";
 import { darkRegionEnemies, getDarkRegionFormationIds } from "./dark-region-enemies.js";
+import { getMagicRegionFormationIds, magicRegionEnemies } from "./magic-region-enemies.js";
 import { getTortureRegionFormationIds, tortureRegionEnemies } from "./torture-region-enemies.js";
 
 export const enemies = Object.freeze([
@@ -641,6 +642,7 @@ export const enemies = Object.freeze([
     }),
     escapeRate: 0.22, surpriseRate: 0.22, surpriseRateMaximum: 0.34, isBoss: false
   }),
+  ...magicRegionEnemies,
   ...tortureRegionEnemies,
   ...waterRegionEnemies,
   ...crystalRegionEnemies,
@@ -733,6 +735,10 @@ export function getRandomEncounterEnemy({ depth = 1, rng = Math.random, allowRar
     return { ...getEnemyById("maikaefer"), level: floor, experienceReward: floor * 1000 };
   }
   return getRandomEnemy({ depth: floor, rng });
+}
+
+export function getMagicRegionEncounterFormation({ depth = 10, flags = {}, rng = Math.random } = {}) {
+  return getMagicRegionFormationIds({ depth, flags, rng }).map(getEnemyById).filter(Boolean);
 }
 
 export function getTortureRegionEncounterFormation({ depth = 20, flags = {}, rng = Math.random } = {}) {

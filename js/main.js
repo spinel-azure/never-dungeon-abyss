@@ -102,7 +102,7 @@ import { getActivePlayTimeDelta, normalizeAdventureStats, recordInnStay, recordS
 import { getAdventureChronicle } from "../data/adventure-records.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName, grantEquipmentInstance } from "../data/equipment-inventory.js";
-import { createEnemyCombatant, getEnemyById, getEnemyEncounterCount, getRandomEncounterEnemy, getTortureRegionEncounterFormation, getWaterRegionEncounterFormation, getCrystalRegionEncounterFormation, getDarkRegionEncounterFormation } from "../data/enemies.js";
+import { createEnemyCombatant, getEnemyById, getEnemyEncounterCount, getRandomEncounterEnemy, getMagicRegionEncounterFormation, getTortureRegionEncounterFormation, getWaterRegionEncounterFormation, getCrystalRegionEncounterFormation, getDarkRegionEncounterFormation } from "../data/enemies.js";
 import { applyBossVictory, bossLeavesRemains, createBossCombatant, getBossById, getFloorBossByDepth, isBossDefeated } from "../data/bosses.js";
 import { consumeKeyItem, getKeyItem, grantKeyItem, hasKeyItem } from "../data/key-items.js";
 import { configureBattle, handleBattleInput, isBattleActive, isJireneScriptedBattleActive, openBattleItems, startBattle } from "./battle.js";
@@ -1713,6 +1713,9 @@ import {
     if (forcedEnemyId) return [getEnemyById(forcedEnemyId)].filter(Boolean);
     const enemyData = getRandomEncounterEnemy({ depth: currentDepth });
     if (enemyData.id === "maikaefer") return [enemyData];
+    if (currentDepth >= 10 && currentDepth <= 19) {
+      return getMagicRegionEncounterFormation({ depth: currentDepth, flags: character?.eventFlags });
+    }
     if (currentDepth >= 20 && currentDepth <= 29) {
       return getTortureRegionEncounterFormation({ depth: currentDepth, flags: character?.eventFlags });
     }
@@ -3425,7 +3428,8 @@ import {
   function applyCurrentFloorMist() {
     const options = getDungeonMistOptions();
     const color = currentDepth >= 20 && currentDepth <= 29 ? "torture"
-      : currentDepth >= 1 && currentDepth <= 19 ? "slate"
+      : currentDepth >= 10 && currentDepth <= 19 ? "magic"
+      : currentDepth >= 1 && currentDepth <= 9 ? "slate"
       : isFireFloorDepth(currentDepth) ? "red"
       : isColdFloorDepth(currentDepth) ? "blue"
         : currentDepth >= 50 && currentDepth <= 59 ? "green"

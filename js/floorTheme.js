@@ -1,5 +1,5 @@
-export const WALL_COLORS = Object.freeze(["default", "red", "blue", "green", "yellow", "slate", "torture", "water", "crystal", "acacia", "white", "black"]);
-export const FLOOR_COLORS = Object.freeze(["default", "red", "blue", "green", "yellow", "slate", "torture", "water", "purple", "crystal", "acacia", "white", "black"]);
+export const WALL_COLORS = Object.freeze(["default", "red", "blue", "green", "yellow", "slate", "magic", "torture", "water", "crystal", "acacia", "white", "black"]);
+export const FLOOR_COLORS = Object.freeze(["default", "red", "blue", "green", "yellow", "slate", "magic", "torture", "water", "purple", "crystal", "acacia", "white", "black"]);
 export const FLOOR_THEME_MODES = Object.freeze({ FIXED: "fixed", RANDOM: "random" });
 
 export function isForcedTorchZeroFloor(depth) {
@@ -41,7 +41,7 @@ export function resolveFloorTheme(depth, current = settings.fixed) {
     return { wall: "slate", floor: "slate", source: "floor" };
   }
   if (Number(depth) >= 10 && Number(depth) <= 19) {
-    return { wall: "slate", floor: "slate", source: "floor" };
+    return { wall: "magic", floor: "magic", source: "floor" };
   }
   if (Number(depth) >= 20 && Number(depth) <= 29) {
     return { wall: "torture", floor: "torture", source: "floor" };

@@ -39,6 +39,7 @@ const renderer = {
   darkWallTextures: [],
   desertWallTextures: [],
   midDungeonWallTextures: [],
+  magicWallTextures: [],
   tortureWallTextures: [],
   waterWallTextures: [],
   crystalWallTextures: [],
@@ -64,6 +65,7 @@ const MIST_PALETTES = {
   frost: { main: [112, 145, 164], veil: [92, 126, 145], haze: [151, 187, 205], bloom: [150, 203, 229] },
   blue: { main: [35, 69, 112], veil: [25, 51, 91], haze: [62, 105, 157], bloom: [97, 166, 226] },
   poison: { main: [93, 62, 111], veil: [82, 48, 101], haze: [139, 91, 160], bloom: [174, 112, 199] },
+  magic: { main: [61, 49, 112], veil: [35, 28, 76], haze: [104, 82, 168], bloom: [154, 123, 235] },
   red: { main: [112, 38, 31], veil: [88, 26, 22], haze: [158, 54, 42], bloom: [224, 105, 66] },
   black: { main: [12, 12, 15], veil: [5, 5, 7], haze: [24, 23, 29], bloom: [72, 66, 82] },
   yellow: { main: [206, 209, 21], veil: [151, 154, 14], haze: [222, 224, 67], bloom: [244, 226, 116] },
@@ -82,6 +84,7 @@ const WALL_PALETTES = {
   green: { base: "#526b55", rows: ["#607c61", "#435a47"], mortar: "rgba(18,31,20,.68)", speckle: "rgba(203,236,184,.14)" },
   yellow: { base: "#ced115", rows: ["#dadd25", "#a4a711"], mortar: "rgba(61,62,5,.68)", speckle: "rgba(255,250,147,.18)" },
   slate: { base: "#5a6c68", rows: ["#687b76", "#485a56"], mortar: "rgba(19,28,26,.68)", speckle: "rgba(190,211,204,.14)" },
+  magic: { base: "#30275a", rows: ["#493778", "#211a45"], mortar: "rgba(9,6,24,.78)", speckle: "rgba(184,150,255,.2)" },
   torture: { base: "rgb(69, 66, 52)", rows: ["rgb(83, 80, 62)", "rgb(54, 52, 41)"], mortar: "rgba(22,21,17,.76)", speckle: "rgba(187,178,132,.14)" },
   water: { base: "#3e7bcc", rows: ["#4d8bd9", "#3165ab"], mortar: "rgba(12,35,67,.68)", speckle: "rgba(174,220,255,.17)" },
   crystal: { base: "rgb(116, 24, 114)", rows: ["rgb(138, 39, 145)", "rgb(82, 18, 96)"], mortar: "rgba(35,8,45,.76)", speckle: "rgba(235,177,255,.22)" },
@@ -96,6 +99,7 @@ const FLOOR_PALETTES = {
   green: { near: "#081109", mid: "#18341b", far: "#315b2d", grid: "rgba(174,226,137,.1)" },
   yellow: { near: "#181902", mid: "#686b0a", far: "#ced115", grid: "rgba(255,252,137,.12)" },
   slate: { near: "#080b0a", mid: "#273431", far: "#5a6c68", grid: "rgba(185,209,201,.09)" },
+  magic: { near: "#05030d", mid: "#17102f", far: "#38265d", grid: "rgba(177,137,255,.13)" },
   torture: { near: "rgb(18, 17, 13)", mid: "rgb(36, 35, 27)", far: "rgb(54, 52, 41)", grid: "rgba(176,169,126,.09)" },
   water: { near: "#050d18", mid: "#183c6c", far: "#3e7bcc", grid: "rgba(171,218,255,.13)" },
   purple: { near: "#110713", mid: "#35143c", far: "#5d2369", grid: "rgba(226,143,244,.12)" },
@@ -174,6 +178,7 @@ export function configureRenderer(options) {
   loadDarkWallTextures();
   loadDesertWallTextures();
   loadMidDungeonWallTextures();
+  loadMagicWallTextures();
   loadTortureWallTextures();
   loadWaterWallTextures();
   loadCrystalWallTextures();
@@ -481,6 +486,10 @@ export function drawCeiling() {
     g.addColorStop(0, "rgb(21, 20, 14)");
     g.addColorStop(0.58, "rgb(16, 15, 11)");
     g.addColorStop(1, "rgb(10, 10, 7)");
+  } else if (renderer.floorColor === "magic") {
+    g.addColorStop(0, "rgb(25, 17, 54)");
+    g.addColorStop(0.58, "rgb(15, 10, 36)");
+    g.addColorStop(1, "rgb(7, 4, 20)");
   } else {
     g.addColorStop(0, "#151918");
     g.addColorStop(0.58, "#0d1010");
@@ -634,6 +643,7 @@ function getThemedWallTextures(color) {
   if (color === "black") return renderer.darkWallTextures;
   if (color === "yellow") return renderer.desertWallTextures;
   if (color === "slate") return renderer.midDungeonWallTextures;
+  if (color === "magic") return renderer.magicWallTextures;
   if (color === "torture") return renderer.tortureWallTextures;
   if (color === "water") return renderer.waterWallTextures;
   if (color === "crystal") return renderer.crystalWallTextures;
@@ -688,6 +698,13 @@ function loadMidDungeonWallTextures() {
   loadThemedWallTextures("midDungeonWallTextures", "slate", [
     "images/dungeon_effects/dungeon_wall_05.webp",
     "images/dungeon_effects/dungeon_wall_06.webp"
+  ]);
+}
+
+function loadMagicWallTextures() {
+  loadThemedWallTextures("magicWallTextures", "magic", [
+    "images/dungeon_effects/magic_wall_01.webp",
+    "images/dungeon_effects/magic_wall_02.webp"
   ]);
 }
 
