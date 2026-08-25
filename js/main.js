@@ -2010,6 +2010,16 @@ import {
     layer.append(popup);
     popup.addEventListener("animationend", () => popup.remove(), { once: true });
   }
+
+  function showStepSpRecovery(amount) {
+    const layer = document.getElementById("crystalStepSpDamage");
+    if (!layer || amount <= 0) return;
+    const popup = document.createElement("i");
+    popup.className = "is-healing";
+    popup.textContent = `＋${amount}`;
+    layer.append(popup);
+    popup.addEventListener("animationend", () => popup.remove(), { once: true });
+  }
   function handleDungeonStep() {
     applyDungeonPoisonStep();
     applyDungeonDeadlyPoisonStep();
@@ -2019,6 +2029,7 @@ import {
     applyCrystalFloorStep();
     if (!character) return;
     const hpBeforePassives = character.hp;
+    const spBeforePassives = character.sp;
     character = recordNpcExpeditionDepth(character, currentDepth);
     character = applyNpcExplorationPassives(character);
     character.cardPassiveStepCount = (Math.max(0, Math.floor(Number(character.cardPassiveStepCount) || 0)) + 1) % 5;
@@ -2027,6 +2038,7 @@ import {
       if (hasCardEffect(character.cards?.deckSlots, "step_sp_recovery")) character.sp = Math.min(character.maxSp, character.sp + 1);
     }
     showStepHpRecovery(character.hp - hpBeforePassives);
+    showStepSpRecovery(character.sp - spBeforePassives);
     character.condition = currentCondition(character);
     character = recordFloorExploration(character, { depth: currentDepth, explored });
     updateCharacterUi();

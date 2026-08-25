@@ -69,6 +69,13 @@ test("stage six Erika and Johan passives recover one point every five successful
   );
 });
 
+test("exploration HP and SP passive recovery both have popup hooks", async () => {
+  const source = readFileSync(new URL("../js/main.js", import.meta.url), "utf8");
+  assert.match(source, /showStepHpRecovery\(character\.hp - hpBeforePassives\)/);
+  assert.match(source, /showStepSpRecovery\(character\.sp - spBeforePassives\)/);
+  assert.match(source, /function showStepSpRecovery[\s\S]*?crystalStepSpDamage[\s\S]*?className = "is-healing"/);
+});
+
 test("stage five exploration NPCs do not receive stage six passives", () => {
   let character = hero();
   character.hp -= 3;

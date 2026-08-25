@@ -124,3 +124,9 @@ test("a multi-battle enemy defeated before its queued turn cannot attack", () =>
     event.actorSide === "enemy" && event.actorName === "行動前撃破対象"
   ), false);
 });
+
+test("battle presentation skips queued hits after their target has vanished", async () => {
+  const battleUi = fs.readFileSync(new URL("../js/battle.js", import.meta.url), "utf8");
+  assert.match(battleUi, /defeatedTargetHasQueuedHit[\s\S]*?Number\(enemyHpBefore\) <= 0/);
+  assert.match(battleUi, /if \(defeatedTargetHasQueuedHit\) continue/);
+});

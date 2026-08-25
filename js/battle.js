@@ -429,6 +429,10 @@ async function playPresentationEvents() {
       : battleUi.battle.enemies && Array.isArray(battleUi.presentationHp?.enemies)
         ? battleUi.presentationHp.enemies[vanishTargetIndex]
         : battleUi.presentationHp?.enemy;
+    const defeatedTargetHasQueuedHit = event.targetSide === "enemy"
+      && Number(enemyHpBefore) <= 0
+      && (event.hit || ["damage", "poisonDamage", "bleedingDamage"].includes(event.type));
+    if (defeatedTargetHasQueuedHit) continue;
     applyPresentationHp(event);
     const enemyHpAfter = event.targetSide !== "enemy"
       ? null
@@ -486,7 +490,7 @@ async function playPresentationEvents() {
     const duration = dedicatedPresentationPlayed ? 0 : event.targetSide === "player" && event.hit ? 520 : event.hit ? 360 : 280;
     await delay(duration);
     targetImage?.classList.remove("is-hit");
-    if (event.slashExecution) await playSlashEffect(targetImage);
+    if (event.slashExecution) await playSlashEffect(targetImage, { restoreImage: !vanishImage });
     if (vanishImage && vanishEnemy) {
       await playEnemyVanish({ image: vanishImage, enemy: vanishEnemy });
       renderBattleVitals();
@@ -521,7 +525,7 @@ function syncFinalPlayerState() {
   });
 }
 
-async function playSlashEffect(image) {
+async function playSlashEffect(image, { restoreImage = true } = {}) {
   const stage = image?.closest(".battle-enemy-stage");
   if (!stage || !image.src) return;
   const stageRect = stage.getBoundingClientRect();
@@ -544,7 +548,7 @@ async function playSlashEffect(image) {
   await delay(1250);
   fragments.forEach(fragment => fragment.remove());
   slash.remove();
-  image.style.visibility = "";
+  if (restoreImage) image.style.visibility = "";
 }
 
 function applyPresentationHp(event) {

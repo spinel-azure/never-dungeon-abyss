@@ -51,3 +51,10 @@ test("completed vanish playback keeps the defeated image hidden until the next b
   assert.match(source,/if\(restoreImage&&playback\.image\?\.isConnected\)playback\.image\.style\.visibility=""/);
   assert.match(source,/querySelectorAll\?\.\("\.battle-enemy-member-image, #battleEnemyImage"\)/);
 });
+
+test("instant-death slash hands its hidden image directly to vanish playback",async()=>{
+  const source=await fs.readFile(new URL("../js/battle.js",import.meta.url),"utf8");
+  assert.match(source,/playSlashEffect\(targetImage, \{ restoreImage: !vanishImage \}\)/);
+  assert.match(source,/function playSlashEffect\(image, \{ restoreImage = true \} = \{\}\)/);
+  assert.match(source,/if \(restoreImage\) image\.style\.visibility = ""/);
+});
