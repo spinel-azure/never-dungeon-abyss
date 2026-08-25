@@ -40,3 +40,15 @@ test("floor transition overlay renders the zone name beneath the floor number in
   assert.match(renderer, /Math\.floor\(H \* \.15\)[\s\S]*?Math\.floor\(H \* \.045\)/);
   assert.match(renderer, /ctx\.fillText\(subtitle, W \/ 2, H \* \.59\)/);
 });
+
+test("entering through a transfer portal also shows the destination floor and zone", async () => {
+  const main = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
+  const transferEntry = main.match(/async function enterFloorFromTransfer\(depth = 10\)[\s\S]*?return true;\n  }/)?.[0] || "";
+
+  assert.match(transferEntry, /await runSceneTransition\(/);
+  assert.match(transferEntry, /startFloorLapNotice\(destination\);/);
+  assert.ok(
+    transferEntry.indexOf("startFloorLapNotice(destination);") > transferEntry.indexOf("await runSceneTransition("),
+    "the floor notice should begin after the transfer transition completes"
+  );
+});

@@ -3028,6 +3028,7 @@ import {
         saveGame();
       }
     });
+    startFloorLapNotice(destination);
     setPlayerInputEnabled(true);
     return true;
   }
