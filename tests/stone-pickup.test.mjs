@@ -84,6 +84,13 @@ test("the dungeon pickup handler adds stones to the loot bag", async () => {
   assert.match(source, /石ころ|item\.name/);
 });
 
+test("floor materials and key items use the shared silhouette-hiding glow", async () => {
+  const source = await readFile(new URL("../js/renderer.js", import.meta.url), "utf8");
+  assert.match(source, /questEvent: cell\.questEvent/);
+  assert.match(source, /event\.questEvent\?\.itemId \|\| event\.questEvent\?\.keyItemId/);
+  assert.match(source, /createRadialGradient[\s\S]*?globalCompositeOperation = "lighter"/);
+});
+
 test("Search and Destroy makes thrown items hit even the Maikaefer at the maximum miss roll", () => {
   const maikaefer = structuredClone(getEnemyById("maikaefer"));
   maikaefer.hp = maikaefer.maxHp;

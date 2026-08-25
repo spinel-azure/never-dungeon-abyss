@@ -963,7 +963,7 @@ export function drawCellEvents(layer = "all") {
       }
       if (cell.questEvent) {
         if (layer === "floor") continue;
-        events.push({ ...projected, eventKind: "questEvent" });
+        events.push({ ...projected, eventKind: "questEvent", questEvent: cell.questEvent });
       }
     }
   }
@@ -1020,8 +1020,32 @@ export function isSpriteEventCell(cell = {}) {
 
 function drawQuestEvent(ctx, event) {
   const radius = Math.max(8, event.size * .32);
+  const isCollectible = Boolean(event.questEvent?.itemId || event.questEvent?.keyItemId);
   ctx.save();
   ctx.globalAlpha = event.alpha;
+  if (isCollectible) {
+    const centerY = event.floorY - radius * 1.4;
+    const pulse = .94 + Math.sin(performance.now() * .004) * .06;
+    const glow = ctx.createRadialGradient(event.x, centerY, 0, event.x, centerY, radius * 3.8 * pulse);
+    glow.addColorStop(0, "rgba(239,253,255,.98)");
+    glow.addColorStop(.12, "rgba(180,246,255,.92)");
+    glow.addColorStop(.34, "rgba(91,221,255,.55)");
+    glow.addColorStop(.68, "rgba(42,177,255,.18)");
+    glow.addColorStop(1, "rgba(42,177,255,0)");
+    ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(event.x, centerY, radius * 3.8 * pulse, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowColor = "rgba(185,247,255,.98)";
+    ctx.shadowBlur = radius * 2.8;
+    ctx.fillStyle = "rgba(222,252,255,.78)";
+    ctx.beginPath();
+    ctx.arc(event.x, centerY, radius * .66, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    return;
+  }
   ctx.shadowColor = "rgba(110,225,255,.95)";
   ctx.shadowBlur = radius * 3.4;
   ctx.fillStyle = "rgba(190,250,255,.92)";

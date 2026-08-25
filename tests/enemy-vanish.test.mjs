@@ -44,3 +44,10 @@ test("each defeated enemy receives an independent visual playback record without
 test("boss timeline can combine shake flash aura shatter and fade",()=>{
   assert.deepEqual(getEnemyVanishEffect({isBoss:true}).steps.map(step=>step.type),["shake","flash","boss_vanish","shatter","fade"]);
 });
+
+test("completed vanish playback keeps the defeated image hidden until the next battle reset",async()=>{
+  const source=await fs.readFile(new URL("../combat/enemy-vanish.js",import.meta.url),"utf8");
+  assert.match(source,/cleanupPlayback\(controller,previousPosition,false\)/);
+  assert.match(source,/if\(restoreImage&&playback\.image\?\.isConnected\)playback\.image\.style\.visibility=""/);
+  assert.match(source,/querySelectorAll\?\.\("\.battle-enemy-member-image, #battleEnemyImage"\)/);
+});
