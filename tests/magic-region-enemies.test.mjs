@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import { getEnemyById, getMagicRegionEncounterFormation } from "../data/enemies.js";
+import { resolveSpell } from "../combat/resolve-spell.js";
 
 const expected = Object.freeze([
   ["junghexe", "ユングヘクセ", "images/enemies/enemy_45.avif", "medium", 1, 1],
@@ -30,6 +31,43 @@ test("magic-region enemies use the B90F-style three-action weighting", () => {
     assert.deepEqual(enemy.actions.map(entry => entry.weight), [55, 35, 10], id);
     assert.deepEqual(enemy.actions[2].when, { hpRateBelow: 0.5 }, id);
   }
+});
+
+test("magic-region stats and spell damage stay appropriate for the shallow B10F band", () => {
+  const expectedBalance = {
+    junghexe: { level: 14, maxHp: 100, int: 12, def: 9, attack: 9, experienceReward: 75 },
+    merseburg_spell: { level: 11, maxHp: 38, int: 9, def: 6, attack: 6, experienceReward: 25 },
+    geistflamme: { level: 13, maxHp: 44, int: 11, def: 6, attack: 7, experienceReward: 30 },
+    tanzlichter: { level: 10, maxHp: 32, int: 8, def: 5, attack: 6, experienceReward: 20 }
+  };
+  for (const [id, balance] of Object.entries(expectedBalance)) {
+    const enemy = getEnemyById(id);
+    for (const [key, value] of Object.entries(balance)) {
+      assert.equal(key === "int" ? enemy.stats.int : enemy[key], value, `${id}.${key}`);
+    }
+    for (const entry of enemy.actions.filter(entry => entry.action.actionType === "spell")) {
+      const result = resolveSpell({
+        attacker: { int: enemy.stats.int }, defender: {}, spell: entry.action, rng: () => 0.999999
+      });
+      assert.ok(result.totalDamage <= 19, `${id}.${entry.action.id}: ${result.totalDamage}`);
+    }
+  }
+});
+
+test("B10F begins with single enemies and unlocks larger groups gradually", () => {
+  const maximumPartySize = depth => {
+    let maximum = 0;
+    for (let index = 0; index < 1000; index += 1) {
+      maximum = Math.max(maximum, getMagicRegionEncounterFormation({
+        depth, rng: () => (index + 0.5) / 1000
+      }).length);
+    }
+    return maximum;
+  };
+  assert.equal(maximumPartySize(10), 1);
+  assert.equal(maximumPartySize(11), 2);
+  assert.equal(maximumPartySize(13), 3);
+  assert.equal(maximumPartySize(19), 3);
 });
 
 test("magic-region formations keep Junghexe single and the smaller enemies at one to three", () => {

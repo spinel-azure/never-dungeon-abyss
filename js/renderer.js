@@ -397,8 +397,9 @@ function drawEncounterMessage() {
 
 function drawFloorLapMessage() {
   const { ctx, W, H, state } = renderer;
-  const lines = state.overlayEvent?.overlayMessage?.split("\n") || [];
-  if (!lines.length) return;
+  const title = String(state.overlayEvent?.overlayMessage || "");
+  const subtitle = String(state.overlayEvent?.overlaySubtitle || "");
+  if (!title) return;
   ctx.save();
   ctx.fillStyle = "rgba(0,0,0,.8)";
   ctx.fillRect(0, 0, W, H);
@@ -406,11 +407,13 @@ function drawFloorLapMessage() {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.font = `400 ${Math.max(54, Math.floor(H * .15))}px PixelFont, monospace`;
-  const lineHeight = Math.max(42, H * .09);
-  lines.forEach((line, index) => {
-    const offset = (index - (lines.length - 1) / 2) * lineHeight;
-    ctx.fillText(line, W / 2, H / 2 + offset);
-  });
+  const titleY = subtitle ? H * .46 : H / 2;
+  ctx.fillText(title, W / 2, titleY);
+  if (subtitle) {
+    ctx.fillStyle = "#bbb5aa";
+    ctx.font = `400 ${Math.max(18, Math.floor(H * .045))}px PixelFont, monospace`;
+    ctx.fillText(subtitle, W / 2, H * .59);
+  }
   ctx.restore();
 }
 

@@ -38,6 +38,7 @@ import {
 import { getNpcEncounter } from "../data/npcs.js";
 import { DESERT_OASIS, DESERT_OASIS_MIRAGE, getFountainById } from "../data/fountains.js";
 import { getBossById } from "../data/bosses.js";
+import { getFloorZoneName } from "../data/floor-zone-names.js";
 import { onExplorationStep, resetPresence } from "./presence.js";
 import { getRapidCurrentForcedPath, RAPID_CURRENT, RAPID_CURRENT_DIRECTIONS } from "../data/rapid-currents.js";
 
@@ -895,7 +896,8 @@ export function startFloorLapNotice(depth) {
   startOverlayEvent({
     type: "floorLap",
     showOverlay: false,
-    overlayMessage: `B${depth}F`
+    overlayMessage: `B${depth}F`,
+    overlaySubtitle: getFloorZoneName(depth)
   });
 }
 
