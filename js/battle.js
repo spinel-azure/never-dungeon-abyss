@@ -11,6 +11,12 @@ import { playBattleSkillPresentation } from "./battle-skill-presentation.js";
 import { getSkill } from "../data/skills.js";
 import { getItem } from "../data/items.js";
 import { getItemUnavailableReason } from "../combat/resolve-item-use.js";
+import {
+  isEnemyVanishPending,
+  markEnemyVanishPending,
+  playEnemyVanish,
+  resetEnemyVanishEffects
+} from "../combat/enemy-vanish.js";
 
 const COMMANDS = Object.freeze([
   ["attack", "戦う"],
@@ -74,6 +80,7 @@ export function startBattle(enemy, { playStartSe = true, ambush = false, conceal
   battleUi.selectedIndex = 0;
   battleUi.autoActive = false;
   battleUi.concealed = Boolean(concealed);
+  resetEnemyVanishEffects(battleUi.root);
   clearAutoTimer();
   battleUi.battle = createBattleState({ character, enemy, enemies, targetIndex });
   if (scriptedBattleType) {
@@ -413,7 +420,28 @@ async function playPresentationEvents() {
       battleUi.onNpcCharge(event.npcId, 0);
       continue;
     }
+    const vanishTargetIndex = Number.isInteger(event.targetIndex) ? event.targetIndex : battleUi.battle.targetIndex;
+    const vanishEnemy = event.targetSide === "enemy" && battleUi.battle.enemies
+      ? battleUi.battle.enemies[vanishTargetIndex]
+      : event.targetSide === "enemy" ? battleUi.battle.enemy : null;
+    const enemyHpBefore = event.targetSide !== "enemy"
+      ? null
+      : battleUi.battle.enemies && Array.isArray(battleUi.presentationHp?.enemies)
+        ? battleUi.presentationHp.enemies[vanishTargetIndex]
+        : battleUi.presentationHp?.enemy;
     applyPresentationHp(event);
+    const enemyHpAfter = event.targetSide !== "enemy"
+      ? null
+      : battleUi.battle.enemies && Array.isArray(battleUi.presentationHp?.enemies)
+        ? battleUi.presentationHp.enemies[vanishTargetIndex]
+        : battleUi.presentationHp?.enemy;
+    const shouldPlayVanish = Number(enemyHpBefore) > 0 && Number(enemyHpAfter) <= 0;
+    const vanishImage = shouldPlayVanish
+      ? battleUi.battle.enemies
+        ? battleUi.root.querySelector(`.battle-enemy-member[data-index="${vanishTargetIndex}"] .battle-enemy-member-image`)
+        : image
+      : null;
+    if (vanishImage) markEnemyVanishPending(vanishImage);
     if (event.type === "barrierDamage") battleUi.presentationBarrier = Math.max(0, Number(event.remaining) || 0);
     if (event.npcId) battleUi.onNpcSupport(event.npcId);
     renderBattleVitals();
@@ -459,6 +487,10 @@ async function playPresentationEvents() {
     await delay(duration);
     targetImage?.classList.remove("is-hit");
     if (event.slashExecution) await playSlashEffect(targetImage);
+    if (vanishImage && vanishEnemy) {
+      await playEnemyVanish({ image: vanishImage, enemy: vanishEnemy });
+      renderBattleVitals();
+    }
   }
 }
 
@@ -657,6 +689,7 @@ function closeBattle() {
   battleUi.presenting = false;
   battleUi.presentationHp = null;
   battleUi.presentationBarrier = null;
+  resetEnemyVanishEffects(battleUi.root);
   battleUi.active = false;
   battleUi.root.hidden = true;
   document.body.classList.remove("battle-active");
@@ -780,9 +813,10 @@ function renderEnemyParty(battle) {
     const displayEnemy = Number.isFinite(presentedHp) ? { ...enemy, hp: presentedHp } : enemy;
     const selectedIndex = battleUi.mode === "targets" ? battleUi.selectedIndex : battle.targetIndex;
     const visuallyDefeated = Number.isFinite(presentedHp) ? presentedHp <= 0 : !enemy.alive;
+    const hideDefeated = visuallyDefeated && !isEnemyVanishPending(member);
     member.classList.toggle("is-selected", index === selectedIndex && enemy.alive);
-    member.classList.toggle("is-defeated", visuallyDefeated);
-    member.setAttribute("aria-hidden", visuallyDefeated ? "true" : "false");
+    member.classList.toggle("is-defeated", hideDefeated);
+    member.setAttribute("aria-hidden", hideDefeated ? "true" : "false");
     member.disabled = !enemy.alive;
     member.querySelector(".battle-enemy-member-name").textContent = battleUi.concealed ? "？？？？？" : enemy.name;
     renderWeaknessIcons(member.querySelector(".battle-enemy-member-weakness"), enemy);

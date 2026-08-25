@@ -1,0 +1,83 @@
+{
+  "format": "NDA_VANISH_EFFECTS",
+  "version": 1,
+  "defaults": {
+    "normal": "vanish_default",
+    "undead": "vanish_ash",
+    "spirit": "vanish_evaporate",
+    "slime": "vanish_dissolve",
+    "construct": "vanish_shatter",
+    "boss": "vanish_boss"
+  },
+  "effects": {
+    "vanish_default": {
+      "id": "vanish_default",
+      "name": "Default Fade",
+      "category": "normal",
+      "duration": 650,
+      "seed": 1,
+      "steps": [
+        { "id": "fade_1", "type": "fade", "enabled": true, "start": 0, "duration": 650, "from": 1, "to": 0 }
+      ]
+    },
+    "vanish_ash": {
+      "id": "vanish_ash",
+      "name": "Undead Ash",
+      "category": "undead",
+      "duration": 1100,
+      "seed": 13,
+      "steps": [
+        { "id": "flash_1", "type": "flash", "enabled": true, "start": 0, "duration": 100, "color": "#d9e0e3", "strength": 0.45 },
+        { "id": "ash_1", "type": "ash", "enabled": true, "start": 80, "duration": 950, "direction": "bottomToTop", "particleCount": 45, "particleSize": 3, "velocity": 35, "spread": 40, "gravity": -15, "color": "#9ba2a6" },
+        { "id": "fade_1", "type": "fade", "enabled": true, "start": 450, "duration": 650, "from": 1, "to": 0 }
+      ]
+    },
+    "vanish_evaporate": {
+      "id": "vanish_evaporate",
+      "name": "Spirit Evaporate",
+      "category": "spirit",
+      "duration": 1050,
+      "seed": 21,
+      "steps": [
+        { "id": "flash_1", "type": "flash", "enabled": true, "start": 0, "duration": 180, "color": "#d9fbff", "strength": 0.7 },
+        { "id": "evaporate_1", "type": "evaporate", "enabled": true, "start": 100, "duration": 900, "distance": 150, "from": 1, "to": 0, "blur": 8, "particleCount": 30, "particleSize": 3, "velocity": 45, "spread": 35, "color": "#c9f7ff" }
+      ]
+    },
+    "vanish_dissolve": {
+      "id": "vanish_dissolve",
+      "name": "Water Dissolve",
+      "category": "slime",
+      "duration": 950,
+      "seed": 34,
+      "steps": [
+        { "id": "dissolve_1", "type": "dissolve", "enabled": true, "start": 0, "duration": 900, "noiseScale": 5, "thresholdStart": 0, "thresholdEnd": 1, "direction": "topToBottom", "edgeGlowEnabled": true, "edgeGlowColor": "#63dcff", "edgeGlowWidth": 2 },
+        { "id": "fade_1", "type": "fade", "enabled": true, "start": 650, "duration": 300, "from": 1, "to": 0 }
+      ]
+    },
+    "vanish_shatter": {
+      "id": "vanish_shatter",
+      "name": "Stone Shatter",
+      "category": "construct",
+      "duration": 850,
+      "seed": 55,
+      "steps": [
+        { "id": "shake_1", "type": "shake", "enabled": true, "start": 0, "duration": 180, "strength": 8, "frequency": 25 },
+        { "id": "shatter_1", "type": "shatter", "enabled": true, "start": 140, "duration": 700, "fragmentCount": 24, "spread": 90, "gravity": 100, "rotation": 18 }
+      ]
+    },
+    "vanish_boss": {
+      "id": "vanish_boss",
+      "name": "Boss Vanish 01",
+      "category": "boss",
+      "duration": 1800,
+      "seed": 89,
+      "steps": [
+        { "id": "shake_1", "type": "shake", "enabled": true, "start": 0, "duration": 300, "strength": 14, "frequency": 28 },
+        { "id": "flash_1", "type": "flash", "enabled": true, "start": 220, "duration": 180, "color": "#ffffff", "strength": 0.9 },
+        { "id": "aura_1", "type": "boss_vanish", "enabled": true, "start": 300, "duration": 1200, "color": "#ffcf58", "strength": 1, "particleCount": 60, "particleSize": 5, "velocity": 70, "spread": 90 },
+        { "id": "shatter_1", "type": "shatter", "enabled": true, "start": 800, "duration": 850, "fragmentCount": 48, "spread": 180, "gravity": 80, "rotation": 35 },
+        { "id": "fade_1", "type": "fade", "enabled": true, "start": 1150, "duration": 650, "from": 1, "to": 0 }
+      ]
+    }
+  }
+}

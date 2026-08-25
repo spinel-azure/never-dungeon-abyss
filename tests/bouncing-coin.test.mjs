@@ -85,7 +85,8 @@ test("multi-enemy UI hides HP bars and preserves defeated layout slots invisibly
   assert.match(css, /battle-enemy-member-hp\s*\{[^}]*display:\s*none/);
   assert.match(battleUi, /member\.disabled = !enemy\.alive/);
   assert.match(battleUi, /visuallyDefeated.*presentedHp[^;]*presentedHp <= 0/);
-  assert.match(battleUi, /aria-hidden.*visuallyDefeated/);
+  assert.match(battleUi, /hideDefeated = visuallyDefeated.*isEnemyVanishPending/);
+  assert.match(battleUi, /aria-hidden.*hideDefeated/);
   assert.match(battleUi, /img\.classList\.toggle\("is-concealed", battleUi\.concealed\)/);
   assert.match(css, /battle-enemy-member-image\.is-concealed/);
   assert.match(css, /battle-enemy-member-image\.is-hit/);

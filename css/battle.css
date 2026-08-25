@@ -736,6 +736,13 @@ body.battle-active .viewport > #treasureCanvas {
 .battle-enemy-member-hp > i { display: block; height: 100%; background: #e4253d; }
 .battle-enemy-member .battle-number-layer { inset: 38% 0 auto; }
 
+.battle-enemy-vanish-canvas {
+  position: absolute;
+  z-index: 5;
+  display: block;
+  pointer-events: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .battle-enemy-member,
   .battle-enemy-member.is-defeated { transition-duration: 1ms, 0s; transition-delay: 0s; }
