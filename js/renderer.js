@@ -192,6 +192,9 @@ export function configureRenderer(options) {
     specialLocked: makeDoorTexture("special"),
     specialUnlocked: makeDoorTexture("special")
   };
+  loadDoorTexture(["normal", "locked"], "images/dungeon_effects/dungeon_door_normal.webp");
+  loadDoorTexture(["boss", "bossUnlocked"], "images/dungeon_effects/dungeon_door_red.webp");
+  loadDoorTexture(["specialLocked", "specialUnlocked"], "images/dungeon_effects/dungeon_door_purple.webp");
   npcs.forEach(npc => loadCharacterImage(npc.imageId, npc.image));
   Object.values(BOSSES).forEach(boss => {
     if (boss.encounterImageId && boss.encounterImage) {
@@ -1508,6 +1511,20 @@ export function makeDoorTexture(kind = "normal") {
   c.fill();
 
   return tex;
+}
+
+function loadDoorTexture(kinds, source) {
+  const image = new Image();
+  image.decoding = "async";
+  image.onload = () => {
+    kinds.forEach(kind => {
+      renderer.doorTextures[kind] = image;
+    });
+  };
+  image.onerror = () => {
+    console.warn(`Door texture failed to load: ${source}`);
+  };
+  image.src = source;
 }
 
 export function roundRect(x, y, w, h, r) {
