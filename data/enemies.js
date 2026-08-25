@@ -756,6 +756,7 @@ export function createEnemyCombatant(enemy) {
     id: enemy.id,
     name: enemy.name,
     image: enemy.image,
+    battleSize: enemy.battleSize || "small",
     race: enemy.race || "unknown",
     level: Math.max(1, Math.floor(Number(enemy.level) || 1)),
     hp: enemy.maxHp,

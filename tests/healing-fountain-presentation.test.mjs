@@ -21,7 +21,7 @@ test("Iron Maiden has a dedicated reduced-motion-safe pendulum presentation", as
   ]);
 
   assert.match(battleSource, /is-iron-maiden[^\n]+iron_maiden_b29f/);
-  assert.match(css, /\.battle-enemy-image\.is-iron-maiden\s*\{[^}]*width:\s*min\(70%,\s*450px\)/s);
+  assert.match(css, /\.battle-enemy-image\.is-size-large\s*\{[^}]*width:\s*min\(78%,\s*520px\)/s);
   assert.match(css, /@keyframes battle-iron-maiden-pendulum/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.battle-enemy-image\.is-iron-maiden[\s\S]*animation:\s*none/);
 });

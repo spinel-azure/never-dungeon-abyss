@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { getBossById } from "../data/bosses.js";
 
 import {
   TRANSFER_DESTINATIONS,
@@ -65,9 +66,9 @@ test("Glacies and Eiskoenigin use dedicated large boss image sizes", async () =>
     readFile(new URL("../js/battle.js", import.meta.url), "utf8")
   ]);
   assert.match(battleSource, /is-glacies[^\n]+glacies_event_boss/);
-  assert.match(css, /battle-enemy-image\.is-glacies\s*\{[^}]*width:\s*min\(76%,\s*510px\)/s);
+  assert.match(css, /battle-enemy-image\.is-size-large\s*\{[^}]*width:\s*min\(78%,\s*520px\)/s);
   assert.match(battleSource, /is-eiskoenigin[^\n]+eiskoenigin_b49f/);
-  assert.match(css, /battle-enemy-image\.is-eiskoenigin\s*\{[^}]*width:\s*min\(72%,\s*480px\)/s);
+  assert.equal(getBossById("eiskoenigin_b49f").battleSize, "large");
 });
 
 test("Fleischfresser uses its dedicated large battle image size", async () => {
@@ -76,7 +77,7 @@ test("Fleischfresser uses its dedicated large battle image size", async () => {
     readFile(new URL("../js/battle.js", import.meta.url), "utf8")
   ]);
   assert.match(battleSource, /is-fleischfresser[^\n]+fleischfresser_b59f/);
-  assert.match(css, /battle-enemy-image\.is-fleischfresser\s*\{[^}]*width:\s*min\(90%,\s*600px\)/s);
+  assert.match(css, /battle-enemy-image\.is-size-huge-wide\s*\{[^}]*width:\s*min\(90%,\s*600px\)/s);
 });
 
 test("Otherworldly Wisdom uses its dedicated large battle image size", async () => {
@@ -85,7 +86,7 @@ test("Otherworldly Wisdom uses its dedicated large battle image size", async () 
     readFile(new URL("../js/battle.js", import.meta.url), "utf8")
   ]);
   assert.match(battleSource, /is-otherworldly-wisdom[^\n]+otherworldly_wisdom_b4f/);
-  assert.match(css, /battle-enemy-image\.is-otherworldly-wisdom\s*\{[^}]*width:\s*min\(84%,\s*560px\)/s);
+  assert.equal(getBossById("otherworldly_wisdom_b4f").battleSize, "huge-wide");
 });
 
 test("Todes Scorpio uses a dedicated superboss image size", async () => {
@@ -94,8 +95,8 @@ test("Todes Scorpio uses a dedicated superboss image size", async () => {
     readFile(new URL("../js/battle.js", import.meta.url), "utf8")
   ]);
   assert.match(battleSource, /is-todes-scorpio[^\n]+todes_scorpio_b64f/);
-  assert.match(css, /battle-enemy-image\.is-todes-scorpio\s*\{[^}]*width:\s*min\(88%,\s*590px\)/s);
-  assert.match(css, /battle-enemy-image\.is-sphinx\s*\{[^}]*width:\s*min\(82%,\s*550px\)/s);
+  assert.equal(getBossById("todes_scorpio_b64f").battleSize, "huge-wide");
+  assert.equal(getBossById("sphinx_b69f").battleSize, "huge-wide");
   assert.match(battleSource, /is-sphinx[^\n]+sphinx_b69f/);
 });
 

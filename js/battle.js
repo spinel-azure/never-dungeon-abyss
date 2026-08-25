@@ -11,6 +11,7 @@ import { playBattleSkillPresentation } from "./battle-skill-presentation.js";
 import { getSkill } from "../data/skills.js";
 import { getItem } from "../data/items.js";
 import { getItemUnavailableReason } from "../combat/resolve-item-use.js";
+import { ENEMY_DISPLAY_SIZES, getEnemyDisplaySize } from "../combat/enemy-display-size.js";
 import {
   isEnemyVanishPending,
   markEnemyVanishPending,
@@ -779,6 +780,7 @@ function renderBattle() {
   const defeated = ["victory", "enemyEscaped"].includes(battle.outcome) && !battleUi.presenting;
   image.classList.toggle("is-defeated", defeated);
   image.classList.toggle("is-concealed", battleUi.concealed);
+  ENEMY_DISPLAY_SIZES.forEach(size => image.classList.toggle(`is-size-${size}`, size === getEnemyDisplaySize(battle.enemy)));
   image.classList.toggle("is-jabberwock", battle.enemy.id === "jabberwock_event_boss");
   image.classList.toggle("is-iron-maiden", battle.enemy.id === "iron_maiden_b29f");
   image.classList.toggle("is-thief-leader", battle.enemy.id === "thief_leader_event_boss");

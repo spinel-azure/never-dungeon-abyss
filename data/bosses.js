@@ -40,6 +40,7 @@ export const BOSSES = Object.freeze({
     floor: 4,
     imageId: "otherworldly_wisdom_b4f",
     image: "images/bosses/boss_00.avif",
+    battleSize: "huge-wide",
     encounterImageId: "otherworldly_wisdom_event_b4f",
     encounterImage: "images/background/dungeon_event_06.avif",
     race: "aberration",
@@ -137,6 +138,7 @@ export const BOSSES = Object.freeze({
     floor: 19,
     imageId: "fallen_mage_b19f",
     image: "images/bosses/boss_03.avif",
+    battleSize: "medium",
     encounterImageId: "fallen_mage_event_b19f",
     encounterImage: "images/npc/NPC_event_03.avif",
     defeatedEncounterImageId: "fallen_mage_remains_b19f",
@@ -240,6 +242,7 @@ export const BOSSES = Object.freeze({
     floor: 29,
     imageId: "iron_maiden_b29f",
     image: "images/bosses/boss_05.avif",
+    battleSize: "large",
     encounterImageId: "iron_maiden_event_b29f",
     encounterImage: "images/npc/NPC_event_05.avif",
     defeatedEncounterImageId: "iron_maiden_remains_b29f",
@@ -343,6 +346,7 @@ export const BOSSES = Object.freeze({
     floor: 39,
     imageId: "wicker_man_b39f",
     image: "images/bosses/boss_07.avif",
+    battleSize: "medium",
     encounterImageId: "wicker_man_event_b39f",
     encounterImage: "images/npc/NPC_event_07.avif",
     defeatedEncounterImageId: "wicker_man_remains_b39f",
@@ -420,6 +424,7 @@ export const BOSSES = Object.freeze({
     floor: 49,
     imageId: "eiskoenigin_b49f",
     image: "images/bosses/boss_10.avif",
+    battleSize: "large",
     encounterImageId: "eiskoenigin_event_b49f",
     encounterImage: "images/npc/NPC_event_09.avif",
     defeatedEncounterImageId: "eiskoenigin_remains_b49f",
@@ -480,7 +485,7 @@ export const BOSSES = Object.freeze({
   }),
   todes_scorpio_b64f: Object.freeze({
     id: "todes_scorpio_b64f", name: "トーデス・スコルピオ", level: 85, floor: 64,
-    imageId: "todes_scorpio_b64f", image: "images/bosses/boss_14.avif",
+    imageId: "todes_scorpio_b64f", image: "images/bosses/boss_14.avif", battleSize: "huge-wide",
     encounterImageId: "todes_scorpio_event_b64f", encounterImage: "images/background/dungeon_event_09.avif",
     race: "insect", maxHp: 40000,
     stats: Object.freeze({ str: 46, int: 24, agi: 30, dex: 42, luc: 36 }),
@@ -529,7 +534,7 @@ export const BOSSES = Object.freeze({
   }),
   musk_beast_b56f: Object.freeze({
     id: "musk_beast_b56f", name: "ムスクビースト", level: 56, floor: 56,
-    imageId: "musk_beast_b56f", image: "images/bosses/boss_12.avif",
+    imageId: "musk_beast_b56f", image: "images/bosses/boss_12.avif", battleSize: "medium",
     encounterImageId: "musk_beast_event_b56f", encounterImage: "images/background/dungeon_event_07.avif",
     race: "beast", maxHp: 2000,
     stats: Object.freeze({ str: 28, int: 14, agi: 24, dex: 27, luc: 18 }),
@@ -597,7 +602,7 @@ export const BOSSES = Object.freeze({
   }),
   fleischfresser_b59f: Object.freeze({
     id: "fleischfresser_b59f", name: "フライシュフレッサー", level: 65, floor: 59,
-    imageId: "fleischfresser_b59f", image: "images/bosses/boss_11.avif",
+    imageId: "fleischfresser_b59f", image: "images/bosses/boss_11.avif", battleSize: "huge-wide",
     encounterImageId: "fleischfresser_event_b59f", encounterImage: "images/npc/NPC_event_11b.avif",
     defeatedEncounterImageId: "fleischfresser_remains_b59f", defeatedEncounterImage: "images/npc/NPC_event_12.avif",
     race: "plant", maxHp: 10000,
@@ -622,7 +627,7 @@ export const BOSSES = Object.freeze({
   }),
   sphinx_b69f: Object.freeze({
     id: "sphinx_b69f", name: "スピンクス", level: 72, floor: 69,
-    imageId: "sphinx_b69f", image: "images/bosses/boss_13.avif",
+    imageId: "sphinx_b69f", image: "images/bosses/boss_13.avif", battleSize: "huge-wide",
     encounterImageId: "sphinx_event_b69f", encounterImage: "images/npc/NPC_event_13.avif",
     renderScale: 1.18,
     defeatedEncounterImageId: "sphinx_remains_b69f", defeatedEncounterImage: "images/npc/NPC_event_14.avif",
@@ -679,7 +684,7 @@ export const BOSSES = Object.freeze({
   }),
   amethyst_drache_b89f: Object.freeze({
     id: "amethyst_drache_b89f", name: "アメティストドラッヘ", level: 98, floor: 89,
-    imageId: "amethyst_drache_b89f", image: "images/bosses/boss_16.avif",
+    imageId: "amethyst_drache_b89f", image: "images/bosses/boss_16.avif", battleSize: "huge-wide",
     encounterImageId: "amethyst_drache_b89f", encounterImage: "images/bosses/boss_16.avif",
     race: "dragon", maxHp: 14000,
     stats: Object.freeze({ str: 54, int: 50, agi: 30, dex: 44, luc: 38 }),
@@ -729,7 +734,7 @@ export const BOSSES = Object.freeze({
     })
   }),  jirene_b79f: Object.freeze({
     id: "jirene_b79f", name: "ジレーネ", level: 90, floor: 79,
-    imageId: "jirene_b79f", image: "images/bosses/boss_15.avif",
+    imageId: "jirene_b79f", image: "images/bosses/boss_15.avif", battleSize: "large",
     encounterImageId: "parthenope_event_b79f", encounterImage: "images/npc/NPC_event_17b.avif",
     defeatedEncounterImageId: "jirene_after_b79f", defeatedEncounterImage: "images/npc/NPC_event_18.avif",
     race: "beast", maxHp: 7000,
@@ -886,7 +891,7 @@ export const BOSSES = Object.freeze({
   /*
   glacies_event_boss: Object.freeze({
     id: "glacies_event_boss", name: "グラキエス", level: 42,
-    imageId: "glacies_event_boss", image: "images/bosses/boss_09.avif", race: "giant",
+    imageId: "glacies_event_boss", image: "images/bosses/boss_09.avif", battleSize: "large", race: "giant",
     maxHp: 1050, stats: Object.freeze({ str: 28, int: 10, agi: 14, dex: 22, luc: 14 }),
     def: 23, attack: 25, experienceReward: 6500, specialAttack: null,
     actions: Object.freeze([
@@ -916,7 +921,7 @@ export const BOSSES = Object.freeze({
   }),
   glacies_event_boss: Object.freeze({
     id: "glacies_event_boss", name: "グラキエス", level: 42,
-    imageId: "glacies_event_boss", image: "images/bosses/boss_09.avif", race: "giant",
+    imageId: "glacies_event_boss", image: "images/bosses/boss_09.avif", battleSize: "large", race: "giant",
     maxHp: 1050, stats: Object.freeze({ str: 28, int: 10, agi: 14, dex: 22, luc: 14 }),
     def: 23, attack: 25, experienceReward: 6500, specialAttack: null,
     actions: Object.freeze([
@@ -947,7 +952,7 @@ export const BOSSES = Object.freeze({
   */
   thief_leader_event_boss: Object.freeze({
     id: "thief_leader_event_boss", name: "悪意に満ちた頭目", level: 32, floor: 27,
-    imageId: "thief_leader_event_boss", image: "images/bosses/boss_04.avif",
+    imageId: "thief_leader_event_boss", image: "images/bosses/boss_04.avif", battleSize: "large",
     encounterImageId: "thief_hideout_event_b27f", encounterImage: "images/background/dungeon_event_03.avif",
     race: "human", maxHp: 580,
     stats: Object.freeze({ str: 21, int: 12, agi: 22, dex: 23, luc: 16 }),
@@ -974,6 +979,7 @@ export const BOSSES = Object.freeze({
     floor: 36,
     imageId: "brass_bull_event_boss",
     image: "images/bosses/boss_08.avif",
+    battleSize: "medium",
     encounterImageId: "brass_bull_event_b36f",
     encounterImage: "images/background/dungeon_event_04.avif",
     race: "construct",
@@ -1030,6 +1036,7 @@ export const BOSSES = Object.freeze({
     floor: 16,
     imageId: "jabberwock_event_boss",
     image: "images/bosses/boss_06.avif",
+    battleSize: "huge-wide",
     race: "dragon",
     maxHp: 620,
     stats: Object.freeze({ str: 19, int: 5, agi: 13, dex: 16, luc: 10 }),
@@ -1078,7 +1085,7 @@ export const BOSSES = Object.freeze({
   quest_mimic_b6f: Object.freeze({
     id: "quest_mimic_b6f", name: "ミミック", floor: 6,
     level: 10,
-    imageId: "quest_mimic_b6f", image: "images/enemies/enemy_05.avif",
+    imageId: "quest_mimic_b6f", image: "images/enemies/enemy_05.avif", battleSize: "medium",
     encounterImageId: "quest_mimic_event_b6f", encounterImage: "images/background/dungeon_event_02.avif",
     race: "construct", maxHp: 60,
     stats: Object.freeze({ str: 10, int: 3, agi: 6, dex: 8, luc: 7 }),

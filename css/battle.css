@@ -204,53 +204,63 @@
   animation: battle-enemy-aura 3.4s ease-in-out infinite;
 }
 
-.battle-enemy-image.is-jabberwock {
-  width: min(82%, 560px);
-  max-height: 95%;
+.battle-enemy-image.is-size-small {
+  width: min(55%, 360px);
+  max-height: 82%;
 }
 
-.battle-enemy-image.is-thief-leader {
+.battle-enemy-image.is-size-medium {
+  width: min(68%, 450px);
+  max-height: 92%;
+}
+
+.battle-enemy-image.is-size-large {
   width: min(78%, 520px);
   max-height: 96%;
 }
 
-.battle-enemy-image.is-glacies {
-  width: min(76%, 510px);
-  max-height: 95%;
-}
-
-.battle-enemy-image.is-eiskoenigin {
-  width: min(72%, 480px);
-  max-height: 95%;
-}
-
-.battle-enemy-image.is-fleischfresser {
+.battle-enemy-image.is-size-huge-wide {
   width: min(90%, 600px);
   max-height: 100%;
 }
 
+.battle-enemy-image.is-jabberwock {
+  max-height: 95%;
+}
+
+.battle-enemy-image.is-thief-leader {
+  max-height: 96%;
+}
+
+.battle-enemy-image.is-glacies {
+  max-height: 95%;
+}
+
+.battle-enemy-image.is-eiskoenigin {
+  max-height: 95%;
+}
+
+.battle-enemy-image.is-fleischfresser {
+  max-height: 100%;
+}
+
 .battle-enemy-image.is-otherworldly-wisdom {
-  width: min(84%, 560px);
   max-height: 98%;
 }
 
 .battle-enemy-image.is-todes-scorpio {
-  width: min(88%, 590px);
   max-height: 100%;
 }
 
 .battle-enemy-image.is-sphinx {
-  width: min(82%, 550px);
   max-height: 98%;
 }
 
 .battle-enemy-image.is-jirene {
-  width: min(76%, 510px);
   max-height: 96%;
 }
 
 .battle-enemy-image.is-iron-maiden {
-  width: min(70%, 450px);
   max-height: 94%;
   transform-origin: 50% 10%;
   animation:
@@ -662,13 +672,16 @@ body.battle-active .viewport > #treasureCanvas {
     width: min(60%, 260px);
   }
 
+  .battle-enemy-image.is-size-small { width: min(60%, 260px); }
+  .battle-enemy-image.is-size-medium { width: min(70%, 330px); }
+  .battle-enemy-image.is-size-large { width: min(80%, 390px); }
+  .battle-enemy-image.is-size-huge-wide { width: min(92%, 430px); }
+
   .battle-enemy-image.is-iron-maiden {
-    width: min(76%, 360px);
     max-height: 92%;
   }
 
   .battle-enemy-image.is-thief-leader {
-    width: min(82%, 420px);
     max-height: 94%;
   }
 
@@ -679,7 +692,6 @@ body.battle-active .viewport > #treasureCanvas {
   .battle-enemy-image.is-todes-scorpio,
   .battle-enemy-image.is-sphinx,
   .battle-enemy-image.is-jirene {
-    width: min(80%, 390px);
     max-height: 93%;
   }
 

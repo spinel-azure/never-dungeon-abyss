@@ -19,7 +19,7 @@ test("Jirene rematch and victory presentation use the requested assets and copy"
   assert.match(mainSource, /また、私…いえ、妾の歌を…聴きたいのね/);
   assert.match(mainSource, /showNamedItemGetEffect\(\[equipment\?\.name/);
   assert.match(battleSource, /is-jirene[^\n]+jirene_b79f/);
-  assert.match(battleCss, /battle-enemy-image\.is-jirene\s*\{[^}]*width:\s*min\(76%,\s*510px\)/s);
+  assert.match(battleCss, /battle-enemy-image\.is-size-large\s*\{[^}]*width:\s*min\(78%,\s*520px\)/s);
 });
 
 test("quest 028 reporting unlocks the B80 transfer portal", () => {
