@@ -35,7 +35,10 @@ test("B99F Soul Strangler has all three specials and Lichtbringer weakens it", a
   assert.ok(weakened.actions[2].action.effects[0].baseRate
     < normal.actions[2].action.effects[0].baseRate);
   assert.equal(isDungeonDepthUnlocked({ eventFlags: {} }, 100), false);
-  assert.equal(isDungeonDepthUnlocked({ eventFlags: { boss_b99f_defeated: true } }, 100), true);
+  let regalia = grantKeyItem(null, "queen_tiara").keyItems;
+  regalia = grantKeyItem(regalia, "queen_earring").keyItems;
+  regalia = grantKeyItem(regalia, "queen_necklace").keyItems;
+  assert.equal(isDungeonDepthUnlocked({ eventFlags: { boss_b99f_defeated: true }, keyItems: regalia }, 100), true);
   await access(new URL("../images/bosses/boss_17.avif", import.meta.url));
 });
 

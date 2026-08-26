@@ -37,5 +37,5 @@ test("lucky charm acquisition starts one locked three-second tutorial", () => {
   assert.match(main, /setPlayerInputEnabled\(false\)[\s\S]*?deckTutorialTimer = window\.setTimeout\([\s\S]*?say\("＊Aボタンで次へ"\);[\s\S]*?3000\)/);
   assert.match(main, /function handleBlockingTutorialInput[\s\S]*?if \(!deckTutorialActive\) return false;[\s\S]*?action === "confirm"/);
   assert.match(main, /character\.deckTutorialSeen = true;[\s\S]*?saveGame\(\);[\s\S]*?setPlayerInputEnabled\(true\)/);
-  assert.match(html, /js\/main\.js\?v=20260827-03/);
+  assert.match(html, /js\/main\.js\?v=20260827-04/);
 });

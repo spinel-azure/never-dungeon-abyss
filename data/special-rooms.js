@@ -167,6 +167,17 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
       minimapMarker: "E",
       revealBeforeExploration: true
     })
+  }),
+  99: Object.freeze({
+    lock: Object.freeze({ mode: "alwaysSuccess", attempts: 1 }),
+    content: Object.freeze({
+      type: "thirdQueenShadowFinale",
+      requiredQuestId: "guild_032",
+      requiredProgress: 9,
+      accessBlockedMessage: "漆黒の闇に閉ざされ、今は扉の場所すら分からない。",
+      minimapMarker: "E",
+      revealBeforeExploration: true
+    })
   })
 });
 

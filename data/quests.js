@@ -36,6 +36,7 @@ export const JIRENE_SONG_INVESTIGATION_ACCEPTED_FLAG = "guild_028_accepted_once"
 export const BEESWAX_COLLECTION_QUEST_ID = "guild_029";
 export const CREEPING_CHAOS_QUEST_ID = "guild_030";
 export const LICHTBRINGER_QUEST_ID = "guild_033";
+export const THIRD_QUEEN_SHADOW_QUEST_ID = "guild_032";
 export const CREEPING_CHAOS_ITEM_FLAG = "guild_030_trapezohedron_received";
 export const BEESWAX_REQUIRED_COUNT = 15;
 export const HERBICIDE_TRIAL_SUPPLY_FLAG = "guild_020_trial_herbicide_received";
@@ -55,6 +56,10 @@ export const QUEEN_SHADOW_PROGRESS_FLAGS = Object.freeze([
 export const SECOND_QUEEN_SHADOW_PROGRESS_FLAGS = Object.freeze([
   ...Array.from({ length: 6 }, (_, index) => `quest_024_shadow_b${index + 60}f_found`),
   "quest_024_earring_found"
+]);
+export const THIRD_QUEEN_SHADOW_PROGRESS_FLAGS = Object.freeze([
+  ...Array.from({ length: 9 }, (_, index) => `quest_032_shadow_b${index + 90}f_found`),
+  "quest_032_necklace_found"
 ]);
 export const RED_DOOR_DEFENSE_CARD_FLAG = "guild_007_defense_card_received";
 export const RED_DOOR_DEFENSE_CARD_ID = "rare_defense_up";
@@ -771,6 +776,30 @@ export const QUESTS = Object.freeze([
     completedTargetFlag: "lichtbringer_b95f_found",
     ownedKeyItemCompletionId: "lichtbringer",
     available: true
+  }),
+  Object.freeze({
+    id: THIRD_QUEEN_SHADOW_QUEST_ID,
+    number: "032",
+    title: "女王の影を追え――その3",
+    client: "ギルドマスター",
+    category: "other",
+    objectiveType: "custom",
+    targetDepth: 99,
+    requiredCount: 10,
+    objectiveLabel: "女王の影を見つける",
+    reward: Object.freeze({ type: "card", label: "デッキカード×1", amount: 1, cardId: "legendary_vital_surge" }),
+    descriptionLabel: "内容",
+    description: Object.freeze([
+      "光に照らされた漆黒区域で女王らしき姿を目撃した",
+      "という情報が入った。今度こそ本物の女王かも",
+      "知れない。真偽を確かめてくれ。頼んだぞ。",
+      ""
+    ]),
+    prerequisiteQuestIds: Object.freeze([LICHTBRINGER_QUEST_ID]),
+    persistentProgressFlags: THIRD_QUEEN_SHADOW_PROGRESS_FLAGS,
+    progressMode: "matchedFlags",
+    ownedKeyItemCompletionId: "queen_necklace",
+    available: true
   })
 ]);
 
@@ -1184,6 +1213,36 @@ export function completeSecondQueenShadowInvestigation(character) {
   return recordCustomQuestProgress(next, SECOND_QUEEN_SHADOW_QUEST_ID, 1);
 }
 
+export function recordThirdQueenShadowEncounter(character, depth) {
+  const normalizedDepth = Math.floor(Number(depth) || 0);
+  const flag = normalizedDepth >= 90 && normalizedDepth <= 98
+    ? THIRD_QUEEN_SHADOW_PROGRESS_FLAGS[normalizedDepth - 90]
+    : null;
+  const progress = getQuestProgress(character, THIRD_QUEEN_SHADOW_QUEST_ID);
+  if (!flag || !progress.active || progress.completed || character?.eventFlags?.[flag]) return character;
+  const next = {
+    ...character,
+    eventFlags: { ...(character.eventFlags || {}), [flag]: true }
+  };
+  return recordCustomQuestProgress(next, THIRD_QUEEN_SHADOW_QUEST_ID, 1);
+}
+
+export function completeThirdQueenShadowInvestigation(character) {
+  const progress = getQuestProgress(character, THIRD_QUEEN_SHADOW_QUEST_ID);
+  const completionFlag = THIRD_QUEEN_SHADOW_PROGRESS_FLAGS[9];
+  if (!progress.active || progress.progress < 9 || character?.eventFlags?.[completionFlag]) return character;
+  const next = {
+    ...character,
+    eventFlags: { ...(character.eventFlags || {}), [completionFlag]: true }
+  };
+  return recordCustomQuestProgress(next, THIRD_QUEEN_SHADOW_QUEST_ID, 1);
+}
+
+export function hasCompleteQueenRegalia(character) {
+  return ["queen_tiara", "queen_earring", "queen_necklace"]
+    .every(keyItemId => hasKeyItem(character?.keyItems, keyItemId));
+}
+
 export function reportQuest(character, questId) {
   const progress = getQuestProgress(character, questId);
   if (!progress.readyToReport) return result(character, false, "notReady");
@@ -1321,7 +1380,7 @@ export function isDungeonDepthUnlocked(character, depth) {
     return Boolean(character?.eventFlags?.boss_b89f_defeated);
   }
   if (requestedDepth === 100) {
-    return Boolean(character?.eventFlags?.boss_b99f_defeated);
+    return Boolean(character?.eventFlags?.boss_b99f_defeated) && hasCompleteQueenRegalia(character);
   }
   return true;
 }

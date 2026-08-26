@@ -164,12 +164,14 @@ import {
   acceptQuest,
   completeQueenShadowInvestigation,
   completeSecondQueenShadowInvestigation,
+  completeThirdQueenShadowInvestigation,
   grantRedDoorInvestigationSupply,
   getForcedEnemyId,
   getActiveDefeatQuestProgress,
   formatDefeatQuestProgressUpdates,
   getQuestProgress,
   hasActiveQuest,
+  hasCompleteQueenRegalia,
   isDungeonDepthUnlocked,
   recordEnemyDefeat,
   recordBossDefeat,
@@ -179,6 +181,7 @@ import {
   deliverQuestBeeswax,
   recordQueenShadowEncounter,
   recordSecondQueenShadowEncounter,
+  recordThirdQueenShadowEncounter,
   recordThievesClue,
   reportQuest
 } from "../data/quests.js";
@@ -514,7 +517,11 @@ import {
     getDescendBlockMessage: () => (
       isDungeonDepthUnlocked(character, currentDepth + 1)
         ? ""
-        : "まだこの先に進むのは止めた方がよさそうだ。"
+        : currentDepth === 99
+          && character?.eventFlags?.boss_b99f_defeated
+          && !hasCompleteQueenRegalia(character)
+          ? "あなたを拒む絶対的な力を感じる。この力に抗うには何かが足りないようだ…。"
+          : "まだこの先に進むのは止めた方がよさそうだ。"
     ),
     descendFloor,
     playSe,
@@ -649,6 +656,12 @@ import {
         saveGame();
         return;
       }
+      if (character && npc?.id === "queen_shadow_dark") {
+        character = recordThirdQueenShadowEncounter(character, currentDepth);
+        updateCharacterUi();
+        saveGame();
+        return;
+      }
       if (!character || !String(npc?.id || "").startsWith("NPC_01")) return;
       character = {
         ...character,
@@ -675,6 +688,17 @@ import {
       updateCharacterUi();
       saveGame();
       setTimeout(() => showNamedItemGetEffect(["女王のイヤリング"], { important: true }), 0);
+      return true;
+    },
+    isThirdQueenShadowFinaleCompleted: () => Boolean(character?.eventFlags?.quest_032_necklace_found),
+    onThirdQueenShadowFinaleComplete: () => {
+      if (!character || character.eventFlags?.quest_032_necklace_found) return false;
+      const granted = grantKeyItem(character.keyItems, "queen_necklace");
+      if (!granted.gained && granted.reason !== "alreadyOwned") return false;
+      character = completeThirdQueenShadowInvestigation({ ...character, keyItems: granted.keyItems });
+      updateCharacterUi();
+      saveGame();
+      setTimeout(() => showNamedItemGetEffect(["女王の首飾り"], { important: true }), 0);
       return true;
     },
     onQuestEvent: event => {
@@ -3593,6 +3617,7 @@ import {
     const room = floorBoss?.room || {};
     const queenShadowQuest = getQuestProgress(character, "guild_008");
     const secondQueenShadowQuest = getQuestProgress(character, "guild_024");
+    const thirdQueenShadowQuest = getQuestProgress(character, "guild_032");
     return {
       bossDefeated: isBossDefeated(character, "strange_knight_statue_b9f"),
       bossDefeatedById: {
@@ -3624,6 +3649,11 @@ import {
         active: secondQueenShadowQuest.active,
         completed: secondQueenShadowQuest.completed,
         progress: secondQueenShadowQuest.progress
+      },
+      thirdQueenShadowQuest: {
+        active: thirdQueenShadowQuest.active,
+        completed: thirdQueenShadowQuest.completed,
+        progress: thirdQueenShadowQuest.progress
       },
       activeQuestIds: Object.keys(character?.quests?.active || {}),
       forcedEnemyId: getForcedEnemyId(character, { depth: currentDepth }),

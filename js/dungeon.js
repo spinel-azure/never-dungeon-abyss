@@ -490,6 +490,7 @@ export function placeNpc(depth = 1, progress = {}) {
   const normalizedDepth = Math.floor(Number(depth) || 1);
   const queenShadowQuest = progress.queenShadowQuest || {};
   const secondQueenShadowQuest = progress.secondQueenShadowQuest || {};
+  const thirdQueenShadowQuest = progress.thirdQueenShadowQuest || {};
   const queenShadowFloor = normalizedDepth >= 10 && normalizedDepth <= 13;
   const queenShadowExpectedDepth = 10 + Math.min(4, Math.max(0, Math.floor(Number(queenShadowQuest.progress) || 0)));
   const suppressMikanForQuest = queenShadowQuest.active
@@ -510,8 +511,17 @@ export function placeNpc(depth = 1, progress = {}) {
   const placeSecondQueenShadow = suppressDesertMikanForQuest
     && secondQueenShadowFloor
     && !progress.eventFlags?.[secondQueenShadowFlag];
+  const thirdQueenShadowFloor = normalizedDepth >= 90 && normalizedDepth <= 98;
+  const thirdQueenShadowFlag = thirdQueenShadowFloor
+    ? `quest_032_shadow_b${normalizedDepth}f_found`
+    : "";
+  const placeThirdQueenShadow = thirdQueenShadowQuest.active
+    && !thirdQueenShadowQuest.completed
+    && thirdQueenShadowFloor
+    && !progress.eventFlags?.[thirdQueenShadowFlag];
   if (suppressMikanForQuest && !placeQueenShadow) return;
   if (suppressDesertMikanForQuest && !placeSecondQueenShadow) return;
+  if (normalizedDepth >= 90 && normalizedDepth <= 99 && !placeThirdQueenShadow) return;
   const distances = makeDistanceMap(startX, startY);
   const reserved = getTraversalBlockingReservations(cells);
   const candidates = [];
@@ -532,6 +542,7 @@ export function placeNpc(depth = 1, progress = {}) {
   if (selected) {
     cells[selected.y][selected.x].npc = placeQueenShadow ? "queen_shadow"
       : placeSecondQueenShadow ? "queen_shadow_desert"
+      : placeThirdQueenShadow ? "queen_shadow_dark"
       : normalizedDepth === 2 ? "NPC_01_b2"
       : normalizedDepth === 4 ? (progress.bossDefeatedById?.otherworldly_wisdom_b4f ? "NPC_01" : "NPC_01_b4")
       : normalizedDepth === 5 ? "NPC_01_b5"

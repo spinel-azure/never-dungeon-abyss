@@ -15,6 +15,14 @@ export const KEY_ITEMS = Object.freeze({
     consumable: false,
     version: 1
   }),
+  queen_necklace: Object.freeze({
+    id: "queen_necklace",
+    name: "女王の首飾り",
+    description: "女王の物と思われる美しい首飾り。闇の中でも淡い光をたたえている。",
+    sellable: false,
+    consumable: false,
+    version: 1
+  }),
   thieves_clue_emblem: Object.freeze({
     id: "thieves_clue_emblem", name: "盗賊団の徽章",
     description: "盗賊団が仲間の証として使っている徽章。", sellable: false, consumable: false, version: 1
