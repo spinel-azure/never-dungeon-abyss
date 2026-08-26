@@ -116,7 +116,7 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
   next.presentationEvents = [];
 
   let playerActionExecuted = false;
-  const priorityPlayerAction = playerAction.action?.id === "triage"
+  const priorityPlayerAction = playerAction.action?.actionType === "healing"
     && Number(playerAction.action.turnPriority) >= 100;
   applyNpcBattleStart(next, rng);
   if (!priorityPlayerAction) applyNpcChargeSkills(next, rng);
@@ -264,7 +264,7 @@ export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.rand
   next.presentationEvents = [];
 
   let playerActionExecuted = false;
-  const priorityPlayerAction = playerAction.action?.id === "triage"
+  const priorityPlayerAction = playerAction.action?.actionType === "healing"
     && Number(playerAction.action.turnPriority) >= 100;
   applyNpcBattleStart(next, rng);
   setNpcTarget(next, lowestHpRatioTargetIndex(next.enemies));
@@ -854,10 +854,11 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
   if (action.actionType === "healing") {
     const result = resolveHealing({ caster: actorStats, target: actor, healing: action });
     actor.hp = Math.min(actor.maxHp, actor.hp + result.actualHealing);
-    const healingMessage = action.id === "triage"
-      ? `トリアージュで最速治療！HPが${result.actualHealing}回復した！`
+    const priorityHealing = Number(action.turnPriority) >= 100;
+    const healingMessage = priorityHealing
+      ? `${action.name}で最速治療！HPが${result.actualHealing}回復した！`
       : `${result.actualHealing}回復！`;
-    battle.log.push(action.id === "triage"
+    battle.log.push(priorityHealing
       ? healingMessage
       : `${actor.name}のHPが${result.actualHealing}回復した。`);
     battle.presentationEvents.push({

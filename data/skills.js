@@ -211,6 +211,21 @@ export const SKILLS = Object.freeze({
     speedModifier: 0,
     battleOnly: true
   }),
+  die_triage: Object.freeze({
+    id: "die_triage",
+    name: "ディー・トリアージュ",
+    description: "最優先で自分のHPを大きく回復する。\n回復量は40＋最大HPの40％＋INT×1.0。",
+    actionType: "healing",
+    category: "miracle",
+    spCost: 20,
+    target: "self",
+    baseHealing: 40,
+    maxHpMultiplier: 0.4,
+    intelligenceMultiplier: 1,
+    turnPriority: 100,
+    speedModifier: 0,
+    battleOnly: true
+  }),
   antidote: Object.freeze({
     id: "antidote",
     name: "アンチドート",
@@ -500,6 +515,7 @@ export const LEVEL_SKILL_UNLOCKS = Object.freeze([
   Object.freeze({ job: "priest", level: 5, skillId: "exorcism" }),
   Object.freeze({ job: "priest", level: 7, skillId: "hemostasis" }),
   Object.freeze({ job: "priest", level: 25, skillId: "die_antidote" }),
+  Object.freeze({ job: "priest", level: 40, skillId: "die_triage" }),
   Object.freeze({ job: "thief", level: 8, skillId: "conceal_presence" }),
   Object.freeze({ job: "thief", level: 38, skillId: "assassination" }),
   Object.freeze({ job: "warrior", level: 55, skillId: "falcon_schnitt" }),
