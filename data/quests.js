@@ -1,7 +1,7 @@
 import { grantCard } from "./deck.js";
 import { grantEquipmentInstance } from "./equipment-inventory.js";
 import { grantItemWithOverflow } from "./inventory.js";
-import { consumeKeyItem, getKeyItemCount, grantKeyItem } from "./key-items.js";
+import { consumeKeyItem, getKeyItemCount, grantKeyItem, hasKeyItem } from "./key-items.js";
 
 export const MAX_ACTIVE_QUESTS = 3;
 export const GUILD_TRIAL_QUEST_ID = "guild_001_abyss_rat";
@@ -35,6 +35,7 @@ export const JIRENE_SONG_INVESTIGATION_QUEST_ID = "guild_028";
 export const JIRENE_SONG_INVESTIGATION_ACCEPTED_FLAG = "guild_028_accepted_once";
 export const BEESWAX_COLLECTION_QUEST_ID = "guild_029";
 export const CREEPING_CHAOS_QUEST_ID = "guild_030";
+export const LICHTBRINGER_QUEST_ID = "guild_033";
 export const CREEPING_CHAOS_ITEM_FLAG = "guild_030_trapezohedron_received";
 export const BEESWAX_REQUIRED_COUNT = 15;
 export const HERBICIDE_TRIAL_SUPPLY_FLAG = "guild_020_trial_herbicide_received";
@@ -747,6 +748,29 @@ export const QUESTS = Object.freeze([
     minimumDepthReached: 80,
     completedTargetFlag: "boss_b89f_defeated",
     available: true
+  }),
+  Object.freeze({
+    id: LICHTBRINGER_QUEST_ID,
+    number: "033",
+    title: "闇を照らすもの",
+    client: "キルケ",
+    category: "other",
+    objectiveType: "custom",
+    targetDepth: 95,
+    requiredCount: 1,
+    objectiveLabel: "リヒトブリンガーの入手",
+    reward: Object.freeze({ type: "card", label: "デッキカード×1", amount: 1, cardId: "zodiac_virgo" }),
+    descriptionLabel: "内容",
+    description: Object.freeze([
+      "漆黒区域は闇に閉ざされており、あらゆる光を拒む",
+      "そうじゃが、その闇を照らすものがあるという。",
+      "手がかりは漆黒区域のどこか、しか分からぬが",
+      "女王様を探す手助けにはなるはずじゃ。"
+    ]),
+    prerequisiteQuestIds: Object.freeze([CREEPING_CHAOS_QUEST_ID]),
+    completedTargetFlag: "lichtbringer_b95f_found",
+    ownedKeyItemCompletionId: "lichtbringer",
+    available: true
   })
 ]);
 
@@ -803,8 +827,10 @@ export function getQuestProgress(character, questId) {
   const state = normalizeQuestState(character?.quests);
   const savedProgress = Math.max(0, Math.floor(Number(state.active[questId]?.progress) || 0));
   const targetAlreadyCompleted = Boolean(
-    state.active[questId] && quest?.completedTargetFlag
-    && character?.eventFlags?.[quest.completedTargetFlag]
+    state.active[questId] && (
+      quest?.completedTargetFlag && character?.eventFlags?.[quest.completedTargetFlag]
+      || quest?.ownedKeyItemCompletionId && hasKeyItem(character?.keyItems, quest.ownedKeyItemCompletionId)
+    )
   );
   const persistentProgress = Array.isArray(quest?.persistentProgressFlags)
     ? quest.progressMode === "matchedFlags"
@@ -854,6 +880,7 @@ export function acceptQuest(character, questId) {
   const persistentProgressFlag = quest.persistentProgressFlag || quest.customProgressFlag;
   const targetAlreadyCompleted = Boolean(
     quest.completedTargetFlag && character?.eventFlags?.[quest.completedTargetFlag]
+    || quest.ownedKeyItemCompletionId && hasKeyItem(character?.keyItems, quest.ownedKeyItemCompletionId)
   );
   const persistentProgress = Array.isArray(quest.persistentProgressFlags)
     ? quest.progressMode === "matchedFlags"

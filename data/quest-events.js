@@ -2,10 +2,6 @@ export const QUEST_EVENTS_BY_DEPTH = Object.freeze({
   22: Object.freeze({ id: "thieves_clue_emblem_event", questId: "guild_011", keyItemId: "thieves_clue_emblem", flag: "quest_011_clue_emblem_found" }),
   24: Object.freeze({ id: "thieves_clue_ledger_event", questId: "guild_011", keyItemId: "thieves_clue_ledger", flag: "quest_011_clue_ledger_found" }),
   26: Object.freeze({ id: "thieves_clue_map_event", questId: "guild_011", keyItemId: "thieves_clue_map", flag: "quest_011_clue_map_found" }),
-  95: Object.freeze({
-    id: "lichtbringer_b95f_event", keyItemId: "lichtbringer",
-    flag: "lichtbringer_b95f_found", alwaysAvailable: true
-  }),
   ...Object.fromEntries(Array.from({ length: 8 }, (_, index) => {
     const depth = index + 51;
     return [depth, Object.freeze({

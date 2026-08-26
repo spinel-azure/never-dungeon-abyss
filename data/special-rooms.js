@@ -153,6 +153,20 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
       minimapMarker: "E",
       revealBeforeExploration: true
     })
+  }),
+  95: Object.freeze({
+    lock: Object.freeze({ mode: "alwaysSuccess", attempts: 1 }),
+    content: Object.freeze({
+      type: "keyItemPickup",
+      id: "lichtbringer_b95f_event",
+      questId: "guild_033",
+      keyItemId: "lichtbringer",
+      flag: "lichtbringer_b95f_found",
+      requiredQuestId: "guild_033",
+      accessBlockedMessage: "漆黒の闇に閉ざされ、今は扉の場所すら分からない。",
+      minimapMarker: "E",
+      revealBeforeExploration: true
+    })
   })
 });
 

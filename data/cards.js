@@ -11,6 +11,7 @@ export const DEEP_FLOOR_PROOF_CARD_ID = "legendary_deep_floor_proof";
 export const MANA_BOOSTER_CARD_ID = "legendary_mana_booster";
 export const LIFE_BOOSTER_CARD_ID = "legendary_life_booster";
 export const MIRAGE_CARD_ID = "sr_mirage";
+export const VIRGO_CARD_ID = "zodiac_virgo";
 
 const STANDARD_CARDS = [
   {
@@ -459,6 +460,13 @@ const ZODIAC_CARDS = [
   concept: "最大HP＋50％／深層ほどDEF上昇",
   descriptionJa: "最大HPが50％上昇する。\n迷宮を深く潜るほどDEFが上昇する。",
   maxHpMultiplier: 1.5
+} : card.id === VIRGO_CARD_ID ? {
+  ...card,
+  concept: "最大HP・SP＋25％／階層移動回復",
+  descriptionJa: "最大HPと最大SPが25％上昇する。階段で次の階層へ進むとHPとSPを10％回復する。",
+  maxHpMultiplier: 1.25,
+  maxSpMultiplier: 1.25,
+  floorRecoveryRate: 0.1
 } : card.id === "zodiac_libra" ? {
   ...card,
   concept: "強敵への与ダメージ＋30％／被ダメージ－30％",

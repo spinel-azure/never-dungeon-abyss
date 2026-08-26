@@ -752,6 +752,11 @@ export function placeSpecialRoom(depth = 1, rng = Math.random, progress = {}) {
         attemptsRemaining: Math.max(1, Math.floor(Number(definition.lock?.attempts) || 3)),
         unlocked: false
       };
+      if (room.specialRoom.content?.type === "keyItemPickup"
+        && progress.activeQuestIds?.includes(room.specialRoom.content.questId)
+        && !progress.eventFlags?.[room.specialRoom.content.flag]) {
+        room.questEvent = structuredClone(room.specialRoom.content);
+      }
       return { ...candidate, definition: structuredClone(room.specialRoom) };
     });
     if (placed) return placed;

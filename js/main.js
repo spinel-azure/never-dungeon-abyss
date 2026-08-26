@@ -158,6 +158,7 @@ import {
   startLongMarchChallenge,
   startMarathonChallenge
 } from "../data/marathon-challenge.js";
+import { applyVirgoFloorRecovery } from "../data/virgo-card.js";
 import {
   abandonQuest,
   acceptQuest,
@@ -699,6 +700,12 @@ import {
           ...withItem,
           eventFlags: { ...(withItem.eventFlags || {}), [event.flag]: true }
         };
+      if (keyItem.id === "lichtbringer") {
+        state.torchFuel = 100;
+        state.lightbringerActive = false;
+        state.minimapEffectForced = false;
+        updateHud();
+      }
       updateCharacterUi();
       saveGame();
       if (granted.gained) setTimeout(() => showNamedItemGetEffect([keyItem.name], { important: true }), 0);
@@ -1383,6 +1390,14 @@ import {
           "ギルドマスター：依頼人がお前に会いたいそうだ。\n＊Aボタンで次へ",
           "怪しげな男「…依頼を受けてくれて感謝する…。そんなに難しい依頼では…ない。あんたに預けた『トラペツォエーダー』――その多面体を指定した場所で使うだけでいい…。頼んだぞ…。」\n＊Aボタンで次へ"
         ]
+      } : questId === "guild_033" ? {
+        clientName: "キルケ",
+        clientPortrait: "images/npc/NPC_23.avif",
+        clientPortraitStartIndex: 1,
+        clientDialogue: [
+          "ギルドマスター：依頼人がお前に会いたいそうだ。\n＊Aボタンで次へ",
+          "キルケ「漆黒の闇を手探りで進むのは容易ではない…。くれぐれも気をつけるのじゃ…。\nそして必ずや女王様をお助けするのじゃ…。」\n＊Aボタンで次へ"
+        ]
       } : {}),
       acceptedMessage: questId === "guild_020"
         ? "ギルドマスター：これがヘレンから預かった除草剤の試供品だ。持っていけ。"
@@ -1617,8 +1632,8 @@ import {
   function hasMaxVitalBonus(target, key) {
     return Number(target?.equipmentStatBonuses?.[key]) > 0
       || Number(target?.cardStatBonuses?.[key]) > 0
-      || (key === "maxHp" && target?.cards?.deckSlots?.some(cardId => ["zodiac_taurus", "legendary_life_booster"].includes(cardId)))
-      || (key === "maxSp" && target?.cards?.deckSlots?.includes("legendary_mana_booster"));
+      || (key === "maxHp" && target?.cards?.deckSlots?.some(cardId => ["zodiac_taurus", "legendary_life_booster", "zodiac_virgo"].includes(cardId)))
+      || (key === "maxSp" && target?.cards?.deckSlots?.some(cardId => ["legendary_mana_booster", "zodiac_virgo"].includes(cardId)));
   }
 
   function renderStatusGauges(target) {
@@ -2354,7 +2369,9 @@ import {
   }
 
   async function useFieldSkill(skillId) {
-    if (["staff_light", "grain_glow"].includes(skillId) && isForcedTorchZeroFloor(currentDepth)) {
+    if (["staff_light", "grain_glow"].includes(skillId)
+      && isForcedTorchZeroFloor(currentDepth)
+      && !hasKeyItem(character?.keyItems, "lichtbringer")) {
       say("この区域では、たいまつの光を補充できない。");
       return { accepted: false, reason: "forcedTorchZero" };
     }
@@ -2401,7 +2418,10 @@ import {
 
   async function useFieldItem(itemId) {
     const context = isTownOpen() ? "town" : "dungeon";
-    if (context === "dungeon" && itemId === "guiding_torch" && isForcedTorchZeroFloor(currentDepth)) {
+    if (context === "dungeon"
+      && itemId === "guiding_torch"
+      && isForcedTorchZeroFloor(currentDepth)
+      && !hasKeyItem(character?.keyItems, "lichtbringer")) {
       say("この区域では、たいまつの光を補充できない。");
       return { accepted: false, reason: "forcedTorchZero" };
     }
@@ -3466,6 +3486,14 @@ import {
         longMarchRewardGained = reward.gained > 0;
       }
       character = recordNpcExpeditionDepth(character, currentDepth);
+      const virgoRecovery = applyVirgoFloorRecovery(character);
+      character = virgoRecovery.character;
+      if (virgoRecovery.hpRecovered > 0) {
+        setTimeout(() => showStepHpRecovery(virgoRecovery.hpRecovered), 420);
+      }
+      if (virgoRecovery.spRecovered > 0) {
+        setTimeout(() => showStepSpRecovery(virgoRecovery.spRecovered), 420);
+      }
     }
     if (currentDepth === 10 && character) {
       character = {
@@ -3674,23 +3702,24 @@ import {
   }
 
   function updateHud() {
-    state.lightbringerActive = currentDepth >= 90 && currentDepth <= 99
+    const lightbringerOwned = currentDepth >= 90 && currentDepth <= 99
       && hasKeyItem(character?.keyItems, "lichtbringer");
-    state.minimapEffectForced = state.lightbringerActive;
-    if (isForcedTorchZeroFloor(currentDepth)) state.torchFuel = 0;
+    state.lightbringerActive = false;
+    state.minimapEffectForced = false;
+    if (isForcedTorchZeroFloor(currentDepth) && !lightbringerOwned) state.torchFuel = 0;
     const displayGridY = currentDepth === 100 ? MAP_H - 1 - state.gridY : state.gridY;
     posEl.textContent = `X:${state.gridX} Y:${displayGridY}`;
     depthEl.textContent = `B${currentDepth}F`;
     stopwatchEl.textContent = formatElapsedTime(performance.now() - runStartedAt);
     drawCompass();
-    const displayedTorchFuel = isForcedTorchZeroFloor(currentDepth) && !state.lightbringerActive
+    const displayedTorchFuel = isForcedTorchZeroFloor(currentDepth) && !lightbringerOwned
       ? 0
-      : state.torchEffectForced || state.lightbringerActive ? 100 : state.torchFuel;
+      : state.torchEffectForced ? 100 : state.torchFuel;
     torchMeterEl.style.width = `${displayedTorchFuel}%`;
     torchMeterEl.parentElement.classList.toggle(
       "is-critical",
-      (isForcedTorchZeroFloor(currentDepth) && !state.lightbringerActive)
-        || (!state.torchEffectForced && !state.lightbringerActive && state.torchFuel <= 20)
+      (isForcedTorchZeroFloor(currentDepth) && !lightbringerOwned)
+        || (!state.torchEffectForced && state.torchFuel <= 20)
     );
     const presence = getPresence();
     presenceMeterEl.style.setProperty("--presence", `${presence}%`);
