@@ -133,27 +133,26 @@ test("B10F to B19F red chests use the midgame consumable, card and anti-magic ar
   assert.equal(getEquipmentItem("anti_magic_shoes", "footId").allowedJobs, undefined);
 });
 
-test("B19F ends the anti-magic armor table and B20F retains the following midgame table", () => {
+test("B19F ends the anti-magic armor table and B20F starts the restraint equipment table", () => {
   assert.equal(rollRedChestLoot(rng(0.95, 0), 19).equipmentId, "anti_magic_shoes");
-  const weapon = rollRedChestLoot(rng(0.95, 0), 20);
-  assert.equal(weapon.equipmentId, "steel_longsword");
-  assert.equal(weapon.enhancement, 1);
+  const equipment = rollRedChestLoot(rng(0.4, 0, 0), 20);
+  assert.equal(equipment.equipmentId, "restraint_guard_helm");
+  assert.equal(equipment.enhancement, 1);
 });
 
-test("B21F to B30F temporarily reuse the midgame red chest table", () => {
-  for (const depth of [21, 25, 29, 30]) {
-    assert.equal(rollRedChestLoot(rng(0.1, 0.5), depth).itemId, "healing_potion_medium");
-    const weapon = rollRedChestLoot(rng(0.95, 0.999, 0), depth);
-    assert.equal(weapon.equipmentId, "steel_longsword");
-    assert.equal(weapon.enhancement, 1);
+test("B20F to B29F consistently use the torture-region red chest table", () => {
+  for (const depth of [20, 21, 25, 29]) {
+    assert.equal(rollRedChestLoot(rng(0.05), depth).itemId, "healing_potion_medium");
+    assert.equal(rollRedChestLoot(rng(0.15), depth).itemId, "antidote_medium");
+    const equipment = rollRedChestLoot(rng(0.4, 0.999, 0), depth);
+    assert.equal(equipment.equipmentId, "iron_chain_talisman");
+    assert.equal(equipment.enhancement, 1);
   }
 });
 
-test("B21F to B30F split the temporary weapon reward evenly across all three weapons", () => {
-  assert.deepEqual(
-    [0, 0.34, 0.67].map(weaponRoll => rollRedChestLoot(rng(0.95, weaponRoll, 0), 21).equipmentId),
-    ["baselard", "silver_flail", "steel_longsword"]
-  );
+test("B30F keeps the former midgame table at the region boundary", () => {
+  assert.equal(rollRedChestLoot(rng(0.1, 0.5), 30).itemId, "healing_potion_medium");
+  assert.equal(rollRedChestLoot(rng(0.95, 0.999, 0), 30).equipmentId, "steel_longsword");
 });
 
 test("B31F to B40F red chests use floor-fixed class armor and 70/25/5 enhancements", () => {
@@ -226,6 +225,30 @@ test("B10F to B19F black chests use SP cards, magic resistance, and the moved en
   assert.equal(rollBlackChestLoot(rng(0.6, 0), 15).equipmentId, "silver_flail");
   assert.equal(rollBlackChestLoot(rng(0.8, 0.999), 19).equipmentId, "steel_longsword");
   assert.equal(rollBlackChestLoot(rng(0.8, 0.999), 19).enhancement, 3);
+});
+
+test("B20F to B29F black chests provide four job weapon upgrades", () => {
+  assert.deepEqual(
+    [0, 0.25, 0.5, 0.75].map(weaponRoll => rollBlackChestLoot(rng(0, weaponRoll, 0), 24).equipmentId),
+    ["executioner_longsword", "chain_dagger", "inquisitor_mace", "anguish_staff"]
+  );
+  assert.deepEqual(
+    ["warrior", "thief", "priest", "mage"].map(job => rollBlackChestLoot(rng(0), 29, job).equipmentId),
+    ["executioner_longsword", "chain_dagger", "inquisitor_mace", "anguish_staff"]
+  );
+  assert.equal(rollBlackChestLoot(rng(0, 0, 0.699), 24).enhancement, 1);
+  assert.equal(rollBlackChestLoot(rng(0, 0, 0.7), 24).enhancement, 2);
+  assert.equal(rollBlackChestLoot(rng(0, 0, 0.95), 24).enhancement, 3);
+});
+
+test("B20F to B29F red chests provide restraint armor and an accessory", () => {
+  assert.equal(rollRedChestLoot(rng(0.099), 20).itemId, "healing_potion_medium");
+  assert.equal(rollRedChestLoot(rng(0.1), 20).itemId, "antidote_medium");
+  assert.deepEqual(
+    [0, 0.25, 0.5, 0.75].map(equipmentRoll => rollRedChestLoot(rng(0.4, equipmentRoll, 0), 25).equipmentId),
+    ["restraint_guard_helm", "restraint_guard_mantle", "restraint_guard_boots", "iron_chain_talisman"]
+  );
+  assert.equal(rollRedChestLoot(rng(0.4, 0.75, 0.95), 29).enhancement, 3);
 });
 
 test("B50F to B59F black chests cycle job weapons with 70/25/5 enhancements", () => {

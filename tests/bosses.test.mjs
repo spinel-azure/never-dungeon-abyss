@@ -100,18 +100,18 @@ test("B19 fallen mage is a one-time magic floor boss with a placeholder reward",
 test("B29 Iron Maiden is a physical checkpoint boss with a low-HP death bite", () => {
   const boss = getBossById("iron_maiden_b29f");
   assert.equal(boss.name, "鋼鉄の乙女");
-  assert.equal(boss.level, 38);
+  assert.equal(boss.level, 32);
   assert.equal(boss.floor, 29);
   assert.equal(boss.image, "images/bosses/boss_05.avif");
   assert.equal(boss.encounterImage, "images/npc/NPC_event_05.avif");
   assert.equal(boss.defeatedEncounterImage, "images/npc/NPC_event_06.avif");
-  assert.equal(boss.maxHp, 720);
+  assert.equal(boss.maxHp, 600);
   assert.equal(boss.experienceReward, 5000);
   assert.equal(boss.room.keyItemId, "red_rust_key_b29f");
   assert.equal(boss.room.unlockFlag, "red_door_b29f_unlocked");
   const deathBite = boss.actions.find(entry => entry.action.id === "death_bite");
   assert.equal(deathBite.when.hpRateBelow, 0.49);
-  assert.ok(deathBite.action.powerPerHit > 1.5);
+  assert.equal(deathBite.action.powerPerHit, 1.55);
   assert.match(boss.event.prompt, /眠った乙女/);
   assert.match(boss.event.remains, /朽ちた棺の残骸/);
 });

@@ -36,6 +36,21 @@ test("all torture-region enemies use the B90F three-action pattern", () => {
   }
 });
 
+test("torture-region stats form a survivable progression from the magic region", () => {
+  const expected = {
+    morgenstern: [18, 75, 12, 11, 11],
+    inquisitorin: [20, 110, 14, 13, 13],
+    folterzange: [23, 160, 17, 16, 16],
+    folterpanzer: [28, 280, 21, 22, 20]
+  };
+  for (const [id, values] of Object.entries(expected)) {
+    const enemy = getEnemyById(id);
+    assert.deepEqual([enemy.level, enemy.maxHp, enemy.stats.str, enemy.def, enemy.attack], values);
+  }
+  assert.ok(getEnemyById("morgenstern").actions[1].action.powerPerHit <= 0.55);
+  assert.ok(getEnemyById("folterpanzer").actions[2].action.powerPerHit <= 1.45);
+});
+
 test("torture-region third actions implement bleeding, defense ignore, and restraint", () => {
   assert.equal(getEnemyById("morgenstern").actions[2].action.effects[0].statusId, "bleeding");
   assert.equal(getEnemyById("inquisitorin").actions[2].action.ignoresDefense, true);

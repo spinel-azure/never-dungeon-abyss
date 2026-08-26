@@ -238,7 +238,7 @@ export const BOSSES = Object.freeze({
   iron_maiden_b29f: Object.freeze({
     id: "iron_maiden_b29f",
     name: "鋼鉄の乙女",
-    level: 38,
+    level: 32,
     floor: 29,
     imageId: "iron_maiden_b29f",
     image: "images/bosses/boss_05.avif",
@@ -248,10 +248,10 @@ export const BOSSES = Object.freeze({
     defeatedEncounterImageId: "iron_maiden_remains_b29f",
     defeatedEncounterImage: "images/npc/NPC_event_06.avif",
     race: "construct",
-    maxHp: 720,
-    stats: Object.freeze({ str: 22, int: 4, agi: 10, dex: 16, luc: 12 }),
-    def: 18,
-    attack: 17,
+    maxHp: 600,
+    stats: Object.freeze({ str: 20, int: 4, agi: 10, dex: 15, luc: 12 }),
+    def: 17,
+    attack: 16,
     experienceReward: 5000,
     specialAttack: null,
     actions: Object.freeze([
@@ -279,7 +279,7 @@ export const BOSSES = Object.freeze({
             statusId: "action_skip",
             trigger: "firstHitOnly",
             statusKind: "physical",
-            baseRate: 0.55
+            baseRate: 0.45
           })])
         })
       }),
@@ -290,7 +290,7 @@ export const BOSSES = Object.freeze({
           name: "棺砕き",
           actionType: "physicalAttack",
           hitCount: 1,
-          powerPerHit: 1.3,
+          powerPerHit: 1.2,
           speedModifier: -2,
           effects: Object.freeze([])
         })
@@ -303,13 +303,13 @@ export const BOSSES = Object.freeze({
           name: "デスバイト",
           actionType: "physicalAttack",
           hitCount: 1,
-          powerPerHit: 1.75,
+          powerPerHit: 1.55,
           hitBonus: 0.08,
           effects: Object.freeze([Object.freeze({
             statusId: "bleeding",
             trigger: "firstHitOnly",
             statusKind: "physical",
-            baseRate: 0.4
+            baseRate: 0.35
           })])
         })
       })

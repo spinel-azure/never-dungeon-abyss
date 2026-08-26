@@ -165,6 +165,46 @@ export const WEAPONS = Object.freeze({
     buyPrice: 1200, sellPrice: 600, shopUnlockDepth: 10,
     shopRequiredFlags: Object.freeze(["transfer_portal_b10f_unlocked", "boss_strange_knight_statue_b9f_defeated"])
   }),
+  executioner_longsword: Object.freeze({
+    id: "executioner_longsword", name: "処刑人の長剣", type: "longsword", attack: 13,
+    attackByEnhancement: Object.freeze([13, 14, 15, 16]),
+    statBonuses: Object.freeze({ str: 1 }),
+    statBonusesByEnhancement: Object.freeze([
+      Object.freeze({ str: 1 }), Object.freeze({ str: 1 }), Object.freeze({ str: 2 }), Object.freeze({ str: 3 })
+    ]),
+    element: "physical", allowedJobs: Object.freeze(["warrior"]), sellPrice: 1000,
+    sellPriceByEnhancement: Object.freeze([1000, 1200, 1500, 2000])
+  }),
+  chain_dagger: Object.freeze({
+    id: "chain_dagger", name: "鎖刃の短剣", type: "dagger", attack: 9,
+    attackByEnhancement: Object.freeze([9, 10, 10, 11]),
+    statBonuses: Object.freeze({ dex: 3 }),
+    statBonusesByEnhancement: Object.freeze([
+      Object.freeze({ dex: 3 }), Object.freeze({ dex: 3 }), Object.freeze({ dex: 4 }), Object.freeze({ dex: 5 })
+    ]),
+    element: "physical", allowedJobs: Object.freeze(["thief"]), sellPrice: 1000,
+    sellPriceByEnhancement: Object.freeze([1000, 1200, 1500, 2000])
+  }),
+  inquisitor_mace: Object.freeze({
+    id: "inquisitor_mace", name: "審問官のメイス", type: "blunt", attack: 12,
+    attackByEnhancement: Object.freeze([12, 13, 13, 14]),
+    statBonuses: Object.freeze({ luc: 2 }),
+    statBonusesByEnhancement: Object.freeze([
+      Object.freeze({ luc: 2 }), Object.freeze({ luc: 2 }), Object.freeze({ luc: 3 }), Object.freeze({ luc: 4 })
+    ]),
+    element: "physical", allowedJobs: Object.freeze(["priest"]), sellPrice: 1000,
+    sellPriceByEnhancement: Object.freeze([1000, 1200, 1500, 2000])
+  }),
+  anguish_staff: Object.freeze({
+    id: "anguish_staff", name: "責め苦の杖", type: "staff", attack: 4,
+    attackByEnhancement: Object.freeze([4, 4, 5, 5]),
+    statBonuses: Object.freeze({ int: 3 }),
+    statBonusesByEnhancement: Object.freeze([
+      Object.freeze({ int: 3 }), Object.freeze({ int: 3 }), Object.freeze({ int: 4 }), Object.freeze({ int: 5 })
+    ]),
+    element: "physical", allowedJobs: Object.freeze(["mage"]), twoHanded: true, sellPrice: 1000,
+    sellPriceByEnhancement: Object.freeze([1000, 1200, 1500, 2000])
+  }),
   blacksteel_longsword: Object.freeze({
     id: "blacksteel_longsword", name: "黒鋼の長剣", type: "longsword", attack: 17,
     attackByEnhancement: Object.freeze([17, 18, 19, 21]),

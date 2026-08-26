@@ -64,6 +64,34 @@ export const EQUIPMENT = Object.freeze({
     2: { def: 3, magicDamageReduction: 0.03 },
     3: { def: 4, magicDamageReduction: 0.04 }
   })),
+  restraint_guard_helm: item("restraint_guard_helm", "拘束避けの兜", "headId", {
+    def: 3, bleedingResistance: 0.05
+  }, tortureArmor({
+    1: { def: 4, bleedingResistance: 0.05 },
+    2: { def: 4, bleedingResistance: 0.08 },
+    3: { def: 5, bleedingResistance: 0.1 }
+  })),
+  restraint_guard_mantle: item("restraint_guard_mantle", "拘束避けの外套", "bodyId", {
+    def: 4, bleedingResistance: 0.05
+  }, tortureArmor({
+    1: { def: 5, bleedingResistance: 0.05 },
+    2: { def: 5, bleedingResistance: 0.08 },
+    3: { def: 6, bleedingResistance: 0.1 }
+  })),
+  restraint_guard_boots: item("restraint_guard_boots", "拘束避けの靴", "footId", {
+    def: 3, actionSkipResistance: 0.05
+  }, tortureArmor({
+    1: { def: 4, actionSkipResistance: 0.05 },
+    2: { def: 4, actionSkipResistance: 0.08 },
+    3: { def: 5, actionSkipResistance: 0.1 }
+  })),
+  iron_chain_talisman: item("iron_chain_talisman", "鉄鎖の護符", "accessoryId", {
+    def: 2, bleedingResistance: 0.08, actionSkipResistance: 0.08
+  }, tortureArmor({
+    1: { def: 3, bleedingResistance: 0.1, actionSkipResistance: 0.1 },
+    2: { def: 3, bleedingResistance: 0.12, actionSkipResistance: 0.12 },
+    3: { def: 4, bleedingResistance: 0.15, actionSkipResistance: 0.15 }
+  })),
   spell_sealing_talisman: item("spell_sealing_talisman", "魔封じの護符", "accessoryId", {
     def: 2,
     magicDamageReduction: 0.1
@@ -405,6 +433,19 @@ function antiMagicArmor(statBonusesByEnhancement) {
       ])
     )),
     sellPriceByEnhancement: Object.freeze({ 0: 250, 1: 300, 2: 450, 3: 700 })
+  };
+}
+
+function tortureArmor(statBonusesByEnhancement) {
+  return {
+    sellPrice: 500,
+    statBonusesByEnhancement: Object.freeze(Object.fromEntries(
+      Object.entries(statBonusesByEnhancement).map(([level, bonuses]) => [
+        level,
+        Object.freeze({ ...bonuses })
+      ])
+    )),
+    sellPriceByEnhancement: Object.freeze({ 0: 500, 1: 600, 2: 750, 3: 1000 })
   };
 }
 

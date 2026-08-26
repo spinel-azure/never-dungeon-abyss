@@ -1659,7 +1659,8 @@ import {
           attackSpellDamageBonus: "攻撃呪文威力",
           healingMiracleBonus: "回復奇蹟威力",
           passiveInstantDeathRateBonus: "一閃・暗殺術",
-          poisonResistance: "毒・猛毒耐性"
+          poisonResistance: "毒・猛毒耐性",
+          bleedingResistance: "出血耐性"
         };
         return percentLabels[key]
           ? `${percentLabels[key]} ${Number(value) >= 0 ? "+" : ""}${Math.round(Number(value) * 100)}%`

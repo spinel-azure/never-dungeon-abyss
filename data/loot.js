@@ -145,6 +145,20 @@ export function rollBlackChestLoot(rng = Math.random, depth = 6, job = null) {
       unidentifiedName: "？武器"
     };
   }
+  if (Number(depth) >= 20 && Number(depth) <= 29) {
+    const weaponIds = ["executioner_longsword", "chain_dagger", "inquisitor_mace", "anguish_staff"];
+    const jobWeaponIds = {
+      warrior: "executioner_longsword", thief: "chain_dagger", priest: "inquisitor_mace", mage: "anguish_staff"
+    };
+    const equipmentId = Number(depth) === 29 && jobWeaponIds[job]
+      ? jobWeaponIds[job]
+      : rollFromList(weaponIds, rng);
+    return {
+      kind: "equipment", equipmentId, slot: "rightArmId",
+      enhancement: rollEnhancement(MID_BLACK_CHEST_WEAPON_ENHANCEMENT_RATES, rng) + 1,
+      unidentifiedName: equipmentId === "anguish_staff" ? "？両手杖" : "？武器"
+    };
+  }
   if (roll < 0.45) return { kind: "gold", amount: rollBlackChestGold(rng, table) };
   if (roll < 0.65) return { kind: "item", itemId: table.potionId, amount: 1, unidentifiedName: "？薬" };
   if (roll < 0.8) return { kind: "item", itemId: "antidote", amount: 1, unidentifiedName: "？薬" };
@@ -167,7 +181,8 @@ export function rollRedChestLoot(rng = Math.random, depth = 1) {
   const roll = normalizedRoll(rng);
   const floor = Math.max(1, Math.floor(Number(depth) || 1));
   if (floor >= 10 && floor <= 19) return rollMagicRedChestLoot(roll, floor, rng);
-  if (floor >= 20 && floor <= 30) return rollMidRedChestLoot(roll, floor, rng);
+  if (floor >= 20 && floor <= 29) return rollTortureRedChestLoot(roll, rng);
+  if (floor === 30) return rollMidRedChestLoot(roll, floor, rng);
   if (floor >= 31 && floor <= 40) return rollDeepRedChestLoot(roll, floor, rng);
   if (floor >= 50 && floor <= 59) return rollForestRedChestLoot(roll, floor, rng);
   if (floor >= 60 && floor <= 69) return rollDesertRedChestLoot(roll, rng);
@@ -368,6 +383,30 @@ function rollMidRedChestLoot(roll, depth, rng) {
     kind: "equipment", equipmentId, slot: "rightArmId",
     enhancement: rollEnhancement(MID_RED_CHEST_WEAPON_ENHANCEMENT_RATES, rng) + 1,
     unidentifiedName: "？武器"
+  };
+}
+
+function rollTortureRedChestLoot(roll, rng) {
+  if (roll < 0.1) return { kind: "item", itemId: "healing_potion_medium", amount: 1, unidentifiedName: "？薬" };
+  if (roll < 0.2) return { kind: "item", itemId: "antidote_medium", amount: 1, unidentifiedName: "？薬" };
+  if (roll < 0.3) return {
+    kind: "card", cardId: rollFromList(["common_strength_down", "common_agility_down"], rng),
+    amount: 1, unidentifiedName: "？カード", rarity: "C"
+  };
+  if (roll < 0.4) return {
+    kind: "card", cardId: "rare_spell_resistance", amount: 1,
+    unidentifiedName: "？カード", rarity: "R"
+  };
+  const equipment = rollFromList([
+    ["restraint_guard_helm", "headId"],
+    ["restraint_guard_mantle", "bodyId"],
+    ["restraint_guard_boots", "footId"],
+    ["iron_chain_talisman", "accessoryId"]
+  ], rng);
+  return {
+    kind: "equipment", equipmentId: equipment[0], slot: equipment[1],
+    enhancement: rollEnhancement(MID_RED_CHEST_WEAPON_ENHANCEMENT_RATES, rng) + 1,
+    unidentifiedName: equipment[1] === "accessoryId" ? "？装備" : "？防具"
   };
 }
 
