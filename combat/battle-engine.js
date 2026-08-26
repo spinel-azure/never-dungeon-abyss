@@ -91,6 +91,23 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
   const playerAction = createPlayerAction(next.player, playerCommand, next.enemy);
   if (!playerAction.ok) return { battle: next, accepted: false, reason: playerAction.reason };
   const enemyAction = createEnemyAction(next.enemy, rng, { battle: next });
+  if (next.enemy.id === "maikaefer"
+    && enemyAction.actionType === "enemyEscape"
+    && !next.ariesActiveAtStart) {
+    next.log = [];
+    next.presentationEvents = [];
+    executeAction({
+      battle: next,
+      action: enemyAction,
+      actor: next.enemy,
+      actorSide: "enemy",
+      target: next.player,
+      targetSide: "player",
+      rng
+    });
+    finishAction(next, "enemy");
+    return { battle: next, accepted: true };
+  }
   const order = applyAriesOpeningPriority(next, resolveTurnOrder([
     { side: "player", actor: combatStats(next.player), action: playerAction.action },
     { side: "enemy", actor: combatStats(next.enemy), action: enemyAction }

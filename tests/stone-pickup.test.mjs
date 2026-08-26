@@ -52,6 +52,7 @@ test("a thrown stone uses normal hit chance and deals fixed nine damage", () => 
   const maikaefer = structuredClone(getEnemyById("maikaefer"));
   maikaefer.hp = maikaefer.maxHp;
   maikaefer.alive = true;
+  maikaefer.actions = [{ weight: 1, action: { id: "wait", name: "待機", actionType: "wait" } }];
   const hit = resolveBattleRound({
     battle: createBattleState({ character: characterWithStone(), enemy: maikaefer }),
     playerCommand: { type: "item", itemId: "stone" },

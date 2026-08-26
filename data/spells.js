@@ -58,12 +58,13 @@ export const SPELLS = Object.freeze({
   healing_prayer: Object.freeze({
     id: "healing_prayer",
     name: "癒やしの祈り",
-    description: "自分のHPを回復する。\n回復量は10＋INT×0.5。",
+    description: "自分のHPを回復する。\n回復量は10＋INT×1.0。",
     actionType: "healing",
     category: "miracle",
     spCost: 3,
     target: "self",
     baseHealing: 10,
+    intelligenceMultiplier: 1,
     speedModifier: 0
   })
 });

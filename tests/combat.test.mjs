@@ -93,6 +93,24 @@ test("Maikaefer usually escapes and leaves no battle reward", () => {
   assert.equal(result.battle.enemy.noDrop, true);
   assert.equal(result.battle.enemy.escaped, true);
 });
+
+test("Maikaefer escape resolves before NPC opening support", () => {
+  const enemy = createEnemyCombatant(getEnemyById("maikaefer"));
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.npcSystem = {
+    registeredIds: ["rebecca"],
+    activeIds: ["rebecca"],
+    records: { rebecca: { growthStage: 10 } }
+  };
+  const result = resolveBattleRound({
+    battle: createBattleState({ character, enemy }),
+    playerCommand: { type: "wait" },
+    rng: () => 0
+  });
+  assert.equal(result.battle.outcome, "enemyEscaped");
+  assert.equal(result.battle.enemy.escaped, true);
+  assert.equal(result.battle.presentationEvents.some(event => event.npcId === "rebecca"), false);
+});
 import {
   getExperienceForLevel,
   getDeckCostAtLevel,
@@ -497,7 +515,7 @@ test("healing skill exposes a green-number presentation event", () => {
   });
   const healing = resolved.battle.presentationEvents.find(event => event.type === "healing");
   assert.equal(healing.targetSide, "player");
-  assert.equal(healing.amount, 13);
+  assert.equal(healing.amount, 15);
 });
 
 test("Holy Strike ignores defense and uses the combined STR and INT holy formula", () => {
@@ -757,7 +775,7 @@ test("healing uses no RNG and cannot overheal", () => {
     healing: getSkill("healing_prayer"),
     rng: () => { calls += 1; return 0; }
   });
-  assert.equal(result.calculatedHealing, 13);
+  assert.equal(result.calculatedHealing, 16);
   assert.equal(result.actualHealing, 2);
   assert.equal(calls, 0);
 });
@@ -1944,8 +1962,8 @@ test("healing prayer can restore HP and consume SP outside battle", () => {
   priest.hp = 5;
   const result = resolveFieldSkill({ character: priest, skillId: "healing_prayer" });
   assert.equal(result.accepted, true);
-  assert.equal(result.healing, 13);
-  assert.equal(result.character.hp, 18);
+  assert.equal(result.healing, 15);
+  assert.equal(result.character.hp, 20);
   assert.equal(result.character.sp, 22);
   assert.equal(priest.hp, 5);
 });
@@ -2035,7 +2053,7 @@ test("Die Antidote is learned at level 25 and cures poison plus deadly poison fo
   assert.equal(result.character.sp, priest.sp - 5);
   assert.equal(result.character.statuses.length, 0);
   assert.equal(result.character.condition, "GOOD");
-  assert.equal(getSkill("die_antidote").name, "ディー・アンチドーテ");
+  assert.equal(getSkill("die_antidote").name, "ディー・アンチドート");
 });
 
 test("the three jobs learn their new dungeon skills at the intended levels", () => {
@@ -2247,10 +2265,13 @@ test("action seal forces normal enemy attacks for three turns and bosses for one
   assert.equal(createEnemyAction(boss, () => 0.99).id, "normal_attack");
 });
 
-test("greater healing scales with full INT and magic focus is a one-use multiplier", () => {
+test("greater healing scales with max HP and full INT while magic focus is a one-use multiplier", () => {
+  assert.equal(getSkill("greater_healing").baseHealing, 20);
+  assert.equal(getSkill("greater_healing").maxHpMultiplier, 0.3);
+  assert.equal(getSkill("greater_healing").intelligenceMultiplier, 1);
   assert.equal(resolveHealing({
     caster: { int: 20 }, target: { hp: 1, maxHp: 100 }, healing: getSkill("greater_healing")
-  }).calculatedHealing, 55);
+  }).calculatedHealing, 70);
   const focused = applyStatusApplications([], [{ statusId: "magic_focus", success: true }]);
   assert.equal(focused[0].attackSpellDamageMultiplier, 1.5);
   assert.equal(getSkill("holy_light").raceDamageMultipliers.undead, 1.5);

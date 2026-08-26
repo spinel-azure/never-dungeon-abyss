@@ -9,6 +9,7 @@ export function resolveHealing({
     0,
     Math.floor(
       (numeric(healing.baseHealing)
+      + numeric(target.maxHp) * numeric(healing.maxHpMultiplier)
       + numeric(caster.int) * numericOr(healing.intelligenceMultiplier, COMBAT_CONFIG.intelligenceMultiplier))
       * numericOr(caster.healingMiracleMultiplier, 1)
     )

@@ -128,9 +128,9 @@ export const SKILLS = Object.freeze({
   }),
   greater_healing: Object.freeze({
     id: "greater_healing", name: "大治癒",
-    description: "自分のHPを大きく回復する。\n回復量は35＋INT×1.0。",
+    description: "自分のHPを大きく回復する。\n回復量は20＋最大HPの30％＋INT×1.0。",
     actionType: "healing", category: "miracle", spCost: 10, target: "self",
-    baseHealing: 35, intelligenceMultiplier: 1, speedModifier: 0
+    baseHealing: 20, maxHpMultiplier: 0.3, intelligenceMultiplier: 1, speedModifier: 0
   }),
   holy_light: Object.freeze({
     id: "holy_light", name: "聖光",
@@ -225,7 +225,7 @@ export const SKILLS = Object.freeze({
   }),
   die_antidote: Object.freeze({
     id: "die_antidote",
-    name: "ディー・アンチドーテ",
+    name: "ディー・アンチドート",
     description: "毒および猛毒状態を回復する。\nHPは回復しない。",
     actionType: "cureStatus",
     category: "miracle",
