@@ -61,7 +61,7 @@ export const SPELLS = Object.freeze({
     description: "自分のHPを回復する。\n回復量は10＋INT×0.5。",
     actionType: "healing",
     category: "miracle",
-    spCost: 5,
+    spCost: 3,
     target: "self",
     baseHealing: 10,
     speedModifier: 0

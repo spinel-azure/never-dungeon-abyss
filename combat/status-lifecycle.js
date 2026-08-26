@@ -120,6 +120,12 @@ export function getDefenseMultiplier(statuses = []) {
   return debuff * buff;
 }
 
+export function getStatusDefenseBonus(statuses = []) {
+  return statuses
+    .filter(status => status.active !== false)
+    .reduce((total, status) => total + (Number(status.defenseBonus) || 0), 0);
+}
+
 function cloneStatuses(statuses) {
   return Array.isArray(statuses) ? statuses.map(status => ({ ...status })) : [];
 }

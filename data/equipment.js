@@ -9,6 +9,13 @@ export const EQUIPMENT_SLOTS = Object.freeze([
   "accessoryId"
 ]);
 
+export const ANTI_MAGIC_SET_EQUIPMENT_IDS = Object.freeze([
+  "anti_magic_hat",
+  "anti_magic_mantle",
+  "anti_magic_shoes"
+]);
+export const ANTI_MAGIC_SET_MAGIC_DAMAGE_REDUCTION = 0.1;
+
 export const EQUIPMENT = Object.freeze({
   musa_crown: item("musa_crown", "ムーサの冠", "accessoryId", { def: 6, temptationResistance: 1 }, {
     sellPrice: 0,
@@ -36,6 +43,27 @@ export const EQUIPMENT = Object.freeze({
     buyPrice: 2000,
     sellPrice: 1000
   }),
+  anti_magic_hat: item("anti_magic_hat", "耐魔の帽子", "headId", {
+    def: 2, magicDamageReduction: 0.02
+  }, antiMagicArmor({
+    1: { def: 3, magicDamageReduction: 0.02 },
+    2: { def: 3, magicDamageReduction: 0.03 },
+    3: { def: 4, magicDamageReduction: 0.04 }
+  })),
+  anti_magic_mantle: item("anti_magic_mantle", "耐魔の外套", "bodyId", {
+    def: 3, magicDamageReduction: 0.03
+  }, antiMagicArmor({
+    1: { def: 4, magicDamageReduction: 0.03 },
+    2: { def: 4, magicDamageReduction: 0.05 },
+    3: { def: 5, magicDamageReduction: 0.07 }
+  })),
+  anti_magic_shoes: item("anti_magic_shoes", "耐魔の靴", "footId", {
+    def: 2, magicDamageReduction: 0.02
+  }, antiMagicArmor({
+    1: { def: 3, magicDamageReduction: 0.02 },
+    2: { def: 3, magicDamageReduction: 0.03 },
+    3: { def: 4, magicDamageReduction: 0.04 }
+  })),
   spell_sealing_talisman: item("spell_sealing_talisman", "魔封じの護符", "accessoryId", {
     def: 2,
     magicDamageReduction: 0.1
@@ -314,14 +342,26 @@ export function getEquipmentItem(id, slot) {
 
 export function collectEquipmentBonuses(equipment = {}) {
   const bonuses = {};
+  const equippedIds = [];
   for (const slot of EQUIPMENT_SLOTS) {
     const equippedId = slot === "rightArmId"
       ? equipment.rightArmId || equipment.weaponId
       : equipment[slot];
     const equipped = getEquipmentItem(equippedId, slot);
+    if (equipped?.id) equippedIds.push(equipped.id);
     for (const [key, value] of Object.entries(equipped?.statBonuses || {})) {
       bonuses[key] = (bonuses[key] || 0) + Number(value || 0);
     }
+  }
+  applyAntiMagicSetBonus(bonuses, equippedIds);
+  return bonuses;
+}
+
+export function applyAntiMagicSetBonus(bonuses = {}, equippedIds = []) {
+  const equipped = new Set(equippedIds);
+  if (ANTI_MAGIC_SET_EQUIPMENT_IDS.every(id => equipped.has(id))) {
+    bonuses.magicDamageReduction = (Number(bonuses.magicDamageReduction) || 0)
+      + ANTI_MAGIC_SET_MAGIC_DAMAGE_REDUCTION;
   }
   return bonuses;
 }
@@ -352,6 +392,19 @@ function enhancedArmor(job, statBonusesByEnhancement) {
     )),
     buyPriceByEnhancement: Object.freeze({ 1: 100, 2: 500, 3: 1500 }),
     sellPriceByEnhancement: Object.freeze({ 0: 25, 1: 50, 2: 250, 3: 750 })
+  };
+}
+
+function antiMagicArmor(statBonusesByEnhancement) {
+  return {
+    sellPrice: 250,
+    statBonusesByEnhancement: Object.freeze(Object.fromEntries(
+      Object.entries(statBonusesByEnhancement).map(([level, bonuses]) => [
+        level,
+        Object.freeze({ ...bonuses })
+      ])
+    )),
+    sellPriceByEnhancement: Object.freeze({ 0: 250, 1: 300, 2: 450, 3: 700 })
   };
 }
 

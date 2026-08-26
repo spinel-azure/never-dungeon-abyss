@@ -4,7 +4,9 @@ import assert from "node:assert/strict";
 import { CHARACTER_CLASSES, createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { getWeapon } from "../data/weapons.js";
 import { collectEquipmentBonuses, getEquipmentItem } from "../data/equipment.js";
+import { collectEquippedInstanceBonuses } from "../data/equipment-inventory.js";
 import { getLevelUnlockedSkillIds, getSkill } from "../data/skills.js";
+import { getStatusEffect } from "../data/status-effects.js";
 import { collectStats } from "../combat/collect-stats.js";
 import { createNormalAttack, createSkillAttack } from "../combat/create-attack.js";
 import {
@@ -498,6 +500,49 @@ test("healing skill exposes a green-number presentation event", () => {
   assert.equal(healing.amount, 13);
 });
 
+test("Holy Strike ignores defense and uses the combined STR and INT holy formula", () => {
+  const action = createSkillAttack(getSkill("holy_strike"), { weapon: getWeapon("iron_mace") });
+  const result = resolvePhysicalAttack({
+    attacker: { str: 5, int: 6, dex: 30 },
+    defender: { agi: 0, def: 999, elementMultipliers: { holy: 1 } },
+    attack: action,
+    rng: fixed(0, 0.99, 0.5)
+  });
+  assert.equal(getSkill("holy_strike").spCost, 4);
+  assert.equal(result.ignoresDefense, true);
+  assert.equal(result.effectiveDefense, 0);
+  assert.equal(result.element, "holy");
+  assert.equal(result.attackPower, (5 + 6) * 0.8);
+});
+
+test("Guardian Prayer grants five DEF for the full battle and cannot stack", () => {
+  const skill = getSkill("guardian_prayer");
+  const status = getStatusEffect("guardian_prayer");
+  assert.equal(skill.spCost, 6);
+  assert.equal(skill.preventWhileStatusActive, "guardian_prayer");
+  assert.equal(status.defenseBonus, 5);
+  assert.equal(status.expiresAfterBattle, true);
+  assert.equal(status.duration, undefined);
+});
+
+test("Triage is a level-ten battle-only miracle that always acts before ordinary enemy actions", () => {
+  const skill = getSkill("triage");
+  assert.equal(skill.spCost, 6);
+  assert.equal(skill.baseHealing, 25);
+  assert.equal(skill.intelligenceMultiplier, 0.7);
+  assert.equal(getLevelUnlockedSkillIds("priest", 9).includes("triage"), false);
+  assert.equal(getLevelUnlockedSkillIds("priest", 10).includes("triage"), true);
+  const order = resolveTurnOrder([
+    { side: "enemy", actor: { agi: 999 }, action: { id: "enemy_attack", speedModifier: 9999 } },
+    { side: "player", actor: { agi: 1 }, action: skill }
+  ], fixed(0, 0, 0, 0));
+  assert.equal(order[0].side, "player");
+  const priest = createInitialCharacter({ name: "TEST", job: "priest" });
+  priest.skillIds.push("triage");
+  priest.hp = 1;
+  assert.equal(resolveFieldSkill({ character: priest, skillId: "triage" }).reason, "battleOnly");
+});
+
 test("poison blade resolves poison once on the first landed hit", () => {
   const result = resolvePhysicalAttack({
     attacker: { str: 4, dex: 30 },
@@ -603,6 +648,28 @@ test("three Magic Barrier cards combine with deep equipment up to the 75 percent
     cardStatBonuses: collectCardStatBonuses(Array(3).fill(card.id))
   });
   assert.equal(stats.magicDamageReduction, 0.75);
+});
+
+test("the complete anti-magic armor set grants a hidden ten-percent bonus and still respects the cap", () => {
+  const equipmentInventory = {
+    instances: [
+      { instanceId: "hat", equipmentId: "anti_magic_hat", slot: "headId", enhancement: 3 },
+      { instanceId: "mantle", equipmentId: "anti_magic_mantle", slot: "bodyId", enhancement: 3 },
+      { instanceId: "shoes", equipmentId: "anti_magic_shoes", slot: "footId", enhancement: 3 }
+    ]
+  };
+  const fullSet = collectEquippedInstanceBonuses(equipmentInventory, {
+    headId: "hat", bodyId: "mantle", footId: "shoes"
+  });
+  assert.equal(fullSet.magicDamageReduction, 0.25);
+  const incompleteSet = collectEquippedInstanceBonuses(equipmentInventory, {
+    headId: "hat", bodyId: "mantle"
+  });
+  assert.ok(Math.abs(incompleteSet.magicDamageReduction - 0.11) < Number.EPSILON);
+  assert.equal(collectStats({
+    equipmentStatBonuses: fullSet,
+    cardStatBonuses: { magicDamageReduction: 0.6 }
+  }).magicDamageReduction, 0.75);
 });
 
 test("negative ability cards cost one and cannot lower STR or AGI below one", () => {
@@ -1879,7 +1946,7 @@ test("healing prayer can restore HP and consume SP outside battle", () => {
   assert.equal(result.accepted, true);
   assert.equal(result.healing, 13);
   assert.equal(result.character.hp, 18);
-  assert.equal(result.character.sp, 20);
+  assert.equal(result.character.sp, 22);
   assert.equal(priest.hp, 5);
 });
 

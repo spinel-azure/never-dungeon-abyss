@@ -1,4 +1,4 @@
-import { EQUIPMENT_SLOTS, getEquipmentItem, getInitialEquipment } from "./equipment.js";
+import { EQUIPMENT_SLOTS, applyAntiMagicSetBonus, getEquipmentItem, getInitialEquipment } from "./equipment.js";
 
 export const EQUIPMENT_SLOT_LABELS = Object.freeze({
   rightArmId: "RIGHT ARM",
@@ -85,16 +85,18 @@ export function getEquipmentInstanceDefinition(instance) {
 
 export function collectEquippedInstanceBonuses(equipmentInventory, equippedInstanceIds) {
   const bonuses = {};
+  const equippedIds = [];
   const instances = equipmentInventory?.instances || [];
   for (const instanceId of Object.values(equippedInstanceIds || {})) {
     if (!instanceId) continue;
     const instance = instances.find(entry => entry.instanceId === instanceId);
     const definition = getEquipmentInstanceDefinition(instance);
+    if (definition?.id) equippedIds.push(definition.id);
     for (const [key, value] of Object.entries(definition?.statBonuses || {})) {
       bonuses[key] = (bonuses[key] || 0) + Number(value || 0);
     }
   }
-  return bonuses;
+  return applyAntiMagicSetBonus(bonuses, equippedIds);
 }
 
 export function findEquipmentDefinition(equipmentId, slot) {

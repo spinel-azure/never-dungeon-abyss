@@ -8,6 +8,7 @@ export function resolveFieldSkill({ character, skillId, torchFuel = 0, presenceI
   if (!character || !skill || !character.skillIds?.includes(skill.id)) {
     return { accepted: false, reason: "unknownSkill" };
   }
+  if (skill.battleOnly) return { accepted: false, reason: "battleOnly" };
   if (skill.actionType !== "healing" || skill.target !== "self") {
     if (!["cureStatus", "sacrificialCure", "dungeonEffect"].includes(skill.actionType) || skill.target !== "self") {
       return { accepted: false, reason: "battleOnly" };

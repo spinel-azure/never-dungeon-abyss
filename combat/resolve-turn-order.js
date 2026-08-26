@@ -21,7 +21,8 @@ export function resolveTurnOrder(entries = [], rng = Math.random) {
       ...calculateActionSpeed({ actor: entry.actor, action: entry.action, rng })
     }))
     .sort((a, b) =>
-      b.speed - a.speed
+      numeric(b.action?.turnPriority) - numeric(a.action?.turnPriority)
+      || b.speed - a.speed
       || b.baseAgility - a.baseAgility
       || b.tieBreaker - a.tieBreaker
     );

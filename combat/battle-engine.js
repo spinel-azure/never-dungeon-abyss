@@ -10,6 +10,7 @@ import {
   getDefenseMultiplier,
   getNonlethalPoisonDamage,
   getPhysicalDamageReduction,
+  getStatusDefenseBonus,
   getStatusResistanceBonus,
   resolveActionOpportunity,
   resolveEndOfAction
@@ -1309,7 +1310,8 @@ function combatStats(combatant) {
   );
   return {
     ...collected,
-    def: Math.floor(collected.def * getDefenseMultiplier(combatant.statuses)),
+    def: Math.floor((collected.def + getStatusDefenseBonus(combatant.statuses))
+      * getDefenseMultiplier(combatant.statuses)),
     statusResistanceBonus: collected.statusResistanceBonus + getStatusResistanceBonus(combatant.statuses),
     statuses: structuredClone(combatant.statuses || []),
     statusResistances,

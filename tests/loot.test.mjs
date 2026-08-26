@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { getGoldChestWeaponId, hasGoldChestWeapon, hasPurpleChestLootTable, rollBlackChestLoot, rollEnemyDrop, rollGoldChestLoot, rollPurpleChestLoot, rollRedChestLoot } from "../data/loot.js";
 import { buildBoundaryWallMap, cells } from "../js/dungeon.js";
 import { getWeapon } from "../data/weapons.js";
+import { getEquipmentItem } from "../data/equipment.js";
 import { createInnStableRecovery, getInnStayFee } from "../js/character-services.js";
 import { addLootCard, settleLootBag } from "../data/inventory.js";
 import { createInitialCharacter } from "../data/classes.js";
@@ -105,39 +106,38 @@ test("B1F to B9F red chests use the early reward bands and upgraded gold values"
 });
 
 test("later red chest reward categories keep their existing bands", () => {
-  assert.equal(rollRedChestLoot(rng(0.54, 0), 10).kind, "gold");
-  assert.equal(rollRedChestLoot(rng(0.55), 10).itemId, "healing_potion");
-  assert.equal(rollRedChestLoot(rng(0.75), 10).itemId, "antidote");
-  assert.equal(rollRedChestLoot(rng(0.88), 10).equipmentId, "stiletto");
+  assert.equal(rollRedChestLoot(rng(0.54, 0), 41).kind, "gold");
+  assert.equal(rollRedChestLoot(rng(0.55), 41).itemId, "healing_potion");
+  assert.equal(rollRedChestLoot(rng(0.75), 41).itemId, "antidote");
+  assert.equal(rollRedChestLoot(rng(0.88), 41).equipmentId, "stiletto");
 });
 
-test("B11F to B20F red chests use the midgame consumable, card and enhanced weapon table", () => {
-  assert.equal(rollRedChestLoot(rng(0.1, 0.1, 0.59), 11).amount, 60);
-  assert.equal(rollRedChestLoot(rng(0.1, 0.1, 0.6), 11).amount, 90);
-  assert.equal(rollRedChestLoot(rng(0.1, 0.1, 0.9), 11).amount, 120);
-  assert.equal(rollRedChestLoot(rng(0.1, 0.5), 11).itemId, "healing_potion_medium");
-  assert.equal(rollRedChestLoot(rng(0.5, 0, 0), 11).cardId, "common_strength_down");
-  assert.equal(rollRedChestLoot(rng(0.5, 0, 0.6), 11).cardId, "common_agility_down");
-  assert.equal(rollRedChestLoot(rng(0.5, 0.5), 11).cardId, "rare_spell_resistance");
-  assert.equal(rollRedChestLoot(rng(0.5, 0.95), 11).cardId, "sr_scorching_resistance");
+test("B10F to B19F red chests use the midgame consumable, card and anti-magic armor table", () => {
+  assert.equal(rollRedChestLoot(rng(0.1, 0.1, 0.59), 10).amount, 60);
+  assert.equal(rollRedChestLoot(rng(0.1, 0.1, 0.6), 10).amount, 90);
+  assert.equal(rollRedChestLoot(rng(0.1, 0.1, 0.9), 10).amount, 120);
+  assert.equal(rollRedChestLoot(rng(0.1, 0.5), 10).itemId, "healing_potion_medium");
+  assert.equal(rollRedChestLoot(rng(0.5, 0, 0), 10).cardId, "common_strength_down");
+  assert.equal(rollRedChestLoot(rng(0.5, 0, 0.6), 10).cardId, "common_agility_down");
+  assert.equal(rollRedChestLoot(rng(0.5, 0.5), 10).cardId, "rare_spell_resistance");
+  assert.equal(rollRedChestLoot(rng(0.5, 0.95), 10).cardId, "sr_scorching_resistance");
   assert.deepEqual(
-    [11, 13, 16].map(depth => rollRedChestLoot(rng(0.8, 0), depth).equipmentId),
-    ["baselard", "silver_flail", "steel_longsword"]
+    [10, 13, 16].map(depth => rollRedChestLoot(rng(0.8, 0), depth).equipmentId),
+    ["anti_magic_hat", "anti_magic_mantle", "anti_magic_shoes"]
   );
-  assert.equal(rollRedChestLoot(rng(0.8, 0), 11).enhancement, 1);
+  assert.equal(rollRedChestLoot(rng(0.8, 0), 10).enhancement, 1);
   assert.equal(rollRedChestLoot(rng(0.8, 0.7), 13).enhancement, 2);
   assert.equal(rollRedChestLoot(rng(0.8, 0.95), 16).enhancement, 3);
+  assert.equal(getEquipmentItem("anti_magic_hat", "headId").statBonuses.magicDamageReduction, 0.02);
+  assert.equal(getEquipmentItem("anti_magic_mantle", "bodyId").statBonusesByEnhancement[3].magicDamageReduction, 0.07);
+  assert.equal(getEquipmentItem("anti_magic_shoes", "footId").allowedJobs, undefined);
 });
 
-test("B19F and B20F red chests retain the midgame table and steel longsword band", () => {
-  for (const depth of [19, 20]) {
-    assert.deepEqual(rollRedChestLoot(rng(0.25, 0.75), depth), {
-      kind: "item", itemId: "healing_potion_medium", amount: 1, unidentifiedName: "？薬"
-    });
-    const weapon = rollRedChestLoot(rng(0.95, 0), depth);
-    assert.equal(weapon.equipmentId, "steel_longsword");
-    assert.equal(weapon.enhancement, 1);
-  }
+test("B19F ends the anti-magic armor table and B20F retains the following midgame table", () => {
+  assert.equal(rollRedChestLoot(rng(0.95, 0), 19).equipmentId, "anti_magic_shoes");
+  const weapon = rollRedChestLoot(rng(0.95, 0), 20);
+  assert.equal(weapon.equipmentId, "steel_longsword");
+  assert.equal(weapon.enhancement, 1);
 });
 
 test("B21F to B30F temporarily reuse the midgame red chest table", () => {
@@ -203,10 +203,10 @@ test("B60F to B69F red chests feature all five enhanced accessory series", () =>
   assert.equal(rollRedChestLoot(rng(0.2, 0.95), 64).enhancement, 3);
 });
 
-test("B6F to B10F black chests use the potion, R-card and SR-card bands", () => {
+test("B6F to B9F black chests use the potion, R-card and SR-card bands", () => {
   assert.equal(rollBlackChestLoot(rng(0.429), 6).itemId, "healing_potion_medium");
   assert.equal(rollBlackChestLoot(rng(0.43, 0), 6).cardId, "rare_strength_up_plus");
-  assert.equal(rollBlackChestLoot(rng(0.43, 0.999), 10).cardId, "rare_gale_feather_plus");
+  assert.equal(rollBlackChestLoot(rng(0.43, 0.999), 9).cardId, "rare_gale_feather_plus");
   assert.equal(rollBlackChestLoot(rng(0.73, 0), 8).cardId, "rare_hp_up");
   assert.equal(rollBlackChestLoot(rng(0.73, 0.999), 8).cardId, "rare_sp_up");
   assert.equal(rollBlackChestLoot(rng(0.929, 0.999), 8).cardId, "rare_sp_up");
@@ -216,17 +216,16 @@ test("B6F to B10F black chests use the potion, R-card and SR-card bands", () => 
   });
 });
 
-test("B11F to B20F black chests use SP cards, magic resistance, and enhanced elemental staves", () => {
-  assert.equal(rollBlackChestLoot(rng(0.199), 11).cardId, "common_sp_saver");
-  assert.equal(rollBlackChestLoot(rng(0.2), 20).cardId, "rare_magic_resistance");
+test("B10F to B19F black chests use SP cards, magic resistance, and the moved enhanced weapons", () => {
+  assert.equal(rollBlackChestLoot(rng(0.199), 10).cardId, "common_sp_saver");
+  assert.equal(rollBlackChestLoot(rng(0.2), 19).cardId, "rare_magic_resistance");
   assert.deepEqual(rollBlackChestLoot(rng(0.4, 0), 15), {
-    kind: "equipment", equipmentId: "salamander_staff", slot: "rightArmId",
-    enhancement: 1, unidentifiedName: "？両手杖"
+    kind: "equipment", equipmentId: "baselard", slot: "rightArmId",
+    enhancement: 1, unidentifiedName: "？武器"
   });
-  assert.deepEqual(rollBlackChestLoot(rng(0.7, 0.999), 20), {
-    kind: "equipment", equipmentId: "ice_lizard_staff", slot: "rightArmId",
-    enhancement: 3, unidentifiedName: "？両手杖"
-  });
+  assert.equal(rollBlackChestLoot(rng(0.6, 0), 15).equipmentId, "silver_flail");
+  assert.equal(rollBlackChestLoot(rng(0.8, 0.999), 19).equipmentId, "steel_longsword");
+  assert.equal(rollBlackChestLoot(rng(0.8, 0.999), 19).enhancement, 3);
 });
 
 test("B50F to B59F black chests cycle job weapons with 70/25/5 enhancements", () => {
@@ -307,8 +306,8 @@ test("B1F to B4F keep one to three red chests alongside eligible purple special-
   assert.deepEqual(cells.flat().map(cell => cell.treasure).filter(Boolean), ["purple"]);
 });
 
-test("B11F to B20F place one to three red chests alongside any enabled black chest", () => {
-  for (const depth of [11, 18, 19, 20]) {
+test("B10F to B20F place one to three red chests alongside any enabled black chest", () => {
+  for (const depth of [10, 18, 19, 20]) {
     buildBoundaryWallMap(depth, () => 0.5, { blackChestsUnlocked: true });
     const treasures = cells.flat().map(cell => cell.treasure).filter(Boolean);
     assert.equal(treasures.filter(type => type === "red").length, 2);

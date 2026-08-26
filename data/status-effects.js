@@ -64,9 +64,8 @@ export const STATUS_EFFECTS = Object.freeze({
     id: "guardian_prayer",
     name: "守護",
     kind: "buff",
-    duration: 3,
-    physicalDamageReduction: 0.3,
-    statusResistancePoints: 20
+    defenseBonus: 5,
+    expiresAfterBattle: true
   }),
   illusion: Object.freeze({
     id: "illusion",

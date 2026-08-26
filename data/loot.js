@@ -3,7 +3,7 @@ export const STILETTO_ENHANCEMENT_RATES = Object.freeze([0.75, 0.18, 0.06, 0.01]
 export const BLACK_CHEST_STILETTO_ENHANCEMENT_RATES = Object.freeze([0.45, 0.35, 0.15, 0.05]);
 export const MID_RED_CHEST_WEAPON_ENHANCEMENT_RATES = Object.freeze([0.7, 0.25, 0.05]);
 export const DEEP_RED_CHEST_ARMOR_ENHANCEMENT_RATES = Object.freeze([0.7, 0.25, 0.05]);
-export const MID_BLACK_CHEST_STAFF_ENHANCEMENT_RATES = Object.freeze([0.7, 0.25, 0.05]);
+export const MID_BLACK_CHEST_WEAPON_ENHANCEMENT_RATES = Object.freeze([0.7, 0.25, 0.05]);
 export const GOLD_CHEST_WEAPONS_BY_JOB = Object.freeze({
   warrior: "musashi_blade",
   thief: "the_five_star",
@@ -109,7 +109,7 @@ export function rollBlackChestLoot(rng = Math.random, depth = 6, job = null) {
       unidentifiedName: equipmentId === "ancient_tree_staff" ? "？両手杖" : "？武器"
     };
   }
-  if (Number(depth) >= 6 && Number(depth) <= 10) {
+  if (Number(depth) >= 6 && Number(depth) <= 9) {
     if (roll < 0.43) {
       return { kind: "item", itemId: "healing_potion_medium", amount: 1, unidentifiedName: "？薬" };
     }
@@ -129,7 +129,7 @@ export function rollBlackChestLoot(rng = Math.random, depth = 6, job = null) {
     return { kind: "card", cardId: "sr_indomitable_spirit", amount: 1,
       unidentifiedName: "？カード", rarity: "SR" };
   }
-  if (Number(depth) >= 11 && Number(depth) <= 20) {
+  if (Number(depth) >= 10 && Number(depth) <= 19) {
     if (roll < 0.2) return {
       kind: "card", cardId: "common_sp_saver", amount: 1,
       unidentifiedName: "？カード", rarity: "C"
@@ -138,12 +138,11 @@ export function rollBlackChestLoot(rng = Math.random, depth = 6, job = null) {
       kind: "card", cardId: "rare_magic_resistance", amount: 1,
       unidentifiedName: "？カード", rarity: "R"
     };
+    const equipmentId = roll < 0.6 ? "baselard" : roll < 0.8 ? "silver_flail" : "steel_longsword";
     return {
-      kind: "equipment",
-      equipmentId: roll < 0.7 ? "salamander_staff" : "ice_lizard_staff",
-      slot: "rightArmId",
-      enhancement: rollEnhancement(MID_BLACK_CHEST_STAFF_ENHANCEMENT_RATES, rng) + 1,
-      unidentifiedName: "？両手杖"
+      kind: "equipment", equipmentId, slot: "rightArmId",
+      enhancement: rollEnhancement(MID_BLACK_CHEST_WEAPON_ENHANCEMENT_RATES, rng) + 1,
+      unidentifiedName: "？武器"
     };
   }
   if (roll < 0.45) return { kind: "gold", amount: rollBlackChestGold(rng, table) };
@@ -167,7 +166,8 @@ export function getBlackChestLootTable(depth = 6) {
 export function rollRedChestLoot(rng = Math.random, depth = 1) {
   const roll = normalizedRoll(rng);
   const floor = Math.max(1, Math.floor(Number(depth) || 1));
-  if (floor >= 11 && floor <= 30) return rollMidRedChestLoot(roll, floor, rng);
+  if (floor >= 10 && floor <= 19) return rollMagicRedChestLoot(roll, floor, rng);
+  if (floor >= 20 && floor <= 30) return rollMidRedChestLoot(roll, floor, rng);
   if (floor >= 31 && floor <= 40) return rollDeepRedChestLoot(roll, floor, rng);
   if (floor >= 50 && floor <= 59) return rollForestRedChestLoot(roll, floor, rng);
   if (floor >= 60 && floor <= 69) return rollDesertRedChestLoot(roll, rng);
@@ -309,6 +309,36 @@ function rollCrystalRedChestLoot(roll, depth, rng) {
     slot: ["leftArmId", "headId", "bodyId", "footId"][slotIndex],
     enhancement: rollEnhancement(DEEP_RED_CHEST_ARMOR_ENHANCEMENT_RATES, rng) + 1,
     unidentifiedName: slotIndex === 0 && family === families[3] ? "？魔導書" : "？防具"
+  };
+}
+function rollMagicRedChestLoot(roll, depth, rng) {
+  if (roll < 0.5) {
+    if (normalizedRoll(rng) < 0.5) return { kind: "gold", amount: rollMidRedChestGold(rng) };
+    return { kind: "item", itemId: "healing_potion_medium", amount: 1, unidentifiedName: "？薬" };
+  }
+  if (roll < 0.8) {
+    const cardRoll = normalizedRoll(rng);
+    if (cardRoll < 0.5) return {
+      kind: "card", cardId: rollFromList(["common_strength_down", "common_agility_down"], rng),
+      amount: 1, unidentifiedName: "？カード", rarity: "C"
+    };
+    if (cardRoll < 0.9) return {
+      kind: "card", cardId: "rare_spell_resistance",
+      amount: 1, unidentifiedName: "？カード", rarity: "R"
+    };
+    return {
+      kind: "card", cardId: "sr_scorching_resistance",
+      amount: 1, unidentifiedName: "？カード", rarity: "SR"
+    };
+  }
+  const equipmentId = depth <= 12
+    ? "anti_magic_hat"
+    : depth <= 15 ? "anti_magic_mantle" : "anti_magic_shoes";
+  const slot = depth <= 12 ? "headId" : depth <= 15 ? "bodyId" : "footId";
+  return {
+    kind: "equipment", equipmentId, slot,
+    enhancement: rollEnhancement(DEEP_RED_CHEST_ARMOR_ENHANCEMENT_RATES, rng) + 1,
+    unidentifiedName: "？防具"
   };
 }
 function rollMidRedChestLoot(roll, depth, rng) {
