@@ -99,14 +99,38 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
   next.presentationEvents = [];
 
   let playerActionExecuted = false;
+  const priorityPlayerAction = playerAction.action?.id === "triage"
+    && Number(playerAction.action.turnPriority) >= 100;
   applyNpcBattleStart(next, rng);
-  applyNpcChargeSkills(next, rng);
+  if (!priorityPlayerAction) applyNpcChargeSkills(next, rng);
   if (!next.outcome && playerAction.spCost > 0) next.player.sp -= playerAction.spCost;
   if (!next.outcome && playerCommand.type === "guard") applyNpcGuardSupport(next);
+  if (!next.outcome && priorityPlayerAction) {
+    const opportunity = resolveActionOpportunity(next.player.statuses);
+    next.player.statuses = opportunity.statuses;
+    if (opportunity.skipped) {
+      next.log.push(`${next.player.name}は動けない！`);
+    } else {
+      executeAction({
+        battle: next,
+        action: playerAction.action,
+        actor: next.player,
+        actorSide: "player",
+        target: next.enemy,
+        targetSide: "enemy",
+        rng
+      });
+      playerActionExecuted = true;
+    }
+    finishAction(next, "player");
+    updateOutcome(next);
+    if (!next.outcome) applyNpcChargeSkills(next, rng);
+  }
   if (!next.outcome) applyNpcTurnStart(next, rng);
 
   for (const entry of order) {
     if (next.outcome) break;
+    if (priorityPlayerAction && entry.side === "player") continue;
     const actor = next[entry.side];
     const targetSide = entry.side === "player" ? "enemy" : "player";
     const target = next[targetSide];
@@ -223,12 +247,41 @@ export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.rand
   next.presentationEvents = [];
 
   let playerActionExecuted = false;
+  const priorityPlayerAction = playerAction.action?.id === "triage"
+    && Number(playerAction.action.turnPriority) >= 100;
   applyNpcBattleStart(next, rng);
   setNpcTarget(next, lowestHpRatioTargetIndex(next.enemies));
-  applyNpcChargeSkills(next, rng);
-  updateMultiOutcome(next);
+  if (!priorityPlayerAction) {
+    applyNpcChargeSkills(next, rng);
+    updateMultiOutcome(next);
+  }
   if (!next.outcome && playerAction.spCost > 0) next.player.sp -= playerAction.spCost;
   if (!next.outcome && playerCommand.type === "guard") applyNpcGuardSupport(next);
+  if (!next.outcome && priorityPlayerAction) {
+    const opportunity = resolveActionOpportunity(next.player.statuses);
+    next.player.statuses = opportunity.statuses;
+    if (opportunity.skipped) {
+      next.log.push(`${next.player.name}は動けない！`);
+    } else {
+      executeAction({
+        battle: next,
+        action: playerAction.action,
+        actor: next.player,
+        actorSide: "player",
+        target: next.enemy,
+        targetSide: "enemy",
+        rng
+      });
+      playerActionExecuted = true;
+    }
+    finishCombatantAction(next, next.player, "player");
+    updateMultiOutcome(next);
+    if (!next.outcome) {
+      setNpcTarget(next, lowestHpRatioTargetIndex(next.enemies));
+      applyNpcChargeSkills(next, rng);
+      updateMultiOutcome(next);
+    }
+  }
   if (!next.outcome) {
     setNpcTarget(next, lowestHpRatioTargetIndex(next.enemies));
     applyNpcTurnStart(next, rng);
@@ -237,6 +290,7 @@ export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.rand
 
   for (const entry of order) {
     if (next.outcome) break;
+    if (priorityPlayerAction && entry.side === "player") continue;
     const actor = entry.side === "player" ? next.player : next.enemies[entry.partyIndex];
     if (!actor?.alive || actor.hp <= 0) continue;
     const opportunity = resolveActionOpportunity(actor.statuses);
@@ -783,13 +837,18 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
   if (action.actionType === "healing") {
     const result = resolveHealing({ caster: actorStats, target: actor, healing: action });
     actor.hp = Math.min(actor.maxHp, actor.hp + result.actualHealing);
-    battle.log.push(`${actor.name}のHPが${result.actualHealing}回復した。`);
+    const healingMessage = action.id === "triage"
+      ? `トリアージュで最速治療！HPが${result.actualHealing}回復した！`
+      : `${result.actualHealing}回復！`;
+    battle.log.push(action.id === "triage"
+      ? healingMessage
+      : `${actor.name}のHPが${result.actualHealing}回復した。`);
     battle.presentationEvents.push({
       type: "healing",
       actorSide,
       targetSide: actorSide,
       amount: result.actualHealing,
-      message: `${result.actualHealing}回復！`
+      message: healingMessage
     });
     return;
   }

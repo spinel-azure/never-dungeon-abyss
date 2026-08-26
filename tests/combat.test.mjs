@@ -1962,6 +1962,33 @@ test("field skills reject battle-only actions and full-HP healing", () => {
   }).reason, "fullHp");
 });
 
+test("Triage resolves before NPC charge skills and uses its explicit healing message", () => {
+  const priest = normalizeCharacter({
+    ...createInitialCharacter({ name: "TEST", job: "priest" }),
+    level: 10,
+    npcSystem: {
+      registeredIds: ["erika"],
+      activeIds: ["erika"],
+      records: { erika: { maxDepth: 10, charge: 100 } }
+    }
+  });
+  priest.hp = 1;
+  const enemy = createEnemyCombatant(getEnemyById("abyss_rat"));
+  enemy.hp = 999;
+  enemy.maxHp = 999;
+  const result = resolveBattleRound({
+    battle: createBattleState({ character: priest, enemy }),
+    playerCommand: { type: "skill", skillId: "triage" },
+    rng: () => 0.99
+  });
+  const healingIndex = result.battle.presentationEvents.findIndex(event => event.type === "healing");
+  const npcChargeIndex = result.battle.presentationEvents.findIndex(event => event.type === "npcChargeSkill");
+  assert.equal(result.accepted, true);
+  assert.equal(healingIndex, 0);
+  assert.ok(npcChargeIndex > healingIndex);
+  assert.match(result.battle.presentationEvents[healingIndex].message, /^トリアージュで最速治療！HPが\d+回復した！$/);
+});
+
 test("priests learn Antidote at level 3 and Exorcism at level 5", () => {
   const priest = createInitialCharacter({ name: "TEST", job: "priest" });
   assert.equal(priest.skillIds.includes("antidote"), false);

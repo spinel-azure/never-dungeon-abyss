@@ -312,11 +312,11 @@ function rollCrystalRedChestLoot(roll, depth, rng) {
   };
 }
 function rollMagicRedChestLoot(roll, depth, rng) {
-  if (roll < 0.5) {
+  if (roll < 0.4) {
     if (normalizedRoll(rng) < 0.5) return { kind: "gold", amount: rollMidRedChestGold(rng) };
     return { kind: "item", itemId: "healing_potion_medium", amount: 1, unidentifiedName: "？薬" };
   }
-  if (roll < 0.8) {
+  if (roll < 0.6) {
     const cardRoll = normalizedRoll(rng);
     if (cardRoll < 0.5) return {
       kind: "card", cardId: rollFromList(["common_strength_down", "common_agility_down"], rng),

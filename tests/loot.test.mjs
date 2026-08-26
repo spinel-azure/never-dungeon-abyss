@@ -117,17 +117,17 @@ test("B10F to B19F red chests use the midgame consumable, card and anti-magic ar
   assert.equal(rollRedChestLoot(rng(0.1, 0.1, 0.6), 10).amount, 90);
   assert.equal(rollRedChestLoot(rng(0.1, 0.1, 0.9), 10).amount, 120);
   assert.equal(rollRedChestLoot(rng(0.1, 0.5), 10).itemId, "healing_potion_medium");
-  assert.equal(rollRedChestLoot(rng(0.5, 0, 0), 10).cardId, "common_strength_down");
-  assert.equal(rollRedChestLoot(rng(0.5, 0, 0.6), 10).cardId, "common_agility_down");
-  assert.equal(rollRedChestLoot(rng(0.5, 0.5), 10).cardId, "rare_spell_resistance");
-  assert.equal(rollRedChestLoot(rng(0.5, 0.95), 10).cardId, "sr_scorching_resistance");
+  assert.equal(rollRedChestLoot(rng(0.4, 0, 0), 10).cardId, "common_strength_down");
+  assert.equal(rollRedChestLoot(rng(0.4, 0, 0.6), 10).cardId, "common_agility_down");
+  assert.equal(rollRedChestLoot(rng(0.4, 0.5), 10).cardId, "rare_spell_resistance");
+  assert.equal(rollRedChestLoot(rng(0.4, 0.95), 10).cardId, "sr_scorching_resistance");
   assert.deepEqual(
-    [10, 13, 16].map(depth => rollRedChestLoot(rng(0.8, 0), depth).equipmentId),
+    [10, 13, 16].map(depth => rollRedChestLoot(rng(0.6, 0), depth).equipmentId),
     ["anti_magic_hat", "anti_magic_mantle", "anti_magic_shoes"]
   );
-  assert.equal(rollRedChestLoot(rng(0.8, 0), 10).enhancement, 1);
-  assert.equal(rollRedChestLoot(rng(0.8, 0.7), 13).enhancement, 2);
-  assert.equal(rollRedChestLoot(rng(0.8, 0.95), 16).enhancement, 3);
+  assert.equal(rollRedChestLoot(rng(0.6, 0), 10).enhancement, 1);
+  assert.equal(rollRedChestLoot(rng(0.6, 0.7), 13).enhancement, 2);
+  assert.equal(rollRedChestLoot(rng(0.6, 0.95), 16).enhancement, 3);
   assert.equal(getEquipmentItem("anti_magic_hat", "headId").statBonuses.magicDamageReduction, 0.02);
   assert.equal(getEquipmentItem("anti_magic_mantle", "bodyId").statBonusesByEnhancement[3].magicDamageReduction, 0.07);
   assert.equal(getEquipmentItem("anti_magic_shoes", "footId").allowedJobs, undefined);
