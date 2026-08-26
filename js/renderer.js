@@ -941,6 +941,22 @@ export function drawCellEvents(layer = "all") {
           portal: cell.portal
         });
       }
+      if (cell.fixedWarp || cell.fixedReturnPortal) {
+        if (layer === "floor") continue;
+        events.push({
+          ...projected,
+          eventKind: "fixedPortal",
+          npc: { imageId: "warp_portal_b100f", renderScale: 0.82, glow: "paleBlue" }
+        });
+      }
+      if (cell.fixedEvent) {
+        if (layer === "floor") continue;
+        events.push({
+          ...projected,
+          eventKind: "fixedEvent",
+          npc: { imageId: "NPC_01b", renderScale: 0.92, glow: "paleBlue" }
+        });
+      }
       if (cell.bossId) {
         if (layer === "floor") continue;
         const boss = getBossById(cell.bossId);
@@ -1007,6 +1023,8 @@ export function drawCellEvents(layer = "all") {
       if (event.eventKind === "quicksand") drawNpcEvent(ctx, event);
       if (event.eventKind === "treasure") drawTreasureEvent(ctx, event);
       if (event.eventKind === "questEvent") drawQuestEvent(ctx, event);
+      if (event.eventKind === "fixedPortal") drawNpcEvent(ctx, event);
+      if (event.eventKind === "fixedEvent") drawNpcEvent(ctx, event);
     });
 }
 
@@ -1043,7 +1061,7 @@ function projectCellCenter(cellX, cellY) {
 }
 
 export function isSpriteEventCell(cell = {}) {
-  return Boolean(cell.bossId || cell.bossRemainsId || cell.npc || cell.fountain || cell.quicksand || cell.treasure || cell.questEvent);
+  return Boolean(cell.bossId || cell.bossRemainsId || cell.npc || cell.fountain || cell.quicksand || cell.treasure || cell.questEvent || cell.fixedWarp || cell.fixedReturnPortal || cell.fixedEvent);
 }
 
 function drawQuestEvent(ctx, event) {

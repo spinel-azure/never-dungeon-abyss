@@ -21,6 +21,7 @@ import {
 } from "../data/fountains.js";
 import { getSpecialRoomDefinition, getSpecialRoomUnlockRate, rollMaikaeferNestContent } from "../data/special-rooms.js";
 import { getBossById, getFloorBossByDepth } from "../data/bosses.js";
+import { areB100GauntletBossesDefeated, B100_FIXED_FLOOR_MAP, getB100GauntletFlag } from "../data/fixed-floor-maps.js";
 import { getQuestEventForDepth } from "../data/quest-events.js";
 import { DESERT_QUICKSAND, floorHasQuicksand, QUICKSAND_COUNT } from "../data/quicksand.js";
 import { floorHasRapidCurrents, getRapidCurrentTargetCount, RAPID_CURRENT, RAPID_CURRENT_DIRECTIONS } from "../data/rapid-currents.js";
@@ -78,6 +79,10 @@ export function makeCells(w, h) {
       featureReservation: null,
       featureApproach: null,
       portal: null,
+      fixedWarp: null,
+      fixedReturnPortal: null,
+      fixedReturnPoint: null,
+      fixedEvent: null,
       specialRoom: null,
       questEvent: null,
       walls: { N: true, E: true, S: true, W: true },
@@ -102,6 +107,13 @@ export function resetExplored() {
 }
 
 export function buildBoundaryWallMap(depth = 1, rng = Math.random, progress = {}) {
+  if (Math.floor(Number(depth) || 1) === B100_FIXED_FLOOR_MAP.floor) {
+    buildFixedFloorMap(B100_FIXED_FLOOR_MAP, progress);
+    const report = validateDungeonLayout({ depth, progress });
+    lastDungeonBuildReport = structuredClone({ ...report, attempt: 1 });
+    if (!report.valid) throw new Error(`Fixed dungeon map failed validation: ${report.errors.join(" / ")}`);
+    return lastDungeonBuildReport;
+  }
   let lastReport = null;
   for (let attempt = 1; attempt <= MAX_DUNGEON_BUILD_ATTEMPTS; attempt += 1) {
     buildBoundaryWallMapAttempt(depth, rng, progress);
@@ -114,6 +126,99 @@ export function buildBoundaryWallMap(depth = 1, rng = Math.random, progress = {}
   }
   lastDungeonBuildReport = structuredClone(lastReport);
   throw new Error(`Dungeon generation failed validation: ${lastReport?.errors?.join(" / ") || "unknown error"}`);
+}
+
+function fixedMapPointToInternal(map, point) {
+  return { x: point.x, y: map.height - 1 - point.y };
+}
+
+function applyFixedMapWall(map, wall) {
+  if (wall.side === "N" && wall.y === -1) {
+    setWall(wall.x, map.height - 1, "S", true);
+    return;
+  }
+  if (wall.side === "W" && wall.x === map.width) {
+    setWall(map.width - 1, map.height - 1 - wall.y, "E", true);
+    return;
+  }
+  const position = fixedMapPointToInternal(map, wall);
+  if (inBounds(position.x, position.y)) setWall(position.x, position.y, wall.side, true);
+}
+
+export function buildFixedFloorMap(map = B100_FIXED_FLOOR_MAP, progress = {}) {
+  if (map.width !== MAP_W || map.height !== MAP_H) {
+    throw new Error(`Unsupported fixed map size ${map.width}x${map.height}; expected ${MAP_W}x${MAP_H}`);
+  }
+  resetAllWalls();
+  for (const cell of cells.flat()) cell.walls = { N: false, E: false, S: false, W: false };
+  for (let x = 0; x < MAP_W; x += 1) {
+    setWall(x, 0, "N", true);
+    setWall(x, MAP_H - 1, "S", true);
+  }
+  for (let y = 0; y < MAP_H; y += 1) {
+    setWall(0, y, "W", true);
+    setWall(MAP_W - 1, y, "E", true);
+  }
+  map.walls.forEach(wall => applyFixedMapWall(map, wall));
+
+  const entrance = fixedMapPointToInternal(map, map.transferPortals[0]);
+  setStartPosition(entrance.x, entrance.y);
+  cells[entrance.y][entrance.x].type = "stairsUp";
+  cells[entrance.y][entrance.x].portal = "transfer_b100f";
+  map.warps.forEach(warp => {
+    const from = fixedMapPointToInternal(map, warp);
+    cells[from.y][from.x].fixedWarp = {
+      id: warp.id,
+      warpId: warp.warpId,
+      to: fixedMapPointToInternal(map, warp.to),
+      oneWay: Boolean(warp.oneWay)
+    };
+  });
+  const returnPoint = fixedMapPointToInternal(map, map.returnPoints[0]);
+  cells[returnPoint.y][returnPoint.x].fixedReturnPoint = { id: map.returnPoints[0].id };
+  map.returnPortals.forEach(portal => {
+    const from = fixedMapPointToInternal(map, portal);
+    cells[from.y][from.x].fixedReturnPortal = { id: portal.id, to: { ...returnPoint } };
+  });
+  map.events.forEach(event => {
+    const position = fixedMapPointToInternal(map, event);
+    cells[position.y][position.x].fixedEvent = structuredClone(event);
+  });
+  map.healingFountains.forEach(fountain => {
+    const position = fixedMapPointToInternal(map, fountain);
+    cells[position.y][position.x].fountain = HEALING_FOUNTAIN.id;
+  });
+
+  const flags = progress.eventFlags || {};
+  map.bosses.forEach(placement => {
+    if (flags[getB100GauntletFlag(placement.bossId)]) return;
+    const position = fixedMapPointToInternal(map, placement);
+    cells[position.y][position.x].bossId = placement.bossId;
+  });
+  if (areB100GauntletBossesDefeated(flags)) {
+    const position = fixedMapPointToInternal(map, map.finalBoss);
+    const firstBoss = getBossById(map.finalBoss.bossId);
+    const nextBoss = firstBoss?.nextBossId ? getBossById(firstBoss.nextBossId) : null;
+    cells[position.y][position.x].bossId = !flags[firstBoss.defeatedFlag]
+      ? firstBoss.id
+      : nextBoss && !flags[nextBoss.defeatedFlag]
+        ? nextBoss.id
+        : null;
+  }
+  return { map, startPosition: getStartPosition() };
+}
+
+export function refreshB100FinalBoss(eventFlags = {}) {
+  if (!areB100GauntletBossesDefeated(eventFlags)) return false;
+  const position = fixedMapPointToInternal(B100_FIXED_FLOOR_MAP, B100_FIXED_FLOOR_MAP.finalBoss);
+  const firstBoss = getBossById(B100_FIXED_FLOOR_MAP.finalBoss.bossId);
+  const nextBoss = firstBoss?.nextBossId ? getBossById(firstBoss.nextBossId) : null;
+  cells[position.y][position.x].bossId = !eventFlags[firstBoss.defeatedFlag]
+    ? firstBoss.id
+    : nextBoss && !eventFlags[nextBoss.defeatedFlag]
+      ? nextBoss.id
+      : null;
+  return Boolean(cells[position.y][position.x].bossId);
 }
 
 function buildBoundaryWallMapAttempt(depth = 1, rng = Math.random, progress = {}) {
@@ -194,6 +299,28 @@ export function getLastDungeonBuildReport() {
 
 export function validateDungeonLayout({ depth = 1, progress = {} } = {}) {
   const errors = [];
+  const normalizedDepth = Math.max(1, Math.floor(Number(depth) || 1));
+  if (normalizedDepth === B100_FIXED_FLOOR_MAP.floor) {
+    const flat = cells.flat();
+    if (flat.filter(cell => cell.type === "stairsUp" && cell.portal === "transfer_b100f").length !== 1) errors.push("B100F transfer portal count must be 1");
+    if (flat.some(cell => cell.type === "stairsDown")) errors.push("B100F must not contain downward stairs");
+    if (flat.filter(cell => cell.fixedWarp).length !== B100_FIXED_FLOOR_MAP.warps.length) errors.push("B100F warp count mismatch");
+    if (flat.filter(cell => cell.fixedReturnPortal).length !== B100_FIXED_FLOOR_MAP.returnPortals.length) errors.push("B100F return portal count mismatch");
+    if (flat.filter(cell => cell.fountain).length !== B100_FIXED_FLOOR_MAP.healingFountains.length) errors.push("B100F healing fountain count mismatch");
+    if (flat.filter(cell => cell.fixedEvent).length !== B100_FIXED_FLOOR_MAP.events.length) errors.push("B100F fixed event count mismatch");
+    const fromEntrance = fixedMapReachableCellKeys(startPosition.x, startPosition.y);
+    const canReturnToEntrance = fixedMapReachableCellKeys(startPosition.x, startPosition.y, true);
+    if (fromEntrance.size !== MAP_W * MAP_H) errors.push(`B100F reachable cells ${fromEntrance.size}/${MAP_W * MAP_H}`);
+    if (canReturnToEntrance.size !== MAP_W * MAP_H) errors.push(`B100F returnable cells ${canReturnToEntrance.size}/${MAP_W * MAP_H}`);
+    for (const cell of flat) {
+      for (const dir of DIRS) {
+        const nx = cell.x + dir.dx;
+        const ny = cell.y + dir.dy;
+        if (!inBounds(nx, ny) && !cell.walls[dir.key]) errors.push(`open outer boundary at ${cell.x},${cell.y},${dir.key}`);
+      }
+    }
+    return { valid: errors.length === 0, errors };
+  }
   const blocking = getTraversalBlockingReservations(cells);
   const blocked = new Set(blocking.map(cell => `${cell.x},${cell.y}`));
   for (const cell of cells.flat()) {
@@ -234,7 +361,6 @@ export function validateDungeonLayout({ depth = 1, progress = {} } = {}) {
     const doorCount = Object.values(room.doorKinds).filter(kind => String(kind).startsWith("special")).length;
     if (doorCount !== 1) errors.push(`special room door count ${doorCount}/1 at ${room.x},${room.y}`);
   }
-  const normalizedDepth = Math.max(1, Math.floor(Number(depth) || 1));
   const expectedQuestEvent = getQuestEventForDepth(normalizedDepth, progress);
   if (expectedQuestEvent && !cells.flat().some(cell => cell.questEvent?.id === expectedQuestEvent.id)) {
     errors.push(`required quest event missing: ${expectedQuestEvent.id}`);
@@ -282,6 +408,36 @@ function validationReachableCellKeys(startX, startY, blocked) {
   return seen;
 }
 
+function fixedMapReachableCellKeys(startX, startY, reverseWarps = false) {
+  const queue = [{ x: startX, y: startY }];
+  const seen = new Set([`${startX},${startY}`]);
+  for (let index = 0; index < queue.length; index += 1) {
+    const current = queue[index];
+    const destinations = [];
+    for (const dir of DIRS) {
+      const x = current.x + dir.dx;
+      const y = current.y + dir.dy;
+      if (inBounds(x, y) && !wallOnCell(current.x, current.y, dir.key)) destinations.push({ x, y });
+    }
+    if (reverseWarps) {
+      for (const cell of cells.flat()) {
+        const warp = cell.fixedWarp || cell.fixedReturnPortal;
+        if (warp?.to?.x === current.x && warp?.to?.y === current.y) destinations.push({ x: cell.x, y: cell.y });
+      }
+    } else {
+      const warp = cells[current.y][current.x].fixedWarp || cells[current.y][current.x].fixedReturnPortal;
+      if (warp?.to) destinations.push(warp.to);
+    }
+    for (const destination of destinations) {
+      const key = `${destination.x},${destination.y}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      queue.push(destination);
+    }
+  }
+  return seen;
+}
+
 export function resetAllWalls() {
   for (let y = 0; y < MAP_H; y++) {
     for (let x = 0; x < MAP_W; x++) {
@@ -301,6 +457,10 @@ export function resetAllWalls() {
       cells[y][x].featureReservation = null;
       cells[y][x].featureApproach = null;
       cells[y][x].portal = null;
+      cells[y][x].fixedWarp = null;
+      cells[y][x].fixedReturnPortal = null;
+      cells[y][x].fixedReturnPoint = null;
+      cells[y][x].fixedEvent = null;
       cells[y][x].specialRoom = null;
       cells[y][x].questEvent = null;
       cells[y][x].walls = { N: true, E: true, S: true, W: true };
@@ -391,6 +551,16 @@ export function removeNpcAt(x, y) {
 export function getFountainAt(x, y) {
   if (!inBounds(x, y)) return null;
   return cells[y][x].fountain || null;
+}
+
+export function getFixedWarpAt(x, y) {
+  if (!inBounds(x, y)) return null;
+  return cells[y][x].fixedWarp || cells[y][x].fixedReturnPortal || null;
+}
+
+export function getFixedEventAt(x, y) {
+  if (!inBounds(x, y)) return null;
+  return cells[y][x].fixedEvent || null;
 }
 
 export function getQuicksandAt(x, y) {

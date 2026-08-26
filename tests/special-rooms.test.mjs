@@ -186,7 +186,7 @@ test("forced encounters block special-room unlocking without exposing a rate", (
 
 test("each floor creates at most one sealed one-cell special room with an internal black door", () => {
   setStartPosition(0, 0);
-  for (const depth of [1, 5, 9, 10, 100]) {
+  for (const depth of [1, 5, 9, 10, 99]) {
     buildBoundaryWallMap(depth, seeded(depth), {});
     const rooms = cells.flat().filter(cell => cell.specialRoom);
     assert.equal(rooms.length, 1, `B${depth}F special room`);

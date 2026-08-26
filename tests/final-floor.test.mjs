@@ -2,24 +2,84 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { buildBoundaryWallMap, cells, getStartPosition, validateDungeonLayout } from "../js/dungeon.js";
 import { getBossById, getFloorBossByDepth } from "../data/bosses.js";
+import { B100_FIXED_FLOOR_MAP, B100_GAUNTLET_BOSS_IDS, getB100GauntletFlag } from "../data/fixed-floor-maps.js";
+import { DIRS } from "../js/config.js";
+import { configurePlayer, manualMove, setPlayerInputEnabled, state, updateAnimation } from "../js/player.js";
 
-test("B100F is a terminal floor with its upward transfer portal and first final boss", () => {
+const internal = ({ x, y }) => ({ x, y: B100_FIXED_FLOOR_MAP.height - 1 - y });
+
+test("B100F loads the mapper JSON as a terminal fixed floor", () => {
   buildBoundaryWallMap(100, () => 0.5, {});
   const flat = cells.flat();
+  assert.deepEqual(getStartPosition(), { x: 0, y: 9 });
   assert.equal(flat.filter(cell => cell.type === "stairsUp").length, 1);
   assert.equal(flat.filter(cell => cell.type === "stairsDown").length, 0);
-  const start = getStartPosition();
-  assert.equal(cells[start.y][start.x].portal, "transfer_b100f");
-  assert.equal(cells.flat().filter(cell => cell.bossId === "erzdaemonin_b100f").length, 1);
+  assert.equal(cells[9][0].portal, "transfer_b100f");
+  assert.equal(flat.filter(cell => cell.fixedWarp).length, 11);
+  assert.equal(flat.filter(cell => cell.fixedReturnPortal).length, 11);
+  assert.equal(flat.filter(cell => cell.fixedReturnPoint).length, 1);
+  assert.equal(flat.filter(cell => cell.fixedEvent).length, 2);
+  assert.equal(flat.filter(cell => cell.fountain).length, 1);
   assert.equal(validateDungeonLayout({ depth: 100 }).valid, true);
 });
 
-test("B100F changes to Amayenak after Erzdaemonin is defeated", () => {
-  const progress = { bossDefeatedById: { erzdaemonin_b100f: true } };
+test("B100F converts bottom-left mapper coordinates and warp targets", () => {
+  buildBoundaryWallMap(100, () => 0.5, {});
+  const firstWarp = B100_FIXED_FLOOR_MAP.warps[0];
+  const from = internal(firstWarp);
+  const to = internal(firstWarp.to);
+  assert.equal(cells[from.y][from.x].fixedWarp.warpId, "W01");
+  assert.deepEqual(cells[from.y][from.x].fixedWarp.to, to);
+  const fountain = internal(B100_FIXED_FLOOR_MAP.healingFountains[0]);
+  assert.equal(cells[fountain.y][fountain.x].fountain, "healing_fountain");
+  assert.equal(cells[9][0].walls.W, true);
+  assert.equal(cells[9][0].walls.S, true);
+});
+
+test("B100F warp and return portals move the player to their configured targets", () => {
+  const messages = [];
+  configurePlayer({ say: message => messages.push(message), onDungeonStep: () => {}, onStateChanged: () => {} });
+  buildBoundaryWallMap(100, () => 0.5, {});
+  setPlayerInputEnabled(true);
+  const north = DIRS.findIndex(dir => dir.key === "N");
+  Object.assign(state, { gridX: 0, gridY: 8, x: 0.5, y: 8.5, dir: north, angle: DIRS[north].angle, anim: null });
+  manualMove(1);
+  updateAnimation(state.anim.start + state.anim.duration + 1);
+  assert.deepEqual({ x: state.gridX, y: state.gridY }, { x: 8, y: 8 });
+  assert.match(messages.at(-1), /W01/);
+
+  Object.assign(state, { gridX: 8, gridY: 7, x: 8.5, y: 7.5, dir: north, angle: DIRS[north].angle, anim: null });
+  manualMove(1);
+  updateAnimation(state.anim.start + state.anim.duration + 1);
+  assert.deepEqual({ x: state.gridX, y: state.gridY }, { x: 1, y: 9 });
+  assert.match(messages.at(-1), /転送門の近く/);
+});
+
+test("B100F begins with all ten unique checkpoint bosses and no final boss", () => {
+  buildBoundaryWallMap(100, () => 0.5, {});
+  const activeBossIds = cells.flat().map(cell => cell.bossId).filter(Boolean);
+  assert.equal(activeBossIds.length, 10);
+  assert.deepEqual(new Set(activeBossIds), new Set(B100_GAUNTLET_BOSS_IDS));
+  const finalPosition = internal(B100_FIXED_FLOOR_MAP.finalBoss);
+  assert.equal(cells[finalPosition.y][finalPosition.x].bossId, null);
+});
+
+test("B100F unlocks Erzdaemonin only after all ten rematch flags", () => {
+  const eventFlags = Object.fromEntries(B100_GAUNTLET_BOSS_IDS.map(id => [getB100GauntletFlag(id), true]));
+  const progress = { eventFlags };
   buildBoundaryWallMap(100, () => 0.5, progress);
-  assert.equal(cells.flat().filter(cell => cell.bossId === "amayenak_b100f").length, 1);
-  assert.equal(cells.flat().filter(cell => cell.type === "stairsDown").length, 0);
+  const finalPosition = internal(B100_FIXED_FLOOR_MAP.finalBoss);
+  assert.equal(cells.flat().filter(cell => B100_GAUNTLET_BOSS_IDS.includes(cell.bossId)).length, 0);
+  assert.equal(cells[finalPosition.y][finalPosition.x].bossId, "erzdaemonin_b100f");
   assert.equal(validateDungeonLayout({ depth: 100, progress }).valid, true);
+});
+
+test("B100F resumes with Amayenak after Erzdaemonin is defeated", () => {
+  const eventFlags = Object.fromEntries(B100_GAUNTLET_BOSS_IDS.map(id => [getB100GauntletFlag(id), true]));
+  eventFlags.boss_erzdaemonin_b100f_defeated = true;
+  buildBoundaryWallMap(100, () => 0.5, { eventFlags });
+  const finalPosition = internal(B100_FIXED_FLOOR_MAP.finalBoss);
+  assert.equal(cells[finalPosition.y][finalPosition.x].bossId, "amayenak_b100f");
 });
 
 test("B100F boss definitions form the final two-stage battle", () => {

@@ -20,6 +20,7 @@ import {
   attemptSpecialRoomUnlock,
   markBossDefeatedAt,
   removeBossAt,
+  refreshB100FinalBoss,
   setStartPosition,
   randomizeStartPosition
 } from "./dungeon.js";
@@ -104,6 +105,7 @@ import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName, grantEquipmentInstance } from "../data/equipment-inventory.js";
 import { createEnemyCombatant, getEnemyById, getEnemyEncounterCount, getRandomEncounterEnemy, getMagicRegionEncounterFormation, getTortureRegionEncounterFormation, getWaterRegionEncounterFormation, getCrystalRegionEncounterFormation, getDarkRegionEncounterFormation } from "../data/enemies.js";
 import { applyBossVictory, bossLeavesRemains, createBossCombatant, getBossById, getFloorBossByDepth, isBossDefeated } from "../data/bosses.js";
+import { areB100GauntletBossesDefeated, B100_GAUNTLET_BOSS_IDS, getB100GauntletFlag } from "../data/fixed-floor-maps.js";
 import { consumeKeyItem, getKeyItem, grantKeyItem, hasKeyItem } from "../data/key-items.js";
 import { configureBattle, handleBattleInput, isBattleActive, isJireneScriptedBattleActive, openBattleItems, startBattle } from "./battle.js";
 import { awardBattleExperience, calculateBattleExperienceReward, createTempleRevival, getInnStayFee, grantEventItems, resolveDungeonDefeat, resolveInnStableStay, resolveInnStay, resolveTemplePoisonTreatment, unlockGuildRequest } from "./character-services.js";
@@ -545,17 +547,22 @@ import {
     getSpecialDoorLockInfo: getCurrentSpecialDoorLockInfo,
     getSpecialDoorAccessBlock: getCurrentSpecialDoorAccessBlock,
     attemptSpecialDoorUnlock: attemptCurrentSpecialDoorUnlock,
-    isBossDefeated: bossId => isBossDefeated(character, bossId),
+    isBossDefeated: isCurrentBossDefeated,
+    isBossRematch: isB100GauntletBossId,
     isBossRetryBlocked: bossId => escapedSpecialBossesThisExploration.has(bossId),
-    getBossEncounterImageId: boss => boss?.id === "jirene_b79f" && character?.eventFlags?.jirene_scripted_defeat_seen
+    getBossEncounterImageId: boss => currentDepth === 79 && boss?.id === "jirene_b79f" && character?.eventFlags?.jirene_scripted_defeat_seen
       ? boss.event?.transformationImageId
       : boss?.encounterImageId || boss?.imageId || "",
-    getBossEncounterPrompt: boss => boss?.id === "jirene_b79f" && character?.eventFlags?.jirene_scripted_defeat_seen
-      ? "ジレーネ「ああ…！また来たのね…。また、私…いえ、妾の歌を…聴きたいのね…！」\n＊Aボタンで次へ"
-      : boss?.event?.prompt,
-    getBossStartMessage: boss => boss?.id === "jirene_b79f" && character?.eventFlags?.jirene_scripted_defeat_seen
-      ? "ジレーネが歌声を響かせる。しかし、蜜蝋の耳栓が魔性の響きを遮った！"
-      : boss?.event?.start,
+    getBossEncounterPrompt: boss => isB100GauntletBossId(boss?.id)
+      ? `${boss.name}が再び行く手に立ちはだかっている。\n＊Aボタンで次へ`
+      : currentDepth === 79 && boss?.id === "jirene_b79f" && character?.eventFlags?.jirene_scripted_defeat_seen
+        ? "ジレーネ「ああ…！また来たのね…。また、私…いえ、妾の歌を…聴きたいのね…！」\n＊Aボタンで次へ"
+        : boss?.event?.prompt,
+    getBossStartMessage: boss => isB100GauntletBossId(boss?.id)
+      ? `B100Fの守護者として、${boss.name}が襲いかかってきた！`
+      : currentDepth === 79 && boss?.id === "jirene_b79f" && character?.eventFlags?.jirene_scripted_defeat_seen
+        ? "ジレーネが歌声を響かせる。しかし、蜜蝋の耳栓が魔性の響きを遮った！"
+        : boss?.event?.start,
     hasSphinxAnswer: () => hasKeyItem(character?.keyItems, "johanna_calico_cat"),
     onSphinxRiddleHeard: () => {
       if (!character) return false;
@@ -678,6 +685,7 @@ import {
       if (granted.gained) setTimeout(() => showNamedItemGetEffect([keyItem.name], { important: true }), 0);
       return `貴重品「${keyItem.name}」を手に入れた！`;
     },
+    onFixedFloorEvent: event => event?.description || "女王の影が静かに揺らめいている。",
     onDungeonStep: handleDungeonStep,
     onStateChanged: scheduleAutosave
   });
@@ -866,6 +874,7 @@ import {
       },
       dungeon: {
         depth: currentDepth,
+        fixedMapVersion: currentDepth === 100 ? 3 : null,
         cells: structuredClone(cells),
         explored: explored.map(row => row.slice()),
         startPosition: cells.flat().find(cell => cell.type === "stairsUp") || { x: state.gridX, y: state.gridY },
@@ -940,9 +949,17 @@ import {
     if (!dungeon.explored.every(row => Array.isArray(row) && row.length === MAP_W)) return false;
     if (!inBounds(player.gridX, player.gridY) || !Number.isInteger(player.dir) || !DIRS[player.dir]) return false;
     currentDepth = Math.max(1, Math.floor(Number(dungeon.depth) || 1));
+    const rebuildB100FixedMap = currentDepth === 100 && Number(dungeon.fixedMapVersion) !== 3;
+    if (rebuildB100FixedMap) {
+      buildBoundaryWallMap(100, Math.random, { eventFlags: { ...(save.character?.eventFlags || {}) } });
+    }
 
     for (let y = 0; y < MAP_H; y += 1) {
       for (let x = 0; x < MAP_W; x += 1) {
+        if (rebuildB100FixedMap) {
+          explored[y][x] = false;
+          continue;
+        }
         const savedCell = structuredClone(dungeon.cells[y][x]);
         if (savedCell.bossRemainsId && !bossLeavesRemains(savedCell.bossRemainsId)) {
           savedCell.bossRemainsId = null;
@@ -970,16 +987,17 @@ import {
         explored[y][x] = Boolean(dungeon.explored[y][x]);
       }
     }
-    const start = dungeon.startPosition;
+    const start = rebuildB100FixedMap ? cells.flat().find(cell => cell.type === "stairsUp") : dungeon.startPosition;
     if (start && inBounds(start.x, start.y)) setStartPosition(start.x, start.y);
     setDungeonColors(resolveFloorTheme(currentDepth, getDungeonColors()));
     applyCurrentFloorMist();
     state.anim = null;
-    state.gridX = player.gridX;
-    state.gridY = player.gridY;
+    state.gridX = rebuildB100FixedMap ? start.x : player.gridX;
+    state.gridY = rebuildB100FixedMap ? start.y : player.gridY;
     state.dir = player.dir;
-    state.x = player.gridX + .5;
-    state.y = player.gridY + .5;
+    state.x = state.gridX + .5;
+    state.y = state.gridY + .5;
+    if (rebuildB100FixedMap) explored[state.gridY][state.gridX] = true;
     state.angle = DIRS[player.dir].angle;
     state.shake = 0;
     state.torchFuel = Math.max(0, Math.min(100, Number(player.torchFuel) || 0));
@@ -1744,7 +1762,7 @@ import {
   }
 
   function prepareRandomEncounter() {
-    if (!character || worldLocation !== "dungeon" || isBattleActive()) return false;
+    if (!character || worldLocation !== "dungeon" || isBattleActive() || currentDepth === 100) return false;
     const enemyPartyData = getRandomEncounterEnemyPartyData();
     const enemyData = enemyPartyData[0];
     const surprise = resolveSurprise({
@@ -1842,13 +1860,23 @@ import {
     return started;
   }
 
+  function isB100GauntletBossId(bossId) {
+    return currentDepth === 100 && B100_GAUNTLET_BOSS_IDS.includes(bossId);
+  }
+
+  function isCurrentBossDefeated(bossId) {
+    return isB100GauntletBossId(bossId)
+      ? Boolean(character?.eventFlags?.[getB100GauntletFlag(bossId)])
+      : isBossDefeated(character, bossId);
+  }
+
   function beginBossBattle(bossId) {
     if (!character || worldLocation !== "dungeon" || isBattleActive()) return false;
     const boss = getBossById(bossId);
-    if (!boss || isBossDefeated(character, boss)) return false;
+    if (!boss || isCurrentBossDefeated(boss.id)) return false;
     const summonKeyItemId = boss.room?.summonKeyItemId;
     const alreadySummoned = summonKeyItemId && character.eventFlags?.boss_b89f_summoned;
-    if (summonKeyItemId && !alreadySummoned) {
+    if (currentDepth === 89 && summonKeyItemId && !alreadySummoned) {
       if (!hasKeyItem(character.keyItems, summonKeyItemId)) {
         say("輝く多面体がなければ、異界の存在を呼び出すことはできない。");
         setPlayerInputEnabled(true);
@@ -1885,7 +1913,7 @@ import {
       concealed: state.torchFuel <= 0 && !state.torchEffectForced && !state.lightbringerActive,
       enemies: encounterEnemies,
       targetIndex: encounterEnemies ? Math.max(0, encounterEnemies.findIndex(enemy => enemy.id === bossId)) : 0,
-      scriptedBattleType: bossId === "jirene_b79f" && !character?.eventFlags?.jirene_scripted_defeat_seen
+      scriptedBattleType: currentDepth === 79 && bossId === "jirene_b79f" && !character?.eventFlags?.jirene_scripted_defeat_seen
         ? "jirene_first_encounter"
         : ""
     });
@@ -2419,11 +2447,24 @@ import {
           }
         };
       }
-      const victory = applyBossVictory(character, battle.enemy.id);
+      const b100Rematch = isB100GauntletBossId(battle.enemy.id);
+      const victory = b100Rematch
+        ? {
+            character: {
+              ...character,
+              eventFlags: {
+                ...(character.eventFlags || {}),
+                [getB100GauntletFlag(battle.enemy.id)]: true
+              }
+            },
+            accepted: true,
+            reward: { type: "none" }
+          }
+        : applyBossVictory(character, battle.enemy.id);
       if (victory.accepted) {
         character = victory.character;
         character = recordBossDefeat(character, battle.enemy.id, currentDepth);
-        if (battle.enemy.id === "sphinx_b69f") {
+        if (!b100Rematch && battle.enemy.id === "sphinx_b69f") {
           character = {
             ...character,
             eventFlags: {
@@ -2433,7 +2474,8 @@ import {
             }
           };
         }
-        if (bossLeavesRemains(battle.enemy)) markBossDefeatedAt(state.gridX, state.gridY, battle.enemy.id);
+        if (b100Rematch) removeBossAt(state.gridX, state.gridY);
+        else if (bossLeavesRemains(battle.enemy)) markBossDefeatedAt(state.gridX, state.gridY, battle.enemy.id);
         else removeBossAt(state.gridX, state.gridY);
         if (victory.reward?.type === "routeCard" && battle.enemy.id === "sphinx_b69f") {
           const cardId = "legendary_sphinx_majesty";
@@ -2504,6 +2546,10 @@ import {
         }
         if (battle.enemy.questProgressId) {
           character = recordCustomQuestProgress(character, battle.enemy.questProgressId, 1);
+        }
+        if (b100Rematch && areB100GauntletBossesDefeated(character.eventFlags)) {
+          refreshB100FinalBoss(character.eventFlags);
+          bossRewardMessage = "\n十の守護者をすべて退けた。迷宮最奥で、新たな気配が目覚める――！";
         }
       }
     }
@@ -3598,7 +3644,8 @@ import {
       && hasKeyItem(character?.keyItems, "lichtbringer");
     state.minimapEffectForced = state.lightbringerActive;
     if (isForcedTorchZeroFloor(currentDepth)) state.torchFuel = 0;
-    posEl.textContent = `X:${state.gridX} Y:${state.gridY}`;
+    const displayGridY = currentDepth === 100 ? MAP_H - 1 - state.gridY : state.gridY;
+    posEl.textContent = `X:${state.gridX} Y:${displayGridY}`;
     depthEl.textContent = `B${currentDepth}F`;
     stopwatchEl.textContent = formatElapsedTime(performance.now() - runStartedAt);
     drawCompass();

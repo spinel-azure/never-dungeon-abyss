@@ -68,6 +68,8 @@
         ? drawTextMark(ctx, "🌿", x1, y1, cell)
         : drawBossMark(ctx, x1, y1, cell);
       if (c.fountain && effectiveTorchActive) drawFountainMark(ctx, x1, y1, cell);
+      if ((c.fixedWarp || c.fixedReturnPortal) && isExplored) drawTextMark(ctx, "※", x1, y1, cell, "#63e9ff");
+      if (c.fixedEvent && isExplored) drawTextMark(ctx, "!", x1, y1, cell, "#b9f4ff");
       if (c.quicksand && isExplored) drawQuicksandMark(ctx, x1, y1, cell);
       if (c.rapidCurrent && c.rapidCurrentDiscovered) {
         drawRapidCurrentMark(ctx, x1, y1, cell, c.rapidCurrent.direction);
@@ -154,8 +156,9 @@ export function drawBossMark(ctx, x, y, size) {
   ctx.restore();
 }
 
-export function drawTextMark(ctx, label, x, y, size) {
+export function drawTextMark(ctx, label, x, y, size, color = "#ffffff") {
   ctx.save();
+  ctx.fillStyle = color;
   ctx.font = `${Math.max(9, size * .72)}px sans-serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";

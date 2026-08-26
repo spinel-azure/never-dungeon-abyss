@@ -21,6 +21,8 @@ import {
   getBossRemainsAt,
   removeNpcAt,
   getFountainAt,
+  getFixedWarpAt,
+  getFixedEventAt,
   getQuicksandAt,
   getRapidCurrentAt,
   discoverRapidCurrent,
@@ -66,6 +68,7 @@ const hooks = {
   getSpecialDoorAccessBlock: () => ({ blocked: false }),
   attemptSpecialDoorUnlock: () => ({ accepted: false }),
   isBossDefeated: () => false,
+  isBossRematch: () => false,
   isBossRetryBlocked: () => false,
   getBossEncounterImageId: boss => boss?.encounterImageId || boss?.imageId || "",
   getBossEncounterPrompt: boss => boss?.event?.prompt,
@@ -88,6 +91,7 @@ const hooks = {
   isQueenShadowFinaleCompleted: () => false,
   onQueenShadowFinaleComplete: () => false,
   onQuestEvent: () => "",
+  onFixedFloorEvent: () => "",
   onDungeonStep: () => {},
   onStateChanged: () => {}
 };
@@ -230,20 +234,24 @@ export function updateAnimation(now) {
         const bossId = getBossAt(state.gridX, state.gridY);
         const bossRemainsId = getBossRemainsAt(state.gridX, state.gridY);
         const fountain = getFountainAt(state.gridX, state.gridY);
+        const fixedWarp = getFixedWarpAt(state.gridX, state.gridY);
+        const fixedEvent = getFixedEventAt(state.gridX, state.gridY);
         const quicksand = getQuicksandAt(state.gridX, state.gridY);
         const rapidCurrent = getRapidCurrentAt(state.gridX, state.gridY);
         const treasure = getTreasureAt(state.gridX, state.gridY);
         const specialRoom = getSpecialRoomAt(state.gridX, state.gridY);
         const questEvent = getQuestEventAt(state.gridX, state.gridY);
         const isStairs = a.cellType === "stairsUp" || a.cellType === "stairsDown";
-        const isSpecialEventCell = Boolean(npc) || Boolean(bossId) || Boolean(bossRemainsId) || Boolean(fountain) || Boolean(quicksand) || Boolean(rapidCurrent) || Boolean(treasure) || Boolean(questEvent) || Boolean(specialRoom?.content) || isStairs;
+        const isSpecialEventCell = Boolean(npc) || Boolean(bossId) || Boolean(bossRemainsId) || Boolean(fountain) || Boolean(fixedWarp) || Boolean(fixedEvent) || Boolean(quicksand) || Boolean(rapidCurrent) || Boolean(treasure) || Boolean(questEvent) || Boolean(specialRoom?.content) || isStairs;
         const encounterTriggered = onExplorationStep({
           autoWalkerActive: state.autoWalkerActive,
           isSpecialEventCell,
           inDarkness: movedInDarkness
         });
         if (encounterTriggered) hooks.cancelAutoReturn(false);
-        if (bossId) {
+        if (fixedWarp) {
+          applyFixedFloorWarp(fixedWarp);
+        } else if (bossId) {
           startBossEvent(bossId, a.fromGX, a.fromGY);
         } else if (bossRemainsId) {
           startBossRemainsEvent(bossRemainsId);
@@ -251,6 +259,8 @@ export function updateAnimation(now) {
           startNpcTalkEvent(npc, a.fromGX, a.fromGY);
         } else if (fountain) {
           startFountainEvent(fountain, a.fromGX, a.fromGY);
+        } else if (fixedEvent) {
+          startFixedFloorEvent(fixedEvent);
         } else if (quicksand) {
           startQuicksandEvent(quicksand);
         } else if (rapidCurrent) {
@@ -294,6 +304,24 @@ export function updateAnimation(now) {
     }
     if (state.autoReturning) hooks.continueAutoReturn();
   }
+}
+
+function applyFixedFloorWarp(warp) {
+  const target = warp?.to;
+  if (!target || !inBounds(target.x, target.y)) return false;
+  hooks.cancelAutoReturn(false);
+  state.gridX = target.x;
+  state.gridY = target.y;
+  state.x = target.x + .5;
+  state.y = target.y + .5;
+  markExplored(target.x, target.y);
+  state.npcAwarenessShown = false;
+  hooks.playSe("teleport");
+  hooks.say(warp.warpId
+    ? `ワープポイント「${warp.warpId}」が輝き、別の場所へ転送された。`
+    : "帰還の印が輝き、転送門の近くへ戻された。");
+  hooks.onStateChanged();
+  return true;
 }
 
 export function tryMove(amount, automated = false, specialEntryConfirmed = false) {
@@ -803,6 +831,7 @@ export function handleOverlayEventInput(action) {
     else if (state.overlayEvent.type === "bossPrompt") confirmBossEvent();
     else if (state.overlayEvent.type === "bossRemains") finishBossRemainsEvent();
     else if (state.overlayEvent.type === "fountain") confirmFountainEvent();
+    else if (state.overlayEvent.type === "fixedFloorEvent") finishFixedFloorEvent();
     else if (state.overlayEvent.type === "stairsPrompt") confirmStairsPrompt();
     else if (state.overlayEvent.type === "treasure") confirmTreasureEvent();
     else if (state.overlayEvent.type === "specialDoorLock") confirmSpecialDoorLockEvent();
@@ -924,21 +953,39 @@ function startStairsPrompt(cellType) {
   });
 }
 
+function startFixedFloorEvent(eventDefinition) {
+  const message = hooks.onFixedFloorEvent(eventDefinition) || eventDefinition?.description || "何かの気配を感じる…。";
+  startOverlayEvent({
+    type: "fixedFloorEvent",
+    imageId: "NPC_01b",
+    message: `${message}\n＊Aボタン：次へ`,
+    canCancel: true
+  });
+}
+
+function finishFixedFloorEvent() {
+  if (state.overlayEvent?.type !== "fixedFloorEvent") return;
+  state.overlayEvent = null;
+  hooks.say("");
+  hooks.onStateChanged();
+}
+
 function startBossEvent(bossId, fromGX, fromGY) {
   const boss = getBossById(bossId);
   state.bossEncounterOrigin = { x: fromGX, y: fromGY };
-  const hasSphinxAnswer = boss?.event?.sphinxChoice && hooks.hasSphinxAnswer();
+  const isRematch = hooks.isBossRematch(bossId);
+  const hasSphinxAnswer = boss?.event?.sphinxChoice && !isRematch && hooks.hasSphinxAnswer();
   startOverlayEvent({
     type: "bossPrompt",
     bossId,
     imageId: boss?.encounterImageId ?? "",
     fromGX,
     fromGY,
-    phase: hasSphinxAnswer ? "sphinxAnswer" : boss?.event?.sphinxChoice ? "sphinxIntro" : "prompt",
+    phase: hasSphinxAnswer ? "sphinxAnswer" : boss?.event?.sphinxChoice && !isRematch ? "sphinxIntro" : "prompt",
     message: hasSphinxAnswer
       ? "スピンクス「ふむ。正解だ。知恵ある者よこれを授けよう。そして以後、自由にここを通るがよい。」\n＊Aボタン：次へ"
       : hooks.getBossEncounterPrompt(boss) || "部屋の中央に騎士の彫像がある。まるで行く手を遮っているようだ。調べてみますか？\n＊Aボタン：はい　Bボタン：いいえ",
-    canCancel: !boss?.event?.sphinxChoice || hasSphinxAnswer,
+    canCancel: !boss?.event?.sphinxChoice || isRematch || hasSphinxAnswer,
     retreatOnCancel: true
   });
 }
@@ -948,7 +995,7 @@ function confirmBossEvent() {
   if (!event || event.type !== "bossPrompt") return;
   event.canCancel = false;
   const boss = getBossById(event.bossId);
-  if (boss?.event?.sphinxChoice) {
+  if (boss?.event?.sphinxChoice && !hooks.isBossRematch(boss.id)) {
     if (event.phase === "sphinxAnswer") {
       hooks.onSphinxPeaceResolved();
       state.overlayEvent = null;
