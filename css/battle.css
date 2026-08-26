@@ -273,8 +273,12 @@
 }
 
 .battle-enemy-image.is-concealed {
-  filter: brightness(0) drop-shadow(0 8px 8px rgba(0, 0, 0, .72)) !important;
-  animation: none;
+  filter:
+    brightness(0)
+    drop-shadow(0 0 2px rgba(225, 252, 255, .98))
+    drop-shadow(0 0 7px rgba(128, 235, 255, .9))
+    drop-shadow(0 0 18px rgba(55, 173, 255, .68)) !important;
+  animation: battle-concealed-glow 2.4s ease-in-out infinite;
 }
 
 .battle-enemy-image.is-hit {
@@ -741,7 +745,14 @@ body.battle-active .viewport > #treasureCanvas {
 
 .battle-enemy-member-name { display: block; font-family: "PixelFont", monospace; font-weight: 400; text-shadow: 2px 2px #000; }
 .battle-enemy-member .battle-enemy-member-image { width: 100%; height: 75%; object-fit: contain; filter: drop-shadow(0 0 5px #000); }
-.battle-enemy-member .battle-enemy-member-image.is-concealed { filter: brightness(0) drop-shadow(0 8px 8px rgba(0, 0, 0, .72)) !important; }
+.battle-enemy-member .battle-enemy-member-image.is-concealed {
+  filter:
+    brightness(0)
+    drop-shadow(0 0 2px rgba(225, 252, 255, .98))
+    drop-shadow(0 0 6px rgba(128, 235, 255, .88))
+    drop-shadow(0 0 14px rgba(55, 173, 255, .64)) !important;
+  animation: battle-concealed-glow 2.4s ease-in-out infinite;
+}
 .battle-enemy-member .battle-enemy-member-image.is-hit { animation: battle-enemy-hit 260ms steps(2, end); }
 .battle-enemy-member.is-defeated { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 900ms ease-out, visibility 0s linear 900ms; }
 .battle-enemy-member-hp { display: none; width: 90%; height: 8px; margin: 0 auto; border: 1px solid #b8d7e3; background: #071017; }
@@ -753,6 +764,11 @@ body.battle-active .viewport > #treasureCanvas {
   z-index: 5;
   display: block;
   pointer-events: none;
+}
+
+@keyframes battle-concealed-glow {
+  0%, 100% { opacity: .76; }
+  50% { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
