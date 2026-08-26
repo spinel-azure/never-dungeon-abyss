@@ -121,6 +121,8 @@ const town = {
   rumorDialogueIndex: 0,
   questClientDialogue: [],
   questClientDialogueIndex: 0,
+  questClientPortrait: "",
+  questClientPortraitStartIndex: 0,
   activeRumor: null,
   facilityTalkDialogue: [],
   facilityTalkDialogueIndex: 0,
@@ -810,11 +812,18 @@ function handleQuestInput(action) {
     if (action !== "confirm") return true;
     town.questClientDialogueIndex += 1;
     if (town.questClientDialogueIndex < town.questClientDialogue.length) {
+      if (town.questClientDialogueIndex === town.questClientPortraitStartIndex && town.questClientPortrait) {
+        town.portrait.src = town.questClientPortrait;
+        town.portrait.hidden = false;
+        town.portraitPlaceholder.hidden = true;
+      }
       town.messageEl.textContent = town.questClientDialogue[town.questClientDialogueIndex];
       return true;
     }
     town.questClientDialogue = [];
     town.questClientDialogueIndex = 0;
+    town.questClientPortrait = "";
+    town.questClientPortraitStartIndex = 0;
     renderFacility();
     return true;
   }
@@ -866,7 +875,9 @@ function handleQuestInput(action) {
         town.mode = "questClientDialogue";
         town.questClientDialogue = result.clientDialogue;
         town.questClientDialogueIndex = 0;
-        town.portrait.src = result.clientPortrait;
+        town.questClientPortrait = result.clientPortrait;
+        town.questClientPortraitStartIndex = Math.max(0, Math.floor(Number(result.clientPortraitStartIndex) || 0));
+        if (town.questClientPortraitStartIndex === 0) town.portrait.src = result.clientPortrait;
         town.portrait.alt = result.clientName || quest.client;
         town.portrait.hidden = false;
         town.portraitPlaceholder.hidden = true;

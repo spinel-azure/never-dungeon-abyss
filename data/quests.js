@@ -706,16 +706,16 @@ export const QUESTS = Object.freeze([
     objectiveType: "custom",
     targetDepth: 89,
     requiredCount: 1,
-    objectiveLabel: "B89Fでトラペツォエーダーを使う",
-    reward: Object.freeze({ type: "none", label: "――" }),
+    objectiveLabel: "B89Fの赤い扉のある部屋へ行く",
+    reward: Object.freeze({ type: "card", label: "デッキカード×1", amount: 1, cardId: "legendary_life_booster", bonusGold: 40000 }),
     descriptionLabel: "内容",
     description: Object.freeze([
-      "この多面体を奈落のB89Fへ持って行き、",
-      "そこで掲げてほしい。何が現れても、",
-      "最後まで見届けてくれればそれでいい。",
-      ""
+      "この多面体を奈落B89Fにある赤い扉の奥にある",
+      "部屋まで持っていき、そこで掲げてほしい。",
+      "そして、最後まで見届けてくれ。",
+      "たとえ…何があっても…な。"
     ]),
-    prerequisiteQuestIds: Object.freeze([JIRENE_SONG_INVESTIGATION_QUEST_ID]),
+    prerequisiteQuestIds: Object.freeze([BEESWAX_COLLECTION_QUEST_ID]),
     minimumDepthReached: 80,
     completedTargetFlag: "boss_b89f_defeated",
     available: true

@@ -98,6 +98,15 @@ export function startBattle(enemy, { playStartSe = true, ambush = false, conceal
   showCommandButtons();
   if (playStartSe) battleUi.playSe("battleStart");
   renderBattle();
+  if (battleUi.battle.lifeBoosterRecovery > 0) {
+    battleUi.onCharacterChanged({ hp: battleUi.battle.player.hp });
+    const openingBattle = battleUi.battle;
+    window.setTimeout(() => {
+      if (battleUi.active && battleUi.battle === openingBattle) {
+        showBattleNumber("player", openingBattle.lifeBoosterRecovery, "healing");
+      }
+    }, 300);
+  }
   if (battleUi.battle.manaBoosterRecovery > 0) {
     battleUi.onCharacterChanged({ sp: battleUi.battle.player.sp });
     const openingBattle = battleUi.battle;

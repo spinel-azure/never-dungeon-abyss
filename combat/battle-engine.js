@@ -51,6 +51,12 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     ? Math.max(1, Math.ceil(Math.max(1, Number(character?.maxHp) || 1) * sphinxBarrierRate))
     : 0;
   const player = cloneCombatant(character);
+  const lifeBoosterRecoveryPotential = hasCardEffect(character?.cards?.deckSlots, "life_booster")
+    ? Math.ceil(player.maxHp * 0.05)
+    : 0;
+  const hpBeforeLifeBooster = player.hp;
+  if (lifeBoosterRecoveryPotential > 0) player.hp = Math.min(player.maxHp, player.hp + lifeBoosterRecoveryPotential);
+  const lifeBoosterRecovery = Math.max(0, player.hp - hpBeforeLifeBooster);
   const manaBoosterRecoveryPotential = hasCardEffect(character?.cards?.deckSlots, "mana_booster")
     ? Math.ceil(player.maxSp * 0.05)
     : 0;
@@ -73,12 +79,14 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     throwingItemGuaranteedHitAtStart: hasCardEffect(character?.cards?.deckSlots, "throwing_item_guaranteed_hit"),
     sphinxBarrier,
     sphinxBarrierMax: sphinxBarrier,
+    lifeBoosterRecovery,
     manaBoosterRecovery,
     vorpalExecution: false,
     slashExecution: null,
     log: [
       enemyParty ? `${enemyParty.map(member => member.name).join("、")}が現れた！` : `${enemy.name}が現れた！`,
       ...(sphinxBarrier > 0 ? ["スピンクスの威容が障壁を展開した！"] : []),
+      ...(lifeBoosterRecovery > 0 ? [`ライフブースターがHPを${lifeBoosterRecovery}回復した！`] : []),
       ...(manaBoosterRecovery > 0 ? [`マナブースターがSPを${manaBoosterRecovery}回復した！`] : [])
     ],
     presentationEvents: []

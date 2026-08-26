@@ -9,6 +9,7 @@ export const SPHINX_WISDOM_CARD_ID = "legendary_sphinx_wisdom";
 export const SPHINX_MAJESTY_CARD_ID = "legendary_sphinx_majesty";
 export const DEEP_FLOOR_PROOF_CARD_ID = "legendary_deep_floor_proof";
 export const MANA_BOOSTER_CARD_ID = "legendary_mana_booster";
+export const LIFE_BOOSTER_CARD_ID = "legendary_life_booster";
 
 const STANDARD_CARDS = [
   {
@@ -370,6 +371,13 @@ const STANDARD_CARDS = [
     descriptionJa: "最大SPを20％増加し、戦闘開始時に最大SPの5％を回復する。",
     category: "ability", effectId: "mana_booster", effectValue: 0.2,
     battleStartRecoveryRate: 0.05, iconId: "mana-core", maxOwned: 1, maxCopies: 1
+  },
+  {
+    id: LIFE_BOOSTER_CARD_ID, rarity: "L", cost: 6,
+    name: "Life Booster", nameJa: "ライフブースター", concept: "MAX HP +20% / 開幕HP回復",
+    descriptionJa: "最大HPを20％増加し、戦闘開始時に最大HPの5％を回復する。",
+    category: "ability", effectId: "life_booster", effectValue: 0.2,
+    battleStartRecoveryRate: 0.05, iconId: "health-pulse", maxOwned: 1, maxCopies: 1
   },
   {
     id: "sr_lightning_armament", rarity: "SR", cost: 4,

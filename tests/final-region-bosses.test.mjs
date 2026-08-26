@@ -52,7 +52,7 @@ test("accepting request 030 grants the Trapezohedron once", () => {
   const character = createInitialCharacter({ name: "TEST", job: "priest" });
   character.highestDungeonDepthReached = 80;
   character.quests.completedQuestIds = [
-    "guild_001_abyss_rat", "guild_002_cave_slime", "guild_003_b1f_survey", "guild_028"
+    "guild_001_abyss_rat", "guild_002_cave_slime", "guild_003_b1f_survey", "guild_029"
   ];
   const accepted = acceptQuest(character, "guild_030");
   assert.equal(accepted.accepted, true);

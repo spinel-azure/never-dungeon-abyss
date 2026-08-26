@@ -1356,6 +1356,14 @@ import {
           "パルテノペー「…あ、あなたが依頼を受けてくれた…人？まるで何かを誘うような歌声がずっと聞こえてくるの…。\n誰が歌っているのか気になって…。よかったら調べてほしいの。お願い…。」\n＊Aボタンで次へ",
           "それだけ言い残すと、上目遣いでこちらを見つめていた女性は去って行った…。\n＊Aボタンで次へ"
         ]
+      } : questId === "guild_030" ? {
+        clientName: "怪しげな男",
+        clientPortrait: "images/npc/NPC_25.avif",
+        clientPortraitStartIndex: 1,
+        clientDialogue: [
+          "ギルドマスター：依頼人がお前に会いたいそうだ。\n＊Aボタンで次へ",
+          "怪しげな男「…依頼を受けてくれて感謝する…。そんなに難しい依頼では…ない。あんたに預けた『トラペツォエーダー』――その多面体を指定した場所で使うだけでいい…。頼んだぞ…。」\n＊Aボタンで次へ"
+        ]
       } : {}),
       acceptedMessage: questId === "guild_020"
         ? "ギルドマスター：これがヘレンから預かった除草剤の試供品だ。持っていけ。"
@@ -1590,7 +1598,8 @@ import {
   function hasMaxVitalBonus(target, key) {
     return Number(target?.equipmentStatBonuses?.[key]) > 0
       || Number(target?.cardStatBonuses?.[key]) > 0
-      || (key === "maxHp" && target?.cards?.deckSlots?.includes("zodiac_taurus"));
+      || (key === "maxHp" && target?.cards?.deckSlots?.some(cardId => ["zodiac_taurus", "legendary_life_booster"].includes(cardId)))
+      || (key === "maxSp" && target?.cards?.deckSlots?.includes("legendary_mana_booster"));
   }
 
   function renderStatusGauges(target) {
