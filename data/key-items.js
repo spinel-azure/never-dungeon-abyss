@@ -44,6 +44,16 @@ export const KEY_ITEMS = Object.freeze({
     description: "魔女キルケが作った耳栓。ジレーネの魔性の歌声を遮る。",
     sellable: false, consumable: false, version: 1
   }),
+  trapezohedron: Object.freeze({
+    id: "trapezohedron", name: "トラペツォエーダー",
+    description: "異界の混沌を呼び出すという、妖しく輝く多面体。",
+    sellable: false, consumable: true, version: 1
+  }),
+  lichtbringer: Object.freeze({
+    id: "lichtbringer", name: "リヒトブリンガー",
+    description: "漆黒を退ける光を宿した遺物。ミニマップを照らし、魂を喰らう者の力を弱める。",
+    sellable: false, consumable: false, version: 1
+  }),
   red_rust_key_b9f: Object.freeze({
     id: "red_rust_key_b9f",
     name: "赤錆びた鍵",

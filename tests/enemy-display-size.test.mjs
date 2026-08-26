@@ -23,7 +23,7 @@ test("ordinary enemies default to small and combatants retain explicit sizes", (
 test("representative bosses use the intended large image categories", () => {
   assert.equal(createBossCombatant("fallen_mage_b19f").battleSize, "medium");
   assert.equal(createBossCombatant("iron_maiden_b29f").battleSize, "large");
-  for (const id of ["sphinx_b69f", "amethyst_drache_b89f", "jabberwock_event_boss"]) {
+  for (const id of ["sphinx_b69f", "kriechendes_chaos_b89f", "seelenwuerger_b99f", "jabberwock_event_boss"]) {
     assert.equal(createBossCombatant(id).battleSize, "huge-wide");
   }
 });

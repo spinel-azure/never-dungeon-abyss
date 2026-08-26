@@ -1,7 +1,7 @@
 import { grantCard } from "./deck.js";
 import { grantEquipmentInstance } from "./equipment-inventory.js";
 import { grantItemWithOverflow } from "./inventory.js";
-import { consumeKeyItem, getKeyItemCount } from "./key-items.js";
+import { consumeKeyItem, getKeyItemCount, grantKeyItem } from "./key-items.js";
 
 export const MAX_ACTIVE_QUESTS = 3;
 export const GUILD_TRIAL_QUEST_ID = "guild_001_abyss_rat";
@@ -33,6 +33,8 @@ export const SEVENTH_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_027";
 export const JIRENE_SONG_INVESTIGATION_QUEST_ID = "guild_028";
 export const JIRENE_SONG_INVESTIGATION_ACCEPTED_FLAG = "guild_028_accepted_once";
 export const BEESWAX_COLLECTION_QUEST_ID = "guild_029";
+export const CREEPING_CHAOS_QUEST_ID = "guild_030";
+export const CREEPING_CHAOS_ITEM_FLAG = "guild_030_trapezohedron_received";
 export const BEESWAX_REQUIRED_COUNT = 15;
 export const HERBICIDE_TRIAL_SUPPLY_FLAG = "guild_020_trial_herbicide_received";
 export const SPECIAL_MEDICINE_INGREDIENT_FLAGS = Object.freeze(
@@ -694,6 +696,29 @@ export const QUESTS = Object.freeze([
     ]),
     availableFlag: "jirene_scripted_defeat_seen",
     available: true
+  }),
+  Object.freeze({
+    id: CREEPING_CHAOS_QUEST_ID,
+    number: "030",
+    title: "異界の混沌",
+    client: "怪しげな男",
+    category: "other",
+    objectiveType: "custom",
+    targetDepth: 89,
+    requiredCount: 1,
+    objectiveLabel: "B89Fでトラペツォエーダーを使う",
+    reward: Object.freeze({ type: "none", label: "――" }),
+    descriptionLabel: "内容",
+    description: Object.freeze([
+      "この多面体を奈落のB89Fへ持って行き、",
+      "そこで掲げてほしい。何が現れても、",
+      "最後まで見届けてくれればそれでいい。",
+      ""
+    ]),
+    prerequisiteQuestIds: Object.freeze([JIRENE_SONG_INVESTIGATION_QUEST_ID]),
+    minimumDepthReached: 80,
+    completedTargetFlag: "boss_b89f_defeated",
+    available: true
   })
 ]);
 
@@ -838,6 +863,16 @@ export function acceptQuest(character, questId) {
   }
   let acceptanceSupplyItemId = null;
   let acceptanceSupplyAmount = 0;
+  let acceptanceKeyItemId = null;
+  if (quest.id === CREEPING_CHAOS_QUEST_ID && !next.eventFlags?.[CREEPING_CHAOS_ITEM_FLAG]) {
+    const granted = grantKeyItem(next.keyItems, "trapezohedron");
+    next = {
+      ...next,
+      keyItems: granted.keyItems,
+      eventFlags: { ...(next.eventFlags || {}), [CREEPING_CHAOS_ITEM_FLAG]: true }
+    };
+    if (granted.gained) acceptanceKeyItemId = "trapezohedron";
+  }
   if (quest.id === B35F_SURVEY_QUEST_ID && !next.eventFlags?.[B35F_SURVEY_SUPPLY_FLAG]) {
     const supply = grantItemWithOverflow(next, "healing_potion_large", 10);
     next = {
@@ -865,7 +900,10 @@ export function acceptQuest(character, questId) {
     acceptanceSupplyItemId = "strong_herbicide_trial";
     acceptanceSupplyAmount = supply.gained + supply.stored;
   }
-  return { ...result(next, true), acceptanceRewardCardId, acceptanceSupplyItemId, acceptanceSupplyAmount };
+  return {
+    ...result(next, true), acceptanceRewardCardId, acceptanceSupplyItemId,
+    acceptanceSupplyAmount, acceptanceKeyItemId
+  };
 }
 
 export function grantRedDoorInvestigationSupply(character) {
@@ -1201,6 +1239,9 @@ export function isDungeonDepthUnlocked(character, depth) {
   }
   if (requestedDepth === 90) {
     return Boolean(character?.eventFlags?.boss_b89f_defeated);
+  }
+  if (requestedDepth === 100) {
+    return Boolean(character?.eventFlags?.boss_b99f_defeated);
   }
   return true;
 }

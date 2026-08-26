@@ -682,38 +682,38 @@ export const BOSSES = Object.freeze({
     defeatedEncounterImageId: "sphinx_event_b69f", defeatedEncounterImage: "images/npc/NPC_event_13.avif",
     event: Object.freeze({ remains: "スピンクスは目を閉じて静かに眠っている。どうやら通り抜けてもよさそうだ。\n＊Aボタン：次へ" })
   }),
-  amethyst_drache_b89f: Object.freeze({
-    id: "amethyst_drache_b89f", name: "アメティストドラッヘ", level: 98, floor: 89,
-    imageId: "amethyst_drache_b89f", image: "images/bosses/boss_16.avif", battleSize: "huge-wide",
-    encounterImageId: "amethyst_drache_b89f", encounterImage: "images/bosses/boss_16.avif",
-    race: "dragon", maxHp: 14000,
-    stats: Object.freeze({ str: 54, int: 50, agi: 30, dex: 44, luc: 38 }),
-    def: 52, attack: 55, experienceReward: 65000,
+  kriechendes_chaos_b89f: Object.freeze({
+    id: "kriechendes_chaos_b89f", name: "クリーヒェンデス・カーオス", level: 98, floor: 89,
+    imageId: "kriechendes_chaos_b89f", image: "images/bosses/boss_16.avif", battleSize: "huge-wide",
+    encounterImageId: "kriechendes_chaos_b89f", encounterImage: "images/bosses/boss_16.avif",
+    race: "aberration", maxHp: 14000,
+    stats: Object.freeze({ str: 52, int: 54, agi: 32, dex: 44, luc: 40 }),
+    def: 50, attack: 54, experienceReward: 65000,
     actions: Object.freeze([
       Object.freeze({ weight: 28, action: Object.freeze({
-        id: "amethyst_drache_claw", name: "紫晶爪", actionType: "physicalAttack",
+        id: "chaos_tentacle", name: "混沌の触腕", actionType: "physicalAttack",
         hitCount: 2, powerPerHit: 0.8, hitBonus: 0.03, effects: Object.freeze([])
       }) }),
       Object.freeze({ weight: 24, action: Object.freeze({
-        id: "amethyst_drache_tail", name: "結晶尾撃", actionType: "physicalAttack",
+        id: "chaos_distortion", name: "歪曲する肢体", actionType: "physicalAttack",
         hitCount: 1, powerPerHit: 1.45, hitBonus: -0.05, speedModifier: -5,
         effects: Object.freeze([Object.freeze({ statusId: "speed_down", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.35 })])
       }) }),
       Object.freeze({ weight: 22, action: Object.freeze({
-        id: "amethyst_drache_breath", name: "紫晶の吐息", actionType: "spell", element: "arcane",
+        id: "chaos_miasma", name: "異界の瘴気", actionType: "spell", element: "dark",
         spellPower: 72, powerMultiplier: 1.05, unavoidable: true,
         effects: Object.freeze([Object.freeze({ statusId: "crystal_accuracy_down", trigger: "perAction", statusKind: "magical", baseRate: 0.4 })])
       }) }),
       Object.freeze({ weight: 16, action: Object.freeze({
-        id: "amethyst_drache_mana_break", name: "魔晶吸収", actionType: "spDrain", spDamage: 18
+        id: "chaos_mind_drain", name: "精神侵食", actionType: "spDrain", spDamage: 18
       }) }),
       Object.freeze({ weight: 10, when: Object.freeze({ hpRateBelow: 0.5 }), action: Object.freeze({
-        id: "amethyst_drache_resonance", name: "破滅の共鳴", actionType: "spell", element: "arcane",
-        spellPower: 90, powerMultiplier: 1.15, unavoidable: true, speedModifier: -7, effects: Object.freeze([])
+        id: "madness_roar", name: "狂気の咆哮", actionType: "spell", element: "dark",
+        spellPower: 84, powerMultiplier: 1.1, unavoidable: true, speedModifier: -7,
+        effects: Object.freeze([Object.freeze({ statusId: "action_skip", trigger: "perAction", statusKind: "magical", baseRate: 0.45 })])
       }) })
     ]),
-    resonanceTrait: Object.freeze({ element: "lightning", rate: 0.3, statusId: "resonance_collapse" }),
-    elementMultipliers: Object.freeze({ fire: 1, ice: 0.75, lightning: 1.35, holy: 1, dark: 1, arcane: 0.8 }),
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1, lightning: 1.25, holy: 1.5, dark: 0.65, arcane: 0.8 }),
     statusResistances: Object.freeze({
       instant_death: Object.freeze({ resistancePoints: 100, immune: true }),
       poison: Object.freeze({ resistancePoints: 90, immune: false }),
@@ -725,14 +725,64 @@ export const BOSSES = Object.freeze({
     escapeRate: 0, surpriseRate: 0, surpriseRateMaximum: 0, noDrop: true,
     isBoss: true, bossKind: "floor", defeatedFlag: "boss_b89f_defeated",
     transferUnlockFlag: "transfer_portal_b90f_unlocked",
+    room: Object.freeze({ doorStartsUnlocked: true, summonKeyItemId: "trapezohedron" }),
+    event: Object.freeze({
+      prompt: "部屋の中央でトラペツォエーダーが妖しく輝いている。手に取って掲げますか？\n＊Aボタンで次へ",
+      start: "輝く多面体が空間を引き裂き、異界の混沌――クリーヒェンデス・カーオスを呼び出した！",
+      autoStartDelay: 2000,
+      remains: "異界へ続く裂け目は閉じ、砕けた多面体の残滓だけが鈍く光っている。\n＊Aボタン：次へ"
+    })
+  }),
+  seelenwuerger_b99f: Object.freeze({
+    id: "seelenwuerger_b99f", name: "ゼーレンヴュルガー", level: 108, floor: 99,
+    imageId: "seelenwuerger_b99f", image: "images/bosses/boss_17.avif", battleSize: "huge-wide",
+    encounterImageId: "seelenwuerger_b99f", encounterImage: "images/bosses/boss_17.avif",
+    race: "spirit", maxHp: 22000,
+    stats: Object.freeze({ str: 58, int: 64, agi: 42, dex: 52, luc: 48 }),
+    def: 56, attack: 60, experienceReward: 100000,
+    actions: Object.freeze([
+      Object.freeze({ weight: 35, action: Object.freeze({
+        id: "soul_devour", name: "魂食い", actionType: "physicalAttack",
+        hitCount: 2, powerPerHit: 0.85, hitBonus: 0.04,
+        effects: Object.freeze([Object.freeze({ statusId: "death_poison", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.2 })])
+      }) }),
+      Object.freeze({ weight: 35, action: Object.freeze({
+        id: "final_darkness", name: "終焉の漆黒", actionType: "spell", element: "dark",
+        spellPower: 105, powerMultiplier: 1.15, unavoidable: true,
+        effects: Object.freeze([Object.freeze({ statusId: "speed_down", trigger: "perAction", statusKind: "magical", baseRate: 0.45 })])
+      }) }),
+      Object.freeze({ weight: 30, when: Object.freeze({ hpRateBelow: 0.6 }), action: Object.freeze({
+        id: "todes_ruf", name: "トーデス・ルーフ", actionType: "spell", element: "dark",
+        spellPower: 72, powerMultiplier: 0.85, unavoidable: true, speedModifier: -5,
+        effects: Object.freeze([Object.freeze({ statusId: "death_poison", trigger: "perAction", statusKind: "magical", baseRate: 0.55 })])
+      }) })
+    ]),
+    lightbringerWeakening: Object.freeze({
+      maxHpMultiplier: 0.75, attackMultiplier: 0.85, intMultiplier: 0.85,
+      deathPoisonRateMultiplier: 0.5
+    }),
+    reward: Object.freeze({ type: "none" }),
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1, lightning: 1, holy: 1.5, dark: 0.5, arcane: 1 }),
+    statusResistances: Object.freeze({
+      instant_death: Object.freeze({ resistancePoints: 100, immune: true }),
+      poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      deadly_poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      bleeding: Object.freeze({ resistancePoints: 100, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 100, immune: true }),
+      speed_down: Object.freeze({ resistancePoints: 90, immune: false })
+    }),
+    escapeRate: 0, surpriseRate: 0, surpriseRateMaximum: 0, noDrop: true,
+    isBoss: true, bossKind: "floor", defeatedFlag: "boss_b99f_defeated",
+    transferUnlockFlag: "transfer_portal_b100f_unlocked",
     room: Object.freeze({ doorStartsUnlocked: true }),
     event: Object.freeze({
-      prompt: "巨大な紫水晶の竜が、地鳴りのような共鳴音とともに目を覚ました。\n＊Aボタンで次へ",
-      start: "アメティストドラッヘが咆哮した！ 水晶洞窟全体が激しく震えている！",
-      autoStartDelay: 2000,
-      remains: "砕けた紫水晶の欠片が、静かな光を放っている。\n＊Aボタン：次へ"
+      prompt: "漆黒の闇の中で、無数の魂を締め上げる異形がこちらを見つめている。\n＊Aボタンで次へ",
+      start: "ゼーレンヴュルガーが魂を引き裂く絶叫を放った！",
+      autoStartDelay: 2500,
+      remains: "魂を縛っていた漆黒の影は消え、静かな光だけが残っている。\n＊Aボタン：次へ"
     })
-  }),  jirene_b79f: Object.freeze({
+  }),
+  jirene_b79f: Object.freeze({
     id: "jirene_b79f", name: "ジレーネ", level: 90, floor: 79,
     imageId: "jirene_b79f", image: "images/bosses/boss_15.avif", battleSize: "large",
     encounterImageId: "parthenope_event_b79f", encounterImage: "images/npc/NPC_event_17b.avif",
@@ -1192,18 +1242,28 @@ export function applyBossVictory(character, bossOrId) {
   };
 }
 
-export function createBossCombatant(bossOrId) {
+export function createBossCombatant(bossOrId, { lightbringerActive = false } = {}) {
   const boss = typeof bossOrId === "string" ? getBossById(bossOrId) : bossOrId;
   if (!boss) return null;
+  const weakening = lightbringerActive ? boss.lightbringerWeakening : null;
+  const maxHp = weakening ? Math.max(1, Math.floor(boss.maxHp * weakening.maxHpMultiplier)) : boss.maxHp;
+  const stats = { ...boss.stats };
+  if (weakening) stats.int = Math.max(1, Math.floor(stats.int * weakening.intMultiplier));
+  const actions = structuredClone(boss.actions || []);
+  if (weakening) actions.forEach(entry => entry.action?.effects?.forEach(effect => {
+    if (effect.statusId === "death_poison") effect.baseRate *= weakening.deathPoisonRateMultiplier;
+  }));
   return {
     ...boss,
-    hp: boss.maxHp,
+    hp: maxHp,
+    maxHp,
     maxSp: 0,
     sp: 0,
     baseDef: boss.def,
-    stats: { ...boss.stats },
+    attack: weakening ? Math.max(1, Math.floor(boss.attack * weakening.attackMultiplier)) : boss.attack,
+    stats,
     specialAttack: structuredClone(boss.specialAttack || null),
-    actions: structuredClone(boss.actions || []),
+    actions,
     reward: structuredClone(boss.reward || { type: "none" }),
     elementMultipliers: { ...boss.elementMultipliers },
     statusResistances: structuredClone(boss.statusResistances || {}),

@@ -121,7 +121,7 @@ export function setTorchFlickerEnabled(enabled) {
 }
 
 export function toggleMinimapOverlay() {
-  if (!renderer.state || !hasEffectiveTorch(renderer.state)) {
+  if (!renderer.state || !hasEffectiveMinimap(renderer.state)) {
     renderer.minimapOverlayVisible = false;
     return false;
   }
@@ -246,7 +246,7 @@ export function drawScene(now) {
   drawCellEvents("sprite");
   drawMist(now);
   drawDarkness();
-  if (!hasEffectiveTorch(state)) {
+  if (!hasEffectiveMinimap(state)) {
     renderer.minimapOverlayVisible = false;
     drawMinimapStatic(now);
   } else {
@@ -279,7 +279,7 @@ function handleCanvasTouchEnd(e) {
 
 function handleCanvasActivation(clientX, clientY) {
   const { canvas, W, H, state } = renderer;
-  if (!hasEffectiveTorch(state)) {
+  if (!hasEffectiveMinimap(state)) {
     renderer.minimapOverlayVisible = false;
     return;
   }
@@ -302,7 +302,11 @@ function handleCanvasActivation(clientX, clientY) {
 }
 
 function hasEffectiveTorch(state) {
-  return Number(state?.torchFuel) > 0 || Boolean(state?.torchEffectForced);
+  return Number(state?.torchFuel) > 0 || Boolean(state?.torchEffectForced) || Boolean(state?.lightbringerActive);
+}
+
+function hasEffectiveMinimap(state) {
+  return hasEffectiveTorch(state) || Boolean(state?.minimapEffectForced);
 }
 
 function drawMinimapStatic(now) {

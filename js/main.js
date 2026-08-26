@@ -666,10 +666,13 @@ import {
       const withItem = { ...character, keyItems: granted.keyItems };
       character = event.questId === "guild_011"
         ? recordThievesClue(withItem, event.flag)
-        : recordCustomQuestProgress({
+        : event.questId ? recordCustomQuestProgress({
           ...withItem,
           eventFlags: { ...(withItem.eventFlags || {}), [event.flag]: true }
-        }, event.questId, 1);
+        }, event.questId, 1) : {
+          ...withItem,
+          eventFlags: { ...(withItem.eventFlags || {}), [event.flag]: true }
+        };
       updateCharacterUi();
       saveGame();
       if (granted.gained) setTimeout(() => showNamedItemGetEffect([keyItem.name], { important: true }), 0);
@@ -1320,6 +1323,10 @@ import {
         { important: true, amounts: [result.acceptanceSupplyAmount] }
       ), 0);
     }
+    if (result.acceptanceKeyItemId) {
+      const keyItemName = getKeyItem(result.acceptanceKeyItemId)?.name || result.acceptanceKeyItemId;
+      setTimeout(() => showNamedItemGetEffect([keyItemName], { important: true }), 0);
+    }
     return {
       ...result,
       character,
@@ -1338,11 +1345,15 @@ import {
         ? "ギルドマスター：何が起こるか分からない危険な調査になるだろう。これを持っていけ。"
         : result.acceptanceSupplyItemId
           ? "ギルドマスター：危険な調査だ。事前支給品を受け取れ。"
+        : result.acceptanceKeyItemId
+          ? "怪しげな男：これをB89Fで掲げてくれ。何が現れても、最後まで見届けるんだ。"
         : "",
       acceptanceRewardMessage: result.acceptanceRewardCardId
         ? "Rカード「防御力上昇」を手に入れた！"
         : result.acceptanceSupplyItemId
           ? `「${getItem(result.acceptanceSupplyItemId)?.name || result.acceptanceSupplyItemId}」を${result.acceptanceSupplyAmount}個受け取った！`
+        : result.acceptanceKeyItemId
+          ? `貴重品「${getKeyItem(result.acceptanceKeyItemId)?.name || result.acceptanceKeyItemId}」を受け取った！`
         : ""
     };
   }
@@ -1741,7 +1752,7 @@ import {
       enemyBaseRate: enemyData.surpriseRate,
       enemyMaximum: enemyData.surpriseRateMaximum,
       ignoreNormalCap: Boolean(enemyData.ignoreNormalSurpriseCap),
-      forceAmbush: state.torchFuel <= 0 && !state.torchEffectForced
+      forceAmbush: state.torchFuel <= 0 && !state.torchEffectForced && !state.lightbringerActive
     });
     const ariesActive = hasCardEffect(character?.cards?.deckSlots, "zodiac_aries");
     pendingEncounter = {
@@ -1749,7 +1760,7 @@ import {
       enemyPartyData,
       ambush: surprise.ambush && !ariesActive,
       surpriseRate: surprise.rate,
-      concealed: state.torchFuel <= 0 && !state.torchEffectForced
+      concealed: state.torchFuel <= 0 && !state.torchEffectForced && !state.lightbringerActive
     };
     if (pendingEncounter.ambush) startAmbushEncounterNotice();
     else startRandomEncounterNotice();
@@ -1801,7 +1812,7 @@ import {
     const started = startBattle(enemy, {
       playStartSe: true,
       ambush: false,
-      concealed: state.torchFuel <= 0 && !state.torchEffectForced
+      concealed: state.torchFuel <= 0 && !state.torchEffectForced && !state.lightbringerActive
     });
     if (!started) {
       activeRareRoomEncounterId = null;
@@ -1835,11 +1846,31 @@ import {
     if (!character || worldLocation !== "dungeon" || isBattleActive()) return false;
     const boss = getBossById(bossId);
     if (!boss || isBossDefeated(character, boss)) return false;
+    const summonKeyItemId = boss.room?.summonKeyItemId;
+    const alreadySummoned = summonKeyItemId && character.eventFlags?.boss_b89f_summoned;
+    if (summonKeyItemId && !alreadySummoned) {
+      if (!hasKeyItem(character.keyItems, summonKeyItemId)) {
+        say("輝く多面体がなければ、異界の存在を呼び出すことはできない。");
+        setPlayerInputEnabled(true);
+        return false;
+      }
+      const consumed = consumeKeyItem(character.keyItems, summonKeyItemId);
+      if (!consumed.consumed) return false;
+      character = {
+        ...character,
+        keyItems: consumed.keyItems,
+        eventFlags: { ...(character.eventFlags || {}), boss_b89f_summoned: true }
+      };
+      updateCharacterUi();
+      saveGame();
+    }
     cancelAutoReturn(false);
     setPlayerInputEnabled(false);
     pendingEncounter = null;
     startBgm(selectBattleBgm(boss));
-    const bossCombatant = createBossCombatant(boss);
+    const lightbringerActive = boss.id === "seelenwuerger_b99f"
+      && hasKeyItem(character.keyItems, "lichtbringer");
+    const bossCombatant = createBossCombatant(boss, { lightbringerActive });
     const encounterEnemies = Array.isArray(boss.encounterEnemyIds)
       ? boss.encounterEnemyIds.map((enemyId, index) => {
         const definition = getBossById(enemyId) || getEnemyById(enemyId);
@@ -1851,7 +1882,7 @@ import {
     const started = startBattle(bossCombatant, {
       playStartSe: true,
       ambush: false,
-      concealed: state.torchFuel <= 0 && !state.torchEffectForced,
+      concealed: state.torchFuel <= 0 && !state.torchEffectForced && !state.lightbringerActive,
       enemies: encounterEnemies,
       targetIndex: encounterEnemies ? Math.max(0, encounterEnemies.findIndex(enemy => enemy.id === bossId)) : 0,
       scriptedBattleType: bossId === "jirene_b79f" && !character?.eventFlags?.jirene_scripted_defeat_seen
@@ -1877,7 +1908,7 @@ import {
     const started = startBattle(mimic, {
       playStartSe: true,
       ambush: false,
-      concealed: state.torchFuel <= 0 && !state.torchEffectForced
+      concealed: state.torchFuel <= 0 && !state.torchEffectForced && !state.lightbringerActive
     });
     if (!started) {
       startBgm(selectDungeonBgm());
@@ -3551,18 +3582,22 @@ import {
   }
 
   function updateHud() {
+    state.lightbringerActive = currentDepth >= 90 && currentDepth <= 99
+      && hasKeyItem(character?.keyItems, "lichtbringer");
+    state.minimapEffectForced = state.lightbringerActive;
     if (isForcedTorchZeroFloor(currentDepth)) state.torchFuel = 0;
     posEl.textContent = `X:${state.gridX} Y:${state.gridY}`;
     depthEl.textContent = `B${currentDepth}F`;
     stopwatchEl.textContent = formatElapsedTime(performance.now() - runStartedAt);
     drawCompass();
-    const displayedTorchFuel = isForcedTorchZeroFloor(currentDepth)
+    const displayedTorchFuel = isForcedTorchZeroFloor(currentDepth) && !state.lightbringerActive
       ? 0
-      : state.torchEffectForced ? 100 : state.torchFuel;
+      : state.torchEffectForced || state.lightbringerActive ? 100 : state.torchFuel;
     torchMeterEl.style.width = `${displayedTorchFuel}%`;
     torchMeterEl.parentElement.classList.toggle(
       "is-critical",
-      isForcedTorchZeroFloor(currentDepth) || (!state.torchEffectForced && state.torchFuel <= 20)
+      (isForcedTorchZeroFloor(currentDepth) && !state.lightbringerActive)
+        || (!state.torchEffectForced && !state.lightbringerActive && state.torchFuel <= 20)
     );
     const presence = getPresence();
     presenceMeterEl.style.setProperty("--presence", `${presence}%`);

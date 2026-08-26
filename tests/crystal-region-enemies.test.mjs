@@ -50,12 +50,13 @@ test("crystal multi-hit ranges and SP drain use the shared battle engine safely"
   assert.match(result.battle.log.join("\n"), /SPが12減少/);
 });
 
-test("B89F Amethystdrache is a tuned floor boss and gates B90F", () => {
+test("B89F Creeping Chaos is summoned with the Trapezohedron and gates B90F", () => {
   const boss = getFloorBossByDepth(89);
   assert.deepEqual([boss.id, boss.image, boss.maxHp, boss.def, boss.experienceReward], [
-    "amethyst_drache_b89f", "images/bosses/boss_16.avif", 14000, 52, 65000
+    "kriechendes_chaos_b89f", "images/bosses/boss_16.avif", 14000, 50, 65000
   ]);
-  assert.equal(createBossCombatant(boss).resonanceTrait.element, "lightning");
+  assert.equal(boss.room.summonKeyItemId, "trapezohedron");
+  assert.equal(boss.actions.at(-1).action.name, "狂気の咆哮");
   assert.equal(isDungeonDepthUnlocked({ eventFlags: {} }, 90), false);
   assert.equal(isDungeonDepthUnlocked({ eventFlags: { boss_b89f_defeated: true } }, 90), true);
 });

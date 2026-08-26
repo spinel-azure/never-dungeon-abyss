@@ -133,6 +133,8 @@ export function createPlayerState(startDir) {
     torch: 0,
     torchFuel: TORCH_FUEL_MAX,
     torchEffectForced: false,
+    minimapEffectForced: false,
+    lightbringerActive: false,
     treasureCompassActive: false,
     autoReturning: false,
     autoWalkerActive: false,
@@ -219,7 +221,7 @@ export function updateAnimation(now) {
         updateNpcAwareness();
       } else {
         markExplored(state.gridX, state.gridY);
-        const movedInDarkness = state.torchFuel <= 0 && !state.torchEffectForced;
+        const movedInDarkness = state.torchFuel <= 0 && !state.torchEffectForced && !state.lightbringerActive;
         if (!torchFuelDisabled && !torchConsumptionDisabledByCard) {
           state.torchFuel = Math.max(0, state.torchFuel - TORCH_FUEL_STEP);
         }
