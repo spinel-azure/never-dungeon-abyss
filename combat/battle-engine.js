@@ -77,6 +77,7 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     libraActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_libra"),
     sphinxWisdomActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "sphinx_weakness_insight"),
     throwingItemGuaranteedHitAtStart: hasCardEffect(character?.cards?.deckSlots, "throwing_item_guaranteed_hit"),
+    mirageFirstAttackAvailable: hasCardEffect(character?.cards?.deckSlots, "mirage_first_attack_evasion"),
     sphinxBarrier,
     sphinxBarrierMax: sphinxBarrier,
     lifeBoosterRecovery,
@@ -967,6 +968,14 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
         * raceMultiplier
     )) : 0
   }));
+  if (actorSide === "enemy" && targetSide === "player" && battle.mirageFirstAttackAvailable
+    && ["physicalAttack", "spell"].includes(action.actionType)) {
+    battle.mirageFirstAttackAvailable = false;
+    if (rng() < 0.5) {
+      presentedHits = presentedHits.map(hit => ({ ...hit, hit: false, damage: 0, mirageEvaded: true }));
+      battle.log.push("蜃気楼が敵の攻撃を惑わせた！");
+    }
+  }
   if (magicFocus) {
     actor.statuses = actor.statuses.filter(status => status !== magicFocus);
     battle.log.push("魔力集中の力が攻撃呪文を増幅した！");
@@ -1109,6 +1118,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
         ? action.presentationId || null
         : null,
       blockedByNpcWall: Boolean(hit.blockedByNpcWall),
+      mirageEvaded: Boolean(hit.mirageEvaded),
       reducedByNpcWall: Boolean(hit.reducedByNpcWall),
       sphinxBarrierAbsorbed: Math.max(0, Number(hit.sphinxBarrierAbsorbed) || 0),
       message

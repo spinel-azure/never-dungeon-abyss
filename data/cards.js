@@ -10,6 +10,7 @@ export const SPHINX_MAJESTY_CARD_ID = "legendary_sphinx_majesty";
 export const DEEP_FLOOR_PROOF_CARD_ID = "legendary_deep_floor_proof";
 export const MANA_BOOSTER_CARD_ID = "legendary_mana_booster";
 export const LIFE_BOOSTER_CARD_ID = "legendary_life_booster";
+export const MIRAGE_CARD_ID = "sr_mirage";
 
 const STANDARD_CARDS = [
   {
@@ -386,6 +387,13 @@ const STANDARD_CARDS = [
     category: "ability", effectId: "weapon_lightning_imbue", effectValue: "lightning",
     exclusiveGroup: "weapon_element_imbue", iconId: "lightning-sword",
     maxOwned: 1, maxCopies: 1, sellPrice: 5000, buybackPrice: 50000
+  },
+  {
+    id: MIRAGE_CARD_ID, rarity: "SR", cost: 4,
+    name: "Mirage", nameJa: "蜃気楼", concept: "最初の被攻撃を50％で完全回避",
+    descriptionJa: "戦闘開始後、最初に受ける攻撃を50％の確率で完全に回避する。",
+    category: "battle", effectId: "mirage_first_attack_evasion", effectValue: 0.5,
+    iconId: "agility", maxOwned: 1, maxCopies: 1, sellPrice: 5000, buybackPrice: 50000
   },
   {
     id: "legendary_ability_boost_plus", rarity: "L", cost: 6,

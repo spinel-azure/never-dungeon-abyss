@@ -13,6 +13,19 @@ export const npcs = [
     retreatOnCancel: false
   },
   {
+    id: "queen_shadow_desert",
+    name: "女王の影",
+    imageId: "NPC_01b",
+    image: "images/npc/NPC_01b.avif",
+    interactionType: "contact",
+    glow: "paleBlue",
+    renderScale: 1.85,
+    contactMessage: "砂煙の向こうにいた女王の影は、近づく前に消えてしまった…。",
+    leaveAfterTalk: true,
+    canCancel: false,
+    retreatOnCancel: false
+  },
+  {
     id: "NPC_01",
     name: "みかんにゃんこ",
     imageId: "NPC_01",

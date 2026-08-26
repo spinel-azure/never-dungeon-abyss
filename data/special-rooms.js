@@ -142,6 +142,17 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
       minimapMarker: "E",
       revealBeforeExploration: true
     })
+  }),
+  66: Object.freeze({
+    lock: Object.freeze({ mode: "alwaysSuccess", attempts: 1 }),
+    content: Object.freeze({
+      type: "secondQueenShadowFinale",
+      requiredQuestId: "guild_024",
+      requiredProgress: 6,
+      accessBlockedMessage: "砂に埋もれた扉は、今は開かないようだ。",
+      minimapMarker: "E",
+      revealBeforeExploration: true
+    })
   })
 });
 

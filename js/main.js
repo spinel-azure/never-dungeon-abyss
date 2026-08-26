@@ -162,6 +162,7 @@ import {
   abandonQuest,
   acceptQuest,
   completeQueenShadowInvestigation,
+  completeSecondQueenShadowInvestigation,
   grantRedDoorInvestigationSupply,
   getForcedEnemyId,
   getActiveDefeatQuestProgress,
@@ -176,6 +177,7 @@ import {
   recordQuestBeeswax,
   deliverQuestBeeswax,
   recordQueenShadowEncounter,
+  recordSecondQueenShadowEncounter,
   recordThievesClue,
   reportQuest
 } from "../data/quests.js";
@@ -640,6 +642,12 @@ import {
         saveGame();
         return;
       }
+      if (character && npc?.id === "queen_shadow_desert") {
+        character = recordSecondQueenShadowEncounter(character, currentDepth);
+        updateCharacterUi();
+        saveGame();
+        return;
+      }
       if (!character || !String(npc?.id || "").startsWith("NPC_01")) return;
       character = {
         ...character,
@@ -655,6 +663,17 @@ import {
       updateCharacterUi();
       saveGame();
       setTimeout(() => showNamedItemGetEffect(["女王のティアラ"]), 0);
+      return true;
+    },
+    isSecondQueenShadowFinaleCompleted: () => Boolean(character?.eventFlags?.quest_024_earring_found),
+    onSecondQueenShadowFinaleComplete: () => {
+      if (!character || character.eventFlags?.quest_024_earring_found) return false;
+      const granted = grantKeyItem(character.keyItems, "queen_earring");
+      if (!granted.gained && granted.reason !== "alreadyOwned") return false;
+      character = completeSecondQueenShadowInvestigation({ ...character, keyItems: granted.keyItems });
+      updateCharacterUi();
+      saveGame();
+      setTimeout(() => showNamedItemGetEffect(["女王のイヤリング"], { important: true }), 0);
       return true;
     },
     onQuestEvent: event => {
@@ -3545,6 +3564,7 @@ import {
     const floorBoss = getFloorBossByDepth(currentDepth);
     const room = floorBoss?.room || {};
     const queenShadowQuest = getQuestProgress(character, "guild_008");
+    const secondQueenShadowQuest = getQuestProgress(character, "guild_024");
     return {
       bossDefeated: isBossDefeated(character, "strange_knight_statue_b9f"),
       bossDefeatedById: {
@@ -3571,6 +3591,11 @@ import {
         active: queenShadowQuest.active,
         completed: queenShadowQuest.completed,
         progress: queenShadowQuest.progress
+      },
+      secondQueenShadowQuest: {
+        active: secondQueenShadowQuest.active,
+        completed: secondQueenShadowQuest.completed,
+        progress: secondQueenShadowQuest.progress
       },
       activeQuestIds: Object.keys(character?.quests?.active || {}),
       forcedEnemyId: getForcedEnemyId(character, { depth: currentDepth }),

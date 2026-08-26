@@ -90,6 +90,8 @@ const hooks = {
   onNpcEncountered: () => {},
   isQueenShadowFinaleCompleted: () => false,
   onQueenShadowFinaleComplete: () => false,
+  isSecondQueenShadowFinaleCompleted: () => false,
+  onSecondQueenShadowFinaleComplete: () => false,
   onQuestEvent: () => "",
   onFixedFloorEvent: () => "",
   onDungeonStep: () => {},
@@ -643,6 +645,21 @@ function startSpecialRoomContentEvent(content, fromGX, fromGY) {
     });
     return;
   }
+  if (content?.type === "secondQueenShadowFinale") {
+    if (hooks.isSecondQueenShadowFinaleCompleted()) return;
+    startOverlayEvent({
+      type: "secondQueenShadowFinale",
+      phase: "prompt",
+      imageId: "NPC_01b",
+      glow: "paleBlue",
+      fromGX,
+      fromGY,
+      canCancel: true,
+      retreatOnCancel: true,
+      message: "部屋の奥に女王の影が佇んでいる。近づきますか？\n＊Aボタン：はい　Bボタン：いいえ"
+    });
+    return;
+  }
   if (!["repeatableBoss", "eventBoss", "multiEnemyBoss"].includes(content?.type)) return;
   const boss = getBossById(content.bossId);
   if (!boss || hooks.isBossDefeated(boss.id)) return;
@@ -730,6 +747,46 @@ function advanceQueenShadowFinaleEvent() {
     event.phase = "acquired";
     hooks.onQueenShadowFinaleComplete();
     hooks.say("「女王のティアラ」を手に入れた！\n＊Aボタン：次へ");
+    hooks.onStateChanged();
+    return;
+  }
+  state.overlayEvent = null;
+  hooks.say("");
+  hooks.onStateChanged();
+}
+
+function advanceSecondQueenShadowFinaleEvent() {
+  const event = state.overlayEvent;
+  if (!event || event.type !== "secondQueenShadowFinale") return;
+  event.canCancel = false;
+  if (event.phase === "prompt") {
+    event.phase = "vanished";
+    event.imageId = "";
+    event.glow = "";
+    hooks.say("女王の影へ近づこうとした瞬間、砂を巻き上げて姿を消した。\n＊Aボタン：次へ");
+    return;
+  }
+  if (event.phase === "vanished") {
+    event.phase = "mikan";
+    event.imageId = "NPC_01";
+    hooks.say("みかんにゃんこ「にゃあ…。どこにいっても暑いにゃあ…。うみゅん…？女王…？何言ってるにゃあ？」\n＊Aボタン：次へ");
+    return;
+  }
+  if (event.phase === "mikan") {
+    event.phase = "departed";
+    event.imageId = "";
+    hooks.say("みかんにゃんこは去って行った。\n＊Aボタン：次へ");
+    return;
+  }
+  if (event.phase === "departed") {
+    event.phase = "found";
+    hooks.say("…何か落ちている。\n＊Aボタン：次へ");
+    return;
+  }
+  if (event.phase === "found") {
+    event.phase = "acquired";
+    hooks.onSecondQueenShadowFinaleComplete();
+    hooks.say("「女王のイヤリング」を手に入れた！\n＊Aボタン：次へ");
     hooks.onStateChanged();
     return;
   }
@@ -864,6 +921,7 @@ export function handleOverlayEventInput(action) {
       hooks.onStateChanged();
     }
     else if (state.overlayEvent.type === "queenShadowFinale") advanceQueenShadowFinaleEvent();
+    else if (state.overlayEvent.type === "secondQueenShadowFinale") advanceSecondQueenShadowFinaleEvent();
     else if (state.overlayEvent.type === "jireneAwakening") {
       state.overlayEvent = null;
       hooks.say("");

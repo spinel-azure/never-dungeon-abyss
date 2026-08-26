@@ -29,6 +29,7 @@ export const FIFTH_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_019";
 export const HERBICIDE_TRIAL_QUEST_ID = "guild_020";
 export const ABYSS_MUSK_QUEST_ID = "guild_021";
 export const SIXTH_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_023";
+export const SECOND_QUEEN_SHADOW_QUEST_ID = "guild_024";
 export const SEVENTH_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_027";
 export const JIRENE_SONG_INVESTIGATION_QUEST_ID = "guild_028";
 export const JIRENE_SONG_INVESTIGATION_ACCEPTED_FLAG = "guild_028_accepted_once";
@@ -49,6 +50,10 @@ export const QUEEN_SHADOW_PROGRESS_FLAGS = Object.freeze([
   "quest_008_shadow_b12f_found",
   "quest_008_shadow_b13f_found",
   "quest_008_tiara_found"
+]);
+export const SECOND_QUEEN_SHADOW_PROGRESS_FLAGS = Object.freeze([
+  ...Array.from({ length: 6 }, (_, index) => `quest_024_shadow_b${index + 60}f_found`),
+  "quest_024_earring_found"
 ]);
 export const RED_DOOR_DEFENSE_CARD_FLAG = "guild_007_defense_card_received";
 export const RED_DOOR_DEFENSE_CARD_ID = "rare_defense_up";
@@ -622,6 +627,29 @@ export const QUESTS = Object.freeze([
     available: true
   }),
   Object.freeze({
+    id: SECOND_QUEEN_SHADOW_QUEST_ID,
+    number: "024",
+    title: "女王の影を追え――その2",
+    client: "ギルドマスター",
+    category: "other",
+    objectiveType: "custom",
+    targetDepth: 66,
+    requiredCount: 7,
+    objectiveLabel: "砂漠区域で女王の影を見つける",
+    reward: Object.freeze({ type: "card", label: "デッキカード×1", amount: 1, cardId: "sr_mirage" }),
+    descriptionLabel: "内容",
+    description: Object.freeze([
+      "行方不明の女王に似た姿を砂漠区域で多数見かけ",
+      "たいう情報が入った。真偽を確かめてくれ。",
+      "砂漠区域は流砂に足を取られたり、蜃気楼に",
+      "惑わされるという。十分に気をつけろ。"
+    ]),
+    prerequisiteQuestIds: Object.freeze([HERBICIDE_TRIAL_QUEST_ID]),
+    persistentProgressFlags: SECOND_QUEEN_SHADOW_PROGRESS_FLAGS,
+    progressMode: "matchedFlags",
+    available: true
+  }),
+  Object.freeze({
     id: SEVENTH_RED_DOOR_INVESTIGATION_QUEST_ID,
     number: "027",
     title: "赤い扉の調査――その7",
@@ -1102,6 +1130,31 @@ export function completeQueenShadowInvestigation(character) {
     eventFlags: { ...(character.eventFlags || {}), [completionFlag]: true }
   };
   return recordCustomQuestProgress(next, QUEEN_SHADOW_QUEST_ID, 1);
+}
+
+export function recordSecondQueenShadowEncounter(character, depth) {
+  const normalizedDepth = Math.floor(Number(depth) || 0);
+  const flag = normalizedDepth >= 60 && normalizedDepth <= 65
+    ? SECOND_QUEEN_SHADOW_PROGRESS_FLAGS[normalizedDepth - 60]
+    : null;
+  const progress = getQuestProgress(character, SECOND_QUEEN_SHADOW_QUEST_ID);
+  if (!flag || !progress.active || progress.completed || character?.eventFlags?.[flag]) return character;
+  const next = {
+    ...character,
+    eventFlags: { ...(character.eventFlags || {}), [flag]: true }
+  };
+  return recordCustomQuestProgress(next, SECOND_QUEEN_SHADOW_QUEST_ID, 1);
+}
+
+export function completeSecondQueenShadowInvestigation(character) {
+  const progress = getQuestProgress(character, SECOND_QUEEN_SHADOW_QUEST_ID);
+  const completionFlag = SECOND_QUEEN_SHADOW_PROGRESS_FLAGS[6];
+  if (!progress.active || progress.progress < 6 || character?.eventFlags?.[completionFlag]) return character;
+  const next = {
+    ...character,
+    eventFlags: { ...(character.eventFlags || {}), [completionFlag]: true }
+  };
+  return recordCustomQuestProgress(next, SECOND_QUEEN_SHADOW_QUEST_ID, 1);
 }
 
 export function reportQuest(character, questId) {
