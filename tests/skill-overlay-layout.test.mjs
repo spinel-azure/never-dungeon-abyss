@@ -19,6 +19,17 @@ test("battle skills hide passives and paginate as two columns of six", async () 
   assert.match(html, /data-skill-next/);
 });
 
+test("field skills paginate every eight entries without overlapping", async () => {
+  const [source, styles] = await Promise.all([
+    readFile(new URL("../js/skill-overlay.js", import.meta.url), "utf8"),
+    readFile(new URL("../css/skill-overlay.css", import.meta.url), "utf8")
+  ]);
+  assert.match(source, /FIELD_SKILLS_PER_PAGE = 8/);
+  assert.match(source, /function getPageSize\(\)[\s\S]*?BATTLE_SKILLS_PER_PAGE : FIELD_SKILLS_PER_PAGE/);
+  assert.match(source, /const pageCount = getPageCount\(\)/);
+  assert.match(styles, /\.skill-overlay\.is-field-inventory \.skill-overlay-list\{[^}]*repeat\(8,/);
+});
+
 
 test("item and skill overlays remember the last used selection separately by context", async () => {
   const [items, skills] = await Promise.all([

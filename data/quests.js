@@ -15,6 +15,7 @@ export const QUEEN_SHADOW_QUEST_ID = "guild_008";
 export const JABBERWOCK_QUEST_ID = "guild_009";
 export const SECOND_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_010";
 export const THIEVES_HIDEOUT_QUEST_ID = "guild_011";
+export const THIEVES_HIDEOUT_ACCEPTED_FLAG = "guild_011_accepted_once";
 export const THIRD_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_012";
 export const B35F_SURVEY_QUEST_ID = "guild_013";
 export const B35F_SURVEY_SUPPLY_FLAG = "guild_013_large_potions_received";
@@ -820,6 +821,15 @@ export function acceptQuest(character, questId) {
       }
     };
   }
+  if (quest.id === THIEVES_HIDEOUT_QUEST_ID) {
+    next = {
+      ...next,
+      eventFlags: {
+        ...(next.eventFlags || {}),
+        [THIEVES_HIDEOUT_ACCEPTED_FLAG]: true
+      }
+    };
+  }
   let acceptanceRewardCardId = null;
   if (quest.id === RED_DOOR_INVESTIGATION_QUEST_ID) {
     const supply = grantRedDoorInvestigationSupply(next);
@@ -893,7 +903,15 @@ export function abandonQuest(character, questId) {
 
 export function recordEnemyDefeat(character, enemyId, depth = null) {
   const quests = normalizeQuestState(character?.quests);
+  let eventFlags = character?.eventFlags || {};
   let updated = false;
+  if (enemyId === "maikaefer") {
+    eventFlags = {
+      ...eventFlags,
+      maikaefer_defeat_count: Math.max(0, Math.floor(Number(eventFlags.maikaefer_defeat_count) || 0)) + 1
+    };
+    updated = true;
+  }
   Object.entries(quests.active).forEach(([questId, entry]) => {
     const quest = getQuestById(questId);
     if (quest?.objectiveType !== "defeatEnemy" || quest.targetId !== enemyId) return;
@@ -902,7 +920,7 @@ export function recordEnemyDefeat(character, enemyId, depth = null) {
     entry.progress = Math.min(quest.requiredCount, entry.progress + 1);
     updated = true;
   });
-  return updated ? { ...character, quests } : character;
+  return updated ? { ...character, quests, eventFlags } : character;
 }
 
 export function getActiveDefeatQuestProgress(character) {

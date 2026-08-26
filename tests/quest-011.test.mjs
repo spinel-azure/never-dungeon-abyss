@@ -8,7 +8,7 @@ import { grantKeyItem, hasKeyItem } from "../data/key-items.js";
 import {
   acceptQuest, abandonQuest, getQuestProgress, isQuestAvailable, recordBossDefeat,
   recordThievesClue, reportQuest, SECOND_RED_DOOR_INVESTIGATION_QUEST_ID,
-  THIEVES_HIDEOUT_QUEST_ID, THIRD_RED_DOOR_INVESTIGATION_QUEST_ID
+  THIEVES_HIDEOUT_ACCEPTED_FLAG, THIEVES_HIDEOUT_QUEST_ID, THIRD_RED_DOOR_INVESTIGATION_QUEST_ID
 } from "../data/quests.js";
 import { getQuestRequiredSpecialRoomAccess, getSpecialRoomDefinition } from "../data/special-rooms.js";
 import { buildBoundaryWallMap, cells, setStartPosition } from "../js/dungeon.js";
@@ -34,6 +34,7 @@ test("quest 011 links quest 010 to quest 012 without invalidating legacy quest 0
 
 test("three clues progress in any order, survive abandonment, and restore on reacceptance", () => {
   let character = acceptQuest(eligible(), THIEVES_HIDEOUT_QUEST_ID).character;
+  assert.equal(character.eventFlags[THIEVES_HIDEOUT_ACCEPTED_FLAG], true);
   for (const flag of ["quest_011_clue_map_found", "quest_011_clue_emblem_found", "quest_011_clue_ledger_found"]) {
     character = recordThievesClue(character, flag);
   }

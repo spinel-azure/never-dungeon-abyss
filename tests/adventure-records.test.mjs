@@ -16,6 +16,7 @@ test("rumor history reserves more lines and scrolls long dialogue", async () => 
 });
 import { formatPlayTime, getActivePlayTimeDelta, normalizeAdventureStats, PLAY_TIME_ERA, recordInnStay, recordShopPurchase, recordTempleDonation } from "../data/adventure-stats.js";
 import { createInitialCharacter } from "../data/classes.js";
+import { recordEnemyDefeat } from "../data/quests.js";
 
 test("adventure records summarize values already stored in the save", () => {
   const character = createInitialCharacter({ name: "記録係", job: "thief" });
@@ -131,6 +132,22 @@ test("unachieved stable and Otherworldly Wisdom milestones show their hints", ()
   const chronicle = getAdventureChronicle(character);
   assert.equal(chronicle.find(entry => entry.id === "stable").label, "？？？？？？――朝の目覚め");
   assert.equal(chronicle.find(entry => entry.id === "otherworldlyWisdom").label, "？？？？？？――絶望への挑戦");
+});
+
+test("Mimic and ten-Maikaefer achievements expose their requested hidden hints", () => {
+  let character = createInitialCharacter({ name: "採取者", job: "thief" });
+  let chronicle = getAdventureChronicle(character);
+  assert.equal(chronicle.find(entry => entry.id === "mimic").label, "？？？？？？――ビックリばこ");
+  assert.equal(chronicle.find(entry => entry.id === "maikaeferCollector").label, "？？？？？？――昆虫採取");
+  for (let count = 0; count < 10; count += 1) {
+    character = recordEnemyDefeat(character, "maikaefer");
+  }
+  assert.equal(character.eventFlags.maikaefer_defeat_count, 10);
+  chronicle = getAdventureChronicle(character);
+  assert.equal(chronicle.find(entry => entry.id === "maikaeferCollector").achieved, true);
+  assert.equal(chronicle.find(entry => entry.id === "maikaeferCollector").label, "マイケーファーを10匹討伐した");
+  character.eventFlags.boss_quest_mimic_b6f_defeated = true;
+  assert.equal(getAdventureChronicle(character).find(entry => entry.id === "mimic").label, "黒い箱の怪物を討伐した");
 });
 
 test("midgame chronicle includes the seven new boss, floor, and survey achievements", () => {

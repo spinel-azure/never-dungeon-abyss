@@ -2,7 +2,9 @@ import { isAnastasiaFestivalSunday } from "../data/anastasia-event.js";
 import {
   getQuestProgress,
   JIRENE_SONG_INVESTIGATION_ACCEPTED_FLAG,
-  JIRENE_SONG_INVESTIGATION_QUEST_ID
+  JIRENE_SONG_INVESTIGATION_QUEST_ID,
+  THIEVES_HIDEOUT_ACCEPTED_FLAG,
+  THIEVES_HIDEOUT_QUEST_ID
 } from "../data/quests.js";
 
 const PASSERBY_CONFIGS = Object.freeze([
@@ -23,6 +25,7 @@ const PASSERBY_CONFIGS = Object.freeze([
     id: "quietTownGirl",
     src: "images/npc/NPC_16.avif",
     hiddenAfterFlag: JIRENE_SONG_INVESTIGATION_ACCEPTED_FLAG,
+    hiddenAfterQuestId: JIRENE_SONG_INVESTIGATION_QUEST_ID,
     speed: 34,
     bobAmplitude: 1,
     walkPeriod: 660,
@@ -147,6 +150,8 @@ const PASSERBY_CONFIGS = Object.freeze([
   Object.freeze({
     id: "malicious",
     src: "images/npc/NPC_24.avif",
+    hiddenAfterFlag: THIEVES_HIDEOUT_ACCEPTED_FLAG,
+    hiddenAfterQuestId: THIEVES_HIDEOUT_QUEST_ID,
     speed: 78,
     bobAmplitude: 1,
     walkPeriod: 360,
@@ -337,6 +342,8 @@ export function isTownPasserbyVisible(id, character) {
   const config = PASSERBY_CONFIGS.find(entry => entry.id === id);
   if (!config) return false;
   if (!config.hiddenAfterFlag) return true;
-  const quest = getQuestProgress(character, JIRENE_SONG_INVESTIGATION_QUEST_ID);
+  if (character?.eventFlags?.[config.hiddenAfterFlag]) return false;
+  if (!config.hiddenAfterQuestId) return true;
+  const quest = getQuestProgress(character, config.hiddenAfterQuestId);
   return !character?.eventFlags?.[config.hiddenAfterFlag] && !quest.active && !quest.completed;
 }

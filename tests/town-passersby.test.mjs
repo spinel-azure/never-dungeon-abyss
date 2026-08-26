@@ -55,3 +55,13 @@ test("Malicious hurries through town immediately behind the horse layer", () => 
   assert.match(source, /id: "malicious"[\s\S]*?drawOrder: 0\.9[\s\S]*?gait: "skulk"/);
   assert.match(source, /config\.gait === "skulk"[\s\S]*?\[0, 0, -1, -1, 0, 0, -1, -1\]/);
 });
+
+test("Malicious permanently leaves the town passersby after quest 011 is accepted", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "thief" });
+  assert.equal(isTownPasserbyVisible("malicious", character), true);
+  character.eventFlags.guild_011_accepted_once = true;
+  assert.equal(isTownPasserbyVisible("malicious", character), false);
+  delete character.eventFlags.guild_011_accepted_once;
+  character.quests.active.guild_011 = { progress: 0 };
+  assert.equal(isTownPasserbyVisible("malicious", character), false);
+});

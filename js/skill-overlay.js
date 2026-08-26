@@ -3,6 +3,7 @@ import { getEffectiveSpCost } from "../combat/sp-cost.js";
 
 const BATTLE_SKILLS_PER_COLUMN = 6;
 const BATTLE_SKILLS_PER_PAGE = BATTLE_SKILLS_PER_COLUMN * 2;
+const FIELD_SKILLS_PER_PAGE = 8;
 
 const overlay = {
   root: null,
@@ -44,7 +45,7 @@ export function openSkillOverlay({ context = "field", character, enemy = null, o
   overlay.context = context;
   overlay.skills = getSkills(character.skillIds).filter(skill => context !== "battle" || skill.actionType !== "passive");
   overlay.selectedIndex = restoreSelectedIndex(overlay.skills, overlay.lastSelectionByContext[context]);
-  overlay.page = context === "battle" ? Math.floor(overlay.selectedIndex / BATTLE_SKILLS_PER_PAGE) : 0;
+  overlay.page = Math.floor(overlay.selectedIndex / getPageSize());
   overlay.enemy = enemy;
   overlay.getCharacter = () => character;
   if (onUse) overlay.onUse = onUse;
@@ -91,11 +92,13 @@ export function handleSkillOverlayInput(action) {
     return true;
   }
   if (action === "left") {
-    moveHorizontal(-1);
+    if (overlay.context === "battle") moveHorizontal(-1);
+    else changePage(-1);
     return true;
   }
   if (action === "right") {
-    moveHorizontal(1);
+    if (overlay.context === "battle") moveHorizontal(1);
+    else changePage(1);
     return true;
   }
   if (action === "confirm") {
@@ -141,8 +144,17 @@ function moveHorizontal(amount) {
 }
 
 function moveLinear(amount) {
-  const itemCount = overlay.skills.length + 1;
-  overlay.selectedIndex = (overlay.selectedIndex + amount + itemCount) % itemCount;
+  const { start, items } = getCurrentPage();
+  if (!items.length) return selectBack();
+  if (overlay.selectedIndex === overlay.skills.length) {
+    overlay.selectedIndex = amount < 0 ? start + items.length - 1 : start;
+  } else {
+    const localIndex = overlay.selectedIndex - start;
+    const nextIndex = localIndex + amount;
+    overlay.selectedIndex = nextIndex >= 0 && nextIndex < items.length
+      ? start + nextIndex
+      : overlay.skills.length;
+  }
   overlay.playSe("cursorMove");
   renderSelection();
 }
@@ -154,8 +166,7 @@ function selectBack() {
 }
 
 function changePage(amount, preferredRow = 0) {
-  if (overlay.context !== "battle") return false;
-  const pageCount = Math.max(1, Math.ceil(overlay.skills.length / BATTLE_SKILLS_PER_PAGE));
+  const pageCount = getPageCount();
   if (pageCount <= 1) return false;
   overlay.page = (overlay.page + amount + pageCount) % pageCount;
   const { start, items } = getCurrentPage();
@@ -166,9 +177,17 @@ function changePage(amount, preferredRow = 0) {
 }
 
 function getCurrentPage() {
-  const pageSize = overlay.context === "battle" ? BATTLE_SKILLS_PER_PAGE : Math.max(1, overlay.skills.length);
+  const pageSize = getPageSize();
   const start = overlay.page * pageSize;
   return { start, items: overlay.skills.slice(start, start + pageSize) };
+}
+
+function getPageSize() {
+  return overlay.context === "battle" ? BATTLE_SKILLS_PER_PAGE : FIELD_SKILLS_PER_PAGE;
+}
+
+function getPageCount() {
+  return Math.max(1, Math.ceil(overlay.skills.length / getPageSize()));
 }
 
 async function activateSelected() {
@@ -229,10 +248,10 @@ function render() {
     return button;
   });
   overlay.list.replaceChildren(...buttons);
-  const pageCount = overlay.context === "battle" ? Math.max(1, Math.ceil(overlay.skills.length / BATTLE_SKILLS_PER_PAGE)) : 1;
+  const pageCount = getPageCount();
   overlay.pageEl.textContent = `${overlay.page + 1}/${pageCount}`;
-  if (overlay.prevButton) overlay.prevButton.hidden = overlay.context !== "battle" || pageCount <= 1;
-  if (overlay.nextButton) overlay.nextButton.hidden = overlay.context !== "battle" || pageCount <= 1;
+  if (overlay.prevButton) overlay.prevButton.hidden = pageCount <= 1;
+  if (overlay.nextButton) overlay.nextButton.hidden = pageCount <= 1;
   renderSelection();
 }
 
