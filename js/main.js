@@ -2406,6 +2406,7 @@ import {
     );
     const reward = calculateBattleExperienceReward(character, baseReward);
     let bossRewardMessage = "";
+    const nextBoss = battle?.enemy?.nextBossId ? getBossById(battle.enemy.nextBossId) : null;
     if (character && battle?.enemy?.isDungeonObstacle) {
       removeBossAt(state.gridX, state.gridY);
     } else if (character && battle?.enemy?.isBoss) {
@@ -2529,7 +2530,10 @@ import {
 
     const drop = fixedGoldPerDefeat > 0 ? { kind: "gold", amount: fixedGoldPerDefeat } : rollEnemyDrop(battle?.enemy);
     const dropMessage = drop.kind === "redChest" ? "" : addRolledLoot(drop);
-    const victoryMessage = `${reward > 0 ? `戦闘に勝利した。${reward}EXPを獲得した。` : "戦闘に勝利した。"}${bossRewardMessage}${questCollectionMessage}${dropMessage ? `\n${dropMessage}` : ""}${defeatQuestProgressMessage}`;
+    const chainedBattleMessage = nextBoss && !isBossDefeated(character, nextBoss)
+      ? `\nしかし、その奥から${nextBoss.name}が姿を現した――！`
+      : "";
+    const victoryMessage = `${reward > 0 ? `戦闘に勝利した。${reward}EXPを獲得した。` : "戦闘に勝利した。"}${bossRewardMessage}${questCollectionMessage}${dropMessage ? `\n${dropMessage}` : ""}${defeatQuestProgressMessage}${chainedBattleMessage}`;
     resetPresence();
     setPlayerInputEnabled(true);
     if (drop.kind === "redChest") {
@@ -2541,6 +2545,13 @@ import {
     }
     updateCharacterUi();
     saveGame();
+    if (nextBoss && !isBossDefeated(character, nextBoss)) {
+      setPlayerInputEnabled(false);
+      window.setTimeout(() => {
+        say(nextBoss.event?.start || `${nextBoss.name}が現れた！`);
+        window.setTimeout(() => beginBossBattle(nextBoss.id), 1800);
+      }, 900);
+    }
   }
 
   async function finishBattleDefeat(battle) {
@@ -3483,6 +3494,7 @@ import {
       bossDefeated: isBossDefeated(character, "strange_knight_statue_b9f"),
       bossDefeatedById: {
         ...(floorBoss ? { [floorBoss.id]: isBossDefeated(character, floorBoss) } : {}),
+        ...(floorBoss?.nextBossId ? { [floorBoss.nextBossId]: isBossDefeated(character, floorBoss.nextBossId) } : {}),
         quest_mimic_b6f: isBossDefeated(character, "quest_mimic_b6f"),
         otherworldly_wisdom_b4f: isBossDefeated(character, "otherworldly_wisdom_b4f"),
         todes_scorpio_b64f: isBossDefeated(character, "todes_scorpio_b64f")

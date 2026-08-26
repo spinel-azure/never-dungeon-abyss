@@ -216,6 +216,7 @@ export function configureRenderer(options) {
   loadCharacterImage("giant_wasp_hive_b18f", "images/background/dungeon_event_10.avif");
   loadCharacterImage("kirke_house_b58f", "images/background/dungeon_event_11.avif");
   loadCharacterImage("NPC_23", "images/npc/NPC_23.avif");
+  loadCharacterImage("warp_portal_b100f", "images/dungeon_effects/warp_portal.avif");
   ["red", "black", "gold"].forEach(type => loadTreasureImage(type, `images/treasure/treasure-${type}.png`));
   loadTreasureImage("purple", "images/treasure/treasure-red.png", "#8f42d8");
   renderer.canvas.addEventListener("pointerup", handleCanvasPointerUp);
@@ -1208,6 +1209,20 @@ function directionKeyBetween(fromX, fromY, toX, toY) {
 function drawStairsEventMarker(ctx, W, H, event) {
   const isUp = event.type === "stairsUp";
   const isPortal = isUp && String(event.portal || "").startsWith("transfer_b");
+  if (event.portal === "transfer_b100f") {
+    const image = renderer.characterImages.get("warp_portal_b100f");
+    if (image?.complete && image.naturalWidth > 0) {
+      const drawH = event.size * 2.15;
+      const drawW = drawH * (image.naturalWidth / image.naturalHeight);
+      ctx.save();
+      ctx.globalAlpha = event.alpha;
+      ctx.shadowColor = "rgba(128,224,255,.95)";
+      ctx.shadowBlur = event.size * .35;
+      ctx.drawImage(image, event.x - drawW / 2, event.floorY - drawH, drawW, drawH);
+      ctx.restore();
+      return;
+    }
+  }
   const color = isPortal ? "#c67cff" : isUp ? "#8ed4ff" : "#f3b15a";
   const quad = event.footprint ? (isUp ? event.footprint.ceiling : event.footprint.floor) : null;
   const centerY = isUp ? event.ceilingY : event.floorY;

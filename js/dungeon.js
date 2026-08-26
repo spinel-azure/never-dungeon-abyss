@@ -20,7 +20,7 @@ import {
   isDesertOasisFloor
 } from "../data/fountains.js";
 import { getSpecialRoomDefinition, getSpecialRoomUnlockRate, rollMaikaeferNestContent } from "../data/special-rooms.js";
-import { getFloorBossByDepth } from "../data/bosses.js";
+import { getBossById, getFloorBossByDepth } from "../data/bosses.js";
 import { getQuestEventForDepth } from "../data/quest-events.js";
 import { DESERT_QUICKSAND, floorHasQuicksand, QUICKSAND_COUNT } from "../data/quicksand.js";
 import { floorHasRapidCurrents, getRapidCurrentTargetCount, RAPID_CURRENT, RAPID_CURRENT_DIRECTIONS } from "../data/rapid-currents.js";
@@ -936,9 +936,13 @@ export function placeNormalDoors(count = NORMAL_DOOR_COUNT, reset = true) {
 }
 
 export function placeFloorBossRoom(bossDefinition, rng = Math.random, progress = {}) {
-  const floorBoss = typeof bossDefinition === "number"
+  const initialFloorBoss = typeof bossDefinition === "number"
     ? getFloorBossByDepth(bossDefinition)
     : bossDefinition;
+  const nextBoss = initialFloorBoss?.nextBossId ? getBossById(initialFloorBoss.nextBossId) : null;
+  const floorBoss = initialFloorBoss && progress.bossDefeatedById?.[initialFloorBoss.id] && nextBoss
+    ? nextBoss
+    : initialFloorBoss;
   if (!floorBoss) return null;
   const { x: startX, y: startY } = startPosition;
   const candidates = [];
@@ -994,7 +998,7 @@ export function placeFloorBossRoom(bossDefinition, rng = Math.random, progress =
         : bossDefeated && (floorBoss.defeatedEncounterImage || floorBoss.event?.remains)
           ? floorBoss.id
           : null;
-      stairs.type = "stairsDown";
+      if (floorBoss.floor !== 100) stairs.type = "stairsDown";
       for (const target of [blank, boss, stairs]) {
         target.npc = null; target.fountain = null; target.treasure = null; target.eventTreasureId = null;
       }

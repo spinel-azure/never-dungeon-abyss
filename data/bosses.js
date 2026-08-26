@@ -782,6 +782,94 @@ export const BOSSES = Object.freeze({
       remains: "魂を縛っていた漆黒の影は消え、静かな光だけが残っている。\n＊Aボタン：次へ"
     })
   }),
+  erzdaemonin_b100f: Object.freeze({
+    id: "erzdaemonin_b100f", name: "エルツデモーニン", level: 115, floor: 100,
+    imageId: "erzdaemonin_b100f", image: "images/bosses/boss_18.avif", battleSize: "huge-wide",
+    encounterImageId: "erzdaemonin_b100f", encounterImage: "images/bosses/boss_18.avif",
+    race: "demon", maxHp: 28000,
+    stats: Object.freeze({ str: 68, int: 62, agi: 46, dex: 58, luc: 50 }),
+    def: 62, attack: 68, experienceReward: 140000,
+    actions: Object.freeze([
+      Object.freeze({ weight: 38, action: Object.freeze({
+        id: "archdemon_claw", name: "大悪魔の鉤爪", actionType: "physicalAttack",
+        hitCount: 2, powerPerHit: 0.9, hitBonus: 0.04, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 34, action: Object.freeze({
+        id: "hellfire", name: "獄炎", actionType: "spell", element: "fire",
+        spellPower: 112, powerMultiplier: 1.15, unavoidable: true, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 28, when: Object.freeze({ hpRateBelow: 0.55 }), action: Object.freeze({
+        id: "demonic_crush", name: "魔界震砕", actionType: "physicalAttack",
+        hitCount: 1, powerPerHit: 1.7, hitBonus: -0.04, speedModifier: -6,
+        effects: Object.freeze([Object.freeze({ statusId: "action_skip", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.35 })])
+      }) })
+    ]),
+    reward: Object.freeze({ type: "none" }),
+    elementMultipliers: Object.freeze({ fire: 0.5, ice: 1.25, lightning: 1, holy: 1.5, dark: 0.5, arcane: 1 }),
+    statusResistances: Object.freeze({
+      instant_death: Object.freeze({ resistancePoints: 100, immune: true }),
+      poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      deadly_poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      bleeding: Object.freeze({ resistancePoints: 95, immune: false }),
+      action_skip: Object.freeze({ resistancePoints: 100, immune: true }),
+      speed_down: Object.freeze({ resistancePoints: 90, immune: false })
+    }),
+    escapeRate: 0, surpriseRate: 0, surpriseRateMaximum: 0, noDrop: true,
+    isBoss: true, bossKind: "floor", defeatedFlag: "boss_erzdaemonin_b100f_defeated",
+    nextBossId: "amayenak_b100f",
+    room: Object.freeze({ doorStartsUnlocked: true }),
+    event: Object.freeze({
+      prompt: "大魔導師を守る大悪魔が、行く手を塞いでいる。\n＊Aボタンで次へ",
+      start: "アマイェナクに忠誠を誓う大悪魔――エルツデモーニンが襲いかかってきた！",
+      autoStartDelay: 2200
+    })
+  }),
+  amayenak_b100f: Object.freeze({
+    id: "amayenak_b100f", name: "ドゥンケルマギーア・アマイェナク", level: 120, floor: 100,
+    imageId: "amayenak_b100f", image: "images/bosses/boss_19.avif", battleSize: "huge-wide",
+    encounterImageId: "amayenak_b100f", encounterImage: "images/bosses/boss_19.avif",
+    race: "human", maxHp: 36000,
+    stats: Object.freeze({ str: 56, int: 82, agi: 52, dex: 64, luc: 58 }),
+    def: 66, attack: 62, experienceReward: 220000,
+    actions: Object.freeze([
+      Object.freeze({ weight: 30, action: Object.freeze({
+        id: "abyss_magic", name: "深淵魔術", actionType: "spell", element: "dark",
+        spellPower: 126, powerMultiplier: 1.2, unavoidable: true, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 28, action: Object.freeze({
+        id: "stolen_truth", name: "奪われた真実", actionType: "spell", element: "arcane",
+        spellPower: 118, powerMultiplier: 1.1, unavoidable: true,
+        effects: Object.freeze([Object.freeze({ statusId: "speed_down", trigger: "perAction", statusKind: "magical", baseRate: 0.45 })])
+      }) }),
+      Object.freeze({ weight: 24, action: Object.freeze({
+        id: "dark_staff_strike", name: "真実の杖", actionType: "physicalAttack",
+        hitCount: 2, powerPerHit: 0.95, hitBonus: 0.06, effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 18, when: Object.freeze({ hpRateBelow: 0.5 }), action: Object.freeze({
+        id: "abyss_end", name: "アビス・エンド", actionType: "spell", element: "dark",
+        spellPower: 145, powerMultiplier: 1.25, unavoidable: true, speedModifier: -8,
+        effects: Object.freeze([Object.freeze({ statusId: "action_skip", trigger: "perAction", statusKind: "magical", baseRate: 0.4 })])
+      }) })
+    ]),
+    reward: Object.freeze({ type: "none" }),
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1, lightning: 1, holy: 1.5, dark: 0.5, arcane: 0.7 }),
+    statusResistances: Object.freeze({
+      instant_death: Object.freeze({ resistancePoints: 100, immune: true }),
+      poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      deadly_poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      bleeding: Object.freeze({ resistancePoints: 100, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 100, immune: true }),
+      speed_down: Object.freeze({ resistancePoints: 95, immune: false })
+    }),
+    escapeRate: 0, surpriseRate: 0, surpriseRateMaximum: 0, noDrop: true,
+    isBoss: true, bossKind: "finalPhase", defeatedFlag: "boss_amayenak_b100f_defeated",
+    room: Object.freeze({ doorStartsUnlocked: true }),
+    event: Object.freeze({
+      prompt: "真実の杖を手にした大魔導師アマイェナクが、静かにこちらを見据えている。\n＊Aボタンで次へ",
+      start: "女王ミカエラから真実の杖を奪った張本人――ドゥンケルマギーア・アマイェナクとの最終決戦が始まる！",
+      autoStartDelay: 2400
+    })
+  }),
   jirene_b79f: Object.freeze({
     id: "jirene_b79f", name: "ジレーネ", level: 90, floor: 79,
     imageId: "jirene_b79f", image: "images/bosses/boss_15.avif", battleSize: "large",
