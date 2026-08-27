@@ -162,6 +162,28 @@ test("inventory overflow and loot settlement retain every acquired item", () => 
   assert.deepEqual(settled.character.lootBag.items, {});
 });
 
+test("Allheilmittel carries one, stores ninety-nine total, then converts overflow to gold", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "thief" });
+  const result = grantItemWithOverflow(character, "allheilmittel", 102);
+  character = result.character;
+  assert.equal(character.inventory.counts.allheilmittel, 1);
+  assert.deepEqual(character.warehouse.itemStacks.filter(stack => stack.itemId === "allheilmittel"), [
+    { itemId: "allheilmittel", count: 99 }
+  ]);
+  assert.equal(result.convertedGold, 200000);
+  assert.equal(character.gold, 200000);
+});
+
+test("a full Allheilmittel warehouse refuses manual deposit without consuming the carried item", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "thief" });
+  character.inventory = { counts: { allheilmittel: 1 } };
+  character.warehouse = { itemStacks: [{ itemId: "allheilmittel", count: 99 }], equipmentInstances: [] };
+  const result = depositItemInWarehouse(character, "allheilmittel", 1);
+  assert.equal(result.accepted, false);
+  assert.equal(result.reason, "warehouseFull");
+  assert.equal(result.character.inventory.counts.allheilmittel, 1);
+});
+
 test("unidentified stiletto quality is retained when the loot bag is settled", () => {
   const character = createInitialCharacter({ name: "TEST", job: "thief" });
   character.lootBag = {

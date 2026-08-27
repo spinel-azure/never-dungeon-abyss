@@ -1,5 +1,13 @@
 import { canUseItemIn, getItem } from "../data/items.js";
 import { consumeItem, getItemCount } from "../data/inventory.js";
+import { getStatusEffect } from "../data/status-effects.js";
+
+export function cureAllNegativeStatuses(statuses = []) {
+  return (Array.isArray(statuses) ? statuses : []).filter(status => {
+    const kind = getStatusEffect(status?.statusId || status?.id)?.kind;
+    return kind !== "ailment" && kind !== "debuff";
+  });
+}
 
 export function getItemUnavailableReason({ character, itemId, context, enemy, torchFuel = 0, treasureCompassActive = false } = {}) {
   const item = getItem(itemId);
@@ -17,6 +25,9 @@ export function getItemUnavailableReason({ character, itemId, context, enemy, to
   if (itemId === "strong_antidote" && character.hp >= character.maxHp && !hasPoison(character)) return "noEffect";
   if (itemId === "styptic" && character.hp >= character.maxHp && !hasStatus(character, "bleeding")) return "noEffect";
   if (itemId === "active_healing_potion_small" && hasStatus(character, "active_healing_potion_small_used")) return "oncePerBattle";
+  if (itemId === "allheilmittel" && context === "battle" && hasStatus(character, "allheilmittel_used")) return "allheilmittelOncePerBattle";
+  if (itemId === "allheilmittel" && character.hp >= character.maxHp && character.sp >= character.maxSp
+    && cureAllNegativeStatuses(character.statuses).length === (character.statuses || []).length) return "noEffect";
   if (itemId === "guiding_torch" && Number(torchFuel) >= 100) return "fullTorch";
   if (itemId === "treasure_compass" && treasureCompassActive) return "noEffect";
   if (itemId === "holy_water") {
@@ -53,6 +64,7 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
   const next = structuredClone(character);
   const environment = {};
   let healing = 0;
+  let spHealing = 0;
   const deathPoisonUnaffected = ["antidote", "strong_antidote"].includes(itemId)
     && hasStatus(next, "death_poison");
   for (const effect of item.effects) {
@@ -71,6 +83,14 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
       next.statuses = (next.statuses || []).filter(status => (status.statusId || status.id) !== "deadly_poison");
     } else if (effect.id === "cure_bleeding") {
       next.statuses = (next.statuses || []).filter(status => (status.statusId || status.id) !== "bleeding");
+    } else if (effect.id === "restore_hp_full") {
+      healing += Math.max(0, next.maxHp - next.hp);
+      next.hp = next.maxHp;
+    } else if (effect.id === "restore_sp_full") {
+      spHealing += Math.max(0, next.maxSp - next.sp);
+      next.sp = next.maxSp;
+    } else if (effect.id === "cure_all_ailments") {
+      next.statuses = cureAllNegativeStatuses(next.statuses);
     } else if (effect.id === "restore_torch") {
       environment.torchFuel = effect.value;
     } else if (effect.id === "reset_presence") {
@@ -95,7 +115,10 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
     character: next,
     environment,
     healing,
-    message: `${healing > 0 ? `${item.name}を使った。HPが${healing}回復した。` : `${item.name}を使った。`}${deathPoisonUnaffected ? "\n死毒は治療する事が出来ない！" : ""}`
+    spHealing,
+    message: itemId === "allheilmittel"
+      ? `${item.name}を使った。HPとSPが全回復し、すべての状態異常が治った。`
+      : `${healing > 0 ? `${item.name}を使った。HPが${healing}回復した。` : `${item.name}を使った。`}${deathPoisonUnaffected ? "\n死毒は治療する事が出来ない！" : ""}`
   };
 }
 

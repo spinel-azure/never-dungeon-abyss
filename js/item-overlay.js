@@ -236,6 +236,7 @@ function showReason(reason) {
     dungeonOnly: "このアイテムはダンジョン探索中のみ使用できる。",
     undeadOnly: "アンデッドにしか効果がない。",
     bossImmune: "ボスには効果がない。",
-    notOwned: "そのアイテムは所持していない。"
+    notOwned: "そのアイテムは所持していない。",
+    allheilmittelOncePerBattle: "アルハイルミッテルは1戦闘に1回だけ使用できる。"
   })[reason] || "現在使用できない。";
 }

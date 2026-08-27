@@ -224,6 +224,11 @@
   max-height: 100%;
 }
 
+.battle-enemy-image.is-amayenak {
+  width: min(96%, 760px);
+  max-height: calc(100% - 64px);
+}
+
 .battle-enemy-image.is-jabberwock {
   max-height: 95%;
 }
@@ -281,6 +286,14 @@
   animation: battle-concealed-glow 2.4s ease-in-out infinite;
 }
 
+.battle-enemy-image.is-phantom {
+  filter:
+    brightness(0)
+    drop-shadow(0 0 2px rgba(225, 252, 255, .98))
+    drop-shadow(0 0 8px rgba(128, 235, 255, .9))
+    drop-shadow(0 0 18px rgba(55, 173, 255, .68));
+}
+
 .battle-enemy-image.is-hit {
   animation: battle-enemy-hit 260ms steps(2, end);
 }
@@ -288,6 +301,16 @@
 .battle-enemy-image.is-iron-maiden.is-hit {
   animation:
     battle-enemy-hit 260ms steps(2, end),
+    battle-iron-maiden-pendulum 4s ease-in-out infinite;
+}
+
+.battle-enemy-image.is-phantom.is-hit {
+  animation: battle-phantom-hit 260ms steps(2, end);
+}
+
+.battle-enemy-image.is-iron-maiden.is-phantom.is-hit {
+  animation:
+    battle-phantom-hit 260ms steps(2, end),
     battle-iron-maiden-pendulum 4s ease-in-out infinite;
 }
 
@@ -538,6 +561,12 @@ body.layout-tablet .battle-boss-hp-meter{flex:0 0 12px;width:min(52%,360px);min-
   }
 }
 
+@keyframes battle-phantom-hit {
+  0%, 40%, 80%, 100% { opacity: 1; transform: translateX(0); }
+  20% { opacity: .18; transform: translateX(-8px); }
+  60% { opacity: .28; transform: translateX(8px); }
+}
+
 @keyframes battle-iron-maiden-pendulum {
   0%, 100% { rotate: -1.75deg; }
   50% { rotate: 1.75deg; }
@@ -680,6 +709,7 @@ body.battle-active .viewport > #treasureCanvas {
   .battle-enemy-image.is-size-medium { width: min(70%, 330px); }
   .battle-enemy-image.is-size-large { width: min(80%, 390px); }
   .battle-enemy-image.is-size-huge-wide { width: min(92%, 430px); }
+  .battle-enemy-image.is-amayenak { width: min(96%, 520px); max-height: calc(100% - 58px); }
 
   .battle-enemy-image.is-iron-maiden {
     max-height: 92%;

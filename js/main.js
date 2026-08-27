@@ -568,7 +568,7 @@ import {
       ? boss.event?.transformationImageId
       : boss?.encounterImageId || boss?.imageId || "",
     getBossEncounterPrompt: boss => isB100GauntletBossId(boss?.id)
-      ? `${boss.name}が再び行く手に立ちはだかっている。\n＊Aボタンで次へ`
+      ? `${boss.name}の幻影が行く手に立ちはだかっている。\n＊Aボタンで次へ`
       : currentDepth === 79 && boss?.id === "jirene_b79f" && character?.eventFlags?.jirene_scripted_defeat_seen
         ? "ジレーネ「ああ…！また来たのね…。また、私…いえ、妾の歌を…聴きたいのね…！」\n＊Aボタンで次へ"
         : boss?.event?.prompt,
@@ -1990,6 +1990,7 @@ import {
       playStartSe: true,
       ambush: false,
       concealed: state.torchFuel <= 0 && !state.torchEffectForced && !state.lightbringerActive,
+      phantom: isB100GauntletBossId(boss.id),
       enemies: encounterEnemies,
       targetIndex: encounterEnemies ? Math.max(0, encounterEnemies.findIndex(enemy => enemy.id === bossId)) : 0,
       scriptedBattleType: currentDepth === 79 && bossId === "jirene_b79f" && !character?.eventFlags?.jirene_scripted_defeat_seen
@@ -3752,6 +3753,7 @@ import {
       && hasKeyItem(character?.keyItems, "lichtbringer");
     state.lightbringerActive = false;
     state.minimapEffectForced = false;
+    state.minimapBlocked = currentDepth === 100;
     if (isForcedTorchZeroFloor(currentDepth) && !lightbringerOwned) state.torchFuel = 0;
     const displayGridY = currentDepth === 100 ? MAP_H - 1 - state.gridY : state.gridY;
     posEl.textContent = `X:${state.gridX} Y:${displayGridY}`;

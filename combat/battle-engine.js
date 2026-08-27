@@ -18,7 +18,7 @@ import {
 import { getSkill } from "../data/skills.js";
 import { getItem } from "../data/items.js";
 import { consumeItem } from "../data/inventory.js";
-import { getItemUnavailableReason } from "./resolve-item-use.js";
+import { cureAllNegativeStatuses, getItemUnavailableReason } from "./resolve-item-use.js";
 import { resolvePassiveInstantDeath } from "./passive-instant-death.js";
 import { getCardById, hasCardEffect, sumCardEffectValues } from "../data/cards.js";
 import { getEffectiveSpCost } from "./sp-cost.js";
@@ -730,6 +730,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
   if (action.actionType === "item") {
     actor.inventory = consumeItem(actor.inventory, action.item.id).inventory;
     let healing = 0;
+    let spHealing = 0;
     const deathPoisonUnaffected = ["antidote", "strong_antidote"].includes(action.item.id)
       && (actor.statuses || []).some(status => (status.statusId || status.id) === "death_poison");
     for (const effect of action.item.effects) {
@@ -763,6 +764,16 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
         actor.statuses = (actor.statuses || []).filter(status => (status.statusId || status.id) !== "deadly_poison");
       } else if (effect.id === "cure_bleeding") {
         actor.statuses = (actor.statuses || []).filter(status => (status.statusId || status.id) !== "bleeding");
+      } else if (effect.id === "restore_hp_full") {
+        const amount = Math.max(0, actor.maxHp - actor.hp);
+        actor.hp = actor.maxHp;
+        healing += amount;
+      } else if (effect.id === "restore_sp_full") {
+        const amount = Math.max(0, actor.maxSp - actor.sp);
+        actor.sp = actor.maxSp;
+        spHealing += amount;
+      } else if (effect.id === "cure_all_ailments") {
+        actor.statuses = cureAllNegativeStatuses(actor.statuses);
       } else if (effect.id === "banish_undead") {
         target.hp = 0;
         target.alive = false;
@@ -821,11 +832,25 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
       }
     }
     battle.log.push(`${actor.name}は${action.item.name}を使った。`);
+    if (action.item.id === "allheilmittel") {
+      actor.statuses = [
+        ...(actor.statuses || []).filter(status => (status.id || status.statusId) !== "allheilmittel_used"),
+        { id: "allheilmittel_used", statusId: "allheilmittel_used", expiresAfterBattle: true }
+      ];
+      actor.condition = "GOOD";
+      battle.log.push("HPとSPが全回復し、すべての状態異常が治った！");
+    }
     if (deathPoisonUnaffected) battle.log.push("死毒は治療する事が出来ない！");
     if (healing > 0) {
       battle.presentationEvents.push({
         type: "healing", actorSide, targetSide: actorSide, amount: healing,
         message: `HPが${healing}回復した。`
+      });
+    }
+    if (spHealing > 0) {
+      battle.presentationEvents.push({
+        type: "spHealing", actorSide, targetSide: actorSide, amount: spHealing,
+        message: `SPが${spHealing}回復した。`
       });
     }
     if (action.item.id === "holy_water") {

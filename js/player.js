@@ -316,7 +316,9 @@ function startFixedFloorWarpEvent(warp) {
   startOverlayEvent({
     type: "fixedFloorWarp",
     warp: structuredClone(warp),
-    showOverlay: false,
+    showOverlay: true,
+    imageId: "warp_portal_b100f",
+    glow: "paleBlue",
     message: "足を踏み入れた途端、転送陣がまばゆい光に包まれる――――！\n＊Aボタンで次へ",
     canCancel: false
   });
@@ -1136,6 +1138,7 @@ function startBossEvent(bossId, fromGX, fromGY) {
     type: "bossPrompt",
     bossId,
     imageId: boss?.encounterImageId ?? "",
+    silhouette: isRematch,
     fromGX,
     fromGY,
     phase: hasSphinxAnswer ? "sphinxAnswer" : boss?.event?.sphinxChoice && !isRematch ? "sphinxIntro" : "prompt",

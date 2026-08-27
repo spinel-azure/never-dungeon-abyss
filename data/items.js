@@ -299,6 +299,14 @@ export const ITEMS = Object.freeze([
     effects: Object.freeze([{ id: "thrown_fixed_damage", value: 9 }]),
     description: "ただの石ころ。", maxOwned: 99,
     repurchasable: false, iconId: "stone", version: 1
+  }),
+  Object.freeze({
+    number: 47, id: "allheilmittel", name: "アルハイルミッテル", category: "recovery",
+    buyPrice: 0, sellPrice: 0, source: "special", usableIn: Object.freeze(["town", "dungeon", "battle"]),
+    effects: Object.freeze([{ id: "restore_hp_full" }, { id: "restore_sp_full" }, { id: "cure_all_ailments" }]),
+    description: "HPとSPを全回復し、すべての状態異常を治療する。戦闘中は1回だけ使用可能。",
+    maxOwned: 1, warehouseMaxOwned: 99, overflowGold: 100000,
+    repurchasable: false, iconId: "antidote", version: 1
   })
 ]);
 

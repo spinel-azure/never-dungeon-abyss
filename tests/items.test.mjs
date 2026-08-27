@@ -515,6 +515,58 @@ test("antidotes heal normally but explicitly cannot cure death poison", () => {
   }
 });
 
+test("Allheilmittel fully restores HP and SP and cures every registered ailment and debuff", () => {
+  const item = getItem("allheilmittel");
+  const character = characterWith(item.id);
+  character.maxHp = 320;
+  character.hp = 1;
+  character.maxSp = 140;
+  character.sp = 2;
+  character.statuses = [
+    { statusId: "death_poison" },
+    { statusId: "bleeding" },
+    { statusId: "armor_break" },
+    { statusId: "charge_budding" }
+  ];
+  const result = resolveFieldItemUse({ character, itemId: item.id, context: "dungeon" });
+  assert.equal(result.accepted, true);
+  assert.equal(result.character.hp, 320);
+  assert.equal(result.character.sp, 140);
+  assert.deepEqual(result.character.statuses.map(status => status.statusId), ["charge_budding"]);
+  assert.equal(result.character.condition, "GOOD");
+});
+
+test("Allheilmittel can only be used once in each battle", () => {
+  const character = characterWith("allheilmittel");
+  character.hp = 1;
+  character.sp = 0;
+  character.statuses = [{ statusId: "death_poison" }];
+  const enemy = {
+    id: "test_dummy", name: "DUMMY", race: "beast", hp: 9999, maxHp: 9999,
+    sp: 0, maxSp: 0, stats: { str: 1, int: 1, agi: 1, dex: 1, luc: 1 },
+    def: 0, attack: 0, actions: [{ id: "wait", name: "待機", actionType: "wait", weight: 1 }],
+    experienceReward: 0, statuses: [], equipment: {}, elementMultipliers: {},
+    statusResistances: {}, isBoss: false, alive: true
+  };
+  const first = resolveBattleRound({
+    battle: createBattleState({ character, enemy }),
+    playerCommand: { type: "item", itemId: "allheilmittel" },
+    rng: () => 0.5
+  });
+  assert.equal(first.accepted, true);
+  assert.equal(first.battle.player.statuses.some(status => status.statusId === "death_poison"), false);
+  assert.equal(first.battle.player.statuses.some(status => status.statusId === "allheilmittel_used"), true);
+  first.battle.player.inventory = grantItem(first.battle.player.inventory, "allheilmittel", 1).inventory;
+  first.battle.player.hp -= 1;
+  const second = resolveBattleRound({
+    battle: first.battle,
+    playerCommand: { type: "item", itemId: "allheilmittel" },
+    rng: () => 0.5
+  });
+  assert.equal(second.accepted, false);
+  assert.equal(second.reason, "allheilmittelOncePerBattle");
+});
+
 test("B50F enemy materials resolve to their registered item data", () => {
   assert.equal(getItem("abyss_tiger_fur").name, "奈落虎の毛皮");
   assert.equal(getItem("abyss_mushroom_cap").name, "キノコの傘");

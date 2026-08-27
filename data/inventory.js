@@ -55,10 +55,16 @@ export function consumeItem(inventory, itemId, amount = 1) {
 
 export function normalizeWarehouse(warehouse) {
   const itemStacks = [];
+  const storedTotals = {};
   for (const raw of warehouse?.itemStacks || []) {
     const item = getItem(raw?.itemId);
-    const count = Math.max(0, Math.min(99, Math.floor(Number(raw?.count) || 0)));
+    const totalLimit = Number.isFinite(Number(item?.warehouseMaxOwned))
+      ? Math.max(0, Math.floor(Number(item.warehouseMaxOwned)))
+      : Infinity;
+    const capacity = Math.max(0, totalLimit - (storedTotals[item?.id] || 0));
+    const count = Math.max(0, Math.min(99, capacity, Math.floor(Number(raw?.count) || 0)));
     if (item && count > 0) itemStacks.push({ itemId: item.id, count });
+    if (item && count > 0) storedTotals[item.id] = (storedTotals[item.id] || 0) + count;
   }
   return {
     itemStacks,
@@ -94,8 +100,14 @@ export function normalizeLootBag(lootBag) {
 export function storeItemInWarehouse(warehouse, itemId, amount = 1) {
   const source = normalizeWarehouse(warehouse);
   let remaining = Math.max(0, Math.floor(Number(amount) || 0));
-  if (!getItem(itemId) || remaining <= 0) return { warehouse: source, stored: 0 };
+  const item = getItem(itemId);
+  if (!item || remaining <= 0) return { warehouse: source, stored: 0 };
   const itemStacks = source.itemStacks.map(stack => ({ ...stack }));
+  const currentTotal = itemStacks.filter(stack => stack.itemId === itemId).reduce((sum, stack) => sum + stack.count, 0);
+  const totalLimit = Number.isFinite(Number(item.warehouseMaxOwned))
+    ? Math.max(0, Math.floor(Number(item.warehouseMaxOwned)))
+    : Infinity;
+  remaining = Math.min(remaining, Math.max(0, totalLimit - currentTotal));
   const requested = remaining;
   for (const stack of itemStacks) {
     if (stack.itemId !== itemId || stack.count >= 99 || remaining <= 0) continue;
@@ -138,9 +150,11 @@ export function withdrawItemFromWarehouse(character, itemId, amount = 1) {
 export function depositItemInWarehouse(character, itemId, amount = 1) {
   if (!character || !getItem(itemId)) return { accepted: false, reason: "unknownItem", character };
   const requested = Math.max(1, Math.floor(Number(amount) || 1));
-  const consumed = consumeItem(character.inventory, itemId, requested);
-  if (consumed.consumed <= 0) return { accepted: false, reason: "notOwned", character };
-  const stored = storeItemInWarehouse(character.warehouse, itemId, consumed.consumed);
+  const owned = getItemCount(character.inventory, itemId);
+  if (owned <= 0) return { accepted: false, reason: "notOwned", character };
+  const stored = storeItemInWarehouse(character.warehouse, itemId, Math.min(requested, owned));
+  if (stored.stored <= 0) return { accepted: false, reason: "warehouseFull", character };
+  const consumed = consumeItem(character.inventory, itemId, stored.stored);
   return {
     accepted: true, reason: "", amount: stored.stored,
     character: { ...character, inventory: consumed.inventory, warehouse: stored.warehouse }
@@ -213,10 +227,15 @@ export function grantItemWithOverflow(character, itemId, amount = 1) {
   const granted = grantItem(character.inventory, itemId, requested);
   const overflow = Math.max(0, requested - granted.gained);
   const stored = storeItemInWarehouse(character.warehouse, itemId, overflow);
+  const discarded = Math.max(0, overflow - stored.stored);
+  const convertedGold = discarded * Math.max(0, Math.floor(Number(getItem(itemId)?.overflowGold) || 0));
   return {
-    character: { ...character, inventory: granted.inventory, warehouse: stored.warehouse },
+    character: { ...character, inventory: granted.inventory, warehouse: stored.warehouse,
+      gold: Math.max(0, Math.floor(Number(character.gold) || 0)) + convertedGold },
     gained: granted.gained,
     stored: stored.stored,
+    discarded,
+    convertedGold,
     reason: granted.gained <= 0 && stored.stored <= 0 ? granted.reason : ""
   };
 }

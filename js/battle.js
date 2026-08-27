@@ -39,6 +39,7 @@ const battleUi = {
   selectedIndex: 0,
   battle: null,
   concealed: false,
+  phantom: false,
   autoActive: false,
   autoTimer: 0,
   presenting: false,
@@ -73,7 +74,7 @@ export function configureBattle(options) {
   });
 }
 
-export function startBattle(enemy, { playStartSe = true, ambush = false, concealed = false, enemies = null, targetIndex = 0, scriptedBattleType = "" } = {}) {
+export function startBattle(enemy, { playStartSe = true, ambush = false, concealed = false, phantom = false, enemies = null, targetIndex = 0, scriptedBattleType = "" } = {}) {
   const character = battleUi.getCharacter();
   if (!character || battleUi.active) return false;
   battleUi.active = true;
@@ -81,6 +82,7 @@ export function startBattle(enemy, { playStartSe = true, ambush = false, conceal
   battleUi.selectedIndex = 0;
   battleUi.autoActive = false;
   battleUi.concealed = Boolean(concealed);
+  battleUi.phantom = Boolean(phantom);
   resetEnemyVanishEffects(battleUi.root);
   clearAutoTimer();
   battleUi.battle = createBattleState({ character, enemy, enemies, targetIndex });
@@ -322,7 +324,8 @@ async function executeCommand(command) {
       bossImmune: "この敵には効かない。",
       plantOnly: "植物型の障害物にしか効果がない。",
       chargeNotReady: "チャージが満タンではない。",
-      oncePerBattle: "活性回復薬（小）は1戦闘に1回だけ使用できる。"
+      oncePerBattle: "活性回復薬（小）は1戦闘に1回だけ使用できる。",
+      allheilmittelOncePerBattle: "アルハイルミッテルは1戦闘に1回だけ使用できる。"
     };
     battleUi.messageEl.textContent = messages[resolved.reason] || "現在使用できません。";
     return;
@@ -473,6 +476,9 @@ async function playPresentationEvents() {
       : false;
     if (event.type === "healing") {
       showBattleNumber(event.targetSide, event.amount, "healing");
+      battleUi.playSe("heal");
+    } else if (event.type === "spHealing") {
+      showBattleNumber(event.targetSide, event.amount, "sp-healing");
       battleUi.playSe("heal");
     } else if (event.type === "barrierDamage") {
       showBattleNumber("player", event.amount, "barrier");
@@ -789,6 +795,7 @@ function renderBattle() {
   const defeated = ["victory", "enemyEscaped"].includes(battle.outcome) && !battleUi.presenting;
   image.classList.toggle("is-defeated", defeated);
   image.classList.toggle("is-concealed", battleUi.concealed);
+  image.classList.toggle("is-phantom", battleUi.phantom);
   ENEMY_DISPLAY_SIZES.forEach(size => image.classList.toggle(`is-size-${size}`, size === getEnemyDisplaySize(battle.enemy)));
   image.classList.toggle("is-jabberwock", battle.enemy.id === "jabberwock_event_boss");
   image.classList.toggle("is-iron-maiden", battle.enemy.id === "iron_maiden_b29f");
@@ -800,6 +807,7 @@ function renderBattle() {
   image.classList.toggle("is-todes-scorpio", battle.enemy.id === "todes_scorpio_b64f");
   image.classList.toggle("is-sphinx", battle.enemy.id === "sphinx_b69f");
   image.classList.toggle("is-jirene", battle.enemy.id === "jirene_b79f");
+  image.classList.toggle("is-amayenak", battle.enemy.id === "amayenak_b100f");
   const enemyStage = battleUi.root.querySelector(".battle-enemy-stage");
   enemyStage.hidden = Boolean(battle.enemies);
   enemyStage?.classList.toggle("is-defeated", defeated);
