@@ -13,6 +13,7 @@ export function applyStatus(statuses = [], application = {}) {
   const status = {
     ...definition,
     statusId: definition.id,
+    damageMaxHpRate: application.damageMaxHpRate ?? definition.damageMaxHpRate,
     remainingTurns: application.duration ?? definition.duration,
     skipInitialDecrement: Boolean(application.skipInitialDecrement),
     active: true

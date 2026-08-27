@@ -75,6 +75,7 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     ariesOpeningAttackAvailable: hasCardEffect(character?.cards?.deckSlots, "zodiac_aries"),
     capricornActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_capricorn"),
     libraActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_libra"),
+    scorpioActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_scorpio"),
     sphinxWisdomActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "sphinx_weakness_insight"),
     throwingItemGuaranteedHitAtStart: hasCardEffect(character?.cards?.deckSlots, "throwing_item_guaranteed_hit"),
     mirageFirstAttackAvailable: hasCardEffect(character?.cards?.deckSlots, "mirage_first_attack_evasion"),
@@ -1139,6 +1140,18 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
   for (const applied of applications.filter(item => item.success)) {
     battle.log.push(`${target.name}は${statusName(applied.statusId)}状態になった。`);
   }
+  if (actorSide === "player" && battle.scorpioActiveAtStart && landedHits.length > 0 && target.alive) {
+    const scorpio = getCardById("zodiac_scorpio");
+    const rate = getScorpioDeathPoisonRate(target);
+    if (Number(rng()) < rate) {
+      target.statuses = applyStatusApplications(target.statuses, [{
+        statusId: "death_poison",
+        success: true,
+        damageMaxHpRate: Number(scorpio?.deathPoisonDamageMaxHpRate) || 0.05
+      }]);
+      battle.log.push(`${target.name}はスコルピオの死毒に侵された。`);
+    }
+  }
   if (actorSide === "player" && actualDamage > 0 && action.actionType === "physicalAttack" && target.crackTrait) {
     const alreadyCracked = target.statuses.some(status => (status.id || status.statusId) === target.crackTrait.statusId);
     const rate = (action.weapon?.physicalDamageType || action.weapon?.type) === "blunt" ? Number(target.crackTrait.bluntRate) : Number(target.crackTrait.baseRate);
@@ -1369,6 +1382,11 @@ function updateOutcome(battle) {
 function combatStats(combatant) {
   const collected = collectStats(combatant);
   const statusResistances = structuredClone(combatant.statusResistances || {});
+  if (hasCardEffect(combatant?.cards?.deckSlots, "zodiac_scorpio")) {
+    for (const statusId of ["poison", "deadly_poison", "death_poison"]) {
+      statusResistances[statusId] = { resistancePoints: 100, immune: true };
+    }
+  }
   if ((Number(collected.deadlyPoisonResistance) || 0) >= 1) {
     statusResistances.deadly_poison = { resistancePoints: 100, immune: true };
   }
@@ -1425,6 +1443,14 @@ function combatStats(combatant) {
     magicDamageTakenBonus: statusMagicDamageTakenBonus,
     isBoss: Boolean(combatant.isBoss)
   };
+}
+
+export function getScorpioDeathPoisonRate(target = {}) {
+  const card = getCardById("zodiac_scorpio");
+  const rate = Math.max(0, Math.min(1, Number(card?.deathPoisonApplicationRate) || 0));
+  return target?.isBoss
+    ? rate * Math.max(0, Math.min(1, Number(card?.bossDeathPoisonApplicationMultiplier) || 0))
+    : rate;
 }
 
 function cloneCombatant(source) {

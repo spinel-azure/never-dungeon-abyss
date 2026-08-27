@@ -473,6 +473,16 @@ const ZODIAC_CARDS = [
   descriptionJa: "ボス、または自分より内部レベルが高い敵に与えるダメージが30％上昇し、その敵から受けるダメージが30％減少する。",
   strongerEnemyDamageMultiplier: 1.3,
   strongerEnemyReceivedDamageMultiplier: 0.7
+} : card.id === "zodiac_scorpio" ? {
+  ...card,
+  concept: "毒・猛毒・死毒無効／攻撃命中時に死毒付与",
+  descriptionJa: "毒・猛毒・死毒を完全に防ぐ。攻撃命中時、20％の確率で敵を死毒状態にする。ボスへの付与率は半減する。死毒は行動ごとに最大HPの5％ダメージを与える。",
+  deathPoisonApplicationRate: 0.2,
+  bossDeathPoisonApplicationMultiplier: 0.5,
+  deathPoisonDamageMaxHpRate: 0.05,
+  poisonImmunity: true,
+  deadlyPoisonImmunity: true,
+  deathPoisonImmunity: true
 } : card);
 
 export const CARDS = Object.freeze(
