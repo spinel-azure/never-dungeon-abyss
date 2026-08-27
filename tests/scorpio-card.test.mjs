@@ -31,7 +31,7 @@ test("Scorpio exposes the complete overpowered Zodiac effect", () => {
   assert.equal(card.deathPoisonApplicationRate, 0.2);
   assert.equal(card.bossDeathPoisonApplicationMultiplier, 0.5);
   assert.equal(card.deathPoisonDamageMaxHpRate, 0.05);
-  assert.match(card.descriptionJa, /毒・猛毒・死毒を完全に防ぐ/);
+  assert.equal(card.descriptionJa, "毒系完全無効。命中時20％で死毒付与（ボス10％）。死毒は行動ごとに最大HPの5％ダメージ。");
 });
 
 test("Scorpio death-poison rate is twenty percent and halves against bosses", () => {

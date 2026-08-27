@@ -476,7 +476,7 @@ const ZODIAC_CARDS = [
 } : card.id === "zodiac_scorpio" ? {
   ...card,
   concept: "毒・猛毒・死毒無効／攻撃命中時に死毒付与",
-  descriptionJa: "毒・猛毒・死毒を完全に防ぐ。攻撃命中時、20％の確率で敵を死毒状態にする。ボスへの付与率は半減する。死毒は行動ごとに最大HPの5％ダメージを与える。",
+  descriptionJa: "毒系完全無効。命中時20％で死毒付与（ボス10％）。死毒は行動ごとに最大HPの5％ダメージ。",
   deathPoisonApplicationRate: 0.2,
   bossDeathPoisonApplicationMultiplier: 0.5,
   deathPoisonDamageMaxHpRate: 0.05,
