@@ -785,7 +785,10 @@ export function placePurpleSpecialRoomTreasure(depth = 1, rng = Math.random) {
 }
 
 export function placeQuestEvent(depth = 1, rng = Math.random, progress = {}) {
-  for (const cell of cells.flat()) cell.questEvent = null;
+  for (const cell of cells.flat()) {
+    const specialRoomEventId = cell.specialRoom?.content?.id;
+    if (!specialRoomEventId || cell.questEvent?.id !== specialRoomEventId) cell.questEvent = null;
+  }
   const event = getQuestEventForDepth(depth, progress);
   if (!event) return null;
   const { x: startX, y: startY } = startPosition;

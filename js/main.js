@@ -1027,6 +1027,14 @@ import {
         if (cells[y][x].specialRoom) {
           const fixedContent = getSpecialRoomDefinition(currentDepth)?.content;
           cells[y][x].specialRoom.content = fixedContent ?? savedCell.specialRoom?.content ?? null;
+          if (fixedContent?.type === "keyItemPickup") {
+            const pickupQuest = getQuestProgress(save.character, fixedContent.requiredQuestId || fixedContent.questId);
+            const pickupAlreadyResolved = Boolean(save.character?.eventFlags?.[fixedContent.flag])
+              || hasKeyItem(save.character?.keyItems, fixedContent.keyItemId);
+            cells[y][x].questEvent = pickupQuest.active && !pickupAlreadyResolved
+              ? structuredClone(fixedContent)
+              : null;
+          }
         }
         cells[y][x].featureReservation = savedCell.featureReservation || null;
         cells[y][x].featureApproach = savedCell.featureApproach || null;

@@ -5,6 +5,7 @@ import fs from "node:fs";
 import { getCardById } from "../data/cards.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { grantCard, getOwnedCardCount } from "../data/deck.js";
+import { buildBoundaryWallMap, cells } from "../js/dungeon.js";
 import { grantKeyItem } from "../data/key-items.js";
 import { acceptQuest, getQuestById, getQuestProgress, isQuestAvailable, reportQuest } from "../data/quests.js";
 import { getSpecialRoomDefinition } from "../data/special-rooms.js";
@@ -46,6 +47,28 @@ test("quest 033 copy, event room, client scene, and Virgo reward match the speci
   assert.equal(room.content.keyItemId, "lichtbringer");
   assert.match(mainSource, /clientPortrait: "images\/npc\/NPC_23\.avif"/);
   assert.match(mainSource, /漆黒の闇を手探りで進むのは容易ではない/);
+});
+
+test("B95F generation preserves the active Lichtbringer pickup inside its special room", () => {
+  const character = acceptQuest(questReadyCharacter(), "guild_033").character;
+  buildBoundaryWallMap(95, () => 0.5, {
+    activeQuestIds: Object.keys(character.quests.active),
+    eventFlags: character.eventFlags
+  });
+  const eventRoom = cells.flat().find(cell => cell.specialRoom?.content?.id === "lichtbringer_b95f_event");
+  assert.ok(eventRoom);
+  assert.equal(eventRoom.questEvent?.keyItemId, "lichtbringer");
+});
+
+test("B95F does not restore Lichtbringer before acceptance or after acquisition", () => {
+  buildBoundaryWallMap(95, () => 0.5, { activeQuestIds: [], eventFlags: {} });
+  assert.equal(cells.flat().some(cell => cell.questEvent?.keyItemId === "lichtbringer"), false);
+  buildBoundaryWallMap(95, () => 0.5, {
+    activeQuestIds: ["guild_033"],
+    eventFlags: { lichtbringer_b95f_found: true }
+  });
+  assert.equal(cells.flat().some(cell => cell.questEvent?.keyItemId === "lichtbringer"), false);
+  assert.match(mainSource, /pickupQuest\.active && !pickupAlreadyResolved[\s\S]*structuredClone\(fixedContent\)/);
 });
 
 test("reporting quest 033 grants the one-copy Z Virgo card", () => {
