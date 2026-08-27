@@ -29,19 +29,20 @@ export const B100_FIXED_FLOOR_MAP = Object.freeze({
   height: 10,
   walls: parseWalls(B100_WALLS),
   warps: Object.freeze([
-    point("E005", 0, 2, { warpId: "W01", to: Object.freeze({ x: 8, y: 1 }), oneWay: true }),
-    point("E009", 9, 3, { warpId: "W02", to: Object.freeze({ x: 0, y: 7 }), oneWay: true }),
-    point("E012", 3, 7, { warpId: "W03", to: Object.freeze({ x: 2, y: 0 }), oneWay: true }),
-    point("E015", 5, 2, { warpId: "W04", to: Object.freeze({ x: 8, y: 5 }), oneWay: true }),
-    point("E018", 6, 6, { warpId: "W05", to: Object.freeze({ x: 3, y: 8 }), oneWay: true }),
-    point("E021", 5, 7, { warpId: "W06", to: Object.freeze({ x: 7, y: 5 }), oneWay: true }),
-    point("E025", 8, 8, { warpId: "W07", to: Object.freeze({ x: 0, y: 5 }), oneWay: true }),
-    point("E028", 1, 1, { warpId: "W08", to: Object.freeze({ x: 6, y: 5 }), oneWay: true }),
-    point("E031", 5, 4, { warpId: "W09", to: Object.freeze({ x: 4, y: 3 }), oneWay: true }),
-    point("E034", 3, 3, { warpId: "W10", to: Object.freeze({ x: 0, y: 6 }), oneWay: true }),
-    point("E037", 3, 4, { warpId: "W11", to: Object.freeze({ x: 4, y: 4 }), oneWay: true })
+    point("E005", 0, 2, { warpId: "W01", to: Object.freeze({ x: 8, y: 1 }), facing: "E", oneWay: true }),
+    point("E009", 9, 3, { warpId: "W02", to: Object.freeze({ x: 0, y: 7 }), facing: "N", oneWay: true }),
+    point("E012", 3, 7, { warpId: "W03", to: Object.freeze({ x: 2, y: 0 }), facing: "E", oneWay: true }),
+    point("E015", 5, 2, { warpId: "W04", to: Object.freeze({ x: 8, y: 5 }), facing: "E", oneWay: true }),
+    point("E018", 6, 6, { warpId: "W05", to: Object.freeze({ x: 3, y: 8 }), facing: "N", oneWay: true }),
+    point("E021", 5, 7, { warpId: "W06", to: Object.freeze({ x: 7, y: 5 }), facing: "N", oneWay: true }),
+    point("E025", 8, 8, { warpId: "W07", to: Object.freeze({ x: 0, y: 5 }), facing: "S", oneWay: true }),
+    point("E028", 1, 1, { warpId: "W08", to: Object.freeze({ x: 6, y: 5 }), facing: "S", oneWay: true }),
+    point("E031", 5, 4, { warpId: "W09", to: Object.freeze({ x: 4, y: 3 }), facing: "S", oneWay: true }),
+    point("E034", 3, 3, { warpId: "W10", to: Object.freeze({ x: 0, y: 6 }), facing: "E", oneWay: true }),
+    point("E037", 3, 4, { warpId: "W11", to: Object.freeze({ x: 4, y: 4 }), facing: "N", oneWay: true })
   ]),
   transferPortals: Object.freeze([point("E004", 0, 0)]),
+  returnPortalFacing: "W",
   returnPortals: Object.freeze([
     point("E008", 8, 3), point("E011", 1, 8), point("E014", 6, 2),
     point("E016", 8, 4), point("E019", 4, 8), point("E023", 8, 6),
@@ -50,8 +51,8 @@ export const B100_FIXED_FLOOR_MAP = Object.freeze({
   ]),
   returnPoints: Object.freeze([point("E007", 1, 0)]),
   events: Object.freeze([
-    point("E043", 0, 1, { name: "女王の影1", eventKey: "queen_shadow_warning_1", description: "女王の影が警告してくる" }),
-    point("E044", 2, 6, { name: "女王の影2", eventKey: "queen_shadow_warning_2", description: "女王の影が警告してくる（2回目）" })
+    point("E043", 0, 1, { name: "女王の影1", eventKey: "queen_shadow_warning_1", description: "「この先では、これまであなたが戦ってきた守護者たちの幻影が待ち受けています。\nたとえ倒してもひとたび戻ってしまうと、再びあなたの前に立ち塞がるでしょう。\nどうか、お気を付けて…。」", fadeOut: true }),
+    point("E044", 2, 6, { name: "女王の影2", eventKey: "queen_shadow_warning_2", description: "「ここから先に進むと引き返すことは出来ません…。その覚悟は、おありですか…？」", fadeOut: true })
   ]),
   healingFountains: Object.freeze([point("E040", 8, 7, { name: "癒やしの噴水" })]),
   bosses: Object.freeze([

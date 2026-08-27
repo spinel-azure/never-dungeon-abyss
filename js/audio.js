@@ -33,7 +33,8 @@ export const SE = Object.freeze({
   costOver: "boo.wav",
   achievementUnlocked: "item-get.mp3",
   rapidCurrentSplash: "minamo.mp3",
-  rapidCurrentFlow: "suiryuu.mp3"
+  rapidCurrentFlow: "suiryuu.mp3",
+  fixedWarp: "warp.wav"
 });
 
 const audio = {
@@ -53,7 +54,12 @@ const audio = {
     ["registration", "bgm/skip-melzo.mp3"],
     ["townFacilities", "bgm/tabidachi-junbi.mp3"],
     ["lotBag", "bgm/casino-hitotooki.mp3"],
-    ["shrine", "bgm/hokora.mp3"]
+    ["shrine", "bgm/hokora.mp3"],
+    ["jungleZone", "bgm/taikutsu-mori.mp3"],
+    ["desertZone", "bgm/arabu-sabaku.mp3"],
+    ["finalBoss", "bgm/tozasareshi-seisen.mp3"],
+    ["maerchentiereBoss", "bgm/manuke-kyoku.mp3"],
+    ["ending", "bgm/jo-jokyoku.mp3"]
   ]),
   context: null,
   seMasterGain: null,
@@ -101,7 +107,8 @@ const PLAYBACK_POLICIES = {
   catVoice02: { mode: "complete", priority: 2 },
   catVoice03: { mode: "complete", priority: 2 },
   rapidCurrentSplash: { mode: "restart", priority: 3 },
-  rapidCurrentFlow: { mode: "restart", priority: 2 }
+  rapidCurrentFlow: { mode: "restart", priority: 2 },
+  fixedWarp: { mode: "complete", priority: 3 }
 };
 const DEFAULT_POLICY = { mode: "drop", priority: 2 };
 

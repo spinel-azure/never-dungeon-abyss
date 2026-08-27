@@ -145,6 +145,11 @@ function applyFixedMapWall(map, wall) {
   if (inBounds(position.x, position.y)) setWall(position.x, position.y, wall.side, true);
 }
 
+function normalizeFixedWarpFacing(facing) {
+  const normalized = String(facing || "").toUpperCase();
+  return ["N", "E", "S", "W"].includes(normalized) ? normalized : "";
+}
+
 export function buildFixedFloorMap(map = B100_FIXED_FLOOR_MAP, progress = {}) {
   if (map.width !== MAP_W || map.height !== MAP_H) {
     throw new Error(`Unsupported fixed map size ${map.width}x${map.height}; expected ${MAP_W}x${MAP_H}`);
@@ -171,6 +176,7 @@ export function buildFixedFloorMap(map = B100_FIXED_FLOOR_MAP, progress = {}) {
       id: warp.id,
       warpId: warp.warpId,
       to: fixedMapPointToInternal(map, warp.to),
+      facing: normalizeFixedWarpFacing(warp.facing),
       oneWay: Boolean(warp.oneWay)
     };
   });
@@ -178,7 +184,11 @@ export function buildFixedFloorMap(map = B100_FIXED_FLOOR_MAP, progress = {}) {
   cells[returnPoint.y][returnPoint.x].fixedReturnPoint = { id: map.returnPoints[0].id };
   map.returnPortals.forEach(portal => {
     const from = fixedMapPointToInternal(map, portal);
-    cells[from.y][from.x].fixedReturnPortal = { id: portal.id, to: { ...returnPoint } };
+    cells[from.y][from.x].fixedReturnPortal = {
+      id: portal.id,
+      to: { ...returnPoint },
+      facing: normalizeFixedWarpFacing(portal.facing || map.returnPortalFacing)
+    };
   });
   map.events.forEach(event => {
     const position = fixedMapPointToInternal(map, event);
@@ -586,6 +596,12 @@ export function getFixedWarpAt(x, y) {
 export function getFixedEventAt(x, y) {
   if (!inBounds(x, y)) return null;
   return cells[y][x].fixedEvent || null;
+}
+
+export function removeFixedEventAt(x, y) {
+  if (!inBounds(x, y) || !cells[y][x].fixedEvent) return false;
+  cells[y][x].fixedEvent = null;
+  return true;
 }
 
 export function getQuicksandAt(x, y) {

@@ -1,4 +1,4 @@
-﻿import {
+import {
   TAU,
   STEP_MS,
   TURN_MS,
@@ -23,6 +23,7 @@ import {
   getFountainAt,
   getFixedWarpAt,
   getFixedEventAt,
+  removeFixedEventAt,
   getQuicksandAt,
   getRapidCurrentAt,
   discoverRapidCurrent,
@@ -55,6 +56,7 @@ const hooks = {
   playStairsSequence: () => Promise.resolve(),
   runStairsTransition: (onDark) => Promise.resolve().then(onDark),
   runQuicksandTransition: (onDark) => Promise.resolve().then(onDark),
+  runFixedWarpTransition: (onDark) => Promise.resolve().then(onDark),
   startRapidCurrentFlow: () => {},
   stopRapidCurrentFlow: () => {},
   showTreasure: () => {},
@@ -254,7 +256,7 @@ export function updateAnimation(now) {
         });
         if (encounterTriggered) hooks.cancelAutoReturn(false);
         if (fixedWarp) {
-          applyFixedFloorWarp(fixedWarp);
+          startFixedFloorWarpEvent(fixedWarp);
         } else if (bossId) {
           startBossEvent(bossId, a.fromGX, a.fromGY);
         } else if (bossRemainsId) {
@@ -310,6 +312,28 @@ export function updateAnimation(now) {
   }
 }
 
+function startFixedFloorWarpEvent(warp) {
+  startOverlayEvent({
+    type: "fixedFloorWarp",
+    warp: structuredClone(warp),
+    showOverlay: false,
+    message: "足を踏み入れた途端、転送陣がまばゆい光に包まれる――――！\n＊Aボタンで次へ",
+    canCancel: false
+  });
+}
+
+function confirmFixedFloorWarpEvent() {
+  const event = state.overlayEvent;
+  if (!event || event.type !== "fixedFloorWarp") return;
+  const transition = { type: "fixedWarpTransition", canCancel: false };
+  state.overlayEvent = transition;
+  hooks.say("");
+  hooks.runFixedWarpTransition(() => applyFixedFloorWarp(event.warp)).finally(() => {
+    if (state.overlayEvent === transition) state.overlayEvent = null;
+    hooks.onStateChanged();
+  });
+}
+
 function applyFixedFloorWarp(warp) {
   const target = warp?.to;
   if (!target || !inBounds(target.x, target.y)) return false;
@@ -318,12 +342,13 @@ function applyFixedFloorWarp(warp) {
   state.gridY = target.y;
   state.x = target.x + .5;
   state.y = target.y + .5;
+  const facingIndex = DIRS.findIndex(direction => direction.key === warp?.facing);
+  if (facingIndex >= 0) {
+    state.dir = facingIndex;
+    state.angle = DIRS[facingIndex].angle;
+  }
   markExplored(target.x, target.y);
   state.npcAwarenessShown = false;
-  hooks.playSe("teleport");
-  hooks.say(warp.warpId
-    ? `ワープポイント「${warp.warpId}」が輝き、別の場所へ転送された。`
-    : "帰還の印が輝き、転送門の近くへ戻された。");
   hooks.onStateChanged();
   return true;
 }
@@ -929,7 +954,7 @@ function scheduleSpecialRoomBossBattle(event, boss) {
 
 export function handleOverlayEventInput(action) {
   if (!state.overlayEvent) return false;
-  if (state.overlayEvent.type === "stairsTransition") return true;
+  if (["stairsTransition", "fixedWarpTransition"].includes(state.overlayEvent.type)) return true;
   if (state.overlayEvent.type === "floorLap") {
     state.overlayEvent = null;
     hooks.say("");
@@ -944,6 +969,7 @@ export function handleOverlayEventInput(action) {
     else if (state.overlayEvent.type === "bossPrompt") confirmBossEvent();
     else if (state.overlayEvent.type === "bossRemains") finishBossRemainsEvent();
     else if (state.overlayEvent.type === "fountain") confirmFountainEvent();
+    else if (state.overlayEvent.type === "fixedFloorWarp") confirmFixedFloorWarpEvent();
     else if (state.overlayEvent.type === "fixedFloorEvent") finishFixedFloorEvent();
     else if (state.overlayEvent.type === "stairsPrompt") confirmStairsPrompt();
     else if (state.overlayEvent.type === "treasure") confirmTreasureEvent();
@@ -1073,13 +1099,29 @@ function startFixedFloorEvent(eventDefinition) {
   startOverlayEvent({
     type: "fixedFloorEvent",
     imageId: "NPC_01b",
-    message: `${message}\n＊Aボタン：次へ`,
-    canCancel: true
+    message: `${message}\n＊Aボタンで次へ`,
+    canCancel: false,
+    fadeOut: Boolean(eventDefinition?.fadeOut),
+    phase: "message"
   });
 }
 
 function finishFixedFloorEvent() {
-  if (state.overlayEvent?.type !== "fixedFloorEvent") return;
+  const event = state.overlayEvent;
+  if (!event || event.type !== "fixedFloorEvent") return;
+  if (event.fadeOut && event.phase !== "fading") {
+    event.phase = "fading";
+    event.fadeStartedAt = performance.now();
+    hooks.say("");
+    hooks.onStateChanged();
+    event.fadeTimer = window.setTimeout(() => {
+      if (state.overlayEvent !== event) return;
+      removeFixedEventAt(state.gridX, state.gridY);
+      state.overlayEvent = null;
+      hooks.onStateChanged();
+    }, 650);
+    return;
+  }
   state.overlayEvent = null;
   hooks.say("");
   hooks.onStateChanged();

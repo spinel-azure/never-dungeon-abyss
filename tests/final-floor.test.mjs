@@ -4,7 +4,7 @@ import { buildBoundaryWallMap, cells, getStartPosition, validateDungeonLayout } 
 import { getBossById, getFloorBossByDepth } from "../data/bosses.js";
 import { B100_FIXED_FLOOR_MAP, B100_GAUNTLET_BOSS_IDS, getB100GauntletFlag } from "../data/fixed-floor-maps.js";
 import { DIRS } from "../js/config.js";
-import { configurePlayer, manualMove, setPlayerInputEnabled, state, updateAnimation } from "../js/player.js";
+import { configurePlayer, handleOverlayEventInput, manualMove, setPlayerInputEnabled, state, updateAnimation } from "../js/player.js";
 
 const internal = ({ x, y }) => ({ x, y: B100_FIXED_FLOOR_MAP.height - 1 - y });
 
@@ -36,23 +36,69 @@ test("B100F converts bottom-left mapper coordinates and warp targets", () => {
   assert.equal(cells[9][0].walls.S, true);
 });
 
-test("B100F warp and return portals move the player to their configured targets", () => {
+test("B100F warp portals wait for confirmation and apply every configured arrival direction", async () => {
   const messages = [];
-  configurePlayer({ say: message => messages.push(message), onDungeonStep: () => {}, onStateChanged: () => {} });
+  const transitions = [];
+  configurePlayer({
+    say: message => messages.push(message),
+    onDungeonStep: () => {},
+    onStateChanged: () => {},
+    runFixedWarpTransition: async onDark => { transitions.push("warp"); await onDark(); }
+  });
+  const expectedFacings = ["E", "N", "E", "E", "N", "N", "S", "S", "S", "E", "N"];
+  assert.deepEqual(B100_FIXED_FLOOR_MAP.warps.map(warp => warp.facing), expectedFacings);
+
   buildBoundaryWallMap(100, () => 0.5, {});
   setPlayerInputEnabled(true);
   const north = DIRS.findIndex(dir => dir.key === "N");
-  Object.assign(state, { gridX: 0, gridY: 8, x: 0.5, y: 8.5, dir: north, angle: DIRS[north].angle, anim: null });
+  const east = DIRS.findIndex(dir => dir.key === "E");
+  Object.assign(state, { gridX: 0, gridY: 8, x: 0.5, y: 8.5, dir: north, angle: DIRS[north].angle, anim: null, overlayEvent: null });
   manualMove(1);
   updateAnimation(state.anim.start + state.anim.duration + 1);
+  assert.deepEqual({ x: state.gridX, y: state.gridY }, { x: 0, y: 7 });
+  assert.match(messages.at(-1), /転送陣がまばゆい光に包まれる/);
+  handleOverlayEventInput("confirm");
+  await new Promise(resolve => setTimeout(resolve, 0));
   assert.deepEqual({ x: state.gridX, y: state.gridY }, { x: 8, y: 8 });
-  assert.match(messages.at(-1), /W01/);
+  assert.equal(state.dir, east);
+  assert.deepEqual(transitions, ["warp"]);
+});
 
-  Object.assign(state, { gridX: 8, gridY: 7, x: 8.5, y: 7.5, dir: north, angle: DIRS[north].angle, anim: null });
+test("B100F return portals always face west and missing facing preserves the prior direction", async () => {
+  configurePlayer({
+    say: () => {},
+    onDungeonStep: () => {},
+    onStateChanged: () => {},
+    runFixedWarpTransition: async onDark => onDark()
+  });
+  buildBoundaryWallMap(100, () => 0.5, {});
+  setPlayerInputEnabled(true);
+  const north = DIRS.findIndex(dir => dir.key === "N");
+  const west = DIRS.findIndex(dir => dir.key === "W");
+  Object.assign(state, { gridX: 8, gridY: 7, x: 8.5, y: 7.5, dir: north, angle: DIRS[north].angle, anim: null, overlayEvent: null });
   manualMove(1);
   updateAnimation(state.anim.start + state.anim.duration + 1);
+  handleOverlayEventInput("confirm");
+  await new Promise(resolve => setTimeout(resolve, 0));
   assert.deepEqual({ x: state.gridX, y: state.gridY }, { x: 1, y: 9 });
-  assert.match(messages.at(-1), /転送門の近く/);
+  assert.equal(state.dir, west);
+
+  buildBoundaryWallMap(100, () => 0.5, {});
+  const w01 = internal(B100_FIXED_FLOOR_MAP.warps[0]);
+  cells[w01.y][w01.x].fixedWarp.facing = "";
+  Object.assign(state, { gridX: 0, gridY: 8, x: 0.5, y: 8.5, dir: north, angle: DIRS[north].angle, anim: null, overlayEvent: null });
+  manualMove(1);
+  updateAnimation(state.anim.start + state.anim.duration + 1);
+  handleOverlayEventInput("confirm");
+  await new Promise(resolve => setTimeout(resolve, 0));
+  assert.equal(state.dir, north);
+});
+
+test("B100F queen shadows carry the final warnings and fade after confirmation", () => {
+  assert.match(B100_FIXED_FLOOR_MAP.events[0].description, /守護者たちの幻影/);
+  assert.match(B100_FIXED_FLOOR_MAP.events[0].description, /再びあなたの前に立ち塞がる/);
+  assert.match(B100_FIXED_FLOOR_MAP.events[1].description, /引き返すことは出来ません/);
+  assert.equal(B100_FIXED_FLOOR_MAP.events.every(event => event.fadeOut === true), true);
 });
 
 test("B100F begins with all ten unique checkpoint bosses and no final boss", () => {

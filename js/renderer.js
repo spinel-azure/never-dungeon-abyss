@@ -446,6 +446,11 @@ function drawOverlayEvent() {
       ctx.filter = `blur(${Math.floor(mirageProgress * 5)}px)`;
       if (!reducedMotion) ctx.translate(Math.sin(mirageProgress * Math.PI * 12) * (3 + mirageProgress * 15), 0);
     }
+    if (event.type === "fixedFloorEvent" && event.phase === "fading") {
+      const fadeProgress = Math.max(0, Math.min(1, (performance.now() - Number(event.fadeStartedAt || 0)) / 650));
+      ctx.globalAlpha = Math.max(0, 1 - fadeProgress);
+      ctx.filter = `blur(${Math.floor(fadeProgress * 4)}px)`;
+    }
     if (event.imageFit === "cover") {
       const scale = Math.max(W / image.naturalWidth, H / image.naturalHeight);
       const drawW = image.naturalWidth * scale;

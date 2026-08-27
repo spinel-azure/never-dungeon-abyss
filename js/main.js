@@ -536,6 +536,10 @@ import {
       holdMs: 100,
       revealMs: 550
     }),
+    runFixedWarpTransition: async (onDark) => {
+      await playSe("fixedWarp");
+      return runSceneTransition({ onDark, darkenMs: 650, holdMs: 100, revealMs: 550 });
+    },
     startRapidCurrentFlow: startLoopSe,
     stopRapidCurrentFlow: stopLoopSe,
     showTreasure,
@@ -2021,10 +2025,14 @@ import {
   }
 
   function selectDungeonBgm() {
+    if (currentDepth >= 50 && currentDepth <= 59) return "jungleZone";
+    if (currentDepth >= 60 && currentDepth <= 69) return "desertZone";
     return currentDepth >= 101 ? "deepDungeon" : "dungeon";
   }
 
   function selectBattleBgm(enemyData) {
+    if (enemyData?.battleBgmKey) return enemyData.battleBgmKey;
+    if (["erzdaemonin_b100f", "amayenak_b100f"].includes(enemyData?.id)) return "finalBoss";
     if (enemyData?.isEventBoss || enemyData?.bossKind === "event") return "eventBoss";
     if (enemyData?.isBoss) return "floorBoss";
     return "normalBattle";

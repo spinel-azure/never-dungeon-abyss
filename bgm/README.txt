@@ -19,6 +19,14 @@ bukimi-tou.mp3
 用途：ダンジョン内移動時(B1F～B100F)
 ループ：ON
 
+taikutsu-mori.mp3
+用途：ダンジョン内移動時（B50F～B59F）
+ループ：ON
+
+arabu-sabaku.mp3
+用途：ダンジョン内移動時（B60F～B69F）
+ループ：ON
+
 matou-izanai.mp3
 用途：ダンジョン内移動時（B101F～B200F）
 ループ：ON
@@ -34,6 +42,14 @@ sentou-two.mp3
 battle-of-galfer.mp3
 用途：特別なボス戦等時（イベントボスなど）
 ループ：ON
+
+tozasareshi-seisen.mp3
+用途：B100Fラスボス戦
+ループ：ON
+
+manuke-kyoku.mp3
+用途：メルヒェンティーレ戦用
+ループON
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 タイトル・町
@@ -59,6 +75,9 @@ casino-hitotoki.mp3
 用途：ロット袋開封時
 ループ：ON
 
+jo-jokyoku.mp3
+用途：エンディング用
+ループ：ON
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
