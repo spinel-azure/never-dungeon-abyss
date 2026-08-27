@@ -226,8 +226,10 @@
 
 .battle-enemy-image.is-amayenak {
   width: min(96%, 760px);
-  max-height: calc(100% - 64px);
+  max-height: calc(100% - 54px);
 }
+
+.battle-enemy-stage.is-amayenak { inset: 7% 3% 15%; }
 
 .battle-enemy-image.is-jabberwock {
   max-height: 95%;
@@ -292,6 +294,14 @@
     drop-shadow(0 0 2px rgba(225, 252, 255, .98))
     drop-shadow(0 0 8px rgba(128, 235, 255, .9))
     drop-shadow(0 0 18px rgba(55, 173, 255, .68));
+}
+
+.battle-enemy-image[data-phantom="true"] {
+  filter:
+    brightness(0)
+    drop-shadow(0 0 2px rgba(225, 252, 255, .98))
+    drop-shadow(0 0 8px rgba(128, 235, 255, .9))
+    drop-shadow(0 0 18px rgba(55, 173, 255, .68)) !important;
 }
 
 .battle-enemy-image.is-hit {
@@ -709,7 +719,8 @@ body.battle-active .viewport > #treasureCanvas {
   .battle-enemy-image.is-size-medium { width: min(70%, 330px); }
   .battle-enemy-image.is-size-large { width: min(80%, 390px); }
   .battle-enemy-image.is-size-huge-wide { width: min(92%, 430px); }
-  .battle-enemy-image.is-amayenak { width: min(96%, 520px); max-height: calc(100% - 58px); }
+  .battle-enemy-image.is-amayenak { width: min(98%, 560px); max-height: calc(100% - 48px); }
+  .battle-enemy-stage.is-amayenak { inset: 6% 2% 14%; }
 
   .battle-enemy-image.is-iron-maiden {
     max-height: 92%;

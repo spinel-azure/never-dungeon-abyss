@@ -3,6 +3,10 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { MICHAELA_RESTORATION_DIALOGUE } from "../js/michaela-restoration.js";
 import { getKeyItem, grantKeyItem } from "../data/key-items.js";
+import { createInitialCharacter } from "../data/classes.js";
+import { createBossCombatant, getBossById } from "../data/bosses.js";
+import { createBattleState } from "../combat/battle-engine.js";
+import { createBattleCompletionSnapshot } from "../js/battle.js";
 
 const read = path => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
@@ -30,12 +34,29 @@ test("Michaela restoration preserves all six requested dialogue pages", () => {
 
 test("Amayenak victory persists recovery flags and returns to the B100F entrance", () => {
   const main = read("js/main.js");
-  assert.match(main, /battle\?\.enemy\?\.id === "amayenak_b100f"[\s\S]*?!character\?\.eventFlags\?\.michaela_restored/);
+  assert.match(main, /defeatedEnemyId === "amayenak_b100f"[\s\S]*?!character\?\.eventFlags\?\.michaela_restored/);
   assert.match(main, /truth_staff_obtained: true/);
   assert.match(main, /michaela_restored: true/);
   assert.match(main, /cells\.flat\(\)\.find\(cell => cell\.fixedReturnPoint\)/);
   assert.match(main, /applyFixedFloorWarp\(\{ to: \{ x: returnPoint\.x, y: returnPoint\.y \}, facing: "W" \}\)/);
   assert.match(main, /boss_amayenak_b100f_defeated[\s\S]*?resumeMichaelaRestoration/);
+});
+
+test("the real battle completion snapshot reaches the restoration bridge with Amayenak's ID", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  const enemy = createBossCombatant(getBossById("amayenak_b100f"));
+  const battle = createBattleState({ character, enemy });
+  battle.encounterBossId = enemy.id;
+  battle.enemy.hp = 0;
+  battle.enemy.alive = false;
+  battle.outcome = "victory";
+  const snapshot = createBattleCompletionSnapshot(battle);
+  assert.equal(snapshot.outcome, "victory");
+  assert.equal(snapshot.enemy.id, "amayenak_b100f");
+  assert.equal(snapshot.defeatedEnemyId, "amayenak_b100f");
+  const main = read("js/main.js");
+  assert.match(main, /defeatedEnemyId === "amayenak_b100f"/);
+  assert.match(main, /void runMichaelaRestoration\(\);\s*return;/);
 });
 
 test("restoration overlay uses the cat and both Michaela portraits", () => {
@@ -52,6 +73,6 @@ test("restoration overlay uses the cat and both Michaela portraits", () => {
 
 test("only main.js receives the new cache buster", () => {
   const html = read("index.html");
-  assert.match(html, /js\/main\.js\?v=20260827-11/);
+  assert.match(html, /js\/main\.js\?v=20260828-01/);
   assert.doesNotMatch(read("js/main.js"), /from\s+["'][^"']+\?v=/);
 });

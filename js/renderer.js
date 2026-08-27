@@ -1276,7 +1276,8 @@ function drawStairsEventMarker(ctx, W, H, event) {
 
 function drawNpcEvent(ctx, event) {
   const image = renderer.characterImages.get(event.npc.imageId);
-  const spriteH = event.size * 2.05 * Math.max(0.25, Number(event.npc.renderScale) || 1);
+  const proximityScale = event.forward <= 1.55 ? 1.22 : 1;
+  const spriteH = event.size * 2.05 * proximityScale * Math.max(0.25, Number(event.npc.renderScale) || 1);
   const fallbackW = spriteH * .64;
   const top = event.floorY - spriteH;
 

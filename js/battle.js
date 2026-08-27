@@ -688,7 +688,17 @@ function finishBattle() {
     statuses: structuredClone(battleUi.battle.player.statuses),
     npcSystem: structuredClone(battleUi.battle.player.npcSystem)
   });
-  const snapshot = structuredClone(battleUi.battle);
+  const snapshot = createBattleCompletionSnapshot(battleUi.battle);
+  closeBattle();
+  if (outcome === "victory") battleUi.onVictory(snapshot);
+  else if (outcome === "defeat") battleUi.onDefeat(snapshot);
+  else if (outcome === "jireneScriptedDefeat") battleUi.onScriptedDefeat(snapshot);
+  else battleUi.onEscape(snapshot);
+}
+
+export function createBattleCompletionSnapshot(battle) {
+  const snapshot = structuredClone(battle);
+  snapshot.defeatedEnemyId = snapshot.encounterBossId || snapshot.enemy?.id || "";
   if (snapshot.enemies) {
     snapshot.enemy = snapshot.enemies.find(enemy => enemy.id === snapshot.encounterBossId) || snapshot.enemy;
     snapshot.enemy.experienceReward = snapshot.enemies.reduce(
@@ -696,11 +706,7 @@ function finishBattle() {
       0
     );
   }
-  closeBattle();
-  if (outcome === "victory") battleUi.onVictory(snapshot);
-  else if (outcome === "defeat") battleUi.onDefeat(snapshot);
-  else if (outcome === "jireneScriptedDefeat") battleUi.onScriptedDefeat(snapshot);
-  else battleUi.onEscape(snapshot);
+  return snapshot;
 }
 
 function closeBattle() {
@@ -796,6 +802,7 @@ function renderBattle() {
   image.classList.toggle("is-defeated", defeated);
   image.classList.toggle("is-concealed", battleUi.concealed);
   image.classList.toggle("is-phantom", battleUi.phantom);
+  image.dataset.phantom = battleUi.phantom ? "true" : "false";
   image.style.filter = battleUi.phantom
     ? "brightness(0) drop-shadow(0 0 2px rgba(225,252,255,.98)) drop-shadow(0 0 8px rgba(128,235,255,.9)) drop-shadow(0 0 18px rgba(55,173,255,.68))"
     : "";
@@ -815,6 +822,7 @@ function renderBattle() {
   enemyStage.hidden = Boolean(battle.enemies);
   enemyStage?.classList.toggle("is-defeated", defeated);
   enemyStage?.classList.toggle("is-eiskoenigin", battle.enemy.id === "eiskoenigin_b49f" && !defeated && !battleUi.concealed);
+  enemyStage?.classList.toggle("is-amayenak", battle.enemy.id === "amayenak_b100f");
   battleUi.messageEl.textContent = formatBattleMessage(battle);
 }
 

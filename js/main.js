@@ -288,6 +288,7 @@ import {
     text: document.getElementById("michaelaRestorationText"),
     onComplete: completeMichaelaRestoration
   });
+  let michaelaRestorationStarting = false;
   let sceneTransitionRunning = false;
   let templeRevivalJinglePending = false;
   let cardGetTimer = 0;
@@ -2559,7 +2560,8 @@ import {
 
   function finishBattleVictory(battle) {
     const questWaspHiveVictory = activeRareRoomEncounterId === "quest_029_wasp_hive";
-    const startMichaelaRestoration = battle?.enemy?.id === "amayenak_b100f"
+    const defeatedEnemyId = battle?.defeatedEnemyId || battle?.encounterBossId || battle?.enemy?.id || "";
+    const startMichaelaRestoration = defeatedEnemyId === "amayenak_b100f"
       && !character?.eventFlags?.michaela_restored;
     activeRareRoomEncounterId = null;
     startBgm(selectDungeonBgm());
@@ -2735,7 +2737,7 @@ import {
       say(victoryMessage);
       updateCharacterUi();
       saveGame();
-      window.setTimeout(() => void runMichaelaRestoration(), 150);
+      void runMichaelaRestoration();
       return;
     }
     setPlayerInputEnabled(true);
@@ -2758,12 +2760,18 @@ import {
   }
 
   async function runMichaelaRestoration() {
-    if (!character || character.eventFlags?.michaela_restored || michaelaRestorationController.isActive()) return false;
-    stopBgm();
-    showNamedItemGetEffect(["真実の杖"], { important: true });
-    say("「真実の杖」を手に入れた！");
-    await wait(3500);
-    return michaelaRestorationController.start();
+    if (!character || character.eventFlags?.michaela_restored
+      || michaelaRestorationStarting || michaelaRestorationController.isActive()) return false;
+    michaelaRestorationStarting = true;
+    try {
+      stopBgm();
+      showNamedItemGetEffect(["真実の杖"], { important: true });
+      say("「真実の杖」を手に入れた！");
+      await wait(3500);
+      return await michaelaRestorationController.start();
+    } finally {
+      michaelaRestorationStarting = false;
+    }
   }
 
   async function completeMichaelaRestoration() {

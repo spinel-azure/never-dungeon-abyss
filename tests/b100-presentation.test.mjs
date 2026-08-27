@@ -79,5 +79,17 @@ test("B100F guardian progress is per exploration while repeat victories award ze
 
 test("Amayenak receives a dedicated enlarged battle image without consuming the vital area", () => {
   assert.match(battle, /is-amayenak"[^\n]*amayenak_b100f/);
-  assert.match(battleCss, /\.battle-enemy-image\.is-amayenak[\s\S]*?max-height: calc\(100% - 64px\)/);
+  assert.match(battle, /enemyStage\?\.classList\.toggle\("is-amayenak", battle\.enemy\.id === "amayenak_b100f"\)/);
+  assert.match(battleCss, /\.battle-enemy-image\.is-amayenak[\s\S]*?max-height: calc\(100% - 54px\)/);
+  assert.match(battleCss, /\.battle-enemy-stage\.is-amayenak \{ inset: 7% 3% 15%; \}/);
+});
+
+test("guardian silhouettes remain forced between hit animations", () => {
+  assert.match(battle, /image\.dataset\.phantom = battleUi\.phantom \? "true" : "false"/);
+  assert.match(battleCss, /\.battle-enemy-image\[data-phantom="true"\][\s\S]*?brightness\(0\)[\s\S]*?!important/);
+});
+
+test("nearby dungeon NPC and boss sprites receive a shared proximity enlargement", () => {
+  assert.match(renderer, /event\.forward <= 1\.55 \? 1\.22 : 1/);
+  assert.match(renderer, /spriteH = event\.size \* 2\.05 \* proximityScale/);
 });
