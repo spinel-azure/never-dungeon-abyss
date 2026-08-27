@@ -69,10 +69,17 @@ test("restoration overlay uses the cat and both Michaela portraits", () => {
   assert.match(css, /michaela-cat-rising/);
   assert.match(css, /michaela-human-reveal/);
   assert.match(css, /is-crossfade/);
+  assert.match(css, /\.michaela-restoration\{position:absolute;inset:0/);
+  assert.doesNotMatch(css, /\.michaela-restoration\{position:fixed/);
+});
+
+test("restoration returns silently without an unrelated floor transition message", () => {
+  const main = read("js/main.js");
+  assert.doesNotMatch(main, /say\("第100層\\n↓\\n奈落入口"\)/);
 });
 
 test("only main.js receives the new cache buster", () => {
   const html = read("index.html");
-  assert.match(html, /js\/main\.js\?v=20260828-01/);
+  assert.match(html, /js\/main\.js\?v=20260828-02/);
   assert.doesNotMatch(read("js/main.js"), /from\s+["'][^"']+\?v=/);
 });

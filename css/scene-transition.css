@@ -22,7 +22,7 @@
 @media(prefers-reduced-motion:reduce){.revival-prayer img.is-active{animation:revival-goddess-fade 4s linear both}@keyframes revival-goddess-fade{0%,100%{opacity:0;transform:translate(-50%,-50%) scale(1)}20%,70%{opacity:.9;transform:translate(-50%,-50%) scale(1)}}}
 body.scene-transition-active .game>:not(.scene-transition){pointer-events:none}
 
-.michaela-restoration{position:fixed;inset:0;z-index:10020;overflow:hidden;background:#000;color:#fff;font-family:"DotGothic16","GameFont",sans-serif;pointer-events:auto;isolation:isolate}
+.michaela-restoration{position:absolute;inset:0;z-index:10020;overflow:hidden;border-radius:7px;background:#000;color:#fff;font-family:"DotGothic16","GameFont",sans-serif;pointer-events:auto;isolation:isolate}
 .michaela-restoration[hidden],.michaela-restoration-dialogue[hidden]{display:none}
 .michaela-restoration-stage{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden}
 .michaela-restoration-figure{position:absolute;left:50%;top:45%;width:min(68%,640px);height:min(72%,700px);object-fit:contain;opacity:0;transform:translate(-50%,-50%);pointer-events:none;will-change:filter,opacity,transform}

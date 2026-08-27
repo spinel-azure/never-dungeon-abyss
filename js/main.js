@@ -2787,7 +2787,6 @@ import {
     await playSe("fixedWarp");
     const returnPoint = cells.flat().find(cell => cell.fixedReturnPoint);
     if (returnPoint) applyFixedFloorWarp({ to: { x: returnPoint.x, y: returnPoint.y }, facing: "W" });
-    say("第100層\n↓\n奈落入口");
     startBgm(selectDungeonBgm());
     setPlayerInputEnabled(true);
     state.autoReturnPaused = false;
