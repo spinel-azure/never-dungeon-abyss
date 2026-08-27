@@ -21,3 +21,27 @@
 @media(prefers-reduced-motion:reduce){.scene-transition{transition-timing-function:linear}}
 @media(prefers-reduced-motion:reduce){.revival-prayer img.is-active{animation:revival-goddess-fade 4s linear both}@keyframes revival-goddess-fade{0%,100%{opacity:0;transform:translate(-50%,-50%) scale(1)}20%,70%{opacity:.9;transform:translate(-50%,-50%) scale(1)}}}
 body.scene-transition-active .game>:not(.scene-transition){pointer-events:none}
+
+.michaela-restoration{position:fixed;inset:0;z-index:10020;overflow:hidden;background:#000;color:#fff;font-family:"DotGothic16","GameFont",sans-serif;pointer-events:auto;isolation:isolate}
+.michaela-restoration[hidden],.michaela-restoration-dialogue[hidden]{display:none}
+.michaela-restoration-stage{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden}
+.michaela-restoration-figure{position:absolute;left:50%;top:45%;width:min(68%,640px);height:min(72%,700px);object-fit:contain;opacity:0;transform:translate(-50%,-50%);pointer-events:none;will-change:filter,opacity,transform}
+.michaela-restoration-cat{width:min(49%,470px);height:min(58%,570px);filter:brightness(0) drop-shadow(0 0 10px #dffcff) drop-shadow(0 0 28px #55dfff);opacity:.78}
+.michaela-restoration.is-cat-rising .michaela-restoration-cat{animation:michaela-cat-rising 2.45s ease-in-out both}
+.michaela-restoration.is-human-start .michaela-restoration-cat{opacity:0}
+.michaela-restoration-queen{filter:brightness(0) drop-shadow(0 0 18px #e7fdff) drop-shadow(0 0 54px #51dcff)}
+.michaela-restoration.is-human-start .michaela-restoration-queen-c{opacity:.7;animation:michaela-human-reveal 3.4s ease-in-out both}
+.michaela-restoration.is-crossfade .michaela-restoration-queen-c{animation:michaela-queen-c-crossfade 1.8s ease both}
+.michaela-restoration-queen-d{filter:none}
+.michaela-restoration.is-crossfade .michaela-restoration-queen-d{opacity:1;transition:opacity 1.8s ease}
+.michaela-restoration-flash{position:absolute;inset:0;z-index:3;background:#fff;opacity:0;pointer-events:none;transition:opacity .12s linear}
+.michaela-restoration-flash.is-active{opacity:1}
+.michaela-restoration-dialogue{position:absolute;z-index:5;left:5%;right:5%;bottom:4%;padding:clamp(12px,2.2vw,22px);border:1px solid #65747a;border-radius:7px;background:rgba(0,0,0,.9);box-shadow:0 0 18px rgba(130,230,255,.25);text-align:left}
+.michaela-restoration-dialogue strong{display:block;margin-bottom:.45em;color:#dffcff;font-size:clamp(17px,2.3vw,27px);font-weight:400;text-shadow:0 0 8px #54dfff}
+.michaela-restoration-dialogue p{min-height:3.2em;margin:0;white-space:pre-line;font-size:clamp(14px,1.95vw,22px);line-height:1.55}
+.michaela-restoration-dialogue small{display:block;margin-top:.35em;color:#c9d2d4;font-size:clamp(11px,1.45vw,16px)}
+@keyframes michaela-cat-rising{0%{opacity:.68;filter:brightness(0) drop-shadow(0 0 8px #dffcff) drop-shadow(0 0 20px #55dfff);transform:translate(-50%,-50%) scale(.98)}35%{opacity:.92;filter:brightness(0) drop-shadow(0 0 17px #fff) drop-shadow(0 0 38px #55dfff);transform:translate(-50%,-50%) scale(1.015)}60%{opacity:.72;filter:brightness(0) drop-shadow(0 0 12px #dffcff) drop-shadow(0 0 30px #55dfff)}78%{opacity:1;filter:brightness(0) drop-shadow(0 0 28px #fff) drop-shadow(0 0 65px #55dfff);transform:translate(-50%,-50%) scale(1.04)}88%{opacity:.7}100%{opacity:1;filter:brightness(0) drop-shadow(0 0 42px #fff) drop-shadow(0 0 92px #55dfff);transform:translate(-50%,-50%) scale(1.065)}}
+@keyframes michaela-human-reveal{0%{opacity:.7;filter:brightness(0) drop-shadow(0 0 30px #fff) drop-shadow(0 0 75px #51dcff);transform:translate(-50%,-50%) scale(1.025)}18%{opacity:.86}32%{opacity:.68}48%{opacity:.94}65%{opacity:.82;filter:brightness(.35) drop-shadow(0 0 20px #e7fdff) drop-shadow(0 0 45px #51dcff)}82%{opacity:.96;filter:brightness(.72) drop-shadow(0 0 10px #dffcff) drop-shadow(0 0 22px #51dcff)}100%{opacity:1;filter:brightness(1) drop-shadow(0 0 5px rgba(223,252,255,.45));transform:translate(-50%,-50%) scale(1)}}
+@keyframes michaela-queen-c-crossfade{from{opacity:1;filter:brightness(1) drop-shadow(0 0 5px rgba(223,252,255,.45))}to{opacity:0;filter:brightness(1)}}
+@media(max-width:600px){.michaela-restoration-figure{top:40%;width:76%;height:62%}.michaela-restoration-dialogue{left:3%;right:3%;bottom:2%;padding:10px}.michaela-restoration-dialogue p{font-size:clamp(12px,3.2vw,16px);line-height:1.42}}
+@media(prefers-reduced-motion:reduce){.michaela-restoration.is-cat-rising .michaela-restoration-cat,.michaela-restoration.is-human-start .michaela-restoration-queen-c{animation-duration:.8s}.michaela-restoration.is-crossfade .michaela-restoration-queen-c,.michaela-restoration.is-crossfade .michaela-restoration-queen-d{transition-duration:.6s}}

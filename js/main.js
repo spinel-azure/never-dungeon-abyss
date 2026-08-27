@@ -46,7 +46,8 @@ import {
   startFloorLapNotice,
   startOverlayEvent,
   setNpcTypewriterOptions,
-  cancelRapidCurrentTransition
+  cancelRapidCurrentTransition,
+  applyFixedFloorWarp
 } from "./player.js";
 import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setMistOptions, setWallColor, setFloorColor, toggleMinimapOverlay } from "./renderer.js";
 import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minimap.js";
@@ -144,6 +145,7 @@ import { renameCharacter as applyCharacterRename } from "../data/character-name.
 import { isTransferDestinationUnlocked } from "../data/transfer-destinations.js";
 import { selectRevivalGoddessImage } from "../data/revival-presentation.js";
 import { ANASTASIA_OUTFIT_EVENT_FLAG } from "../data/anastasia-event.js";
+import { createMichaelaRestorationController } from "./michaela-restoration.js";
 import { HELEN_HIDDEN_EVENT_PENDING_FLAG, HELEN_HIDDEN_EVENT_SEEN_FLAG, isHelenHiddenEventPending } from "../data/helen-event.js";
 import { getFireFloorStepDamage, isFireFloorDepth } from "../data/fire-floor.js";
 import { getColdFloorStepDamage, isColdFloorDepth } from "../data/cold-floor.js";
@@ -278,6 +280,14 @@ import {
   const revivalPrayer = document.getElementById("revivalPrayer");
   const revivalPrayerText = document.getElementById("revivalPrayerText");
   const revivalGoddess = document.getElementById("revivalGoddess");
+  const michaelaRestorationRoot = document.getElementById("michaelaRestoration");
+  const michaelaRestorationController = createMichaelaRestorationController({
+    root: michaelaRestorationRoot,
+    flash: document.getElementById("michaelaRestorationFlash"),
+    dialogue: document.getElementById("michaelaRestorationDialogue"),
+    text: document.getElementById("michaelaRestorationText"),
+    onComplete: completeMichaelaRestoration
+  });
   let sceneTransitionRunning = false;
   let templeRevivalJinglePending = false;
   let cardGetTimer = 0;
@@ -1084,6 +1094,21 @@ import {
     state.npcEncounterCounts = player.npcEncounterCounts && typeof player.npcEncounterCounts === "object" ? { ...player.npcEncounterCounts } : {};
     state.stairsPromptDismissed = Boolean(player.stairsPromptDismissed);
     character = normalizeCharacter(save.character);
+    const resumeMichaelaRestoration = Boolean(
+      character?.eventFlags?.boss_amayenak_b100f_defeated
+      && !character?.eventFlags?.michaela_restored
+    );
+    if (resumeMichaelaRestoration) {
+      const truthStaff = grantKeyItem(character.keyItems, "truth_staff");
+      character = {
+        ...character,
+        keyItems: truthStaff.keyItems,
+        eventFlags: {
+          ...(character.eventFlags || {}),
+          truth_staff_obtained: true
+        }
+      };
+    }
     let restoredLongMarchReward = false;
     if (character?.eventFlags?.b1_b84_long_march_completed) {
       const reward = grantCard(character.cards, LONG_MARCH_REWARD_CARD_ID, 1, character.deckCost);
@@ -1138,6 +1163,10 @@ import {
       setPlayerInputEnabled(true);
       closeTown();
       say("冒険を再開しました。");
+      if (currentDepth === 100 && resumeMichaelaRestoration) {
+        setPlayerInputEnabled(false);
+        window.setTimeout(() => void runMichaelaRestoration(), 150);
+      }
     }
     if (restoredLongMarchReward) {
       setTimeout(() => showCardGetEffect(LONG_MARCH_REWARD_CARD_ID, { seId: "itemGet" }), 120);
@@ -2530,6 +2559,8 @@ import {
 
   function finishBattleVictory(battle) {
     const questWaspHiveVictory = activeRareRoomEncounterId === "quest_029_wasp_hive";
+    const startMichaelaRestoration = battle?.enemy?.id === "amayenak_b100f"
+      && !character?.eventFlags?.michaela_restored;
     activeRareRoomEncounterId = null;
     startBgm(selectDungeonBgm());
     const rewardEnemies = Array.isArray(battle?.enemies) ? battle.enemies : [battle?.enemy];
@@ -2568,6 +2599,17 @@ import {
         : applyBossVictory(character, battle.enemy.id);
       if (victory.accepted) {
         character = victory.character;
+        if (startMichaelaRestoration) {
+          const truthStaff = grantKeyItem(character.keyItems, "truth_staff");
+          character = {
+            ...character,
+            keyItems: truthStaff.keyItems,
+            eventFlags: {
+              ...(character.eventFlags || {}),
+              truth_staff_obtained: true
+            }
+          };
+        }
         if (b100Rematch) b100GauntletDefeatedThisExploration.add(battle.enemy.id);
         character = recordBossDefeat(character, battle.enemy.id, currentDepth);
         if (!b100Rematch && battle.enemy.id === "sphinx_b69f") {
@@ -2687,6 +2729,15 @@ import {
       : "";
     const victoryMessage = `${reward > 0 ? `戦闘に勝利した。${reward}EXPを獲得した。` : "戦闘に勝利した。"}${bossRewardMessage}${questCollectionMessage}${dropMessage ? `\n${dropMessage}` : ""}${defeatQuestProgressMessage}${chainedBattleMessage}`;
     resetPresence();
+    if (startMichaelaRestoration) {
+      setPlayerInputEnabled(false);
+      state.autoReturnPaused = true;
+      say(victoryMessage);
+      updateCharacterUi();
+      saveGame();
+      window.setTimeout(() => void runMichaelaRestoration(), 150);
+      return;
+    }
     setPlayerInputEnabled(true);
     if (drop.kind === "redChest") {
       startBattleTreasureEvent("red", rollTreasureTrap("red"), victoryMessage);
@@ -2704,6 +2755,37 @@ import {
         window.setTimeout(() => beginBossBattle(nextBoss.id), 1800);
       }, 900);
     }
+  }
+
+  async function runMichaelaRestoration() {
+    if (!character || character.eventFlags?.michaela_restored || michaelaRestorationController.isActive()) return false;
+    stopBgm();
+    showNamedItemGetEffect(["真実の杖"], { important: true });
+    say("「真実の杖」を手に入れた！");
+    await wait(3500);
+    return michaelaRestorationController.start();
+  }
+
+  async function completeMichaelaRestoration() {
+    if (!character) return false;
+    character = {
+      ...character,
+      eventFlags: {
+        ...(character.eventFlags || {}),
+        truth_staff_obtained: true,
+        michaela_restored: true
+      }
+    };
+    await playSe("fixedWarp");
+    const returnPoint = cells.flat().find(cell => cell.fixedReturnPoint);
+    if (returnPoint) applyFixedFloorWarp({ to: { x: returnPoint.x, y: returnPoint.y }, facing: "W" });
+    say("第100層\n↓\n奈落入口");
+    startBgm(selectDungeonBgm());
+    setPlayerInputEnabled(true);
+    state.autoReturnPaused = false;
+    updateCharacterUi();
+    saveGame();
+    return true;
   }
 
   async function finishBattleDefeat(battle) {
@@ -3824,6 +3906,7 @@ import {
       window.dispatchEvent(new CustomEvent("nda:title-input", { detail: { action } }));
       return true;
     }
+    if (michaelaRestorationController.handleAction(action)) return true;
     if (handleBlockingTutorialInput(action)) return true;
     recordUserInput();
     if (action === "items") {
@@ -3876,6 +3959,7 @@ import {
     onButtonPreviewChange: setGamepadPressedButtons,
     onConnectionChange: showGamepadConnectionNotification,
     toggleMinimap: () => {
+      if (michaelaRestorationController.isActive()) return true;
       if (handleBlockingTutorialInput("dismiss")) return true;
       recordUserInput();
       if (worldLocation !== "dungeon" || isBattleActive() || isMenuOpen()
@@ -3902,16 +3986,16 @@ import {
       if (handleBlockingTutorialInput("dismiss")) return true;
       return openStatusMenu();
     },
-    handleSkillInput: action => handleBlockingTutorialInput(action) || handleSkillOverlayInput(action),
-    handleItemInput: action => handleBlockingTutorialInput(action) || handleItemOverlayInput(action),
-    handleOverlayInput: action => handleBlockingTutorialInput(action) || handleOverlayEventInput(action),
-    handleBattleInput: action => handleBlockingTutorialInput(action) || handleBattleInput(action),
+    handleSkillInput: action => michaelaRestorationController.handleAction(action) || handleBlockingTutorialInput(action) || handleSkillOverlayInput(action),
+    handleItemInput: action => michaelaRestorationController.handleAction(action) || handleBlockingTutorialInput(action) || handleItemOverlayInput(action),
+    handleOverlayInput: action => michaelaRestorationController.handleAction(action) || handleBlockingTutorialInput(action) || handleOverlayEventInput(action),
+    handleBattleInput: action => michaelaRestorationController.handleAction(action) || handleBlockingTutorialInput(action) || handleBattleInput(action),
     handleTownInput: action => (
-      handleBlockingTutorialInput(action) || sceneTransitionRunning || handleLootIdentifyInput(action) || handleExperienceSettlementInput(action) || handleTownInput(action)
+      michaelaRestorationController.handleAction(action) || handleBlockingTutorialInput(action) || sceneTransitionRunning || handleLootIdentifyInput(action) || handleExperienceSettlementInput(action) || handleTownInput(action)
     ),
     handleDoorInput: openDoorAhead,
     onUserOperation: recordUserInput,
-    handleMenuInput
+    handleMenuInput: action => michaelaRestorationController.handleAction(action) || handleMenuInput(action)
   });
   let virtualStickController = null;
   configureMenu({

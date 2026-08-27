@@ -336,7 +336,7 @@ function confirmFixedFloorWarpEvent() {
   });
 }
 
-function applyFixedFloorWarp(warp) {
+export function applyFixedFloorWarp(warp) {
   const target = warp?.to;
   if (!target || !inBounds(target.x, target.y)) return false;
   hooks.cancelAutoReturn(false);

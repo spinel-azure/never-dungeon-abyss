@@ -70,6 +70,11 @@ export const KEY_ITEMS = Object.freeze({
     description: "漆黒を退ける光を宿した遺物。ミニマップを照らし、魂を喰らう者の力を弱める。",
     sellable: false, consumable: false, version: 1
   }),
+  truth_staff: Object.freeze({
+    id: "truth_staff", name: "真実の杖",
+    description: "王家の血統と結びつき、アカシックレコードへの道を開く平和の象徴。",
+    sellable: false, consumable: false, version: 1
+  }),
   red_rust_key_b9f: Object.freeze({
     id: "red_rust_key_b9f",
     name: "赤錆びた鍵",
