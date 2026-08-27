@@ -105,7 +105,7 @@ import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName, grantEquipmentInstance } from "../data/equipment-inventory.js";
 import { createEnemyCombatant, getEnemyById, getEnemyEncounterCount, getRandomEncounterEnemy, getMagicRegionEncounterFormation, getTortureRegionEncounterFormation, getWaterRegionEncounterFormation, getCrystalRegionEncounterFormation, getDarkRegionEncounterFormation } from "../data/enemies.js";
 import { applyBossVictory, bossLeavesRemains, createBossCombatant, getBossById, getFloorBossByDepth, isBossDefeated } from "../data/bosses.js";
-import { areB100GauntletBossesDefeated, B100_GAUNTLET_BOSS_IDS, getB100GauntletFlag } from "../data/fixed-floor-maps.js";
+import { B100_GAUNTLET_BOSS_IDS, getB100GauntletFlag } from "../data/fixed-floor-maps.js";
 import { consumeKeyItem, getKeyItem, grantKeyItem, hasKeyItem } from "../data/key-items.js";
 import { configureBattle, handleBattleInput, isBattleActive, isJireneScriptedBattleActive, openBattleItems, startBattle } from "./battle.js";
 import { awardBattleExperience, calculateBattleExperienceReward, createTempleRevival, getInnStayFee, grantEventItems, resolveDungeonDefeat, resolveInnStableStay, resolveInnStay, resolveTemplePoisonTreatment, unlockGuildRequest } from "./character-services.js";
@@ -466,6 +466,7 @@ import {
   let pendingEncounter = null;
   let activeRareRoomEncounterId = null;
   const escapedSpecialBossesThisExploration = new Set();
+  const b100GauntletDefeatedThisExploration = new Set();
   configureDevice();
   configureEvents({ messageEl: msgEl });
   configurePresence({
@@ -928,7 +929,10 @@ import {
       },
       dungeon: {
         depth: currentDepth,
-        fixedMapVersion: currentDepth === 100 ? 3 : null,
+        fixedMapVersion: currentDepth === 100 ? 4 : null,
+        b100GauntletDefeatedBossIds: currentDepth === 100
+          ? [...b100GauntletDefeatedThisExploration]
+          : [],
         cells: structuredClone(cells),
         explored: explored.map(row => row.slice()),
         startPosition: cells.flat().find(cell => cell.type === "stairsUp") || { x: state.gridX, y: state.gridY },
@@ -1003,9 +1007,18 @@ import {
     if (!dungeon.explored.every(row => Array.isArray(row) && row.length === MAP_W)) return false;
     if (!inBounds(player.gridX, player.gridY) || !Number.isInteger(player.dir) || !DIRS[player.dir]) return false;
     currentDepth = Math.max(1, Math.floor(Number(dungeon.depth) || 1));
-    const rebuildB100FixedMap = currentDepth === 100 && Number(dungeon.fixedMapVersion) !== 3;
+    const rebuildB100FixedMap = currentDepth === 100 && Number(dungeon.fixedMapVersion) !== 4;
+    b100GauntletDefeatedThisExploration.clear();
+    if (!rebuildB100FixedMap && currentDepth === 100) {
+      for (const bossId of dungeon.b100GauntletDefeatedBossIds || []) {
+        if (B100_GAUNTLET_BOSS_IDS.includes(bossId)) b100GauntletDefeatedThisExploration.add(bossId);
+      }
+    }
     if (rebuildB100FixedMap) {
-      buildBoundaryWallMap(100, Math.random, { eventFlags: { ...(save.character?.eventFlags || {}) } });
+      buildBoundaryWallMap(100, Math.random, {
+        eventFlags: { ...(save.character?.eventFlags || {}) },
+        b100GauntletDefeatedBossIds: []
+      });
     }
 
     for (let y = 0; y < MAP_H; y += 1) {
@@ -1945,7 +1958,7 @@ import {
 
   function isCurrentBossDefeated(bossId) {
     return isB100GauntletBossId(bossId)
-      ? Boolean(character?.eventFlags?.[getB100GauntletFlag(bossId)])
+      ? b100GauntletDefeatedThisExploration.has(bossId)
       : isBossDefeated(character, bossId);
   }
 
@@ -1978,6 +1991,9 @@ import {
     const lightbringerActive = boss.id === "seelenwuerger_b99f"
       && hasKeyItem(character.keyItems, "lichtbringer");
     const bossCombatant = createBossCombatant(boss, { lightbringerActive });
+    if (isB100GauntletBossId(boss.id) && character?.eventFlags?.[getB100GauntletFlag(boss.id)]) {
+      bossCombatant.experienceReward = 0;
+    }
     const encounterEnemies = Array.isArray(boss.encounterEnemyIds)
       ? boss.encounterEnemyIds.map((enemyId, index) => {
         const definition = getBossById(enemyId) || getEnemyById(enemyId);
@@ -2552,6 +2568,7 @@ import {
         : applyBossVictory(character, battle.enemy.id);
       if (victory.accepted) {
         character = victory.character;
+        if (b100Rematch) b100GauntletDefeatedThisExploration.add(battle.enemy.id);
         character = recordBossDefeat(character, battle.enemy.id, currentDepth);
         if (!b100Rematch && battle.enemy.id === "sphinx_b69f") {
           character = {
@@ -2636,8 +2653,8 @@ import {
         if (battle.enemy.questProgressId) {
           character = recordCustomQuestProgress(character, battle.enemy.questProgressId, 1);
         }
-        if (b100Rematch && areB100GauntletBossesDefeated(character.eventFlags)) {
-          refreshB100FinalBoss(character.eventFlags);
+        if (b100Rematch && B100_GAUNTLET_BOSS_IDS.every(id => b100GauntletDefeatedThisExploration.has(id))) {
+          refreshB100FinalBoss(character.eventFlags, [...b100GauntletDefeatedThisExploration]);
           bossRewardMessage = "\n十の守護者をすべて退けた。迷宮最奥で、新たな気配が目覚める――！";
         }
       }
@@ -3160,6 +3177,7 @@ import {
       playAudio: () => playSeSequence("stairs", 3),
       onDark: () => {
         escapedSpecialBossesThisExploration.clear();
+        b100GauntletDefeatedThisExploration.clear();
         currentDepth = 1;
         character = startMarathonChallenge(character);
         character = startLongMarchChallenge(character);
@@ -3187,6 +3205,7 @@ import {
       playAudio: () => playSeSequence("stairs", 3),
       onDark: () => {
         escapedSpecialBossesThisExploration.clear();
+        b100GauntletDefeatedThisExploration.clear();
         currentDepth = destination;
         character = invalidateMarathonChallenge(character);
         character = invalidateLongMarchChallenge(character);
@@ -3262,6 +3281,7 @@ import {
 
   function returnToTown() {
     escapedSpecialBossesThisExploration.clear();
+    b100GauntletDefeatedThisExploration.clear();
     cancelRapidCurrentTransition();
     const returnFloor = currentDepth;
     let bag = null;
@@ -3467,7 +3487,7 @@ import {
     if (nextStart) setStartPosition(nextStart.x, nextStart.y);
     else randomizeStartPosition();
     buildBoundaryWallMap(currentDepth, Math.random, getDungeonProgress());
-    startDir = chooseStartDirection();
+    startDir = currentDepth === 100 ? DIRS.findIndex(direction => direction.key === "N") : chooseStartDirection();
     resetExplored();
     resetPlayer(startDir);
     if (character) {
@@ -3675,7 +3695,8 @@ import {
       activeQuestIds: Object.keys(character?.quests?.active || {}),
       forcedEnemyId: getForcedEnemyId(character, { depth: currentDepth }),
       maikaeferNestRoll: Math.random(),
-      eventFlags: { ...(character?.eventFlags || {}) }
+      eventFlags: { ...(character?.eventFlags || {}) },
+      b100GauntletDefeatedBossIds: [...b100GauntletDefeatedThisExploration]
     };
   }
 

@@ -51,7 +51,7 @@ export const B100_FIXED_FLOOR_MAP = Object.freeze({
   ]),
   returnPoints: Object.freeze([point("E007", 1, 0)]),
   events: Object.freeze([
-    point("E043", 0, 1, { name: "女王の影1", eventKey: "queen_shadow_warning_1", description: "「この先では、これまであなたが戦ってきた守護者たちの幻影が待ち受けています。\nたとえ倒してもひとたび戻ってしまうと、再びあなたの前に立ち塞がるでしょう。\nどうか、お気を付けて…。」", fadeOut: true }),
+    point("E043", 0, 1, { name: "女王の影1", eventKey: "queen_shadow_warning_1", description: "「この先では、これまであなたが戦ってきた守護者たちの幻影が待ち受けています。\nたとえ倒しても、ひとたび奈落の外に出てしまうと、再びあなたの前に立ち塞がるでしょう。\nどうか、お気を付けて…。」", fadeOut: true }),
     point("E044", 2, 6, { name: "女王の影2", eventKey: "queen_shadow_warning_2", description: "「ここから先に進むと引き返すことは出来ません…。その覚悟は、おありですか…？」", fadeOut: true })
   ]),
   healingFountains: Object.freeze([point("E040", 8, 7, { name: "癒やしの噴水" })]),

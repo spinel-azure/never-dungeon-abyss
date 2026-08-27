@@ -201,6 +201,13 @@
     body.event-message-expanded .message {
       min-height: calc(1.35em * 5 + 18px);
     }
+
+    body.layout-pc.event-message-expanded .message,
+    body.layout-tablet.event-message-expanded .message,
+    body.layout-mobile.event-message-expanded .message {
+      height: calc(1.35em * 5 + 18px);
+      min-height: calc(1.35em * 5 + 18px);
+    }
     .controls {
       display: grid;
       grid-template-columns: 1fr auto auto 1fr;

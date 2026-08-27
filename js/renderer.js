@@ -6,6 +6,7 @@ import {
 import { npcs, getNpcById } from "../data/npcs.js";
 import { DESERT_OASIS, DESERT_OASIS_MIRAGE, getFountainById, HEALING_FOUNTAIN } from "../data/fountains.js";
 import { BOSSES, getBossById } from "../data/bosses.js";
+import { B100_GAUNTLET_BOSS_IDS } from "../data/fixed-floor-maps.js";
 import { DESERT_QUICKSAND } from "../data/quicksand.js";
 import { RAPID_CURRENT } from "../data/rapid-currents.js";
 
@@ -972,7 +973,13 @@ export function drawCellEvents(layer = "all") {
         if (boss) events.push({
           ...projected,
           eventKind: "boss",
-          npc: { imageId: boss.encounterImageId, renderScale: boss.renderScale }
+          npc: {
+            imageId: boss.encounterImageId,
+            renderScale: boss.renderScale,
+            silhouette: Boolean(
+              renderer.state?.minimapBlocked && B100_GAUNTLET_BOSS_IDS.includes(cell.bossId)
+            )
+          }
         });
       }
       if (cell.bossRemainsId) {
@@ -1275,6 +1282,9 @@ function drawNpcEvent(ctx, event) {
 
   ctx.save();
   ctx.globalAlpha = event.alpha;
+  if (event.npc.silhouette) {
+    ctx.filter = "brightness(0) drop-shadow(0 0 3px rgba(225,252,255,.98)) drop-shadow(0 0 10px rgba(128,235,255,.9))";
+  }
   ctx.shadowColor = event.npc.glow === "paleBlue"
     ? "rgba(165,235,255,.95)"
     : "rgba(255,221,151,.45)";

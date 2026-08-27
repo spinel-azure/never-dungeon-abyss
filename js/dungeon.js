@@ -21,7 +21,7 @@ import {
 } from "../data/fountains.js";
 import { getSpecialRoomDefinition, getSpecialRoomUnlockRate, rollMaikaeferNestContent } from "../data/special-rooms.js";
 import { getBossById, getFloorBossByDepth } from "../data/bosses.js";
-import { areB100GauntletBossesDefeated, B100_FIXED_FLOOR_MAP, getB100GauntletFlag } from "../data/fixed-floor-maps.js";
+import { B100_GAUNTLET_BOSS_IDS, B100_FIXED_FLOOR_MAP } from "../data/fixed-floor-maps.js";
 import { getQuestEventForDepth } from "../data/quest-events.js";
 import { DESERT_QUICKSAND, floorHasQuicksand, QUICKSAND_COUNT } from "../data/quicksand.js";
 import { floorHasRapidCurrents, getRapidCurrentTargetCount, RAPID_CURRENT, RAPID_CURRENT_DIRECTIONS } from "../data/rapid-currents.js";
@@ -200,12 +200,15 @@ export function buildFixedFloorMap(map = B100_FIXED_FLOOR_MAP, progress = {}) {
   });
 
   const flags = progress.eventFlags || {};
+  const defeatedThisExploration = new Set(
+    Array.isArray(progress.b100GauntletDefeatedBossIds) ? progress.b100GauntletDefeatedBossIds : []
+  );
   map.bosses.forEach(placement => {
-    if (flags[getB100GauntletFlag(placement.bossId)]) return;
+    if (defeatedThisExploration.has(placement.bossId)) return;
     const position = fixedMapPointToInternal(map, placement);
     cells[position.y][position.x].bossId = placement.bossId;
   });
-  if (areB100GauntletBossesDefeated(flags)) {
+  if (B100_GAUNTLET_BOSS_IDS.every(bossId => defeatedThisExploration.has(bossId))) {
     const position = fixedMapPointToInternal(map, map.finalBoss);
     const firstBoss = getBossById(map.finalBoss.bossId);
     const nextBoss = firstBoss?.nextBossId ? getBossById(firstBoss.nextBossId) : null;
@@ -218,8 +221,9 @@ export function buildFixedFloorMap(map = B100_FIXED_FLOOR_MAP, progress = {}) {
   return { map, startPosition: getStartPosition() };
 }
 
-export function refreshB100FinalBoss(eventFlags = {}) {
-  if (!areB100GauntletBossesDefeated(eventFlags)) return false;
+export function refreshB100FinalBoss(eventFlags = {}, defeatedBossIds = []) {
+  const defeatedThisExploration = new Set(Array.isArray(defeatedBossIds) ? defeatedBossIds : []);
+  if (!B100_GAUNTLET_BOSS_IDS.every(bossId => defeatedThisExploration.has(bossId))) return false;
   const position = fixedMapPointToInternal(B100_FIXED_FLOOR_MAP, B100_FIXED_FLOOR_MAP.finalBoss);
   const firstBoss = getBossById(B100_FIXED_FLOOR_MAP.finalBoss.bossId);
   const nextBoss = firstBoss?.nextBossId ? getBossById(firstBoss.nextBossId) : null;

@@ -796,6 +796,9 @@ function renderBattle() {
   image.classList.toggle("is-defeated", defeated);
   image.classList.toggle("is-concealed", battleUi.concealed);
   image.classList.toggle("is-phantom", battleUi.phantom);
+  image.style.filter = battleUi.phantom
+    ? "brightness(0) drop-shadow(0 0 2px rgba(225,252,255,.98)) drop-shadow(0 0 8px rgba(128,235,255,.9)) drop-shadow(0 0 18px rgba(55,173,255,.68))"
+    : "";
   ENEMY_DISPLAY_SIZES.forEach(size => image.classList.toggle(`is-size-${size}`, size === getEnemyDisplaySize(battle.enemy)));
   image.classList.toggle("is-jabberwock", battle.enemy.id === "jabberwock_event_boss");
   image.classList.toggle("is-iron-maiden", battle.enemy.id === "iron_maiden_b29f");

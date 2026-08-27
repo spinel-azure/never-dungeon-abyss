@@ -1104,6 +1104,7 @@ function startFixedFloorEvent(eventDefinition) {
     message: `${message}\n＊Aボタンで次へ`,
     canCancel: false,
     fadeOut: Boolean(eventDefinition?.fadeOut),
+    reserveMessageLines: 5,
     phase: "message"
   });
 }

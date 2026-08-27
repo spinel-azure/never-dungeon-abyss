@@ -8,6 +8,8 @@ const player = readFileSync(new URL("../js/player.js", import.meta.url), "utf8")
 const renderer = readFileSync(new URL("../js/renderer.js", import.meta.url), "utf8");
 const battle = readFileSync(new URL("../js/battle.js", import.meta.url), "utf8");
 const battleCss = readFileSync(new URL("../css/battle.css", import.meta.url), "utf8");
+const style = readFileSync(new URL("../css/style.css", import.meta.url), "utf8");
+const fixedFloorMaps = readFileSync(new URL("../data/fixed-floor-maps.js", import.meta.url), "utf8");
 
 test("new B100F, zone, reserved boss, and ending audio assets are registered", () => {
   for (const relativePath of [
@@ -44,6 +46,9 @@ test("B100F queen shadow overlay fades after its warning", () => {
   assert.match(player, /event\.fadeOut[\s\S]*?event\.fadeStartedAt = performance\.now\(\)/);
   assert.match(player, /removeFixedEventAt\(state\.gridX, state\.gridY\)/);
   assert.match(renderer, /event\.type === "fixedFloorEvent" && event\.phase === "fading"/);
+  assert.match(player, /reserveMessageLines: 5/);
+  assert.match(fixedFloorMaps, /たとえ倒しても、ひとたび奈落の外に出てしまうと/);
+  assert.match(style, /event-message-expanded[\s\S]*?height: calc\(1\.35em \* 5 \+ 18px\)/);
 });
 
 test("B100F blocks minimap only and keeps the entrance portal canvas-rendered", () => {
@@ -58,7 +63,18 @@ test("B100F warp and guardian prompts use large overlay imagery and phantom silh
   assert.match(main, /\$\{boss\.name\}の幻影が行く手に立ちはだかっている/);
   assert.match(main, /phantom: isB100GauntletBossId\(boss\.id\)/);
   assert.match(battle, /classList\.toggle\("is-phantom", battleUi\.phantom\)/);
+  assert.match(battle, /image\.style\.filter = battleUi\.phantom/);
+  assert.match(renderer, /silhouette: Boolean\([\s\S]*?renderer\.state\?\.minimapBlocked && B100_GAUNTLET_BOSS_IDS\.includes\(cell\.bossId\)/);
+  assert.match(renderer, /if \(event\.npc\.silhouette\)[\s\S]*?brightness\(0\)/);
   assert.match(battleCss, /\.battle-enemy-image\.is-phantom[\s\S]*?brightness\(0\)/);
+});
+
+test("B100F guardian progress is per exploration while repeat victories award zero EXP", () => {
+  assert.match(main, /const b100GauntletDefeatedThisExploration = new Set\(\)/);
+  assert.match(main, /b100GauntletDefeatedThisExploration\.add\(battle\.enemy\.id\)/);
+  assert.match(main, /bossCombatant\.experienceReward = 0/);
+  assert.match(main, /b100GauntletDefeatedThisExploration\.clear\(\)[\s\S]*?function returnToTown|function returnToTown\(\)[\s\S]*?b100GauntletDefeatedThisExploration\.clear\(\)/);
+  assert.match(main, /currentDepth === 100 \? DIRS\.findIndex\(direction => direction\.key === "N"\)/);
 });
 
 test("Amayenak receives a dedicated enlarged battle image without consuming the vital area", () => {

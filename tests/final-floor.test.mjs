@@ -112,7 +112,7 @@ test("B100F begins with all ten unique checkpoint bosses and no final boss", () 
 
 test("B100F unlocks Erzdaemonin only after all ten rematch flags", () => {
   const eventFlags = Object.fromEntries(B100_GAUNTLET_BOSS_IDS.map(id => [getB100GauntletFlag(id), true]));
-  const progress = { eventFlags };
+  const progress = { eventFlags, b100GauntletDefeatedBossIds: [...B100_GAUNTLET_BOSS_IDS] };
   buildBoundaryWallMap(100, () => 0.5, progress);
   const finalPosition = internal(B100_FIXED_FLOOR_MAP.finalBoss);
   assert.equal(cells.flat().filter(cell => B100_GAUNTLET_BOSS_IDS.includes(cell.bossId)).length, 0);
@@ -120,10 +120,18 @@ test("B100F unlocks Erzdaemonin only after all ten rematch flags", () => {
   assert.equal(validateDungeonLayout({ depth: 100, progress }).valid, true);
 });
 
+test("persistent first-victory flags do not prevent guardian phantoms from returning on a new exploration", () => {
+  const eventFlags = Object.fromEntries(B100_GAUNTLET_BOSS_IDS.map(id => [getB100GauntletFlag(id), true]));
+  buildBoundaryWallMap(100, () => 0.5, { eventFlags, b100GauntletDefeatedBossIds: [] });
+  const activeBossIds = cells.flat().map(cell => cell.bossId).filter(id => B100_GAUNTLET_BOSS_IDS.includes(id));
+  assert.equal(activeBossIds.length, B100_GAUNTLET_BOSS_IDS.length);
+  assert.deepEqual(new Set(activeBossIds), new Set(B100_GAUNTLET_BOSS_IDS));
+});
+
 test("B100F resumes with Amayenak after Erzdaemonin is defeated", () => {
   const eventFlags = Object.fromEntries(B100_GAUNTLET_BOSS_IDS.map(id => [getB100GauntletFlag(id), true]));
   eventFlags.boss_erzdaemonin_b100f_defeated = true;
-  buildBoundaryWallMap(100, () => 0.5, { eventFlags });
+  buildBoundaryWallMap(100, () => 0.5, { eventFlags, b100GauntletDefeatedBossIds: [...B100_GAUNTLET_BOSS_IDS] });
   const finalPosition = internal(B100_FIXED_FLOOR_MAP.finalBoss);
   assert.equal(cells[finalPosition.y][finalPosition.x].bossId, "amayenak_b100f");
 });
