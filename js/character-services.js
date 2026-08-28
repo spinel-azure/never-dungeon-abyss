@@ -70,8 +70,8 @@ export function resolveInnStay(character) {
   const growth = getLevelGrowth(character.job, level);
   const maxHpBonus = getVitalBonus(character, "maxHp");
   const maxSpBonus = getVitalBonus(character, "maxSp");
-  const maxHp = growth.hp + maxHpBonus;
-  const maxSp = growth.sp + maxSpBonus;
+  const maxHp = applyInnVitalCardMultipliers(character, "maxHp", growth.hp + maxHpBonus);
+  const maxSp = applyInnVitalCardMultipliers(character, "maxSp", growth.sp + maxSpBonus);
   const previousSkillIds = Array.isArray(character.skillIds) ? character.skillIds : [];
   const unlockedSkillIds = getLevelUnlockedSkillIds(character.job, level);
   const skillIds = [...new Set([...previousSkillIds, ...unlockedSkillIds])];
@@ -155,6 +155,24 @@ function getVitalBonus(character, key) {
     Math.floor(Number(character?.cardStatBonuses?.[key]) || 0)
   );
   return equipment + cards;
+}
+
+function applyInnVitalCardMultipliers(character, key, baseValue) {
+  let value = Math.max(0, Math.floor(Number(baseValue) || 0));
+  if (key === "maxHp" && hasCardEffect(character?.cards?.deckSlots, "zodiac_taurus")) {
+    value = Math.ceil(value * 1.5);
+  }
+  if (key === "maxHp" && hasCardEffect(character?.cards?.deckSlots, "life_booster")) {
+    value = Math.ceil(value * 1.2);
+  }
+  if (key === "maxSp" && hasCardEffect(character?.cards?.deckSlots, "mana_booster")) {
+    value = Math.ceil(value * 1.2);
+  }
+  if (["maxHp", "maxSp"].includes(key)
+    && hasCardEffect(character?.cards?.deckSlots, "zodiac_virgo")) {
+    value = Math.ceil(value * 1.25);
+  }
+  return value;
 }
 
 function retainPoisonStatuses(character) {

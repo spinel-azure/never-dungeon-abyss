@@ -10,6 +10,8 @@ import { grantKeyItem } from "../data/key-items.js";
 import { acceptQuest, getQuestById, getQuestProgress, isQuestAvailable, reportQuest } from "../data/quests.js";
 import { getSpecialRoomDefinition } from "../data/special-rooms.js";
 import { applyVirgoFloorRecovery } from "../data/virgo-card.js";
+import { resolveInnStableStay, resolveInnStay } from "../js/character-services.js";
+import { getExperienceForLevel } from "../data/growth.js";
 
 const mainSource = fs.readFileSync(new URL("../js/main.js", import.meta.url), "utf8");
 
@@ -98,4 +100,58 @@ test("Virgo raises maximum HP and SP by 25 percent and heals 10 percent on desce
   const recovered = applyVirgoFloorRecovery(character);
   assert.equal(recovered.hpRecovered, Math.ceil(character.maxHp * 0.1));
   assert.equal(recovered.spRecovered, Math.ceil(character.maxSp * 0.1));
+});
+
+test("Virgo maximum HP and SP remain applied after either kind of inn stay", () => {
+  let character = createInitialCharacter({ name: "VIRGO INN", job: "thief" });
+  character.level = 99;
+  character.experience = getExperienceForLevel(99);
+  character = normalizeCharacter(character);
+  character.cards = grantCard(character.cards, "zodiac_virgo", 1, character.deckCost).cards;
+  character.cards.deckSlots[0] = "zodiac_virgo";
+  character = normalizeCharacter(character);
+  character.hp = 1;
+  character.sp = 1;
+  const expected = { maxHp: character.maxHp, maxSp: character.maxSp };
+
+  const room = resolveInnStay(character);
+  assert.deepEqual(
+    { maxHp: room.changes.maxHp, maxSp: room.changes.maxSp },
+    expected
+  );
+  assert.equal(room.changes.hp, expected.maxHp);
+  assert.equal(room.changes.sp, expected.maxSp);
+
+  const stable = resolveInnStableStay(character);
+  assert.deepEqual(
+    { maxHp: stable.changes.maxHp, maxSp: stable.changes.maxSp },
+    expected
+  );
+});
+
+test("inn recalculation preserves the established order of every vital multiplier card", () => {
+  let character = createInitialCharacter({ name: "VITAL INN", job: "thief" });
+  character.level = 99;
+  character.experience = getExperienceForLevel(99);
+  character = normalizeCharacter(character);
+  for (const cardId of [
+    "zodiac_taurus",
+    "legendary_life_booster",
+    "legendary_mana_booster",
+    "zodiac_virgo"
+  ]) {
+    character.cards = grantCard(character.cards, cardId, 1, character.deckCost).cards;
+  }
+  character.cards.deckSlots = [
+    "zodiac_taurus",
+    "legendary_life_booster",
+    "legendary_mana_booster",
+    "zodiac_virgo",
+    null,
+    null
+  ];
+  character = normalizeCharacter(character);
+  const stayed = resolveInnStay(character);
+  assert.equal(stayed.changes.maxHp, character.maxHp);
+  assert.equal(stayed.changes.maxSp, character.maxSp);
 });
