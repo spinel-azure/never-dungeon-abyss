@@ -9,6 +9,10 @@ import { BOSSES, getBossById } from "../data/bosses.js";
 import { B100_GAUNTLET_BOSS_IDS } from "../data/fixed-floor-maps.js";
 import { DESERT_QUICKSAND } from "../data/quicksand.js";
 import { RAPID_CURRENT } from "../data/rapid-currents.js";
+import {
+  B100_FINAL_PRELUDE_ASSETS,
+  B100_FINAL_PRELUDE_TRANSITION_MS
+} from "../data/b100-final-prelude.js";
 
 const renderer = {
   canvas: null,
@@ -218,6 +222,7 @@ export function configureRenderer(options) {
   loadCharacterImage("kirke_house_b58f", "images/background/dungeon_event_11.avif");
   loadCharacterImage("NPC_23", "images/npc/NPC_23.avif");
   loadCharacterImage("warp_portal_b100f", "images/dungeon_effects/warp_portal.avif");
+  Object.values(B100_FINAL_PRELUDE_ASSETS).forEach(asset => loadCharacterImage(asset.id, asset.image));
   ["red", "black", "gold"].forEach(type => loadTreasureImage(type, `images/treasure/treasure-${type}.png`));
   loadTreasureImage("purple", "images/treasure/treasure-red.png", "#8f42d8");
   renderer.canvas.addEventListener("pointerup", handleCanvasPointerUp);
@@ -429,6 +434,7 @@ function drawOverlayEvent() {
   if (!ctx) return;
   ctx.clearRect(0, 0, W, H);
   const event = state.overlayEvent;
+  document.body.classList.toggle("event-message-expanded", Number(event?.reserveMessageLines) >= 4);
   renderer.eventOverlayCanvas.style.pointerEvents = event?.type === "floorLap" ? "auto" : "none";
   if (!event?.showOverlay) return;
   if (event.type === "randomEncounter") return;
@@ -437,6 +443,49 @@ function drawOverlayEvent() {
   ctx.save();
   ctx.fillStyle = "rgba(0,0,0,.8)";
   ctx.fillRect(0, 0, W, H);
+
+  if (event.type === "b100FinalPrelude") {
+    const drawLayer = (layer, { alpha = 1, scaleMultiplier = 1, blur = 0, fit = "cover" } = {}) => {
+      if (!layer?.complete || layer.naturalWidth <= 0) return;
+      const fitScale = fit === "contain"
+        ? Math.min(W / layer.naturalWidth, H / layer.naturalHeight)
+        : Math.max(W / layer.naturalWidth, H / layer.naturalHeight);
+      const scale = fitScale * scaleMultiplier;
+      const drawW = layer.naturalWidth * scale;
+      const drawH = layer.naturalHeight * scale;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      if (blur > 0) ctx.filter = `blur(${blur}px)`;
+      ctx.drawImage(layer, (W - drawW) / 2, (H - drawH) / 2, drawW, drawH);
+      ctx.restore();
+    };
+    drawLayer(renderer.characterImages.get(event.backgroundImageId));
+    const transitionProgress = event.transitionStartedAt
+      ? Math.max(0, Math.min(1, (performance.now() - event.transitionStartedAt) / B100_FINAL_PRELUDE_TRANSITION_MS))
+      : 1;
+    if (event.outgoingImageId && transitionProgress < 1) {
+      drawLayer(renderer.characterImages.get(event.outgoingImageId), {
+        alpha: Math.max(0, 1 - transitionProgress),
+        fit: "contain"
+      });
+    }
+    if (event.foregroundImageId) {
+      const incoming = renderer.characterImages.get(event.foregroundImageId);
+      if (event.transitionStartedAt && transitionProgress < 1) {
+        const eased = 1 - Math.pow(1 - transitionProgress, 3);
+        drawLayer(incoming, {
+          alpha: eased,
+          scaleMultiplier: .72 + eased * .28,
+          blur: Math.max(0, Math.round((1 - eased) * 5)),
+          fit: "contain"
+        });
+      } else {
+        drawLayer(incoming, { fit: "contain" });
+      }
+    }
+    ctx.restore();
+    return;
+  }
 
   if (image && image.complete && image.naturalWidth > 0) {
     const mirageProgress = event.type === "fountain" && event.phase === "mirageFading"

@@ -4,7 +4,16 @@ import { buildBoundaryWallMap, cells, getStartPosition, validateDungeonLayout } 
 import { getBossById, getFloorBossByDepth } from "../data/bosses.js";
 import { B100_FIXED_FLOOR_MAP, B100_GAUNTLET_BOSS_IDS, getB100GauntletFlag } from "../data/fixed-floor-maps.js";
 import { DIRS } from "../js/config.js";
-import { configurePlayer, handleOverlayEventInput, manualMove, setPlayerInputEnabled, state, updateAnimation } from "../js/player.js";
+import {
+  configurePlayer,
+  handleOverlayEventInput,
+  manualMove,
+  setPlayerInputEnabled,
+  startBossEvent,
+  state,
+  updateAnimation
+} from "../js/player.js";
+import { B100_FINAL_PRELUDE_MESSAGES } from "../data/b100-final-prelude.js";
 
 const internal = ({ x, y }) => ({ x, y: B100_FIXED_FLOOR_MAP.height - 1 - y });
 
@@ -134,6 +143,61 @@ test("B100F resumes with Amayenak after Erzdaemonin is defeated", () => {
   buildBoundaryWallMap(100, () => 0.5, { eventFlags, b100GauntletDefeatedBossIds: [...B100_GAUNTLET_BOSS_IDS] });
   const finalPosition = internal(B100_FIXED_FLOOR_MAP.finalBoss);
   assert.equal(cells[finalPosition.y][finalPosition.x].bossId, "amayenak_b100f");
+});
+
+test("Erzdaemonin starts through the five-page altar prelude and layered portraits", () => {
+  const messages = [];
+  const battles = [];
+  const previousWindow = globalThis.window;
+  let scheduled = null;
+  globalThis.window = {
+    ...(previousWindow || {}),
+    setTimeout(callback, delay) {
+      scheduled = { callback, delay };
+      return 1;
+    }
+  };
+  configurePlayer({
+    say: message => messages.push(message),
+    onStateChanged: () => {},
+    beginBossBattle: bossId => battles.push(bossId)
+  });
+  state.overlayEvent = null;
+  startBossEvent("erzdaemonin_b100f", 4, 4);
+  assert.deepEqual(B100_FINAL_PRELUDE_MESSAGES.map(message => message.endsWith("＊Aボタンで次へ")), [true, true, true, true, true]);
+  assert.deepEqual({
+    type: state.overlayEvent.type,
+    background: state.overlayEvent.backgroundImageId,
+    foreground: state.overlayEvent.foregroundImageId,
+    page: state.overlayEvent.page
+  }, {
+    type: "b100FinalPrelude",
+    background: "b100_final_altar",
+    foreground: "",
+    page: 0
+  });
+
+  handleOverlayEventInput("confirm");
+  assert.equal(state.overlayEvent.foregroundImageId, "b100_final_master_and_demon");
+  handleOverlayEventInput("confirm");
+  handleOverlayEventInput("confirm");
+  assert.equal(state.overlayEvent.page, 3);
+  handleOverlayEventInput("confirm");
+  assert.equal(state.overlayEvent.page, 4);
+  assert.equal(state.overlayEvent.outgoingImageId, "b100_final_master_and_demon");
+  assert.equal(state.overlayEvent.foregroundImageId, "b100_final_demon_advancing");
+  assert.equal(Number.isFinite(state.overlayEvent.transitionStartedAt), true);
+  assert.deepEqual(messages.slice(-5), B100_FINAL_PRELUDE_MESSAGES);
+  handleOverlayEventInput("confirm");
+  assert.equal(state.overlayEvent.phase, "battleStarting");
+  assert.equal(scheduled.delay, 2000);
+  handleOverlayEventInput("confirm");
+  assert.deepEqual(battles, []);
+  scheduled.callback();
+  assert.deepEqual(battles, ["erzdaemonin_b100f"]);
+  assert.equal(state.overlayEvent, null);
+  if (previousWindow === undefined) delete globalThis.window;
+  else globalThis.window = previousWindow;
 });
 
 test("B100F boss definitions form the final two-stage battle", () => {

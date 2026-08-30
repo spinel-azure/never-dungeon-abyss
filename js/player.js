@@ -44,6 +44,11 @@ import { getBossById } from "../data/bosses.js";
 import { getFloorZoneName } from "../data/floor-zone-names.js";
 import { onExplorationStep, resetPresence } from "./presence.js";
 import { getRapidCurrentForcedPath, RAPID_CURRENT, RAPID_CURRENT_DIRECTIONS } from "../data/rapid-currents.js";
+import {
+  B100_FINAL_PRELUDE_ASSETS,
+  B100_FINAL_PRELUDE_BATTLE_DELAY_MS,
+  B100_FINAL_PRELUDE_MESSAGES
+} from "../data/b100-final-prelude.js";
 
 const hooks = {
   say: () => {},
@@ -969,6 +974,7 @@ export function handleOverlayEventInput(action) {
   if (action === "confirm") {
     if (state.overlayEvent.type === "npcTalk") advanceNpcTalkEvent();
     else if (state.overlayEvent.type === "bossPrompt") confirmBossEvent();
+    else if (state.overlayEvent.type === "b100FinalPrelude") advanceB100FinalPrelude();
     else if (state.overlayEvent.type === "bossRemains") finishBossRemainsEvent();
     else if (state.overlayEvent.type === "fountain") confirmFountainEvent();
     else if (state.overlayEvent.type === "fixedFloorWarp") confirmFixedFloorWarpEvent();
@@ -1130,9 +1136,25 @@ function finishFixedFloorEvent() {
   hooks.onStateChanged();
 }
 
-function startBossEvent(bossId, fromGX, fromGY) {
+export function startBossEvent(bossId, fromGX, fromGY) {
   const boss = getBossById(bossId);
   state.bossEncounterOrigin = { x: fromGX, y: fromGY };
+  if (bossId === "erzdaemonin_b100f") {
+    startOverlayEvent({
+      type: "b100FinalPrelude",
+      bossId,
+      fromGX,
+      fromGY,
+      phase: "altar",
+      page: 0,
+      backgroundImageId: B100_FINAL_PRELUDE_ASSETS.altar.id,
+      foregroundImageId: "",
+      reserveMessageLines: 5,
+      message: B100_FINAL_PRELUDE_MESSAGES[0],
+      canCancel: false
+    });
+    return;
+  }
   const isRematch = hooks.isBossRematch(bossId);
   const hasSphinxAnswer = boss?.event?.sphinxChoice && !isRematch && hooks.hasSphinxAnswer();
   startOverlayEvent({
@@ -1204,6 +1226,31 @@ function confirmBossEvent() {
     hooks.beginBossBattle(event.bossId);
   }, Math.max(0, Number(boss?.event?.autoStartDelay) || 1000));
   event.autoStartTimer = timer;
+}
+
+function advanceB100FinalPrelude() {
+  const event = state.overlayEvent;
+  if (!event || event.type !== "b100FinalPrelude" || event.phase === "battleStarting") return;
+  if (event.page < B100_FINAL_PRELUDE_MESSAGES.length - 1) {
+    event.page += 1;
+    event.phase = ["amayenakOne", "amayenakTwo", "demonRises", "demonAdvances"][event.page - 1];
+    if (event.page === 1) event.foregroundImageId = B100_FINAL_PRELUDE_ASSETS.masterAndDemon.id;
+    if (event.page === 4) {
+      event.outgoingImageId = B100_FINAL_PRELUDE_ASSETS.masterAndDemon.id;
+      event.foregroundImageId = B100_FINAL_PRELUDE_ASSETS.demonAdvancing.id;
+      event.transitionStartedAt = performance.now();
+    }
+    hooks.say(B100_FINAL_PRELUDE_MESSAGES[event.page]);
+    hooks.onStateChanged();
+    return;
+  }
+  event.phase = "battleStarting";
+  event.autoStartTimer = window.setTimeout(() => {
+    if (state.overlayEvent !== event) return;
+    state.overlayEvent = null;
+    hooks.say("");
+    hooks.beginBossBattle(event.bossId);
+  }, B100_FINAL_PRELUDE_BATTLE_DELAY_MS);
 }
 
 function startBossRemainsEvent(bossId) {

@@ -6,6 +6,7 @@ const audio = readFileSync(new URL("../js/audio.js", import.meta.url), "utf8");
 const main = readFileSync(new URL("../js/main.js", import.meta.url), "utf8");
 const player = readFileSync(new URL("../js/player.js", import.meta.url), "utf8");
 const renderer = readFileSync(new URL("../js/renderer.js", import.meta.url), "utf8");
+const finalPrelude = readFileSync(new URL("../data/b100-final-prelude.js", import.meta.url), "utf8");
 const battle = readFileSync(new URL("../js/battle.js", import.meta.url), "utf8");
 const battleCss = readFileSync(new URL("../css/battle.css", import.meta.url), "utf8");
 const style = readFileSync(new URL("../css/style.css", import.meta.url), "utf8");
@@ -92,4 +93,13 @@ test("guardian silhouettes remain forced between hit animations", () => {
 test("nearby dungeon NPC and boss sprites receive a shared proximity enlargement", () => {
   assert.match(renderer, /event\.forward <= 1\.55 \? 1\.22 : 1/);
   assert.match(renderer, /spriteH = event\.size \* 2\.05 \* proximityScale/);
+});
+
+test("B100F final prelude registers its altar layers and delays battle for two seconds", () => {
+  assert.match(finalPrelude, /b100_final_altar[^\n]*dungeon_event_00\.avif/);
+  assert.match(finalPrelude, /b100_final_master_and_demon[^\n]*NPC_event_19\.avif/);
+  assert.match(finalPrelude, /b100_final_demon_advancing[^\n]*NPC_event_20\.avif/);
+  assert.match(renderer, /transitionStartedAt[\s\S]*?B100_FINAL_PRELUDE_TRANSITION_MS/);
+  assert.match(player, /phase = "battleStarting"[\s\S]*?hooks\.beginBossBattle\(event\.bossId\);[\s\S]*?B100_FINAL_PRELUDE_BATTLE_DELAY_MS/);
+  assert.match(finalPrelude, /B100_FINAL_PRELUDE_BATTLE_DELAY_MS = 2000/);
 });
