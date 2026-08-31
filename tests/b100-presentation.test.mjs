@@ -91,8 +91,10 @@ test("guardian silhouettes remain forced between hit animations", () => {
 });
 
 test("nearby dungeon NPC and boss sprites receive a shared proximity enlargement", () => {
-  assert.match(renderer, /event\.forward <= 1\.55 \? 1\.22 : 1/);
-  assert.match(renderer, /spriteH = event\.size \* 2\.05 \* proximityScale/);
+  assert.match(renderer, /\["npc", "boss", "bossRemains", "fixedEvent"\]\.includes\(event\.eventKind\)/);
+  assert.match(renderer, /isOneStepAway = supportsProximityEnlargement && event\.forward <= 1\.55/);
+  assert.match(renderer, /proximityScale = isOneStepAway \? 1\.9 : 1/);
+  assert.match(renderer, /Math\.min\(scaledSpriteH, renderer\.H \* \.82\)/);
 });
 
 test("B100F final prelude registers its altar layers and delays battle for two seconds", () => {
