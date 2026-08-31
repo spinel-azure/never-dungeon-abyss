@@ -349,3 +349,14 @@ function seeded(seed) {
     return value / 0x100000000;
   };
 }
+
+test("survey protection makes the purple special-room lock a guaranteed success", () => {
+  setStartPosition(0, 0);
+  buildBoundaryWallMap(1, seeded(311), {});
+  const edge = findSpecialDoorEdge();
+  assert.equal(getSpecialRoomLockInfo({ ...edge, dex: 0, guaranteed: true }).rate, 1);
+  const result = attemptSpecialRoomUnlock({ ...edge, dex: 0, rng: () => 0.999, guaranteed: true });
+  assert.equal(result.accepted, true);
+  assert.equal(result.unlocked, true);
+  assert.equal(result.attemptedRate, 1);
+});

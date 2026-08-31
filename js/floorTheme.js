@@ -1,5 +1,5 @@
-export const WALL_COLORS = Object.freeze(["default", "red", "blue", "green", "yellow", "slate", "magic", "torture", "water", "crystal", "acacia", "white", "black"]);
-export const FLOOR_COLORS = Object.freeze(["default", "red", "blue", "green", "yellow", "slate", "magic", "torture", "water", "purple", "crystal", "acacia", "white", "black"]);
+export const WALL_COLORS = Object.freeze(["default", "red", "blue", "green", "yellow", "slate", "magic", "torture", "water", "crystal", "acacia", "light", "white", "black"]);
+export const FLOOR_COLORS = Object.freeze(["default", "red", "blue", "green", "yellow", "slate", "magic", "torture", "water", "purple", "crystal", "acacia", "light", "white", "black"]);
 export const FLOOR_THEME_MODES = Object.freeze({ FIXED: "fixed", RANDOM: "random" });
 
 export function isForcedTorchZeroFloor(depth) {
@@ -36,7 +36,7 @@ export function clearFloorThemeOverride(depth) {
   settings.floorOverrides.delete(depth);
 }
 
-export function resolveFloorTheme(depth, current = settings.fixed) {
+export function resolveFloorTheme(depth, current = settings.fixed, { lichtbringerOwned = false } = {}) {
   if (Number(depth) >= 1 && Number(depth) <= 9) {
     return { wall: "slate", floor: "slate", source: "floor" };
   }
@@ -65,7 +65,9 @@ export function resolveFloorTheme(depth, current = settings.fixed) {
     return { wall: "crystal", floor: "crystal", source: "floor" };
   }
   if (Number(depth) >= 90 && Number(depth) <= 99) {
-    return { wall: "black", floor: "black", source: "floor" };
+    return lichtbringerOwned
+      ? { wall: "light", floor: "light", source: "lichtbringer" }
+      : { wall: "black", floor: "black", source: "floor" };
   }
   if (Number(depth) === 100) {
     return { wall: "acacia", floor: "acacia", source: "floor" };

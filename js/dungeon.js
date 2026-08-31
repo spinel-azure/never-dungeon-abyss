@@ -866,7 +866,7 @@ export function getSpecialRoomAt(x, y) {
   return cells[y][x].specialRoom || null;
 }
 
-export function getSpecialRoomLockInfo({ x, y, dirKey, dex = 0 } = {}) {
+export function getSpecialRoomLockInfo({ x, y, dirKey, dex = 0, guaranteed = false } = {}) {
   const room = getSpecialRoomAtDoor(x, y, dirKey);
   if (!room) return null;
   const maximum = Math.max(1, Math.floor(Number(room.lock?.attempts) || 3));
@@ -876,14 +876,14 @@ export function getSpecialRoomLockInfo({ x, y, dirKey, dex = 0 } = {}) {
     roomId: room.id,
     remaining,
     maximum,
-    rate: remaining > 0 ? getSpecialRoomUnlockRate(room.lock, dex, attemptIndex) : 0,
+    rate: remaining > 0 ? (guaranteed ? 1 : getSpecialRoomUnlockRate(room.lock, dex, attemptIndex)) : 0,
     unlocked: Boolean(room.unlocked)
   };
 }
 
-export function attemptSpecialRoomUnlock({ x, y, dirKey, dex = 0, rng = Math.random } = {}) {
+export function attemptSpecialRoomUnlock({ x, y, dirKey, dex = 0, rng = Math.random, guaranteed = false } = {}) {
   const room = getSpecialRoomAtDoor(x, y, dirKey);
-  const info = getSpecialRoomLockInfo({ x, y, dirKey, dex });
+  const info = getSpecialRoomLockInfo({ x, y, dirKey, dex, guaranteed });
   if (!room || !info || info.unlocked || info.remaining <= 0) return { accepted: false, ...info };
   room.attemptsRemaining = info.remaining - 1;
   const unlocked = Math.max(0, Math.min(0.999999999, Number(rng()) || 0)) < info.rate;
@@ -895,7 +895,7 @@ export function attemptSpecialRoomUnlock({ x, y, dirKey, dex = 0, rng = Math.ran
     accepted: true,
     unlocked,
     attemptedRate: info.rate,
-    ...getSpecialRoomLockInfo({ x, y, dirKey, dex })
+    ...getSpecialRoomLockInfo({ x, y, dirKey, dex, guaranteed })
   };
 }
 

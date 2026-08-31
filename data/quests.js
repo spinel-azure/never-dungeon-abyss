@@ -1101,6 +1101,18 @@ export function recordThievesClue(character, flag) {
   return { ...next, quests };
 }
 
+export function hasActiveFullFloorSurvey(character, depth) {
+  const floor = Math.floor(Number(depth) || 0);
+  const quests = normalizeQuestState(character?.quests);
+  return Object.entries(quests.active).some(([questId, entry]) => {
+    const quest = getQuestById(questId);
+    return quest?.objectiveType === "exploreFloor"
+      && quest.targetDepth === floor
+      && quest.requiredCount >= 100
+      && Math.max(0, Math.floor(Number(entry?.progress) || 0)) < quest.requiredCount;
+  });
+}
+
 export function recordFloorExploration(character, { depth, explored } = {}) {
   const quests = normalizeQuestState(character?.quests);
   const exploredCount = Array.isArray(explored)

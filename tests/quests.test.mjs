@@ -39,6 +39,7 @@ import {
   isQuestAvailable,
   normalizeQuestState,
   recordFloorExploration,
+  hasActiveFullFloorSurvey,
   recordQueenShadowEncounter,
   completeQueenShadowInvestigation,
   recordEnemyDefeat,
@@ -730,4 +731,12 @@ test("Helen's herbicide reward uses the important item popup", async () => {
   const { readFile } = await import("node:fs/promises");
   const source = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
   assert.match(source, /strong_herbicide_shop_reward_pending[\s\S]*showNamedItemGetEffect\([\s\S]*getItem\("strong_herbicide"\)[\s\S]*important: true[\s\S]*amounts: \[herbicideAmount\]/);
+});
+
+test("active 100-cell surveys guarantee only their target floor special door", () => {
+  const character = { quests: { active: { [FLOOR_SURVEY_QUEST_ID]: { progress: 99 } }, completed: {} } };
+  assert.equal(hasActiveFullFloorSurvey(character, 1), true);
+  assert.equal(hasActiveFullFloorSurvey(character, 2), false);
+  character.quests.active[FLOOR_SURVEY_QUEST_ID].progress = 100;
+  assert.equal(hasActiveFullFloorSurvey(character, 1), false);
 });

@@ -174,6 +174,7 @@ import {
   getQuestProgress,
   hasActiveQuest,
   hasCompleteQueenRegalia,
+  hasActiveFullFloorSurvey,
   isDungeonDepthUnlocked,
   recordEnemyDefeat,
   recordBossDefeat,
@@ -280,6 +281,7 @@ import {
   const revivalPrayer = document.getElementById("revivalPrayer");
   const revivalPrayerText = document.getElementById("revivalPrayerText");
   const revivalGoddess = document.getElementById("revivalGoddess");
+  const lichtbringerWhiteout = document.getElementById("lichtbringerWhiteout");
   const michaelaRestorationRoot = document.getElementById("michaelaRestoration");
   const michaelaRestorationController = createMichaelaRestorationController({
     root: michaelaRestorationRoot,
@@ -744,10 +746,11 @@ import {
         state.lightbringerActive = false;
         state.minimapEffectForced = false;
         updateHud();
+        setTimeout(() => runLichtbringerWhiteout(), 0);
       }
       updateCharacterUi();
       saveGame();
-      if (granted.gained) setTimeout(() => showNamedItemGetEffect([keyItem.name], { important: true }), 0);
+      if (granted.gained) setTimeout(() => showNamedItemGetEffect([keyItem.name], { important: true }), keyItem.id === "lichtbringer" ? 1100 : 0);
       return `貴重品「${keyItem.name}」を手に入れた！`;
     },
     onFixedFloorEvent: event => event?.description || "女王の影が静かに揺らめいている。",
@@ -1074,7 +1077,7 @@ import {
     }
     const start = rebuildB100FixedMap ? cells.flat().find(cell => cell.type === "stairsUp") : dungeon.startPosition;
     if (start && inBounds(start.x, start.y)) setStartPosition(start.x, start.y);
-    setDungeonColors(resolveFloorTheme(currentDepth, getDungeonColors()));
+    setDungeonColors(resolveCurrentFloorTheme());
     applyCurrentFloorMist();
     state.anim = null;
     state.gridX = rebuildB100FixedMap ? start.x : player.gridX;
@@ -3269,7 +3272,7 @@ import {
         currentDepth = 1;
         character = startMarathonChallenge(character);
         character = startLongMarchChallenge(character);
-        setDungeonColors(resolveFloorTheme(currentDepth, getDungeonColors()));
+        setDungeonColors(resolveCurrentFloorTheme());
         applyCurrentFloorMist();
         state.treasureCompassActive = false;
         resetDungeon("", null, true);
@@ -3297,7 +3300,7 @@ import {
         currentDepth = destination;
         character = invalidateMarathonChallenge(character);
         character = invalidateLongMarchChallenge(character);
-        setDungeonColors(resolveFloorTheme(currentDepth, getDungeonColors()));
+        setDungeonColors(resolveCurrentFloorTheme());
         applyCurrentFloorMist();
         character.highestDungeonDepthReached = Math.max(
           character.highestDungeonDepthReached || 1,
@@ -3702,7 +3705,7 @@ import {
       };
     }
     startBgm(selectDungeonBgm());
-    setDungeonColors(resolveFloorTheme(currentDepth, getDungeonColors()));
+    setDungeonColors(resolveCurrentFloorTheme());
     applyCurrentFloorMist();
     floorStartedAt = descendedAt;
     resetDungeon("", nextStart);
@@ -3720,6 +3723,34 @@ import {
     scheduleAutosave();
   }
 
+  function resolveCurrentFloorTheme() {
+    return resolveFloorTheme(currentDepth, getDungeonColors(), {
+      lichtbringerOwned: hasKeyItem(character?.keyItems, "lichtbringer")
+    });
+  }
+
+  async function runLichtbringerWhiteout() {
+    if (!lichtbringerWhiteout || currentDepth < 90 || currentDepth > 99) {
+      setDungeonColors(resolveCurrentFloorTheme());
+      applyCurrentFloorMist();
+      return;
+    }
+    setPlayerInputEnabled(false);
+    lichtbringerWhiteout.hidden = false;
+    lichtbringerWhiteout.style.transitionDuration = ".45s";
+    void lichtbringerWhiteout.offsetWidth;
+    requestAnimationFrame(() => { lichtbringerWhiteout.style.opacity = "1"; });
+    await wait(450);
+    setDungeonColors(resolveCurrentFloorTheme());
+    applyCurrentFloorMist();
+    updateHud();
+    lichtbringerWhiteout.style.transitionDuration = ".65s";
+    lichtbringerWhiteout.style.opacity = "0";
+    await wait(650);
+    lichtbringerWhiteout.style.removeProperty("transition-duration");
+    lichtbringerWhiteout.hidden = true;
+    setPlayerInputEnabled(true);
+  }
   function applyCurrentFloorMist() {
     const options = getDungeonMistOptions();
     const color = currentDepth >= 20 && currentDepth <= 29 ? "torture"
@@ -3731,7 +3762,7 @@ import {
           : currentDepth >= 60 && currentDepth <= 69 ? "yellow"
             : currentDepth >= 70 && currentDepth <= 79 ? "water"
             : currentDepth >= 80 && currentDepth <= 89 ? "crystal"
-            : currentDepth >= 90 && currentDepth <= 99 ? "black"
+            : currentDepth >= 90 && currentDepth <= 99 ? (hasKeyItem(character?.keyItems, "lichtbringer") ? "light" : "black")
             : currentDepth === 100 ? "acacia"
           : options.color;
     setMistOptions({ ...options, color });
@@ -3793,7 +3824,8 @@ import {
       x,
       y,
       dirKey,
-      dex: collectStats(getContextualCharacter()).dex
+      dex: collectStats(getContextualCharacter()).dex,
+      guaranteed: hasActiveFullFloorSurvey(character, currentDepth)
     });
   }
 
@@ -3828,7 +3860,8 @@ import {
       x,
       y,
       dirKey,
-      dex: collectStats(getContextualCharacter()).dex
+      dex: collectStats(getContextualCharacter()).dex,
+      guaranteed: hasActiveFullFloorSurvey(character, currentDepth)
     });
     scheduleAutosave();
     return result;

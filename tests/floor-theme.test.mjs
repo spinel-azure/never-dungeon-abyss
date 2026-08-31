@@ -55,6 +55,8 @@ test("all themed dungeon areas load their dedicated WebP wall textures and mist"
   assert.match(renderer, /images\/dungeon_effects\/ice_wall_02\.webp/);
   assert.match(renderer, /images\/dungeon_effects\/dark_wall_01\.webp/);
   assert.match(renderer, /images\/dungeon_effects\/dark_wall_02\.webp/);
+  assert.match(renderer, /images\/dungeon_effects\/light_wall_01\.webp/);
+  assert.match(renderer, /images\/dungeon_effects\/light_wall_02\.webp/);
   assert.match(renderer, /images\/dungeon_effects\/desert_wall_01\.webp/);
   assert.match(renderer, /images\/dungeon_effects\/desert_wall_02\.webp/);
   assert.match(renderer, /images\/dungeon_effects\/dungeon_wall_05\.webp/);
@@ -97,7 +99,7 @@ test("all themed dungeon areas load their dedicated WebP wall textures and mist"
   assert.match(renderer, /color === "crystal".*crystalWallTextures/s);
   assert.match(renderer, /color === "acacia".*acaciaWallTextures/s);
   assert.match(renderer, /color === "white".*marbleWallTextures/s);
-  assert.match(menu, /\["default", "stone", "red", "blue", "green", "yellow", "slate", "magic", "torture", "water", "crystal", "acacia", "white", "black"\]\.includes\(wall\)/);
+  assert.match(menu, /\["default", "stone", "red", "blue", "green", "yellow", "slate", "magic", "torture", "water", "crystal", "acacia", "light", "white", "black"\]\.includes\(wall\)/);
   assert.match(main, /currentDepth >= 50 && currentDepth <= 59 \? "green"/);
   assert.match(main, /currentDepth >= 10 && currentDepth <= 19 \? "magic"/);
   assert.match(main, /currentDepth >= 1 && currentDepth <= 9 \? "slate"/);
@@ -105,6 +107,14 @@ test("all themed dungeon areas load their dedicated WebP wall textures and mist"
   assert.match(main, /currentDepth >= 60 && currentDepth <= 69 \? "yellow"/);
   assert.match(main, /currentDepth >= 70 && currentDepth <= 79 \? "water"/);
   assert.match(main, /currentDepth >= 80 && currentDepth <= 89 \? "crystal"/);
-  assert.match(main, /currentDepth >= 90 && currentDepth <= 99 \? "black"/);
+  assert.match(main, /currentDepth >= 90 && currentDepth <= 99 \? \(hasKeyItem[\s\S]*?\? "light" : "black"\)/);
   assert.match(main, /currentDepth === 100 \? "acacia"/);
+});
+
+test("Lichtbringer changes only B90F to B99F to the light theme", () => {
+  const options = { lichtbringerOwned: true };
+  assert.deepEqual(resolveFloorTheme(89, {}, options), { wall: "crystal", floor: "crystal", source: "floor" });
+  assert.deepEqual(resolveFloorTheme(90, {}, options), { wall: "light", floor: "light", source: "lichtbringer" });
+  assert.deepEqual(resolveFloorTheme(99, {}, options), { wall: "light", floor: "light", source: "lichtbringer" });
+  assert.deepEqual(resolveFloorTheme(100, {}, options), { wall: "acacia", floor: "acacia", source: "floor" });
 });

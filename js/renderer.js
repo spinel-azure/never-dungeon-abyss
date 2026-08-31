@@ -42,6 +42,7 @@ const renderer = {
   fireWallTextures: [],
   iceWallTextures: [],
   darkWallTextures: [],
+  lightWallTextures: [],
   desertWallTextures: [],
   midDungeonWallTextures: [],
   magicWallTextures: [],
@@ -79,6 +80,7 @@ const MIST_PALETTES = {
   water: { main: [62, 123, 204], veil: [35, 83, 151], haze: [102, 158, 224], bloom: [142, 199, 244] },
   crystal: { main: [116, 24, 114], veil: [78, 18, 91], haze: [158, 62, 170], bloom: [221, 143, 244] },
   acacia: { main: [169, 163, 51], veil: [145, 139, 40], haze: [194, 187, 61], bloom: [232, 224, 111] },
+  light: { main: [174, 202, 205], veil: [132, 165, 169], haze: [205, 229, 231], bloom: [241, 255, 255] },
   white: { main: [235, 235, 235], veil: [210, 210, 210], haze: [245, 245, 245], bloom: [255, 255, 255] }
 };
 const WALL_PALETTES = {
@@ -94,6 +96,7 @@ const WALL_PALETTES = {
   water: { base: "#3e7bcc", rows: ["#4d8bd9", "#3165ab"], mortar: "rgba(12,35,67,.68)", speckle: "rgba(174,220,255,.17)" },
   crystal: { base: "rgb(116, 24, 114)", rows: ["rgb(138, 39, 145)", "rgb(82, 18, 96)"], mortar: "rgba(35,8,45,.76)", speckle: "rgba(235,177,255,.22)" },
   acacia: { base: "rgb(169, 163, 51)", rows: ["rgb(194, 186, 66)", "rgb(139, 133, 38)"], mortar: "rgba(61,57,14,.66)", speckle: "rgba(255,247,158,.22)" },
+  light: { base: "#9fb8ba", rows: ["#bed3d4", "#78999c"], mortar: "rgba(38,54,57,.54)", speckle: "rgba(241,255,255,.24)" },
   white: { base: "#aaa79e", rows: ["#c3c0b5", "#918f88"], mortar: "rgba(55,54,51,.52)", speckle: "rgba(255,255,240,.2)" },
   black: { base: "#28282b", rows: ["#35343a", "#1d1d20"], mortar: "rgba(0,0,0,.82)", speckle: "rgba(151,136,165,.12)" }
 };
@@ -110,6 +113,7 @@ const FLOOR_PALETTES = {
   purple: { near: "#110713", mid: "#35143c", far: "#5d2369", grid: "rgba(226,143,244,.12)" },
   crystal: { near: "rgb(28, 6, 35)", mid: "rgb(70, 15, 82)", far: "rgb(116, 24, 114)", grid: "rgba(230,159,255,.16)" },
   acacia: { near: "rgb(92, 87, 25)", mid: "rgb(158, 151, 45)", far: "rgb(215, 207, 71)", grid: "rgba(255,247,158,.18)" },
+  light: { near: "rgb(72, 94, 97)", mid: "rgb(128, 158, 161)", far: "rgb(184, 211, 213)", grid: "rgba(235,255,255,.18)" },
   white: { near: "rgb(170, 170, 170)", mid: "rgb(210, 210, 210)", far: "rgb(235, 235, 235)", grid: "rgba(255,255,255,.2)" },
   black: { near: "#010102", mid: "#08080a", far: "#111116", grid: "rgba(104,94,118,.06)" }
 };
@@ -181,6 +185,7 @@ export function configureRenderer(options) {
   loadFireWallTextures();
   loadIceWallTextures();
   loadDarkWallTextures();
+  loadLightWallTextures();
   loadDesertWallTextures();
   loadMidDungeonWallTextures();
   loadMagicWallTextures();
@@ -540,6 +545,10 @@ export function drawCeiling() {
     g.addColorStop(0, "rgb(38, 111, 176)");
     g.addColorStop(0.58, "rgb(25, 75, 122)");
     g.addColorStop(1, "rgb(8, 27, 46)");
+  } else if (renderer.floorColor === "light") {
+    g.addColorStop(0, "rgb(125, 151, 154)");
+    g.addColorStop(0.58, "rgb(88, 111, 114)");
+    g.addColorStop(1, "rgb(48, 65, 68)");
   } else if (renderer.floorColor === "white") {
     g.addColorStop(0, "rgb(185, 185, 185)");
     g.addColorStop(0.58, "rgb(155, 155, 155)");
@@ -711,6 +720,7 @@ function getThemedWallTextures(color) {
   if (color === "blue") return renderer.iceWallTextures;
   if (color === "green") return renderer.forestWallTextures;
   if (color === "black") return renderer.darkWallTextures;
+  if (color === "light") return renderer.lightWallTextures;
   if (color === "yellow") return renderer.desertWallTextures;
   if (color === "slate") return renderer.midDungeonWallTextures;
   if (color === "magic") return renderer.magicWallTextures;
@@ -754,6 +764,13 @@ function loadDarkWallTextures() {
   loadThemedWallTextures("darkWallTextures", "black", [
     "images/dungeon_effects/dark_wall_01.webp",
     "images/dungeon_effects/dark_wall_02.webp"
+  ]);
+}
+
+function loadLightWallTextures() {
+  loadThemedWallTextures("lightWallTextures", "light", [
+    "images/dungeon_effects/light_wall_01.webp",
+    "images/dungeon_effects/light_wall_02.webp"
   ]);
 }
 
