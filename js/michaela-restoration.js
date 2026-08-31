@@ -9,7 +9,7 @@ export const MICHAELA_RESTORATION_DIALOGUE = Object.freeze([
 
 const wait = milliseconds => new Promise(resolve => window.setTimeout(resolve, milliseconds));
 
-export function createMichaelaRestorationController({ root, flash, dialogue, text, onComplete }) {
+export function createMichaelaRestorationController({ root, flash, onMessage, onComplete }) {
   let active = false;
   let phase = "idle";
   let page = 0;
@@ -21,7 +21,6 @@ export function createMichaelaRestorationController({ root, flash, dialogue, tex
     phase = "transform";
     page = 0;
     root.hidden = false;
-    dialogue.hidden = true;
     root.className = "michaela-restoration is-cat-rising";
     await wait(2450);
     if (!active) return false;
@@ -42,8 +41,9 @@ export function createMichaelaRestorationController({ root, flash, dialogue, tex
   }
 
   function showPage() {
-    text.textContent = MICHAELA_RESTORATION_DIALOGUE[page] || "";
-    dialogue.hidden = false;
+    const message = MICHAELA_RESTORATION_DIALOGUE[page] || "";
+    onMessage?.(`女王ミカエラ「${message}」\n＊Aボタンで次へ`);
+    document.body.classList.add("michaela-message-active");
     lastAdvanceAt = performance.now();
   }
 
@@ -62,7 +62,8 @@ export function createMichaelaRestorationController({ root, flash, dialogue, tex
 
   async function finish() {
     phase = "finishing";
-    dialogue.hidden = true;
+    document.body.classList.remove("michaela-message-active");
+    onMessage?.("");
     await onComplete?.();
     root.hidden = true;
     root.className = "michaela-restoration";

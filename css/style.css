@@ -208,6 +208,13 @@
       height: calc(1.35em * 5 + 18px);
       min-height: calc(1.35em * 5 + 18px);
     }
+    body.michaela-message-active .message {
+      height: calc(1.35em * 6 + 18px);
+      min-height: calc(1.35em * 6 + 18px);
+      color: #d8e5e7;
+      border-color: rgba(130, 230, 255, .45);
+      box-shadow: 0 0 14px rgba(120, 220, 255, .16);
+    }
     .controls {
       display: grid;
       grid-template-columns: 1fr auto auto 1fr;

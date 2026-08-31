@@ -65,12 +65,17 @@ test("restoration overlay uses the cat and both Michaela portraits", () => {
   assert.match(html, /mikan_silhouette\.avif/);
   assert.match(html, /NPC_01c\.avif/);
   assert.match(html, /NPC_01d\.avif/);
-  assert.match(html, /女王ミカエラ/);
+  assert.match(read("js/michaela-restoration.js"), /女王ミカエラ/);
   assert.match(css, /michaela-cat-rising/);
   assert.match(css, /michaela-human-reveal/);
   assert.match(css, /is-crossfade/);
   assert.match(css, /\.michaela-restoration\{position:absolute;inset:0/);
   assert.doesNotMatch(css, /\.michaela-restoration\{position:fixed/);
+  assert.match(html, /<div class="viewport">[\s\S]*?<section id="michaelaRestoration"/);
+  assert.doesNotMatch(html, /michaelaRestorationDialogue/);
+  assert.match(read("js/main.js"), /onMessage: say/);
+  assert.match(read("js/michaela-restoration.js"), /classList\.remove\("michaela-message-active"\);\s*onMessage\?\.\(""\)/);
+  assert.match(read("css/style.css"), /body\.michaela-message-active \.message/);
 });
 
 test("restoration returns silently without an unrelated floor transition message", () => {
@@ -80,6 +85,6 @@ test("restoration returns silently without an unrelated floor transition message
 
 test("only main.js receives the new cache buster", () => {
   const html = read("index.html");
-  assert.match(html, /js\/main\.js\?v=20260830-01/);
+  assert.match(html, /js\/main\.js\?v=20260831-01/);
   assert.doesNotMatch(read("js/main.js"), /from\s+["'][^"']+\?v=/);
 });

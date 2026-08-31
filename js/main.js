@@ -284,8 +284,7 @@ import {
   const michaelaRestorationController = createMichaelaRestorationController({
     root: michaelaRestorationRoot,
     flash: document.getElementById("michaelaRestorationFlash"),
-    dialogue: document.getElementById("michaelaRestorationDialogue"),
-    text: document.getElementById("michaelaRestorationText"),
+    onMessage: say,
     onComplete: completeMichaelaRestoration
   });
   let michaelaRestorationStarting = false;
