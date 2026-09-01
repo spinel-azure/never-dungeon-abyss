@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFile } from "node:fs/promises";
 
-import { getGuildQuestPageSize } from "../js/guild-quest-pagination.js";
+import { getGuildQuestPageSize, getVisibleGuildQuestIndexes } from "../js/guild-quest-pagination.js";
 
 test("guild quest page size stays between three and six across layouts", () => {
   assert.equal(getGuildQuestPageSize({ width: 390, height: 600, layout: "mobile" }), 3);
@@ -24,4 +24,23 @@ test("guild quest list keeps pager controls and clips rows inside the notice", a
   assert.match(css, /\.guild-quest-pager\{[^}]*bottom:4%/);
   assert.match(townSource, /pager\.hidden = pageCount <= 1/);
   assert.match(townSource, /window\.addEventListener\("resize"[\s\S]*renderGuildQuestList/);
+});
+
+test("guild quest lists hide locked requests and separate acceptance from reporting", () => {
+  const quests = ["locked", "available", "active", "completed"].map(id => ({ id }));
+  const progressById = {
+    locked: { active: false, completed: false },
+    available: { active: false, completed: false },
+    active: { active: true, completed: false },
+    completed: { active: false, completed: true }
+  };
+  const options = {
+    quests,
+    character: {},
+    getProgress: (_character, id) => progressById[id],
+    isAvailable: (_character, quest) => quest.id !== "locked" && quest.id !== "completed"
+  };
+
+  assert.deepEqual(getVisibleGuildQuestIndexes({ ...options, mode: "questAcceptList" }), [1]);
+  assert.deepEqual(getVisibleGuildQuestIndexes({ ...options, mode: "questReportList" }), [2]);
 });

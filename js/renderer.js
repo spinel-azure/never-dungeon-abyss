@@ -14,6 +14,9 @@ import {
   B100_FINAL_PRELUDE_TRANSITION_MS
 } from "../data/b100-final-prelude.js";
 
+export const MOBILE_FRAME_INTERVAL = 1000 / 30;
+let lastRenderTime = null;
+
 const renderer = {
   canvas: null,
   ctx: null,
@@ -34,6 +37,7 @@ const renderer = {
   drawMinimap: () => {},
   getMinimapOptions: () => ({}),
   getMinimapBounds: () => ({ x: 0, y: 0, w: 0, h: 0 }),
+  isMobileDevice: () => false,
   minimapOverlayVisible: false,
   lastCanvasTouchAt: 0,
   wallTexture: null,
@@ -235,10 +239,16 @@ export function configureRenderer(options) {
 }
 
 export function startRenderLoop() {
+  lastRenderTime = null;
   requestAnimationFrame(drawScene);
 }
 
 export function drawScene(now) {
+  requestAnimationFrame(drawScene);
+  const mobileLimited = renderer.isMobileDevice();
+  const frame = resolveRenderFrame(now, lastRenderTime, mobileLimited);
+  lastRenderTime = frame.lastRenderTime;
+  if (!frame.shouldRender) return;
   const { ctx, W, H, state } = renderer;
   renderer.updateAnimation(now);
   ctx.save();
@@ -246,7 +256,7 @@ export function drawScene(now) {
   ctx.fillRect(0, 0, W, H);
 
   const sway = renderer.screenShakeEnabled ? Math.sin(now * 0.005) * 2 + state.shake : 0;
-  state.shake *= 0.86;
+  state.shake *= mobileLimited ? 0.86 ** 2 : 0.86;
   state.torch = renderer.torchFlickerEnabled ? Math.sin(now * 0.007) * 0.035 + Math.sin(now * 0.013) * 0.02 : 0;
   ctx.translate(0, sway);
 
@@ -274,7 +284,20 @@ export function drawScene(now) {
   drawFrame();
   renderer.updateHud();
   drawOverlayEvent();
-  requestAnimationFrame(drawScene);
+}
+
+export function resolveRenderFrame(timestamp, previousRenderTime, mobileLimited) {
+  const now = Number(timestamp) || 0;
+  if (!mobileLimited) return { shouldRender: true, lastRenderTime: null };
+  if (!Number.isFinite(previousRenderTime)) return { shouldRender: true, lastRenderTime: now };
+  const elapsed = now - previousRenderTime;
+  if (elapsed < MOBILE_FRAME_INTERVAL) {
+    return { shouldRender: false, lastRenderTime: previousRenderTime };
+  }
+  return {
+    shouldRender: true,
+    lastRenderTime: now - (elapsed % MOBILE_FRAME_INTERVAL)
+  };
 }
 
 function handleCanvasPointerUp(e) {

@@ -519,7 +519,9 @@ import {
         treasureDetectionActive: hasCardEffect(character?.cards?.deckSlots, "treasure_detection")
       }
     }),
-    getMinimapBounds
+    getMinimapBounds,
+    isMobileDevice: () => document.body.classList.contains("layout-mobile")
+      || document.body.classList.contains("layout-tablet")
   });
   configureAutoReturn({ autoReturnBtn, say, playArrivalSe: playArrivalSequence });
   configurePlayer({

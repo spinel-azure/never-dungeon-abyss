@@ -9,3 +9,14 @@ export function getGuildQuestPageSize({ width = 1280, height = 720, layout = "de
   const widthBasedSize = safeWidth < 760 ? 4 : safeWidth < 1100 ? 5 : 6;
   return clamp(Math.min(heightBasedSize, widthBasedSize), 3, 6);
 }
+
+export function getVisibleGuildQuestIndexes({ quests = [], character, mode, getProgress, isAvailable } = {}) {
+  const reportMode = mode === "questReportList";
+  return quests.flatMap((quest, index) => {
+    const progress = getProgress(character, quest.id);
+    const visible = reportMode
+      ? progress.active
+      : isAvailable(character, quest) && !progress.active && !progress.completed;
+    return visible ? [index] : [];
+  });
+}

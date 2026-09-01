@@ -17,7 +17,7 @@ import { getEquipmentInstanceDefinition, getEquipmentInstanceName } from "../dat
 import { getShopEquipmentStock } from "../data/shop-stock.js";
 import { configureTownPassersby } from "./town-passersby.js";
 import { getInnStayFee } from "./character-services.js";
-import { getGuildQuestPageSize } from "./guild-quest-pagination.js";
+import { getGuildQuestPageSize, getVisibleGuildQuestIndexes } from "./guild-quest-pagination.js";
 import { getTavernRumorTypewriterParts } from "../data/tavern-rumors.js";
 import { CHARACTER_NAME_MAX_LENGTH, CHARACTER_RENAME_COST, normalizeCharacterName } from "../data/character-name.js";
 import { getUnlockedTransferDestinations } from "../data/transfer-destinations.js";
@@ -2751,13 +2751,13 @@ function renderGuildQuestList() {
 
 function getVisibleQuestIndexes() {
   const character = town.getCharacter();
-  const initialTrialComplete = QUESTS.slice(0, 3).every(quest => getQuestProgress(character, quest.id).completed);
-  return QUESTS
-    .map((quest, index) => ({ index, progress: getQuestProgress(town.getCharacter(), quest.id) }))
-    .filter(({ index }) => initialTrialComplete || index < 3)
-    .filter(({ index, progress }) => QUESTS[index].id !== "guild_016" || progress.active || isQuestAvailable(character, QUESTS[index]))
-    .filter(({ progress }) => !progress.completed)
-    .map(({ index }) => index);
+  return getVisibleGuildQuestIndexes({
+    quests: QUESTS,
+    character,
+    mode: town.mode,
+    getProgress: getQuestProgress,
+    isAvailable: isQuestAvailable
+  });
 }
 
 function getQuestPageSize() {
