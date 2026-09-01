@@ -51,6 +51,7 @@ import {
 } from "./player.js";
 import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setFrameRateMode, getEffectiveFrameRate, setMistOptions, setWallColor, setFloorColor, toggleMinimapOverlay } from "./renderer.js";
 import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minimap.js";
+import { getQueenRegaliaMinimapEffects } from "./queen-regalia-effects.js";
 import { configureInput } from "./input.js";
 import { configureGamepadInput } from "./gamepad-input.js";
 import { configureFloatingStick } from "./floating-stick.js";
@@ -505,21 +506,28 @@ import {
     updateAnimation,
     updateHud,
     drawMinimap,
-    getMinimapOptions: () => ({
-      W,
-      H: canvas.height,
-      MAP_W,
-      MAP_H,
-      cells,
-      explored,
-      state: {
-        ...state,
-        floorDetectionActive: hasCardEffect(character?.cards?.deckSlots, "floor_detection"),
-        stairsDetectionActive: hasCardEffect(character?.cards?.deckSlots, "stairs_detection"),
-        npcDetectionActive: hasCardEffect(character?.cards?.deckSlots, "npc_detection"),
-        treasureDetectionActive: hasCardEffect(character?.cards?.deckSlots, "treasure_detection")
-      }
-    }),
+    getMinimapOptions: () => {
+      const regaliaEffects = getQueenRegaliaMinimapEffects(character?.keyItems);
+      return {
+        W,
+        H: canvas.height,
+        MAP_W,
+        MAP_H,
+        cells,
+        explored,
+        state: {
+          ...state,
+          fullMapRevealActive: regaliaEffects.fullMapRevealActive,
+          floorDetectionActive: hasCardEffect(character?.cards?.deckSlots, "floor_detection"),
+          stairsDetectionActive: hasCardEffect(character?.cards?.deckSlots, "stairs_detection")
+            || regaliaEffects.stairsDetectionActive,
+          npcDetectionActive: hasCardEffect(character?.cards?.deckSlots, "npc_detection")
+            || regaliaEffects.npcDetectionActive,
+          treasureDetectionActive: hasCardEffect(character?.cards?.deckSlots, "treasure_detection")
+            || regaliaEffects.treasureDetectionActive
+        }
+      };
+    },
     getMinimapBounds,
     isMobileDevice: () => document.body.classList.contains("layout-mobile")
       || document.body.classList.contains("layout-tablet")

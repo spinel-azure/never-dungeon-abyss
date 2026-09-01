@@ -12,6 +12,12 @@
   alpha = .82
 }) {
   const cell = size / MAP_W;
+  const effectiveTorchActive = state.torchFuel > 0 || state.torchEffectForced;
+  const fullMapRevealActive = isFullMapRevealActive(state);
+  const floorDetectionActive = effectiveTorchActive && state.floorDetectionActive;
+  const stairsDetectionActive = floorDetectionActive || (effectiveTorchActive && state.stairsDetectionActive);
+  const npcDetectionActive = floorDetectionActive || (effectiveTorchActive && state.npcDetectionActive);
+  const treasureDetectionActive = floorDetectionActive || (effectiveTorchActive && state.treasureDetectionActive);
   ctx.save();
   ctx.globalAlpha = alpha;
   ctx.fillStyle = "rgba(4,5,5,.68)";
@@ -31,6 +37,12 @@
         ctx.strokeStyle = "rgba(174,160,126,.13)";
         ctx.lineWidth = 1;
         ctx.strokeRect(x1 + .5, y1 + .5, cell, cell);
+      } else if (fullMapRevealActive) {
+        ctx.fillStyle = "#0d1713";
+        ctx.fillRect(x1 + 1, y1 + 1, cell - 2, cell - 2);
+        ctx.strokeStyle = "rgba(174,160,126,.08)";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x1 + .5, y1 + .5, cell, cell);
       } else {
         drawUnknownMapCell(ctx, x1, y1, cell, x, y);
       }
@@ -43,23 +55,18 @@
   for (let y = 0; y < MAP_H; y++) {
     for (let x = 0; x < MAP_W; x++) {
       const isExplored = explored[y][x];
+      const isMapVisible = isExplored || fullMapRevealActive;
       const c = cells[y][x];
       const x1 = ox + x * cell;
       const y1 = oy + y * cell;
       const x2 = x1 + cell;
       const y2 = y1 + cell;
-      if (isExplored) {
+      if (isMapVisible) {
         if (c.walls.N) line(ctx, x1, y1, x2, y1);
         if (c.walls.W) line(ctx, x1, y1, x1, y2);
         if (c.walls.E) line(ctx, x2, y1, x2, y2);
         if (c.walls.S) line(ctx, x1, y2, x2, y2);
       }
-      const effectiveTorchActive = state.torchFuel > 0 || state.torchEffectForced;
-      const torchDetectionActive = effectiveTorchActive;
-      const floorDetectionActive = torchDetectionActive && state.floorDetectionActive;
-      const stairsDetectionActive = floorDetectionActive || (torchDetectionActive && state.stairsDetectionActive);
-      const npcDetectionActive = floorDetectionActive || (torchDetectionActive && state.npcDetectionActive);
-      const treasureDetectionActive = floorDetectionActive || (torchDetectionActive && state.treasureDetectionActive);
       if ((isExplored && c.type === "stairsUp") || (c.type === "stairsDown" && (isExplored || revealOptions.stairsDown || stairsDetectionActive))) {
         drawStairsMark(ctx, x1, y1, cell, c.type, c.portal);
       }
@@ -91,7 +98,7 @@
   ctx.lineCap = "round";
   for (let y = 0; y < MAP_H; y++) {
     for (let x = 0; x < MAP_W; x++) {
-      if (!explored[y][x]) continue;
+      if (!explored[y][x] && !fullMapRevealActive) continue;
       const c = cells[y][x];
       const x1 = ox + x * cell;
       const y1 = oy + y * cell;
@@ -121,6 +128,11 @@
   ctx.lineWidth = 1;
   ctx.strokeRect(ox - 5, oy - 5, size + 10, size + 10);
   ctx.restore();
+}
+
+export function isFullMapRevealActive(state = {}) {
+  const effectiveTorchActive = state.torchFuel > 0 || state.torchEffectForced;
+  return effectiveTorchActive && Boolean(state.fullMapRevealActive);
 }
 
 const revealOptions = { stairsDown: false, npcs: false, treasures: false };
