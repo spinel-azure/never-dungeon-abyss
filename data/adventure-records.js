@@ -2,6 +2,7 @@ import { BOSSES } from "./bosses.js";
 import { getCharacterClass } from "./classes.js";
 import { normalizeQuestState } from "./quests.js";
 import { formatPlayTime, normalizeAdventureStats } from "./adventure-stats.js";
+import { getMonsterCompendiumCompletion } from "./monster-compendium.js";
 
 function formatNumber(value) {
   return Math.max(0, Math.floor(Number(value) || 0)).toLocaleString("ja-JP");
@@ -34,6 +35,7 @@ export function getAdventureRecords(character) {
   const totalCardCount = ownedCardCounts.reduce((total, count) => total + count, 0);
   const deepestFloor = Math.max(1, Math.floor(Number(character?.highestDungeonDepthReached) || 1));
   const adventureStats = normalizeAdventureStats(character?.adventureStats);
+  const bestiary = getMonsterCompendiumCompletion(character);
 
   return [
     { id: "playTime", label: "プレイ時間", value: formatPlayTime(adventureStats.playTimeSeconds), description: "ゲームを実際に遊んでいた時間です。非表示タブと5分以上の無操作時間は含みません。" },
@@ -52,7 +54,7 @@ export function getAdventureRecords(character) {
     { id: "shopPurchaseGold", label: "購入金額合計", value: `${formatNumber(adventureStats.shopPurchaseGold)}G`, description: "商店で商品購入と買い戻しに支払ったGOLDの合計です。" },
     { id: "templeDonations", label: "寺院で寄進した回数", value: `${formatNumber(adventureStats.templeDonationCount)}回`, description: "寺院で治療のために寄進した回数です。" },
     { id: "templeDonationGold", label: "寄進額合計", value: `${formatNumber(adventureStats.templeDonationGold)}G`, description: "寺院で治療のために寄進したGOLDの合計です。" },
-    { id: "bestiaryCompletion", label: "図鑑達成率", value: "未集計", description: "図鑑の整備後に集計を開始する予定です。", disabled: true }
+    { id: "bestiaryCompletion", label: "魔物図鑑達成率", value: `${bestiary.percentage}%`, description: `通常図鑑枠 ${bestiary.total}種のうち、${bestiary.defeated}種を討伐済みです。秘密の魔物は達成率の集計対象に含まれません。` }
   ];
 }
 

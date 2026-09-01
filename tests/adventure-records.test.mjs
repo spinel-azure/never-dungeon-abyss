@@ -54,7 +54,7 @@ test("adventure records summarize values already stored in the save", () => {
   assert.equal(values.shopPurchaseGold, "1,500G");
   assert.equal(values.templeDonations, "1回");
   assert.equal(values.templeDonationGold, "15G");
-  assert.equal(values.bestiaryCompletion, "未集計");
+  assert.equal(values.bestiaryCompletion, "0%");
 });
 
 test("adventure statistics include the original entries and new activity counters", () => {

@@ -171,6 +171,7 @@ const town = {
   onHireNpc: () => ({ accepted: false }),
   onRenewNpc: () => ({ accepted: false }),
   onOpenAdventureRecords: () => {},
+  onOpenMonsterCompendium: () => {},
   onOpenCardGallery: () => {},
   facilityPreviewCommand: "",
   getUnreadRumor: () => null,
@@ -1144,7 +1145,7 @@ function activateFacility(facility) {
 }
 
 function isLibraryPreviewCommand(command) {
-  return currentFacility().id === "library" && ["records", "cards"].includes(command);
+  return currentFacility().id === "library" && ["monsters", "records", "cards"].includes(command);
 }
 
 function previewLibraryCommand(command) {
@@ -1152,9 +1153,11 @@ function previewLibraryCommand(command) {
     town.facilityPreviewCommand = "";
     return false;
   }
-  town.messageEl.textContent = command === "records"
-    ? "司書イライザ：あなたの冒険の記録をまとめておいたわ。積み重ねてきた足跡を、ゆっくり振り返ってみて。"
-    : "司書イライザ：あなたが手にしたカードを記録してあるわ。気になる一枚を選んでみて。";
+  town.messageEl.textContent = command === "monsters"
+    ? "司書イライザ：奈落で出会った魔物の記録よ。討伐した相手ほど、詳しい情報が読めるようになっているわ。"
+    : command === "records"
+      ? "司書イライザ：あなたの冒険の記録をまとめておいたわ。積み重ねてきた足跡を、ゆっくり振り返ってみて。"
+      : "司書イライザ：あなたが手にしたカードを記録してあるわ。気になる一枚を選んでみて。";
   town.facilityPreviewCommand = command;
   return true;
 }
@@ -1535,8 +1538,7 @@ function showFacilityCommands(facilityId) {
       || (facilityId === "guild" && id === "accept" && requestUnlocked)
       || (facilityId === "guild" && id === "report" && reportAvailable)
       || (facilityId === "guild" && ["history", "tavern"].includes(id))
-      || (facilityId === "library" && id === "records")
-      || (facilityId === "library" && id === "cards")
+      || (facilityId === "library" && ["monsters", "records", "cards"].includes(id))
       || (facilityId === "tavern" && id === "npc-hire" && NPC_SUPPORT_ENABLED)
       || (facilityId === "npcHire" && ["npc-search", "npc-roster", "npc-hire-return"].includes(id))
       || (facilityId === "tavern" && id === "rumors" && Boolean(town.getUnreadRumor()))
@@ -1589,6 +1591,12 @@ function activateFacilityService(command) {
   if (command === "past-rumors") {
     if (currentFacility().id !== "tavern") return false;
     town.onOpenRumorHistory();
+    return true;
+  }
+  if (command === "monsters") {
+    if (currentFacility().id !== "library") return false;
+    town.messageEl.textContent = "司書イライザ：奈落で出会った魔物の記録よ。討伐した相手ほど、詳しい情報が読めるようになっているわ。";
+    town.onOpenMonsterCompendium();
     return true;
   }
   if (command === "records") {

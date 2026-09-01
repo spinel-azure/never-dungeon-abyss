@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="css/style.css?v=20260810-2">
   <link rel="stylesheet" href="css/game-menu.css?v=20260817-5">
   <link rel="stylesheet" href="css/card-gallery.css?v=20260810-1">
+  <link rel="stylesheet" href="css/monster-compendium.css">
   <link rel="stylesheet" href="css/title-screen.css?v=20260815-2">
   <link rel="stylesheet" href="css/town.css?v=20260817-4">
   <link rel="stylesheet" href="css/effects.css?v=20260805-2">
@@ -403,6 +404,53 @@
         <nav class="inventory-pager" aria-label="冒険記録のページ操作"><button type="button" class="menu-footer" data-adventure-records-nav="back">BACK</button><span data-adventure-records-page>1/1</span><button type="button" class="menu-footer" data-adventure-records-nav="next">NEXT</button></nav>
       </div>
 
+      <div class="menu-panel monster-compendium-panel" data-menu-view="monsterCompendium" hidden>
+        <header class="monster-compendium-header">
+          <h1 class="menu-title">MONSTER COMPENDIUM</h1>
+          <p data-monster-compendium-count>登録 0/0　討伐 0/0　0%</p>
+        </header>
+        <nav class="monster-compendium-filters" aria-label="出現階層フィルター">
+          <button type="button" data-monster-compendium-filter="ALL" aria-pressed="true">ALL</button>
+          <button type="button" data-monster-compendium-filter="1" aria-pressed="false">1</button>
+          <button type="button" data-monster-compendium-filter="10" aria-pressed="false">10</button>
+          <button type="button" data-monster-compendium-filter="20" aria-pressed="false">20</button>
+          <button type="button" data-monster-compendium-filter="30" aria-pressed="false">30</button>
+          <button type="button" data-monster-compendium-filter="40" aria-pressed="false">40</button>
+          <button type="button" data-monster-compendium-filter="50" aria-pressed="false">50</button>
+          <button type="button" data-monster-compendium-filter="60" aria-pressed="false">60</button>
+          <button type="button" data-monster-compendium-filter="70" aria-pressed="false">70</button>
+          <button type="button" data-monster-compendium-filter="80" aria-pressed="false">80</button>
+          <button type="button" data-monster-compendium-filter="90" aria-pressed="false">90</button>
+        </nav>
+        <section class="monster-compendium-list-view" data-monster-compendium-list-view>
+          <div class="monster-compendium-list" data-monster-compendium-list aria-label="魔物一覧"></div>
+          <nav class="monster-compendium-pager" aria-label="魔物一覧のページ操作">
+            <button type="button" data-monster-compendium-nav="previous">BACK</button>
+            <span data-monster-compendium-page>1/1</span>
+            <button type="button" data-monster-compendium-nav="next">NEXT</button>
+          </nav>
+        </section>
+        <section class="monster-compendium-detail" data-monster-compendium-detail hidden>
+          <div class="monster-detail-portrait">
+            <img data-monster-detail-image alt="" hidden>
+            <span data-monster-detail-unknown aria-label="未登録">？</span>
+          </div>
+          <div class="monster-detail-content">
+            <h2 data-monster-detail-name>？？？？？</h2>
+            <p><span data-monster-detail-habitat>出現階層：？？？？？</span>　<span data-monster-detail-race>種族：？？？</span></p>
+            <dl class="monster-detail-stats">
+              <div><dt>LV</dt><dd data-monster-detail-level>？？</dd></div><div><dt>HP</dt><dd data-monster-detail-hp>？？？</dd></div>
+              <div><dt>ATK</dt><dd data-monster-detail-attack>？？</dd></div><div><dt>DEF</dt><dd data-monster-detail-defense>？？</dd></div>
+              <div><dt>STR</dt><dd data-monster-detail-str>？？</dd></div><div><dt>INT</dt><dd data-monster-detail-int>？？</dd></div>
+              <div><dt>AGI</dt><dd data-monster-detail-agi>？？</dd></div><div><dt>DEX</dt><dd data-monster-detail-dex>？？</dd></div>
+              <div><dt>LUC</dt><dd data-monster-detail-luc>？？</dd></div><div><dt>EXP</dt><dd data-monster-detail-exp>？？？</dd></div>
+            </dl>
+            <div class="monster-detail-records"><p><strong>討伐数</strong><span data-monster-detail-defeats>？？？</span></p><p><strong>属性相性</strong><span data-monster-detail-elements>討伐後に記録</span></p><p><strong>状態耐性</strong><span data-monster-detail-statuses>討伐後に記録</span></p><p><strong>発見した戦利品</strong><span data-monster-detail-drops>討伐後に記録</span></p></div>
+          </div>
+          <button type="button" class="monster-detail-back" data-monster-compendium-detail-back>BACK</button>
+        </section>
+        <p class="monster-compendium-hint">↑↓：MONSTER　←→：FLOOR　A：DETAIL　B：BACK</p>
+      </div>
       <div class="menu-panel card-gallery-panel" data-menu-view="cardGallery" hidden>
         <header class="card-gallery-header">
           <h1 class="menu-title">CARD GALLERY</h1>
@@ -499,7 +547,7 @@
     </section>
   </section>
 </main>
-  <script type="module" src="js/main.js?v=20260902-02"></script>
+  <script type="module" src="js/main.js?v=20260902-03"></script>
   <script type="module" src="js/title-screen.js"></script>
 </body>
 </html>

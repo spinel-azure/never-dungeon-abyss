@@ -56,7 +56,7 @@ import { configureInput } from "./input.js";
 import { configureGamepadInput } from "./gamepad-input.js";
 import { configureFloatingStick } from "./floating-stick.js";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, getDungeonMistOptions, setDungeonColors, getGamepadBindings, getGamepadCaptureAction, completeGamepadBinding, setGamepadPressedButtons, getTouchControlsMode, isMenuOpen, openItemInventory, openStatusMenu, openDeckEditor, openQuestHistory, openRumorHistory, openAdventureRecords, openLibraryCardGallery, openTitleOptions, refreshAdventureRecordsPlayTime, openShopSellInventory, openShopPurchaseInventory, closeCampMenu, resetDebugSettingsForNewGame } from "./menu.js";
+import { configureMenu, handleMenuInput, getDungeonColors, getDungeonMistOptions, setDungeonColors, getGamepadBindings, getGamepadCaptureAction, completeGamepadBinding, setGamepadPressedButtons, getTouchControlsMode, isMenuOpen, openItemInventory, openStatusMenu, openDeckEditor, openQuestHistory, openRumorHistory, openAdventureRecords, openLibraryMonsterCompendium, openLibraryCardGallery, openTitleOptions, refreshAdventureRecordsPlayTime, openShopSellInventory, openShopPurchaseInventory, closeCampMenu, resetDebugSettingsForNewGame } from "./menu.js";
 import { isForcedTorchZeroFloor, resolveFloorTheme } from "./floorTheme.js";
 import { applyCrystalFloorSpStep } from "../data/crystal-floor.js";
 import {
@@ -827,6 +827,7 @@ import {
       return result;
     },
     onOpenAdventureRecords: openAdventureRecords,
+    onOpenMonsterCompendium: openLibraryMonsterCompendium,
     onOpenCardGallery: openLibraryCardGallery,
     getUnreadRumor: () => getUnreadTavernRumor(character, {
       mikanEncountered: Boolean(character?.eventFlags?.mikan_nyanko_encountered)

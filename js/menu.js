@@ -13,6 +13,7 @@ import { getShopBuyPrice, getShopSellPrice } from "../data/shop-discount.js";
 import { getQuestHistory } from "../data/quests.js";
 import { getAdventureChronicle, getAdventureRecords } from "../data/adventure-records.js";
 import { closeCardGallery, configureCardGallery, handleCardGalleryInput, openCardGallery } from "./card-gallery.js";
+import { closeMonsterCompendium, configureMonsterCompendium, handleMonsterCompendiumInput, openMonsterCompendium } from "./monster-compendium.js";
 
 const ACTION_FEEDBACK_MS = 260;
 const DEBUG_SEQUENCE_MS = 1000;
@@ -24,7 +25,7 @@ const DECK_PICKER_PAGE_SIZE = 5;
 const EQUIPMENT_JOB_LABELS = Object.freeze({ warrior: "戦士", thief: "盗賊", priest: "僧侶", mage: "魔術師" });
 
 const menu = {
-  root: null, commandRoot: null, statusPanel: null, deckPanel: null, inventoryPanel: null, questHistoryPanel: null, rumorHistoryPanel: null, adventureRecordsPanel: null, cardGalleryPanel: null, savePanel: null, optionsPanel: null, debugPanel: null,
+  root: null, commandRoot: null, statusPanel: null, deckPanel: null, inventoryPanel: null, questHistoryPanel: null, rumorHistoryPanel: null, adventureRecordsPanel: null, monsterCompendiumPanel: null, cardGalleryPanel: null, savePanel: null, optionsPanel: null, debugPanel: null,
   commands: [], enabledCommands: [], commandIndex: 0, statusPage: 0,
   deckCursor: 0, deckSlots: [], deckEditable: false, deckReturnView: "commands",
   deckPickerOpen: false, deckPickerCursor: 0, deckPickerItems: [], deckPickerPage: 0,
@@ -84,6 +85,7 @@ export function configureMenu(options) {
   menu.questHistoryPanel = menu.root.querySelector('[data-menu-view="questHistory"]');
   menu.rumorHistoryPanel = menu.root.querySelector('[data-menu-view="rumorHistory"]');
   menu.adventureRecordsPanel = menu.root.querySelector('[data-menu-view="adventureRecords"]');
+  menu.monsterCompendiumPanel = menu.root.querySelector('[data-menu-view="monsterCompendium"]');
   menu.cardGalleryPanel = menu.root.querySelector('[data-menu-view="cardGallery"]');
   menu.optionsPanel = menu.root.querySelector('[data-menu-view="options"]');
   configureGamepadPreview();
@@ -106,6 +108,16 @@ export function configureMenu(options) {
     playSe: key => menu.playSe(key),
     onClose: () => {
       closeCardGallery();
+      menu.view = "dungeon";
+      updateView();
+    }
+  });
+  configureMonsterCompendium({
+    root: menu.monsterCompendiumPanel,
+    getCharacter: () => menu.getCharacter(),
+    playSe: key => menu.playSe(key),
+    onClose: () => {
+      closeMonsterCompendium();
       menu.view = "dungeon";
       updateView();
     }
@@ -249,6 +261,11 @@ export function openLibraryCardGallery() {
   updateView();
   openCardGallery();
 }
+export function openLibraryMonsterCompendium() {
+  menu.view = "monsterCompendium";
+  updateView();
+  openMonsterCompendium();
+}
 export function closeCampMenu(reason = "back") { menu.view = "dungeon"; updateView(); if (reason === "back" || reason === "main") menu.onReturnToDungeon(reason); }
 
 export function handleMenuInput(action) {
@@ -291,6 +308,7 @@ export function handleMenuInput(action) {
   else if (menu.view === "questHistory") handleQuestHistory(action);
   else if (menu.view === "rumorHistory") handleRumorHistory(action);
   else if (menu.view === "adventureRecords") handleAdventureRecords(action);
+  else if (menu.view === "monsterCompendium") handleMonsterCompendiumInput(action);
   else if (menu.view === "cardGallery") handleCardGalleryInput(action);
   else if (menu.view === "save") handleManualSave(action);
   else if (menu.view === "options") handleOptions(action);
@@ -1420,12 +1438,13 @@ function bindDebug() {
 function renderEmptyStats() { const rows = ["STR", "INT", "AGI", "DEX", "LUC", "DEF"].map(label => { const row = document.createElement("div"); row.className = "nde-stat-row"; const name = document.createElement("strong"); name.textContent = label; const gauge = document.createElement("span"); gauge.className = "nde-empty-gauge"; for (let index = 0; index < 30; index += 1) gauge.append(document.createElement("i")); const value = document.createElement("output"); value.textContent = "--"; row.append(name, gauge, value); return row; }); menu.root.querySelector("#ndeStatRows").replaceChildren(...rows); }
 
 function updateView() {
-  const screenOpen = ["status", "deck", "inventory", "questHistory", "rumorHistory", "adventureRecords", "cardGallery", "save", "options", "debug"].includes(menu.view);
+  const screenOpen = ["status", "deck", "inventory", "questHistory", "rumorHistory", "adventureRecords", "monsterCompendium", "cardGallery", "save", "options", "debug"].includes(menu.view);
   document.body.classList.toggle("menu-open", screenOpen); document.body.classList.toggle("command-open", menu.view === "commands");
   document.body.classList.toggle("deck-open", menu.view === "deck");
   document.body.classList.toggle("inventory-open", menu.view === "inventory");
+  document.body.classList.toggle("monster-compendium-open", menu.view === "monsterCompendium");
   document.body.classList.toggle("card-gallery-open", menu.view === "cardGallery");
-  menu.root.hidden = !screenOpen; menu.statusPanel.hidden = menu.view !== "status"; menu.deckPanel.hidden = menu.view !== "deck"; menu.inventoryPanel.hidden = menu.view !== "inventory"; menu.questHistoryPanel.hidden = menu.view !== "questHistory"; menu.rumorHistoryPanel.hidden = menu.view !== "rumorHistory"; menu.adventureRecordsPanel.hidden = menu.view !== "adventureRecords"; menu.cardGalleryPanel.hidden = menu.view !== "cardGallery"; menu.savePanel.hidden = menu.view !== "save"; menu.optionsPanel.hidden = menu.view !== "options"; menu.debugPanel.hidden = menu.view !== "debug";
+  menu.root.hidden = !screenOpen; menu.statusPanel.hidden = menu.view !== "status"; menu.deckPanel.hidden = menu.view !== "deck"; menu.inventoryPanel.hidden = menu.view !== "inventory"; menu.questHistoryPanel.hidden = menu.view !== "questHistory"; menu.rumorHistoryPanel.hidden = menu.view !== "rumorHistory"; menu.adventureRecordsPanel.hidden = menu.view !== "adventureRecords"; menu.monsterCompendiumPanel.hidden = menu.view !== "monsterCompendium"; menu.cardGalleryPanel.hidden = menu.view !== "cardGallery"; menu.savePanel.hidden = menu.view !== "save"; menu.optionsPanel.hidden = menu.view !== "options"; menu.debugPanel.hidden = menu.view !== "debug";
   menu.commandRoot.dataset.active = String(menu.view === "commands");
   const hint = document.querySelector("#commandHint"); if (hint) hint.textContent = menu.view === "commands" ? "＊ Bボタンでメニュー非表示" : "＊ Bボタンでメニュー表示";
   updateStatus(); updatePager(); updateDebugPager(); updateSelection();
