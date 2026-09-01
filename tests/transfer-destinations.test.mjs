@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { getBossById } from "../data/bosses.js";
+import { grantKeyItem } from "../data/key-items.js";
 
 import {
   TRANSFER_DESTINATIONS,
@@ -28,7 +29,13 @@ test("transfer destinations are data-driven and expose only unlocked floors", ()
   character.eventFlags.boss_jirene_b79f_defeated = true;
   character.eventFlags.boss_b89f_defeated = true;
   character.eventFlags.boss_b99f_defeated = true;
+  assert.deepEqual(getUnlockedTransferDestinations(character).map(entry => entry.depth), [10, 20, 30, 40, 50, 60, 70, 80, 90]);
+  assert.equal(isTransferDestinationUnlocked(character, 100), false);
+  for (const keyItemId of ["queen_tiara", "queen_earring", "queen_necklace"]) {
+    character.keyItems = grantKeyItem(character.keyItems, keyItemId).keyItems;
+  }
   assert.deepEqual(getUnlockedTransferDestinations(character).map(entry => entry.depth), [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+  assert.equal(isTransferDestinationUnlocked(character, 100), true);
   assert.ok(TRANSFER_DESTINATIONS.every(entry => entry.label === `B${entry.depth}F`));
 });
 

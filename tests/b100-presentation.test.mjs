@@ -93,7 +93,8 @@ test("guardian silhouettes remain forced between hit animations", () => {
 test("nearby dungeon NPC and boss sprites receive a shared proximity enlargement", () => {
   assert.match(renderer, /\["npc", "boss", "bossRemains", "fixedEvent"\]\.includes\(event\.eventKind\)/);
   assert.match(renderer, /isOneStepAway = supportsProximityEnlargement && event\.forward <= 1\.55/);
-  assert.match(renderer, /proximityScale = isOneStepAway \? 1\.9 : 1/);
+  assert.match(renderer, /nearbyScale = event\.npc\.imageId === "NPC_01" \? 1\.5 : 1\.9/);
+  assert.match(renderer, /proximityScale = isOneStepAway \? nearbyScale : 1/);
   assert.match(renderer, /Math\.min\(scaledSpriteH, renderer\.H \* \.82\)/);
 });
 

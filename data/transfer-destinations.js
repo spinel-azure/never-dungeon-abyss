@@ -1,3 +1,5 @@
+import { hasCompleteQueenRegalia } from "./quests.js";
+
 export const TRANSFER_DESTINATIONS = Object.freeze([
   checkpointDestination(10, "boss_strange_knight_statue_b9f_defeated", "transfer_portal_b10f_unlocked"),
   checkpointDestination(20, "boss_fallen_mage_b19f_defeated", "transfer_portal_b20f_unlocked"),
@@ -8,7 +10,12 @@ export const TRANSFER_DESTINATIONS = Object.freeze([
   checkpointDestination(70, "boss_b69f_defeated", "transfer_portal_b70f_unlocked"),
   checkpointDestination(80, "boss_jirene_b79f_defeated", "transfer_portal_b80f_unlocked"),
   checkpointDestination(90, "boss_b89f_defeated", "transfer_portal_b90f_unlocked"),
-  checkpointDestination(100, "boss_b99f_defeated", "transfer_portal_b100f_unlocked")
+  checkpointDestination(
+    100,
+    "boss_b99f_defeated",
+    "transfer_portal_b100f_unlocked",
+    hasCompleteQueenRegalia
+  )
 ]);
 
 export function getUnlockedTransferDestinations(character) {
@@ -24,8 +31,9 @@ function destination(depth, isUnlocked) {
   return Object.freeze({ depth, label: `B${depth}F`, isUnlocked });
 }
 
-function checkpointDestination(depth, bossFlag, legacyFlag) {
+function checkpointDestination(depth, bossFlag, legacyFlag, additionalRequirement = () => true) {
   return destination(depth, character => Boolean(
-    character?.eventFlags?.[bossFlag] || character?.eventFlags?.[legacyFlag]
+    (character?.eventFlags?.[bossFlag] || character?.eventFlags?.[legacyFlag])
+      && additionalRequirement(character)
   ));
 }

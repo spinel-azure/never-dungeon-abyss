@@ -1367,7 +1367,8 @@ function drawNpcEvent(ctx, event) {
   const image = renderer.characterImages.get(event.npc.imageId);
   const supportsProximityEnlargement = ["npc", "boss", "bossRemains", "fixedEvent"].includes(event.eventKind);
   const isOneStepAway = supportsProximityEnlargement && event.forward <= 1.55;
-  const proximityScale = isOneStepAway ? 1.9 : 1;
+  const nearbyScale = event.npc.imageId === "NPC_01" ? 1.5 : 1.9;
+  const proximityScale = isOneStepAway ? nearbyScale : 1;
   const scaledSpriteH = event.size * 2.05 * proximityScale * Math.max(0.25, Number(event.npc.renderScale) || 1);
   const spriteH = isOneStepAway ? Math.min(scaledSpriteH, renderer.H * .82) : scaledSpriteH;
   const fallbackW = spriteH * .64;
