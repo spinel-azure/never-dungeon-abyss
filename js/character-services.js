@@ -10,6 +10,7 @@ import {
 } from "../data/experience-settlement.js";
 import { getLevelUnlockedSkillIds } from "../data/skills.js";
 import { hasCardEffect } from "../data/cards.js";
+import { getConditionLabel } from "../combat/condition-label.js";
 
 export const TOWN_INTRODUCTION_FLAGS = Object.freeze([
   "inn_first_talk_card",
@@ -104,9 +105,7 @@ export function resolveInnStay(character) {
 }
 
 function conditionFromStatuses(statuses = []) {
-  if (statuses.some(status => (status.statusId || status.id) === "bleeding")) return "BLEED";
-  if (statuses.some(status => ["poison", "deadly_poison"].includes(status.statusId || status.id))) return "POISON";
-  return "GOOD";
+  return getConditionLabel(statuses);
 }
 
 export function getInnStayFee(character) {

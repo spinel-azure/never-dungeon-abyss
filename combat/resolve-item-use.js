@@ -1,6 +1,7 @@
 import { canUseItemIn, getItem } from "../data/items.js";
 import { consumeItem, getItemCount } from "../data/inventory.js";
 import { getStatusEffect } from "../data/status-effects.js";
+import { getConditionLabel } from "./condition-label.js";
 
 export function cureAllNegativeStatuses(statuses = []) {
   return (Array.isArray(statuses) ? statuses : []).filter(status => {
@@ -21,6 +22,7 @@ export function getItemUnavailableReason({ character, itemId, context, enemy, to
   const healsHp = item.effects?.some(effect => effect.id === "heal_hp" || effect.id === "heal_hp_rate");
   const hasAnotherEffect = item.effects?.some(effect => effect.id !== "heal_hp" && effect.id !== "heal_hp_rate");
   if (healsHp && !hasAnotherEffect && character.hp >= character.maxHp) return "fullHp";
+  if (itemId === "antidote" && hasStatus(character, "deadly_poison")) return "deadlyPoisonNotCurable";
   if (itemId === "antidote" && character.hp >= character.maxHp && !hasStatus(character, "poison")) return "noEffect";
   if (itemId === "strong_antidote" && character.hp >= character.maxHp && !hasPoison(character)) return "noEffect";
   if (itemId === "styptic" && character.hp >= character.maxHp && !hasStatus(character, "bleeding")) return "noEffect";
@@ -105,9 +107,7 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
       environment.emergencyEscape = true;
     }
   }
-  next.condition = hasStatus(next, "death_poison") ? "DEATH POISON"
-    : hasStatus(next, "bleeding") ? "BLEED"
-      : hasPoison(next) ? "POISON" : "GOOD";
+  next.condition = getConditionLabel(next.statuses);
   next.inventory = consumeItem(next.inventory, itemId).inventory;
   return {
     accepted: true,

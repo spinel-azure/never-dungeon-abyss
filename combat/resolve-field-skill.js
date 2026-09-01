@@ -2,6 +2,7 @@ import { collectStats } from "./collect-stats.js";
 import { resolveHealing } from "./resolve-healing.js";
 import { getSkill } from "../data/skills.js";
 import { getEffectiveSpCost } from "./sp-cost.js";
+import { getConditionLabel } from "./condition-label.js";
 
 export function resolveFieldSkill({ character, skillId, torchFuel = 0, presenceIncreaseReduction = 0 } = {}) {
   const skill = getSkill(skillId);
@@ -50,7 +51,7 @@ export function resolveFieldSkill({ character, skillId, torchFuel = 0, presenceI
       .filter(status => (status.statusId || status.id) !== skill.statusId);
     const damage = Math.floor(Math.max(0, Number(character.maxHp) || 0) * skill.damageRate);
     nextCharacter.hp = Math.max(1, Number(character.hp) - damage);
-    nextCharacter.condition = hasStatus(nextCharacter, "bleeding") ? "BLEED" : "GOOD";
+    nextCharacter.condition = getConditionLabel(nextCharacter.statuses);
     return { accepted: true, character: nextCharacter, skill, healing: 0, damage, environment: {} };
   }
 
@@ -92,7 +93,5 @@ function getCuredStatusIds(skill = {}) {
 }
 
 function getCondition(character) {
-  return hasStatus(character, "bleeding") ? "BLEED"
-    : ["poison", "deadly_poison"].some(statusId => hasStatus(character, statusId)) ? "POISON"
-      : "GOOD";
+  return getConditionLabel(character?.statuses);
 }

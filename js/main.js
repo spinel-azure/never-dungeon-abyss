@@ -121,6 +121,7 @@ import {
   formatDepthReturnSettlement
 } from "../data/experience-settlement.js";
 import { getDeadlyPoisonStepDamage, getNonlethalPoisonDamage } from "../combat/status-lifecycle.js";
+import { getConditionLabel } from "../combat/condition-label.js";
 import { getNextLevelExperience, MAX_LEVEL } from "../data/growth.js";
 import { resolveFieldSkill } from "../combat/resolve-field-skill.js";
 import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from "./skill-overlay.js";
@@ -162,6 +163,7 @@ import {
   startMarathonChallenge
 } from "../data/marathon-challenge.js";
 import { applyVirgoFloorRecovery } from "../data/virgo-card.js";
+import { backfillCompendiumFromCharacter, recordMonsterDefeat as recordCompendiumMonsterDefeat, recordMonsterDrop, recordMonsterEncounter } from "../data/compendium.js";
 import {
   abandonQuest,
   acceptQuest,
@@ -981,6 +983,12 @@ import {
       clearTimeout(autosaveTimer);
       autosaveTimer = 0;
     }
+    if (character) {
+      character = {
+        ...character,
+        compendium: backfillCompendiumFromCharacter(character.compendium, character)
+      };
+    }
     const snapshot = makeSaveSnapshot();
     const autoSaved = writeGame(snapshot, "auto");
     const saved = isManualSave
@@ -1665,7 +1673,7 @@ import {
     if (statusJob) statusJob.textContent = character?.jobLabel || "UNKNOWN";
     if (statusLevel) statusLevel.textContent = character ? String(character.level).padStart(3, "0") : "---";
     if (statusCondition) statusCondition.textContent = character?.condition || "----";
-    statusCondition?.classList.toggle("condition-poison", ["POISON", "DEATH POISON"].includes(character?.condition));
+    statusCondition?.classList.toggle("condition-poison", ["POISON", "TOXIC", "DEATH POISON"].includes(character?.condition));
     statusCondition?.classList.toggle("condition-bleeding", character?.condition === "BLEED");
     if (statusGold) statusGold.textContent = String(Math.max(0, Math.floor(Number(character?.gold) || 0)));
     const vitals = document.querySelector(".nde-status-vitals");
@@ -1940,6 +1948,7 @@ import {
       enemies: encounterEnemies,
       targetIndex: 0
     });
+    if (started) recordCompendiumEncounter(encounterEnemies || [enemy]);
     if (!started) {
       startBgm(selectDungeonBgm());
       setPlayerInputEnabled(true);
@@ -1967,6 +1976,7 @@ import {
       ambush: false,
       concealed: state.torchFuel <= 0 && !state.torchEffectForced && !state.lightbringerActive
     });
+    if (started) recordCompendiumEncounter([enemy]);
     if (!started) {
       activeRareRoomEncounterId = null;
       startBgm(selectDungeonBgm());
@@ -1987,6 +1997,7 @@ import {
     activeRareRoomEncounterId = "quest_029_wasp_hive";
     startBgm(selectBattleBgm(enemyData));
     const started = startBattle(enemies[0], { playStartSe: true, enemies, targetIndex: 0 });
+    if (started) recordCompendiumEncounter(enemies);
     if (!started) {
       activeRareRoomEncounterId = null;
       startBgm(selectDungeonBgm());
@@ -2056,6 +2067,7 @@ import {
         ? "jirene_first_encounter"
         : ""
     });
+    if (started) recordCompendiumEncounter(encounterEnemies || [bossCombatant]);
     if (!started) {
       startBgm(selectDungeonBgm());
       setPlayerInputEnabled(true);
@@ -2077,11 +2089,20 @@ import {
       ambush: false,
       concealed: state.torchFuel <= 0 && !state.torchEffectForced && !state.lightbringerActive
     });
+    if (started) recordCompendiumEncounter([mimic]);
     if (!started) {
       startBgm(selectDungeonBgm());
       setPlayerInputEnabled(true);
     }
     return started;
+  }
+
+  function recordCompendiumEncounter(combatants) {
+    if (!character) return;
+    character = {
+      ...character,
+      compendium: recordMonsterEncounter(character.compendium, (combatants || []).map(combatant => combatant?.id))
+    };
   }
 
   function selectDungeonBgm() {
@@ -2117,7 +2138,7 @@ import {
     if (damage <= 0) return 0;
     character.hp -= damage;
     character.alive = true;
-    character.condition = "POISON";
+    character.condition = getConditionLabel(character.statuses);
     updateCharacterUi();
     showPoisonStepDamage(damage);
     return damage;
@@ -2129,7 +2150,7 @@ import {
     if (damage <= 0) return 0;
     character.hp -= damage;
     character.alive = true;
-    character.condition = "POISON";
+    character.condition = getConditionLabel(character.statuses);
     updateCharacterUi();
     showPoisonStepDamage(damage);
     return damage;
@@ -2182,10 +2203,7 @@ import {
   }
 
   function currentCondition(target) {
-    return hasCharacterStatus(target, "death_poison") ? "DEATH POISON"
-      : hasCharacterStatus(target, "bleeding") ? "BLEED"
-      : ["poison", "deadly_poison"].some(statusId => hasCharacterStatus(target, statusId)) ? "POISON"
-        : "GOOD";
+    return getConditionLabel(target?.statuses);
   }
 
   function showPoisonStepDamage(damage) {
@@ -2722,6 +2740,12 @@ import {
       for (const defeatedEnemy of defeatedEnemies) {
         if (defeatedEnemy?.id) character = recordEnemyDefeat(character, defeatedEnemy.id, currentDepth);
       }
+      for (const defeatedEnemy of rewardEnemies.filter(enemy => enemy?.id && Number(enemy.hp) <= 0)) {
+        character = {
+          ...character,
+          compendium: recordCompendiumMonsterDefeat(character.compendium, defeatedEnemy.id)
+        };
+      }
     }
     const defeatQuestProgressMessage = character
       ? formatDefeatQuestProgressUpdates(defeatQuestProgressBefore, getActiveDefeatQuestProgress(character))
@@ -2738,6 +2762,12 @@ import {
     const fixedGoldPerDefeat = calculateFixedGoldPerDefeat(rewardEnemies);
 
     const drop = fixedGoldPerDefeat > 0 ? { kind: "gold", amount: fixedGoldPerDefeat } : rollEnemyDrop(battle?.enemy);
+    if (character && drop?.itemId && battle?.enemy?.id) {
+      character = {
+        ...character,
+        compendium: recordMonsterDrop(character.compendium, battle.enemy.id, drop.itemId)
+      };
+    }
     const dropMessage = drop.kind === "redChest" ? "" : addRolledLoot(drop);
     const chainedBattleMessage = nextBoss && !isBossDefeated(character, nextBoss)
       ? `\nしかし、その奥から${nextBoss.name}が姿を現した――！`

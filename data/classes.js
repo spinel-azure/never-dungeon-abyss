@@ -22,6 +22,8 @@ import { createInitialKeyItemState, normalizeKeyItemState } from "./key-items.js
 import { getItem } from "./items.js";
 import { createInitialNpcSystem, normalizeNpcSystem } from "./npc-party.js";
 import { createInitialPlayerCharge, normalizePlayerCharge } from "../combat/player-charge.js";
+import { getConditionLabel } from "../combat/condition-label.js";
+import { backfillCompendiumFromCharacter, createInitialCompendium } from "./compendium.js";
 
 export const STAT_KEYS = Object.freeze(["str", "int", "agi", "dex", "luc"]);
 
@@ -120,6 +122,9 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     def: 0,
     equipment,
     ...equipmentCollection,
+    compendium: backfillCompendiumFromCharacter(createInitialCompendium(), {
+      equipmentInventory: equipmentCollection.equipmentInventory
+    }),
     equipmentBuyback: [],
     itemBuyback: [],
     skillIds: [...characterClass.initialSkillIds],
@@ -194,6 +199,23 @@ export function normalizeCharacter(character) {
   if (quests.completedQuestIds.includes("guild_011")) {
     eventFlags.support_npc_malicious_join_unlocked = true;
   }
+  const inventory = normalizeInventory(character.inventory);
+  const keyItems = normalizeKeyItemState(character.keyItems);
+  const warehouse = normalizeWarehouse(character.warehouse);
+  const lootBag = normalizeLootBag(character.lootBag);
+  const equipmentBuyback = latestEquipmentBuyback ? [latestEquipmentBuyback] : [];
+  const itemBuyback = latestEquipmentBuyback ? [] : latestItemBuyback ? [latestItemBuyback] : [];
+  const compendium = backfillCompendiumFromCharacter(character.compendium, {
+    ...character,
+    inventory,
+    keyItems,
+    warehouse,
+    lootBag,
+    ...equipmentCollection,
+    equipmentBuyback,
+    itemBuyback,
+    eventFlags
+  });
   return {
     ...character,
     job: characterClass.id,
@@ -201,10 +223,10 @@ export function normalizeCharacter(character) {
     level,
     deckCost: growth.deckCost,
     cards,
-    inventory: normalizeInventory(character.inventory),
-    keyItems: normalizeKeyItemState(character.keyItems),
-    warehouse: normalizeWarehouse(character.warehouse),
-    lootBag: normalizeLootBag(character.lootBag),
+    inventory,
+    keyItems,
+    warehouse,
+    lootBag,
     quests,
     eventFlags,
     adventureStats: normalizeAdventureStats(character.adventureStats),
@@ -249,8 +271,9 @@ export function normalizeCharacter(character) {
     def: Math.max(0, Number(character.def) || 0),
     equipment,
     ...equipmentCollection,
-    equipmentBuyback: latestEquipmentBuyback ? [latestEquipmentBuyback] : [],
-    itemBuyback: latestEquipmentBuyback ? [] : latestItemBuyback ? [latestItemBuyback] : [],
+    equipmentBuyback,
+    itemBuyback,
+    compendium,
     skillIds: [...new Set([
       ...characterClass.initialSkillIds,
       ...(Array.isArray(character.skillIds) ? character.skillIds : []),
@@ -258,9 +281,7 @@ export function normalizeCharacter(character) {
     ])],
     statuses: normalizeCharacterStatuses(character.statuses),
     bleedingStepCount: Math.max(0, Math.floor(Number(character.bleedingStepCount) || 0)) % 5,
-    condition: normalizeCharacterStatuses(character.statuses).some(status => (status.statusId || status.id) === "bleeding") ? "BLEED"
-      : normalizeCharacterStatuses(character.statuses).some(status => ["poison", "deadly_poison"].includes(status.statusId || status.id)) ? "POISON"
-      : "GOOD",
+    condition: getConditionLabel(normalizeCharacterStatuses(character.statuses)),
     alive: character.alive !== false && Number(character.hp) > 0
   };
 }

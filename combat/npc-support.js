@@ -2,6 +2,7 @@ import { NPC_SUPPORT_ENABLED, getNpcDefinition } from "../data/npc-definitions.j
 import { resolveSpell } from "./resolve-spell.js";
 import { resolveInstantDeath } from "./resolve-status-effect.js";
 import { getNpcStagePassive, NPC_ADVANCED_GROWTH } from "../data/npc-passives.js";
+import { getConditionLabel } from "./condition-label.js";
 
 export const NPC_SUPPORT_BALANCE = Object.freeze({
   alec: Object.freeze({ attackRate: 0.8, growthAttack: 3, guardBase: 0.15, guardPerStage: 0.02, guardMaximum: 0.35 }),
@@ -520,7 +521,5 @@ function cureNpcPrayerStatuses(statuses = [], { all = false, chargeCure = false 
 }
 
 function getNpcCondition(statuses = []) {
-  if (statuses.some(status => (status.id || status.statusId) === "bleeding")) return "BLEED";
-  if (statuses.some(status => ["poison", "deadly_poison"].includes(status.id || status.statusId))) return "POISON";
-  return "GOOD";
+  return getConditionLabel(statuses);
 }

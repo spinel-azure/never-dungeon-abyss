@@ -155,7 +155,7 @@ async function activate() {
   const item = overlay.items[overlay.selectedIndex];
   const reason = unavailableReason(item);
   if (reason) {
-    overlay.playSe("cancel");
+    overlay.playSe(reason === "deadlyPoisonNotCurable" ? "costOver" : "cancel");
     showReason(reason);
     return;
   }
@@ -185,7 +185,10 @@ function render() {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "skill-overlay-item";
-    button.disabled = Boolean(unavailableReason(item));
+    const reason = unavailableReason(item);
+    button.disabled = Boolean(reason && reason !== "deadlyPoisonNotCurable");
+    button.classList.toggle("is-unavailable", Boolean(reason));
+    button.setAttribute("aria-disabled", reason ? "true" : "false");
     button.innerHTML = `<span>${item.name}</span><small>×${getItemCount(overlay.character.inventory, item.id)}</small>`;
     button.addEventListener("click", () => {
       overlay.selectedIndex = index;
@@ -230,6 +233,7 @@ function showReason(reason) {
   overlay.messageEl.textContent = ({
     fullHp: "HPは満タンだ。",
     noEffect: "今使っても効果がない。",
+    deadlyPoisonNotCurable: "解毒剤では猛毒を治療できません。",
     fullTorch: "たいまつは十分に明るい。",
     battleOnly: "このアイテムは戦闘中のみ使用できる。",
     fieldOnly: "このアイテムは戦闘中には使用できない。",

@@ -11,6 +11,7 @@ import { playBattleSkillPresentation } from "./battle-skill-presentation.js";
 import { getSkill } from "../data/skills.js";
 import { getItem } from "../data/items.js";
 import { getItemUnavailableReason } from "../combat/resolve-item-use.js";
+import { getConditionLabel } from "../combat/condition-label.js";
 import { ENEMY_DISPLAY_SIZES, getEnemyDisplaySize } from "../combat/enemy-display-size.js";
 import {
   isEnemyVanishPending,
@@ -319,6 +320,7 @@ async function executeCommand(command) {
     const messages = {
       insufficientSp: "SPが足りない。",
       noEffect: "毒状態ではない。",
+      deadlyPoisonNotCurable: "解毒剤では猛毒を治療できません。",
       fieldOnly: "このスキルは探索中のみ使用できる。",
       undeadOnly: "アンデッドにしか効果がない。",
       bossImmune: "この敵には効かない。",
@@ -327,6 +329,7 @@ async function executeCommand(command) {
       oncePerBattle: "活性回復薬（小）は1戦闘に1回だけ使用できる。",
       allheilmittelOncePerBattle: "アルハイルミッテルは1戦闘に1回だけ使用できる。"
     };
+    if (resolved.reason === "deadlyPoisonNotCurable") battleUi.playSe("costOver");
     battleUi.messageEl.textContent = messages[resolved.reason] || "現在使用できません。";
     return;
   }
@@ -782,7 +785,7 @@ function renderBattle() {
   setText("battlePlayerName", `${battle.player.name} [${battle.player.jobLabel || battle.player.job}]`);
   battleUi.root.querySelector("#battlePlayerName")?.classList.toggle(
     "condition-poison",
-    ["POISON", "DEATH POISON"].includes(statusText(battle.player))
+    ["POISON", "TOXIC", "DEATH POISON"].includes(getConditionLabel(battle.player.statuses))
   );
   renderBattleVitals();
   setText("battlePlayerSp", `${battle.player.sp} / ${battle.player.maxSp}`);

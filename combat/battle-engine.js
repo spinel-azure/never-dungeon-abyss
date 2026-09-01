@@ -19,6 +19,7 @@ import { getSkill } from "../data/skills.js";
 import { getItem } from "../data/items.js";
 import { consumeItem } from "../data/inventory.js";
 import { cureAllNegativeStatuses, getItemUnavailableReason } from "./resolve-item-use.js";
+import { getConditionLabel } from "./condition-label.js";
 import { resolvePassiveInstantDeath } from "./passive-instant-death.js";
 import { getCardById, hasCardEffect, sumCardEffectValues } from "../data/cards.js";
 import { getEffectiveSpCost } from "./sp-cost.js";
@@ -908,9 +909,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
   if (action.actionType === "cureStatus") {
     const curedStatusIds = getCuredStatusIds(action);
     actor.statuses = (actor.statuses || []).filter(status => !curedStatusIds.includes(status.statusId || status.id));
-    const bleeding = (actor.statuses || []).some(status => (status.statusId || status.id) === "bleeding");
-    const poison = (actor.statuses || []).some(status => ["poison", "deadly_poison"].includes(status.statusId || status.id));
-    actor.condition = bleeding ? "BLEED" : poison ? "POISON" : "GOOD";
+    actor.condition = getConditionLabel(actor.statuses);
     battle.log.push(`${actor.name}は${action.name}を唱えた。${curedStatusIds.includes("bleeding") ? "出血が止まった。" : "毒が消え去った。"}`);
     return;
   }
@@ -918,8 +917,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
     actor.statuses = (actor.statuses || []).filter(status => (status.statusId || status.id) !== action.statusId);
     const damage = Math.floor(Math.max(0, Number(actor.maxHp) || 0) * (Number(action.damageRate) || 0));
     actor.hp = Math.max(1, actor.hp - damage);
-    const bleeding = (actor.statuses || []).some(status => (status.statusId || status.id) === "bleeding");
-    actor.condition = bleeding ? "BLEED" : "GOOD";
+    actor.condition = getConditionLabel(actor.statuses);
     battle.log.push(`${actor.name}は${action.name}を使った。毒が消え、${damage}ダメージを受けた。`);
     battle.presentationEvents.push({
       type: "damage", actorSide, targetSide: actorSide, amount: damage,
