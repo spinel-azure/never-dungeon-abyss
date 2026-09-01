@@ -232,6 +232,7 @@ function showReason(reason) {
   overlay.messageEl.classList.remove("is-skill-description");
   overlay.messageEl.textContent = ({
     fullHp: "HPは満タンだ。",
+    fullSp: "SPは満タンだ。",
     noEffect: "今使っても効果がない。",
     deadlyPoisonNotCurable: "解毒剤では猛毒を治療できません。",
     fullTorch: "たいまつは十分に明るい。",

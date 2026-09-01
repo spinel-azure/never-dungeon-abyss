@@ -773,6 +773,11 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
         const amount = Math.max(0, actor.maxSp - actor.sp);
         actor.sp = actor.maxSp;
         spHealing += amount;
+      } else if (effect.id === "restore_sp_rate") {
+        const requested = Math.max(1, Math.ceil(actor.maxSp * (Number(effect.value) || 0)));
+        const amount = Math.min(requested, actor.maxSp - actor.sp);
+        actor.sp += amount;
+        spHealing += amount;
       } else if (effect.id === "cure_all_ailments") {
         actor.statuses = cureAllNegativeStatuses(actor.statuses);
       } else if (effect.id === "banish_undead") {

@@ -307,6 +307,13 @@ export const ITEMS = Object.freeze([
     description: "HPとSPを全回復し、すべての状態異常を治療する。戦闘中は1回だけ使用可能。",
     maxOwned: 1, warehouseMaxOwned: 99, overflowGold: 100000,
     repurchasable: false, iconId: "antidote", version: 1
+  }),
+  Object.freeze({
+    number: 48, id: "zaubertrank", name: "ツァウバートランク", category: "recovery",
+    buyPrice: 0, sellPrice: 0, source: "event", usableIn: Object.freeze(["town", "dungeon", "battle"]),
+    effects: Object.freeze([{ id: "restore_sp_rate", value: 0.25 }]),
+    description: "最大SPの25％を回復する。", maxOwned: 5, warehouseMaxOwned: 99,
+    overflowGold: 50000, repurchasable: false, iconId: "antidote", version: 1
   })
 ]);
 

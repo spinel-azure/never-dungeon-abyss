@@ -567,6 +567,55 @@ test("Allheilmittel can only be used once in each battle", () => {
   assert.equal(second.reason, "allheilmittelOncePerBattle");
 });
 
+test("Zaubertrank restores twenty-five percent maximum SP in the field and cannot be used at full SP", () => {
+  const item = getItem("zaubertrank");
+  assert.equal(item.name, "ツァウバートランク");
+  assert.equal(item.maxOwned, 5);
+  assert.equal(item.warehouseMaxOwned, 99);
+  assert.equal(item.overflowGold, 50000);
+  assert.equal(item.buyPrice, 0);
+  assert.equal(item.sellPrice, 0);
+  assert.equal(getShopItemIdsForDepth(100).includes(item.id), false);
+
+  const character = characterWith(item.id);
+  character.maxSp = 101;
+  character.sp = 70;
+  const result = resolveFieldItemUse({ character, itemId: item.id, context: "dungeon" });
+  assert.equal(result.accepted, true);
+  assert.equal(result.spHealing, 26);
+  assert.equal(result.character.sp, 96);
+  assert.equal(getItemCount(result.character.inventory, item.id), 0);
+  assert.match(result.message, /SPが26回復した/);
+
+  const full = characterWith(item.id);
+  full.sp = full.maxSp;
+  const rejected = resolveFieldItemUse({ character: full, itemId: item.id, context: "town" });
+  assert.equal(rejected.accepted, false);
+  assert.equal(rejected.reason, "fullSp");
+  assert.equal(getItemCount(rejected.character?.inventory || full.inventory, item.id), 1);
+});
+
+test("Zaubertrank restores SP up to the maximum during battle", () => {
+  const character = characterWith("zaubertrank");
+  character.maxSp = 101;
+  character.sp = 90;
+  const enemy = {
+    id: "test_dummy", name: "DUMMY", race: "beast", hp: 9999, maxHp: 9999,
+    sp: 0, maxSp: 0, attack: 0, def: 0, stats: {}, speed: 0,
+    experienceReward: 0, statuses: [], equipment: {}, elementMultipliers: {},
+    statusResistances: {}, isBoss: false, alive: true
+  };
+  const result = resolveBattleRound({
+    battle: createBattleState({ character, enemy }),
+    playerCommand: { type: "item", itemId: "zaubertrank" },
+    rng: () => 0.5
+  });
+  assert.equal(result.accepted, true);
+  assert.equal(result.battle.player.sp, 101);
+  assert.equal(getItemCount(result.battle.player.inventory, "zaubertrank"), 0);
+  assert.ok(result.battle.presentationEvents.some(event => event.type === "spHealing" && event.amount === 11));
+});
+
 test("B50F enemy materials resolve to their registered item data", () => {
   assert.equal(getItem("abyss_tiger_fur").name, "奈落虎の毛皮");
   assert.equal(getItem("abyss_mushroom_cap").name, "キノコの傘");

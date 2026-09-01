@@ -174,6 +174,18 @@ test("Allheilmittel carries one, stores ninety-nine total, then converts overflo
   assert.equal(character.gold, 200000);
 });
 
+test("Zaubertrank carries five, stores ninety-nine total, then converts overflow to gold", () => {
+  let character = createInitialCharacter({ name: "TEST", job: "thief" });
+  const result = grantItemWithOverflow(character, "zaubertrank", 106);
+  character = result.character;
+  assert.equal(character.inventory.counts.zaubertrank, 5);
+  assert.deepEqual(character.warehouse.itemStacks.filter(stack => stack.itemId === "zaubertrank"), [
+    { itemId: "zaubertrank", count: 99 }
+  ]);
+  assert.equal(result.convertedGold, 100000);
+  assert.equal(character.gold, 100000);
+});
+
 test("a full Allheilmittel warehouse refuses manual deposit without consuming the carried item", () => {
   let character = createInitialCharacter({ name: "TEST", job: "thief" });
   character.inventory = { counts: { allheilmittel: 1 } };

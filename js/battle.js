@@ -327,7 +327,8 @@ async function executeCommand(command) {
       plantOnly: "植物型の障害物にしか効果がない。",
       chargeNotReady: "チャージが満タンではない。",
       oncePerBattle: "活性回復薬（小）は1戦闘に1回だけ使用できる。",
-      allheilmittelOncePerBattle: "アルハイルミッテルは1戦闘に1回だけ使用できる。"
+      allheilmittelOncePerBattle: "アルハイルミッテルは1戦闘に1回だけ使用できる。",
+      fullSp: "SPは満タンだ。"
     };
     if (resolved.reason === "deadlyPoisonNotCurable") battleUi.playSe("costOver");
     battleUi.messageEl.textContent = messages[resolved.reason] || "現在使用できません。";

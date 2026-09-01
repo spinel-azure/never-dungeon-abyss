@@ -22,6 +22,9 @@ export function getItemUnavailableReason({ character, itemId, context, enemy, to
   const healsHp = item.effects?.some(effect => effect.id === "heal_hp" || effect.id === "heal_hp_rate");
   const hasAnotherEffect = item.effects?.some(effect => effect.id !== "heal_hp" && effect.id !== "heal_hp_rate");
   if (healsHp && !hasAnotherEffect && character.hp >= character.maxHp) return "fullHp";
+  const restoresSp = item.effects?.some(effect => effect.id === "restore_sp_rate" || effect.id === "restore_sp_full");
+  const hasNonSpEffect = item.effects?.some(effect => effect.id !== "restore_sp_rate" && effect.id !== "restore_sp_full");
+  if (restoresSp && !hasNonSpEffect && character.sp >= character.maxSp) return "fullSp";
   if (itemId === "antidote" && hasStatus(character, "deadly_poison")) return "deadlyPoisonNotCurable";
   if (itemId === "antidote" && character.hp >= character.maxHp && !hasStatus(character, "poison")) return "noEffect";
   if (itemId === "strong_antidote" && character.hp >= character.maxHp && !hasPoison(character)) return "noEffect";
@@ -91,6 +94,11 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
     } else if (effect.id === "restore_sp_full") {
       spHealing += Math.max(0, next.maxSp - next.sp);
       next.sp = next.maxSp;
+    } else if (effect.id === "restore_sp_rate") {
+      const requested = Math.max(1, Math.ceil(next.maxSp * (Number(effect.value) || 0)));
+      const amount = Math.min(requested, next.maxSp - next.sp);
+      next.sp += amount;
+      spHealing += amount;
     } else if (effect.id === "cure_all_ailments") {
       next.statuses = cureAllNegativeStatuses(next.statuses);
     } else if (effect.id === "restore_torch") {
@@ -118,6 +126,8 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
     spHealing,
     message: itemId === "allheilmittel"
       ? `${item.name}を使った。HPとSPが全回復し、すべての状態異常が治った。`
+      : spHealing > 0 && healing === 0
+        ? `${item.name}を使った。SPが${spHealing}回復した。`
       : `${healing > 0 ? `${item.name}を使った。HPが${healing}回復した。` : `${item.name}を使った。`}${deathPoisonUnaffected ? "\n死毒は治療する事が出来ない！" : ""}`
   };
 }
