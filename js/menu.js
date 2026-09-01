@@ -40,7 +40,7 @@ const menu = {
   optionReturnView: "commands",
   optionPages: [], optionItems: [], optionNavButtons: [], optionCursor: 0, optionPage: 0,
   debugPages: [], debugItems: [], debugNavButtons: [], debugCursor: 0, debugPage: 0, recentConfirms: [], debugArmed: false, view: "dungeon",
-  compassVisible: true, readoutVisible: false, screenShakeEnabled: true,
+  compassVisible: true, readoutVisible: false, screenShakeEnabled: true, frameRateMode: "auto",
   torchFlickerEnabled: true, torchFuelDisabled: false, presenceDisabled: false, stopwatchVisible: true,
   stairsDownVisible: false, npcsVisible: false, treasuresVisible: false,
   mistEnabled: true, mistIntensity: 1, mistDistance: 9, mistColor: "frost",
@@ -53,7 +53,7 @@ const menu = {
   gamepadPreviewCanvas: null, gamepadPreviewImage: null, gamepadPressedButtons: [],
   actionActive: { random: false, autoReturn: false, emergencyEscape: false, torchFull: false, stopwatchReset: false },
   generateRandomDungeon: () => {}, startAutoReturn: () => {}, emergencyEscape: () => {}, refillTorch: () => {},
-  setScreenShakeEnabled: () => {}, setTorchFlickerEnabled: () => {}, setTorchFuelDisabled: () => {}, setPresenceDisabled: () => {},
+  setScreenShakeEnabled: () => {}, setTorchFlickerEnabled: () => {}, setFrameRateMode: () => {}, getEffectiveFrameRate: () => 60, setTorchFuelDisabled: () => {}, setPresenceDisabled: () => {},
   setMistOptions: () => {}, setWallColor: () => {}, setFloorColor: () => {},
   setBgmOptions: () => {}, setSeOptions: () => {}, playSe: () => {},
   setMinimapRevealOptions: () => {},
@@ -1280,14 +1280,15 @@ function executeOption(key) {
   if (key === "language" || key === "bgmVolume" || key === "seVolume") return;
   if (key === "bgmEnabled") { menu.bgmEnabled = !menu.bgmEnabled; applyBgmOptions(); updateOptionStates(); persistSettings(); }
   if (key === "seEnabled") { menu.seEnabled = !menu.seEnabled; applySeOptions(); updateOptionStates(); persistSettings(); }
-  if (key === "screenShake") { menu.screenShakeEnabled = !menu.screenShakeEnabled; applyRenderOptions(); updateOptionStates(); persistSettings(); }
-  if (key === "torchFlicker") { menu.torchFlickerEnabled = !menu.torchFlickerEnabled; applyRenderOptions(); updateOptionStates(); persistSettings(); }
+  if (key === "screenShake" && menu.getEffectiveFrameRate() !== 30) { menu.screenShakeEnabled = !menu.screenShakeEnabled; applyRenderOptions(); updateOptionStates(); persistSettings(); }
+  if (key === "torchFlicker" && menu.getEffectiveFrameRate() !== 30) { menu.torchFlickerEnabled = !menu.torchFlickerEnabled; applyRenderOptions(); updateOptionStates(); persistSettings(); }
+  if (key === "frameRateMode") { menu.frameRateMode = menu.getEffectiveFrameRate() === 30 ? "60" : "30"; applyRenderOptions(); updateOptionStates(); persistSettings(); }
   if (key === "npcTypewriterEnabled") { menu.npcTypewriterEnabled = !menu.npcTypewriterEnabled; applyNpcTypewriterOptions(); updateOptionStates(); persistSettings(); }
   if (key === "npcTypewriterSpeed" && menu.npcTypewriterEnabled) { cycleNpcTypewriterSpeed(1); }
   if (key === "touchControlsMode") { cycleTouchControlsMode(1); }
   if (key?.startsWith("gamepad")) { menu.gamepadCaptureAction = key.slice(7).toLowerCase(); updateOptionStates(); }
 }
-function adjustSelectedOption(amount) { if (menu.optionCursor >= menu.optionItems.length) return; const key = menu.optionItems[menu.optionCursor].dataset.option; if (key === "bgmVolume" || key === "seVolume") { const slider = menu.root.querySelector(`#${key}`); slider.value = String(Math.max(0, Math.min(100, Number(slider.value) + amount * 10))); slider.dispatchEvent(new Event("input", { bubbles: true })); if (key === "seVolume") menu.playSe("cursorMove"); } else if (key === "npcTypewriterSpeed" && menu.npcTypewriterEnabled) cycleNpcTypewriterSpeed(amount); else if (key === "touchControlsMode") cycleTouchControlsMode(amount); else if (key === "screenShake" || key === "torchFlicker" || key === "npcTypewriterEnabled" || key === "bgmEnabled" || key === "seEnabled") executeOption(key); }
+function adjustSelectedOption(amount) { if (menu.optionCursor >= menu.optionItems.length) return; const key = menu.optionItems[menu.optionCursor].dataset.option; if (key === "bgmVolume" || key === "seVolume") { const slider = menu.root.querySelector(`#${key}`); slider.value = String(Math.max(0, Math.min(100, Number(slider.value) + amount * 10))); slider.dispatchEvent(new Event("input", { bubbles: true })); if (key === "seVolume") menu.playSe("cursorMove"); } else if (key === "npcTypewriterSpeed" && menu.npcTypewriterEnabled) cycleNpcTypewriterSpeed(amount); else if (key === "touchControlsMode") cycleTouchControlsMode(amount); else if (key === "screenShake" || key === "torchFlicker" || key === "frameRateMode" || key === "npcTypewriterEnabled" || key === "bgmEnabled" || key === "seEnabled") executeOption(key); }
 
 function cycleTouchControlsMode(amount) {
   const modes = ["auto", "on", "off"];
@@ -1617,6 +1618,7 @@ function updateSelection() { menu.commands.forEach((button, index) => { const un
 function updateOptionStates() {
   const shake = menu.root.querySelector('[data-option-state="screenShake"]');
   const torch = menu.root.querySelector('[data-option-state="torchFlicker"]');
+  const frameRate = menu.root.querySelector('[data-option-state="frameRateMode"]');
   const typewriter = menu.root.querySelector('[data-option-state="npcTypewriterEnabled"]');
   const speed = menu.root.querySelector('[data-option-state="npcTypewriterSpeed"]');
   const speedButton = menu.root.querySelector('[data-option="npcTypewriterSpeed"]');
@@ -1625,8 +1627,14 @@ function updateOptionStates() {
   const touchControls = menu.root.querySelector('[data-option-state="touchControlsMode"]');
   const bgmSlider = menu.root.querySelector('#bgmVolume');
   const seSlider = menu.root.querySelector('#seVolume');
+  const frameRateLimited = menu.getEffectiveFrameRate() === 30;
   if (shake) shake.textContent = toggleText(menu.screenShakeEnabled);
   if (torch) torch.textContent = toggleText(menu.torchFlickerEnabled);
+  if (frameRate) frameRate.textContent = `60fps ${frameRateLimited ? OFF_MARK : ON_MARK}　30fps ${frameRateLimited ? ON_MARK : OFF_MARK}`;
+  for (const key of ["screenShake", "torchFlicker"]) {
+    const button = menu.root.querySelector(`[data-option="${key}"]`);
+    if (button) { button.disabled = frameRateLimited; button.classList.toggle("is-disabled", frameRateLimited); }
+  }
   if (typewriter) typewriter.textContent = toggleText(menu.npcTypewriterEnabled);
   if (speed) speed.textContent = ["slow", "normal", "fast"].map(value => `${value.toUpperCase()} ${menu.npcTypewriterSpeed === value ? ON_MARK : OFF_MARK}`).join("　");
   if (speedButton) speedButton.disabled = !menu.npcTypewriterEnabled;
@@ -1679,7 +1687,15 @@ function updateDebugStates() {
 }
 function toggleText(enabled) { return enabled ? `ON ${ON_MARK}　OFF ${OFF_MARK}` : `ON ${OFF_MARK}　OFF ${ON_MARK}`; }
 function applyDisplayOptions() { document.body.classList.toggle("hide-compass", !menu.compassVisible); document.body.classList.toggle("show-readout", menu.readoutVisible); }
-function applyRenderOptions() { menu.setScreenShakeEnabled(menu.screenShakeEnabled); menu.setTorchFlickerEnabled(menu.torchFlickerEnabled); }
+function applyRenderOptions() {
+  menu.setFrameRateMode(menu.frameRateMode);
+  if (menu.getEffectiveFrameRate() === 30) {
+    menu.screenShakeEnabled = false;
+    menu.torchFlickerEnabled = false;
+  }
+  menu.setScreenShakeEnabled(menu.screenShakeEnabled);
+  menu.setTorchFlickerEnabled(menu.torchFlickerEnabled);
+}
 function applyMinimapRevealOptions() { menu.setMinimapRevealOptions({ stairsDown: menu.stairsDownVisible, npcs: menu.npcsVisible, treasures: menu.treasuresVisible }); }
 export function resetDebugSettingsForNewGame() {
   menu.torchFuelDisabled = false;
@@ -1729,6 +1745,7 @@ function restoreSettings() {
     if (!saved || typeof saved !== "object") return;
     const booleanKeys = ["compassVisible", "readoutVisible", "screenShakeEnabled", "torchFlickerEnabled", "torchFuelDisabled", "presenceDisabled", "stopwatchVisible", "stairsDownVisible", "npcsVisible", "treasuresVisible", "npcTypewriterEnabled", "mistEnabled", "bgmEnabled", "seEnabled"];
     booleanKeys.forEach(key => { if (typeof saved[key] === "boolean") menu[key] = saved[key]; });
+    if (["30", "60"].includes(String(saved.frameRateMode))) menu.frameRateMode = String(saved.frameRateMode);
     if (["slow", "normal", "fast"].includes(saved.npcTypewriterSpeed)) menu.npcTypewriterSpeed = saved.npcTypewriterSpeed;
     if (["auto", "on", "off"].includes(saved.touchControlsMode)) menu.touchControlsMode = saved.touchControlsMode;
     if (saved.gamepadBindings && typeof saved.gamepadBindings === "object") {
@@ -1771,6 +1788,7 @@ function persistSettings() {
     const settings = {
       compassVisible: menu.compassVisible,
       readoutVisible: menu.readoutVisible,
+      frameRateMode: menu.frameRateMode,
       screenShakeEnabled: menu.screenShakeEnabled,
       torchFlickerEnabled: menu.torchFlickerEnabled,
       torchFuelDisabled: menu.torchFuelDisabled,

@@ -85,6 +85,6 @@ test("restoration returns silently without an unrelated floor transition message
 
 test("only main.js receives the new cache buster", () => {
   const html = read("index.html");
-  assert.match(html, /js\/main\.js\?v=20260901-03/);
+  assert.match(html, /js\/main\.js\?v=20260901-04/);
   assert.doesNotMatch(read("js/main.js"), /from\s+["'][^"']+\?v=/);
 });

@@ -38,6 +38,7 @@ const renderer = {
   getMinimapOptions: () => ({}),
   getMinimapBounds: () => ({ x: 0, y: 0, w: 0, h: 0 }),
   isMobileDevice: () => false,
+  frameRateMode: "auto",
   minimapOverlayVisible: false,
   lastCanvasTouchAt: 0,
   wallTexture: null,
@@ -131,6 +132,17 @@ export function setScreenShakeEnabled(enabled) {
 export function setTorchFlickerEnabled(enabled) {
   renderer.torchFlickerEnabled = Boolean(enabled);
   if (!renderer.torchFlickerEnabled && renderer.state) renderer.state.torch = 0;
+}
+
+export function setFrameRateMode(mode) {
+  renderer.frameRateMode = ["30", "60"].includes(String(mode)) ? String(mode) : "auto";
+  lastRenderTime = null;
+}
+
+export function getEffectiveFrameRate() {
+  if (renderer.frameRateMode === "30") return 30;
+  if (renderer.frameRateMode === "60") return 60;
+  return renderer.isMobileDevice() ? 30 : 60;
 }
 
 export function toggleMinimapOverlay() {
@@ -245,8 +257,8 @@ export function startRenderLoop() {
 
 export function drawScene(now) {
   requestAnimationFrame(drawScene);
-  const mobileLimited = renderer.isMobileDevice();
-  const frame = resolveRenderFrame(now, lastRenderTime, mobileLimited);
+  const frameRateLimited = getEffectiveFrameRate() === 30;
+  const frame = resolveRenderFrame(now, lastRenderTime, frameRateLimited);
   lastRenderTime = frame.lastRenderTime;
   if (!frame.shouldRender) return;
   const { ctx, W, H, state } = renderer;
@@ -256,7 +268,7 @@ export function drawScene(now) {
   ctx.fillRect(0, 0, W, H);
 
   const sway = renderer.screenShakeEnabled ? Math.sin(now * 0.005) * 2 + state.shake : 0;
-  state.shake *= mobileLimited ? 0.86 ** 2 : 0.86;
+  state.shake *= frameRateLimited ? 0.86 ** 2 : 0.86;
   state.torch = renderer.torchFlickerEnabled ? Math.sin(now * 0.007) * 0.035 + Math.sin(now * 0.013) * 0.02 : 0;
   ctx.translate(0, sway);
 

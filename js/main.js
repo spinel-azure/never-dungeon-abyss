@@ -49,7 +49,7 @@ import {
   cancelRapidCurrentTransition,
   applyFixedFloorWarp
 } from "./player.js";
-import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setMistOptions, setWallColor, setFloorColor, toggleMinimapOverlay } from "./renderer.js";
+import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setFrameRateMode, getEffectiveFrameRate, setMistOptions, setWallColor, setFloorColor, toggleMinimapOverlay } from "./renderer.js";
 import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minimap.js";
 import { configureInput } from "./input.js";
 import { configureGamepadInput } from "./gamepad-input.js";
@@ -233,6 +233,7 @@ import {
   const torchMeterEl = document.getElementById("torchMeter");
   const presenceMeterEl = document.getElementById("presenceMeter");
   const compassCanvas = document.getElementById("compass");
+  const fpsIndicator = document.getElementById("fpsIndicator");
   const stopwatchEl = document.getElementById("stopwatch");
   const forwardBtn = document.getElementById("forward");
   const backBtn = document.getElementById("back");
@@ -3905,6 +3906,7 @@ import {
     depthEl.textContent = `B${currentDepth}F`;
     stopwatchEl.textContent = formatElapsedTime(performance.now() - runStartedAt);
     drawCompass();
+    if (fpsIndicator) fpsIndicator.textContent = `${getEffectiveFrameRate()}fps`;
     const displayedTorchFuel = isForcedTorchZeroFloor(currentDepth) && !lightbringerOwned
       ? 0
       : state.torchEffectForced ? 100 : state.torchFuel;
@@ -4082,6 +4084,8 @@ import {
     setTorchFuelDisabled,
     setScreenShakeEnabled,
     setTorchFlickerEnabled,
+    setFrameRateMode,
+    getEffectiveFrameRate,
     setMistOptions,
     setWallColor,
     setFloorColor,
