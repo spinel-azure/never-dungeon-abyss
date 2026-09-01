@@ -62,6 +62,18 @@ test("Mikan Nyanko gives floor-specific guidance throughout the desert region", 
   assert.equal(cells.flat().filter(cell => cell.npc === "NPC_01_b60_desert").length, 1);
 });
 
+test("Mikan Nyanko no longer appears after all three queen regalia are collected", () => {
+  buildBoundaryWallMap(5, () => .5, { queenRegaliaComplete: true });
+  assert.equal(cells.flat().filter(cell => String(cell.npc || "").startsWith("NPC_01")).length, 0);
+
+  const active = { active: true, completed: false, progress: 0 };
+  buildBoundaryWallMap(10, () => .5, {
+    queenRegaliaComplete: true,
+    queenShadowQuest: active
+  });
+  assert.equal(cells.flat().filter(cell => cell.npc === "queen_shadow").length, 1);
+});
+
 test("quest 008 replaces Mikan with the queen shadow in strict floor order", () => {
   const active = { active: true, completed: false, progress: 0 };
   buildBoundaryWallMap(10, () => .5, { queenShadowQuest: active });

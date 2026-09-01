@@ -84,7 +84,7 @@ const MIST_PALETTES = {
   water: { main: [62, 123, 204], veil: [35, 83, 151], haze: [102, 158, 224], bloom: [142, 199, 244] },
   crystal: { main: [116, 24, 114], veil: [78, 18, 91], haze: [158, 62, 170], bloom: [221, 143, 244] },
   acacia: { main: [169, 163, 51], veil: [145, 139, 40], haze: [194, 187, 61], bloom: [232, 224, 111] },
-  light: { main: [174, 202, 205], veil: [132, 165, 169], haze: [205, 229, 231], bloom: [241, 255, 255] },
+  light: { main: [99, 103, 77], veil: [74, 77, 58], haze: [126, 132, 99], bloom: [177, 184, 139] },
   white: { main: [235, 235, 235], veil: [210, 210, 210], haze: [245, 245, 245], bloom: [255, 255, 255] }
 };
 const WALL_PALETTES = {
@@ -117,7 +117,7 @@ const FLOOR_PALETTES = {
   purple: { near: "#110713", mid: "#35143c", far: "#5d2369", grid: "rgba(226,143,244,.12)" },
   crystal: { near: "rgb(28, 6, 35)", mid: "rgb(70, 15, 82)", far: "rgb(116, 24, 114)", grid: "rgba(230,159,255,.16)" },
   acacia: { near: "rgb(92, 87, 25)", mid: "rgb(158, 151, 45)", far: "rgb(215, 207, 71)", grid: "rgba(255,247,158,.18)" },
-  light: { near: "rgb(72, 94, 97)", mid: "rgb(128, 158, 161)", far: "rgb(184, 211, 213)", grid: "rgba(235,255,255,.18)" },
+  light: { near: "rgb(61, 64, 50)", mid: "rgb(108, 112, 88)", far: "rgb(155, 160, 125)", grid: "rgba(224,232,180,.16)" },
   white: { near: "rgb(170, 170, 170)", mid: "rgb(210, 210, 210)", far: "rgb(235, 235, 235)", grid: "rgba(255,255,255,.2)" },
   black: { near: "#010102", mid: "#08080a", far: "#111116", grid: "rgba(104,94,118,.06)" }
 };
@@ -569,9 +569,9 @@ export function drawCeiling() {
     g.addColorStop(0.58, "rgb(25, 75, 122)");
     g.addColorStop(1, "rgb(8, 27, 46)");
   } else if (renderer.floorColor === "light") {
-    g.addColorStop(0, "rgb(125, 151, 154)");
-    g.addColorStop(0.58, "rgb(88, 111, 114)");
-    g.addColorStop(1, "rgb(48, 65, 68)");
+    g.addColorStop(0, "rgb(43, 45, 29)");
+    g.addColorStop(0.58, "rgb(30, 32, 21)");
+    g.addColorStop(1, "rgb(16, 18, 12)");
   } else if (renderer.floorColor === "white") {
     g.addColorStop(0, "rgb(185, 185, 185)");
     g.addColorStop(0.58, "rgb(155, 155, 155)");

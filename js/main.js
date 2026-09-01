@@ -3813,6 +3813,7 @@ import {
         completed: thirdQueenShadowQuest.completed,
         progress: thirdQueenShadowQuest.progress
       },
+      queenRegaliaComplete: hasCompleteQueenRegalia(character),
       activeQuestIds: Object.keys(character?.quests?.active || {}),
       forcedEnemyId: getForcedEnemyId(character, { depth: currentDepth }),
       maikaeferNestRoll: Math.random(),

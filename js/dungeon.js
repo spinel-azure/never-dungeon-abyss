@@ -536,6 +536,10 @@ export function placeNpc(depth = 1, progress = {}) {
   if (suppressMikanForQuest && !placeQueenShadow) return;
   if (suppressDesertMikanForQuest && !placeSecondQueenShadow) return;
   if (normalizedDepth >= 90 && normalizedDepth <= 99 && !placeThirdQueenShadow) return;
+  if (progress.queenRegaliaComplete
+    && !placeQueenShadow
+    && !placeSecondQueenShadow
+    && !placeThirdQueenShadow) return;
   const distances = makeDistanceMap(startX, startY);
   const reserved = getTraversalBlockingReservations(cells);
   const candidates = [];
