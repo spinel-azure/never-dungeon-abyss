@@ -4085,6 +4085,7 @@ import {
     root: menuScreen,
     commandRoot: dungeonCommands,
     getCharacter: () => character,
+    onStatusOpened: updateCharacterUi,
     getRumorHistory: () => getPastTavernRumors(character, {
       mikanEncountered: Boolean(character?.eventFlags?.mikan_nyanko_encountered)
         || Object.entries(state.npcEncounterCounts || {}).some(

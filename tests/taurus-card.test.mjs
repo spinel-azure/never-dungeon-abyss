@@ -66,8 +66,12 @@ test("Taurus applies a derived DEF bonus without storing or accumulating it", ()
 
 test("main uses contextual Taurus stats for status, battle, traps, and lock checks", () => {
   const source = fs.readFileSync(new URL("../js/main.js", import.meta.url), "utf8");
+  const menuSource = fs.readFileSync(new URL("../js/menu.js", import.meta.url), "utf8");
   assert.match(source, /function getContextualCharacter\(\)/);
   assert.match(source, /getCharacter: \(\) => getContextualCharacter\(\)/);
   assert.match(source, /player: collectStats\(getContextualCharacter\(\)\)/);
   assert.match(source, /resolveTreasureTrap\(\{ character: getContextualCharacter\(\)/);
+  assert.match(source, /onStatusOpened: updateCharacterUi/);
+  assert.match(menuSource, /openStatusMenu\(\)[\s\S]*?menu\.onStatusOpened\(\)/);
+  assert.match(menuSource, /key === "status"[\s\S]*?menu\.onStatusOpened\(\)/);
 });

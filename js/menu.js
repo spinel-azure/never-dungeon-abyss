@@ -70,6 +70,7 @@ const menu = {
   onSellInventoryItem: () => ({ accepted: false }), onSellInventoryEquipment: () => ({ accepted: false }), onInventorySaleClosed: () => {},
   onPurchaseInventoryItem: () => ({ accepted: false }), onPurchaseInventoryEquipment: () => ({ accepted: false }), onInventoryPurchaseClosed: () => {},
   onDeckChanged: () => {},
+  onStatusOpened: () => {},
   openItems: () => false,
   openSkills: () => false,
   onReturnToDungeon: () => {}
@@ -215,7 +216,7 @@ export function setDungeonColors({ wall, floor } = {}, { save = false } = {}) {
   if (save) persistSettings();
 }
 export function openCampMenu() { menu.view = "commands"; menu.commandIndex = 0; updateView(); }
-export function openStatusMenu() { menu.playSe("confirm"); menu.view = "status"; menu.statusPage = 0; updateView(); }
+export function openStatusMenu() { menu.playSe("confirm"); menu.view = "status"; menu.statusPage = 0; menu.onStatusOpened(); updateView(); }
 export function openDeckEditor() {
   menu.playSe("confirm");
   menu.view = "deck";
@@ -341,7 +342,7 @@ function isCommandUnavailable(button) {
   return button?.dataset.unavailable === "true"
     || (button?.dataset.command === "save" && !menu.canManualSave());
 }
-function openCommand(key) { if (key === "status") { menu.view = "status"; menu.statusPage = 0; updateView(); } else if (key === "deck") { menu.view = "deck"; menu.deckEditable = false; menu.deckReturnView = "commands"; menu.deckPickerOpen = false; menu.deckCursor = 0; renderDeck(); updateView(); } else if (key === "items") openInventory(); else if (key === "skills") menu.openSkills(); else if (key === "options") setOptionPage(0); else if (key === "save" && menu.canManualSave()) { menu.view = "save"; menu.saveCursor = 0; renderManualSave(); updateView(); } }
+function openCommand(key) { if (key === "status") { menu.view = "status"; menu.statusPage = 0; menu.onStatusOpened(); updateView(); } else if (key === "deck") { menu.view = "deck"; menu.deckEditable = false; menu.deckReturnView = "commands"; menu.deckPickerOpen = false; menu.deckCursor = 0; renderDeck(); updateView(); } else if (key === "items") openInventory(); else if (key === "skills") menu.openSkills(); else if (key === "options") setOptionPage(0); else if (key === "save" && menu.canManualSave()) { menu.view = "save"; menu.saveCursor = 0; renderManualSave(); updateView(); } }
 
 export function openTitleOptions() {
   menu.view = "options";
