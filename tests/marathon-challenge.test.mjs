@@ -3,10 +3,13 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
+import { grantCard } from "../data/deck.js";
+import { isTransferDestinationUnlocked } from "../data/transfer-destinations.js";
 import {
   LONG_MARCH_COMPLETION_FLAG,
   LONG_MARCH_REQUIRED_TRANSFER_FLAG,
   LONG_MARCH_REWARD_CARD_ID,
+  invalidateLongMarchChallenge,
   invalidateMarathonChallenge,
   MARATHON_COMPLETION_FLAG,
   recordLongMarchDescent,
@@ -98,6 +101,18 @@ test("the second long march survives saves and fails on a skipped floor", () => 
   assert.equal(skipped.character.longMarchChallenge.active, false);
 });
 
+test("returning, defeat, and transfer entry invalidate the second long march", () => {
+  let character = createInitialCharacter({ name: "STOPPER", job: "mage" });
+  character.eventFlags[LONG_MARCH_REQUIRED_TRANSFER_FLAG] = true;
+  character = startLongMarchChallenge(character);
+  assert.equal(invalidateLongMarchChallenge(character).longMarchChallenge.active, false);
+
+  const source = fs.readFileSync(new URL("../js/main.js", import.meta.url), "utf8");
+  assert.match(source, /completeDungeonDefeat\(\)[\s\S]*?invalidateLongMarchChallenge\(character\)/);
+  assert.match(source, /enterFloorFromTransfer\(depth = 10\)[\s\S]*?invalidateLongMarchChallenge\(character\)/);
+  assert.match(source, /returnToTown\([\s\S]*?invalidateLongMarchChallenge\(character\)/);
+});
+
 test("the B84F long march starts only after the B80F transfer portal is unlocked", () => {
   const locked = createInitialCharacter({ name: "RUNNER", job: "warrior" });
   assert.equal(startLongMarchChallenge(locked).longMarchChallenge.active, false);
@@ -110,10 +125,67 @@ test("the B84F long march starts only after the B80F transfer portal is unlocked
   assert.equal(LONG_MARCH_REWARD_CARD_ID, "zodiac_taurus");
 });
 
+test("a legacy B79F boss clear starts the long march whenever B80F is a valid transfer destination", () => {
+  const legacy = createInitialCharacter({ name: "OLD RUNNER", job: "warrior" });
+  legacy.eventFlags.boss_jirene_b79f_defeated = true;
+
+  assert.equal(isTransferDestinationUnlocked(legacy, 80), true);
+  assert.deepEqual(startLongMarchChallenge(legacy).longMarchChallenge, {
+    active: true,
+    currentDepth: 1
+  });
+});
+
+test("legacy quest 028 reports and reached B80F boss clears backfill the B80F portal flag", () => {
+  const reported = createInitialCharacter({ name: "REPORT", job: "priest" });
+  reported.quests.completedQuestIds.push("guild_028");
+  const normalizedReported = normalizeCharacter(reported);
+  assert.equal(normalizedReported.eventFlags[LONG_MARCH_REQUIRED_TRANSFER_FLAG], true);
+
+  const reached = createInitialCharacter({ name: "REACHED", job: "mage" });
+  reached.eventFlags.boss_jirene_b79f_defeated = true;
+  reached.eventFlags.floor_b80_reached = true;
+  const normalizedReached = normalizeCharacter(reached);
+  assert.equal(normalizedReached.eventFlags[LONG_MARCH_REQUIRED_TRANSFER_FLAG], true);
+
+  const unbeaten = normalizeCharacter(createInitialCharacter({ name: "NEW", job: "thief" }));
+  assert.equal(unbeaten.eventFlags[LONG_MARCH_REQUIRED_TRANSFER_FLAG], undefined);
+  assert.equal(startLongMarchChallenge(unbeaten).longMarchChallenge.active, false);
+});
+
+test("the town entrance route reaches B84F, grants Taurus once, and survives save normalization", () => {
+  let character = createInitialCharacter({ name: "ROUTE", job: "thief" });
+  character.eventFlags.boss_jirene_b79f_defeated = true;
+  character.eventFlags.floor_b80_reached = true;
+  character = normalizeCharacter(character);
+  character = startLongMarchChallenge(character);
+
+  for (let fromDepth = 1; fromDepth < 84; fromDepth += 1) {
+    character = recordLongMarchDescent(character, {
+      fromDepth,
+      toDepth: fromDepth + 1
+    }).character;
+    if (fromDepth === 41) character = normalizeCharacter(character);
+  }
+
+  assert.equal(character.eventFlags[LONG_MARCH_COMPLETION_FLAG], true);
+  const reward = grantCard(character.cards, LONG_MARCH_REWARD_CARD_ID, 1, character.deckCost);
+  character = normalizeCharacter({ ...character, cards: reward.cards });
+  assert.equal(reward.gained, 1);
+  assert.equal(character.cards.ownedCardCounts[LONG_MARCH_REWARD_CARD_ID], 1);
+  assert.equal(startLongMarchChallenge(character).longMarchChallenge.active, false);
+  assert.equal(
+    grantCard(character.cards, LONG_MARCH_REWARD_CARD_ID, 1, character.deckCost).gained,
+    0
+  );
+});
+
 test("main grants Taurus after the B84F achievement presentation", () => {
   const source = fs.readFileSync(new URL("../js/main.js", import.meta.url), "utf8");
+  const achievementSource = fs.readFileSync(new URL("../data/adventure-records.js", import.meta.url), "utf8");
   assert.match(source, /grantCard\(character\.cards, LONG_MARCH_REWARD_CARD_ID/);
   assert.match(source, /showCardGetEffect\(LONG_MARCH_REWARD_CARD_ID, \{ seId: "itemGet" \}\), 4300/);
   assert.match(source, /character\?\.eventFlags\?\.b1_b84_long_march_completed/);
   assert.match(source, /if \(restoredLongMarchReward\)/);
+  assert.match(achievementSource, /\["longMarch84", "深淵への大行軍再び", flags\.b1_b84_long_march_completed/);
 });

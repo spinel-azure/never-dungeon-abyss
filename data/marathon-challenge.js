@@ -1,3 +1,5 @@
+import { B80_TRANSFER_FLAG, isB80TransferUnlocked } from "./b80-transfer-unlock.js";
+
 export const MARATHON_START_DEPTH = 1;
 export const MARATHON_GOAL_DEPTH = 42;
 export const MARATHON_BOSS_FLOORS = Object.freeze([9, 19, 29, 39]);
@@ -5,7 +7,7 @@ export const MARATHON_REWARD_CARD_ID = "zodiac_capricorn";
 export const MARATHON_COMPLETION_FLAG = "b1_b42_marathon_completed";
 export const LONG_MARCH_GOAL_DEPTH = 84;
 export const LONG_MARCH_COMPLETION_FLAG = "b1_b84_long_march_completed";
-export const LONG_MARCH_REQUIRED_TRANSFER_FLAG = "transfer_portal_b80f_unlocked";
+export const LONG_MARCH_REQUIRED_TRANSFER_FLAG = B80_TRANSFER_FLAG;
 export const LONG_MARCH_REWARD_CARD_ID = "zodiac_taurus";
 
 export function createInitialMarathonChallenge() {
@@ -49,7 +51,7 @@ export function startMarathonChallenge(character) {
 export function startLongMarchChallenge(character) {
   if (!character
     || character.eventFlags?.[LONG_MARCH_COMPLETION_FLAG]
-    || !character.eventFlags?.[LONG_MARCH_REQUIRED_TRANSFER_FLAG]) return character;
+    || !isB80TransferUnlocked(character)) return character;
   return {
     ...character,
     longMarchChallenge: { active: true, currentDepth: MARATHON_START_DEPTH }

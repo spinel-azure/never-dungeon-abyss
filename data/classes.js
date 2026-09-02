@@ -12,7 +12,6 @@ import { normalizeAdventureStats } from "./adventure-stats.js";
 import {
   createInitialLongMarchChallenge,
   createInitialMarathonChallenge,
-  LONG_MARCH_REQUIRED_TRANSFER_FLAG,
   normalizeLongMarchChallenge,
   normalizeMarathonChallenge
 } from "./marathon-challenge.js";
@@ -24,6 +23,7 @@ import { createInitialNpcSystem, normalizeNpcSystem } from "./npc-party.js";
 import { createInitialPlayerCharge, normalizePlayerCharge } from "../combat/player-charge.js";
 import { getConditionLabel } from "../combat/condition-label.js";
 import { backfillCompendiumFromCharacter, createInitialCompendium } from "./compendium.js";
+import { backfillB80TransferUnlock, isB80TransferUnlocked } from "./b80-transfer-unlock.js";
 
 export const STAT_KEYS = Object.freeze(["str", "int", "agi", "dex", "luc"]);
 
@@ -193,9 +193,10 @@ export function normalizeCharacter(character) {
   const latestEquipmentBuyback = normalizedEquipmentBuyback.at(-1);
   const latestItemBuyback = normalizedItemBuyback.at(-1);
   const quests = normalizeQuestState(character.quests);
-  const eventFlags = character.eventFlags && typeof character.eventFlags === "object"
-    ? { ...character.eventFlags }
-    : {};
+  const eventFlags = backfillB80TransferUnlock(
+    character.eventFlags,
+    quests.completedQuestIds
+  );
   if (quests.completedQuestIds.includes("guild_011")) {
     eventFlags.support_npc_malicious_join_unlocked = true;
   }
@@ -231,7 +232,7 @@ export function normalizeCharacter(character) {
     eventFlags,
     adventureStats: normalizeAdventureStats(character.adventureStats),
     marathonChallenge: normalizeMarathonChallenge(character.marathonChallenge),
-    longMarchChallenge: eventFlags[LONG_MARCH_REQUIRED_TRANSFER_FLAG]
+    longMarchChallenge: isB80TransferUnlocked({ eventFlags })
       ? normalizeLongMarchChallenge(character.longMarchChallenge)
       : createInitialLongMarchChallenge(),
     npcSystem: normalizeNpcSystem(character.npcSystem),
