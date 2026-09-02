@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { normalizeEffectDefinition } from "../js/effects/effect-schema.js";
+import { EFFECT_PART_TYPES, normalizeEffectDefinition } from "../js/effects/effect-schema.js";
 import { prepareBattleSkillEffect } from "../js/battle-skill-presentation.js";
 import { SPELLS } from "../data/spells.js";
 import { getLotEquipmentHighlightClass, hasUncertainLoot, isHighlightedLotCardRarity, isHighlightedLotEquipment } from "../js/loot-identification.js";
@@ -30,8 +30,27 @@ test("fire ball uses its data-driven depth orb timeline and runtime damage popup
     ["shake", 900, 300]
   ]);
   assert.equal(effect.parts.find(part => part.type === "popup").text, "321");
+  assert.equal(effect.parts.find(part => part.type === "popup").valueSource, "fixed");
   assert.equal(SPELLS.fireball.name, "炎よ、燃やせ！");
   assert.equal(SPELLS.fireball.presentationId, "fire_ball");
+});
+
+test("the shared battle effect schema retains every generator-only presentation part", () => {
+  for (const type of ["cutin", "whiteout", "blackout", "depthOrb"]) {
+    assert.ok(EFFECT_PART_TYPES[type], `${type} must be available in the NDA runtime`);
+  }
+  const effect = normalizeEffectDefinition({
+    version: 3,
+    duration: 900,
+    parts: [{
+      type: "cutin",
+      imageData: "data:image/png;base64,abc",
+      fileName: "cutin.png",
+      start: 0,
+      duration: 900
+    }]
+  });
+  assert.equal(effect.parts[0].imageData, "data:image/png;base64,abc");
 });
 
 test("lot bag identification is skipped only when all carried loot is already known", () => {

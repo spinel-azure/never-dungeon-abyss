@@ -12,7 +12,7 @@ export function prepareBattleSkillEffect(definition, damage = 0) {
   return {
     ...structuredClone(definition),
     parts: (definition?.parts || []).map(part => part.type === "popup" && part.valueSource === "damage"
-      ? { ...part, text: String(part.text || "{damage}").replaceAll("{damage}", value) }
+      ? { ...part, valueSource: "fixed", text: String(part.text || "{damage}").replaceAll("{damage}", value) }
       : { ...part })
   };
 }

@@ -16,6 +16,13 @@ export class EffectEngine {
     this.animationFrame = 0;
     this.transparent = Boolean(transparent);
     this.backdrop = Boolean(backdrop);
+    this.imageCache = new Map();
+  }
+
+  setRenderMode({ transparent = this.transparent, backdrop = this.backdrop } = {}) {
+    this.transparent = Boolean(transparent);
+    this.backdrop = Boolean(backdrop);
+    this.render();
   }
 
   load(definition) {
@@ -80,8 +87,33 @@ export class EffectEngine {
     if (!part.enabled || this.time < part.start || this.time > part.start + part.duration || part.type === "shake") return;
     const raw = Math.min(1, Math.max(0, (this.time - part.start) / part.duration));
     const progress = (EASINGS[part.easing] || EASINGS.linear)(raw);
-    const draw = DRAWERS[part.type];
-    if (draw) draw(this.ctx, part, progress, raw);
+    if (part.type === "cutin") this.drawCutin(part, progress, raw);
+    else {
+      const draw = DRAWERS[part.type];
+      if (draw) draw(this.ctx, part, progress, raw);
+    }
+  }
+
+  drawCutin(part, progress, raw) {
+    if (!part.imageData) return;
+    let image = this.imageCache.get(part.imageData);
+    if (!image) {
+      image = new Image();
+      image.onload = () => this.render();
+      image.src = part.imageData;
+      this.imageCache.set(part.imageData, image);
+    }
+    if (!image.complete || !image.naturalWidth) return;
+    const elapsed = raw * part.duration;
+    const remaining = (1 - raw) * part.duration;
+    const fadeIn = part.fadeIn ? Math.min(1, elapsed / part.fadeIn) : 1;
+    const fadeOut = part.fadeOut ? Math.min(1, remaining / part.fadeOut) : 1;
+    const x = part.fromX + (part.toX - part.fromX) * progress;
+    const y = part.fromY + (part.toY - part.fromY) * progress;
+    this.ctx.save();
+    this.ctx.globalAlpha = Math.max(0, Math.min(1, part.opacity)) * fadeIn * fadeOut;
+    this.ctx.drawImage(image, x - part.width / 2, y - part.height / 2, part.width, part.height);
+    this.ctx.restore();
   }
 }
 
@@ -95,30 +127,16 @@ function drawBackdrop(ctx, width, height) {
 }
 
 const DRAWERS = {
-  depthOrb(ctx, p, t, raw) {
-    const points = parsePathPoints(p.pathPoints, p.x, p.y);
-    const position = quadraticPoint(points, t);
-    const scale = p.fromScale + (p.toScale - p.fromScale) * t;
-    const elapsed = raw * p.duration;
-    const remaining = (1 - raw) * p.duration;
-    const alpha = Math.min(1, elapsed / Math.max(1, p.fadeIn), remaining / Math.max(1, p.fadeOut));
-    const radius = Math.max(1, p.radius * scale);
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.globalCompositeOperation = "lighter";
-    ctx.shadowColor = p.glowColor;
-    ctx.shadowBlur = Math.max(0, p.glowStrength);
-    const gradient = ctx.createRadialGradient(position.x, position.y, 0, position.x, position.y, radius);
-    gradient.addColorStop(0, "#ffffff");
-    gradient.addColorStop(.22, p.glowColor);
-    gradient.addColorStop(.72, p.color);
-    gradient.addColorStop(1, "rgba(255,0,13,0)");
-    ctx.fillStyle = gradient;
-    ctx.beginPath(); ctx.arc(position.x, position.y, radius, 0, Math.PI * 2); ctx.fill();
-    if (p.outlineWidth > 0) {
-      ctx.strokeStyle = p.color; ctx.lineWidth = p.outlineWidth;
-      ctx.beginPath(); ctx.arc(position.x, position.y, radius * .76, 0, Math.PI * 2); ctx.stroke();
-    }
+  whiteout(ctx, p, t) { drawScreenFade(ctx, p, t); },
+  blackout(ctx, p, t) { drawScreenFade(ctx, p, t); },
+  depthOrb(ctx, p, t) {
+    const depthT = p.depthDirection === "nearToFar" ? 1 - t : t, scale = p.fromScale + (p.toScale - p.fromScale) * depthT, radius = Math.max(1, p.radius * scale), points = parseControlPoints(p.pathPoints), ordered = p.pathDirection === "reverse" ? [...points].reverse() : points, position = quadraticPoint(ordered, t, p.x, p.y), elapsed = t * p.duration, remaining = p.duration - elapsed, fadeIn = p.fadeIn ? Math.min(1, elapsed / p.fadeIn) : 1, fadeOut = p.fadeOut ? Math.min(1, remaining / p.fadeOut) : 1, alpha = fadeIn * fadeOut;
+    ctx.save(); ctx.globalAlpha = alpha;
+    if (p.glowMode === "outer" || p.glowMode === "both") { ctx.shadowColor = p.glowColor; ctx.shadowBlur = p.glowStrength * Math.max(.4, scale); }
+    const gradient = ctx.createRadialGradient(position.x - radius * .25, position.y - radius * .3, radius * .08, position.x, position.y, radius);
+    gradient.addColorStop(0, "#ffffff"); gradient.addColorStop(.28, p.color); gradient.addColorStop(1, p.glowMode === "inner" || p.glowMode === "both" ? p.glowColor : p.color);
+    ctx.fillStyle = gradient; ctx.beginPath(); ctx.arc(position.x, position.y, radius, 0, Math.PI * 2); ctx.fill();
+    if (p.outlineWidth > 0) { ctx.strokeStyle = p.glowColor; ctx.lineWidth = p.outlineWidth; ctx.stroke(); }
     ctx.restore();
   },
   flash(ctx, p, t) {
@@ -126,7 +144,13 @@ const DRAWERS = {
     ctx.beginPath(); ctx.arc(p.x, p.y, p.radius * t, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
   },
   slash(ctx, p, t) {
-    const angle = p.angle * Math.PI / 180, length = p.length * Math.min(1, t * 1.5), fade = 1 - Math.max(0, (t - .65) / .35);
+    const points = parseControlPoints(p.controlPoints), fade = 1 - Math.max(0, (t - .72) / .28);
+    if (points.length >= 2) {
+      const ordered = p.pathDirection === "reverse" ? [...points].reverse() : points;
+      ctx.save(); ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.globalAlpha = fade; ctx.strokeStyle = p.color; ctx.lineWidth = p.width; ctx.shadowColor = p.color; ctx.shadowBlur = p.width;
+      traceSlashPath(ctx, ordered, p.pathMode); ctx.setLineDash([2000]); ctx.lineDashOffset = 2000 * (1 - Math.min(1, t * 1.4)); ctx.stroke(); ctx.restore(); return;
+    }
+    const angle = p.angle * Math.PI / 180, length = p.length * Math.min(1, t * 1.5);
     ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(angle); ctx.lineCap = "round";
     for (let i = p.trail - 1; i >= 0; i--) {
       ctx.globalAlpha = fade * (1 - i / (p.trail + 1)); ctx.strokeStyle = p.color; ctx.lineWidth = p.width * (1 - i / (p.trail + 2));
@@ -206,25 +230,37 @@ const DRAWERS = {
     ctx.beginPath(); for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3; const x = Math.cos(a) * p.radius, y = Math.sin(a) * p.radius; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.closePath(); ctx.stroke(); ctx.restore();
   },
   popup(ctx, p, t) {
-    ctx.save(); ctx.globalAlpha = Math.min(1, t * 5) * (1 - Math.max(0, (t - .75) / .25)); ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.font = `bold ${p.fontSize}px sans-serif`; ctx.lineWidth = Math.max(3, p.fontSize / 12); ctx.strokeStyle = p.outlineColor; ctx.fillStyle = p.color; const y = p.y - p.rise * t; ctx.strokeText(p.text, p.x, y); ctx.fillText(p.text, p.x, y); ctx.restore();
+    const displayText = p.valueSource === "fixed" || !/^\{.+\}$/.test(p.text) ? p.text : p.previewText;
+    const font = { game: 'Game, "Yu Gothic UI", sans-serif', pixel: 'Pixel, monospace', sans: '"Yu Gothic UI", sans-serif', serif: '"Yu Mincho", serif' }[p.fontFamily] || '"Yu Gothic UI", sans-serif';
+    ctx.save(); ctx.globalAlpha = Math.min(1, t * 5) * (1 - Math.max(0, (t - .75) / .25)); ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.font = `bold ${p.fontSize}px ${font}`; ctx.lineWidth = Math.max(3, p.fontSize / 12); ctx.strokeStyle = p.outlineColor; ctx.fillStyle = p.color; const y = p.y - p.rise * t; ctx.strokeText(displayText, p.x, y); ctx.fillText(displayText, p.x, y); ctx.restore();
   }
 };
 
-function parsePathPoints(source, fallbackX, fallbackY) {
-  const points = String(source || "").split(";").map(pair => {
-    const [x, y] = pair.split(",").map(Number);
-    return Number.isFinite(x) && Number.isFinite(y) ? { x, y } : null;
-  }).filter(Boolean);
-  if (points.length >= 3) return points.slice(0, 3);
-  return [{ x: fallbackX, y: fallbackY }, { x: fallbackX, y: fallbackY }, { x: fallbackX, y: fallbackY }];
+function drawScreenFade(ctx, p, t) {
+  const elapsed = t * p.duration, fadeIn = Math.max(1, p.fadeIn), holdEnd = fadeIn + Math.max(0, p.hold), fadeOut = Math.max(1, p.fadeOut);
+  let alpha = elapsed < fadeIn ? elapsed / fadeIn : elapsed < holdEnd ? 1 : 1 - (elapsed - holdEnd) / fadeOut;
+  alpha = Math.max(0, Math.min(1, alpha)) * p.intensity;
+  ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = p.color; ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height); ctx.restore();
 }
 
-function quadraticPoint(points, t) {
-  const inverse = 1 - t;
-  return {
-    x: inverse * inverse * points[0].x + 2 * inverse * t * points[1].x + t * t * points[2].x,
-    y: inverse * inverse * points[0].y + 2 * inverse * t * points[1].y + t * t * points[2].y
-  };
+function parseControlPoints(value) {
+  return String(value || "").split(";").map(pair => pair.split(",").map(Number)).filter(pair => pair.length === 2 && pair.every(Number.isFinite)).map(([x, y]) => ({ x, y }));
+}
+
+function quadraticPoint(points, t, fallbackX, fallbackY) {
+  if (points.length < 3) return points[0] || { x: fallbackX, y: fallbackY };
+  const [start, control, end] = points, inverse = 1 - t;
+  return { x: inverse * inverse * start.x + 2 * inverse * t * control.x + t * t * end.x, y: inverse * inverse * start.y + 2 * inverse * t * control.y + t * t * end.y };
+}
+
+function traceSlashPath(ctx, points, mode = "line") {
+  ctx.beginPath(); ctx.moveTo(points[0].x, points[0].y);
+  if (mode === "line") { for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y); return; }
+  const side = mode === "arcRight" ? 1 : -1;
+  for (let i = 1; i < points.length; i++) {
+    const a = points[i - 1], b = points[i], mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, dx = b.x - a.x, dy = b.y - a.y, length = Math.hypot(dx, dy) || 1, bend = Math.min(120, length * .28) * side;
+    ctx.quadraticCurveTo(mx - dy / length * bend, my + dx / length * bend, b.x, b.y);
+  }
 }
 
 function drawBoltPath(ctx, points, color, lineWidth) {
