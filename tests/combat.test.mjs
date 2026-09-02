@@ -40,7 +40,7 @@ import { CHARACTER_JOBS } from "../data/town.js";
 import { createEnemyCombatant, getEnemyById, getEnemyEncounterCount, getRandomEnemy } from "../data/enemies.js";
 import { createBossCombatant, getBossById } from "../data/bosses.js";
 import { CARDS, collectCardStatBonuses, getCardById, hasCardEffect } from "../data/cards.js";
-import { calculateDeckCost, DECK_SLOT_COUNT, grantCard, normalizeCardState, setDeckSlot } from "../data/deck.js";
+import { calculateDeckCost, DECK_SLOT_COUNT, getDeckSlotRejectionReason, grantCard, normalizeCardState, setDeckSlot } from "../data/deck.js";
 import { resolveTurnOrder, createGuardAction } from "../combat/resolve-turn-order.js";
 import {
   applyStatus,
@@ -1687,49 +1687,75 @@ test("Libra grants thirty percent offense and defense only against bosses or hig
   assert.equal(received(lowerLevelBoss), received(higherLevel));
 });
 
-test("Ability Boost is a six-copy SR card that raises all five abilities", () => {
+test("Ability Boost grants five to every ability and rejects a fourth deck copy", () => {
   const card = getCardById("sr_ability_boost");
   assert.equal(card.rarity, "SR");
   assert.equal(card.cost, 4);
   assert.equal(card.maxOwned, 99);
-  assert.equal(card.maxCopies, 6);
-  assert.deepEqual(card.statBonus, { str: 2, int: 2, agi: 2, dex: 2, luc: 2 });
-  assert.deepEqual(collectCardStatBonuses(Array(6).fill("sr_ability_boost")), {
-    str: 12, int: 12, agi: 12, dex: 12, luc: 12
+  assert.equal(card.maxCopies, 3);
+  assert.equal(card.effectValue, 5);
+  assert.equal(card.concept, "STR / INT / AGI / DEX / LUC +5");
+  assert.equal(card.descriptionJa, "STR、INT、AGI、DEX、LUCがそれぞれ5上昇する。");
+  assert.deepEqual(card.statBonus, { str: 5, int: 5, agi: 5, dex: 5, luc: 5 });
+  assert.deepEqual(collectCardStatBonuses(Array(3).fill(card.id)), {
+    str: 15, int: 15, agi: 15, dex: 15, luc: 15
   });
+
+  let cards = grantCard(createInitialCharacter({ name: "TEST", job: "warrior" }).cards, card.id, 4, 99).cards;
+  for (let index = 0; index < 3; index += 1) cards = setDeckSlot(cards, index, card.id, 99);
+  assert.equal(getDeckSlotRejectionReason(cards, 3, card.id, 99), "copyLimit");
+  assert.deepEqual(setDeckSlot(cards, 3, card.id, 99), cards);
 });
 
-test("Ability Boost Plus is a six-copy L card that can maximize all abilities at level 137", () => {
+test("Ability Boost Plus grants ten to every ability and rejects a fourth deck copy", () => {
   const card = getCardById("legendary_ability_boost_plus");
   assert.equal(card.rarity, "L");
   assert.equal(card.cost, 6);
   assert.equal(card.maxOwned, 99);
-  assert.equal(card.maxCopies, 6);
-  assert.deepEqual(card.statBonus, { str: 5, int: 5, agi: 5, dex: 5, luc: 5 });
-
-  const level136 = normalizeCharacter({
-    ...createInitialCharacter({ name: "TEST", job: "warrior" }),
-    level: 136
-  });
-  const level137 = normalizeCharacter({ ...level136, level: 137 });
-  assert.equal(level136.deckCost, 35);
-  assert.equal(level137.deckCost, 36);
-
-  let cardsAt136 = grantCard(level136.cards, card.id, 6, level136.deckCost).cards;
-  for (let index = 0; index < DECK_SLOT_COUNT; index += 1) {
-    cardsAt136 = setDeckSlot(cardsAt136, index, card.id, level136.deckCost);
-  }
-  assert.equal(cardsAt136.deckSlots.filter(Boolean).length, 5);
-
-  let cardsAt137 = grantCard(level137.cards, card.id, 6, level137.deckCost).cards;
-  for (let index = 0; index < DECK_SLOT_COUNT; index += 1) {
-    cardsAt137 = setDeckSlot(cardsAt137, index, card.id, level137.deckCost);
-  }
-  assert.equal(cardsAt137.deckSlots.filter(Boolean).length, 6);
-  assert.equal(calculateDeckCost(cardsAt137.deckSlots), 36);
-  assert.deepEqual(collectCardStatBonuses(cardsAt137.deckSlots), {
+  assert.equal(card.maxCopies, 3);
+  assert.equal(card.effectValue, 10);
+  assert.equal(card.concept, "STR / INT / AGI / DEX / LUC +10");
+  assert.equal(card.descriptionJa, "STR、INT、AGI、DEX、LUCがそれぞれ10上昇する。");
+  assert.deepEqual(card.statBonus, { str: 10, int: 10, agi: 10, dex: 10, luc: 10 });
+  assert.deepEqual(collectCardStatBonuses(Array(3).fill(card.id)), {
     str: 30, int: 30, agi: 30, dex: 30, luc: 30
   });
+
+  let cards = grantCard(createInitialCharacter({ name: "TEST", job: "warrior" }).cards, card.id, 4, 99).cards;
+  for (let index = 0; index < 3; index += 1) cards = setDeckSlot(cards, index, card.id, 99);
+  assert.equal(getDeckSlotRejectionReason(cards, 3, card.id, 99), "copyLimit");
+  assert.deepEqual(setDeckSlot(cards, 3, card.id, 99), cards);
+});
+
+test("three Ability Boost cards and three Plus cards coexist, survive normalization, and respect the stat cap", () => {
+  let character = normalizeCharacter({
+    ...createInitialCharacter({ name: "TEST", job: "warrior" }),
+    level: 137
+  });
+  let cards = grantCard(character.cards, "sr_ability_boost", 3, character.deckCost).cards;
+  cards = grantCard(cards, "legendary_ability_boost_plus", 3, character.deckCost).cards;
+  for (let index = 0; index < 3; index += 1) cards = setDeckSlot(cards, index, "sr_ability_boost", character.deckCost);
+  for (let index = 3; index < 6; index += 1) cards = setDeckSlot(cards, index, "legendary_ability_boost_plus", character.deckCost);
+
+  assert.equal(calculateDeckCost(cards.deckSlots), 30);
+  assert.deepEqual(collectCardStatBonuses(cards.deckSlots), {
+    str: 45, int: 45, agi: 45, dex: 45, luc: 45
+  });
+  character = normalizeCharacter(JSON.parse(JSON.stringify({ ...character, cards })));
+  assert.deepEqual(character.cards.deckSlots, cards.deckSlots);
+  assert.equal(character.cards.ownedCardCounts.sr_ability_boost, 3);
+  assert.equal(character.cards.ownedCardCounts.legendary_ability_boost_plus, 3);
+  assert.deepEqual(
+    Object.fromEntries(["str", "int", "agi", "dex", "luc"].map(key => [key, collectStats(character)[key]])),
+    { str: 30, int: 30, agi: 30, dex: 30, luc: 30 }
+  );
+
+  const legacy = normalizeCardState({
+    ownedCardCounts: { sr_ability_boost: 4 },
+    deckSlots: Array(4).fill("sr_ability_boost")
+  }, 99);
+  assert.equal(legacy.ownedCardCounts.sr_ability_boost, 4);
+  assert.equal(legacy.deckSlots.filter(id => id === "sr_ability_boost").length, 3);
 });
 
 test("Resistance Spirit stacks to sixty percent across three R cards", () => {
@@ -1888,18 +1914,6 @@ test("Defense Up is a six-copy R card with three defense", () => {
   assert.equal(card.maxCopies, 6);
   assert.deepEqual(card.statBonus, { def: 3 });
   assert.deepEqual(collectCardStatBonuses(Array(6).fill(card.id)), { def: 18 });
-});
-
-test("Ability Boost is a six-copy SR card that raises all five abilities", () => {
-  const card = getCardById("sr_ability_boost");
-  assert.equal(card.rarity, "SR");
-  assert.equal(card.cost, 4);
-  assert.equal(card.maxOwned, 99);
-  assert.equal(card.maxCopies, 6);
-  assert.deepEqual(card.statBonus, { str: 2, int: 2, agi: 2, dex: 2, luc: 2 });
-  assert.deepEqual(collectCardStatBonuses(Array(6).fill("sr_ability_boost")), {
-    str: 12, int: 12, agi: 12, dex: 12, luc: 12
-  });
 });
 
 test("Goddess's Grace is a unique cost-one C card that preserves defeat experience", () => {

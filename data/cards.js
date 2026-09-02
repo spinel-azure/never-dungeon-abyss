@@ -227,11 +227,11 @@ const STANDARD_CARDS = [
   },
   {
     id: "sr_ability_boost", rarity: "SR", cost: 4,
-    name: "Ability Boost", nameJa: "能力向上", concept: "STR / INT / AGI / DEX / LUC +2",
-    descriptionJa: "STR、INT、AGI、DEX、LUCがそれぞれ2上昇する。",
-    category: "ability", effectId: "all_ability_up", effectValue: 2,
-    statBonus: Object.freeze({ str: 2, int: 2, agi: 2, dex: 2, luc: 2 }),
-    iconId: "power-pose", maxOwned: 99, maxCopies: 6
+    name: "Ability Boost", nameJa: "能力向上", concept: "STR / INT / AGI / DEX / LUC +5",
+    descriptionJa: "STR、INT、AGI、DEX、LUCがそれぞれ5上昇する。",
+    category: "ability", effectId: "all_ability_up", effectValue: 5,
+    statBonus: Object.freeze({ str: 5, int: 5, agi: 5, dex: 5, luc: 5 }),
+    iconId: "power-pose", maxOwned: 99, maxCopies: 3
   },
   {
     id: "sr_indomitable_spirit", rarity: "SR", cost: 4,
@@ -398,11 +398,11 @@ const STANDARD_CARDS = [
   },
   {
     id: "legendary_ability_boost_plus", rarity: "L", cost: 6,
-    name: "Ability Boost +", nameJa: "能力向上＋", concept: "STR / INT / AGI / DEX / LUC +5",
-    descriptionJa: "STR、INT、AGI、DEX、LUCがそれぞれ5上昇する。",
-    category: "ability", effectId: "all_ability_up_plus", effectValue: 5,
-    statBonus: Object.freeze({ str: 5, int: 5, agi: 5, dex: 5, luc: 5 }),
-    iconId: "power-pose", maxOwned: 99, maxCopies: 6
+    name: "Ability Boost +", nameJa: "能力向上＋", concept: "STR / INT / AGI / DEX / LUC +10",
+    descriptionJa: "STR、INT、AGI、DEX、LUCがそれぞれ10上昇する。",
+    category: "ability", effectId: "all_ability_up_plus", effectValue: 10,
+    statBonus: Object.freeze({ str: 10, int: 10, agi: 10, dex: 10, luc: 10 }),
+    iconId: "power-pose", maxOwned: 99, maxCopies: 3
   },
   {
     id: "legendary_vital_surge", rarity: "L", cost: 6,
