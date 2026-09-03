@@ -50,6 +50,7 @@ const menu = {
   bgmEnabled: true, seEnabled: true,
   npcTypewriterEnabled: true, npcTypewriterSpeed: "normal",
   touchControlsMode: "auto",
+  touchMovementMode: "dpad",
   gamepadBindings: { confirm: null, cancel: null, minimap: null, items: null }, gamepadCaptureAction: "",
   gamepadPreviewCanvas: null, gamepadPreviewImage: null, gamepadPressedButtons: [],
   actionActive: { random: false, autoReturn: false, emergencyEscape: false, torchFull: false, stopwatchReset: false },
@@ -60,6 +61,7 @@ const menu = {
   setMinimapRevealOptions: () => {},
   setNpcTypewriterOptions: () => {},
   setTouchControlsMode: () => {},
+  setTouchMovementMode: () => {},
   setStopwatchVisible: () => {}, resetStopwatch: () => {},
   saveGame: () => false,
   canManualSave: () => false,
@@ -129,6 +131,7 @@ export function configureMenu(options) {
 
 export function isMenuOpen() { return menu.view !== "dungeon"; }
 export function getTouchControlsMode() { return menu.touchControlsMode; }
+export function getTouchMovementMode() { return menu.touchMovementMode; }
 export function getGamepadBindings() { return { ...menu.gamepadBindings }; }
 export function getGamepadCaptureAction() { return menu.gamepadCaptureAction; }
 export function setGamepadPressedButtons(buttons = []) {
@@ -1305,15 +1308,25 @@ function executeOption(key) {
   if (key === "npcTypewriterEnabled") { menu.npcTypewriterEnabled = !menu.npcTypewriterEnabled; applyNpcTypewriterOptions(); updateOptionStates(); persistSettings(); }
   if (key === "npcTypewriterSpeed" && menu.npcTypewriterEnabled) { cycleNpcTypewriterSpeed(1); }
   if (key === "touchControlsMode") { cycleTouchControlsMode(1); }
+  if (key === "touchMovementMode") { cycleTouchMovementMode(1); }
   if (key?.startsWith("gamepad")) { menu.gamepadCaptureAction = key.slice(7).toLowerCase(); updateOptionStates(); }
 }
-function adjustSelectedOption(amount) { if (menu.optionCursor >= menu.optionItems.length) return; const key = menu.optionItems[menu.optionCursor].dataset.option; if (key === "bgmVolume" || key === "seVolume") { const slider = menu.root.querySelector(`#${key}`); slider.value = String(Math.max(0, Math.min(100, Number(slider.value) + amount * 10))); slider.dispatchEvent(new Event("input", { bubbles: true })); if (key === "seVolume") menu.playSe("cursorMove"); } else if (key === "npcTypewriterSpeed" && menu.npcTypewriterEnabled) cycleNpcTypewriterSpeed(amount); else if (key === "touchControlsMode") cycleTouchControlsMode(amount); else if (key === "screenShake" || key === "torchFlicker" || key === "frameRateMode" || key === "npcTypewriterEnabled" || key === "bgmEnabled" || key === "seEnabled") executeOption(key); }
+function adjustSelectedOption(amount) { if (menu.optionCursor >= menu.optionItems.length) return; const key = menu.optionItems[menu.optionCursor].dataset.option; if (key === "bgmVolume" || key === "seVolume") { const slider = menu.root.querySelector(`#${key}`); slider.value = String(Math.max(0, Math.min(100, Number(slider.value) + amount * 10))); slider.dispatchEvent(new Event("input", { bubbles: true })); if (key === "seVolume") menu.playSe("cursorMove"); } else if (key === "npcTypewriterSpeed" && menu.npcTypewriterEnabled) cycleNpcTypewriterSpeed(amount); else if (key === "touchControlsMode") cycleTouchControlsMode(amount); else if (key === "touchMovementMode") cycleTouchMovementMode(amount); else if (key === "screenShake" || key === "torchFlicker" || key === "frameRateMode" || key === "npcTypewriterEnabled" || key === "bgmEnabled" || key === "seEnabled") executeOption(key); }
 
 function cycleTouchControlsMode(amount) {
   const modes = ["auto", "on", "off"];
   const index = modes.indexOf(menu.touchControlsMode);
   menu.touchControlsMode = modes[(index + amount + modes.length) % modes.length];
   menu.setTouchControlsMode(menu.touchControlsMode);
+  updateOptionStates();
+  persistSettings();
+}
+
+function cycleTouchMovementMode(amount) {
+  const modes = ["dpad", "stick"];
+  const index = modes.indexOf(menu.touchMovementMode);
+  menu.touchMovementMode = modes[(index + amount + modes.length) % modes.length];
+  menu.setTouchMovementMode(menu.touchMovementMode);
   updateOptionStates();
   persistSettings();
 }
@@ -1645,6 +1658,7 @@ function updateOptionStates() {
   const se = menu.root.querySelector('[data-option-state="seEnabled"]');
   const bgm = menu.root.querySelector('[data-option-state="bgmEnabled"]');
   const touchControls = menu.root.querySelector('[data-option-state="touchControlsMode"]');
+  const touchMovement = menu.root.querySelector('[data-option-state="touchMovementMode"]');
   const bgmSlider = menu.root.querySelector('#bgmVolume');
   const seSlider = menu.root.querySelector('#seVolume');
   const frameRateLimited = menu.getEffectiveFrameRate() === 30;
@@ -1661,6 +1675,7 @@ function updateOptionStates() {
   if (se) se.textContent = toggleText(menu.seEnabled);
   if (bgm) bgm.textContent = toggleText(menu.bgmEnabled);
   if (touchControls) touchControls.textContent = ["auto", "on", "off"].map(value => `${value.toUpperCase()} ${menu.touchControlsMode === value ? ON_MARK : OFF_MARK}`).join("　");
+  if (touchMovement) touchMovement.textContent = `十字キー ${menu.touchMovementMode === "dpad" ? ON_MARK : OFF_MARK}　フローティングスティック ${menu.touchMovementMode === "stick" ? ON_MARK : OFF_MARK}`;
   if (bgmSlider) { bgmSlider.disabled = !menu.bgmEnabled; bgmSlider.parentElement.classList.toggle("is-muted", !menu.bgmEnabled); }
   if (seSlider) { seSlider.disabled = !menu.seEnabled; seSlider.parentElement.classList.toggle("is-muted", !menu.seEnabled); }
   const gamepadDefaults = { confirm: 0, cancel: 1, minimap: 3, items: 2 };
@@ -1733,6 +1748,7 @@ export function resetDebugSettingsForNewGame() {
 
 function applyNpcTypewriterOptions() { menu.setNpcTypewriterOptions({ enabled: menu.npcTypewriterEnabled, speed: menu.npcTypewriterSpeed }); }
 function applyTouchControlsMode() { menu.setTouchControlsMode(menu.touchControlsMode); }
+function applyTouchMovementMode() { menu.setTouchMovementMode(menu.touchMovementMode); }
 function applyMistOptions() { menu.setMistOptions({ enabled: menu.mistEnabled, intensity: menu.mistIntensity, distance: menu.mistDistance, color: menu.mistColor }); }
 function applyWallColor() { menu.setWallColor(menu.wallColor); }
 function applyFloorColor() { menu.setFloorColor(menu.floorColor); }
@@ -1745,6 +1761,7 @@ function applyAllSettings() {
   applyMinimapRevealOptions();
   applyNpcTypewriterOptions();
   applyTouchControlsMode();
+  applyTouchMovementMode();
   applyMistOptions();
   applyWallColor();
   applyFloorColor();
@@ -1768,6 +1785,7 @@ function restoreSettings() {
     if (["30", "60"].includes(String(saved.frameRateMode))) menu.frameRateMode = String(saved.frameRateMode);
     if (["slow", "normal", "fast"].includes(saved.npcTypewriterSpeed)) menu.npcTypewriterSpeed = saved.npcTypewriterSpeed;
     if (["auto", "on", "off"].includes(saved.touchControlsMode)) menu.touchControlsMode = saved.touchControlsMode;
+    if (["dpad", "stick"].includes(saved.touchMovementMode)) menu.touchMovementMode = saved.touchMovementMode;
     if (saved.gamepadBindings && typeof saved.gamepadBindings === "object") {
       const keys = ["confirm", "cancel", "minimap"];
       const values = keys.map(key => Number(saved.gamepadBindings[key]));
@@ -1820,6 +1838,7 @@ function persistSettings() {
       npcTypewriterEnabled: menu.npcTypewriterEnabled,
       npcTypewriterSpeed: menu.npcTypewriterSpeed,
       touchControlsMode: menu.touchControlsMode,
+      touchMovementMode: menu.touchMovementMode,
       gamepadBindings: menu.gamepadBindings,
       mistEnabled: menu.mistEnabled,
       mistIntensity: menu.mistIntensity,

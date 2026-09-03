@@ -102,6 +102,7 @@ body.inventory-open .game{width:min(96vw,720px)}body.inventory-open .menu-screen
 /* Touch-only lower-screen floating movement surface. */
 .floating-stick-zone{display:none;position:fixed;z-index:35;left:max(8px,env(safe-area-inset-left));right:max(162px,calc(154px + env(safe-area-inset-right)));bottom:max(8px,env(safe-area-inset-bottom));height:min(220px,28dvh);touch-action:none;-webkit-user-select:none;user-select:none}
 body.touch-controls-enabled .floating-stick-zone{display:block}
+.floating-stick-zone[hidden]{display:none!important}
 body.title-active .floating-stick-zone{display:none!important}
 .floating-stick-zone .virtual-stick{display:none!important;position:absolute!important;z-index:1;left:0;top:0;bottom:auto!important;width:112px!important;height:112px!important;margin:0!important;pointer-events:none!important;transform:translate(-50%,-50%)}
 .floating-stick-zone .virtual-stick.is-active{display:grid!important}
@@ -111,6 +112,15 @@ body.touch-controls-disabled .action-buttons{display:none!important}
 body.touch-controls-enabled.layout-pc .action-buttons,body.touch-controls-enabled.layout-tablet .action-buttons{display:grid;position:fixed;z-index:35;right:max(18px,env(safe-area-inset-right));bottom:calc(24px + env(safe-area-inset-bottom));grid-template-columns:66px 66px;grid-template-rows:66px 66px;gap:12px}
 @media(min-width:681px){.floating-stick-zone{right:max(190px,calc(180px + env(safe-area-inset-right)));width:min(65vw,620px);height:min(220px,30dvh)}}
 @media(max-width:420px){.floating-stick-zone{right:max(162px,calc(154px + env(safe-area-inset-right)));height:min(210px,28dvh)}.floating-stick-zone .virtual-stick{width:108px!important;height:108px!important}.floating-stick-zone .virtual-stick-base{width:106px;height:106px}}
+/* Selectable fixed movement pad for touch layouts. */
+.touch-dpad{display:grid;position:fixed;z-index:35;left:max(18px,env(safe-area-inset-left));bottom:calc(24px + env(safe-area-inset-bottom));grid-template-columns:repeat(3,48px);grid-template-rows:repeat(3,48px);width:144px;height:144px;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.touch-dpad[hidden],body.title-active .touch-dpad,body:not(.touch-controls-enabled) .touch-dpad{display:none!important}
+.touch-dpad-button{position:relative;display:grid!important;width:48px!important;height:48px!important;min-width:48px!important;min-height:48px!important;padding:0!important;place-items:center;border:1px solid rgba(205,210,166,.5)!important;border-radius:0!important;clip-path:polygon(8px 0,calc(100% - 8px) 0,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0 calc(100% - 8px),0 8px);background:linear-gradient(145deg,rgba(139,145,95,.9),rgba(73,78,49,.94))!important;box-shadow:inset 2px 2px 0 rgba(225,230,187,.2),inset -3px -3px 0 rgba(35,38,23,.42)!important;color:rgba(223,226,193,.88)!important;font:26px/1 "PixelFont",monospace!important;text-shadow:0 1px 1px rgba(0,0,0,.55);touch-action:none!important;-webkit-tap-highlight-color:transparent}
+.touch-dpad-button::after{content:"";position:absolute;inset:4px;border-top:1px solid rgba(255,255,255,.11);border-left:1px solid rgba(255,255,255,.08);pointer-events:none}
+.touch-dpad-button.is-pressed,.touch-dpad-button:active{transform:translateY(2px) scale(.96)!important;filter:brightness(1.3);box-shadow:inset 3px 3px 4px rgba(20,22,13,.55)!important}
+.touch-dpad-up{grid-column:2;grid-row:1}.touch-dpad-left{grid-column:1;grid-row:2}.touch-dpad-right{grid-column:3;grid-row:2}.touch-dpad-down{grid-column:2;grid-row:3}
+body.menu-open.input-touch .touch-dpad{z-index:40}
+@media(max-width:420px){.touch-dpad{left:max(12px,env(safe-area-inset-left));grid-template-columns:repeat(3,44px);grid-template-rows:repeat(3,44px);width:132px;height:132px}.touch-dpad-button{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;font-size:23px!important}}
 .npc-status-slot.is-charged .npc-charge-gauge{border-color:#ff646b;animation:npc-charge-ready 1s ease-in-out infinite}.npc-status-slot.is-charged .npc-charge-gauge i{background:#ff303b;box-shadow:0 0 9px #ff303b}@keyframes npc-charge-ready{0%,100%{box-shadow:inset 0 0 3px #111,0 0 4px rgba(255,48,59,.65)}50%{box-shadow:inset 0 0 3px #111,0 0 13px #ff303b}}
 @media(prefers-reduced-motion:reduce){.npc-status-slot.is-charged .npc-charge-gauge{animation:none;box-shadow:inset 0 0 3px #111,0 0 9px #ff303b}}
 .nde-stat-row{grid-template-columns:30px minmax(0,1fr) 50px}

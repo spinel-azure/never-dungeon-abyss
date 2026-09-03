@@ -56,7 +56,7 @@ import { configureInput } from "./input.js";
 import { configureGamepadInput } from "./gamepad-input.js";
 import { configureFloatingStick } from "./floating-stick.js";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, getDungeonMistOptions, setDungeonColors, getGamepadBindings, getGamepadCaptureAction, completeGamepadBinding, setGamepadPressedButtons, getTouchControlsMode, isMenuOpen, openItemInventory, openStatusMenu, openDeckEditor, openQuestHistory, openRumorHistory, openAdventureRecords, openLibraryMonsterCompendium, openLibraryCardGallery, openTitleOptions, refreshAdventureRecordsPlayTime, openShopSellInventory, openShopPurchaseInventory, closeCampMenu, resetDebugSettingsForNewGame } from "./menu.js";
+import { configureMenu, handleMenuInput, getDungeonColors, getDungeonMistOptions, setDungeonColors, getGamepadBindings, getGamepadCaptureAction, completeGamepadBinding, setGamepadPressedButtons, getTouchControlsMode, getTouchMovementMode, isMenuOpen, openItemInventory, openStatusMenu, openDeckEditor, openQuestHistory, openRumorHistory, openAdventureRecords, openLibraryMonsterCompendium, openLibraryCardGallery, openTitleOptions, refreshAdventureRecordsPlayTime, openShopSellInventory, openShopPurchaseInventory, closeCampMenu, resetDebugSettingsForNewGame } from "./menu.js";
 import { isForcedTorchZeroFloor, resolveFloorTheme } from "./floorTheme.js";
 import { applyCrystalFloorSpStep } from "../data/crystal-floor.js";
 import {
@@ -246,6 +246,7 @@ import {
   const randomGenerateBtn = document.getElementById("randomGenerate");
   const virtualStickEl = document.getElementById("virtualStick");
   const floatingStickZone = document.getElementById("floatingStickZone");
+  const touchDpad = document.getElementById("touchDpad");
   const buttonA = document.getElementById("buttonA");
   const buttonB = document.getElementById("buttonB");
   const gamepadNotification = document.getElementById("gamepadNotification");
@@ -4139,6 +4140,7 @@ import {
       setTownTypewriterOptions(options);
     },
     setTouchControlsMode: mode => virtualStickController?.setMode(mode),
+    setTouchMovementMode: mode => virtualStickController?.setMovementMode(mode),
     setStopwatchVisible,
     resetStopwatch,
     emergencyEscape: () => {
@@ -4171,7 +4173,9 @@ import {
   virtualStickController = configureFloatingStick({
     zoneEl: floatingStickZone,
     stickEl: virtualStickEl,
+    dpadEl: touchDpad,
     mode: getTouchControlsMode(),
+    movementMode: getTouchMovementMode(),
     isInputAllowed: () => Boolean(
       character
       && !sceneTransitionRunning
