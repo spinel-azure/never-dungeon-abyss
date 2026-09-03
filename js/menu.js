@@ -19,6 +19,17 @@ const ACTION_FEEDBACK_MS = 260;
 const DEBUG_SEQUENCE_MS = 1000;
 const DEBUG_CANCEL_WINDOW_MS = 2000;
 const SETTINGS_KEY = "nde-settings-v1";
+const DEBUG_DEFAULTS_VERSION = 1;
+export const DEFAULT_DEBUG_SETTINGS = Object.freeze({
+  stopwatchVisible: false,
+  compassVisible: true,
+  readoutVisible: true,
+  torchFuelDisabled: false,
+  presenceDisabled: false,
+  stairsDownVisible: false,
+  npcsVisible: false,
+  treasuresVisible: false
+});
 const ON_MARK = "🔘";
 const OFF_MARK = "⚫";
 const DECK_PICKER_PAGE_SIZE = 5;
@@ -41,9 +52,8 @@ const menu = {
   optionReturnView: "commands",
   optionPages: [], optionItems: [], optionNavButtons: [], optionCursor: 0, optionPage: 0,
   debugPages: [], debugItems: [], debugNavButtons: [], debugCursor: 0, debugPage: 0, recentConfirms: [], debugArmed: false, view: "dungeon",
-  compassVisible: true, readoutVisible: false, screenShakeEnabled: true, frameRateMode: "auto",
-  torchFlickerEnabled: true, torchFuelDisabled: false, presenceDisabled: false, stopwatchVisible: true,
-  stairsDownVisible: false, npcsVisible: false, treasuresVisible: false,
+  ...DEFAULT_DEBUG_SETTINGS,
+  screenShakeEnabled: true, frameRateMode: "auto", torchFlickerEnabled: true,
   mistEnabled: true, mistIntensity: 1, mistDistance: 9, mistColor: "frost",
   wallColor: "default",
   floorColor: "default",
@@ -1733,15 +1743,13 @@ function applyRenderOptions() {
 }
 function applyMinimapRevealOptions() { menu.setMinimapRevealOptions({ stairsDown: menu.stairsDownVisible, npcs: menu.npcsVisible, treasures: menu.treasuresVisible }); }
 export function resetDebugSettingsForNewGame() {
-  menu.torchFuelDisabled = false;
-  menu.presenceDisabled = false;
-  menu.stairsDownVisible = false;
-  menu.npcsVisible = false;
-  menu.treasuresVisible = false;
+  Object.assign(menu, DEFAULT_DEBUG_SETTINGS);
   Object.keys(menu.actionActive).forEach(key => { menu.actionActive[key] = false; });
-  menu.setTorchFuelDisabled(false);
-  menu.setPresenceDisabled(false);
+  applyDisplayOptions();
+  menu.setTorchFuelDisabled(menu.torchFuelDisabled);
+  menu.setPresenceDisabled(menu.presenceDisabled);
   applyMinimapRevealOptions();
+  menu.setStopwatchVisible(menu.stopwatchVisible);
   updateDebugStates();
   persistSettings();
 }
@@ -1776,10 +1784,28 @@ function applyAllSettings() {
   });
 }
 
+export function normalizeDebugSettingsDefaults(settings) {
+  const source = settings && typeof settings === "object" ? settings : {};
+  const savedVersion = Math.max(0, Math.floor(Number(source.debugDefaultsVersion) || 0));
+  if (savedVersion >= DEBUG_DEFAULTS_VERSION) {
+    return { settings: { ...source }, migrated: false };
+  }
+  return {
+    settings: {
+      ...source,
+      ...DEFAULT_DEBUG_SETTINGS,
+      debugDefaultsVersion: DEBUG_DEFAULTS_VERSION
+    },
+    migrated: true
+  };
+}
+
 function restoreSettings() {
   try {
-    const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "null");
-    if (!saved || typeof saved !== "object") return;
+    const stored = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "null");
+    if (!stored || typeof stored !== "object") return;
+    const normalized = normalizeDebugSettingsDefaults(stored);
+    const saved = normalized.settings;
     const booleanKeys = ["compassVisible", "readoutVisible", "screenShakeEnabled", "torchFlickerEnabled", "torchFuelDisabled", "presenceDisabled", "stopwatchVisible", "stairsDownVisible", "npcsVisible", "treasuresVisible", "npcTypewriterEnabled", "mistEnabled", "bgmEnabled", "seEnabled"];
     booleanKeys.forEach(key => { if (typeof saved[key] === "boolean") menu[key] = saved[key]; });
     if (["30", "60"].includes(String(saved.frameRateMode))) menu.frameRateMode = String(saved.frameRateMode);
@@ -1816,6 +1842,7 @@ function restoreSettings() {
     menu.wallColor = "default";
     menu.floorColor = "default";
     menu.mistColor = "frost";
+    if (normalized.migrated) persistSettings();
   } catch (error) {
     console.warn("NDE settings could not be restored.", error);
   }
@@ -1824,6 +1851,7 @@ function restoreSettings() {
 function persistSettings() {
   try {
     const settings = {
+      debugDefaultsVersion: DEBUG_DEFAULTS_VERSION,
       compassVisible: menu.compassVisible,
       readoutVisible: menu.readoutVisible,
       frameRateMode: menu.frameRateMode,
