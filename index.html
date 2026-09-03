@@ -55,15 +55,27 @@
   <section id="greetingScreen" class="greeting-screen" aria-label="ゲーム開始前のご案内" hidden>
     <div class="greeting-content">
       <h2>＊NEVER DUNGEON : ABYSSの世界へようこそ！＊</h2>
-      <h3>＊ はじめに ＊</h3>
-      <div class="greeting-description">
-        <p>・このゲームは基本的にオートセーブされますが、<br>任意のデータセーブも可能です。</p>
-        <p>また、セーブデータを外部へEXPORT（書き出し）<br>IMPORT（読み込み）する事も可能です。</p>
-        <p>ブラウザのキャッシュを削除すると<br>セーブデータも消えてしまうので、<br>ご活用ください。</p>
-        <p>なお、ダンジョン内ではオートセーブのみ、<br>任意セーブは町でのみ可能となっております。</p>
-        <p>・それではゲームをお楽しみください。<br>まずは冒険者登録からスタートです！</p>
+      <div class="greeting-page" data-greeting-page="0">
+        <h3>＊ はじめに ＊</h3>
+        <div class="greeting-description">
+          <p>・このゲームは基本的にオートセーブされますが、<br>任意のデータセーブも可能です。</p>
+          <p>また、セーブデータを外部へEXPORT（書き出し）<br>IMPORT（読み込み）する事も可能です。</p>
+          <p>ブラウザのキャッシュを削除すると<br>セーブデータも消えてしまうので、<br>ご活用ください。</p>
+          <p>なお、ダンジョン内ではオートセーブのみ、<br>任意セーブは町でのみ可能となっております。</p>
+        </div>
       </div>
-      <button id="greetingGameStart" type="button">GAME START</button>
+      <div class="greeting-page" data-greeting-page="1" hidden>
+        <h3>＊ はじめに ＊</h3>
+        <div class="greeting-description greeting-controls-description">
+          <p>・操作方法について</p>
+          <p>PCではカーソルキーでダンジョン移動・メニュー<br>の上下左右移動を行います。</p>
+          <p>決定はXキー、キャンセルはZキーです。</p>
+          <p>スマートフォンおよびタブレットでは十字ボタン<br>とA、Bボタンで操作を行います。オプションで<br>フローティングスティックへの切り替えも可能です。</p>
+          <p>なお、USBゲームパッドやBluetoothコントローラー<br>にも対応しております。</p>
+          <p>・それではゲームをお楽しみください。<br>まずは冒険者登録からスタートです！</p>
+        </div>
+      </div>
+      <button id="greetingGameStart" type="button">NEXT</button>
     </div>
   </section>
 </section>
@@ -554,7 +566,7 @@
     </section>
   </section>
 </main>
-  <script type="module" src="js/main.js?v=20260903-02"></script>
+  <script type="module" src="js/main.js?v=20260903-03"></script>
   <script type="module" src="js/title-screen.js"></script>
 </body>
 </html>

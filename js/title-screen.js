@@ -18,6 +18,7 @@ const importFile = document.getElementById("importSaveFile");
 const feedback = document.getElementById("titleSaveFeedback");
 const greetingScreen = document.getElementById("greetingScreen");
 const greetingGameStart = document.getElementById("greetingGameStart");
+const greetingPages = [...greetingScreen.querySelectorAll("[data-greeting-page]")];
 const prologueScreen = document.getElementById("prologueScreen");
 const prologue = createPrologueController({
   screen: prologueScreen,
@@ -30,6 +31,7 @@ const prologue = createPrologueController({
 let titleOpen = true;
 let loadOpen = false;
 let greetingOpen = false;
+let greetingPageIndex = 0;
 let selectedIndex = 0;
 let loadSelectedIndex = 0;
 let mainReady = document.documentElement.dataset.ndaMainReady === "true";
@@ -166,7 +168,8 @@ function handleTitleKey(event) {
   }
   if (greetingOpen) {
     if (event.key === "Enter" || event.key === " " || event.key === "x" || event.key === "X") {
-      startGame("nda:new-game", {}, event);
+      event.preventDefault();
+      advanceGreeting(event);
     }
     return;
   }
@@ -228,7 +231,33 @@ function openGreeting(event) {
   titleScreen.classList.add("is-greeting");
   titleScreen.classList.remove("is-prologue");
   greetingScreen.hidden = false;
+  greetingPageIndex = 0;
+  renderGreetingPage();
   greetingGameStart.focus({ preventScroll: true });
+}
+
+function renderGreetingPage() {
+  const lastPageIndex = Math.max(0, greetingPages.length - 1);
+  greetingPageIndex = Math.max(0, Math.min(greetingPageIndex, lastPageIndex));
+  greetingPages.forEach((page, index) => {
+    const active = index === greetingPageIndex;
+    page.hidden = !active;
+    page.setAttribute("aria-hidden", String(!active));
+  });
+  greetingGameStart.textContent = greetingPageIndex < lastPageIndex ? "NEXT" : "GAME START";
+}
+
+function advanceGreeting(event) {
+  if (!greetingOpen) return;
+  event?.preventDefault();
+  event?.stopImmediatePropagation();
+  if (greetingPageIndex < greetingPages.length - 1) {
+    greetingPageIndex += 1;
+    renderGreetingPage();
+    greetingGameStart.focus({ preventScroll: true });
+    return;
+  }
+  startGame("nda:new-game", {}, event);
 }
 
 titleMenu.addEventListener("pointerdown", event => {
@@ -249,11 +278,11 @@ loadPanel.addEventListener("pointerdown", event => {
 }, true);
 
 greetingGameStart.addEventListener("pointerdown", event => {
-  if (greetingOpen) startGame("nda:new-game", {}, event);
+  if (greetingOpen) advanceGreeting(event);
 }, true);
 
 greetingGameStart.addEventListener("click", event => {
-  if (greetingOpen) startGame("nda:new-game", {}, event);
+  if (greetingOpen && event.detail === 0) advanceGreeting(event);
 });
 
 exportButton.addEventListener("click", async () => {
@@ -351,7 +380,7 @@ window.addEventListener("nda:title-input", event => {
     return;
   }
   if (greetingOpen) {
-    if (action === "confirm") startGame("nda:new-game", {});
+    if (action === "confirm") advanceGreeting();
     return;
   }
   if (loadOpen) {

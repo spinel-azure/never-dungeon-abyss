@@ -59,6 +59,21 @@ test("NEW GAMEはプロローグから案内画面へ接続する", async () => 
   assert.match(source, /greetingOpen[\s\S]*nda:new-game/);
 });
 
+test("ゲーム開始前の案内はセーブ方法と操作方法の二ページで進行する", async () => {
+  const [html, source] = await Promise.all([
+    readFile(new URL("../index.html", import.meta.url), "utf8"),
+    readFile(new URL("../js/title-screen.js", import.meta.url), "utf8")
+  ]);
+  assert.equal((html.match(/data-greeting-page=/g) || []).length, 2);
+  assert.match(html, /data-greeting-page="0"[\s\S]*オートセーブ[\s\S]*EXPORT/);
+  assert.match(html, /data-greeting-page="1"[\s\S]*操作方法について[\s\S]*カーソルキー[\s\S]*十字ボタン[\s\S]*Bluetoothコントローラー/);
+  assert.match(html, /id="greetingGameStart"[^>]*>NEXT<\/button>/);
+  assert.match(source, /greetingPageIndex < greetingPages\.length - 1/);
+  assert.match(source, /greetingGameStart\.textContent = greetingPageIndex < lastPageIndex \? "NEXT" : "GAME START"/);
+  assert.match(source, /action === "confirm"\) advanceGreeting\(\)/);
+  assert.match(source, /event\.detail === 0/);
+});
+
 test("プロローグは表示後の画面高から本文開始位置を決める", async () => {
   const source = await readFile(new URL("../js/prologue.js", import.meta.url), "utf8");
   assert.ok(source.indexOf("screen.hidden = false") < source.indexOf("offset = screen.clientHeight"));
