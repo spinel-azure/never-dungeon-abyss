@@ -75,3 +75,22 @@ test("main uses contextual Taurus stats for status, battle, traps, and lock chec
   assert.match(menuSource, /openStatusMenu\(\)[\s\S]*?menu\.onStatusOpened\(\)/);
   assert.match(menuSource, /key === "status"[\s\S]*?menu\.onStatusOpened\(\)/);
 });
+
+test("town receives the persistent character instead of a Taurus presentation copy", () => {
+  const source = fs.readFileSync(new URL("../js/main.js", import.meta.url), "utf8");
+  const townStart = source.indexOf("configureTown({");
+  const battleStart = source.indexOf("configureBattle({", townStart);
+  const townConfiguration = source.slice(townStart, battleStart);
+
+  assert.ok(townStart >= 0);
+  assert.ok(battleStart > townStart);
+  assert.match(townConfiguration, /getCharacter:\s*\(\)\s*=>\s*character,/);
+  assert.doesNotMatch(townConfiguration, /getCharacter:\s*\(\)\s*=>\s*getContextualCharacter\(\),/);
+
+  const character = createInitialCharacter({ name: "INN", job: "warrior" });
+  const presentation = applyTaurusDepthBonus(character, { location: "town", depth: 1 });
+  presentation.eventFlags = { ...presentation.eventFlags, inn_visited: true };
+
+  assert.notEqual(presentation, character);
+  assert.equal(character.eventFlags.inn_visited, undefined);
+});

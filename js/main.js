@@ -774,7 +774,7 @@ import {
     root: townScreen,
     messageEl: msgEl,
     commandRoot: dungeonCommands,
-    getCharacter: () => getContextualCharacter(),
+    getCharacter: () => character,
     onRegister: registerCharacter,
     onEnterDungeon: enterDungeonFromTown,
     onUseTransfer: enterFloorFromTransfer,
