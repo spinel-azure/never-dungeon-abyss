@@ -2495,13 +2495,26 @@ import {
       say("この区域では、たいまつの光を補充できない。");
       return { accepted: false, reason: "forcedTorchZero" };
     }
+    const autoReturnAvailability = skillId === "full_sprint"
+      ? getAutoReturnAvailability()
+      : null;
     const result = resolveFieldSkill({
       character,
       skillId,
+      context: worldLocation,
       torchFuel: state.torchFuel,
-      presenceIncreaseReduction: getPresenceIncreaseReduction()
+      presenceIncreaseReduction: getPresenceIncreaseReduction(),
+      autoReturnAvailability
     });
     if (!result.accepted) return result;
+    if (result.environment?.startAutoWalker) {
+      closeCampMenu("main");
+      const started = startAutoReturn({
+        persistentThroughBattle: true,
+        availability: autoReturnAvailability
+      });
+      if (!started) return { accepted: false, reason: "noPath" };
+    }
     character = result.character;
     if (Number.isFinite(result.environment?.torchFuel)) state.torchFuel = result.environment.torchFuel;
     if (Number.isFinite(result.environment?.presenceIncreaseReduction)) {
@@ -2509,7 +2522,9 @@ import {
     }
     updateHud();
     updateCharacterUi();
-    say(result.skill.actionType === "sacrificialCure"
+    say(result.environment?.startAutoWalker
+      ? `${result.skill.name}を使い、踏破済みの道をたどって上り階段へ向かう。`
+      : result.skill.actionType === "sacrificialCure"
       ? `${result.skill.name}を使った。毒が消え、${result.damage}ダメージを受けた。`
       : result.skill.environmentEffect === "restoreTorch"
         ? `${result.skill.name}を使った。たいまつゲージが回復した。`

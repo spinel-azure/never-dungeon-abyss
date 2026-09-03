@@ -4,7 +4,14 @@ import { getSkill } from "../data/skills.js";
 import { getEffectiveSpCost } from "./sp-cost.js";
 import { getConditionLabel } from "./condition-label.js";
 
-export function resolveFieldSkill({ character, skillId, torchFuel = 0, presenceIncreaseReduction = 0 } = {}) {
+export function resolveFieldSkill({
+  character,
+  skillId,
+  context = "dungeon",
+  torchFuel = 0,
+  presenceIncreaseReduction = 0,
+  autoReturnAvailability = null
+} = {}) {
   const skill = getSkill(skillId);
   if (!character || !skill || !character.skillIds?.includes(skill.id)) {
     return { accepted: false, reason: "unknownSkill" };
@@ -34,6 +41,12 @@ export function resolveFieldSkill({ character, skillId, torchFuel = 0, presenceI
   if (skill.environmentEffect === "presenceIncreaseReduction" && Number(presenceIncreaseReduction) >= skill.effectValue) {
     return { accepted: false, reason: "alreadyActive" };
   }
+  if (skill.environmentEffect === "autoReturn") {
+    if (context !== "dungeon") return { accepted: false, reason: "dungeonOnly" };
+    if (!autoReturnAvailability?.accepted) {
+      return { accepted: false, reason: autoReturnAvailability?.reason || "noPath" };
+    }
+  }
 
   if (skill.actionType === "cureStatus") {
     const nextCharacter = structuredClone(character);
@@ -60,7 +73,11 @@ export function resolveFieldSkill({ character, skillId, torchFuel = 0, presenceI
     nextCharacter.sp = Math.max(0, character.sp - spCost);
     const environment = skill.environmentEffect === "restoreTorch"
       ? { torchFuel: Math.min(100, Number(torchFuel) + skill.effectValue) }
-      : { presenceIncreaseReduction: skill.effectValue };
+      : skill.environmentEffect === "presenceIncreaseReduction"
+        ? { presenceIncreaseReduction: skill.effectValue }
+        : skill.environmentEffect === "autoReturn"
+          ? { startAutoWalker: true }
+          : {};
     return { accepted: true, character: nextCharacter, skill, healing: 0, environment };
   }
 

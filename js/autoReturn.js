@@ -29,6 +29,7 @@ export function configureAutoReturn(config) {
 
 export function getAutoReturnAvailability() {
   const start = getStartPosition();
+  if (state.autoReturning) return { accepted: false, reason: "alreadyActive" };
   if (state.anim) return { accepted: false, reason: "moving" };
   if (state.gridX === start.x && state.gridY === start.y) {
     return { accepted: false, reason: "alreadyAtStart" };
@@ -38,14 +39,14 @@ export function getAutoReturnAvailability() {
   return { accepted: true, reason: "", path };
 }
 
-export function startAutoReturn({ persistentThroughBattle = false } = {}) {
-  const availability = getAutoReturnAvailability();
-  if (!availability.accepted) {
-    if (availability.reason === "alreadyAtStart") options.say("すでにスタート地点にいる。");
-    else if (availability.reason === "noPath") options.say("踏破済みの道だけではスタート地点へ戻れない。");
+export function startAutoReturn({ persistentThroughBattle = false, availability = null } = {}) {
+  const resolvedAvailability = availability?.accepted ? availability : getAutoReturnAvailability();
+  if (!resolvedAvailability.accepted) {
+    if (resolvedAvailability.reason === "alreadyAtStart") options.say("すでにスタート地点にいる。");
+    else if (resolvedAvailability.reason === "noPath") options.say("踏破済みの道だけではスタート地点へ戻れない。");
     return false;
   }
-  const path = availability.path;
+  const path = [...resolvedAvailability.path];
   if (!path.length) {
     options.say("踏破済みの道だけではスタート地点へ戻れない。");
     return false;

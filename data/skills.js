@@ -53,6 +53,20 @@ export const SKILLS = Object.freeze({
     speedModifier: 15,
     effects: Object.freeze([{ statusId: "unyielding_stance", trigger: "perAction", guaranteed: true }])
   }),
+  wide_swing: Object.freeze({
+    id: "wide_swing",
+    name: "ぶん回し",
+    description: "武器を大きく振り回し、敵全体へ\n威力70%の物理攻撃を放つ。行動速度−5。",
+    actionType: "physicalAttack",
+    category: "combatArt",
+    spCost: 7,
+    target: "allEnemies",
+    hitCount: 1,
+    powerPerHit: 0.7,
+    speedModifier: -5,
+    inheritWeaponEffects: false,
+    effects: Object.freeze([])
+  }),
   quick_strike: Object.freeze({
     id: "quick_strike",
     name: "素早い一撃",
@@ -99,6 +113,20 @@ export const SKILLS = Object.freeze({
       statusKind: "physical",
       baseRate: 0.55
     }])
+  }),
+  blade_dance: Object.freeze({
+    id: "blade_dance",
+    name: "刃の舞",
+    description: "素早く敵陣を駆け抜け、敵全体へ\n威力60%の物理攻撃を放つ。行動速度＋10。",
+    actionType: "physicalAttack",
+    category: "combatArt",
+    spCost: 6,
+    target: "allEnemies",
+    hitCount: 1,
+    powerPerHit: 0.6,
+    speedModifier: 10,
+    inheritWeaponEffects: false,
+    effects: Object.freeze([])
   }),
   gale_blades: Object.freeze({
     id: "gale_blades", name: "疾風連刃",
@@ -152,6 +180,22 @@ export const SKILLS = Object.freeze({
     actionType: "buff", category: "supportSpell", spCost: 8, target: "self", speedModifier: 10,
     preventWhileStatusActive: "magic_focus",
     effects: Object.freeze([{ statusId: "magic_focus", trigger: "perAction", guaranteed: true }])
+  }),
+  flame_sweep: Object.freeze({
+    id: "flame_sweep",
+    name: "炎よ、薙ぎ払え！",
+    description: "炎で敵全体を薙ぎ払い、必中する\n火属性魔法ダメージを与える。行動速度−5。",
+    actionType: "spell",
+    category: "attackSpell",
+    spCost: 8,
+    target: "allEnemies",
+    element: "fire",
+    spellPower: 8,
+    powerMultiplier: 0.8,
+    unavoidable: true,
+    presentationId: "fire_ball",
+    speedModifier: -5,
+    effects: Object.freeze([])
   }),
   conceal_presence: Object.freeze({
     id: "conceal_presence",
@@ -335,13 +379,24 @@ export const SKILLS = Object.freeze({
   survival_instinct: Object.freeze({
     id: "survival_instinct",
     name: "生存本能",
-    description: "毒状態を回復するが、最大HPの50％分のダメージを受ける。HPは1未満にならない。",
+    description: "毒状態を回復するが、最大HPの25％分の\nダメージを受ける。HPは1未満にならない。",
     actionType: "sacrificialCure",
     category: "combatArt",
     spCost: 0,
     target: "self",
     statusId: "poison",
-    damageRate: 0.5,
+    damageRate: 0.25,
+    effects: Object.freeze([])
+  }),
+  full_sprint: Object.freeze({
+    id: "full_sprint",
+    name: "全力疾走",
+    description: "体力に任せて踏破済みの道を駆け抜け、\n上り階段までオート移動する。消費SP30。",
+    actionType: "dungeonEffect",
+    category: "combatArt",
+    spCost: 30,
+    target: "self",
+    environmentEffect: "autoReturn",
     effects: Object.freeze([])
   }),
   nieder_schlag: Object.freeze({
@@ -489,6 +544,10 @@ export function getSkills(ids = []) {
 
 export const LEVEL_SKILL_UNLOCKS = Object.freeze([
   Object.freeze({ job: "mage", level: 8, skillId: "lightning_pierce" }),
+  Object.freeze({ job: "warrior", level: 12, skillId: "wide_swing" }),
+  Object.freeze({ job: "thief", level: 12, skillId: "blade_dance" }),
+  Object.freeze({ job: "mage", level: 12, skillId: "flame_sweep" }),
+  Object.freeze({ job: "warrior", level: 20, skillId: "full_sprint" }),
   Object.freeze({ job: "warrior", level: 10, skillId: "nieder_schlag" }),
   Object.freeze({ job: "thief", level: 10, skillId: "blindheit" }),
   Object.freeze({ job: "priest", level: 10, skillId: "green_budding" }),

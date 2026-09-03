@@ -52,6 +52,9 @@ export function createSkillAttack(skill, { weapon, weaponId, weaponEnhancement =
     hitBonus: (resolvedWeapon.hitBonus || 0) + (skill.hitBonus || 0),
     criticalBonus: (resolvedWeapon.criticalBonus || 0) + (skill.criticalBonus || 0),
     speedModifier: skill.speedModifier ?? weaponType.speedModifier ?? 0,
-    effects: [...(resolvedWeapon.effects || []), ...(skill.effects || [])]
+    effects: [
+      ...(skill.inheritWeaponEffects === false ? [] : resolvedWeapon.effects || []),
+      ...(skill.effects || [])
+    ]
   };
 }
