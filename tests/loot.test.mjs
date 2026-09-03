@@ -71,14 +71,14 @@ test("B50F to B58F replace the black chest with a gold chest on the one-percent 
 test("B1F to B9F purple chests use the card-only 30/30/30/9/1 table", () => {
   assert.equal(hasPurpleChestLootTable(1), true);
   assert.equal(hasPurpleChestLootTable(9), true);
-  assert.equal(hasPurpleChestLootTable(10), false);
+  assert.equal(hasPurpleChestLootTable(10), true);
   assert.equal(rollPurpleChestLoot(rng(0.299), 1).cardId, "common_stairs_detection");
   assert.equal(rollPurpleChestLoot(rng(0.3), 1).cardId, "common_person_detection");
   assert.equal(rollPurpleChestLoot(rng(0.6), 9).cardId, "common_treasure_detection");
   assert.equal(rollPurpleChestLoot(rng(0.9), 9).cardId, "rare_search_and_destroy");
   assert.equal(rollPurpleChestLoot(rng(0.9), 9).rarity, "R");
   assert.equal(rollPurpleChestLoot(rng(0.99), 9).cardId, "sr_silent_steps");
-  assert.equal(rollPurpleChestLoot(rng(0), 10).kind, "none");
+  assert.equal(rollPurpleChestLoot(rng(0), 20).kind, "none");
 });
 
 test("early enemy drops use 40/55/5 percent bands", () => {
@@ -335,6 +335,7 @@ test("B10F to B20F place one to three red chests alongside any enabled black che
     const treasures = cells.flat().map(cell => cell.treasure).filter(Boolean);
     assert.equal(treasures.filter(type => type === "red").length, 2);
     assert.equal(treasures.filter(type => type === "black").length, depth === 19 ? 0 : 1);
+    assert.equal(treasures.filter(type => type === "purple").length, [10, 19].includes(depth) ? 1 : 0);
   }
 });
 

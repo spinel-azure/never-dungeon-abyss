@@ -10,13 +10,14 @@ test("battle HP presentation applies attacks, poison, bleeding and healing witho
     { type: "poisonDamage", targetSide: "player", amount: 3 },
     { type: "bleedingDamage", targetSide: "player", amount: 5 },
     { type: "healing", targetSide: "player", amount: 10 },
-    { type: "attackHit", targetSide: "enemy", hit: true, damage: 20 }
+    { type: "attackHit", targetSide: "enemy", hit: true, damage: 20 },
+    { type: "followUpDamage", targetSide: "enemy", damage: 10 }
   ];
   const result = events.reduce(
     (hp, event) => applyHpPresentationEvent(hp, battle, event),
     { player: 70, enemy: 80 }
   );
-  assert.deepEqual(result, { player: 60, enemy: 60 });
+  assert.deepEqual(result, { player: 60, enemy: 50 });
 });
 
 test("quick-status HP can follow every player presentation event through zero HP", () => {

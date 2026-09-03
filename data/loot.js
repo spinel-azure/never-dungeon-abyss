@@ -210,32 +210,49 @@ export function rollRedChestLoot(rng = Math.random, depth = 1) {
 }
 
 export const PURPLE_CHEST_LOOT_TABLES = Object.freeze([
-  Object.freeze({ minDepth: 1, maxDepth: 9 })
+  Object.freeze({
+    minDepth: 1,
+    maxDepth: 9,
+    entries: Object.freeze([
+      Object.freeze({ upperBound: 0.3, cardId: "common_stairs_detection", rarity: "C" }),
+      Object.freeze({ upperBound: 0.6, cardId: "common_person_detection", rarity: "C" }),
+      Object.freeze({ upperBound: 0.9, cardId: "common_treasure_detection", rarity: "C" }),
+      Object.freeze({ upperBound: 0.99, cardId: "rare_search_and_destroy", rarity: "R" }),
+      Object.freeze({ upperBound: 1, cardId: "sr_silent_steps", rarity: "SR" })
+    ])
+  }),
+  Object.freeze({
+    minDepth: 10,
+    maxDepth: 19,
+    entries: Object.freeze([
+      Object.freeze({ upperBound: 0.33, cardId: "common_follow_up", rarity: "C" }),
+      Object.freeze({ upperBound: 0.66, cardId: "common_guard_stone", rarity: "C" }),
+      Object.freeze({ upperBound: 0.99, cardId: "rare_mana_recovery", rarity: "R" }),
+      Object.freeze({ upperBound: 1, cardId: "sr_ability_boost", rarity: "SR" })
+    ])
+  })
 ]);
 
-export function hasPurpleChestLootTable(depth = 1) {
+export function getPurpleChestLootTable(depth = 1) {
   const floor = Math.max(1, Math.floor(Number(depth) || 1));
-  return PURPLE_CHEST_LOOT_TABLES.some(table => floor >= table.minDepth && floor <= table.maxDepth);
+  return PURPLE_CHEST_LOOT_TABLES.find(table => floor >= table.minDepth && floor <= table.maxDepth) || null;
+}
+
+export function hasPurpleChestLootTable(depth = 1) {
+  return Boolean(getPurpleChestLootTable(depth));
 }
 
 export function rollPurpleChestLoot(rng = Math.random, depth = 1) {
-  if (!hasPurpleChestLootTable(depth)) return { kind: "none" };
+  const table = getPurpleChestLootTable(depth);
+  if (!table) return { kind: "none" };
   const roll = normalizedRoll(rng);
-  const cardId = roll < 0.3
-    ? "common_stairs_detection"
-    : roll < 0.6
-      ? "common_person_detection"
-      : roll < 0.9
-        ? "common_treasure_detection"
-        : roll < 0.99
-          ? "rare_search_and_destroy"
-          : "sr_silent_steps";
+  const selected = table.entries.find(entry => roll < entry.upperBound) || table.entries.at(-1);
   return {
     kind: "card",
-    cardId,
+    cardId: selected.cardId,
     amount: 1,
     unidentifiedName: "？カード",
-    rarity: cardId === "sr_silent_steps" ? "SR" : cardId === "rare_search_and_destroy" ? "R" : "C"
+    rarity: selected.rarity
   };
 }
 

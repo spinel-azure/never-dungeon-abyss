@@ -124,6 +124,30 @@ const STANDARD_CARDS = [
     maxOwned: 1, maxCopies: 1, sellPrice: 1000, buybackPrice: 10000, overflowGold: 1000
   },
   {
+    id: "common_follow_up", rarity: "C", cost: 1,
+    name: "Follow-Up", nameJa: "追撃", concept: "直接ダメージ後に固定10ダメージ",
+    descriptionJa: "通常攻撃・物理スキル・攻撃呪文で\nダメージを与えた敵に、10の固定追加ダメージ。",
+    category: "battle", effectId: "direct_damage_follow_up", effectValue: 10,
+    iconId: "flame-sword", maxOwned: 1, maxCopies: 1,
+    sellPrice: 100, buybackPrice: 1000, overflowGold: 100
+  },
+  {
+    id: "common_guard_stone", rarity: "C", cost: 1,
+    name: "Guard Stone", nameJa: "護りの魔石", concept: "戦闘開始時に固定15障壁",
+    descriptionJa: "戦闘開始時、15ダメージ分の\n障壁を展開する。",
+    category: "battle", effectId: "battle_start_barrier_flat", effectValue: 15,
+    iconId: "quartered-shield", maxOwned: 1, maxCopies: 1,
+    sellPrice: 100, buybackPrice: 1000, overflowGold: 100
+  },
+  {
+    id: "rare_mana_recovery", rarity: "R", cost: 2,
+    name: "Mana Recovery", nameJa: "魔力回収", concept: "戦闘勝利時にSP5回復",
+    descriptionJa: "戦闘に勝利すると、\nSPを5回復する。",
+    category: "battle", effectId: "battle_victory_sp_recovery", effectValue: 5,
+    iconId: "mana-core", maxOwned: 1, maxCopies: 1,
+    sellPrice: 1000, buybackPrice: 10000, overflowGold: 1000
+  },
+  {
     id: "common_first_aid", rarity: "R", cost: 2,
     name: "First Aid", nameJa: "応急措置", concept: "出血耐性 +30%",
     descriptionJa: "出血状態になる確率を30％軽減する。",

@@ -216,7 +216,14 @@ test("configured empty special rooms contain one purple card chest without repla
   assert.equal(fixedEventRoom.treasure, null);
 
   buildBoundaryWallMap(10, seeded(110), {});
-  assert.equal(cells.flat().find(cell => cell.specialRoom).treasure, null);
+  assert.equal(cells.flat().find(cell => cell.specialRoom).treasure, "purple");
+
+  for (const depth of [14, 16, 18]) {
+    buildBoundaryWallMap(depth, seeded(100 + depth), {});
+    const protectedRoom = cells.flat().find(cell => cell.specialRoom);
+    assert.ok(protectedRoom.specialRoom.content);
+    assert.equal(protectedRoom.treasure, null);
+  }
 });
 
 test("an eligible empty special room can become a Maikaefer nest instead of a purple chest", () => {

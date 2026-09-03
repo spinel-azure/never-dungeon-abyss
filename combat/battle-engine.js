@@ -48,9 +48,13 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     : 0;
   const selectedEnemy = enemyParty ? enemyParty[selectedTargetIndex] : cloneCombatant(enemy);
   const sphinxBarrierRate = Math.max(0, sumCardEffectValues(character?.cards?.deckSlots, "sphinx_battle_barrier"));
-  const sphinxBarrier = sphinxBarrierRate > 0
+  const sphinxBarrierAmount = sphinxBarrierRate > 0
     ? Math.max(1, Math.ceil(Math.max(1, Number(character?.maxHp) || 1) * sphinxBarrierRate))
     : 0;
+  const guardStoneBarrier = Math.max(0, Math.floor(
+    sumCardEffectValues(character?.cards?.deckSlots, "battle_start_barrier_flat")
+  ));
+  const sphinxBarrier = sphinxBarrierAmount + guardStoneBarrier;
   const player = cloneCombatant(character);
   const lifeBoosterRecoveryPotential = hasCardEffect(character?.cards?.deckSlots, "life_booster")
     ? Math.ceil(player.maxHp * 0.05)
@@ -79,6 +83,13 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     scorpioActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_scorpio"),
     sphinxWisdomActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "sphinx_weakness_insight"),
     throwingItemGuaranteedHitAtStart: hasCardEffect(character?.cards?.deckSlots, "throwing_item_guaranteed_hit"),
+    followUpDamageAtStart: Math.max(0, Math.floor(
+      sumCardEffectValues(character?.cards?.deckSlots, "direct_damage_follow_up")
+    )),
+    victorySpRecoveryAtStart: Math.max(0, Math.floor(
+      sumCardEffectValues(character?.cards?.deckSlots, "battle_victory_sp_recovery")
+    )),
+    victoryCardEffectsApplied: false,
     mirageFirstAttackAvailable: hasCardEffect(character?.cards?.deckSlots, "mirage_first_attack_evasion"),
     sphinxBarrier,
     sphinxBarrierMax: sphinxBarrier,
@@ -88,7 +99,8 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     slashExecution: null,
     log: [
       enemyParty ? `${enemyParty.map(member => member.name).join("、")}が現れた！` : `${enemy.name}が現れた！`,
-      ...(sphinxBarrier > 0 ? ["スピンクスの威容が障壁を展開した！"] : []),
+      ...(sphinxBarrierAmount > 0 ? ["スピンクスの威容が障壁を展開した！"] : []),
+      ...(guardStoneBarrier > 0 ? ["護りの魔石が障壁を展開した！"] : []),
       ...(lifeBoosterRecovery > 0 ? [`ライフブースターがHPを${lifeBoosterRecovery}回復した！`] : []),
       ...(manaBoosterRecovery > 0 ? [`マナブースターがSPを${manaBoosterRecovery}回復した！`] : [])
     ],
@@ -203,6 +215,7 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
     next.turn += 1;
     next.phase = "command";
   }
+  applyBattleVictoryCardEffects(next);
   return { battle: next, accepted: true };
 }
 
@@ -377,21 +390,24 @@ export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.rand
   }
   next.targetIndex = normalizeLivingTargetIndex(next.enemies, next.targetIndex);
   next.enemy = next.enemies[next.targetIndex];
+  applyBattleVictoryCardEffects(next);
   return { battle: next, accepted: true };
 }
 
 function executeTargetedAction(options) {
   const start = options.battle.presentationEvents.length;
-  executeAction(options);
-  if (options.targetSide !== "enemy" || options.targetIndex == null) return;
+  const result = executeAction(options);
+  if (options.targetSide !== "enemy" || options.targetIndex == null) return result;
   for (let index = start; index < options.battle.presentationEvents.length; index += 1) {
     const event = options.battle.presentationEvents[index];
     if (event.targetSide === "enemy") event.targetIndex = options.targetIndex;
   }
+  return result;
 }
 
 function executeRandomlyDistributedHits({ battle, action, actor, rng }) {
   const hitCount = Math.max(1, Math.floor(Number(action.hitCount) || 1));
+  const followUpTargetIndexes = new Set();
   for (let hitIndex = 0; hitIndex < hitCount; hitIndex += 1) {
     const living = livingEnemyIndexes(battle.enemies);
     if (living.length === 0) break;
@@ -399,7 +415,7 @@ function executeRandomlyDistributedHits({ battle, action, actor, rng }) {
     const targetIndex = living.length === 1 ? living[0] : living[Math.floor(roll * living.length)];
     const target = battle.enemies[targetIndex];
     const eventStart = battle.presentationEvents.length;
-    executeTargetedAction({
+    const result = executeTargetedAction({
       battle,
       action: { ...action, hitCount: 1 },
       actor,
@@ -407,14 +423,20 @@ function executeRandomlyDistributedHits({ battle, action, actor, rng }) {
       target,
       targetSide: "enemy",
       targetIndex,
+      deferFollowUp: true,
       rng
     });
+    if (result?.followUpEligible) followUpTargetIndexes.add(targetIndex);
     for (let index = eventStart; index < battle.presentationEvents.length; index += 1) {
       const event = battle.presentationEvents[index];
       if (event.type !== "attackHit" || event.actorSide !== "player") continue;
       event.hitIndex = hitIndex;
       event.hitCount = hitCount;
     }
+  }
+  for (const targetIndex of followUpTargetIndexes) {
+    const target = battle.enemies[targetIndex];
+    if (target?.alive && target.hp > 0) applyFixedFollowUpDamage(battle, target, targetIndex);
   }
 }
 
@@ -641,7 +663,7 @@ function buildEnemyAction(action, normalAttack) {
   };
 }
 
-function executeAction({ battle, action, actor, actorSide, target, targetSide, rng }) {
+function executeAction({ battle, action, actor, actorSide, target, targetSide, deferFollowUp = false, rng }) {
   const actorStats = combatStats(actor);
   const targetStats = combatStats(target);
   if (action.actionType === "enemyEscape" && actorSide === "enemy") {
@@ -1097,7 +1119,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
     presentedHits = protectedDamage.presentedHits;
     actualDamage = protectedDamage.actualDamage;
   }
-  if (targetSide === "player" && actualDamage > 0 && Number(battle.sphinxBarrier) > 0) {
+  if (actorSide === "enemy" && targetSide === "player" && actualDamage > 0 && Number(battle.sphinxBarrier) > 0) {
     const absorbed = Math.min(actualDamage, Math.max(0, Math.floor(Number(battle.sphinxBarrier) || 0)));
     let remainingAbsorption = absorbed;
     presentedHits = presentedHits.map(hit => {
@@ -1154,9 +1176,16 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
     });
   });
   if (isMultiHit && hitCount > 0) battle.log.push(`合計${actualDamage}ダメージ！`);
+  const followUpEligible = actorSide === "player"
+    && targetSide === "enemy"
+    && ["physicalAttack", "spell"].includes(action.actionType)
+    && actualDamage > 0
+    && target.alive
+    && Number(battle.followUpDamageAtStart) > 0;
+  if (followUpEligible && !deferFollowUp) applyFixedFollowUpDamage(battle, target);
   const landedHits = presentedHits.filter(hit => hit.hit);
   const allLandedHitsBlockedByNpcWall = landedHits.length > 0 && landedHits.every(hit => hit.blockedByNpcWall);
-  const applications = barrier || allLandedHitsBlockedByNpcWall ? [] : [
+  const applications = barrier || allLandedHitsBlockedByNpcWall || !target.alive ? [] : [
     ...resolvedHits.flatMap(hit => hit.effects || []),
     ...(result.actionEffects || [])
   ];
@@ -1197,6 +1226,43 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, r
     }
   }
   markUltimateUsed(actor, action);
+  return { followUpEligible, actualDamage };
+}
+
+export function applyFixedFollowUpDamage(battle, target, targetIndex = null) {
+  const damage = Math.max(0, Math.floor(Number(battle?.followUpDamageAtStart) || 0));
+  if (!battle || !target?.alive || target.hp <= 0 || damage <= 0) return 0;
+  target.hp = Math.max(0, target.hp - damage);
+  target.alive = target.hp > 0;
+  battle.log.push(`追撃！ ${damage}ダメージ！`);
+  battle.presentationEvents.push({
+    type: "followUpDamage",
+    actorSide: "player",
+    targetSide: "enemy",
+    ...(targetIndex == null ? {} : { targetIndex }),
+    damage,
+    message: `追撃！ ${damage}ダメージ！`
+  });
+  return damage;
+}
+
+export function applyBattleVictoryCardEffects(battle) {
+  if (!battle || battle.outcome !== "victory" || battle.victoryCardEffectsApplied) return 0;
+  battle.victoryCardEffectsApplied = true;
+  const requested = Math.max(0, Math.floor(Number(battle.victorySpRecoveryAtStart) || 0));
+  const recovered = Math.min(requested, Math.max(0, battle.player.maxSp - battle.player.sp));
+  if (recovered <= 0) return 0;
+  battle.player.sp += recovered;
+  const message = `魔力回収によりSPが${recovered}回復した！`;
+  battle.log.push(message);
+  battle.presentationEvents.push({
+    type: "spHealing",
+    actorSide: "player",
+    targetSide: "player",
+    amount: recovered,
+    message
+  });
+  return recovered;
 }
 
 export function getPlayerWeaponElement(player, action = {}) {

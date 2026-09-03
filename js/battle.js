@@ -448,7 +448,7 @@ async function playPresentationEvents() {
         : battleUi.presentationHp?.enemy;
     const defeatedTargetHasQueuedHit = event.targetSide === "enemy"
       && Number(enemyHpBefore) <= 0
-      && (event.hit || ["damage", "poisonDamage", "bleedingDamage"].includes(event.type));
+      && (event.hit || ["damage", "followUpDamage", "poisonDamage", "bleedingDamage"].includes(event.type));
     if (defeatedTargetHasQueuedHit) continue;
     applyPresentationHp(event);
     const enemyHpAfter = event.targetSide !== "enemy"
@@ -486,7 +486,7 @@ async function playPresentationEvents() {
       battleUi.playSe("heal");
     } else if (event.type === "barrierDamage") {
       showBattleNumber("player", event.amount, "barrier");
-    } else if (!dedicatedPresentationPlayed && (event.hit || event.type === "damage" || event.type === "poisonDamage" || event.type === "bleedingDamage")) {
+    } else if (!dedicatedPresentationPlayed && (event.hit || event.type === "damage" || event.type === "followUpDamage" || event.type === "poisonDamage" || event.type === "bleedingDamage")) {
       showBattleNumber(
         event.targetSide,
         event.damage ?? event.amount,
@@ -587,7 +587,7 @@ export function applyHpPresentationEvent(presentationHp, battle, event) {
     if (!enemy || !Number.isFinite(next.enemies[targetIndex])) return next;
     if (event.type === "healing") {
       next.enemies[targetIndex] = Math.min(enemy.maxHp, next.enemies[targetIndex] + amount);
-    } else if (event.hit || ["damage", "poisonDamage", "bleedingDamage"].includes(event.type)) {
+    } else if (event.hit || ["damage", "followUpDamage", "poisonDamage", "bleedingDamage"].includes(event.type)) {
       next.enemies[targetIndex] = Math.max(0, next.enemies[targetIndex] - amount);
     }
     return next;
@@ -595,7 +595,7 @@ export function applyHpPresentationEvent(presentationHp, battle, event) {
   if (event.type === "healing") {
     const maximum = battle?.[event.targetSide]?.maxHp ?? Number.MAX_SAFE_INTEGER;
     next[event.targetSide] = Math.min(maximum, next[event.targetSide] + amount);
-  } else if (event.hit || ["damage", "poisonDamage", "bleedingDamage"].includes(event.type)) {
+  } else if (event.hit || ["damage", "followUpDamage", "poisonDamage", "bleedingDamage"].includes(event.type)) {
     const minimum = battle?.scriptedNonlethal ? 1 : 0;
     next[event.targetSide] = Math.max(minimum, next[event.targetSide] - amount);
   }
