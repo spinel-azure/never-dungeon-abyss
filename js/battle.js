@@ -547,16 +547,7 @@ async function playNpcChargeCutIn(event) {
 }
 
 function syncFinalPlayerState() {
-  battleUi.onCharacterChanged({
-    hp: battleUi.battle.player.hp,
-    sp: battleUi.battle.player.sp,
-    statuses: structuredClone(battleUi.battle.player.statuses),
-    inventory: structuredClone(battleUi.battle.player.inventory),
-    herbicideTrialUses: Number(battleUi.battle.player.herbicideTrialUses) || 0,
-    alive: battleUi.battle.player.alive,
-    npcSystem: structuredClone(battleUi.battle.player.npcSystem),
-    playerCharge: structuredClone(battleUi.battle.player.playerCharge)
-  });
+  battleUi.onCharacterChanged(createPersistentBattlePlayerChanges(battleUi.battle.player));
 }
 
 async function playSlashEffect(image, { restoreImage = true } = {}) {
@@ -700,12 +691,7 @@ function finishBattle() {
   }
   battleUi.battle.player.hp = Math.min(battleUi.battle.player.maxHp, battleUi.battle.player.hp);
   battleUi.battle.player.statuses = clearBattleOnlyStatuses(battleUi.battle.player.statuses);
-  battleUi.onCharacterChanged({
-    hp: battleUi.battle.player.hp,
-    alive: battleUi.battle.player.hp > 0,
-    statuses: structuredClone(battleUi.battle.player.statuses),
-    npcSystem: structuredClone(battleUi.battle.player.npcSystem)
-  });
+  syncFinalPlayerState();
   const snapshot = createBattleCompletionSnapshot(battleUi.battle);
   closeBattle();
   if (outcome === "victory") battleUi.onVictory(snapshot);
@@ -725,6 +711,19 @@ export function createBattleCompletionSnapshot(battle) {
     );
   }
   return snapshot;
+}
+
+export function createPersistentBattlePlayerChanges(player) {
+  return {
+    hp: player.hp,
+    sp: player.sp,
+    statuses: structuredClone(player.statuses),
+    inventory: structuredClone(player.inventory),
+    herbicideTrialUses: Number(player.herbicideTrialUses) || 0,
+    alive: player.hp > 0,
+    npcSystem: structuredClone(player.npcSystem),
+    playerCharge: structuredClone(player.playerCharge)
+  };
 }
 
 function closeBattle() {

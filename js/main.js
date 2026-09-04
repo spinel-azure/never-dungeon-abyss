@@ -109,7 +109,7 @@ import { createEnemyCombatant, getEnemyById, getEnemyEncounterCount, getRandomEn
 import { applyBossVictory, bossLeavesRemains, createBossCombatant, getBossById, getFloorBossByDepth, isBossDefeated } from "../data/bosses.js";
 import { B100_GAUNTLET_BOSS_IDS, getB100GauntletFlag } from "../data/fixed-floor-maps.js";
 import { consumeKeyItem, getKeyItem, grantKeyItem, hasKeyItem } from "../data/key-items.js";
-import { configureBattle, handleBattleInput, isBattleActive, isJireneScriptedBattleActive, openBattleItems, startBattle } from "./battle.js";
+import { configureBattle, createPersistentBattlePlayerChanges, handleBattleInput, isBattleActive, isJireneScriptedBattleActive, openBattleItems, startBattle } from "./battle.js";
 import { awardBattleExperience, calculateBattleExperienceReward, createTempleRevival, getInnStayFee, grantEventItems, resolveDungeonDefeat, resolveInnStableStay, resolveInnStay, resolveTemplePoisonTreatment, unlockGuildRequest } from "./character-services.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { resolveTreasureTrap } from "../combat/resolve-trap.js";
@@ -2683,6 +2683,9 @@ import {
   }
 
   function finishBattleVictory(battle) {
+    if (character && battle?.player) {
+      updateCharacterFromBattle(createPersistentBattlePlayerChanges(battle.player));
+    }
     const questWaspHiveVictory = activeRareRoomEncounterId === "quest_029_wasp_hive";
     const defeatedEnemyId = battle?.defeatedEnemyId || battle?.encounterBossId || battle?.enemy?.id || "";
     const startMichaelaRestoration = defeatedEnemyId === "amayenak_b100f"

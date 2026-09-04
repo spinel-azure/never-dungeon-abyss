@@ -25,6 +25,7 @@ import {
   createBattleState,
   resolveBattleRound
 } from "../combat/battle-engine.js";
+import { createPersistentBattlePlayerChanges } from "../js/battle.js";
 
 const CARD_IDS = Object.freeze(["common_follow_up", "common_guard_stone", "rare_mana_recovery"]);
 
@@ -325,6 +326,16 @@ test("Mana Recovery restores actual SP once on a real victory and persists on th
   assert.equal(applyBattleVictoryCardEffects(battle), 0);
   assert.equal(battle.player.sp, 85);
   assert.equal(normalizeCharacter(structuredClone(battle.player)).sp, 85);
+});
+
+test("Mana Recovery is included in the persistent character state at battle completion", () => {
+  const character = makeCharacter("warrior", ["rare_mana_recovery"]);
+  character.sp = 80;
+  const battle = resolve(character, makeEnemy(0, { hp: 1, maxHp: 1 }));
+  const changes = createPersistentBattlePlayerChanges(battle.player);
+  assert.equal(changes.sp, 85);
+  assert.equal(normalizeCharacter({ ...character, ...changes }).sp, 85);
+  assert.notEqual(changes.inventory, battle.player.inventory);
 });
 
 test("Mana Recovery caps the actual amount and stays silent at full SP", () => {
