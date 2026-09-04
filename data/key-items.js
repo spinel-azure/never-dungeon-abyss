@@ -1,4 +1,9 @@
 export const KEY_ITEMS = Object.freeze({
+  royal_cat_medal: Object.freeze({
+    id: "royal_cat_medal", name: "ケーニクリヒャー・カッツェンオルデン",
+    description: "女王の加護：表層の奈落で、女王の装飾品が持っていた力を再現する。",
+    sellPrice: 0, sellable: false, consumable: false, version: 1
+  }),
   queen_tiara: Object.freeze({
     id: "queen_tiara",
     name: "女王のティアラ",

@@ -523,6 +523,15 @@ export function closeTown() {
   town.onBgmChanged("");
 }
 
+export function setTownEndingSuspended(suspended) {
+  town.disposePassersby?.();
+  town.disposePassersby = null;
+  town.root.classList.toggle("ending-suspended", suspended);
+  if (!suspended) town.disposePassersby = configureTownPassersby({
+    canvas: town.passersbyCanvas, root: town.root, getCharacter: town.getCharacter
+  });
+}
+
 export function isTownOpen() {
   return town.active;
 }

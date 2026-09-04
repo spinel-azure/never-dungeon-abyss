@@ -1,4 +1,5 @@
 import { getInitialEquipment } from "./equipment.js";
+import { normalizeEndingFlags } from "./ending.js";
 import { getDeckCostAtLevel, getLevelGrowth, normalizeExperience } from "./growth.js";
 import { createInitialCardState, normalizeCardState } from "./deck.js";
 import { collectCardStatBonuses } from "./cards.js";
@@ -90,7 +91,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     warehouse: createInitialWarehouse(),
     lootBag: createInitialLootBag(),
     quests: normalizeQuestState(),
-    eventFlags: {},
+    eventFlags: normalizeEndingFlags(),
     adventureStats: normalizeAdventureStats(),
     marathonChallenge: createInitialMarathonChallenge(),
     longMarchChallenge: createInitialLongMarchChallenge(),
@@ -193,10 +194,10 @@ export function normalizeCharacter(character) {
   const latestEquipmentBuyback = normalizedEquipmentBuyback.at(-1);
   const latestItemBuyback = normalizedItemBuyback.at(-1);
   const quests = normalizeQuestState(character.quests);
-  const eventFlags = backfillB80TransferUnlock(
+  const eventFlags = normalizeEndingFlags(backfillB80TransferUnlock(
     character.eventFlags,
     quests.completedQuestIds
-  );
+  ));
   if (quests.completedQuestIds.includes("guild_011")) {
     eventFlags.support_npc_malicious_join_unlocked = true;
   }

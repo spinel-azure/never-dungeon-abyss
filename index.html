@@ -22,6 +22,7 @@
   <link rel="preload" as="image" href="images/npc/NPC_12.avif" type="image/avif">
   <link rel="preload" as="image" href="images/npc/NPC_13e.avif" type="image/avif">
   <link rel="preload" as="image" href="images/npc/NPC_19b.avif" type="image/avif">
+  <link rel="stylesheet" href="css/ending.css">
 </head>
 <body class="title-active">
   <section id="titleScreen" class="title-screen" aria-label="NEVER DUNGEON : ABYSS タイトル画面">
@@ -335,7 +336,10 @@
     <section class="menu-screen" id="menuScreen" aria-label="メニュー画面" hidden>
       <div class="menu-panel status-panel" data-menu-view="status" hidden>
         <article class="nde-status-page" data-status-page="0">
-          <h1 class="menu-title">＊ STATUS ＊</h1>
+          <h1 class="menu-title">＊ STATUS ＊<details id="royalMedal" class="royal-medal" hidden><summary aria-label="王家の猫勲章"><img src="images/screenshots/medal_01.avif" alt="王家の猫勲章"></summary><span>《Königlicher Katzenorden》
+ケーニクリヒャー・カッツェンオルデン
+
+女王の加護：表層の奈落で、女王の装飾品が持っていた力を再現する。</span></details></h1>
           <div class="nde-status-identity"><strong><span>NAME：</span><output id="statusName">NO_NAME</output></strong><strong><span>JOB：</span><output id="statusJob">UNKNOWN</output></strong><strong><span>LV：</span><output id="statusLevel">---</output></strong></div>
           <div class="nde-status-vitals"><span>HP ---- / ----</span><span>SP ---- / ----</span><span>DECK COST : --</span></div>
           <section id="ndeStatRows" class="nde-stat-rows" aria-label="能力値未接続"></section>
@@ -566,7 +570,7 @@
     </section>
   </section>
 </main>
-  <script type="module" src="js/main.js?v=20260904-01"></script>
+  <script type="module" src="js/main.js?v=20260904-02"></script>
   <script type="module" src="js/title-screen.js"></script>
 </body>
 </html>

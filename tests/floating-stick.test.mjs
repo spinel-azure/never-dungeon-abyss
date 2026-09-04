@@ -44,7 +44,7 @@ test("floating touch UI is available across town, dungeon, battle, and menus", a
   assert.match(menu, /touchControlsMode:\s*menu\.touchControlsMode/);
   assert.match(main, /manualMove: amount => dispatchGamepadAction\(amount > 0 \? "up" : "down"\)/);
   assert.match(main, /manualTurn: amount => dispatchGamepadAction\(amount < 0 \? "left" : "right"\)/);
-  assert.match(main, /character\s*&& !sceneTransitionRunning\s*&& !document\.body\.classList\.contains\("title-active"\)/);
+  assert.match(main, /character\s*&& !sceneTransitionRunning\s*&& !endingSequenceActive\s*&& !document\.body\.classList\.contains\("title-active"\)/);
   assert.doesNotMatch(main, /isInputAllowed:[\s\S]*?&& !isBattleActive\(\)/);
   assert.match(css, /\.floating-stick-zone\{[^}]*position:fixed/);
   assert.doesNotMatch(css, /body\.town-active \.floating-stick-zone/);

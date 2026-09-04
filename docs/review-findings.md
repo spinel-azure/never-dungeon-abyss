@@ -1,5 +1,24 @@
 # Repository review findings
 
+### 2026-09-04 本編エンディング・王家の猫勲章・女王の加護
+
+- 状態: 対応済み（PC・スマートフォン・タブレット相当のEdgeブラウザ検証済み。実端末検証は未実施）
+- 既存アマイェナク勝利情報からミカエラ復元演出へ接続し、既存6ページの会話を自動送りへ対応。最後の台詞を指定文へ変更した。B100F帰還地点へ転送後1.5秒表示し、既存returnToTown／ロット確定・帰還精算・NPC契約更新の共通処理を通して町へ帰還する。凱旋ではロット鑑定や契約更新画面を割り込ませず、確定済み所持品と既存の保留精算状態を維持する。
+- 凱旋は通常の町UIから分離した専用イベント画面。NPC_ending.avifと専用メッセージ、ロット画面と共通のEffectEngineによる四隅から内向きの紙吹雪を表示する。既存crackerへ方向指定（既定値は従来の上向き）を追加した。1.8秒で粒子を終了し、文章表示後に2秒暗転する。prefers-reduced-motionでは各隅の粒子数を36→5へ減らす。
+- 通行人は既存disposeでRAF・ResizeObserverを解除し、Canvasと雲を停止・非表示にする。完走・スキップ・中断復帰では既存ループを破棄してから1本だけ再開する。凱旋・ロールのRAFは1本の管理器で実時間基準、スマートフォン・タブレットは最大30fps。ロール終了後に専用RAFが0本、通行人RAFが1本へ戻ることをブラウザで検証した。
+- エピローグ・クレジットはdata/ending.jsから生成する。空のテストプレイヤー項目は生成しない。オープニング共通のメッシュとシルエット用CSSを使用し、NPC_01e.avif、128px整数倍のmedal_01.avif、dasende.avifを表示する。29～35秒は勲章、35～41秒はエピローグ末文、41～73秒はクレジット、73～81秒は謝辞、81秒以降は終了画像を中央固定し、91～96秒に画面と音声をフェードアウトする。
+- audio.js既存のending登録とデコードキャッシュ・AudioContext・BGMマスター音量を共用する非ループ再生を追加。source.start後のAudioContext.currentTimeをロール時刻に用い、通常のBGM復帰処理で先頭へ巻き戻さない。音声無効・再生拒否・読み込みタイムアウト時は96秒の実時間タイマーへ切替。遅延ロード後に音声が勝手に再生されないこと、キャンセル時のタイマー・Source・Gain解放を検証した。
+- 凱旋完了時にconsumeKeyItemでqueen_tiara／queen_earring／queen_necklaceを返還し、grantKeyItemで一品物royal_cat_medalを付与する。物語・報酬状態を本体へまとめて反映してオートセーブ後にロールへ進む。保存失敗時は再試行表示で待機する。完走・スキップで鑑賞済みにして再保存する。再ロード時は物語済み・再生待ちならロールだけ再開する。
+- 新規永続フラグ: queen_regalia_returned、royal_cat_medal_awarded、queen_blessing_unlocked、ending_story_completed、ending_credits_pending、ending_credits_watched。既存boss_amayenak_b100f_defeated／michaela_restored／truth_staff_obtainedも維持する。旧セーブの新規フラグ既定値はfalse。階層到達だけでクリア扱いしない。
+- 女王の加護はB1F～B99Fで既存三装飾品のNPC・宝箱・下り階段探知と未踏破表示を再現する。たいまつ条件と実踏破率を変更しない。B100Fの砂嵐を優先し、B101F以降と町では加護を無効化する。返還後も三装飾品完成扱いを維持し、通常猫の再出現とB100F進入不能への回帰を防ぐ。
+- ステータス見出しへ勲章を48pxで表示し、タップ／クリックで正式名称と指定説明を確認できる。鑑賞済みなら町の冒険記録からエンドロールを再鑑賞できる。再鑑賞では返還・報酬・クリアフラグを再処理しない。
+- 入力は既存の移動停止と共通入力経路に加え、直接タップによるメニュー起動を専用の一時イベントガードで遮断する。終了・pagehide時にガード、復元会話タイマー、入口待機タイマー、ロールのリスナーとRAFを解除する。BFCache復帰も保存段階から再開する。
+- 追加テスト: tests/ending.test.mjs、tests/ending-audio.test.mjs（計19件）。既存テストのキャッシュ番号・帰還関数引数・終了判定・タッチ入力ロックの前提を新仕様へ更新した。Node全919件成功・失敗0件、Python21件成功・警告0件・失敗0件・スキップ2件。変更／新規JS・MJS22ファイルの構文チェックとgit diff --check成功。
+- ブラウザ検証: tests/browser/ending.mjsは実main.jsにテスト時だけ状態操作フックを注入し、独立したブラウザコンテキストで勝利スナップショット→復元→入口→共通帰還→保存→ロールを検証する。1280×900、390×844、820×1180で表示、入力割込み抑止、完走、途中ロード後スキップ、再鑑賞、pagehide／pageshow、通行人・雲の復帰を確認。tests/browser/ending-audio.mjsは実BGMを96秒再生して完走、tests/browser/ending-fallback.mjsはユーザー操作なしの音声制限下でフォールバック完走を確認。pageerrorは全経路0件。自動操作前の既存AudioContext制限警告、通常bootstrapを省いた音声単独テストの既存preload未使用警告は観測された（警告0件とは報告しない）。
+- 再実行: Playwright利用可能な環境でnode tools/dev-server.cjs 4175を起動し、node tests/browser/ending.mjs、node tests/browser/ending-audio.mjs、node tests/browser/ending-fallback.mjsを実行する。ENDING_TEST_URLで接続先、ENDING_TEST_OUTPUTで主結合テストの画像出力先を変更可能。既定の画像出力先はOS一時ディレクトリのnda-ending-qa。
+- 未確認: iOS Safari／Android実機、実コントローラー、実端末での発熱・音声出力。ブラウザ相当検証を実機確認として扱わない。
+- 日付・キャッシュ: LAST UPDATEは当日更新済みの2026-09-04を維持し、index.htmlのmain.jsだけを20260904-02へ更新。内部ES Module importに?v=を付けない。翌日以降、その日最初のゲーム本体更新ではLAST UPDATEを実作業日へ更新する。READMEは変更せず、非公開仕様を公開していない。元から未追跡のNPC_01e.avifは正式指示に基づき参照しただけで、素材ファイルを加工・削除していない。コミット／push未実施。
+
 ### 2026-09-04 ウィッカーマン・真鍮の雄牛の常時炎レイヤー
 
 - 状態: 対応済み

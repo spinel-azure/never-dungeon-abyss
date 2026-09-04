@@ -147,7 +147,7 @@ test("escaping Todes Scorpio blocks a rematch until the next exploration", async
   assert.match(mainSource, /isBossRetryBlocked: bossId => escapedSpecialBossesThisExploration\.has\(bossId\)/);
   assert.match(mainSource, /enterDungeonFromTown[\s\S]*escapedSpecialBossesThisExploration\.clear\(\)/);
   assert.match(mainSource, /enterFloorFromTransfer[\s\S]*escapedSpecialBossesThisExploration\.clear\(\)/);
-  assert.match(mainSource, /function returnToTown\(\) \{\s*escapedSpecialBossesThisExploration\.clear\(\)/);
+  assert.match(mainSource, /function returnToTown\([^)]*\) \{\s*escapedSpecialBossesThisExploration\.clear\(\)/);
   assert.match(playerSource, /hooks\.isBossRetryBlocked\(boss\.id\)[\s\S]*今は開けるのをやめておこう…。/);
   assert.match(playerSource, /state\.gridX = fromGX;[\s\S]*state\.gridY = fromGY;/);
 });

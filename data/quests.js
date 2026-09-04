@@ -1251,6 +1251,7 @@ export function completeThirdQueenShadowInvestigation(character) {
 }
 
 export function hasCompleteQueenRegalia(character) {
+  if (character?.eventFlags?.queen_regalia_returned) return true;
   return ["queen_tiara", "queen_earring", "queen_necklace"]
     .every(keyItemId => hasKeyItem(character?.keyItems, keyItemId));
 }

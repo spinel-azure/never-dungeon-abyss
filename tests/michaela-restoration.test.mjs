@@ -34,7 +34,7 @@ test("Michaela restoration preserves all six requested dialogue pages", () => {
 
 test("Amayenak victory persists recovery flags and returns to the B100F entrance", () => {
   const main = read("js/main.js");
-  assert.match(main, /defeatedEnemyId === "amayenak_b100f"[\s\S]*?!character\?\.eventFlags\?\.michaela_restored/);
+  assert.match(main, /defeatedEnemyId === "amayenak_b100f"[\s\S]*?!character\?\.eventFlags\?\.ending_story_completed/);
   assert.match(main, /truth_staff_obtained: true/);
   assert.match(main, /michaela_restored: true/);
   assert.match(main, /cells\.flat\(\)\.find\(cell => cell\.fixedReturnPoint\)/);
@@ -85,6 +85,6 @@ test("restoration returns silently without an unrelated floor transition message
 
 test("only main.js receives the new cache buster", () => {
   const html = read("index.html");
-  assert.match(html, /js\/main\.js\?v=20260904-01/);
+  assert.match(html, /js\/main\.js\?v=20260904-02/);
   assert.doesNotMatch(read("js/main.js"), /from\s+["'][^"']+\?v=/);
 });

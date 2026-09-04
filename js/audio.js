@@ -72,6 +72,7 @@ const audio = {
   desiredLoops: new Set(),
   desiredBgmKey: "",
   bgmSource: null,
+  cinematic: null,
   bgmRequestId: 0,
   pendingRequests: new Map(),
   requestIds: new Map(),
@@ -161,6 +162,7 @@ export function startBgm(key) {
 }
 
 export function stopBgm() {
+  audio.cinematic?.stop();
   audio.desiredBgmKey = "";
   audio.bgmRequestId += 1;
   stopBgmSource();
@@ -254,10 +256,48 @@ function restartDesiredLoops() {
 
 function stopInterruptedAudio() {
   stopAllSe();
+  if (audio.cinematic) return;
   stopBgmSource();
 }
 
+// Non-looping presentation using shared decoding, options and master gain.
+export function createEndingAudioClock({ timeoutMs = 8000 } = {}) {
+  stopBgm();
+  let source = null, gain = null, context = null, startedAt = 0, fallbackAt = 0;
+  let cancelled = false, timer = 0, cancelStart = null;
+  const session = {
+    async start() {
+      const interrupted = new Promise(resolve => { cancelStart = () => resolve(false); });
+      const timedOut = new Promise(resolve => { timer = setTimeout(() => resolve(false), timeoutMs); });
+      const ready = audio.bgmEnabled && audio.bgmVolume > 0
+        ? Promise.all([resumeAudioContext(), loadBuffer("bgm:ending", audio.bgmUrls.get("ending"))])
+        : Promise.resolve(false);
+      const result = await Promise.race([ready, timedOut, interrupted]);
+      clearTimeout(timer); timer = 0; cancelStart = null;
+      if (cancelled) return false;
+      if (result && result[0]?.state === "running" && result[1]) {
+        context = result[0]; source = context.createBufferSource();
+        source.buffer = result[1]; source.loop = false;
+        gain = context.createGain(); gain.connect(audio.bgmMasterGain); source.connect(gain);
+        startedAt = context.currentTime; source.start(0);
+      } else fallbackAt = performance.now();
+      return Boolean(source);
+    },
+    elapsed() { return source ? Math.max(0, context.currentTime - startedAt) : Math.max(0, (performance.now() - fallbackAt) / 1000); },
+    fade(value) { if (gain) gain.gain.setValueAtTime(Math.max(0, Math.min(1, value)), context.currentTime); },
+    stop() {
+      cancelled = true; clearTimeout(timer); timer = 0; cancelStart?.();
+      if (source) { try { source.stop(); } catch {} source.disconnect(); }
+      gain?.disconnect(); source = null; gain = null;
+      if (audio.cinematic === session) audio.cinematic = null;
+    }
+  };
+  audio.cinematic = session;
+  return session;
+}
+
 function restartInterruptedAudio() {
+  if (audio.cinematic) { void resumeAudioContext(); return; }
   restartDesiredLoops();
   restartBgm();
 }

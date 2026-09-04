@@ -1,0 +1,26 @@
+.ending-screen{position:fixed;inset:0;z-index:1000;overflow:hidden;background:#000;color:#fff;font-family:"PixelFont","GameFont",sans-serif;isolation:isolate}
+.ending-roll,.ending-scroll,.ending-arrival,.ending-shade{position:absolute;inset:0;overflow:hidden}
+.ending-roll{opacity:0}.ending-shade{z-index:10;background:#000;opacity:0;pointer-events:none}
+.ending-arrival{display:none;max-width:1100px;max-height:740px;margin:auto;background:#111 url("../images/background/town_01b.avif") center/cover no-repeat}
+.ending-screen[data-phase="arrival"] .ending-arrival,.ending-screen[data-phase="save-error"] .ending-arrival{display:block}
+.ending-screen[data-phase="arrival"] .ending-roll{visibility:hidden}
+.ending-arrival-image{position:absolute;width:100%;height:100%;object-fit:contain;object-position:center bottom}
+.ending-arrival canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.ending-arrival p{position:absolute;bottom:3%;left:5%;width:90%;box-sizing:border-box;padding:1em;background:rgba(0,0,0,.8);font:clamp(15px,2vw,24px)/1.8 "GameFont",sans-serif;text-align:center;text-shadow:0 2px #000}
+.ending-queen{opacity:.14;width:min(80vw,680px);height:85%;filter:brightness(0) invert(.75) sepia(.3) drop-shadow(0 0 12px #e4c375)}
+.ending-scroll{z-index:2}
+.ending-section{position:absolute;top:0;left:8%;width:84%;text-align:center;white-space:pre-line;visibility:hidden;font-size:clamp(16px,2.2vw,27px);line-height:1.85;overflow-wrap:anywhere}
+.ending-section p{margin:0 0 2.2em}
+.ending-credit{margin-bottom:3.4em}.ending-credit p{margin:0 0 .7em}.ending-credit p:first-child{color:#e5ce9a;font-size:.82em}
+.ending-medal,.ending-after,.ending-thanks,.ending-end{top:50%}
+.ending-medal img{width:128px;height:128px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 0 9px #c49c43)}
+.ending-end img{width:min(70vw,560px);max-height:45vh;object-fit:contain;image-rendering:pixelated}
+.ending-thanks{font-size:clamp(22px,4vw,42px)}
+.ending-presenting .game>*:not(#endingScreen){visibility:hidden!important;pointer-events:none!important}
+.ending-presenting #touchControls,.ending-presenting .touch-controls,.ending-presenting .floating-stick,.ending-presenting .mobile-dpad{visibility:hidden!important}
+.town-screen.ending-suspended .town-passersby,.town-screen.ending-suspended .town-cloud-layer{visibility:hidden!important}
+.town-screen.ending-suspended .town-cloud-track{animation-play-state:paused!important}
+.royal-medal{display:inline-block;vertical-align:middle;margin-left:.5em;position:relative;font:12px/1.6 "GameFont",sans-serif;text-align:left}
+.royal-medal[hidden]{display:none}.royal-medal summary{cursor:pointer;list-style:none}.royal-medal summary img{width:48px;height:48px;image-rendering:pixelated;object-fit:contain;filter:drop-shadow(0 0 3px #eec365)}
+.royal-medal>span{position:absolute;top:100%;right:0;z-index:30;width:min(280px,70vw);padding:12px;border:1px solid #d2b865;background:#121212;color:#fff;white-space:pre-line}
+@media(max-width:600px){.ending-section{left:6%;width:88%;font-size:16px;line-height:1.8}.ending-arrival{max-height:76vh}.ending-arrival p{bottom:2%;font-size:15px}.ending-queen{width:94vw}.royal-medal summary img{width:48px;height:48px}}

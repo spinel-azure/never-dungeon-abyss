@@ -219,7 +219,7 @@ const DRAWERS = {
     const rng = mulberry32(Number(p.seed) || 1), count = Math.max(1, Math.floor(p.count)), spread = p.spread * Math.PI / 180;
     ctx.save(); ctx.globalAlpha = 1 - Math.max(0, (t - .82) / .18);
     for (let i = 0; i < count; i++) {
-      const angle = -Math.PI / 2 + (rng() - .5) * spread, speed = p.speed * (.45 + rng() * .8), x = p.x + Math.cos(angle) * speed * t, y = p.y + Math.sin(angle) * speed * t + .5 * p.gravity * t * t, size = p.size * (.45 + rng());
+      const angle = (p.direction ?? -90) * Math.PI / 180 + (rng() - .5) * spread, speed = p.speed * (.45 + rng() * .8), x = p.x + Math.cos(angle) * speed * t, y = p.y + Math.sin(angle) * speed * t + .5 * p.gravity * t * t, size = p.size * (.45 + rng());
       ctx.save(); ctx.translate(x, y); ctx.rotate((rng() * 8 - 4) * Math.PI * t); ctx.fillStyle = i % 2 ? p.color : p.secondaryColor; ctx.fillRect(-size, -size * .35, size * 2, size * .7); ctx.restore();
     }
     ctx.restore();

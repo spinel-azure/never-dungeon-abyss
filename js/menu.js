@@ -888,6 +888,10 @@ function renderRumorHistory() {
 }
 
 function handleAdventureRecords(action) {
+  if (action === "confirm" && menu.adventureRecordsFocus === "list"
+    && adventureRecordEntries()[menu.adventureRecordsCursor]?.id === "endingReplay") {
+    menu.replayEnding?.(); return;
+  }
   if ((action === "left" || action === "right") && menu.adventureRecordsFocus === "list") {
     menu.adventureRecordsTab = menu.adventureRecordsTab === "statistics" ? "chronicle" : "statistics";
     menu.adventureRecordsCursor = 0;
@@ -932,9 +936,13 @@ function handleAdventureRecords(action) {
 }
 
 function adventureRecordEntries() {
-  return menu.adventureRecordsTab === "chronicle"
+  const entries = menu.adventureRecordsTab === "chronicle"
     ? getAdventureChronicle(menu.getCharacter())
     : getAdventureRecords(menu.getCharacter());
+  return menu.canReplayEnding?.() ? [{
+    id: "endingReplay", label: "エンドロール", value: "再鑑賞",
+    description: "決定するとエンドロールを再鑑賞します。"
+  }, ...entries] : entries;
 }
 
 function bindAdventureRecords() {
@@ -977,6 +985,7 @@ function renderAdventureRecords() {
     button.addEventListener("click", () => {
       menu.adventureRecordsCursor = index;
       menu.adventureRecordsFocus = "list";
+      if (entry.id === "endingReplay") { menu.replayEnding?.(); return; }
       renderAdventureRecords();
     });
     return button;
