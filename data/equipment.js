@@ -92,6 +92,34 @@ export const EQUIPMENT = Object.freeze({
     2: { def: 3, bleedingResistance: 0.12, actionSkipResistance: 0.12 },
     3: { def: 4, bleedingResistance: 0.15, actionSkipResistance: 0.15 }
   })),
+  frost_giant_talisman: item("frost_giant_talisman", "霜巨人の護符", "accessoryId", {
+    def: 3, str: 2, iceDamageReduction: 0.1
+  }, frostAccessory({
+    1: { def: 4, str: 2, iceDamageReduction: 0.12 },
+    2: { def: 4, str: 3, iceDamageReduction: 0.15 },
+    3: { def: 5, str: 4, iceDamageReduction: 0.2 }
+  })),
+  snow_hare_charm: item("snow_hare_charm", "雪兎の飾り", "accessoryId", {
+    agi: 3, iceDamageReduction: 0.1
+  }, frostAccessory({
+    1: { agi: 3, iceDamageReduction: 0.12 },
+    2: { agi: 4, iceDamageReduction: 0.15 },
+    3: { agi: 5, iceDamageReduction: 0.2 }
+  })),
+  white_snow_rosary: item("white_snow_rosary", "白雪のロザリオ", "accessoryId", {
+    luc: 3, iceDamageReduction: 0.1
+  }, frostAccessory({
+    1: { luc: 3, iceDamageReduction: 0.12 },
+    2: { luc: 4, iceDamageReduction: 0.15 },
+    3: { luc: 5, iceDamageReduction: 0.2 }
+  })),
+  ice_crystal_catalyst: item("ice_crystal_catalyst", "氷晶の触媒", "accessoryId", {
+    int: 3, iceDamageReduction: 0.1
+  }, frostAccessory({
+    1: { int: 3, iceDamageReduction: 0.12 },
+    2: { int: 4, iceDamageReduction: 0.15 },
+    3: { int: 5, iceDamageReduction: 0.2 }
+  })),
   spell_sealing_talisman: item("spell_sealing_talisman", "魔封じの護符", "accessoryId", {
     def: 2,
     magicDamageReduction: 0.1
@@ -446,6 +474,19 @@ function tortureArmor(statBonusesByEnhancement) {
       ])
     )),
     sellPriceByEnhancement: Object.freeze({ 0: 500, 1: 600, 2: 750, 3: 1000 })
+  };
+}
+
+function frostAccessory(statBonusesByEnhancement) {
+  return {
+    sellPrice: 2000,
+    statBonusesByEnhancement: Object.freeze(Object.fromEntries(
+      Object.entries(statBonusesByEnhancement).map(([level, bonuses]) => [
+        level,
+        Object.freeze({ ...bonuses })
+      ])
+    )),
+    sellPriceByEnhancement: Object.freeze({ 0: 2000, 1: 2400, 2: 3000, 3: 4000 })
   };
 }
 

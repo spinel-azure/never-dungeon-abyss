@@ -1896,6 +1896,7 @@ import {
           magicDamageReduction: "魔法耐性",
           nonElementalMagicDamageReduction: "無属性呪文耐性",
           elementalMagicDamageReduction: "属性呪文耐性",
+          iceDamageReduction: "氷ダメージ軽減",
           fireSpellDamageBonus: "炎魔法威力",
           iceSpellDamageBonus: "氷魔法威力",
           fireDamageTakenBonus: "被炎ダメージ",

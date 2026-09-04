@@ -159,6 +159,20 @@ export function rollBlackChestLoot(rng = Math.random, depth = 6, job = null) {
       unidentifiedName: equipmentId === "anguish_staff" ? "？両手杖" : "？武器"
     };
   }
+  if (Number(depth) >= 40 && Number(depth) <= 48) {
+    const weaponIds = ["frostsilver_longsword", "icefang_dagger", "whitefrost_mace", "winterstar_staff"];
+    const jobWeaponIds = {
+      warrior: "frostsilver_longsword", thief: "icefang_dagger", priest: "whitefrost_mace", mage: "winterstar_staff"
+    };
+    const equipmentId = Number(depth) === 48 && jobWeaponIds[job]
+      ? jobWeaponIds[job]
+      : rollFromList(weaponIds, rng);
+    return {
+      kind: "equipment", equipmentId, slot: "rightArmId",
+      enhancement: rollEnhancement(MID_BLACK_CHEST_WEAPON_ENHANCEMENT_RATES, rng) + 1,
+      unidentifiedName: equipmentId === "winterstar_staff" ? "？両手杖" : "？武器"
+    };
+  }
   if (roll < 0.45) return { kind: "gold", amount: rollBlackChestGold(rng, table) };
   if (roll < 0.65) return { kind: "item", itemId: table.potionId, amount: 1, unidentifiedName: "？薬" };
   if (roll < 0.8) return { kind: "item", itemId: "antidote", amount: 1, unidentifiedName: "？薬" };
@@ -184,6 +198,7 @@ export function rollRedChestLoot(rng = Math.random, depth = 1) {
   if (floor >= 20 && floor <= 29) return rollTortureRedChestLoot(roll, rng);
   if (floor === 30) return rollMidRedChestLoot(roll, floor, rng);
   if (floor >= 31 && floor <= 40) return rollDeepRedChestLoot(roll, floor, rng);
+  if (floor >= 41 && floor <= 49) return rollFrostRedChestLoot(roll, rng);
   if (floor >= 50 && floor <= 59) return rollForestRedChestLoot(roll, floor, rng);
   if (floor >= 60 && floor <= 69) return rollDesertRedChestLoot(roll, rng);
   if (floor >= 80 && floor <= 89) return rollCrystalRedChestLoot(roll, floor, rng);
@@ -303,6 +318,24 @@ function rollForestRedChestLoot(roll, depth, rng) {
     slot: slots[slotIndex],
     enhancement: rollEnhancement(DEEP_RED_CHEST_ARMOR_ENHANCEMENT_RATES, rng) + 1,
     unidentifiedName: slotIndex === 0 && family === families[3] ? "？魔導書" : "？防具"
+  };
+}
+
+function rollFrostRedChestLoot(roll, rng) {
+  if (roll < 0.1) {
+    return { kind: "item", itemId: "strong_healing_potion_small", amount: 1, unidentifiedName: "？薬" };
+  }
+  if (roll < 0.2) {
+    return { kind: "item", itemId: "strong_antidote", amount: 1, unidentifiedName: "？薬" };
+  }
+  return {
+    kind: "equipment",
+    equipmentId: rollFromList([
+      "frost_giant_talisman", "snow_hare_charm", "white_snow_rosary", "ice_crystal_catalyst"
+    ], rng),
+    slot: "accessoryId",
+    enhancement: rollEnhancement(DEEP_RED_CHEST_ARMOR_ENHANCEMENT_RATES, rng) + 1,
+    unidentifiedName: "？装備"
   };
 }
 

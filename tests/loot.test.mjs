@@ -105,11 +105,11 @@ test("B1F to B9F red chests use the early reward bands and upgraded gold values"
   assert.equal(getWeapon("stiletto", 2).defensePenetration, 0.3);
 });
 
-test("later red chest reward categories keep their existing bands", () => {
-  assert.equal(rollRedChestLoot(rng(0.54, 0), 41).kind, "gold");
-  assert.equal(rollRedChestLoot(rng(0.55), 41).itemId, "healing_potion");
-  assert.equal(rollRedChestLoot(rng(0.75), 41).itemId, "antidote");
-  assert.equal(rollRedChestLoot(rng(0.88), 41).equipmentId, "stiletto");
+test("B41F starts the frost accessory red chest table", () => {
+  assert.equal(rollRedChestLoot(rng(0.099), 41).itemId, "strong_healing_potion_small");
+  assert.equal(rollRedChestLoot(rng(0.1), 41).itemId, "strong_antidote");
+  assert.equal(rollRedChestLoot(rng(0.2, 0, 0), 41).equipmentId, "frost_giant_talisman");
+  assert.equal(rollRedChestLoot(rng(0.2, 0, 0), 41).enhancement, 1);
 });
 
 test("B10F to B19F red chests use the midgame consumable, card and anti-magic armor table", () => {
@@ -354,6 +354,15 @@ test("B31F to B40F place red chests and keep B39F free of black chests", () => {
     const treasures = cells.flat().map(cell => cell.treasure).filter(Boolean);
     assert.equal(treasures.filter(type => type === "red").length, 2);
     assert.equal(treasures.filter(type => type === "black").length, depth === 39 ? 0 : 1);
+  }
+});
+
+test("B41F to B49F place frost-region red chests and keep B49F free of black chests", () => {
+  for (const depth of [41, 48, 49]) {
+    buildBoundaryWallMap(depth, () => 0.5, { blackChestsUnlocked: true });
+    const treasures = cells.flat().map(cell => cell.treasure).filter(Boolean);
+    assert.equal(treasures.filter(type => type === "red").length, 2);
+    assert.equal(treasures.filter(type => type === "black").length, depth === 49 ? 0 : 1);
   }
 });
 
