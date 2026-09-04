@@ -900,6 +900,9 @@ import {
     root: battleScreen,
     commandRoot: dungeonCommands,
     messageEl: msgEl,
+    getFrameRate: getEffectiveFrameRate,
+    isMobileDevice: () => document.body.classList.contains("layout-mobile")
+      || document.body.classList.contains("layout-tablet"),
     getCharacter: () => getContextualCharacter(),
     onCharacterChanged: updateCharacterFromBattle,
     onVictory: finishBattleVictory,

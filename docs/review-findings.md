@@ -1,5 +1,20 @@
 # Repository review findings
 
+### 2026-09-04 ウィッカーマン・真鍮の雄牛の常時炎レイヤー
+
+- 状態: 対応済み
+- `data/bosses.js`の`wicker_man_b39f`へ`ambientEffect: "wicker-flame"`、`brass_bull_event_boss`へ`ambientEffect: "brass-heat"`を追加した。既存のボス生成・戦闘状態複製で設定を引き継ぐため、描画側へ敵ID判定を分散させていない。他の敵には設定していない。
+- `js/enemy-ambient-effects.js`で背面Canvas／既存敵画像／前面Canvas・火の粉の順に描画する。ウィッカーマンは全身の輪郭から大きめの炎、雄牛は口・腹・脚・関節の小さな炉炎と赤熱を重ねる。既存画像ファイル、画像サイズ、画像の変形・被弾フィルターは変更しない。
+- 画像の実寸とobject-fit: containの余白から炎の座標を算出し、単体・複数敵・画面サイズ変更に対応する。名前・HPゲージ・ダメージ数字・スキル演出は炎より手前へ表示する。幻影／正体不明のシルエットでは前面の炎・赤熱を抑制し、背面炎と火の粉も減光する。
+- 戦闘表示のHPが0になる時点で対象レイヤーを除去し、消滅処理へ引き渡す。勝利・敗北・逃走の確定および戦闘を閉じる共通処理で全レイヤー、RAF、画像load・resize・visibility・メディア設定のリスナー／監視を解除する。再戦時に使い回す共通管理器は1個で、複数敵でも常時炎のRAFは1本だけ。対象なしの戦闘はCanvas・RAF・監視を起動しない。
+- 既存の`layout-mobile`／`layout-tablet`判定と`getEffectiveFrameRate()`を受け取り、PCは最大60fps（30fps選択時は30）、スマホ・タブレットは最大30fpsに制限する。RAF時刻で描画間隔を間引き、炎・火の粉の進み方は実時間を使う。30fpsでは火の粉を28→14／8→4個、炎の発生点も約2/3へ削減し、Canvas内部長辺を640→448pxに抑える。DPRで内部解像度を増やさない。
+- メニューでviewportが非表示になった場合、タブ非表示、親画面の非表示も更新を停止し、再表示で時刻をリセットして再開する。OSの動きを減らす設定では静的な赤熱だけを1回描画し、継続RAFを停止する。セーブ形式、戦闘計算、報酬処理は変更しない。
+- 回帰テスト: `tests/enemy-ambient-effects.test.mjs`に14件追加。対象設定・複製、描画座標と解像度、60/120Hz入力に対する60/30fps上限、実時間進行、対象なし、複数敵、非表示・復帰、撃破・消滅、再戦・後片付け、未ロード画像、シルエット、粒子削減、動きを減らす設定、戦闘側の接続を検証した。
+- ブラウザ結合テスト: `tests/browser/enemy-ambient-effects.mjs`で実際のindex.html／CSS／戦闘モジュール・戦闘エンジンを使用。通常bootstrapだけを省き、独立したテストキャラクターで実行し、ユーザーのセーブ／localStorageは使用しない。1280px・390px・820pxおよび縦横切替、被弾・ダメージ数字・スキル演出、幻影、複数敵、メニュー停止、再戦、実攻撃による撃破→消滅→勝利、敗北、逃走を確認。Edge headless計測例はPC58.8fps／スマホ相当29.7fps／タブレット相当29.8fps、pageerrorは0件。実端末の発熱・消費電力は未測定。
+- ブラウザテストの再実行: Playwright利用可能な環境で`node tools/dev-server.cjs 4175`を起動後、`node tests/browser/enemy-ambient-effects.mjs`。URL・スクリーンショット出力先・ブラウザchannelは`AMBIENT_TEST_URL`／`AMBIENT_TEST_OUTPUT`／`AMBIENT_TEST_CHANNEL`で変更できる。
+- 検証結果: Node全900件成功・失敗0件。Pythonデータ検証21件成功・警告0件・失敗0件・スキップ2件。変更したJS／MJSの構文検査と`git diff --check`は問題なし。
+- タイトル画面のLAST UPDATEを2026-09-04、index.htmlのmain.jsキャッシュ番号を20260904-01へ更新した。内部ES Module importと既存CSSのキャッシュ番号は更新せず、READMEも変更していない。コミット／pushは未実施。
+
 ### 2026-09-03 NEW GAME・既存設定の表示初期値統一
 
 - 状態: 対応済み

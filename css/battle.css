@@ -26,6 +26,25 @@
   display: none;
 }
 
+/* Image-space back/front flames; never replace the sprite's filter or animation. */
+.has-enemy-ambient { isolation: isolate; }
+.battle-enemy-ambient {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+.battle-enemy-ambient-back { z-index: 0; filter: blur(.7px); }
+.battle-enemy-ambient-front { z-index: 2; }
+.has-enemy-ambient > .battle-enemy-member-image { position: relative; z-index: 1; }
+.has-enemy-ambient > .battle-enemy-heading,
+.has-enemy-ambient > .battle-enemy-member-name,
+.has-enemy-ambient > .battle-enemy-member-weakness,
+.has-enemy-ambient > .battle-enemy-member-hp { position: relative; z-index: 3; }
+.is-defeated > .battle-enemy-ambient,
+[data-vanish-pending="true"] > .battle-enemy-ambient,
+[data-vanish-playing="true"] > .battle-enemy-ambient { display: none; }
+
 .battle-enemy-heading {
   position: relative;
   z-index: 2;

@@ -8,6 +8,7 @@ import { getEquipmentAdjustedEscapeRate, resolveEscapeAttempt } from "../combat/
 import { clearBattleOnlyStatuses } from "../combat/status-lifecycle.js";
 import { playPlayerChargePresentation } from "./player-charge-presentation.js";
 import { playBattleSkillPresentation } from "./battle-skill-presentation.js";
+import { createEnemyAmbientEffects } from "./enemy-ambient-effects.js";
 import { getSkill } from "../data/skills.js";
 import { getItem } from "../data/items.js";
 import { getItemUnavailableReason } from "../combat/resolve-item-use.js";
@@ -47,6 +48,9 @@ const battleUi = {
   presentationHp: null,
   presentationBarrier: null,
   pendingCommand: null,
+  ambientEffects: null,
+  getFrameRate: () => 60,
+  isMobileDevice: () => false,
   getCharacter: () => null,
   onCharacterChanged: () => {},
   onVictory: () => {},
@@ -61,7 +65,13 @@ const battleUi = {
 };
 
 export function configureBattle(options) {
+  battleUi.ambientEffects?.destroy();
   Object.assign(battleUi, options);
+  battleUi.ambientEffects = createEnemyAmbientEffects({
+    root: battleUi.root,
+    getFrameRate: () => battleUi.getFrameRate(),
+    isMobileDevice: () => battleUi.isMobileDevice()
+  });
   battleUi.normalButtons = [...battleUi.commandRoot.children];
   battleUi.battleButtons = COMMANDS.map(([id, label]) => {
     const button = document.createElement("button");
@@ -84,6 +94,7 @@ export function startBattle(enemy, { playStartSe = true, ambush = false, conceal
   battleUi.autoActive = false;
   battleUi.concealed = Boolean(concealed);
   battleUi.phantom = Boolean(phantom);
+  battleUi.ambientEffects?.clear();
   resetEnemyVanishEffects(battleUi.root);
   clearAutoTimer();
   battleUi.battle = createBattleState({ character, enemy, enemies, targetIndex });
@@ -462,7 +473,10 @@ async function playPresentationEvents() {
         ? battleUi.root.querySelector(`.battle-enemy-member[data-index="${vanishTargetIndex}"] .battle-enemy-member-image`)
         : image
       : null;
-    if (vanishImage) markEnemyVanishPending(vanishImage);
+    if (vanishImage) {
+      battleUi.ambientEffects?.remove(vanishImage);
+      markEnemyVanishPending(vanishImage);
+    }
     if (event.type === "barrierDamage") battleUi.presentationBarrier = Math.max(0, Number(event.remaining) || 0);
     if (event.npcId) battleUi.onNpcSupport(event.npcId);
     renderBattleVitals();
@@ -714,6 +728,7 @@ export function createBattleCompletionSnapshot(battle) {
 }
 
 function closeBattle() {
+  battleUi.ambientEffects?.clear();
   clearAutoTimer();
   battleUi.autoActive = false;
   battleUi.presenting = false;
@@ -828,6 +843,28 @@ function renderBattle() {
   enemyStage?.classList.toggle("is-eiskoenigin", battle.enemy.id === "eiskoenigin_b49f" && !defeated && !battleUi.concealed);
   enemyStage?.classList.toggle("is-amayenak", battle.enemy.id === "amayenak_b100f");
   battleUi.messageEl.textContent = formatBattleMessage(battle);
+  syncEnemyAmbientEffects();
+}
+
+function syncEnemyAmbientEffects() {
+  const battle = battleUi.battle;
+  if (!battleUi.active || !battle || (battle.outcome && !battleUi.presenting)) {
+    battleUi.ambientEffects?.clear();
+    return;
+  }
+  const concealed = battleUi.concealed || battleUi.phantom;
+  const targets = battle.enemies
+    ? battle.enemies.map((enemy, index) => ({
+      enemy, concealed,
+      hp: battleUi.presentationHp?.enemies?.[index] ?? enemy.hp,
+      image: battleUi.root.querySelector(`.battle-enemy-member[data-index="${index}"] .battle-enemy-member-image`)
+    }))
+    : [{
+      enemy: battle.enemy, concealed,
+      hp: battleUi.presentationHp?.enemy ?? battle.enemy.hp,
+      image: battleUi.root.querySelector("#battleEnemyImage")
+    }];
+  battleUi.ambientEffects?.sync(targets);
 }
 
 function renderEnemyParty(battle) {
@@ -895,6 +932,7 @@ function renderBattleVitals() {
   setText("battleEnemyHp", `${enemyHp} / ${battle.enemy.maxHp}`);
   renderBossHpMeter({ ...battle.enemy, hp: enemyHp });
   if (battle.enemies) renderEnemyParty(battle);
+  syncEnemyAmbientEffects();
 }
 
 const WEAKNESS_ICONS = Object.freeze({
