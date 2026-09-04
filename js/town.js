@@ -1893,6 +1893,27 @@ function handleInnStayConfirmationInput(action) {
   return true;
 }
 
+function resetCommerceOverlayForNpcManagement() {
+  town.commerceOverlay.classList.remove("is-storage");
+  if (town.storageTabs) town.storageTabs.hidden = true;
+  if (town.storageDescription) {
+    town.storageDescription.hidden = true;
+    town.storageDescription.textContent = "";
+  }
+  if (town.storagePager) town.storagePager.hidden = true;
+  if (town.storagePageEl) town.storagePageEl.textContent = "1/1";
+  if (town.commerceQuantityControls) town.commerceQuantityControls.hidden = true;
+  if (town.commerceGold?.parentElement) town.commerceGold.parentElement.hidden = false;
+  town.storageCategory = "items";
+  town.storagePage = 0;
+  town.storageFocus = "list";
+  town.commerceIndex = 0;
+  town.commerceQuantity = 1;
+  town.commercePointerArmedIndex = -1;
+  town.commerceKind = "";
+  town.commerceItems = [];
+}
+
 function openNpcManagement(kind) {
   const state = town.getCharacter()?.npcSystem || {};
   const registered = new Set(state.registeredIds || []);
@@ -1904,9 +1925,9 @@ function openNpcManagement(kind) {
   town.npcManagementItems = kind === "search"
     ? NPC_DEFINITIONS.filter(npc => !registered.has(npc.id))
     : NPC_DEFINITIONS.filter(npc => registered.has(npc.id)).map(npc => ({ ...npc, active: active.has(npc.id) }));
+  resetCommerceOverlayForNpcManagement();
   town.mode = "npcManagement";
   town.commerceOverlay.classList.add("is-npc-management");
-  if (town.storageTabs) town.storageTabs.hidden = true;
   town.npcManagementReturn = { mode: "facilityMenu", subFacilityId: town.subFacilityId, selectedIndex: town.selectedIndex };
   town.commerceOverlay.hidden = false;
   town.guildQuestOverlay.hidden = true;
@@ -1928,9 +1949,9 @@ export function openPendingNpcRenewal() {
   town.npcManagementPointerArmedIndex = -1;
   town.npcManagementItems = pendingIds.map(getNpcDefinition).filter(Boolean);
   if (!town.npcManagementItems.length) return false;
+  resetCommerceOverlayForNpcManagement();
   town.mode = "npcManagement";
   town.commerceOverlay.classList.add("is-npc-management");
-  if (town.storageTabs) town.storageTabs.hidden = true;
   town.commandRoot.hidden = true;
   town.commerceOverlay.hidden = false;
   town.guildQuestOverlay.hidden = true;

@@ -513,3 +513,19 @@ test("NPC renewal hides background commands and restores its originating town sc
   assert.match(source, /destination\?\.mode === "dungeonEntrance"[\s\S]*renderDungeonEntrance\(\)/);
   assert.match(source, /destination\?\.mode === "selection" \|\| destination\?\.mode === "arrival"[\s\S]*showTownArrival\(\)/);
 });
+
+test("NPC management clears every storage-only overlay state before reuse", () => {
+  const source = readFileSync(new URL("../js/town.js", import.meta.url), "utf8");
+  const reset = source.match(/function resetCommerceOverlayForNpcManagement\(\) \{([\s\S]*?)\n\}/)?.[1] || "";
+  assert.match(reset, /commerceOverlay\.classList\.remove\("is-storage"\)/);
+  assert.match(reset, /storageTabs\) town\.storageTabs\.hidden = true/);
+  assert.match(reset, /storageDescription\.hidden = true/);
+  assert.match(reset, /storagePager\) town\.storagePager\.hidden = true/);
+  assert.match(reset, /commerceQuantityControls\) town\.commerceQuantityControls\.hidden = true/);
+  assert.match(reset, /commerceGold\?\.parentElement\) town\.commerceGold\.parentElement\.hidden = false/);
+  assert.match(reset, /storageCategory = "items"[\s\S]*storagePage = 0[\s\S]*storageFocus = "list"/);
+  assert.match(reset, /commerceKind = ""[\s\S]*commerceItems = \[\]/);
+  assert.equal((source.match(/resetCommerceOverlayForNpcManagement\(\);/g) || []).length, 2);
+  assert.match(source, /function openNpcManagement\(kind\)[\s\S]*resetCommerceOverlayForNpcManagement\(\);[\s\S]*commerceTitle\.textContent = kind === "search"/);
+  assert.match(source, /export function openPendingNpcRenewal\(\)[\s\S]*resetCommerceOverlayForNpcManagement\(\);[\s\S]*commerceTitle\.textContent = "雇用更新"/);
+});
