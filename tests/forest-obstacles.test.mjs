@@ -52,6 +52,12 @@ test("herbicide quests, items, and legendary step-recovery cards keep their cont
   assert.equal(quest020.client, "ヘレン");
   assert.equal(quest020.requiredCount, 5);
   assert.equal(quest020.reward.cardId, "legendary_mana_activation");
+  assert.deepEqual(quest020.description, [
+    "強力除草剤の試供品を入荷したんだけど、試しに",
+    "密林区域で使ってもらいたいの。",
+    "もしも効き目があるなら、店で正式に取り扱う",
+    "つもりよ。お願いできるかしら？"
+  ]);
   const quest023 = getQuestById("guild_023");
   assert.deepEqual(quest023.prerequisiteQuestIds, ["guild_020"]);
   assert.equal(quest023.reward.cardId, "legendary_goddess_breath");

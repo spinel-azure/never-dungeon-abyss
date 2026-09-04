@@ -571,9 +571,10 @@ export const QUESTS = Object.freeze([
     reward: Object.freeze({ type: "card", label: "デッキカード×1", amount: 1, cardId: "legendary_mana_activation", bonusGold: 20000 }),
     descriptionLabel: "目的",
     description: Object.freeze([
-      "強力除草剤の試供品を入荷したんだけど、試しに密林区域で使って",
-      "貰いたいの。もしも効き目があるなら店で正式に取り扱う",
-      "つもりよ。よろしく頼むわね。"
+      "強力除草剤の試供品を入荷したんだけど、試しに",
+      "密林区域で使ってもらいたいの。",
+      "もしも効き目があるなら、店で正式に取り扱う",
+      "つもりよ。お願いできるかしら？"
     ]),
     prerequisiteQuestIds: Object.freeze([FIFTH_RED_DOOR_INVESTIGATION_QUEST_ID]),
     reportUnlockFlags: Object.freeze(["strong_herbicide_shop_unlocked", "strong_herbicide_shop_reward_pending"]),
