@@ -10,7 +10,7 @@ import {
   BOSS_DOOR_COUNT,
   LOCKED_DOOR_COUNT
 } from "./config.js";
-import { getNpcById } from "../data/npcs.js";
+import { getMikanGenericNpcId, getMikanRegionalNpcId, getNpcById } from "../data/npcs.js";
 import { rollTreasureTrap } from "../data/traps.js";
 import {
   DESERT_OASIS,
@@ -250,7 +250,7 @@ function buildBoundaryWallMapAttempt(depth = 1, rng = Math.random, progress = {}
   if (floorBoss) placeFloorBossRoom(floorBoss, rng, progress);
   placeSpecialRoom(depth, rng, progress);
   placeQuestEvent(depth, rng, progress);
-  placeNpc(depth, progress);
+  placeNpc(depth, progress, rng);
   placeTreasures(depth, rng, progress);
   placePurpleSpecialRoomTreasure(depth, rng);
   placeFountain(depth, rng);
@@ -498,7 +498,7 @@ export function placeStairs(depth = 1) {
   }
 }
 
-export function placeNpc(depth = 1, progress = {}) {
+export function placeNpc(depth = 1, progress = {}, rng = Math.random) {
   const { x: startX, y: startY } = startPosition;
   resetNpcs();
   const normalizedDepth = Math.floor(Number(depth) || 1);
@@ -562,7 +562,7 @@ export function placeNpc(depth = 1, progress = {}) {
       : placeSecondQueenShadow ? "queen_shadow_desert"
       : placeThirdQueenShadow ? "queen_shadow_dark"
       : normalizedDepth === 2 ? "NPC_01_b2"
-      : normalizedDepth === 4 ? (progress.bossDefeatedById?.otherworldly_wisdom_b4f ? "NPC_01" : "NPC_01_b4")
+      : normalizedDepth === 4 ? (progress.bossDefeatedById?.otherworldly_wisdom_b4f ? getMikanGenericNpcId(rng()) : "NPC_01_b4")
       : normalizedDepth === 5 ? "NPC_01_b5"
       : normalizedDepth === 6 ? (progress.bossDefeatedById?.quest_mimic_b6f ? "NPC_01_b6_after" : "NPC_01_b6")
       : normalizedDepth === 9 ? "NPC_01_b9"
@@ -571,7 +571,7 @@ export function placeNpc(depth = 1, progress = {}) {
       : normalizedDepth === 65 ? "NPC_01_b65_oasis"
       : normalizedDepth >= 66 && normalizedDepth <= 68 ? "NPC_01_desert_hot"
       : normalizedDepth === 69 ? "NPC_01_b69_riddle"
-      : "NPC_01";
+      : getMikanRegionalNpcId(normalizedDepth) || getMikanGenericNpcId(rng());
   }
 }
 
