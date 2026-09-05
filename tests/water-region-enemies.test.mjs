@@ -52,7 +52,7 @@ test("Abyss Piranha uses lightning weakness, multi-hit attacks, and normal bleed
   const enemy = createEnemyCombatant(getEnemyById("abyss_piranha"));
   const latch = createEnemyAction(enemy, () => 0.5);
   const rend = createEnemyAction(enemy, () => 0.999);
-  assert.deepEqual([enemy.maxHp, enemy.def, latch.hitCount, rend.effects[0].statusId], [320, 24, 2, "bleeding"]);
+  assert.deepEqual([enemy.maxHp, enemy.def, latch.hitCount, rend.effects[0].statusId], [280, 24, 2, "bleeding"]);
   assert.deepEqual(enemy.elementMultipliers, { fire: 1, ice: 1, lightning: 1.5, arcane: 1 });
   assert.equal(resolveStatusEffect({ attacker: { dex: 30 }, defender: enemy, effect: { statusId: "bleeding", statusKind: "physical", baseRate: 0.25 }, rng: () => 0 }).immune, false);
 });
@@ -71,7 +71,7 @@ test("Abgrundkrabbe is the high-defense bleeding-immune enemy and uses existing 
   const greatPincer = createEnemyAction(enemy, () => 0.4);
   const combo = createEnemyAction(enemy, () => 0.7);
   const guard = createEnemyAction(enemy, () => 0.999);
-  assert.deepEqual([enemy.maxHp, enemy.def, greatPincer.speedModifier, combo.hitCount, guard.actionType], [1250, 48, -5, 2, "guard"]);
+  assert.deepEqual([enemy.maxHp, enemy.def, greatPincer.speedModifier, combo.hitCount, guard.actionType], [650, 48, -5, 2, "guard"]);
   assert.equal(enemy.statusResistances.bleeding.immune, true);
   assert.equal(resolveStatusEffect({ defender: enemy, effect: { statusId: "bleeding", baseRate: 1 }, rng: () => 0 }).immune, true);
 });
@@ -80,7 +80,7 @@ test("Abyss Giant Catfish is the largest reward enemy and applies action disable
   const enemy = createEnemyCombatant(getEnemyById("abyss_giant_catfish"));
   const swallow = createEnemyAction(enemy, () => 0.7);
   const muddyStream = createEnemyAction(enemy, () => 0.999);
-  assert.deepEqual([enemy.maxHp, enemy.experienceReward, swallow.effects[0].statusId], [1800, 2200, "action_skip"]);
+  assert.deepEqual([enemy.maxHp, enemy.experienceReward, swallow.effects[0].statusId], [850, 2200, "action_skip"]);
   assert.deepEqual([muddyStream.actionType, muddyStream.element, muddyStream.unavoidable, muddyStream.effects[0].statusId], ["spell", "arcane", true, "speed_down"]);
 });
 

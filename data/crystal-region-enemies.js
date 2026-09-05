@@ -5,7 +5,7 @@ export const crystalRegionEnemies = Object.freeze([
   Object.freeze({
     id: "abyss_crystal_beetle", name: "奈落水晶虫", imageId: "abyss_crystal_beetle", level: 78,
     image: "images/enemies/enemy_33.avif", race: "insect", minimumDepth: 80, maximumDepth: 88,
-    maxHp: 620, stats: Object.freeze({ str: 29, int: 10, agi: 25, dex: 27, luc: 20 }),
+    maxHp: 400, stats: Object.freeze({ str: 29, int: 10, agi: 25, dex: 27, luc: 20 }),
     def: 43, attack: 31, experienceReward: 800, encounterCountRange: Object.freeze([1, 3]),
     actions: Object.freeze([
       action(45, { id: "crystal_beetle_attack", name: "攻撃", actionType: "physicalAttack", hitCount: 1, powerPerHit: 1, effects: Object.freeze([]) }),
@@ -21,7 +21,7 @@ export const crystalRegionEnemies = Object.freeze([
   Object.freeze({
     id: "prism_moth", name: "プリズムモス", imageId: "prism_moth", level: 80,
     image: "images/enemies/enemy_34.avif", race: "insect", minimumDepth: 82, maximumDepth: 88,
-    maxHp: 520, stats: Object.freeze({ str: 18, int: 42, agi: 38, dex: 35, luc: 27 }),
+    maxHp: 420, stats: Object.freeze({ str: 18, int: 42, agi: 38, dex: 35, luc: 27 }),
     def: 24, attack: 23, experienceReward: 1450,
     actions: Object.freeze([
       action(35, { id: "prism_moth_attack", name: "攻撃", actionType: "physicalAttack", hitCount: 1, powerPerHit: 0.85, effects: Object.freeze([]) }),
@@ -36,7 +36,7 @@ export const crystalRegionEnemies = Object.freeze([
   Object.freeze({
     id: "amethyst_golem", name: "アメジストゴーレム", imageId: "amethyst_golem", level: 84,
     image: "images/enemies/enemy_35.avif", race: "construct", minimumDepth: 84, maximumDepth: 88,
-    maxHp: 2800, stats: Object.freeze({ str: 48, int: 12, agi: 9, dex: 29, luc: 23 }),
+    maxHp: 1100, stats: Object.freeze({ str: 48, int: 12, agi: 9, dex: 29, luc: 23 }),
     def: 55, attack: 50, experienceReward: 3600,
     actions: Object.freeze([
       action(35, { id: "crystal_fist", name: "水晶拳", actionType: "physicalAttack", hitCount: 1, powerPerHit: 1.25, effects: Object.freeze([]) }),
@@ -52,7 +52,7 @@ export const crystalRegionEnemies = Object.freeze([
   Object.freeze({
     id: "crystal_mimic", name: "クリスタルミミック", imageId: "crystal_mimic", level: 85,
     image: "images/enemies/enemy_36.avif", race: "aberration", minimumDepth: 86, maximumDepth: 88,
-    maxHp: 2100, stats: Object.freeze({ str: 43, int: 35, agi: 27, dex: 39, luc: 30 }),
+    maxHp: 950, stats: Object.freeze({ str: 43, int: 35, agi: 27, dex: 39, luc: 30 }),
     def: 38, attack: 44, experienceReward: 3200,
     actions: Object.freeze([
       action(34, { id: "crystal_fang", name: "水晶牙", actionType: "physicalAttack", hitCount: 1, powerPerHit: 1.15, effects: Object.freeze([{ statusId: "bleeding", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.35 }]) }),

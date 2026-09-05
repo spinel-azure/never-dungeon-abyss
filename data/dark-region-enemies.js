@@ -9,7 +9,7 @@ export const darkRegionEnemies = Object.freeze([
   Object.freeze({
     id: "sensenmann", name: "ゼンゼンマン", imageId: "sensenmann", level: 90,
     image: "images/enemies/enemy_37.avif", race: "undead", minimumDepth: 90, maximumDepth: 99,
-    maxHp: 1250, stats: Object.freeze({ str: 45, int: 24, agi: 29, dex: 39, luc: 28 }),
+    maxHp: 700, stats: Object.freeze({ str: 45, int: 24, agi: 29, dex: 39, luc: 28 }),
     def: 38, attack: 45, experienceReward: 2300, encounterCountRange: Object.freeze([1, 2]),
     actions: Object.freeze([
       action(55, { id: "sensenmann_attack", name: "攻撃", actionType: "physicalAttack", hitCount: 1, powerPerHit: 1, effects: Object.freeze([]) }),
@@ -23,7 +23,7 @@ export const darkRegionEnemies = Object.freeze([
   Object.freeze({
     id: "wraith", name: "レイス", imageId: "wraith", level: 93,
     image: "images/enemies/enemy_38.avif", race: "undead", minimumDepth: 90, maximumDepth: 99,
-    maxHp: 2600, stats: Object.freeze({ str: 28, int: 56, agi: 38, dex: 42, luc: 35 }),
+    maxHp: 1050, stats: Object.freeze({ str: 28, int: 56, agi: 38, dex: 42, luc: 35 }),
     def: 36, attack: 38, experienceReward: 5200,
     actions: Object.freeze([
       action(55, { id: "wraith_attack", name: "攻撃", actionType: "physicalAttack", hitCount: 1, powerPerHit: 0.9, effects: Object.freeze([]) }),
@@ -38,7 +38,7 @@ export const darkRegionEnemies = Object.freeze([
   Object.freeze({
     id: "will_o_wisp", name: "ウィルオーウィスプ", imageId: "will_o_wisp", level: 88,
     image: "images/enemies/enemy_39.avif", race: "spirit", minimumDepth: 90, maximumDepth: 99,
-    maxHp: 500, stats: Object.freeze({ str: 12, int: 46, agi: 44, dex: 37, luc: 32 }),
+    maxHp: 420, stats: Object.freeze({ str: 12, int: 46, agi: 44, dex: 37, luc: 32 }),
     def: 22, attack: 18, experienceReward: 1200, encounterCountRange: Object.freeze([1, 3]),
     actions: Object.freeze([
       action(55, { id: "will_o_wisp_attack", name: "攻撃", actionType: "physicalAttack", hitCount: 1, powerPerHit: 0.75, effects: Object.freeze([]) }),
@@ -53,7 +53,7 @@ export const darkRegionEnemies = Object.freeze([
   Object.freeze({
     id: "schleipnir", name: "シュライプニール", imageId: "schleipnir", level: 96,
     image: "images/enemies/enemy_40.avif", race: "beast", minimumDepth: 90, maximumDepth: 99,
-    maxHp: 4300, stats: Object.freeze({ str: 58, int: 38, agi: 45, dex: 48, luc: 36 }),
+    maxHp: 1500, stats: Object.freeze({ str: 58, int: 38, agi: 45, dex: 48, luc: 36 }),
     def: 50, attack: 58, experienceReward: 7800,
     actions: Object.freeze([
       action(55, { id: "schleipnir_attack", name: "攻撃", actionType: "physicalAttack", hitCount: 1, powerPerHit: 1, effects: Object.freeze([]) }),

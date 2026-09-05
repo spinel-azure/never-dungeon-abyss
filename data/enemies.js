@@ -562,7 +562,7 @@ export const enemies = Object.freeze([
     level: 58,
     image: "images/enemies/enemy_25.avif", race: "beast", minimumDepth: 60, maximumDepth: 69,
     encounterCountRange: Object.freeze([1, 3]),
-    maxHp: 260, stats: Object.freeze({ str: 20, int: 8, agi: 25, dex: 23, luc: 14 }),
+    maxHp: 240, stats: Object.freeze({ str: 20, int: 8, agi: 25, dex: 23, luc: 14 }),
     def: 22, attack: 20, experienceReward: 360, dropItemId: "abyss_lizard_hide",
     actions: Object.freeze([
       Object.freeze({ weight: 60, action: Object.freeze({
@@ -589,7 +589,7 @@ export const enemies = Object.freeze([
     id: "abyss_giant_scorpion", name: "奈落オオサソリ", imageId: "abyss_giant_scorpion",
     level: 62,
     image: "images/enemies/enemy_26.avif", race: "insect", minimumDepth: 60, maximumDepth: 69,
-    maxHp: 720, stats: Object.freeze({ str: 31, int: 7, agi: 17, dex: 28, luc: 18 }),
+    maxHp: 480, stats: Object.freeze({ str: 31, int: 7, agi: 17, dex: 28, luc: 18 }),
     def: 31, attack: 31, experienceReward: 1180, dropItemId: "abyss_scorpion_tail",
     actions: Object.freeze([
       Object.freeze({ weight: 40, action: Object.freeze({
@@ -616,7 +616,7 @@ export const enemies = Object.freeze([
     id: "cobra_gator", name: "コブラゲーター", imageId: "cobra_gator",
     level: 64,
     image: "images/enemies/enemy_27.avif", race: "beast", minimumDepth: 60, maximumDepth: 69,
-    maxHp: 820, stats: Object.freeze({ str: 34, int: 9, agi: 20, dex: 27, luc: 19 }),
+    maxHp: 560, stats: Object.freeze({ str: 34, int: 9, agi: 20, dex: 27, luc: 19 }),
     def: 29, attack: 34, experienceReward: 1320, dropItemId: "cobra_gator_hide",
     actions: Object.freeze([
       Object.freeze({ weight: 45, action: Object.freeze({

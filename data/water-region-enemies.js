@@ -2,7 +2,7 @@ export const waterRegionEnemies = Object.freeze([
   Object.freeze({
     id: "abyss_piranha", name: "奈落ピラニア", imageId: "abyss_piranha", level: 68,
     image: "images/enemies/enemy_29.avif", race: "beast", minimumDepth: 70, maximumDepth: 79,
-    maxHp: 320, stats: Object.freeze({ str: 24, int: 7, agi: 29, dex: 28, luc: 17 }),
+    maxHp: 280, stats: Object.freeze({ str: 24, int: 7, agi: 29, dex: 28, luc: 17 }),
     def: 24, attack: 25, experienceReward: 480,
     actions: Object.freeze([
       Object.freeze({ weight: 45, action: Object.freeze({ id: "abyss_piranha_bite", name: "噛みつき", actionType: "physicalAttack", hitCount: 1, powerPerHit: 1, effects: Object.freeze([]) }) }),
@@ -16,7 +16,7 @@ export const waterRegionEnemies = Object.freeze([
   Object.freeze({
     id: "abgrund_aal", name: "アプグルントアール", imageId: "abgrund_aal", level: 72,
     image: "images/enemies/enemy_30.avif", race: "beast", minimumDepth: 74, maximumDepth: 79,
-    maxHp: 900, stats: Object.freeze({ str: 27, int: 34, agi: 28, dex: 27, luc: 22 }),
+    maxHp: 540, stats: Object.freeze({ str: 27, int: 34, agi: 28, dex: 27, luc: 22 }),
     def: 31, attack: 33, experienceReward: 1500,
     actions: Object.freeze([
       Object.freeze({ weight: 40, action: Object.freeze({ id: "abgrund_aal_bite", name: "噛みつき", actionType: "physicalAttack", hitCount: 1, powerPerHit: 1, effects: Object.freeze([]) }) }),
@@ -30,7 +30,7 @@ export const waterRegionEnemies = Object.freeze([
   Object.freeze({
     id: "abgrund_krabbe", name: "アプグルントクラッベ", imageId: "abgrund_krabbe", level: 71,
     image: "images/enemies/enemy_31.avif", race: "beast", minimumDepth: 72, maximumDepth: 79,
-    maxHp: 1250, stats: Object.freeze({ str: 38, int: 10, agi: 13, dex: 25, luc: 20 }),
+    maxHp: 650, stats: Object.freeze({ str: 38, int: 10, agi: 13, dex: 25, luc: 20 }),
     def: 48, attack: 39, experienceReward: 1800,
     actions: Object.freeze([
       Object.freeze({ weight: 35, action: Object.freeze({ id: "abgrund_krabbe_pincer", name: "ハサミ", actionType: "physicalAttack", hitCount: 1, powerPerHit: 1, effects: Object.freeze([]) }) }),
@@ -45,7 +45,7 @@ export const waterRegionEnemies = Object.freeze([
   Object.freeze({
     id: "abyss_giant_catfish", name: "奈落オオナマズ", imageId: "abyss_giant_catfish", level: 75,
     image: "images/enemies/enemy_32.avif", race: "beast", minimumDepth: 76, maximumDepth: 79,
-    maxHp: 1800, stats: Object.freeze({ str: 41, int: 26, agi: 14, dex: 23, luc: 24 }),
+    maxHp: 850, stats: Object.freeze({ str: 41, int: 26, agi: 14, dex: 23, luc: 24 }),
     def: 34, attack: 41, experienceReward: 2200,
     actions: Object.freeze([
       Object.freeze({ weight: 35, action: Object.freeze({ id: "abyss_giant_catfish_bite", name: "噛みつき", actionType: "physicalAttack", hitCount: 1, powerPerHit: 1, effects: Object.freeze([]) }) }),
