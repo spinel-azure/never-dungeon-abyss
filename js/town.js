@@ -80,6 +80,7 @@ const NPC_HIRE_FACILITY = Object.freeze({ ...TAVERN_FACILITY, id: "npcHire", lab
 const TOWN_TYPEWRITER_DELAYS = Object.freeze({ slow: 75, normal: 42, fast: 20 });
 const JOHANNA_CAT_BORROW_TRANSITION_FLAG = "johanna_cat_borrow_transition";
 const JOHANNA_CAT_RETURN_TRANSITION_FLAG = "johanna_cat_return_transition";
+const JOHANNA_CAT_BORROW_POPUP_WAIT_MS = 3000;
 const townTypewriter = {
   enabled: true,
   speed: "normal",
@@ -138,6 +139,7 @@ const town = {
   subFacilityId: "",
   active: false,
   transitioning: false,
+  johannaCatTransitionTimers: new Set(),
   mode: "arrival",
   registrationRequired: false,
   firstTownArrivalPending: false,
@@ -483,6 +485,8 @@ export function setTownTypewriterOptions({ enabled, speed } = {}) {
 }
 
 export function openTown({ registrationRequired = false, facilityId = null, mode = null, firstTownArrivalPending = false } = {}) {
+  clearJohannaCatTransitionTimers();
+  document.body.classList.remove("johanna-cat-message-expanded");
   town.active = true;
   town.registrationRequired = Boolean(registrationRequired);
   town.firstTownArrivalPending = Boolean(firstTownArrivalPending);
@@ -511,6 +515,8 @@ export function openTown({ registrationRequired = false, facilityId = null, mode
 
 export function closeTown() {
   town.active = false;
+  clearJohannaCatTransitionTimers();
+  document.body.classList.remove("johanna-cat-message-expanded");
   stopTownNameBanner();
   clearTownTypewriter();
   town.root.hidden = true;
@@ -684,7 +690,9 @@ function handleTavernRumorInput(action) {
 function handleFacilityTalkInput(action) {
   if (action === "cancel") return true;
   if (action !== "confirm") return true;
-  town.playSe("confirm");
+  const completingJohannaCatBorrow = town.facilityTalkCompletionFlag === JOHANNA_CAT_BORROW_TRANSITION_FLAG
+    && town.facilityTalkDialogueIndex + 1 >= town.facilityTalkDialogue.length;
+  if (!completingJohannaCatBorrow) town.playSe("confirm");
   town.facilityTalkDialogueIndex += 1;
   if (town.facilityTalkDialogueIndex < town.facilityTalkDialogue.length) {
     town.messageEl.textContent = town.facilityTalkDialogue[town.facilityTalkDialogueIndex];
@@ -694,8 +702,11 @@ function handleFacilityTalkInput(action) {
     beginAnastasiaOutfitBlackout();
     return true;
   }
-  if (town.facilityTalkCompletionFlag === JOHANNA_CAT_BORROW_TRANSITION_FLAG
-    || town.facilityTalkCompletionFlag === JOHANNA_CAT_RETURN_TRANSITION_FLAG) {
+  if (town.facilityTalkCompletionFlag === JOHANNA_CAT_BORROW_TRANSITION_FLAG) {
+    beginJohannaCatBorrowTransition();
+    return true;
+  }
+  if (town.facilityTalkCompletionFlag === JOHANNA_CAT_RETURN_TRANSITION_FLAG) {
     beginJohannaCatBlackout(town.facilityTalkCompletionFlag);
     return true;
   }
@@ -726,23 +737,68 @@ function beginAnastasiaOutfitBlackout() {
   }, 360);
 }
 
-function beginJohannaCatBlackout(completionFlag, delayMs = 0) {
-  town.transitioning = true;
-  window.setTimeout(() => {
+function scheduleJohannaCatTransition(callback, delayMs) {
+  const timer = window.setTimeout(() => {
+    town.johannaCatTransitionTimers.delete(timer);
+    callback();
+  }, Math.max(0, Number(delayMs) || 0));
+  town.johannaCatTransitionTimers.add(timer);
+  return timer;
+}
+
+function clearJohannaCatTransitionTimers() {
+  const hadActiveTransition = town.johannaCatTransitionTimers.size > 0
+    || Boolean(town.root?.classList.contains("is-inn-cat-blackout"));
+  town.johannaCatTransitionTimers.forEach(timer => window.clearTimeout(timer));
+  town.johannaCatTransitionTimers.clear();
+  town.root?.classList.remove("is-inn-cat-blackout");
+  if (hadActiveTransition) town.transitioning = false;
+}
+
+function finishJohannaCatDialogue() {
+  town.facilityTalkDialogue = [];
+  town.facilityTalkDialogueIndex = 0;
+  town.facilityTalkCompletionFlag = "";
+  town.mode = "facilityMenu";
+  document.body.classList.remove("johanna-cat-message-expanded");
+  renderFacility();
+}
+
+function runJohannaCatBlackout({ completionFlag = "", delayMs = 0, completeDuringBlackout = false } = {}) {
+  scheduleJohannaCatTransition(() => {
+    if (!town.active) {
+      clearJohannaCatTransitionTimers();
+      return;
+    }
     town.root.classList.add("is-inn-cat-blackout");
-    window.setTimeout(() => {
-      town.onCompleteFacilityTalk(completionFlag);
-      town.facilityTalkDialogue = [];
-      town.facilityTalkDialogueIndex = 0;
-      town.facilityTalkCompletionFlag = "";
-      town.mode = "facilityMenu";
-      renderFacility();
-      window.setTimeout(() => {
+    scheduleJohannaCatTransition(() => {
+      if (!town.active) {
+        clearJohannaCatTransitionTimers();
+        return;
+      }
+      if (completeDuringBlackout && completionFlag) town.onCompleteFacilityTalk(completionFlag);
+      finishJohannaCatDialogue();
+      scheduleJohannaCatTransition(() => {
         town.root.classList.remove("is-inn-cat-blackout");
-        window.setTimeout(() => { town.transitioning = false; }, 360);
+        scheduleJohannaCatTransition(() => { town.transitioning = false; }, 360);
       }, 120);
     }, 360);
-  }, Math.max(0, Number(delayMs) || 0));
+  }, delayMs);
+}
+
+function beginJohannaCatBorrowTransition() {
+  if (town.transitioning) return false;
+  town.transitioning = true;
+  town.onCompleteFacilityTalk(JOHANNA_CAT_BORROW_TRANSITION_FLAG);
+  runJohannaCatBlackout({ delayMs: JOHANNA_CAT_BORROW_POPUP_WAIT_MS });
+  return true;
+}
+
+function beginJohannaCatBlackout(completionFlag) {
+  if (town.transitioning) return false;
+  town.transitioning = true;
+  runJohannaCatBlackout({ completionFlag, completeDuringBlackout: true });
+  return true;
 }
 
 function configureTownMessageObserver() {
@@ -1720,9 +1776,10 @@ function activateFacilityService(command) {
       town.facilityTalkDialogueIndex = 0;
       town.facilityTalkCompletionFlag = result.completionFlag || "";
       town.mode = "facilityTalk";
-      if (result.autoCompleteAfterMs != null) {
-        beginJohannaCatBlackout(result.completionFlag, result.autoCompleteAfterMs);
-      }
+      document.body.classList.toggle(
+        "johanna-cat-message-expanded",
+        town.facilityTalkCompletionFlag === JOHANNA_CAT_BORROW_TRANSITION_FLAG
+      );
     }
     if (result?.focusCommand) {
       showFacilityCommands(facility.id);

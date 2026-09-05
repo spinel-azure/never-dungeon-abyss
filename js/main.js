@@ -923,6 +923,20 @@ import {
     },
     onCompleteFacilityTalk: flag => {
       if (!flag || !character) return;
+      if (flag === "johanna_cat_borrow_transition") {
+        const granted = grantKeyItem(character.keyItems, "johanna_calico_cat");
+        character = {
+          ...character,
+          keyItems: granted.keyItems,
+          eventFlags: { ...(character.eventFlags || {}), [flag]: true }
+        };
+        updateCharacterUi();
+        saveGame();
+        if (granted.gained > 0) {
+          showNamedItemGetEffect(["ヨハンナの愛猫"], { important: true });
+        }
+        return { gained: granted.gained };
+      }
       if (flag === "johanna_cat_return_transition") {
         const returned = consumeKeyItem(character.keyItems, "johanna_calico_cat");
         character = {
@@ -1442,16 +1456,10 @@ import {
       && character?.eventFlags?.sphinx_b69f_riddle_heard
       && !character?.eventFlags?.sphinx_b69f_route_fixed
       && !hasKeyItem(character.keyItems, "johanna_calico_cat")) {
-      const granted = grantKeyItem(character.keyItems, "johanna_calico_cat");
-      character = { ...character, keyItems: granted.keyItems };
-      updateCharacterUi();
-      saveGame();
-      if (granted.gained > 0) setTimeout(() => showNamedItemGetEffect(["ヨハンナの愛猫"], { important: true }), 0);
-      const message = "女将ヨハンナ：おや？一体どうしたんだい？この子を見つめて。えっ？ちょっとこの子を貸して欲しいって？\nどこへ連れて行くつもりだい？危ない目には遭わせないでおくれよ？";
+      const message = "女将ヨハンナ：おや？一体どうしたんだい？この子を見つめて。えっ？ちょっとこの子を貸して欲しいって？\nどこへ連れて行くつもりだい？危ない目には遭わせないでおくれよ？\n＊Aボタン：次へ";
       return {
         dialogue: [message],
-        completionFlag: "johanna_cat_borrow_transition",
-        autoCompleteAfterMs: 2000
+        completionFlag: "johanna_cat_borrow_transition"
       };
     }
     if (facilityId === "guild" && character?.eventFlags?.guild_registration_card) {
