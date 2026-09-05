@@ -38,6 +38,8 @@ import {
 import { applyPlayerChargeAction, isPlayerChargeReady } from "./player-charge.js";
 import { getWeapon } from "../data/weapons.js";
 
+const FLEISCHFRESSER_REGAIN_SUPPRESSION_TURNS = 5;
+
 export function createBattleState({ character, enemy, enemies = null, targetIndex = 0 }) {
   const vorpalSwordEquippedAtStart = character?.equipment?.weaponId === "vorpal_sword";
   const enemyParty = Array.isArray(enemies) && enemies.length
@@ -754,6 +756,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, d
     actor.inventory = consumeItem(actor.inventory, action.item.id).inventory;
     let healing = 0;
     let spHealing = 0;
+    let itemUsageLogged = false;
     const deathPoisonUnaffected = ["antidote", "strong_antidote"].includes(action.item.id)
       && (actor.statuses || []).some(status => (status.statusId || status.id) === "death_poison");
     for (const effect of action.item.effects) {
@@ -840,11 +843,27 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, d
           if (action.item.id === "strong_herbicide_trial") actor.herbicideTrialUses = (Number(actor.herbicideTrialUses) || 0) + 1;
         } else if (target.id === "fleischfresser_b59f") {
           const alreadySuppressed = Number(target.regainSuppressedTurns) > 0;
-          if (!alreadySuppressed) target.hp = Math.max(1, target.hp - Math.max(0, Math.floor(Number(effect.value) || 500)));
-          target.regainSuppressedTurns = 5;
-          battle.log.push(alreadySuppressed
-            ? "フライシュフレッサーの再生停止時間が延長された！"
-            : "フライシュフレッサーの表皮が焼けただれ、再生能力が停止した！");
+          const fixedDamage = Math.max(0, Math.floor(Number(effect.value) || 0));
+          const useMessage = `${action.item.name}を散布した！`;
+          const damageMessage = `${target.name}に${fixedDamage}の固定ダメージ！`;
+          const suppressionMessage = alreadySuppressed
+            ? `${target.name}の再生停止時間が${FLEISCHFRESSER_REGAIN_SUPPRESSION_TURNS}ターンに延長された！`
+            : `${target.name}の再生能力が${FLEISCHFRESSER_REGAIN_SUPPRESSION_TURNS}ターン停止した！`;
+          target.hp = Math.max(0, target.hp - fixedDamage);
+          target.alive = target.hp > 0;
+          target.regainSuppressedTurns = FLEISCHFRESSER_REGAIN_SUPPRESSION_TURNS;
+          battle.log.push(useMessage, damageMessage, suppressionMessage);
+          itemUsageLogged = true;
+          if (fixedDamage > 0) {
+            battle.presentationEvents.push({
+              type: "damage",
+              actorSide,
+              targetSide,
+              hit: true,
+              damage: fixedDamage,
+              message: `${useMessage}\n${damageMessage}\n${suppressionMessage}`
+            });
+          }
         }
       } else if (effect.id === "thrown_fixed_damage") {
         const hitRate = calculatePhysicalHitRate({ attacker: actor, defender: target, attack: {} });
@@ -859,7 +878,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, d
         }
       }
     }
-    battle.log.push(`${actor.name}は${action.item.name}を使った。`);
+    if (!itemUsageLogged) battle.log.push(`${actor.name}は${action.item.name}を使った。`);
     if (action.item.id === "allheilmittel") {
       actor.statuses = [
         ...(actor.statuses || []).filter(status => (status.id || status.statusId) !== "allheilmittel_used"),

@@ -1,17 +1,40 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { getBossById } from "../data/bosses.js";
+import { createBossCombatant, getBossById } from "../data/bosses.js";
 import { getCardById } from "../data/cards.js";
 import { getItem } from "../data/items.js";
 import { getQuestById } from "../data/quests.js";
 import { createInitialCharacter } from "../data/classes.js";
-import { grantItem } from "../data/inventory.js";
+import { getItemCount, grantItem } from "../data/inventory.js";
 import { getItemUnavailableReasonForEnemies } from "../combat/resolve-item-use.js";
+import { createBattleState, resolveBattleRound } from "../combat/battle-engine.js";
 import { buildBoundaryWallMap, cells } from "../js/dungeon.js";
 import { readFile } from "node:fs/promises";
 
 const fixedRng = () => 0.5;
+
+function createHerbicideBattle({ hp = 10000, amount = 1, suppressedTurns = 0, enemyActsFirst = false } = {}) {
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.inventory = grantItem(character.inventory, "strong_herbicide", amount).inventory;
+  const enemy = createBossCombatant("fleischfresser_b59f");
+  enemy.hp = hp;
+  enemy.def = 9999;
+  enemy.physicalDamageReduction = 1;
+  enemy.magicDamageReduction = 1;
+  enemy.regainSuppressedTurns = suppressedTurns;
+  enemy.actions = [{
+    weight: 1,
+    action: {
+      id: "herbicide_test_wait",
+      name: "待機",
+      actionType: "wait",
+      speedModifier: enemyActsFirst ? 1000 : -1000,
+      waitMessage: "フライシュフレッサーは動かない。"
+    }
+  }];
+  return createBattleState({ character, enemy });
+}
 
 test("B50F through B58F place five giant vines until Fleischfresser is defeated", () => {
   for (const depth of [50, 54, 58]) {
@@ -82,6 +105,120 @@ test("strong herbicide is available immediately when any living battle target is
     context: "battle",
     enemies: [muskBeast]
   }), "plantOnly");
+  for (const itemId of ["strong_herbicide_trial", "strong_herbicide"]) {
+    assert.equal(getItemUnavailableReasonForEnemies({
+      character: { ...character, inventory: grantItem(character.inventory, itemId, 1).inventory },
+      itemId,
+      context: "battle",
+      enemies: [createBossCombatant("fleischfresser_b59f")]
+    }), "");
+  }
+});
+
+test("strong herbicide always deals its configured 500 fixed damage and refreshes regain suppression", () => {
+  let battle = createHerbicideBattle({ amount: 2, enemyActsFirst: true });
+  let result = resolveBattleRound({
+    battle,
+    playerCommand: { type: "item", itemId: "strong_herbicide" },
+    rng: fixedRng
+  });
+  assert.equal(result.accepted, true);
+  battle = result.battle;
+  assert.equal(battle.enemy.hp, 9500);
+  assert.equal(battle.enemy.regainSuppressedTurns, 5);
+  assert.equal(getItemCount(battle.player.inventory, "strong_herbicide"), 1);
+  assert.match(battle.log.join("\n"), /フライシュフレッサーに500の固定ダメージ！/);
+  assert.match(battle.log.join("\n"), /再生能力が5ターン停止した！/);
+  assert.deepEqual(
+    battle.presentationEvents.filter(event => event.type === "damage" && event.targetSide === "enemy")
+      .map(event => ({ hit: event.hit, damage: event.damage })),
+    [{ hit: true, damage: 500 }]
+  );
+
+  result = resolveBattleRound({
+    battle,
+    playerCommand: { type: "item", itemId: "strong_herbicide" },
+    rng: fixedRng
+  });
+  battle = result.battle;
+  assert.equal(battle.enemy.hp, 9000);
+  assert.equal(battle.enemy.regainSuppressedTurns, 5);
+  assert.equal(getItemCount(battle.player.inventory, "strong_herbicide"), 0);
+  assert.match(battle.log.join("\n"), /再生停止時間が5ターンに延長された！/);
+  assert.deepEqual(
+    battle.presentationEvents.filter(event => event.type === "damage" && event.targetSide === "enemy")
+      .map(event => event.damage),
+    [500]
+  );
+});
+
+test("strong herbicide can defeat Fleischfresser through the normal victory path", () => {
+  const result = resolveBattleRound({
+    battle: createHerbicideBattle({ hp: 400 }),
+    playerCommand: { type: "item", itemId: "strong_herbicide" },
+    rng: fixedRng
+  });
+  assert.equal(result.accepted, true);
+  assert.equal(result.battle.enemy.hp, 0);
+  assert.equal(result.battle.enemy.alive, false);
+  assert.equal(result.battle.enemy.regainSuppressedTurns, 5);
+  assert.equal(result.battle.outcome, "victory");
+  assert.equal(result.battle.phase, "complete");
+  assert.equal(getItemCount(result.battle.player.inventory, "strong_herbicide"), 0);
+  assert.equal(result.battle.presentationEvents.some(event =>
+    event.type === "damage" && event.hit === true && event.damage === 500
+  ), true);
+  assert.match(result.battle.log.at(-1), /フライシュフレッサーを倒した！/);
+});
+
+test("Fleischfresser loses five regain opportunities before its ordinary five-percent regain returns", () => {
+  let battle = createHerbicideBattle({ hp: 9000, amount: 0, suppressedTurns: 5 });
+  for (let turn = 0; turn < 5; turn += 1) {
+    battle = resolveBattleRound({ battle, playerCommand: { type: "guard" }, rng: fixedRng }).battle;
+    assert.equal(battle.enemy.hp, 9000);
+    assert.equal(battle.enemy.regainSuppressedTurns, 4 - turn);
+  }
+  battle = resolveBattleRound({ battle, playerCommand: { type: "guard" }, rng: fixedRng }).battle;
+  assert.equal(battle.enemy.hp, 9500);
+  assert.match(battle.log.join("\n"), /500HPを再生した！/);
+});
+
+test("trial herbicide still removes a giant vine in one use and records only that quest use", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.inventory = grantItem(character.inventory, "strong_herbicide_trial", 1).inventory;
+  const vine = createBossCombatant("giant_vine_obstacle");
+  vine.actions = [{ weight: 1, action: { id: "wait", name: "待機", actionType: "wait", speedModifier: -1000 } }];
+  const result = resolveBattleRound({
+    battle: createBattleState({ character, enemy: vine }),
+    playerCommand: { type: "item", itemId: "strong_herbicide_trial" },
+    rng: fixedRng
+  });
+  assert.equal(result.battle.enemy.hp, 0);
+  assert.equal(result.battle.enemy.alive, false);
+  assert.equal(result.battle.outcome, "victory");
+  assert.equal(result.battle.player.herbicideTrialUses, 1);
+  assert.equal(getItemCount(result.battle.player.inventory, "strong_herbicide_trial"), 0);
+});
+
+test("multi-enemy herbicide damage stays on the selected Fleischfresser target", () => {
+  const character = createInitialCharacter({ name: "TEST", job: "warrior" });
+  character.inventory = grantItem(character.inventory, "strong_herbicide", 1).inventory;
+  const vine = createBossCombatant("giant_vine_obstacle");
+  const fleischfresser = createBossCombatant("fleischfresser_b59f");
+  for (const enemy of [vine, fleischfresser]) {
+    enemy.actions = [{ weight: 1, action: { id: "wait", name: "待機", actionType: "wait", speedModifier: -1000 } }];
+  }
+  const result = resolveBattleRound({
+    battle: createBattleState({ character, enemy: fleischfresser, enemies: [vine, fleischfresser], targetIndex: 1 }),
+    playerCommand: { type: "item", itemId: "strong_herbicide", targetIndex: 1 },
+    rng: fixedRng
+  });
+  assert.equal(result.battle.enemies[0].hp, vine.maxHp);
+  assert.equal(result.battle.enemies[0].alive, true);
+  assert.equal(result.battle.enemies[1].hp, 9500);
+  assert.equal(result.battle.presentationEvents.some(event =>
+    event.type === "damage" && event.damage === 500 && event.targetIndex === 1
+  ), true);
 });
 
 test("the hidden legacy enemy stage cannot appear behind a multi-enemy formation", async () => {
