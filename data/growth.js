@@ -11,6 +11,9 @@ export const JOB_GROWTH = Object.freeze({
 const VITAL_GROWTH_EXPONENT = 1.35;
 const VITAL_EARLY_BOOST = 0.009;
 const VITAL_GROWTH_JOIN_LEVEL = 50;
+const MIDGAME_HP_BONUS_START_LEVEL = 20;
+const MIDGAME_HP_BONUS_END_LEVEL = 100;
+const MIDGAME_HP_PROGRESS_BONUS_MAX = 0.03;
 const PRIME_LEVELS = Object.freeze(
   Array.from({ length: MAX_LEVEL + 1 }, (_, level) => level).filter(isPrime)
 );
@@ -41,13 +44,28 @@ const EXPERIENCE_ANCHORS = Object.freeze([
 export function getLevelGrowth(jobId, level) {
   const job = JOB_GROWTH[jobId] || JOB_GROWTH.warrior;
   const normalized = normalizeLevel(level);
-  const progress = getVitalGrowthProgress(normalized);
+  const baseVitalProgress = getVitalGrowthProgress(normalized);
+  const hpProgress = Math.min(
+    1,
+    baseVitalProgress + getMidgameHpProgressBonus(normalized)
+  );
   return Object.freeze({
     level: normalized,
-    hp: Math.round(job.hp + (job.hpMax - job.hp) * progress),
-    sp: Math.round(job.sp + (job.spMax - job.sp) * progress),
+    hp: Math.round(job.hp + (job.hpMax - job.hp) * hpProgress),
+    sp: Math.round(job.sp + (job.spMax - job.sp) * baseVitalProgress),
     deckCost: getDeckCostAtLevel(normalized)
   });
+}
+
+export function getMidgameHpProgressBonus(level) {
+  const normalized = normalizeLevel(level);
+  if (normalized <= MIDGAME_HP_BONUS_START_LEVEL || normalized >= MIDGAME_HP_BONUS_END_LEVEL) {
+    return 0;
+  }
+
+  const phase = (normalized - MIDGAME_HP_BONUS_START_LEVEL)
+    / (MIDGAME_HP_BONUS_END_LEVEL - MIDGAME_HP_BONUS_START_LEVEL);
+  return MIDGAME_HP_PROGRESS_BONUS_MAX * Math.sin(Math.PI * phase);
 }
 
 export function getDeckCostAtLevel(level) {
