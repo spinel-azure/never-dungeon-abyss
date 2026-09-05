@@ -1,4 +1,6 @@
-﻿export function drawMinimap(ctx, {
+﻿import { getExplorationObstacleById } from "../data/exploration-obstacles.js";
+
+export function drawMinimap(ctx, {
   W,
   MAP_W,
   MAP_H,
@@ -74,6 +76,10 @@
       if (c.bossId && isExplored) c.bossId === "giant_vine_obstacle"
         ? drawTextMark(ctx, "🌿", x1, y1, cell)
         : drawBossMark(ctx, x1, y1, cell);
+      if (c.explorationObstacleId && isExplored) {
+        const obstacle = getExplorationObstacleById(c.explorationObstacleId);
+        if (obstacle) drawTextMark(ctx, obstacle.minimapMarker, x1, y1, cell, obstacle.minimapColor);
+      }
       if (c.fountain && effectiveTorchActive) drawFountainMark(ctx, x1, y1, cell);
       if ((c.fixedWarp || c.fixedReturnPortal) && isExplored) drawTextMark(ctx, "※", x1, y1, cell, "#63e9ff");
       if (c.fixedEvent && isExplored) drawTextMark(ctx, "!", x1, y1, cell, "#b9f4ff");

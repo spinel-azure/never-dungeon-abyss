@@ -27,6 +27,11 @@ import { DESERT_QUICKSAND, floorHasQuicksand, QUICKSAND_COUNT } from "../data/qu
 import { floorHasRapidCurrents, getRapidCurrentTargetCount, RAPID_CURRENT, RAPID_CURRENT_DIRECTIONS } from "../data/rapid-currents.js";
 import { hasPurpleChestLootTable } from "../data/loot.js";
 import {
+  EXPLORATION_OBSTACLE_TARGET_COUNT,
+  getExplorationObstacleById,
+  getExplorationObstacleForDepth
+} from "../data/exploration-obstacles.js";
+import {
   DUNGEON_FEATURE_PRIORITIES,
   getTraversalBlockingReservations,
   isDungeonFeatureOccupied,
@@ -75,6 +80,7 @@ export function makeCells(w, h) {
       eventTreasureId: null,
       bossId: null,
       bossRemainsId: null,
+      explorationObstacleId: null,
       reserved: null,
       featureReservation: null,
       featureApproach: null,
@@ -256,6 +262,7 @@ function buildBoundaryWallMapAttempt(depth = 1, rng = Math.random, progress = {}
   placeFountain(depth, rng);
   placeQuicksands(depth, rng);
   if (floorBoss?.room?.requiresKey) placeFloorBossKeyTreasure(floorBoss, rng, progress);
+  placeExplorationObstacles(depth, rng);
   placeForestVines(depth, rng, progress);
   placeNormalDoors(NORMAL_DOOR_COUNT, false);
   placeRapidCurrents(depth, rng);
@@ -305,6 +312,47 @@ export function placeForestVines(depth = 1, rng = Math.random, progress = {}) {
   const placed = shuffled(candidates, rng).slice(0, 5);
   for (const cell of placed) cell.bossId = "giant_vine_obstacle";
   return placed.map(cell => ({ x: cell.x, y: cell.y }));
+}
+
+export function placeExplorationObstacles(depth = 1, rng = Math.random) {
+  for (const cell of cells.flat()) {
+    cell.explorationObstacleId = null;
+    if (cell.featureReservation?.type !== "explorationObstacle") continue;
+    cell.featureReservation = null;
+    cell.reserved = null;
+  }
+  const obstacle = getExplorationObstacleForDepth(depth);
+  if (!obstacle) return [];
+  const { x: startX, y: startY } = startPosition;
+  const distances = makeDistanceMap(startX, startY);
+  const occupiedByNpc = cells.flat().filter(cell => cell.npc).map(cell => ({ x: cell.x, y: cell.y }));
+  const candidates = shuffled(cells.flat().filter(cell => (
+    cell.type === "floor"
+    && !isDungeonFeatureOccupied(cell)
+    && !cell.npc && !cell.fountain && !cell.treasure && !cell.questEvent
+    && !cell.quicksand && !cell.rapidCurrent && !cell.bossId && !cell.bossRemainsId
+    && distances[cell.y][cell.x] >= 3
+    && Math.abs(cell.x - startX) + Math.abs(cell.y - startY) >= 3
+  )), rng);
+  const placed = [];
+  for (const cell of candidates) {
+    if (placed.length >= EXPLORATION_OBSTACLE_TARGET_COUNT) break;
+    if (placed.some(other => Math.abs(other.x - cell.x) + Math.abs(other.y - cell.y) < 3)) continue;
+    const blocked = [...getTraversalBlockingReservations(cells), ...occupiedByNpc, { x: cell.x, y: cell.y }];
+    if (countReachableCells(startX, startY, blocked) !== MAP_W * MAP_H - blocked.length) continue;
+    const sequence = placed.length + 1;
+    const reservation = reserveDungeonFeature(cells, {
+      featureId: `${obstacle.id}_b${Math.floor(Number(depth) || 1)}f_${sequence}`,
+      type: "explorationObstacle",
+      footprint: [cell],
+      priority: DUNGEON_FEATURE_PRIORITIES.explorationObstacle,
+      blocksTraversal: true
+    });
+    if (!reservation.accepted) continue;
+    cell.explorationObstacleId = obstacle.id;
+    placed.push({ x: cell.x, y: cell.y, obstacleId: obstacle.id });
+  }
+  return placed;
 }
 
 export function getLastDungeonBuildReport() {
@@ -467,6 +515,7 @@ export function resetAllWalls() {
       cells[y][x].eventTreasureId = null;
       cells[y][x].bossId = null;
       cells[y][x].bossRemainsId = null;
+      cells[y][x].explorationObstacleId = null;
       cells[y][x].reserved = null;
       cells[y][x].featureReservation = null;
       cells[y][x].featureApproach = null;
@@ -635,6 +684,23 @@ export function discoverRapidCurrent(streamId) {
 export function getBossAt(x, y) {
   if (!inBounds(x, y)) return null;
   return cells[y][x].bossId || null;
+}
+
+export function getExplorationObstacleAt(x, y) {
+  if (!inBounds(x, y)) return null;
+  return getExplorationObstacleById(cells[y][x].explorationObstacleId);
+}
+
+export function removeExplorationObstacleAt(x, y) {
+  if (!inBounds(x, y)) return false;
+  const cell = cells[y][x];
+  if (!cell.explorationObstacleId) return false;
+  cell.explorationObstacleId = null;
+  if (cell.featureReservation?.type === "explorationObstacle") {
+    cell.featureReservation = null;
+    cell.reserved = null;
+  }
+  return true;
 }
 
 export function removeBossAt(x, y) {

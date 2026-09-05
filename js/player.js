@@ -18,6 +18,7 @@ import {
   getStartPosition,
   getNpcAt,
   getBossAt,
+  getExplorationObstacleAt,
   getBossRemainsAt,
   removeNpcAt,
   getFountainAt,
@@ -42,6 +43,10 @@ import { getNpcEncounter } from "../data/npcs.js";
 import { DESERT_OASIS, DESERT_OASIS_MIRAGE, getFountainById } from "../data/fountains.js";
 import { getBossById } from "../data/bosses.js";
 import { getFloorZoneName } from "../data/floor-zone-names.js";
+import {
+  getExplorationObstacleMethodPrompt,
+  getExplorationObstacleOilPrompt
+} from "../data/exploration-obstacles.js";
 import { onExplorationStep, resetPresence } from "./presence.js";
 import { getRapidCurrentForcedPath, RAPID_CURRENT, RAPID_CURRENT_DIRECTIONS } from "../data/rapid-currents.js";
 import {
@@ -71,6 +76,8 @@ const hooks = {
   awardTreasure: () => ({ message: "中には何も入っていなかった！" }),
   unlockBossDoor: () => ({ accepted: false, message: "鍵がかかっている。" }),
   getBossRoomEntryBlock: () => ({ blocked: false }),
+  getExplorationObstacleRemovalOptions: () => ({}),
+  resolveExplorationObstacleRemoval: () => ({ accepted: false, reason: "unavailable" }),
   getSpecialDoorLockInfo: () => null,
   getSpecialDoorAccessBlock: () => ({ blocked: false }),
   attemptSpecialDoorUnlock: () => ({ accepted: false }),
@@ -399,6 +406,12 @@ export function tryMove(amount, automated = false, specialEntryConfirmed = false
     hooks.playSe("blocked");
     state.shake = amount > 0 ? -7 : 5;
     hooks.say("外周の向こうは闇に閉ざされている。");
+    return;
+  }
+  const explorationObstacle = getExplorationObstacleAt(nx, ny);
+  if (explorationObstacle) {
+    if (automated) hooks.cancelAutoReturn(false);
+    startExplorationObstacleEvent(explorationObstacle, nx, ny, amount);
     return;
   }
   const destinationCurrent = getRapidCurrentAt(nx, ny);
@@ -951,6 +964,107 @@ function beginSpecialRoomBossBattle(event, boss) {
   scheduleSpecialRoomBossBattle(event, boss);
 }
 
+function startExplorationObstacleEvent(obstacle, obstacleGX, obstacleGY, moveAmount) {
+  const options = hooks.getExplorationObstacleRemovalOptions(obstacle.id) || {};
+  state.shake = moveAmount > 0 ? -8 : 6;
+  hooks.playSe("blocked");
+  if (options.johan) {
+    startOverlayEvent({
+      type: "explorationObstacle",
+      phase: "johanIntro",
+      obstacle,
+      obstacleGX,
+      obstacleGY,
+      canCancel: false,
+      showOverlay: false,
+      message: `${obstacle.johanMessage}\n＊Aボタン：次へ`
+    });
+    return;
+  }
+  if (options.canUseMagic && options.canUseOil) {
+    startOverlayEvent({
+      type: "explorationObstacle",
+      phase: "methodChoice",
+      obstacle,
+      obstacleGX,
+      obstacleGY,
+      oilCount: options.oilCount,
+      canCancel: true,
+      showOverlay: false,
+      message: getExplorationObstacleMethodPrompt(obstacle, options.oilCount)
+    });
+    return;
+  }
+  if (options.canUseMagic) {
+    startExplorationObstacleConfirmation({ obstacle, obstacleGX, obstacleGY }, "magic");
+    return;
+  }
+  if (options.canUseOil) {
+    startExplorationObstacleConfirmation({
+      obstacle,
+      obstacleGX,
+      obstacleGY,
+      oilCount: options.oilCount
+    }, "oil");
+    return;
+  }
+  hooks.say(obstacle.blockedMessage);
+}
+
+function startExplorationObstacleConfirmation(event, method) {
+  const obstacle = event.obstacle;
+  startOverlayEvent({
+    ...event,
+    type: "explorationObstacle",
+    phase: "confirm",
+    method,
+    canCancel: true,
+    showOverlay: false,
+    message: method === "magic"
+      ? obstacle.magicConfirmMessage
+      : getExplorationObstacleOilPrompt(obstacle, event.oilCount)
+  });
+}
+
+function advanceExplorationObstacleEvent() {
+  const event = state.overlayEvent;
+  if (!event || event.type !== "explorationObstacle") return;
+  if (event.phase === "methodChoice") {
+    startExplorationObstacleConfirmation(event, "magic");
+    return;
+  }
+  if (event.phase === "result") {
+    state.overlayEvent = null;
+    hooks.say("");
+    hooks.onStateChanged();
+    return;
+  }
+  const method = event.phase === "johanIntro" ? "johan" : event.method;
+  if (!method) return;
+  const result = hooks.resolveExplorationObstacleRemoval({
+    obstacleId: event.obstacle.id,
+    x: event.obstacleGX,
+    y: event.obstacleGY,
+    method
+  }) || {};
+  if (!result.accepted) {
+    state.overlayEvent = null;
+    hooks.say(event.obstacle.blockedMessage);
+    hooks.onStateChanged();
+    return;
+  }
+  event.phase = "result";
+  event.canCancel = false;
+  event.method = method;
+  const resultMessage = method === "johan"
+    ? event.obstacle.johanResultMessage
+    : method === "magic"
+      ? event.obstacle.magicResultMessage
+      : event.obstacle.oilResultMessage;
+  hooks.say(`${resultMessage}\n＊Aボタン：次へ`);
+  hooks.onStateChanged();
+}
+
 function scheduleSpecialRoomBossBattle(event, boss) {
   event.autoStartTimer = window.setTimeout(() => {
     if (state.overlayEvent !== event) return;
@@ -965,6 +1079,12 @@ export function handleOverlayEventInput(action) {
   if (state.overlayEvent.type === "floorLap") {
     state.overlayEvent = null;
     hooks.say("");
+    return true;
+  }
+  if (action === "cancel"
+    && state.overlayEvent.type === "explorationObstacle"
+    && state.overlayEvent.phase === "methodChoice") {
+    startExplorationObstacleConfirmation(state.overlayEvent, "oil");
     return true;
   }
   if (action === "cancel") {
@@ -985,6 +1105,7 @@ export function handleOverlayEventInput(action) {
     else if (state.overlayEvent.type === "specialDoorAccessConfirm") confirmSpecialDoorAccessEvent();
     else if (state.overlayEvent.type === "specialRoomWarning") confirmSpecialRoomWarningEvent();
     else if (state.overlayEvent.type === "specialRoomBoss") confirmSpecialRoomBossEvent();
+    else if (state.overlayEvent.type === "explorationObstacle") advanceExplorationObstacleEvent();
     else if (state.overlayEvent.type === "rareEnemyRoom") confirmRareEnemyRoomEvent();
     else if (state.overlayEvent.type === "waspHive") {
       const event = state.overlayEvent;

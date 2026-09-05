@@ -7,6 +7,7 @@ export const DUNGEON_FEATURE_PRIORITIES = Object.freeze({
   npc: 400,
   treasure: 300,
   fountain: 200,
+  explorationObstacle: 150,
   normalDoor: 100
 });
 
@@ -19,6 +20,7 @@ export const DUNGEON_PLACEMENT_ORDER = Object.freeze([
   "npc",
   "treasure",
   "fountain",
+  "explorationObstacle",
   "normalDoor"
 ]);
 

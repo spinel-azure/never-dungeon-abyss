@@ -20,6 +20,7 @@ import {
   attemptSpecialRoomUnlock,
   markBossDefeatedAt,
   removeBossAt,
+  removeExplorationObstacleAt,
   refreshB100FinalBoss,
   setStartPosition,
   randomizeStartPosition
@@ -131,6 +132,10 @@ import { grantCard } from "../data/deck.js";
 import { CARDS, collectCardStatBonuses, getCardById, hasCardEffect, sumCardEffectValues } from "../data/cards.js";
 import { drawCardCanvas } from "./card-canvas.js";
 import { getItem } from "../data/items.js";
+import {
+  getExplorationObstacleRemovalOptions,
+  resolveExplorationObstacleRemoval as applyExplorationObstacleRemoval
+} from "../data/exploration-obstacles.js";
 import { isCriticalHp } from "../data/quick-status.js";
 import { applyTaurusDepthBonus } from "../data/taurus.js";
 import { scaleBlackChestMimic } from "../data/mimic-scaling.js";
@@ -641,6 +646,21 @@ import {
           || (flags.jirene_scripted_defeat_seen && !hasKeyItem(character?.keyItems, "beeswax_earplugs")))
         ? { blocked: true, message: "今はこれ以上進むべきではない…。" }
         : { blocked: false };
+    },
+    getExplorationObstacleRemovalOptions: obstacleId => (
+      getExplorationObstacleRemovalOptions(character, obstacleId)
+    ),
+    resolveExplorationObstacleRemoval: ({ obstacleId, x, y, method } = {}) => {
+      if (!character) return { accepted: false, reason: "noCharacter" };
+      const result = applyExplorationObstacleRemoval(character, obstacleId, method);
+      if (!result.accepted) return result;
+      if (!removeExplorationObstacleAt(x, y)) {
+        return { accepted: false, reason: "obstacleMissing", character };
+      }
+      character = result.character;
+      updateCharacterUi();
+      saveGame();
+      return result;
     },
     getSpecialDoorLockInfo: getCurrentSpecialDoorLockInfo,
     getSpecialDoorAccessBlock: getCurrentSpecialDoorAccessBlock,
@@ -1155,6 +1175,7 @@ import {
         cells[y][x].quicksand = savedCell.quicksand || null;
         cells[y][x].rapidCurrent = savedCell.rapidCurrent || null;
         cells[y][x].rapidCurrentDiscovered = Boolean(savedCell.rapidCurrentDiscovered);
+        cells[y][x].explorationObstacleId = savedCell.explorationObstacleId || null;
         explored[y][x] = Boolean(dungeon.explored[y][x]);
       }
     }

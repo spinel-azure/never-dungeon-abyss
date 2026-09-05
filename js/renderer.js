@@ -9,6 +9,7 @@ import { BOSSES, getBossById } from "../data/bosses.js";
 import { B100_GAUNTLET_BOSS_IDS } from "../data/fixed-floor-maps.js";
 import { DESERT_QUICKSAND } from "../data/quicksand.js";
 import { RAPID_CURRENT } from "../data/rapid-currents.js";
+import { EXPLORATION_OBSTACLES, getExplorationObstacleById } from "../data/exploration-obstacles.js";
 import {
   B100_FINAL_PRELUDE_ASSETS,
   B100_FINAL_PRELUDE_TRANSITION_MS
@@ -238,6 +239,9 @@ export function configureRenderer(options) {
   loadCharacterImage(DESERT_OASIS_MIRAGE.id, DESERT_OASIS_MIRAGE.image);
   loadCharacterImage(DESERT_QUICKSAND.id, DESERT_QUICKSAND.image);
   loadCharacterImage(RAPID_CURRENT.imageId, RAPID_CURRENT.image);
+  Object.values(EXPLORATION_OBSTACLES).forEach(obstacle => {
+    loadCharacterImage(obstacle.imageId, obstacle.image);
+  });
   loadCharacterImage("maikaefer_nest_event", "images/background/dungeon_event_08.avif");
   loadCharacterImage("giant_wasp_hive_b18f", "images/background/dungeon_event_10.avif");
   loadCharacterImage("kirke_house_b58f", "images/background/dungeon_event_11.avif");
@@ -1068,6 +1072,15 @@ export function drawCellEvents(layer = "all") {
           npc: { imageId: "NPC_01b", renderScale: 0.92, glow: "paleBlue" }
         });
       }
+      if (cell.explorationObstacleId) {
+        if (layer === "floor") continue;
+        const obstacle = getExplorationObstacleById(cell.explorationObstacleId);
+        if (obstacle) events.push({
+          ...projected,
+          eventKind: "explorationObstacle",
+          npc: obstacle
+        });
+      }
       if (cell.bossId) {
         if (layer === "floor") continue;
         const boss = getBossById(cell.bossId);
@@ -1142,6 +1155,7 @@ export function drawCellEvents(layer = "all") {
       if (event.eventKind === "questEvent") drawQuestEvent(ctx, event);
       if (event.eventKind === "fixedPortal") drawNpcEvent(ctx, event);
       if (event.eventKind === "fixedEvent") drawNpcEvent(ctx, event);
+      if (event.eventKind === "explorationObstacle") drawNpcEvent(ctx, event);
     });
 }
 
@@ -1178,7 +1192,7 @@ function projectCellCenter(cellX, cellY) {
 }
 
 export function isSpriteEventCell(cell = {}) {
-  return Boolean(cell.bossId || cell.bossRemainsId || cell.npc || cell.fountain || cell.quicksand || cell.treasure || cell.questEvent || cell.fixedWarp || cell.fixedReturnPortal || cell.fixedEvent);
+  return Boolean(cell.bossId || cell.bossRemainsId || cell.explorationObstacleId || cell.npc || cell.fountain || cell.quicksand || cell.treasure || cell.questEvent || cell.fixedWarp || cell.fixedReturnPortal || cell.fixedEvent);
 }
 
 function drawQuestEvent(ctx, event) {

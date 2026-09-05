@@ -5,6 +5,7 @@ import {
   explored,
   getDoorKind,
   getDoorState,
+  getExplorationObstacleAt,
   getStartPosition,
   inBounds,
   wallOnCell
@@ -126,6 +127,7 @@ export function findExploredPathToStart() {
       const key = `${nx},${ny}`;
       if (!inBounds(nx, ny)) continue;
       if (!explored[ny][nx]) continue;
+      if (getExplorationObstacleAt(nx, ny)) continue;
       const doorState = getDoorState(cur.x, cur.y, dir.key);
       const doorKind = getDoorKind(cur.x, cur.y, dir.key);
       if (doorState && (doorKind === "locked" || doorKind === "boss" || doorKind === "specialLocked")) continue;
