@@ -45,6 +45,8 @@ import {
   state
 } from "../js/player.js";
 import { findExploredPathToStart } from "../js/autoReturn.js";
+import { SE } from "../js/audio.js";
+import { resolveExplorationObstacleEffectFrame } from "../js/renderer.js";
 import { loadGame, writeGame } from "../js/save-data.js";
 
 function seededRng(seed) {
@@ -93,9 +95,10 @@ function prepareObstacleInteraction(character, obstacleId) {
   cells[1][2].explorationObstacleId = obstacleId;
   let currentCharacter = character;
   const messages = [];
+  const soundEffects = [];
   configurePlayer({
     say: message => messages.push(message),
-    playSe: () => {},
+    playSe: key => soundEffects.push(key),
     cancelAutoReturn: () => {},
     getExplorationObstacleRemovalOptions: id => getExplorationObstacleRemovalOptions(currentCharacter, id),
     resolveExplorationObstacleRemoval: ({ obstacleId: id, x, y, method }) => {
@@ -109,6 +112,7 @@ function prepareObstacleInteraction(character, obstacleId) {
   });
   return {
     messages,
+    soundEffects,
     get character() { return currentCharacter; }
   };
 }
@@ -170,6 +174,10 @@ test("obstacle definitions use the requested assets and floor-zone exclusions", 
   const ice = getExplorationObstacleById("giant_ice_block");
   assert.equal(fire.image, "images/npc/NPC_event_21.avif");
   assert.equal(ice.image, "images/npc/NPC_event_22.avif");
+  assert.equal(fire.renderScale, 1.9);
+  assert.equal(ice.renderScale, 1.9);
+  assert.equal(fire.renderEffect, "fire-waver");
+  assert.equal(ice.renderEffect, "ice-sparkle");
   assert.equal(getExplorationObstacleForDepth(34)?.id, fire.id);
   assert.equal(getExplorationObstacleForDepth(35), null);
   assert.equal(getExplorationObstacleForDepth(44)?.id, ice.id);
@@ -186,7 +194,7 @@ test("walking into an unavailable obstacle does not move or change facing", () =
   assert.equal(state.dir, direction);
   assert.equal(state.anim, null);
   assert.equal(state.overlayEvent, null);
-  assert.equal(interaction.messages.at(-1), "激しく燃え上がる火柱が行く手を遮っている。\nこのままでは通れそうにない。");
+  assert.equal(interaction.messages.at(-1), "激しく燃え上がる火柱が行く手を遮っている。\nこのままでは通れそうにない。迂回するしかなさそうだ。");
 });
 
 test("a mage spends ten SP only after confirming the matching spell", () => {
@@ -213,7 +221,7 @@ test("SP9 cannot remove an obstacle by magic but the matching oil remains select
   manualMove(1);
   assert.equal(state.overlayEvent, null);
   assert.equal(interaction.character.sp, 9);
-  assert.equal(interaction.messages.at(-1), "巨大な氷塊が行く手を塞いでいる。\nこのままでは通れそうにない。");
+  assert.equal(interaction.messages.at(-1), "巨大な氷塊が行く手を塞いでいる。\nこのままでは通れそうにない。迂回するしかなさそうだ。");
 
   interaction = prepareObstacleInteraction(createObstacleCharacter("mage", 9, "fire_lizard_oil", 1), "giant_ice_block");
   manualMove(1);
@@ -232,6 +240,7 @@ test("a mage can deliberately choose oil without spending SP", () => {
   assert.equal(interaction.character.sp, 20);
   assert.equal(getItemCount(interaction.character.inventory, "ice_lizard_oil"), 1);
   assert.equal(getExplorationObstacleAt(2, 1), null);
+  assert.equal(interaction.soundEffects.filter(key => key === "explorationObstacleOil").length, 1);
 });
 
 test("an accompanying Johan always removes the obstacle without consuming player resources", () => {
@@ -250,6 +259,7 @@ test("an accompanying Johan always removes the obstacle without consuming player
   assert.equal(interaction.character.sp, 20);
   assert.equal(getItemCount(interaction.character.inventory, "ice_lizard_oil"), 2);
   assert.equal(getExplorationObstacleAt(2, 1), null);
+  assert.equal(interaction.soundEffects.includes("explorationObstacleOil"), false);
 });
 
 test("registered but non-accompanying Johan does not grant free removal", () => {
@@ -329,6 +339,41 @@ test("B35F and B45F survey quests still complete on a fully explored map", () =>
   iceCharacter = acceptQuest(iceCharacter, B45F_SURVEY_QUEST_ID).character;
   iceCharacter = recordFloorExploration(iceCharacter, { depth: 45, explored: fullMap });
   assert.equal(getQuestProgress(iceCharacter, B45F_SURVEY_QUEST_ID).readyToReport, true);
+});
+
+test("obstacle effects animate inside the shared renderer and remain reduced-motion safe", () => {
+  const fireStart = resolveExplorationObstacleEffectFrame("fire-waver", 0, false);
+  const fireLater = resolveExplorationObstacleEffectFrame("fire-waver", 500, false);
+  assert.notEqual(fireStart.offsetXRatio, fireLater.offsetXRatio);
+  assert.notEqual(fireStart.scaleY, fireLater.scaleY);
+  assert.deepEqual(
+    resolveExplorationObstacleEffectFrame("fire-waver", 500, true),
+    { offsetXRatio: 0, scaleX: 1, scaleY: 1, glowAlpha: .42, sparkles: [] }
+  );
+
+  const iceStart = resolveExplorationObstacleEffectFrame("ice-sparkle", 0, false);
+  const iceLater = resolveExplorationObstacleEffectFrame("ice-sparkle", 500, false);
+  assert.equal(iceStart.sparkles.length, 5);
+  assert.notDeepEqual(iceStart.sparkles.map(entry => entry.alpha), iceLater.sparkles.map(entry => entry.alpha));
+  const reducedIce = resolveExplorationObstacleEffectFrame("ice-sparkle", 500, true);
+  assert.equal(reducedIce.sparkles.length, 2);
+  assert.ok(reducedIce.sparkles.every(entry => entry.alpha === .48));
+});
+
+test("matching oil removal uses the registered sliding2 sound once", async () => {
+  assert.equal(SE.explorationObstacleOil, "sliding2.mp3");
+  await readFile(new URL("../se/sliding2.mp3", import.meta.url));
+
+  const interaction = prepareObstacleInteraction(
+    createObstacleCharacter("warrior", 20, "fire_lizard_oil", 1),
+    "giant_ice_block"
+  );
+  manualMove(1);
+  assert.equal(interaction.soundEffects.filter(key => key === "explorationObstacleOil").length, 0);
+  handleOverlayEventInput("confirm");
+  assert.equal(interaction.soundEffects.filter(key => key === "explorationObstacleOil").length, 1);
+  handleOverlayEventInput("confirm");
+  assert.equal(interaction.soundEffects.filter(key => key === "explorationObstacleOil").length, 1);
 });
 
 test("elemental oils keep their battle-only prices and shop unlock contract", () => {

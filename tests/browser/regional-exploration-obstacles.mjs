@@ -41,6 +41,7 @@ try {
     }));
     await page.addInitScript(() => {
       window.qaObstacleDraws = [];
+      window.qaObstacleSoundEffects = [];
       let frameId = 0;
       window.requestAnimationFrame = () => ++frameId;
       window.cancelAnimationFrame = () => {};
@@ -61,6 +62,7 @@ try {
       const renderer = await import("/js/renderer.js");
       const minimap = await import("/js/minimap.js");
       const input = await import("/js/input.js");
+      const audio = await import("/js/audio.js");
       const obstacles = await import("/data/exploration-obstacles.js");
       const inventory = await import("/data/inventory.js");
       const classes = await import("/data/classes.js");
@@ -114,7 +116,7 @@ try {
       });
       player.configurePlayer({
         say: text => { message.textContent = text; },
-        playSe: () => {},
+        playSe: key => { window.qaObstacleSoundEffects.push(key); },
         cancelAutoReturn: () => {},
         getExplorationObstacleRemovalOptions: id => obstacles.getExplorationObstacleRemovalOptions(character, id),
         resolveExplorationObstacleRemoval: ({ obstacleId, x, y, method }) => {
@@ -163,11 +165,31 @@ try {
         const alpha = context.getImageData(0, 0, sample.width, sample.height).data;
         let transparent = 0;
         let opaque = 0;
+        let minX = image.naturalWidth;
+        let minY = image.naturalHeight;
+        let maxX = -1;
+        let maxY = -1;
         for (let index = 3; index < alpha.length; index += 4) {
-          if (alpha[index] === 0) transparent += 1;
-          if (alpha[index] > 0) opaque += 1;
+          if (alpha[index] === 0) {
+            transparent += 1;
+            continue;
+          }
+          opaque += 1;
+          const pixelIndex = (index - 3) / 4;
+          const x = pixelIndex % image.naturalWidth;
+          const y = Math.floor(pixelIndex / image.naturalWidth);
+          minX = Math.min(minX, x);
+          minY = Math.min(minY, y);
+          maxX = Math.max(maxX, x);
+          maxY = Math.max(maxY, y);
         }
-        return { width: image.naturalWidth, height: image.naturalHeight, transparent, opaque };
+        return {
+          width: image.naturalWidth,
+          height: image.naturalHeight,
+          transparent,
+          opaque,
+          contentBounds: { minX, minY, maxX, maxY }
+        };
       }
 
       window.qa = {
@@ -199,7 +221,19 @@ try {
             canvas: { width: canvas.width, height: canvas.height }
           };
         },
+        effectFrames() {
+          return {
+            fireStart: renderer.resolveExplorationObstacleEffectFrame("fire-waver", 0, false),
+            fireLater: renderer.resolveExplorationObstacleEffectFrame("fire-waver", 500, false),
+            iceStart: renderer.resolveExplorationObstacleEffectFrame("ice-sparkle", 0, false),
+            iceLater: renderer.resolveExplorationObstacleEffectFrame("ice-sparkle", 500, false),
+            reducedFire: renderer.resolveExplorationObstacleEffectFrame("fire-waver", 500, true),
+            reducedIce: renderer.resolveExplorationObstacleEffectFrame("ice-sparkle", 500, true),
+            audioFile: audio.SE.explorationObstacleOil
+          };
+        },
         prepareBranch() {
+          window.qaObstacleSoundEffects.length = 0;
           character = classes.createInitialCharacter({ name: "QA", job: layout.branch === "oil" ? "warrior" : "mage" });
           character.sp = 20;
           const obstacleId = layout.branch === "oil" ? "giant_ice_block" : "fire_pillar";
@@ -230,20 +264,46 @@ try {
             message: message.textContent,
             moveCalls: window.qaMoveCalls || 0,
             position: [player.state.gridX, player.state.gridY],
-            direction: player.state.dir
+            direction: player.state.dir,
+            soundEffects: window.qaObstacleSoundEffects.slice()
           };
         }
       };
     }, { layout });
 
+    const effectFrames = await page.evaluate(() => window.qa.effectFrames());
+    assert.equal(effectFrames.audioFile, "sliding2.mp3");
+    assert.notEqual(effectFrames.fireStart.offsetXRatio, effectFrames.fireLater.offsetXRatio);
+    assert.notEqual(effectFrames.fireStart.scaleY, effectFrames.fireLater.scaleY);
+    assert.equal(effectFrames.iceStart.sparkles.length, 5);
+    assert.notDeepEqual(
+      effectFrames.iceStart.sparkles.map(entry => entry.alpha),
+      effectFrames.iceLater.sparkles.map(entry => entry.alpha)
+    );
+    assert.equal(effectFrames.reducedFire.offsetXRatio, 0);
+    assert.equal(effectFrames.reducedIce.sparkles.length, 2);
+    const audioAsset = await page.evaluate(async () => {
+      const response = await fetch("/se/sliding2.mp3");
+      const encoded = await response.arrayBuffer();
+      const context = new AudioContext();
+      const decoded = await context.decodeAudioData(encoded.slice(0));
+      await context.close();
+      return { ok: response.ok, bytes: encoded.byteLength, duration: decoded.duration };
+    });
+    assert.equal(audioAsset.ok, true);
+    assert.ok(audioAsset.bytes > 0);
+    assert.ok(audioAsset.duration > 0);
+
     let nearFireWidth = 0;
     for (const obstacleId of ["fire_pillar", "giant_ice_block"]) {
       const visual = await page.evaluate(id => window.qa.show(id), obstacleId);
-      assert.deepEqual({ width: visual.asset.width, height: visual.asset.height }, { width: 400, height: 400 });
+      assert.deepEqual({ width: visual.asset.width, height: visual.asset.height }, { width: 800, height: 800 });
       assert.ok(visual.asset.transparent > 0 && visual.asset.opaque > 0, `${layout.name}/${obstacleId}: alpha`);
       assert.ok(visual.draw, `${layout.name}/${obstacleId}: sprite was not drawn`);
       assert.ok(visual.draw.x >= 0 && visual.draw.x + visual.draw.width <= visual.canvas.width);
       assert.ok(visual.draw.y >= 0 && visual.draw.y + visual.draw.height <= visual.canvas.height);
+      assert.ok(visual.draw.height >= visual.canvas.height * .74, JSON.stringify(visual.draw));
+      assert.ok(visual.draw.height <= visual.canvas.height * .78, JSON.stringify(visual.draw));
       assert.ok(
         Math.abs(visual.draw.y + visual.draw.height - visual.canvas.height * 0.94) < 1,
         JSON.stringify(visual.draw)
@@ -280,19 +340,22 @@ try {
     if (layout.branch === "mage") {
       assert.equal(result.sp, 20);
       assert.equal(result.oil, 1);
+      assert.equal(result.soundEffects.filter(key => key === "explorationObstacleOil").length, 1);
     } else if (layout.branch === "johan") {
       assert.equal(result.sp, 20);
       assert.equal(result.oil, 2);
+      assert.equal(result.soundEffects.includes("explorationObstacleOil"), false);
     } else {
       assert.equal(result.sp, 20);
       assert.equal(result.oil, 1);
+      assert.equal(result.soundEffects.filter(key => key === "explorationObstacleOil").length, 1);
     }
     results.push({
       layout: layout.name,
       viewport: `${layout.width}x${layout.height}`,
       input: layout.input,
       removalBranch: layout.branch,
-      assets: "400x400 AVIF with alpha",
+      assets: "800x800 AVIF with alpha",
       screenshots: [
         path.join(output, `${layout.name}-fire_pillar.png`),
         path.join(output, `${layout.name}-giant_ice_block.png`)

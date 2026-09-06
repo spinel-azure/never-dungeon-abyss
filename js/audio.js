@@ -34,6 +34,7 @@ export const SE = Object.freeze({
   achievementUnlocked: "item-get.mp3",
   rapidCurrentSplash: "minamo.mp3",
   rapidCurrentFlow: "suiryuu.mp3",
+  explorationObstacleOil: "sliding2.mp3",
   fixedWarp: "warp.wav"
 });
 
@@ -109,6 +110,7 @@ const PLAYBACK_POLICIES = {
   catVoice03: { mode: "complete", priority: 2 },
   rapidCurrentSplash: { mode: "restart", priority: 3 },
   rapidCurrentFlow: { mode: "restart", priority: 2 },
+  explorationObstacleOil: { mode: "complete", priority: 3 },
   fixedWarp: { mode: "complete", priority: 3 }
 };
 const DEFAULT_POLICY = { mode: "drop", priority: 2 };

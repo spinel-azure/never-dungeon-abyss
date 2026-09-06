@@ -279,9 +279,9 @@ export function drawScene(now) {
   drawCeiling();
   drawFloor();
   drawRapidCurrentMotion(now);
-  drawCellEvents("floor");
+  drawCellEvents("floor", now);
   drawBoundaryWalls();
-  drawCellEvents("sprite");
+  drawCellEvents("sprite", now);
   drawMist(now);
   drawDarkness();
   if (!hasEffectiveMinimap(state)) {
@@ -1029,7 +1029,7 @@ function rgba([r, g, b], alpha) {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
-export function drawCellEvents(layer = "all") {
+export function drawCellEvents(layer = "all", now = 0) {
   const { ctx, W, H, state } = renderer;
   const {
     MAP_W,
@@ -1146,16 +1146,16 @@ export function drawCellEvents(layer = "all") {
     .sort((a, b) => b.forward - a.forward)
     .forEach(event => {
       if (event.eventKind === "stairs") drawStairsEventMarker(ctx, W, H, event);
-      if (event.eventKind === "npc") drawNpcEvent(ctx, event);
-      if (event.eventKind === "boss") drawNpcEvent(ctx, event);
-      if (event.eventKind === "bossRemains") drawNpcEvent(ctx, event);
-      if (event.eventKind === "fountain") drawNpcEvent(ctx, event);
-      if (event.eventKind === "quicksand") drawNpcEvent(ctx, event);
+      if (event.eventKind === "npc") drawNpcEvent(ctx, event, now);
+      if (event.eventKind === "boss") drawNpcEvent(ctx, event, now);
+      if (event.eventKind === "bossRemains") drawNpcEvent(ctx, event, now);
+      if (event.eventKind === "fountain") drawNpcEvent(ctx, event, now);
+      if (event.eventKind === "quicksand") drawNpcEvent(ctx, event, now);
       if (event.eventKind === "treasure") drawTreasureEvent(ctx, event);
       if (event.eventKind === "questEvent") drawQuestEvent(ctx, event);
-      if (event.eventKind === "fixedPortal") drawNpcEvent(ctx, event);
-      if (event.eventKind === "fixedEvent") drawNpcEvent(ctx, event);
-      if (event.eventKind === "explorationObstacle") drawNpcEvent(ctx, event);
+      if (event.eventKind === "fixedPortal") drawNpcEvent(ctx, event, now);
+      if (event.eventKind === "fixedEvent") drawNpcEvent(ctx, event, now);
+      if (event.eventKind === "explorationObstacle") drawNpcEvent(ctx, event, now);
     });
 }
 
@@ -1389,37 +1389,121 @@ function drawStairsEventMarker(ctx, W, H, event) {
   ctx.restore();
 }
 
-function drawNpcEvent(ctx, event) {
+const ICE_OBSTACLE_SPARKLES = Object.freeze([
+  Object.freeze({ x: .27, y: .23, phase: 0, size: .034 }),
+  Object.freeze({ x: .66, y: .17, phase: 1.15, size: .025 }),
+  Object.freeze({ x: .78, y: .43, phase: 2.4, size: .032 }),
+  Object.freeze({ x: .42, y: .55, phase: 3.55, size: .022 }),
+  Object.freeze({ x: .61, y: .72, phase: 4.7, size: .028 })
+]);
+
+export function resolveExplorationObstacleEffectFrame(effectId, timestamp = 0, reducedMotion = false) {
+  const now = Number(timestamp) || 0;
+  if (effectId === "fire-waver") {
+    if (reducedMotion) {
+      return { offsetXRatio: 0, scaleX: 1, scaleY: 1, glowAlpha: .42, sparkles: [] };
+    }
+    return {
+      offsetXRatio: Math.sin(now * .0027) * .014 + Math.sin(now * .0061 + .8) * .006,
+      scaleX: 1 + Math.sin(now * .0039 + .4) * .022,
+      scaleY: 1 + Math.sin(now * .0031 + 1.2) * .014,
+      glowAlpha: .38 + (Math.sin(now * .0053) + 1) * .09,
+      sparkles: []
+    };
+  }
+  if (effectId === "ice-sparkle") {
+    const sparkles = ICE_OBSTACLE_SPARKLES
+      .slice(0, reducedMotion ? 2 : ICE_OBSTACLE_SPARKLES.length)
+      .map(sparkle => ({
+        ...sparkle,
+        alpha: reducedMotion
+          ? .48
+          : .18 + Math.max(0, Math.sin(now * .0042 + sparkle.phase)) * .82
+      }));
+    return { offsetXRatio: 0, scaleX: 1, scaleY: 1, glowAlpha: .42, sparkles };
+  }
+  return { offsetXRatio: 0, scaleX: 1, scaleY: 1, glowAlpha: 0, sparkles: [] };
+}
+
+function drawExplorationObstacleSparkles(ctx, event, bounds, sparkles) {
+  if (!sparkles.length) return;
+  ctx.save();
+  ctx.globalCompositeOperation = "screen";
+  ctx.strokeStyle = "rgba(224,250,255,.98)";
+  ctx.lineCap = "round";
+  ctx.shadowColor = "rgba(130,226,255,.95)";
+  ctx.shadowBlur = Math.max(3, event.size * .09);
+  for (const sparkle of sparkles) {
+    const x = bounds.x + bounds.width * sparkle.x;
+    const y = bounds.y + bounds.height * sparkle.y;
+    const radius = Math.max(2, bounds.height * sparkle.size);
+    ctx.globalAlpha = event.alpha * sparkle.alpha;
+    ctx.lineWidth = Math.max(1, radius * .17);
+    ctx.beginPath();
+    ctx.moveTo(x - radius, y);
+    ctx.lineTo(x + radius, y);
+    ctx.moveTo(x, y - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.moveTo(x - radius * .42, y - radius * .42);
+    ctx.lineTo(x + radius * .42, y + radius * .42);
+    ctx.moveTo(x + radius * .42, y - radius * .42);
+    ctx.lineTo(x - radius * .42, y + radius * .42);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawNpcEvent(ctx, event, now = 0) {
   const image = renderer.characterImages.get(event.npc.imageId);
   const supportsProximityEnlargement = ["npc", "boss", "bossRemains", "fixedEvent"].includes(event.eventKind);
   const isOneStepAway = supportsProximityEnlargement && event.forward <= 1.55;
   const nearbyScale = event.npc.imageId === "NPC_01" ? 1.5 : 1.9;
   const proximityScale = isOneStepAway ? nearbyScale : 1;
   const scaledSpriteH = event.size * 2.05 * proximityScale * Math.max(0.25, Number(event.npc.renderScale) || 1);
-  const spriteH = isOneStepAway ? Math.min(scaledSpriteH, renderer.H * .82) : scaledSpriteH;
-  const fallbackW = spriteH * .64;
-  const top = event.floorY - spriteH;
+  const obstacleHeightLimit = event.eventKind === "explorationObstacle" ? renderer.H * .76 : Infinity;
+  const spriteH = isOneStepAway
+    ? Math.min(scaledSpriteH, renderer.H * .82)
+    : Math.min(scaledSpriteH, obstacleHeightLimit);
+  const reducedMotion = Boolean(
+    event.npc.renderEffect && window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches
+  );
+  const effect = resolveExplorationObstacleEffectFrame(event.npc.renderEffect, now, reducedMotion);
+  const drawH = spriteH * effect.scaleY;
+  const fallbackW = drawH * .64;
+  const top = event.floorY - drawH;
 
   ctx.save();
   ctx.globalAlpha = event.alpha;
   if (event.npc.silhouette) {
     ctx.filter = "brightness(0) drop-shadow(0 0 3px rgba(225,252,255,.98)) drop-shadow(0 0 10px rgba(128,235,255,.9))";
   }
-  ctx.shadowColor = event.npc.glow === "paleBlue"
-    ? "rgba(165,235,255,.95)"
-    : "rgba(255,221,151,.45)";
-  ctx.shadowBlur = event.npc.glow === "paleBlue" ? event.size * .32 : event.size * .14;
+  ctx.shadowColor = event.npc.renderEffect === "fire-waver"
+    ? "rgba(255,105,34," + effect.glowAlpha + ")"
+    : event.npc.renderEffect === "ice-sparkle"
+      ? "rgba(151,231,255," + effect.glowAlpha + ")"
+      : event.npc.glow === "paleBlue"
+        ? "rgba(165,235,255,.95)"
+        : "rgba(255,221,151,.45)";
+  ctx.shadowBlur = event.npc.renderEffect
+    ? event.size * (.18 + effect.glowAlpha * .2)
+    : event.npc.glow === "paleBlue" ? event.size * .32 : event.size * .14;
+  let bounds = { x: event.x - fallbackW / 2, y: top, width: fallbackW, height: drawH };
   if (image && image.complete && image.naturalWidth > 0) {
-    const drawW = spriteH * (image.naturalWidth / image.naturalHeight);
-    ctx.drawImage(image, event.x - drawW / 2, top, drawW, spriteH);
+    const drawW = drawH * (image.naturalWidth / image.naturalHeight) * effect.scaleX;
+    const drawX = event.x - drawW / 2 + drawW * effect.offsetXRatio;
+    bounds = { x: drawX, y: top, width: drawW, height: drawH };
+    ctx.drawImage(image, drawX, top, drawW, drawH);
   } else {
     ctx.fillStyle = "rgba(255,232,186,.72)";
-    ctx.fillRect(event.x - fallbackW / 2, top, fallbackW, spriteH);
+    ctx.fillRect(bounds.x, top, fallbackW, drawH);
     ctx.strokeStyle = "rgba(65,38,20,.9)";
     ctx.lineWidth = Math.max(2, event.size * .04);
-    ctx.strokeRect(event.x - fallbackW / 2, top, fallbackW, spriteH);
+    ctx.strokeRect(bounds.x, top, fallbackW, drawH);
   }
   ctx.restore();
+  if (event.npc.renderEffect === "ice-sparkle") {
+    drawExplorationObstacleSparkles(ctx, event, bounds, effect.sparkles);
+  }
 }
 
 function drawTreasureEvent(ctx, event) {

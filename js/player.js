@@ -1053,6 +1053,7 @@ function advanceExplorationObstacleEvent() {
     hooks.onStateChanged();
     return;
   }
+  if (method === "oil") hooks.playSe("explorationObstacleOil");
   event.phase = "result";
   event.canCancel = false;
   event.method = method;
