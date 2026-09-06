@@ -314,6 +314,18 @@ export const ITEMS = Object.freeze([
     effects: Object.freeze([{ id: "restore_sp_rate", value: 0.25 }]),
     description: "最大SPの25％を回復する。", maxOwned: 5, warehouseMaxOwned: 99,
     overflowGold: 50000, repurchasable: false, iconId: "antidote", version: 1
+  }),
+  Object.freeze({
+    number: 49, id: "kirke_special_birdlime", name: "キルケ特製とりもち", category: "battle",
+    buyPrice: 0, sellPrice: 0, source: "keyItem", usableIn: Object.freeze(["battle"]),
+    effects: Object.freeze([Object.freeze({
+      id: "capture_target",
+      targetIds: Object.freeze(["maerchentiere_b58f"]),
+      maximumHpRate: 0.1
+    })]),
+    description: "最大HPの10％以下まで弱らせたメルヒェンティーレを捕獲する。使用してもなくならない。",
+    maxOwned: 1, iconId: "bandage", version: 1, repurchasable: false,
+    reusable: true, keyItemId: "kirke_special_birdlime"
   })
 ]);
 

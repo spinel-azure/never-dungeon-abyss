@@ -18,6 +18,7 @@ test("shop greeting and guild quest client names stay synchronized", () => {
     ["guild_016", "アナスタシア"],
     ["guild_020", "ヘレン"],
     ["guild_021", "ヘレン"],
+    ["guild_026", "キルケ"],
     ["guild_028", "パルテノペー"],
     ["guild_029", "キルケ"],
     ["guild_030", "怪しげな男"],

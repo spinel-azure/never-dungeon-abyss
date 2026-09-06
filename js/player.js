@@ -100,6 +100,8 @@ const hooks = {
   inspectWaspHive: () => ({ canBattle: false, message: "巨大な蜂の巣がある。" }),
   inspectKirkeHouse: () => ({ canDeliver: false, message: "巨大な蔓に囲まれた家が建っている。" }),
   deliverBeeswaxToKirke: () => ({ accepted: false, message: "" }),
+  grantKirkeSpecialBirdlime: () => ({ accepted: false, gained: false }),
+  beginMaerchentiereBattle: () => false,
   playNpcVoice: () => {},
   onNpcEncountered: () => {},
   isQueenShadowFinaleCompleted: () => false,
@@ -654,8 +656,26 @@ function startSpecialRoomContentEvent(content, fromGX, fromGY) {
   }
   if (content?.type === "kirkeHouse") {
     const result = hooks.inspectKirkeHouse();
+    if (result?.mode === "maerchentiere") {
+      startOverlayEvent({
+        type: "kirkeHouse",
+        content,
+        phase: "maerchentierePrompt",
+        fromGX,
+        fromGY,
+        imageId: content.imageId,
+        imageFit: "cover",
+        reserveMessageLines: 5,
+        showOverlay: true,
+        canCancel: true,
+        retreatOnCancel: true,
+        message: "キルケの家がある。入りますか？\n\n＊Aボタン：はい　Bボタン：いいえ"
+      });
+      return;
+    }
     startOverlayEvent({
       type: "kirkeHouse", content, canDeliver: Boolean(result?.canDeliver), phase: "house",
+      fromGX, fromGY,
       imageId: content.imageId,
       imageFit: "cover", showOverlay: true, canCancel: false,
       message: `${result?.message || "巨大な蔓に囲まれて今にも朽ちそうな家が建っている。"}\n＊Aボタン：${result?.canDeliver ? "次へ" : "戻る"}`
@@ -1074,6 +1094,110 @@ function scheduleSpecialRoomBossBattle(event, boss) {
   }, Math.max(0, Number(boss?.event?.autoStartDelay) || 1200));
 }
 
+function advanceKirkeHouseEvent() {
+  const event = state.overlayEvent;
+  if (!event || event.type !== "kirkeHouse") return;
+  if (event.phase === "maerchentierePrompt") {
+    event.phase = "maerchentiereArrival";
+    event.canCancel = false;
+    event.backgroundImageId = event.content.interiorImageId;
+    event.imageId = "";
+    hooks.say("家の中に入った途端、キルケの怒鳴り声が響く。\n「こら――ッ！お前たち！またイタズラばかりして！」\n＊Aボタンで次へ");
+    hooks.onStateChanged();
+    return;
+  }
+  if (event.phase === "maerchentiereArrival") {
+    event.phase = "maerchentiereMischief";
+    event.imageId = event.content.mischiefImageId;
+    event.imageFit = "contain";
+    hooks.say("見ると、3匹の動物が蜂蜜のツボを倒してこぼしている。\n＊Aボタンで次へ");
+    hooks.onStateChanged();
+    return;
+  }
+  if (event.phase === "maerchentiereMischief") {
+    event.phase = "maerchentiereBirdlime";
+    hooks.say("キルケ「このイタズラどうぶつどもを何とかしておくれ！弱らせてから、こいつを使いな！」\n＊Aボタンで次へ");
+    hooks.onStateChanged();
+    return;
+  }
+  if (event.phase === "maerchentiereBirdlime") {
+    const result = hooks.grantKirkeSpecialBirdlime();
+    if (!result?.accepted) return;
+    event.phase = "maerchentiereBattleReady";
+    hooks.say(result.gained
+      ? "「キルケ特製とりもち」を手に入れた！\n＊Aボタンで次へ"
+      : "キルケ特製とりもちで、メルヒェンティーレを捕まえよう。\n＊Aボタンで次へ");
+    hooks.onStateChanged();
+    return;
+  }
+  if (event.phase === "maerchentiereBattleReady") {
+    state.overlayEvent = null;
+    hooks.say("");
+    if (!hooks.beginMaerchentiereBattle({ fromGX: event.fromGX, fromGY: event.fromGY })) {
+      hooks.onStateChanged();
+    }
+    return;
+  }
+  if (event.phase === "house" && event.canDeliver) {
+    const result = hooks.deliverBeeswaxToKirke();
+    if (result?.accepted) {
+      event.phase = "kirke";
+      event.canDeliver = false;
+      event.imageId = event.content.portraitId;
+      hooks.say(`${result.message}\n＊Aボタン：戻る`);
+      hooks.onStateChanged();
+      return;
+    }
+  }
+  state.overlayEvent = null;
+  hooks.say("");
+  hooks.onStateChanged();
+}
+
+export function startKirkeMaerchentiereResultEvent({ captured = false, fromGX, fromGY } = {}) {
+  const pages = captured
+    ? [
+        "キルケ「やっと大人しくなったようだね。まったく、手を焼かせてくれたもんだよ！大鍋で煮込んじまおうかねえ…？」",
+        "カニンヒェン「Ja……」ニートリヒ「Woo……」ブレッセ「ごめんなさい……」",
+        "キルケ「これに懲りたら、もう悪さするんじゃないよ！分かったね！」\n\n動物たちはうなだれたまま黙っている。",
+        "キルケ「あんたも世話になったね。ありがとうよ。報酬はギルドで受け取っておくれ。それと……。」",
+        "キルケ「女王様を必ず見つけ出しておくれ。ドゥンケルマギーア…女王様から真実の杖を奪った男…！」"
+      ]
+    : [
+        "キルケ「逃げちまったじゃないか！あいつらは何度も来てイタズラばっかりするんだ。\nまたすぐに来るよ！何とかしておくれ！」",
+        "キルケ「それと、アンタひとりで来た方がいいんじゃないのかねぇ？あいつらはあれで臆病だからね。\n石ころでもぶつけてビビらせてからとりもちを使ったらどうだい？」"
+      ];
+  return startOverlayEvent({
+    type: "kirkeMaerchentiereResult",
+    phase: "dialogue",
+    pageIndex: 0,
+    pages,
+    fromGX,
+    fromGY,
+    backgroundImageId: "kirke_house_interior_b58f",
+    imageId: captured ? "maerchentiere_captured_b58f" : "maerchentiere_mischief_b58f",
+    imageFit: "contain",
+    reserveMessageLines: 5,
+    canCancel: false,
+    message: `${pages[0]}\n＊Aボタンで次へ`
+  });
+}
+
+function advanceKirkeMaerchentiereResultEvent() {
+  const event = state.overlayEvent;
+  if (!event || event.type !== "kirkeMaerchentiereResult") return;
+  event.pageIndex += 1;
+  if (event.pageIndex < event.pages.length) {
+    hooks.say(`${event.pages[event.pageIndex]}\n＊Aボタンで次へ`);
+    hooks.onStateChanged();
+    return;
+  }
+  state.overlayEvent = null;
+  hooks.say("");
+  hooks.onStateChanged();
+  if (Number.isInteger(event.fromGX) && Number.isInteger(event.fromGY)) startNpcRetreat(event);
+}
+
 export function handleOverlayEventInput(action) {
   if (!state.overlayEvent) return false;
   if (["stairsTransition", "fixedWarpTransition"].includes(state.overlayEvent.type)) return true;
@@ -1116,22 +1240,9 @@ export function handleOverlayEventInput(action) {
       else hooks.onStateChanged();
     }
     else if (state.overlayEvent.type === "kirkeHouse") {
-      const event = state.overlayEvent;
-      if (event.phase === "house" && event.canDeliver) {
-        const result = hooks.deliverBeeswaxToKirke();
-        if (result?.accepted) {
-          event.phase = "kirke";
-          event.canDeliver = false;
-          event.imageId = event.content.portraitId;
-          hooks.say(`${result.message}\n＊Aボタン：戻る`);
-          hooks.onStateChanged();
-          return true;
-        }
-      }
-      state.overlayEvent = null;
-      hooks.say("");
-      hooks.onStateChanged();
+      advanceKirkeHouseEvent();
     }
+    else if (state.overlayEvent.type === "kirkeMaerchentiereResult") advanceKirkeMaerchentiereResultEvent();
     else if (state.overlayEvent.type === "queenShadowFinale") advanceQueenShadowFinaleEvent();
     else if (state.overlayEvent.type === "secondQueenShadowFinale") advanceSecondQueenShadowFinaleEvent();
     else if (state.overlayEvent.type === "thirdQueenShadowFinale") advanceThirdQueenShadowFinaleEvent();

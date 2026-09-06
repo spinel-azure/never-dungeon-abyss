@@ -1,5 +1,6 @@
 import { ITEMS } from "../data/items.js";
 import { getItemCount } from "../data/inventory.js";
+import { hasKeyItem } from "../data/key-items.js";
 import { getItemUnavailableReason, getItemUnavailableReasonForEnemies } from "../combat/resolve-item-use.js";
 
 const BATTLE_ITEMS_PER_COLUMN = 6;
@@ -35,7 +36,8 @@ export function openItemOverlay({ context = "dungeon", character, enemy = null, 
   overlay.torchFuel = torchFuel;
   overlay.treasureCompassActive = Boolean(treasureCompassActive);
   overlay.items = ITEMS.filter(item =>
-    getItemCount(character.inventory, item.id) > 0 && item.usableIn?.includes(context)
+    (item.keyItemId ? hasKeyItem(character.keyItems, item.keyItemId) : getItemCount(character.inventory, item.id) > 0)
+      && item.usableIn?.includes(context)
   );
   overlay.selectedIndex = restoreSelectedIndex(overlay.items, overlay.lastSelectionByContext[context]);
   overlay.page = context === "battle" ? Math.floor(overlay.selectedIndex / BATTLE_ITEMS_PER_PAGE) : 0;
@@ -189,7 +191,8 @@ function render() {
     button.disabled = Boolean(reason && reason !== "deadlyPoisonNotCurable");
     button.classList.toggle("is-unavailable", Boolean(reason));
     button.setAttribute("aria-disabled", reason ? "true" : "false");
-    button.innerHTML = `<span>${item.name}</span><small>×${getItemCount(overlay.character.inventory, item.id)}</small>`;
+    const count = item.keyItemId ? 1 : getItemCount(overlay.character.inventory, item.id);
+    button.innerHTML = `<span>${item.name}</span><small>×${count}</small>`;
     button.addEventListener("click", () => {
       overlay.selectedIndex = index;
       renderSelection();

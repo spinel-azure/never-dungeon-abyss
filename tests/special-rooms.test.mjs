@@ -218,7 +218,7 @@ test("configured empty special rooms contain one purple card chest without repla
   buildBoundaryWallMap(10, seeded(110), {});
   assert.equal(cells.flat().find(cell => cell.specialRoom).treasure, "purple");
 
-  for (const depth of [14, 16, 18]) {
+  for (const depth of [8, 14, 16]) {
     buildBoundaryWallMap(depth, seeded(100 + depth), {});
     const protectedRoom = cells.flat().find(cell => cell.specialRoom);
     assert.ok(protectedRoom.specialRoom.content);

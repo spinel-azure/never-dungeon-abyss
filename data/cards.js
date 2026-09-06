@@ -10,6 +10,7 @@ export const SPHINX_MAJESTY_CARD_ID = "legendary_sphinx_majesty";
 export const DEEP_FLOOR_PROOF_CARD_ID = "legendary_deep_floor_proof";
 export const MANA_BOOSTER_CARD_ID = "legendary_mana_booster";
 export const LIFE_BOOSTER_CARD_ID = "legendary_life_booster";
+export const SWIFT_FOOT_CARD_ID = "legendary_swift_foot";
 export const MIRAGE_CARD_ID = "sr_mirage";
 export const VIRGO_CARD_ID = "zodiac_virgo";
 
@@ -390,6 +391,14 @@ const STANDARD_CARDS = [
     descriptionJa: "深層への到達をギルドから認められた証。帰還時の深層帰還ボーナスに10ポイント加算する。",
     category: "exploration", effectId: "depth_return_bonus_points", effectValue: 0.1,
     iconId: "knowledge", maxOwned: 1, maxCopies: 1
+  },
+  {
+    id: SWIFT_FOOT_CARD_ID, rarity: "L", cost: 6,
+    name: "Swift Foot", nameJa: "俊敏俊足", concept: "気配ゲージ上昇なし",
+    descriptionJa: "セットしている間、気配ゲージが上昇しない。",
+    category: "exploration", effectId: "presence_gain_reduction", effectValue: 1,
+    iconId: "agility", maxOwned: 1, maxCopies: 1,
+    sellPrice: 5000, buybackPrice: 50000, overflowGold: 5000
   },
   {
     id: MANA_BOOSTER_CARD_ID, rarity: "L", cost: 6,

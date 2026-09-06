@@ -396,7 +396,7 @@ test("Mana Recovery runs once for a multi-enemy victory regardless of enemy coun
 
 test("B10F-B19F purple chests use empty special rooms and never replace fixed contents", () => {
   setStartPosition(0, 0);
-  for (const depth of [10, 11, 12, 13, 15, 17, 19]) {
+  for (const depth of [10, 11, 12, 13, 15, 17, 18, 19]) {
     buildBoundaryWallMap(depth, () => 0.5, { maikaeferNestRoll: 1 });
     const room = cells.flat().find(cell => cell.specialRoom);
     assert.equal(room.specialRoom.content, null, `B${depth}F content`);
@@ -404,7 +404,7 @@ test("B10F-B19F purple chests use empty special rooms and never replace fixed co
     assert.ok(room.treasureTrapId === null || typeof room.treasureTrapId === "string");
     assert.equal(cells.flat().filter(cell => cell.treasure === "purple").length, 1);
   }
-  for (const depth of [14, 16, 18]) {
+  for (const depth of [14, 16]) {
     buildBoundaryWallMap(depth, () => 0.5, { maikaeferNestRoll: 1 });
     const room = cells.flat().find(cell => cell.specialRoom);
     assert.ok(room.specialRoom.content, `B${depth}F fixed content`);

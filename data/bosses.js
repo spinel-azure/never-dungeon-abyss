@@ -1222,6 +1222,32 @@ export const BOSSES = Object.freeze({
       start: "部屋に入ると突然、燻り狂うような咆哮が響き渡り、それと同時に巨大な何かが襲ってきた！"
     })
   }),
+  maerchentiere_b58f: Object.freeze({
+    id: "maerchentiere_b58f", name: "メルヒェンティーレ", floor: 58,
+    level: 1,
+    imageId: "maerchentiere_b58f", image: "images/bosses/boss_20.avif",
+    captureImage: "images/npc/NPC_event_24.avif", battleSize: "large",
+    race: "beast", maxHp: 30,
+    stats: Object.freeze({ str: 1, int: 1, agi: 1, dex: 1, luc: 1 }),
+    def: 0, attack: 0, experienceReward: 0, specialAttack: null,
+    scriptedActionCycle: Object.freeze([
+      "カニンヒェン「Ja…!!」\nカニンヒェンは蜂蜜を舐めている。",
+      "ニートリヒ「Woo…!!」\nニートリヒは蜂蜜を見て興奮している。",
+      "ブレッセ「蜂蜜こぼして怒られない…？」\nブレッセはうろたえている。"
+    ]),
+    reward: Object.freeze({ type: "none" }),
+    elementMultipliers: Object.freeze({ fire: 1, ice: 1, lightning: 1, holy: 1, dark: 1, arcane: 1 }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      deadly_poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      death_poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      bleeding: Object.freeze({ resistancePoints: 100, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 100, immune: true }),
+      speed_down: Object.freeze({ resistancePoints: 100, immune: true })
+    }),
+    escapeRate: 0, surpriseRate: 0, surpriseRateMaximum: 0,
+    noDrop: true, isBoss: true, bossKind: "event", capturePuzzle: true
+  }),
   quest_mimic_b6f: Object.freeze({
     id: "quest_mimic_b6f", name: "ミミック", floor: 6,
     level: 10,

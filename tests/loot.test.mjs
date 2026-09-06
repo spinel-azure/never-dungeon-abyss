@@ -335,7 +335,7 @@ test("B10F to B20F place one to three red chests alongside any enabled black che
     const treasures = cells.flat().map(cell => cell.treasure).filter(Boolean);
     assert.equal(treasures.filter(type => type === "red").length, 2);
     assert.equal(treasures.filter(type => type === "black").length, depth === 19 ? 0 : 1);
-    assert.equal(treasures.filter(type => type === "purple").length, [10, 19].includes(depth) ? 1 : 0);
+    assert.equal(treasures.filter(type => type === "purple").length, [10, 18, 19].includes(depth) ? 1 : 0);
   }
 });
 

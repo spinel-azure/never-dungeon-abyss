@@ -30,6 +30,7 @@ export const HERBICIDE_TRIAL_QUEST_ID = "guild_020";
 export const ABYSS_MUSK_QUEST_ID = "guild_021";
 export const SIXTH_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_023";
 export const SECOND_QUEEN_SHADOW_QUEST_ID = "guild_024";
+export const MAERCHENTIERE_QUEST_ID = "guild_026";
 export const SEVENTH_RED_DOOR_INVESTIGATION_QUEST_ID = "guild_027";
 export const JIRENE_SONG_INVESTIGATION_QUEST_ID = "guild_028";
 export const JIRENE_SONG_INVESTIGATION_ACCEPTED_FLAG = "guild_028_accepted_once";
@@ -657,6 +658,39 @@ export const QUESTS = Object.freeze([
     available: true
   }),
   Object.freeze({
+    id: MAERCHENTIERE_QUEST_ID,
+    number: "026",
+    title: "メルヒェンティーレ",
+    client: "キルケ",
+    category: "other",
+    objectiveType: "custom",
+    targetDepth: 58,
+    requiredCount: 1,
+    objectiveHeading: "目的",
+    objectiveLabel: "キルケの家の騒動を解決する",
+    reward: Object.freeze({
+      type: "card",
+      label: "Lカード「俊敏俊足」×1／ツァウバートランク×5",
+      amount: 1,
+      cardId: "legendary_swift_foot",
+      additionalItems: Object.freeze([
+        Object.freeze({ itemId: "zaubertrank", amount: 5 })
+      ])
+    }),
+    descriptionLabel: "内容",
+    description: Object.freeze([
+      "急いでB58Fにあるあたしの家まで来ておくれ！",
+      "あの、イタズラどうぶつどもときたら…！"
+    ]),
+    prerequisiteQuestIds: Object.freeze([
+      JIRENE_SONG_INVESTIGATION_QUEST_ID,
+      BEESWAX_COLLECTION_QUEST_ID
+    ]),
+    persistentProgressFlag: "quest_026_maerchentiere_captured",
+    completedTargetFlag: "quest_026_maerchentiere_captured",
+    available: true
+  }),
+  Object.freeze({
     id: SEVENTH_RED_DOOR_INVESTIGATION_QUEST_ID,
     number: "027",
     title: "赤い扉の調査――その7",
@@ -720,7 +754,8 @@ export const QUESTS = Object.freeze([
     targetDepth: 58,
     requiredCount: BEESWAX_REQUIRED_COUNT + 1,
     displayRequiredCount: BEESWAX_REQUIRED_COUNT,
-    objectiveLabel: "密林区域で蜜蝋を15個採取する",
+    objectiveHeading: "目的",
+    objectiveLabel: "蜂の巣を見つけて蜜蝋を15個採取する",
     reward: Object.freeze({ type: "card", label: "デッキカード×1", amount: 1, cardId: "sr_lightning_armament", bonusGold: 30000 }),
     descriptionLabel: "内容",
     description: Object.freeze([
@@ -813,6 +848,38 @@ export function recordQuestBeeswax(character, amount = 1) {
     : character;
 }
 
+export function getWaspHiveInteraction(character) {
+  const progress = getQuestProgress(character, BEESWAX_COLLECTION_QUEST_ID);
+  if (!progress.active) return {
+    canBattle: false,
+    message: "巨大な蜂の巣がある。無数の羽音が聞こえる。今は近づかない方がよさそうだ。"
+  };
+  if (progress.progress >= BEESWAX_REQUIRED_COUNT) return {
+    canBattle: false,
+    message: "依頼に必要な蜜蝋は集まった。キルケの家へ届けよう。"
+  };
+  return { canBattle: true, message: "巨大な蜂の巣からワスプの群れが飛び出してきた！" };
+}
+
+export function getKirkeHouseInteraction(character) {
+  const maerchentiere = getQuestProgress(character, MAERCHENTIERE_QUEST_ID);
+  if (maerchentiere.active
+    && !maerchentiere.completed
+    && !character?.eventFlags?.quest_026_maerchentiere_captured) {
+    return { mode: "maerchentiere", canDeliver: false, message: "キルケの家がある。" };
+  }
+  const beeswax = getQuestProgress(character, BEESWAX_COLLECTION_QUEST_ID);
+  const delivered = Boolean(character?.eventFlags?.quest_029_beeswax_delivered);
+  if (delivered || beeswax.completed) {
+    return { mode: "normal", canDeliver: false, message: "ここは魔女キルケの家だ。" };
+  }
+  return {
+    mode: "beeswax",
+    canDeliver: Boolean(beeswax.active && beeswax.progress >= BEESWAX_REQUIRED_COUNT),
+    message: "巨大な蔓に囲まれて今にも朽ちそうな家が建っている。こんな所に人が住んでいるのだろうか…？"
+  };
+}
+
 export function deliverQuestBeeswax(character) {
   const progress = getQuestProgress(character, BEESWAX_COLLECTION_QUEST_ID);
   if (!progress.active || progress.completed || progress.progress < BEESWAX_REQUIRED_COUNT
@@ -826,6 +893,49 @@ export function deliverQuestBeeswax(character) {
     }
   };
   return result(recordCustomQuestProgress(withDelivery, BEESWAX_COLLECTION_QUEST_ID, 1), true);
+}
+
+export function grantKirkeSpecialBirdlime(character) {
+  const progress = getQuestProgress(character, MAERCHENTIERE_QUEST_ID);
+  if (!progress.active || progress.completed || character?.eventFlags?.quest_026_maerchentiere_captured) {
+    return result(character, false, "notReady");
+  }
+  if (character?.eventFlags?.quest_026_birdlime_received
+    || hasKeyItem(character?.keyItems, "kirke_special_birdlime")) {
+    const next = character?.eventFlags?.quest_026_birdlime_received
+      ? character
+      : {
+          ...character,
+          eventFlags: { ...(character.eventFlags || {}), quest_026_birdlime_received: true }
+        };
+    return { ...result(next, true), gained: false };
+  }
+  const granted = grantKeyItem(character.keyItems, "kirke_special_birdlime");
+  const next = {
+    ...character,
+    keyItems: granted.keyItems,
+    eventFlags: {
+      ...(character.eventFlags || {}),
+      quest_026_birdlime_received: true
+    }
+  };
+  return { ...result(next, true), gained: Boolean(granted.gained) };
+}
+
+export function completeMaerchentiereCapture(character) {
+  const progress = getQuestProgress(character, MAERCHENTIERE_QUEST_ID);
+  if (!progress.active || progress.completed) return result(character, false, "notReady");
+  if (character?.eventFlags?.quest_026_maerchentiere_captured) {
+    return result(character, false, "alreadyCompleted");
+  }
+  const next = {
+    ...character,
+    eventFlags: {
+      ...(character.eventFlags || {}),
+      quest_026_maerchentiere_captured: true
+    }
+  };
+  return result(recordCustomQuestProgress(next, MAERCHENTIERE_QUEST_ID, 1), true);
 }
 
 export function getQuestById(questId) {
@@ -1282,6 +1392,7 @@ export function reportQuest(character, questId) {
   let rewardEquipmentId = null;
   let rewardItemId = null;
   let rewardItemAmount = 0;
+  const rewardItems = [];
   const bonusGold = Math.max(0, Math.floor(Number(progress.quest.reward?.bonusGold) || 0));
   if (progress.quest.reward?.type === "card") {
     const reward = grantCard(
@@ -1318,6 +1429,13 @@ export function reportQuest(character, questId) {
     rewardItemId = progress.quest.reward.itemId;
     rewardItemAmount = reward.gained + reward.stored;
   }
+  for (const entry of progress.quest.reward?.additionalItems || []) {
+    if (!entry?.itemId) continue;
+    const amount = Math.max(1, Math.floor(Number(entry.amount) || 1));
+    const reward = grantItemWithOverflow(next, entry.itemId, amount);
+    next = reward.character;
+    rewardItems.push({ itemId: entry.itemId, amount: reward.gained + reward.stored });
+  }
   if (bonusGold > 0) {
     next = {
       ...next,
@@ -1344,6 +1462,7 @@ export function reportQuest(character, questId) {
     rewardEquipmentId,
     rewardItemId,
     rewardItemAmount,
+    rewardItems,
     presentationOrder: progress.quest.reward?.presentationOrder || "",
     reportMessage: progress.quest.reportMessage || "",
     bonusGold

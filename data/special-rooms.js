@@ -57,6 +57,14 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
     content: Object.freeze({ type: "eventBoss", bossId: "quest_mimic_b6f",
       minimapMarker: "E", revealBeforeExploration: true, requiredQuestId: "guild_006" })
   }),
+  8: Object.freeze({
+    lock: Object.freeze({ mode: "alwaysSuccess", attempts: 1 }),
+    content: Object.freeze({
+      type: "waspHive", imageId: "giant_wasp_hive_b8f",
+      image: "images/background/dungeon_event_10.avif",
+      minimapMarker: "E", revealBeforeExploration: true
+    })
+  }),
   14: Object.freeze({
     lock: Object.freeze({ mode: "alwaysSuccess", attempts: 1 }),
     content: Object.freeze({
@@ -76,14 +84,6 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
       requiredQuestId: "guild_009",
       minimapMarker: "E",
       revealBeforeExploration: true
-    })
-  }),
-  18: Object.freeze({
-    lock: Object.freeze({ mode: "alwaysSuccess", attempts: 1 }),
-    content: Object.freeze({
-      type: "waspHive", imageId: "giant_wasp_hive_b18f",
-      image: "images/background/dungeon_event_10.avif",
-      minimapMarker: "E", revealBeforeExploration: true
     })
   }),
   27: Object.freeze({
@@ -127,6 +127,12 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
       type: "kirkeHouse", imageId: "kirke_house_b58f",
       image: "images/background/dungeon_event_11.avif",
       portraitId: "NPC_23", portrait: "images/npc/NPC_23.avif",
+      interiorImageId: "kirke_house_interior_b58f",
+      interiorImage: "images/background/dungeon_event_12.avif",
+      mischiefImageId: "maerchentiere_mischief_b58f",
+      mischiefImage: "images/npc/NPC_event_23.avif",
+      capturedImageId: "maerchentiere_captured_b58f",
+      capturedImage: "images/npc/NPC_event_24.avif",
       minimapMarker: "E", revealBeforeExploration: true
     })
   }),

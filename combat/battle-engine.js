@@ -40,6 +40,14 @@ import { getWeapon } from "../data/weapons.js";
 
 const FLEISCHFRESSER_REGAIN_SUPPRESSION_TURNS = 5;
 
+export function isCaptureAvailable(enemy, maximumHpRate = 0.1) {
+  if (enemy?.alive === false) return false;
+  const maxHp = Math.max(1, Math.floor(Number(enemy?.maxHp) || 1));
+  const hp = Math.max(0, Math.floor(Number(enemy?.hp) || 0));
+  const rate = Math.max(0, Math.min(1, Number(maximumHpRate) || 0.1));
+  return hp > 0 && hp <= Math.floor(maxHp * rate);
+}
+
 export function createBattleState({ character, enemy, enemies = null, targetIndex = 0 }) {
   const vorpalSwordEquippedAtStart = character?.equipment?.weaponId === "vorpal_sword";
   const enemyParty = Array.isArray(enemies) && enemies.length
@@ -593,6 +601,16 @@ export function createPlayerAction(player, command = {}, enemy = null) {
 }
 
 export function createEnemyAction(enemy, rng = Math.random, context = {}) {
+  if (Array.isArray(enemy?.scriptedActionCycle) && enemy.scriptedActionCycle.length > 0) {
+    const turn = Math.max(1, Math.floor(Number(context?.battle?.turn) || 1));
+    return {
+      id: `scripted_wait_${turn}`,
+      name: "いたずら",
+      actionType: "wait",
+      speedModifier: 0,
+      waitMessage: enemy.scriptedActionCycle[(turn - 1) % enemy.scriptedActionCycle.length]
+    };
+  }
   const attack = createNormalAttack({
     weapon: {
       id: `${enemy.id}_attack`,
@@ -753,7 +771,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, d
     return;
   }
   if (action.actionType === "item") {
-    actor.inventory = consumeItem(actor.inventory, action.item.id).inventory;
+    if (!action.item.reusable) actor.inventory = consumeItem(actor.inventory, action.item.id).inventory;
     let healing = 0;
     let spHealing = 0;
     let itemUsageLogged = false;
@@ -862,6 +880,35 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, d
               hit: true,
               damage: fixedDamage,
               message: `${useMessage}\n${damageMessage}\n${suppressionMessage}`
+            });
+          }
+        }
+      } else if (effect.id === "capture_target") {
+        const supportedTargets = Array.isArray(effect.targetIds) ? effect.targetIds : [];
+        itemUsageLogged = true;
+        if (!supportedTargets.includes(target.id)) {
+          battle.log.push(`${actor.name}は${action.item.name}を使った。`, "効果がなかった。");
+        } else {
+          const captureAvailable = isCaptureAvailable(target, effect.maximumHpRate);
+          if (!captureAvailable) {
+            battle.log.push(`${actor.name}は${action.item.name}を使った。`, "まだ元気すぎて拘束できない！");
+          } else {
+            target.captured = true;
+            target.alive = false;
+            if (target.captureImage) target.image = target.captureImage;
+            target.experienceReward = 0;
+            target.dropGold = 0;
+            target.dropItemId = null;
+            target.noDrop = true;
+            battle.outcome = "maerchentiereCaptured";
+            battle.phase = "complete";
+            battle.log.push("キルケ特製とりもちでメルヒェンティーレを捕獲した！");
+            battle.presentationEvents.push({
+              type: "capture",
+              actorSide,
+              targetSide,
+              image: target.captureImage || "",
+              message: "キルケ特製とりもちでメルヒェンティーレを捕獲した！"
             });
           }
         }
@@ -996,7 +1043,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, d
     : 0;
   let resolvedHits = result.hits;
   let passiveExecution = null;
-  if (actorSide === "player" && action.passiveInstantDeathId) {
+  if (actorSide === "player" && action.passiveInstantDeathId && !target.capturePuzzle) {
     for (let index = 0; index < resolvedHits.length; index += 1) {
       if (!resolvedHits[index].hit) continue;
       const instantDeath = resolvePassiveInstantDeath({
@@ -1200,6 +1247,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, d
     && ["physicalAttack", "spell"].includes(action.actionType)
     && actualDamage > 0
     && target.alive
+    && !target.capturePuzzle
     && Number(battle.followUpDamageAtStart) > 0;
   if (followUpEligible && !deferFollowUp) applyFixedFollowUpDamage(battle, target);
   const landedHits = presentedHits.filter(hit => hit.hit);
@@ -1216,7 +1264,8 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, d
   for (const applied of applications.filter(item => item.success)) {
     battle.log.push(`${target.name}は${statusName(applied.statusId)}状態になった。`);
   }
-  if (actorSide === "player" && battle.scorpioActiveAtStart && landedHits.length > 0 && target.alive) {
+  if (actorSide === "player" && battle.scorpioActiveAtStart && landedHits.length > 0 && target.alive
+    && !target.capturePuzzle) {
     const scorpio = getCardById("zodiac_scorpio");
     const rate = getScorpioDeathPoisonRate(target);
     if (Number(rng()) < rate) {
@@ -1478,7 +1527,18 @@ function updateOutcome(battle) {
     battle.outcome = null;
     return;
   }
-  if (battle.enemy.hp <= 0) {
+  if (battle.enemy.hp <= 0 && battle.enemy.capturePuzzle) {
+    battle.enemy.hp = 0;
+    battle.enemy.alive = false;
+    battle.enemy.escaped = true;
+    battle.enemy.experienceReward = 0;
+    battle.enemy.dropGold = 0;
+    battle.enemy.dropItemId = null;
+    battle.enemy.noDrop = true;
+    battle.outcome = "maerchentiereEscaped";
+    battle.phase = "complete";
+    battle.log.push("メルヒェンティーレは逃げていった。");
+  } else if (battle.enemy.hp <= 0) {
     battle.enemy.alive = false;
     battle.outcome = "victory";
     battle.phase = "complete";

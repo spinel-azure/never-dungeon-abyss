@@ -1,5 +1,6 @@
 import {
   createBattleState,
+  isCaptureAvailable,
   resolveJireneScriptedRound,
   resolveBattleRound,
   resolveEnemyAmbush
@@ -57,6 +58,7 @@ const battleUi = {
   onDefeat: () => {},
   onEscape: () => {},
   onScriptedDefeat: () => {},
+  onSpecialOutcome: () => {},
   openItems: () => false,
   openSkills: () => false,
   playSe: () => {},
@@ -275,7 +277,7 @@ async function useBattleSkill(skillId) {
 
 async function useBattleItem(itemId) {
   const item = getItem(itemId);
-  const targetsEnemy = item?.effects?.some(effect => ["strong_herbicide", "thrown_fixed_damage"].includes(effect.id));
+  const targetsEnemy = item?.effects?.some(effect => ["strong_herbicide", "thrown_fixed_damage", "capture_target"].includes(effect.id));
   if (battleUi.battle?.enemies && targetsEnemy) showTargetButtons({ type: "item", itemId });
   else await executeCommand({ type: "item", itemId, targetIndex: battleUi.battle.targetIndex });
   return { accepted: true };
@@ -513,6 +515,7 @@ async function playPresentationEvents() {
     const targetImage = event.targetSide === "enemy" && battleUi.battle.enemies
       ? battleUi.root.querySelector(`.battle-enemy-member[data-index="${event.targetIndex ?? battleUi.battle.targetIndex}"] .battle-enemy-member-image`)
       : image;
+    if (event.type === "capture" && event.image && targetImage) targetImage.src = event.image;
     if (event.targetSide === "enemy" && event.hit && !dedicatedPresentationPlayed) {
       targetImage?.classList.remove("is-hit");
       if (targetImage) void targetImage.offsetWidth;
@@ -697,6 +700,7 @@ function finishBattle() {
   if (outcome === "victory") battleUi.onVictory(snapshot);
   else if (outcome === "defeat") battleUi.onDefeat(snapshot);
   else if (outcome === "jireneScriptedDefeat") battleUi.onScriptedDefeat(snapshot);
+  else if (["maerchentiereCaptured", "maerchentiereEscaped"].includes(outcome)) battleUi.onSpecialOutcome(snapshot);
   else battleUi.onEscape(snapshot);
 }
 
@@ -816,7 +820,7 @@ function renderBattle() {
   const image = battleUi.root.querySelector("#battleEnemyImage");
   image.src = battle.enemy.image || "";
   image.alt = battleUi.concealed ? "正体不明の敵" : battle.enemy.name;
-  const defeated = ["victory", "enemyEscaped"].includes(battle.outcome) && !battleUi.presenting;
+  const defeated = ["victory", "enemyEscaped", "maerchentiereEscaped"].includes(battle.outcome) && !battleUi.presenting;
   image.classList.toggle("is-defeated", defeated);
   image.classList.toggle("is-concealed", battleUi.concealed);
   image.classList.toggle("is-phantom", battleUi.phantom);
@@ -991,6 +995,7 @@ function renderBossHpMeter(enemy) {
   fill.style.width = `${percent}%`;
   meter.setAttribute("aria-valuenow", String(percent));
   meter.classList.toggle("is-critical", percent > 0 && percent < 10);
+  meter.classList.toggle("is-capture-available", Boolean(enemy?.capturePuzzle && isCaptureAvailable(enemy)));
 }
 
 export function getBattleHpPercent(enemy) {

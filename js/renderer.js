@@ -243,9 +243,12 @@ export function configureRenderer(options) {
     loadCharacterImage(obstacle.imageId, obstacle.image);
   });
   loadCharacterImage("maikaefer_nest_event", "images/background/dungeon_event_08.avif");
-  loadCharacterImage("giant_wasp_hive_b18f", "images/background/dungeon_event_10.avif");
+  loadCharacterImage("giant_wasp_hive_b8f", "images/background/dungeon_event_10.avif");
   loadCharacterImage("kirke_house_b58f", "images/background/dungeon_event_11.avif");
   loadCharacterImage("NPC_23", "images/npc/NPC_23.avif");
+  loadCharacterImage("kirke_house_interior_b58f", "images/background/dungeon_event_12.avif");
+  loadCharacterImage("maerchentiere_mischief_b58f", "images/npc/NPC_event_23.avif");
+  loadCharacterImage("maerchentiere_captured_b58f", "images/npc/NPC_event_24.avif");
   loadCharacterImage("warp_portal_b100f", "images/dungeon_effects/warp_portal.avif");
   Object.values(B100_FINAL_PRELUDE_ASSETS).forEach(asset => loadCharacterImage(asset.id, asset.image));
   ["red", "black", "gold"].forEach(type => loadTreasureImage(type, `images/treasure/treasure-${type}.png`));
@@ -529,6 +532,18 @@ function drawOverlayEvent() {
     }
     ctx.restore();
     return;
+  }
+
+  const backgroundImage = event.backgroundImageId
+    ? renderer.characterImages.get(event.backgroundImageId)
+    : null;
+  if (backgroundImage?.complete && backgroundImage.naturalWidth > 0) {
+    const scale = Math.max(W / backgroundImage.naturalWidth, H / backgroundImage.naturalHeight);
+    const drawW = backgroundImage.naturalWidth * scale;
+    const drawH = backgroundImage.naturalHeight * scale;
+    ctx.drawImage(backgroundImage, (W - drawW) / 2, (H - drawH) / 2, drawW, drawH);
+    ctx.fillStyle = "rgba(0,0,0,.08)";
+    ctx.fillRect(0, 0, W, H);
   }
 
   if (image && image.complete && image.naturalWidth > 0) {

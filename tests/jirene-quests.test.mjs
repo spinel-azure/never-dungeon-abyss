@@ -101,13 +101,17 @@ test("Musa's Crown exposes DEF while retaining hidden future temptation immunity
   assert.equal(collectStats({ equipmentStatBonuses: crown.statBonuses }).temptationResistance, 1);
 });
 
-test("B18 hive and B58 Kirke house use the supplied event art", async () => {
-  assert.equal(getSpecialRoomDefinition(18).content.type, "waspHive");
+test("B8 hive and B58 Kirke house use the supplied event art", async () => {
+  assert.equal(getSpecialRoomDefinition(8).content.type, "waspHive");
+  assert.equal(getSpecialRoomDefinition(18).content, null);
   assert.equal(getSpecialRoomDefinition(58).content.type, "kirkeHouse");
   await Promise.all([
     access(new URL("../images/background/dungeon_event_10.avif", import.meta.url)),
     access(new URL("../images/background/dungeon_event_11.avif", import.meta.url)),
-    access(new URL("../images/npc/NPC_23.avif", import.meta.url))
+    access(new URL("../images/background/dungeon_event_12.avif", import.meta.url)),
+    access(new URL("../images/npc/NPC_23.avif", import.meta.url)),
+    access(new URL("../images/npc/NPC_event_23.avif", import.meta.url)),
+    access(new URL("../images/npc/NPC_event_24.avif", import.meta.url))
   ]);
 });
 
@@ -122,8 +126,8 @@ test("the giant hive rumor follows quest 029 and delivery state", () => {
   });
   const hiveRumor = getUnreadTavernRumor(character);
   assert.equal(hiveRumor?.id, "rumor_007_base");
-  assert.match(hiveRumor.dialogue[0], /B18F/);
-  assert.doesNotMatch(hiveRumor.dialogue[0], /B20F/);
+  assert.match(hiveRumor.dialogue[0], /B8F/);
+  assert.doesNotMatch(hiveRumor.dialogue[0], /B18F/);
   character.eventFlags.quest_029_beeswax_delivered = true;
   assert.equal(getUnreadTavernRumor(character)?.id, "rumor_007_delivered");
 });
@@ -139,6 +143,6 @@ test("quest presentation and safe Jirene transformation remain wired outside exp
   assert.match(player, /prefers-reduced-motion/);
   assert.match(player, /transformationImageId/);
   assert.match(main, /type: "jireneAwakening",[\s\S]*?imageId: "",[\s\S]*?showOverlay: false/);
-  assert.match(player, /type: "kirkeHouse", content, canDeliver:[\s\S]*?imageId: content\.imageId/);
+  assert.match(player, /type: "kirkeHouse", content, canDeliver:[\s\S]*?fromGX, fromGY,[\s\S]*?imageId: content\.imageId/);
   assert.match(player, /event\.phase === "house" && event\.canDeliver[\s\S]*?event\.imageId = event\.content\.portraitId/);
 });

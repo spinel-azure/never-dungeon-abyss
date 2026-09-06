@@ -539,6 +539,17 @@ body.layout-tablet .battle-boss-hp-meter{flex:0 0 12px;width:min(52%,360px);min-
   animation: battle-boss-hp-critical 720ms steps(2, end) infinite;
 }
 
+.battle-boss-hp-meter.is-capture-available {
+  border-color: #ffe36e;
+  box-shadow: 0 0 8px rgba(255, 227, 110, .8), 0 0 18px rgba(255, 178, 50, .48);
+  animation: battle-capture-ready 560ms steps(2, end) infinite;
+}
+
+@keyframes battle-capture-ready {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.7); }
+}
+
 @keyframes battle-boss-hp-critical {
   0%, 100% { opacity: 1; }
   50% { opacity: .3; }
@@ -709,6 +720,12 @@ body.battle-active .viewport > #treasureCanvas {
   .battle-boss-hp-meter.is-critical {
     animation: none;
     border-color: #ff5964;
+  }
+
+  .battle-boss-hp-meter.is-capture-available {
+    animation: none;
+    border-color: #ffe36e;
+    background: #4a3604;
   }
 }
 

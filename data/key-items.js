@@ -65,6 +65,11 @@ export const KEY_ITEMS = Object.freeze({
     description: "魔女キルケが作った耳栓。ジレーネの魔性の歌声を遮る。",
     sellable: false, consumable: false, version: 1
   }),
+  kirke_special_birdlime: Object.freeze({
+    id: "kirke_special_birdlime", name: "キルケ特製とりもち",
+    description: "弱らせた特定の相手を傷つけずに捕らえる、キルケ特製のとりもち。",
+    sellable: false, consumable: false, version: 1
+  }),
   trapezohedron: Object.freeze({
     id: "trapezohedron", name: "トラペツォエーダー",
     description: "異界の混沌を呼び出すという、妖しく輝く多面体。",

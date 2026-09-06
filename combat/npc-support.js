@@ -449,13 +449,14 @@ function applyNpcDamage(battle, { npcId, damage, actionName = "", message, hitIn
   battle.enemy.hp -= actual;
   const stage = getGrowthStage(battle.player, npcId);
   const passive = getNpcStagePassive(npcId, stage);
-  const instantDeath = battle.enemy.hp > 0 && passive?.instantDeathRate
+  const instantDeath = battle.enemy.hp > 0 && passive?.instantDeathRate && !battle.enemy.capturePuzzle
     ? resolveInstantDeath({ defender: battle.enemy, baseRate: passive.instantDeathRate,
       minimumRate: passive.instantDeathRate, maximumRate: passive.instantDeathRate, rng })
     : { success: false };
   let advancedDamage = 0;
   let advancedMessage = "";
-  if (battle.enemy.hp > 0 && instantDeath.immune && stage >= 9 && Number(rng()) < passive.instantDeathRate) {
+  if (battle.enemy.hp > 0 && instantDeath.immune && !battle.enemy.capturePuzzle
+    && stage >= 9 && Number(rng()) < passive.instantDeathRate) {
     if (npcId === "alec") {
       advancedDamage = Math.min(battle.enemy.hp,
         Math.max(1, Math.floor(actual * (NPC_ADVANCED_GROWTH.alec.stage9.immuneDamageMultiplier - 1))));
@@ -491,6 +492,17 @@ function setNpcVictory(battle) {
   battle.enemy.hp = 0;
   battle.enemy.alive = false;
   if (Array.isArray(battle.enemies) && battle.enemies.some(enemy => enemy.alive && enemy.hp > 0)) return;
+  if (battle.enemy.capturePuzzle) {
+    battle.enemy.escaped = true;
+    battle.enemy.experienceReward = 0;
+    battle.enemy.dropGold = 0;
+    battle.enemy.dropItemId = null;
+    battle.enemy.noDrop = true;
+    battle.outcome = "maerchentiereEscaped";
+    battle.phase = "complete";
+    battle.log.push("メルヒェンティーレは逃げていった。");
+    return;
+  }
   battle.outcome = "victory";
   battle.phase = "complete";
   battle.log.push(`${battle.enemy.name}を倒した！`);

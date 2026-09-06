@@ -46,6 +46,7 @@ import {
   startBattleTreasureEvent,
   startFloorLapNotice,
   startOverlayEvent,
+  startKirkeMaerchentiereResultEvent,
   setNpcTypewriterOptions,
   cancelRapidCurrentTransition,
   applyFixedFloorWarp
@@ -182,8 +183,11 @@ import {
   getActiveDefeatQuestProgress,
   formatDefeatQuestProgressUpdates,
   getQuestProgress,
+  getWaspHiveInteraction,
+  getKirkeHouseInteraction,
   hasActiveQuest,
   hasCompleteQueenRegalia,
+  MAERCHENTIERE_QUEST_ID,
   hasActiveFullFloorSurvey,
   isDungeonDepthUnlocked,
   recordEnemyDefeat,
@@ -196,6 +200,8 @@ import {
   recordSecondQueenShadowEncounter,
   recordThirdQueenShadowEncounter,
   recordThievesClue,
+  grantKirkeSpecialBirdlime,
+  completeMaerchentiereCapture,
   reportQuest
 } from "../data/quests.js";
 
@@ -716,25 +722,8 @@ import {
     beginBattle: beginRandomBattle,
     beginRareEnemyBattle,
     beginQuestEnemyBattle,
-    inspectWaspHive: () => {
-      const progress = getQuestProgress(character, "guild_029");
-      if (!progress.active) return {
-        canBattle: false,
-        message: "巨大な蜂の巣がある。無数の羽音が聞こえる。今は近づかない方がよさそうだ。"
-      };
-      if (progress.progress >= 15) return {
-        canBattle: false,
-        message: "依頼に必要な蜜蝋は集まった。キルケの家へ届けよう。"
-      };
-      return { canBattle: true, message: "巨大な蜂の巣からワスプの群れが飛び出してきた！" };
-    },
-    inspectKirkeHouse: () => {
-      const progress = getQuestProgress(character, "guild_029");
-      const delivered = Boolean(character?.eventFlags?.quest_029_beeswax_delivered);
-      if (delivered) return { canDeliver: false, message: "ここは魔女キルケの家だ。" };
-      const introduction = "巨大な蔓に囲まれて今にも朽ちそうな家が建っている。こんな所に人が住んでいるのだろうか…？";
-      return { canDeliver: Boolean(progress.active && progress.progress >= 15), message: introduction };
-    },
+    inspectWaspHive: () => getWaspHiveInteraction(character),
+    inspectKirkeHouse: () => getKirkeHouseInteraction(character),
     deliverBeeswaxToKirke: () => {
       const delivery = deliverQuestBeeswax(character);
       if (!delivery.accepted) return { accepted: false, message: "" };
@@ -748,6 +737,19 @@ import {
         message: "キルケ「わざわざこんな所まで届けさせて悪かったね。あたしも歳だからね。足を悪くして遠出は厳しいのさ。\nお礼にコイツをあげるよ。今のアンタにちょうどいいんじゃないかねぇ…？ひっひっひ…。」\n「蜜蝋の耳栓」を手に入れた！"
       };
     },
+    grantKirkeSpecialBirdlime: () => {
+      if (!character) return { accepted: false, gained: false };
+      const granted = grantKirkeSpecialBirdlime(character);
+      if (!granted.accepted) return granted;
+      character = granted.character;
+      updateCharacterUi();
+      saveGame();
+      if (granted.gained) {
+        showNamedItemGetEffect(["キルケ特製とりもち"], { important: true });
+      }
+      return granted;
+    },
+    beginMaerchentiereBattle,
     beginBossBattle,
     beginMimicBattle,
     playNpcVoice: playSe,
@@ -1002,6 +1004,7 @@ import {
     onDefeat: finishBattleDefeat,
     onEscape: finishBattleEscape,
     onScriptedDefeat: finishJireneScriptedDefeat,
+    onSpecialOutcome: finishMaerchentiereBattle,
     openSkills: ({ character: battleCharacter, enemy, onUse }) => openSkillOverlay({
       context: "battle",
       character: battleCharacter,
@@ -1412,6 +1415,11 @@ import {
   function showNamedItemGetEffect(itemNames, { important = false, amounts = [] } = {}) {
     if (!itemGetEffect || !itemGetItems || itemNames.length === 0) return;
     window.clearTimeout(itemGetTimer);
+    const townPortraitFrame = townScreen?.querySelector(".town-portrait-frame");
+    const viewport = document.querySelector(".viewport");
+    if (townScreen?.hidden && viewport && itemGetEffect.parentElement !== viewport) {
+      viewport.append(itemGetEffect);
+    }
     playSe(important ? "importantItem" : "itemGet");
     itemGetItems.replaceChildren(...itemNames.map((itemName, index) => {
       const row = document.createElement("span");
@@ -1426,6 +1434,9 @@ import {
     itemGetTimer = window.setTimeout(() => {
       itemGetEffect.classList.remove("is-active");
       itemGetEffect.hidden = true;
+      if (townPortraitFrame && itemGetEffect.parentElement !== townPortraitFrame) {
+        townPortraitFrame.append(itemGetEffect);
+      }
     }, 3400);
   }
 
@@ -1573,7 +1584,13 @@ import {
     return {
       ...result,
       character,
-      ...(questId === "guild_028" ? {
+      ...(questId === "guild_029" ? {
+        clientName: "ギルドマスター",
+        clientPortrait: "images/npc/NPC_10.avif",
+        clientDialogue: [
+          "ギルドマスター「蜜蝋集めか。蜂の巣を探すのは骨が折れそうだ。酒場で情報でも集めたらどうだ？\n＊Aボタンで次へ"
+        ]
+      } : questId === "guild_028" ? {
         clientName: "パルテノペー",
         clientPortrait: "images/npc/NPC_22.avif",
         clientDialogue: [
@@ -1673,6 +1690,7 @@ import {
         rewardEquipmentId: result.rewardEquipmentId,
         rewardItemId: result.rewardItemId,
         rewardItemAmount: result.rewardItemAmount,
+        rewardItems: result.rewardItems,
         bonusGold: result.bonusGold,
         presentationOrder: result.presentationOrder,
         eventRewardCardId
@@ -1687,6 +1705,7 @@ import {
     rewardEquipmentId,
     rewardItemId,
     rewardItemAmount,
+    rewardItems = [],
     bonusGold,
     presentationOrder,
     eventRewardCardId
@@ -1705,7 +1724,7 @@ import {
     }
     if (rewardCardId) {
       showCardGetEffect(rewardCardId);
-      if (eventRewardCardId || rewardEquipmentId) await wait(3400);
+      if (eventRewardCardId || rewardEquipmentId || rewardItemId || rewardItems.length) await wait(3400);
     }
     if (rewardEquipmentId) {
       const equipment = getEquipmentItem(rewardEquipmentId, "footId");
@@ -1717,6 +1736,13 @@ import {
       const amount = Math.max(1, Math.floor(Number(rewardItemAmount) || 1));
       showNamedItemGetEffect([item?.name || rewardItemId], { important: true, amounts: [amount] });
       if (eventRewardCardId) await wait(3400);
+    }
+    for (let index = 0; index < rewardItems.length; index += 1) {
+      const entry = rewardItems[index];
+      if (!entry?.itemId || entry.amount <= 0) continue;
+      const item = getItem(entry.itemId);
+      showNamedItemGetEffect([item?.name || entry.itemId], { important: true, amounts: [entry.amount] });
+      if (eventRewardCardId || index < rewardItems.length - 1) await wait(3400);
     }
     if (eventRewardCardId) {
       showCardGetEffect(eventRewardCardId);
@@ -2112,6 +2138,35 @@ import {
     return started;
   }
 
+  function beginMaerchentiereBattle({ fromGX, fromGY } = {}) {
+    if (endingSequenceActive) return false;
+    if (!character || worldLocation !== "dungeon" || currentDepth !== 58 || isBattleActive()) return false;
+    const progress = getQuestProgress(character, MAERCHENTIERE_QUEST_ID);
+    if (!progress.active || progress.completed || character?.eventFlags?.quest_026_maerchentiere_captured) return false;
+    const boss = getBossById("maerchentiere_b58f");
+    if (!boss || !hasKeyItem(character.keyItems, "kirke_special_birdlime")) return false;
+    cancelAutoReturn(false);
+    setPlayerInputEnabled(false);
+    pendingEncounter = null;
+    if (Number.isInteger(fromGX) && Number.isInteger(fromGY)) {
+      state.bossEncounterOrigin = { x: fromGX, y: fromGY };
+    }
+    activeRareRoomEncounterId = "quest_026_maerchentiere";
+    startBgm(selectBattleBgm(boss));
+    const started = startBattle(createBossCombatant(boss), {
+      playStartSe: true,
+      ambush: false,
+      concealed: false
+    });
+    if (!started) {
+      activeRareRoomEncounterId = null;
+      state.bossEncounterOrigin = null;
+      startBgm(selectDungeonBgm());
+      setPlayerInputEnabled(true);
+    }
+    return started;
+  }
+
   function isB100GauntletBossId(bossId) {
     return currentDepth === 100 && B100_GAUNTLET_BOSS_IDS.includes(bossId);
   }
@@ -2238,6 +2293,31 @@ import {
     character.condition = currentCondition(character);
     updateCharacterUi();
     scheduleAutosave();
+  }
+
+  function finishMaerchentiereBattle(battle) {
+    if (character && battle?.player) {
+      updateCharacterFromBattle(createPersistentBattlePlayerChanges(battle.player));
+    }
+    const captured = battle?.outcome === "maerchentiereCaptured";
+    if (captured && character) {
+      const completion = completeMaerchentiereCapture(character);
+      if (completion.accepted) character = completion.character;
+    }
+    activeRareRoomEncounterId = null;
+    startBgm(selectDungeonBgm());
+    resetPresence();
+    state.autoReturnPaused = false;
+    setPlayerInputEnabled(true);
+    updateCharacterUi();
+    saveGame();
+    const encounterOrigin = state.bossEncounterOrigin;
+    state.bossEncounterOrigin = null;
+    startKirkeMaerchentiereResultEvent({
+      captured,
+      fromGX: encounterOrigin?.x,
+      fromGY: encounterOrigin?.y
+    });
   }
 
   function applyDungeonPoisonStep() {

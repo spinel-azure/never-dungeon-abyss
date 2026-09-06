@@ -2,6 +2,7 @@ import { canUseItemIn, getItem } from "../data/items.js";
 import { consumeItem, getItemCount } from "../data/inventory.js";
 import { getStatusEffect } from "../data/status-effects.js";
 import { getConditionLabel } from "./condition-label.js";
+import { hasKeyItem } from "../data/key-items.js";
 
 export function cureAllNegativeStatuses(statuses = []) {
   return (Array.isArray(statuses) ? statuses : []).filter(status => {
@@ -13,7 +14,10 @@ export function cureAllNegativeStatuses(statuses = []) {
 export function getItemUnavailableReason({ character, itemId, context, enemy, torchFuel = 0, treasureCompassActive = false } = {}) {
   const item = getItem(itemId);
   if (!item) return "unknownItem";
-  if (getItemCount(character?.inventory, itemId) <= 0) return "notOwned";
+  const owned = item.keyItemId
+    ? hasKeyItem(character?.keyItems, item.keyItemId)
+    : getItemCount(character?.inventory, itemId) > 0;
+  if (!owned) return "notOwned";
   if (!canUseItemIn(item, context)) {
     if (context === "battle") return "fieldOnly";
     if (item.usableIn?.includes("dungeon")) return "dungeonOnly";
