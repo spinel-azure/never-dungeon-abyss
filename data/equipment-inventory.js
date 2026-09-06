@@ -54,7 +54,18 @@ export function normalizeEquipmentInventory(source, equipment, equippedInstanceI
     }
     slotInstances[slot] = instance.instanceId;
   }
-  return { equipmentInventory: { instances, nextOrder }, equippedInstanceIds: slotInstances };
+  const rightArmInstance = instances.find(entry => entry.instanceId === slotInstances.rightArmId);
+  const rightArmDefinition = findEquipmentDefinition(rightArmInstance?.equipmentId, "rightArmId");
+  const normalizedEquipment = { ...(equipment || {}) };
+  if (rightArmDefinition?.twoHanded) {
+    slotInstances.leftArmId = null;
+    normalizedEquipment.leftArmId = null;
+  }
+  return {
+    equipmentInventory: { instances, nextOrder },
+    equippedInstanceIds: slotInstances,
+    equipment: normalizedEquipment
+  };
 }
 
 export function getEquipmentInstanceName(instance) {
@@ -188,6 +199,9 @@ export function isEquipmentBuybackEligible(instance) {
 export function canEquipInstance(character, instance) {
   const definition = findEquipmentDefinition(instance?.equipmentId, instance?.slot);
   if (!definition) return { accepted: false, reason: "装備品データが見つかりません。" };
+  if (definition.slot === "leftArmId" && hasEquippedTwoHandedWeapon(character)) {
+    return { accepted: false, reason: "両手武器の装備中は左手装備を使用できません。" };
+  }
   if (definition.allowedJobs?.length && !definition.allowedJobs.includes(character?.job)) {
     return { accepted: false, reason: "この職業では装備できません。" };
   }
@@ -196,6 +210,17 @@ export function canEquipInstance(character, instance) {
     if (current < Number(required)) return { accepted: false, reason: `装備条件：${stat.toUpperCase()} ${required}以上（現在値 ${current}）` };
   }
   return { accepted: true, reason: "" };
+}
+
+function hasEquippedTwoHandedWeapon(character) {
+  const rightArmInstanceId = character?.equippedInstanceIds?.rightArmId;
+  const rightArmInstance = character?.equipmentInventory?.instances?.find(
+    entry => entry.instanceId === rightArmInstanceId
+  );
+  const instanceDefinition = findEquipmentDefinition(rightArmInstance?.equipmentId, "rightArmId");
+  if (instanceDefinition) return instanceDefinition.twoHanded === true;
+  const equipmentId = character?.equipment?.rightArmId || character?.equipment?.weaponId;
+  return findEquipmentDefinition(equipmentId, "rightArmId")?.twoHanded === true;
 }
 
 export function equipInstance(character, slot, instanceId) {

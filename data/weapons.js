@@ -115,7 +115,8 @@ export const WEAPONS = Object.freeze({
     name: "訓練用の両手剣",
     type: "greatsword",
     attack: 10,
-    element: "physical"
+    element: "physical",
+    twoHanded: true
   }),
   iron_greatsword: Object.freeze({
     id: "iron_greatsword", name: "鉄の両手剣", type: "greatsword", attack: 12,
