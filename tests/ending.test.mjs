@@ -4,7 +4,8 @@ import { readFileSync, existsSync } from "node:fs";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { grantKeyItem, hasKeyItem, getKeyItem } from "../data/key-items.js";
 import { completeEndingStory, completeEndingCredits, getEndingResumeMode, getEndingCredits,
-  ENDING_ASSETS, ENDING_FLAGS, EPILOGUE, EPILOGUE_AFTER_MEDAL } from "../data/ending.js";
+  ENDING_ASSETS, ENDING_FLAGS, ENDING_SPECIAL_THANKS, ENDING_TEST_PLAYERS,
+  EPILOGUE, EPILOGUE_AFTER_MEDAL } from "../data/ending.js";
 import { getQueenRegaliaMinimapEffects } from "../js/queen-regalia-effects.js";
 import { getEndingFrame, createArrivalConfetti } from "../js/ending.js";
 import { hasCompleteQueenRegalia } from "../data/quests.js";
@@ -69,19 +70,25 @@ test("town and B100 block regalia while torch and minimap blocking remain render
   const c = completeEndingStory(restored());
   assert.deepEqual(Object.values(getQueenRegaliaMinimapEffects(c.keyItems, { depth: 1, location: "town", eventFlags: c.eventFlags })), Array(4).fill(false));
 });
-test("assets exist, epilogue is ordered and credits omit empty test players", () => {
+test("assets exist, epilogue is ordered and ending collaborators precede production", () => {
   for (const asset of Object.values(ENDING_ASSETS)) assert.equal(existsSync(new URL(`../${asset}`, import.meta.url)), true);
   assert.equal(EPILOGUE.length, 7);
   assert.match(EPILOGUE[0], /^――かくして/);
   assert.equal(EPILOGUE.at(-1), "その勲章には、女王の加護が宿っているといいます。");
   assert.match(EPILOGUE_AFTER_MEDAL, /末永く語り継がれてゆくことでしょう――。$/);
-  assert.deepEqual(getEndingCredits().map(([heading]) => heading), ["企画・原案・ゲームデザイン", "制作相談・シナリオ・画像生成", "実装・検証・デバッグ", "BGM", "効果音", "制作"]);
-  assert.deepEqual(getEndingCredits(["TEST"])[5], ["テストプレイ", ["TEST"]]);
+  assert.deepEqual(ENDING_TEST_PLAYERS, ["・ALC(@ALCHE0274)"]);
+  assert.deepEqual(ENDING_SPECIAL_THANKS, ["・みかにゃ(@RllCQzwYqrjFWrg)"]);
+  assert.deepEqual(getEndingCredits().slice(-3), [
+    ["テストプレイ協力（敬称略）", ["・ALC(@ALCHE0274)"]],
+    ["SPECIAL THANKS（敬称略）", ["・みかにゃ(@RllCQzwYqrjFWrg)"]],
+    ["制作", ["@Spinel_azure"]]
+  ]);
+  assert.deepEqual(getEndingCredits([], []).map(([heading]) => heading), ["企画・原案・ゲームデザイン", "制作相談・シナリオ・画像生成", "実装・検証・デバッグ", "BGM", "効果音", "制作"]);
 });
 test("roll timing reserves the medal pause, stationary final image, and final five-second fade", () => {
-  assert.deepEqual([0, 4, 29, 35, 41, 73, 81, 91].map(t => getEndingFrame(t).stage), ["intro", "epilogue", "medal", "after", "credits", "thanks", "end", "end"]);
-  assert.equal(getEndingFrame(29).progress, getEndingFrame(34).progress);
-  assert.equal(getEndingFrame(82).progress, getEndingFrame(90).progress);
+  assert.deepEqual([0, 4, 27, 33, 37, 77, 83, 91].map(t => getEndingFrame(t).stage), ["intro", "epilogue", "medal", "after", "credits", "thanks", "end", "end"]);
+  assert.equal(getEndingFrame(27).progress, getEndingFrame(32).progress);
+  assert.equal(getEndingFrame(84).progress, getEndingFrame(90).progress);
   assert.equal(getEndingFrame(91).opacity, 1);
   assert.equal(getEndingFrame(93.5).opacity, .5);
   assert.equal(getEndingFrame(96).done, true);

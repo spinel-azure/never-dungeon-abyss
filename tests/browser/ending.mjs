@@ -100,13 +100,30 @@ try {
     assert.equal(pending.character.eventFlags.ending_credits_pending, true);
     assert.ok(pending.character.keyItems.owned.royal_cat_medal);
     assert.equal(pending.character.keyItems.owned.queen_tiara, undefined);
-    assert.equal(await page.getByText("テストプレイ", { exact: true }).count(), 0);
+    assert.equal(await page.getByText("テストプレイ協力（敬称略）", { exact: true }).count(), 1);
+    assert.equal(await page.getByText("・ALC(@ALCHE0274)", { exact: true }).count(), 1);
+    assert.equal(await page.getByText("SPECIAL THANKS（敬称略）", { exact: true }).count(), 1);
+    assert.equal(await page.getByText("・みかにゃ(@RllCQzwYqrjFWrg)", { exact: true }).count(), 1);
     await advance(page, 15000);
     await page.screenshot({ path: path.join(output, `${layout}-epilogue.png`) });
     await advance(page, 15000);
     assert.equal(await page.locator('#endingScreen').getAttribute('data-stage'), 'medal');
     assert.equal(await page.locator('.ending-medal img').evaluate(img => img.naturalWidth > 0 && img.width === 128), true);
     await page.screenshot({ path: path.join(output, `${layout}-medal.png`) });
+    await advance(page, 20000);
+    await page.screenshot({ path: path.join(output, `${layout}-credits.png`) });
+    await advance(page, 11000);
+    assert.equal(await page.getByText("テストプレイ協力（敬称略）", { exact: true }).evaluate(element => {
+      const bounds = element.getBoundingClientRect();
+      return bounds.bottom > 0 && bounds.top < innerHeight;
+    }), true, `${layout}: test-play credit should enter the visible roll`);
+    await page.screenshot({ path: path.join(output, `${layout}-test-play-credit.png`) });
+    await advance(page, 7000);
+    assert.equal(await page.getByText("SPECIAL THANKS（敬称略）", { exact: true }).evaluate(element => {
+      const bounds = element.getBoundingClientRect();
+      return bounds.bottom > 0 && bounds.top < innerHeight;
+    }), true, `${layout}: special-thanks credit should enter the visible roll`);
+    await page.screenshot({ path: path.join(output, `${layout}-special-thanks.png`) });
     if (layout === "mobile") {
       // Reload an actual persisted pending save: no restoration, entrance, or confetti.
       await page.reload(); await page.waitForFunction(() => window.endingQa);
@@ -118,9 +135,7 @@ try {
       await page.evaluate(() => endingQa.action('confirm')); await advance(page, 300);
       await page.evaluate(() => endingQa.action('confirm'));
     } else {
-      await advance(page, 20000);
-      await page.screenshot({ path: path.join(output, `${layout}-credits.png`) });
-      await advance(page, 33000);
+      await advance(page, 15000);
       assert.equal(await page.locator('#endingScreen').getAttribute('data-stage'), 'end');
       const transform = await page.locator('.ending-end').evaluate(el => el.style.transform);
       await advance(page, 6000);

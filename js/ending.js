@@ -5,9 +5,9 @@ import { EffectEngine } from "./effects/effect-engine.js";
 const clamp = n => Math.max(0, Math.min(1, n));
 export function getEndingFrame(seconds) {
   const t = Math.max(0, seconds);
-  const stage = t < 4 ? "intro" : t < 29 ? "epilogue" : t < 35 ? "medal"
-    : t < 41 ? "after" : t < 73 ? "credits" : t < 81 ? "thanks" : "end";
-  const spans = { epilogue: [4, 29], credits: [41, 73] };
+  const stage = t < 4 ? "intro" : t < 27 ? "epilogue" : t < 33 ? "medal"
+    : t < 37 ? "after" : t < 77 ? "credits" : t < 83 ? "thanks" : "end";
+  const spans = { epilogue: [4, 27], credits: [37, 77] };
   const span = spans[stage];
   return { stage, progress: span ? clamp((t - span[0]) / (span[1] - span[0])) : 0,
     opacity: Math.min(clamp(t / 4), clamp((96 - t) / 5)), done: t >= 96 };

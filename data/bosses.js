@@ -1232,6 +1232,7 @@ export const BOSSES = Object.freeze({
     level: 1,
     imageId: "maerchentiere_b58f", image: "images/bosses/boss_20.avif",
     captureImage: "images/npc/NPC_event_24.avif", battleSize: "large",
+    battleBgmKey: "maerchentiereBoss",
     race: "beast", maxHp: 30,
     stats: Object.freeze({ str: 1, int: 1, agi: 1, dex: 1, luc: 1 }),
     def: 0, attack: 0, experienceReward: 0, specialAttack: null,

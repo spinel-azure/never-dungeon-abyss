@@ -135,9 +135,12 @@ test("Kirke gives one reusable birdlime and capture progress survives normalizat
   assert.equal(getQuestProgress(restored, MAERCHENTIERE_QUEST_ID).readyToReport, true);
 });
 
-test("Maerchentiere uses a deterministic harmless three-action cycle", () => {
+test("Maerchentiere uses a deterministic harmless three-action cycle", async () => {
   const boss = createBossCombatant(getBossById("maerchentiere_b58f"));
   assert.equal(boss.maxHp, 30);
+  assert.equal(boss.battleBgmKey, "maerchentiereBoss");
+  const mainSource = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
+  assert.match(mainSource, /function beginMaerchentiereBattle[\s\S]*?startBgm\(selectBattleBgm\(boss\)\)/);
   assert.equal(boss.hp, 30);
   assert.equal(boss.experienceReward, 0);
   assert.equal(boss.noDrop, true);

@@ -20,14 +20,17 @@ export const EPILOGUE = Object.freeze([
   "その勲章には、女王の加護が宿っているといいます。"
 ]);
 export const EPILOGUE_AFTER_MEDAL = "あなたが成し遂げた偉業は、\n猫の国《カッツェンラント》の歴史とともに、\n末永く語り継がれてゆくことでしょう――。";
-export function getEndingCredits(testPlayers = []) {
+export const ENDING_TEST_PLAYERS = Object.freeze(["・ALC(@ALCHE0274)"]);
+export const ENDING_SPECIAL_THANKS = Object.freeze(["・みかにゃ(@RllCQzwYqrjFWrg)"]);
+export function getEndingCredits(testPlayers = ENDING_TEST_PLAYERS, specialThanks = ENDING_SPECIAL_THANKS) {
   return [
     ["企画・原案・ゲームデザイン", ["@Spinel_azure"]],
     ["制作相談・シナリオ・画像生成", ["ChatGPT"]],
     ["実装・検証・デバッグ", ["ChatGPT Codex"]],
     ["BGM", ["もみじばミュージック"]],
     ["効果音", ["イワシロ音楽素材", "効果音ラボ"]],
-    ...(testPlayers.length ? [["テストプレイ", testPlayers]] : []),
+    ...(testPlayers.length ? [["テストプレイ協力（敬称略）", testPlayers]] : []),
+    ...(specialThanks.length ? [["SPECIAL THANKS（敬称略）", specialThanks]] : []),
     ["制作", ["@Spinel_azure"]]
   ];
 }
