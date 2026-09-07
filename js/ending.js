@@ -3,24 +3,35 @@ import { createEndingAudioClock } from "./audio.js";
 import { EffectEngine } from "./effects/effect-engine.js";
 
 const clamp = n => Math.max(0, Math.min(1, n));
+export const ARRIVAL_CONFETTI_BURSTS = 3;
+export const ARRIVAL_CONFETTI_INTERVAL_MS = 1200;
+export const ARRIVAL_CONFETTI_PART_MS = 1800;
+export const ARRIVAL_CONFETTI_END_MS = ARRIVAL_CONFETTI_INTERVAL_MS * (ARRIVAL_CONFETTI_BURSTS - 1) + ARRIVAL_CONFETTI_PART_MS;
+export const ARRIVAL_AFTER_CONFETTI_MS = 5000;
+export const ARRIVAL_TOTAL_MS = ARRIVAL_CONFETTI_END_MS + ARRIVAL_AFTER_CONFETTI_MS;
 export function getEndingFrame(seconds) {
   const t = Math.max(0, seconds);
-  const stage = t < 4 ? "intro" : t < 27 ? "epilogue" : t < 33 ? "medal"
-    : t < 37 ? "after" : t < 77 ? "credits" : t < 83 ? "thanks" : "end";
-  const spans = { epilogue: [4, 27], credits: [37, 77] };
+  const stage = t < 4 ? "intro" : t < 26 ? "epilogue" : t < 32 ? "medal"
+    : t < 36 ? "after" : t < 81 ? "credits" : t < 86 ? "thanks" : "end";
+  const spans = { epilogue: [4, 26], credits: [36, 81] };
   const span = spans[stage];
   return { stage, progress: span ? clamp((t - span[0]) / (span[1] - span[0])) : 0,
     opacity: Math.min(clamp(t / 4), clamp((96 - t) / 5)), done: t >= 96 };
 }
 
-// The same cracker renderer used by LOT BAG. Only its origin/direction differ.
+// Repeat the LOT BAG cracker renderer from four inward-facing origins.
 export function createArrivalConfetti(reduced = false) {
-  return { width: 960, height: 540, duration: 1800, parts: [
-    [0, 0, 30], [960, 0, 150], [0, 540, -30], [960, 540, -150]
-  ].map(([x, y, direction], i) => ({ type: "cracker", id: `arrival_${i}`, enabled: true,
-    x, y, direction, start: 0, duration: 1800, easing: "linear", seed: i + 2,
-    color: ["#ffda63", "#fa8ca5", "#80d9ff", "#c7a7ff"][i], secondaryColor: "#fff4bb",
-    count: reduced ? 5 : 36, speed: 500, spread: 45, gravity: 80, size: 5 })) };
+  const corners = [[0, 0, 30], [960, 0, 150], [0, 540, -30], [960, 540, -150]];
+  return { width: 960, height: 540, duration: ARRIVAL_CONFETTI_END_MS, parts: Array.from(
+    { length: ARRIVAL_CONFETTI_BURSTS },
+    (_, burst) => corners.map(([x, y, direction], corner) => ({
+      type: "cracker", id: `arrival_${burst}_${corner}`, enabled: true,
+      x, y, direction, start: burst * ARRIVAL_CONFETTI_INTERVAL_MS,
+      duration: ARRIVAL_CONFETTI_PART_MS, easing: "linear", seed: burst * 4 + corner + 2,
+      color: ["#ffda63", "#fa8ca5", "#80d9ff", "#c7a7ff"][corner], secondaryColor: "#fff4bb",
+      count: reduced ? 5 : 36, speed: 500, spread: 45, gravity: 80, size: 5
+    }))
+  ).flat() };
 }
 
 export function createEndingController({ parent, onSuspendTown, onSaveStory, onFinish,
@@ -38,11 +49,13 @@ export function createEndingController({ parent, onSuspendTown, onSaveStory, onF
   function build() {
     root = document.createElement("section"); root.id = "endingScreen";
     root.className = "ending-screen"; root.setAttribute("aria-label", "エンディング");
-    root.innerHTML = `<div class="ending-arrival"><img class="ending-arrival-image" alt="町への凱旋"><canvas aria-hidden="true"></canvas><p>カッツェンシュタットの中心部へ戻ってきたあなたを、皆が温かく出迎えてくれた。</p></div>
+    root.innerHTML = `<div class="ending-arrival"><div class="ending-arrival-cloud-layer" aria-hidden="true"><div class="ending-arrival-cloud-track"><img alt=""><img alt=""></div></div><img class="ending-arrival-town" alt=""><img class="ending-arrival-image" alt="町への凱旋"><canvas aria-hidden="true"></canvas><p>カッツェンシュタットの中心部へ戻ってきたあなたを、皆が温かく出迎えてくれた。</p></div>
       <div class="ending-roll"><img class="prologue-silhouette ending-queen" alt="">
       <div class="ending-scroll"></div><div class="prologue-dither prologue-dither-top"><i></i><i></i><i></i><i></i></div><div class="prologue-dither prologue-dither-bottom"><i></i><i></i><i></i><i></i></div></div>
       <div class="ending-shade"></div><button class="prologue-skip" type="button">A / ENTER：SKIP</button>`;
     root.querySelector(".ending-arrival-image").src = ENDING_ASSETS.arrival;
+    root.querySelector(".ending-arrival-town").src = ENDING_ASSETS.arrivalTown;
+    root.querySelectorAll(".ending-arrival-cloud-track img").forEach(image => { image.src = ENDING_ASSETS.arrivalSky; });
     root.querySelector(".ending-queen").src = ENDING_ASSETS.queen;
     const scroll = root.querySelector(".ending-scroll");
     for (const name of ["epilogue", "medal", "after", "credits", "thanks", "end"]) {
@@ -101,10 +114,10 @@ export function createEndingController({ parent, onSuspendTown, onSaveStory, onF
     previousFrame = now;
     if (phase === "arrival") {
       const elapsed = now - phaseStart;
-      if (elapsed <= 1800) effect.seek(elapsed);
+      if (elapsed <= ARRIVAL_CONFETTI_END_MS) effect.seek(elapsed);
       else root.querySelector("canvas").hidden = true;
-      shade.style.opacity = String(clamp((elapsed - 3000) / 2000));
-      if (elapsed >= 5000) { void saveStoryAndStart(); return; }
+      shade.style.opacity = String(clamp((elapsed - (ARRIVAL_TOTAL_MS - 2000)) / 2000));
+      if (elapsed >= ARRIVAL_TOTAL_MS) { void saveStoryAndStart(); return; }
     } else if (phase === "credits") {
       const frame = getEndingFrame(clock.elapsed());
       scene.style.opacity = String(frame.opacity); clock.fade(frame.opacity);

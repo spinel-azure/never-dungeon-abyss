@@ -72,19 +72,46 @@ try {
     assert.equal(await page.locator('[data-menu-view="status"]').isVisible(), false);
     const after = await page.evaluate(() => endingQa.state());
     assert.equal(before.x, after.x); assert.equal(before.y, after.y); assert.equal(after.playerEnabled, false);
-    for (const ms of [2500,200,250,3500,3100,1900]) await advance(page, ms);
+    for (const ms of [2500, 200, 250, 3500]) await advance(page, ms);
+    await page.evaluate(() => document.getAnimations().forEach(animation => animation.finish()));
+    const fullFigure = await page.locator(".michaela-restoration-queen-c").evaluate(element => {
+      const figure = element.getBoundingClientRect();
+      const stage = element.parentElement.getBoundingClientRect();
+      return { heightRatio: figure.height / stage.height, topGap: figure.top - stage.top, bottomGap: stage.bottom - figure.bottom };
+    });
+    assert.ok(fullFigure.heightRatio >= .99);
+    assert.ok(fullFigure.topGap <= 1 && fullFigure.bottomGap <= 1);
+    await page.screenshot({ path: path.join(output, layout + "-michaela-full.png") });
+    for (const ms of [3100, 1900]) await advance(page, ms);
     assert.equal(await page.evaluate(() => endingQa.restoration.getPhase()), "dialogue");
+    await page.evaluate(() => document.getAnimations().forEach(animation => animation.finish()));
+    const dialogueFigure = await page.locator(".michaela-restoration-queen-d").evaluate(element => {
+      const figure = element.getBoundingClientRect();
+      const stage = element.parentElement.getBoundingClientRect();
+      return { heightRatio: figure.height / stage.height, opacity: getComputedStyle(element).opacity };
+    });
+    assert.ok(dialogueFigure.heightRatio >= .99);
+    assert.equal(dialogueFigure.opacity, "1");
+    await page.screenshot({ path: path.join(output, layout + "-michaela-dialogue.png") });
     for (let i=0;i<6;i++) await advance(page, 16000);
     assert.equal(await page.evaluate(() => endingQa.state().location), "dungeon");
     assert.equal(await page.evaluate(() => endingQa.state().playerEnabled), false);
     await advance(page, 1600);
     assert.equal(await page.evaluate(() => endingQa.ending.getPhase()), "arrival");
     assert.equal(await page.locator(".ending-arrival-image").count(), 1);
+    assert.equal(await page.locator(".ending-arrival-town").getAttribute("src"), "images/background/town_01b.avif");
+    assert.deepEqual(await page.locator(".ending-arrival-cloud-track img").evaluateAll(images => images.map(image => image.getAttribute("src"))), [
+      "images/background/town_01c.avif", "images/background/town_01c.avif"
+    ]);
+    const arrivalLayers = await page.evaluate(() => [".ending-arrival-cloud-layer", ".ending-arrival-town", ".ending-arrival-image", ".ending-arrival canvas"].map(selector => Number(getComputedStyle(document.querySelector(selector)).zIndex)));
+    assert.deepEqual(arrivalLayers, [0, 1, 2, 3]);
+    const cloudAnimation = await page.locator(".ending-arrival-cloud-track").evaluate(element => getComputedStyle(element).animationName);
+    assert.equal(cloudAnimation, reduced ? "none" : "town-cloud-scroll");
     assert.equal(await page.evaluate(() => endingRafs.town.size), 0);
     assert.equal(await page.evaluate(() => endingRafs.ending.size), 1);
     assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector("#townPassersby")).visibility), "hidden");
     await page.screenshot({ path: path.join(output, `${layout}-arrival.png`) });
-    await advance(page, 5100);
+    await advance(page, 9300);
     assert.equal(await page.evaluate(() => endingQa.ending.getPhase()), "credits");
     await page.evaluate(() => {
       window.rollPaints = 0;
@@ -100,7 +127,9 @@ try {
     assert.equal(pending.character.eventFlags.ending_credits_pending, true);
     assert.ok(pending.character.keyItems.owned.royal_cat_medal);
     assert.equal(pending.character.keyItems.owned.queen_tiara, undefined);
-    assert.equal(await page.getByText("テストプレイ協力（敬称略）", { exact: true }).count(), 1);
+    assert.equal(await page.getByText("開発・公開環境", { exact: true }).count(), 1);
+    assert.equal(await page.getByText("GitHub / GitHub Pages", { exact: true }).count(), 1);
+    assert.equal(await page.getByText("実機テストプレイ・デバッグ協力（敬称略）", { exact: true }).count(), 1);
     assert.equal(await page.getByText("・ALC(@ALCHE0274)", { exact: true }).count(), 1);
     assert.equal(await page.getByText("SPECIAL THANKS（敬称略）", { exact: true }).count(), 1);
     assert.equal(await page.getByText("・みかにゃ(@RllCQzwYqrjFWrg)", { exact: true }).count(), 1);
@@ -113,7 +142,7 @@ try {
     await advance(page, 20000);
     await page.screenshot({ path: path.join(output, `${layout}-credits.png`) });
     await advance(page, 11000);
-    assert.equal(await page.getByText("テストプレイ協力（敬称略）", { exact: true }).evaluate(element => {
+    assert.equal(await page.getByText("実機テストプレイ・デバッグ協力（敬称略）", { exact: true }).evaluate(element => {
       const bounds = element.getBoundingClientRect();
       return bounds.bottom > 0 && bounds.top < innerHeight;
     }), true, `${layout}: test-play credit should enter the visible roll`);
@@ -135,7 +164,7 @@ try {
       await page.evaluate(() => endingQa.action('confirm')); await advance(page, 300);
       await page.evaluate(() => endingQa.action('confirm'));
     } else {
-      await advance(page, 15000);
+      await advance(page, 18000);
       assert.equal(await page.locator('#endingScreen').getAttribute('data-stage'), 'end');
       const transform = await page.locator('.ending-end').evaluate(el => el.style.transform);
       await advance(page, 6000);

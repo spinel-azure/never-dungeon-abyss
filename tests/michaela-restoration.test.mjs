@@ -24,12 +24,14 @@ test("the truth staff is a unique unsellable key item", () => {
 
 test("Michaela restoration preserves all six requested dialogue pages", () => {
   assert.equal(MICHAELA_RESTORATION_DIALOGUE.length, 6);
-  assert.match(MICHAELA_RESTORATION_DIALOGUE[0], /カッツェンラントの女王/);
-  assert.match(MICHAELA_RESTORATION_DIALOGUE[1], /アカシックレコード/);
-  assert.match(MICHAELA_RESTORATION_DIALOGUE[2], /王家の血統/);
-  assert.match(MICHAELA_RESTORATION_DIALOGUE[3], /無力な猫の姿/);
-  assert.match(MICHAELA_RESTORATION_DIALOGUE[4], /平和の象徴たる真実の杖/);
-  assert.match(MICHAELA_RESTORATION_DIALOGUE[5], /カッツェンシュタット/);
+  assert.deepEqual(MICHAELA_RESTORATION_DIALOGUE, [
+    "わたくしはミカエラ。このカッツェンラントの女王です。\nよくぞアマイェナクから真実の杖を取り戻してくれましたね。深く感謝いたします。",
+    "この世の全ての叡智を欲していたアマイェナクはその源泉である\nアカシックレコードに触れたがっておりました。その為に真実の杖を必要としていたのです。",
+    "アカシックレコードへのアクセスに必要な真実の杖は王家の血統とリンクしています。\n杖が所有者と認めた者が死ねば、アクセスキーとしての機能を失うのです。",
+    "だからアマイェナクは、わたくしを殺すことができなかったのでしょう。けれど、自由にしておくわけにもいかなかった。\nそこで……わたくしから真実の杖を奪った上に、無力な猫の姿へと変えたのです。",
+    "アマイェナクが、なぜそこまで全ての叡智を渇望したのか……。わたくしにも分かりません。\nけれど、その為に平和の象徴たる真実の杖を奪うことは、決して許されることではありません。\nあなたは、それを阻止してくださいました。",
+    "さぁ、戻りましょう。皆が待つカッツェンシュタットへ！"
+  ]);
 });
 
 test("Amayenak victory persists recovery flags and returns to the B100F entrance", () => {
@@ -69,6 +71,7 @@ test("restoration overlay uses the cat and both Michaela portraits", () => {
   assert.match(css, /michaela-cat-rising/);
   assert.match(css, /michaela-human-reveal/);
   assert.match(css, /is-crossfade/);
+  assert.match(css, /\.michaela-restoration-queen\{top:50%;width:100%;height:100%;object-position:center bottom/);
   assert.match(css, /\.michaela-restoration\{position:absolute;inset:0/);
   assert.doesNotMatch(css, /\.michaela-restoration\{position:fixed/);
   assert.match(html, /<div class="viewport">[\s\S]*?<section id="michaelaRestoration"/);
@@ -85,6 +88,6 @@ test("restoration returns silently without an unrelated floor transition message
 
 test("only main.js receives the new cache buster", () => {
   const html = read("index.html");
-  assert.match(html, /js\/main\.js\?v=20260907-07/);
+  assert.match(html, /js\/main\.js\?v=20260908-01/);
   assert.doesNotMatch(read("js/main.js"), /from\s+["'][^"']+\?v=/);
 });

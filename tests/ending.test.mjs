@@ -7,7 +7,9 @@ import { completeEndingStory, completeEndingCredits, getEndingResumeMode, getEnd
   ENDING_ASSETS, ENDING_FLAGS, ENDING_SPECIAL_THANKS, ENDING_TEST_PLAYERS,
   EPILOGUE, EPILOGUE_AFTER_MEDAL } from "../data/ending.js";
 import { getQueenRegaliaMinimapEffects } from "../js/queen-regalia-effects.js";
-import { getEndingFrame, createArrivalConfetti } from "../js/ending.js";
+import { getEndingFrame, createArrivalConfetti, ARRIVAL_AFTER_CONFETTI_MS,
+  ARRIVAL_CONFETTI_BURSTS, ARRIVAL_CONFETTI_END_MS, ARRIVAL_CONFETTI_INTERVAL_MS,
+  ARRIVAL_TOTAL_MS } from "../js/ending.js";
 import { hasCompleteQueenRegalia } from "../data/quests.js";
 const read = file => readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
 const regalia = ["queen_tiara", "queen_earring", "queen_necklace"];
@@ -79,27 +81,33 @@ test("assets exist, epilogue is ordered and ending collaborators precede product
   assert.deepEqual(ENDING_TEST_PLAYERS, ["・ALC(@ALCHE0274)"]);
   assert.deepEqual(ENDING_SPECIAL_THANKS, ["・みかにゃ(@RllCQzwYqrjFWrg)"]);
   assert.deepEqual(getEndingCredits().slice(-3), [
-    ["テストプレイ協力（敬称略）", ["・ALC(@ALCHE0274)"]],
+    ["実機テストプレイ・デバッグ協力（敬称略）", ["・ALC(@ALCHE0274)"]],
     ["SPECIAL THANKS（敬称略）", ["・みかにゃ(@RllCQzwYqrjFWrg)"]],
     ["制作", ["@Spinel_azure"]]
   ]);
-  assert.deepEqual(getEndingCredits([], []).map(([heading]) => heading), ["企画・原案・ゲームデザイン", "制作相談・シナリオ・画像生成", "実装・検証・デバッグ", "BGM", "効果音", "制作"]);
+  assert.deepEqual(getEndingCredits([], []).map(([heading]) => heading), ["企画・原案・ゲームデザイン", "制作相談・シナリオ・画像生成", "実装・検証・デバッグ", "開発・公開環境", "BGM", "効果音", "制作"]);
+  const headings = getEndingCredits().map(([heading]) => heading);
+  assert.equal(headings.indexOf("開発・公開環境") + 1, headings.indexOf("BGM"));
+  assert.deepEqual(getEndingCredits()[headings.indexOf("開発・公開環境")], ["開発・公開環境", ["GitHub / GitHub Pages"]]);
 });
 test("roll timing reserves the medal pause, stationary final image, and final five-second fade", () => {
-  assert.deepEqual([0, 4, 27, 33, 37, 77, 83, 91].map(t => getEndingFrame(t).stage), ["intro", "epilogue", "medal", "after", "credits", "thanks", "end", "end"]);
-  assert.equal(getEndingFrame(27).progress, getEndingFrame(32).progress);
-  assert.equal(getEndingFrame(84).progress, getEndingFrame(90).progress);
+  assert.deepEqual([0, 4, 26, 32, 36, 81, 86, 91].map(t => getEndingFrame(t).stage), ["intro", "epilogue", "medal", "after", "credits", "thanks", "end", "end"]);
+  assert.equal(getEndingFrame(26).progress, getEndingFrame(31).progress);
+  assert.equal(getEndingFrame(87).progress, getEndingFrame(90).progress);
   assert.equal(getEndingFrame(91).opacity, 1);
   assert.equal(getEndingFrame(93.5).opacity, .5);
   assert.equal(getEndingFrame(96).done, true);
 });
-test("confetti reuses cracker renderer with one inward burst from four corners", () => {
+test("confetti reuses the cracker renderer for three inward bursts before a five-second hold", () => {
   const full = createArrivalConfetti(), reduced = createArrivalConfetti(true);
-  assert.equal(full.duration, 1800);
-  assert.equal(full.parts.length, 4);
-  for (let i = 0; i < 4; i++) {
+  assert.equal(ARRIVAL_CONFETTI_BURSTS, 3);
+  assert.equal(full.duration, ARRIVAL_CONFETTI_END_MS);
+  assert.equal(full.parts.length, 12);
+  assert.equal(ARRIVAL_TOTAL_MS - ARRIVAL_CONFETTI_END_MS, ARRIVAL_AFTER_CONFETTI_MS);
+  for (let i = 0; i < 12; i++) {
     const p = full.parts[i]; assert.equal(p.type, "cracker");
-    assert.equal(p.start, 0); assert.ok(reduced.parts[i].count < p.count);
+    assert.equal(p.start, Math.floor(i / 4) * ARRIVAL_CONFETTI_INTERVAL_MS);
+    assert.ok(reduced.parts[i].count < p.count);
     const dx = Math.cos(p.direction * Math.PI / 180), dy = Math.sin(p.direction * Math.PI / 180);
     assert.equal(dx > 0, p.x === 0); assert.equal(dy > 0, p.y === 0);
   }

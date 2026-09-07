@@ -7,7 +7,10 @@ export const ENDING_FLAGS = Object.freeze([
 export const MEDAL_NAME = "《Königlicher Katzenorden》\nケーニクリヒャー・カッツェンオルデン";
 export const MEDAL_DESCRIPTION = "女王の加護：表層の奈落で、女王の装飾品が持っていた力を再現する。";
 export const ENDING_ASSETS = Object.freeze({
-  arrival: "images/npc/NPC_ending.avif", queen: "images/npc/NPC_01e.avif",
+  arrival: "images/npc/NPC_ending.avif",
+  arrivalTown: "images/background/town_01b.avif",
+  arrivalSky: "images/background/town_01c.avif",
+  queen: "images/npc/NPC_01e.avif",
   medal: "images/screenshots/medal_01.avif", end: "images/screenshots/dasende.avif"
 });
 export const EPILOGUE = Object.freeze([
@@ -27,9 +30,10 @@ export function getEndingCredits(testPlayers = ENDING_TEST_PLAYERS, specialThank
     ["企画・原案・ゲームデザイン", ["@Spinel_azure"]],
     ["制作相談・シナリオ・画像生成", ["ChatGPT"]],
     ["実装・検証・デバッグ", ["ChatGPT Codex"]],
+    ["開発・公開環境", ["GitHub / GitHub Pages"]],
     ["BGM", ["もみじばミュージック"]],
     ["効果音", ["イワシロ音楽素材", "効果音ラボ"]],
-    ...(testPlayers.length ? [["テストプレイ協力（敬称略）", testPlayers]] : []),
+    ...(testPlayers.length ? [["実機テストプレイ・デバッグ協力（敬称略）", testPlayers]] : []),
     ...(specialThanks.length ? [["SPECIAL THANKS（敬称略）", specialThanks]] : []),
     ["制作", ["@Spinel_azure"]]
   ];
