@@ -341,6 +341,7 @@ export const WEAPONS = Object.freeze({
     id: "glacies_hammer", name: "グラキエスハンマー", type: "blunt", attack: 24,
     element: "ice", allowedJobs: Object.freeze(["warrior"]), twoHanded: true,
     statBonuses: Object.freeze({ str: 4 }),
+    description: "氷属性攻撃",
     sellPrice: 6000, buybackPrice: 12000
   }),
   sylvan_emera: Object.freeze({

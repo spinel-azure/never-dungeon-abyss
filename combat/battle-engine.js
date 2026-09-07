@@ -646,7 +646,7 @@ function selectWeightedEnemyAction(actionTable, enemy, rng, context) {
     .filter(entry => actionConditionMatches(entry?.when, enemy, context))
     .map(entry => ({
       action: entry?.action || entry,
-      weight: Math.max(0, Number(entry?.weight) || 0)
+      weight: Math.max(0, getEnemyActionWeight(entry, enemy))
     }))
     .filter(entry => entry.action && entry.weight > 0);
   const total = weighted.reduce((sum, entry) => sum + entry.weight, 0);
@@ -657,6 +657,14 @@ function selectWeightedEnemyAction(actionTable, enemy, rng, context) {
     if (roll < 0) return entry.action;
   }
   return weighted.at(-1)?.action || null;
+}
+
+function getEnemyActionWeight(entry, enemy) {
+  const conditional = entry?.weightWhileStatus;
+  const statusActive = conditional?.statusId && (enemy?.statuses || []).some(status =>
+    (status.id || status.statusId) === conditional.statusId && status.active !== false
+  );
+  return Number(statusActive ? conditional.weight : entry?.weight) || 0;
 }
 
 function actionConditionMatches(condition, enemy, context = {}) {
@@ -1293,6 +1301,21 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, d
       battle.log.push(`${target.name}の装甲が崩れた！`);
     }
   }
+  const elementalReaction = target.elementalReactionTrait;
+  if (actorSide === "player" && landedHits.length > 0 && target.alive
+    && elementalReaction && result.element === elementalReaction.element) {
+    target.statuses = applyStatusApplications(target.statuses, [{
+      statusId: elementalReaction.statusId,
+      success: true,
+      duration: elementalReaction.duration
+    }]);
+    target.regainSuppressedTurns = Math.max(
+      Number(target.regainSuppressedTurns) || 0,
+      Math.max(0, Math.floor(Number(elementalReaction.regainSuppressionTurns) || 0))
+    );
+    target.regainSuppressionMessage = `${target.name}の再生能力は冷気に阻まれた！`;
+    if (elementalReaction.message) battle.log.push(elementalReaction.message);
+  }
   markUltimateUsed(actor, action);
   return { followUpEligible, actualDamage };
 }
@@ -1481,12 +1504,17 @@ function finishCombatantAction(battle, actor, side, targetIndex = null) {
       ...(targetIndex == null ? {} : { targetIndex }),
       amount: damage, message: `死毒で${damage}ダメージ！` });
   }
-  if (side === "enemy" && actor.hp > 0 && Number(actor.regainRate) > 0) {
+  const regainAmount = Number.isFinite(Number(actor.regainAmount))
+    ? Math.max(0, Math.floor(Number(actor.regainAmount)))
+    : Math.max(0, Math.floor(actor.maxHp * (Number(actor.regainRate) || 0)));
+  if (side === "enemy" && actor.hp > 0 && regainAmount > 0) {
     if (Number(actor.regainSuppressedTurns) > 0) {
       actor.regainSuppressedTurns -= 1;
-      if (actor.regainSuppressedTurns === 0) battle.log.push(`${actor.name}の再生能力が戻った！`);
+      if (actor.regainSuppressionMessage) battle.log.push(actor.regainSuppressionMessage);
+      else if (actor.regainSuppressedTurns === 0) battle.log.push(`${actor.name}の再生能力が戻った！`);
+      if (actor.regainSuppressedTurns === 0) delete actor.regainSuppressionMessage;
     } else {
-      const amount = Math.min(actor.maxHp - actor.hp, Math.max(1, Math.floor(actor.maxHp * actor.regainRate)));
+      const amount = Math.min(actor.maxHp - actor.hp, Math.max(1, regainAmount));
       actor.hp += amount;
       if (amount > 0) {
         battle.log.push(`${actor.name}は${amount}HPを再生した！`);
@@ -1563,7 +1591,7 @@ function combatStats(combatant) {
   if ((Number(collected.deadlyPoisonResistance) || 0) >= 1) {
     statusResistances.deadly_poison = { resistancePoints: 100, immune: true };
   }
-  for (const statusId of ["poison", "deadly_poison"]) {
+  for (const statusId of ["poison", "deadly_poison", "death_poison"]) {
     const resistance = statusResistances[statusId] || {};
     statusResistances[statusId] = {
       ...resistance,

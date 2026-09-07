@@ -490,28 +490,33 @@ export const BOSSES = Object.freeze({
     encounterImageId: "todes_scorpio_event_b64f", encounterImage: "images/background/dungeon_event_09.avif",
     race: "insect", maxHp: 40000,
     stats: Object.freeze({ str: 46, int: 24, agi: 30, dex: 42, luc: 36 }),
-    def: 48, attack: 44, experienceReward: 50000, regainRate: 0.02,
+    def: 48, attack: 44, experienceReward: 50000, regainAmount: 150,
+    elementalReactionTrait: Object.freeze({
+      element: "ice", statusId: "todes_scorpio_chilled", duration: 2,
+      regainSuppressionTurns: 1,
+      message: "冷気が甲殻を覆い、トーデス・スコルピオの動きが鈍くなった！"
+    }),
     actions: Object.freeze([
-      Object.freeze({ weight: 28, action: Object.freeze({
+      Object.freeze({ weight: 28, weightWhileStatus: Object.freeze({ statusId: "todes_scorpio_chilled", weight: 35 }), action: Object.freeze({
         id: "todes_scorpio_giant_claw", name: "巨大鋏", actionType: "physicalAttack",
         hitCount: 1, powerPerHit: 1.45, hitBonus: 0.06, effects: Object.freeze([])
       }) }),
-      Object.freeze({ weight: 26, action: Object.freeze({
+      Object.freeze({ weight: 26, weightWhileStatus: Object.freeze({ statusId: "todes_scorpio_chilled", weight: 32 }), action: Object.freeze({
         id: "todes_scorpio_double_crush", name: "連続挟撃", actionType: "physicalAttack",
         hitCount: 2, powerPerHit: 0.92, hitBonus: 0.03, effects: Object.freeze([])
       }) }),
-      Object.freeze({ weight: 20, action: Object.freeze({
+      Object.freeze({ weight: 20, weightWhileStatus: Object.freeze({ statusId: "todes_scorpio_chilled", weight: 15 }), action: Object.freeze({
         id: "todes_scorpio_tail_smash", name: "尾針叩き", actionType: "physicalAttack",
         hitCount: 1, powerPerHit: 1.6, hitBonus: -0.04, speedModifier: -4,
         effects: Object.freeze([Object.freeze({
           statusId: "action_skip", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.35
         })])
       }) }),
-      Object.freeze({ weight: 26, action: Object.freeze({
+      Object.freeze({ weight: 26, weightWhileStatus: Object.freeze({ statusId: "todes_scorpio_chilled", weight: 18 }), action: Object.freeze({
         id: "todes_stich", name: "トーデス・シュティッヒ", actionType: "physicalAttack",
         hitCount: 1, powerPerHit: 1.15, hitBonus: 0.08,
         effects: Object.freeze([Object.freeze({
-          statusId: "death_poison", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.55
+          statusId: "death_poison", trigger: "firstHitOnly", statusKind: "physical", baseRate: 0.35
         })])
       }) })
     ]),

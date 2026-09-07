@@ -224,7 +224,7 @@ function describeBonuses(bonuses = {}) {
       : key === "passiveInstantDeathRateBonus"
         ? `一閃・暗殺術+${Math.round(Number(value) * 100)}%`
       : key === "poisonResistance"
-        ? `毒・猛毒耐性+${Math.round(Number(value) * 100)}%`
+        ? `毒・猛毒・死毒耐性+${Math.round(Number(value) * 100)}%`
       : key === "bleedingResistance"
         ? `出血耐性+${Math.round(Number(value) * 100)}%`
       : key === "maxSp"

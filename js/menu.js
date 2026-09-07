@@ -1131,6 +1131,7 @@ function equipmentEffectLabels(definition) {
   if (!definition) return [];
   const labels = [];
   if (Number.isFinite(definition.attack)) labels.push(`ATK +${definition.attack}`);
+  if (definition.description) labels.push(definition.description);
   if (definition.fireFloorDamageImmunity) labels.push("火炎床無効");
   if (definition.coldFloorDamageImmunity) labels.push("氷結床無効");
   if (definition.type) labels.push(`${getWeaponType(definition.type).hitCount || 1}回攻撃`);
@@ -1154,7 +1155,7 @@ function equipmentEffectLabels(definition) {
       attackSpellDamageBonus: "攻撃呪文威力",
       healingMiracleBonus: "回復奇蹟威力",
       passiveInstantDeathRateBonus: "一閃・暗殺術",
-      poisonResistance: "毒・猛毒耐性",
+      poisonResistance: "毒・猛毒・死毒耐性",
       bleedingResistance: "出血耐性"
     };
     labels.push(percentLabels[key]

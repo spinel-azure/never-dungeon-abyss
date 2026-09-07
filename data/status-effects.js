@@ -82,6 +82,13 @@ export const STATUS_EFFECTS = Object.freeze({
     duration: 3,
     speedModifier: -20
   }),
+  todes_scorpio_chilled: Object.freeze({
+    id: "todes_scorpio_chilled",
+    name: "氷結鈍化",
+    kind: "debuff",
+    duration: 2,
+    expiresAfterBattle: true
+  }),
   guard: Object.freeze({
     id: "guard",
     name: "防御",

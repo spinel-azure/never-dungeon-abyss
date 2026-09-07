@@ -326,6 +326,13 @@ export const ITEMS = Object.freeze([
     description: "最大HPの10％以下まで弱らせたメルヒェンティーレを捕獲する。使用してもなくならない。",
     maxOwned: 1, iconId: "bandage", version: 1, repurchasable: false,
     reusable: true, keyItemId: "kirke_special_birdlime"
+  }),
+  Object.freeze({
+    number: 50, id: "strong_healing_potion_medium", name: "強回復薬（中）", category: "recovery",
+    buyPrice: 2000, sellPrice: 1000, source: "shop", usableIn: Object.freeze(["town", "dungeon", "battle"]),
+    effects: Object.freeze([{ id: "heal_hp_rate", value: 0.5 }]),
+    description: "最大HPの50％を回復する。B70F到達後に商店へ入荷する。", maxOwned: 99,
+    iconId: "healing-potion", version: 1, shopUnlockDepth: 70
   })
 ]);
 
@@ -341,6 +348,7 @@ export function getShopItemIdsForDepth(depth = 1) {
     ...(reached >= 20 ? ["healing_potion_large"] : []),
     ...(reached >= 30 ? ["antidote_medium"] : []),
     ...(reached >= 50 ? ["strong_healing_potion_small", "strong_antidote"] : []),
+    ...(reached >= 70 ? ["strong_healing_potion_medium"] : []),
     ...BASE_SHOP_ITEM_IDS.slice(1)
   ];
 }
@@ -354,6 +362,7 @@ export function getShopItemIdsForCharacter(character) {
     ...(flags.shop_stock_b20f_unlocked ? ["healing_potion_large"] : []),
     ...(flags.shop_stock_b30f_unlocked && flags.boss_iron_maiden_b29f_defeated ? ["antidote_medium"] : []),
     ...(flags.transfer_portal_b50f_unlocked ? ["strong_healing_potion_small", "strong_antidote"] : []),
+    ...(flags.transfer_portal_b70f_unlocked ? ["strong_healing_potion_medium"] : []),
     ...(flags.scorching_barrier_shop_unlocked ? ["scorching_barrier"] : []),
     ...(flags.extreme_cold_barrier_shop_unlocked ? ["extreme_cold_barrier"] : []),
     ...(flags.weapon_imbue_oils_shop_unlocked || quest013Reported ? ["fire_lizard_oil", "ice_lizard_oil"] : []),
