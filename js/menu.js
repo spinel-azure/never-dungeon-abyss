@@ -14,6 +14,7 @@ import { getQuestHistory } from "../data/quests.js";
 import { getAdventureChronicle, getAdventureRecords } from "../data/adventure-records.js";
 import { closeCardGallery, configureCardGallery, handleCardGalleryInput, openCardGallery } from "./card-gallery.js";
 import { closeMonsterCompendium, configureMonsterCompendium, handleMonsterCompendiumInput, openMonsterCompendium } from "./monster-compendium.js";
+import { getEquipmentHighlightClass } from "./loot-identification.js";
 
 const ACTION_FEEDBACK_MS = 260;
 const DEBUG_SEQUENCE_MS = 1000;
@@ -1046,7 +1047,12 @@ function renderInventory() {
     if (entry.item) { const badge = menu.inventoryPurpose === "buy" && menu.inventoryNewStockIds.has(entry.item.id) ? '<em class="shop-entry-new">NEW</em>' : ""; button.innerHTML = `<span>${entry.item.name}</span><strong>${badge}${menu.inventoryPurpose === "buy" ? `${inventoryBuyPrice(entry)}G` : `×${entry.count}`}</strong>`; button.classList.toggle("is-unavailable", menu.inventoryPurpose === "manage" && Boolean(unavailableItemReason(entry.item, character))); }
     else if (entry.shopEquipment) { const badge = menu.inventoryNewStockIds.has(entry.shopEquipment.id) ? '<em class="shop-entry-new">NEW</em>' : ""; button.innerHTML = `<span>${entry.shopEquipment.name}</span><strong>${badge}${inventoryBuyPrice(entry)}G</strong>`; }
     else if (entry.keyItem) button.innerHTML = `<span>${entry.keyItem.name}</span><strong>${entry.keyItem.count > 1 ? `×${entry.keyItem.count}` : ""}</strong>`;
-    else if (entry.instance) { button.innerHTML = `<span>${getEquipmentInstanceName(entry.instance)}</span><strong>${entry.instance.locked ? "🔒" : ""}${equippedIds.has(entry.instance.instanceId) ? "［E］" : ""}${entry.instance.curseKnown ? "［C］" : ""}</strong>`; button.classList.toggle("is-unavailable", menu.inventoryPurpose === "sell" ? Boolean(inventoryEquipmentSaleReason(entry.instance, character)) : menu.inventoryMode === "list" && !canEquipInstance(character, entry.instance).accepted); }
+    else if (entry.instance) {
+      const definition = getEquipmentInstanceDefinition(entry.instance);
+      const highlightClass = getEquipmentHighlightClass(entry.instance, definition);
+      button.innerHTML = `<span class="equipment-name${highlightClass ? ` ${highlightClass}` : ""}">${getEquipmentInstanceName(entry.instance)}</span><strong>${entry.instance.locked ? "🔒" : ""}${equippedIds.has(entry.instance.instanceId) ? "［E］" : ""}${entry.instance.curseKnown ? "［C］" : ""}</strong>`;
+      button.classList.toggle("is-unavailable", menu.inventoryPurpose === "sell" ? Boolean(inventoryEquipmentSaleReason(entry.instance, character)) : menu.inventoryMode === "list" && !canEquipInstance(character, entry.instance).accepted);
+    }
     else button.textContent = entry.label;
     button.classList.toggle("is-selected", menu.inventoryFocus === "list" && index === menu.inventoryCursor);
     button.addEventListener("click", () => {

@@ -14,7 +14,11 @@ export function isHighlightedLotEquipment(instance) {
   return Math.max(0, Math.floor(Number(instance?.enhancement) || 0)) >= 3;
 }
 
-export function getLotEquipmentHighlightClass(instance, definition = null) {
+export function getEquipmentHighlightClass(instance, definition = null) {
   if (definition?.lotBagHighlight === "orange") return "is-special-unique";
   return isHighlightedLotEquipment(instance) ? "is-super-rare" : "";
+}
+
+export function getLotEquipmentHighlightClass(instance, definition = null) {
+  return getEquipmentHighlightClass(instance, definition);
 }

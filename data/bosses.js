@@ -742,7 +742,8 @@ export const BOSSES = Object.freeze({
   seelenwuerger_b99f: Object.freeze({
     id: "seelenwuerger_b99f", name: "ゼーレンヴュルガー", level: 108, floor: 99,
     imageId: "seelenwuerger_b99f", image: "images/bosses/boss_17.avif", battleSize: "huge-wide",
-    encounterImageId: "seelenwuerger_b99f", encounterImage: "images/bosses/boss_17.avif",
+    encounterImageId: "seelenwuerger_before_b99f", encounterImage: "images/npc/NPC_event_25.avif",
+    defeatedEncounterImageId: "seelenwuerger_after_b99f", defeatedEncounterImage: "images/npc/NPC_event_26.avif",
     race: "spirit", maxHp: 22000,
     stats: Object.freeze({ str: 58, int: 64, agi: 42, dex: 52, luc: 48 }),
     def: 56, attack: 60, experienceReward: 100000,
@@ -780,11 +781,18 @@ export const BOSSES = Object.freeze({
     escapeRate: 0, surpriseRate: 0, surpriseRateMaximum: 0, noDrop: true,
     isBoss: true, bossKind: "floor", defeatedFlag: "boss_b99f_defeated",
     transferUnlockFlag: "transfer_portal_b100f_unlocked",
-    room: Object.freeze({ doorStartsUnlocked: true }),
+    room: Object.freeze({
+      requiresKey: true,
+      keyItemId: "red_rust_key_b99f",
+      unlockFlag: "red_door_b99f_unlocked"
+    }),
     event: Object.freeze({
-      prompt: "漆黒の闇の中で、無数の魂を締め上げる異形がこちらを見つめている。\n＊Aボタンで次へ",
+      prompt: "「ククク…！この漆黒の中で私に抗う事など出来ぬ。さぁ、この鎌で切り裂いてやろう！」\n＊Aボタンで次へ",
+      promptWithoutLightbringer: "「ククク…！この漆黒の中で私に抗う事など出来ぬ。さぁ、この鎌で切り裂いてやろう！」\n＊Aボタンで次へ",
+      promptWithLightbringer: "「リヒトブリンガー？…忌々しい…！そんな物で吾輩を打ち破ろうなどとはゆめゆめ思わぬ事だ…！\nドゥンケルマギーア様の邪魔はさせぬ。さぁ、この鎌で切り裂いてやろう！」\n＊Aボタンで次へ",
       start: "ゼーレンヴュルガーが魂を引き裂く絶叫を放った！",
-      autoStartDelay: 2500,
+      startBattleOnConfirm: true,
+      reserveMessageLines: 4,
       remains: "魂を縛っていた漆黒の影は消え、静かな光だけが残っている。\n＊Aボタン：次へ"
     })
   }),
@@ -1331,6 +1339,13 @@ export const BOSSES = Object.freeze({
 
 export function getBossById(id) {
   return BOSSES[String(id || "")] || null;
+}
+
+export function resolveBossEncounterPrompt(bossOrId, { lightbringerOwned = false } = {}) {
+  const boss = typeof bossOrId === "string" ? getBossById(bossOrId) : bossOrId;
+  if (!boss?.event) return "";
+  if (lightbringerOwned && boss.event.promptWithLightbringer) return boss.event.promptWithLightbringer;
+  return boss.event.promptWithoutLightbringer || boss.event.prompt || "";
 }
 
 export function bossLeavesRemains(bossOrId) {

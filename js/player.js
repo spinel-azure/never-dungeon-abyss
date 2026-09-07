@@ -1395,6 +1395,7 @@ export function startBossEvent(bossId, fromGX, fromGY) {
     bossId,
     imageId: boss?.encounterImageId ?? "",
     silhouette: isRematch,
+    reserveMessageLines: boss?.event?.reserveMessageLines || 0,
     fromGX,
     fromGY,
     phase: hasSphinxAnswer ? "sphinxAnswer" : boss?.event?.sphinxChoice && !isRematch ? "sphinxIntro" : "prompt",
@@ -1451,6 +1452,13 @@ function confirmBossEvent() {
       }, Math.max(0, Number(boss.event.autoStartDelay) || 2000));
       return;
     }
+  }
+  if (boss?.event?.startBattleOnConfirm) {
+    state.overlayEvent = null;
+    hooks.say("");
+    hooks.onStateChanged();
+    hooks.beginBossBattle(event.bossId);
+    return;
   }
   hooks.say(hooks.getBossStartMessage(boss) || "あなたが近づいた途端、彫像が動き出した！こちらに向かってくる！");
   const timer = window.setTimeout(() => {

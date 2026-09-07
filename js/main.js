@@ -8,6 +8,7 @@ import {
   explored,
   resetExplored,
   buildBoundaryWallMap,
+  placeFloorBossKeyTreasure,
   chooseStartDirection,
   inBounds,
   isCellCompletelySealed,
@@ -98,7 +99,7 @@ import {
 } from "./audio.js";
 import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
 import { EffectEngine } from "./effects/effect-engine.js";
-import { getLotEquipmentHighlightClass, hasUncertainLoot, isHighlightedLotCardRarity } from "./loot-identification.js";
+import { getEquipmentHighlightClass, getLotEquipmentHighlightClass, hasUncertainLoot, isHighlightedLotCardRarity } from "./loot-identification.js";
 import { configureTown, setTownEndingSuspended, openPendingNpcRenewal, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js";
 import { flashNpcPartyStatus, renderNpcPartyStatus, renderNpcStatusPage, setNpcPartyCharge } from "./npc-party-ui.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
@@ -108,7 +109,7 @@ import { getAdventureChronicle } from "../data/adventure-records.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName, grantEquipmentInstance } from "../data/equipment-inventory.js";
 import { createEnemyCombatant, getEnemyById, getEnemyEncounterCount, getRandomEncounterEnemy, getMagicRegionEncounterFormation, getTortureRegionEncounterFormation, getWaterRegionEncounterFormation, getCrystalRegionEncounterFormation, getDarkRegionEncounterFormation } from "../data/enemies.js";
-import { applyBossVictory, bossLeavesRemains, createBossCombatant, getBossById, getFloorBossByDepth, isBossDefeated } from "../data/bosses.js";
+import { applyBossVictory, bossLeavesRemains, createBossCombatant, getBossById, getFloorBossByDepth, isBossDefeated, resolveBossEncounterPrompt } from "../data/bosses.js";
 import { B100_GAUNTLET_BOSS_IDS, getB100GauntletFlag } from "../data/fixed-floor-maps.js";
 import { consumeKeyItem, getKeyItem, grantKeyItem, hasKeyItem } from "../data/key-items.js";
 import { configureBattle, createPersistentBattlePlayerChanges, handleBattleInput, isBattleActive, isJireneScriptedBattleActive, openBattleItems, startBattle } from "./battle.js";
@@ -681,7 +682,9 @@ import {
       ? `${boss.name}の幻影が行く手に立ちはだかっている。\n＊Aボタンで次へ`
       : currentDepth === 79 && boss?.id === "jirene_b79f" && character?.eventFlags?.jirene_scripted_defeat_seen
         ? "ジレーネ「ああ…！また来たのね…。また、私…いえ、妾の歌を…聴きたいのね…！」\n＊Aボタンで次へ"
-        : boss?.event?.prompt,
+        : resolveBossEncounterPrompt(boss, {
+          lightbringerOwned: hasKeyItem(character?.keyItems, "lichtbringer")
+        }),
     getBossStartMessage: boss => isB100GauntletBossId(boss?.id)
       ? `B100Fの守護者として、${boss.name}が襲いかかってきた！`
       : currentDepth === 79 && boss?.id === "jirene_b79f" && character?.eventFlags?.jirene_scripted_defeat_seen
@@ -1198,6 +1201,21 @@ import {
     }
     const start = rebuildB100FixedMap ? cells.flat().find(cell => cell.type === "stairsUp") : dungeon.startPosition;
     if (start && inBounds(start.x, start.y)) setStartPosition(start.x, start.y);
+    const b99Boss = currentDepth === 99 ? getFloorBossByDepth(99) : null;
+    const b99KeyItemId = b99Boss?.room?.keyItemId;
+    const b99UnlockFlag = b99Boss?.room?.unlockFlag;
+    if (b99Boss
+      && !save.character?.eventFlags?.[b99Boss.defeatedFlag]
+      && !save.character?.eventFlags?.[b99UnlockFlag]
+      && !hasKeyItem(save.character?.keyItems, b99KeyItemId)
+      && !cells.flat().some(cell => cell.eventTreasureId === `${b99KeyItemId}_chest`)) {
+      placeFloorBossKeyTreasure(b99Boss, Math.random, {
+        bossDefeatedById: { [b99Boss.id]: false },
+        redDoorUnlocked: false,
+        hasRedKey: false,
+        excludedFeatureCells: [{ x: player.gridX, y: player.gridY }]
+      });
+    }
     setDungeonColors(resolveCurrentFloorTheme());
     applyCurrentFloorMist();
     state.anim = null;
@@ -1927,6 +1945,8 @@ import {
         : getEquipmentItem(equippedId, slot);
       const name = document.createElement("span");
       name.className = "nde-equipment-name";
+      const highlightClass = getEquipmentHighlightClass(equippedInstance, item);
+      if (highlightClass) name.classList.add(highlightClass);
       name.textContent = equippedInstance ? getEquipmentInstanceName(equippedInstance) : item?.name || "―";
       const bonus = document.createElement("span");
       bonus.className = "nde-equipment-bonus";

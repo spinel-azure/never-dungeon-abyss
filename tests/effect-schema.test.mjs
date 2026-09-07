@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import { EFFECT_PART_TYPES, normalizeEffectDefinition } from "../js/effects/effect-schema.js";
 import { prepareBattleSkillEffect } from "../js/battle-skill-presentation.js";
 import { SPELLS } from "../data/spells.js";
-import { getLotEquipmentHighlightClass, hasUncertainLoot, isHighlightedLotCardRarity, isHighlightedLotEquipment } from "../js/loot-identification.js";
+import { getEquipmentHighlightClass, getLotEquipmentHighlightClass, hasUncertainLoot, isHighlightedLotCardRarity, isHighlightedLotEquipment } from "../js/loot-identification.js";
 
 test("lot bag cracker JSON remains compatible with the generic effect schema", async () => {
   const source = JSON.parse(await readFile(new URL("../data/effects/lot_bag_identify.json", import.meta.url), "utf8"));
@@ -73,4 +73,15 @@ test("special unique weapons use the orange lot-bag highlight ahead of plus-thre
   assert.equal(getLotEquipmentHighlightClass({ enhancement: 3 }, { lotBagHighlight: "orange" }), "is-special-unique");
   assert.equal(getLotEquipmentHighlightClass({ enhancement: 3 }, {}), "is-super-rare");
   assert.equal(getLotEquipmentHighlightClass({ enhancement: 0 }, {}), "");
+});
+
+test("inventory, equipment selection, status, and lot bag share equipment highlight priority", () => {
+  assert.equal(getEquipmentHighlightClass({ enhancement: 2 }, {}), "");
+  assert.equal(getEquipmentHighlightClass({ enhancement: 3 }, {}), "is-super-rare");
+  assert.equal(getEquipmentHighlightClass({ enhancement: 0 }, { lotBagHighlight: "orange" }), "is-special-unique");
+  assert.equal(getEquipmentHighlightClass({ enhancement: 3 }, { lotBagHighlight: "orange" }), "is-special-unique");
+  assert.equal(
+    getEquipmentHighlightClass({ enhancement: 3 }, { lotBagHighlight: "orange" }),
+    getLotEquipmentHighlightClass({ enhancement: 3 }, { lotBagHighlight: "orange" })
+  );
 });

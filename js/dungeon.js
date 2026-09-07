@@ -1326,8 +1326,11 @@ export function placeFloorBossKeyTreasure(bossDefinition, rng = Math.random, pro
   if (progress.redDoorUnlocked || bossDefeated || progress.hasRedKey) return null;
   const { x: startX, y: startY } = startPosition;
   const distances = makeDistanceMap(startX, startY);
+  const excludedCells = new Set((Array.isArray(progress.excludedFeatureCells) ? progress.excludedFeatureCells : [])
+    .map(cell => `${cell.x},${cell.y}`));
   const candidates = cells.flat().filter(cell =>
     cell.type === "floor" && !isDungeonFeatureOccupied(cell) && !cell.npc && !cell.fountain && !cell.treasure
+      && !excludedCells.has(`${cell.x},${cell.y}`)
       && distances[cell.y][cell.x] >= 3
   );
   const selected = shuffled(candidates, rng)[0];
