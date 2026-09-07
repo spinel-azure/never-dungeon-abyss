@@ -377,6 +377,8 @@ export const WEAPONS = Object.freeze({
     defensePenetration: 0.4,
     normalAttackRepeatHpRate: 0.5,
     description: "HP50％以下で通常攻撃が二連続になる",
+    showDescriptionInStatus: false,
+    compactStatusBonuses: true,
     flavorText: "猫のように獲物へ食らいつく異国の片手剣。\n傷ついた使い手ほど、その刃は激しく暴れる。",
     unique: true, lotBagHighlight: "orange", sellPrice: 0
   }),
@@ -387,6 +389,8 @@ export const WEAPONS = Object.freeze({
     defensePenetration: 0.75,
     criticalBonus: 0.2,
     description: "猫裂き：4回攻撃／DEF75％無視／会心率＋20％",
+    showDescriptionInStatus: false,
+    compactStatusBonuses: true,
     flavorText: "猫の爪を思わせる細身の短剣。\n最初の傷に気づく頃には、四度目の刃が走っている。",
     unique: true, lotBagHighlight: "orange", sellPrice: 0
   }),
@@ -396,6 +400,9 @@ export const WEAPONS = Object.freeze({
     statBonuses: Object.freeze({ int: 10, luc: 10, maxSp: 100, healingMiracleMultiplier: 1.5 }),
     normalAttackRecovery: Object.freeze({ maxHpRate: 0.1, sp: 10 }),
     description: "肉球の祝福：通常攻撃命中時、HP10％・SP10回復",
+    showDescriptionInStatus: false,
+    compactStatusBonuses: true,
+    statusHiddenStatBonusKeys: Object.freeze(["healingMiracleMultiplier"]),
     flavorText: "肉球の聖印を戴く奇妙なメイス。\n敵を打ち据えるたび、柔らかな祝福が使い手を包む。",
     unique: true, lotBagHighlight: "orange", sellPrice: 0
   }),
@@ -405,6 +412,9 @@ export const WEAPONS = Object.freeze({
     statBonuses: Object.freeze({ int: 15, maxSp: 150, attackSpellDamageBonus: 0.35, spCostMultiplier: 0.75 }),
     attackSpellRecastChance: 0.3,
     description: "猫の気まぐれ：攻撃呪文＋35％／消費SP－25％／30％で再詠唱",
+    showDescriptionInStatus: false,
+    compactStatusBonuses: true,
+    statusHiddenStatBonusKeys: Object.freeze(["attackSpellDamageBonus", "spCostMultiplier"]),
     flavorText: "気まぐれな魔力を宿す、猫飾りの両手杖。\n放たれた魔法は、時折もう一度だけ獲物へ飛びかかる。",
     unique: true, lotBagHighlight: "orange", sellPrice: 0
   })

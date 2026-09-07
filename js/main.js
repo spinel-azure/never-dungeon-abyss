@@ -1938,12 +1938,13 @@ import {
   function formatEquipmentBonuses(item) {
     if (!item) return "";
     const bonuses = [];
-    if (Number.isFinite(item.attack)) bonuses.push(`ATK +${item.attack}`);
-    if (item.description) bonuses.push(item.description);
+    const spacer = item.compactStatusBonuses ? "" : " ";
+    if (Number.isFinite(item.attack)) bonuses.push(`ATK${spacer}+${item.attack}`);
+    if (item.description && item.showDescriptionInStatus !== false) bonuses.push(item.description);
     if (item.fireFloorDamageImmunity) bonuses.push("火炎床無効");
     if (item.coldFloorDamageImmunity) bonuses.push("氷結床無効");
     bonuses.push(...Object.entries(item.statBonuses || {})
-      .filter(([key]) => !item.hiddenStatBonusKeys?.includes(key))
+      .filter(([key]) => !item.hiddenStatBonusKeys?.includes(key) && !item.statusHiddenStatBonusKeys?.includes(key))
       .map(([key, value]) => {
         if (key === "actionSkipResistance") {
           return `行動不能耐性${Math.round(Number(value) * 100)}%`;
@@ -1966,8 +1967,8 @@ import {
           bleedingResistance: "出血耐性"
         };
         return percentLabels[key]
-          ? `${percentLabels[key]} ${Number(value) >= 0 ? "+" : ""}${Math.round(Number(value) * 100)}%`
-          : `${key.toUpperCase()} ${Number(value) >= 0 ? "+" : ""}${value}`;
+          ? `${percentLabels[key]}${spacer}${Number(value) >= 0 ? "+" : ""}${Math.round(Number(value) * 100)}%`
+          : `${key.toUpperCase()}${spacer}${Number(value) >= 0 ? "+" : ""}${value}`;
       }));
     return bonuses.join(" ");
   }

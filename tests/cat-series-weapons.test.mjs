@@ -73,6 +73,17 @@ test("B90F cat gold chests map every job to one unique unenhanced weapon", () =>
   assert.equal(getGoldChestWeaponId("warrior", 50), "musashi_blade");
 });
 
+test("cat weapon special descriptions stay in details but are omitted from the compact status row", () => {
+  for (const equipmentId of Object.values(CAT_GOLD_CHEST_WEAPONS_BY_JOB)) {
+    const weapon = getWeapon(equipmentId);
+    assert.ok(weapon.description, `${equipmentId} keeps its detailed effect description`);
+    assert.equal(weapon.showDescriptionInStatus, false, `${equipmentId} uses the compact status summary`);
+    assert.equal(weapon.compactStatusBonuses, true, `${equipmentId} removes optional spacing from the status row`);
+  }
+  assert.deepEqual(getWeapon("katzenkolben").statusHiddenStatBonusKeys, ["healingMiracleMultiplier"]);
+  assert.deepEqual(getWeapon("katzenstab").statusHiddenStatBonusKeys, ["attackSpellDamageBonus", "spCostMultiplier"]);
+});
+
 test("B90F to B98F use the five-percent boundary without affecting B50F gold chests", () => {
   for (const depth of [90, 94, 98]) {
     buildBoundaryWallMap(depth, () => 0.049999999, { blackChestsUnlocked: true, goldWeaponEligible: true });

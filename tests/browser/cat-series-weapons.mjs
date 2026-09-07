@@ -81,6 +81,31 @@ window.catWeaponQa = {
       viewportWidth: innerWidth
     };
   },
+  async showStatusEquipment(job, weaponId) {
+    await this.baseCharacter(job);
+    const equipmentApi = await import('/data/equipment-inventory.js');
+    const granted = equipmentApi.grantEquipmentInstance(character, weaponId, 'rightArmId');
+    if (!granted.accepted) throw new Error('status grant failed: ' + weaponId);
+    const equipped = equipmentApi.equipInstance(granted.character, 'rightArmId', granted.instance.instanceId);
+    if (!equipped.accepted) throw new Error('status equip failed: ' + weaponId);
+    character = normalizeCharacter(equipped.character);
+    openStatusMenu();
+    const row = document.querySelector('[data-equipment-slot="rightArmId"]');
+    const panel = document.querySelector('[data-menu-view="status"]');
+    const bonus = row?.querySelector('.nde-equipment-bonus');
+    return {
+      text: row?.textContent || '',
+      rowScrollWidth: row?.scrollWidth || 0,
+      rowClientWidth: row?.clientWidth || 0,
+      bonusScrollWidth: bonus?.scrollWidth || 0,
+      bonusClientWidth: bonus?.clientWidth || 0,
+      panelScrollWidth: panel?.scrollWidth || 0,
+      panelClientWidth: panel?.clientWidth || 0
+    };
+  },
+  closeStatus() {
+    closeCampMenu('test');
+  },
   persist() {
     saveEnabled = true;
     return saveGame();
@@ -285,6 +310,25 @@ try {
   for (const [layout, width, height] of [["pc", 1280, 900], ["mobile", 390, 844]]) {
     const context = await browser.newContext({ viewport: { width, height } });
     let page = await openQaPage(context, layout);
+    for (const statusCase of [
+      { job: 'warrior', weapon: 'katzbalger', omitted: /HP50％以下/ },
+      { job: 'thief', weapon: 'katzendolch', omitted: /猫裂き|DEF75％無視|会心率＋20％/ },
+      { job: 'priest', weapon: 'katzenkolben', omitted: /肉球の祝福/ },
+      { job: 'mage', weapon: 'katzenstab', omitted: /猫の気まぐれ|30％で再詠唱/ }
+    ]) {
+      const status = await page.evaluate(({ job, weapon }) => catWeaponQa.showStatusEquipment(job, weapon), statusCase);
+      assert.match(status.text, new RegExp(statusCase.weapon === 'katzbalger' ? 'カッツバルゲル'
+        : statusCase.weapon === 'katzendolch' ? 'カッツェンドルヒ'
+          : statusCase.weapon === 'katzenkolben' ? 'カッツェンコルベン' : 'カッツェンシュタープ'));
+      assert.doesNotMatch(status.text, statusCase.omitted, `${layout} ${statusCase.weapon} omits the long effect text`);
+      assert.ok(status.rowScrollWidth <= status.rowClientWidth + 1, `${layout} ${statusCase.weapon} status row fits`);
+      assert.ok(status.bonusScrollWidth <= status.bonusClientWidth + 1, `${layout} ${statusCase.weapon} bonus text is not clipped`);
+      assert.ok(status.panelScrollWidth <= status.panelClientWidth + 1, `${layout} ${statusCase.weapon} status panel fits`);
+      if (statusCase.weapon === 'katzendolch') {
+        await page.screenshot({ path: path.join(output, `${layout}-compact-status.png`) });
+      }
+      await page.evaluate(() => catWeaponQa.closeStatus());
+    }
     const chest = await page.evaluate(() => catWeaponQa.showGoldChest());
     assert.deepEqual(chest.types, ['gold'], `${layout} B90 has one gold replacement`);
     assert.equal(chest.canvasVisibility, 'visible');
