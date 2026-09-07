@@ -488,6 +488,11 @@ const ZODIAC_CARDS = [
   openingDamageMultiplier: 2,
   openingDefensePenetration: 0.5,
   openingUnavoidable: true
+} : card.id === "zodiac_gemini" ? {
+  ...card,
+  concept: "最初の対象攻撃スキルを複製",
+  descriptionJa: "戦闘中、最初に使用した対象攻撃スキルまたは攻撃呪文を、SP消費なしでもう一度発動する。",
+  duplicateFirstTargetAttack: true
 } : card.id === "zodiac_taurus" ? {
   ...card,
   concept: "最大HP＋50％／深層ほどDEF上昇",

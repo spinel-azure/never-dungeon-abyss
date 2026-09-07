@@ -6,10 +6,15 @@ export function getEffectiveSpCost(skill = {}, character = {}) {
     (status.id || status.statusId) === "charge_mana_spring" && status.active !== false
   );
   if (manaSpring && skill.category === "attackSpell" && !skill.chargeSkill) return 0;
+  const rawMultiplier = Number(character?.spCostMultiplier)
+    || Number(character?.equipmentStatBonuses?.spCostMultiplier)
+    || 1;
+  const multiplier = Math.max(0, rawMultiplier);
+  const multipliedCost = Math.ceil(baseCost * multiplier);
   const reduction = Math.max(0, Math.floor(
     Number(character?.spCostReduction)
       || Number(character?.cardStatBonuses?.spCostReduction)
       || 0
   ));
-  return Math.max(1, baseCost - reduction);
+  return Math.max(1, multipliedCost - reduction);
 }

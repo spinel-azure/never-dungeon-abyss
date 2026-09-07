@@ -88,6 +88,7 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     vorpalSwordEquippedAtStart,
     ariesActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_aries"),
     ariesOpeningAttackAvailable: hasCardEffect(character?.cards?.deckSlots, "zodiac_aries"),
+    geminiDuplicationAvailable: hasCardEffect(character?.cards?.deckSlots, "zodiac_gemini"),
     capricornActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_capricorn"),
     libraActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_libra"),
     scorpioActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_scorpio"),
@@ -194,15 +195,14 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
     }
     const targetHpBefore = target.hp;
     const action = applyAriesOpeningAttack(next, entry.action, entry.side);
-    executeAction({
-      battle: next,
-      action,
-      actor,
-      actorSide: entry.side,
-      target,
-      targetSide,
-      rng
-    });
+    if (entry.side === "player") {
+      executeSinglePlayerActionSequence({
+        battle: next, action, repeatAction: entry.action,
+        command: playerCommand, actor, target, rng
+      });
+    } else {
+      executeAction({ battle: next, action, actor, actorSide: entry.side, target, targetSide, rng });
+    }
     if (entry.side === "player") playerActionExecuted = true;
     finishAction(next, entry.side);
     updateOutcome(next);
@@ -354,19 +354,10 @@ export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.rand
     }
     if (entry.side === "player") {
       const action = applyAriesOpeningAttack(next, entry.action, "player");
-      if (action.randomlyDistributeHits) {
-        executeRandomlyDistributedHits({ battle: next, action, actor, rng });
-      } else {
-        const targetIndexes = entry.action.target === "allEnemies"
-          ? livingEnemyIndexes(next.enemies)
-          : [normalizeLivingTargetIndex(next.enemies, next.targetIndex)];
-        for (const targetIndex of targetIndexes) {
-          const target = next.enemies[targetIndex];
-          if (!target?.alive || target.hp <= 0) continue;
-          executeTargetedAction({ battle: next, action, actor, actorSide: "player",
-            target, targetSide: "enemy", targetIndex, rng });
-        }
-      }
+      executeMultiPlayerActionSequence({
+        battle: next, action, repeatAction: entry.action, command: playerCommand, actor,
+        targetIndex: next.targetIndex, rng
+      });
       playerActionExecuted = true;
       next.lastPlayerTargetIndex = normalizeLivingTargetIndex(next.enemies, next.targetIndex, { allowDefeated: true });
       finishCombatantAction(next, actor, "player");
@@ -448,6 +439,163 @@ function executeRandomlyDistributedHits({ battle, action, actor, rng }) {
     const target = battle.enemies[targetIndex];
     if (target?.alive && target.hp > 0) applyFixedFollowUpDamage(battle, target, targetIndex);
   }
+}
+
+function executeSinglePlayerActionSequence({ battle, action, repeatAction = action, command, actor, target, rng }) {
+  const results = [executeAction({
+    battle, action, actor, actorSide: "player", target, targetSide: "enemy", rng
+  })];
+  const weapon = getEquippedWeapon(actor);
+  const repeatRate = Math.max(0, Math.min(1, Number(weapon.normalAttackRepeatHpRate) || 0));
+  if (command?.type === "attack" && repeatRate > 0
+    && actor.hp <= actor.maxHp * repeatRate && target.alive && target.hp > 0) {
+    battle.log.push("猛猫の追撃！");
+    results.push(executeAction({
+      battle, action: repeatAction, actor, actorSide: "player", target, targetSide: "enemy", rng
+    }));
+  }
+  if (isGeminiEligible(battle, command, action)) {
+    battle.geminiDuplicationAvailable = false;
+    if (target.alive && target.hp > 0) {
+      battle.log.push("ジェミニが行動を複製した！");
+      results.push(executeAction({
+        battle, action: repeatAction, actor, actorSide: "player", target, targetSide: "enemy", rng
+      }));
+    }
+  }
+  if (isCatRecastEligible(actor, command, action)
+    && target.alive && target.hp > 0
+    && Number(rng()) < Math.max(0, Math.min(1, Number(weapon.attackSpellRecastChance) || 0))) {
+    battle.log.push("猫の気まぐれでもう一度詠唱した！");
+    results.push(executeAction({
+      battle, action: repeatAction, actor, actorSide: "player", target, targetSide: "enemy", rng
+    }));
+  }
+  applyNormalAttackRecovery(battle, actor, command, results);
+}
+
+function executeMultiPlayerActionSequence({ battle, action, repeatAction = action, command, actor, targetIndex, rng }) {
+  const resolvedTargetIndex = action.target === "allEnemies" || action.randomlyDistributeHits
+    ? targetIndex
+    : normalizeLivingTargetIndex(battle.enemies, targetIndex);
+  const results = executeMultiPlayerActionPass({
+    battle, action, actor, targetIndex: resolvedTargetIndex, rng
+  });
+  const weapon = getEquippedWeapon(actor);
+  const repeatRate = Math.max(0, Math.min(1, Number(weapon.normalAttackRepeatHpRate) || 0));
+  if (command?.type === "attack" && repeatRate > 0
+    && actor.hp <= actor.maxHp * repeatRate
+    && canRepeatMultiAction(battle, action, resolvedTargetIndex)) {
+    battle.log.push("猛猫の追撃！");
+    results.push(...executeMultiPlayerActionPass({
+      battle, action: repeatAction, actor, targetIndex: resolvedTargetIndex, rng
+    }));
+  }
+  if (isGeminiEligible(battle, command, action)) {
+    battle.geminiDuplicationAvailable = false;
+    if (canRepeatMultiAction(battle, action, resolvedTargetIndex)) {
+      battle.log.push("ジェミニが行動を複製した！");
+      results.push(...executeMultiPlayerActionPass({
+        battle, action: repeatAction, actor, targetIndex: resolvedTargetIndex, rng
+      }));
+    }
+  }
+  if (isCatRecastEligible(actor, command, action)
+    && canRepeatMultiAction(battle, action, resolvedTargetIndex)
+    && Number(rng()) < Math.max(0, Math.min(1, Number(weapon.attackSpellRecastChance) || 0))) {
+    battle.log.push("猫の気まぐれでもう一度詠唱した！");
+    results.push(...executeMultiPlayerActionPass({
+      battle, action: repeatAction, actor, targetIndex: resolvedTargetIndex, rng
+    }));
+  }
+  applyNormalAttackRecovery(battle, actor, command, results);
+}
+
+function executeMultiPlayerActionPass({ battle, action, actor, targetIndex, rng }) {
+  if (action.randomlyDistributeHits) {
+    executeRandomlyDistributedHits({ battle, action, actor, rng });
+    return [];
+  }
+  const results = [];
+  const targetIndexes = action.target === "allEnemies"
+    ? livingEnemyIndexes(battle.enemies)
+    : [Math.max(0, Math.min(battle.enemies.length - 1, Math.floor(Number(targetIndex) || 0)))];
+  for (const currentTargetIndex of targetIndexes) {
+    const target = battle.enemies[currentTargetIndex];
+    if (!target?.alive || target.hp <= 0) continue;
+    results.push(executeTargetedAction({
+      battle, action, actor, actorSide: "player", target,
+      targetSide: "enemy", targetIndex: currentTargetIndex, rng
+    }));
+  }
+  return results;
+}
+
+function canRepeatMultiAction(battle, action, targetIndex) {
+  if (action.target === "allEnemies" || action.randomlyDistributeHits) {
+    return livingEnemyIndexes(battle.enemies).length > 0;
+  }
+  const target = battle.enemies[Math.max(0, Math.min(
+    battle.enemies.length - 1, Math.floor(Number(targetIndex) || 0)
+  ))];
+  return Boolean(target?.alive && target.hp > 0);
+}
+
+function isGeminiEligible(battle, command, action) {
+  return Boolean(battle.geminiDuplicationAvailable)
+    && command?.type === "skill"
+    && ["physicalAttack", "spell"].includes(action?.actionType)
+    && ["enemy", "allEnemies"].includes(action?.target)
+    && !action.chargeSkill
+    && !action.ultimateChargeSkill;
+}
+
+function isCatRecastEligible(actor, command, action) {
+  const weapon = getEquippedWeapon(actor);
+  return command?.type === "skill"
+    && action?.actionType === "spell"
+    && action?.category === "attackSpell"
+    && ["enemy", "allEnemies"].includes(action?.target)
+    && !action.chargeSkill
+    && !action.ultimateChargeSkill
+    && !Number.isFinite(Number(action.fixedDamage))
+    && Number(weapon.attackSpellRecastChance) > 0;
+}
+
+function applyNormalAttackRecovery(battle, actor, command, results) {
+  const weapon = getEquippedWeapon(actor);
+  const recovery = weapon.normalAttackRecovery;
+  if (command?.type !== "attack" || !recovery
+    || !results.some(result => Number(result?.landedHitCount) > 0)) return;
+  const requestedHp = Math.max(1, Math.ceil(actor.maxHp * (Number(recovery.maxHpRate) || 0)));
+  const hpRecovery = Math.min(requestedHp, Math.max(0, actor.maxHp - actor.hp));
+  const spRecovery = Math.min(
+    Math.max(0, Math.floor(Number(recovery.sp) || 0)),
+    Math.max(0, actor.maxSp - actor.sp)
+  );
+  actor.hp += hpRecovery;
+  actor.sp += spRecovery;
+  if (hpRecovery <= 0 && spRecovery <= 0) return;
+  const recovered = [
+    ...(hpRecovery > 0 ? [`HPが${hpRecovery}`] : []),
+    ...(spRecovery > 0 ? [`SPが${spRecovery}`] : [])
+  ].join("、");
+  battle.log.push(`肉球の祝福により${recovered}回復した！`);
+  if (hpRecovery > 0) battle.presentationEvents.push({
+    type: "healing", actorSide: "player", targetSide: "player",
+    amount: hpRecovery, message: `HPが${hpRecovery}回復した！`
+  });
+  if (spRecovery > 0) battle.presentationEvents.push({
+    type: "spHealing", actorSide: "player", targetSide: "player",
+    amount: spRecovery, message: `SPが${spRecovery}回復した！`
+  });
+}
+
+function getEquippedWeapon(player) {
+  return getWeapon(
+    player?.equipment?.rightArmId || player?.equipment?.weaponId,
+    player?.equipment?.rightArmEnhancement || 0
+  );
 }
 
 function setNpcTarget(battle, targetIndex) {
@@ -1317,7 +1465,7 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, d
     if (elementalReaction.message) battle.log.push(elementalReaction.message);
   }
   markUltimateUsed(actor, action);
-  return { followUpEligible, actualDamage };
+  return { followUpEligible, actualDamage, landedHitCount: landedHits.length };
 }
 
 export function applyFixedFollowUpDamage(battle, target, targetIndex = null) {

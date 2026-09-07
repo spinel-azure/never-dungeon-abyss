@@ -22,6 +22,14 @@ export const WEAPON_TYPES = Object.freeze({
     defensePenetration: 0,
     damageDexMultiplier: 0.25
   }),
+  CAT_DAGGER: Object.freeze({
+    id: "cat_dagger",
+    hitCount: 4,
+    powerPerHit: 0.5,
+    speedModifier: 5,
+    defensePenetration: 0,
+    damageDexMultiplier: 0.25
+  }),
   DUAL_BLADE: Object.freeze({
     id: "dual_blade",
     hitCount: 2,
@@ -361,6 +369,44 @@ export const WEAPONS = Object.freeze({
     unique: true,
     lotBagHighlight: "orange",
     sellPrice: 0
+  }),
+  katzbalger: Object.freeze({
+    id: "katzbalger", name: "カッツバルゲル", type: "longsword", weaponTypeLabel: "片手剣", attack: 42,
+    element: "physical", allowedJobs: Object.freeze(["warrior"]),
+    statBonuses: Object.freeze({ str: 10, maxHp: 100 }),
+    defensePenetration: 0.4,
+    normalAttackRepeatHpRate: 0.5,
+    description: "HP50％以下で通常攻撃が二連続になる",
+    flavorText: "猫のように獲物へ食らいつく異国の片手剣。\n傷ついた使い手ほど、その刃は激しく暴れる。",
+    unique: true, lotBagHighlight: "orange", sellPrice: 0
+  }),
+  katzendolch: Object.freeze({
+    id: "katzendolch", name: "カッツェンドルヒ", type: "cat_dagger", weaponTypeLabel: "短剣", attack: 24,
+    element: "physical", allowedJobs: Object.freeze(["thief"]),
+    statBonuses: Object.freeze({ dex: 10, agi: 8, luc: 6 }),
+    defensePenetration: 0.75,
+    criticalBonus: 0.2,
+    description: "猫裂き：4回攻撃／DEF75％無視／会心率＋20％",
+    flavorText: "猫の爪を思わせる細身の短剣。\n最初の傷に気づく頃には、四度目の刃が走っている。",
+    unique: true, lotBagHighlight: "orange", sellPrice: 0
+  }),
+  katzenkolben: Object.freeze({
+    id: "katzenkolben", name: "カッツェンコルベン", type: "blunt", weaponTypeLabel: "片手メイス", attack: 32,
+    element: "physical", allowedJobs: Object.freeze(["priest"]),
+    statBonuses: Object.freeze({ int: 10, luc: 10, maxSp: 100, healingMiracleMultiplier: 1.5 }),
+    normalAttackRecovery: Object.freeze({ maxHpRate: 0.1, sp: 10 }),
+    description: "肉球の祝福：通常攻撃命中時、HP10％・SP10回復",
+    flavorText: "肉球の聖印を戴く奇妙なメイス。\n敵を打ち据えるたび、柔らかな祝福が使い手を包む。",
+    unique: true, lotBagHighlight: "orange", sellPrice: 0
+  }),
+  katzenstab: Object.freeze({
+    id: "katzenstab", name: "カッツェンシュタープ", type: "staff", weaponTypeLabel: "両手杖", attack: 1,
+    element: "physical", allowedJobs: Object.freeze(["mage"]), twoHanded: true,
+    statBonuses: Object.freeze({ int: 15, maxSp: 150, attackSpellDamageBonus: 0.35, spCostMultiplier: 0.75 }),
+    attackSpellRecastChance: 0.3,
+    description: "猫の気まぐれ：攻撃呪文＋35％／消費SP－25％／30％で再詠唱",
+    flavorText: "気まぐれな魔力を宿す、猫飾りの両手杖。\n放たれた魔法は、時折もう一度だけ獲物へ飛びかかる。",
+    unique: true, lotBagHighlight: "orange", sellPrice: 0
   })
 });
 

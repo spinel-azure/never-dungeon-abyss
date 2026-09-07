@@ -1169,7 +1169,7 @@ import {
           && !getSpecialRoomDefinition(currentDepth)?.content;
         if (savedCell.treasure && currentDepth <= 4 && savedCell.treasure !== "purple") savedCell.treasure = "red";
         if (currentDepth > 4 && !savedCell.eventTreasureId
-          && !(savedCell.treasure === "black" && save.character?.eventFlags?.black_chests_unlocked)
+          && !(["black", "gold"].includes(savedCell.treasure) && save.character?.eventFlags?.black_chests_unlocked)
           && !unusedSpecialRoomPurple) savedCell.treasure = null;
         Object.assign(cells[y][x], savedCell);
         cells[y][x].specialRoom = savedCell.specialRoom || null;
@@ -1939,6 +1939,7 @@ import {
     if (!item) return "";
     const bonuses = [];
     if (Number.isFinite(item.attack)) bonuses.push(`ATK +${item.attack}`);
+    if (item.description) bonuses.push(item.description);
     if (item.fireFloorDamageImmunity) bonuses.push("火炎床無効");
     if (item.coldFloorDamageImmunity) bonuses.push("氷結床無効");
     bonuses.push(...Object.entries(item.statBonuses || {})
@@ -1947,6 +1948,8 @@ import {
         if (key === "actionSkipResistance") {
           return `行動不能耐性${Math.round(Number(value) * 100)}%`;
         }
+        if (key === "healingMiracleMultiplier") return `回復奇蹟 ×${Number(value)}`;
+        if (key === "spCostMultiplier") return `消費SP－${Math.round((1 - Number(value)) * 100)}%`;
         const percentLabels = {
           magicDamageReduction: "魔法耐性",
           nonElementalMagicDamageReduction: "無属性呪文耐性",
@@ -2504,7 +2507,7 @@ import {
       treasureType === "black"
         ? rollEnemyDrop({ dropProfile: "blackChest", depth: currentDepth, job: character?.job })
         : treasureType === "gold"
-          ? rollGoldChestLoot(character)
+          ? rollGoldChestLoot(character, currentDepth)
         : treasureType === "purple"
           ? rollPurpleChestLoot(Math.random, currentDepth)
           : rollRedChestLoot(Math.random, currentDepth)
@@ -4077,7 +4080,7 @@ import {
           }
         : {},
       blackChestsUnlocked: Boolean(character?.eventFlags?.black_chests_unlocked),
-      goldWeaponEligible: isGoldChestWeaponEligible(character),
+      goldWeaponEligible: isGoldChestWeaponEligible(character, currentDepth),
       redDoorUnlocked: Boolean(room.unlockFlag && character?.eventFlags?.[room.unlockFlag]),
       hasRedKey: Boolean(room.keyItemId && hasKeyItem(character?.keyItems, room.keyItemId)),
       queenShadowQuest: {

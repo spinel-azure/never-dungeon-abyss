@@ -21,7 +21,8 @@ const EXPECTED_TWO_HANDED_WEAPON_IDS = Object.freeze([
   "musashi_blade",
   "glacies_hammer",
   "sylvan_emera",
-  "comet_booster"
+  "comet_booster",
+  "katzenstab"
 ]);
 
 function findInstance(character, instanceId) {

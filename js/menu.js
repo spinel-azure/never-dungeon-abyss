@@ -1112,9 +1112,14 @@ function renderInventoryComparison(root, candidate) {
     ["HITS", beforeCombat.hits, afterCombat.hits], ["PEN", beforeCombat.penetration, afterCombat.penetration, "%"],
     ["HP", character.maxHp, preview.maxHp], ["SP", character.maxSp, preview.maxSp],
     ["STR", beforeStats.str, afterStats.str], ["INT", beforeStats.int, afterStats.int],
-    ["AGI", beforeStats.agi, afterStats.agi], ["DEX", beforeStats.dex, afterStats.dex], ["LUC", beforeStats.luc, afterStats.luc]
+    ["AGI", beforeStats.agi, afterStats.agi], ["DEX", beforeStats.dex, afterStats.dex], ["LUC", beforeStats.luc, afterStats.luc],
+    ["CRIT", beforeCombat.critical, afterCombat.critical, "%", true],
+    ["SPELL", beforeCombat.spellDamage, afterCombat.spellDamage, "%", true],
+    ["SP CUT", beforeCombat.spCostReduction, afterCombat.spCostReduction, "%", true],
+    ["HEAL", beforeCombat.healing, afterCombat.healing, "%", true]
   ];
-  root.replaceChildren(...values.map(([label, before, after, suffix = ""]) => { const delta = after - before, row = document.createElement("span"); row.className = delta > 0 ? "is-up" : delta < 0 ? "is-down" : ""; row.textContent = `${label} ${before}${suffix} → ${after}${suffix} (${delta >= 0 ? "+" : ""}${delta}${suffix})`; return row; }));
+  root.replaceChildren(...values.filter(([, before, after, , changedOnly]) => !changedOnly || before !== after)
+    .map(([label, before, after, suffix = ""]) => { const delta = after - before, row = document.createElement("span"); row.className = delta > 0 ? "is-up" : delta < 0 ? "is-down" : ""; row.textContent = `${label} ${before}${suffix} → ${after}${suffix} (${delta >= 0 ? "+" : ""}${delta}${suffix})`; return row; }));
 }
 
 function equipmentCombatValues(character) {
@@ -1124,23 +1129,44 @@ function equipmentCombatValues(character) {
     ? getWeapon(weaponId, character?.equipment?.rightArmEnhancement || 0)
     : { attack: 0, type: "longsword", defensePenetration: 0 };
   const type = getWeaponType(weapon?.type);
-  return { attack: deriveDetailStats(character).physicalAttack, hits: type.hitCount || 1, penetration: Math.round(((type.defensePenetration || 0) + (weapon.defensePenetration || 0) + (stats.defensePenetration || 0)) * 100) };
+  const spCostMultiplier = Number(character?.equipmentStatBonuses?.spCostMultiplier) || 1;
+  return {
+    attack: deriveDetailStats(character).physicalAttack,
+    hits: type.hitCount || 1,
+    penetration: Math.round(Math.min(0.75, (type.defensePenetration || 0) + (weapon.defensePenetration || 0) + (stats.defensePenetration || 0)) * 100),
+    critical: Math.round(Math.min(0.4, (Number(stats.criticalBonus) || 0) + (Number(weapon.criticalBonus) || 0)) * 100),
+    spellDamage: Math.round((Number(stats.attackSpellDamageBonus) || 0) * 100),
+    spCostReduction: Math.round(Math.max(0, 1 - spCostMultiplier) * 100),
+    healing: Math.round((Math.max(1, Number(stats.healingMiracleMultiplier) || 1) - 1) * 100)
+  };
 }
 
 function equipmentEffectLabels(definition) {
   if (!definition) return [];
   const labels = [];
   if (Number.isFinite(definition.attack)) labels.push(`ATK +${definition.attack}`);
+  if (definition.weaponTypeLabel) labels.push(`武器種：${definition.weaponTypeLabel}`);
   if (definition.description) labels.push(definition.description);
   if (definition.fireFloorDamageImmunity) labels.push("火炎床無効");
   if (definition.coldFloorDamageImmunity) labels.push("氷結床無効");
   if (definition.type) labels.push(`${getWeaponType(definition.type).hitCount || 1}回攻撃`);
-  if (Number(definition.defensePenetration) > 0) labels.push(`DEF貫通 ${Math.round(definition.defensePenetration * 100)}%`);
+  const penetration = Math.min(0.75,
+    (Number(getWeaponType(definition.type)?.defensePenetration) || 0) + (Number(definition.defensePenetration) || 0));
+  if (penetration > 0) labels.push(`DEF貫通 ${Math.round(penetration * 100)}%`);
+  if (Number(definition.criticalBonus) > 0) labels.push(`会心率＋${Math.round(definition.criticalBonus * 100)}%`);
   if (Number(definition.poisonChance) > 0) labels.push(`毒付与 ${Math.round(definition.poisonChance * 100)}%`);
   for (const [key, value] of Object.entries(definition.statBonuses || {})) {
     if (definition.hiddenStatBonusKeys?.includes(key)) continue;
     if (key === "actionSkipResistance") {
       labels.push(`行動不能耐性${Math.round(Number(value) * 100)}%`);
+      continue;
+    }
+    if (key === "healingMiracleMultiplier") {
+      labels.push(`回復奇蹟 ×${Number(value)}`);
+      continue;
+    }
+    if (key === "spCostMultiplier") {
+      labels.push(`消費SP－${Math.round((1 - Number(value)) * 100)}%`);
       continue;
     }
     const percentLabels = {
@@ -1162,6 +1188,7 @@ function equipmentEffectLabels(definition) {
       ? `${percentLabels[key]} ${value >= 0 ? "+" : ""}${Math.round(Number(value) * 100)}%`
       : `${key.toUpperCase()} ${value >= 0 ? "+" : ""}${value}`);
   }
+  if (definition.flavorText) labels.push(definition.flavorText);
   return labels;
 }
 function handleStatus(action) { if (action === "cancel") { menu.view = "commands"; updateView(); } else if (action === "left") { menu.statusPage = Math.max(0, menu.statusPage - 1); updateStatus(); } else if (action === "right") { menu.statusPage = Math.min(2, menu.statusPage + 1); updateStatus(); } else if (action === "confirm") { menu.view = "commands"; updateView(); } }
