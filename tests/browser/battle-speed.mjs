@@ -20,7 +20,11 @@ const results = [];
 
 try {
   for (const [name, width, height] of [["pc", 1280, 900], ["mobile", 390, 844], ["tablet", 820, 1180]]) {
-    const context = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 1 });
+    const context = await browser.newContext({
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+      hasTouch: name !== "pc"
+    });
     const page = await context.newPage();
     page.on("pageerror", error => errors.push(`${name}: ${error.message}`));
     page.on("console", message => {
@@ -34,10 +38,27 @@ try {
     await page.goto(origin);
     await page.evaluate(async layout => {
       const battle = await import("/js/battle.js");
+      const { configureInput } = await import("/js/input.js");
       const { createInitialCharacter } = await import("/data/classes.js");
       const { createEnemyCombatant, getEnemyById } = await import("/data/enemies.js");
       document.querySelector("#titleScreen").hidden = true;
       document.body.className = `layout-${layout} orientation-portrait input-${layout === "pc" ? "pointer" : "touch"}`;
+      configureInput({
+        forwardBtn: document.querySelector("#forward"),
+        backBtn: document.querySelector("#back"),
+        leftBtn: document.querySelector("#left"),
+        rightBtn: document.querySelector("#right"),
+        autoReturnBtn: document.querySelector("#autoReturn"),
+        randomGenerateBtn: document.querySelector("#randomGenerate"),
+        buttonA: document.querySelector("#buttonA"),
+        buttonB: document.querySelector("#buttonB"),
+        commandRoot: null,
+        manualMove: () => false,
+        manualTurn: () => false,
+        startAutoReturn: () => false,
+        generateRandomDungeon: () => false,
+        handleMenuInput: () => false
+      });
       let character = createInitialCharacter({ name: "速度確認", job: "warrior" });
       character.hp = character.maxHp = 9999;
       character.baseStats = { ...character.baseStats, str: 50, dex: 50, agi: 50 };
@@ -73,6 +94,7 @@ try {
 
     assert.equal(await page.evaluate(() => qa.start()), true);
     const toggle = page.locator("#battleSpeedToggle");
+    const pressToggle = () => name === "pc" ? toggle.click() : toggle.tap();
     await assert.doesNotReject(() => toggle.waitFor({ state: "visible" }));
     assert.equal(await toggle.textContent(), "⏩");
     assert.equal(await toggle.getAttribute("data-speed"), "fast");
@@ -93,7 +115,7 @@ try {
     assert.ok(bounds.rightGap >= 0 && bounds.rightGap <= 16, JSON.stringify(bounds));
     assert.ok(bounds.bottomGap >= 0 && bounds.bottomGap <= 16, JSON.stringify(bounds));
 
-    await toggle.click();
+    await pressToggle();
     assert.equal(await toggle.textContent(), "▶");
     assert.equal(await toggle.getAttribute("data-speed"), "normal");
     assert.match(await toggle.getAttribute("aria-label"), /戦闘速度：等速/);
@@ -103,12 +125,12 @@ try {
 
     await page.locator('[data-battle-command="attack"]').click();
     await page.waitForTimeout(40);
-    await toggle.click();
+    await pressToggle();
     assert.equal(await toggle.textContent(), "⏯", "speed remains switchable during presentation");
     assert.equal(await toggle.getAttribute("data-speed"), "slow");
     assert.match(await toggle.getAttribute("aria-label"), /戦闘速度：低速/);
     await page.locator(".viewport").screenshot({ path: path.join(output, `${name}-battle-speed-slow.png`) });
-    await toggle.click();
+    await pressToggle();
     assert.equal(await toggle.textContent(), "⏩");
     assert.equal(await toggle.getAttribute("data-speed"), "fast");
     await page.waitForTimeout(1800);
@@ -126,7 +148,7 @@ try {
     assert.equal(await toggle.textContent(), "⏯");
     assert.match(await toggle.getAttribute("aria-label"), /戦闘速度：低速/);
     const before = await page.evaluate(() => qa.setCount);
-    await toggle.click();
+    await pressToggle();
     assert.equal(await page.evaluate(() => qa.setCount), before + 1, "reconfiguration must not duplicate click listeners");
     assert.equal(await toggle.textContent(), "⏩");
 

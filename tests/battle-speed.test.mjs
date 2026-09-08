@@ -100,3 +100,11 @@ test("battle speed control exposes all labels through an accessible touch-sized 
   assert.match(css, /\.battle-speed-toggle\s*\{[\s\S]*width: 46px;[\s\S]*height: 46px;/);
   assert.match(css, /touch-action: manipulation/);
 });
+
+test("battle speed handles touchend once even when the global touch guard suppresses click", async () => {
+  const battleSource = await readFile(new URL("../js/battle.js", import.meta.url), "utf8");
+  assert.match(battleSource, /addEventListener\("touchend", battleUi\.speedToggleTouchHandler, \{ passive: false \}\)/);
+  assert.match(battleSource, /battleUi\.speedToggleTouchHandled = true;[\s\S]*toggleBattleSpeed\(\)/);
+  assert.match(battleSource, /if \(battleUi\.speedToggleTouchHandled\) return;/);
+  assert.match(battleSource, /removeEventListener\("touchend", battleUi\.speedToggleTouchHandler\)/);
+});

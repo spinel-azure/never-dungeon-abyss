@@ -59,6 +59,9 @@ const battleUi = {
   ambientEffects: null,
   speedToggle: null,
   speedToggleHandler: null,
+  speedToggleTouchHandler: null,
+  speedToggleTouchHandled: false,
+  speedToggleTouchResetTimer: 0,
   speedMode: DEFAULT_BATTLE_SPEED_MODE,
   getFrameRate: () => 60,
   isMobileDevice: () => false,
@@ -83,14 +86,35 @@ export function configureBattle(options) {
   if (battleUi.speedToggle && battleUi.speedToggleHandler) {
     battleUi.speedToggle.removeEventListener("click", battleUi.speedToggleHandler);
   }
+  if (battleUi.speedToggle && battleUi.speedToggleTouchHandler) {
+    battleUi.speedToggle.removeEventListener("touchend", battleUi.speedToggleTouchHandler);
+  }
+  if (battleUi.speedToggleTouchResetTimer) {
+    window.clearTimeout(battleUi.speedToggleTouchResetTimer);
+  }
   Object.assign(battleUi, options);
   battleUi.speedMode = normalizeBattleSpeedMode(battleUi.getBattleSpeedMode());
   battleUi.speedToggle = battleUi.root.querySelector("#battleSpeedToggle");
+  battleUi.speedToggleTouchHandled = false;
+  battleUi.speedToggleTouchResetTimer = 0;
+  battleUi.speedToggleTouchHandler = event => {
+    event.preventDefault();
+    event.stopPropagation();
+    battleUi.speedToggleTouchHandled = true;
+    window.clearTimeout(battleUi.speedToggleTouchResetTimer);
+    toggleBattleSpeed();
+    battleUi.speedToggleTouchResetTimer = window.setTimeout(() => {
+      battleUi.speedToggleTouchHandled = false;
+      battleUi.speedToggleTouchResetTimer = 0;
+    }, 350);
+  };
   battleUi.speedToggleHandler = event => {
     event.preventDefault();
     event.stopPropagation();
+    if (battleUi.speedToggleTouchHandled) return;
     toggleBattleSpeed();
   };
+  battleUi.speedToggle?.addEventListener("touchend", battleUi.speedToggleTouchHandler, { passive: false });
   battleUi.speedToggle?.addEventListener("click", battleUi.speedToggleHandler);
   updateBattleSpeedToggle();
   battleUi.ambientEffects = createEnemyAmbientEffects({
@@ -786,6 +810,11 @@ function updateBattleSpeedToggle() {
 function closeBattle() {
   battleUi.ambientEffects?.clear();
   clearAutoTimer();
+  if (battleUi.speedToggleTouchResetTimer) {
+    window.clearTimeout(battleUi.speedToggleTouchResetTimer);
+    battleUi.speedToggleTouchResetTimer = 0;
+  }
+  battleUi.speedToggleTouchHandled = false;
   battleUi.autoActive = false;
   battleUi.presenting = false;
   battleUi.presentationHp = null;
