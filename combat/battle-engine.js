@@ -1295,8 +1295,6 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, d
       slashExecution: index === firstLandedIndex
     }));
     battle.vorpalExecution = true;
-    battle.log.push("ヴォーパル・スウォードが怪しく輝いた！");
-    battle.log.push("刃はジャバウォックの首を一閃した！");
   }
   let actualDamage = presentedHits.reduce((total, hit) => total + hit.damage, 0);
   const npcWall = targetSide === "player"
@@ -1365,7 +1363,9 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, d
   battle.log.push(`${actor.name}の${action.name || "攻撃"}！`);
   presentedHits.forEach((hit, index) => {
     const prefix = isMultiHit ? `${index + 1}撃目：` : "";
-    const message = hit.blockedByNpcWall
+    const message = hit.vorpalExecution
+      ? "ヴォーパル・スウォードが光り輝き、\nジャバウォックを一刀両断した！"
+      : hit.blockedByNpcWall
       ? `${prefix}ヨハンの壁が攻撃を防いだ！`
       : hit.hit
         ? `${prefix}${hit.damage}ダメージ！${hit.critical ? " 会心！" : ""}`

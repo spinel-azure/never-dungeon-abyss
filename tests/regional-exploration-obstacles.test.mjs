@@ -26,6 +26,7 @@ import { DIRS, MAP_H, MAP_W, START_X, START_Y } from "../js/config.js";
 import {
   buildBoundaryWallMap,
   cells,
+  discoverExplorationObstacleAt,
   explored,
   getExplorationObstacleAt,
   getStartPosition,
@@ -47,6 +48,7 @@ import {
 import { findExploredPathToStart } from "../js/autoReturn.js";
 import { SE } from "../js/audio.js";
 import { resolveExplorationObstacleEffectFrame } from "../js/renderer.js";
+import { shouldDrawExplorationObstacleMarker } from "../js/minimap.js";
 import { loadGame, writeGame } from "../js/save-data.js";
 
 function seededRng(seed) {
@@ -93,6 +95,7 @@ function prepareObstacleInteraction(character, obstacleId) {
   setPlayerInputEnabled(true);
   setWall(1, 1, "E", false);
   cells[1][2].explorationObstacleId = obstacleId;
+  cells[1][2].explorationObstacleDiscovered = false;
   let currentCharacter = character;
   const messages = [];
   const soundEffects = [];
@@ -187,6 +190,7 @@ test("obstacle definitions use the requested assets and floor-zone exclusions", 
 
 test("walking into an unavailable obstacle does not move or change facing", () => {
   const interaction = prepareObstacleInteraction(createObstacleCharacter("warrior"), "fire_pillar");
+  assert.equal(shouldDrawExplorationObstacleMarker(cells[1][2]), false);
   const direction = state.dir;
   manualMove(1);
   assert.equal(state.gridX, 1);
@@ -194,7 +198,24 @@ test("walking into an unavailable obstacle does not move or change facing", () =
   assert.equal(state.dir, direction);
   assert.equal(state.anim, null);
   assert.equal(state.overlayEvent, null);
+  assert.equal(cells[1][2].explorationObstacleDiscovered, true);
+  assert.equal(shouldDrawExplorationObstacleMarker(cells[1][2]), true);
   assert.equal(interaction.messages.at(-1), "激しく燃え上がる火柱が行く手を遮っている。\nこのままでは通れそうにない。迂回するしかなさそうだ。");
+});
+
+test("regional obstacles use contact-only red and cyan triangle minimap markers", () => {
+  const fire = getExplorationObstacleById("fire_pillar");
+  const ice = getExplorationObstacleById("giant_ice_block");
+  assert.deepEqual(
+    [fire.minimapMarker, fire.minimapColor, ice.minimapMarker, ice.minimapColor],
+    ["▲", "#ff554f", "▲", "#7fe3ff"]
+  );
+  resetAllWalls();
+  cells[1][2].explorationObstacleId = "giant_ice_block";
+  assert.equal(shouldDrawExplorationObstacleMarker(cells[1][2]), false);
+  assert.equal(discoverExplorationObstacleAt(2, 1), true);
+  assert.equal(shouldDrawExplorationObstacleMarker(cells[1][2]), true);
+  assert.equal(discoverExplorationObstacleAt(2, 1), false);
 });
 
 test("a mage spends ten SP only after confirming the matching spell", () => {
@@ -303,10 +324,9 @@ test("removal immediately updates traversal and auto-return pathfinding", () => 
   assert.deepEqual(findExploredPathToStart(), ["W", "W"]);
 });
 
-test("an already removed obstacle remains absent in a saved floor snapshot", () => {
+test("obstacle discovery and removal persist in saved floor snapshots", () => {
   buildSeededFloor(40, 4040);
   const removed = placedObstacles()[0];
-  assert.equal(removeExplorationObstacleAt(removed.x, removed.y), true);
   const storage = new Map();
   globalThis.localStorage = {
     getItem: key => storage.get(key) ?? null,
@@ -315,14 +335,20 @@ test("an already removed obstacle remains absent in a saved floor snapshot", () 
   };
   globalThis.window = { dispatchEvent() {} };
   globalThis.CustomEvent = class CustomEvent { constructor(type) { this.type = type; } };
-  const snapshot = {
+  const makeSnapshot = () => ({
     character: createInitialCharacter({ name: "SAVE", job: "warrior" }),
     player: { gridX: START_X, gridY: START_Y, dir: 0 },
     dungeon: { depth: 40, cells: structuredClone(cells), explored: explored.map(row => row.slice()) }
-  };
-  assert.equal(writeGame(snapshot), true);
-  const loaded = loadGame();
+  });
+  assert.equal(discoverExplorationObstacleAt(removed.x, removed.y), true);
+  assert.equal(writeGame(makeSnapshot()), true);
+  let loaded = loadGame();
+  assert.equal(loaded.dungeon.cells[removed.y][removed.x].explorationObstacleDiscovered, true);
+  assert.equal(removeExplorationObstacleAt(removed.x, removed.y), true);
+  assert.equal(writeGame(makeSnapshot()), true);
+  loaded = loadGame();
   assert.equal(loaded.dungeon.cells[removed.y][removed.x].explorationObstacleId, null);
+  assert.equal(loaded.dungeon.cells[removed.y][removed.x].explorationObstacleDiscovered, false);
   assert.equal(loaded.dungeon.cells[removed.y][removed.x].featureReservation, null);
 });
 
@@ -403,8 +429,8 @@ test("renderer, minimap, save restore, and shared input paths include exploratio
   ]);
   assert.match(renderer, /EXPLORATION_OBSTACLES[\s\S]*loadCharacterImage\(obstacle\.imageId, obstacle\.image\)/);
   assert.match(renderer, /cell\.explorationObstacleId[\s\S]*eventKind: "explorationObstacle"/);
-  assert.match(minimap, /c\.explorationObstacleId[\s\S]*obstacle\.minimapMarker/);
-  assert.match(main, /cells\[y\]\[x\]\.explorationObstacleId = savedCell\.explorationObstacleId \|\| null/);
+  assert.match(minimap, /shouldDrawExplorationObstacleMarker\(c\)[\s\S]*obstacle\.minimapMarker/);
+  assert.match(main, /cells\[y\]\[x\]\.explorationObstacleId = savedCell\.explorationObstacleId \|\| null[\s\S]*explorationObstacleDiscovered = Boolean\(savedCell\.explorationObstacleDiscovered\)/);
   assert.match(input, /handleOverlayInput\("confirm"\)/);
   assert.match(input, /handleOverlayInput\("cancel"\)/);
 });

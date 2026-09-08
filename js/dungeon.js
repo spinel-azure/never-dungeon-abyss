@@ -81,6 +81,7 @@ export function makeCells(w, h) {
       bossId: null,
       bossRemainsId: null,
       explorationObstacleId: null,
+      explorationObstacleDiscovered: false,
       reserved: null,
       featureReservation: null,
       featureApproach: null,
@@ -350,6 +351,7 @@ export function placeExplorationObstacles(depth = 1, rng = Math.random) {
     });
     if (!reservation.accepted) continue;
     cell.explorationObstacleId = obstacle.id;
+    cell.explorationObstacleDiscovered = false;
     placed.push({ x: cell.x, y: cell.y, obstacleId: obstacle.id });
   }
   return placed;
@@ -516,6 +518,7 @@ export function resetAllWalls() {
       cells[y][x].bossId = null;
       cells[y][x].bossRemainsId = null;
       cells[y][x].explorationObstacleId = null;
+      cells[y][x].explorationObstacleDiscovered = false;
       cells[y][x].reserved = null;
       cells[y][x].featureReservation = null;
       cells[y][x].featureApproach = null;
@@ -691,11 +694,20 @@ export function getExplorationObstacleAt(x, y) {
   return getExplorationObstacleById(cells[y][x].explorationObstacleId);
 }
 
+export function discoverExplorationObstacleAt(x, y) {
+  if (!inBounds(x, y)) return false;
+  const cell = cells[y][x];
+  if (!cell.explorationObstacleId || cell.explorationObstacleDiscovered) return false;
+  cell.explorationObstacleDiscovered = true;
+  return true;
+}
+
 export function removeExplorationObstacleAt(x, y) {
   if (!inBounds(x, y)) return false;
   const cell = cells[y][x];
   if (!cell.explorationObstacleId) return false;
   cell.explorationObstacleId = null;
+  cell.explorationObstacleDiscovered = false;
   if (cell.featureReservation?.type === "explorationObstacle") {
     cell.featureReservation = null;
     cell.reserved = null;

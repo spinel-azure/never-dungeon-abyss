@@ -76,7 +76,7 @@ export function drawMinimap(ctx, {
       if (c.bossId && isExplored) c.bossId === "giant_vine_obstacle"
         ? drawTextMark(ctx, "🌿", x1, y1, cell)
         : drawBossMark(ctx, x1, y1, cell);
-      if (c.explorationObstacleId && isExplored) {
+      if (shouldDrawExplorationObstacleMarker(c)) {
         const obstacle = getExplorationObstacleById(c.explorationObstacleId);
         if (obstacle) drawTextMark(ctx, obstacle.minimapMarker, x1, y1, cell, obstacle.minimapColor);
       }
@@ -139,6 +139,10 @@ export function drawMinimap(ctx, {
 export function isFullMapRevealActive(state = {}) {
   const effectiveTorchActive = state.torchFuel > 0 || state.torchEffectForced;
   return effectiveTorchActive && Boolean(state.fullMapRevealActive);
+}
+
+export function shouldDrawExplorationObstacleMarker(cell) {
+  return Boolean(cell?.explorationObstacleId && cell.explorationObstacleDiscovered);
 }
 
 const revealOptions = { stairsDown: false, npcs: false, treasures: false };

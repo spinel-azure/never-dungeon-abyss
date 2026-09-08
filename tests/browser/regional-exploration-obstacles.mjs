@@ -42,6 +42,7 @@ try {
     await page.addInitScript(() => {
       window.qaObstacleDraws = [];
       window.qaObstacleSoundEffects = [];
+      window.qaMinimapMarkers = [];
       let frameId = 0;
       window.requestAnimationFrame = () => ++frameId;
       window.cancelAnimationFrame = () => {};
@@ -53,6 +54,13 @@ try {
           window.qaObstacleDraws.push({ source, x: values[0], y: values[1], width: values[2], height: values[3] });
         }
         return drawImage.call(this, image, ...args);
+      };
+      const fillText = CanvasRenderingContext2D.prototype.fillText;
+      CanvasRenderingContext2D.prototype.fillText = function (value, ...args) {
+        if (value === "▲") {
+          window.qaMinimapMarkers.push({ value, color: this.fillStyle, x: Number(args[0]), y: Number(args[1]) });
+        }
+        return fillText.call(this, value, ...args);
       };
     });
     await page.goto(origin);
@@ -232,6 +240,32 @@ try {
             audioFile: audio.SE.explorationObstacleOil
           };
         },
+        contactMarker(obstacleId) {
+          character = classes.createInitialCharacter({ name: "MAP", job: "warrior" });
+          dungeon.setStartPosition(1, 1);
+          dungeon.resetAllWalls();
+          dungeon.resetExplored();
+          dungeon.setWall(1, 1, "E", false);
+          dungeon.cells[1][2].explorationObstacleId = obstacleId;
+          dungeon.explored[1][1] = true;
+          player.resetPlayer(direction);
+          player.setPlayerInputEnabled(true);
+          message.textContent = "";
+          window.qaMinimapMarkers.length = 0;
+          renderer.drawScene(performance.now());
+          const before = window.qaMinimapMarkers.slice();
+          player.manualMove(1);
+          window.qaMinimapMarkers.length = 0;
+          renderer.drawScene(performance.now() + 34);
+          return {
+            before,
+            after: window.qaMinimapMarkers.slice(),
+            discovered: dungeon.cells[1][2].explorationObstacleDiscovered,
+            explored: dungeon.explored[1][2],
+            message: message.textContent,
+            position: [player.state.gridX, player.state.gridY]
+          };
+        },
         prepareBranch() {
           window.qaObstacleSoundEffects.length = 0;
           character = classes.createInitialCharacter({ name: "QA", job: layout.branch === "oil" ? "warrior" : "mage" });
@@ -318,6 +352,18 @@ try {
     assert.ok(reverse.draw, `${layout.name}: reverse approach`);
     assert.ok(Math.abs(reverse.draw.y + reverse.draw.height - reverse.canvas.height * 0.94) < 1);
 
+    for (const [obstacleId, color] of [["fire_pillar", "#ff554f"], ["giant_ice_block", "#7fe3ff"]]) {
+      const marker = await page.evaluate(id => window.qa.contactMarker(id), obstacleId);
+      assert.deepEqual(marker.before, [], `${layout.name}/${obstacleId}: hidden before contact`);
+      assert.equal(marker.discovered, true);
+      assert.equal(marker.explored, false, `${layout.name}/${obstacleId}: contact must not reveal terrain`);
+      assert.deepEqual(marker.position, [1, 1]);
+      assert.equal(marker.after.at(-1)?.value, "▲");
+      assert.equal(marker.after.at(-1)?.color, color);
+      assert.match(marker.message, /迂回するしかなさそうだ。$/);
+      await page.locator(".game").screenshot({ path: path.join(output, `${layout.name}-${obstacleId}-minimap-contact.png`) });
+    }
+
     await page.evaluate(() => window.qa.prepareBranch());
     if (layout.input === "click") {
       await page.locator("#forward").evaluate(element => element.click());
@@ -358,7 +404,9 @@ try {
       assets: "800x800 AVIF with alpha",
       screenshots: [
         path.join(output, `${layout.name}-fire_pillar.png`),
-        path.join(output, `${layout.name}-giant_ice_block.png`)
+        path.join(output, `${layout.name}-giant_ice_block.png`),
+        path.join(output, `${layout.name}-fire_pillar-minimap-contact.png`),
+        path.join(output, `${layout.name}-giant_ice_block-minimap-contact.png`)
       ]
     });
     await context.close();

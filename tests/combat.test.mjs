@@ -1865,7 +1865,13 @@ test("a landed Vorpal Sword normal attack executes only Jabberwock", () => {
   assert.equal(result.battle.outcome, "victory");
   assert.equal(result.battle.vorpalSwordEquippedAtStart, true);
   assert.equal(result.battle.vorpalExecution, true);
-  assert.equal(result.battle.presentationEvents.some(event => event.vorpalExecution), true);
+  const execution = result.battle.presentationEvents.find(event => event.vorpalExecution);
+  assert.ok(execution);
+  assert.equal(execution.slashExecution, true);
+  assert.equal(execution.message, "ヴォーパル・スウォードが光り輝き、\nジャバウォックを一刀両断した！");
+  assert.match(result.battle.log.join("\n"), /ヴォーパル・スウォードが光り輝き、\nジャバウォックを一刀両断した！/);
+  assert.equal(result.battle.log.filter(message => message.includes("ヴォーパル・スウォードが光り輝き")).length, 1);
+  assert.doesNotMatch(result.battle.log.join("\n"), /怪しく輝いた|首を一閃した/);
 
   const other = createBossCombatant("strange_knight_statue_b9f");
   battle = createBattleState({ character, enemy: other });

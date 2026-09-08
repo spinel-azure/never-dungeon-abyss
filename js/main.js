@@ -1201,6 +1201,7 @@ import {
         cells[y][x].rapidCurrent = savedCell.rapidCurrent || null;
         cells[y][x].rapidCurrentDiscovered = Boolean(savedCell.rapidCurrentDiscovered);
         cells[y][x].explorationObstacleId = savedCell.explorationObstacleId || null;
+        cells[y][x].explorationObstacleDiscovered = Boolean(savedCell.explorationObstacleDiscovered);
         explored[y][x] = Boolean(dungeon.explored[y][x]);
       }
     }

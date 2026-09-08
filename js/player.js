@@ -19,6 +19,7 @@ import {
   getNpcAt,
   getBossAt,
   getExplorationObstacleAt,
+  discoverExplorationObstacleAt,
   getBossRemainsAt,
   removeNpcAt,
   getFountainAt,
@@ -985,6 +986,7 @@ function beginSpecialRoomBossBattle(event, boss) {
 }
 
 function startExplorationObstacleEvent(obstacle, obstacleGX, obstacleGY, moveAmount) {
+  if (discoverExplorationObstacleAt(obstacleGX, obstacleGY)) hooks.onStateChanged();
   const options = hooks.getExplorationObstacleRemovalOptions(obstacle.id) || {};
   state.shake = moveAmount > 0 ? -8 : 6;
   hooks.playSe("blocked");
