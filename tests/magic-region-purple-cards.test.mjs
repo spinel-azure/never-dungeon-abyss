@@ -416,8 +416,7 @@ test("B10F-B19F purple chests use empty special rooms and never replace fixed co
 
 test("purple chest save restoration keeps unopened chests and does not revive opened ones", async () => {
   const source = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
-  assert.match(source, /const unusedSpecialRoomPurple = savedCell\.treasure === "purple"/);
-  assert.match(source, /&& !unusedSpecialRoomPurple\) savedCell\.treasure = null/);
+  assert.match(source, /savedCell\.treasure = getRestoredTreasureType\(savedCell/);
   assert.match(source, /Object\.assign\(cells\[y\]\[x\], savedCell\)/);
   assert.doesNotMatch(source, /restoreGame[\s\S]*placePurpleSpecialRoomTreasure/);
 });

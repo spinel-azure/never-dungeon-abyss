@@ -10,6 +10,7 @@ import { DEEP_FLOOR_PROOF_CARD_ID, GODDESS_GRACE_CARD_ID } from "../data/cards.j
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { grantCard, setDeckSlot } from "../data/deck.js";
 import { resolveInnStableStay, resolveInnStay, resolveTemplePoisonTreatment } from "../js/character-services.js";
+import { loadGame, writeGame } from "../js/save-data.js";
 
 test("depth return bonus uses integer floor division for specified examples", () => {
   const examples = [
@@ -39,6 +40,7 @@ test("Goddess's Grace disables only the depth bonus when equipped", () => {
   assert.deepEqual(result, {
     baseSettlementExp: 1000,
     returnFloor: 100,
+    depthBonusPoints: 0,
     depthBonusRate: 0,
     depthBonusExp: 0,
     finalSettlementExp: 1000,
@@ -92,6 +94,7 @@ test("Deep Floor Proof adds ten points unless Goddess protection suppresses the 
     cards: setDeckSlot(granted.cards, 0, DEEP_FLOOR_PROOF_CARD_ID, initial.deckCost)
   };
   const boosted = createDepthReturnSettlement(equipped, 70);
+  assert.equal(boosted.depthBonusPoints, 0.1);
   assert.equal(boosted.depthBonusRate, 0.45);
   assert.equal(boosted.finalSettlementExp, 1450);
 
@@ -101,6 +104,77 @@ test("Deep Floor Proof adds ten points unless Goddess protection suppresses the 
     cards: setDeckSlot(grace.cards, 1, GODDESS_GRACE_CARD_ID, equipped.deckCost)
   };
   assert.equal(createDepthReturnSettlement(protectedCharacter, 70).depthBonusRate, 0);
+});
+
+test("Deep Floor Proof bonus remains fixed through normalization and later deck changes", () => {
+  const initial = { ...createInitialCharacter({ name: "TEST", job: "priest" }), deckCost: 20 };
+  const granted = grantCard(initial.cards, DEEP_FLOOR_PROOF_CARD_ID, 1, initial.deckCost);
+  const equippedCards = setDeckSlot(granted.cards, 0, DEEP_FLOOR_PROOF_CARD_ID, initial.deckCost);
+  const returned = {
+    ...initial,
+    carriedExperience: 10_000,
+    cards: equippedCards
+  };
+  returned.pendingExperienceSettlement = createDepthReturnSettlement(returned, 80);
+
+  assert.equal(returned.pendingExperienceSettlement.depthBonusPoints, 0.1);
+  assert.equal(returned.pendingExperienceSettlement.finalSettlementExp, 15_000);
+  const restored = normalizeCharacter(structuredClone(returned));
+  assert.equal(restored.pendingExperienceSettlement.depthBonusPoints, 0.1);
+  assert.equal(restored.pendingExperienceSettlement.finalSettlementExp, 15_000);
+
+  const removed = {
+    ...restored,
+    cards: setDeckSlot(restored.cards, 0, null, restored.deckCost)
+  };
+  assert.equal(resolveInnStay(removed).gainedExperience, 15_000);
+
+  const returnedWithoutProof = {
+    ...initial,
+    carriedExperience: 10_000
+  };
+  returnedWithoutProof.pendingExperienceSettlement = createDepthReturnSettlement(returnedWithoutProof, 80);
+  const proofAddedAfterReturn = {
+    ...returnedWithoutProof,
+    cards: equippedCards
+  };
+  assert.equal(resolveInnStay(proofAddedAfterReturn).gainedExperience, 14_000);
+
+  const legacy = structuredClone(returned);
+  delete legacy.pendingExperienceSettlement.depthBonusPoints;
+  const normalizedLegacy = normalizeCharacter(legacy);
+  assert.equal(normalizedLegacy.pendingExperienceSettlement.depthBonusPoints, 0.1);
+  assert.equal(resolveInnStay(normalizedLegacy).gainedExperience, 15_000);
+});
+
+test("Deep Floor Proof settlement survives the protected save and load path", () => {
+  const storage = new Map();
+  globalThis.localStorage = {
+    getItem: key => storage.get(key) ?? null,
+    setItem: (key, value) => storage.set(key, String(value)),
+    removeItem: key => storage.delete(key)
+  };
+  globalThis.window = { dispatchEvent() {} };
+  globalThis.CustomEvent = class CustomEvent { constructor(type) { this.type = type; } };
+
+  const initial = { ...createInitialCharacter({ name: "SAVE", job: "priest" }), deckCost: 20 };
+  const granted = grantCard(initial.cards, DEEP_FLOOR_PROOF_CARD_ID, 1, initial.deckCost);
+  const returned = {
+    ...initial,
+    carriedExperience: 10_000,
+    cards: setDeckSlot(granted.cards, 0, DEEP_FLOOR_PROOF_CARD_ID, initial.deckCost)
+  };
+  returned.pendingExperienceSettlement = createDepthReturnSettlement(returned, 80);
+  const snapshot = {
+    character: returned,
+    player: { gridX: 0, gridY: 0, dir: 0 },
+    dungeon: { cells: [[{ type: "floor" }]], explored: [[true]] }
+  };
+
+  assert.equal(writeGame(snapshot, "auto"), true);
+  const loaded = normalizeCharacter(loadGame("auto").character);
+  assert.equal(loaded.pendingExperienceSettlement.depthBonusPoints, 0.1);
+  assert.equal(resolveInnStay(loaded).gainedExperience, 15_000);
 });
 
 test("Goddess's Grace settlement effect is locked when returning from the dungeon", () => {

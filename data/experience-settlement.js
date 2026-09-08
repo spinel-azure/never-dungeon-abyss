@@ -12,7 +12,9 @@ export function calculateDepthReturnSettlement({
   const base = nonnegativeInteger(baseSettlementExp);
   const floor = nonnegativeInteger(returnFloor);
   const goddessEquipped = Boolean(isGoddessGraceEquipped);
-  const bonusPoints = goddessEquipped ? 0 : Math.max(0, Number(depthBonusPoints) || 0);
+  const bonusPoints = goddessEquipped
+    ? 0
+    : Math.round(Math.max(0, Number(depthBonusPoints) || 0) * 10000) / 10000;
   const depthBonusRate = goddessEquipped
     ? 0
     : Math.round((floor / DEPTH_BONUS_DIVISOR + bonusPoints) * 10000) / 10000;
@@ -22,6 +24,7 @@ export function calculateDepthReturnSettlement({
   return {
     baseSettlementExp: base,
     returnFloor: floor,
+    depthBonusPoints: bonusPoints,
     depthBonusRate,
     depthBonusExp,
     finalSettlementExp: base + depthBonusExp,
@@ -46,7 +49,17 @@ export function createDepthReturnSettlement(character, returnFloor) {
 
 export function normalizeDepthReturnSettlement(candidate, carriedExperience) {
   if (!candidate || typeof candidate !== "object") return null;
-  const normalized = calculateDepthReturnSettlement(candidate);
+  const floor = nonnegativeInteger(candidate.returnFloor);
+  const baseDepthBonusRate = floor / DEPTH_BONUS_DIVISOR;
+  const legacyDepthBonusPoints = candidate.isGoddessGraceEquipped
+    ? 0
+    : Math.max(0, (Number(candidate.depthBonusRate) || 0) - baseDepthBonusRate);
+  const normalized = calculateDepthReturnSettlement({
+    ...candidate,
+    depthBonusPoints: Object.hasOwn(candidate, "depthBonusPoints")
+      ? candidate.depthBonusPoints
+      : legacyDepthBonusPoints
+  });
   const carried = nonnegativeInteger(carriedExperience);
   if (normalized.baseSettlementExp !== carried) return null;
   return normalized;

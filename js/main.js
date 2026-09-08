@@ -123,6 +123,7 @@ import {
   createDepthReturnSettlement,
   formatDepthReturnSettlement
 } from "../data/experience-settlement.js";
+import { getRestoredTreasureType } from "./dungeon-save-restore.js";
 import { getDeadlyPoisonStepDamage, getNonlethalPoisonDamage } from "../combat/status-lifecycle.js";
 import { getConditionLabel } from "../combat/condition-label.js";
 import { getNextLevelExperience, MAX_LEVEL } from "../data/growth.js";
@@ -1174,13 +1175,11 @@ import {
         if (savedCell.bossRemainsId && !bossLeavesRemains(savedCell.bossRemainsId)) {
           savedCell.bossRemainsId = null;
         }
-        const unusedSpecialRoomPurple = savedCell.treasure === "purple"
-          && Boolean(savedCell.specialRoom)
-          && !getSpecialRoomDefinition(currentDepth)?.content;
-        if (savedCell.treasure && currentDepth <= 4 && savedCell.treasure !== "purple") savedCell.treasure = "red";
-        if (currentDepth > 4 && !savedCell.eventTreasureId
-          && !(["black", "gold"].includes(savedCell.treasure) && save.character?.eventFlags?.black_chests_unlocked)
-          && !unusedSpecialRoomPurple) savedCell.treasure = null;
+        savedCell.treasure = getRestoredTreasureType(savedCell, {
+          depth: currentDepth,
+          blackChestsUnlocked: Boolean(save.character?.eventFlags?.black_chests_unlocked),
+          specialRoomHasFixedContent: Boolean(getSpecialRoomDefinition(currentDepth)?.content)
+        });
         Object.assign(cells[y][x], savedCell);
         cells[y][x].specialRoom = savedCell.specialRoom || null;
         cells[y][x].questEvent = savedCell.questEvent || null;

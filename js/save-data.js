@@ -48,18 +48,22 @@ function isValidSaveShape(value) {
     && isObject(value.player);
 }
 
-function readKey(key) {
+function readSerializedSave(serialized, key = "") {
   try {
-    const stored = JSON.parse(localStorage.getItem(key) || "null");
+    const stored = JSON.parse(serialized || "null");
     if (isProtectedSavePayload(stored)) {
       const value = unprotectSavePayload(stored);
       return isValidSaveData(value) ? value : null;
     }
     return isValidLegacySaveData(stored) ? stored : null;
   } catch (error) {
-    console.warn(`NDA save data could not be read (${key}).`, error);
+    if (key) console.warn(`NDA save data could not be read (${key}).`, error);
     return null;
   }
+}
+
+function readKey(key) {
+  return readSerializedSave(localStorage.getItem(key), key);
 }
 
 export function loadGame(slot = AUTO_SAVE_SLOT) {
@@ -69,12 +73,13 @@ export function loadGame(slot = AUTO_SAVE_SLOT) {
   if (current) return current;
   const backup = readKey(keys.backup);
   if (!backup) return null;
+  const promoted = { ...backup, schemaVersion: SAVE_SCHEMA_VERSION };
   try {
-    localStorage.setItem(keys.current, JSON.stringify(backup));
+    localStorage.setItem(keys.current, JSON.stringify(protectSavePayload(promoted)));
   } catch (error) {
     console.warn(`NDA backup save could not be promoted (${slot}).`, error);
   }
-  return backup;
+  return promoted;
 }
 
 export function hasAutoSaveData() {
@@ -117,7 +122,7 @@ function writeValidatedSave(save, keys) {
     throw new Error("Temporary save validation failed.");
   }
   const current = localStorage.getItem(keys.current);
-  if (current) localStorage.setItem(keys.backup, current);
+  if (current && readSerializedSave(current)) localStorage.setItem(keys.backup, current);
   localStorage.setItem(keys.current, serialized);
   localStorage.removeItem(keys.temp);
 }

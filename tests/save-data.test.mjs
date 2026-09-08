@@ -106,3 +106,44 @@ test("a modified current save falls back to its protected backup", () => {
   assert.equal(restored.character.name, "BACKUP");
   assert.equal(loadGame("auto").character.name, "BACKUP");
 });
+
+for (const slot of ["auto", "manual1"]) {
+  test(`${slot} preserves a healthy backup through promotion and later saves`, () => {
+    writeGame(makeSnapshot("A", 7), slot);
+    writeGame(makeSnapshot("B", 8), slot);
+    const prefix = slot === "auto" ? "nda.save.slot1" : "nda.save.manual1";
+    const currentKey = `${prefix}.current`;
+    storage.set(currentKey, "{broken");
+
+    assert.equal(loadGame(slot).character.name, "A");
+    assert.equal(writeGame(makeSnapshot("C", 9), slot), true);
+    storage.set(currentKey, "{broken-again");
+
+    assert.equal(loadGame(slot).character.name, "A");
+    assert.equal(loadGame(slot).schemaVersion, 2);
+  });
+}
+
+test("an unreadable current save never replaces a healthy backup", () => {
+  writeGame(makeSnapshot("A"), "auto");
+  writeGame(makeSnapshot("B"), "auto");
+  storage.set("nda.save.slot1.current", JSON.stringify({ schemaVersion: 2, savedAt: "invalid" }));
+
+  assert.equal(writeGame(makeSnapshot("C"), "auto"), true);
+  storage.set("nda.save.slot1.current", "corrupt");
+  assert.equal(loadGame("auto").character.name, "A");
+});
+
+test("a legacy backup is upgraded when it is promoted", () => {
+  storage.set("nda.save.slot1.current", "broken");
+  storage.set("nda.save.slot1.backup", JSON.stringify({
+    ...makeSnapshot("LEGACY"),
+    schemaVersion: 1,
+    savedAt: new Date().toISOString()
+  }));
+
+  const restored = loadGame("auto");
+  assert.equal(restored.character.name, "LEGACY");
+  assert.equal(restored.schemaVersion, 2);
+  assert.equal(loadGame("auto").character.name, "LEGACY");
+});

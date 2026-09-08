@@ -406,7 +406,7 @@ function executeTargetedAction(options) {
   return result;
 }
 
-function executeRandomlyDistributedHits({ battle, action, actor, rng }) {
+function executeRandomlyDistributedHits({ battle, action, actor, magicFocus = null, rng }) {
   const hitCount = Math.max(1, Math.floor(Number(action.hitCount) || 1));
   const followUpTargetIndexes = new Set();
   for (let hitIndex = 0; hitIndex < hitCount; hitIndex += 1) {
@@ -425,6 +425,7 @@ function executeRandomlyDistributedHits({ battle, action, actor, rng }) {
       targetSide: "enemy",
       targetIndex,
       deferFollowUp: true,
+      magicFocus,
       rng
     });
     if (result?.followUpEligible) followUpTargetIndexes.add(targetIndex);
@@ -442,9 +443,11 @@ function executeRandomlyDistributedHits({ battle, action, actor, rng }) {
 }
 
 function executeSinglePlayerActionSequence({ battle, action, repeatAction = action, command, actor, target, rng }) {
+  const magicFocus = getMagicFocusForCast(actor, action);
   const results = [executeAction({
-    battle, action, actor, actorSide: "player", target, targetSide: "enemy", rng
+    battle, action, actor, actorSide: "player", target, targetSide: "enemy", magicFocus, rng
   })];
+  consumeMagicFocusCast(battle, actor, magicFocus);
   const weapon = getEquippedWeapon(actor);
   const repeatRate = Math.max(0, Math.min(1, Number(weapon.normalAttackRepeatHpRate) || 0));
   if (command?.type === "attack" && repeatRate > 0
@@ -478,9 +481,11 @@ function executeMultiPlayerActionSequence({ battle, action, repeatAction = actio
   const resolvedTargetIndex = action.target === "allEnemies" || action.randomlyDistributeHits
     ? targetIndex
     : normalizeLivingTargetIndex(battle.enemies, targetIndex);
+  const magicFocus = getMagicFocusForCast(actor, action);
   const results = executeMultiPlayerActionPass({
-    battle, action, actor, targetIndex: resolvedTargetIndex, rng
+    battle, action, actor, targetIndex: resolvedTargetIndex, magicFocus, rng
   });
+  consumeMagicFocusCast(battle, actor, magicFocus);
   const weapon = getEquippedWeapon(actor);
   const repeatRate = Math.max(0, Math.min(1, Number(weapon.normalAttackRepeatHpRate) || 0));
   if (command?.type === "attack" && repeatRate > 0
@@ -511,9 +516,9 @@ function executeMultiPlayerActionSequence({ battle, action, repeatAction = actio
   applyNormalAttackRecovery(battle, actor, command, results);
 }
 
-function executeMultiPlayerActionPass({ battle, action, actor, targetIndex, rng }) {
+function executeMultiPlayerActionPass({ battle, action, actor, targetIndex, magicFocus = null, rng }) {
   if (action.randomlyDistributeHits) {
-    executeRandomlyDistributedHits({ battle, action, actor, rng });
+    executeRandomlyDistributedHits({ battle, action, actor, magicFocus, rng });
     return [];
   }
   const results = [];
@@ -525,10 +530,23 @@ function executeMultiPlayerActionPass({ battle, action, actor, targetIndex, rng 
     if (!target?.alive || target.hp <= 0) continue;
     results.push(executeTargetedAction({
       battle, action, actor, actorSide: "player", target,
-      targetSide: "enemy", targetIndex: currentTargetIndex, rng
+      targetSide: "enemy", targetIndex: currentTargetIndex, magicFocus, rng
     }));
   }
   return results;
+}
+
+function getMagicFocusForCast(actor, action) {
+  if (action?.actionType !== "spell") return null;
+  return actor.statuses?.find(status =>
+    (status.id || status.statusId) === "magic_focus" && status.active !== false
+  ) || null;
+}
+
+function consumeMagicFocusCast(battle, actor, magicFocus) {
+  if (!magicFocus) return;
+  actor.statuses = actor.statuses.filter(status => status !== magicFocus);
+  battle.log.push("魔力集中の力が攻撃呪文を増幅した！");
 }
 
 function canRepeatMultiAction(battle, action, targetIndex) {
@@ -839,7 +857,7 @@ function buildEnemyAction(action, normalAttack) {
   };
 }
 
-function executeAction({ battle, action, actor, actorSide, target, targetSide, deferFollowUp = false, rng }) {
+function executeAction({ battle, action, actor, actorSide, target, targetSide, deferFollowUp = false, magicFocus = null, rng }) {
   const actorStats = combatStats(actor);
   const targetStats = combatStats(target);
   if (action.actionType === "enemyEscape" && actorSide === "enemy") {
@@ -1214,9 +1232,6 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, d
       break;
     }
   }
-  const magicFocus = action.actionType === "spell" && actorSide === "player"
-    ? actor.statuses?.find(status => (status.id || status.statusId) === "magic_focus" && status.active !== false)
-    : null;
   const manaAmplification = action.actionType === "spell" && actorSide === "player" && !action.ultimateChargeSkill
     ? actor.statuses?.find(status =>
       (status.id || status.statusId) === "charge_mana_amplification" && status.active !== false
@@ -1248,10 +1263,6 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, d
       presentedHits = presentedHits.map(hit => ({ ...hit, hit: false, damage: 0, mirageEvaded: true }));
       battle.log.push("蜃気楼が敵の攻撃を惑わせた！");
     }
-  }
-  if (magicFocus) {
-    actor.statuses = actor.statuses.filter(status => status !== magicFocus);
-    battle.log.push("魔力集中の力が攻撃呪文を増幅した！");
   }
   if (passiveExecution) {
     const damageBeforeExecution = presentedHits
