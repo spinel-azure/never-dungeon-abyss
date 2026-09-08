@@ -15,6 +15,7 @@ import { getAdventureChronicle, getAdventureRecords } from "../data/adventure-re
 import { closeCardGallery, configureCardGallery, handleCardGalleryInput, openCardGallery } from "./card-gallery.js";
 import { closeMonsterCompendium, configureMonsterCompendium, handleMonsterCompendiumInput, openMonsterCompendium } from "./monster-compendium.js";
 import { getEquipmentHighlightClass } from "./loot-identification.js";
+import { DEFAULT_BATTLE_SPEED_MODE, normalizeBattleSpeedMode } from "./battle-speed.js";
 
 const ACTION_FEEDBACK_MS = 260;
 const DEBUG_SEQUENCE_MS = 1000;
@@ -62,6 +63,7 @@ const menu = {
   npcTypewriterEnabled: true, npcTypewriterSpeed: "normal",
   touchControlsMode: "auto",
   touchMovementMode: "dpad",
+  battleSpeedMode: DEFAULT_BATTLE_SPEED_MODE,
   gamepadBindings: { confirm: null, cancel: null, minimap: null, items: null }, gamepadCaptureAction: "",
   gamepadPreviewCanvas: null, gamepadPreviewImage: null, gamepadPressedButtons: [],
   actionActive: { random: false, autoReturn: false, emergencyEscape: false, torchFull: false, stopwatchReset: false },
@@ -143,6 +145,12 @@ export function configureMenu(options) {
 export function isMenuOpen() { return menu.view !== "dungeon"; }
 export function getTouchControlsMode() { return menu.touchControlsMode; }
 export function getTouchMovementMode() { return menu.touchMovementMode; }
+export function getBattleSpeedMode() { return normalizeBattleSpeedMode(menu.battleSpeedMode); }
+export function setBattleSpeedMode(mode) {
+  menu.battleSpeedMode = normalizeBattleSpeedMode(mode);
+  persistSettings();
+  return menu.battleSpeedMode;
+}
 export function getGamepadBindings() { return { ...menu.gamepadBindings }; }
 export function getGamepadCaptureAction() { return menu.gamepadCaptureAction; }
 export function setGamepadPressedButtons(buttons = []) {
@@ -1856,6 +1864,7 @@ function restoreSettings() {
     if (["slow", "normal", "fast"].includes(saved.npcTypewriterSpeed)) menu.npcTypewriterSpeed = saved.npcTypewriterSpeed;
     if (["auto", "on", "off"].includes(saved.touchControlsMode)) menu.touchControlsMode = saved.touchControlsMode;
     if (["dpad", "stick"].includes(saved.touchMovementMode)) menu.touchMovementMode = saved.touchMovementMode;
+    menu.battleSpeedMode = normalizeBattleSpeedMode(saved.battleSpeedMode);
     if (saved.gamepadBindings && typeof saved.gamepadBindings === "object") {
       const keys = ["confirm", "cancel", "minimap"];
       const values = keys.map(key => Number(saved.gamepadBindings[key]));
@@ -1911,6 +1920,7 @@ function persistSettings() {
       npcTypewriterSpeed: menu.npcTypewriterSpeed,
       touchControlsMode: menu.touchControlsMode,
       touchMovementMode: menu.touchMovementMode,
+      battleSpeedMode: menu.battleSpeedMode,
       gamepadBindings: menu.gamepadBindings,
       mistEnabled: menu.mistEnabled,
       mistIntensity: menu.mistIntensity,

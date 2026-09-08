@@ -59,7 +59,7 @@ import { configureInput } from "./input.js";
 import { configureGamepadInput } from "./gamepad-input.js";
 import { configureFloatingStick } from "./floating-stick.js";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, getDungeonMistOptions, setDungeonColors, getGamepadBindings, getGamepadCaptureAction, completeGamepadBinding, setGamepadPressedButtons, getTouchControlsMode, getTouchMovementMode, isMenuOpen, openItemInventory, openStatusMenu, openDeckEditor, openQuestHistory, openRumorHistory, openAdventureRecords, openLibraryMonsterCompendium, openLibraryCardGallery, openTitleOptions, refreshAdventureRecordsPlayTime, openShopSellInventory, openShopPurchaseInventory, closeCampMenu, resetDebugSettingsForNewGame } from "./menu.js";
+import { configureMenu, handleMenuInput, getDungeonColors, getDungeonMistOptions, setDungeonColors, getGamepadBindings, getGamepadCaptureAction, completeGamepadBinding, setGamepadPressedButtons, getTouchControlsMode, getTouchMovementMode, getBattleSpeedMode, setBattleSpeedMode, isMenuOpen, openItemInventory, openStatusMenu, openDeckEditor, openQuestHistory, openRumorHistory, openAdventureRecords, openLibraryMonsterCompendium, openLibraryCardGallery, openTitleOptions, refreshAdventureRecordsPlayTime, openShopSellInventory, openShopPurchaseInventory, closeCampMenu, resetDebugSettingsForNewGame } from "./menu.js";
 import { isForcedTorchZeroFloor, resolveFloorTheme } from "./floorTheme.js";
 import { applyCrystalFloorSpStep } from "../data/crystal-floor.js";
 import {
@@ -1006,6 +1006,8 @@ import {
     getFrameRate: getEffectiveFrameRate,
     isMobileDevice: () => document.body.classList.contains("layout-mobile")
       || document.body.classList.contains("layout-tablet"),
+    getBattleSpeedMode,
+    setBattleSpeedMode,
     getCharacter: () => getContextualCharacter(),
     onCharacterChanged: updateCharacterFromBattle,
     onVictory: finishBattleVictory,

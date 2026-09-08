@@ -21,6 +21,13 @@ import {
   playEnemyVanish,
   resetEnemyVanishEffects
 } from "../combat/enemy-vanish.js";
+import {
+  DEFAULT_BATTLE_SPEED_MODE,
+  getBattleDedicatedPresentationDwell,
+  getBattlePresentationDelay,
+  normalizeBattleSpeedMode,
+  toggleBattleSpeedMode
+} from "./battle-speed.js";
 
 const COMMANDS = Object.freeze([
   ["attack", "戦う"],
@@ -50,8 +57,13 @@ const battleUi = {
   presentationBarrier: null,
   pendingCommand: null,
   ambientEffects: null,
+  speedToggle: null,
+  speedToggleHandler: null,
+  speedMode: DEFAULT_BATTLE_SPEED_MODE,
   getFrameRate: () => 60,
   isMobileDevice: () => false,
+  getBattleSpeedMode: () => DEFAULT_BATTLE_SPEED_MODE,
+  setBattleSpeedMode: mode => normalizeBattleSpeedMode(mode),
   getCharacter: () => null,
   onCharacterChanged: () => {},
   onVictory: () => {},
@@ -68,7 +80,19 @@ const battleUi = {
 
 export function configureBattle(options) {
   battleUi.ambientEffects?.destroy();
+  if (battleUi.speedToggle && battleUi.speedToggleHandler) {
+    battleUi.speedToggle.removeEventListener("click", battleUi.speedToggleHandler);
+  }
   Object.assign(battleUi, options);
+  battleUi.speedMode = normalizeBattleSpeedMode(battleUi.getBattleSpeedMode());
+  battleUi.speedToggle = battleUi.root.querySelector("#battleSpeedToggle");
+  battleUi.speedToggleHandler = event => {
+    event.preventDefault();
+    event.stopPropagation();
+    toggleBattleSpeed();
+  };
+  battleUi.speedToggle?.addEventListener("click", battleUi.speedToggleHandler);
+  updateBattleSpeedToggle();
   battleUi.ambientEffects = createEnemyAmbientEffects({
     root: battleUi.root,
     getFrameRate: () => battleUi.getFrameRate(),
@@ -91,6 +115,8 @@ export function startBattle(enemy, { playStartSe = true, ambush = false, conceal
   const character = battleUi.getCharacter();
   if (!character || battleUi.active) return false;
   battleUi.active = true;
+  battleUi.speedMode = normalizeBattleSpeedMode(battleUi.getBattleSpeedMode());
+  updateBattleSpeedToggle();
   battleUi.mode = "commands";
   battleUi.selectedIndex = 0;
   battleUi.autoActive = false;
@@ -398,7 +424,7 @@ function scheduleJireneScriptedRound(delayMs = 700) {
     if (!battleUi.active || battleUi.presenting || battleUi.battle?.outcome
       || battleUi.battle?.scriptedBattleType !== "jirene_first_encounter") return;
     void executeCommand({ type: "wait" });
-  }, delayMs);
+  }, getBattlePresentationDelay(delayMs, battleUi.speedMode));
 }
 
 async function executeAmbushOpening() {
@@ -524,7 +550,12 @@ async function playPresentationEvents() {
     } else if (event.targetSide === "player" && event.hit && Number(event.damage) > 0 && !event.blockedByNpcWall) {
       battleUi.playSe("playerDamage");
     }
-    const duration = dedicatedPresentationPlayed ? 0 : event.targetSide === "player" && event.hit ? 520 : event.hit ? 360 : 280;
+    const duration = dedicatedPresentationPlayed
+      ? getBattleDedicatedPresentationDwell(battleUi.speedMode)
+      : getBattlePresentationDelay(
+        event.targetSide === "player" && event.hit ? 520 : event.hit ? 360 : 280,
+        battleUi.speedMode
+      );
     await delay(duration);
     targetImage?.classList.remove("is-hit");
     if (event.slashExecution) await playSlashEffect(targetImage, { restoreImage: !vanishImage });
@@ -649,7 +680,7 @@ function scheduleAutoRound() {
     battleUi.autoTimer = 0;
     if (!battleUi.active || !battleUi.autoActive || battleUi.battle?.outcome) return;
     executeCommand({ type: "attack" });
-  }, 450);
+  }, getBattlePresentationDelay(450, battleUi.speedMode));
 }
 
 function stopAutoBattle() {
@@ -728,6 +759,26 @@ export function createPersistentBattlePlayerChanges(player) {
     npcSystem: structuredClone(player.npcSystem),
     playerCharge: structuredClone(player.playerCharge)
   };
+}
+
+function toggleBattleSpeed() {
+  if (!battleUi.active) return;
+  const nextMode = toggleBattleSpeedMode(battleUi.speedMode);
+  battleUi.speedMode = normalizeBattleSpeedMode(battleUi.setBattleSpeedMode(nextMode) ?? nextMode);
+  updateBattleSpeedToggle();
+  battleUi.playSe("cursorMove");
+}
+
+function updateBattleSpeedToggle() {
+  if (!battleUi.speedToggle) return;
+  const slow = battleUi.speedMode === "slow";
+  const currentLabel = slow ? "低速" : "倍速";
+  const nextLabel = slow ? "倍速" : "低速";
+  battleUi.speedToggle.textContent = slow ? "▶" : "⏩";
+  battleUi.speedToggle.dataset.speed = battleUi.speedMode;
+  battleUi.speedToggle.setAttribute("aria-pressed", String(slow));
+  battleUi.speedToggle.setAttribute("aria-label", `戦闘速度：${currentLabel}。押すと${nextLabel}に切り替えます。`);
+  battleUi.speedToggle.title = `戦闘速度：${currentLabel}`;
 }
 
 function closeBattle() {
