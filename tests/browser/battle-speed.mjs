@@ -95,16 +95,22 @@ try {
 
     await toggle.click();
     assert.equal(await toggle.textContent(), "▶");
-    assert.equal(await toggle.getAttribute("data-speed"), "slow");
-    assert.match(await toggle.getAttribute("aria-label"), /戦闘速度：低速/);
-    assert.equal(await page.evaluate(() => qa.speedMode), "slow");
+    assert.equal(await toggle.getAttribute("data-speed"), "normal");
+    assert.match(await toggle.getAttribute("aria-label"), /戦闘速度：等速/);
+    assert.equal(await page.evaluate(() => qa.speedMode), "normal");
     assert.deepEqual(await page.evaluate(() => qa.sounds), ["cursorMove"]);
-    await page.locator(".viewport").screenshot({ path: path.join(output, `${name}-battle-speed-slow.png`) });
+    await page.locator(".viewport").screenshot({ path: path.join(output, `${name}-battle-speed-normal.png`) });
 
     await page.locator('[data-battle-command="attack"]').click();
     await page.waitForTimeout(40);
     await toggle.click();
-    assert.equal(await toggle.textContent(), "⏩", "speed remains switchable during presentation");
+    assert.equal(await toggle.textContent(), "⏯", "speed remains switchable during presentation");
+    assert.equal(await toggle.getAttribute("data-speed"), "slow");
+    assert.match(await toggle.getAttribute("aria-label"), /戦闘速度：低速/);
+    await page.locator(".viewport").screenshot({ path: path.join(output, `${name}-battle-speed-slow.png`) });
+    await toggle.click();
+    assert.equal(await toggle.textContent(), "⏩");
+    assert.equal(await toggle.getAttribute("data-speed"), "fast");
     await page.waitForTimeout(1800);
 
     await page.locator('[data-battle-command="escape"]').click();
@@ -117,7 +123,8 @@ try {
       qa.configure();
     });
     assert.equal(await page.evaluate(() => qa.start()), true);
-    assert.equal(await toggle.textContent(), "▶");
+    assert.equal(await toggle.textContent(), "⏯");
+    assert.match(await toggle.getAttribute("aria-label"), /戦闘速度：低速/);
     const before = await page.evaluate(() => qa.setCount);
     await toggle.click();
     assert.equal(await page.evaluate(() => qa.setCount), before + 1, "reconfiguration must not duplicate click listeners");
@@ -136,12 +143,26 @@ try {
   });
   await settingsPage.goto(origin);
   await settingsPage.waitForFunction(() => document.documentElement.dataset.ndaMainReady === "true");
-  const storedMode = await settingsPage.evaluate(async () => {
+  await settingsPage.evaluate(() => {
+    localStorage.setItem("nde-settings-v1", JSON.stringify({ battleSpeedMode: "slow" }));
+  });
+  await settingsPage.reload();
+  await settingsPage.waitForFunction(() => document.documentElement.dataset.ndaMainReady === "true");
+  assert.equal(
+    await settingsPage.evaluate(async () => (await import("/js/menu.js")).getBattleSpeedMode()),
+    "normal",
+    "the former slow setting must keep its 1.8x pace after migration"
+  );
+  const stored = await settingsPage.evaluate(async () => {
     const menu = await import("/js/menu.js");
     menu.setBattleSpeedMode("slow");
-    return JSON.parse(localStorage.getItem("nde-settings-v1") || "null")?.battleSpeedMode;
+    const settings = JSON.parse(localStorage.getItem("nde-settings-v1") || "null");
+    return {
+      mode: settings?.battleSpeedMode,
+      version: settings?.battleSpeedSettingsVersion
+    };
   });
-  assert.equal(storedMode, "slow");
+  assert.deepEqual(stored, { mode: "slow", version: 2 });
   await settingsPage.reload();
   await settingsPage.waitForFunction(() => document.documentElement.dataset.ndaMainReady === "true");
   assert.equal(await settingsPage.evaluate(async () => (await import("/js/menu.js")).getBattleSpeedMode()), "slow");

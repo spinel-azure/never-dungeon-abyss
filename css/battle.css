@@ -38,11 +38,18 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.battle-speed-toggle[data-speed="slow"] {
+.battle-speed-toggle[data-speed="normal"] {
   border-color: rgba(255, 223, 119, .78);
   color: #ffe077;
   text-shadow: 0 0 7px rgba(255, 205, 62, .72);
   box-shadow: inset 0 0 8px rgba(255, 205, 62, .16), 0 0 8px rgba(255, 205, 62, .2);
+}
+
+.battle-speed-toggle[data-speed="slow"] {
+  border-color: rgba(255, 164, 128, .82);
+  color: #ffa780;
+  text-shadow: 0 0 7px rgba(255, 105, 70, .74);
+  box-shadow: inset 0 0 8px rgba(255, 105, 70, .18), 0 0 8px rgba(255, 105, 70, .24);
 }
 
 .battle-speed-toggle:hover { filter: brightness(1.16); }

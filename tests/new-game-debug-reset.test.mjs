@@ -72,7 +72,7 @@ test("NEW GAME reapplies every requested setting and its display hooks", async (
   assert.match(reset, /setStopwatchVisible\(menu\.stopwatchVisible\)/);
   assert.match(reset, /persistSettings\(\)/);
   assert.match(menu, /const normalized = normalizeDebugSettingsDefaults\(stored\)/);
-  assert.match(menu, /if \(normalized\.migrated\) persistSettings\(\)/);
+  assert.match(menu, /if \(normalized\.migrated \|\| saved\.battleSpeedSettingsVersion !== BATTLE_SPEED_SETTINGS_VERSION\) \{\s*persistSettings\(\)/);
   assert.match(menu, /debugDefaultsVersion: DEBUG_DEFAULTS_VERSION/);
   assert.match(main, /function startNewGame\(\) \{\s*resetDebugSettingsForNewGame\(\)/);
 });

@@ -15,7 +15,12 @@ import { getAdventureChronicle, getAdventureRecords } from "../data/adventure-re
 import { closeCardGallery, configureCardGallery, handleCardGalleryInput, openCardGallery } from "./card-gallery.js";
 import { closeMonsterCompendium, configureMonsterCompendium, handleMonsterCompendiumInput, openMonsterCompendium } from "./monster-compendium.js";
 import { getEquipmentHighlightClass } from "./loot-identification.js";
-import { DEFAULT_BATTLE_SPEED_MODE, normalizeBattleSpeedMode } from "./battle-speed.js";
+import {
+  BATTLE_SPEED_SETTINGS_VERSION,
+  DEFAULT_BATTLE_SPEED_MODE,
+  normalizeBattleSpeedMode,
+  normalizeStoredBattleSpeedMode
+} from "./battle-speed.js";
 
 const ACTION_FEEDBACK_MS = 260;
 const DEBUG_SEQUENCE_MS = 1000;
@@ -1864,7 +1869,10 @@ function restoreSettings() {
     if (["slow", "normal", "fast"].includes(saved.npcTypewriterSpeed)) menu.npcTypewriterSpeed = saved.npcTypewriterSpeed;
     if (["auto", "on", "off"].includes(saved.touchControlsMode)) menu.touchControlsMode = saved.touchControlsMode;
     if (["dpad", "stick"].includes(saved.touchMovementMode)) menu.touchMovementMode = saved.touchMovementMode;
-    menu.battleSpeedMode = normalizeBattleSpeedMode(saved.battleSpeedMode);
+    menu.battleSpeedMode = normalizeStoredBattleSpeedMode(
+      saved.battleSpeedMode,
+      saved.battleSpeedSettingsVersion
+    );
     if (saved.gamepadBindings && typeof saved.gamepadBindings === "object") {
       const keys = ["confirm", "cancel", "minimap"];
       const values = keys.map(key => Number(saved.gamepadBindings[key]));
@@ -1895,7 +1903,9 @@ function restoreSettings() {
     menu.wallColor = "default";
     menu.floorColor = "default";
     menu.mistColor = "frost";
-    if (normalized.migrated) persistSettings();
+    if (normalized.migrated || saved.battleSpeedSettingsVersion !== BATTLE_SPEED_SETTINGS_VERSION) {
+      persistSettings();
+    }
   } catch (error) {
     console.warn("NDE settings could not be restored.", error);
   }
@@ -1920,6 +1930,7 @@ function persistSettings() {
       npcTypewriterSpeed: menu.npcTypewriterSpeed,
       touchControlsMode: menu.touchControlsMode,
       touchMovementMode: menu.touchMovementMode,
+      battleSpeedSettingsVersion: BATTLE_SPEED_SETTINGS_VERSION,
       battleSpeedMode: menu.battleSpeedMode,
       gamepadBindings: menu.gamepadBindings,
       mistEnabled: menu.mistEnabled,

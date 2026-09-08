@@ -771,14 +771,16 @@ function toggleBattleSpeed() {
 
 function updateBattleSpeedToggle() {
   if (!battleUi.speedToggle) return;
-  const slow = battleUi.speedMode === "slow";
-  const currentLabel = slow ? "低速" : "倍速";
-  const nextLabel = slow ? "倍速" : "低速";
-  battleUi.speedToggle.textContent = slow ? "▶" : "⏩";
+  const display = {
+    fast: { icon: "⏩", label: "倍速", nextLabel: "等速" },
+    normal: { icon: "▶", label: "等速", nextLabel: "低速" },
+    slow: { icon: "⏯", label: "低速", nextLabel: "倍速" }
+  }[battleUi.speedMode];
+  battleUi.speedToggle.textContent = display.icon;
   battleUi.speedToggle.dataset.speed = battleUi.speedMode;
-  battleUi.speedToggle.setAttribute("aria-pressed", String(slow));
-  battleUi.speedToggle.setAttribute("aria-label", `戦闘速度：${currentLabel}。押すと${nextLabel}に切り替えます。`);
-  battleUi.speedToggle.title = `戦闘速度：${currentLabel}`;
+  battleUi.speedToggle.removeAttribute("aria-pressed");
+  battleUi.speedToggle.setAttribute("aria-label", `戦闘速度：${display.label}。押すと${display.nextLabel}に切り替えます。`);
+  battleUi.speedToggle.title = `戦闘速度：${display.label}`;
 }
 
 function closeBattle() {
