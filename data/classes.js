@@ -11,8 +11,10 @@ import { collectEquippedInstanceBonuses, isEquipmentBuybackEligible, normalizeEq
 import { normalizeQuestState } from "./quests.js";
 import { normalizeAdventureStats } from "./adventure-stats.js";
 import {
+  createInitialFinalLongMarchChallenge,
   createInitialLongMarchChallenge,
   createInitialMarathonChallenge,
+  normalizeFinalLongMarchChallenge,
   normalizeLongMarchChallenge,
   normalizeMarathonChallenge
 } from "./marathon-challenge.js";
@@ -95,6 +97,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     adventureStats: normalizeAdventureStats(),
     marathonChallenge: createInitialMarathonChallenge(),
     longMarchChallenge: createInitialLongMarchChallenge(),
+    finalLongMarchChallenge: createInitialFinalLongMarchChallenge(),
     npcSystem: createInitialNpcSystem(),
     playerCharge: createInitialPlayerCharge(),
     firstDungeonTutorialSeen: false,
@@ -236,6 +239,7 @@ export function normalizeCharacter(character) {
     longMarchChallenge: isB80TransferUnlocked({ eventFlags })
       ? normalizeLongMarchChallenge(character.longMarchChallenge)
       : createInitialLongMarchChallenge(),
+    finalLongMarchChallenge: normalizeFinalLongMarchChallenge(character.finalLongMarchChallenge),
     npcSystem: normalizeNpcSystem(character.npcSystem),
     playerCharge: normalizePlayerCharge(character.playerCharge),
     firstDungeonTutorialSeen: typeof character.firstDungeonTutorialSeen === "boolean"

@@ -385,7 +385,12 @@ try {
     assert.match((await page.locator("#message").textContent()), /逃げていった/u);
     await page.evaluate(() => maerchentiereQa.battleInput("confirm"));
     await page.waitForFunction(() => document.querySelector("#battleScreen").hidden);
-    assert.equal((await page.evaluate(() => maerchentiereQa.overlay())).pages.length, 2);
+    const escapeEvent = await page.evaluate(() => maerchentiereQa.overlay());
+    assert.equal(escapeEvent.pages.length, 2);
+    assert.equal(escapeEvent.imageId, "NPC_23");
+    await page.waitForFunction(() => document.querySelector("#itemGetEffect").hidden);
+    await page.evaluate(() => maerchentiereQa.redraw());
+    await page.locator(".viewport").screenshot({ path: path.join(output, `${layout}-kirke-escape.png`) });
     await page.evaluate(() => maerchentiereQa.overlayInput("confirm"));
     await page.evaluate(() => maerchentiereQa.overlayInput("confirm"));
     assert.equal(await page.evaluate(() => maerchentiereQa.overlay()), null);

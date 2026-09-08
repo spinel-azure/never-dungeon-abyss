@@ -9,12 +9,18 @@ export const LONG_MARCH_GOAL_DEPTH = 84;
 export const LONG_MARCH_COMPLETION_FLAG = "b1_b84_long_march_completed";
 export const LONG_MARCH_REQUIRED_TRANSFER_FLAG = B80_TRANSFER_FLAG;
 export const LONG_MARCH_REWARD_CARD_ID = "zodiac_taurus";
+export const FINAL_LONG_MARCH_GOAL_DEPTH = 100;
+export const FINAL_LONG_MARCH_COMPLETION_FLAG = "b1_b100_final_long_march_completed";
 
 export function createInitialMarathonChallenge() {
   return { active: false, currentDepth: 0 };
 }
 
 export function createInitialLongMarchChallenge() {
+  return { active: false, currentDepth: 0 };
+}
+
+export function createInitialFinalLongMarchChallenge() {
   return { active: false, currentDepth: 0 };
 }
 
@@ -40,6 +46,17 @@ export function normalizeLongMarchChallenge(value) {
   return { active: true, currentDepth };
 }
 
+export function normalizeFinalLongMarchChallenge(value) {
+  if (!value || typeof value !== "object" || value.active !== true) {
+    return createInitialFinalLongMarchChallenge();
+  }
+  const currentDepth = Math.max(
+    MARATHON_START_DEPTH,
+    Math.min(FINAL_LONG_MARCH_GOAL_DEPTH - 1, Math.floor(Number(value.currentDepth) || MARATHON_START_DEPTH))
+  );
+  return { active: true, currentDepth };
+}
+
 export function startMarathonChallenge(character) {
   if (!character || character.eventFlags?.[MARATHON_COMPLETION_FLAG]) return character;
   return {
@@ -58,6 +75,14 @@ export function startLongMarchChallenge(character) {
   };
 }
 
+export function startFinalLongMarchChallenge(character) {
+  if (!character || character.eventFlags?.[FINAL_LONG_MARCH_COMPLETION_FLAG]) return character;
+  return {
+    ...character,
+    finalLongMarchChallenge: { active: true, currentDepth: MARATHON_START_DEPTH }
+  };
+}
+
 export function invalidateMarathonChallenge(character) {
   if (!character?.marathonChallenge?.active) return character;
   return { ...character, marathonChallenge: createInitialMarathonChallenge() };
@@ -66,6 +91,41 @@ export function invalidateMarathonChallenge(character) {
 export function invalidateLongMarchChallenge(character) {
   if (!character?.longMarchChallenge?.active) return character;
   return { ...character, longMarchChallenge: createInitialLongMarchChallenge() };
+}
+
+export function invalidateFinalLongMarchChallenge(character) {
+  if (!character?.finalLongMarchChallenge?.active) return character;
+  return { ...character, finalLongMarchChallenge: createInitialFinalLongMarchChallenge() };
+}
+
+export function recordFinalLongMarchDescent(character, { fromDepth, toDepth } = {}) {
+  const challenge = normalizeFinalLongMarchChallenge(character?.finalLongMarchChallenge);
+  if (!character || !challenge.active) return { character, completed: false };
+  const from = Math.floor(Number(fromDepth) || 0);
+  const to = Math.floor(Number(toDepth) || 0);
+  if (to <= challenge.currentDepth && to === from + 1) {
+    return { character, completed: false };
+  }
+  if (challenge.currentDepth !== from || to !== from + 1) {
+    return { character: invalidateFinalLongMarchChallenge(character), completed: false };
+  }
+  if (to < FINAL_LONG_MARCH_GOAL_DEPTH) {
+    return {
+      character: { ...character, finalLongMarchChallenge: { active: true, currentDepth: to } },
+      completed: false
+    };
+  }
+  return {
+    character: {
+      ...character,
+      finalLongMarchChallenge: createInitialFinalLongMarchChallenge(),
+      eventFlags: {
+        ...(character.eventFlags || {}),
+        [FINAL_LONG_MARCH_COMPLETION_FLAG]: true
+      }
+    },
+    completed: true
+  };
 }
 
 export function recordLongMarchDescent(character, { fromDepth, toDepth } = {}) {

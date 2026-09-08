@@ -294,6 +294,7 @@ test("Kirke result dialogue waits for input and exits only after every requested
 
   startKirkeMaerchentiereResultEvent({ captured: false });
   assert.equal(playerState.overlayEvent.pages.length, 2);
+  assert.equal(playerState.overlayEvent.imageId, "NPC_23");
   assert.match(messages.at(-1), /逃げちまったじゃないか/);
   assert.equal(handleOverlayEventInput("confirm"), true);
   assert.match(messages.at(-1), /アンタひとりで来た方がいい/);

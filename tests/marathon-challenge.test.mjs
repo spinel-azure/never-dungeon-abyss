@@ -6,17 +6,51 @@ import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { grantCard } from "../data/deck.js";
 import { isTransferDestinationUnlocked } from "../data/transfer-destinations.js";
 import {
+  FINAL_LONG_MARCH_COMPLETION_FLAG,
   LONG_MARCH_COMPLETION_FLAG,
   LONG_MARCH_REQUIRED_TRANSFER_FLAG,
   LONG_MARCH_REWARD_CARD_ID,
+  invalidateFinalLongMarchChallenge,
   invalidateLongMarchChallenge,
   invalidateMarathonChallenge,
   MARATHON_COMPLETION_FLAG,
+  recordFinalLongMarchDescent,
   recordLongMarchDescent,
   recordMarathonDescent,
+  startFinalLongMarchChallenge,
   startLongMarchChallenge,
   startMarathonChallenge
 } from "../data/marathon-challenge.js";
+
+test("the final long march reaches B100F without return or transfer and allows dungeon backtracking", () => {
+  let character = startFinalLongMarchChallenge(createInitialCharacter({ name: "PIONEER", job: "warrior" }));
+  character = recordFinalLongMarchDescent(character, { fromDepth: 1, toDepth: 2 }).character;
+  character = normalizeCharacter(character);
+  assert.deepEqual(character.finalLongMarchChallenge, { active: true, currentDepth: 2 });
+  character = recordFinalLongMarchDescent(character, { fromDepth: 1, toDepth: 2 }).character;
+  assert.deepEqual(character.finalLongMarchChallenge, { active: true, currentDepth: 2 });
+  for (let fromDepth = 2; fromDepth < 100; fromDepth += 1) {
+    const result = recordFinalLongMarchDescent(character, { fromDepth, toDepth: fromDepth + 1 });
+    character = result.character;
+    assert.equal(result.completed, fromDepth === 99);
+  }
+  assert.equal(character.eventFlags[FINAL_LONG_MARCH_COMPLETION_FLAG], true);
+  assert.deepEqual(character.finalLongMarchChallenge, { active: false, currentDepth: 0 });
+  assert.equal(startFinalLongMarchChallenge(character).finalLongMarchChallenge.active, false);
+});
+
+test("returning, defeat, transfers, and skipped floors invalidate the final long march", () => {
+  const active = startFinalLongMarchChallenge(createInitialCharacter({ name: "PIONEER", job: "thief" }));
+  assert.equal(invalidateFinalLongMarchChallenge(active).finalLongMarchChallenge.active, false);
+  const skipped = recordFinalLongMarchDescent(active, { fromDepth: 1, toDepth: 3 });
+  assert.equal(skipped.completed, false);
+  assert.equal(skipped.character.finalLongMarchChallenge.active, false);
+
+  const source = fs.readFileSync(new URL("../js/main.js", import.meta.url), "utf8");
+  assert.match(source, /completeDungeonDefeat\(\)[\s\S]*?invalidateFinalLongMarchChallenge\(character\)/);
+  assert.match(source, /enterFloorFromTransfer\(depth = 10\)[\s\S]*?invalidateFinalLongMarchChallenge\(character\)/);
+  assert.match(source, /returnToTown\([\s\S]*?invalidateFinalLongMarchChallenge\(character\)/);
+});
 
 function descendToGoal(character, defeatedBossFloors = [9, 19, 29, 39]) {
   let next = character;

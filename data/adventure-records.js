@@ -1,8 +1,16 @@
 import { BOSSES } from "./bosses.js";
 import { getCharacterClass } from "./classes.js";
-import { normalizeQuestState } from "./quests.js";
+import {
+  B35F_SURVEY_QUEST_ID,
+  B45F_SURVEY_QUEST_ID,
+  FLOOR_SURVEY_QUEST_ID,
+  normalizeQuestState
+} from "./quests.js";
 import { formatPlayTime, normalizeAdventureStats } from "./adventure-stats.js";
 import { getMonsterCompendiumCompletion } from "./monster-compendium.js";
+import { hasKeyItem } from "./key-items.js";
+
+export const PLAY_TIME_100_HOURS_SECONDS = 100 * 60 * 60;
 
 function formatNumber(value) {
   return Math.max(0, Math.floor(Number(value) || 0)).toLocaleString("ja-JP");
@@ -61,11 +69,14 @@ export function getAdventureRecords(character) {
 export function getAdventureChronicle(character) {
   const flags = character?.eventFlags || {};
   const completedQuestIds = character?.quests?.completedQuestIds || [];
+  const completedQuests = new Set(completedQuestIds);
   const depth = Math.max(1, Math.floor(Number(character?.highestDungeonDepthReached) || 1));
+  const hasQueenRegalia = ["queen_tiara", "queen_earring", "queen_necklace"]
+    .every(itemId => hasKeyItem(character?.keyItems, itemId));
   const milestones = [
     ["registered", "冒険者として登録した", true, "ギルドで冒険者としての第一歩を踏み出した。"],
     ["stable", "馬小屋に宿泊した", flags.inn_stable_stayed, "宿屋の馬小屋で夜露をしのいだ。", "？？？？？？――朝の目覚め"],
-    ["b1Survey", "B1Fを100マス踏破した", flags.achievement_b1f_100_cells, "依頼003を受注し、B1Fを100マス踏破した。"],
+    ["b1Survey", "B1Fを100マス踏破した", flags.achievement_b1f_100_cells || completedQuests.has(FLOOR_SURVEY_QUEST_ID), "依頼003を受注し、B1Fを100マス踏破した。"],
     ["b2", "B2Fへ到達した", depth >= 2, "奈落の迷宮地下2階へ到達した。"],
     ["ghost", "未練ある亡霊を撃破した", flags.lingering_ghost_b2f_defeated_once, "繰り返し現れる亡霊を初めて退けた。"],
     ["otherworldlyWisdom", "異界の叡智を撃破した", flags.boss_otherworldly_wisdom_b4f_defeated, "B4Fに潜む異界の叡智を打ち破った。", "？？？？？？――絶望への挑戦"],
@@ -78,12 +89,12 @@ export function getAdventureChronicle(character) {
     ["jabberwock", "燻り狂うものを撃破した", flags.boss_jabberwock_event_boss_defeated, "ジャバウォックを撃破した。"],
     ["ironMaiden", "鋼鉄の乙女を撃破した", flags.red_door_b29f_unlocked && flags.boss_iron_maiden_b29f_defeated, "B29Fの赤い扉の奥で鋼鉄の乙女を撃破した。"],
     ["b30", "B30Fへ到達した", flags.boss_iron_maiden_b29f_defeated && depth >= 30, "鋼鉄の乙女を倒し、B30Fへ到達した。"],
-    ["b35Survey", "B35Fを100マス踏破した", flags.achievement_b35f_100_cells, "途中帰還することなくB35Fを100マス踏破した。"],
+    ["b35Survey", "B35Fを100マス踏破した", flags.achievement_b35f_100_cells || completedQuests.has(B35F_SURVEY_QUEST_ID), "途中帰還することなくB35Fを100マス踏破した。"],
     ["brassBull", "真鍮の雄牛を撃破した", flags.boss_brass_bull_event_boss_defeated, "B36Fの真鍮の雄牛を撃破した。"],
     ["wickerMan", "ウィッカーマンを撃破した", flags.red_door_b39f_unlocked && flags.boss_wicker_man_b39f_defeated, "B39Fの赤い扉の奥でウィッカーマンを撃破した。"],
     ["b40", "B40Fへ到達した", flags.boss_wicker_man_b39f_defeated && depth >= 40, "ウィッカーマンを倒し、B40Fへ到達した。"],
     ["marathon42", "深淵への大行軍", flags.b1_b42_marathon_completed, "一度も帰還せず、転送門を使わずにB1FからB42Fへ到達した。", "？？？？？？――地上を忘れし旅人"],
-    ["b45Survey", "B45Fを100マス踏破した", flags.achievement_b45f_100_cells, "途中帰還することなくB45Fを100マス踏破した。", "？？？？？？――凍土を踏破する者"],
+    ["b45Survey", "B45Fを100マス踏破した", flags.achievement_b45f_100_cells || completedQuests.has(B45F_SURVEY_QUEST_ID), "途中帰還することなくB45Fを100マス踏破した。", "？？？？？？――凍土を踏破する者"],
     ["glacies", "グラキエスを撃破した", flags.boss_glacies_event_boss_defeated, "氷の巨人グラキエスを撃破した。", "？？？？？？――氷巨人への挑戦"],
     ["eiskoenigin", "エイスケーニギンを撃破した", flags.boss_eiskoenigin_b49f_defeated, "B49Fの赤い扉の奥でエイスケーニギンを撃破した。", "？？？？？？――凍てつく女王"],
     ["b50", "B50Fへ到達した", flags.boss_eiskoenigin_b49f_defeated && depth >= 50, "エイスケーニギンを倒し、B50Fへ到達した。", "？？？？？？――極寒の果て"],
@@ -92,8 +103,35 @@ export function getAdventureChronicle(character) {
     ["abyssMusk", "奈落麝香の材料を入手した", completedQuestIds.includes("guild_021"), "ムスクビーストを倒し、奈落麝香の材料となる芳香嚢を入手した。", "？？？？？？――淑女の悩み"],
     ["fleischfresser", "フライシュフレッサーを倒した", flags.boss_fleischfresser_b59f_defeated, "B59Fの赤い扉の奥でフライシュフレッサーを倒した。"],
     ["b60", "B60Fへ到達した", depth >= 60 || flags.transfer_portal_b60f_unlocked, "奈落の迷宮地下60階へ到達し、転送門を解放した。"],
-    ["longMarch84", "深淵への大行軍再び", flags.b1_b84_long_march_completed, "一度も帰還せず、転送門を使わずにB1FからB84Fへ到達した。", "？？？？？？――タフすぎて損はない"]
+    ["todesScorpio", "トーデス・スコルピオを撃破した", flags.boss_todes_scorpio_b64f_defeated, "B64Fに潜む死毒の主トーデス・スコルピオを撃破した。", "？？？？？？――死毒の主"],
+    ["sphinx", "スピンクスの試練を越えた", flags.sphinx_b69f_route_fixed, "B69Fでスピンクスの試練を乗り越えた。", "？？？？？？――砂漠の問い"],
+    ["b70", "B70Fへ到達した", depth >= 70 || flags.transfer_portal_b70f_unlocked, "奈落の迷宮地下70階へ到達し、転送門を解放した。"],
+    ["jirene", "ジレーネを撃破した", flags.boss_jirene_b79f_defeated, "B79Fで魔性の歌声を操るジレーネを撃破した。", "？？？？？？――魔性の歌声"],
+    ["b80", "B80Fへ到達した", depth >= 80 || flags.floor_b80_reached || flags.transfer_portal_b80f_unlocked, "奈落の迷宮地下80階へ到達した。"],
+    ["maerchentiere", "メルヒェンティーレを捕獲した", flags.quest_026_maerchentiere_captured, "キルケの家で騒動を起こしたメルヒェンティーレを捕獲した。", "？？？？？？――いたずらどうぶつ捕獲作戦"],
+    ["longMarch84", "深淵への大行軍再び", flags.b1_b84_long_march_completed, "一度も帰還せず、転送門を使わずにB1FからB84Fへ到達した。", "？？？？？？――タフすぎて損はない"],
+    ["kriechendesChaos", "クリーヒェンデス・カーオスを撃破した", flags.boss_b89f_defeated, "B89Fで異界から現れたクリーヒェンデス・カーオスを撃破した。", "？？？？？？――異界からの来訪者"],
+    ["b90", "B90Fへ到達した", depth >= 90 || flags.transfer_portal_b90f_unlocked, "奈落の迷宮地下90階へ到達し、転送門を解放した。"],
+    ["lichtbringer", "リヒトブリンガーを手に入れた", flags.lichtbringer_b95f_found, "漆黒の闇を照らすリヒトブリンガーを手に入れた。", "？？？？？？――闇を照らすもの"],
+    ["queenRegalia", "女王の装飾品をすべて集めた", hasQueenRegalia || flags.queen_regalia_returned, "失われた女王の装飾品を三つとも集めた。", "？？？？？？――失われた王家の宝"],
+    ["seelenwuerger", "ゼーレンヴュルガーを撃破した", flags.boss_b99f_defeated, "B99Fの漆黒の番人ゼーレンヴュルガーを撃破した。", "？？？？？？――漆黒の番人"],
+    ["b100", "B100Fへ到達した", depth >= 100, "奈落の迷宮地下100階へ到達した。", "？？？？？？――奈落の最深部"],
+    ["finalLongMarch", "最後の大行軍", flags.b1_b100_final_long_march_completed, "一度も帰還せず、転送門を使わずにB1FからB100Fへ到達した。", "？？？？？？――前人未踏"],
+    ["b100Gauntlet", "十の幻影を乗り越えた", flags.achievement_b100_gauntlet_completed || flags.boss_amayenak_b100f_defeated || flags.ending_story_completed, "B100Fで立ちはだかる十の守護者の幻影をすべて退けた。", "？？？？？？――過去との決別"],
+    ["amayenak", "闇の大魔導師を撃破した", flags.boss_amayenak_b100f_defeated, "真実の杖を奪った闇の大魔導師アマイェナクを撃破した。", "？？？？？？――真実を奪った者"],
+    ["ending", "女王とともに帰還した", flags.ending_credits_watched, "女王ミカエラとともにカッツェンシュタットへ帰還した。", "？？？？？？――失われた女王"],
+    ["luminaRevival", "復活時に女神ルミナの姿を見た", flags.achievement_lumina_revival_seen, "復活の祈りの中で、黄金の稲穂の女神ルミナの姿を見た。", "？？？？？？――黄金の稲穂の女神"],
+    ["anastasiaOutfit", "アナスタシアの特別な衣装を見た", flags.anastasia_festival_outfit_unlocked, "寺院でアナスタシアの特別な衣装を見た。", "？？？？？？――豊穣感謝際"],
+    ["discountPass", "ディスカウントパスを入手した", hasKeyItem(character?.keyItems, "discount_pass"), "商店のお得意様としてディスカウントパスを入手した。", "？？？？？？――お得意様"],
+    ["playTime100", "プレイ時間が100時間を突破した", Number(character?.adventureStats?.playTimeSeconds) >= PLAY_TIME_100_HOURS_SECONDS, "冒険記録のプレイ時間が100時間に到達した。", "？？？？？？――悠久の冒険者"]
   ];
+  milestones.push([
+    "allAchievements",
+    "全ての実績を獲得した",
+    milestones.every(([, , achieved]) => Boolean(achieved)),
+    "この実績を除く、すべての実績を獲得した。",
+    "？？？？？？――やりこみ王"
+  ]);
   return milestones.map(([id, label, achieved, description, hiddenLabel]) => ({
     id,
     label: achieved ? label : hiddenLabel || "？？？？？？？",

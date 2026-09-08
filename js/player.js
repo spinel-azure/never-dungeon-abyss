@@ -1177,7 +1177,7 @@ export function startKirkeMaerchentiereResultEvent({ captured = false, fromGX, f
     fromGX,
     fromGY,
     backgroundImageId: "kirke_house_interior_b58f",
-    imageId: captured ? "maerchentiere_captured_b58f" : "maerchentiere_mischief_b58f",
+    imageId: captured ? "maerchentiere_captured_b58f" : "NPC_23",
     imageFit: "contain",
     reserveMessageLines: 5,
     canCancel: false,

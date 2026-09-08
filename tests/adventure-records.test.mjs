@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { getAdventureChronicle, getAdventureRecords } from "../data/adventure-records.js";
+import { getAdventureChronicle, getAdventureRecords, PLAY_TIME_100_HOURS_SECONDS } from "../data/adventure-records.js";
 import { readFile } from "node:fs/promises";
+import { grantKeyItem } from "../data/key-items.js";
 
 test("quest history and adventure record descriptions reserve fixed line counts", async () => {
   const css = await readFile(new URL("../css/game-menu.css", import.meta.url), "utf8");
@@ -127,6 +128,15 @@ test("B1F survey achievement follows quest 003's one-hundred-cell flag", () => {
   assert.equal(entry.label, "B1Fを100マス踏破した");
 });
 
+test("reported survey quests rescue all three one-hundred-cell achievements", () => {
+  const character = createInitialCharacter({ name: "救済調査員", job: "priest" });
+  character.quests.completedQuestIds.push("guild_003_b1f_survey", "guild_013", "guild_017");
+  const chronicle = getAdventureChronicle(character);
+  for (const id of ["b1Survey", "b35Survey", "b45Survey"]) {
+    assert.equal(chronicle.find(entry => entry.id === id)?.achieved, true, id);
+  }
+});
+
 test("unachieved stable and Otherworldly Wisdom milestones show their hints", () => {
   const character = createInitialCharacter({ name: "ヒント", job: "warrior" });
   const chronicle = getAdventureChronicle(character);
@@ -231,4 +241,93 @@ test("jungle achievements follow the requested order and preserve the musk hint"
     getAdventureChronicle(hiddenCharacter).find(entry => entry.id === "abyssMusk")?.label,
     "？？？？？？――淑女の悩み"
   );
+});
+
+test("the post-Fleischfresser chronicle uses durable progression flags and requested hints", () => {
+  const character = createInitialCharacter({ name: "深層踏破者", job: "mage" });
+  const hidden = getAdventureChronicle(character);
+  const hiddenLabels = {
+    todesScorpio: "？？？？？？――死毒の主",
+    finalLongMarch: "？？？？？？――前人未踏",
+    luminaRevival: "？？？？？？――黄金の稲穂の女神",
+    anastasiaOutfit: "？？？？？？――豊穣感謝際",
+    discountPass: "？？？？？？――お得意様",
+    playTime100: "？？？？？？――悠久の冒険者",
+    allAchievements: "？？？？？？――やりこみ王"
+  };
+  for (const [id, label] of Object.entries(hiddenLabels)) {
+    assert.equal(hidden.find(entry => entry.id === id)?.label, label, id);
+  }
+
+  character.highestDungeonDepthReached = 100;
+  Object.assign(character.eventFlags, {
+    boss_todes_scorpio_b64f_defeated: true,
+    sphinx_b69f_route_fixed: true,
+    boss_jirene_b79f_defeated: true,
+    floor_b80_reached: true,
+    quest_026_maerchentiere_captured: true,
+    b1_b84_long_march_completed: true,
+    boss_b89f_defeated: true,
+    lichtbringer_b95f_found: true,
+    queen_regalia_returned: true,
+    boss_b99f_defeated: true,
+    b1_b100_final_long_march_completed: true,
+    achievement_b100_gauntlet_completed: true,
+    boss_amayenak_b100f_defeated: true,
+    ending_credits_watched: true,
+    achievement_lumina_revival_seen: true,
+    anastasia_festival_outfit_unlocked: true
+  });
+  character.adventureStats.playTimeSeconds = PLAY_TIME_100_HOURS_SECONDS;
+  character.keyItems = grantKeyItem(character.keyItems, "discount_pass").keyItems;
+  const achieved = getAdventureChronicle(character);
+  for (const id of Object.keys(hiddenLabels).filter(id => id !== "allAchievements")) {
+    assert.equal(achieved.find(entry => entry.id === id)?.achieved, true, id);
+  }
+  assert.equal(achieved.find(entry => entry.id === "todesScorpio")?.label, "トーデス・スコルピオを撃破した");
+});
+
+test("the final long march is placed between B100F arrival and the guardian gauntlet", () => {
+  const ids = getAdventureChronicle(createInitialCharacter({ name: "順序", job: "thief" })).map(entry => entry.id);
+  assert.deepEqual(ids.slice(ids.indexOf("b100"), ids.indexOf("b100") + 3), [
+    "b100", "finalLongMarch", "b100Gauntlet"
+  ]);
+});
+
+test("legacy Amayenak clears retain the B100F guardian achievement", () => {
+  const character = createInitialCharacter({ name: "既存クリア", job: "priest" });
+  character.eventFlags.boss_amayenak_b100f_defeated = true;
+  assert.equal(getAdventureChronicle(character).find(entry => entry.id === "b100Gauntlet")?.achieved, true);
+});
+
+test("the completion achievement unlocks only after every other chronicle entry", () => {
+  const character = createInitialCharacter({ name: "やりこみ", job: "warrior" });
+  character.highestDungeonDepthReached = 100;
+  character.eventFlags = new Proxy(
+    { maikaefer_defeat_count: 10 },
+    { get: (target, property) => property in target ? target[property] : true }
+  );
+  character.quests.completedQuestIds = ["guild_020", "guild_021"];
+  character.adventureStats.playTimeSeconds = PLAY_TIME_100_HOURS_SECONDS;
+  character.keyItems = grantKeyItem(character.keyItems, "discount_pass").keyItems;
+  let completion = getAdventureChronicle(character).find(entry => entry.id === "allAchievements");
+  assert.equal(completion.achieved, true);
+  character.adventureStats.playTimeSeconds -= 1;
+  completion = getAdventureChronicle(character).find(entry => entry.id === "allAchievements");
+  assert.equal(completion.achieved, false);
+});
+
+test("mobile achievement labels stay on one line with a reduced dedicated font", async () => {
+  const css = await readFile(new URL("../css/game-menu.css", import.meta.url), "utf8");
+  assert.match(css, /\.adventure-records-panel \.inventory-entry span\{[^}]*white-space:nowrap/);
+  assert.match(css, /@media\(max-width:540px\)\{\.adventure-records-panel \.inventory-entry\{[^}]*font-size:clamp\(8px,2\.35vw,10px\)/);
+});
+
+test("rare-event and long-play achievements use the existing immediate notification path", async () => {
+  const main = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
+  assert.match(main, /previousPlayTime < PLAY_TIME_100_HOURS_SECONDS[\s\S]*?nextPlayTime >= PLAY_TIME_100_HOURS_SECONDS[\s\S]*?detectAchievementUnlocks\(\)/);
+  assert.match(main, /achievement_lumina_revival_seen: true[\s\S]*?saveGame\(\)[\s\S]*?detectAchievementUnlocks\(\)/);
+  assert.match(main, /\[flag\]: true[\s\S]*?updateCharacterUi\(\)[\s\S]*?saveGame\(\)[\s\S]*?flag === ANASTASIA_OUTFIT_EVENT_FLAG/);
+  assert.match(main, /grantKeyItem\(character\.keyItems, "discount_pass"\)[\s\S]*?updateCharacterUi\(\)[\s\S]*?saveGame\(\)/);
+  assert.match(main, /achievement_b100_gauntlet_completed: true/);
 });

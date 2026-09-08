@@ -21,4 +21,10 @@ test("revival prayer chooses its image once before the existing animation starts
   const end = source.indexOf("function prepareRevivalBlackout()", start);
   const prayer = source.slice(start, end);
   assert.ok(prayer.indexOf("selectRevivalGoddessImage()") < prayer.indexOf('classList.add("is-active")'));
+  assert.match(prayer, /goddessImage === RARE_REVIVAL_GODDESS_IMAGE[\s\S]*?achievement_lumina_revival_seen: true[\s\S]*?saveGame\(\)[\s\S]*?detectAchievementUnlocks\(\)/);
+});
+
+test("the achievement popup can appear above the revival scene", async () => {
+  const css = await readFile(new URL("../css/town.css", import.meta.url), "utf8");
+  assert.match(css, /\.achievement-unlocked-effect\{z-index:10050\}/);
 });

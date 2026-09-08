@@ -105,7 +105,7 @@ import { flashNpcPartyStatus, renderNpcPartyStatus, renderNpcStatusPage, setNpcP
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { applyNpcExplorationPassives, beginNpcRenewal, hireNpc, recordNpcExpeditionDepth, registerNpc, resolveNpcRenewal } from "../data/npc-party.js";
 import { getActivePlayTimeDelta, normalizeAdventureStats, recordInnStay, recordShopPurchase, recordTempleDonation } from "../data/adventure-stats.js";
-import { getAdventureChronicle } from "../data/adventure-records.js";
+import { getAdventureChronicle, PLAY_TIME_100_HOURS_SECONDS } from "../data/adventure-records.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName, grantEquipmentInstance } from "../data/equipment-inventory.js";
 import { createEnemyCombatant, getEnemyById, getEnemyEncounterCount, getRandomEncounterEnemy, getMagicRegionEncounterFormation, getTortureRegionEncounterFormation, getWaterRegionEncounterFormation, getCrystalRegionEncounterFormation, getDarkRegionEncounterFormation } from "../data/enemies.js";
@@ -153,7 +153,7 @@ import { acknowledgeShopStockAnnouncement, getShopEquipmentOffer, getShopStockSt
 import { getPastTavernRumors, getUnreadTavernRumor, markTavernRumorRead } from "../data/tavern-rumors.js";
 import { renameCharacter as applyCharacterRename } from "../data/character-name.js";
 import { isTransferDestinationUnlocked } from "../data/transfer-destinations.js";
-import { selectRevivalGoddessImage } from "../data/revival-presentation.js";
+import { RARE_REVIVAL_GODDESS_IMAGE, selectRevivalGoddessImage } from "../data/revival-presentation.js";
 import { ANASTASIA_OUTFIT_EVENT_FLAG } from "../data/anastasia-event.js";
 import { createMichaelaRestorationController } from "./michaela-restoration.js";
 import { createEndingController } from "./ending.js";
@@ -162,13 +162,16 @@ import { HELEN_HIDDEN_EVENT_PENDING_FLAG, HELEN_HIDDEN_EVENT_SEEN_FLAG, isHelenH
 import { getFireFloorStepDamage, isFireFloorDepth } from "../data/fire-floor.js";
 import { getColdFloorStepDamage, isColdFloorDepth } from "../data/cold-floor.js";
 import {
+  invalidateFinalLongMarchChallenge,
   invalidateLongMarchChallenge,
   invalidateMarathonChallenge,
   LONG_MARCH_REWARD_CARD_ID,
   MARATHON_BOSS_FLOORS,
   MARATHON_REWARD_CARD_ID,
+  recordFinalLongMarchDescent,
   recordLongMarchDescent,
   recordMarathonDescent,
+  startFinalLongMarchChallenge,
   startLongMarchChallenge,
   startMarathonChallenge
 } from "../data/marathon-challenge.js";
@@ -1130,10 +1133,15 @@ import {
     const stats = character.adventureStats && typeof character.adventureStats === "object"
       ? character.adventureStats
       : normalizeAdventureStats();
+    const previousPlayTime = Math.max(0, Number(stats.playTimeSeconds) || 0);
+    const nextPlayTime = previousPlayTime + gainedSeconds;
     character.adventureStats = {
       ...stats,
-      playTimeSeconds: Math.max(0, Number(stats.playTimeSeconds) || 0) + gainedSeconds
+      playTimeSeconds: nextPlayTime
     };
+    if (previousPlayTime < PLAY_TIME_100_HOURS_SECONDS && nextPlayTime >= PLAY_TIME_100_HOURS_SECONDS) {
+      detectAchievementUnlocks();
+    }
   }
 
   function markUserOperation() {
@@ -2966,6 +2974,13 @@ import {
           character = recordCustomQuestProgress(character, battle.enemy.questProgressId, 1);
         }
         if (b100Rematch && B100_GAUNTLET_BOSS_IDS.every(id => b100GauntletDefeatedThisExploration.has(id))) {
+          character = {
+            ...character,
+            eventFlags: {
+              ...(character.eventFlags || {}),
+              achievement_b100_gauntlet_completed: true
+            }
+          };
           refreshB100FinalBoss(character.eventFlags, [...b100GauntletDefeatedThisExploration]);
           bossRewardMessage = "\n十の守護者をすべて退けた。迷宮最奥で、新たな気配が目覚める――！";
         }
@@ -3196,6 +3211,7 @@ import {
     if (character) {
       character = invalidateMarathonChallenge(character);
       character = invalidateLongMarchChallenge(character);
+      character = invalidateFinalLongMarchChallenge(character);
       const carriedExperience = Math.max(
         0,
         Math.floor(Number(character.carriedExperience) || 0)
@@ -3276,7 +3292,8 @@ import {
 
   async function runRevivalPrayer() {
     if (!revivalPrayer || !revivalPrayerText || !revivalGoddess) return;
-    revivalGoddess.src = selectRevivalGoddessImage();
+    const goddessImage = selectRevivalGoddessImage();
+    revivalGoddess.src = goddessImage;
     revivalPrayer.hidden = false;
     revivalGoddess.hidden = true;
     revivalGoddess.classList.remove("is-active");
@@ -3290,6 +3307,19 @@ import {
     revivalGoddess.hidden = false;
     void revivalGoddess.offsetWidth;
     revivalGoddess.classList.add("is-active");
+    if (goddessImage === RARE_REVIVAL_GODDESS_IMAGE
+      && character
+      && !character.eventFlags?.achievement_lumina_revival_seen) {
+      character = {
+        ...character,
+        eventFlags: {
+          ...(character.eventFlags || {}),
+          achievement_lumina_revival_seen: true
+        }
+      };
+      saveGame();
+      detectAchievementUnlocks();
+    }
     await Promise.all([audioPromise, wait(4000)]);
     sceneTransition.classList.add("is-revealing");
     sceneTransition.classList.remove("is-black");
@@ -3586,6 +3616,7 @@ import {
         currentDepth = 1;
         character = startMarathonChallenge(character);
         character = startLongMarchChallenge(character);
+        character = startFinalLongMarchChallenge(character);
         setDungeonColors(resolveCurrentFloorTheme());
         applyCurrentFloorMist();
         state.treasureCompassActive = false;
@@ -3614,6 +3645,7 @@ import {
         currentDepth = destination;
         character = invalidateMarathonChallenge(character);
         character = invalidateLongMarchChallenge(character);
+        character = invalidateFinalLongMarchChallenge(character);
         setDungeonColors(resolveCurrentFloorTheme());
         applyCurrentFloorMist();
         character.highestDungeonDepthReached = Math.max(
@@ -3694,6 +3726,7 @@ import {
     if (character) {
       character = invalidateMarathonChallenge(character);
       character = invalidateLongMarchChallenge(character);
+      character = invalidateFinalLongMarchChallenge(character);
       character.pendingExperienceSettlement = createDepthReturnSettlement(
         character,
         returnFloor
@@ -3943,6 +3976,10 @@ import {
       });
       character = longMarch.character;
       longMarchCompleted = longMarch.completed;
+      character = recordFinalLongMarchDescent(character, {
+        fromDepth: previousDepth,
+        toDepth: currentDepth
+      }).character;
       if (marathonCompleted) {
         const reward = grantCard(character.cards, MARATHON_REWARD_CARD_ID, 1, character.deckCost);
         character = { ...character, cards: reward.cards };
