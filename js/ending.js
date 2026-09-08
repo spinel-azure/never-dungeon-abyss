@@ -9,6 +9,7 @@ export const ARRIVAL_CONFETTI_PART_MS = 1800;
 export const ARRIVAL_CONFETTI_END_MS = ARRIVAL_CONFETTI_INTERVAL_MS * (ARRIVAL_CONFETTI_BURSTS - 1) + ARRIVAL_CONFETTI_PART_MS;
 export const ARRIVAL_AFTER_CONFETTI_MS = 5000;
 export const ARRIVAL_TOTAL_MS = ARRIVAL_CONFETTI_END_MS + ARRIVAL_AFTER_CONFETTI_MS;
+export const ARRIVAL_MESSAGE = "カッツェンシュタットの中心部へ戻ってきたあなたを、皆が温かく出迎えてくれた。";
 export function getEndingFrame(seconds) {
   const t = Math.max(0, seconds);
   const stage = t < 4 ? "intro" : t < 26 ? "epilogue" : t < 32 ? "medal"
@@ -34,7 +35,7 @@ export function createArrivalConfetti(reduced = false) {
   ).flat() };
 }
 
-export function createEndingController({ parent, onSuspendTown, onSaveStory, onFinish,
+export function createEndingController({ parent, arrivalParent = parent, onArrivalMessage, onSuspendTown, onSaveStory, onFinish,
   createAudioClock = createEndingAudioClock, getFrameRate = () => 60 } = {}) {
   let root = null, abort = null, clock = null, effect = null, raf = 0;
   let active = false, phase = "idle", armed = false, lastConfirm = -Infinity;
@@ -46,10 +47,10 @@ export function createEndingController({ parent, onSuspendTown, onSaveStory, onF
     const height = root.clientHeight;
     metrics = { height, epilogue: sections.epilogue.scrollHeight, credits: sections.credits.scrollHeight };
   };
-  function build() {
+  function build(attachParent = parent) {
     root = document.createElement("section"); root.id = "endingScreen";
     root.className = "ending-screen"; root.setAttribute("aria-label", "エンディング");
-    root.innerHTML = `<div class="ending-arrival"><div class="ending-arrival-cloud-layer" aria-hidden="true"><div class="ending-arrival-cloud-track"><img alt=""><img alt=""></div></div><img class="ending-arrival-town" alt=""><img class="ending-arrival-image" alt="町への凱旋"><canvas aria-hidden="true"></canvas><p>カッツェンシュタットの中心部へ戻ってきたあなたを、皆が温かく出迎えてくれた。</p></div>
+    root.innerHTML = `<div class="ending-arrival"><div class="ending-arrival-cloud-layer" aria-hidden="true"><div class="ending-arrival-cloud-track"><img alt=""><img alt=""></div></div><img class="ending-arrival-town" alt=""><img class="ending-arrival-image" alt="町への凱旋"><canvas width="960" height="540" aria-hidden="true"></canvas></div>
       <div class="ending-roll"><img class="prologue-silhouette ending-queen" alt="">
       <div class="ending-scroll"></div><div class="prologue-dither prologue-dither-top"><i></i><i></i><i></i><i></i></div><div class="prologue-dither prologue-dither-bottom"><i></i><i></i><i></i><i></i></div></div>
       <div class="ending-shade"></div><button class="prologue-skip" type="button">A / ENTER：SKIP</button>`;
@@ -73,7 +74,7 @@ export function createEndingController({ parent, onSuspendTown, onSaveStory, onF
     for (const [stage, alt] of [["medal", "王家の猫勲章"], ["end", "Das Ende"]]) {
       const img = document.createElement("img"); img.src = ENDING_ASSETS[stage]; img.alt = alt; sections[stage].append(img);
     }
-    parent.append(root); scene = root.querySelector(".ending-roll"); shade = root.querySelector(".ending-shade");
+    attachParent.append(root); scene = root.querySelector(".ending-roll"); shade = root.querySelector(".ending-shade");
     skip = root.querySelector("button");
     abort = new AbortController();
     skip.addEventListener("pointerdown", event => { event.preventDefault(); event.stopPropagation(); handleAction("confirm"); }, { signal: abort.signal });
@@ -98,9 +99,13 @@ export function createEndingController({ parent, onSuspendTown, onSaveStory, onF
     active = true; replay = isReplay; generation++; phase = arrival ? "arrival" : "loading";
     armed = false; saving = false; previousFrame = -Infinity; lastConfirm = -Infinity;
     onSuspendTown?.(true);
-    document.body.classList.add("ending-presenting");
-    build(); root.dataset.phase = phase;
-    if (arrival) { skip.hidden = true; phaseStart = performance.now(); queue(); }
+    document.body.classList.toggle("ending-arrival-presenting", arrival);
+    document.body.classList.toggle("ending-presenting", !arrival);
+    build(arrival ? arrivalParent : parent); root.dataset.phase = phase;
+    if (arrival) {
+      onArrivalMessage?.(ARRIVAL_MESSAGE);
+      skip.hidden = true; phaseStart = performance.now(); queue();
+    }
     else await startCredits();
     return true;
   }
@@ -144,6 +149,10 @@ export function createEndingController({ parent, onSuspendTown, onSaveStory, onF
   }
   async function startCredits() {
     const token = generation;
+    document.body.classList.remove("ending-arrival-presenting");
+    document.body.classList.add("ending-presenting");
+    if (root?.parentElement !== parent) parent.append(root);
+    onArrivalMessage?.("");
     phase = "loading"; root.dataset.phase = phase; shade.style.opacity = "0";
     skip.hidden = false; skip.textContent = "A / ENTER：SKIP";
     scene.style.opacity = "0";
@@ -183,7 +192,8 @@ export function createEndingController({ parent, onSuspendTown, onSaveStory, onF
     cancelAnimationFrame(raf); raf = 0; clock?.stop(); clock = null;
     effect?.stop(false); effect = null; abort?.abort(); abort = null;
     root?.remove(); root = null; sections = {};
-    document.body.classList.remove("ending-presenting");
+    document.body.classList.remove("ending-presenting", "ending-arrival-presenting");
+    onArrivalMessage?.("");
     onSuspendTown?.(false, { completed });
   }
   return { start, handleAction, dispose, isActive: () => active, getPhase: () => phase };

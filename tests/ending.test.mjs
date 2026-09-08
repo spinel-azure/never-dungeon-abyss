@@ -7,7 +7,7 @@ import { completeEndingStory, completeEndingCredits, getEndingResumeMode, getEnd
   ENDING_ASSETS, ENDING_FLAGS, ENDING_SPECIAL_THANKS, ENDING_TEST_PLAYERS,
   EPILOGUE, EPILOGUE_AFTER_MEDAL } from "../data/ending.js";
 import { getQueenRegaliaMinimapEffects } from "../js/queen-regalia-effects.js";
-import { getEndingFrame, createArrivalConfetti, ARRIVAL_AFTER_CONFETTI_MS,
+import { getEndingFrame, createArrivalConfetti, ARRIVAL_AFTER_CONFETTI_MS, ARRIVAL_MESSAGE,
   ARRIVAL_CONFETTI_BURSTS, ARRIVAL_CONFETTI_END_MS, ARRIVAL_CONFETTI_INTERVAL_MS,
   ARRIVAL_TOTAL_MS } from "../js/ending.js";
 import { hasCompleteQueenRegalia } from "../data/quests.js";
@@ -111,6 +111,17 @@ test("confetti reuses the cracker renderer for three inward bursts before a five
     const dx = Math.cos(p.direction * Math.PI / 180), dy = Math.sin(p.direction * Math.PI / 180);
     assert.equal(dx > 0, p.x === 0); assert.equal(dy > 0, p.y === 0);
   }
+});
+test("arrival uses the normal main viewport and its ordinary message area", () => {
+  const source = read("js/ending.js"), css = read("css/ending.css"), main = read("js/main.js");
+  assert.equal(ARRIVAL_MESSAGE, "カッツェンシュタットの中心部へ戻ってきたあなたを、皆が温かく出迎えてくれた。");
+  assert.match(main, /arrivalParent: viewportEl/);
+  assert.match(main, /onArrivalMessage: say/);
+  assert.match(source, /build\(arrival \? arrivalParent : parent\)/);
+  assert.match(source, /if \(root\?\.parentElement !== parent\) parent\.append\(root\)/);
+  assert.doesNotMatch(source, /<p>カッツェンシュタット/);
+  assert.match(css, /ending-arrival-presenting\.town-active \.game>\.viewport\{display:block\}/);
+  assert.match(css, /\.ending-arrival-image\{[^}]*object-fit:cover;object-position:center top/);
 });
 test("main bridges real victory to automatic entrance, common return settlement, and story autosave", () => {
   const main = read("js/main.js");

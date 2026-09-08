@@ -34,7 +34,11 @@ const errors = [], warnings = [], results = [];
 async function advance(page, ms) { await page.clock.fastForward(ms); await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 0))); }
 try {
   for (const [layout, width, height, reduced] of [["pc",1280,900,false],["mobile",390,844,false],["tablet",820,1180,true]]) {
-    const context = await browser.newContext({ viewport: { width,height }, reducedMotion: reduced ? "reduce" : "no-preference" });
+    const context = await browser.newContext({
+      viewport: { width,height },
+      reducedMotion: reduced ? "reduce" : "no-preference",
+      hasTouch: layout !== "pc"
+    });
     const page = await context.newPage();
     page.on("pageerror", e => errors.push(`${layout}: ${e.message}`));
     page.on("console", m => { if (["warning","error"].includes(m.type())) warnings.push(`${layout}: ${m.text()}`); });
@@ -93,12 +97,56 @@ try {
     assert.ok(dialogueFigure.heightRatio >= .99);
     assert.equal(dialogueFigure.opacity, "1");
     await page.screenshot({ path: path.join(output, layout + "-michaela-dialogue.png") });
-    for (let i=0;i<6;i++) await advance(page, 16000);
+    const firstDialoguePage = await page.locator("#message").textContent();
+    await advance(page, 5000);
+    assert.equal(await page.evaluate(() => endingQa.restoration.getPhase()), "dialogue");
+    assert.equal(await page.locator("#message").textContent(), firstDialoguePage);
+    const expectedDialoguePages = await page.evaluate(() => endingQa.restoration.getPageCount());
+    assert.ok(expectedDialoguePages >= 6 && expectedDialoguePages < 30,
+      `${layout}: measured ${expectedDialoguePages} dialogue pages`);
+    if (layout !== "pc") {
+      assert.equal(await page.locator("body").evaluate(element => element.classList.contains("touch-controls-enabled")), true);
+      assert.equal(await page.locator("#buttonA").isVisible(), true);
+      assert.equal(await page.locator("#buttonB").isVisible(), false);
+      assert.equal(await page.locator(".touch-dpad").isVisible(), false);
+    }
+    let dialoguePageCount = 0;
+    while (await page.evaluate(() => endingQa.restoration.getPhase()) === "dialogue") {
+      const messageMetrics = await page.locator("#message").evaluate(element => ({
+        text: element.textContent, scrollHeight: element.scrollHeight, clientHeight: element.clientHeight
+      }));
+      assert.match(messageMetrics.text, /＊Aボタンで次へ$/);
+      assert.ok(messageMetrics.scrollHeight <= messageMetrics.clientHeight + 1,
+        `${layout}: dialogue page ${dialoguePageCount + 1} must fit`);
+      dialoguePageCount += 1;
+      assert.ok(dialoguePageCount <= expectedDialoguePages,
+        `${layout}: dialogue did not advance after ${expectedDialoguePages} pages`);
+      await advance(page, 250);
+      if (layout !== "pc" && dialoguePageCount === 1) await page.locator("#buttonA").tap();
+      else await page.evaluate(() => endingQa.action("confirm"));
+      await advance(page, 20);
+    }
+    assert.equal(dialoguePageCount, expectedDialoguePages);
     assert.equal(await page.evaluate(() => endingQa.state().location), "dungeon");
     assert.equal(await page.evaluate(() => endingQa.state().playerEnabled), false);
     await advance(page, 1600);
     assert.equal(await page.evaluate(() => endingQa.ending.getPhase()), "arrival");
+    assert.equal(await page.locator("#endingScreen").evaluate(element => element.parentElement.classList.contains("viewport")), true);
+    assert.equal(await page.locator("body").evaluate(element => element.classList.contains("ending-arrival-presenting")), true);
+    assert.equal(await page.locator("#townScreen").isVisible(), false);
+    assert.equal(await page.locator(".viewport").isVisible(), true);
+    if (layout !== "pc") assert.equal(await page.locator("#buttonA").isVisible(), false);
+    const arrivalBounds = await page.evaluate(() => {
+      const viewport = document.querySelector(".viewport").getBoundingClientRect();
+      const ending = document.querySelector("#endingScreen").getBoundingClientRect();
+      return { widthGap: Math.abs(viewport.width - ending.width), heightGap: Math.abs(viewport.height - ending.height) };
+    });
+    assert.ok(arrivalBounds.widthGap <= 2 && arrivalBounds.heightGap <= 2);
     assert.equal(await page.locator(".ending-arrival-image").count(), 1);
+    assert.equal(await page.locator(".ending-arrival-image").evaluate(element => getComputedStyle(element).objectFit), "cover");
+    assert.equal(await page.locator(".ending-arrival p").count(), 0);
+    assert.equal(await page.locator("#message").textContent(), "カッツェンシュタットの中心部へ戻ってきたあなたを、皆が温かく出迎えてくれた。");
+    assert.equal(await page.locator("#message").evaluate(element => element.scrollHeight <= element.clientHeight + 1), true);
     assert.equal(await page.locator(".ending-arrival-town").getAttribute("src"), "images/background/town_01b.avif");
     assert.deepEqual(await page.locator(".ending-arrival-cloud-track img").evaluateAll(images => images.map(image => image.getAttribute("src"))), [
       "images/background/town_01c.avif", "images/background/town_01c.avif"
@@ -113,6 +161,7 @@ try {
     await page.screenshot({ path: path.join(output, `${layout}-arrival.png`) });
     await advance(page, 9300);
     assert.equal(await page.evaluate(() => endingQa.ending.getPhase()), "credits");
+    assert.equal(await page.locator("#endingScreen").evaluate(element => element.parentElement.classList.contains("game")), true);
     await page.evaluate(() => {
       window.rollPaints = 0;
       window.rollObserver = new MutationObserver(records => { window.rollPaints += records.length; });

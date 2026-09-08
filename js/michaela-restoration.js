@@ -1,3 +1,5 @@
+import { paginateMessageToFit } from "./message-pagination.js";
+
 export const MICHAELA_RESTORATION_DIALOGUE = Object.freeze([
   "わたくしはミカエラ。このカッツェンラントの女王です。\nよくぞアマイェナクから真実の杖を取り戻してくれましたね。深く感謝いたします。",
   "この世の全ての叡智を欲していたアマイェナクはその源泉である\nアカシックレコードに触れたがっておりました。その為に真実の杖を必要としていたのです。",
@@ -7,12 +9,22 @@ export const MICHAELA_RESTORATION_DIALOGUE = Object.freeze([
   "さぁ、戻りましょう。皆が待つカッツェンシュタットへ！"
 ]);
 
-export function createMichaelaRestorationController({ root, flash, onMessage, onComplete }) {
+export const formatMichaelaDialoguePage = message => `女王ミカエラ「${message}」\n＊Aボタンで次へ`;
+
+export function createMichaelaDialoguePages(messageElement) {
+  return MICHAELA_RESTORATION_DIALOGUE.flatMap(message => paginateMessageToFit({
+    element: messageElement,
+    text: message,
+    formatPage: formatMichaelaDialoguePage
+  }));
+}
+
+export function createMichaelaRestorationController({ root, flash, messageElement, onMessage, onComplete }) {
   let active = false;
   let phase = "idle";
   let page = 0;
   let lastAdvanceAt = 0;
-  let dialogueTimer = 0;
+  let dialoguePages = [];
   const waits = new Map();
   const wait = milliseconds => new Promise(resolve => {
     const timer = window.setTimeout(() => { waits.delete(timer); resolve(true); }, milliseconds);
@@ -24,6 +36,7 @@ export function createMichaelaRestorationController({ root, flash, onMessage, on
     active = true;
     phase = "transform";
     page = 0;
+    document.body.classList.add("michaela-restoration-active");
     root.hidden = false;
     root.className = "michaela-restoration is-cat-rising";
     if (!await wait(2450)) return false;
@@ -40,18 +53,14 @@ export function createMichaelaRestorationController({ root, flash, onMessage, on
     if (!await wait(1800)) return false;
     if (!active) return false;
     phase = "dialogue";
+    document.body.classList.add("michaela-message-active");
+    dialoguePages = createMichaelaDialoguePages(messageElement);
     showPage();
     return true;
   }
 
   function showPage() {
-    const message = MICHAELA_RESTORATION_DIALOGUE[page] || "";
-    onMessage?.(`女王ミカエラ「${message}」`);
-    clearTimeout(dialogueTimer);
-    dialogueTimer = window.setTimeout(() => {
-      if (phase === "dialogue") handleAction("confirm");
-    }, Math.max(4500, message.length * 100));
-    document.body.classList.add("michaela-message-active");
+    onMessage?.(formatMichaelaDialoguePage(dialoguePages[page] || ""));
     lastAdvanceAt = performance.now();
   }
 
@@ -59,7 +68,7 @@ export function createMichaelaRestorationController({ root, flash, onMessage, on
     if (!active) return false;
     if (action !== "confirm" || phase !== "dialogue") return true;
     if (performance.now() - lastAdvanceAt < 220) return true;
-    if (page < MICHAELA_RESTORATION_DIALOGUE.length - 1) {
+    if (page < dialoguePages.length - 1) {
       page += 1;
       showPage();
       return true;
@@ -70,8 +79,7 @@ export function createMichaelaRestorationController({ root, flash, onMessage, on
 
   async function finish() {
     phase = "finishing";
-    clearTimeout(dialogueTimer);
-    document.body.classList.remove("michaela-message-active");
+    document.body.classList.remove("michaela-message-active", "michaela-restoration-active");
     onMessage?.("");
     root.hidden = true;
     await onComplete?.();
@@ -87,10 +95,12 @@ export function createMichaelaRestorationController({ root, flash, onMessage, on
   }, true);
 
   function dispose() {
-    active = false; phase = "idle"; clearTimeout(dialogueTimer); dialogueTimer = 0;
+    active = false; phase = "idle"; dialoguePages = [];
     for (const [timer, resolve] of waits) { clearTimeout(timer); resolve(false); }
     waits.clear(); root.hidden = true; root.className = "michaela-restoration";
-    flash.classList.remove("is-active"); document.body.classList.remove("michaela-message-active");
+    flash.classList.remove("is-active");
+    document.body.classList.remove("michaela-message-active", "michaela-restoration-active");
   }
-  return Object.freeze({ start, handleAction, dispose, isActive: () => active, getPhase: () => phase });
+  return Object.freeze({ start, handleAction, dispose, isActive: () => active,
+    getPhase: () => phase, getPageIndex: () => page, getPageCount: () => dialoguePages.length });
 }

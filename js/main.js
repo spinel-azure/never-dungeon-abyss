@@ -305,6 +305,7 @@ import {
   const michaelaRestorationController = createMichaelaRestorationController({
     root: michaelaRestorationRoot,
     flash: document.getElementById("michaelaRestorationFlash"),
+    messageElement: msgEl,
     onMessage: say,
     onComplete: completeMichaelaRestoration
   });
@@ -319,6 +320,8 @@ import {
     endingInputAbort = new AbortController();
     const blockOutsideEnding = event => {
       if (event.target instanceof Element && event.target.closest("#endingScreen, #michaelaRestoration")) return;
+      if (michaelaRestorationController.getPhase() === "dialogue"
+        && event.target instanceof Element && event.target.closest("#buttonA")) return;
       event.preventDefault();
       event.stopImmediatePropagation();
     };
@@ -335,6 +338,8 @@ import {
   }
   const endingController = createEndingController({
     parent: document.querySelector(".game"),
+    arrivalParent: viewportEl,
+    onArrivalMessage: say,
     getFrameRate: getEffectiveFrameRate,
     onSuspendTown: suspended => {
       setTownEndingSuspended(suspended);

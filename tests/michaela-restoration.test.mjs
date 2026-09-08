@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { MICHAELA_RESTORATION_DIALOGUE } from "../js/michaela-restoration.js";
+import { createMichaelaDialoguePages, formatMichaelaDialoguePage,
+  MICHAELA_RESTORATION_DIALOGUE } from "../js/michaela-restoration.js";
 import { getKeyItem, grantKeyItem } from "../data/key-items.js";
 import { createInitialCharacter } from "../data/classes.js";
 import { createBossCombatant, getBossById } from "../data/bosses.js";
@@ -32,6 +33,29 @@ test("Michaela restoration preserves all six requested dialogue pages", () => {
     "アマイェナクが、なぜそこまで全ての叡智を渇望したのか……。わたくしにも分かりません。\nけれど、その為に平和の象徴たる真実の杖を奪うことは、決して許されることではありません。\nあなたは、それを阻止してくださいました。",
     "さぁ、戻りましょう。皆が待つカッツェンシュタットへ！"
   ]);
+});
+
+test("Michaela dialogue measures the message box, splits naturally, and always shows the A prompt", () => {
+  const messageElement = {
+    clientHeight: 60,
+    value: "",
+    set textContent(value) { this.value = String(value); },
+    get textContent() { return this.value; },
+    get scrollHeight() {
+      return this.value.split("\n").reduce((height, line) => height + Math.max(1, Math.ceil(line.length / 18)), 0) * 10;
+    }
+  };
+  const pages = createMichaelaDialoguePages(messageElement);
+  assert.ok(pages.length > MICHAELA_RESTORATION_DIALOGUE.length);
+  for (const page of pages) {
+    messageElement.textContent = formatMichaelaDialoguePage(page);
+    assert.ok(messageElement.scrollHeight <= messageElement.clientHeight + 1);
+    assert.match(messageElement.textContent, /＊Aボタンで次へ$/);
+  }
+  assert.equal(
+    pages.join("").replaceAll("\n", ""),
+    MICHAELA_RESTORATION_DIALOGUE.join("").replaceAll("\n", "")
+  );
 });
 
 test("Amayenak victory persists recovery flags and returns to the B100F entrance", () => {
@@ -77,7 +101,9 @@ test("restoration overlay uses the cat and both Michaela portraits", () => {
   assert.match(html, /<div class="viewport">[\s\S]*?<section id="michaelaRestoration"/);
   assert.doesNotMatch(html, /michaelaRestorationDialogue/);
   assert.match(read("js/main.js"), /onMessage: say/);
-  assert.match(read("js/michaela-restoration.js"), /classList\.remove\("michaela-message-active"\);\s*onMessage\?\.\(""\)/);
+  assert.match(read("js/main.js"), /messageElement: msgEl/);
+  assert.doesNotMatch(read("js/michaela-restoration.js"), /dialogueTimer/);
+  assert.match(read("js/michaela-restoration.js"), /classList\.remove\("michaela-message-active", "michaela-restoration-active"\);\s*onMessage\?\.\(""\)/);
   assert.match(read("css/style.css"), /body\.michaela-message-active \.message/);
 });
 
@@ -88,6 +114,6 @@ test("restoration returns silently without an unrelated floor transition message
 
 test("only main.js receives the new cache buster", () => {
   const html = read("index.html");
-  assert.match(html, /js\/main\.js\?v=20260908-01/);
+  assert.match(html, /js\/main\.js\?v=20260908-02/);
   assert.doesNotMatch(read("js/main.js"), /from\s+["'][^"']+\?v=/);
 });
