@@ -687,6 +687,99 @@ export const BOSSES = Object.freeze({
     isBoss: true, bossKind: "obstacle", isDungeonObstacle: true,
     event: Object.freeze({ prompt: "巨大な蔓が行く手を塞いでいる。近づきますか？\n＊Aボタン：はい　Bボタン：いいえ", start: "巨大蔓がうごめき、襲いかかってきた！" })
   }),
+  fleischfresserknospe_b57f: Object.freeze({
+    id: "fleischfresserknospe_b57f",
+    name: "フライシュフレッサークスノペ",
+    level: 90,
+    floor: 57,
+    imageId: "fleischfresserknospe_b57f",
+    image: "images/bosses/boss_23.avif",
+    battleSize: "huge-wide",
+    ambientEffect: "tentacle-sway",
+    race: "plant",
+    maxHp: 18000,
+    stats: Object.freeze({ str: 42, int: 42, agi: 22, dex: 38, luc: 30 }),
+    def: 42,
+    attack: 44,
+    experienceReward: 45000,
+    regainRate: 0.03,
+    actions: Object.freeze([
+      Object.freeze({ weight: 40, action: Object.freeze({
+        id: "fleischfresserknospe_double_thorn_vines",
+        name: "双棘の蔓",
+        actionType: "physicalAttack",
+        hitCount: 2,
+        powerPerHit: 0.9,
+        effects: Object.freeze([Object.freeze({
+          statusId: "bleeding",
+          trigger: "perAction",
+          statusKind: "physical",
+          baseRate: 0.25
+        })])
+      }) }),
+      Object.freeze({ weight: 25, action: Object.freeze({
+        id: "fleischfresserknospe_deadly_pollen",
+        name: "猛毒花粉",
+        actionType: "spell",
+        element: "arcane",
+        spellPower: 32,
+        unavoidable: true,
+        effects: Object.freeze([Object.freeze({
+          statusId: "deadly_poison",
+          trigger: "perAction",
+          statusKind: "magical",
+          baseRate: 0.35
+        })])
+      }) }),
+      Object.freeze({ weight: 20, action: Object.freeze({
+        id: "fleischfresserknospe_life_drain_vine",
+        name: "吸命の蔓",
+        actionType: "physicalAttack",
+        hitCount: 1,
+        powerPerHit: 1.3,
+        selfHealFromActualHpLossRate: 1,
+        effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 15, action: Object.freeze({
+        id: "fleischfresserknospe_predation_omen",
+        name: "捕食の予兆",
+        actionType: "prepareAction",
+        prepareMessage: "花弁の隙間から、冷たい視線があなたを捉えた。\n二本の蔓が、大きく振り上げられる……！",
+        reservedAction: Object.freeze({
+          id: "fleischfresserknospe_double_vine_predation",
+          name: "双蔓捕食",
+          actionType: "physicalAttack",
+          hitCount: 2,
+          powerPerHit: 1.2,
+          turnPriority: -1,
+          canceledMessage: "フライシュフレッサークスノペは体勢を立て直している。",
+          effects: Object.freeze([])
+        })
+      }) })
+    ]),
+    reservedActionBreakTrait: Object.freeze({
+      element: "fire",
+      requireActualHpDamage: true,
+      message: "炎にあぶられ、振り上げた蔓がひるんだ！ 捕食の構えが崩れた！"
+    }),
+    strongHerbicideTrait: Object.freeze({ regainSuppressionTurns: 5 }),
+    reward: Object.freeze({ type: "none" }),
+    elementMultipliers: Object.freeze({
+      fire: 1.5, ice: 1, lightning: 1, holy: 1, dark: 1, arcane: 1
+    }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      deadly_poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 85, immune: false })
+    }),
+    escapeRate: 1,
+    surpriseRate: 0,
+    surpriseRateMaximum: 0,
+    noDrop: true,
+    isBoss: true,
+    bossKind: "event",
+    defeatedFlag: "boss_fleischfresserknospe_b57f_defeated"
+  }),
   fleischfresser_b59f: Object.freeze({
     id: "fleischfresser_b59f", name: "フライシュフレッサー", level: 65, floor: 59,
     imageId: "fleischfresser_b59f", image: "images/bosses/boss_11.avif", battleSize: "huge-wide",
@@ -695,6 +788,7 @@ export const BOSSES = Object.freeze({
     race: "plant", maxHp: 10000,
     stats: Object.freeze({ str: 31, int: 28, agi: 10, dex: 25, luc: 22 }),
     def: 34, attack: 30, experienceReward: 20000, regainRate: 0.05,
+    strongHerbicideTrait: Object.freeze({ regainSuppressionTurns: 5 }),
     actions: Object.freeze([
       Object.freeze({ weight: 45, action: Object.freeze({ id: "flesh_vine", name: "捕食蔓", actionType: "physicalAttack", hitCount: 2, powerPerHit: 0.85, effects: Object.freeze([]) }) }),
       Object.freeze({ weight: 30, action: Object.freeze({ id: "flesh_poison", name: "猛毒花粉", actionType: "spell", element: "arcane", spellPower: 18, unavoidable: true, effects: Object.freeze([Object.freeze({ statusId: "deadly_poison", trigger: "perAction", statusKind: "magical", baseRate: 0.35 })]) }) }),

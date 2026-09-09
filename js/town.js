@@ -81,6 +81,8 @@ const TOWN_TYPEWRITER_DELAYS = Object.freeze({ slow: 75, normal: 42, fast: 20 })
 const JOHANNA_CAT_BORROW_TRANSITION_FLAG = "johanna_cat_borrow_transition";
 const JOHANNA_CAT_RETURN_TRANSITION_FLAG = "johanna_cat_return_transition";
 const JOHANNA_CAT_BORROW_POPUP_WAIT_MS = 3000;
+export const INN_MEDICINE_DELIVERY_TRANSITION_FLAG = "quest_031_medicine_delivery_transition";
+const INN_MEDICINE_BLACKOUT_MS = 360;
 const townTypewriter = {
   enabled: true,
   speed: "normal",
@@ -140,6 +142,9 @@ const town = {
   active: false,
   transitioning: false,
   johannaCatTransitionTimers: new Set(),
+  innKeeperId: "",
+  innVisitPending: false,
+  innProfile: null,
   mode: "arrival",
   registrationRequired: false,
   firstTownArrivalPending: false,
@@ -279,6 +284,13 @@ export function configureTown(options) {
     image.decode().catch(() => {});
     town.portraitPreloads.push(image);
   }
+  ["images/npc/NPC_11c.avif", "images/npc/NPC_11d.avif", "images/npc/NPC_11e.avif"].forEach(src => {
+    const image = new Image();
+    image.decoding = "async";
+    image.src = src;
+    image.decode().catch(() => {});
+    town.portraitPreloads.push(image);
+  });
   for (const npc of NPC_DEFINITIONS) {
     const image = new Image();
     image.decoding = "async";
@@ -484,9 +496,16 @@ export function setTownTypewriterOptions({ enabled, speed } = {}) {
   if (!townTypewriter.enabled && townTypewriter.active) completeTownTypewriter();
 }
 
-export function openTown({ registrationRequired = false, facilityId = null, mode = null, firstTownArrivalPending = false } = {}) {
+export function openTown({
+  registrationRequired = false,
+  facilityId = null,
+  mode = null,
+  firstTownArrivalPending = false,
+  innKeeperId = null
+} = {}) {
   clearJohannaCatTransitionTimers();
   document.body.classList.remove("johanna-cat-message-expanded");
+  document.body.classList.remove("facility-talk-message-expanded");
   town.active = true;
   town.registrationRequired = Boolean(registrationRequired);
   town.firstTownArrivalPending = Boolean(firstTownArrivalPending);
@@ -500,7 +519,12 @@ export function openTown({ registrationRequired = false, facilityId = null, mode
       ? "inn"
       : availableRequested?.id || "inn";
   town.selectedIndex = Math.max(0, TOWN_FACILITIES.findIndex(facility => facility.id === initialId));
-  const opensInsideFacility = mode === "facility" || mode === "facilityMenu";
+  const opensInsideFacility = mode === "facility"
+    || mode === "facilityMenu"
+    || (facilityId === "inn" && ["facilityTalk", "innStayConfirm"].includes(mode));
+  town.innKeeperId = facilityId === "inn" && typeof innKeeperId === "string" ? innKeeperId : "";
+  town.innVisitPending = facilityId === "inn" && opensInsideFacility && !town.innKeeperId;
+  town.innProfile = null;
   town.mode = town.registrationRequired
     ? "registration"
     : mode === "dungeonEntrance"
@@ -517,11 +541,14 @@ export function closeTown() {
   town.active = false;
   clearJohannaCatTransitionTimers();
   document.body.classList.remove("johanna-cat-message-expanded");
+  document.body.classList.remove("facility-talk-message-expanded");
   stopTownNameBanner();
   clearTownTypewriter();
   town.root.hidden = true;
   town.registration.hidden = true;
   town.pendingVoiceFacility = "";
+  town.innVisitPending = false;
+  town.innProfile = null;
   town.subFacilityId = "";
   showGameCommands();
   document.body.classList.remove("town-active");
@@ -553,7 +580,8 @@ export function getTownState() {
     facilityId: currentFacility().id,
     registrationRequired: town.registrationRequired,
     firstTownArrivalPending: town.firstTownArrivalPending,
-    mode: town.mode
+    mode: town.mode,
+    innKeeperId: currentFacility().id === "inn" ? town.innKeeperId || null : null
   };
 }
 
@@ -688,6 +716,7 @@ function handleTavernRumorInput(action) {
 }
 
 function handleFacilityTalkInput(action) {
+  if (town.transitioning) return true;
   if (action === "cancel") return true;
   if (action !== "confirm") return true;
   const completingJohannaCatBorrow = town.facilityTalkCompletionFlag === JOHANNA_CAT_BORROW_TRANSITION_FLAG
@@ -710,10 +739,19 @@ function handleFacilityTalkInput(action) {
     beginJohannaCatBlackout(town.facilityTalkCompletionFlag);
     return true;
   }
-  if (town.facilityTalkCompletionFlag) town.onCompleteFacilityTalk(town.facilityTalkCompletionFlag);
+  if (town.facilityTalkCompletionFlag === INN_MEDICINE_DELIVERY_TRANSITION_FLAG) {
+    beginInnMedicineDeliveryTransition();
+    return true;
+  }
+  if (town.facilityTalkCompletionFlag) {
+    town.onCompleteFacilityTalk(town.facilityTalkCompletionFlag, {
+      innKeeperId: town.innKeeperId || null
+    });
+  }
   town.facilityTalkDialogue = [];
   town.facilityTalkDialogueIndex = 0;
   town.facilityTalkCompletionFlag = "";
+  document.body.classList.remove("facility-talk-message-expanded");
   town.mode = "facilityMenu";
   renderFacility();
   return true;
@@ -748,10 +786,12 @@ function scheduleJohannaCatTransition(callback, delayMs) {
 
 function clearJohannaCatTransitionTimers() {
   const hadActiveTransition = town.johannaCatTransitionTimers.size > 0
-    || Boolean(town.root?.classList.contains("is-inn-cat-blackout"));
+    || Boolean(town.root?.classList.contains("is-inn-cat-blackout"))
+    || Boolean(town.root?.classList.contains("is-inn-medicine-blackout"));
   town.johannaCatTransitionTimers.forEach(timer => window.clearTimeout(timer));
   town.johannaCatTransitionTimers.clear();
   town.root?.classList.remove("is-inn-cat-blackout");
+  town.root?.classList.remove("is-inn-medicine-blackout");
   if (hadActiveTransition) town.transitioning = false;
 }
 
@@ -776,8 +816,14 @@ function runJohannaCatBlackout({ completionFlag = "", delayMs = 0, completeDurin
         clearJohannaCatTransitionTimers();
         return;
       }
-      if (completeDuringBlackout && completionFlag) town.onCompleteFacilityTalk(completionFlag);
-      finishJohannaCatDialogue();
+      const transitionResult = completeDuringBlackout && completionFlag
+        ? town.onCompleteFacilityTalk(completionFlag)
+        : null;
+      if (transitionResult && typeof transitionResult === "object") {
+        applyInnTransitionResult(transitionResult);
+      } else {
+        finishJohannaCatDialogue();
+      }
       scheduleJohannaCatTransition(() => {
         town.root.classList.remove("is-inn-cat-blackout");
         scheduleJohannaCatTransition(() => { town.transitioning = false; }, 360);
@@ -798,6 +844,57 @@ function beginJohannaCatBlackout(completionFlag) {
   if (town.transitioning) return false;
   town.transitioning = true;
   runJohannaCatBlackout({ completionFlag, completeDuringBlackout: true });
+  return true;
+}
+
+function applyInnTransitionResult(result) {
+  const update = result && typeof result === "object" ? result : {};
+  const dialogue = Array.isArray(update.dialogue) ? update.dialogue.filter(Boolean) : [];
+  town.innKeeperId = typeof update.keeperId === "string" && update.keeperId
+    ? update.keeperId
+    : town.innKeeperId;
+  town.innProfile = {
+    ...(town.innProfile || {}),
+    ...update,
+    keeperId: town.innKeeperId,
+    _newVisit: false,
+    dialogue,
+    completionFlag: update.completionFlag || ""
+  };
+  applyInnPortrait(town.innProfile);
+  town.facilityTalkDialogue = dialogue;
+  town.facilityTalkDialogueIndex = 0;
+  town.facilityTalkCompletionFlag = town.innProfile.completionFlag;
+  document.body.classList.toggle("facility-talk-message-expanded", Boolean(update.messageExpanded));
+  if (dialogue.length) {
+    town.mode = "facilityTalk";
+    setInnMessage(dialogue[0], town.innProfile, "talkVoice", { forceVoice: true });
+    return true;
+  }
+  town.mode = "facilityMenu";
+  renderFacility();
+  return false;
+}
+
+function beginInnMedicineDeliveryTransition() {
+  if (town.transitioning) return false;
+  town.transitioning = true;
+  town.root.classList.add("is-inn-medicine-blackout");
+  scheduleJohannaCatTransition(() => {
+    if (!town.active) {
+      clearJohannaCatTransitionTimers();
+      return;
+    }
+    const result = town.onCompleteFacilityTalk(INN_MEDICINE_DELIVERY_TRANSITION_FLAG, {
+      innKeeperId: town.innKeeperId || null
+    });
+    applyInnTransitionResult(result);
+    town.onStateChanged();
+    scheduleJohannaCatTransition(() => {
+      town.root.classList.remove("is-inn-medicine-blackout");
+      scheduleJohannaCatTransition(() => { town.transitioning = false; }, INN_MEDICINE_BLACKOUT_MS);
+    }, 120);
+  }, INN_MEDICINE_BLACKOUT_MS);
   return true;
 }
 
@@ -1203,6 +1300,11 @@ function activateFacility(facility) {
     renderDungeonEntrance();
     return;
   }
+  if (facility.id === "inn") {
+    town.innKeeperId = "";
+    town.innVisitPending = true;
+    town.innProfile = null;
+  }
   town.mode = facility.id === "guild" && town.registrationRequired ? "registration" : "facilityMenu";
   town.facilityCommandIndex = 0;
   town.facilityPreviewCommand = "";
@@ -1230,6 +1332,9 @@ function previewLibraryCommand(command) {
 function beginFacilitySelection() {
   town.suppressFestivalPortraitUntilTempleExit = false;
   town.subFacilityId = "";
+  town.innKeeperId = "";
+  town.innVisitPending = false;
+  town.innProfile = null;
   town.mode = "selection";
   town.selectedIndex = nearestSelectableIndex(town.selectedIndex, 1);
   renderTownView();
@@ -1240,6 +1345,9 @@ export function showTownArrival({ playNameBanner = false, firstVisit = false } =
   town.mode = "selection";
   town.suppressFestivalPortraitUntilTempleExit = false;
   town.subFacilityId = "";
+  town.innKeeperId = "";
+  town.innVisitPending = false;
+  town.innProfile = null;
   town.arrivalMessage = firstVisit ? "firstVisit" : "normal";
   town.selectedIndex = TOWN_FACILITIES.findIndex(facility => facility.id === "inn");
   renderTownView();
@@ -1273,6 +1381,111 @@ function currentFacility() {
       ? "きょ、今日はルミナ様に祈りを捧げる特別な日なので…。"
       : "さぁ、女神様に祈りを捧げましょう。"
   };
+}
+
+export function getStableInnKeeperId({
+  currentKeeperId = "",
+  requestedKeeperId = "",
+  newVisit = false,
+  forceKeeperChange = false
+} = {}) {
+  const current = typeof currentKeeperId === "string" ? currentKeeperId : "";
+  const requested = typeof requestedKeeperId === "string" ? requestedKeeperId : "";
+  if (current && !newVisit && !forceKeeperChange) return current;
+  return requested || current || "johanna";
+}
+
+function resolveInnProfile(facility) {
+  const newVisit = town.innVisitPending;
+  const notice = town.onEnterInn({
+    newVisit,
+    innKeeperId: town.innKeeperId || null
+  }) || {};
+  town.innVisitPending = false;
+  const keeperId = getStableInnKeeperId({
+    currentKeeperId: town.innKeeperId,
+    requestedKeeperId: notice.keeperId,
+    newVisit,
+    forceKeeperChange: notice.forceKeeperChange === true
+  });
+  town.innKeeperId = keeperId;
+  const borrowedCatPortrait = hasBorrowedJohannaCat(town.getCharacter())
+    ? "images/npc/NPC_11c.avif"
+    : facility.image;
+  town.innProfile = {
+    keeperId,
+    _newVisit: newVisit,
+    keeper: notice.keeper || facility.keeper,
+    image: notice.image || borrowedCatPortrait,
+    portraitAlt: notice.portraitAlt || facility.portraitAlt || notice.keeper || facility.keeper,
+    greeting: notice.greeting || facility.greeting,
+    message: notice.message || "",
+    dialogue: Array.isArray(notice.dialogue) ? notice.dialogue.filter(Boolean) : [],
+    completionFlag: notice.completionFlag || "",
+    voice: Object.hasOwn(notice, "voice") ? notice.voice : "inn",
+    talkVoice: Object.hasOwn(notice, "talkVoice") ? notice.talkVoice : undefined,
+    stayConfirmMessage: notice.stayConfirmMessage || "",
+    stayAcceptedMessage: notice.stayAcceptedMessage || "",
+    stayCancelledMessage: notice.stayCancelledMessage || "",
+    insufficientFundsMessage: notice.insufficientFundsMessage || "",
+    stayConfirmVoice: Object.hasOwn(notice, "stayConfirmVoice") ? notice.stayConfirmVoice : undefined,
+    stayAcceptedVoice: Object.hasOwn(notice, "stayAcceptedVoice") ? notice.stayAcceptedVoice : undefined,
+    stayCancelledVoice: Object.hasOwn(notice, "stayCancelledVoice") ? notice.stayCancelledVoice : undefined,
+    insufficientFundsVoice: Object.hasOwn(notice, "insufficientFundsVoice") ? notice.insufficientFundsVoice : undefined
+  };
+  return town.innProfile;
+}
+
+function innVoice(profile, key, fallback = "inn") {
+  if (!profile) return fallback;
+  const value = profile[key];
+  if (value === false || value === null || value === "") return "";
+  if (value === true) return "inn";
+  if (typeof value === "string") return value;
+  const defaultVoice = profile.voice;
+  if (defaultVoice === false || defaultVoice === null || defaultVoice === "") return "";
+  if (defaultVoice === true || defaultVoice === undefined) return fallback;
+  return typeof defaultVoice === "string" ? defaultVoice : fallback;
+}
+
+function setInnMessage(message, profile, key = "voice", { forceVoice = false } = {}) {
+  const text = String(message || "");
+  const unchanged = town.messageEl.textContent === text && !townTypewriter.active;
+  town.pendingVoiceFacility = unchanged && !forceVoice ? "" : innVoice(profile, key);
+  town.messageEl.textContent = text;
+  if (unchanged && town.pendingVoiceFacility) playPendingFacilityVoice();
+}
+
+function formatInnMessage(template, fee, fallback) {
+  const source = String(template || fallback || "");
+  return source
+    .replaceAll("{fee}", String(fee))
+    .replaceAll("◯◯", String(fee));
+}
+
+function buildInnStayContext(fee, canAfford) {
+  const profile = town.innProfile || {};
+  return {
+    keeperId: town.innKeeperId || profile.keeperId || "johanna",
+    keeper: profile.keeper || "女将ヨハンナ",
+    fee,
+    canAfford,
+    stayAcceptedMessage: formatInnMessage(profile.stayAcceptedMessage, fee, ""),
+    insufficientFundsMessage: formatInnMessage(profile.insufficientFundsMessage, fee, "")
+  };
+}
+
+function applyInnPortrait(profile) {
+  const image = profile?.image || "";
+  town.portrait.hidden = !image;
+  town.portraitPlaceholder.hidden = Boolean(image);
+  if (image) {
+    town.portrait.src = image;
+    town.portrait.alt = profile?.portraitAlt || profile?.keeper || "";
+  } else {
+    town.portrait.removeAttribute("src");
+    town.portrait.alt = "";
+  }
 }
 
 function templeKeeper() {
@@ -1359,7 +1572,7 @@ function renderTownView() {
 function renderFacility() {
   stopTownNameBanner();
   const facility = currentFacility();
-  const innNotice = facility.id === "inn" ? town.onEnterInn() : null;
+  const innNotice = facility.id === "inn" ? resolveInnProfile(facility) : null;
   town.onAmbienceChanged(false);
   town.onBgmChanged(
     facility.id === "guild" && town.registrationRequired
@@ -1384,22 +1597,26 @@ function renderFacility() {
   town.background.src = facility.background || "images/background/town_01.avif";
   town.background.alt = `${facility.label}の背景`;
   town.background.hidden = false;
-  town.pendingVoiceFacility = facility.id === "inn" ? "inn" : "";
+  town.pendingVoiceFacility = "";
   if (innNotice?.message) {
-    town.messageEl.textContent = innNotice.message;
+    setInnMessage(innNotice.message, innNotice);
   } else if (facility.id === "inn" && !town.getCharacter()?.eventFlags?.inn_visited) {
     const visitor = town.getCharacter();
     visitor.eventFlags = { ...(visitor.eventFlags || {}), inn_visited: true };
-    town.messageEl.textContent = "女将ヨハンナ：おや？初めて見る顔だね？どこから来たんだい？";
+    setInnMessage("女将ヨハンナ：おや？初めて見る顔だね？どこから来たんだい？", innNotice);
   } else {
-    town.messageEl.textContent = facility.keeper ? `${facility.keeper}：${facility.greeting}` : facility.greeting;
+    const keeper = innNotice?.keeper || facility.keeper;
+    const greeting = innNotice?.greeting || facility.greeting;
+    const message = keeper ? `${keeper}：${greeting}` : greeting;
+    if (facility.id === "inn") setInnMessage(message, innNotice);
+    else town.messageEl.textContent = message;
   }
   const innDialogue = Array.isArray(innNotice?.dialogue) ? innNotice.dialogue.filter(Boolean) : [];
   if (facility.id === "inn" && innDialogue.length) {
     town.facilityTalkDialogue = innDialogue;
     town.facilityTalkDialogueIndex = 0;
     town.facilityTalkCompletionFlag = innNotice.completionFlag || "";
-    town.messageEl.textContent = innDialogue[0];
+    setInnMessage(innDialogue[0], innNotice);
     town.mode = "facilityTalk";
   }
   if (facility.id === "shop") {
@@ -1414,17 +1631,19 @@ function renderFacility() {
       town.mode = "facilityTalk";
     }
   }
-  const portraitImage = facility.id === "inn" && hasBorrowedJohannaCat(town.getCharacter())
-    ? "images/npc/NPC_11c.avif"
-    : facility.image;
-  town.portrait.hidden = !portraitImage;
-  town.portraitPlaceholder.hidden = Boolean(portraitImage);
-  if (portraitImage) {
-    town.portrait.src = portraitImage;
-    town.portrait.alt = facility.portraitAlt || facility.keeper;
+  if (facility.id === "inn") {
+    applyInnPortrait(innNotice);
   } else {
-    town.portrait.removeAttribute("src");
-    town.portrait.alt = "";
+    const portraitImage = facility.image;
+    town.portrait.hidden = !portraitImage;
+    town.portraitPlaceholder.hidden = Boolean(portraitImage);
+    if (portraitImage) {
+      town.portrait.src = portraitImage;
+      town.portrait.alt = facility.portraitAlt || facility.keeper;
+    } else {
+      town.portrait.removeAttribute("src");
+      town.portrait.alt = "";
+    }
   }
   const showRegistration = facility.id === "guild" && town.registrationRequired;
   if (showRegistration) {
@@ -1766,11 +1985,27 @@ function activateFacilityService(command) {
   if (command === "talk") {
     const facility = currentFacility();
     if (!["guild", "inn", "temple", "shop", "library", "tavern"].includes(facility?.id)) return false;
-    const result = town.onTalk(facility?.id);
+    const result = town.onTalk(facility?.id, facility?.id === "inn"
+      ? { innKeeperId: town.innKeeperId || null, innProfile: { ...(town.innProfile || {}) } }
+      : undefined);
     const dialogue = Array.isArray(result?.dialogue) ? result.dialogue.filter(Boolean) : [];
     const message = dialogue[0] || (typeof result === "string" ? result : result?.message);
-    town.pendingVoiceFacility = facility.id === "inn" ? "inn" : "";
-    if (message) town.messageEl.textContent = message;
+    const voiceProfile = facility.id === "inn"
+      ? {
+        ...(town.innProfile || {}),
+        ...(result && typeof result === "object" && Object.hasOwn(result, "voice")
+          ? { talkVoice: result.voice }
+          : {})
+      }
+      : null;
+    if (message) {
+      if (facility.id === "inn") {
+        setInnMessage(message, voiceProfile, "talkVoice", { forceVoice: true });
+      } else {
+        town.pendingVoiceFacility = "";
+        town.messageEl.textContent = message;
+      }
+    }
     if (dialogue.length) {
       town.facilityTalkDialogue = dialogue;
       town.facilityTalkDialogueIndex = 0;
@@ -1779,6 +2014,10 @@ function activateFacilityService(command) {
       document.body.classList.toggle(
         "johanna-cat-message-expanded",
         town.facilityTalkCompletionFlag === JOHANNA_CAT_BORROW_TRANSITION_FLAG
+      );
+      document.body.classList.toggle(
+        "facility-talk-message-expanded",
+        Boolean(result.messageExpanded)
       );
     }
     if (result?.focusCommand) {
@@ -1923,28 +2162,49 @@ function closeTempleRenameInput() {
 function requestInnStay() {
   const character = town.getCharacter();
   const fee = getInnStayFee(character);
+  const profile = town.innProfile;
   if (Math.max(0, Math.floor(Number(character?.gold) || 0)) < fee) {
-    town.onStay();
+    town.pendingVoiceFacility = innVoice(profile, "insufficientFundsVoice");
+    town.onStay(buildInnStayContext(fee, false));
     town.onStateChanged();
     return;
   }
   town.mode = "innStayConfirm";
   town.playSe("confirm");
-  town.messageEl.textContent = `女将ヨハンナ：${fee}Gだけど、いいかい？\n＊Aボタン：はい　Bボタン：いいえ`;
+  setInnMessage(
+    formatInnMessage(
+      profile?.stayConfirmMessage,
+      fee,
+      `女将ヨハンナ：${fee}Gだけど、いいかい？\n＊Aボタン：はい　Bボタン：いいえ`
+    ),
+    profile,
+    "stayConfirmVoice",
+    { forceVoice: true }
+  );
 }
 
 function handleInnStayConfirmationInput(action) {
   if (action === "confirm") {
     town.playSe("confirm");
     town.mode = "facilityMenu";
-    town.onStay();
+    town.pendingVoiceFacility = innVoice(town.innProfile, "stayAcceptedVoice");
+    town.onStay(buildInnStayContext(getInnStayFee(town.getCharacter()), true));
     town.onStateChanged();
     return true;
   }
   if (action === "cancel") {
     town.playSe("cancel");
     town.mode = "facilityMenu";
-    town.messageEl.textContent = "女将ヨハンナ：そうかい。無理をするんじゃないよ？";
+    setInnMessage(
+      formatInnMessage(
+        town.innProfile?.stayCancelledMessage,
+        getInnStayFee(town.getCharacter()),
+        "女将ヨハンナ：そうかい。無理をするんじゃないよ？"
+      ),
+      town.innProfile,
+      "stayCancelledVoice",
+      { forceVoice: true }
+    );
     return true;
   }
   return true;

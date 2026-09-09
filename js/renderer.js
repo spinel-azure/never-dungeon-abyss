@@ -250,6 +250,9 @@ export function configureRenderer(options) {
   loadCharacterImage("kirke_house_interior_b58f", "images/background/dungeon_event_12.avif");
   loadCharacterImage("maerchentiere_mischief_b58f", "images/npc/NPC_event_23.avif");
   loadCharacterImage("maerchentiere_captured_b58f", "images/npc/NPC_event_24.avif");
+  loadCharacterImage("johanna_medicine_spring_b57f", "images/background/dungeon_event_14.avif");
+  loadCharacterImage("maerchentiere_reaching_flower_b57f", "images/npc/NPC_event_28.avif");
+  loadCharacterImage("maerchentiere_offering_flower_b57f", "images/npc/NPC_event_29.avif");
   loadCharacterImage("warp_portal_b100f", "images/dungeon_effects/warp_portal.avif");
   Object.values(B100_FINAL_PRELUDE_ASSETS).forEach(asset => loadCharacterImage(asset.id, asset.image));
   ["red", "black", "gold"].forEach(type => loadTreasureImage(type, `images/treasure/treasure-${type}.png`));
@@ -566,6 +569,15 @@ function drawOverlayEvent() {
       const scale = Math.max(W / image.naturalWidth, H / image.naturalHeight);
       const drawW = image.naturalWidth * scale;
       const drawH = image.naturalHeight * scale;
+      ctx.drawImage(image, (W - drawW) / 2, (H - drawH) / 2, drawW, drawH);
+      ctx.restore();
+      return;
+    }
+    if (event.imageFit === "containFull") {
+      const scale = Math.min((W * .98) / image.naturalWidth, (H * .98) / image.naturalHeight);
+      const drawW = image.naturalWidth * scale;
+      const drawH = image.naturalHeight * scale;
+      ctx.imageSmoothingEnabled = false;
       ctx.drawImage(image, (W - drawW) / 2, (H - drawH) / 2, drawW, drawH);
       ctx.restore();
       return;

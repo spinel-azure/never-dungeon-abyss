@@ -54,14 +54,17 @@ export function resolveInnStay(character) {
     0,
     Math.floor(Number(character.carriedExperience) || 0)
   );
+  const johannaBonusUnlocked = Boolean(character?.eventFlags?.johanna_bonus_unlocked);
   const pendingSettlement = normalizeDepthReturnSettlement(
     character.pendingExperienceSettlement,
-    baseSettlementExp
+    baseSettlementExp,
+    { johannaBonusUnlocked }
   );
   const settlement = pendingSettlement || calculateDepthReturnSettlement({
     baseSettlementExp,
     returnFloor: 0,
-    isGoddessGraceEquipped: false
+    isGoddessGraceEquipped: false,
+    johannaBonusUnlocked
   });
   const gainedExperience = settlement.finalSettlementExp;
   const experience = normalizeExperience((Number(character.experience) || 0) + gainedExperience);

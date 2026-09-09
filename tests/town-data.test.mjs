@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { QUESTS } from "../data/quests.js";
+import { JOHANNA_RESCUE_QUEST_ID, QUESTS } from "../data/quests.js";
 import { getTownFacility } from "../data/town.js";
 
 test("town facilities use the formal character names", () => {
@@ -22,6 +22,7 @@ test("shop greeting and guild quest client names stay synchronized", () => {
     ["guild_028", "パルテノペー"],
     ["guild_029", "キルケ"],
     ["guild_030", "怪しげな男"],
+    [JOHANNA_RESCUE_QUEST_ID, "アンナ"],
     ["guild_033", "キルケ"]
   ]);
   assert.ok(QUESTS.every(quest => quest.client === (specialClients.get(quest.id) || "ギルドマスター")));

@@ -43,6 +43,9 @@ test("Goddess's Grace disables only the depth bonus when equipped", () => {
     depthBonusPoints: 0,
     depthBonusRate: 0,
     depthBonusExp: 0,
+    johannaBonusUnlocked: false,
+    johannaBonusRate: 0,
+    johannaBonusExp: 0,
     finalSettlementExp: 1000,
     isGoddessGraceEquipped: true
   });
@@ -65,6 +68,84 @@ test("settlement breakdown distinguishes normal bonus from Goddess suppression",
   assert.match(goddess, /深層帰還ボーナス　適用なし/);
   assert.match(goddess, /女神の恩寵セット中/);
   assert.doesNotMatch(goddess, /－250/);
+});
+
+test("Johanna bonus adds ten percent of base experience with floor rounding", () => {
+  const zero = calculateDepthReturnSettlement({
+    baseSettlementExp: 0,
+    returnFloor: 80,
+    johannaBonusUnlocked: true
+  });
+  assert.equal(zero.johannaBonusExp, 0);
+  assert.equal(zero.finalSettlementExp, 0);
+
+  const rounded = calculateDepthReturnSettlement({
+    baseSettlementExp: 19,
+    returnFloor: 0,
+    johannaBonusUnlocked: true
+  });
+  assert.equal(rounded.johannaBonusRate, 0.1);
+  assert.equal(rounded.johannaBonusExp, 1);
+  assert.equal(rounded.finalSettlementExp, 20);
+
+  const formatted = formatDepthReturnSettlement(rounded);
+  assert.match(formatted, /ヨハンナボーナス　＋10％/);
+  assert.match(formatted, /ヨハンナ加算経験値　1/);
+  assert.match(formatted, /精算経験値　　　　20/);
+});
+
+test("Johanna bonus is independent of Deep Floor Proof and Goddess protection", () => {
+  const initial = {
+    ...createInitialCharacter({ name: "TEST", job: "priest" }),
+    carriedExperience: 10_000,
+    deckCost: 20,
+    eventFlags: { johanna_bonus_unlocked: true }
+  };
+  const proofGrant = grantCard(initial.cards, DEEP_FLOOR_PROOF_CARD_ID, 1, initial.deckCost);
+  const proofCharacter = {
+    ...initial,
+    cards: setDeckSlot(proofGrant.cards, 0, DEEP_FLOOR_PROOF_CARD_ID, initial.deckCost)
+  };
+  const proofSettlement = createDepthReturnSettlement(proofCharacter, 80);
+  assert.equal(proofSettlement.depthBonusExp, 5_000);
+  assert.equal(proofSettlement.johannaBonusExp, 1_000);
+  assert.equal(proofSettlement.finalSettlementExp, 16_000);
+
+  const graceGrant = grantCard(proofCharacter.cards, GODDESS_GRACE_CARD_ID, 1, proofCharacter.deckCost);
+  const protectedCharacter = {
+    ...proofCharacter,
+    cards: setDeckSlot(graceGrant.cards, 1, GODDESS_GRACE_CARD_ID, proofCharacter.deckCost)
+  };
+  const protectedSettlement = createDepthReturnSettlement(protectedCharacter, 80);
+  assert.equal(protectedSettlement.depthBonusExp, 0);
+  assert.equal(protectedSettlement.johannaBonusExp, 1_000);
+  assert.equal(protectedSettlement.finalSettlementExp, 11_000);
+});
+
+test("unlocking Johanna bonus after return updates pending settlement and settles once", () => {
+  const returned = {
+    ...createInitialCharacter({ name: "TEST", job: "warrior" }),
+    carriedExperience: 10_000
+  };
+  returned.pendingExperienceSettlement = createDepthReturnSettlement(returned, 80);
+  assert.equal(returned.pendingExperienceSettlement.finalSettlementExp, 14_000);
+
+  const unlocked = {
+    ...returned,
+    eventFlags: {
+      ...(returned.eventFlags || {}),
+      johanna_bonus_unlocked: true
+    }
+  };
+  const first = resolveInnStay(unlocked);
+  assert.equal(first.settlement.depthBonusExp, 4_000);
+  assert.equal(first.settlement.johannaBonusExp, 1_000);
+  assert.equal(first.gainedExperience, 15_000);
+
+  const settled = { ...unlocked, ...first.changes };
+  const second = resolveInnStay(settled);
+  assert.equal(second.gainedExperience, 0);
+  assert.equal(second.settlement.johannaBonusExp, 0);
 });
 
 test("owning Goddess's Grace does not disable the bonus unless it is in the deck", () => {
@@ -175,6 +256,42 @@ test("Deep Floor Proof settlement survives the protected save and load path", ()
   const loaded = normalizeCharacter(loadGame("auto").character);
   assert.equal(loaded.pendingExperienceSettlement.depthBonusPoints, 0.1);
   assert.equal(resolveInnStay(loaded).gainedExperience, 15_000);
+});
+
+test("Johanna bonus is restored without duplication through save normalization", () => {
+  const storage = new Map();
+  globalThis.localStorage = {
+    getItem: key => storage.get(key) ?? null,
+    setItem: (key, value) => storage.set(key, String(value)),
+    removeItem: key => storage.delete(key)
+  };
+  globalThis.window = { dispatchEvent() {} };
+  globalThis.CustomEvent = class CustomEvent { constructor(type) { this.type = type; } };
+
+  const returned = {
+    ...createInitialCharacter({ name: "SAVE", job: "priest" }),
+    carriedExperience: 10_000
+  };
+  returned.pendingExperienceSettlement = createDepthReturnSettlement(returned, 80);
+  returned.eventFlags = {
+    ...(returned.eventFlags || {}),
+    johanna_bonus_unlocked: true
+  };
+  const snapshot = {
+    character: returned,
+    player: { gridX: 0, gridY: 0, dir: 0 },
+    dungeon: { cells: [[{ type: "floor" }]], explored: [[true]] }
+  };
+
+  assert.equal(writeGame(snapshot, "auto"), true);
+  const loaded = normalizeCharacter(loadGame("auto").character);
+  assert.equal(loaded.pendingExperienceSettlement.depthBonusExp, 4_000);
+  assert.equal(loaded.pendingExperienceSettlement.johannaBonusExp, 1_000);
+  assert.equal(loaded.pendingExperienceSettlement.finalSettlementExp, 15_000);
+
+  const normalizedAgain = normalizeCharacter(structuredClone(loaded));
+  assert.equal(normalizedAgain.pendingExperienceSettlement.finalSettlementExp, 15_000);
+  assert.equal(resolveInnStay(normalizedAgain).gainedExperience, 15_000);
 });
 
 test("Goddess's Grace settlement effect is locked when returning from the dungeon", () => {

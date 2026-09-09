@@ -11,6 +11,7 @@ export const DEEP_FLOOR_PROOF_CARD_ID = "legendary_deep_floor_proof";
 export const MANA_BOOSTER_CARD_ID = "legendary_mana_booster";
 export const LIFE_BOOSTER_CARD_ID = "legendary_life_booster";
 export const SWIFT_FOOT_CARD_ID = "legendary_swift_foot";
+export const RETURN_FAVOR_CARD_ID = "legendary_return_favor";
 export const MIRAGE_CARD_ID = "sr_mirage";
 export const VIRGO_CARD_ID = "zodiac_virgo";
 
@@ -399,6 +400,15 @@ const STANDARD_CARDS = [
     category: "exploration", effectId: "presence_gain_reduction", effectValue: 1,
     iconId: "agility", maxOwned: 1, maxCopies: 1,
     sellPrice: 5000, buybackPrice: 50000, overflowGold: 5000
+  },
+  {
+    id: RETURN_FAVOR_CARD_ID, rarity: "L", cost: 6,
+    name: "Return the Favor", nameJa: "恩返し", concept: "HP回復アイテムの実回復量10％をSP回復",
+    descriptionJa: "HP回復アイテムで実際に回復したHPの10％分、SPも回復する。HPとSPを同時に回復するアイテムは対象外。",
+    flavorText: "受けた優しさは、いつかあなたの力になる。",
+    category: "ability", effectId: "healing_item_sp_return", effectValue: 0.1,
+    healingItemSpRecoveryRate: 0.1, excludesHpSpRecoveryItems: true,
+    iconId: "health-pulse", maxOwned: 1, maxCopies: 1
   },
   {
     id: MANA_BOOSTER_CARD_ID, rarity: "L", cost: 6,

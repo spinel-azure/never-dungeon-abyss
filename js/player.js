@@ -102,7 +102,13 @@ const hooks = {
   inspectKirkeHouse: () => ({ canDeliver: false, message: "巨大な蔓に囲まれた家が建っている。" }),
   deliverBeeswaxToKirke: () => ({ accepted: false, message: "" }),
   grantKirkeSpecialBirdlime: () => ({ accepted: false, gained: false }),
+  consultKirkeForJohannaMedicine: () => ({ accepted: false }),
+  brewJohannaMedicine: () => ({ accepted: false, brewed: false }),
   beginMaerchentiereBattle: () => false,
+  inspectJohannaMedicineSpring: () => ({ available: false, message: "木々の奥に泉がある。" }),
+  markJohannaMedicineSpringIntroSeen: () => false,
+  beginJohannaMedicineSpringBattle: () => false,
+  grantNightDewFlower: () => ({ accepted: false, gained: false }),
   playNpcVoice: () => {},
   onNpcEncountered: () => {},
   isQueenShadowFinaleCompleted: () => false,
@@ -687,12 +693,131 @@ function startSpecialRoomContentEvent(content, fromGX, fromGY) {
       });
       return;
     }
+    if (["johannaMedicineConsult", "johannaMedicineReminder", "johannaMedicineBrew", "johannaMedicineReady"].includes(result?.mode)) {
+      const pagesByMode = {
+        johannaMedicineConsult: [
+          "キルケ「ヨハンナが寝込んでおるとな？……あの子は昔から、無理をしても口にせんからのう。」",
+          "キルケ「薬を作るには『夜露の花』が必要じゃ。密林の泉に咲く、白い花を摘んできておくれ。」",
+          "キルケ「茎を折らず、根元から丁寧にじゃぞ。」"
+        ],
+        johannaMedicineReminder: [
+          "キルケ「『夜露の花』は密林の泉に咲く白い花じゃ。茎を折らず、根元から丁寧に摘んでおくれ。」"
+        ],
+        johannaMedicineBrew: [
+          "キルケ「おお、これじゃ。……ん？ この歯形……。」",
+          "キルケ「あのいたずら者どもが手伝ったのかい？」",
+          "キルケ「……ふん。少しは、よいこともするようじゃな。」",
+          "brewMedicine",
+          "キルケ「これをアンナに渡しておくれ。それから、母親をしっかり休ませるようにとな。」",
+          "キルケ「元気になったら顔を見せに来いと……ヨハンナにも伝えておくれ。」"
+        ],
+        johannaMedicineReady: [
+          "キルケ「ヨハンナの薬をアンナに渡しておくれ。それから、母親をしっかり休ませるようにとな。」",
+          "キルケ「元気になったら顔を見せに来いと……ヨハンナにも伝えておくれ。」"
+        ]
+      };
+      const pages = pagesByMode[result.mode];
+      startOverlayEvent({
+        type: "kirkeHouse",
+        phase: result.mode,
+        pageIndex: 0,
+        pages,
+        content,
+        fromGX,
+        fromGY,
+        backgroundImageId: content.interiorImageId,
+        imageId: content.portraitId,
+        imageFit: "contain",
+        reserveMessageLines: 5,
+        showOverlay: true,
+        canCancel: false,
+        message: `${pages[0]}\n＊Aボタンで次へ`
+      });
+      return;
+    }
     startOverlayEvent({
       type: "kirkeHouse", content, canDeliver: Boolean(result?.canDeliver), phase: "house",
       fromGX, fromGY,
       imageId: content.imageId,
       imageFit: "cover", showOverlay: true, canCancel: false,
       message: `${result?.message || "巨大な蔓に囲まれて今にも朽ちそうな家が建っている。"}\n＊Aボタン：${result?.canDeliver ? "次へ" : "戻る"}`
+    });
+    return;
+  }
+  if (content?.type === "johannaMedicineSpring") {
+    const result = hooks.inspectJohannaMedicineSpring() || {};
+    if (!result.available) {
+      startOverlayEvent({
+        type: "johannaMedicineSpring",
+        phase: "inactive",
+        content,
+        fromGX,
+        fromGY,
+        backgroundImageId: content.backgroundImageId,
+        showOverlay: true,
+        canCancel: false,
+        message: `${result.message || "木々の奥に、澄んだ水をたたえる泉がある。"}\n＊Aボタン：戻る`
+      });
+      return;
+    }
+    if (result.bossDefeated && !result.flowerReceived) {
+      startJohannaMedicineSpringResultEvent({ content, fromGX, fromGY });
+      return;
+    }
+    if (result.bossDefeated || result.flowerReceived) {
+      startOverlayEvent({
+        type: "johannaMedicineSpring",
+        phase: "resolved",
+        content,
+        fromGX,
+        fromGY,
+        backgroundImageId: content.backgroundImageId,
+        showOverlay: true,
+        canCancel: false,
+        message: "泉は静けさを取り戻している。\n＊Aボタン：戻る"
+      });
+      return;
+    }
+    if (result.introSeen) {
+      startOverlayEvent({
+        type: "johannaMedicineSpring",
+        phase: "retryPrompt",
+        content,
+        fromGX,
+        fromGY,
+        backgroundImageId: content.backgroundImageId,
+        showOverlay: true,
+        canCancel: true,
+        retreatOnCancel: true,
+        message: "泉の岩場には、あの巨大な蕾が潜んでいる。\nもう一度、夜露の花を取りに行きますか？\n＊Aボタン：はい　Bボタン：いいえ"
+      });
+      return;
+    }
+    const pages = [
+      "木々の奥に、澄んだ水をたたえる泉があった。\n泉の中央に浮かぶ岩場に、白い花が咲いている。",
+      "あれが『夜露の花』だろうか。\n岸からは手が届かない……。",
+      "そのとき、背後の茂みががさがさと揺れた。",
+      "見覚えのある三匹が、茂みから顔を出した。\nあなたが身構えると、三匹は不思議そうに首をかしげた。",
+      "そして、あなたの視線を追って泉の中央を見つめる。",
+      "三匹は顔を見合わせると、岩場へぴょんぴょんと飛び移っていった。\n我先にと、白い花へ手を伸ばしている……。",
+      "その足元で、岩場に絡みついた蔓がゆっくりと動いた。\n岩陰に潜んでいた巨大な蕾が、むくりと持ち上がる！",
+      "二本の長い蔓が、花に夢中な三匹へ迫る。\nあなたは武器を構え、三匹と魔物の間へ飛び込んだ！",
+      "三匹が茂みへ逃げ込むのを見届け、あなたは巨大な蕾と対峙した。"
+    ];
+    hooks.markJohannaMedicineSpringIntroSeen();
+    startOverlayEvent({
+      type: "johannaMedicineSpring",
+      phase: "intro",
+      pageIndex: 0,
+      pages,
+      content,
+      fromGX,
+      fromGY,
+      backgroundImageId: content.backgroundImageId,
+      showOverlay: true,
+      canCancel: false,
+      reserveMessageLines: 5,
+      message: `${pages[0]}\n＊Aボタンで次へ`
     });
     return;
   }
@@ -1112,6 +1237,34 @@ function scheduleSpecialRoomBossBattle(event, boss) {
 function advanceKirkeHouseEvent() {
   const event = state.overlayEvent;
   if (!event || event.type !== "kirkeHouse") return;
+  if (["johannaMedicineConsult", "johannaMedicineReminder", "johannaMedicineBrew", "johannaMedicineReady"].includes(event.phase)) {
+    event.pageIndex += 1;
+    if (event.pageIndex < event.pages.length) {
+      if (event.pages[event.pageIndex] === "brewMedicine") {
+        const result = hooks.brewJohannaMedicine() || {};
+        if (!result.accepted) {
+          hooks.say("薬を調合するための夜露の花が見当たらない。\n＊Aボタン：戻る");
+          event.pageIndex = event.pages.length;
+          hooks.onStateChanged();
+          return;
+        }
+        hooks.say(result.brewed
+          ? "『ヨハンナの薬』を手に入れた！\n＊Aボタンで次へ"
+          : "ヨハンナの薬を大切にしまった。\n＊Aボタンで次へ");
+        hooks.onStateChanged();
+        return;
+      }
+      hooks.say(`${event.pages[event.pageIndex]}\n＊Aボタンで次へ`);
+      hooks.onStateChanged();
+      return;
+    }
+    if (event.phase === "johannaMedicineConsult") hooks.consultKirkeForJohannaMedicine();
+    state.overlayEvent = null;
+    hooks.say("");
+    hooks.onStateChanged();
+    if (Number.isInteger(event.fromGX) && Number.isInteger(event.fromGY)) startNpcRetreat(event);
+    return;
+  }
   if (event.phase === "maerchentierePrompt") {
     event.phase = "maerchentiereArrival";
     event.canCancel = false;
@@ -1166,6 +1319,105 @@ function advanceKirkeHouseEvent() {
   }
   state.overlayEvent = null;
   hooks.say("");
+  hooks.onStateChanged();
+}
+
+function beginJohannaMedicineSpringBattle(event) {
+  state.overlayEvent = null;
+  hooks.say("");
+  if (!hooks.beginJohannaMedicineSpringBattle({ fromGX: event.fromGX, fromGY: event.fromGY })) {
+    hooks.onStateChanged();
+  }
+}
+
+function advanceJohannaMedicineSpringEvent() {
+  const event = state.overlayEvent;
+  if (!event || event.type !== "johannaMedicineSpring") return;
+  if (event.phase === "retryPrompt") {
+    beginJohannaMedicineSpringBattle(event);
+    return;
+  }
+  if (["inactive", "resolved"].includes(event.phase)) {
+    state.overlayEvent = null;
+    hooks.say("");
+    hooks.onStateChanged();
+    if (Number.isInteger(event.fromGX) && Number.isInteger(event.fromGY)) startNpcRetreat(event);
+    return;
+  }
+  if (event.phase !== "intro") return;
+  event.pageIndex += 1;
+  if (event.pageIndex < event.pages.length) {
+    if (event.pageIndex === 5) {
+      event.imageId = event.content.reachingImageId;
+      event.imageFit = "cover";
+    }
+    hooks.say(`${event.pages[event.pageIndex]}\n＊Aボタンで次へ`);
+    hooks.onStateChanged();
+    return;
+  }
+  beginJohannaMedicineSpringBattle(event);
+}
+
+function clearJohannaMedicineSpringOverlay() {
+  state.overlayEvent = null;
+  hooks.say("");
+}
+
+export function startJohannaMedicineSpringResultEvent({ content = null, fromGX, fromGY } = {}) {
+  const eventContent = content || {
+    backgroundImageId: "johanna_medicine_spring_b57f",
+    offeringImageId: "maerchentiere_offering_flower_b57f"
+  };
+  const pages = [
+    "魔物が動かなくなると、茂みの中から三匹がおずおずと姿を現した。",
+    "逃げるときも、大切に抱えていたのだろう。\nその手には、白い花があった。",
+    "カニンヒェン「Ja……!」\nニートリヒ「Woo…!」\nブレッセ「おはな…。」",
+    "三匹が、あなたへ花を差し出した。\n茎には、小さな歯形がついている。",
+    "grantFlower",
+    "あなたは花を受け取り、三匹に礼を言った。\n三匹は顔を見合わせると、うれしそうに跳びはねた。",
+    "そして、三匹は茂みの奥へ帰っていった。"
+  ];
+  return startOverlayEvent({
+    type: "johannaMedicineSpringResult",
+    phase: "dialogue",
+    pageIndex: 0,
+    pages,
+    content: eventContent,
+    fromGX,
+    fromGY,
+    backgroundImageId: eventContent.backgroundImageId,
+    imageId: "",
+    imageFit: "containFull",
+    reserveMessageLines: 5,
+    showOverlay: true,
+    canCancel: false,
+    message: `${pages[0]}\n＊Aボタンで次へ`
+  });
+}
+
+function advanceJohannaMedicineSpringResultEvent() {
+  const event = state.overlayEvent;
+  if (!event || event.type !== "johannaMedicineSpringResult") return;
+  event.pageIndex += 1;
+  if (event.pageIndex >= event.pages.length) {
+    clearJohannaMedicineSpringOverlay();
+    hooks.onStateChanged();
+    if (Number.isInteger(event.fromGX) && Number.isInteger(event.fromGY)) startNpcRetreat(event);
+    return;
+  }
+  if (event.pageIndex === 2) {
+    event.imageId = event.content.offeringImageId;
+    event.imageFit = "containFull";
+  }
+  if (event.pages[event.pageIndex] === "grantFlower") {
+    const result = hooks.grantNightDewFlower() || {};
+    hooks.say(result.gained
+      ? "『夜露の花』を手に入れた！\n＊Aボタンで次へ"
+      : "夜露の花を大切にしまった。\n＊Aボタンで次へ");
+    hooks.onStateChanged();
+    return;
+  }
+  hooks.say(`${event.pages[event.pageIndex]}\n＊Aボタンで次へ`);
   hooks.onStateChanged();
 }
 
@@ -1258,6 +1510,8 @@ export function handleOverlayEventInput(action) {
       advanceKirkeHouseEvent();
     }
     else if (state.overlayEvent.type === "kirkeMaerchentiereResult") advanceKirkeMaerchentiereResultEvent();
+    else if (state.overlayEvent.type === "johannaMedicineSpring") advanceJohannaMedicineSpringEvent();
+    else if (state.overlayEvent.type === "johannaMedicineSpringResult") advanceJohannaMedicineSpringResultEvent();
     else if (state.overlayEvent.type === "queenShadowFinale") advanceQueenShadowFinaleEvent();
     else if (state.overlayEvent.type === "secondQueenShadowFinale") advanceSecondQueenShadowFinaleEvent();
     else if (state.overlayEvent.type === "thirdQueenShadowFinale") advanceThirdQueenShadowFinaleEvent();

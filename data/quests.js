@@ -36,6 +36,7 @@ export const JIRENE_SONG_INVESTIGATION_QUEST_ID = "guild_028";
 export const JIRENE_SONG_INVESTIGATION_ACCEPTED_FLAG = "guild_028_accepted_once";
 export const BEESWAX_COLLECTION_QUEST_ID = "guild_029";
 export const CREEPING_CHAOS_QUEST_ID = "guild_030";
+export const JOHANNA_RESCUE_QUEST_ID = "guild_031";
 export const LICHTBRINGER_QUEST_ID = "guild_033";
 export const THIRD_QUEEN_SHADOW_QUEST_ID = "guild_032";
 export const CREEPING_CHAOS_ITEM_FLAG = "guild_030_trapezohedron_received";
@@ -788,6 +789,33 @@ export const QUESTS = Object.freeze([
     prerequisiteQuestIds: Object.freeze([BEESWAX_COLLECTION_QUEST_ID]),
     minimumDepthReached: 80,
     completedTargetFlag: "boss_b89f_defeated",
+    available: true
+  }),
+  Object.freeze({
+    id: JOHANNA_RESCUE_QUEST_ID,
+    number: "031",
+    title: "おかあさんを助けて",
+    client: "アンナ",
+    category: "other",
+    objectiveType: "custom",
+    requiredCount: 1,
+    objectiveHeading: "内容",
+    objectiveLabel: "ヨハンナの薬をアンナに届ける",
+    reward: Object.freeze({
+      type: "card", label: "デッキカード×1", amount: 1, cardId: "legendary_return_favor"
+    }),
+    descriptionLabel: "内容",
+    description: Object.freeze([
+      "わたし、宿屋の娘アンナです。おかあさんの具合が",
+      "悪くなっちゃった。キルケおばあちゃんに",
+      "お薬を作ってもらって、おかあさんを助けて。",
+      ""
+    ]),
+    prerequisiteQuestIds: Object.freeze([MAERCHENTIERE_QUEST_ID]),
+    availableFlag: "quest_031_anna_request_unlocked",
+    persistentProgressFlag: "quest_031_anna_recovery_completed",
+    completedTargetFlag: "quest_031_anna_recovery_completed",
+    reportUnlockFlags: Object.freeze(["quest_031_johanna_thanks_pending"]),
     available: true
   }),
   Object.freeze({

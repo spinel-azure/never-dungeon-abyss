@@ -186,3 +186,33 @@ test("acolyte rumor stays hidden at five hundred donations until the priest rumo
   character.eventFlags.tavern_rumor_004_medicine_read = true;
   assert.equal(getUnreadTavernRumor(character)?.id, "rumor_005_base");
 });
+
+test("Johanna rumor requires one hundred inn stays and reported Maerchentiere, then preserves two exact customer pages", () => {
+  const character = createInitialCharacter({ name: "宿屋の常連", job: "priest" });
+  character.eventFlags.tavern_rumor_001_base_read = true;
+  character.quests.completedQuestIds.push("guild_026");
+  character.adventureStats.innStayCount = 99;
+  assert.equal(getUnreadTavernRumor(character), null);
+
+  character.adventureStats.innStayCount = 100;
+  let rumor = getUnreadTavernRumor(character);
+  assert.equal(rumor.id, "rumor_008_base");
+  assert.deepEqual(rumor.dialogue, [
+    "客「おい、知ってるか？最近ヨハンナの具合が悪いらしい。」\n＊Aボタンで次へ",
+    "客「宿屋の女将だよ。働きすぎなんじゃないかねぇ。娘も心配してるそうだ。」\n＊Aボタンで戻る"
+  ]);
+
+  const missingPrerequisite = createInitialCharacter({ name: "宿泊者", job: "mage" });
+  missingPrerequisite.eventFlags.tavern_rumor_001_base_read = true;
+  missingPrerequisite.adventureStats.innStayCount = 100;
+  assert.equal(getUnreadTavernRumor(missingPrerequisite), null);
+
+  const heard = markTavernRumorRead(character, rumor);
+  assert.equal(heard.eventFlags.tavern_rumor_008_base_read, true);
+  assert.equal(getUnreadTavernRumor(heard), null);
+  const history = getPastTavernRumors(heard).find(entry => entry.id === "rumor_008");
+  assert.deepEqual(history.description, [
+    "客：おい、知ってるか？最近ヨハンナの具合が悪いらしい。",
+    "客：宿屋の女将だよ。働きすぎなんじゃないかねぇ。娘も心配してるそうだ。"
+  ]);
+});

@@ -40,3 +40,16 @@ test("special medicine ingredients share one key-item slot and can be consumed t
   assert.equal(consumed.consumed, true);
   assert.equal(hasKeyItem(consumed.keyItems, "special_medicine_ingredient"), false);
 });
+
+test("Johanna rescue materials are unique unsellable event items", () => {
+  for (const id of ["night_dew_flower", "johanna_medicine"]) {
+    const item = getKeyItem(id);
+    assert.equal(item.sellable, false, id);
+    assert.equal(item.consumable, true, id);
+    const first = grantKeyItem(null, id);
+    const duplicate = grantKeyItem(first.keyItems, id);
+    assert.equal(first.gained, true, id);
+    assert.equal(duplicate.gained, false, id);
+    assert.equal(getKeyItemCount(duplicate.keyItems, id), 1, id);
+  }
+});

@@ -18,7 +18,12 @@ import {
 import { getSkill } from "../data/skills.js";
 import { getItem } from "../data/items.js";
 import { consumeItem } from "../data/inventory.js";
-import { cureAllNegativeStatuses, getItemUnavailableReason } from "./resolve-item-use.js";
+import {
+  calculateHealingItemSpReturn,
+  cureAllNegativeStatuses,
+  getItemUnavailableReason,
+  isStrongHerbicideTarget
+} from "./resolve-item-use.js";
 import { getConditionLabel } from "./condition-label.js";
 import { resolvePassiveInstantDeath } from "./passive-instant-death.js";
 import { getCardById, hasCardEffect, sumCardEffectValues } from "../data/cards.js";
@@ -101,6 +106,8 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     victorySpRecoveryAtStart: Math.max(0, Math.floor(
       sumCardEffectValues(character?.cards?.deckSlots, "battle_victory_sp_recovery")
     )),
+    healingItemSpReturnRateAtStart: Math.max(0,
+      sumCardEffectValues(character?.cards?.deckSlots, "healing_item_sp_return")),
     victoryCardEffectsApplied: false,
     mirageFirstAttackAvailable: hasCardEffect(character?.cards?.deckSlots, "mirage_first_attack_evasion"),
     sphinxBarrier,
@@ -1053,17 +1060,21 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
           target.alive = false;
           battle.log.push("強力除草剤を巨大蔓へ散布した！ 巨大蔓は見る見るうちに枯れていった！");
           if (action.item.id === "strong_herbicide_trial") actor.herbicideTrialUses = (Number(actor.herbicideTrialUses) || 0) + 1;
-        } else if (target.id === "fleischfresser_b59f") {
+        } else if (isStrongHerbicideTarget(target)) {
+          const suppressionTurns = Math.max(1, Math.floor(
+            Number(target.strongHerbicideTrait?.regainSuppressionTurns)
+              || FLEISCHFRESSER_REGAIN_SUPPRESSION_TURNS
+          ));
           const alreadySuppressed = Number(target.regainSuppressedTurns) > 0;
           const fixedDamage = Math.max(0, Math.floor(Number(effect.value) || 0));
           const useMessage = `${action.item.name}を散布した！`;
           const damageMessage = `${target.name}に${fixedDamage}の固定ダメージ！`;
           const suppressionMessage = alreadySuppressed
-            ? `${target.name}の再生停止時間が${FLEISCHFRESSER_REGAIN_SUPPRESSION_TURNS}ターンに延長された！`
-            : `${target.name}の再生能力が${FLEISCHFRESSER_REGAIN_SUPPRESSION_TURNS}ターン停止した！`;
+            ? `${target.name}の再生停止時間が${suppressionTurns}ターンに延長された！`
+            : `${target.name}の再生能力が${suppressionTurns}ターン停止した！`;
           target.hp = Math.max(0, target.hp - fixedDamage);
           target.alive = target.hp > 0;
-          target.regainSuppressedTurns = FLEISCHFRESSER_REGAIN_SUPPRESSION_TURNS;
+          target.regainSuppressedTurns = suppressionTurns;
           battle.log.push(useMessage, damageMessage, suppressionMessage);
           itemUsageLogged = true;
           if (fixedDamage > 0) {
@@ -1119,6 +1130,17 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
         }
       }
     }
+    const healingItemSpReturn = calculateHealingItemSpReturn({
+      item: action.item,
+      actualHpHealing: healing,
+      currentSp: actor.sp,
+      maxSp: actor.maxSp,
+      rate: battle.healingItemSpReturnRateAtStart
+    });
+    if (healingItemSpReturn > 0) {
+      actor.sp += healingItemSpReturn;
+      spHealing += healingItemSpReturn;
+    }
     if (!itemUsageLogged) battle.log.push(`${actor.name}は${action.item.name}を使った。`);
     if (action.item.id === "allheilmittel") {
       actor.statuses = [
@@ -1129,6 +1151,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
       battle.log.push("HPとSPが全回復し、すべての状態異常が治った！");
     }
     if (deathPoisonUnaffected) battle.log.push("死毒は治療する事が出来ない！");
+    if (healingItemSpReturn > 0) battle.log.push(`恩返しによりSPが${healingItemSpReturn}回復した！`);
     if (healing > 0) {
       battle.presentationEvents.push({
         type: "healing", actorSide, targetSide: actorSide, amount: healing,
@@ -1431,6 +1454,14 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     });
   });
   if (isMultiHit && hitCount > 0) battle.log.push(`合計${actualDamage}ダメージ！`);
+  applySelfHealingFromActualHpLoss({
+    battle,
+    action,
+    actor,
+    actorSide,
+    actorIndex,
+    actualHpLoss
+  });
   const followUpEligible = actorSide === "player"
     && targetSide === "enemy"
     && ["physicalAttack", "spell"].includes(action.actionType)
@@ -1446,7 +1477,8 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     actorSide,
     targetSide,
     element: result.element,
-    landedHitCount: landedHits.length
+    landedHitCount: landedHits.length,
+    actualHpLoss
   });
   const allLandedHitsBlockedByNpcWall = landedHits.length > 0 && landedHits.every(hit => hit.blockedByNpcWall);
   const applications = barrier || allLandedHitsBlockedByNpcWall || !target.alive ? [] : [
@@ -1520,13 +1552,42 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
   return { followUpEligible, actualDamage, landedHitCount: landedHits.length };
 }
 
+export function applySelfHealingFromActualHpLoss({
+  battle,
+  action,
+  actor,
+  actorSide = "enemy",
+  actorIndex = null,
+  actualHpLoss = 0
+} = {}) {
+  const rate = Math.max(0, Number(action?.selfHealFromActualHpLossRate) || 0);
+  const loss = Math.max(0, Math.floor(Number(actualHpLoss) || 0));
+  if (rate <= 0 || loss <= 0 || !actor?.alive || Number(actor.hp) <= 0) return 0;
+  const missingHp = Math.max(0,
+    Math.floor(Number(actor.maxHp) || 0) - Math.max(0, Math.floor(Number(actor.hp) || 0)));
+  const healing = Math.min(missingHp, Math.max(0, Math.floor(loss * rate)));
+  if (healing <= 0) return 0;
+  actor.hp += healing;
+  battle?.log?.push(`${actor.name}は${healing}HPを吸収した！`);
+  battle?.presentationEvents?.push({
+    type: "healing",
+    actorSide,
+    targetSide: actorSide,
+    ...(Number.isInteger(actorIndex) ? { targetIndex: actorIndex } : {}),
+    amount: healing,
+    message: `${healing}HP吸収！`
+  });
+  return healing;
+}
+
 export function breakReservedEnemyActionOnElementHit({
   battle,
   enemy,
   actorSide = "player",
   targetSide = "enemy",
   element = "physical",
-  landedHitCount = 0
+  landedHitCount = 0,
+  actualHpLoss = 0
 } = {}) {
   const trait = enemy?.reservedActionBreakTrait;
   if (actorSide !== "player"
@@ -1534,6 +1595,8 @@ export function breakReservedEnemyActionOnElementHit({
     || !enemy?.alive
     || !enemy.reservedEnemyAction
     || Math.max(0, Math.floor(Number(landedHitCount) || 0)) < 1
+    || (trait?.requireActualHpDamage
+      && Math.max(0, Math.floor(Number(actualHpLoss) || 0)) < 1)
     || String(element) !== String(trait?.element || "")) return false;
   delete enemy.reservedEnemyAction;
   if (trait.message) battle?.log?.push(trait.message);

@@ -307,7 +307,7 @@ test("the completion achievement unlocks only after every other chronicle entry"
     { maikaefer_defeat_count: 10 },
     { get: (target, property) => property in target ? target[property] : true }
   );
-  character.quests.completedQuestIds = ["guild_020", "guild_021"];
+  character.quests.completedQuestIds = ["guild_020", "guild_021", "guild_031"];
   character.adventureStats.playTimeSeconds = PLAY_TIME_100_HOURS_SECONDS;
   character.keyItems = grantKeyItem(character.keyItems, "discount_pass").keyItems;
   let completion = getAdventureChronicle(character).find(entry => entry.id === "allAchievements");
@@ -330,4 +330,19 @@ test("rare-event and long-play achievements use the existing immediate notificat
   assert.match(main, /\[flag\]: true[\s\S]*?updateCharacterUi\(\)[\s\S]*?saveGame\(\)[\s\S]*?flag === ANASTASIA_OUTFIT_EVENT_FLAG/);
   assert.match(main, /grantKeyItem\(character\.keyItems, "discount_pass"\)[\s\S]*?updateCharacterUi\(\)[\s\S]*?saveGame\(\)/);
   assert.match(main, /achievement_b100_gauntlet_completed: true/);
+});
+
+test("Johanna medicine achievement unlocks only after quest 031 is reported", () => {
+  const character = createInitialCharacter({ name: "薬の届け人", job: "priest" });
+  character.eventFlags.quest_031_anna_recovery_completed = true;
+  character.quests.active.guild_031 = { progress: 1 };
+  let achievement = getAdventureChronicle(character).find(entry => entry.id === "johannaMedicine");
+  assert.equal(achievement.achieved, false);
+  assert.equal(achievement.label, "？？？？？？――母想いの娘");
+
+  delete character.quests.active.guild_031;
+  character.quests.completedQuestIds.push("guild_031");
+  achievement = getAdventureChronicle(character).find(entry => entry.id === "johannaMedicine");
+  assert.equal(achievement.achieved, true);
+  assert.equal(achievement.label, "ヨハンナに薬を届けた");
 });

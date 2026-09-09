@@ -1,5 +1,24 @@
 // Normalized image-space emitters: x, y, width, rise. No boss-ID checks or image edits.
 export const ENEMY_AMBIENT_EFFECTS = Object.freeze({
+  "tentacle-sway": Object.freeze({
+    kind: "spriteDeform",
+    period: 3.6,
+    amplitude: .004,
+    regions: Object.freeze([
+      Object.freeze({
+        rootX: .47,
+        tipX: .025,
+        phase: 0,
+        polygon: Object.freeze([[.02,.09],[.16,.09],[.31,.31],[.47,.47],[.47,.64],[.29,.57],[.12,.42],[.02,.36]])
+      }),
+      Object.freeze({
+        rootX: .55,
+        tipX: .985,
+        phase: Math.PI,
+        polygon: Object.freeze([[.54,.47],[.7,.42],[.84,.24],[.98,.27],[.99,.51],[.85,.61],[.69,.62],[.54,.64]])
+      })
+    ])
+  }),
   "wicker-flame": Object.freeze({
     back: [[.12,.29,.08,.23],[.19,.45,.08,.23],[.31,.48,.08,.22],
       [.45,.27,.09,.21],[.58,.3,.08,.22],[.7,.45,.09,.25],
@@ -83,11 +102,14 @@ export function createEnemyAmbientEffects({
       borderLeft: host.clientLeft, borderTop: host.clientTop
     }, image.naturalWidth, image.naturalHeight);
     if (!(bounds.width > 0 && bounds.height > 0)) return false;
-    const width = bounds.width * 1.3, height = bounds.height * 1.3;
+    const spriteDeform = entry.profile?.kind === "spriteDeform";
+    const width = bounds.width * (spriteDeform ? 1 : 1.3);
+    const height = bounds.height * (spriteDeform ? 1 : 1.3);
     const size = getAmbientCanvasSize(width, height, frameRate);
     for (const canvas of [back, front]) {
       Object.assign(canvas.style, {
-        left: `${bounds.left - bounds.width * .15}px`, top: `${bounds.top - bounds.height * .22}px`,
+        left: `${bounds.left - bounds.width * (spriteDeform ? 0 : .15)}px`,
+        top: `${bounds.top - bounds.height * (spriteDeform ? 0 : .22)}px`,
         width: `${width}px`, height: `${height}px`
       });
       if (canvas.width !== size.width || canvas.height !== size.height) {
@@ -96,6 +118,8 @@ export function createEnemyAmbientEffects({
       }
     }
     entry.frameRate = frameRate;
+    entry.host.classList.toggle("has-enemy-deform", spriteDeform);
+    entry.back.hidden = spriteDeform;
     return true;
   }
   function refresh() {
@@ -145,6 +169,7 @@ export function createEnemyAmbientEffects({
     entry.back.remove();
     entry.front.remove();
     entry.host.classList.remove("has-enemy-ambient");
+    entry.host.classList.remove("has-enemy-deform");
     entries.delete(image);
     if (!entries.size) { stop(); unlisten(); }
   }
@@ -236,6 +261,10 @@ function flame(ctx, emitter, time, seed, strength) {
 
 export function drawEnemyAmbientFrame(entry, seconds, fps, reducedMotion = false) {
   const { profile, concealed } = entry;
+  if (profile.kind === "spriteDeform") {
+    drawSpriteDeformationFrame(entry, seconds, reducedMotion);
+    return;
+  }
   for (const [layer, canvas] of [["back", entry.back], ["front", entry.front]]) {
     const ctx = canvas.getContext("2d");
     if (!ctx) continue;
@@ -272,4 +301,64 @@ export function drawEnemyAmbientFrame(entry, seconds, fps, reducedMotion = false
     }
     ctx.restore();
   }
+}
+
+function traceNormalizedPolygon(ctx, polygon, width, height) {
+  ctx.beginPath();
+  polygon.forEach(([x, y], index) => {
+    const px = x * width;
+    const py = y * height;
+    if (index === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  });
+  ctx.closePath();
+}
+
+// Draw the complete sprite once, then replace only the two long-tentacle regions
+// with gently displaced strips. The original image element is hidden while this
+// canvas is active, so an unmoving duplicate never remains below the animation.
+export function drawSpriteDeformationFrame(entry, seconds, reducedMotion = false) {
+  const { image, front: canvas, back, profile, concealed } = entry;
+  const ctx = canvas.getContext("2d");
+  back.getContext("2d")?.clearRect(0, 0, back.width, back.height);
+  if (!ctx || !image.complete || !image.naturalWidth || !image.naturalHeight) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.save();
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+  if (!reducedMotion) {
+    const sourceScale = image.naturalWidth / canvas.width;
+    const stripWidth = Math.max(1, Math.ceil(canvas.width / 320));
+    for (const region of profile.regions) {
+      ctx.save();
+      traceNormalizedPolygon(ctx, region.polygon, canvas.width, canvas.height);
+      ctx.clip();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const minX = Math.max(0, Math.floor(Math.min(...region.polygon.map(point => point[0])) * canvas.width));
+      const maxX = Math.min(canvas.width, Math.ceil(Math.max(...region.polygon.map(point => point[0])) * canvas.width));
+      const span = Math.max(1, Math.abs(region.rootX - region.tipX));
+      for (let x = minX; x < maxX; x += stripWidth) {
+        const normalizedX = (x + stripWidth * .5) / canvas.width;
+        const tipProgress = Math.max(0, Math.min(1, Math.abs(normalizedX - region.rootX) / span));
+        const offset = Math.sin((seconds / profile.period) * Math.PI * 2 + region.phase + tipProgress * Math.PI * 1.35)
+          * canvas.width * profile.amplitude * tipProgress * tipProgress;
+        const drawWidth = Math.min(stripWidth + 1, canvas.width - x);
+        ctx.drawImage(
+          image,
+          x * sourceScale,
+          0,
+          drawWidth * sourceScale,
+          image.naturalHeight,
+          x,
+          offset,
+          drawWidth,
+          canvas.height
+        );
+      }
+      ctx.restore();
+    }
+  }
+  ctx.restore();
+  canvas.classList.toggle("is-hit", image.classList.contains("is-hit"));
+  canvas.classList.toggle("is-concealed", Boolean(concealed));
 }

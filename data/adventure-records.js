@@ -4,6 +4,7 @@ import {
   B35F_SURVEY_QUEST_ID,
   B45F_SURVEY_QUEST_ID,
   FLOOR_SURVEY_QUEST_ID,
+  JOHANNA_RESCUE_QUEST_ID,
   normalizeQuestState
 } from "./quests.js";
 import { formatPlayTime, normalizeAdventureStats } from "./adventure-stats.js";
@@ -110,6 +111,7 @@ export function getAdventureChronicle(character) {
     ["jirene", "ジレーネを撃破した", flags.boss_jirene_b79f_defeated, "B79Fで魔性の歌声を操るジレーネを撃破した。", "？？？？？？――魔性の歌声"],
     ["b80", "B80Fへ到達した", depth >= 80 || flags.floor_b80_reached || flags.transfer_portal_b80f_unlocked, "奈落の迷宮地下80階へ到達した。"],
     ["maerchentiere", "メルヒェンティーレを捕獲した", flags.quest_026_maerchentiere_captured, "キルケの家で騒動を起こしたメルヒェンティーレを捕獲した。", "？？？？？？――いたずらどうぶつ捕獲作戦"],
+    ["johannaMedicine", "ヨハンナに薬を届けた", completedQuests.has(JOHANNA_RESCUE_QUEST_ID), "ヨハンナの薬をアンナへ届け、母娘を助けた。", "？？？？？？――母想いの娘"],
     ["longMarch84", "深淵への大行軍再び", flags.b1_b84_long_march_completed, "一度も帰還せず、転送門を使わずにB1FからB84Fへ到達した。", "？？？？？？――タフすぎて損はない"],
     ["kriechendesChaos", "クリーヒェンデス・カーオスを撃破した", flags.boss_b89f_defeated, "B89Fで異界から現れたクリーヒェンデス・カーオスを撃破した。", "？？？？？？――異界からの来訪者"],
     ["b90", "B90Fへ到達した", depth >= 90 || flags.transfer_portal_b90f_unlocked, "奈落の迷宮地下90階へ到達し、転送門を解放した。"],

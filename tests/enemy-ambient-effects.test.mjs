@@ -17,11 +17,25 @@ function eventTarget() {
     fire(type) { listeners.get(type)?.(); }
   };
 }
+function fakeClassList(initial = []) {
+  const classes = new Set(initial);
+  return {
+    add(...names) { names.forEach(name => classes.add(name)); },
+    remove(...names) { names.forEach(name => classes.delete(name)); },
+    contains(name) { return classes.has(name); },
+    toggle(name, force) {
+      const active = force === undefined ? !classes.has(name) : Boolean(force);
+      if (active) classes.add(name);
+      else classes.delete(name);
+      return active;
+    }
+  };
+}
 function drawingContext() {
   const calls = [];
   const gradient = { addColorStop(...args) { calls.push(["color", ...args]); } };
-  const context = { calls };
-  for (const name of ["clearRect", "save", "restore", "setTransform", "fillRect", "beginPath", "moveTo", "bezierCurveTo", "closePath", "fill"]) {
+  const context = { calls, imageSmoothingEnabled: true };
+  for (const name of ["clearRect", "save", "restore", "setTransform", "fillRect", "beginPath", "moveTo", "lineTo", "bezierCurveTo", "closePath", "fill", "clip", "drawImage"]) {
     context[name] = (...args) => calls.push([name, ...args]);
   }
   context.createLinearGradient = (...args) => { calls.push(["linear", ...args]); return gradient; };
@@ -40,7 +54,8 @@ function harness({ rate = 60, mobile = false, reduced = false } = {}) {
   const doc = { ...eventTarget(), hidden: false, createElement() {
     const ctx = drawingContext();
     const canvas = { style: {}, width: 300, height: 150, removed: false,
-      setAttribute() {}, getContext: () => ctx, remove() { this.removed = true; } };
+      classList: fakeClassList(), setAttribute() {}, getContext: () => ctx,
+      remove() { this.removed = true; } };
     canvases.push(canvas);
     return canvas;
   } };
@@ -56,8 +71,7 @@ function harness({ rate = 60, mobile = false, reduced = false } = {}) {
     drawFrame(...args) { draws.push(args); }
   });
   function target(effect = "wicker-flame", hp = 100) {
-    const classes = new Set();
-    const classList = { add: name => classes.add(name), remove: name => classes.delete(name), contains: name => classes.has(name) };
+    const classList = fakeClassList();
     const host = { dataset: {}, classList, clientLeft: 0, clientTop: 0,
       getBoundingClientRect: () => ({ left: 10, top: 20 }), append() {} };
     const image = { ...eventTarget(), classList: { contains: () => false },
@@ -72,17 +86,25 @@ function harness({ rate = 60, mobile = false, reduced = false } = {}) {
   };
 }
 
-test("only the two requested bosses declare ambient effects, retained through combat cloning", () => {
+test("all three configured bosses retain their ambient effect through combat cloning", () => {
   assert.deepEqual(Object.values(BOSSES).filter(b => b.ambientEffect).map(b => [b.id, b.ambientEffect]), [
-    ["wicker_man_b39f", "wicker-flame"], ["brass_bull_event_boss", "brass-heat"]
+    ["wicker_man_b39f", "wicker-flame"],
+    ["fleischfresserknospe_b57f", "tentacle-sway"],
+    ["brass_bull_event_boss", "brass-heat"]
   ]);
-  for (const id of ["wicker_man_b39f", "brass_bull_event_boss"]) {
+  for (const id of ["wicker_man_b39f", "brass_bull_event_boss", "fleischfresserknospe_b57f"]) {
     const enemy = createBossCombatant(id);
     const battle = createBattleState({ character: { hp: 100, maxHp: 100 }, enemy });
     assert.equal(battle.enemy.ambientEffect, BOSSES[id].ambientEffect);
   }
   assert.ok(ENEMY_AMBIENT_EFFECTS["wicker-flame"].sparks > ENEMY_AMBIENT_EFFECTS["brass-heat"].sparks);
   assert.ok(ENEMY_AMBIENT_EFFECTS["wicker-flame"].strength > ENEMY_AMBIENT_EFFECTS["brass-heat"].strength);
+  assert.equal(ENEMY_AMBIENT_EFFECTS["tentacle-sway"].kind, "spriteDeform");
+  assert.equal(ENEMY_AMBIENT_EFFECTS["tentacle-sway"].regions.length, 2);
+  assert.ok(ENEMY_AMBIENT_EFFECTS["tentacle-sway"].period >= 3
+    && ENEMY_AMBIENT_EFFECTS["tentacle-sway"].period <= 4);
+  assert.ok(ENEMY_AMBIENT_EFFECTS["tentacle-sway"].amplitude >= .003
+    && ENEMY_AMBIENT_EFFECTS["tentacle-sway"].amplitude <= .005);
 });
 
 test("PC supports 60/30; phones and tablets cap even a 60fps setting at 30", () => {
@@ -129,6 +151,27 @@ test("multiple targets and repeated sync share exactly one RAF and two layers pe
   assert.equal(h.win.listeners.size, 0);
   assert.ok(h.observers.every(observer => observer.targets.size === 0));
   assert.ok(targets.every(target => target.image.listeners.size === 0));
+});
+
+test("tentacle deformation uses the sprite bounds and toggles its host presentation class", () => {
+  const h = harness(), target = h.target("tentacle-sway");
+  h.controller.sync([target]);
+  assert.equal(h.liveCanvases().length, 2);
+  assert.equal(h.canvases[0].style.left, "90px");
+  assert.equal(h.canvases[0].style.top, "60px");
+  assert.equal(h.canvases[0].style.width, "300px");
+  assert.equal(h.canvases[0].style.height, "300px");
+  assert.equal(h.canvases[0].hidden, true);
+  assert.equal(target.host.classList.contains("has-enemy-deform"), true);
+
+  target.enemy.ambientEffect = "wicker-flame";
+  h.controller.sync([target]);
+  assert.equal(h.canvases[0].hidden, false);
+  assert.equal(target.host.classList.contains("has-enemy-deform"), false);
+
+  h.controller.clear();
+  assert.equal(target.host.classList.contains("has-enemy-ambient"), false);
+  assert.equal(target.host.classList.contains("has-enemy-deform"), false);
 });
 
 test("60/30 caps work on 60/120Hz RAF without slowing real-time animation", () => {
@@ -237,6 +280,48 @@ test("actual painter halves sparks at 30fps and keeps identical time-based tongu
   assert.deepEqual(normal.back.find(c => c[0] === "linear"), low.back.find(c => c[0] === "linear"));
   assert.ok(low.back.filter(c => c[0] === "linear").length < normal.back.filter(c => c[0] === "linear").length);
   assert.equal(silhouette.front.filter(c => ["linear", "radial"].includes(c[0])).length, 0);
+});
+
+test("tentacle painter deforms only its two clipped regions and stays static for reduced motion", () => {
+  function paint(reducedMotion) {
+    const backContext = drawingContext(), frontContext = drawingContext();
+    const makeCanvas = context => ({
+      width: 640,
+      height: 360,
+      classList: fakeClassList(),
+      getContext: () => context
+    });
+    const image = {
+      complete: true,
+      naturalWidth: 1421,
+      naturalHeight: 800,
+      classList: fakeClassList(["is-hit"])
+    };
+    const back = makeCanvas(backContext), front = makeCanvas(frontContext);
+    drawEnemyAmbientFrame({
+      image,
+      back,
+      front,
+      profile: ENEMY_AMBIENT_EFFECTS["tentacle-sway"],
+      concealed: true
+    }, 1.25, 60, reducedMotion);
+    return { back, front, backContext, frontContext };
+  }
+
+  const animated = paint(false);
+  const animatedDraws = animated.frontContext.calls.filter(call => call[0] === "drawImage");
+  const stripDraws = animatedDraws.filter(call => call.length === 10);
+  assert.equal(animated.frontContext.calls.filter(call => call[0] === "clip").length, 2);
+  assert.ok(stripDraws.length > 2);
+  assert.ok(Math.max(...stripDraws.map(call => Math.abs(call[7]))) <= 640 * .004 + Number.EPSILON);
+  assert.equal(animated.frontContext.imageSmoothingEnabled, false);
+  assert.equal(animated.front.classList.contains("is-hit"), true);
+  assert.equal(animated.front.classList.contains("is-concealed"), true);
+  assert.equal(animated.backContext.calls.filter(call => call[0] === "drawImage").length, 0);
+
+  const reduced = paint(true);
+  assert.equal(reduced.frontContext.calls.filter(call => call[0] === "drawImage").length, 1);
+  assert.equal(reduced.frontContext.calls.filter(call => call[0] === "clip").length, 0);
 });
 
 test("battle integration tears down before vanish and close; normal render uses presentation HP", async () => {

@@ -251,14 +251,14 @@ export const ITEMS = Object.freeze([
     number: 39, id: "strong_herbicide_trial", name: "強力除草剤（試供品）", category: "battle",
     buyPrice: 0, sellPrice: 0, source: "quest", usableIn: Object.freeze(["battle"]),
     effects: Object.freeze([{ id: "strong_herbicide", value: 500 }]),
-    description: "密林区域の巨大蔓へ散布すると一撃で枯らす試供品。売却できない。",
+    description: "巨大蔓を一撃で枯らす。フライシュフレッサーとフライシュフレッサークスノペには固定ダメージを与え、再生を5ターン停止する試供品。売却できない。",
     maxOwned: 5, iconId: "antidote", version: 1, repurchasable: false
   }),
   Object.freeze({
     number: 40, id: "strong_herbicide", name: "強力除草剤", category: "battle",
     buyPrice: 100, sellPrice: 50, source: "shop", usableIn: Object.freeze(["battle"]),
     effects: Object.freeze([{ id: "strong_herbicide", value: 500 }]),
-    description: "巨大蔓を一撃で枯らす。フライシュフレッサーには固定ダメージを与え、再生を5ターン停止する。",
+    description: "巨大蔓を一撃で枯らす。フライシュフレッサーとフライシュフレッサークスノペには固定ダメージを与え、再生を5ターン停止する。",
     maxOwned: 99, iconId: "antidote", version: 1
   }),
   Object.freeze({

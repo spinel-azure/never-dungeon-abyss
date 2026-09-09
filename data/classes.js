@@ -252,7 +252,8 @@ export function normalizeCharacter(character) {
     carriedExperience: Math.max(0, Math.floor(Number(character.carriedExperience) || 0)),
     pendingExperienceSettlement: normalizeDepthReturnSettlement(
       character.pendingExperienceSettlement,
-      character.carriedExperience
+      character.carriedExperience,
+      { johannaBonusUnlocked: Boolean(eventFlags.johanna_bonus_unlocked) }
     ),
     maxHp,
     maxSp,

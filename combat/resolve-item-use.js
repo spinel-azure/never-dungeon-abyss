@@ -3,6 +3,20 @@ import { consumeItem, getItemCount } from "../data/inventory.js";
 import { getStatusEffect } from "../data/status-effects.js";
 import { getConditionLabel } from "./condition-label.js";
 import { hasKeyItem } from "../data/key-items.js";
+import { sumCardEffectValues } from "../data/cards.js";
+
+const HP_RECOVERY_ITEM_EFFECT_IDS = new Set([
+  "heal_hp",
+  "heal_hp_rate",
+  "restore_hp_full",
+  "battle_overheal_flat"
+]);
+const SP_RECOVERY_ITEM_EFFECT_IDS = new Set(["restore_sp_rate", "restore_sp_full"]);
+const STRONG_HERBICIDE_TARGET_IDS = new Set([
+  "giant_vine_obstacle",
+  "fleischfresser_b59f",
+  "fleischfresserknospe_b57f"
+]);
 
 export function cureAllNegativeStatuses(statuses = []) {
   return (Array.isArray(statuses) ? statuses : []).filter(status => {
@@ -44,7 +58,7 @@ export function getItemUnavailableReason({ character, itemId, context, enemy, to
     if (enemy?.race !== "undead") return "undeadOnly";
   }
   if (["strong_herbicide_trial", "strong_herbicide"].includes(itemId)
-    && !["giant_vine_obstacle", "fleischfresser_b59f"].includes(enemy?.id)) return "plantOnly";
+    && !isStrongHerbicideTarget(enemy)) return "plantOnly";
   const barrier = item.effects?.find(effect => effect.id === "element_barrier");
   if (barrier && (character?.statuses || []).some(status =>
     (status.id || status.statusId) === `${barrier.element}_barrier`
@@ -66,6 +80,32 @@ export function getItemUnavailableReasonForEnemies({ enemies, ...options } = {})
   return reasons.some(reason => !reason) ? "" : reasons[0];
 }
 
+export function isStrongHerbicideTarget(enemy) {
+  return Boolean(enemy?.strongHerbicideTrait)
+    || STRONG_HERBICIDE_TARGET_IDS.has(String(enemy?.id || ""));
+}
+
+export function isHealingItemSpReturnEligible(item) {
+  const effects = Array.isArray(item?.effects) ? item.effects : [];
+  return effects.some(effect => HP_RECOVERY_ITEM_EFFECT_IDS.has(effect?.id))
+    && !effects.some(effect => SP_RECOVERY_ITEM_EFFECT_IDS.has(effect?.id));
+}
+
+export function calculateHealingItemSpReturn({
+  item,
+  actualHpHealing = 0,
+  currentSp = 0,
+  maxSp = 0,
+  rate = 0
+} = {}) {
+  const recoveryRate = Math.max(0, Number(rate) || 0);
+  if (recoveryRate <= 0 || !isHealingItemSpReturnEligible(item)) return 0;
+  const healing = Math.max(0, Math.floor(Number(actualHpHealing) || 0));
+  const availableSp = Math.max(0,
+    Math.floor(Number(maxSp) || 0) - Math.max(0, Math.floor(Number(currentSp) || 0)));
+  return Math.min(availableSp, Math.floor(healing * recoveryRate));
+}
+
 export function resolveFieldItemUse({ character, itemId, context = "dungeon", torchFuel = 0, treasureCompassActive = false } = {}) {
   const reason = getItemUnavailableReason({ character, itemId, context, torchFuel, treasureCompassActive });
   if (reason) return { accepted: false, reason };
@@ -78,12 +118,14 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
     && hasStatus(next, "death_poison");
   for (const effect of item.effects) {
     if (effect.id === "heal_hp") {
-      healing = Math.min(effect.value, next.maxHp - next.hp);
-      next.hp += healing;
+      const amount = Math.min(effect.value, next.maxHp - next.hp);
+      next.hp += amount;
+      healing += amount;
     } else if (effect.id === "heal_hp_rate") {
-      const amount = Math.max(1, Math.ceil(next.maxHp * (Number(effect.value) || 0)));
-      healing = Math.min(amount, next.maxHp - next.hp);
-      next.hp += healing;
+      const requested = Math.max(1, Math.ceil(next.maxHp * (Number(effect.value) || 0)));
+      const amount = Math.min(requested, next.maxHp - next.hp);
+      next.hp += amount;
+      healing += amount;
     } else if (effect.id === "battle_overheal_flat") {
       return { accepted: false, reason: "battleOnly" };
     } else if (effect.id === "cure_poison") {
@@ -119,6 +161,17 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
       environment.emergencyEscape = true;
     }
   }
+  const healingItemSpReturn = calculateHealingItemSpReturn({
+    item,
+    actualHpHealing: healing,
+    currentSp: next.sp,
+    maxSp: next.maxSp,
+    rate: sumCardEffectValues(next.cards?.deckSlots, "healing_item_sp_return")
+  });
+  if (healingItemSpReturn > 0) {
+    next.sp += healingItemSpReturn;
+    spHealing += healingItemSpReturn;
+  }
   next.condition = getConditionLabel(next.statuses);
   next.inventory = consumeItem(next.inventory, itemId).inventory;
   return {
@@ -132,7 +185,9 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
       ? `${item.name}を使った。HPとSPが全回復し、すべての状態異常が治った。`
       : spHealing > 0 && healing === 0
         ? `${item.name}を使った。SPが${spHealing}回復した。`
-      : `${healing > 0 ? `${item.name}を使った。HPが${healing}回復した。` : `${item.name}を使った。`}${deathPoisonUnaffected ? "\n死毒は治療する事が出来ない！" : ""}`
+      : `${healing > 0 ? `${item.name}を使った。HPが${healing}回復した。` : `${item.name}を使った。`}`
+        + `${healingItemSpReturn > 0 ? `\n恩返しによりSPが${healingItemSpReturn}回復した。` : ""}`
+        + `${deathPoisonUnaffected ? "\n死毒は治療する事が出来ない！" : ""}`
   };
 }
 

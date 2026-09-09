@@ -134,6 +134,21 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
       revealBeforeExploration: true
     })
   }),
+  57: Object.freeze({
+    lock: Object.freeze({ mode: "alwaysSuccess", attempts: 1 }),
+    content: Object.freeze({
+      type: "johannaMedicineSpring",
+      bossId: "fleischfresserknospe_b57f",
+      backgroundImageId: "johanna_medicine_spring_b57f",
+      backgroundImage: "images/background/dungeon_event_14.avif",
+      reachingImageId: "maerchentiere_reaching_flower_b57f",
+      reachingImage: "images/npc/NPC_event_28.avif",
+      offeringImageId: "maerchentiere_offering_flower_b57f",
+      offeringImage: "images/npc/NPC_event_29.avif",
+      minimapMarker: "E",
+      revealBeforeExploration: true
+    })
+  }),
   58: Object.freeze({
     lock: Object.freeze({ mode: "alwaysSuccess", attempts: 1 }),
     content: Object.freeze({

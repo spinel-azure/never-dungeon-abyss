@@ -12,6 +12,7 @@ export const TAVERN_RUMOR_006_BASE_READ_FLAG = "tavern_rumor_006_base_read";
 export const TAVERN_RUMOR_006_PERFUME_READ_FLAG = "tavern_rumor_006_perfume_read";
 export const TAVERN_RUMOR_007_BASE_READ_FLAG = "tavern_rumor_007_base_read";
 export const TAVERN_RUMOR_007_DELIVERED_READ_FLAG = "tavern_rumor_007_delivered_read";
+export const TAVERN_RUMOR_008_BASE_READ_FLAG = "tavern_rumor_008_base_read";
 
 export function getTavernRumorTypewriterParts(message) {
   const text = String(message || "");
@@ -174,10 +175,33 @@ export const TAVERN_RUMORS = Object.freeze([
         rosaContinuation: "えっ！あなたも刺されたの！？大丈夫…？ちゃんと治療しないとダメよ？"
       })
     ])
+  }),
+  Object.freeze({
+    id: "rumor_008",
+    title: "宿屋の女将の噂",
+    unlock: context => context.innStayCount >= 100 && context.maerchentiereCompleted,
+    customerLead: "おい、知ってるか？最近ヨハンナの具合が悪いらしい。",
+    customerReply: "宿屋の女将だよ。働きすぎなんじゃないかねぇ。娘も心配してるそうだ。",
+    phases: Object.freeze([
+      Object.freeze({
+        id: "base",
+        readFlag: TAVERN_RUMOR_008_BASE_READ_FLAG,
+        unlock: () => true,
+        dialogue: Object.freeze([
+          "客「おい、知ってるか？最近ヨハンナの具合が悪いらしい。」\n＊Aボタンで次へ",
+          "客「宿屋の女将だよ。働きすぎなんじゃないかねぇ。娘も心配してるそうだ。」\n＊Aボタンで戻る"
+        ]),
+        historyDescription: Object.freeze([
+          "客：おい、知ってるか？最近ヨハンナの具合が悪いらしい。",
+          "客：宿屋の女将だよ。働きすぎなんじゃないかねぇ。娘も心配してるそうだ。"
+        ])
+      })
+    ])
   })
 ]);
 
 function buildDialogue(rumor, phase) {
+  if (Array.isArray(phase.dialogue)) return [...phase.dialogue];
   const opening = rumor.opening || "あなたはカウンターから耳を澄ます………。";
   const dialogue = [
     `${opening}\n客「おい、知ってるか？${rumor.customerLead}」\n＊Aボタンで次へ`,
@@ -207,6 +231,8 @@ function normalizeRumorContext(character, context = {}) {
     quest029Active: Boolean(context.quest029Active ?? character?.quests?.active?.guild_029),
     quest029Completed: Boolean(context.quest029Completed ?? completedQuestIds.includes("guild_029")),
     quest029BeeswaxDelivered: Boolean(context.quest029BeeswaxDelivered ?? character?.eventFlags?.quest_029_beeswax_delivered),
+    maerchentiereCompleted: Boolean(context.maerchentiereCompleted ?? completedQuestIds.includes("guild_026")),
+    innStayCount: Math.max(0, Math.floor(Number(context.innStayCount ?? character?.adventureStats?.innStayCount) || 0)),
     anastasiaOutfitEventSeen: Boolean(context.anastasiaOutfitEventSeen ?? character?.eventFlags?.anastasia_festival_outfit_unlocked),
     priestRumorCompleted: Boolean(context.priestRumorCompleted ?? character?.eventFlags?.tavern_rumor_004_medicine_read),
     helenHiddenEventSeen: Boolean(context.helenHiddenEventSeen ?? character?.eventFlags?.helen_hidden_event_seen)
@@ -242,7 +268,7 @@ export function getPastTavernRumors(character, context = {}) {
       id: rumor.id,
       number: String(index + 1).padStart(3, "0"),
       title: rumor.title,
-      description: [
+      description: Array.isArray(phase.historyDescription) ? [...phase.historyDescription] : [
         `客：${rumor.customerLead}`,
         `客：${rumor.customerReply}`,
         `ローザ：${phase.rosa}`,

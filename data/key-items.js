@@ -70,6 +70,16 @@ export const KEY_ITEMS = Object.freeze({
     description: "弱らせた特定の相手を傷つけずに捕らえる、キルケ特製のとりもち。",
     sellable: false, consumable: false, version: 1
   }),
+  night_dew_flower: Object.freeze({
+    id: "night_dew_flower", name: "夜露の花",
+    description: "密林の泉で手に入れた、ヨハンナの薬の調合に必要な白い花。",
+    sellable: false, consumable: true, version: 1
+  }),
+  johanna_medicine: Object.freeze({
+    id: "johanna_medicine", name: "ヨハンナの薬",
+    description: "夜露の花からキルケが調合した、ヨハンナのための薬。",
+    sellable: false, consumable: true, version: 1
+  }),
   trapezohedron: Object.freeze({
     id: "trapezohedron", name: "トラペツォエーダー",
     description: "異界の混沌を呼び出すという、妖しく輝く多面体。",

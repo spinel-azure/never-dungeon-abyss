@@ -7,7 +7,7 @@ const townSource = await readFile(new URL("../js/town.js", import.meta.url), "ut
 const townCss = await readFile(new URL("../css/town.css", import.meta.url), "utf8");
 
 test("borrowing Johanna's cat waits for the final confirmation before granting and saving it", () => {
-  const talkBranch = mainSource.match(/function talkAtFacility\(facilityId\) \{([\s\S]*?)if \(facilityId === "guild"/u)?.[1] || "";
+  const talkBranch = mainSource.match(/function talkAtFacility\(facilityId, context = \{\}\) \{([\s\S]*?)if \(facilityId === "guild"/u)?.[1] || "";
   assert.match(talkBranch, /危ない目には遭わせないでおくれよ？\\n＊Aボタン：次へ/);
   assert.match(talkBranch, /completionFlag: "johanna_cat_borrow_transition"/);
   assert.doesNotMatch(talkBranch, /grantKeyItem|showNamedItemGetEffect|autoCompleteAfterMs/);

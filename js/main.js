@@ -49,6 +49,7 @@ import {
   startFloorLapNotice,
   startOverlayEvent,
   startKirkeMaerchentiereResultEvent,
+  startJohannaMedicineSpringResultEvent,
   setNpcTypewriterOptions,
   cancelRapidCurrentTransition,
   applyFixedFloorWarp
@@ -116,7 +117,7 @@ import {
 import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
 import { EffectEngine } from "./effects/effect-engine.js";
 import { getEquipmentHighlightClass, getLotEquipmentHighlightClass, hasUncertainLoot, isHighlightedLotCardRarity } from "./loot-identification.js";
-import { configureTown, setTownEndingSuspended, openPendingNpcRenewal, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js";
+import { configureTown, INN_MEDICINE_DELIVERY_TRANSITION_FLAG, setTownEndingSuspended, openPendingNpcRenewal, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js";
 import { flashNpcPartyStatus, renderNpcPartyStatus, renderNpcStatusPage, setNpcPartyCharge } from "./npc-party-ui.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { applyNpcExplorationPassives, beginNpcRenewal, hireNpc, recordNpcExpeditionDepth, registerNpc, resolveNpcRenewal } from "../data/npc-party.js";
@@ -178,6 +179,28 @@ import { renameCharacter as applyCharacterRename } from "../data/character-name.
 import { isTransferDestinationUnlocked } from "../data/transfer-destinations.js";
 import { RARE_REVIVAL_GODDESS_IMAGE, selectRevivalGoddessImage } from "../data/revival-presentation.js";
 import { ANASTASIA_OUTFIT_EVENT_FLAG } from "../data/anastasia-event.js";
+import {
+  FLEISCHFRESSERKNOSPE_DEFEATED_FLAG,
+  JOHANNA_MEDICINE_KEY_ITEM_ID,
+  JOHANNA_RESCUE_MEDICINE_DELIVERED_FLAG,
+  JOHANNA_RESCUE_REQUEST_UNLOCKED_FLAG,
+  JOHANNA_RESCUE_RECOVERY_COMPLETED_FLAG,
+  JOHANNA_RESCUE_THANKS_SEEN_FLAG,
+  brewJohannaMedicine,
+  canEnterJohannaRescueSpring,
+  completeJohannaRecovery,
+  completeJohannaThanks,
+  consultKirkeForJohannaMedicine,
+  deliverJohannaMedicine,
+  getJohannaRescueInnPhase,
+  getJohannaRescueKirkeMode,
+  getJohannaRescueSpringMode,
+  grantJohannaRescueFlower,
+  markJohannaRescueSpringIntroSeen,
+  recordFleischfresserknospeDefeat,
+  selectPostQuestInnKeeper,
+  unlockJohannaRescueQuest
+} from "../data/quest-031.js";
 import { createMichaelaRestorationController } from "./michaela-restoration.js";
 import { createEndingController } from "./ending.js";
 import { completeEndingStory, completeEndingCredits, getEndingResumeMode } from "../data/ending.js";
@@ -763,7 +786,7 @@ import {
     beginRareEnemyBattle,
     beginQuestEnemyBattle,
     inspectWaspHive: () => getWaspHiveInteraction(character),
-    inspectKirkeHouse: () => getKirkeHouseInteraction(character),
+    inspectKirkeHouse: inspectKirkeHouseWithJohannaQuest,
     deliverBeeswaxToKirke: () => {
       const delivery = deliverQuestBeeswax(character);
       if (!delivery.accepted) return { accepted: false, message: "" };
@@ -789,7 +812,43 @@ import {
       }
       return granted;
     },
+    consultKirkeForJohannaMedicine: () => {
+      const result = consultKirkeForJohannaMedicine(character);
+      if (!result.accepted) return result;
+      character = result.character;
+      updateCharacterUi();
+      saveGame();
+      return result;
+    },
+    brewJohannaMedicine: () => {
+      const result = brewJohannaMedicine(character);
+      if (!result.accepted) return result;
+      character = result.character;
+      updateCharacterUi();
+      saveGame();
+      if (result.brewed) showNamedItemGetEffect(["ヨハンナの薬"], { important: true });
+      return result;
+    },
     beginMaerchentiereBattle,
+    inspectJohannaMedicineSpring,
+    markJohannaMedicineSpringIntroSeen: () => {
+      const result = markJohannaRescueSpringIntroSeen(character);
+      if (!result.accepted) return false;
+      character = result.character;
+      updateCharacterUi();
+      saveGame();
+      return true;
+    },
+    beginJohannaMedicineSpringBattle,
+    grantNightDewFlower: () => {
+      const result = grantJohannaRescueFlower(character);
+      if (!result.accepted) return result;
+      character = result.character;
+      updateCharacterUi();
+      saveGame();
+      if (result.gained) showNamedItemGetEffect(["夜露の花"], { important: true });
+      return result;
+    },
     beginBossBattle,
     beginMimicBattle,
     playNpcVoice: playSe,
@@ -966,8 +1025,55 @@ import {
       updateCharacterUi();
       saveGame();
     },
-    onCompleteFacilityTalk: flag => {
+    onCompleteFacilityTalk: (flag, context = {}) => {
       if (!flag || !character) return;
+      if (flag === JOHANNA_RESCUE_REQUEST_UNLOCKED_FLAG) {
+        const result = unlockJohannaRescueQuest(character);
+        if (result.accepted) character = result.character;
+        updateCharacterUi();
+        saveGame();
+        return;
+      }
+      if (flag === INN_MEDICINE_DELIVERY_TRANSITION_FLAG) {
+        const result = deliverJohannaMedicine(character);
+        if (!result.accepted) return null;
+        character = result.character;
+        updateCharacterUi();
+        saveGame();
+        return {
+          keeperId: "anna_happy",
+          forceKeeperChange: true,
+          keeper: "宿屋の娘アンナ",
+          image: "images/npc/NPC_11d.avif",
+          portraitAlt: "笑顔の宿屋の娘アンナ",
+          message: "宿屋の娘アンナ：いらっしゃいませ！お泊まりですかっ？",
+          voice: "inn",
+          talkVoice: false,
+          stayConfirmMessage: "宿屋の娘アンナ：{fee}Gですが、よろしいですかっ？\n＊Aボタン：はい　Bボタン：いいえ",
+          stayAcceptedMessage: "宿屋の娘アンナ：ごゆっくりどうぞっ！",
+          stayCancelledMessage: "宿屋の娘アンナ：またきてくださいねっ！",
+          insufficientFundsMessage: "宿屋の娘アンナ：お金が足りないみたいです。馬小屋なら休めますよっ！",
+          messageExpanded: true,
+          dialogue: [
+            "宿屋の娘アンナ：おかあさんに薬を飲ませたの。だいぶ落ち着いてきたみたい。本当にありがとう！\n＊Aボタンで戻る"
+          ],
+          completionFlag: JOHANNA_RESCUE_RECOVERY_COMPLETED_FLAG
+        };
+      }
+      if (flag === JOHANNA_RESCUE_RECOVERY_COMPLETED_FLAG) {
+        const result = completeJohannaRecovery(character);
+        if (result.accepted) character = result.character;
+        updateCharacterUi();
+        saveGame();
+        return;
+      }
+      if (flag === JOHANNA_RESCUE_THANKS_SEEN_FLAG) {
+        const result = completeJohannaThanks(character);
+        if (result.accepted) character = result.character;
+        updateCharacterUi();
+        saveGame();
+        return;
+      }
       if (flag === "johanna_cat_borrow_transition") {
         const granted = grantKeyItem(character.keyItems, "johanna_calico_cat");
         character = {
@@ -991,7 +1097,7 @@ import {
         };
         updateCharacterUi();
         saveGame();
-        return;
+        return enterInn({ newVisit: false, innKeeperId: "johanna" });
       }
       character = {
         ...character,
@@ -1373,13 +1479,29 @@ import {
         registrationRequired: !character,
         facilityId: save.world?.town?.facilityId,
         mode: save.world?.town?.mode,
-        firstTownArrivalPending: save.world?.town?.firstTownArrivalPending
+        firstTownArrivalPending: save.world?.town?.firstTownArrivalPending,
+        innKeeperId: save.world?.town?.innKeeperId
       });
     } else {
       startBgm(selectDungeonBgm());
       setPlayerInputEnabled(true);
       closeTown();
-      say("冒険を再開しました。");
+      const resumeJohannaFlowerHandoff = currentDepth === 57
+        && getJohannaRescueSpringMode(character) === "flowerHandoff";
+      if (resumeJohannaFlowerHandoff) {
+        const springDefinition = getSpecialRoomDefinition(57);
+        const springApproach = cells.flat().find(cell => (
+          cell.featureApproach?.id === springDefinition?.id
+        ));
+        state.autoReturnPaused = true;
+        startJohannaMedicineSpringResultEvent({
+          content: springDefinition?.content,
+          fromGX: springApproach?.x,
+          fromGY: springApproach?.y
+        });
+      } else {
+        say("冒険を再開しました。");
+      }
       if (currentDepth === 100 && resumeMichaelaRestoration) {
         setPlayerInputEnabled(false);
         window.setTimeout(() => void runMichaelaRestoration(), 150);
@@ -1534,25 +1656,141 @@ import {
     return character?.eventFlags?.tavern_rumor_004_base_read ? "助祭アナスタシア" : "司祭アーヴァイン";
   }
 
-  function enterInn() {
-    if (!character?.eventFlags?.johanna_cat_return_pending) return null;
-    if (!hasKeyItem(character.keyItems, "johanna_calico_cat")) {
-      character = {
-        ...character,
-        eventFlags: { ...(character.eventFlags || {}), johanna_cat_return_pending: false }
-      };
-      saveGame();
-      return null;
-    }
-    const message = "女将ヨハンナ：あらまあ、おかえり。危ない目には遭わなかったかい？";
+  function johannaInnProfile({ postQuest = false } = {}) {
     return {
-      message,
-      dialogue: [message],
-      completionFlag: "johanna_cat_return_transition"
+      keeperId: "johanna",
+      keeper: "女将ヨハンナ",
+      image: postQuest ? "images/npc/NPC_11c.avif" : "",
+      portraitAlt: "宿屋の女将ヨハンナ",
+      voice: "inn"
     };
   }
 
-  function talkAtFacility(facilityId) {
+  function sadAnnaInnProfile() {
+    return {
+      keeperId: "anna_sad",
+      keeper: "宿屋の娘アンナ",
+      image: "images/npc/NPC_11e.avif",
+      portraitAlt: "悲しげな宿屋の娘アンナ",
+      message: "宿屋の娘アンナ：あっ…。いらっしゃいませ。",
+      voice: false,
+      talkVoice: false,
+      stayConfirmMessage: "宿屋の娘アンナ：お泊まりですか…。{fee}Gになります…。\n＊Aボタン：はい　Bボタン：いいえ",
+      stayAcceptedMessage: "宿屋の娘アンナ：…おやすみなさい…。",
+      stayCancelledMessage: "宿屋の娘アンナ：…さようなら。",
+      insufficientFundsMessage: "宿屋の娘アンナ：お金が足りないみたいです…。馬小屋なら休めます…。"
+    };
+  }
+
+  function happyAnnaInnProfile() {
+    return {
+      keeperId: "anna_happy",
+      keeper: "宿屋の娘アンナ",
+      image: "images/npc/NPC_11d.avif",
+      portraitAlt: "笑顔の宿屋の娘アンナ",
+      message: "宿屋の娘アンナ：いらっしゃいませ！お泊まりですかっ？",
+      voice: "inn",
+      talkVoice: false,
+      stayConfirmMessage: "宿屋の娘アンナ：{fee}Gですが、よろしいですかっ？\n＊Aボタン：はい　Bボタン：いいえ",
+      stayAcceptedMessage: "宿屋の娘アンナ：ごゆっくりどうぞっ！",
+      stayCancelledMessage: "宿屋の娘アンナ：またきてくださいねっ！",
+      insufficientFundsMessage: "宿屋の娘アンナ：お金が足りないみたいです。馬小屋なら休めますよっ！"
+    };
+  }
+
+  function enterInn({ newVisit = false, innKeeperId = null } = {}) {
+    if (character?.eventFlags?.johanna_cat_return_pending) {
+      if (!hasKeyItem(character.keyItems, "johanna_calico_cat")) {
+        character = {
+          ...character,
+          eventFlags: { ...(character.eventFlags || {}), johanna_cat_return_pending: false }
+        };
+        saveGame();
+      } else {
+        const message = "女将ヨハンナ：あらまあ、おかえり。危ない目には遭わなかったかい？";
+        return {
+          ...johannaInnProfile(),
+          message,
+          dialogue: [message],
+          completionFlag: "johanna_cat_return_transition"
+        };
+      }
+    }
+
+    const phase = getJohannaRescueInnPhase(character);
+    if (phase === "annaSad") return sadAnnaInnProfile();
+    if (phase === "annaHappy") {
+      const profile = happyAnnaInnProfile();
+      if (character?.eventFlags?.[JOHANNA_RESCUE_MEDICINE_DELIVERED_FLAG]
+        && !character?.eventFlags?.[JOHANNA_RESCUE_RECOVERY_COMPLETED_FLAG]) {
+        return {
+          ...profile,
+          voice: false,
+          messageExpanded: true,
+          dialogue: [
+            "宿屋の娘アンナ：おかあさんに薬を飲ませたの。だいぶ落ち着いてきたみたい。本当にありがとう！\n＊Aボタンで戻る"
+          ],
+          completionFlag: JOHANNA_RESCUE_RECOVERY_COMPLETED_FLAG
+        };
+      }
+      return profile;
+    }
+    if (phase === "johannaThanks") {
+      return {
+        ...johannaInnProfile({ postQuest: true }),
+        messageExpanded: true,
+        dialogue: [
+          "ヨハンナ：今回はあたしと娘が世話になったね。疲れが溜まっていたのかねぇ…？あの娘には苦労をかけちまったよ。\n＊Aボタンで次へ",
+          "本当に感謝してるよ。ありがとうね。\n＊Aボタンで次へ",
+          "これから宿屋で経験値を精算すると、『ヨハンナボーナス』が加算されます！\n＊Aボタンで戻る"
+        ],
+        completionFlag: JOHANNA_RESCUE_THANKS_SEEN_FLAG
+      };
+    }
+    if (phase === "postQuest") {
+      const selectedKeeper = newVisit
+        ? selectPostQuestInnKeeper(character, Math.random)
+        : ["anna", "anna_happy"].includes(innKeeperId)
+          ? "anna"
+          : "johanna";
+      return selectedKeeper === "anna"
+        ? happyAnnaInnProfile()
+        : johannaInnProfile({ postQuest: true });
+    }
+    return johannaInnProfile();
+  }
+
+  function talkAtFacility(facilityId, context = {}) {
+    if (facilityId === "inn") {
+      const phase = getJohannaRescueInnPhase(character);
+      if (phase === "annaSad" && hasKeyItem(character?.keyItems, JOHANNA_MEDICINE_KEY_ITEM_ID)) {
+        return {
+          voice: false,
+          messageExpanded: true,
+          dialogue: [
+            "宿屋の娘アンナ：それは…おかあさんの薬！キルケおばあちゃんが作ってくれたの！？\n＊Aボタンで次へ"
+          ],
+          completionFlag: INN_MEDICINE_DELIVERY_TRANSITION_FLAG
+        };
+      }
+      if (phase === "annaSad" && !character?.eventFlags?.[JOHANNA_RESCUE_REQUEST_UNLOCKED_FLAG]) {
+        return {
+          voice: false,
+          messageExpanded: true,
+          dialogue: [
+            "宿屋の娘アンナ：わたしはアンナと言います。ヨハンナはわたしのおかあさんです。最近からだの具合がわるくて…。まじょのキルケおばあちゃんにお薬を作ってほしいけど、最近おばあちゃん町に来ないから…。\n＊Aボタンで戻る"
+          ],
+          completionFlag: JOHANNA_RESCUE_REQUEST_UNLOCKED_FLAG
+        };
+      }
+      if (phase === "annaSad") return "宿屋の娘アンナ：…おかあさん…。";
+      if (phase === "annaHappy") {
+        return "宿屋の娘アンナ：おかあさん、ゆっくり休んでるの。本当にありがとう！";
+      }
+      if (phase === "postQuest" && ["anna", "anna_happy"].includes(context?.innKeeperId)) {
+        return "宿屋の娘アンナ：今日はわたしがお店番！おかあさんには、ちゃんと休んでって言ってあるの！";
+      }
+    }
     if (facilityId === "inn"
       && character?.eventFlags?.sphinx_b69f_riddle_heard
       && !character?.eventFlags?.sphinx_b69f_route_fixed
@@ -2332,6 +2570,58 @@ import {
     return started;
   }
 
+  function inspectKirkeHouseWithJohannaQuest() {
+    const existing = getKirkeHouseInteraction(character);
+    if (existing?.mode === "maerchentiere" || existing?.canDeliver) return existing;
+    const mode = getJohannaRescueKirkeMode(character);
+    if (mode === "consult") return { mode: "johannaMedicineConsult", canDeliver: false };
+    if (mode === "reminder") return { mode: "johannaMedicineReminder", canDeliver: false };
+    if (mode === "brew") return { mode: "johannaMedicineBrew", canDeliver: false };
+    if (mode === "medicineReady") return { mode: "johannaMedicineReady", canDeliver: false };
+    return existing;
+  }
+
+  function inspectJohannaMedicineSpring() {
+    const mode = getJohannaRescueSpringMode(character);
+    return {
+      available: ["intro", "retry", "flowerHandoff"].includes(mode),
+      introSeen: mode === "retry",
+      bossDefeated: mode === "flowerHandoff"
+        || Boolean(character?.eventFlags?.[FLEISCHFRESSERKNOSPE_DEFEATED_FLAG]),
+      flowerReceived: mode === "resolved",
+      message: "木々の奥に、澄んだ水をたたえる泉がある。\n今は静かに水をたたえている。"
+    };
+  }
+
+  function beginJohannaMedicineSpringBattle({ fromGX, fromGY } = {}) {
+    if (endingSequenceActive || !character || worldLocation !== "dungeon"
+      || currentDepth !== 57 || isBattleActive() || !canEnterJohannaRescueSpring(character)) return false;
+    const boss = getBossById("fleischfresserknospe_b57f");
+    if (!boss || isCurrentBossDefeated(boss.id)) return false;
+    cancelAutoReturn(false);
+    setPlayerInputEnabled(false);
+    pendingEncounter = null;
+    if (Number.isInteger(fromGX) && Number.isInteger(fromGY)) {
+      state.bossEncounterOrigin = { x: fromGX, y: fromGY };
+    }
+    activeRareRoomEncounterId = "quest_031_fleischfresserknospe";
+    startBgm(selectBattleBgm(boss));
+    const combatant = createBossCombatant(boss);
+    const started = startBattle(combatant, {
+      playStartSe: true,
+      ambush: false,
+      concealed: false
+    });
+    if (started) recordCompendiumEncounter([combatant]);
+    if (!started) {
+      activeRareRoomEncounterId = null;
+      state.bossEncounterOrigin = null;
+      startBgm(selectDungeonBgm());
+      setPlayerInputEnabled(true);
+    }
+    return started;
+  }
+
   function isB100GauntletBossId(bossId) {
     return currentDepth === 100 && B100_GAUNTLET_BOSS_IDS.includes(bossId);
   }
@@ -2967,6 +3257,10 @@ import {
       activeRoamingEnemyInstanceId = null;
     }
     const questWaspHiveVictory = activeRareRoomEncounterId === "quest_029_wasp_hive";
+    const questJohannaMedicineBossVictory = activeRareRoomEncounterId === "quest_031_fleischfresserknospe";
+    const johannaMedicineEncounterOrigin = questJohannaMedicineBossVictory
+      ? state.bossEncounterOrigin
+      : null;
     const defeatedEnemyId = battle?.defeatedEnemyId || battle?.encounterBossId || battle?.enemy?.id || "";
     const startMichaelaRestoration = defeatedEnemyId === "amayenak_b100f"
       && !character?.eventFlags?.ending_story_completed;
@@ -3008,6 +3302,10 @@ import {
         : applyBossVictory(character, battle.enemy.id);
       if (victory.accepted) {
         character = victory.character;
+        if (questJohannaMedicineBossVictory) {
+          const recorded = recordFleischfresserknospeDefeat(character);
+          if (recorded.accepted) character = recorded.character;
+        }
         if (startMichaelaRestoration) {
           const truthStaff = grantKeyItem(character.keyItems, "truth_staff");
           character = {
@@ -3164,6 +3462,21 @@ import {
       updateCharacterUi();
       saveGame();
       void runMichaelaRestoration();
+      return;
+    }
+    if (questJohannaMedicineBossVictory) {
+      state.bossEncounterOrigin = null;
+      setPlayerInputEnabled(true);
+      state.autoReturnPaused = true;
+      say(victoryMessage);
+      updateCharacterUi();
+      saveGame();
+      const content = getSpecialRoomDefinition(57)?.content;
+      startJohannaMedicineSpringResultEvent({
+        content,
+        fromGX: johannaMedicineEncounterOrigin?.x,
+        fromGY: johannaMedicineEncounterOrigin?.y
+      });
       return;
     }
     setPlayerInputEnabled(true);
@@ -3513,6 +3826,8 @@ import {
       saveGame();
       return;
     }
+    const escapedJohannaMedicineBoss = activeRareRoomEncounterId === "quest_031_fleischfresserknospe";
+    const johannaMedicineEncounterOrigin = escapedJohannaMedicineBoss ? state.bossEncounterOrigin : null;
     const escapedRareRoomEnemy = battle?.outcome === "enemyEscaped"
       && activeRareRoomEncounterId === battle.enemy?.id;
     activeRareRoomEncounterId = null;
@@ -3523,7 +3838,13 @@ import {
     resetPresence();
     setPlayerInputEnabled(true);
     const cellBossId = cells[state.gridY]?.[state.gridX]?.bossId;
-    if (["giant_vine_obstacle", "fleischfresser_b59f"].includes(cellBossId) && state.bossEncounterOrigin) {
+    if (escapedJohannaMedicineBoss && johannaMedicineEncounterOrigin) {
+      state.gridX = johannaMedicineEncounterOrigin.x;
+      state.gridY = johannaMedicineEncounterOrigin.y;
+      state.x = state.gridX + 0.5;
+      state.y = state.gridY + 0.5;
+      state.bossEncounterOrigin = null;
+    } else if (["giant_vine_obstacle", "fleischfresser_b59f"].includes(cellBossId) && state.bossEncounterOrigin) {
       state.gridX = state.bossEncounterOrigin.x;
       state.gridY = state.bossEncounterOrigin.y;
       state.x = state.gridX + 0.5;
@@ -3531,7 +3852,9 @@ import {
     }
     state.autoReturnPaused = false;
     if (state.autoWalkerActive) window.setTimeout(continueAutoReturn, 0);
-    say(battle?.outcome === "enemyEscaped"
+    say(escapedJohannaMedicineBoss
+      ? "三匹は無事に茂みへ逃げ込んだ。\n泉へ戻れば、もう一度クスノペに挑戦できる。"
+      : battle?.outcome === "enemyEscaped"
       ? escapedRareRoomEnemy
         ? "マイケーファーは勝ち誇るように羽音を響かせ、闇へ消えた……。"
         : `${battle.enemy?.name || "敵"}は逃げ去った。`
@@ -3540,16 +3863,17 @@ import {
     saveGame();
   }
 
-  async function stayAtInn() {
+  async function stayAtInn(context = {}) {
     if (!character || sceneTransitionRunning) return;
-    const fee = getInnStayFee(character);
-    if (Math.max(0, Math.floor(Number(character.gold) || 0)) < fee) {
-      say("女将ヨハンナ：おや。持ち合わせがないのかい？夜露がしのげればいいなら、馬小屋を使っておくれ。");
+    const fee = Math.max(0, Math.floor(Number(context.fee) || getInnStayFee(character)));
+    if (context.canAfford === false || Math.max(0, Math.floor(Number(character.gold) || 0)) < fee) {
+      say(context.insufficientFundsMessage
+        || "女将ヨハンナ：おや。持ち合わせがないのかい？夜露がしのげればいいなら、馬小屋を使っておくれ。");
       await stayAtInnStable();
       return;
     }
     character.gold -= fee;
-    say(`女将ヨハンナ：${fee}Gいただくよ。さぁ、部屋に上がってゆっくりお休み。`);
+    say(context.stayAcceptedMessage || `女将ヨハンナ：${fee}Gいただくよ。さぁ、部屋に上がってゆっくりお休み。`);
     updateCharacterUi();
     saveGame();
     sceneTransitionRunning = true;
@@ -3586,7 +3910,11 @@ import {
         say(`LVが上がった！HP+${result.hpGained}、SP+${result.spGained}${deckBonus}${formatLearnedSkills(result.learnedSkillIds)}`);
         await levelUpPresentation;
       } else {
-        say("女将ヨハンナ：ゆっくり休めたかい？");
+        say(context.keeperId === "anna_sad"
+          ? "宿屋の娘アンナ：…おはようございます…。"
+          : ["anna", "anna_happy"].includes(context.keeperId)
+            ? "宿屋の娘アンナ：よく眠れましたかっ？"
+            : "女将ヨハンナ：ゆっくり休めたかい？");
       }
       if (worldLocation === "town" && getTownState().facilityId === "inn") {
         startBgm("townFacilities");

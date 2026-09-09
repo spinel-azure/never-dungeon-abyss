@@ -793,7 +793,8 @@ function renderQuestHistory() {
     const { quest, progress } = selected;
     const status = progress.readyToReport ? "報告可能" : progress.active ? "進行中" : "達成済";
     const progressText = progress.completed ? "完了" : `${Math.min(progress.progress, quest.requiredCount)}／${quest.requiredCount}`;
-    description.textContent = `依頼人：${quest.client} / 状態：${status} / 進捗：${progressText} / 目的：${quest.objectiveLabel || quest.description?.join(" ") || "―"} / 報酬：${quest.reward?.label || "―"}${quest.reward?.bonusGold ? `＋${quest.reward.bonusGold}G` : ""}`;
+    const objectiveHeading = quest.objectiveHeading || "目的";
+    description.textContent = `依頼人：${quest.client} / 状態：${status} / 進捗：${progressText} / ${objectiveHeading}：${quest.objectiveLabel || quest.description?.join(" ") || "―"} / 報酬：${quest.reward?.label || "―"}${quest.reward?.bonusGold ? `＋${quest.reward.bonusGold}G` : ""}`;
   }
   panel.querySelector("[data-quest-history-page]").textContent = `${menu.questHistoryPage + 1}/${pages}`;
   const back = panel.querySelector('[data-quest-history-nav="back"]');
