@@ -539,6 +539,14 @@ export function getCardById(cardId) {
   return CARDS.find(card => card.id === cardId) || null;
 }
 
+export function countOwnedZodiacCardKinds(cardState = {}) {
+  const ownedCounts = cardState?.ownedCardCounts || {};
+  return CARDS.filter(card => card.category === "zodiac")
+    .reduce((count, card) => count + (
+      Math.max(0, Number(ownedCounts[card.id]) || 0) > 0 ? 1 : 0
+    ), 0);
+}
+
 export function collectCardStatBonuses(deckSlots = []) {
   return deckSlots.reduce((bonuses, cardId) => {
     const card = getCardById(cardId);

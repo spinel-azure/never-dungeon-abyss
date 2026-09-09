@@ -111,6 +111,19 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
       revealBeforeExploration: true
     })
   }),
+  47: Object.freeze({
+    lock: Object.freeze({ mode: "alwaysSuccess", attempts: 1 }),
+    content: Object.freeze({
+      type: "eventBoss",
+      bossId: "eiskrabbe_b47f",
+      requiredZodiacCount: 3,
+      accessBlockedMessage: "扉は厚い氷に閉ざされている。表面には12星座の紋様が刻まれている……。",
+      accessConfirmMessage: "扉の向こうから、巨大な鋏が氷を砕く音が響く。中に入りますか？\n＊Aボタン：はい　Bボタン：いいえ",
+      confirmAfterUnlock: true,
+      minimapMarker: "E",
+      revealBeforeExploration: true
+    })
+  }),
   56: Object.freeze({
     lock: Object.freeze({ mode: "alwaysSuccess", attempts: 1 }),
     content: Object.freeze({

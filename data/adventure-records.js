@@ -96,6 +96,7 @@ export function getAdventureChronicle(character) {
     ["marathon42", "深淵への大行軍", flags.b1_b42_marathon_completed, "一度も帰還せず、転送門を使わずにB1FからB42Fへ到達した。", "？？？？？？――地上を忘れし旅人"],
     ["b45Survey", "B45Fを100マス踏破した", flags.achievement_b45f_100_cells || completedQuests.has(B45F_SURVEY_QUEST_ID), "途中帰還することなくB45Fを100マス踏破した。", "？？？？？？――凍土を踏破する者"],
     ["glacies", "グラキエスを撃破した", flags.boss_glacies_event_boss_defeated, "氷の巨人グラキエスを撃破した。", "？？？？？？――氷巨人への挑戦"],
+    ["eiskrabbe", "エイスクラッベを倒した", flags.boss_eiskrabbe_b47f_defeated, "B47Fに潜む巨大な氷の蟹エイスクラッベを倒した。", "？？？？？？――巨大な氷鋏"],
     ["eiskoenigin", "エイスケーニギンを撃破した", flags.boss_eiskoenigin_b49f_defeated, "B49Fの赤い扉の奥でエイスケーニギンを撃破した。", "？？？？？？――凍てつく女王"],
     ["b50", "B50Fへ到達した", flags.boss_eiskoenigin_b49f_defeated && depth >= 50, "エイスケーニギンを倒し、B50Fへ到達した。", "？？？？？？――極寒の果て"],
     ["priestBackRecovery", "司祭のぎっくり腰を治療した", flags.achievement_priest_back_recovered, "密林区域で特効薬の素材を集め、司祭アーヴァインのぎっくり腰を治療した。", "？？？？？？――魔女の一撃"],

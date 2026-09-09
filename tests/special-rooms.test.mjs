@@ -17,6 +17,7 @@ import {
   rollMaikaeferNestContent
 } from "../data/special-rooms.js";
 import { shouldDrawSpecialRoomMarker } from "../js/minimap.js";
+import { countOwnedZodiacCardKinds } from "../data/cards.js";
 
 test("B2 special room contains the repeatable lingering ghost event boss", () => {
   assert.deepEqual(getSpecialRoomDefinition(2).content, {
@@ -109,6 +110,32 @@ test("B46 Glacies room is gated by quest 018", () => {
   assert.equal(getQuestRequiredSpecialRoomAccess(room, { active: true, completed: false }).blocked, false);
 });
 
+test("B47 is reserved for the three-Zodiac Eiskrabbe event without replacing B46", () => {
+  const glaciesRoom = getSpecialRoomDefinition(46);
+  const room = getSpecialRoomDefinition(47);
+  assert.equal(glaciesRoom.content.bossId, "glacies_event_boss");
+  assert.equal(glaciesRoom.content.requiredQuestId, "guild_018");
+  assert.equal(room.lock.mode, "alwaysSuccess");
+  assert.equal(room.content.type, "eventBoss");
+  assert.equal(room.content.bossId, "eiskrabbe_b47f");
+  assert.equal(room.content.requiredZodiacCount, 3);
+  assert.equal(room.content.confirmAfterUnlock, true);
+  assert.match(room.content.accessBlockedMessage, /厚い氷.*12星座/);
+  assert.match(room.content.accessConfirmMessage, /巨大な鋏が氷を砕く音/);
+});
+
+test("Zodiac access counts distinct owned kinds without requiring them to be set", () => {
+  const twoKinds = {
+    ownedCardCounts: { zodiac_taurus: 3, zodiac_libra: 1 },
+    deckSlots: []
+  };
+  assert.equal(countOwnedZodiacCardKinds(twoKinds), 2);
+  assert.equal(countOwnedZodiacCardKinds({
+    ...twoKinds,
+    ownedCardCounts: { ...twoKinds.ownedCardCounts, zodiac_scorpio: 1 }
+  }), 3);
+});
+
 test("B64 is reserved for the Zodiac-gated Todes Scorpio event", () => {
   const room = getSpecialRoomDefinition(64);
   assert.equal(room.lock.mode, "alwaysSuccess");
@@ -126,8 +153,7 @@ test("B64 opens first, then asks for confirmation when entering", async () => {
     readFile(new URL("../js/main.js", import.meta.url), "utf8"),
     readFile(new URL("../js/player.js", import.meta.url), "utf8")
   ]);
-  assert.match(mainSource, /CARDS\.filter\(card => card\.category === "zodiac"\)/);
-  assert.match(mainSource, /ownedCounts\[card\.id\]/);
+  assert.match(mainSource, /countOwnedZodiacCardKinds\(character\?\.cards\)/);
   assert.match(mainSource, /room\.content\.confirmAfterUnlock/);
   assert.match(playerSource, /if \(access\.confirmAfterUnlock\)[\s\S]*attemptSpecialDoorUnlock/);
   assert.match(playerSource, /specialRoomEntry\?\.content\?\.accessConfirmMessage/);

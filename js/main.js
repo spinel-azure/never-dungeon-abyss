@@ -132,7 +132,14 @@ import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from
 import { configureItemOverlay, openItemOverlay, handleItemOverlayInput } from "./item-overlay.js";
 import { resolveFieldItemUse } from "../combat/resolve-item-use.js";
 import { grantCard } from "../data/deck.js";
-import { CARDS, collectCardStatBonuses, getCardById, hasCardEffect, sumCardEffectValues } from "../data/cards.js";
+import {
+  CARDS,
+  collectCardStatBonuses,
+  countOwnedZodiacCardKinds,
+  getCardById,
+  hasCardEffect,
+  sumCardEffectValues
+} from "../data/cards.js";
 import { drawCardCanvas } from "./card-canvas.js";
 import { getItem } from "../data/items.js";
 import {
@@ -4217,9 +4224,7 @@ import {
     if (forcedAccess.blocked) return forcedAccess;
     if (room?.content?.requiredZodiacCount) {
       const required = Math.max(1, Math.floor(Number(room.content.requiredZodiacCount) || 1));
-      const ownedCounts = character?.cards?.ownedCardCounts || {};
-      const owned = CARDS.filter(card => card.category === "zodiac")
-        .reduce((count, card) => count + (Math.max(0, Number(ownedCounts[card.id]) || 0) > 0 ? 1 : 0), 0);
+      const owned = countOwnedZodiacCardKinds(character?.cards);
       if (owned < required) {
         return { blocked: true, reason: "zodiacCardsRequired", message: room.content.accessBlockedMessage };
       }

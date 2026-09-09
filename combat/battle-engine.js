@@ -768,6 +768,22 @@ export function createPlayerAction(player, command = {}, enemy = null) {
 }
 
 export function createEnemyAction(enemy, rng = Math.random, context = {}) {
+  const attack = createNormalAttack({
+    weapon: {
+      id: `${enemy.id}_attack`,
+      name: "攻撃",
+      type: "longsword",
+      attack: enemy.attack,
+      element: "physical"
+    }
+  });
+  if (enemy?.reservedEnemyAction) {
+    const reserved = structuredClone(enemy.reservedEnemyAction);
+    return {
+      ...buildEnemyAction(reserved, attack),
+      reservedEnemyActionId: reserved.id
+    };
+  }
   if (Array.isArray(enemy?.scriptedActionCycle) && enemy.scriptedActionCycle.length > 0) {
     const turn = Math.max(1, Math.floor(Number(context?.battle?.turn) || 1));
     return {
@@ -778,15 +794,6 @@ export function createEnemyAction(enemy, rng = Math.random, context = {}) {
       waitMessage: enemy.scriptedActionCycle[(turn - 1) % enemy.scriptedActionCycle.length]
     };
   }
-  const attack = createNormalAttack({
-    weapon: {
-      id: `${enemy.id}_attack`,
-      name: "攻撃",
-      type: "longsword",
-      attack: enemy.attack,
-      element: "physical"
-    }
-  });
   const actionTable = Array.isArray(enemy.actions) ? enemy.actions : [];
   const actionSealed = enemy.statuses?.some(status =>
     (status.id || status.statusId) === "action_seal" && status.active !== false
@@ -861,6 +868,13 @@ function buildEnemyAction(action, normalAttack) {
 function executeAction({ battle, action, actor, actorSide, actorIndex = null, target, targetSide, deferFollowUp = false, magicFocus = null, rng }) {
   const actorStats = combatStats(actor);
   const targetStats = combatStats(target);
+  if (actorSide === "enemy" && action.reservedEnemyActionId) {
+    if (actor.reservedEnemyAction?.id !== action.reservedEnemyActionId) {
+      battle.log.push(action.canceledMessage || `${actor.name}は体勢を立て直している。`);
+      return { followUpEligible: false, actualDamage: 0, landedHitCount: 0 };
+    }
+    delete actor.reservedEnemyAction;
+  }
   if (action.actionType === "enemyEscape" && actorSide === "enemy") {
     actor.alive = false;
     actor.escaped = true;
@@ -912,6 +926,11 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
       skipInitialDecrement: true
     }]);
     battle.log.push(`${actor.name}は身を守った。`);
+    return;
+  }
+  if (action.actionType === "prepareAction" && actorSide === "enemy") {
+    actor.reservedEnemyAction = structuredClone(action.reservedAction || null);
+    battle.log.push(action.prepareMessage || `${actor.name}は次の攻撃に備えた！`);
     return;
   }
   if (action.actionType === "chargeDebuff") {
@@ -1421,6 +1440,14 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     && Number(battle.followUpDamageAtStart) > 0;
   if (followUpEligible && !deferFollowUp) applyFixedFollowUpDamage(battle, target);
   const landedHits = presentedHits.filter(hit => hit.hit);
+  breakReservedEnemyActionOnElementHit({
+    battle,
+    enemy: target,
+    actorSide,
+    targetSide,
+    element: result.element,
+    landedHitCount: landedHits.length
+  });
   const allLandedHitsBlockedByNpcWall = landedHits.length > 0 && landedHits.every(hit => hit.blockedByNpcWall);
   const applications = barrier || allLandedHitsBlockedByNpcWall || !target.alive ? [] : [
     ...resolvedHits.flatMap(hit => hit.effects || []),
@@ -1491,6 +1518,26 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
   });
   markUltimateUsed(actor, action);
   return { followUpEligible, actualDamage, landedHitCount: landedHits.length };
+}
+
+export function breakReservedEnemyActionOnElementHit({
+  battle,
+  enemy,
+  actorSide = "player",
+  targetSide = "enemy",
+  element = "physical",
+  landedHitCount = 0
+} = {}) {
+  const trait = enemy?.reservedActionBreakTrait;
+  if (actorSide !== "player"
+    || targetSide !== "enemy"
+    || !enemy?.alive
+    || !enemy.reservedEnemyAction
+    || Math.max(0, Math.floor(Number(landedHitCount) || 0)) < 1
+    || String(element) !== String(trait?.element || "")) return false;
+  delete enemy.reservedEnemyAction;
+  if (trait.message) battle?.log?.push(trait.message);
+  return true;
 }
 
 export function applyCancerDoubleReturn({

@@ -484,6 +484,87 @@ export const BOSSES = Object.freeze({
       remains: "――氷の女王の体躯は溶けて、後には王笏とティアラが残るのみ…。\n＊Aボタン：次へ"
     })
   }),
+  eiskrabbe_b47f: Object.freeze({
+    id: "eiskrabbe_b47f",
+    name: "エイスクラッベ",
+    level: 65,
+    floor: 47,
+    imageId: "eiskrabbe_b47f",
+    image: "images/bosses/boss_21.avif",
+    encounterImageId: "eiskrabbe_b47f",
+    encounterImage: "images/bosses/boss_21.avif",
+    battleSize: "huge-wide",
+    race: "beast",
+    maxHp: 40000,
+    stats: Object.freeze({ str: 36, int: 18, agi: 16, dex: 30, luc: 24 }),
+    def: 40,
+    attack: 34,
+    experienceReward: 25000,
+    actions: Object.freeze([
+      Object.freeze({ weight: 40, action: Object.freeze({
+        id: "eiskrabbe_ice_pincer",
+        name: "氷鋏",
+        actionType: "physicalAttack",
+        element: "ice",
+        hitCount: 1,
+        powerPerHit: 1.3,
+        effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 35, action: Object.freeze({
+        id: "eiskrabbe_double_pincer",
+        name: "連続挟撃",
+        actionType: "physicalAttack",
+        hitCount: 2,
+        powerPerHit: 0.85,
+        effects: Object.freeze([])
+      }) }),
+      Object.freeze({ weight: 25, action: Object.freeze({
+        id: "eiskrabbe_counter_stance",
+        name: "反撃の構え",
+        actionType: "prepareAction",
+        speedModifier: 0,
+        prepareMessage: "エイスクラッベは巨大な鋏を引き絞り、反撃の構えを取った！",
+        reservedAction: Object.freeze({
+          id: "eiskrabbe_counter_great_pincer",
+          name: "反撃の大鋏",
+          actionType: "physicalAttack",
+          hitCount: 1,
+          powerPerHit: 2,
+          speedModifier: -12,
+          canceledMessage: "エイスクラッベの反撃の大鋏は空を切った！",
+          effects: Object.freeze([])
+        })
+      }) })
+    ]),
+    reservedActionBreakTrait: Object.freeze({
+      element: "fire",
+      message: "炎が氷の鋏を溶かし、エイスクラッベの反撃の構えが崩れた！"
+    }),
+    reward: Object.freeze({ type: "card", cardId: "zodiac_cancer", amount: 1 }),
+    elementMultipliers: Object.freeze({
+      fire: 1.5, ice: 0.5, lightning: 1, holy: 1, dark: 1, arcane: 1
+    }),
+    statusResistances: Object.freeze({
+      poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      deadly_poison: Object.freeze({ resistancePoints: 65, immune: false }),
+      death_poison: Object.freeze({ resistancePoints: 100, immune: true }),
+      bleeding: Object.freeze({ resistancePoints: 100, immune: true }),
+      action_skip: Object.freeze({ resistancePoints: 90, immune: false }),
+      speed_down: Object.freeze({ resistancePoints: 85, immune: false })
+    }),
+    escapeRate: 1,
+    surpriseRate: 0,
+    surpriseRateMaximum: 0,
+    noDrop: true,
+    isBoss: true,
+    bossKind: "event",
+    defeatedFlag: "boss_eiskrabbe_b47f_defeated",
+    event: Object.freeze({
+      immediateStart: true,
+      start: "部屋の中央で巨大な氷の蟹が鋏を打ち鳴らし、襲いかかってきた！",
+      autoStartDelay: 2000
+    })
+  }),
   todes_scorpio_b64f: Object.freeze({
     id: "todes_scorpio_b64f", name: "トーデス・スコルピオ", level: 85, floor: 64,
     imageId: "todes_scorpio_b64f", image: "images/bosses/boss_14.avif", battleSize: "huge-wide",
@@ -1366,6 +1447,9 @@ export function isBossDefeated(character, bossOrId) {
 export function applyBossVictory(character, bossOrId) {
   const boss = typeof bossOrId === "string" ? getBossById(bossOrId) : bossOrId;
   if (!character || !boss?.defeatedFlag) return { character, accepted: false, reward: null };
+  if (isBossDefeated(character, boss)) {
+    return { character, accepted: false, reward: null, reason: "alreadyDefeated" };
+  }
   return {
     character: {
       ...character,
