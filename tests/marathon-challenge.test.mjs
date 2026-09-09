@@ -6,7 +6,10 @@ import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { grantCard } from "../data/deck.js";
 import { isTransferDestinationUnlocked } from "../data/transfer-destinations.js";
 import {
+  claimFinalLongMarchReward,
   FINAL_LONG_MARCH_COMPLETION_FLAG,
+  FINAL_LONG_MARCH_REWARD_CARD_ID,
+  FINAL_LONG_MARCH_REWARD_CLAIMED_FLAG,
   LONG_MARCH_COMPLETION_FLAG,
   LONG_MARCH_REQUIRED_TRANSFER_FLAG,
   LONG_MARCH_REWARD_CARD_ID,
@@ -37,6 +40,62 @@ test("the final long march reaches B100F without return or transfer and allows d
   assert.equal(character.eventFlags[FINAL_LONG_MARCH_COMPLETION_FLAG], true);
   assert.deepEqual(character.finalLongMarchChallenge, { active: false, currentDepth: 0 });
   assert.equal(startFinalLongMarchChallenge(character).finalLongMarchChallenge.active, false);
+});
+
+test("the final long march grants Aries exactly once and survives save normalization", () => {
+  let character = startFinalLongMarchChallenge(createInitialCharacter({ name: "PIONEER", job: "mage" }));
+  for (let fromDepth = 1; fromDepth < 100; fromDepth += 1) {
+    character = recordFinalLongMarchDescent(character, {
+      fromDepth,
+      toDepth: fromDepth + 1
+    }).character;
+  }
+
+  const first = claimFinalLongMarchReward(character);
+  assert.equal(FINAL_LONG_MARCH_REWARD_CARD_ID, "zodiac_aries");
+  assert.equal(first.claimed, true);
+  assert.equal(first.gained, 1);
+  assert.equal(first.character.cards.ownedCardCounts[FINAL_LONG_MARCH_REWARD_CARD_ID], 1);
+  assert.equal(first.character.eventFlags[FINAL_LONG_MARCH_REWARD_CLAIMED_FLAG], true);
+
+  const restored = normalizeCharacter(first.character);
+  assert.equal(restored.cards.ownedCardCounts[FINAL_LONG_MARCH_REWARD_CARD_ID], 1);
+  assert.equal(restored.eventFlags[FINAL_LONG_MARCH_REWARD_CLAIMED_FLAG], true);
+  const repeated = claimFinalLongMarchReward(restored);
+  assert.equal(repeated.claimed, false);
+  assert.equal(repeated.gained, 0);
+  assert.equal(repeated.character.cards.ownedCardCounts[FINAL_LONG_MARCH_REWARD_CARD_ID], 1);
+});
+
+test("legacy final-long-march clears receive Aries once without duplicating an owned card", () => {
+  const legacy = createInitialCharacter({ name: "LEGACY", job: "priest" });
+  legacy.eventFlags[FINAL_LONG_MARCH_COMPLETION_FLAG] = true;
+  const compensated = claimFinalLongMarchReward(legacy);
+  assert.equal(compensated.claimed, true);
+  assert.equal(compensated.gained, 1);
+
+  const alreadyOwned = createInitialCharacter({ name: "OWNER", job: "warrior" });
+  alreadyOwned.eventFlags[FINAL_LONG_MARCH_COMPLETION_FLAG] = true;
+  alreadyOwned.cards = grantCard(
+    alreadyOwned.cards,
+    FINAL_LONG_MARCH_REWARD_CARD_ID,
+    1,
+    alreadyOwned.deckCost
+  ).cards;
+  const noDuplicate = claimFinalLongMarchReward(alreadyOwned);
+  assert.equal(noDuplicate.claimed, true);
+  assert.equal(noDuplicate.gained, 0);
+  assert.equal(noDuplicate.character.cards.ownedCardCounts[FINAL_LONG_MARCH_REWARD_CARD_ID], 1);
+  assert.equal(noDuplicate.character.eventFlags[FINAL_LONG_MARCH_REWARD_CLAIMED_FLAG], true);
+});
+
+test("Aries cannot be claimed before the final long march is complete", () => {
+  const character = createInitialCharacter({ name: "EARLY", job: "thief" });
+  const result = claimFinalLongMarchReward(character);
+  assert.equal(result.claimed, false);
+  assert.equal(result.gained, 0);
+  assert.equal(result.character.cards.ownedCardCounts[FINAL_LONG_MARCH_REWARD_CARD_ID], undefined);
+  assert.equal(result.character.eventFlags[FINAL_LONG_MARCH_REWARD_CLAIMED_FLAG], undefined);
 });
 
 test("returning, defeat, transfers, and skipped floors invalidate the final long march", () => {
@@ -222,4 +281,15 @@ test("main grants Taurus after the B84F achievement presentation", () => {
   assert.match(source, /character\?\.eventFlags\?\.b1_b84_long_march_completed/);
   assert.match(source, /if \(restoredLongMarchReward\)/);
   assert.match(achievementSource, /\["longMarch84", "深淵への大行軍再び", flags\.b1_b84_long_march_completed/);
+});
+
+test("main grants Aries after the B100F achievement presentation and backfills legacy clears", () => {
+  const source = fs.readFileSync(new URL("../js/main.js", import.meta.url), "utf8");
+  assert.match(source, /finalLongMarchCompleted = finalLongMarch\.completed/);
+  assert.match(source, /if \(finalLongMarchCompleted\)[\s\S]*?claimFinalLongMarchReward\(character\)/);
+  assert.match(source, /Zカード「エアリーズ」を手に入れた！/);
+  assert.match(source, /showCardGetEffect\(FINAL_LONG_MARCH_REWARD_CARD_ID, \{ seId: "itemGet" \}\), 8500/);
+  assert.match(source, /restoredFinalLongMarchReward = claimFinalLongMarchReward\(character\)/);
+  assert.match(source, /if \(restoredFinalLongMarchReward\.gained > 0\)/);
+  assert.match(source, /const delay = restoredLongMarchReward \? 3650 : 120/);
 });

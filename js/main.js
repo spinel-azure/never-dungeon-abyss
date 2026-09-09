@@ -162,9 +162,11 @@ import { HELEN_HIDDEN_EVENT_PENDING_FLAG, HELEN_HIDDEN_EVENT_SEEN_FLAG, isHelenH
 import { getFireFloorStepDamage, isFireFloorDepth } from "../data/fire-floor.js";
 import { getColdFloorStepDamage, isColdFloorDepth } from "../data/cold-floor.js";
 import {
+  claimFinalLongMarchReward,
   invalidateFinalLongMarchChallenge,
   invalidateLongMarchChallenge,
   invalidateMarathonChallenge,
+  FINAL_LONG_MARCH_REWARD_CARD_ID,
   LONG_MARCH_REWARD_CARD_ID,
   MARATHON_BOSS_FLOORS,
   MARATHON_REWARD_CARD_ID,
@@ -1272,6 +1274,8 @@ import {
       character = { ...character, cards: reward.cards };
       restoredLongMarchReward = reward.gained > 0;
     }
+    const restoredFinalLongMarchReward = claimFinalLongMarchReward(character);
+    character = restoredFinalLongMarchReward.character;
     knownAchievementIds = new Set(getAdventureChronicle(character).filter(entry => entry.achieved).map(entry => entry.id));
     const quest007Supply = grantRedDoorInvestigationSupply(character);
     character = quest007Supply.character;
@@ -1300,6 +1304,9 @@ import {
     const savedLocation = save.world?.location === "town" ? "town" : "dungeon";
     if (savedLocation === "town") clearPresenceIncreaseReduction();
     worldLocation = savedLocation;
+    if (restoredLongMarchReward || restoredFinalLongMarchReward.claimed) {
+      scheduleAutosave();
+    }
     if (savedLocation === "dungeon" && isCellCompletelySealed(state.gridX, state.gridY)) {
       returnToTown();
       say("移動できない場所から救出され、ダンジョン入口へ戻った。");
@@ -1333,7 +1340,10 @@ import {
     }
     if (restoredLongMarchReward) {
       setTimeout(() => showCardGetEffect(LONG_MARCH_REWARD_CARD_ID, { seId: "itemGet" }), 120);
-      scheduleAutosave();
+    }
+    if (restoredFinalLongMarchReward.gained > 0) {
+      const delay = restoredLongMarchReward ? 3650 : 120;
+      setTimeout(() => showCardGetEffect(FINAL_LONG_MARCH_REWARD_CARD_ID, { seId: "itemGet" }), delay);
     }
     return true;
   }
@@ -3952,6 +3962,8 @@ import {
     let marathonCompleted = false;
     let longMarchCompleted = false;
     let longMarchRewardGained = false;
+    let finalLongMarchCompleted = false;
+    let finalLongMarchRewardGained = false;
     if (character) {
       if (currentDepth === 80) {
         character = { ...character, eventFlags: { ...(character.eventFlags || {}), floor_b80_reached: true } };
@@ -3976,10 +3988,12 @@ import {
       });
       character = longMarch.character;
       longMarchCompleted = longMarch.completed;
-      character = recordFinalLongMarchDescent(character, {
+      const finalLongMarch = recordFinalLongMarchDescent(character, {
         fromDepth: previousDepth,
         toDepth: currentDepth
-      }).character;
+      });
+      character = finalLongMarch.character;
+      finalLongMarchCompleted = finalLongMarch.completed;
       if (marathonCompleted) {
         const reward = grantCard(character.cards, MARATHON_REWARD_CARD_ID, 1, character.deckCost);
         character = { ...character, cards: reward.cards };
@@ -3988,6 +4002,11 @@ import {
         const reward = grantCard(character.cards, LONG_MARCH_REWARD_CARD_ID, 1, character.deckCost);
         character = { ...character, cards: reward.cards };
         longMarchRewardGained = reward.gained > 0;
+      }
+      if (finalLongMarchCompleted) {
+        const reward = claimFinalLongMarchReward(character);
+        character = reward.character;
+        finalLongMarchRewardGained = reward.gained > 0;
       }
       character = recordNpcExpeditionDepth(character, currentDepth);
       const virgoRecovery = applyVirgoFloorRecovery(character);
@@ -4070,6 +4089,14 @@ import {
       say("――長き道の果てに、あなたはB84Fへ到達した。\n\nZカード「トーラス」を手に入れた！");
       if (longMarchRewardGained) {
         setTimeout(() => showCardGetEffect(LONG_MARCH_REWARD_CARD_ID, { seId: "itemGet" }), 4300);
+      }
+    }
+    if (finalLongMarchCompleted) {
+      say(finalLongMarchRewardGained
+        ? "――前人未踏の大行軍を成し遂げたあなたに、\n牡羊座の力が応えた。\n\nZカード「エアリーズ」を手に入れた！"
+        : "――前人未踏の大行軍を成し遂げ、あなたはB100Fへ到達した。");
+      if (finalLongMarchRewardGained) {
+        setTimeout(() => showCardGetEffect(FINAL_LONG_MARCH_REWARD_CARD_ID, { seId: "itemGet" }), 8500);
       }
     }
     scheduleAutosave();

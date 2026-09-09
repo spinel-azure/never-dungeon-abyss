@@ -1,4 +1,5 @@
 import { B80_TRANSFER_FLAG, isB80TransferUnlocked } from "./b80-transfer-unlock.js";
+import { grantCard } from "./deck.js";
 
 export const MARATHON_START_DEPTH = 1;
 export const MARATHON_GOAL_DEPTH = 42;
@@ -11,6 +12,8 @@ export const LONG_MARCH_REQUIRED_TRANSFER_FLAG = B80_TRANSFER_FLAG;
 export const LONG_MARCH_REWARD_CARD_ID = "zodiac_taurus";
 export const FINAL_LONG_MARCH_GOAL_DEPTH = 100;
 export const FINAL_LONG_MARCH_COMPLETION_FLAG = "b1_b100_final_long_march_completed";
+export const FINAL_LONG_MARCH_REWARD_CARD_ID = "zodiac_aries";
+export const FINAL_LONG_MARCH_REWARD_CLAIMED_FLAG = "b1_b100_final_long_march_reward_claimed";
 
 export function createInitialMarathonChallenge() {
   return { active: false, currentDepth: 0 };
@@ -125,6 +128,32 @@ export function recordFinalLongMarchDescent(character, { fromDepth, toDepth } = 
       }
     },
     completed: true
+  };
+}
+
+export function claimFinalLongMarchReward(character) {
+  if (!character
+    || !character.eventFlags?.[FINAL_LONG_MARCH_COMPLETION_FLAG]
+    || character.eventFlags?.[FINAL_LONG_MARCH_REWARD_CLAIMED_FLAG]) {
+    return { character, claimed: false, gained: 0 };
+  }
+  const reward = grantCard(
+    character.cards,
+    FINAL_LONG_MARCH_REWARD_CARD_ID,
+    1,
+    character.deckCost
+  );
+  return {
+    character: {
+      ...character,
+      cards: reward.cards,
+      eventFlags: {
+        ...(character.eventFlags || {}),
+        [FINAL_LONG_MARCH_REWARD_CLAIMED_FLAG]: true
+      }
+    },
+    claimed: true,
+    gained: reward.gained
   };
 }
 
