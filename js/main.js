@@ -1902,7 +1902,7 @@ import {
   function hasMaxVitalBonus(target, key) {
     return Number(target?.equipmentStatBonuses?.[key]) > 0
       || Number(target?.cardStatBonuses?.[key]) > 0
-      || (key === "maxHp" && target?.cards?.deckSlots?.some(cardId => ["zodiac_taurus", "legendary_life_booster", "zodiac_virgo"].includes(cardId)))
+      || (key === "maxHp" && target?.cards?.deckSlots?.some(cardId => ["zodiac_taurus", "zodiac_cancer", "legendary_life_booster", "zodiac_virgo"].includes(cardId)))
       || (key === "maxSp" && target?.cards?.deckSlots?.some(cardId => ["legendary_mana_booster", "zodiac_virgo"].includes(cardId)));
   }
 

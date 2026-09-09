@@ -2,7 +2,7 @@ import { getInitialEquipment } from "./equipment.js";
 import { normalizeEndingFlags } from "./ending.js";
 import { getDeckCostAtLevel, getLevelGrowth, normalizeExperience } from "./growth.js";
 import { createInitialCardState, normalizeCardState } from "./deck.js";
-import { collectCardStatBonuses } from "./cards.js";
+import { applyCardVitalMultipliers, collectCardStatBonuses } from "./cards.js";
 import {
   createInitialInventory, createInitialLootBag, createInitialWarehouse,
   normalizeInventory, normalizeLootBag, normalizeWarehouse
@@ -157,27 +157,14 @@ export function normalizeCharacter(character) {
   );
   const cards = normalizeCardState(character.cards, growth.deckCost);
   const cardStatBonuses = collectCardStatBonuses(cards.deckSlots);
-  const maxHpBeforeTaurus = growth.hp
+  const maxHpBeforeMultipliers = growth.hp
     + Math.max(0, Math.floor(Number(equipmentStatBonuses.maxHp) || 0))
     + Math.max(0, Math.floor(Number(cardStatBonuses.maxHp) || 0));
-  const maxHpAfterTaurus = cards.deckSlots.includes("zodiac_taurus")
-    ? Math.ceil(maxHpBeforeTaurus * 1.5)
-    : maxHpBeforeTaurus;
-  const maxHpAfterLifeBooster = cards.deckSlots.includes("legendary_life_booster")
-    ? Math.ceil(maxHpAfterTaurus * 1.2)
-    : maxHpAfterTaurus;
-  const maxHp = cards.deckSlots.includes("zodiac_virgo")
-    ? Math.ceil(maxHpAfterLifeBooster * 1.25)
-    : maxHpAfterLifeBooster;
-  const maxSpBeforeManaBooster = growth.sp
+  const maxHp = applyCardVitalMultipliers(cards.deckSlots, "maxHp", maxHpBeforeMultipliers);
+  const maxSpBeforeMultipliers = growth.sp
     + Math.max(0, Math.floor(Number(equipmentStatBonuses.maxSp) || 0))
     + Math.max(0, Math.floor(Number(cardStatBonuses.maxSp) || 0));
-  const maxSpAfterManaBooster = cards.deckSlots.includes("legendary_mana_booster")
-    ? Math.ceil(maxSpBeforeManaBooster * 1.2)
-    : maxSpBeforeManaBooster;
-  const maxSp = cards.deckSlots.includes("zodiac_virgo")
-    ? Math.ceil(maxSpAfterManaBooster * 1.25)
-    : maxSpAfterManaBooster;
+  const maxSp = applyCardVitalMultipliers(cards.deckSlots, "maxSp", maxSpBeforeMultipliers);
   const inferredDepth = character.eventFlags?.transfer_portal_b10f_unlocked ? 10 : 1;
   const normalizedEquipmentBuyback = Array.isArray(character.equipmentBuyback)
     ? structuredClone(character.equipmentBuyback)

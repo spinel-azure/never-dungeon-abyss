@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { grantItem, getItemCount } from "../data/inventory.js";
 import { resolveFieldItemUse } from "../combat/resolve-item-use.js";
+import { getInventoryItemUnavailableReason } from "../js/menu.js";
 import { createBattleState, resolveBattleRound } from "../combat/battle-engine.js";
 import {
   clearPresenceIncreaseReduction, configurePresence, getEffectivePresenceIncreaseReduction, getPresence, getPresenceIncreaseReduction,
@@ -683,6 +684,26 @@ test("styptic cures bleeding and restores 15 HP", () => {
   assert.equal(result.character.hp, character.hp + 15);
   assert.equal(result.character.statuses.some(status => status.statusId === "bleeding"), false);
   assert.equal(result.character.condition, "GOOD");
+});
+
+test("styptic remains usable from the field inventory at full HP while bleeding", () => {
+  const character = characterWith("styptic");
+  character.hp = character.maxHp;
+  character.statuses = [{ statusId: "bleeding" }];
+  character.condition = "BLEED";
+  const item = getItem("styptic");
+  assert.equal(getInventoryItemUnavailableReason(item, character, "dungeon"), "");
+
+  const result = resolveFieldItemUse({ character, itemId: item.id, context: "dungeon" });
+  assert.equal(result.accepted, true);
+  assert.equal(result.character.hp, character.maxHp);
+  assert.equal(result.character.statuses.some(status => status.statusId === "bleeding"), false);
+  assert.equal(result.character.condition, "GOOD");
+  assert.equal(getItemCount(result.character.inventory, item.id), 0);
+
+  const healthy = characterWith("healing_potion");
+  healthy.hp = healthy.maxHp;
+  assert.equal(getInventoryItemUnavailableReason(getItem("healing_potion"), healthy, "dungeon"), "HPが最大です。");
 });
 
 test("shop and temple purchases spend gold and grant the selected item", () => {

@@ -9,7 +9,7 @@ import {
   normalizeDepthReturnSettlement
 } from "../data/experience-settlement.js";
 import { getLevelUnlockedSkillIds } from "../data/skills.js";
-import { hasCardEffect } from "../data/cards.js";
+import { applyCardVitalMultipliers, hasCardEffect } from "../data/cards.js";
 import { getConditionLabel } from "../combat/condition-label.js";
 
 export const TOWN_INTRODUCTION_FLAGS = Object.freeze([
@@ -157,21 +157,7 @@ function getVitalBonus(character, key) {
 }
 
 function applyInnVitalCardMultipliers(character, key, baseValue) {
-  let value = Math.max(0, Math.floor(Number(baseValue) || 0));
-  if (key === "maxHp" && hasCardEffect(character?.cards?.deckSlots, "zodiac_taurus")) {
-    value = Math.ceil(value * 1.5);
-  }
-  if (key === "maxHp" && hasCardEffect(character?.cards?.deckSlots, "life_booster")) {
-    value = Math.ceil(value * 1.2);
-  }
-  if (key === "maxSp" && hasCardEffect(character?.cards?.deckSlots, "mana_booster")) {
-    value = Math.ceil(value * 1.2);
-  }
-  if (["maxHp", "maxSp"].includes(key)
-    && hasCardEffect(character?.cards?.deckSlots, "zodiac_virgo")) {
-    value = Math.ceil(value * 1.25);
-  }
-  return value;
+  return applyCardVitalMultipliers(character?.cards?.deckSlots, key, baseValue);
 }
 
 function retainPoisonStatuses(character) {

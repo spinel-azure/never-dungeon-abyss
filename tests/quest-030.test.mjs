@@ -83,5 +83,5 @@ test("Life Booster mirrors Mana Booster for HP and presents recovery over HP", (
   assert.match(mainSource, /clientPortraitStartIndex: 1/);
   assert.match(mainSource, /依頼人がお前に会いたいそうだ/);
   assert.match(townSource, /questClientDialogueIndex === town\.questClientPortraitStartIndex/);
-  assert.match(mainSource, /"zodiac_taurus", "legendary_life_booster"/);
+  assert.match(mainSource, /"zodiac_taurus", "zodiac_cancer", "legendary_life_booster"/);
 });

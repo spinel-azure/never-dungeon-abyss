@@ -404,14 +404,14 @@ const STANDARD_CARDS = [
     id: MANA_BOOSTER_CARD_ID, rarity: "L", cost: 6,
     name: "Mana Booster", nameJa: "マナブースター", concept: "MAX SP +20% / 開幕SP回復",
     descriptionJa: "最大SPを20％増加し、戦闘開始時に最大SPの5％を回復する。",
-    category: "ability", effectId: "mana_booster", effectValue: 0.2,
+    category: "ability", effectId: "mana_booster", effectValue: 0.2, maxSpMultiplier: 1.2,
     battleStartRecoveryRate: 0.05, iconId: "mana-core", maxOwned: 1, maxCopies: 1
   },
   {
     id: LIFE_BOOSTER_CARD_ID, rarity: "L", cost: 6,
     name: "Life Booster", nameJa: "ライフブースター", concept: "MAX HP +20% / 開幕HP回復",
     descriptionJa: "最大HPを20％増加し、戦闘開始時に最大HPの5％を回復する。",
-    category: "ability", effectId: "life_booster", effectValue: 0.2,
+    category: "ability", effectId: "life_booster", effectValue: 0.2, maxHpMultiplier: 1.2,
     battleStartRecoveryRate: 0.05, iconId: "health-pulse", maxOwned: 1, maxCopies: 1
   },
   {
@@ -498,6 +498,14 @@ const ZODIAC_CARDS = [
   concept: "最大HP＋50％／深層ほどDEF上昇",
   descriptionJa: "最大HPが50％上昇する。\n迷宮を深く潜るほどDEFが上昇する。",
   maxHpMultiplier: 1.5
+} : card.id === "zodiac_cancer" ? {
+  ...card,
+  concept: "最大HP＋25％／倍返し",
+  descriptionJa: "最大HPが25％上昇する。敵の攻撃を受けて生き残ると、30％の確率で、実際に受けたダメージの2倍を攻撃者に与える。",
+  detailDescriptionJa: "最大HP＋25％。被攻撃後、生存時30％で実HP減少の2倍を返す。\n複数ヒットは合計で1回判定。継続ダメージ・罠・自傷・反射・反撃は対象外。",
+  maxHpMultiplier: 1.25,
+  doubleReturnRate: 0.3,
+  doubleReturnMultiplier: 2
 } : card.id === VIRGO_CARD_ID ? {
   ...card,
   concept: "最大HP・SP＋25％／階層移動回復",
@@ -546,6 +554,30 @@ export function hasCardEffect(deckSlots = [], effectId = "") {
     const card = getCardById(cardId);
     return card?.effectId === effectId || card?.effectIds?.includes(effectId);
   });
+}
+
+const VITAL_MULTIPLIER_CARD_IDS = Object.freeze({
+  maxHp: Object.freeze([
+    "zodiac_taurus",
+    "zodiac_cancer",
+    LIFE_BOOSTER_CARD_ID,
+    VIRGO_CARD_ID
+  ]),
+  maxSp: Object.freeze([
+    MANA_BOOSTER_CARD_ID,
+    VIRGO_CARD_ID
+  ])
+});
+
+export function applyCardVitalMultipliers(deckSlots = [], key = "", baseValue = 0) {
+  const equipped = new Set(Array.isArray(deckSlots) ? deckSlots.filter(Boolean) : []);
+  return (VITAL_MULTIPLIER_CARD_IDS[key] || []).reduce((value, cardId) => {
+    if (!equipped.has(cardId)) return value;
+    const multiplier = Number(getCardById(cardId)?.[`${key}Multiplier`]);
+    return Number.isFinite(multiplier) && multiplier > 0
+      ? Math.ceil(value * multiplier)
+      : value;
+  }, Math.max(0, Math.floor(Number(baseValue) || 0)));
 }
 
 

@@ -108,7 +108,8 @@ function drawCardDetailsOverlay(context, card, cardRect) {
 
   context.fillStyle = "#f4f5e9";
   context.font = `${effectFontSize}px NdeDot, sans-serif`;
-  const description = card.effect?.descriptionJa ?? card.descriptionJa ?? "効果情報は未登録です。";
+  const description = card.effect?.detailDescriptionJa ?? card.detailDescriptionJa
+    ?? card.effect?.descriptionJa ?? card.descriptionJa ?? "効果情報は未登録です。";
   const effectLines = wrapTextByWidth(context, description, panelWidth * 0.84).slice(0, 5);
   const lineHeight = effectFontSize * 1.35;
   effectLines.forEach((line, index) => {

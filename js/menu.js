@@ -425,13 +425,16 @@ function availableInventoryTabs() {
   return menu.inventoryPurpose === "sell" || menu.inventoryPurpose === "buy" ? ["items", "equipment"] : ["items", "keyItems", "equipment"];
 }
 
-function unavailableItemReason(item, character) {
-  const context = menu.getInventoryContext();
+export function getInventoryItemUnavailableReason(item, character, context = menu.getInventoryContext()) {
   if (!canUseItemIn(item, context)) return context === "town" ? "ダンジョンまたは戦闘中のみ使用可能です。" : "現在は使用できません。";
   const heals = item.effects?.some(effect => effect.id === "heal_hp" || effect.id === "heal_hp_rate");
-  const cures = item.effects?.some(effect => effect.id === "cure_poison");
+  const cures = item.effects?.some(effect => ["cure_poison", "cure_deadly_poison", "cure_bleeding"].includes(effect.id));
   if (heals && !cures && character.hp >= character.maxHp) return "HPが最大です。";
   return "";
+}
+
+function unavailableItemReason(item, character) {
+  return getInventoryItemUnavailableReason(item, character);
 }
 
 function handleInventory(action) {

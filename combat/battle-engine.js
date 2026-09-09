@@ -89,6 +89,7 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     ariesActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_aries"),
     ariesOpeningAttackAvailable: hasCardEffect(character?.cards?.deckSlots, "zodiac_aries"),
     geminiDuplicationAvailable: hasCardEffect(character?.cards?.deckSlots, "zodiac_gemini"),
+    cancerActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_cancer"),
     capricornActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_capricorn"),
     libraActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_libra"),
     scorpioActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_scorpio"),
@@ -369,7 +370,7 @@ export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.rand
       }
     } else {
       executeTargetedAction({ battle: next, action: entry.action, actor, actorSide: "enemy",
-        target: next.player, targetSide: "player", targetIndex: null, rng });
+        actorIndex: entry.partyIndex, target: next.player, targetSide: "player", targetIndex: null, rng });
       finishCombatantAction(next, actor, "enemy", entry.partyIndex);
       updateMultiOutcome(next);
     }
@@ -857,7 +858,7 @@ function buildEnemyAction(action, normalAttack) {
   };
 }
 
-function executeAction({ battle, action, actor, actorSide, target, targetSide, deferFollowUp = false, magicFocus = null, rng }) {
+function executeAction({ battle, action, actor, actorSide, actorIndex = null, target, targetSide, deferFollowUp = false, magicFocus = null, rng }) {
   const actorStats = combatStats(actor);
   const targetStats = combatStats(target);
   if (action.actionType === "enemyEscape" && actorSide === "enemy") {
@@ -1367,7 +1368,9 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, d
       message: battle.sphinxBarrier > 0 ? `障壁 −${absorbed}` : `障壁 −${absorbed}\n障壁が砕け散った！` });
     if (battle.sphinxBarrier <= 0) battle.log.push("障壁が砕け散った！");
   }
+  const targetHpBeforeDamage = Math.max(0, Number(target.hp) || 0);
   target.hp = Math.max(0, target.hp - actualDamage);
+  const actualHpLoss = Math.max(0, targetHpBeforeDamage - target.hp);
   target.alive = target.hp > 0;
   const hitCount = presentedHits.filter(hit => hit.hit).length;
   const isMultiHit = presentedHits.length > 1;
@@ -1475,8 +1478,63 @@ function executeAction({ battle, action, actor, actorSide, target, targetSide, d
     target.regainSuppressionMessage = `${target.name}の再生能力は冷気に阻まれた！`;
     if (elementalReaction.message) battle.log.push(elementalReaction.message);
   }
+  applyCancerDoubleReturn({
+    battle,
+    action,
+    actorSide,
+    targetSide,
+    attacker: actor,
+    attackerIndex: actorIndex,
+    defender: target,
+    actualHpLoss,
+    rng
+  });
   markUltimateUsed(actor, action);
   return { followUpEligible, actualDamage, landedHitCount: landedHits.length };
+}
+
+export function applyCancerDoubleReturn({
+  battle,
+  action,
+  actorSide = "enemy",
+  targetSide = "player",
+  attacker,
+  attackerIndex = null,
+  defender,
+  actualHpLoss = 0,
+  rng = Math.random
+} = {}) {
+  const loss = Math.max(0, Math.floor(Number(actualHpLoss) || 0));
+  if (!battle?.cancerActiveAtStart
+    || actorSide !== "enemy"
+    || targetSide !== "player"
+    || !["physicalAttack", "spell"].includes(action?.actionType)
+    || loss <= 0
+    || !defender?.alive
+    || Number(defender.hp) <= 0
+    || !attacker?.alive
+    || Number(attacker.hp) <= 0) return 0;
+  const cancer = getCardById("zodiac_cancer");
+  const rate = Math.max(0, Math.min(1, Number(cancer?.doubleReturnRate) || 0));
+  if (Number(rng?.()) >= rate) return 0;
+  const damage = Math.max(0, Math.floor(loss * (Number(cancer?.doubleReturnMultiplier) || 0)));
+  if (damage <= 0) return 0;
+  attacker.hp = Math.max(0, attacker.hp - damage);
+  attacker.alive = attacker.hp > 0;
+  const message = `キャンサーの加護！ 倍返しで${attacker.name}に${damage}のダメージ！`;
+  battle.log.push(message);
+  battle.presentationEvents.push({
+    type: "cancerCounterDamage",
+    actorName: defender.name,
+    actorSide: "player",
+    targetSide: "enemy",
+    ...(Number.isInteger(attackerIndex) ? { targetIndex: attackerIndex } : {}),
+    hit: true,
+    damage,
+    cancerDoubleReturn: true,
+    message
+  });
+  return damage;
 }
 
 export function applyFixedFollowUpDamage(battle, target, targetIndex = null) {

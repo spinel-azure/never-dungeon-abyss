@@ -3091,7 +3091,12 @@ export function renderCharacterStatus() {
 function hasMaxVitalBonus(character, key) {
   return Number(character?.equipmentStatBonuses?.[key]) > 0
     || Number(character?.cardStatBonuses?.[key]) > 0
-    || (key === "maxHp" && character?.cards?.deckSlots?.includes("zodiac_taurus"));
+    || (key === "maxHp" && character?.cards?.deckSlots?.some(cardId => (
+      ["zodiac_taurus", "zodiac_cancer", "legendary_life_booster", "zodiac_virgo"].includes(cardId)
+    )))
+    || (key === "maxSp" && character?.cards?.deckSlots?.some(cardId => (
+      ["legendary_mana_booster", "zodiac_virgo"].includes(cardId)
+    )));
 }
 
 function showTownCommands() {
