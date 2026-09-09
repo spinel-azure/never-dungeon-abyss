@@ -108,6 +108,18 @@ test("Mikan Nyanko gives floor-specific guidance throughout the desert region", 
   assert.equal(cells.flat().filter(cell => cell.npc === "NPC_01_b60_desert").length, 1);
 });
 
+test("B47F Mikan warns about Eiskrabbe until the optional boss is defeated", () => {
+  const npc = getNpcById("NPC_01_b47_eiskrabbe");
+  assert.deepEqual(getNpcEncounter(npc, 0).dialogue, [
+    "紫の扉の向こうから何かを打ち付ける音が聞こえてくるにゃあ…。怖いにゃあ…！"
+  ]);
+  assert.equal(getNpcEncounter(npc, 0).leaveAfterTalk, true);
+  buildBoundaryWallMap(47, () => .5, {});
+  assert.equal(placedNpcId(), "NPC_01_b47_eiskrabbe");
+  buildBoundaryWallMap(47, () => .5, { bossDefeatedById: { eiskrabbe_b47f: true } });
+  assert.equal(placedNpcId(), "NPC_01_frost");
+});
+
 test("new regional Mikan guidance follows the existing floor-zone definitions", () => {
   const expectations = [
     [30, "NPC_01_glut", "あっつ…！足が熱いにゃあ…！歩くと足がヒリヒリするにゃあ…！にゃんこも靴を履きたいにゃあ…。耐火ブーツ、履きたいにゃあ…！"],

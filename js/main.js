@@ -4167,6 +4167,7 @@ import {
         ...(floorBoss?.nextBossId ? { [floorBoss.nextBossId]: isBossDefeated(character, floorBoss.nextBossId) } : {}),
         quest_mimic_b6f: isBossDefeated(character, "quest_mimic_b6f"),
         otherworldly_wisdom_b4f: isBossDefeated(character, "otherworldly_wisdom_b4f"),
+        eiskrabbe_b47f: isBossDefeated(character, "eiskrabbe_b47f"),
         todes_scorpio_b64f: isBossDefeated(character, "todes_scorpio_b64f")
       },
       bossRemainsById: floorBoss?.id === "sphinx_b69f"

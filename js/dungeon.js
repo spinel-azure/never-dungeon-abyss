@@ -618,6 +618,7 @@ export function placeNpc(depth = 1, progress = {}, rng = Math.random) {
       : normalizedDepth === 5 ? "NPC_01_b5"
       : normalizedDepth === 6 ? (progress.bossDefeatedById?.quest_mimic_b6f ? "NPC_01_b6_after" : "NPC_01_b6")
       : normalizedDepth === 9 ? "NPC_01_b9"
+      : normalizedDepth === 47 ? (progress.bossDefeatedById?.eiskrabbe_b47f ? "NPC_01_frost" : "NPC_01_b47_eiskrabbe")
       : normalizedDepth >= 60 && normalizedDepth <= 63 ? "NPC_01_b60_desert"
       : normalizedDepth === 64 ? (progress.bossDefeatedById?.todes_scorpio_b64f ? "NPC_01_b60_desert" : "NPC_01_b64_todes")
       : normalizedDepth === 65 ? "NPC_01_b65_oasis"

@@ -208,6 +208,21 @@ export const npcs = [
     retreatOnCancel: true
   },
   {
+    id: "NPC_01_b47_eiskrabbe",
+    name: "みかんにゃんこ",
+    imageId: "NPC_01",
+    image: "images/npc/NPC_01.avif",
+    interactionType: "talk",
+    greeting: "",
+    voiceSe: ["catVoice01", "catVoice02", "catVoice03"],
+    encounters: [{
+      dialogue: ["紫の扉の向こうから何かを打ち付ける音が聞こえてくるにゃあ…。怖いにゃあ…！"],
+      leaveAfterTalk: true
+    }],
+    canCancel: true,
+    retreatOnCancel: true
+  },
+  {
     id: "NPC_01_b60_desert",
     name: "みかんにゃんこ",
     imageId: "NPC_01",

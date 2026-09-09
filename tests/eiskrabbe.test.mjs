@@ -71,8 +71,12 @@ test("Eiskrabbe has the requested optional B47 superboss data and existing image
   assert.equal(boss.bossKind, "event");
   assert.deepEqual(boss.reward, { type: "card", cardId: "zodiac_cancer", amount: 1 });
   assert.equal(boss.image, "images/bosses/boss_21.avif");
-  assert.equal(boss.encounterImage, boss.image);
+  assert.equal(boss.encounterImageId, "eiskrabbe_event_b47f");
+  assert.equal(boss.encounterImage, "images/background/dungeon_event_13.avif");
+  assert.equal(boss.event.start, "部屋の中央で巨大な氷の蟹が鋏を打ち鳴らし、襲いかかってきた！");
+  assert.equal(boss.event.autoStartDelay, 2000);
   await access(new URL("../images/bosses/boss_21.avif", import.meta.url));
+  await access(new URL("../images/background/dungeon_event_13.avif", import.meta.url));
 
   assert.deepEqual(boss.statusResistances.poison, { resistancePoints: 100, immune: true });
   assert.deepEqual(boss.statusResistances.deadly_poison, { resistancePoints: 65, immune: false });
