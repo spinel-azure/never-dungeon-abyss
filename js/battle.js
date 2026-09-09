@@ -135,7 +135,16 @@ export function configureBattle(options) {
   });
 }
 
-export function startBattle(enemy, { playStartSe = true, ambush = false, concealed = false, phantom = false, enemies = null, targetIndex = 0, scriptedBattleType = "" } = {}) {
+export function startBattle(enemy, {
+  playStartSe = true,
+  ambush = false,
+  concealed = false,
+  phantom = false,
+  enemies = null,
+  targetIndex = 0,
+  scriptedBattleType = "",
+  roamingEnemyInstanceId = ""
+} = {}) {
   const character = battleUi.getCharacter();
   if (!character || battleUi.active) return false;
   battleUi.active = true;
@@ -150,6 +159,7 @@ export function startBattle(enemy, { playStartSe = true, ambush = false, conceal
   resetEnemyVanishEffects(battleUi.root);
   clearAutoTimer();
   battleUi.battle = createBattleState({ character, enemy, enemies, targetIndex });
+  battleUi.battle.roamingEnemyInstanceId = String(roamingEnemyInstanceId || "");
   if (scriptedBattleType) {
     battleUi.battle.scriptedBattleType = scriptedBattleType;
     battleUi.battle.scriptedTurn = 1;

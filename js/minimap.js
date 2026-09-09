@@ -7,6 +7,7 @@ export function drawMinimap(ctx, {
   cells,
   explored,
   state,
+  roamingEnemy = null,
   roundRect,
   size = 126,
   ox = W - size - 16,
@@ -101,6 +102,15 @@ export function drawMinimap(ctx, {
     }
   }
 
+  if (shouldDrawRoamingEnemyMarker(roamingEnemy, explored)) {
+    drawRoamingEnemyMark(
+      ctx,
+      ox + roamingEnemy.x * cell,
+      oy + roamingEnemy.y * cell,
+      cell
+    );
+  }
+
   ctx.lineCap = "round";
   for (let y = 0; y < MAP_H; y++) {
     for (let x = 0; x < MAP_W; x++) {
@@ -134,6 +144,15 @@ export function drawMinimap(ctx, {
   ctx.lineWidth = 1;
   ctx.strokeRect(ox - 5, oy - 5, size + 10, size + 10);
   ctx.restore();
+}
+
+export function shouldDrawRoamingEnemyMarker(roamingEnemy, explored = []) {
+  return Boolean(
+    roamingEnemy?.status === "active"
+    && Number.isInteger(roamingEnemy.x)
+    && Number.isInteger(roamingEnemy.y)
+    && explored[roamingEnemy.y]?.[roamingEnemy.x]
+  );
 }
 
 export function isFullMapRevealActive(state = {}) {
@@ -175,6 +194,24 @@ export function drawBossMark(ctx, x, y, size) {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText("♟", x + size / 2, y + size / 2);
+  ctx.restore();
+}
+
+export function drawRoamingEnemyMark(ctx, x, y, size) {
+  const cx = x + size / 2;
+  const cy = y + size / 2;
+  const radius = Math.max(3, size * .3);
+  ctx.save();
+  ctx.fillStyle = "#ff3434";
+  ctx.shadowColor = "rgba(255,52,52,.82)";
+  ctx.shadowBlur = Math.max(2, size * .18);
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - radius);
+  ctx.lineTo(cx + radius, cy);
+  ctx.lineTo(cx, cy + radius);
+  ctx.lineTo(cx - radius, cy);
+  ctx.closePath();
+  ctx.fill();
   ctx.restore();
 }
 

@@ -114,6 +114,9 @@ const hooks = {
   onQuestEvent: () => "",
   onFixedFloorEvent: () => "",
   onDungeonStep: () => {},
+  onRoamingEnemyPlayerStep: () => ({ handled: false }),
+  updateRoamingEnemyAnimation: () => ({ contact: false }),
+  onRoamingEnemyForcedMovementComplete: () => ({ handled: false }),
   onStateChanged: () => {}
 };
 
@@ -225,6 +228,8 @@ export function isPlayerInputEnabled() {
 }
 
 export function updateAnimation(now) {
+  const roamingAnimationResult = hooks.updateRoamingEnemyAnimation(now) || {};
+  if (roamingAnimationResult.contact) return;
   if (!state.anim) return;
   const a = state.anim;
   const p = Math.min(1, (now - a.start) / a.duration);
@@ -241,6 +246,7 @@ export function updateAnimation(now) {
       state.gridY = a.toGY;
       state.x = state.gridX + .5;
       state.y = state.gridY + .5;
+      if (a.crossedDoor) closeDoor(a.crossedDoor.x, a.crossedDoor.y, a.crossedDoor.dirKey);
       if (a.npcRetreat) {
         markExplored(state.gridX, state.gridY);
         updateNpcAwareness();
@@ -251,6 +257,14 @@ export function updateAnimation(now) {
           state.torchFuel = Math.max(0, state.torchFuel - TORCH_FUEL_STEP);
         }
         hooks.onDungeonStep();
+        const roamingStepResult = hooks.onRoamingEnemyPlayerStep({
+          x: state.gridX,
+          y: state.gridY,
+          now
+        }) || {};
+        if (roamingStepResult.handled) {
+          state.npcAwarenessShown = false;
+        } else {
         const npc = getNpcAt(state.gridX, state.gridY);
         const bossId = getBossAt(state.gridX, state.gridY);
         const bossRemainsId = getBossRemainsAt(state.gridX, state.gridY);
@@ -302,9 +316,7 @@ export function updateAnimation(now) {
           hooks.say(hooks.messageFor(state.gridX, state.gridY, a.cellType));
           updateNpcAwareness();
         }
-      }
-      if (a.crossedDoor) {
-        closeDoor(a.crossedDoor.x, a.crossedDoor.y, a.crossedDoor.dirKey);
+        }
       }
     } else if (a.type === "turn") {
       state.dir = a.toDir;
@@ -347,6 +359,7 @@ function confirmFixedFloorWarpEvent() {
   hooks.say("");
   hooks.runFixedWarpTransition(() => applyFixedFloorWarp(event.warp)).finally(() => {
     if (state.overlayEvent === transition) state.overlayEvent = null;
+    hooks.onRoamingEnemyForcedMovementComplete({ x: state.gridX, y: state.gridY });
     hooks.onStateChanged();
   });
 }
@@ -1635,14 +1648,21 @@ function startQuicksandEvent(quicksand) {
       state.y = state.gridY + .5;
       markExplored(state.gridX, state.gridY);
       state.overlayEvent = null;
-      hooks.say("流砂に押し流され、別の場所へ辿り着いた。");
-      updateNpcAwareness();
       hooks.onStateChanged();
     };
     await runQuicksandTransitionWithFallback(
       hooks.runQuicksandTransition,
       moveToDestination
     );
+    if (!moved) return;
+    const roamingResult = hooks.onRoamingEnemyForcedMovementComplete({
+      x: state.gridX,
+      y: state.gridY
+    }) || {};
+    if (!roamingResult.handled) {
+      hooks.say("流砂に押し流され、別の場所へ辿り着いた。");
+      updateNpcAwareness();
+    }
   }, 900);
 }
 
@@ -1738,8 +1758,14 @@ function finishRapidCurrentTransition(restoreInput) {
   state.rapidCurrentTransitionActive = false;
   state.rapidCurrentMotionStartedAt = 0;
   if (state.overlayEvent?.type === "rapidCurrent") state.overlayEvent = null;
-  if (restoreInput) setPlayerInputEnabled(true);
-  updateNpcAwareness();
+  const roamingResult = restoreInput
+    ? hooks.onRoamingEnemyForcedMovementComplete({
+        x: state.gridX,
+        y: state.gridY
+      }) || {}
+    : {};
+  if (restoreInput && !roamingResult.handled) setPlayerInputEnabled(true);
+  if (!roamingResult.handled) updateNpcAwareness();
   hooks.onStateChanged();
 }
 

@@ -1,7 +1,8 @@
 import {
   MAP_W,
   MAP_H,
-  DIRS
+  DIRS,
+  STEP_MS
 } from "./config.js";
 import {
   cells,
@@ -54,6 +55,21 @@ import {
 } from "./player.js";
 import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setFrameRateMode, getEffectiveFrameRate, setMistOptions, setWallColor, setFloorColor, toggleMinimapOverlay } from "./renderer.js";
 import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minimap.js";
+import {
+  advanceRoamingEnemyForPlayerStep,
+  beginRoamingEnemyBattle as markRoamingEnemyBattleStarted,
+  cancelRoamingEnemyBattle,
+  completeRoamingEnemyAnimation,
+  defeatRoamingEnemy,
+  departRoamingEnemy,
+  getActiveRoamingEnemy,
+  getRoamingEnemyDefinition,
+  getRoamingEnemyRenderState,
+  isRoamingEnemyAt,
+  resetRoamingEnemyAfterEscape,
+  restoreRoamingEnemyState,
+  serializeRoamingEnemyState
+} from "./roaming-enemies.js";
 import { getQueenRegaliaMinimapEffects } from "./queen-regalia-effects.js";
 import { configureInput } from "./input.js";
 import { configureGamepadInput } from "./gamepad-input.js";
@@ -569,6 +585,7 @@ import {
   window.addEventListener("resize", updateDeckTutorialTarget);
   let pendingEncounter = null;
   let activeRareRoomEncounterId = null;
+  let activeRoamingEnemyInstanceId = null;
   const escapedSpecialBossesThisExploration = new Set();
   const b100GauntletDefeatedThisExploration = new Set();
   configureDevice();
@@ -605,6 +622,7 @@ import {
         MAP_H,
         cells,
         explored,
+        roamingEnemy: serializeRoamingEnemyState(),
         state: {
           ...state,
           fullMapRevealActive: regaliaEffects.fullMapRevealActive,
@@ -618,6 +636,7 @@ import {
         }
       };
     },
+    getRoamingEnemyRenderState,
     getMinimapBounds,
     isMobileDevice: () => document.body.classList.contains("layout-mobile")
       || document.body.classList.contains("layout-tablet")
@@ -869,6 +888,9 @@ import {
     },
     onFixedFloorEvent: event => event?.description || "女王の影が静かに揺らめいている。",
     onDungeonStep: handleDungeonStep,
+    onRoamingEnemyPlayerStep: resolveRoamingEnemyPlayerStep,
+    updateRoamingEnemyAnimation: updateCurrentRoamingEnemyAnimation,
+    onRoamingEnemyForcedMovementComplete: resolveRoamingEnemyForcedMovementContact,
     onStateChanged: scheduleAutosave
   });
   configureTown({
@@ -1091,13 +1113,16 @@ import {
         presenceSuppressedSteps: getPresenceSuppressedSteps(),
         presenceIncreaseReduction: getPresenceIncreaseReduction(),
         runElapsedMs: Math.max(0, now - runStartedAt),
-        floorElapsedMs: Math.max(0, now - floorStartedAt)
+        floorElapsedMs: Math.max(0, now - floorStartedAt),
+        roamingEnemy: serializeRoamingEnemyState()
       }
     };
   }
 
   function saveGame({ announce = false, slot = "auto" } = {}) {
     if (!saveEnabled) return false;
+    const roamingEnemy = getActiveRoamingEnemy();
+    if (activeRoamingEnemyInstanceId || roamingEnemy?.inBattle || roamingEnemy?.transition?.pendingContact) return false;
     if (state.rapidCurrentTransitionActive) return false;
     if (isJireneScriptedBattleActive()) return false;
     accruePlayTime();
@@ -1160,6 +1185,7 @@ import {
   }
 
   function restoreGame(save) {
+    activeRoamingEnemyInstanceId = null;
     cancelRapidCurrentTransition();
     const dungeon = save?.dungeon;
     const player = save?.player;
@@ -1259,6 +1285,20 @@ import {
     state.npcAwarenessShown = false;
     state.npcEncounterCounts = player.npcEncounterCounts && typeof player.npcEncounterCounts === "object" ? { ...player.npcEncounterCounts } : {};
     state.stairsPromptDismissed = Boolean(player.stairsPromptDismissed);
+    if (rebuildB100FixedMap) {
+      const restoredRoamingEnemy = getActiveRoamingEnemy();
+      if (restoredRoamingEnemy && isRoamingEnemyAt(state.gridX, state.gridY, restoredRoamingEnemy)) {
+        resetRoamingEnemyAfterEscape({ grid: cells, player: { x: state.gridX, y: state.gridY }, rng: Math.random });
+      }
+    } else {
+      const restoredRoamingEnemy = restoreRoamingEnemyState(dungeon.roamingEnemy, {
+        grid: cells,
+        moveDuration: STEP_MS
+      });
+      if (restoredRoamingEnemy && isRoamingEnemyAt(state.gridX, state.gridY, restoredRoamingEnemy)) {
+        resetRoamingEnemyAfterEscape({ grid: cells, player: { x: state.gridX, y: state.gridY }, rng: Math.random });
+      }
+    }
     character = normalizeCharacter(save.character);
     const resumeMichaelaRestoration = Boolean(
       character?.eventFlags?.boss_amayenak_b100f_defeated
@@ -2113,6 +2153,75 @@ import {
     return true;
   }
 
+  function resolveRoamingEnemyPlayerStep({ x, y, now } = {}) {
+    if (!character || worldLocation !== "dungeon" || isBattleActive()) return { handled: false };
+    const result = advanceRoamingEnemyForPlayerStep({
+      grid: cells,
+      player: { x, y },
+      rng: Math.random,
+      now
+    });
+    if (result.contact) {
+      return { handled: beginRoamingEnemyEncounter(result.instanceId), contact: true };
+    }
+    if (result.pendingContact) {
+      cancelAutoReturn(false);
+      setPlayerInputEnabled(false);
+      return { handled: true, pendingContact: true };
+    }
+    return { handled: false, moved: result.moved };
+  }
+
+  function updateCurrentRoamingEnemyAnimation(now) {
+    const result = completeRoamingEnemyAnimation(now);
+    if (!result?.contact) return result || { contact: false };
+    const started = beginRoamingEnemyEncounter(result.instanceId);
+    if (!started) setPlayerInputEnabled(true);
+    return { ...result, contact: started };
+  }
+
+  function resolveRoamingEnemyForcedMovementContact({ x, y } = {}) {
+    const enemy = getActiveRoamingEnemy();
+    if (!enemy || !isRoamingEnemyAt(x, y, enemy)) return { handled: false };
+    return { handled: beginRoamingEnemyEncounter(enemy.instanceId), contact: true };
+  }
+
+  function beginRoamingEnemyEncounter(instanceId) {
+    if (endingSequenceActive || !character || worldLocation !== "dungeon" || isBattleActive()) return false;
+    const mapEnemy = getActiveRoamingEnemy();
+    if (!mapEnemy || mapEnemy.instanceId !== instanceId) return false;
+    const definition = getRoamingEnemyDefinition(mapEnemy);
+    const enemyData = definition ? getEnemyById(definition.enemyId) : null;
+    if (!definition || !enemyData) {
+      departRoamingEnemy(instanceId);
+      return false;
+    }
+    if (!markRoamingEnemyBattleStarted(instanceId)) return false;
+    cancelAutoReturn(false);
+    setPlayerInputEnabled(false);
+    pendingEncounter = null;
+    activeRoamingEnemyInstanceId = instanceId;
+    const combatant = createEnemyCombatant({
+      ...enemyData,
+      escapeRate: definition.escapeRate
+    });
+    startBgm(selectBattleBgm(enemyData));
+    const started = startBattle(combatant, {
+      playStartSe: true,
+      ambush: false,
+      concealed: state.torchFuel <= 0 && !state.torchEffectForced && !state.lightbringerActive,
+      roamingEnemyInstanceId: instanceId
+    });
+    if (started) recordCompendiumEncounter([combatant]);
+    if (!started) {
+      cancelRoamingEnemyBattle(instanceId);
+      activeRoamingEnemyInstanceId = null;
+      startBgm(selectDungeonBgm());
+      setPlayerInputEnabled(true);
+    }
+    return started;
+  }
+
   function beginRandomBattle() {
     if (endingSequenceActive) return false;
     if (!character || worldLocation !== "dungeon" || isBattleActive()) return false;
@@ -2852,6 +2961,11 @@ import {
     if (character && battle?.player) {
       updateCharacterFromBattle(createPersistentBattlePlayerChanges(battle.player));
     }
+    const defeatedRoamingEnemyInstanceId = battle?.roamingEnemyInstanceId || activeRoamingEnemyInstanceId;
+    if (defeatedRoamingEnemyInstanceId) {
+      defeatRoamingEnemy(defeatedRoamingEnemyInstanceId);
+      activeRoamingEnemyInstanceId = null;
+    }
     const questWaspHiveVictory = activeRareRoomEncounterId === "quest_029_wasp_hive";
     const defeatedEnemyId = battle?.defeatedEnemyId || battle?.encounterBossId || battle?.enemy?.id || "";
     const startMichaelaRestoration = defeatedEnemyId === "amayenak_b100f"
@@ -3145,6 +3259,15 @@ import {
 
   async function finishBattleDefeat(battle) {
     activeRareRoomEncounterId = null;
+    const defeatedRoamingEnemyInstanceId = battle?.roamingEnemyInstanceId || activeRoamingEnemyInstanceId;
+    if (defeatedRoamingEnemyInstanceId) {
+      resetRoamingEnemyAfterEscape({
+        grid: cells,
+        player: { x: state.gridX, y: state.gridY },
+        rng: Math.random
+      });
+      activeRoamingEnemyInstanceId = null;
+    }
     const recovery = resolveDefeatRecovery({
       character,
       battle,
@@ -3366,6 +3489,30 @@ import {
   }
 
   function finishBattleEscape(battle) {
+    const roamingInstanceId = battle?.roamingEnemyInstanceId || activeRoamingEnemyInstanceId;
+    if (roamingInstanceId) {
+      activeRoamingEnemyInstanceId = null;
+      const playerEscaped = battle?.outcome === "escaped";
+      if (playerEscaped) {
+        resetRoamingEnemyAfterEscape({
+          grid: cells,
+          player: { x: state.gridX, y: state.gridY },
+          rng: Math.random
+        });
+      } else {
+        departRoamingEnemy(roamingInstanceId);
+      }
+      startBgm(selectDungeonBgm());
+      resetPresence();
+      state.autoReturnPaused = false;
+      setPlayerInputEnabled(true);
+      say(playerEscaped
+        ? "戦闘から逃げ切った。追跡者は遠くへ離れていった。"
+        : `${battle.enemy?.name || "敵"}は迷宮の奥へ去っていった。`);
+      updateCharacterUi();
+      saveGame();
+      return;
+    }
     const escapedRareRoomEnemy = battle?.outcome === "enemyEscaped"
       && activeRareRoomEncounterId === battle.enemy?.id;
     activeRareRoomEncounterId = null;
@@ -3936,6 +4083,7 @@ import {
 
   function resetDungeon(message = "", nextStart = null, resetTimer = false) {
     cancelAutoReturn(false);
+    activeRoamingEnemyInstanceId = null;
     if (resetTimer) {
       runStartedAt = performance.now();
       floorStartedAt = runStartedAt;

@@ -38,6 +38,7 @@ const renderer = {
   drawMinimap: () => {},
   getMinimapOptions: () => ({}),
   getMinimapBounds: () => ({ x: 0, y: 0, w: 0, h: 0 }),
+  getRoamingEnemyRenderState: () => null,
   isMobileDevice: () => false,
   frameRateMode: "auto",
   minimapOverlayVisible: false,
@@ -1054,6 +1055,36 @@ export function drawCellEvents(layer = "all", now = 0) {
   if (!cells) return;
 
   const events = [];
+  if (layer !== "floor") {
+    const roaming = renderer.getRoamingEnemyRenderState(now);
+    if (roaming?.definition) {
+      const projected = projectWorldPoint(roaming.renderX, roaming.renderY);
+      const occupiedCells = roaming.transition
+        ? [
+            { x: roaming.transition.fromX, y: roaming.transition.fromY },
+            { x: roaming.transition.toX, y: roaming.transition.toY }
+          ]
+        : [{ x: roaming.x, y: roaming.y }];
+      const footprints = projected
+        ? occupiedCells
+            .filter(cell => isSpriteCellVisible(cell.x, cell.y))
+            .map(cell => projectCellFootprint(cell.x, cell.y, projected.forward, true))
+            .filter(Boolean)
+        : [];
+      if (projected && footprints.length) {
+        loadCharacterImage(roaming.definition.imageId, roaming.definition.image);
+        events.push({
+          ...projected,
+          footprints,
+          eventKind: "roamingEnemy",
+          npc: {
+            imageId: roaming.definition.imageId,
+            renderScale: roaming.definition.renderScale
+          }
+        });
+      }
+    }
+  }
   for (let y = 0; y < MAP_H; y++) {
     for (let x = 0; x < MAP_W; x++) {
       const cell = cells[y][x];
@@ -1171,6 +1202,7 @@ export function drawCellEvents(layer = "all", now = 0) {
       if (event.eventKind === "fixedPortal") drawNpcEvent(ctx, event, now);
       if (event.eventKind === "fixedEvent") drawNpcEvent(ctx, event, now);
       if (event.eventKind === "explorationObstacle") drawNpcEvent(ctx, event, now);
+      if (event.eventKind === "roamingEnemy") drawNpcEvent(ctx, event, now);
     });
 }
 
@@ -1488,6 +1520,19 @@ function drawNpcEvent(ctx, event, now = 0) {
   const top = event.floorY - drawH;
 
   ctx.save();
+  if (event.eventKind === "roamingEnemy" && event.footprints?.length) {
+    ctx.beginPath();
+    for (const footprint of event.footprints) {
+      const points = [...footprint.ceiling, ...footprint.floor];
+      if (points.length < 3) continue;
+      const left = Math.min(...points.map(point => point.x));
+      const right = Math.max(...points.map(point => point.x));
+      const topEdge = Math.min(...footprint.ceiling.map(point => point.y));
+      const bottom = Math.max(...footprint.floor.map(point => point.y));
+      ctx.rect(left, topEdge, Math.max(0, right - left), Math.max(0, bottom - topEdge));
+    }
+    ctx.clip();
+  }
   ctx.globalAlpha = event.alpha;
   if (event.npc.silhouette) {
     ctx.filter = "brightness(0) drop-shadow(0 0 3px rgba(225,252,255,.98)) drop-shadow(0 0 10px rgba(128,235,255,.9))";

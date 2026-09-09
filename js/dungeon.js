@@ -38,6 +38,7 @@ import {
   reserveDungeonFeature,
   runDungeonPlacementTransaction
 } from "./dungeon-feature-placement.js";
+import { clearRoamingEnemy, placeRoamingEnemyForFloor } from "./roaming-enemies.js";
 
 export const cells = makeCells(MAP_W, MAP_H);
 export const explored = makeExplored(MAP_W, MAP_H);
@@ -114,8 +115,16 @@ export function resetExplored() {
 }
 
 export function buildBoundaryWallMap(depth = 1, rng = Math.random, progress = {}) {
+  clearRoamingEnemy();
   if (Math.floor(Number(depth) || 1) === B100_FIXED_FLOOR_MAP.floor) {
     buildFixedFloorMap(B100_FIXED_FLOOR_MAP, progress);
+    placeRoamingEnemyForFloor({
+      depth,
+      grid: cells,
+      player: startPosition,
+      rng,
+      definitions: progress.roamingEnemyDefinitions
+    });
     const report = validateDungeonLayout({ depth, progress });
     lastDungeonBuildReport = structuredClone({ ...report, attempt: 1 });
     if (!report.valid) throw new Error(`Fixed dungeon map failed validation: ${report.errors.join(" / ")}`);
@@ -268,6 +277,13 @@ function buildBoundaryWallMapAttempt(depth = 1, rng = Math.random, progress = {}
   placeNormalDoors(NORMAL_DOOR_COUNT, false);
   placeRapidCurrents(depth, rng);
   placeFloorLootPickups(depth, rng);
+  placeRoamingEnemyForFloor({
+    depth,
+    grid: cells,
+    player: startPosition,
+    rng,
+    definitions: progress.roamingEnemyDefinitions
+  });
 }
 
 export function placeFloorLootPickups(depth = 1, rng = Math.random) {
