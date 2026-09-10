@@ -27,6 +27,10 @@ import { createInitialPlayerCharge, normalizePlayerCharge } from "../combat/play
 import { getConditionLabel } from "../combat/condition-label.js";
 import { backfillCompendiumFromCharacter, createInitialCompendium } from "./compendium.js";
 import { backfillB80TransferUnlock, isB80TransferUnlocked } from "./b80-transfer-unlock.js";
+import {
+  createInitialTavernRumorNotificationState,
+  normalizeTavernRumorNotificationState
+} from "./tavern-rumor-notifications.js";
 
 export const STAT_KEYS = Object.freeze(["str", "int", "agi", "dex", "luc"]);
 
@@ -94,6 +98,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     lootBag: createInitialLootBag(),
     quests: normalizeQuestState(),
     eventFlags: normalizeEndingFlags(),
+    tavernRumorNotifications: createInitialTavernRumorNotificationState(),
     adventureStats: normalizeAdventureStats(),
     marathonChallenge: createInitialMarathonChallenge(),
     longMarchChallenge: createInitialLongMarchChallenge(),
@@ -221,6 +226,7 @@ export function normalizeCharacter(character) {
     lootBag,
     quests,
     eventFlags,
+    tavernRumorNotifications: normalizeTavernRumorNotificationState(character.tavernRumorNotifications),
     adventureStats: normalizeAdventureStats(character.adventureStats),
     marathonChallenge: normalizeMarathonChallenge(character.marathonChallenge),
     longMarchChallenge: isB80TransferUnlocked({ eventFlags })

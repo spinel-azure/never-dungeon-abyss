@@ -34,7 +34,7 @@ import {
   refillTorch,
   setTorchFuelDisabled,
   setTorchCardEffects,
-  setPlayerInputEnabled,
+  setPlayerInputEnabled as setRawPlayerInputEnabled,
   isPlayerInputEnabled,
   updateAnimation,
   manualMove,
@@ -108,7 +108,9 @@ import {
   setBgmOptions,
   setSeOptions,
   playSe,
+  playSeToEnd,
   playSeSequence,
+  stopSe,
   startLoopSe,
   stopLoopSe,
   startBgm,
@@ -117,7 +119,7 @@ import {
 import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
 import { EffectEngine } from "./effects/effect-engine.js";
 import { getEquipmentHighlightClass, getLotEquipmentHighlightClass, hasUncertainLoot, isHighlightedLotCardRarity } from "./loot-identification.js";
-import { configureTown, INN_MEDICINE_DELIVERY_TRANSITION_FLAG, setTownEndingSuspended, openPendingNpcRenewal, openTown, closeTown, getTownState, handleTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js";
+import { configureTown, INN_MEDICINE_DELIVERY_TRANSITION_FLAG, setTownEndingSuspended, openPendingNpcRenewal, openTown, closeTown, getTownState, handleTownInput as handleRawTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js";
 import { flashNpcPartyStatus, renderNpcPartyStatus, renderNpcStatusPage, setNpcPartyCharge } from "./npc-party-ui.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { applyNpcExplorationPassives, beginNpcRenewal, hireNpc, recordNpcExpeditionDepth, registerNpc, resolveNpcRenewal } from "../data/npc-party.js";
@@ -175,6 +177,15 @@ import { getSkill } from "../data/skills.js";
 import { getQuestRequiredSpecialRoomAccess, getSpecialRoomAccessRestriction, getSpecialRoomDefinition } from "../data/special-rooms.js";
 import { acknowledgeShopStockAnnouncement, getShopEquipmentOffer, getShopStockState, markShopCategorySeen } from "../data/shop-stock.js";
 import { getPastTavernRumors, getUnreadTavernRumor, markTavernRumorRead } from "../data/tavern-rumors.js";
+import {
+  getPendingTavernRumorNotifications,
+  markTavernRumorNotificationsShown,
+  syncTavernRumorNotifications
+} from "../data/tavern-rumor-notifications.js";
+import {
+  createPassiveNotificationCoordinator,
+  createRumorNotificationController
+} from "./rumor-notification.js";
 import { renameCharacter as applyCharacterRename } from "../data/character-name.js";
 import { isTransferDestinationUnlocked } from "../data/transfer-destinations.js";
 import { RARE_REVIVAL_GODDESS_IMAGE, selectRevivalGoddessImage } from "../data/revival-presentation.js";
@@ -324,6 +335,11 @@ import {
   const questCompleteEffect = document.getElementById("questCompleteEffect");
   const achievementUnlockedEffect = document.getElementById("achievementUnlockedEffect");
   if (achievementUnlockedEffect) document.body.append(achievementUnlockedEffect);
+  const rumorNotification = document.getElementById("rumorNotification");
+  const rumorNotificationBell = document.getElementById("rumorNotificationBell");
+  const rumorNotificationCopy = document.getElementById("rumorNotificationCopy");
+  const rumorNotificationDetail = document.getElementById("rumorNotificationDetail");
+  if (rumorNotification) document.body.append(rumorNotification);
   const cardGetEffect = document.getElementById("cardGetEffect");
   const cardGetCanvas = document.getElementById("cardGetCanvas");
   const itemGetEffect = document.getElementById("itemGetEffect");
@@ -400,6 +416,7 @@ import {
         state.autoReturnPaused = false;
         openTown({ registrationRequired: false });
         updateCharacterUi();
+        resumePassiveNotifications();
       }
     },
     onSaveStory: () => {
@@ -420,6 +437,7 @@ import {
     const mode = getEndingResumeMode(character);
     if (mode === "restoration") void runMichaelaRestoration();
     else if (mode === "arrival" || mode === "credits") void runMainEnding();
+    else resumePassiveNotifications();
   });
   let sceneTransitionRunning = false;
   let templeRevivalJinglePending = false;
@@ -444,6 +462,136 @@ import {
   let lootBagTutorialActive = false;
   let lootBagTutorialReady = false;
   let lootBagTutorialTimer = 0;
+  let passiveNotificationsReady = false;
+  let passiveNotificationSession = 0;
+
+  const passiveNotificationCoordinator = createPassiveNotificationCoordinator({
+    canPresent: canPresentPassiveNotification
+  });
+  document.addEventListener("visibilitychange", () => {
+    passiveNotificationCoordinator.updateAvailability();
+  });
+  // Town command buttons can change presentation mode directly without going
+  // through handleTownInput(). Recheck after the native click has completed so
+  // mouse and touch activation interrupt passive notices just like A/B input.
+  document.addEventListener("click", () => {
+    queueMicrotask(() => passiveNotificationCoordinator.updateAvailability());
+  }, { capture: true });
+
+  function setPlayerInputEnabled(enabled) {
+    setRawPlayerInputEnabled(enabled);
+    passiveNotificationCoordinator.updateAvailability();
+  }
+
+  function handleTownInput(action) {
+    const handled = handleRawTownInput(action);
+    passiveNotificationCoordinator.updateAvailability();
+    return handled;
+  }
+
+  const rumorNotificationController = createRumorNotificationController({
+    root: rumorNotification,
+    bell: rumorNotificationBell,
+    copy: rumorNotificationCopy,
+    detail: rumorNotificationDetail,
+    coordinator: passiveNotificationCoordinator,
+    getPending: () => getPendingTavernRumorNotifications(
+      character,
+      getCurrentTavernRumorContext()
+    ),
+    markShown: notificationIds => {
+      character = markTavernRumorNotificationsShown(character, notificationIds);
+    },
+    save: saveGame,
+    playBell: () => playSeToEnd("rumorBell"),
+    stopBell: () => stopSe("rumorBell")
+  });
+
+  function getCurrentTavernRumorContext() {
+    return {
+      mikanEncountered: Boolean(character?.eventFlags?.mikan_nyanko_encountered)
+        || Object.entries(state.npcEncounterCounts || {}).some(
+          ([npcId, count]) => npcId.startsWith("NPC_01") && Number(count) > 0
+        ),
+      depthReached: character?.highestDungeonDepthReached,
+      lingeringGhostDefeated: Boolean(character?.eventFlags?.lingering_ghost_b2f_defeated_once),
+      otherworldlyWisdomDefeated: Boolean(character?.eventFlags?.boss_otherworldly_wisdom_b4f_defeated)
+    };
+  }
+
+  function isBlockingPresentationVisible(element) {
+    return Boolean(element && !element.hidden);
+  }
+
+  function canPresentPassiveNotification() {
+    if (!passiveNotificationsReady || !character || document.hidden) return false;
+    if (document.body.classList.contains("title-active") || endingSequenceActive
+      || michaelaRestorationStarting || mainEndingStarting || sceneTransitionRunning
+      || isBattleActive() || isMenuOpen() || state.overlayEvent || pendingEncounter) return false;
+    if (firstDungeonTutorialActive || deckTutorialActive || lootBagTutorialActive
+      || pendingLootIdentification || experienceSettlementCloseCallback) return false;
+    if ([
+      sceneTransition,
+      defeatMessage,
+      revivalPrayer,
+      michaelaRestorationRoot,
+      battleScreen,
+      skillOverlay,
+      itemOverlay,
+      firstDungeonTutorial,
+      deckTutorial,
+      lootBagTutorial,
+      trapResultEffect,
+      levelUpEffect,
+      questCompleteEffect,
+      cardGetEffect,
+      itemGetEffect,
+      bonusGetEffect,
+      experienceSettlementOverlay,
+      lootIdentifyOverlay,
+      lichtbringerWhiteout
+    ].some(isBlockingPresentationVisible)) return false;
+    if (isTownOpen()) {
+      return ["selection", "facilityMenu", "dungeonEntrance"].includes(getTownState().mode);
+    }
+    return worldLocation === "dungeon" && isPlayerInputEnabled();
+  }
+
+  function syncRumorNotifications({ persist = true } = {}) {
+    if (!character) return false;
+    const result = syncTavernRumorNotifications(character, getCurrentTavernRumorContext());
+    const changed = result.character !== character;
+    character = result.character;
+    if (changed && persist) scheduleAutosave();
+    rumorNotificationController.request();
+    passiveNotificationCoordinator.updateAvailability();
+    return changed;
+  }
+
+  function handlePersistentStateChanged() {
+    scheduleAutosave();
+    syncRumorNotifications();
+  }
+
+  function resetPassiveNotifications() {
+    passiveNotificationSession += 1;
+    passiveNotificationsReady = false;
+    achievementNotificationQueue.length = 0;
+    achievementNotificationRunning = false;
+    achievementUnlockedEffect?.classList.remove("is-active");
+    if (achievementUnlockedEffect) achievementUnlockedEffect.hidden = true;
+    passiveNotificationCoordinator.reset();
+    rumorNotificationController.reset();
+    stopSe("achievementUnlocked");
+    stopSe("rumorBell");
+  }
+
+  function resumePassiveNotifications(expectedSession = passiveNotificationSession) {
+    if (expectedSession !== passiveNotificationSession) return;
+    passiveNotificationsReady = true;
+    syncRumorNotifications();
+    passiveNotificationCoordinator.updateAvailability();
+  }
 
   let lootIdentifyTouchHandled = false;
 
@@ -950,7 +1098,7 @@ import {
     onRoamingEnemyPlayerStep: resolveRoamingEnemyPlayerStep,
     updateRoamingEnemyAnimation: updateCurrentRoamingEnemyAnimation,
     onRoamingEnemyForcedMovementComplete: resolveRoamingEnemyForcedMovementContact,
-    onStateChanged: scheduleAutosave
+    onStateChanged: handlePersistentStateChanged
   });
   configureTown({
     root: townScreen,
@@ -1011,15 +1159,7 @@ import {
     onOpenAdventureRecords: openAdventureRecords,
     onOpenMonsterCompendium: openLibraryMonsterCompendium,
     onOpenCardGallery: openLibraryCardGallery,
-    getUnreadRumor: () => getUnreadTavernRumor(character, {
-      mikanEncountered: Boolean(character?.eventFlags?.mikan_nyanko_encountered)
-        || Object.entries(state.npcEncounterCounts || {}).some(
-          ([npcId, count]) => npcId.startsWith("NPC_01") && Number(count) > 0
-        ),
-      depthReached: character?.highestDungeonDepthReached,
-      lingeringGhostDefeated: Boolean(character?.eventFlags?.lingering_ghost_b2f_defeated_once),
-      otherworldlyWisdomDefeated: Boolean(character?.eventFlags?.boss_otherworldly_wisdom_b4f_defeated)
-    }),
+    getUnreadRumor: () => getUnreadTavernRumor(character, getCurrentTavernRumorContext()),
     onCompleteRumor: rumor => {
       character = markTavernRumorRead(character, rumor);
       updateCharacterUi();
@@ -1136,7 +1276,7 @@ import {
       const voices = ["catVoice01", "catVoice02", "catVoice03"];
       playSe(voices[Math.floor(Math.random() * voices.length)]);
     },
-    onStateChanged: scheduleAutosave,
+    onStateChanged: handlePersistentStateChanged,
     isMenuOpen,
     playSe
   });
@@ -1291,6 +1431,7 @@ import {
   }
 
   function restoreGame(save) {
+    resetPassiveNotifications();
     activeRoamingEnemyInstanceId = null;
     cancelRapidCurrentTransition();
     const dungeon = save?.dungeon;
@@ -1463,6 +1604,7 @@ import {
     if (savedLocation === "dungeon" && isCellCompletelySealed(state.gridX, state.gridY)) {
       returnToTown();
       say("移動できない場所から救出され、ダンジョン入口へ戻った。");
+      resumePassiveNotifications();
       return true;
     }
     const endingResume = getEndingResumeMode(character);
@@ -1514,10 +1656,12 @@ import {
       const delay = restoredLongMarchReward ? 3650 : 120;
       setTimeout(() => showCardGetEffect(FINAL_LONG_MARCH_REWARD_CARD_ID, { seId: "itemGet" }), delay);
     }
+    resumePassiveNotifications();
     return true;
   }
 
   function startNewGame() {
+    resetPassiveNotifications();
     resetDebugSettingsForNewGame();
     saveEnabled = true;
     currentDepth = 1;
@@ -1531,6 +1675,7 @@ import {
     setPlayerInputEnabled(false);
     updateCharacterUi();
     openTown({ registrationRequired: true, facilityId: "guild" });
+    resumePassiveNotifications();
     saveGame();
   }
 
@@ -2147,6 +2292,7 @@ import {
     renderDetailStats(statusCharacter);
     renderExperience(statusCharacter);
     detectAchievementUnlocks();
+    syncRumorNotifications();
   }
 
   function detectAchievementUnlocks() {
@@ -2166,22 +2312,53 @@ import {
     void playNextAchievementNotification();
   }
 
-  async function playNextAchievementNotification() {
-    if (achievementNotificationRunning || !achievementUnlockedEffect) return;
-    const achievement = achievementNotificationQueue.shift();
-    if (!achievement) return;
-    achievementNotificationRunning = true;
-    achievementUnlockedEffect.textContent = "実績解除";
-    achievementUnlockedEffect.hidden = false;
-    achievementUnlockedEffect.classList.remove("is-active");
-    void achievementUnlockedEffect.offsetWidth;
-    playSe("achievementUnlocked");
-    achievementUnlockedEffect.classList.add("is-active");
-    await wait(4200);
-    achievementUnlockedEffect.classList.remove("is-active");
-    achievementUnlockedEffect.hidden = true;
-    achievementNotificationRunning = false;
-    void playNextAchievementNotification();
+  function waitForPassiveNotification(milliseconds, signal) {
+    return new Promise(resolve => {
+      if (signal?.aborted) return resolve(false);
+      let timer = 0;
+      const abort = () => {
+        clearTimeout(timer);
+        signal?.removeEventListener("abort", abort);
+        resolve(false);
+      };
+      timer = window.setTimeout(() => {
+        signal?.removeEventListener("abort", abort);
+        resolve(true);
+      }, milliseconds);
+      signal?.addEventListener("abort", abort, { once: true });
+    });
+  }
+
+  function playNextAchievementNotification() {
+    if (!achievementUnlockedEffect) return false;
+    const achievement = achievementNotificationQueue[0];
+    if (!achievement) return false;
+    return passiveNotificationCoordinator.enqueue({
+      id: `achievement:${achievement.id}`,
+      channel: "achievement",
+      play: async ({ signal }) => {
+        if (!achievementNotificationQueue.some(entry => entry.id === achievement.id)) return true;
+        achievementNotificationRunning = true;
+        achievementUnlockedEffect.textContent = "実績解除";
+        achievementUnlockedEffect.hidden = false;
+        achievementUnlockedEffect.classList.remove("is-active");
+        void achievementUnlockedEffect.offsetWidth;
+        playSe("achievementUnlocked");
+        achievementUnlockedEffect.classList.add("is-active");
+        const completed = await waitForPassiveNotification(4200, signal);
+        achievementUnlockedEffect.classList.remove("is-active");
+        achievementUnlockedEffect.hidden = true;
+        achievementNotificationRunning = false;
+        if (!completed) {
+          stopSe("achievementUnlocked");
+          return false;
+        }
+        const index = achievementNotificationQueue.findIndex(entry => entry.id === achievement.id);
+        if (index >= 0) achievementNotificationQueue.splice(index, 1);
+        queueMicrotask(playNextAchievementNotification);
+        return true;
+      }
+    });
   }
 
   function hasMaxVitalBonus(target, key) {
@@ -3723,6 +3900,7 @@ import {
   async function runDefeatPresentation() {
     if (sceneTransitionRunning) return false;
     sceneTransitionRunning = true;
+    passiveNotificationCoordinator.updateAvailability();
     sceneTransition.hidden = false;
     sceneTransition.classList.remove("is-black", "is-revealing", "is-inn-stay");
     sceneTransition.classList.add("is-running", "is-defeat");
@@ -4197,6 +4375,7 @@ import {
       sceneTransition.hidden = true;
       document.body.classList.remove("scene-transition-active");
       sceneTransitionRunning = false;
+      passiveNotificationCoordinator.updateAvailability();
     }
   }
 
@@ -4910,15 +5089,7 @@ import {
     onStatusOpened: updateCharacterUi,
     canReplayEnding: () => worldLocation === "town" && Boolean(character?.eventFlags?.ending_credits_watched),
     replayEnding: () => void runMainEnding({ replay: true }),
-    getRumorHistory: () => getPastTavernRumors(character, {
-      mikanEncountered: Boolean(character?.eventFlags?.mikan_nyanko_encountered)
-        || Object.entries(state.npcEncounterCounts || {}).some(
-          ([npcId, count]) => npcId.startsWith("NPC_01") && Number(count) > 0
-        ),
-      depthReached: character?.highestDungeonDepthReached,
-      lingeringGhostDefeated: Boolean(character?.eventFlags?.lingering_ghost_b2f_defeated_once),
-      otherworldlyWisdomDefeated: Boolean(character?.eventFlags?.boss_otherworldly_wisdom_b4f_defeated)
-    }),
+    getRumorHistory: () => getPastTavernRumors(character, getCurrentTavernRumorContext()),
     getInventoryContext: () => isTownOpen() ? "town" : "dungeon",
     onUseInventoryItem: useFieldItem,
     onEquipmentChanged: next => {
@@ -5027,6 +5198,7 @@ import {
   window.addEventListener("pointerdown", markUserOperation, { capture: true, passive: true });
   window.addEventListener("pagehide", () => {
     saveGame();
+    resetPassiveNotifications();
     for (const [timer, resolve] of endingWaits) { clearTimeout(timer); resolve(false); }
     endingWaits.clear();
     if (endingSequenceActive) {

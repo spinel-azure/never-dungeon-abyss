@@ -52,7 +52,9 @@ test("achievement popup uses the k8x12 font and queues newly achieved records", 
   assert.match(source, /document\.body\.append\(achievementUnlockedEffect\)/);
   assert.match(css, /\.achievement-unlocked-effect\{[^}]*border-radius:15px/s);
   assert.match(css, /achievement-unlocked-popup 4\.2s/);
-  assert.match(source, /await wait\(4200\)/);
+  assert.match(source, /passiveNotificationCoordinator\.enqueue\(\{/);
+  assert.match(source, /await waitForPassiveNotification\(4200, signal\)/);
+  assert.match(source, /if \(!completed\) \{\s*stopSe\("achievementUnlocked"\)/);
 });
 
 test("Eiskoenigin alone receives a reduced-motion-safe multi-sparkle layer", async () => {

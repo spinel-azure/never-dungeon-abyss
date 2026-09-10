@@ -35,6 +35,7 @@ export const SE = Object.freeze({
   rapidCurrentSplash: "minamo.mp3",
   rapidCurrentFlow: "suiryuu.mp3",
   explorationObstacleOil: "sliding2.mp3",
+  rumorBell: "nda_rumor_bell_3.wav",
   fixedWarp: "warp.wav"
 });
 
@@ -111,6 +112,7 @@ const PLAYBACK_POLICIES = {
   rapidCurrentSplash: { mode: "restart", priority: 3 },
   rapidCurrentFlow: { mode: "restart", priority: 2 },
   explorationObstacleOil: { mode: "complete", priority: 3 },
+  rumorBell: { mode: "complete", priority: 3 },
   fixedWarp: { mode: "complete", priority: 3 }
 };
 const DEFAULT_POLICY = { mode: "drop", priority: 2 };
@@ -205,6 +207,54 @@ export async function playSe(key) {
   } finally {
     clearPendingRequest(key, requestId);
   }
+}
+
+// Plays one SE through the shared option/volume graph and resolves when that
+// individual source finishes. Presentations which follow an audio cue use
+// this instead of assuming playSe() waits for playback.
+export async function playSeToEnd(key) {
+  if (!audio.enabled || audio.volume <= 0) return false;
+  const url = audio.urls.get(key);
+  if (!url) {
+    console.warn(`Unknown SE key: ${key}`);
+    return false;
+  }
+  const policy = PLAYBACK_POLICIES[key] || DEFAULT_POLICY;
+  if (policy.disabledOnTouch && isTouchLayout()) return false;
+  const now = performance.now();
+  const cooldown = isTouchLayout() ? policy.mobileCooldown || 0 : policy.desktopCooldown || 0;
+  if (cooldown && now - (audio.lastStartedAt.get(key) || -Infinity) < cooldown) return false;
+
+  const matchingSources = getActiveSources(key);
+  if (audio.pendingRequests.has(key)) return false;
+  if (matchingSources.length) {
+    if (policy.mode !== "restart") return false;
+    matchingSources.forEach(stopSource);
+  }
+  if (!reservePlaybackSlot(policy.priority)) return false;
+
+  const requestId = (audio.requestIds.get(key) || 0) + 1;
+  audio.requestIds.set(key, requestId);
+  audio.pendingRequests.set(key, { priority: policy.priority, requestId });
+  audio.lastStartedAt.set(key, now);
+  try {
+    const [context, buffer] = await Promise.all([resumeAudioContext(), loadBuffer(key, url)]);
+    if (!context || !buffer || !isCurrentRequest(key, requestId) || !audio.enabled || audio.volume <= 0) return false;
+    clearPendingRequest(key, requestId);
+    return await startSourceToEnd(key, buffer, policy.priority);
+  } catch (error) {
+    warnAudio(`SE could not be played to completion: ${key}`, error);
+    return false;
+  } finally {
+    clearPendingRequest(key, requestId);
+  }
+}
+
+// Stops only the requested cue, including a decode/load still in progress.
+// Other SE and BGM sources remain untouched.
+export function stopSe(key) {
+  cancelPendingRequest(key);
+  getActiveSources(key).forEach(stopSource);
 }
 
 export async function playSeSequence(key, count = 1) {

@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="css/card-gallery.css?v=20260810-1">
   <link rel="stylesheet" href="css/monster-compendium.css">
   <link rel="stylesheet" href="css/title-screen.css?v=20260815-2">
-  <link rel="stylesheet" href="css/town.css?v=20260817-4">
+  <link rel="stylesheet" href="css/town.css?v=20260910-1">
   <link rel="stylesheet" href="css/effects.css?v=20260805-2">
   <link rel="stylesheet" href="css/scene-transition.css?v=20260809-2">
   <link rel="stylesheet" href="css/battle.css?v=20260809-1">
@@ -22,6 +22,7 @@
   <link rel="preload" as="image" href="images/npc/NPC_12.avif" type="image/avif">
   <link rel="preload" as="image" href="images/npc/NPC_13e.avif" type="image/avif">
   <link rel="preload" as="image" href="images/npc/NPC_19b.avif" type="image/avif">
+  <link rel="preload" as="image" href="images/screenshots/bell.avif" type="image/avif">
   <link rel="stylesheet" href="css/ending.css">
 </head>
 <body class="title-active">
@@ -160,6 +161,13 @@
         <div id="levelUpEffect" class="level-up-effect" aria-hidden="true" hidden>LEVEL UP!!</div>
         <div id="questCompleteEffect" class="level-up-effect" aria-hidden="true" hidden>COMPLETE!!</div>
         <div id="achievementUnlockedEffect" class="achievement-unlocked-effect" aria-hidden="true" hidden>実績解除</div>
+        <div id="rumorNotification" class="rumor-notification" role="status" aria-live="polite" aria-atomic="true" hidden>
+          <img id="rumorNotificationBell" class="rumor-notification-bell" src="images/screenshots/bell.avif" alt="" aria-hidden="true">
+          <span id="rumorNotificationCopy" class="rumor-notification-copy" hidden>
+            <strong>噂話新着</strong>
+            <span id="rumorNotificationDetail">酒場で新しい噂が聞けます</span>
+          </span>
+        </div>
         <div id="cardGetEffect" class="card-get-effect" aria-hidden="true" hidden>
           <strong class="card-get-title">CARD GET!!</strong>
           <span class="card-get-card"><canvas id="cardGetCanvas" width="180" height="260"></canvas></span>
@@ -571,7 +579,7 @@
     </section>
   </section>
 </main>
-  <script type="module" src="js/main.js?v=20260909-11"></script>
+  <script type="module" src="js/main.js?v=20260910-1"></script>
   <script type="module" src="js/title-screen.js"></script>
 </body>
 </html>

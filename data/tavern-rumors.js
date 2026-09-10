@@ -218,10 +218,11 @@ function buildDialogue(rumor, phase) {
 
 function normalizeRumorContext(character, context = {}) {
   const completedQuestIds = character?.quests?.completedQuestIds || [];
+  const eventFlags = character?.eventFlags || {};
   return {
-    mikanEncountered: Boolean(context.mikanEncountered),
-    lingeringGhostDefeated: Boolean(context.lingeringGhostDefeated),
-    otherworldlyWisdomDefeated: Boolean(context.otherworldlyWisdomDefeated),
+    mikanEncountered: Boolean(context.mikanEncountered ?? eventFlags.mikan_nyanko_encountered),
+    lingeringGhostDefeated: Boolean(context.lingeringGhostDefeated ?? eventFlags.lingering_ghost_b2f_defeated_once),
+    otherworldlyWisdomDefeated: Boolean(context.otherworldlyWisdomDefeated ?? eventFlags.boss_otherworldly_wisdom_b4f_defeated),
     depthReached: Math.max(1, Math.floor(Number(context.depthReached ?? character?.highestDungeonDepthReached) || 1)),
     templeDonationCount: Math.max(0, Math.floor(Number(context.templeDonationCount ?? character?.adventureStats?.templeDonationCount) || 0)),
     shopPurchaseCount: Math.max(0, Math.floor(Number(context.shopPurchaseCount ?? character?.adventureStats?.shopPurchaseCount) || 0)),
@@ -230,31 +231,42 @@ function normalizeRumorContext(character, context = {}) {
     quest020Completed: Boolean(context.quest020Completed ?? completedQuestIds.includes("guild_020")),
     quest029Active: Boolean(context.quest029Active ?? character?.quests?.active?.guild_029),
     quest029Completed: Boolean(context.quest029Completed ?? completedQuestIds.includes("guild_029")),
-    quest029BeeswaxDelivered: Boolean(context.quest029BeeswaxDelivered ?? character?.eventFlags?.quest_029_beeswax_delivered),
+    quest029BeeswaxDelivered: Boolean(context.quest029BeeswaxDelivered ?? eventFlags.quest_029_beeswax_delivered),
     maerchentiereCompleted: Boolean(context.maerchentiereCompleted ?? completedQuestIds.includes("guild_026")),
     innStayCount: Math.max(0, Math.floor(Number(context.innStayCount ?? character?.adventureStats?.innStayCount) || 0)),
-    anastasiaOutfitEventSeen: Boolean(context.anastasiaOutfitEventSeen ?? character?.eventFlags?.anastasia_festival_outfit_unlocked),
-    priestRumorCompleted: Boolean(context.priestRumorCompleted ?? character?.eventFlags?.tavern_rumor_004_medicine_read),
-    helenHiddenEventSeen: Boolean(context.helenHiddenEventSeen ?? character?.eventFlags?.helen_hidden_event_seen)
+    anastasiaOutfitEventSeen: Boolean(context.anastasiaOutfitEventSeen ?? eventFlags.anastasia_festival_outfit_unlocked),
+    priestRumorCompleted: Boolean(context.priestRumorCompleted ?? eventFlags.tavern_rumor_004_medicine_read),
+    helenHiddenEventSeen: Boolean(context.helenHiddenEventSeen ?? eventFlags.helen_hidden_event_seen)
   };
 }
 
-export function getUnreadTavernRumor(character, context = {}) {
+export function getTavernRumorNotificationId(rumorId, stageId) {
+  return `${String(rumorId || "")}:${String(stageId || "")}`;
+}
+
+export function getUnreadTavernRumors(character, context = {}) {
   const normalizedContext = normalizeRumorContext(character, context);
   const flags = character?.eventFlags || {};
-  for (const rumor of TAVERN_RUMORS) {
-    if (!rumor.unlock(normalizedContext)) continue;
+  return TAVERN_RUMORS.flatMap(rumor => {
+    if (!rumor.unlock(normalizedContext)) return [];
     const unlockedPhases = rumor.phases.filter(phase => phase.unlock(normalizedContext));
     const phase = unlockedPhases.at(-1);
-    if (!phase || flags[phase.readFlag]) continue;
+    if (!phase || flags[phase.readFlag]) return [];
     const phaseIndex = rumor.phases.indexOf(phase);
-    return {
+    return [{
       id: `${rumor.id}_${phase.id}`,
+      rumorId: rumor.id,
+      stageId: phase.id,
+      notificationId: getTavernRumorNotificationId(rumor.id, phase.id),
+      title: rumor.title,
       readFlags: rumor.phases.slice(0, phaseIndex + 1).map(candidate => candidate.readFlag),
       dialogue: buildDialogue(rumor, phase)
-    };
-  }
-  return null;
+    }];
+  });
+}
+
+export function getUnreadTavernRumor(character, context = {}) {
+  return getUnreadTavernRumors(character, context)[0] || null;
 }
 
 export function getPastTavernRumors(character, context = {}) {

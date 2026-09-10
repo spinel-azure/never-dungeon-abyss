@@ -44,6 +44,25 @@ function makeSnapshot(name = "TEST", level = 8) {
 
 test.beforeEach(() => storage.clear());
 
+test("rumor notification state survives protected saves without crossing slots", () => {
+  const auto = makeSnapshot("AUTO RUMOR");
+  auto.character.tavernRumorNotifications = {
+    pendingIds: ["rumor_008:base"],
+    notifiedIds: ["rumor_001:base"]
+  };
+  const manual = makeSnapshot("MANUAL RUMOR");
+  manual.character.tavernRumorNotifications = {
+    pendingIds: ["rumor_005:outfit"],
+    notifiedIds: ["rumor_004:medicine"]
+  };
+
+  assert.equal(writeGame(auto, "auto"), true);
+  assert.equal(writeGame(manual, "manual1"), true);
+
+  assert.deepEqual(loadGame("auto").character.tavernRumorNotifications, auto.character.tavernRumorNotifications);
+  assert.deepEqual(loadGame("manual1").character.tavernRumorNotifications, manual.character.tavernRumorNotifications);
+});
+
 test("auto and three manual save slots are stored independently", () => {
   assert.equal(writeGame(makeSnapshot("AUTO"), "auto"), true);
   assert.equal(writeGame(makeSnapshot("ONE"), "manual1"), true);
