@@ -260,6 +260,9 @@ test("an eligible empty special room can become a Maikaefer nest instead of a pu
   assert.equal(room.specialRoom.content.type, "rareEnemy");
   assert.equal(room.specialRoom.content.enemyId, "maikaefer");
   assert.equal(room.specialRoom.content.image, "images/background/dungeon_event_08.avif");
+  assert.equal(room.specialRoom.content.revealBeforeExploration, true);
+  assert.equal(shouldDrawSpecialRoomMarker(room.specialRoom, false, 100), true);
+  assert.equal(shouldDrawSpecialRoomMarker(room.specialRoom, false, 0), false);
   assert.equal(room.treasure, null);
 });
 

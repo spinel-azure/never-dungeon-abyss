@@ -31,7 +31,7 @@ export const MAIKAEFER_NEST_CONTENT = Object.freeze({
   imageId: "maikaefer_nest_event",
   image: "images/background/dungeon_event_08.avif",
   minimapMarker: "E",
-  revealBeforeExploration: false
+  revealBeforeExploration: true
 });
 
 // Add only differences here when a floor receives an event, treasure or boss.
