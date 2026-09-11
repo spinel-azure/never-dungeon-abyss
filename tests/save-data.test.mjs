@@ -63,6 +63,24 @@ test("rumor notification state survives protected saves without crossing slots",
   assert.deepEqual(loadGame("manual1").character.tavernRumorNotifications, manual.character.tavernRumorNotifications);
 });
 
+test("guild request notification state survives protected saves without crossing slots", () => {
+  const auto = makeSnapshot("AUTO QUEST NOTICE");
+  auto.character.guildQuestNotifications = {
+    pendingIds: ["guild_031"],
+    notifiedIds: ["guild_001_abyss_rat"]
+  };
+  const manual = makeSnapshot("MANUAL QUEST NOTICE");
+  manual.character.guildQuestNotifications = {
+    pendingIds: ["guild_029"],
+    notifiedIds: ["guild_002_cave_slime"]
+  };
+
+  assert.equal(writeGame(auto, "auto"), true);
+  assert.equal(writeGame(manual, "manual1"), true);
+  assert.deepEqual(loadGame("auto").character.guildQuestNotifications, auto.character.guildQuestNotifications);
+  assert.deepEqual(loadGame("manual1").character.guildQuestNotifications, manual.character.guildQuestNotifications);
+});
+
 test("auto and three manual save slots are stored independently", () => {
   assert.equal(writeGame(makeSnapshot("AUTO"), "auto"), true);
   assert.equal(writeGame(makeSnapshot("ONE"), "manual1"), true);

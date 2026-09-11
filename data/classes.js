@@ -31,6 +31,10 @@ import {
   createInitialTavernRumorNotificationState,
   normalizeTavernRumorNotificationState
 } from "./tavern-rumor-notifications.js";
+import {
+  createInitialGuildQuestNotificationState,
+  normalizeGuildQuestNotificationState
+} from "./guild-quest-notifications.js";
 
 export const STAT_KEYS = Object.freeze(["str", "int", "agi", "dex", "luc"]);
 
@@ -99,6 +103,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     quests: normalizeQuestState(),
     eventFlags: normalizeEndingFlags(),
     tavernRumorNotifications: createInitialTavernRumorNotificationState(),
+    guildQuestNotifications: createInitialGuildQuestNotificationState(),
     adventureStats: normalizeAdventureStats(),
     marathonChallenge: createInitialMarathonChallenge(),
     longMarchChallenge: createInitialLongMarchChallenge(),
@@ -227,6 +232,7 @@ export function normalizeCharacter(character) {
     quests,
     eventFlags,
     tavernRumorNotifications: normalizeTavernRumorNotificationState(character.tavernRumorNotifications),
+    guildQuestNotifications: normalizeGuildQuestNotificationState(character.guildQuestNotifications),
     adventureStats: normalizeAdventureStats(character.adventureStats),
     marathonChallenge: normalizeMarathonChallenge(character.marathonChallenge),
     longMarchChallenge: isB80TransferUnlocked({ eventFlags })

@@ -183,6 +183,12 @@ import {
   syncTavernRumorNotifications
 } from "../data/tavern-rumor-notifications.js";
 import {
+  getPendingGuildQuestNotifications,
+  markGuildQuestNotificationsShown,
+  syncGuildQuestNotifications
+} from "../data/guild-quest-notifications.js";
+import {
+  createGuildQuestNotificationController,
   createPassiveNotificationCoordinator,
   createRumorNotificationController
 } from "./rumor-notification.js";
@@ -340,6 +346,11 @@ import {
   const rumorNotificationCopy = document.getElementById("rumorNotificationCopy");
   const rumorNotificationDetail = document.getElementById("rumorNotificationDetail");
   if (rumorNotification) document.body.append(rumorNotification);
+  const guildQuestNotification = document.getElementById("guildQuestNotification");
+  const guildQuestNotificationBell = document.getElementById("guildQuestNotificationBell");
+  const guildQuestNotificationCopy = document.getElementById("guildQuestNotificationCopy");
+  const guildQuestNotificationDetail = document.getElementById("guildQuestNotificationDetail");
+  if (guildQuestNotification) document.body.append(guildQuestNotification);
   const cardGetEffect = document.getElementById("cardGetEffect");
   const cardGetCanvas = document.getElementById("cardGetCanvas");
   const itemGetEffect = document.getElementById("itemGetEffect");
@@ -507,6 +518,27 @@ import {
     stopBell: () => stopSe("rumorBell")
   });
 
+  const guildQuestNotificationController = createGuildQuestNotificationController({
+    root: guildQuestNotification,
+    bell: guildQuestNotificationBell,
+    copy: guildQuestNotificationCopy,
+    detail: guildQuestNotificationDetail,
+    coordinator: passiveNotificationCoordinator,
+    getPending: () => {
+      const result = syncGuildQuestNotifications(character);
+      const changed = result.character !== character;
+      character = result.character;
+      if (changed) scheduleAutosave();
+      return getPendingGuildQuestNotifications(character);
+    },
+    markShown: notificationIds => {
+      character = markGuildQuestNotificationsShown(character, notificationIds);
+    },
+    save: saveGame,
+    playBell: () => playSeToEnd("rumorBell"),
+    stopBell: () => stopSe("rumorBell")
+  });
+
   function getCurrentTavernRumorContext() {
     return {
       mikanEncountered: Boolean(character?.eventFlags?.mikan_nyanko_encountered)
@@ -568,9 +600,21 @@ import {
     return changed;
   }
 
+  function syncQuestNotifications({ persist = true } = {}) {
+    if (!character) return false;
+    const result = syncGuildQuestNotifications(character);
+    const changed = result.character !== character;
+    character = result.character;
+    if (changed && persist) scheduleAutosave();
+    guildQuestNotificationController.request();
+    passiveNotificationCoordinator.updateAvailability();
+    return changed;
+  }
+
   function handlePersistentStateChanged() {
     scheduleAutosave();
     syncRumorNotifications();
+    syncQuestNotifications();
   }
 
   function resetPassiveNotifications() {
@@ -582,6 +626,7 @@ import {
     if (achievementUnlockedEffect) achievementUnlockedEffect.hidden = true;
     passiveNotificationCoordinator.reset();
     rumorNotificationController.reset();
+    guildQuestNotificationController.reset();
     stopSe("achievementUnlocked");
     stopSe("rumorBell");
   }
@@ -590,6 +635,7 @@ import {
     if (expectedSession !== passiveNotificationSession) return;
     passiveNotificationsReady = true;
     syncRumorNotifications();
+    syncQuestNotifications();
     passiveNotificationCoordinator.updateAvailability();
   }
 
@@ -2293,6 +2339,7 @@ import {
     renderExperience(statusCharacter);
     detectAchievementUnlocks();
     syncRumorNotifications();
+    syncQuestNotifications();
   }
 
   function detectAchievementUnlocks() {

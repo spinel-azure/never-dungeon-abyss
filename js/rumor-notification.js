@@ -134,7 +134,7 @@ export function createPassiveNotificationCoordinator({
   };
 }
 
-export function createRumorNotificationController({
+export function createPassiveBellNotificationController({
   root,
   bell,
   copy,
@@ -145,12 +145,15 @@ export function createRumorNotificationController({
   save = () => {},
   playBell = () => Promise.resolve(false),
   stopBell = () => {},
+  queueId = "passive-bell:new",
+  channel = "passive-bell",
+  getDetailText = pending => String(pending.length),
   ringDurationMs = DEFAULT_RING_DURATION_MS,
   messageDurationMs = DEFAULT_MESSAGE_DURATION_MS,
   fadeDurationMs = DEFAULT_FADE_DURATION_MS
 } = {}) {
-  const queueId = "rumor:new";
   let disposed = false;
+  let generation = 0;
 
   function conceal() {
     stopBell();
@@ -162,14 +165,13 @@ export function createRumorNotificationController({
 
   async function play({ signal }) {
     if (disposed || !root || !bell || !copy || !detail) return true;
+    const sessionGeneration = generation;
     const pending = [...new Map(
       (getPending() || []).filter(entry => entry?.notificationId).map(entry => [entry.notificationId, entry])
     ).values()];
     if (!pending.length) return true;
     const notificationIds = pending.map(entry => entry.notificationId);
-    detail.textContent = pending.length === 1
-      ? "酒場で新しい噂が聞けます"
-      : `酒場で新しい噂が${pending.length}件聞けます`;
+    detail.textContent = getDetailText(pending);
     copy.hidden = true;
     root.hidden = false;
     root.classList.remove("is-message", "is-fading");
@@ -207,24 +209,48 @@ export function createRumorNotificationController({
     markShown(notificationIds);
     save();
     conceal();
-    queueMicrotask(request);
+    queueMicrotask(() => queueMicrotask(() => {
+      if (!disposed && generation === sessionGeneration) request();
+    }));
     return true;
   }
 
   function request() {
     if (disposed || !(getPending() || []).length) return false;
-    return coordinator?.enqueue({ id: queueId, channel: "rumor", play }) || false;
+    return coordinator?.enqueue({ id: queueId, channel, play }) || false;
   }
 
   function reset() {
+    generation += 1;
     conceal();
   }
 
   function dispose() {
     disposed = true;
+    generation += 1;
     conceal();
   }
 
   conceal();
   return { request, reset, dispose, isVisible: () => Boolean(root && !root.hidden) };
+}
+
+export function createRumorNotificationController(options = {}) {
+  return createPassiveBellNotificationController({
+    ...options,
+    queueId: "rumor:new",
+    channel: "rumor",
+    getDetailText: pending => pending.length === 1
+      ? "酒場で新しい噂が聞けます"
+      : `酒場で新しい噂が${pending.length}件聞けます`
+  });
+}
+
+export function createGuildQuestNotificationController(options = {}) {
+  return createPassiveBellNotificationController({
+    ...options,
+    queueId: "quest:new",
+    channel: "quest",
+    getDetailText: () => "ギルド依頼が追加されました"
+  });
 }

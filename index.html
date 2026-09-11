@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="css/card-gallery.css?v=20260810-1">
   <link rel="stylesheet" href="css/monster-compendium.css">
   <link rel="stylesheet" href="css/title-screen.css?v=20260815-2">
-  <link rel="stylesheet" href="css/town.css?v=20260910-2">
+  <link rel="stylesheet" href="css/town.css?v=20260911-1">
   <link rel="stylesheet" href="css/effects.css?v=20260805-2">
   <link rel="stylesheet" href="css/scene-transition.css?v=20260809-2">
   <link rel="stylesheet" href="css/battle.css?v=20260809-1">
@@ -166,6 +166,13 @@
           <span id="rumorNotificationCopy" class="rumor-notification-copy" hidden>
             <strong>噂話新着</strong>
             <span id="rumorNotificationDetail">酒場で新しい噂が聞けます</span>
+          </span>
+        </div>
+        <div id="guildQuestNotification" class="rumor-notification guild-quest-notification" role="status" aria-live="polite" aria-atomic="true" hidden>
+          <img id="guildQuestNotificationBell" class="rumor-notification-bell" src="images/screenshots/bell.avif" alt="" aria-hidden="true">
+          <span id="guildQuestNotificationCopy" class="rumor-notification-copy" hidden>
+            <strong>依頼新着</strong>
+            <span id="guildQuestNotificationDetail">ギルド依頼が追加されました</span>
           </span>
         </div>
         <div id="cardGetEffect" class="card-get-effect" aria-hidden="true" hidden>
@@ -579,7 +586,7 @@
     </section>
   </section>
 </main>
-  <script type="module" src="js/main.js?v=20260910-2"></script>
+  <script type="module" src="js/main.js?v=20260911-1"></script>
   <script type="module" src="js/title-screen.js"></script>
 </body>
 </html>

@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  createGuildQuestNotificationController,
   createPassiveNotificationCoordinator,
   createRumorNotificationController
 } from "../js/rumor-notification.js";
@@ -250,5 +251,78 @@ test("achievement and rumor presentations share one serial coordinator", async (
     "rumor:start",
     "rumor:end"
   ]);
+  coordinator.dispose();
+});
+
+test("rumor and quest notices share the coordinator and quest copy stays singular", async () => {
+  const timeline = [];
+  const rumorPending = [{ notificationId: "rumor_009:base" }];
+  const questPending = [
+    { notificationId: "guild_004" },
+    { notificationId: "guild_005" }
+  ];
+  const coordinator = createPassiveNotificationCoordinator({ observeRoot: null });
+  const rumorElements = createElements();
+  const questElements = createElements();
+  const rumor = createRumorNotificationController({
+    ...rumorElements,
+    coordinator,
+    getPending: () => rumorPending,
+    markShown: () => { timeline.push("rumor:end"); rumorPending.length = 0; },
+    playBell: () => { timeline.push("rumor:start"); return Promise.resolve(true); },
+    ringDurationMs: 3,
+    messageDurationMs: 3,
+    fadeDurationMs: 3
+  });
+  const quest = createGuildQuestNotificationController({
+    ...questElements,
+    coordinator,
+    getPending: () => questPending,
+    markShown: () => { timeline.push("quest:end"); questPending.length = 0; },
+    playBell: () => { timeline.push("quest:start"); return Promise.resolve(true); },
+    ringDurationMs: 3,
+    messageDurationMs: 3,
+    fadeDurationMs: 3
+  });
+
+  rumor.request();
+  quest.request();
+  await waitUntil(() => timeline.includes("quest:end"));
+
+  assert.deepEqual(timeline, ["rumor:start", "rumor:end", "quest:start", "quest:end"]);
+  assert.equal(questElements.detail.textContent, "ギルド依頼が追加されました");
+  coordinator.dispose();
+});
+
+test("a quest unlocked during an active batch is left for the next display", async () => {
+  const pending = [{ notificationId: "guild_010" }];
+  const batches = [];
+  let injected = false;
+  const elements = createElements();
+  const coordinator = createPassiveNotificationCoordinator({ observeRoot: null });
+  const quest = createGuildQuestNotificationController({
+    ...elements,
+    coordinator,
+    getPending: () => pending,
+    markShown: ids => {
+      batches.push(ids);
+      pending.splice(0, ids.length);
+    },
+    playBell: async () => {
+      if (!injected) {
+        injected = true;
+        pending.push({ notificationId: "guild_011" });
+      }
+      await delay(6);
+      return true;
+    },
+    ringDurationMs: 3,
+    messageDurationMs: 3,
+    fadeDurationMs: 3
+  });
+
+  quest.request();
+  await waitUntil(() => batches.length === 2);
+  assert.deepEqual(batches, [["guild_010"], ["guild_011"]]);
   coordinator.dispose();
 });
