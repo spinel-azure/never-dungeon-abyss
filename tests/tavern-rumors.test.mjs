@@ -2,7 +2,13 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { createInitialCharacter } from "../data/classes.js";
-import { getPastTavernRumors, getTavernRumorTypewriterParts, getUnreadTavernRumor, markTavernRumorRead } from "../data/tavern-rumors.js";
+import {
+  getPastTavernRumors,
+  getTavernRumorTypewriterParts,
+  getUnreadTavernRumor,
+  getUnreadTavernRumors,
+  markTavernRumorRead
+} from "../data/tavern-rumors.js";
 
 test("tavern rumor typewriter isolates only customer and Rosa dialogue", () => {
   assert.deepEqual(
@@ -123,7 +129,8 @@ test("priest rumor requires quest 019 plus one hundred donations and updates aft
   character.eventFlags = {
     tavern_rumor_001_base_read: true,
     tavern_rumor_002_base_read: true,
-    tavern_rumor_003_base_read: true
+    tavern_rumor_003_base_read: true,
+    tavern_rumor_009_base_read: true
   };
   character.highestDungeonDepthReached = 50;
   character.adventureStats.templeDonationCount = 100;
@@ -215,4 +222,67 @@ test("Johanna rumor requires one hundred inn stays and reported Maerchentiere, t
     "客：おい、知ってるか？最近ヨハンナの具合が悪いらしい。",
     "客：宿屋の女将だよ。働きすぎなんじゃないかねぇ。娘も心配してるそうだ。"
   ]);
+});
+
+test("B40 unlocks the marathon rumor and a B42 marathon completion adds its follow-up", () => {
+  let character = createInitialCharacter({ name: "長距離走者", job: "warrior" });
+  character.highestDungeonDepthReached = 39;
+  assert.equal(getUnreadTavernRumors(character).some(rumor => rumor.rumorId === "rumor_009"), false);
+
+  character.highestDungeonDepthReached = 40;
+  const base = getUnreadTavernRumors(character).find(rumor => rumor.rumorId === "rumor_009");
+  assert.equal(base?.id, "rumor_009_base");
+  assert.deepEqual(base?.dialogue, [
+    "あなたはカウンターから耳を澄ます………。\n客「おい、知ってるか？長距離走る事をマラソンって言うらしいな？」\n＊Aボタンで次へ",
+    "客「ああ。お前も「奈落の入口」からマラソンしてみたらどうだ？」\n＊Aボタンで次へ",
+    "ローザ「マラソンって42キロも走るのよね？私には無理だわ…。」\n＊Aボタンで戻る"
+  ]);
+  assert.equal(base.dialogue.every(message => getTavernRumorTypewriterParts(message)), true);
+
+  character = markTavernRumorRead(character, base);
+  let history = getPastTavernRumors(character).find(entry => entry.id === "rumor_009");
+  assert.equal(history?.number, "009");
+  assert.equal(history?.title, "マラソンの噂");
+  assert.deepEqual(history?.description, [
+    "客：おい、知ってるか？長距離走る事をマラソンって言うらしいな？",
+    "客：ああ。お前も「奈落の入口」からマラソンしてみたらどうだ？",
+    "ローザ：マラソンって42キロも走るのよね？私には無理だわ…。"
+  ]);
+
+  character.eventFlags.b1_b42_marathon_completed = true;
+  const completed = getUnreadTavernRumors(character).find(rumor => rumor.rumorId === "rumor_009");
+  assert.equal(completed?.id, "rumor_009_marathon");
+  assert.deepEqual(completed?.readFlags, [
+    "tavern_rumor_009_base_read",
+    "tavern_rumor_009_marathon_read"
+  ]);
+  assert.deepEqual(completed?.dialogue, [
+    "あなたはカウンターから耳を澄ます………。\n客「おい、知ってるか？長距離走る事をマラソンって言うらしいな？」\n＊Aボタンで次へ",
+    "客「ああ。お前も「奈落の入口」からマラソンしてみたらどうだ？」\n＊Aボタンで次へ",
+    "ローザ「マラソンって42キロも走るのよね？私には無理だわ…。」\n＊Aボタンで次へ",
+    "ローザ「えっ！？あなた完走したの！？スゴいわ…！」\n＊Aボタンで戻る"
+  ]);
+  assert.equal(completed.dialogue.every(message => getTavernRumorTypewriterParts(message)), true);
+  assert.equal(getPastTavernRumors(character).some(entry => entry.id === "rumor_009"), false);
+
+  character = markTavernRumorRead(character, completed);
+  history = getPastTavernRumors(character).find(entry => entry.id === "rumor_009");
+  assert.deepEqual(history?.description, [
+    "客：おい、知ってるか？長距離走る事をマラソンって言うらしいな？",
+    "客：ああ。お前も「奈落の入口」からマラソンしてみたらどうだ？",
+    "ローザ：マラソンって42キロも走るのよね？私には無理だわ…。",
+    "ローザ：えっ！？あなた完走したの！？スゴいわ…！"
+  ]);
+});
+
+test("an existing save that already completed the B42 marathon receives only the latest rumor stage", () => {
+  const character = createInitialCharacter({ name: "完走済み", job: "thief" });
+  character.highestDungeonDepthReached = 42;
+  character.eventFlags.b1_b42_marathon_completed = true;
+
+  const rumor = getUnreadTavernRumors(character).find(entry => entry.rumorId === "rumor_009");
+  assert.equal(rumor?.id, "rumor_009_marathon");
+  const heard = markTavernRumorRead(character, rumor);
+  assert.equal(heard.eventFlags.tavern_rumor_009_base_read, true);
+  assert.equal(heard.eventFlags.tavern_rumor_009_marathon_read, true);
 });

@@ -13,6 +13,8 @@ export const TAVERN_RUMOR_006_PERFUME_READ_FLAG = "tavern_rumor_006_perfume_read
 export const TAVERN_RUMOR_007_BASE_READ_FLAG = "tavern_rumor_007_base_read";
 export const TAVERN_RUMOR_007_DELIVERED_READ_FLAG = "tavern_rumor_007_delivered_read";
 export const TAVERN_RUMOR_008_BASE_READ_FLAG = "tavern_rumor_008_base_read";
+export const TAVERN_RUMOR_009_BASE_READ_FLAG = "tavern_rumor_009_base_read";
+export const TAVERN_RUMOR_009_MARATHON_READ_FLAG = "tavern_rumor_009_marathon_read";
 
 export function getTavernRumorTypewriterParts(message) {
   const text = String(message || "");
@@ -197,6 +199,29 @@ export const TAVERN_RUMORS = Object.freeze([
         ])
       })
     ])
+  }),
+  Object.freeze({
+    id: "rumor_009",
+    verbatimCustomers: true,
+    title: "マラソンの噂",
+    unlock: context => context.depthReached >= 40,
+    customerLead: "おい、知ってるか？長距離走る事をマラソンって言うらしいな？",
+    customerReply: "ああ。お前も「奈落の入口」からマラソンしてみたらどうだ？",
+    phases: Object.freeze([
+      Object.freeze({
+        id: "base",
+        readFlag: TAVERN_RUMOR_009_BASE_READ_FLAG,
+        unlock: context => !context.marathonCompleted,
+        rosa: "マラソンって42キロも走るのよね？私には無理だわ…。"
+      }),
+      Object.freeze({
+        id: "marathon",
+        readFlag: TAVERN_RUMOR_009_MARATHON_READ_FLAG,
+        unlock: context => context.marathonCompleted,
+        rosa: "マラソンって42キロも走るのよね？私には無理だわ…。",
+        rosaContinuation: "えっ！？あなた完走したの！？スゴいわ…！"
+      })
+    ])
   })
 ]);
 
@@ -236,7 +261,8 @@ function normalizeRumorContext(character, context = {}) {
     innStayCount: Math.max(0, Math.floor(Number(context.innStayCount ?? character?.adventureStats?.innStayCount) || 0)),
     anastasiaOutfitEventSeen: Boolean(context.anastasiaOutfitEventSeen ?? eventFlags.anastasia_festival_outfit_unlocked),
     priestRumorCompleted: Boolean(context.priestRumorCompleted ?? eventFlags.tavern_rumor_004_medicine_read),
-    helenHiddenEventSeen: Boolean(context.helenHiddenEventSeen ?? eventFlags.helen_hidden_event_seen)
+    helenHiddenEventSeen: Boolean(context.helenHiddenEventSeen ?? eventFlags.helen_hidden_event_seen),
+    marathonCompleted: Boolean(context.marathonCompleted ?? eventFlags.b1_b42_marathon_completed)
   };
 }
 

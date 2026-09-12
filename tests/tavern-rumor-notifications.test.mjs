@@ -168,3 +168,25 @@ test("the Johanna rumor participates in the same notification list", () => {
   assert.deepEqual(result.addedIds, ["rumor_008:base"]);
   assert.equal(result.pendingRumors[0].title, "宿屋の女将の噂");
 });
+
+test("the B42 marathon follow-up replaces the pending B40 rumor stage", () => {
+  const character = makeCharacter("マラソン通知係");
+  character.highestDungeonDepthReached = 40;
+  character.eventFlags = {
+    ...character.eventFlags,
+    tavern_rumor_001_base_read: true,
+    tavern_rumor_002_base_read: true,
+    tavern_rumor_003_base_read: true
+  };
+
+  const unlocked = syncTavernRumorNotifications(character);
+  assert.deepEqual(unlocked.addedIds, ["rumor_009:base"]);
+  assert.equal(unlocked.pendingRumors[0].title, "マラソンの噂");
+
+  unlocked.character.eventFlags.b1_b42_marathon_completed = true;
+  unlocked.character.highestDungeonDepthReached = 42;
+  const completed = syncTavernRumorNotifications(unlocked.character);
+  assert.deepEqual(completed.removedIds, ["rumor_009:base"]);
+  assert.deepEqual(completed.addedIds, ["rumor_009:marathon"]);
+  assert.deepEqual(completed.character.tavernRumorNotifications.pendingIds, ["rumor_009:marathon"]);
+});
