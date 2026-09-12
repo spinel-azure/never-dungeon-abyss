@@ -40,6 +40,9 @@ export const DEFAULT_DEBUG_SETTINGS = Object.freeze({
 const ON_MARK = "🔘";
 const OFF_MARK = "⚫";
 const DECK_PICKER_PAGE_SIZE = 5;
+const INVENTORY_DESKTOP_PAGE_SIZE = 10;
+const INVENTORY_MOBILE_PAGE_SIZE = 8;
+const STATIC_STATUS_PAGE_COUNT = 3;
 const EQUIPMENT_JOB_LABELS = Object.freeze({ warrior: "戦士", thief: "盗賊", priest: "僧侶", mage: "魔術師" });
 
 const menu = {
@@ -151,6 +154,18 @@ export function isMenuOpen() { return menu.view !== "dungeon"; }
 export function getTouchControlsMode() { return menu.touchControlsMode; }
 export function getTouchMovementMode() { return menu.touchMovementMode; }
 export function getBattleSpeedMode() { return normalizeBattleSpeedMode(menu.battleSpeedMode); }
+export function getInventoryPageSize(
+  viewportWidth = Number(globalThis.window?.innerWidth) || 1024,
+  mobileLayout = Boolean(globalThis.document?.body?.classList?.contains("layout-mobile"))
+) {
+  return mobileLayout || Number(viewportWidth) <= 540 ? INVENTORY_MOBILE_PAGE_SIZE : INVENTORY_DESKTOP_PAGE_SIZE;
+}
+export function getActiveStatusQuestEntries(character) {
+  return getQuestHistory(character).filter(entry => entry.progress.active);
+}
+export function getStatusPageCount(character) {
+  return STATIC_STATUS_PAGE_COUNT + Math.max(1, getActiveStatusQuestEntries(character).length);
+}
 export function setBattleSpeedMode(mode) {
   menu.battleSpeedMode = normalizeBattleSpeedMode(mode);
   persistSettings();
@@ -450,7 +465,8 @@ function handleInventory(action) {
   }
 
   const entries = inventoryEntries();
-  const pages = Math.max(1, Math.ceil(entries.length / 10));
+  const pageSize = getInventoryPageSize();
+  const pages = Math.max(1, Math.ceil(entries.length / pageSize));
   const switchTab = offset => {
     if (menu.inventoryMode !== "list") return false;
     const tabs = availableInventoryTabs();
@@ -468,7 +484,7 @@ function handleInventory(action) {
     const nextPage = Math.max(0, Math.min(pages - 1, menu.inventoryPage + offset));
     if (nextPage === menu.inventoryPage) return false;
     menu.inventoryPage = nextPage;
-    menu.inventoryCursor = nextPage * 10;
+    menu.inventoryCursor = nextPage * pageSize;
     menu.inventoryFocus = "list";
     renderInventory();
     return true;
@@ -482,7 +498,7 @@ function handleInventory(action) {
     if (action === "left" || action === "right") switchTab(action === "right" ? 1 : -1);
     else if (action === "down") {
       menu.inventoryFocus = entries.length ? "list" : "back";
-      menu.inventoryCursor = menu.inventoryPage * 10;
+      menu.inventoryCursor = menu.inventoryPage * pageSize;
       renderInventory();
     } else if (action === "up") {
       menu.inventoryFocus = "back";
@@ -497,7 +513,7 @@ function handleInventory(action) {
     }
     if (action === "up") {
       if (entries.length) {
-        menu.inventoryCursor = Math.min(entries.length - 1, menu.inventoryPage * 10 + 9);
+        menu.inventoryCursor = Math.min(entries.length - 1, menu.inventoryPage * pageSize + pageSize - 1);
         menu.inventoryFocus = "list";
       } else if (menu.inventoryMode === "list") menu.inventoryFocus = "tabs";
       renderInventory(); return;
@@ -523,8 +539,8 @@ function handleInventory(action) {
     renderInventory(); return;
   }
   if ((action === "up" || action === "down") && entries.length) {
-    const pageStart = menu.inventoryPage * 10;
-    const pageEnd = Math.min(entries.length - 1, pageStart + 9);
+    const pageStart = menu.inventoryPage * pageSize;
+    const pageEnd = Math.min(entries.length - 1, pageStart + pageSize - 1);
     if (action === "up" && menu.inventoryCursor === pageStart) menu.inventoryFocus = menu.inventoryMode === "list" ? "tabs" : "back";
     else if (action === "down" && menu.inventoryCursor === pageEnd) menu.inventoryFocus = "back";
     else menu.inventoryCursor += action === "down" ? 1 : -1;
@@ -548,7 +564,7 @@ function handleInventory(action) {
   Object.assign(menu, { inventoryMode: "equip", inventorySlot: entry.instance.slot, inventoryCursor: 0, inventoryPage: 0, inventoryFocus: "list" });
   const candidates = inventoryEntries();
   const selectedIndex = candidates.findIndex(candidate => candidate.instance?.instanceId === entry.instance.instanceId);
-  menu.inventoryCursor = Math.max(0, selectedIndex); menu.inventoryPage = Math.floor(menu.inventoryCursor / 10); renderInventory();
+  menu.inventoryCursor = Math.max(0, selectedIndex); menu.inventoryPage = Math.floor(menu.inventoryCursor / pageSize); renderInventory();
 }
 function toggleSelectedEquipmentLock(entries = inventoryEntries()) {
   if (menu.inventoryFocus !== "list" || menu.inventorySaleStage !== "list") return false;
@@ -1031,13 +1047,15 @@ function bindInventory() {
     Object.assign(menu, { inventoryTab: button.dataset.inventoryTab, inventoryMode: "list", inventoryCursor: 0, inventoryPage: 0, inventoryFocus: "tabs", inventorySaleStage: "list", inventorySaleQuantity: 1 }); renderInventory();
   }));
   menu.inventoryPanel.querySelector('[data-inventory-nav="back"]').addEventListener("click", () => {
+    const pageSize = getInventoryPageSize();
     menu.inventoryFocus = "back";
-    if (menu.inventoryPage > 0) { menu.inventoryPage -= 1; menu.inventoryCursor = menu.inventoryPage * 10; menu.inventoryFocus = "list"; renderInventory(); }
+    if (menu.inventoryPage > 0) { menu.inventoryPage -= 1; menu.inventoryCursor = menu.inventoryPage * pageSize; menu.inventoryFocus = "list"; renderInventory(); }
   });
   menu.inventoryPanel.querySelector('[data-inventory-nav="next"]').addEventListener("click", () => {
+    const pageSize = getInventoryPageSize();
     menu.inventoryFocus = "next";
-    const pages = Math.max(1, Math.ceil(inventoryEntries().length / 10));
-    if (menu.inventoryPage < pages - 1) { menu.inventoryPage += 1; menu.inventoryCursor = menu.inventoryPage * 10; renderInventory(); }
+    const pages = Math.max(1, Math.ceil(inventoryEntries().length / pageSize));
+    if (menu.inventoryPage < pages - 1) { menu.inventoryPage += 1; menu.inventoryCursor = menu.inventoryPage * pageSize; renderInventory(); }
   });
   menu.inventoryPanel.querySelector("[data-inventory-lock]")?.addEventListener("click", () => {
     toggleSelectedEquipmentLock();
@@ -1046,8 +1064,10 @@ function bindInventory() {
 
 function renderInventory() {
   const panel = menu.inventoryPanel, character = menu.getCharacter(), entries = inventoryEntries();
-  const pages = Math.max(1, Math.ceil(entries.length / 10));
-  menu.inventoryPage = Math.min(menu.inventoryPage, pages - 1); menu.inventoryCursor = entries.length ? Math.min(menu.inventoryCursor, entries.length - 1) : 0;
+  const pageSize = getInventoryPageSize();
+  const pages = Math.max(1, Math.ceil(entries.length / pageSize));
+  menu.inventoryCursor = entries.length ? Math.min(menu.inventoryCursor, entries.length - 1) : 0;
+  menu.inventoryPage = entries.length ? Math.min(pages - 1, Math.floor(menu.inventoryCursor / pageSize)) : 0;
   panel.querySelector(".menu-title").textContent = menu.inventoryPurpose === "sell" ? "SELL" : menu.inventoryPurpose === "buy" ? "BUY" : menu.inventoryMode === "equip" ? `EQUIPMENT : ${EQUIPMENT_SLOT_LABELS[menu.inventorySlot]}` : "INVENTORY";
   const tabs = panel.querySelector(".inventory-tabs");
   tabs.hidden = menu.inventoryMode === "equip";
@@ -1059,8 +1079,10 @@ function renderInventory() {
     if (button.dataset.inventoryTab === "items") button.textContent = menu.inventoryPurpose === "sell" || menu.inventoryPurpose === "buy" ? "道具" : "アイテム";
   });
   const equippedIds = new Set(Object.values(character?.equippedInstanceIds || {}));
-  panel.querySelector("[data-inventory-list]").replaceChildren(...entries.slice(menu.inventoryPage * 10, menu.inventoryPage * 10 + 10).map((entry, offset) => {
-    const index = menu.inventoryPage * 10 + offset, button = document.createElement("button"); button.type = "button"; button.className = "inventory-entry";
+  const list = panel.querySelector("[data-inventory-list]");
+  list.style.setProperty("--inventory-page-size", String(pageSize));
+  list.replaceChildren(...entries.slice(menu.inventoryPage * pageSize, menu.inventoryPage * pageSize + pageSize).map((entry, offset) => {
+    const index = menu.inventoryPage * pageSize + offset, button = document.createElement("button"); button.type = "button"; button.className = "inventory-entry";
     if (entry.item) { const badge = menu.inventoryPurpose === "buy" && menu.inventoryNewStockIds.has(entry.item.id) ? '<em class="shop-entry-new">NEW</em>' : ""; button.innerHTML = `<span>${entry.item.name}</span><strong>${badge}${menu.inventoryPurpose === "buy" ? `${inventoryBuyPrice(entry)}G` : `×${entry.count}`}</strong>`; button.classList.toggle("is-unavailable", menu.inventoryPurpose === "manage" && Boolean(unavailableItemReason(entry.item, character))); }
     else if (entry.shopEquipment) { const badge = menu.inventoryNewStockIds.has(entry.shopEquipment.id) ? '<em class="shop-entry-new">NEW</em>' : ""; button.innerHTML = `<span>${entry.shopEquipment.name}</span><strong>${badge}${inventoryBuyPrice(entry)}G</strong>`; }
     else if (entry.keyItem) button.innerHTML = `<span>${entry.keyItem.name}</span><strong>${entry.keyItem.count > 1 ? `×${entry.keyItem.count}` : ""}</strong>`;
@@ -1214,8 +1236,26 @@ function equipmentEffectLabels(definition) {
   if (definition.flavorText) labels.push(definition.flavorText);
   return labels;
 }
-function handleStatus(action) { if (action === "cancel") { menu.view = "commands"; updateView(); } else if (action === "left") { menu.statusPage = Math.max(0, menu.statusPage - 1); updateStatus(); } else if (action === "right") { menu.statusPage = Math.min(2, menu.statusPage + 1); updateStatus(); } else if (action === "confirm") { menu.view = "commands"; updateView(); } }
-function statusNavigate(key) { if (key === "back") { if (menu.statusPage === 0) { menu.view = "commands"; updateView(); } else { menu.statusPage -= 1; updateStatus(); } } else if (menu.statusPage < 2) { menu.statusPage += 1; updateStatus(); } else { menu.view = "commands"; updateView(); } }
+function handleStatus(action) {
+  const lastPage = getStatusPageCount(menu.getCharacter()) - 1;
+  if (action === "cancel") { menu.view = "commands"; updateView(); }
+  else if (action === "left") { menu.statusPage = Math.max(0, menu.statusPage - 1); updateStatus(); }
+  else if (action === "right") { menu.statusPage = Math.min(lastPage, menu.statusPage + 1); updateStatus(); }
+  else if (action === "confirm") { menu.view = "commands"; updateView(); }
+}
+function statusNavigate(key) {
+  const lastPage = getStatusPageCount(menu.getCharacter()) - 1;
+  if (key === "back") {
+    if (menu.statusPage === 0) { menu.view = "commands"; updateView(); }
+    else { menu.statusPage -= 1; updateStatus(); }
+  } else if (menu.statusPage < lastPage) {
+    menu.statusPage += 1;
+    updateStatus();
+  } else {
+    menu.view = "commands";
+    updateView();
+  }
+}
 
 function handleDeck(action) {
   if (["up", "down", "left", "right"].includes(action)) {
@@ -1715,7 +1755,69 @@ function formatSaveSummary(summary) {
     }).format(date);
   return `${summary.label}（${summary.name}／Lv${summary.level}／${formatted}）`;
 }
-function updateStatus() { menu.statusPanel.querySelectorAll("[data-status-page]").forEach((page, index) => { page.hidden = index !== menu.statusPage; }); menu.statusPanel.querySelector("[data-status-indicator]").textContent = `${menu.statusPage + 1}/3`; const next = menu.statusPanel.querySelector('[data-status-nav="next"]'); next.textContent = menu.statusPage < 2 ? "NEXT" : "MAIN"; menu.statusPanel.querySelector('[data-status-nav="back"]').classList.toggle("is-selected", menu.statusPage === 0); next.classList.toggle("is-selected", menu.statusPage === 2); }
+function renderStatusQuestPage(entries) {
+  const root = menu.statusPanel.querySelector("[data-status-quest-content]");
+  const questIndex = Math.max(0, menu.statusPage - STATIC_STATUS_PAGE_COUNT);
+  const selected = entries[questIndex];
+  root.replaceChildren();
+  if (!selected) {
+    const empty = document.createElement("p");
+    empty.className = "nde-status-quest-empty";
+    empty.textContent = "現在受注している依頼はありません。";
+    root.append(empty);
+    return;
+  }
+  const { quest, progress } = selected;
+  const card = document.createElement("section");
+  card.className = "nde-status-quest-card";
+  const heading = document.createElement("div");
+  heading.className = "nde-status-quest-heading";
+  const title = document.createElement("h2");
+  title.textContent = `${quest.number}：${quest.title}`;
+  const status = document.createElement("strong");
+  status.textContent = progress.readyToReport ? "報告可能" : "進行中";
+  status.classList.toggle("is-reportable", progress.readyToReport);
+  heading.append(title, status);
+  card.append(heading);
+  const addRow = (label, value, className = "") => {
+    const row = document.createElement("div");
+    row.className = `nde-status-quest-row${className ? ` ${className}` : ""}`;
+    const term = document.createElement("span");
+    const detail = document.createElement("p");
+    term.textContent = label;
+    detail.textContent = value;
+    row.append(term, detail);
+    card.append(row);
+  };
+  const progressText = `${Math.min(progress.progress, quest.requiredCount)}／${quest.requiredCount}`;
+  const rewardText = `${quest.reward?.label || "―"}${quest.reward?.bonusGold ? `＋${quest.reward.bonusGold}G` : ""}`;
+  addRow("依頼人", quest.client || "―");
+  addRow("進捗", progress.readyToReport ? `${progressText}（報告待ち）` : progressText);
+  addRow(quest.objectiveHeading || "目的", quest.objectiveLabel || quest.description?.filter(Boolean).join(" ") || "―", "is-objective");
+  addRow("報酬", rewardText);
+  const position = document.createElement("p");
+  position.className = "nde-status-quest-position";
+  position.textContent = `受注中 ${questIndex + 1}／${entries.length}`;
+  root.append(card, position);
+}
+
+function updateStatus() {
+  const questEntries = getActiveStatusQuestEntries(menu.getCharacter());
+  const pageCount = STATIC_STATUS_PAGE_COUNT + Math.max(1, questEntries.length);
+  const lastPage = pageCount - 1;
+  menu.statusPage = Math.min(menu.statusPage, lastPage);
+  menu.statusPanel.querySelectorAll("[data-status-page]").forEach(page => {
+    page.hidden = Number(page.dataset.statusPage) !== menu.statusPage;
+  });
+  const questPage = menu.statusPanel.querySelector("[data-status-quest-page]");
+  questPage.hidden = menu.statusPage < STATIC_STATUS_PAGE_COUNT;
+  if (!questPage.hidden) renderStatusQuestPage(questEntries);
+  menu.statusPanel.querySelector("[data-status-indicator]").textContent = `${menu.statusPage + 1}/${pageCount}`;
+  const next = menu.statusPanel.querySelector('[data-status-nav="next"]');
+  next.textContent = menu.statusPage < lastPage ? "NEXT" : "MAIN";
+  menu.statusPanel.querySelector('[data-status-nav="back"]').classList.toggle("is-selected", menu.statusPage === 0);
+  next.classList.toggle("is-selected", menu.statusPage === lastPage);
+}
 function updatePager() { menu.optionsPanel.querySelector("[data-page-indicator]").textContent = `${menu.optionPage + 1}/${menu.optionPages.length}`; menu.optionNavButtons.find(button => button.dataset.optionNav === "next").textContent = menu.optionPage < menu.optionPages.length - 1 ? "NEXT" : "MAIN"; }
 function updateDebugPager() { menu.debugPanel.querySelector("[data-debug-indicator]").textContent = `${menu.debugPage + 1}/2`; menu.debugNavButtons.find(button => button.dataset.debugNav === "next").textContent = menu.debugPage === 0 ? "NEXT" : "MAIN"; }
 function updateSelection() { menu.commands.forEach((button, index) => { const unavailable = isCommandUnavailable(button); button.classList.toggle("is-selected", menu.view === "commands" && index === menu.commandIndex); button.classList.toggle("is-unavailable", unavailable); button.setAttribute("aria-disabled", String(unavailable)); }); menu.optionItems.forEach((item, index) => item.classList.toggle("is-selected", menu.view === "options" && index === menu.optionCursor)); menu.optionNavButtons.forEach((button, index) => button.classList.toggle("is-selected", menu.view === "options" && menu.optionCursor === menu.optionItems.length + index)); menu.debugItems.forEach((item, index) => item.classList.toggle("is-selected", menu.view === "debug" && index === menu.debugCursor)); menu.debugNavButtons.forEach((button, index) => button.classList.toggle("is-selected", menu.view === "debug" && menu.debugCursor === menu.debugItems.length + index)); updateOptionStates(); updateDebugStates(); }

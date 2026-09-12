@@ -112,8 +112,8 @@ test("restoration returns silently without an unrelated floor transition message
   assert.doesNotMatch(main, /say\("第100層\\n↓\\n奈落入口"\)/);
 });
 
-test("only main.js receives the new cache buster", () => {
+test("main.js keeps the current top-level cache buster without versioned module imports", () => {
   const html = read("index.html");
-  assert.match(html, /js\/main\.js\?v=20260911-1/);
+  assert.match(html, /js\/main\.js\?v=20260912-1/);
   assert.doesNotMatch(read("js/main.js"), /from\s+["'][^"']+\?v=/);
 });

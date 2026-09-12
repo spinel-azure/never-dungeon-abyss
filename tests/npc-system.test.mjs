@@ -500,8 +500,8 @@ test("status page three derives each active NPC display from current support bal
   const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
   const menuSource = readFileSync(new URL("../js/menu.js", import.meta.url), "utf8");
   const menuCss = readFileSync(new URL("../css/game-menu.css", import.meta.url), "utf8");
-  assert.match(html, /data-status-page="2"[\s\S]*data-npc-status-list[\s\S]*data-status-indicator>1\/3/);
-  assert.match(menuSource, /menu\.statusPage < 2[\s\S]*\$\{menu\.statusPage \+ 1\}\/3/);
+  assert.match(html, /data-status-page="2"[\s\S]*data-npc-status-list[\s\S]*data-status-quest-page[\s\S]*data-status-indicator>1\/4/);
+  assert.match(menuSource, /getStatusPageCount[\s\S]*renderStatusQuestPage[\s\S]*\$\{menu\.statusPage \+ 1\}\/\$\{pageCount\}/);
   assert.match(menuCss, /\.nde-stat-row output\{font-size:14px\}/);
 });
 
