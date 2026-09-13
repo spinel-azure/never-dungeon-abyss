@@ -190,10 +190,11 @@ test("SR lethal follow-up produces one victory with all enemies defeated", () =>
   assert.deepEqual(followUps(battle).map(e=>e.damage),[50]);
 });
 
-test("unassigned SR never enters generic chest pools across floors and jobs", () => {
+test("Follow-Up Plus is exclusive to B70-B79 purple chests", () => {
   for(let depth=1;depth<=100;depth++) for(const job of ["warrior","thief","priest","mage"]) for(let i=0;i<=100;i++) {
     const rng=()=>Math.min(i/100,0.999999);
-    for(const result of [rollBlackChestLoot(rng,depth,job),rollRedChestLoot(rng,depth),rollPurpleChestLoot(rng,depth)]) assert.notEqual(result.cardId,SR);
+    for(const result of [rollBlackChestLoot(rng,depth,job),rollRedChestLoot(rng,depth)]) assert.notEqual(result.cardId,SR);
+    if(depth < 70 || depth > 79) assert.notEqual(rollPurpleChestLoot(rng,depth).cardId,SR);
   }
 });
 test("protected auto and manual saves restore the new card and preserve C-only legacy saves", async () => {

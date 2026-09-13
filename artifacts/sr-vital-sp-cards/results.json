@@ -1,0 +1,100 @@
+[
+  {
+    "label": "pc",
+    "costs": [
+      {
+        "mode": "field",
+        "combined": false,
+        "expected": 7,
+        "used": {
+          "accepted": true,
+          "sp": 0
+        }
+      },
+      {
+        "mode": "field",
+        "combined": true,
+        "expected": 6,
+        "used": {
+          "accepted": true,
+          "sp": 0
+        }
+      },
+      {
+        "mode": "battle",
+        "combined": false,
+        "expected": 7,
+        "used": {
+          "accepted": true,
+          "sp": 0
+        }
+      },
+      {
+        "mode": "battle",
+        "combined": true,
+        "expected": 6,
+        "used": {
+          "accepted": true,
+          "sp": 0
+        }
+      }
+    ],
+    "purpleAwards": [
+      "sr_sp_saver_plus",
+      "sr_vital_abundance",
+      "sr_spirit_abundance",
+      "sr_follow_up_plus",
+      "sr_ability_boost"
+    ],
+    "errors": []
+  },
+  {
+    "label": "mobile",
+    "costs": [
+      {
+        "mode": "field",
+        "combined": false,
+        "expected": 7,
+        "used": {
+          "accepted": true,
+          "sp": 0
+        }
+      },
+      {
+        "mode": "field",
+        "combined": true,
+        "expected": 6,
+        "used": {
+          "accepted": true,
+          "sp": 0
+        }
+      },
+      {
+        "mode": "battle",
+        "combined": false,
+        "expected": 7,
+        "used": {
+          "accepted": true,
+          "sp": 0
+        }
+      },
+      {
+        "mode": "battle",
+        "combined": true,
+        "expected": 6,
+        "used": {
+          "accepted": true,
+          "sp": 0
+        }
+      }
+    ],
+    "purpleAwards": [
+      "sr_sp_saver_plus",
+      "sr_vital_abundance",
+      "sr_spirit_abundance",
+      "sr_follow_up_plus",
+      "sr_ability_boost"
+    ],
+    "errors": []
+  }
+]

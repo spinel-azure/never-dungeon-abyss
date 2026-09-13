@@ -259,6 +259,17 @@ export const PURPLE_CHEST_LOOT_TABLES = Object.freeze([
       Object.freeze({ upperBound: 0.99, cardId: "rare_mana_recovery", rarity: "R" }),
       Object.freeze({ upperBound: 1, cardId: "sr_ability_boost", rarity: "SR" })
     ])
+  }),
+  Object.freeze({
+    minDepth: 70,
+    maxDepth: 79,
+    entries: Object.freeze([
+      Object.freeze({ upperBound: 0.3, cardId: "sr_sp_saver_plus", rarity: "SR" }),
+      Object.freeze({ upperBound: 0.6, cardId: "sr_vital_abundance", rarity: "SR" }),
+      Object.freeze({ upperBound: 0.9, cardId: "sr_spirit_abundance", rarity: "SR" }),
+      Object.freeze({ upperBound: 0.95, cardId: "sr_follow_up_plus", rarity: "SR" }),
+      Object.freeze({ upperBound: 1, cardId: "sr_ability_boost", rarity: "SR" })
+    ])
   })
 ]);
 

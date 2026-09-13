@@ -134,6 +134,30 @@ const STANDARD_CARDS = [
     sellPrice: 100, buybackPrice: 1000, overflowGold: 100
   },
   {
+    id: "sr_vital_abundance", rarity: "SR", cost: 4,
+    name: "Vital Abundance", nameJa: "生命充実", concept: "MAX HP +50",
+    descriptionJa: "最大HPが50上昇する。",
+    category: "ability", effectId: "max_hp_up_legendary", effectValue: 50,
+    statBonus: Object.freeze({ maxHp: 50 }), iconId: "vital-heart",
+    maxOwned: 3, maxCopies: 3, sellPrice: 5000, buybackPrice: 50000, overflowGold: 5000
+  },
+  {
+    id: "sr_spirit_abundance", rarity: "SR", cost: 4,
+    name: "Spirit Abundance", nameJa: "精神充実", concept: "MAX SP +50",
+    descriptionJa: "最大SPが50上昇する。",
+    category: "ability", effectId: "max_sp_up_legendary", effectValue: 50,
+    statBonus: Object.freeze({ maxSp: 50 }), iconId: "mana-core",
+    maxOwned: 3, maxCopies: 3, sellPrice: 5000, buybackPrice: 50000, overflowGold: 5000
+  },
+  {
+    id: "sr_sp_saver_plus", rarity: "SR", cost: 4,
+    name: "SP Saver +", nameJa: "節約術＋", concept: "消費SP -3",
+    descriptionJa: "スキル・呪文・奇蹟の消費SPを3減らす。ただし消費SPは1未満にならない。",
+    category: "ability", effectId: "sp_cost_reduction", effectValue: 3,
+    statBonus: Object.freeze({ spCostReduction: 3 }), iconId: "mana-core",
+    maxOwned: 1, maxCopies: 1, sellPrice: 5000, buybackPrice: 50000, overflowGold: 5000
+  },
+  {
     id: "sr_follow_up_plus", rarity: "SR", cost: 4,
     name: "Follow-Up +", nameJa: "追撃＋", concept: "直接ダメージ後に固定50ダメージ",
     descriptionJa: "通常攻撃・物理スキル・攻撃呪文で\nダメージを与えた敵に、50の固定追加ダメージ。",
