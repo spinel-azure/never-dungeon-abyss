@@ -1,0 +1,114 @@
+[
+  {
+    "label": "pc",
+    "awards": [
+      {
+        "mode": "floor",
+        "id": "strong_healing_potion_medium"
+      },
+      {
+        "mode": "floor",
+        "id": "blue_pearl"
+      },
+      {
+        "mode": "floor",
+        "id": "crystal_coral"
+      },
+      {
+        "mode": "floor",
+        "id": "sunken_kingdom_coin_pouch"
+      },
+      {
+        "mode": "drop",
+        "id": "strong_healing_potion_medium"
+      },
+      {
+        "mode": "drop",
+        "id": "blue_pearl"
+      },
+      {
+        "mode": "drop",
+        "id": "crystal_coral"
+      },
+      {
+        "mode": "drop",
+        "id": "sunken_kingdom_coin_pouch"
+      }
+    ],
+    "sales": [
+      {
+        "id": "blue_pearl",
+        "accepted": true,
+        "value": 5000
+      },
+      {
+        "id": "crystal_coral",
+        "accepted": true,
+        "value": 10000
+      },
+      {
+        "id": "sunken_kingdom_coin_pouch",
+        "accepted": true,
+        "value": 20000
+      }
+    ],
+    "oldFloor": 0,
+    "errors": []
+  },
+  {
+    "label": "mobile",
+    "awards": [
+      {
+        "mode": "floor",
+        "id": "strong_healing_potion_medium"
+      },
+      {
+        "mode": "floor",
+        "id": "blue_pearl"
+      },
+      {
+        "mode": "floor",
+        "id": "crystal_coral"
+      },
+      {
+        "mode": "floor",
+        "id": "sunken_kingdom_coin_pouch"
+      },
+      {
+        "mode": "drop",
+        "id": "strong_healing_potion_medium"
+      },
+      {
+        "mode": "drop",
+        "id": "blue_pearl"
+      },
+      {
+        "mode": "drop",
+        "id": "crystal_coral"
+      },
+      {
+        "mode": "drop",
+        "id": "sunken_kingdom_coin_pouch"
+      }
+    ],
+    "sales": [
+      {
+        "id": "blue_pearl",
+        "accepted": true,
+        "value": 5000
+      },
+      {
+        "id": "crystal_coral",
+        "accepted": true,
+        "value": 10000
+      },
+      {
+        "id": "sunken_kingdom_coin_pouch",
+        "accepted": true,
+        "value": 20000
+      }
+    ],
+    "oldFloor": 0,
+    "errors": []
+  }
+]

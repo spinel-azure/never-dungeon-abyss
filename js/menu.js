@@ -448,6 +448,11 @@ export function getInventoryItemUnavailableReason(item, character, context = men
   return "";
 }
 
+export function getInventoryItemDescription(item, character, context = menu.getInventoryContext()) {
+  return item?.category === "material"
+    ? item.description
+    : getInventoryItemUnavailableReason(item, character, context) || item.description;
+}
 function unavailableItemReason(item, character) {
   return getInventoryItemUnavailableReason(item, character);
 }
@@ -1104,7 +1109,7 @@ function renderInventory() {
   if (!selected) description.textContent = menu.inventoryPurpose === "sell" ? "売却できる所持品がありません。" : menu.inventoryTab === "keyItems" ? "貴重品を所持していません。" : "所持品がありません。";
   else if (menu.inventoryPurpose === "sell") description.textContent = inventorySaleDescription(selected, character);
   else if (menu.inventoryPurpose === "buy") description.textContent = selected.item ? `${selected.item.description} / 購入価格 ${inventoryBuyPrice(selected)}G / 所持数 ${inventoryOwnedItemCount(selected.item.id)}／${selected.item.maxOwned || 99} / 倉庫 ${inventoryWarehouseItemCount(selected.item.id)} / Aボタン：購入` : `${equipmentEffectLabels(selected.shopEquipment).join(" / ")}${incompatibleEquipmentJobLabel(selected.shopEquipment, character)} / 購入価格 ${inventoryBuyPrice(selected)}G / Aボタン：購入`;
-  else if (selected.item) description.textContent = unavailableItemReason(selected.item, character) || selected.item.description;
+  else if (selected.item) description.textContent = getInventoryItemDescription(selected.item, character);
   else if (selected.keyItem) description.textContent = selected.keyItem.description || "大切な貴重品です。";
   else if (!selected.instance) description.textContent = "この装備部位を空にします。";
   else { const definition = getEquipmentInstanceDefinition(selected.instance); const requirements = Object.entries(definition?.requirements || {}).map(([key, value]) => `${key.toUpperCase()} ${value}以上`).join(" / "); const effects = equipmentEffectLabels(definition); description.textContent = `${EQUIPMENT_SLOT_LABELS[selected.instance.slot]} / ${effects.join(" / ")}${effects.length ? " / " : ""}${requirements ? `装備条件：${requirements}` : "装備条件なし"}${incompatibleEquipmentJobLabel(definition, character)}${selected.instance.locked ? " / ロック中" : ""}${selected.instance.curseKnown ? " / 呪われているため外せません。" : ""}`; }

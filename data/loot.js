@@ -207,6 +207,14 @@ export function rollRedChestLoot(rng = Math.random, depth = 1) {
   if (floor >= 41 && floor <= 49) return rollFrostRedChestLoot(roll, rng);
   if (floor >= 50 && floor <= 59) return rollForestRedChestLoot(roll, floor, rng);
   if (floor >= 60 && floor <= 69) return rollDesertRedChestLoot(roll, rng);
+  if (floor === 70) {
+    const itemId = roll < 0.5 ? "strong_healing_potion_medium"
+      : roll < 0.8 ? "blue_pearl"
+      : roll < 0.95 ? "crystal_coral"
+      : "sunken_kingdom_coin_pouch";
+    return { kind: "item", itemId, amount: 1,
+      unidentifiedName: itemId === "strong_healing_potion_medium" ? "？薬" : "？アイテム" };
+  }
   if (floor >= 80 && floor <= 89) return rollCrystalRedChestLoot(roll, floor, rng);
   const earlyFloor = Number(depth) >= 1 && Number(depth) <= 9;
   if (earlyFloor && roll < 0.4) return { kind: "gold", amount: rollRedChestGold(rng) };

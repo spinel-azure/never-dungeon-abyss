@@ -333,6 +333,27 @@ export const ITEMS = Object.freeze([
     effects: Object.freeze([{ id: "heal_hp_rate", value: 0.5 }]),
     description: "最大HPの50％を回復する。B70F到達後に商店へ入荷する。", maxOwned: 99,
     iconId: "healing-potion", version: 1, shopUnlockDepth: 70
+  }),
+  Object.freeze({
+    number: 51, id: "blue_pearl", name: "蒼真珠", category: "material",
+    buyPrice: 0, sellPrice: 5000, source: "treasure", usableIn: Object.freeze([]),
+    effects: Object.freeze([]),
+    description: "《換金アイテム》\n激流の底で育まれた青い真珠。澄んだ水のような光沢を持つ。",
+    maxOwned: 99, repurchasable: false, iconId: "blue-pearl", version: 1
+  }),
+  Object.freeze({
+    number: 52, id: "crystal_coral", name: "水晶珊瑚", category: "material",
+    buyPrice: 0, sellPrice: 10000, source: "treasure", usableIn: Object.freeze([]),
+    effects: Object.freeze([]),
+    description: "《換金アイテム》\n水晶のように透き通った希少な珊瑚。繊細な枝ぶりが好事家に珍重される。",
+    maxOwned: 99, repurchasable: false, iconId: "crystal-coral", version: 1
+  }),
+  Object.freeze({
+    number: 53, id: "sunken_kingdom_coin_pouch", name: "沈没王国の金貨袋", category: "material",
+    buyPrice: 0, sellPrice: 20000, source: "treasure", usableIn: Object.freeze([]),
+    effects: Object.freeze([]),
+    description: "《換金アイテム》\n水底に沈んだ王国の金貨が詰まった袋。今は失われた王の横顔が刻まれている。",
+    maxOwned: 99, repurchasable: false, iconId: "sunken-kingdom-coin-pouch", version: 1
   })
 ]);
 
