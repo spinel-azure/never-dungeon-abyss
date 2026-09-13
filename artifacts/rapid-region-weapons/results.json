@@ -1,0 +1,162 @@
+[
+  {
+    "label": "pc",
+    "job": "warrior",
+    "award": {
+      "kind": "equipment",
+      "equipmentId": "current_cleaving_longsword",
+      "slot": "rightArmId",
+      "enhancement": 3,
+      "unidentifiedName": "？武器"
+    },
+    "mimicAward": {
+      "kind": "equipment",
+      "equipmentId": "current_cleaving_longsword",
+      "slot": "rightArmId",
+      "enhancement": 3,
+      "unidentifiedName": "？武器"
+    },
+    "description": "RIGHT ARM / ATK +27 / 1回攻撃 / STR +7 / 装備条件なし",
+    "errors": []
+  },
+  {
+    "label": "pc",
+    "job": "thief",
+    "award": {
+      "kind": "equipment",
+      "equipmentId": "whirlpool_dagger",
+      "slot": "rightArmId",
+      "enhancement": 3,
+      "unidentifiedName": "？武器"
+    },
+    "mimicAward": {
+      "kind": "equipment",
+      "equipmentId": "whirlpool_dagger",
+      "slot": "rightArmId",
+      "enhancement": 3,
+      "unidentifiedName": "？武器"
+    },
+    "description": "RIGHT ARM / ATK +17 / 2回攻撃 / DEX +7 / 装備条件なし",
+    "errors": []
+  },
+  {
+    "label": "pc",
+    "job": "priest",
+    "award": {
+      "kind": "equipment",
+      "equipmentId": "tide_piercing_mace",
+      "slot": "rightArmId",
+      "enhancement": 3,
+      "unidentifiedName": "？武器"
+    },
+    "mimicAward": {
+      "kind": "equipment",
+      "equipmentId": "tide_piercing_mace",
+      "slot": "rightArmId",
+      "enhancement": 3,
+      "unidentifiedName": "？武器"
+    },
+    "description": "RIGHT ARM / ATK +22 / 1回攻撃 / DEF貫通 45% / LUC +6 / 装備条件なし",
+    "errors": []
+  },
+  {
+    "label": "pc",
+    "job": "mage",
+    "award": {
+      "kind": "equipment",
+      "equipmentId": "deep_current_staff",
+      "slot": "rightArmId",
+      "enhancement": 3,
+      "unidentifiedName": "？両手杖"
+    },
+    "mimicAward": {
+      "kind": "equipment",
+      "equipmentId": "deep_current_staff",
+      "slot": "rightArmId",
+      "enhancement": 3,
+      "unidentifiedName": "？両手杖"
+    },
+    "description": "RIGHT ARM / ATK +7 / 1回攻撃 / INT +14 / MAXSP +15 / 装備条件なし",
+    "errors": []
+  },
+  {
+    "label": "mobile",
+    "job": "warrior",
+    "award": {
+      "kind": "equipment",
+      "equipmentId": "current_cleaving_longsword",
+      "slot": "rightArmId",
+      "enhancement": 3,
+      "unidentifiedName": "？武器"
+    },
+    "mimicAward": {
+      "kind": "equipment",
+      "equipmentId": "current_cleaving_longsword",
+      "slot": "rightArmId",
+      "enhancement": 3,
+      "unidentifiedName": "？武器"
+    },
+    "description": "RIGHT ARM / ATK +27 / 1回攻撃 / STR +7 / 装備条件なし",
+    "errors": []
+  },
+  {
+    "label": "mobile",
+    "job": "thief",
+    "award": {
+      "kind": "equipment",
+      "equipmentId": "whirlpool_dagger",
+      "slot": "rightArmId",
+      "enhancement": 3,
+      "unidentifiedName": "？武器"
+    },
+    "mimicAward": {
+      "kind": "equipment",
+      "equipmentId": "whirlpool_dagger",
+      "slot": "rightArmId",
+      "enhancement": 3,
+      "unidentifiedName": "？武器"
+    },
+    "description": "RIGHT ARM / ATK +17 / 2回攻撃 / DEX +7 / 装備条件なし",
+    "errors": []
+  },
+  {
+    "label": "mobile",
+    "job": "priest",
+    "award": {
+      "kind": "equipment",
+      "equipmentId": "tide_piercing_mace",
+      "slot": "rightArmId",
+      "enhancement": 3,
+      "unidentifiedName": "？武器"
+    },
+    "mimicAward": {
+      "kind": "equipment",
+      "equipmentId": "tide_piercing_mace",
+      "slot": "rightArmId",
+      "enhancement": 3,
+      "unidentifiedName": "？武器"
+    },
+    "description": "RIGHT ARM / ATK +22 / 1回攻撃 / DEF貫通 45% / LUC +6 / 装備条件なし",
+    "errors": []
+  },
+  {
+    "label": "mobile",
+    "job": "mage",
+    "award": {
+      "kind": "equipment",
+      "equipmentId": "deep_current_staff",
+      "slot": "rightArmId",
+      "enhancement": 3,
+      "unidentifiedName": "？両手杖"
+    },
+    "mimicAward": {
+      "kind": "equipment",
+      "equipmentId": "deep_current_staff",
+      "slot": "rightArmId",
+      "enhancement": 3,
+      "unidentifiedName": "？両手杖"
+    },
+    "description": "RIGHT ARM / ATK +7 / 1回攻撃 / INT +14 / MAXSP +15 / 装備条件なし",
+    "errors": []
+  }
+]

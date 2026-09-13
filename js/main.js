@@ -2930,6 +2930,10 @@ import {
     pendingEncounter = null;
     startBgm(selectBattleBgm(enemyData));
     const mimic = createEnemyCombatant(scaleBlackChestMimic(enemyData, currentDepth));
+    if (currentDepth >= 70 && currentDepth <= 78) {
+      mimic.depth = currentDepth;
+      mimic.job = character.job;
+    }
     const started = startBattle(mimic, {
       playStartSe: true,
       ambush: false,

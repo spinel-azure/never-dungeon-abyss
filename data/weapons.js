@@ -294,6 +294,40 @@ export const WEAPONS = Object.freeze({
     element: "physical", allowedJobs: Object.freeze(["mage"]), twoHanded: true, sellPrice: 3000,
     sellPriceByEnhancement: Object.freeze([3000, 3600, 4500, 6000])
   }),
+  current_cleaving_longsword: Object.freeze({
+    id: "current_cleaving_longsword", name: "断流の長剣", type: "longsword", attack: 22,
+    attackByEnhancement: Object.freeze([22, 23, 25, 27]),
+    statBonuses: Object.freeze({ str: 5 }),
+    statBonusesByEnhancement: Object.freeze([Object.freeze({ str: 5 }), Object.freeze({ str: 5 }), Object.freeze({ str: 6 }), Object.freeze({ str: 7 })]),
+    element: "physical", allowedJobs: Object.freeze(["warrior"]), sellPrice: 5000,
+    sellPriceByEnhancement: Object.freeze([5000, 6000, 7500, 10000])
+  }),
+  whirlpool_dagger: Object.freeze({
+    id: "whirlpool_dagger", name: "渦潮の短剣", type: "dagger", attack: 14,
+    attackByEnhancement: Object.freeze([14, 15, 16, 17]),
+    statBonuses: Object.freeze({ dex: 5 }),
+    statBonusesByEnhancement: Object.freeze([Object.freeze({ dex: 5 }), Object.freeze({ dex: 5 }), Object.freeze({ dex: 6 }), Object.freeze({ dex: 7 })]),
+    element: "physical", allowedJobs: Object.freeze(["thief"]), sellPrice: 5000,
+    sellPriceByEnhancement: Object.freeze([5000, 6000, 7500, 10000])
+  }),
+  tide_piercing_mace: Object.freeze({
+    id: "tide_piercing_mace", name: "穿潮のメイス", type: "blunt", attack: 18,
+    attackByEnhancement: Object.freeze([18, 19, 20, 22]),
+    statBonuses: Object.freeze({ luc: 4 }),
+    statBonusesByEnhancement: Object.freeze([Object.freeze({ luc: 4 }), Object.freeze({ luc: 4 }), Object.freeze({ luc: 5 }), Object.freeze({ luc: 6 })]),
+    // Added to the blunt type's standard 25%: total 35 / 35 / 40 / 45%.
+    penetrationByEnhancement: Object.freeze([0.1, 0.1, 0.15, 0.2]),
+    element: "physical", allowedJobs: Object.freeze(["priest"]), sellPrice: 5000,
+    sellPriceByEnhancement: Object.freeze([5000, 6000, 7500, 10000])
+  }),
+  deep_current_staff: Object.freeze({
+    id: "deep_current_staff", name: "深流の大杖", type: "staff", attack: 6,
+    attackByEnhancement: Object.freeze([6, 6, 7, 7]),
+    statBonuses: Object.freeze({ int: 11, maxSp: 5 }),
+    statBonusesByEnhancement: Object.freeze([Object.freeze({ int: 11, maxSp: 5 }), Object.freeze({ int: 12, maxSp: 5 }), Object.freeze({ int: 13, maxSp: 10 }), Object.freeze({ int: 14, maxSp: 15 })]),
+    element: "physical", allowedJobs: Object.freeze(["mage"]), twoHanded: true, sellPrice: 5000,
+    sellPriceByEnhancement: Object.freeze([5000, 6000, 7500, 10000])
+  }),
   crystal_warhammer: Object.freeze({
     id: "crystal_warhammer", name: "砕晶の戦槌", type: "greatsword", physicalDamageType: "blunt", attack: 26,
     attackByEnhancement: Object.freeze([26, 28, 30, 33]),

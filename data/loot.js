@@ -82,6 +82,21 @@ export function rollGoldChestLoot(character, depth = 50) {
 export function rollBlackChestLoot(rng = Math.random, depth = 6, job = null) {
   const table = getBlackChestLootTable(depth);
   const roll = normalizedRoll(rng);
+  if (Number(depth) >= 70 && Number(depth) <= 78) {
+    const weaponIds = ["current_cleaving_longsword", "whirlpool_dagger", "tide_piercing_mace", "deep_current_staff"];
+    const jobWeaponIds = {
+      warrior: "current_cleaving_longsword", thief: "whirlpool_dagger",
+      priest: "tide_piercing_mace", mage: "deep_current_staff"
+    };
+    const equipmentId = Number(depth) === 78 && jobWeaponIds[job]
+      ? jobWeaponIds[job]
+      : weaponIds[(Math.floor(Number(depth)) - 70) % weaponIds.length];
+    return {
+      kind: "equipment", equipmentId, slot: "rightArmId",
+      enhancement: rollEnhancement(MID_RED_CHEST_WEAPON_ENHANCEMENT_RATES, rng) + 1,
+      unidentifiedName: equipmentId === "deep_current_staff" ? "？両手杖" : "？武器"
+    };
+  }
   if (Number(depth) >= 80 && Number(depth) <= 88) {
     const weaponIds = ["crystal_warhammer", "resonant_katar", "amethyst_flail", "resonance_staff"];
     const jobWeaponIds = {

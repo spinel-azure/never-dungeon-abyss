@@ -16,6 +16,7 @@ const EXPECTED_TWO_HANDED_WEAPON_IDS = Object.freeze([
   "anguish_staff",
   "winterstar_staff",
   "ancient_tree_staff",
+  "deep_current_staff",
   "crystal_warhammer",
   "resonance_staff",
   "musashi_blade",
