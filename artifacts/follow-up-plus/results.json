@@ -1,0 +1,2008 @@
+[
+  {
+    "label": "pc",
+    "errors": [],
+    "result": {
+      "outcome": "victory",
+      "follow": [
+        60
+      ],
+      "before": {
+        "name": "FOLLOW UP QA",
+        "job": "mage",
+        "jobLabel": "MAGE",
+        "level": 40,
+        "deckCost": 15,
+        "cards": {
+          "ownedCardIds": [
+            "common_follow_up",
+            "sr_follow_up_plus"
+          ],
+          "ownedCardCounts": {
+            "common_follow_up": 1,
+            "sr_follow_up_plus": 1
+          },
+          "deckSlots": [
+            "common_follow_up",
+            "sr_follow_up_plus",
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "inventory": {
+          "counts": {}
+        },
+        "keyItems": {
+          "owned": {},
+          "acquisitionOrder": []
+        },
+        "warehouse": {
+          "itemStacks": [],
+          "equipmentInstances": []
+        },
+        "lootBag": {
+          "items": {},
+          "cards": {},
+          "equipmentInstances": [],
+          "gold": 0
+        },
+        "quests": {
+          "active": {},
+          "completedQuestIds": []
+        },
+        "eventFlags": {
+          "queen_regalia_returned": false,
+          "royal_cat_medal_awarded": false,
+          "queen_blessing_unlocked": false,
+          "ending_story_completed": false,
+          "ending_credits_pending": false,
+          "ending_credits_watched": false
+        },
+        "tavernRumorNotifications": {
+          "pendingIds": [
+            "rumor_001:base"
+          ],
+          "notifiedIds": []
+        },
+        "guildQuestNotifications": {
+          "pendingIds": [],
+          "notifiedIds": []
+        },
+        "adventureStats": {
+          "playTimeSeconds": 0,
+          "playTimeEra": "mvp",
+          "innStayCount": 0,
+          "shopPurchaseCount": 0,
+          "shopPurchaseGold": 0,
+          "templeDonationCount": 0,
+          "templeDonationGold": 0
+        },
+        "marathonChallenge": {
+          "active": false,
+          "currentDepth": 0
+        },
+        "longMarchChallenge": {
+          "active": false,
+          "currentDepth": 0
+        },
+        "finalLongMarchChallenge": {
+          "active": false,
+          "currentDepth": 0
+        },
+        "npcSystem": {
+          "registeredIds": [],
+          "activeIds": [],
+          "records": {},
+          "renewal": null,
+          "expeditionMaxDepth": 0
+        },
+        "playerCharge": {
+          "value": 0,
+          "cooldown": 0
+        },
+        "firstDungeonTutorialSeen": false,
+        "deckTutorialSeen": true,
+        "lootBagTutorialSeen": true,
+        "crystalFloorStepCount": 0,
+        "herbicideTrialUses": 0,
+        "cardPassiveStepCount": 0,
+        "highestDungeonDepthReached": 1,
+        "gold": 0,
+        "experience": 0,
+        "carriedExperience": 0,
+        "pendingExperienceSettlement": null,
+        "hp": 15,
+        "maxHp": 104,
+        "sp": 30,
+        "maxSp": 145,
+        "baseStats": {
+          "str": 2,
+          "int": 8,
+          "agi": 5,
+          "dex": 5,
+          "luc": 4
+        },
+        "equipmentStatBonuses": {
+          "int": 2,
+          "def": 3
+        },
+        "cardStatBonuses": {},
+        "def": 0,
+        "equipment": {
+          "weaponId": "oak_staff",
+          "rightArmId": "oak_staff",
+          "leftArmId": "beginner_grimoire",
+          "headId": "mage_hat",
+          "bodyId": "mage_robe",
+          "footId": "cloth_shoes",
+          "accessoryId": null
+        },
+        "equipmentInventory": {
+          "instances": [
+            {
+              "instanceId": "eq-000001",
+              "equipmentId": "oak_staff",
+              "slot": "rightArmId",
+              "acquiredOrder": 1,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000002",
+              "equipmentId": "beginner_grimoire",
+              "slot": "leftArmId",
+              "acquiredOrder": 2,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000003",
+              "equipmentId": "mage_hat",
+              "slot": "headId",
+              "acquiredOrder": 3,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000004",
+              "equipmentId": "mage_robe",
+              "slot": "bodyId",
+              "acquiredOrder": 4,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000005",
+              "equipmentId": "cloth_shoes",
+              "slot": "footId",
+              "acquiredOrder": 5,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            }
+          ],
+          "nextOrder": 6
+        },
+        "equippedInstanceIds": {
+          "rightArmId": "eq-000001",
+          "leftArmId": "eq-000002",
+          "headId": "eq-000003",
+          "bodyId": "eq-000004",
+          "footId": "eq-000005",
+          "accessoryId": null
+        },
+        "compendium": {
+          "monsters": {},
+          "items": {},
+          "keyItems": {},
+          "equipment": {
+            "oak_staff": {
+              "discovered": true,
+              "obtained": true
+            },
+            "beginner_grimoire": {
+              "discovered": true,
+              "obtained": true
+            },
+            "mage_hat": {
+              "discovered": true,
+              "obtained": true
+            },
+            "mage_robe": {
+              "discovered": true,
+              "obtained": true
+            },
+            "cloth_shoes": {
+              "discovered": true,
+              "obtained": true
+            }
+          }
+        },
+        "equipmentBuyback": [],
+        "itemBuyback": [],
+        "skillIds": [
+          "magic_wall",
+          "illusion",
+          "fireball",
+          "ice_bind",
+          "lightning_pierce",
+          "flame_sweep",
+          "mana_spring",
+          "mana_amplification",
+          "lightning_bolt",
+          "magic_focus",
+          "staff_light",
+          "wisdom_to_power"
+        ],
+        "statuses": [],
+        "condition": "GOOD",
+        "alive": true,
+        "bleedingStepCount": 0
+      },
+      "after": {
+        "name": "FOLLOW UP QA",
+        "job": "mage",
+        "jobLabel": "MAGE",
+        "level": 40,
+        "deckCost": 15,
+        "cards": {
+          "ownedCardIds": [
+            "common_follow_up",
+            "sr_follow_up_plus"
+          ],
+          "ownedCardCounts": {
+            "common_follow_up": 1,
+            "sr_follow_up_plus": 1
+          },
+          "deckSlots": [
+            "common_follow_up",
+            "sr_follow_up_plus",
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "inventory": {
+          "counts": {}
+        },
+        "keyItems": {
+          "owned": {},
+          "acquisitionOrder": []
+        },
+        "warehouse": {
+          "itemStacks": [],
+          "equipmentInstances": []
+        },
+        "lootBag": {
+          "items": {},
+          "cards": {},
+          "equipmentInstances": [],
+          "gold": 7
+        },
+        "quests": {
+          "active": {},
+          "completedQuestIds": []
+        },
+        "eventFlags": {
+          "queen_regalia_returned": false,
+          "royal_cat_medal_awarded": false,
+          "queen_blessing_unlocked": false,
+          "ending_story_completed": false,
+          "ending_credits_pending": false,
+          "ending_credits_watched": false
+        },
+        "tavernRumorNotifications": {
+          "pendingIds": [
+            "rumor_001:base"
+          ],
+          "notifiedIds": []
+        },
+        "guildQuestNotifications": {
+          "pendingIds": [],
+          "notifiedIds": []
+        },
+        "adventureStats": {
+          "playTimeSeconds": 0.6343000000119209,
+          "playTimeEra": "mvp",
+          "innStayCount": 0,
+          "shopPurchaseCount": 0,
+          "shopPurchaseGold": 0,
+          "templeDonationCount": 0,
+          "templeDonationGold": 0
+        },
+        "marathonChallenge": {
+          "active": false,
+          "currentDepth": 0
+        },
+        "longMarchChallenge": {
+          "active": false,
+          "currentDepth": 0
+        },
+        "finalLongMarchChallenge": {
+          "active": false,
+          "currentDepth": 0
+        },
+        "npcSystem": {
+          "registeredIds": [],
+          "activeIds": [],
+          "records": {},
+          "renewal": null,
+          "expeditionMaxDepth": 0
+        },
+        "playerCharge": {
+          "value": 15,
+          "cooldown": 0
+        },
+        "firstDungeonTutorialSeen": false,
+        "deckTutorialSeen": true,
+        "lootBagTutorialSeen": true,
+        "crystalFloorStepCount": 0,
+        "herbicideTrialUses": 0,
+        "cardPassiveStepCount": 0,
+        "highestDungeonDepthReached": 1,
+        "gold": 0,
+        "experience": 0,
+        "carriedExperience": 10,
+        "pendingExperienceSettlement": null,
+        "hp": 15,
+        "maxHp": 104,
+        "sp": 27,
+        "maxSp": 145,
+        "baseStats": {
+          "str": 2,
+          "int": 8,
+          "agi": 5,
+          "dex": 5,
+          "luc": 4
+        },
+        "equipmentStatBonuses": {
+          "int": 2,
+          "def": 3
+        },
+        "cardStatBonuses": {},
+        "def": 0,
+        "equipment": {
+          "weaponId": "oak_staff",
+          "rightArmId": "oak_staff",
+          "leftArmId": "beginner_grimoire",
+          "headId": "mage_hat",
+          "bodyId": "mage_robe",
+          "footId": "cloth_shoes",
+          "accessoryId": null
+        },
+        "equipmentInventory": {
+          "instances": [
+            {
+              "instanceId": "eq-000001",
+              "equipmentId": "oak_staff",
+              "slot": "rightArmId",
+              "acquiredOrder": 1,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000002",
+              "equipmentId": "beginner_grimoire",
+              "slot": "leftArmId",
+              "acquiredOrder": 2,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000003",
+              "equipmentId": "mage_hat",
+              "slot": "headId",
+              "acquiredOrder": 3,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000004",
+              "equipmentId": "mage_robe",
+              "slot": "bodyId",
+              "acquiredOrder": 4,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000005",
+              "equipmentId": "cloth_shoes",
+              "slot": "footId",
+              "acquiredOrder": 5,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            }
+          ],
+          "nextOrder": 6
+        },
+        "equippedInstanceIds": {
+          "rightArmId": "eq-000001",
+          "leftArmId": "eq-000002",
+          "headId": "eq-000003",
+          "bodyId": "eq-000004",
+          "footId": "eq-000005",
+          "accessoryId": null
+        },
+        "compendium": {
+          "monsters": {
+            "abyss_rat": {
+              "encountered": true,
+              "defeated": true,
+              "defeatCount": 1,
+              "discoveredDropIds": []
+            }
+          },
+          "items": {},
+          "keyItems": {},
+          "equipment": {
+            "oak_staff": {
+              "discovered": true,
+              "obtained": true
+            },
+            "beginner_grimoire": {
+              "discovered": true,
+              "obtained": true
+            },
+            "mage_hat": {
+              "discovered": true,
+              "obtained": true
+            },
+            "mage_robe": {
+              "discovered": true,
+              "obtained": true
+            },
+            "cloth_shoes": {
+              "discovered": true,
+              "obtained": true
+            }
+          }
+        },
+        "equipmentBuyback": [],
+        "itemBuyback": [],
+        "skillIds": [
+          "magic_wall",
+          "illusion",
+          "fireball",
+          "ice_bind",
+          "lightning_pierce",
+          "flame_sweep",
+          "mana_spring",
+          "mana_amplification",
+          "lightning_bolt",
+          "magic_focus",
+          "staff_light",
+          "wisdom_to_power"
+        ],
+        "statuses": [],
+        "condition": "GOOD",
+        "alive": true,
+        "bleedingStepCount": 0
+      },
+      "saved": {
+        "name": "FOLLOW UP QA",
+        "job": "mage",
+        "jobLabel": "MAGE",
+        "level": 40,
+        "deckCost": 15,
+        "cards": {
+          "ownedCardIds": [
+            "common_follow_up",
+            "sr_follow_up_plus"
+          ],
+          "ownedCardCounts": {
+            "common_follow_up": 1,
+            "sr_follow_up_plus": 1
+          },
+          "deckSlots": [
+            "common_follow_up",
+            "sr_follow_up_plus",
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "inventory": {
+          "counts": {}
+        },
+        "keyItems": {
+          "owned": {},
+          "acquisitionOrder": []
+        },
+        "warehouse": {
+          "itemStacks": [],
+          "equipmentInstances": []
+        },
+        "lootBag": {
+          "items": {},
+          "cards": {},
+          "equipmentInstances": [],
+          "gold": 7
+        },
+        "quests": {
+          "active": {},
+          "completedQuestIds": []
+        },
+        "eventFlags": {
+          "queen_regalia_returned": false,
+          "royal_cat_medal_awarded": false,
+          "queen_blessing_unlocked": false,
+          "ending_story_completed": false,
+          "ending_credits_pending": false,
+          "ending_credits_watched": false
+        },
+        "tavernRumorNotifications": {
+          "pendingIds": [
+            "rumor_001:base"
+          ],
+          "notifiedIds": []
+        },
+        "guildQuestNotifications": {
+          "pendingIds": [],
+          "notifiedIds": []
+        },
+        "adventureStats": {
+          "playTimeSeconds": 0.6941000000238418,
+          "playTimeEra": "mvp",
+          "innStayCount": 0,
+          "shopPurchaseCount": 0,
+          "shopPurchaseGold": 0,
+          "templeDonationCount": 0,
+          "templeDonationGold": 0
+        },
+        "marathonChallenge": {
+          "active": false,
+          "currentDepth": 0
+        },
+        "longMarchChallenge": {
+          "active": false,
+          "currentDepth": 0
+        },
+        "finalLongMarchChallenge": {
+          "active": false,
+          "currentDepth": 0
+        },
+        "npcSystem": {
+          "registeredIds": [],
+          "activeIds": [],
+          "records": {},
+          "renewal": null,
+          "expeditionMaxDepth": 0
+        },
+        "playerCharge": {
+          "value": 15,
+          "cooldown": 0
+        },
+        "firstDungeonTutorialSeen": false,
+        "deckTutorialSeen": true,
+        "lootBagTutorialSeen": true,
+        "crystalFloorStepCount": 0,
+        "herbicideTrialUses": 0,
+        "cardPassiveStepCount": 0,
+        "highestDungeonDepthReached": 1,
+        "gold": 0,
+        "experience": 0,
+        "carriedExperience": 10,
+        "pendingExperienceSettlement": null,
+        "hp": 15,
+        "maxHp": 104,
+        "sp": 27,
+        "maxSp": 145,
+        "baseStats": {
+          "str": 2,
+          "int": 8,
+          "agi": 5,
+          "dex": 5,
+          "luc": 4
+        },
+        "equipmentStatBonuses": {
+          "int": 2,
+          "def": 3
+        },
+        "cardStatBonuses": {},
+        "def": 0,
+        "equipment": {
+          "weaponId": "oak_staff",
+          "rightArmId": "oak_staff",
+          "leftArmId": "beginner_grimoire",
+          "headId": "mage_hat",
+          "bodyId": "mage_robe",
+          "footId": "cloth_shoes",
+          "accessoryId": null
+        },
+        "equipmentInventory": {
+          "instances": [
+            {
+              "instanceId": "eq-000001",
+              "equipmentId": "oak_staff",
+              "slot": "rightArmId",
+              "acquiredOrder": 1,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000002",
+              "equipmentId": "beginner_grimoire",
+              "slot": "leftArmId",
+              "acquiredOrder": 2,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000003",
+              "equipmentId": "mage_hat",
+              "slot": "headId",
+              "acquiredOrder": 3,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000004",
+              "equipmentId": "mage_robe",
+              "slot": "bodyId",
+              "acquiredOrder": 4,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000005",
+              "equipmentId": "cloth_shoes",
+              "slot": "footId",
+              "acquiredOrder": 5,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            }
+          ],
+          "nextOrder": 6
+        },
+        "equippedInstanceIds": {
+          "rightArmId": "eq-000001",
+          "leftArmId": "eq-000002",
+          "headId": "eq-000003",
+          "bodyId": "eq-000004",
+          "footId": "eq-000005",
+          "accessoryId": null
+        },
+        "compendium": {
+          "monsters": {
+            "abyss_rat": {
+              "encountered": true,
+              "defeated": true,
+              "defeatCount": 1,
+              "discoveredDropIds": []
+            }
+          },
+          "items": {},
+          "keyItems": {},
+          "equipment": {
+            "oak_staff": {
+              "discovered": true,
+              "obtained": true
+            },
+            "beginner_grimoire": {
+              "discovered": true,
+              "obtained": true
+            },
+            "mage_hat": {
+              "discovered": true,
+              "obtained": true
+            },
+            "mage_robe": {
+              "discovered": true,
+              "obtained": true
+            },
+            "cloth_shoes": {
+              "discovered": true,
+              "obtained": true
+            }
+          }
+        },
+        "equipmentBuyback": [],
+        "itemBuyback": [],
+        "skillIds": [
+          "magic_wall",
+          "illusion",
+          "fireball",
+          "ice_bind",
+          "lightning_pierce",
+          "flame_sweep",
+          "mana_spring",
+          "mana_amplification",
+          "lightning_bolt",
+          "magic_focus",
+          "staff_light",
+          "wisdom_to_power"
+        ],
+        "statuses": [],
+        "condition": "GOOD",
+        "alive": true,
+        "bleedingStepCount": 0
+      },
+      "loaded": {
+        "name": "FOLLOW UP QA",
+        "job": "mage",
+        "jobLabel": "MAGE",
+        "level": 40,
+        "deckCost": 15,
+        "cards": {
+          "ownedCardIds": [
+            "common_follow_up",
+            "sr_follow_up_plus"
+          ],
+          "ownedCardCounts": {
+            "common_follow_up": 1,
+            "sr_follow_up_plus": 1
+          },
+          "deckSlots": [
+            "common_follow_up",
+            "sr_follow_up_plus",
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "inventory": {
+          "counts": {}
+        },
+        "keyItems": {
+          "owned": {},
+          "acquisitionOrder": []
+        },
+        "warehouse": {
+          "itemStacks": [],
+          "equipmentInstances": []
+        },
+        "lootBag": {
+          "items": {},
+          "cards": {},
+          "equipmentInstances": [],
+          "gold": 7
+        },
+        "quests": {
+          "active": {},
+          "completedQuestIds": []
+        },
+        "eventFlags": {
+          "queen_regalia_returned": false,
+          "royal_cat_medal_awarded": false,
+          "queen_blessing_unlocked": false,
+          "ending_story_completed": false,
+          "ending_credits_pending": false,
+          "ending_credits_watched": false
+        },
+        "tavernRumorNotifications": {
+          "pendingIds": [
+            "rumor_001:base"
+          ],
+          "notifiedIds": []
+        },
+        "guildQuestNotifications": {
+          "pendingIds": [],
+          "notifiedIds": []
+        },
+        "adventureStats": {
+          "playTimeSeconds": 0,
+          "playTimeEra": "mvp",
+          "innStayCount": 0,
+          "shopPurchaseCount": 0,
+          "shopPurchaseGold": 0,
+          "templeDonationCount": 0,
+          "templeDonationGold": 0
+        },
+        "marathonChallenge": {
+          "active": false,
+          "currentDepth": 0
+        },
+        "longMarchChallenge": {
+          "active": false,
+          "currentDepth": 0
+        },
+        "finalLongMarchChallenge": {
+          "active": false,
+          "currentDepth": 0
+        },
+        "npcSystem": {
+          "registeredIds": [],
+          "activeIds": [],
+          "records": {},
+          "renewal": null,
+          "expeditionMaxDepth": 0
+        },
+        "playerCharge": {
+          "value": 15,
+          "cooldown": 0
+        },
+        "firstDungeonTutorialSeen": false,
+        "deckTutorialSeen": true,
+        "lootBagTutorialSeen": true,
+        "crystalFloorStepCount": 0,
+        "herbicideTrialUses": 0,
+        "cardPassiveStepCount": 0,
+        "highestDungeonDepthReached": 1,
+        "gold": 0,
+        "experience": 0,
+        "carriedExperience": 10,
+        "pendingExperienceSettlement": null,
+        "hp": 15,
+        "maxHp": 104,
+        "sp": 27,
+        "maxSp": 145,
+        "baseStats": {
+          "str": 2,
+          "int": 8,
+          "agi": 5,
+          "dex": 5,
+          "luc": 4
+        },
+        "equipmentStatBonuses": {
+          "int": 2,
+          "def": 3
+        },
+        "cardStatBonuses": {},
+        "def": 0,
+        "equipment": {
+          "weaponId": "oak_staff",
+          "rightArmId": "oak_staff",
+          "leftArmId": "beginner_grimoire",
+          "headId": "mage_hat",
+          "bodyId": "mage_robe",
+          "footId": "cloth_shoes",
+          "accessoryId": null
+        },
+        "equipmentInventory": {
+          "instances": [
+            {
+              "instanceId": "eq-000001",
+              "equipmentId": "oak_staff",
+              "slot": "rightArmId",
+              "acquiredOrder": 1,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000002",
+              "equipmentId": "beginner_grimoire",
+              "slot": "leftArmId",
+              "acquiredOrder": 2,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000003",
+              "equipmentId": "mage_hat",
+              "slot": "headId",
+              "acquiredOrder": 3,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000004",
+              "equipmentId": "mage_robe",
+              "slot": "bodyId",
+              "acquiredOrder": 4,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000005",
+              "equipmentId": "cloth_shoes",
+              "slot": "footId",
+              "acquiredOrder": 5,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            }
+          ],
+          "nextOrder": 6
+        },
+        "equippedInstanceIds": {
+          "rightArmId": "eq-000001",
+          "leftArmId": "eq-000002",
+          "headId": "eq-000003",
+          "bodyId": "eq-000004",
+          "footId": "eq-000005",
+          "accessoryId": null
+        },
+        "compendium": {
+          "monsters": {
+            "abyss_rat": {
+              "encountered": true,
+              "defeated": true,
+              "defeatCount": 1,
+              "discoveredDropIds": []
+            }
+          },
+          "items": {},
+          "keyItems": {},
+          "equipment": {
+            "oak_staff": {
+              "discovered": true,
+              "obtained": true
+            },
+            "beginner_grimoire": {
+              "discovered": true,
+              "obtained": true
+            },
+            "mage_hat": {
+              "discovered": true,
+              "obtained": true
+            },
+            "mage_robe": {
+              "discovered": true,
+              "obtained": true
+            },
+            "cloth_shoes": {
+              "discovered": true,
+              "obtained": true
+            }
+          }
+        },
+        "equipmentBuyback": [],
+        "itemBuyback": [],
+        "skillIds": [
+          "magic_wall",
+          "illusion",
+          "fireball",
+          "ice_bind",
+          "lightning_pierce",
+          "flame_sweep",
+          "mana_spring",
+          "mana_amplification",
+          "lightning_bolt",
+          "magic_focus",
+          "staff_light",
+          "wisdom_to_power"
+        ],
+        "statuses": [],
+        "condition": "GOOD",
+        "alive": true,
+        "bleedingStepCount": 0
+      }
+    }
+  },
+  {
+    "label": "mobile",
+    "errors": [],
+    "result": {
+      "outcome": "victory",
+      "follow": [
+        60
+      ],
+      "before": {
+        "name": "FOLLOW UP QA",
+        "job": "mage",
+        "jobLabel": "MAGE",
+        "level": 40,
+        "deckCost": 15,
+        "cards": {
+          "ownedCardIds": [
+            "common_follow_up",
+            "sr_follow_up_plus"
+          ],
+          "ownedCardCounts": {
+            "common_follow_up": 1,
+            "sr_follow_up_plus": 1
+          },
+          "deckSlots": [
+            "common_follow_up",
+            "sr_follow_up_plus",
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "inventory": {
+          "counts": {}
+        },
+        "keyItems": {
+          "owned": {},
+          "acquisitionOrder": []
+        },
+        "warehouse": {
+          "itemStacks": [],
+          "equipmentInstances": []
+        },
+        "lootBag": {
+          "items": {},
+          "cards": {},
+          "equipmentInstances": [],
+          "gold": 0
+        },
+        "quests": {
+          "active": {},
+          "completedQuestIds": []
+        },
+        "eventFlags": {
+          "queen_regalia_returned": false,
+          "royal_cat_medal_awarded": false,
+          "queen_blessing_unlocked": false,
+          "ending_story_completed": false,
+          "ending_credits_pending": false,
+          "ending_credits_watched": false
+        },
+        "tavernRumorNotifications": {
+          "pendingIds": [
+            "rumor_001:base"
+          ],
+          "notifiedIds": []
+        },
+        "guildQuestNotifications": {
+          "pendingIds": [],
+          "notifiedIds": []
+        },
+        "adventureStats": {
+          "playTimeSeconds": 0,
+          "playTimeEra": "mvp",
+          "innStayCount": 0,
+          "shopPurchaseCount": 0,
+          "shopPurchaseGold": 0,
+          "templeDonationCount": 0,
+          "templeDonationGold": 0
+        },
+        "marathonChallenge": {
+          "active": false,
+          "currentDepth": 0
+        },
+        "longMarchChallenge": {
+          "active": false,
+          "currentDepth": 0
+        },
+        "finalLongMarchChallenge": {
+          "active": false,
+          "currentDepth": 0
+        },
+        "npcSystem": {
+          "registeredIds": [],
+          "activeIds": [],
+          "records": {},
+          "renewal": null,
+          "expeditionMaxDepth": 0
+        },
+        "playerCharge": {
+          "value": 0,
+          "cooldown": 0
+        },
+        "firstDungeonTutorialSeen": false,
+        "deckTutorialSeen": true,
+        "lootBagTutorialSeen": true,
+        "crystalFloorStepCount": 0,
+        "herbicideTrialUses": 0,
+        "cardPassiveStepCount": 0,
+        "highestDungeonDepthReached": 1,
+        "gold": 0,
+        "experience": 0,
+        "carriedExperience": 0,
+        "pendingExperienceSettlement": null,
+        "hp": 15,
+        "maxHp": 104,
+        "sp": 30,
+        "maxSp": 145,
+        "baseStats": {
+          "str": 2,
+          "int": 8,
+          "agi": 5,
+          "dex": 5,
+          "luc": 4
+        },
+        "equipmentStatBonuses": {
+          "int": 2,
+          "def": 3
+        },
+        "cardStatBonuses": {},
+        "def": 0,
+        "equipment": {
+          "weaponId": "oak_staff",
+          "rightArmId": "oak_staff",
+          "leftArmId": "beginner_grimoire",
+          "headId": "mage_hat",
+          "bodyId": "mage_robe",
+          "footId": "cloth_shoes",
+          "accessoryId": null
+        },
+        "equipmentInventory": {
+          "instances": [
+            {
+              "instanceId": "eq-000001",
+              "equipmentId": "oak_staff",
+              "slot": "rightArmId",
+              "acquiredOrder": 1,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000002",
+              "equipmentId": "beginner_grimoire",
+              "slot": "leftArmId",
+              "acquiredOrder": 2,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000003",
+              "equipmentId": "mage_hat",
+              "slot": "headId",
+              "acquiredOrder": 3,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000004",
+              "equipmentId": "mage_robe",
+              "slot": "bodyId",
+              "acquiredOrder": 4,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000005",
+              "equipmentId": "cloth_shoes",
+              "slot": "footId",
+              "acquiredOrder": 5,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            }
+          ],
+          "nextOrder": 6
+        },
+        "equippedInstanceIds": {
+          "rightArmId": "eq-000001",
+          "leftArmId": "eq-000002",
+          "headId": "eq-000003",
+          "bodyId": "eq-000004",
+          "footId": "eq-000005",
+          "accessoryId": null
+        },
+        "compendium": {
+          "monsters": {},
+          "items": {},
+          "keyItems": {},
+          "equipment": {
+            "oak_staff": {
+              "discovered": true,
+              "obtained": true
+            },
+            "beginner_grimoire": {
+              "discovered": true,
+              "obtained": true
+            },
+            "mage_hat": {
+              "discovered": true,
+              "obtained": true
+            },
+            "mage_robe": {
+              "discovered": true,
+              "obtained": true
+            },
+            "cloth_shoes": {
+              "discovered": true,
+              "obtained": true
+            }
+          }
+        },
+        "equipmentBuyback": [],
+        "itemBuyback": [],
+        "skillIds": [
+          "magic_wall",
+          "illusion",
+          "fireball",
+          "ice_bind",
+          "lightning_pierce",
+          "flame_sweep",
+          "mana_spring",
+          "mana_amplification",
+          "lightning_bolt",
+          "magic_focus",
+          "staff_light",
+          "wisdom_to_power"
+        ],
+        "statuses": [],
+        "condition": "GOOD",
+        "alive": true,
+        "bleedingStepCount": 0
+      },
+      "after": {
+        "name": "FOLLOW UP QA",
+        "job": "mage",
+        "jobLabel": "MAGE",
+        "level": 40,
+        "deckCost": 15,
+        "cards": {
+          "ownedCardIds": [
+            "common_follow_up",
+            "sr_follow_up_plus"
+          ],
+          "ownedCardCounts": {
+            "common_follow_up": 1,
+            "sr_follow_up_plus": 1
+          },
+          "deckSlots": [
+            "common_follow_up",
+            "sr_follow_up_plus",
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "inventory": {
+          "counts": {}
+        },
+        "keyItems": {
+          "owned": {},
+          "acquisitionOrder": []
+        },
+        "warehouse": {
+          "itemStacks": [],
+          "equipmentInstances": []
+        },
+        "lootBag": {
+          "items": {},
+          "cards": {},
+          "equipmentInstances": [],
+          "gold": 7
+        },
+        "quests": {
+          "active": {},
+          "completedQuestIds": []
+        },
+        "eventFlags": {
+          "queen_regalia_returned": false,
+          "royal_cat_medal_awarded": false,
+          "queen_blessing_unlocked": false,
+          "ending_story_completed": false,
+          "ending_credits_pending": false,
+          "ending_credits_watched": false
+        },
+        "tavernRumorNotifications": {
+          "pendingIds": [
+            "rumor_001:base"
+          ],
+          "notifiedIds": []
+        },
+        "guildQuestNotifications": {
+          "pendingIds": [],
+          "notifiedIds": []
+        },
+        "adventureStats": {
+          "playTimeSeconds": 0.6846999999880791,
+          "playTimeEra": "mvp",
+          "innStayCount": 0,
+          "shopPurchaseCount": 0,
+          "shopPurchaseGold": 0,
+          "templeDonationCount": 0,
+          "templeDonationGold": 0
+        },
+        "marathonChallenge": {
+          "active": false,
+          "currentDepth": 0
+        },
+        "longMarchChallenge": {
+          "active": false,
+          "currentDepth": 0
+        },
+        "finalLongMarchChallenge": {
+          "active": false,
+          "currentDepth": 0
+        },
+        "npcSystem": {
+          "registeredIds": [],
+          "activeIds": [],
+          "records": {},
+          "renewal": null,
+          "expeditionMaxDepth": 0
+        },
+        "playerCharge": {
+          "value": 15,
+          "cooldown": 0
+        },
+        "firstDungeonTutorialSeen": false,
+        "deckTutorialSeen": true,
+        "lootBagTutorialSeen": true,
+        "crystalFloorStepCount": 0,
+        "herbicideTrialUses": 0,
+        "cardPassiveStepCount": 0,
+        "highestDungeonDepthReached": 1,
+        "gold": 0,
+        "experience": 0,
+        "carriedExperience": 10,
+        "pendingExperienceSettlement": null,
+        "hp": 15,
+        "maxHp": 104,
+        "sp": 27,
+        "maxSp": 145,
+        "baseStats": {
+          "str": 2,
+          "int": 8,
+          "agi": 5,
+          "dex": 5,
+          "luc": 4
+        },
+        "equipmentStatBonuses": {
+          "int": 2,
+          "def": 3
+        },
+        "cardStatBonuses": {},
+        "def": 0,
+        "equipment": {
+          "weaponId": "oak_staff",
+          "rightArmId": "oak_staff",
+          "leftArmId": "beginner_grimoire",
+          "headId": "mage_hat",
+          "bodyId": "mage_robe",
+          "footId": "cloth_shoes",
+          "accessoryId": null
+        },
+        "equipmentInventory": {
+          "instances": [
+            {
+              "instanceId": "eq-000001",
+              "equipmentId": "oak_staff",
+              "slot": "rightArmId",
+              "acquiredOrder": 1,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000002",
+              "equipmentId": "beginner_grimoire",
+              "slot": "leftArmId",
+              "acquiredOrder": 2,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000003",
+              "equipmentId": "mage_hat",
+              "slot": "headId",
+              "acquiredOrder": 3,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000004",
+              "equipmentId": "mage_robe",
+              "slot": "bodyId",
+              "acquiredOrder": 4,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000005",
+              "equipmentId": "cloth_shoes",
+              "slot": "footId",
+              "acquiredOrder": 5,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            }
+          ],
+          "nextOrder": 6
+        },
+        "equippedInstanceIds": {
+          "rightArmId": "eq-000001",
+          "leftArmId": "eq-000002",
+          "headId": "eq-000003",
+          "bodyId": "eq-000004",
+          "footId": "eq-000005",
+          "accessoryId": null
+        },
+        "compendium": {
+          "monsters": {
+            "abyss_rat": {
+              "encountered": true,
+              "defeated": true,
+              "defeatCount": 1,
+              "discoveredDropIds": []
+            }
+          },
+          "items": {},
+          "keyItems": {},
+          "equipment": {
+            "oak_staff": {
+              "discovered": true,
+              "obtained": true
+            },
+            "beginner_grimoire": {
+              "discovered": true,
+              "obtained": true
+            },
+            "mage_hat": {
+              "discovered": true,
+              "obtained": true
+            },
+            "mage_robe": {
+              "discovered": true,
+              "obtained": true
+            },
+            "cloth_shoes": {
+              "discovered": true,
+              "obtained": true
+            }
+          }
+        },
+        "equipmentBuyback": [],
+        "itemBuyback": [],
+        "skillIds": [
+          "magic_wall",
+          "illusion",
+          "fireball",
+          "ice_bind",
+          "lightning_pierce",
+          "flame_sweep",
+          "mana_spring",
+          "mana_amplification",
+          "lightning_bolt",
+          "magic_focus",
+          "staff_light",
+          "wisdom_to_power"
+        ],
+        "statuses": [],
+        "condition": "GOOD",
+        "alive": true,
+        "bleedingStepCount": 0
+      },
+      "saved": {
+        "name": "FOLLOW UP QA",
+        "job": "mage",
+        "jobLabel": "MAGE",
+        "level": 40,
+        "deckCost": 15,
+        "cards": {
+          "ownedCardIds": [
+            "common_follow_up",
+            "sr_follow_up_plus"
+          ],
+          "ownedCardCounts": {
+            "common_follow_up": 1,
+            "sr_follow_up_plus": 1
+          },
+          "deckSlots": [
+            "common_follow_up",
+            "sr_follow_up_plus",
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "inventory": {
+          "counts": {}
+        },
+        "keyItems": {
+          "owned": {},
+          "acquisitionOrder": []
+        },
+        "warehouse": {
+          "itemStacks": [],
+          "equipmentInstances": []
+        },
+        "lootBag": {
+          "items": {},
+          "cards": {},
+          "equipmentInstances": [],
+          "gold": 7
+        },
+        "quests": {
+          "active": {},
+          "completedQuestIds": []
+        },
+        "eventFlags": {
+          "queen_regalia_returned": false,
+          "royal_cat_medal_awarded": false,
+          "queen_blessing_unlocked": false,
+          "ending_story_completed": false,
+          "ending_credits_pending": false,
+          "ending_credits_watched": false
+        },
+        "tavernRumorNotifications": {
+          "pendingIds": [
+            "rumor_001:base"
+          ],
+          "notifiedIds": []
+        },
+        "guildQuestNotifications": {
+          "pendingIds": [],
+          "notifiedIds": []
+        },
+        "adventureStats": {
+          "playTimeSeconds": 0.7434000000059604,
+          "playTimeEra": "mvp",
+          "innStayCount": 0,
+          "shopPurchaseCount": 0,
+          "shopPurchaseGold": 0,
+          "templeDonationCount": 0,
+          "templeDonationGold": 0
+        },
+        "marathonChallenge": {
+          "active": false,
+          "currentDepth": 0
+        },
+        "longMarchChallenge": {
+          "active": false,
+          "currentDepth": 0
+        },
+        "finalLongMarchChallenge": {
+          "active": false,
+          "currentDepth": 0
+        },
+        "npcSystem": {
+          "registeredIds": [],
+          "activeIds": [],
+          "records": {},
+          "renewal": null,
+          "expeditionMaxDepth": 0
+        },
+        "playerCharge": {
+          "value": 15,
+          "cooldown": 0
+        },
+        "firstDungeonTutorialSeen": false,
+        "deckTutorialSeen": true,
+        "lootBagTutorialSeen": true,
+        "crystalFloorStepCount": 0,
+        "herbicideTrialUses": 0,
+        "cardPassiveStepCount": 0,
+        "highestDungeonDepthReached": 1,
+        "gold": 0,
+        "experience": 0,
+        "carriedExperience": 10,
+        "pendingExperienceSettlement": null,
+        "hp": 15,
+        "maxHp": 104,
+        "sp": 27,
+        "maxSp": 145,
+        "baseStats": {
+          "str": 2,
+          "int": 8,
+          "agi": 5,
+          "dex": 5,
+          "luc": 4
+        },
+        "equipmentStatBonuses": {
+          "int": 2,
+          "def": 3
+        },
+        "cardStatBonuses": {},
+        "def": 0,
+        "equipment": {
+          "weaponId": "oak_staff",
+          "rightArmId": "oak_staff",
+          "leftArmId": "beginner_grimoire",
+          "headId": "mage_hat",
+          "bodyId": "mage_robe",
+          "footId": "cloth_shoes",
+          "accessoryId": null
+        },
+        "equipmentInventory": {
+          "instances": [
+            {
+              "instanceId": "eq-000001",
+              "equipmentId": "oak_staff",
+              "slot": "rightArmId",
+              "acquiredOrder": 1,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000002",
+              "equipmentId": "beginner_grimoire",
+              "slot": "leftArmId",
+              "acquiredOrder": 2,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000003",
+              "equipmentId": "mage_hat",
+              "slot": "headId",
+              "acquiredOrder": 3,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000004",
+              "equipmentId": "mage_robe",
+              "slot": "bodyId",
+              "acquiredOrder": 4,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000005",
+              "equipmentId": "cloth_shoes",
+              "slot": "footId",
+              "acquiredOrder": 5,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            }
+          ],
+          "nextOrder": 6
+        },
+        "equippedInstanceIds": {
+          "rightArmId": "eq-000001",
+          "leftArmId": "eq-000002",
+          "headId": "eq-000003",
+          "bodyId": "eq-000004",
+          "footId": "eq-000005",
+          "accessoryId": null
+        },
+        "compendium": {
+          "monsters": {
+            "abyss_rat": {
+              "encountered": true,
+              "defeated": true,
+              "defeatCount": 1,
+              "discoveredDropIds": []
+            }
+          },
+          "items": {},
+          "keyItems": {},
+          "equipment": {
+            "oak_staff": {
+              "discovered": true,
+              "obtained": true
+            },
+            "beginner_grimoire": {
+              "discovered": true,
+              "obtained": true
+            },
+            "mage_hat": {
+              "discovered": true,
+              "obtained": true
+            },
+            "mage_robe": {
+              "discovered": true,
+              "obtained": true
+            },
+            "cloth_shoes": {
+              "discovered": true,
+              "obtained": true
+            }
+          }
+        },
+        "equipmentBuyback": [],
+        "itemBuyback": [],
+        "skillIds": [
+          "magic_wall",
+          "illusion",
+          "fireball",
+          "ice_bind",
+          "lightning_pierce",
+          "flame_sweep",
+          "mana_spring",
+          "mana_amplification",
+          "lightning_bolt",
+          "magic_focus",
+          "staff_light",
+          "wisdom_to_power"
+        ],
+        "statuses": [],
+        "condition": "GOOD",
+        "alive": true,
+        "bleedingStepCount": 0
+      },
+      "loaded": {
+        "name": "FOLLOW UP QA",
+        "job": "mage",
+        "jobLabel": "MAGE",
+        "level": 40,
+        "deckCost": 15,
+        "cards": {
+          "ownedCardIds": [
+            "common_follow_up",
+            "sr_follow_up_plus"
+          ],
+          "ownedCardCounts": {
+            "common_follow_up": 1,
+            "sr_follow_up_plus": 1
+          },
+          "deckSlots": [
+            "common_follow_up",
+            "sr_follow_up_plus",
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "inventory": {
+          "counts": {}
+        },
+        "keyItems": {
+          "owned": {},
+          "acquisitionOrder": []
+        },
+        "warehouse": {
+          "itemStacks": [],
+          "equipmentInstances": []
+        },
+        "lootBag": {
+          "items": {},
+          "cards": {},
+          "equipmentInstances": [],
+          "gold": 7
+        },
+        "quests": {
+          "active": {},
+          "completedQuestIds": []
+        },
+        "eventFlags": {
+          "queen_regalia_returned": false,
+          "royal_cat_medal_awarded": false,
+          "queen_blessing_unlocked": false,
+          "ending_story_completed": false,
+          "ending_credits_pending": false,
+          "ending_credits_watched": false
+        },
+        "tavernRumorNotifications": {
+          "pendingIds": [
+            "rumor_001:base"
+          ],
+          "notifiedIds": []
+        },
+        "guildQuestNotifications": {
+          "pendingIds": [],
+          "notifiedIds": []
+        },
+        "adventureStats": {
+          "playTimeSeconds": 0,
+          "playTimeEra": "mvp",
+          "innStayCount": 0,
+          "shopPurchaseCount": 0,
+          "shopPurchaseGold": 0,
+          "templeDonationCount": 0,
+          "templeDonationGold": 0
+        },
+        "marathonChallenge": {
+          "active": false,
+          "currentDepth": 0
+        },
+        "longMarchChallenge": {
+          "active": false,
+          "currentDepth": 0
+        },
+        "finalLongMarchChallenge": {
+          "active": false,
+          "currentDepth": 0
+        },
+        "npcSystem": {
+          "registeredIds": [],
+          "activeIds": [],
+          "records": {},
+          "renewal": null,
+          "expeditionMaxDepth": 0
+        },
+        "playerCharge": {
+          "value": 15,
+          "cooldown": 0
+        },
+        "firstDungeonTutorialSeen": false,
+        "deckTutorialSeen": true,
+        "lootBagTutorialSeen": true,
+        "crystalFloorStepCount": 0,
+        "herbicideTrialUses": 0,
+        "cardPassiveStepCount": 0,
+        "highestDungeonDepthReached": 1,
+        "gold": 0,
+        "experience": 0,
+        "carriedExperience": 10,
+        "pendingExperienceSettlement": null,
+        "hp": 15,
+        "maxHp": 104,
+        "sp": 27,
+        "maxSp": 145,
+        "baseStats": {
+          "str": 2,
+          "int": 8,
+          "agi": 5,
+          "dex": 5,
+          "luc": 4
+        },
+        "equipmentStatBonuses": {
+          "int": 2,
+          "def": 3
+        },
+        "cardStatBonuses": {},
+        "def": 0,
+        "equipment": {
+          "weaponId": "oak_staff",
+          "rightArmId": "oak_staff",
+          "leftArmId": "beginner_grimoire",
+          "headId": "mage_hat",
+          "bodyId": "mage_robe",
+          "footId": "cloth_shoes",
+          "accessoryId": null
+        },
+        "equipmentInventory": {
+          "instances": [
+            {
+              "instanceId": "eq-000001",
+              "equipmentId": "oak_staff",
+              "slot": "rightArmId",
+              "acquiredOrder": 1,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000002",
+              "equipmentId": "beginner_grimoire",
+              "slot": "leftArmId",
+              "acquiredOrder": 2,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000003",
+              "equipmentId": "mage_hat",
+              "slot": "headId",
+              "acquiredOrder": 3,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000004",
+              "equipmentId": "mage_robe",
+              "slot": "bodyId",
+              "acquiredOrder": 4,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            },
+            {
+              "instanceId": "eq-000005",
+              "equipmentId": "cloth_shoes",
+              "slot": "footId",
+              "acquiredOrder": 5,
+              "enhancement": 0,
+              "identified": true,
+              "curseKnown": false,
+              "locked": false
+            }
+          ],
+          "nextOrder": 6
+        },
+        "equippedInstanceIds": {
+          "rightArmId": "eq-000001",
+          "leftArmId": "eq-000002",
+          "headId": "eq-000003",
+          "bodyId": "eq-000004",
+          "footId": "eq-000005",
+          "accessoryId": null
+        },
+        "compendium": {
+          "monsters": {
+            "abyss_rat": {
+              "encountered": true,
+              "defeated": true,
+              "defeatCount": 1,
+              "discoveredDropIds": []
+            }
+          },
+          "items": {},
+          "keyItems": {},
+          "equipment": {
+            "oak_staff": {
+              "discovered": true,
+              "obtained": true
+            },
+            "beginner_grimoire": {
+              "discovered": true,
+              "obtained": true
+            },
+            "mage_hat": {
+              "discovered": true,
+              "obtained": true
+            },
+            "mage_robe": {
+              "discovered": true,
+              "obtained": true
+            },
+            "cloth_shoes": {
+              "discovered": true,
+              "obtained": true
+            }
+          }
+        },
+        "equipmentBuyback": [],
+        "itemBuyback": [],
+        "skillIds": [
+          "magic_wall",
+          "illusion",
+          "fireball",
+          "ice_bind",
+          "lightning_pierce",
+          "flame_sweep",
+          "mana_spring",
+          "mana_amplification",
+          "lightning_bolt",
+          "magic_focus",
+          "staff_light",
+          "wisdom_to_power"
+        ],
+        "statuses": [],
+        "condition": "GOOD",
+        "alive": true,
+        "bleedingStepCount": 0
+      }
+    }
+  }
+]

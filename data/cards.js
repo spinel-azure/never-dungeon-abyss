@@ -134,6 +134,13 @@ const STANDARD_CARDS = [
     sellPrice: 100, buybackPrice: 1000, overflowGold: 100
   },
   {
+    id: "sr_follow_up_plus", rarity: "SR", cost: 4,
+    name: "Follow-Up +", nameJa: "追撃＋", concept: "直接ダメージ後に固定50ダメージ",
+    descriptionJa: "通常攻撃・物理スキル・攻撃呪文で\nダメージを与えた敵に、50の固定追加ダメージ。",
+    category: "battle", effectId: "direct_damage_follow_up", effectValue: 50,
+    iconId: "flame-sword", maxOwned: 1, maxCopies: 1
+  },
+  {
     id: "common_guard_stone", rarity: "C", cost: 1,
     name: "Guard Stone", nameJa: "護りの魔石", concept: "戦闘開始時に固定15障壁",
     descriptionJa: "戦闘開始時、15ダメージ分の\n障壁を展開する。",
