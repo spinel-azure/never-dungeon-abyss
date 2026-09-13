@@ -1,3 +1,6 @@
+import { characterOwnsEquipment } from "./equipment-inventory.js";
+import { GOLD_CHEST_WEAPONS_BY_JOB } from "./loot.js";
+
 export const TAVERN_RUMOR_001_BASE_READ_FLAG = "tavern_rumor_001_base_read";
 export const TAVERN_RUMOR_001_MIKAN_READ_FLAG = "tavern_rumor_001_mikan_read";
 export const TAVERN_RUMOR_002_BASE_READ_FLAG = "tavern_rumor_002_base_read";
@@ -15,6 +18,14 @@ export const TAVERN_RUMOR_007_DELIVERED_READ_FLAG = "tavern_rumor_007_delivered_
 export const TAVERN_RUMOR_008_BASE_READ_FLAG = "tavern_rumor_008_base_read";
 export const TAVERN_RUMOR_009_BASE_READ_FLAG = "tavern_rumor_009_base_read";
 export const TAVERN_RUMOR_009_MARATHON_READ_FLAG = "tavern_rumor_009_marathon_read";
+export const TAVERN_RUMOR_010_BASE_READ_FLAG = "tavern_rumor_010_base_read";
+export const TAVERN_RUMOR_010_RELIC_READ_FLAG = "tavern_rumor_010_relic_read";
+export const TAVERN_RUMOR_011_BASE_READ_FLAG = "tavern_rumor_011_base_read";
+export const TAVERN_RUMOR_011_LONG_MARCH_READ_FLAG = "tavern_rumor_011_long_march_read";
+export const TAVERN_RUMOR_012_BASE_READ_FLAG = "tavern_rumor_012_base_read";
+export const TAVERN_RUMOR_012_FINAL_LONG_MARCH_READ_FLAG = "tavern_rumor_012_final_long_march_read";
+
+const RELIC_WEAPON_IDS = Object.freeze(Object.values(GOLD_CHEST_WEAPONS_BY_JOB));
 
 export function getTavernRumorTypewriterParts(message) {
   const text = String(message || "");
@@ -222,6 +233,75 @@ export const TAVERN_RUMORS = Object.freeze([
         rosaContinuation: "えっ！？あなた完走したの！？スゴいわ…！"
       })
     ])
+  }),
+  Object.freeze({
+    id: "rumor_010",
+    verbatimCustomers: true,
+    title: "遺物武器の噂",
+    unlock: context => context.depthReached >= 50,
+    customerLead: "おい、知ってるか？密林区域で『遺物武器』が見つかったらしい。",
+    customerReply: "ああ。普段なら黒い箱のハズが金色の箱だったらしいぞ？",
+    phases: Object.freeze([
+      Object.freeze({
+        id: "base",
+        readFlag: TAVERN_RUMOR_010_BASE_READ_FLAG,
+        unlock: context => !context.relicWeaponOwned,
+        rosa: "『遺物武器』、ですって。そんなモノ本当にあるのかしら？"
+      }),
+      Object.freeze({
+        id: "relic",
+        readFlag: TAVERN_RUMOR_010_RELIC_READ_FLAG,
+        unlock: context => context.relicWeaponOwned,
+        rosa: "『遺物武器』、ですって。そんなモノ本当にあるのかしら？",
+        rosaContinuation: "まぁ！あなた、見つけたの！？スゴいわ…！本当にあったのね…。"
+      })
+    ])
+  }),
+  Object.freeze({
+    id: "rumor_011",
+    verbatimCustomers: true,
+    title: "続・マラソンの噂",
+    unlock: context => context.depthReached >= 80 && context.marathonCompleted,
+    customerLead: "おい、知ってるか？例の『マラソン』をやり遂げたヤツがいるらしい。",
+    customerReply: "ああ。とんでもねえよな！倍の距離もいけるんじゃねえか？",
+    phases: Object.freeze([
+      Object.freeze({
+        id: "base",
+        readFlag: TAVERN_RUMOR_011_BASE_READ_FLAG,
+        unlock: context => !context.longMarchCompleted,
+        rosa: "とんでもないわ…！倍の距離なんて、とても無理よ…。"
+      }),
+      Object.freeze({
+        id: "long_march",
+        readFlag: TAVERN_RUMOR_011_LONG_MARCH_READ_FLAG,
+        unlock: context => context.longMarchCompleted,
+        rosa: "とんでもないわ…！倍の距離なんて、とても無理よ…。",
+        rosaContinuation: "ええっ！？やり遂げたの！？すごいわ…。"
+      })
+    ])
+  }),
+  Object.freeze({
+    id: "rumor_012",
+    verbatimCustomers: true,
+    title: "前人未踏の噂",
+    unlock: context => context.depthReached >= 100 && context.longMarchCompleted,
+    customerLead: "おい、知ってるか？例の『マラソン』、倍の距離を成し遂げたヤツがいるらしい",
+    customerReply: "ああ。いっその事、最後まで行ってもらいたいよな！",
+    phases: Object.freeze([
+      Object.freeze({
+        id: "base",
+        readFlag: TAVERN_RUMOR_012_BASE_READ_FLAG,
+        unlock: context => !context.finalLongMarchCompleted,
+        rosa: "倍の距離でも凄いのに、最後まで行くなんて絶対無理よ…！"
+      }),
+      Object.freeze({
+        id: "final_long_march",
+        readFlag: TAVERN_RUMOR_012_FINAL_LONG_MARCH_READ_FLAG,
+        unlock: context => context.finalLongMarchCompleted,
+        rosa: "倍の距離でも凄いのに、最後まで行くなんて絶対無理よ…！",
+        rosaContinuation: "ええっ！？最後の階まで走りきった、ですって！？あなた、逞しいのね。素敵よ…！"
+      })
+    ])
   })
 ]);
 
@@ -262,7 +342,12 @@ function normalizeRumorContext(character, context = {}) {
     anastasiaOutfitEventSeen: Boolean(context.anastasiaOutfitEventSeen ?? eventFlags.anastasia_festival_outfit_unlocked),
     priestRumorCompleted: Boolean(context.priestRumorCompleted ?? eventFlags.tavern_rumor_004_medicine_read),
     helenHiddenEventSeen: Boolean(context.helenHiddenEventSeen ?? eventFlags.helen_hidden_event_seen),
-    marathonCompleted: Boolean(context.marathonCompleted ?? eventFlags.b1_b42_marathon_completed)
+    marathonCompleted: Boolean(context.marathonCompleted ?? eventFlags.b1_b42_marathon_completed),
+    longMarchCompleted: Boolean(context.longMarchCompleted ?? eventFlags.b1_b84_long_march_completed),
+    finalLongMarchCompleted: Boolean(context.finalLongMarchCompleted ?? eventFlags.b1_b100_final_long_march_completed),
+    relicWeaponOwned: Boolean(context.relicWeaponOwned ?? RELIC_WEAPON_IDS.some(
+      equipmentId => characterOwnsEquipment(character, equipmentId)
+    ))
   };
 }
 

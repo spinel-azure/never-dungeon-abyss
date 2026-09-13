@@ -130,7 +130,8 @@ test("priest rumor requires quest 019 plus one hundred donations and updates aft
     tavern_rumor_001_base_read: true,
     tavern_rumor_002_base_read: true,
     tavern_rumor_003_base_read: true,
-    tavern_rumor_009_base_read: true
+    tavern_rumor_009_base_read: true,
+    tavern_rumor_010_base_read: true
   };
   character.highestDungeonDepthReached = 50;
   character.adventureStats.templeDonationCount = 100;
@@ -285,4 +286,139 @@ test("an existing save that already completed the B42 marathon receives only the
   const heard = markTavernRumorRead(character, rumor);
   assert.equal(heard.eventFlags.tavern_rumor_009_base_read, true);
   assert.equal(heard.eventFlags.tavern_rumor_009_marathon_read, true);
+});
+
+test("B50 unlocks the relic weapon rumor and any four-relic ownership location unlocks its follow-up", () => {
+  const makeRelicRumorCharacter = () => {
+    const character = createInitialCharacter({ name: "遺物探し", job: "warrior" });
+    character.highestDungeonDepthReached = 50;
+    return character;
+  };
+  const getRelicRumor = character => getUnreadTavernRumors(character)
+    .find(entry => entry.rumorId === "rumor_010");
+
+  const locked = makeRelicRumorCharacter();
+  locked.highestDungeonDepthReached = 49;
+  assert.equal(getRelicRumor(locked), undefined);
+
+  let character = makeRelicRumorCharacter();
+  const base = getRelicRumor(character);
+  assert.equal(base?.id, "rumor_010_base");
+  assert.deepEqual(base?.dialogue, [
+    "あなたはカウンターから耳を澄ます………。\n客「おい、知ってるか？密林区域で『遺物武器』が見つかったらしい。」\n＊Aボタンで次へ",
+    "客「ああ。普段なら黒い箱のハズが金色の箱だったらしいぞ？」\n＊Aボタンで次へ",
+    "ローザ「『遺物武器』、ですって。そんなモノ本当にあるのかしら？」\n＊Aボタンで戻る"
+  ]);
+  assert.equal(base.dialogue.every(message => getTavernRumorTypewriterParts(message)), true);
+
+  character = markTavernRumorRead(character, base);
+  assert.equal(getPastTavernRumors(character).find(entry => entry.id === "rumor_010")?.number, "010");
+  character.equipmentInventory.instances.push({ equipmentId: "musashi_blade", slot: "rightArmId" });
+  assert.equal(getPastTavernRumors(character).some(entry => entry.id === "rumor_010"), false);
+
+  const found = getRelicRumor(character);
+  assert.equal(found?.id, "rumor_010_relic");
+  assert.deepEqual(found?.readFlags, [
+    "tavern_rumor_010_base_read",
+    "tavern_rumor_010_relic_read"
+  ]);
+  assert.match(found?.dialogue.at(-1) || "", /本当にあったのね/);
+  character = markTavernRumorRead(character, found);
+  assert.equal(getPastTavernRumors(character).find(entry => entry.id === "rumor_010")?.description.length, 4);
+
+  const ownershipCases = [
+    candidate => { candidate.equipment.rightArmId = "musashi_blade"; },
+    candidate => { candidate.equipmentInventory.instances.push({ equipmentId: "the_five_star" }); },
+    candidate => { candidate.warehouse.equipmentInstances.push({ equipmentId: "sylvan_emera" }); },
+    candidate => { candidate.lootBag.equipmentInstances.push({ equipmentId: "comet_booster" }); }
+  ];
+  ownershipCases.forEach(placeRelic => {
+    const candidate = makeRelicRumorCharacter();
+    placeRelic(candidate);
+    assert.equal(getRelicRumor(candidate)?.id, "rumor_010_relic");
+  });
+});
+
+test("B80 plus the B42 marathon unlocks the second marathon rumor and B84 adds its follow-up", () => {
+  const character = createInitialCharacter({ name: "倍距離走者", job: "thief" });
+  const getSecondRumor = () => getUnreadTavernRumors(character)
+    .find(entry => entry.rumorId === "rumor_011");
+
+  character.highestDungeonDepthReached = 80;
+  assert.equal(getSecondRumor(), undefined);
+  character.eventFlags.b1_b42_marathon_completed = true;
+  character.highestDungeonDepthReached = 79;
+  assert.equal(getSecondRumor(), undefined);
+
+  character.highestDungeonDepthReached = 80;
+  const base = getSecondRumor();
+  assert.equal(base?.id, "rumor_011_base");
+  assert.deepEqual(base?.dialogue, [
+    "あなたはカウンターから耳を澄ます………。\n客「おい、知ってるか？例の『マラソン』をやり遂げたヤツがいるらしい。」\n＊Aボタンで次へ",
+    "客「ああ。とんでもねえよな！倍の距離もいけるんじゃねえか？」\n＊Aボタンで次へ",
+    "ローザ「とんでもないわ…！倍の距離なんて、とても無理よ…。」\n＊Aボタンで戻る"
+  ]);
+
+  const heardBase = markTavernRumorRead(character, base);
+  character.eventFlags = heardBase.eventFlags;
+  assert.equal(getPastTavernRumors(character).find(entry => entry.id === "rumor_011")?.number, "011");
+
+  character.eventFlags.b1_b84_long_march_completed = true;
+  const completed = getSecondRumor();
+  assert.equal(completed?.id, "rumor_011_long_march");
+  assert.match(completed?.dialogue.at(-1) || "", /やり遂げたの/);
+  assert.equal(completed?.dialogue.every(message => getTavernRumorTypewriterParts(message)), true);
+  assert.equal(getPastTavernRumors(character).some(entry => entry.id === "rumor_011"), false);
+});
+
+test("B100 plus the B84 long march unlocks the final rumor and final completion adds its follow-up", () => {
+  let character = createInitialCharacter({ name: "前人未踏", job: "priest" });
+  const getFinalRumor = value => getUnreadTavernRumors(value)
+    .find(entry => entry.rumorId === "rumor_012");
+
+  character.eventFlags.b1_b84_long_march_completed = true;
+  character.highestDungeonDepthReached = 99;
+  assert.equal(getFinalRumor(character), undefined);
+  character.highestDungeonDepthReached = 100;
+  const base = getFinalRumor(character);
+  assert.equal(base?.id, "rumor_012_base");
+  assert.deepEqual(base?.dialogue, [
+    "あなたはカウンターから耳を澄ます………。\n客「おい、知ってるか？例の『マラソン』、倍の距離を成し遂げたヤツがいるらしい」\n＊Aボタンで次へ",
+    "客「ああ。いっその事、最後まで行ってもらいたいよな！」\n＊Aボタンで次へ",
+    "ローザ「倍の距離でも凄いのに、最後まで行くなんて絶対無理よ…！」\n＊Aボタンで戻る"
+  ]);
+
+  character = markTavernRumorRead(character, base);
+  character.eventFlags.b1_b100_final_long_march_completed = true;
+  const completed = getFinalRumor(character);
+  assert.equal(completed?.id, "rumor_012_final_long_march");
+  assert.deepEqual(completed?.readFlags, [
+    "tavern_rumor_012_base_read",
+    "tavern_rumor_012_final_long_march_read"
+  ]);
+  assert.equal(completed?.dialogue.every(message => getTavernRumorTypewriterParts(message)), true);
+  assert.match(completed?.dialogue.at(-1) || "", /あなた、逞しいのね。素敵よ/);
+
+  character = markTavernRumorRead(character, completed);
+  const history = getPastTavernRumors(character).find(entry => entry.id === "rumor_012");
+  assert.equal(history?.number, "012");
+  assert.equal(history?.title, "前人未踏の噂");
+  assert.equal(history?.description.length, 4);
+});
+
+test("legacy saves that already meet all conditions receive only the latest new rumor stages", () => {
+  const character = createInitialCharacter({ name: "既達成者", job: "mage" });
+  character.highestDungeonDepthReached = 100;
+  character.eventFlags.b1_b42_marathon_completed = true;
+  character.eventFlags.b1_b84_long_march_completed = true;
+  character.eventFlags.b1_b100_final_long_march_completed = true;
+  character.warehouse.equipmentInstances.push({ equipmentId: "comet_booster" });
+
+  const latest = getUnreadTavernRumors(character)
+    .filter(entry => ["rumor_010", "rumor_011", "rumor_012"].includes(entry.rumorId));
+  assert.deepEqual(latest.map(entry => entry.id), [
+    "rumor_010_relic",
+    "rumor_011_long_march",
+    "rumor_012_final_long_march"
+  ]);
 });

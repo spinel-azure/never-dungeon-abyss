@@ -171,7 +171,7 @@ export function grantEquipmentInstance(character, equipmentId, slot, options = {
   };
 }
 
-function characterOwnsEquipment(character, equipmentId) {
+export function characterOwnsEquipment(character, equipmentId) {
   return [
     ...(character?.equipmentInventory?.instances || []),
     ...(character?.warehouse?.equipmentInstances || []),

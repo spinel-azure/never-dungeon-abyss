@@ -1,3 +1,5 @@
+import { characterOwnsEquipment } from "./equipment-inventory.js";
+
 export const ENEMY_DROP_RATES = Object.freeze({ none: 0.4, item: 0.55, redChest: 0.05 });
 export const STILETTO_ENHANCEMENT_RATES = Object.freeze([0.75, 0.18, 0.06, 0.01]);
 export const BLACK_CHEST_STILETTO_ENHANCEMENT_RATES = Object.freeze([0.45, 0.35, 0.15, 0.05]);
@@ -57,13 +59,7 @@ export function getGoldChestWeaponId(job, depth = 50) {
 
 export function hasGoldChestWeapon(character, depth = 50) {
   const equipmentId = getGoldChestWeaponId(character?.job, depth);
-  if (!equipmentId) return false;
-  return [
-    ...(character?.equipmentInventory?.instances || []),
-    ...(character?.warehouse?.equipmentInstances || []),
-    ...(character?.lootBag?.equipmentInstances || [])
-  ].some(instance => instance?.equipmentId === equipmentId)
-    || Object.values(character?.equipment || {}).includes(equipmentId);
+  return Boolean(equipmentId) && characterOwnsEquipment(character, equipmentId);
 }
 
 export function isGoldChestWeaponEligible(character, depth = 50) {

@@ -190,3 +190,31 @@ test("the B42 marathon follow-up replaces the pending B40 rumor stage", () => {
   assert.deepEqual(completed.addedIds, ["rumor_009:marathon"]);
   assert.deepEqual(completed.character.tavernRumorNotifications.pendingIds, ["rumor_009:marathon"]);
 });
+
+test("new relic and long-march rumor stages use the shared notification queue", () => {
+  const character = makeCharacter("終盤噂通知係");
+  character.highestDungeonDepthReached = 100;
+  character.eventFlags = {
+    ...character.eventFlags,
+    tavern_rumor_001_base_read: true,
+    tavern_rumor_002_base_read: true,
+    tavern_rumor_003_base_read: true,
+    tavern_rumor_009_marathon_read: true,
+    b1_b42_marathon_completed: true,
+    b1_b84_long_march_completed: true,
+    b1_b100_final_long_march_completed: true
+  };
+  character.lootBag.equipmentInstances.push({ equipmentId: "the_five_star" });
+
+  const result = syncTavernRumorNotifications(character);
+  assert.deepEqual(result.addedIds, [
+    "rumor_010:relic",
+    "rumor_011:long_march",
+    "rumor_012:final_long_march"
+  ]);
+  assert.deepEqual(result.pendingRumors.map(entry => entry.title), [
+    "遺物武器の噂",
+    "続・マラソンの噂",
+    "前人未踏の噂"
+  ]);
+});
