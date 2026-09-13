@@ -2279,7 +2279,7 @@ test("Poison Mask contributes equal poison and deadly-poison application resista
 test("The Five Star attacks five times and Musashi Blade is a two-handed two-hit warrior weapon", () => {
   const fiveStar = getWeapon("the_five_star");
   const fiveStarAttack = createNormalAttack({ weapon: fiveStar, skillIds: ["assassination"] });
-  assert.equal(fiveStar.attack, 1);
+  assert.equal(fiveStar.attack, 18);
   assert.equal(fiveStarAttack.hitCount, 5);
   assert.equal(fiveStarAttack.powerPerHit, .25);
   assert.equal(fiveStarAttack.passiveInstantDeathId, "assassination");

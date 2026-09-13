@@ -195,7 +195,11 @@ import {
 import { renameCharacter as applyCharacterRename } from "../data/character-name.js";
 import { isTransferDestinationUnlocked } from "../data/transfer-destinations.js";
 import { RARE_REVIVAL_GODDESS_IMAGE, selectRevivalGoddessImage } from "../data/revival-presentation.js";
-import { ANASTASIA_OUTFIT_EVENT_FLAG } from "../data/anastasia-event.js";
+import {
+  ANASTASIA_OUTFIT_EVENT_FLAG,
+  getTempleRevivalMessage,
+  isAnastasiaAssigned
+} from "../data/anastasia-event.js";
 import {
   FLEISCHFRESSERKNOSPE_DEFEATED_FLAG,
   JOHANNA_MEDICINE_KEY_ITEM_ID,
@@ -1844,7 +1848,7 @@ import {
   }
 
   function templeKeeperName() {
-    return character?.eventFlags?.tavern_rumor_004_base_read ? "助祭アナスタシア" : "司祭アーヴァイン";
+    return isAnastasiaAssigned(character) ? "助祭アナスタシア" : "司祭アーヴァイン";
   }
 
   function johannaInnProfile({ postQuest = false } = {}) {
@@ -2011,7 +2015,7 @@ import {
       }
       return "ギルドマスター：これを持っていけ。ついでに町を見て回ったらどうだ？一通り回ったら、また戻ってこい。";
     }
-    if (facilityId === "temple" && character?.eventFlags?.tavern_rumor_004_base_read) {
+    if (facilityId === "temple" && isAnastasiaAssigned(character)) {
       if (!character.eventFlags?.anastasia_first_talk_completed) {
         return {
           dialogue: [
@@ -3938,8 +3942,9 @@ import {
       openTown({ registrationRequired: false, facilityId: "temple", mode: "facilityMenu" });
       updateCharacterUi();
     }
+    say("");
     await runRevivalPrayer();
-    say(`司祭アーヴァイン：おお…！女神の祈りが届いたか…！よくぞ目覚めた…！${experienceMessage}`);
+    say(getTempleRevivalMessage(character, experienceMessage));
     if (worldLocation === "town" && getTownState().facilityId === "temple") startBgm("temple");
     window.setTimeout(() => openPendingNpcRenewal(), 0);
   }

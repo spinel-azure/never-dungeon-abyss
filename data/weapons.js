@@ -336,13 +336,22 @@ export const WEAPONS = Object.freeze({
     hiddenBossSlayerIds: Object.freeze(["jabberwock_event_boss"])
   }),
   the_five_star: Object.freeze({
-    id: "the_five_star", name: "ザ・ファイブスター", type: "five_hit_dagger", attack: 1,
-    element: "physical", allowedJobs: Object.freeze(["thief"]), unique: true,
+    id: "the_five_star", name: "ザ・ファイブスター", type: "five_hit_dagger", attack: 18,
+    element: "physical", allowedJobs: Object.freeze(["thief"]),
+    statBonuses: Object.freeze({ dex: 8, agi: 5, luc: 4 }),
+    defensePenetration: 0.75,
+    criticalBonus: 0.1,
+    compactStatusBonuses: true,
+    unique: true,
     lotBagHighlight: "orange", sellPrice: 0
   }),
   musashi_blade: Object.freeze({
-    id: "musashi_blade", name: "ムサシブレード", type: "dual_blade", attack: 15,
-    element: "physical", allowedJobs: Object.freeze(["warrior"]), twoHanded: true, unique: true,
+    id: "musashi_blade", name: "ムサシブレード", type: "dual_blade", attack: 40,
+    element: "physical", allowedJobs: Object.freeze(["warrior"]), twoHanded: true,
+    statBonuses: Object.freeze({ str: 8 }),
+    defensePenetration: 0.4,
+    compactStatusBonuses: true,
+    unique: true,
     lotBagHighlight: "orange", sellPrice: 0
   }),
   glacies_hammer: Object.freeze({
@@ -353,9 +362,12 @@ export const WEAPONS = Object.freeze({
     sellPrice: 6000, buybackPrice: 12000
   }),
   sylvan_emera: Object.freeze({
-    id: "sylvan_emera", name: "シルワンエメラ", type: "staff", attack: 18,
+    id: "sylvan_emera", name: "シルワンエメラ", type: "staff", attack: 28,
     element: "physical", allowedJobs: Object.freeze(["priest"]), twoHanded: true,
-    statBonuses: Object.freeze({ luc: 6, healingMiracleMultiplier: 1.5, defenseMultiplier: 1.5 }),
+    statBonuses: Object.freeze({ int: 8, luc: 8, maxSp: 60, healingMiracleMultiplier: 1.5, defenseMultiplier: 1.5 }),
+    description: "DEF1.5倍／回復奇蹟1.5倍",
+    showDescriptionInStatus: false,
+    compactStatusBonuses: true,
     hiddenStatBonusKeys: Object.freeze(["healingMiracleMultiplier", "defenseMultiplier"]),
     unique: true,
     lotBagHighlight: "orange",
@@ -364,8 +376,12 @@ export const WEAPONS = Object.freeze({
   comet_booster: Object.freeze({
     id: "comet_booster", name: "コメットブースター", type: "staff", attack: 1,
     element: "physical", allowedJobs: Object.freeze(["mage"]), twoHanded: true,
-    statBonuses: Object.freeze({ int: 10 }),
+    statBonuses: Object.freeze({ int: 14, maxSp: 80, attackSpellDamageBonus: 0.2 }),
     grantedSkillIds: Object.freeze(["fall_the_meteor"]),
+    description: "攻撃呪文＋20％／「墜ちよ、隕石」使用可能",
+    showDescriptionInStatus: false,
+    compactStatusBonuses: true,
+    hiddenStatBonusKeys: Object.freeze(["attackSpellDamageBonus"]),
     unique: true,
     lotBagHighlight: "orange",
     sellPrice: 0
