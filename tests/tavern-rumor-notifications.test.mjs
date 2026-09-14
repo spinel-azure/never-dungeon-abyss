@@ -210,11 +210,24 @@ test("new relic and long-march rumor stages use the shared notification queue", 
   assert.deepEqual(result.addedIds, [
     "rumor_010:relic",
     "rumor_011:long_march",
-    "rumor_012:final_long_march"
+    "rumor_012:final_long_march", "rumor_013:base", "rumor_014:base"
   ]);
   assert.deepEqual(result.pendingRumors.map(entry => entry.title), [
     "遺物武器の噂",
     "続・マラソンの噂",
-    "前人未踏の噂"
+    "前人未踏の噂", "暗闇から忍び寄る追跡者の噂", "「光もたらすもの」の噂"
   ]);
+});
+
+test('Verfolger notification changes from base to defeated without marking the rumor read',()=>{
+ const c=makeCharacter('追跡者');c.highestDungeonDepthReached=90;
+ const first=syncTavernRumorNotifications(c);assert.ok(first.addedIds.includes('rumor_013:base'));
+ first.character.eventFlags.achievement_verfolger_defeated=true;
+ const next=syncTavernRumorNotifications(first.character);assert.ok(next.removedIds.includes('rumor_013:base'));assert.ok(next.addedIds.includes('rumor_013:defeated'));
+ assert.equal(Boolean(next.character.eventFlags.tavern_rumor_013_defeated_read),false);
+});
+test('Lichtbringer notification switches to ownership stage without reading it',()=>{
+ const c=makeCharacter('光');c.highestDungeonDepthReached=90;const first=syncTavernRumorNotifications(c);assert.ok(first.addedIds.includes('rumor_014:base'));
+ first.character.keyItems={owned:{lichtbringer:{acquiredAt:1,count:1}},acquisitionOrder:['lichtbringer']};const next=syncTavernRumorNotifications(first.character);
+ assert.ok(next.removedIds.includes('rumor_014:base'));assert.ok(next.addedIds.includes('rumor_014:lichtbringer'));assert.equal(Boolean(next.character.eventFlags.tavern_rumor_014_lichtbringer_read),false);
 });

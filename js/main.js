@@ -1,3 +1,5 @@
+import { ROAMING_ENEMY_DEFINITIONS } from '../data/roaming-enemies.js';
+import { recordVerfolgerDefeat, isVerfolgerDefeatedOnFloor, VERFOLGER_DEFEAT_MESSAGE } from '../data/verfolger.js';
 import {
   MAP_W,
   MAP_H,
@@ -1146,6 +1148,7 @@ import {
     onFixedFloorEvent: event => event?.description || "女王の影が静かに揺らめいている。",
     onDungeonStep: handleDungeonStep,
     onRoamingEnemyPlayerStep: resolveRoamingEnemyPlayerStep,
+    onRoamingEnemyEncounterConfirm: launchRoamingEnemyBattle,
     updateRoamingEnemyAnimation: updateCurrentRoamingEnemyAnimation,
     onRoamingEnemyForcedMovementComplete: resolveRoamingEnemyForcedMovementContact,
     onStateChanged: handlePersistentStateChanged
@@ -2667,6 +2670,22 @@ import {
     setPlayerInputEnabled(false);
     pendingEncounter = null;
     activeRoamingEnemyInstanceId = instanceId;
+    if (definition.encounterImage) {
+      startOverlayEvent({ type: 'roamingEncounter', instanceId,
+        imageId: definition.encounterImageId, image: definition.encounterImage,
+        message: definition.encounterMessage, canCancel: false });
+      return true;
+    }
+    return launchRoamingEnemyBattle(instanceId);
+  }
+
+  function launchRoamingEnemyBattle(instanceId) {
+    const mapEnemy = getActiveRoamingEnemy();
+    if (!character || worldLocation !== 'dungeon' || isBattleActive()
+      || activeRoamingEnemyInstanceId !== instanceId || !mapEnemy?.inBattle) return false;
+    const definition = getRoamingEnemyDefinition(mapEnemy);
+    const enemyData = definition ? getEnemyById(definition.enemyId) : null;
+    if (!enemyData) return false;
     const combatant = createEnemyCombatant({
       ...enemyData,
       escapeRate: definition.escapeRate
@@ -3480,13 +3499,14 @@ import {
   }
 
   function finishBattleVictory(battle) {
-    if (character && battle?.player) {
-      updateCharacterFromBattle(createPersistentBattlePlayerChanges(battle.player));
-    }
     const defeatedRoamingEnemyInstanceId = battle?.roamingEnemyInstanceId || activeRoamingEnemyInstanceId;
     if (defeatedRoamingEnemyInstanceId) {
-      defeatRoamingEnemy(defeatedRoamingEnemyInstanceId);
+      if (!defeatRoamingEnemy(defeatedRoamingEnemyInstanceId)) return;
+      if (battle?.enemy?.id === 'verfolger') character = recordVerfolgerDefeat(character, currentDepth);
       activeRoamingEnemyInstanceId = null;
+    }
+    if (character && battle?.player) {
+      updateCharacterFromBattle(createPersistentBattlePlayerChanges(battle.player));
     }
     const questWaspHiveVictory = activeRareRoomEncounterId === "quest_029_wasp_hive";
     const questJohannaMedicineBossVictory = activeRareRoomEncounterId === "quest_031_fleischfresserknospe";
@@ -3685,7 +3705,7 @@ import {
     const chainedBattleMessage = nextBoss && !isBossDefeated(character, nextBoss)
       ? `\nしかし、その奥から${nextBoss.name}が姿を現した――！`
       : "";
-    const victoryMessage = `${reward > 0 ? `戦闘に勝利した。${reward}EXPを獲得した。` : "戦闘に勝利した。"}${bossRewardMessage}${questCollectionMessage}${dropMessage ? `\n${dropMessage}` : ""}${defeatQuestProgressMessage}${chainedBattleMessage}`;
+    const victoryMessage = `${defeatedEnemyId === "verfolger" ? VERFOLGER_DEFEAT_MESSAGE + "\n" : ""}${reward > 0 ? `戦闘に勝利した。${reward}EXPを獲得した。` : "戦闘に勝利した。"}${bossRewardMessage}${questCollectionMessage}${dropMessage ? `\n${dropMessage}` : ""}${defeatQuestProgressMessage}${chainedBattleMessage}`;
     resetPresence();
     if (startMichaelaRestoration) {
       setPlayerInputEnabled(false);
@@ -4872,6 +4892,7 @@ import {
     const secondQueenShadowQuest = getQuestProgress(character, "guild_024");
     const thirdQueenShadowQuest = getQuestProgress(character, "guild_032");
     return {
+      roamingEnemyDefinitions: ROAMING_ENEMY_DEFINITIONS.filter(definition => definition.enemyId !== 'verfolger' || !isVerfolgerDefeatedOnFloor(character, currentDepth)),
       bossDefeated: isBossDefeated(character, "strange_knight_statue_b9f"),
       bossDefeatedById: {
         ...(floorBoss ? { [floorBoss.id]: isBossDefeated(character, floorBoss) } : {}),

@@ -1,0 +1,55 @@
+NDE Data Validation
+===================
+PASS: JSON構文 [data/effects/fire_ball.json]
+
+PASS: JSON構文 [data/effects/lot_bag_identify.json]
+
+PASS: JSON構文 [data/effects/player_charge_skills.json]
+
+PASS: JSON構文 [data/vanish-effects.json]
+
+PASS: 各データコレクション内のIDに重複はありません
+
+PASS: ボスの必須項目 [data/bosses.js]
+
+PASS: 敵の必須項目 [data/enemies.js]
+
+PASS: 武器の必須項目 [data/weapons.js]
+
+PASS: 職業の必須項目 [data/classes.js]
+
+PASS: 戦技の必須項目 [data/skills.js]
+
+PASS: 呪文・奇蹟の必須項目 [data/spells.js]
+
+PASS: NPCの必須項目 [data/npcs.js]
+
+PASS: アイテムの必須項目 [data/items.js]
+
+PASS: 数値型と非負数（525項目）
+
+PASS: 職業から初期スキルへの参照 [data/classes.js]
+
+PASS: スキルから状態効果への参照 [data/skills.js]
+
+PASS: 初期装備IDの参照 [data/equipment.js]
+
+PASS: 町の登録職業IDから職業データへの参照 [data/town.js]
+
+PASS: 画像・背景パス（84件）
+
+PASS: カードのレアリティ別コスト（19枚）
+
+PASS: Zカードは12種類・ID一意・コスト8です
+
+SKIP: カードの画像・アイコン実体
+Reason: カードはiconIdと描画関数レジストリを使用するため、単純なファイルパス検証の対象外です
+
+SKIP: ダンジョン生成結果の到達率・分布 [js/dungeon.js]
+Reason: ランダム生成を実行した結果が必要なため、JavaScript側からJSON出力する集計ブリッジが必要です
+
+Files checked: 21
+Passed: 21
+Warnings: 0
+Failed: 0
+Skipped: 2

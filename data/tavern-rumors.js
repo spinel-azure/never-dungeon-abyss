@@ -1,3 +1,4 @@
+import { hasKeyItem } from './key-items.js';
 import { characterOwnsEquipment } from "./equipment-inventory.js";
 import { GOLD_CHEST_WEAPONS_BY_JOB } from "./loot.js";
 
@@ -29,7 +30,7 @@ const RELIC_WEAPON_IDS = Object.freeze(Object.values(GOLD_CHEST_WEAPONS_BY_JOB))
 
 export function getTavernRumorTypewriterParts(message) {
   const text = String(message || "");
-  const match = text.match(/^(.*?(?:客|ローザ)「)([^」]*)(」[\s\S]*)$/s);
+  const match = text.match(/^(.*?(?:客|ローザ)「)(.*)(」[\s\S]*)$/s);
   if (!match) return null;
   return { prefix: match[1], dialogue: match[2], suffix: match[3] };
 }
@@ -302,6 +303,38 @@ export const TAVERN_RUMORS = Object.freeze([
         rosaContinuation: "ええっ！？最後の階まで走りきった、ですって！？あなた、逞しいのね。素敵よ…！"
       })
     ])
+  }),
+  Object.freeze({
+    id: 'rumor_013', verbatimCustomers: true,
+    title: '暗闇から忍び寄る追跡者の噂',
+    unlock: context => context.depthReached >= 90,
+    customerLead: 'おい、知ってるか？漆黒区域で執拗に追いかけてくる魔物が出るらしいぞ！',
+    customerReply: 'ああ。もしも出会っちまったら、「逃げる」のもアリかもな！',
+    phases: Object.freeze([
+      Object.freeze({ id: 'base', readFlag: 'tavern_rumor_013_base_read',
+        unlock: context => !context.verfolgerDefeated,
+        rosa: 'まあ…！追いかけてくるなんて、恐ろしいわ…！' }),
+      Object.freeze({ id: 'defeated', readFlag: 'tavern_rumor_013_defeated_read',
+        unlock: context => context.verfolgerDefeated,
+        rosa: 'まあ…！追いかけてくるなんて、恐ろしいわ…！',
+        rosaContinuation: 'ええっ！？返り討ちにしたですって！？あなたには驚かされっぱなしね…。' })
+    ])
+  }),
+  Object.freeze({
+    id: 'rumor_014', verbatimCustomers: true,
+    title: '「光もたらすもの」の噂',
+    unlock: context => context.depthReached >= 90,
+    customerLead: 'おい、知ってるか？漆黒区域のどこかでまばゆい光を見たヤツがいるらしい。',
+    customerReply: 'ああ。どこだったかな？確か、噴水のある階じゃねえかな…？',
+    phases: Object.freeze([
+      Object.freeze({ id: 'base', readFlag: 'tavern_rumor_014_base_read',
+        unlock: context => !context.lichtbringerOwned,
+        rosa: 'まぁ、まばゆい光ですって。一体何かしらね？' }),
+      Object.freeze({ id: 'lichtbringer', readFlag: 'tavern_rumor_014_lichtbringer_read',
+        unlock: context => context.lichtbringerOwned,
+        rosa: 'まぁ、まばゆい光ですって。一体何かしらね？',
+        rosaContinuation: 'ええっ！？あなた、そのまばゆい光を手に入れたの！？きゃっ！眩しいわ…！' })
+    ])
   })
 ]);
 
@@ -345,6 +378,8 @@ function normalizeRumorContext(character, context = {}) {
     marathonCompleted: Boolean(context.marathonCompleted ?? eventFlags.b1_b42_marathon_completed),
     longMarchCompleted: Boolean(context.longMarchCompleted ?? eventFlags.b1_b84_long_march_completed),
     finalLongMarchCompleted: Boolean(context.finalLongMarchCompleted ?? eventFlags.b1_b100_final_long_march_completed),
+    lichtbringerOwned: Boolean(context.lichtbringerOwned ?? hasKeyItem(character?.keyItems, 'lichtbringer')),
+    verfolgerDefeated: Boolean(context.verfolgerDefeated ?? eventFlags.achievement_verfolger_defeated),
     relicWeaponOwned: Boolean(context.relicWeaponOwned ?? RELIC_WEAPON_IDS.some(
       equipmentId => characterOwnsEquipment(character, equipmentId)
     ))

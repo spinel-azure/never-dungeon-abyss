@@ -1,3 +1,4 @@
+import { verfolger } from './verfolger.js';
 import { getWaterRegionFormationIds, waterRegionEnemies } from "./water-region-enemies.js";
 import { crystalRegionEnemies, getCrystalRegionFormationIds } from "./crystal-region-enemies.js";
 import { darkRegionEnemies, getDarkRegionFormationIds } from "./dark-region-enemies.js";
@@ -5,6 +6,7 @@ import { getMagicRegionFormationIds, magicRegionEnemies } from "./magic-region-e
 import { getTortureRegionFormationIds, tortureRegionEnemies } from "./torture-region-enemies.js";
 
 export const enemies = Object.freeze([
+  verfolger,
   Object.freeze({
     id: "abyss_rat",
     name: "奈落ネズミ",
@@ -792,6 +794,8 @@ export function createEnemyCombatant(enemy) {
     physicalTypeMultipliers: { ...(enemy.physicalTypeMultipliers || {}) },
     crackTrait: structuredClone(enemy.crackTrait || null),
     resonanceTrait: structuredClone(enemy.resonanceTrait || null),
+    reservedActionBreakTrait: structuredClone(enemy.reservedActionBreakTrait || null),
+    noDrop: Boolean(enemy.noDrop),
     isBoss: Boolean(enemy.isBoss),
     alive: true
   };

@@ -422,3 +422,44 @@ test("legacy saves that already meet all conditions receive only the latest new 
     "rumor_012_final_long_march"
   ]);
 });
+
+test('Verfolger rumor unlocks at B90, follows first defeat, and preserves latest-stage history',()=>{
+ let c=createInitialCharacter({name:'噂',job:'warrior'});
+ const current=()=>getUnreadTavernRumors(c).find(r=>r.rumorId==='rumor_013');
+ const past=()=>getPastTavernRumors(c).find(r=>r.id==='rumor_013');
+ c.highestDungeonDepthReached=89;assert.equal(current(),undefined);
+ c.highestDungeonDepthReached=90;const base=current();assert.equal(base.id,'rumor_013_base');
+ assert.deepEqual(base.dialogue,[
+  'あなたはカウンターから耳を澄ます………。\n客「おい、知ってるか？漆黒区域で執拗に追いかけてくる魔物が出るらしいぞ！」\n＊Aボタンで次へ',
+  '客「ああ。もしも出会っちまったら、「逃げる」のもアリかもな！」\n＊Aボタンで次へ',
+  'ローザ「まあ…！追いかけてくるなんて、恐ろしいわ…！」\n＊Aボタンで戻る']);
+ assert.ok(base.dialogue.every(s=>getTavernRumorTypewriterParts(s)));assert.equal(past(),undefined);
+ c=markTavernRumorRead(c,base);assert.equal(current(),undefined);assert.equal(past().title,'暗闇から忍び寄る追跡者の噂');
+ c.eventFlags.achievement_verfolger_defeated=true;const next=current();assert.equal(next.id,'rumor_013_defeated');assert.equal(past(),undefined);
+ assert.equal(next.dialogue.at(-1),'ローザ「ええっ！？返り討ちにしたですって！？あなたには驚かされっぱなしね…。」\n＊Aボタンで戻る');
+ assert.ok(next.dialogue.every(s=>getTavernRumorTypewriterParts(s)));
+ c=markTavernRumorRead(c,next);assert.equal(current(),undefined);assert.equal(past().description.length,4);
+ assert.equal(past().number,'013');c=JSON.parse(JSON.stringify(c));assert.equal(current(),undefined);assert.ok(past());
+});
+test('Verfolger already defeated old saves offer only the latest unread stage',()=>{
+ const c=createInitialCharacter({name:'既達成',job:'mage'});c.highestDungeonDepthReached=98;c.eventFlags.achievement_verfolger_defeated=true;
+ const rumors=getUnreadTavernRumors(c).filter(r=>r.rumorId==='rumor_013');assert.equal(rumors.length,1);assert.equal(rumors[0].stageId,'defeated');
+ assert.equal(rumors[0].notificationId,'rumor_013:defeated');assert.deepEqual(rumors[0].readFlags,['tavern_rumor_013_base_read','tavern_rumor_013_defeated_read']);
+});
+ test('nested dialogue quotes remain inside typewriter text',()=>{assert.equal(getTavernRumorTypewriterParts('客「ああ。「逃げる」のもアリかもな！」\n＊Aボタンで次へ').dialogue,'ああ。「逃げる」のもアリかもな！');});
+
+test('Lichtbringer rumor uses B90, real ownership, exact dialogue and latest history',()=>{
+ let c=createInitialCharacter({name:'光',job:'mage'});c.highestDungeonDepthReached=89;
+ const current=()=>getUnreadTavernRumors(c).find(r=>r.rumorId==='rumor_014');const past=()=>getPastTavernRumors(c).find(r=>r.id==='rumor_014');
+ assert.equal(current(),undefined);c.highestDungeonDepthReached=90;const base=current();assert.equal(base.id,'rumor_014_base');
+ assert.deepEqual(base.dialogue,[
+ 'あなたはカウンターから耳を澄ます………。\n客「おい、知ってるか？漆黒区域のどこかでまばゆい光を見たヤツがいるらしい。」\n＊Aボタンで次へ',
+ '客「ああ。どこだったかな？確か、噴水のある階じゃねえかな…？」\n＊Aボタンで次へ',
+ 'ローザ「まぁ、まばゆい光ですって。一体何かしらね？」\n＊Aボタンで戻る']);
+ c=markTavernRumorRead(c,base);assert.equal(current(),undefined);assert.equal(past().title,'「光もたらすもの」の噂');
+ c.eventFlags.lichtbringer_b95f_found=true;assert.equal(current(),undefined);
+ c.keyItems={owned:{lichtbringer:{acquiredAt:1,count:1}},acquisitionOrder:['lichtbringer']};const next=current();assert.equal(next.id,'rumor_014_lichtbringer');assert.equal(past(),undefined);
+ assert.equal(next.dialogue.at(-1),'ローザ「ええっ！？あなた、そのまばゆい光を手に入れたの！？きゃっ！眩しいわ…！」\n＊Aボタンで戻る');assert.ok(next.dialogue.every(s=>getTavernRumorTypewriterParts(s)));
+ c=markTavernRumorRead(c,next);c=JSON.parse(JSON.stringify(c));assert.equal(current(),undefined);assert.equal(past().description.length,4);assert.equal(past().number,'014');
+ delete c.eventFlags.tavern_rumor_014_base_read;delete c.eventFlags.tavern_rumor_014_lichtbringer_read;assert.equal(current().stageId,'lichtbringer');
+});

@@ -63,8 +63,8 @@ const TEST_DEFINITION = Object.freeze({
 
 test.afterEach(() => clearRoamingEnemy());
 
-test("production roaming-enemy registry is empty until concrete floor values are approved", () => {
-  assert.deepEqual(ROAMING_ENEMY_DEFINITIONS, []);
+test("production roaming-enemy registry enables only approved Verfolger floors", () => {
+  assert.deepEqual(ROAMING_ENEMY_DEFINITIONS.map(d => [d.enemyId, d.minDepth, d.maxDepth]), [['verfolger', 90, 98]]);
   assert.equal(getRoamingEnemyDefinitionForDepth(12), null);
 });
 

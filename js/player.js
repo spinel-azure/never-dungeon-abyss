@@ -1484,7 +1484,13 @@ export function handleOverlayEventInput(action) {
     return true;
   }
   if (action === "confirm") {
-    if (state.overlayEvent.type === "npcTalk") advanceNpcTalkEvent();
+    if (state.overlayEvent.type === 'roamingEncounter') {
+      const event = state.overlayEvent;
+      state.overlayEvent = null;
+      hooks.say('');
+      hooks.onRoamingEnemyEncounterConfirm?.(event.instanceId);
+    }
+    else if (state.overlayEvent.type === "npcTalk") advanceNpcTalkEvent();
     else if (state.overlayEvent.type === "bossPrompt") confirmBossEvent();
     else if (state.overlayEvent.type === "b100FinalPrelude") advanceB100FinalPrelude();
     else if (state.overlayEvent.type === "bossRemains") finishBossRemainsEvent();

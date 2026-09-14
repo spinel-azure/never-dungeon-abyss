@@ -489,6 +489,7 @@ function drawOverlayEvent() {
   renderer.eventOverlayCanvas.style.pointerEvents = event?.type === "floorLap" ? "auto" : "none";
   if (!event?.showOverlay) return;
   if (event.type === "randomEncounter") return;
+  if (event.imageId && event.image) loadCharacterImage(event.imageId, event.image);
   const image = event.imageId ? renderer.characterImages.get(event.imageId) : null;
 
   ctx.save();
@@ -1091,7 +1092,7 @@ export function drawCellEvents(layer = "all", now = 0) {
           eventKind: "roamingEnemy",
           npc: {
             imageId: roaming.definition.imageId,
-            renderScale: roaming.definition.renderScale
+            renderScale: roaming.definition.renderScale, maxHeightRatio: roaming.definition.maxHeightRatio
           }
         });
       }
@@ -1326,7 +1327,7 @@ function projectCellFootprint(cellX, cellY, forward, requireFullVisibility = fal
     { x: cellX + 1 - projectionInset, y: cellY + 1 - projectionInset },
     { x: cellX + projectionInset, y: cellY + 1 - projectionInset }
   ];
-  const corners = projectionSamples.map(sample => projectWorldPoint(sample.x, sample.y));
+  const corners = projectionSamples.map(sample => projectWorldPoint(sample.x, sample.y, requireFullVisibility));
   if (corners.some(corner => !corner)) return null;
   return {
     floor: corners.map(corner => ({ x: corner.x, y: corner.floorY })),
@@ -1334,7 +1335,7 @@ function projectCellFootprint(cellX, cellY, forward, requireFullVisibility = fal
   };
 }
 
-function projectWorldPoint(worldX, worldY) {
+function projectWorldPoint(worldX, worldY, allowOffscreen = false) {
   const { W, H, state } = renderer;
   const dx = worldX - state.x;
   const dy = worldY - state.y;
@@ -1344,7 +1345,7 @@ function projectWorldPoint(worldX, worldY) {
   const side = dx * -Math.sin(state.angle) + dy * Math.cos(state.angle);
   const focalLength = (W / 2) / Math.tan(FOV / 2);
   const x = W / 2 + (side / forward) * focalLength;
-  if (x < -W * .08 || x > W * 1.08) return null;
+  if (!allowOffscreen && (x < -W * .08 || x > W * 1.08)) return null;
 
   const projectedWallH = Math.min(H * 1.85, H / forward);
   const floorY = Math.max(H * .5, Math.min(H * .94, H / 2 + projectedWallH / 2));
@@ -1519,7 +1520,9 @@ function drawNpcEvent(ctx, event, now = 0) {
   const nearbyScale = event.npc.imageId === "NPC_01" ? 1.5 : 1.9;
   const proximityScale = isOneStepAway ? nearbyScale : 1;
   const scaledSpriteH = event.size * 2.05 * proximityScale * Math.max(0.25, Number(event.npc.renderScale) || 1);
-  const obstacleHeightLimit = event.eventKind === "explorationObstacle" ? renderer.H * .76 : Infinity;
+  const obstacleHeightLimit = event.eventKind === 'roamingEnemy' && event.npc.maxHeightRatio
+    ? renderer.H * event.npc.maxHeightRatio
+    : event.eventKind === "explorationObstacle" ? renderer.H * .76 : Infinity;
   const spriteH = isOneStepAway
     ? Math.min(scaledSpriteH, renderer.H * .82)
     : Math.min(scaledSpriteH, obstacleHeightLimit);

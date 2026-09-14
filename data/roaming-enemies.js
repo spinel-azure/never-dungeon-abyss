@@ -1,8 +1,10 @@
-// Production entries are intentionally empty until the roaming enemy's floors,
-// combatant, exploration artwork, and escape rate are finalized. A definition is:
-// { id, enemyId, imageId, image, floors: [..] | minDepth/maxDepth, escapeRate, renderScale }.
-export const ROAMING_ENEMY_DEFINITIONS = Object.freeze([]);
-
+export const ROAMING_ENEMY_DEFINITIONS = Object.freeze([Object.freeze({
+  id: 'verfolger', enemyId: 'verfolger', imageId: 'verfolger_silhouette',
+  image: 'images/npc/NPC_event_27.avif', minDepth: 90, maxDepth: 98,
+  escapeRate: 1, renderScale: 1.5, maxHeightRatio: .6,
+  encounterImageId: 'verfolger_revealed', encounterImage: 'images/bosses/boss_22b.avif',
+  encounterMessage: '黒い影が、ゆっくりと身を起こした。\n追ってきていたのは――こいつだ。\n＊Aボタン：戦闘開始'
+})]);
 export function normalizeRoamingEnemyDefinition(definition = {}) {
   const floors = Array.isArray(definition.floors)
     ? [...new Set(definition.floors.map(value => Math.floor(Number(value) || 0)).filter(value => value > 0))]
@@ -16,6 +18,10 @@ export function normalizeRoamingEnemyDefinition(definition = {}) {
     image: String(definition.image || ""),
     renderScale: Math.max(0.25, Number(definition.renderScale) || 1),
     escapeRate: Math.max(0, Math.min(1, Number(definition.escapeRate) || 0)),
+    maxHeightRatio: Math.max(0, Math.min(1, Number(definition.maxHeightRatio) || 0)),
+    encounterImageId: String(definition.encounterImageId || ''),
+    encounterImage: String(definition.encounterImage || ''),
+    encounterMessage: String(definition.encounterMessage || ''),
     floors,
     minDepth,
     maxDepth
