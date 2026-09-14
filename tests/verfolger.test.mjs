@@ -74,6 +74,7 @@ test('all nine floors place one legal individual; old saves stay empty, escape r
 test('per-floor defeat and achievement survive normalization without affecting other floors',()=>{
  const old=createInitialCharacter({name:'SAVE',job:'warrior'});assert.equal(isVerfolgerDefeatedOnFloor(old,90),false);
  const c=normalizeCharacter(JSON.parse(JSON.stringify(recordVerfolgerDefeat(old,90))));assert.equal(isVerfolgerDefeatedOnFloor(c,90),true);assert.equal(isVerfolgerDefeatedOnFloor(c,91),false);
- assert.equal(getAdventureChronicle(c).find(e=>e.id==='verfolger').label,'追跡者を狩る者');
+ assert.equal(getAdventureChronicle(c).find(e=>e.id==='verfolger').label,'フェルフォルガーを討伐した');
+ const chronicle=getAdventureChronicle(c);assert.equal(chronicle.findIndex(e=>e.id==='verfolger'),chronicle.findIndex(e=>e.id==='b90')+1);
  assert.equal(VERFOLGER_DEFEAT_MESSAGE,'フェルフォルガーは「ギャギャッ！」と耳障りな叫び声を上げながら姿を消した…。');
 });
