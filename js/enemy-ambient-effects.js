@@ -1,5 +1,6 @@
 // Normalized image-space emitters: x, y, width, rise. No boss-ID checks or image edits.
 export const ENEMY_AMBIENT_EFFECTS = Object.freeze({
+  'arrow-glint': Object.freeze({ kind: 'arrowGlint', point: Object.freeze([.972, .287]) }),
   'blood-drip': Object.freeze({ kind: 'bloodDrip', emitters: Object.freeze([[.235, .565], [.105, .63]]) }),
   "tentacle-sway": Object.freeze({
     kind: "spriteDeform",
@@ -262,6 +263,10 @@ function flame(ctx, emitter, time, seed, strength) {
 
 export function drawEnemyAmbientFrame(entry, seconds, fps, reducedMotion = false) {
   const { profile, concealed } = entry;
+  if (profile.kind === 'arrowGlint') {
+    drawArrowGlintFrame(entry, seconds, reducedMotion);
+    return;
+  }
   if (profile.kind === 'bloodDrip') {
     drawBloodDripFrame(entry, seconds, reducedMotion);
     return;
@@ -306,6 +311,35 @@ export function drawEnemyAmbientFrame(entry, seconds, fps, reducedMotion = false
     }
     ctx.restore();
   }
+}
+
+export function getArrowGlintStrength(seconds) {
+  const phase = ((Number(seconds) || 0) % 2.8 + 2.8) % 2.8;
+  return Math.max(0, ...[.35, .95].map(center => Math.max(0, 1 - Math.abs(phase - center) / .23))) ** 2;
+}
+
+export function drawArrowGlintFrame(entry, seconds, reducedMotion = false) {
+  for (const canvas of [entry.back, entry.front]) canvas.getContext('2d')?.clearRect(0, 0, canvas.width, canvas.height);
+  if (entry.concealed || reducedMotion) return;
+  const strength = getArrowGlintStrength(seconds);
+  if (!strength) return;
+  const canvas = entry.front, ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  const [x,y] = entry.profile.point;
+  const radius = .013 + .032 * strength;
+  ctx.save();
+  ctx.setTransform(canvas.width / 1.3, 0, 0, canvas.height / 1.3, canvas.width * .15 / 1.3, canvas.height * .22 / 1.3);
+  ctx.globalCompositeOperation = 'lighter';
+  const glow = ctx.createRadialGradient(x,y,0,x,y,radius * 1.5);
+  glow.addColorStop(0,`rgba(255,247,180,${strength * .8})`);
+  glow.addColorStop(1,'rgba(255,220,100,0)');
+  ctx.fillStyle = glow;ctx.fillRect(x-radius*1.5,y-radius*1.5,radius*3,radius*3);
+  ctx.globalAlpha = strength;
+  ctx.fillStyle = '#fffde8';
+  ctx.beginPath();ctx.moveTo(x,y-radius);ctx.lineTo(x+.004,y-.004);ctx.lineTo(x+radius,y);
+  ctx.lineTo(x+.004,y+.004);ctx.lineTo(x,y+radius);ctx.lineTo(x-.004,y+.004);
+  ctx.lineTo(x-radius,y);ctx.lineTo(x-.004,y-.004);ctx.closePath();ctx.fill();
+  ctx.restore();
 }
 
 function traceNormalizedPolygon(ctx, polygon, width, height) {

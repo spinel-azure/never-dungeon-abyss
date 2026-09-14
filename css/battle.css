@@ -321,6 +321,11 @@
 }
 
 .battle-enemy-stage.is-amayenak { inset: 7% 3% 15%; }
+.battle-enemy-stage.is-zentaurin { inset: 9% 8% 15%; }
+.battle-enemy-stage.is-zentaurin > .battle-enemy-heading {
+  position: absolute;
+  top: -8%;
+}
 
 .battle-enemy-image.is-jabberwock {
   max-height: 95%;

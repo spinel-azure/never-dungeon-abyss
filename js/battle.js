@@ -962,6 +962,7 @@ function renderBattle() {
   enemyStage?.classList.toggle("is-defeated", defeated);
   enemyStage?.classList.toggle("is-eiskoenigin", battle.enemy.id === "eiskoenigin_b49f" && !defeated && !battleUi.concealed);
   enemyStage?.classList.toggle("is-amayenak", battle.enemy.id === "amayenak_b100f");
+  enemyStage?.classList.toggle("is-zentaurin", battle.enemy.id === "zentaurin_b96f");
   battleUi.messageEl.textContent = formatBattleMessage(battle);
   syncEnemyAmbientEffects();
 }

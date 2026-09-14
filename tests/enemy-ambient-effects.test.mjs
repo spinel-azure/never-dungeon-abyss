@@ -88,6 +88,7 @@ function harness({ rate = 60, mobile = false, reduced = false } = {}) {
 
 test("all three configured bosses retain their ambient effect through combat cloning", () => {
   assert.deepEqual(Object.values(BOSSES).filter(b => b.ambientEffect).map(b => [b.id, b.ambientEffect]), [
+    ["zentaurin_b96f", "arrow-glint"],
     ["wicker_man_b39f", "wicker-flame"],
     ["fleischfresserknospe_b57f", "tentacle-sway"],
     ["brass_bull_event_boss", "brass-heat"]

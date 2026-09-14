@@ -5,7 +5,7 @@ export const ZENTAURIN = Object.freeze({
   id: ZENTAURIN_ID, name: "ツェンタウリン", level: 110, floor: 96,
   imageId: ZENTAURIN_ID, image: "images/bosses/boss_24.avif",
   encounterImageId: "zentaurin_event_b96f", encounterImage: "images/background/dungeon_event_15.avif",
-  battleSize: "huge-wide", race: "beast", maxHp: 40000,
+  battleSize: "huge-wide", ambientEffect: "arrow-glint", race: "beast", maxHp: 40000,
   stats: { str: 30, int: 20, agi: 28, dex: 30, luc: 26 },
   def: 42, attack: 58, experienceReward: 45000,
   escapeRate: 1, surpriseRate: 0, surpriseRateMaximum: 0,
