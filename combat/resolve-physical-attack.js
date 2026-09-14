@@ -58,7 +58,7 @@ export function resolvePhysicalAttack({
     const critical = roll(rng) < criticalRate;
     const baseDamage = Math.max(
       0,
-      attackPower * numericOr(attack.powerPerHit, 1) - effectiveDefense
+      attackPower * numericOr(attack.attackPowerMultiplier, 1) * numericOr(attack.powerPerHit, 1) - effectiveDefense
     );
     const variance = randomBetween(
       rng,
@@ -68,7 +68,7 @@ export function resolvePhysicalAttack({
     const normalDamage = elementMultiplier <= 0
       ? 0
       : Math.max(1, Math.floor(baseDamage * variance * elementMultiplier * (1 - elementalReduction)));
-    const damage = critical
+    const damage = normalDamage <= 0 ? 0 : critical
       ? Math.max(
         COMBAT_CONFIG.criticalDamageMinimum,
         Math.floor(normalDamage * COMBAT_CONFIG.criticalMultiplier)

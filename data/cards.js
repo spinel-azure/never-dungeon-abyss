@@ -522,6 +522,11 @@ const ZODIAC_CARDS = [
   longBattleMaximumStacks: 3,
   longBattleDamagePerStack: 0.1,
   longBattleReductionPerStack: 0.1
+} : card.id === "zodiac_sagittarius" ? {
+  ...card,
+  concept: "必中／物理DEF無視／呪文の属性耐性無視",
+  detailDescriptionJa: "通常攻撃・物理技・攻撃呪文\nが必中。物理はDEF無視。\n呪文は属性耐性軽減を無視。\n属性無効・吸収・特殊無敵\nは突破しない。",
+  descriptionJa: "通常攻撃・物理スキル・攻撃呪文が必ず命中する。物理攻撃は敵のDEFを無視し、攻撃呪文は属性耐性による軽減を無視する。ただし、属性無効・吸収や特殊な無敵は突破できない。"
 } : card.id === "zodiac_aries" ? {
   ...card,
   concept: "必ず先制／初回攻撃必中・威力2倍・DEF50％貫通",

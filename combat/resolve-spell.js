@@ -10,7 +10,8 @@ export function resolveSpell({
   elementMultiplier,
   rng = Math.random
 } = {}) {
-  const multiplier = resolveElementMultiplier(defender, spell.element, elementMultiplier);
+  const baseMultiplier = resolveElementMultiplier(defender, spell.element, elementMultiplier);
+  const multiplier = spell.ignoresElementResistance && baseMultiplier > 0 && baseMultiplier < 1 ? 1 : baseMultiplier;
   const unavoidable = spell.unavoidable !== false;
   const hitRate = unavoidable
     ? 1
@@ -43,13 +44,13 @@ export function resolveSpell({
       COMBAT_CONFIG.spellVarianceMin,
       COMBAT_CONFIG.spellVarianceMax
     );
-    const elementalReduction = spell.element === "fire"
+    const elementalReduction = spell.ignoresElementResistance ? 0 : spell.element === "fire"
       ? numeric(defender.fireDamageReduction)
       : spell.element === "ice" ? numeric(defender.iceDamageReduction) : 0;
     const nonElementalReduction = isElementalSpell(spell.element)
       ? 0
       : numeric(defender.nonElementalMagicDamageReduction);
-    const elementalMagicReduction = isElementalSpell(spell.element)
+    const elementalMagicReduction = !spell.ignoresElementResistance && isElementalSpell(spell.element)
       ? numeric(defender.elementalMagicDamageReduction)
       : 0;
     const damageReduction = spell.ignoresMagicResistance

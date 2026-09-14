@@ -1686,6 +1686,7 @@ export function startBossEvent(bossId, fromGX, fromGY) {
 function confirmBossEvent() {
   const event = state.overlayEvent;
   if (!event || event.type !== "bossPrompt") return;
+  if (event.autoStartTimer) return;
   event.canCancel = false;
   const boss = getBossById(event.bossId);
   if (boss?.event?.sphinxChoice && !hooks.isBossRematch(boss.id)) {

@@ -111,6 +111,14 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
       revealBeforeExploration: true
     })
   }),
+  96: Object.freeze({
+    lock: Object.freeze({ mode: "alwaysSuccess", attempts: 1 }),
+    content: Object.freeze({
+      type: "eventBoss", bossId: "zentaurin_b96f",
+      accessConfirmMessage: "扉の向こうに強い気配を感じる。中に入りますか？\n＊Aボタン：はい　Bボタン：いいえ",
+      confirmAfterUnlock: true, minimapMarker: "E", revealBeforeExploration: true
+    })
+  }),
   47: Object.freeze({
     lock: Object.freeze({ mode: "alwaysSuccess", attempts: 1 }),
     content: Object.freeze({

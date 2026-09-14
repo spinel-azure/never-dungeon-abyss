@@ -1,0 +1,210 @@
+[
+  {
+    "job": "warrior",
+    "aries": false,
+    "level": 110,
+    "gear": "existing B90 pacing fixture (crystal +3), Alec/Rebecca/Erika",
+    "runs": [
+      {
+        "outcome": "victory",
+        "turns": 224,
+        "hp": 210,
+        "healingRemaining": 18
+      },
+      {
+        "outcome": "victory",
+        "turns": 238,
+        "hp": 309,
+        "healingRemaining": 16
+      },
+      {
+        "outcome": "victory",
+        "turns": 219,
+        "hp": 375,
+        "healingRemaining": 17
+      }
+    ]
+  },
+  {
+    "job": "warrior",
+    "aries": true,
+    "level": 110,
+    "gear": "existing B90 pacing fixture (crystal +3), Alec/Rebecca/Erika",
+    "runs": [
+      {
+        "outcome": "victory",
+        "turns": 216,
+        "hp": 469,
+        "healingRemaining": 14
+      },
+      {
+        "outcome": "victory",
+        "turns": 226,
+        "hp": 392,
+        "healingRemaining": 20
+      },
+      {
+        "outcome": "victory",
+        "turns": 229,
+        "hp": 389,
+        "healingRemaining": 16
+      }
+    ]
+  },
+  {
+    "job": "thief",
+    "aries": false,
+    "level": 110,
+    "gear": "existing B90 pacing fixture (crystal +3), Alec/Rebecca/Erika",
+    "runs": [
+      {
+        "outcome": "victory",
+        "turns": 251,
+        "hp": 307,
+        "healingRemaining": 8
+      },
+      {
+        "outcome": "victory",
+        "turns": 313,
+        "hp": 240,
+        "healingRemaining": 6
+      },
+      {
+        "outcome": "victory",
+        "turns": 289,
+        "hp": 386,
+        "healingRemaining": 12
+      }
+    ]
+  },
+  {
+    "job": "thief",
+    "aries": true,
+    "level": 110,
+    "gear": "existing B90 pacing fixture (crystal +3), Alec/Rebecca/Erika",
+    "runs": [
+      {
+        "outcome": "victory",
+        "turns": 229,
+        "hp": 344,
+        "healingRemaining": 6
+      },
+      {
+        "outcome": "victory",
+        "turns": 229,
+        "hp": 322,
+        "healingRemaining": 14
+      },
+      {
+        "outcome": "victory",
+        "turns": 230,
+        "hp": 397,
+        "healingRemaining": 18
+      }
+    ]
+  },
+  {
+    "job": "priest",
+    "aries": false,
+    "level": 110,
+    "gear": "existing B90 pacing fixture (crystal +3), Alec/Rebecca/Erika",
+    "runs": [
+      {
+        "outcome": "victory",
+        "turns": 251,
+        "hp": 271,
+        "healingRemaining": 7
+      },
+      {
+        "outcome": "victory",
+        "turns": 265,
+        "hp": 313,
+        "healingRemaining": 1
+      },
+      {
+        "outcome": "victory",
+        "turns": 257,
+        "hp": 261,
+        "healingRemaining": 3
+      }
+    ]
+  },
+  {
+    "job": "priest",
+    "aries": true,
+    "level": 110,
+    "gear": "existing B90 pacing fixture (crystal +3), Alec/Rebecca/Erika",
+    "runs": [
+      {
+        "outcome": "victory",
+        "turns": 283,
+        "hp": 276,
+        "healingRemaining": 0
+      },
+      {
+        "outcome": "victory",
+        "turns": 251,
+        "hp": 271,
+        "healingRemaining": 4
+      },
+      {
+        "outcome": "defeat",
+        "turns": 257,
+        "hp": 0,
+        "healingRemaining": 0
+      }
+    ]
+  },
+  {
+    "job": "mage",
+    "aries": false,
+    "level": 110,
+    "gear": "existing B90 pacing fixture (crystal +3), Alec/Rebecca/Erika",
+    "runs": [
+      {
+        "outcome": "defeat",
+        "turns": 136,
+        "hp": 0,
+        "healingRemaining": 0
+      },
+      {
+        "outcome": "defeat",
+        "turns": 116,
+        "hp": 0,
+        "healingRemaining": 0
+      },
+      {
+        "outcome": "defeat",
+        "turns": 119,
+        "hp": 0,
+        "healingRemaining": 0
+      }
+    ]
+  },
+  {
+    "job": "mage",
+    "aries": true,
+    "level": 110,
+    "gear": "existing B90 pacing fixture (crystal +3), Alec/Rebecca/Erika",
+    "runs": [
+      {
+        "outcome": "defeat",
+        "turns": 165,
+        "hp": 0,
+        "healingRemaining": 0
+      },
+      {
+        "outcome": "defeat",
+        "turns": 137,
+        "hp": 0,
+        "healingRemaining": 0
+      },
+      {
+        "outcome": "defeat",
+        "turns": 151,
+        "hp": 0,
+        "healingRemaining": 0
+      }
+    ]
+  }
+]

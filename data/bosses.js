@@ -1,4 +1,7 @@
+import { ZENTAURIN } from "./zentaurin.js";
+
 export const BOSSES = Object.freeze({
+  zentaurin_b96f: ZENTAURIN,
   lingering_ghost_b2f: Object.freeze({
     id: "lingering_ghost_b2f",
     name: "未練ある亡霊",

@@ -11,6 +11,7 @@ import { playPlayerChargePresentation } from "./player-charge-presentation.js";
 import { playBattleSkillPresentation } from "./battle-skill-presentation.js";
 import { createEnemyAmbientEffects } from "./enemy-ambient-effects.js";
 import { getSkill } from "../data/skills.js";
+import { showZentaurinArrow } from "./zentaurin-opening.js";
 import { getItem } from "../data/items.js";
 import { getItemUnavailableReason } from "../combat/resolve-item-use.js";
 import { getConditionLabel } from "../combat/condition-label.js";
@@ -193,12 +194,28 @@ export function startBattle(enemy, {
     }, 300);
   }
   if (scriptedBattleType === "jirene_first_encounter") scheduleJireneScriptedRound(900);
+  else if (battleUi.battle.zentaurinOpening) void presentZentaurinOpening();
   else if (ambush) void executeAmbushOpening();
   return true;
 }
 
 export function isBattleActive() {
   return battleUi.active;
+}
+
+async function presentZentaurinOpening() {
+  const battle = battleUi.battle;
+  battleUi.presenting = true;
+  hideBattleCommands();
+  battleUi.messageEl.textContent = battle.zentaurinOpening.message;
+  const cleanup = showZentaurinArrow(battleUi.root, battle.zentaurinOpening.broken);
+  battleUi.openingCleanup = cleanup;
+  await delay(1800);
+  cleanup();
+  if (battleUi.openingCleanup === cleanup) battleUi.openingCleanup = null;
+  if (!battleUi.active || battleUi.battle !== battle) return;
+  battleUi.presenting = false;
+  showCommandButtons();
 }
 
 export function isJireneScriptedBattleActive() {
@@ -303,6 +320,10 @@ function activateSelected() {
   }
   const command = button.dataset.battleCommand;
   if (command === "skills") {
+    if (battleUi.battle.player.battleSkillSealed) {
+      battleUi.messageEl.textContent = "封印の矢により、スキル・呪文・奇蹟は使用できない！";
+      return;
+    }
     battleUi.openSkills({
       character: battleUi.battle.player,
       enemy: battleUi.battle.enemy,
@@ -391,6 +412,7 @@ async function executeCommand(command) {
     : resolveBattleRound({ battle: battleUi.battle, playerCommand: command });
   if (!resolved.accepted) {
     const messages = {
+      battleSkillSealed: "封印の矢により、スキル・呪文・奇蹟は使用できない！",
       insufficientSp: "SPが足りない。",
       noEffect: "毒状態ではない。",
       deadlyPoisonNotCurable: "解毒剤では猛毒を治療できません。",
@@ -831,6 +853,8 @@ function closeBattle() {
   battleUi.presentationBarrier = null;
   resetEnemyVanishEffects(battleUi.root);
   battleUi.active = false;
+  battleUi.openingCleanup?.();
+  battleUi.openingCleanup = null;
   battleUi.root.hidden = true;
   document.body.classList.remove("battle-active");
   battleUi.commandRoot.replaceChildren(...battleUi.normalButtons);
@@ -856,6 +880,7 @@ function showCommandButtons() {
     delete button.dataset.skillId;
     delete button.dataset.targetIndex;
     button.textContent = label;
+    if (id === "skills" && battleUi.battle?.player.battleSkillSealed) button.textContent = "スキル（封印）";
     button.disabled = false;
     button.classList.remove("is-unavailable");
   });

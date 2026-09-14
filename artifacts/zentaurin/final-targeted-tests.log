@@ -1,0 +1,17 @@
+✔ card gallery lists only owned production cards (1.8323ms)
+✔ card gallery rarity filter keeps owned cards of the selected rarity (0.3163ms)
+✔ seal snapshots equipped Aries only; no opening damage or resource/charge consumption (12.5246ms)
+✔ action weights and pride last three subsequent opportunities with no restacking (5.2266ms)
+✔ triple bleeding is one successful after-damage application; misses and barrier absorption exclude it (3.7774ms)
+✔ star arrow is reserved, has a fresh command opportunity, and guard reduces its damage (1.9977ms)
+✔ Sagittarius preserves immunity and weaknesses while bypassing elemental resistance and DEF (1.6337ms)
+✔ Sagittarius applies through real multi-target physical skills and spell actions (4.7467ms)
+✔ B96 fixed room, neighboring rooms, first victory, old ownership and saved achievement (13.2824ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 308.7673

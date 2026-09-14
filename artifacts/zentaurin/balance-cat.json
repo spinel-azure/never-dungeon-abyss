@@ -1,0 +1,210 @@
+[
+  {
+    "job": "warrior",
+    "aries": false,
+    "level": 130,
+    "gear": "cat weapon, crystal armor +3, Alec/Rebecca/Erika",
+    "runs": [
+      {
+        "outcome": "victory",
+        "turns": 223,
+        "hp": 520,
+        "healingRemaining": 30
+      },
+      {
+        "outcome": "victory",
+        "turns": 228,
+        "hp": 598,
+        "healingRemaining": 29
+      },
+      {
+        "outcome": "victory",
+        "turns": 234,
+        "hp": 579,
+        "healingRemaining": 29
+      }
+    ]
+  },
+  {
+    "job": "warrior",
+    "aries": true,
+    "level": 130,
+    "gear": "cat weapon, crystal armor +3, Alec/Rebecca/Erika",
+    "runs": [
+      {
+        "outcome": "victory",
+        "turns": 201,
+        "hp": 399,
+        "healingRemaining": 29
+      },
+      {
+        "outcome": "victory",
+        "turns": 213,
+        "hp": 466,
+        "healingRemaining": 29
+      },
+      {
+        "outcome": "victory",
+        "turns": 230,
+        "hp": 681,
+        "healingRemaining": 26
+      }
+    ]
+  },
+  {
+    "job": "thief",
+    "aries": false,
+    "level": 130,
+    "gear": "cat weapon, crystal armor +3, Alec/Rebecca/Erika",
+    "runs": [
+      {
+        "outcome": "victory",
+        "turns": 199,
+        "hp": 393,
+        "healingRemaining": 24
+      },
+      {
+        "outcome": "victory",
+        "turns": 203,
+        "hp": 263,
+        "healingRemaining": 24
+      },
+      {
+        "outcome": "victory",
+        "turns": 205,
+        "hp": 391,
+        "healingRemaining": 29
+      }
+    ]
+  },
+  {
+    "job": "thief",
+    "aries": true,
+    "level": 130,
+    "gear": "cat weapon, crystal armor +3, Alec/Rebecca/Erika",
+    "runs": [
+      {
+        "outcome": "victory",
+        "turns": 116,
+        "hp": 455,
+        "healingRemaining": 26
+      },
+      {
+        "outcome": "victory",
+        "turns": 107,
+        "hp": 474,
+        "healingRemaining": 28
+      },
+      {
+        "outcome": "victory",
+        "turns": 117,
+        "hp": 494,
+        "healingRemaining": 28
+      }
+    ]
+  },
+  {
+    "job": "priest",
+    "aries": false,
+    "level": 130,
+    "gear": "cat weapon, crystal armor +3, Alec/Rebecca/Erika",
+    "runs": [
+      {
+        "outcome": "victory",
+        "turns": 254,
+        "hp": 386,
+        "healingRemaining": 30
+      },
+      {
+        "outcome": "victory",
+        "turns": 256,
+        "hp": 435,
+        "healingRemaining": 30
+      },
+      {
+        "outcome": "victory",
+        "turns": 238,
+        "hp": 435,
+        "healingRemaining": 30
+      }
+    ]
+  },
+  {
+    "job": "priest",
+    "aries": true,
+    "level": 130,
+    "gear": "cat weapon, crystal armor +3, Alec/Rebecca/Erika",
+    "runs": [
+      {
+        "outcome": "victory",
+        "turns": 226,
+        "hp": 433,
+        "healingRemaining": 21
+      },
+      {
+        "outcome": "victory",
+        "turns": 259,
+        "hp": 424,
+        "healingRemaining": 17
+      },
+      {
+        "outcome": "victory",
+        "turns": 220,
+        "hp": 313,
+        "healingRemaining": 21
+      }
+    ]
+  },
+  {
+    "job": "mage",
+    "aries": false,
+    "level": 130,
+    "gear": "cat weapon, crystal armor +3, Alec/Rebecca/Erika",
+    "runs": [
+      {
+        "outcome": "defeat",
+        "turns": 229,
+        "hp": 0,
+        "healingRemaining": 0
+      },
+      {
+        "outcome": "defeat",
+        "turns": 201,
+        "hp": 0,
+        "healingRemaining": 0
+      },
+      {
+        "outcome": "defeat",
+        "turns": 206,
+        "hp": 0,
+        "healingRemaining": 0
+      }
+    ]
+  },
+  {
+    "job": "mage",
+    "aries": true,
+    "level": 130,
+    "gear": "cat weapon, crystal armor +3, Alec/Rebecca/Erika",
+    "runs": [
+      {
+        "outcome": "defeat",
+        "turns": 215,
+        "hp": 0,
+        "healingRemaining": 0
+      },
+      {
+        "outcome": "victory",
+        "turns": 227,
+        "hp": 114,
+        "healingRemaining": 0
+      },
+      {
+        "outcome": "defeat",
+        "turns": 184,
+        "hp": 0,
+        "healingRemaining": 0
+      }
+    ]
+  }
+]

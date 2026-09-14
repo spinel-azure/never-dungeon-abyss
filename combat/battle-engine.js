@@ -42,6 +42,7 @@ import {
 } from "./npc-support.js";
 import { applyPlayerChargeAction, isPlayerChargeReady } from "./player-charge.js";
 import { getWeapon } from "../data/weapons.js";
+import { getZentaurinOpening, ZENTAURIN_ID } from "../data/zentaurin.js";
 
 const FLEISCHFRESSER_REGAIN_SUPPRESSION_TURNS = 5;
 
@@ -71,6 +72,8 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
   ));
   const sphinxBarrier = sphinxBarrierAmount + guardStoneBarrier;
   const player = cloneCombatant(character);
+  const zentaurinOpening = getZentaurinOpening(selectedEnemy, character?.cards?.deckSlots);
+  player.battleSkillSealed = Boolean(zentaurinOpening?.sealed);
   const lifeBoosterRecoveryPotential = hasCardEffect(character?.cards?.deckSlots, "life_booster")
     ? Math.ceil(player.maxHp * 0.05)
     : 0;
@@ -88,6 +91,7 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     phase: "command",
     outcome: null,
     player,
+    zentaurinOpening,
     enemy: selectedEnemy,
     ...(enemyParty ? { enemies: enemyParty, targetIndex: selectedTargetIndex, lastPlayerTargetIndex: selectedTargetIndex } : {}),
     vorpalSwordEquippedAtStart,
@@ -118,6 +122,7 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     slashExecution: null,
     log: [
       enemyParty ? `${enemyParty.map(member => member.name).join("、")}が現れた！` : `${enemy.name}が現れた！`,
+      ...(zentaurinOpening ? [zentaurinOpening.message] : []),
       ...(sphinxBarrierAmount > 0 ? ["スピンクスの威容が障壁を展開した！"] : []),
       ...(guardStoneBarrier > 0 ? ["護りの魔石が障壁を展開した！"] : []),
       ...(lifeBoosterRecovery > 0 ? [`ライフブースターがHPを${lifeBoosterRecovery}回復した！`] : []),
@@ -694,6 +699,7 @@ export function resolveEnemyAmbush({ battle, rng = Math.random } = {}) {
 }
 
 export function createPlayerAction(player, command = {}, enemy = null) {
+  if (command.type === "skill" && player.battleSkillSealed) return { ok: false, reason: "battleSkillSealed" };
   if (command.type === "attack") {
     const action = createNormalAttack({
       weaponId: player.equipment?.weaponId,
@@ -841,6 +847,10 @@ function selectWeightedEnemyAction(actionTable, enemy, rng, context) {
 }
 
 function getEnemyActionWeight(entry, enemy) {
+  if (enemy.id === ZENTAURIN_ID && enemy.zentaurinPrideActions > 0) {
+    if (entry.action?.id === "zentaurin_pride") return 0;
+    if (entry.action?.id === "zentaurin_triple") return 80;
+  }
   const conditional = entry?.weightWhileStatus;
   const statusActive = conditional?.statusId && (enemy?.statuses || []).some(status =>
     (status.id || status.statusId) === conditional.statusId && status.active !== false
@@ -873,6 +883,14 @@ function buildEnemyAction(action, normalAttack) {
 }
 
 function executeAction({ battle, action, actor, actorSide, actorIndex = null, target, targetSide, deferFollowUp = false, magicFocus = null, rng }) {
+  if (actorSide === "player" && ["physicalAttack", "spell"].includes(action.actionType)
+    && hasCardEffect(actor.cards?.deckSlots, "zodiac_sagittarius")) {
+    action = { ...action, unavoidable: true,
+      ...(action.actionType === "physicalAttack" ? { ignoresDefense: true } : { ignoresElementResistance: true }) };
+  }
+  if (actorSide === "enemy" && actor.id === ZENTAURIN_ID && actor.zentaurinPrideActions > 0 && action.actionType === "physicalAttack") {
+    action = { ...action, attackPowerMultiplier: 1.2, hitBonus: (Number(action.hitBonus) || 0) + 0.1 };
+  }
   const actorStats = combatStats(actor);
   const targetStats = combatStats(target);
   if (actorSide === "enemy" && action.reservedEnemyActionId) {
@@ -933,6 +951,11 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
       skipInitialDecrement: true
     }]);
     battle.log.push(`${actor.name}は身を守った。`);
+    return;
+  }
+  if (action.actionType === "zentaurinPride" && actorSide === "enemy" && actor.id === ZENTAURIN_ID) {
+    actor.zentaurinPrideActions = 4;
+    battle.log.push("ツェンタウリンのツェンタウルの誇り！ 攻撃力と命中率が上昇した！");
     return;
   }
   if (action.actionType === "prepareAction" && actorSide === "enemy") {
@@ -1413,6 +1436,11 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
   const targetHpBeforeDamage = Math.max(0, Number(target.hp) || 0);
   target.hp = Math.max(0, target.hp - actualDamage);
   const actualHpLoss = Math.max(0, targetHpBeforeDamage - target.hp);
+  if (actorSide === "enemy" && actor.id === ZENTAURIN_ID && action.afterDamageStatus && actualHpLoss > 0 && target.hp > 0) {
+    const applications = resolveEffects({ effects: [action.afterDamageStatus], trigger: "perAction", attacker: actorStats, defender: targetStats, rng });
+    target.statuses = applyStatusApplications(target.statuses, applications);
+    if (applications.some(application => application.success)) battle.log.push(`${target.name}は出血した！`);
+  }
   target.alive = target.hp > 0;
   const hitCount = presentedHits.filter(hit => hit.hit).length;
   const isMultiHit = presentedHits.length > 1;
@@ -1784,6 +1812,7 @@ function finishAction(battle, side) {
 }
 
 function finishCombatantAction(battle, actor, side, targetIndex = null) {
+  if (actor.id === ZENTAURIN_ID && actor.zentaurinPrideActions > 0) actor.zentaurinPrideActions -= 1;
   const end = resolveEndOfAction({ statuses: actor.statuses, maxHp: actor.maxHp });
   actor.statuses = end.statuses;
   if (end.poisonDamage > 0 && actor.hp > 0) {
