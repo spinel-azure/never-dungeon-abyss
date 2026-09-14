@@ -15,13 +15,17 @@ import { isDungeonDepthUnlocked } from "../data/quests.js";
 
 const ids = formation => formation.map(enemy => enemy.id);
 
-test("B80F through B88F use progressive crystal-region formations and B89F excludes them", () => {
+test("B80F through B89F use progressive crystal-region formations", () => {
   assert.deepEqual(ids(getCrystalRegionEncounterFormation({ depth: 80, rng: () => 0 })), ["abyss_crystal_beetle"]);
   assert.deepEqual(ids(getCrystalRegionEncounterFormation({ depth: 81, rng: () => 0.999 })), ["abyss_crystal_beetle", "abyss_crystal_beetle", "abyss_crystal_beetle"]);
   assert.deepEqual(ids(getCrystalRegionEncounterFormation({ depth: 82, rng: () => 0.999 })), ["abyss_crystal_beetle", "abyss_crystal_beetle", "prism_moth"]);
   assert.deepEqual(ids(getCrystalRegionEncounterFormation({ depth: 84, rng: () => 0.999 })), ["abyss_crystal_beetle", "amethyst_golem"]);
   assert.deepEqual(ids(getCrystalRegionEncounterFormation({ depth: 88, rng: () => 0.999 })), ["amethyst_golem", "abyss_crystal_beetle", "abyss_crystal_beetle"]);
-  assert.notEqual(getRandomEnemy({ depth: 89, rng: () => 0.999 }).maximumDepth, 88);
+  for (let index = 0; index < 100; index++) {
+    const rng = () => index / 100;
+    assert.deepEqual(ids(getCrystalRegionEncounterFormation({ depth: 89, rng })), ids(getCrystalRegionEncounterFormation({ depth: 88, rng })));
+    assert.equal(getRandomEnemy({ depth: 89, rng }).maximumDepth, 89);
+  }
 });
 
 test("crystal enemies divide weaknesses, defenses, statuses, rewards, and SP drain", () => {

@@ -728,7 +728,7 @@ export function getRandomEnemy({ depth = 1, rng = Math.random } = {}) {
     available.length - 1,
     Math.floor(Math.max(0, Number(rng()) || 0) * available.length)
   );
-  return available[index] || enemies[0];
+  return available[index] || getEnemyById("abyss_rat");
 }
 
 export function getRandomEncounterEnemy({ depth = 1, rng = Math.random, allowRare = true } = {}) {

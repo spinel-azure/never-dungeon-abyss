@@ -2588,7 +2588,7 @@ import {
     if (currentDepth >= 70 && currentDepth <= 79) {
       return getWaterRegionEncounterFormation({ depth: currentDepth, flags: character?.eventFlags });
     }
-    if (currentDepth >= 80 && currentDepth <= 88) {
+    if (currentDepth >= 80 && currentDepth <= 89) {
       return getCrystalRegionEncounterFormation({ depth: currentDepth, flags: character?.eventFlags });
     }
     if (currentDepth >= 90 && currentDepth <= 99) {
