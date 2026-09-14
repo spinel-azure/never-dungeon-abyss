@@ -2,7 +2,7 @@ export const VERFOLGER_DEFEAT_MESSAGE = 'フェルフォルガーは「ギャギ
 export const verfolger = Object.freeze({
   id: 'verfolger', name: 'フェルフォルガー', level: 100,
   imageId: 'verfolger', image: 'images/bosses/boss_22.avif', battleSize: 'huge-wide',
-  race: 'beast', randomEncounter: false, isBoss: true, battleBgmKey: 'eventBoss',
+  ambientEffect: 'blood-drip', race: 'beast', randomEncounter: false, isBoss: true, battleBgmKey: 'eventBoss',
   maxHp: 12000, attack: 48, def: 40,
   stats: Object.freeze({ str: 46, int: 20, agi: 32, dex: 40, luc: 30 }),
   experienceReward: 30000, noDrop: true, escapeRate: 1, surpriseRate: 0, surpriseRateMaximum: 0,

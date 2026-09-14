@@ -335,6 +335,22 @@ export const TAVERN_RUMORS = Object.freeze([
         rosa: 'まぁ、まばゆい光ですって。一体何かしらね？',
         rosaContinuation: 'ええっ！？あなた、そのまばゆい光を手に入れたの！？きゃっ！眩しいわ…！' })
     ])
+  }),
+  Object.freeze({
+    id: 'rumor_015', verbatimCustomers: true,
+    title: 'ヨハンナの愛猫の噂',
+    unlock: context => context.depthReached >= 69 && (context.quest027Active || (context.quest027Completed && (context.johannaCatRumorResolved || context.johannaCatRumorBaseRead))),
+    customerLead: 'おい、知ってるか？宿屋の女将の飼い猫、捜し物が得意らしいな？',
+    customerReply: 'ああ。何でもすぐに見つけちまうんだってな。驚きだぜ！',
+    phases: Object.freeze([
+      Object.freeze({ id: 'base', readFlag: 'tavern_rumor_015_base_read',
+        unlock: context => !context.johannaCatRumorResolved,
+        rosa: 'ヨハンナさんの三毛猫ちゃんにそんな特技があるなんて…。' }),
+      Object.freeze({ id: 'solved', readFlag: 'tavern_rumor_015_solved_read',
+        unlock: context => context.johannaCatRumorResolved,
+        rosa: 'ヨハンナさんの三毛猫ちゃんにそんな特技があるなんて…。',
+        rosaContinuation: 'えっ！？ヨハンナさんの三毛猫ちゃんを借りたですって！？借りてどうしたのかしら？' })
+    ])
   })
 ]);
 
@@ -378,6 +394,11 @@ function normalizeRumorContext(character, context = {}) {
     marathonCompleted: Boolean(context.marathonCompleted ?? eventFlags.b1_b42_marathon_completed),
     longMarchCompleted: Boolean(context.longMarchCompleted ?? eventFlags.b1_b84_long_march_completed),
     finalLongMarchCompleted: Boolean(context.finalLongMarchCompleted ?? eventFlags.b1_b100_final_long_march_completed),
+    quest027Active: Boolean(character?.quests?.active?.guild_027),
+    quest027Completed: completedQuestIds.includes('guild_027'),
+    johannaCatRumorBaseRead: Boolean(eventFlags.tavern_rumor_015_base_read),
+    johannaCatRumorResolved: Boolean(eventFlags.sphinx_b69f_peaceful
+      && (eventFlags.johanna_cat_borrow_transition || hasKeyItem(character?.keyItems, 'johanna_calico_cat'))),
     lichtbringerOwned: Boolean(context.lichtbringerOwned ?? hasKeyItem(character?.keyItems, 'lichtbringer')),
     verfolgerDefeated: Boolean(context.verfolgerDefeated ?? eventFlags.achievement_verfolger_defeated),
     relicWeaponOwned: Boolean(context.relicWeaponOwned ?? RELIC_WEAPON_IDS.some(

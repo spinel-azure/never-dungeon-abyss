@@ -463,3 +463,26 @@ test('Lichtbringer rumor uses B90, real ownership, exact dialogue and latest his
  c=markTavernRumorRead(c,next);c=JSON.parse(JSON.stringify(c));assert.equal(current(),undefined);assert.equal(past().description.length,4);assert.equal(past().number,'014');
  delete c.eventFlags.tavern_rumor_014_base_read;delete c.eventFlags.tavern_rumor_014_lichtbringer_read;assert.equal(current().stageId,'lichtbringer');
 });
+test('Johanna cat rumor requires B69 and quest 027; only borrowed cat plus peaceful solution continues',()=>{
+ let c=createInitialCharacter({name:'三毛猫',job:'priest'});
+ const current=()=>getUnreadTavernRumors(c).find(r=>r.rumorId==='rumor_015');const history=()=>getPastTavernRumors(c).find(r=>r.id==='rumor_015');
+ c.highestDungeonDepthReached=69;assert.equal(current(),undefined);c.quests.active.guild_027={progress:0};c.highestDungeonDepthReached=68;assert.equal(current(),undefined);
+ c.highestDungeonDepthReached=69;const base=current();assert.equal(base.stageId,'base');assert.deepEqual(base.dialogue,[
+ 'あなたはカウンターから耳を澄ます………。\n客「おい、知ってるか？宿屋の女将の飼い猫、捜し物が得意らしいな？」\n＊Aボタンで次へ',
+ '客「ああ。何でもすぐに見つけちまうんだってな。驚きだぜ！」\n＊Aボタンで次へ',
+ 'ローザ「ヨハンナさんの三毛猫ちゃんにそんな特技があるなんて…。」\n＊Aボタンで戻る']);
+ c=markTavernRumorRead(c,base);assert.equal(history().title,'ヨハンナの愛猫の噂');
+ c.eventFlags.johanna_cat_borrow_transition=true;assert.equal(current(),undefined);
+ c.eventFlags.sphinx_b69f_defeated=true;c.eventFlags.boss_b69f_defeated=true;assert.equal(current(),undefined);
+ c.eventFlags.sphinx_b69f_peaceful=true;const solved=current();assert.equal(solved.stageId,'solved');assert.equal(history(),undefined);
+ assert.equal(solved.dialogue.at(-1),'ローザ「えっ！？ヨハンナさんの三毛猫ちゃんを借りたですって！？借りてどうしたのかしら？」\n＊Aボタンで戻る');assert.ok(solved.dialogue.every(s=>getTavernRumorTypewriterParts(s)));
+ delete c.quests.active.guild_027;c.quests.completedQuestIds.push('guild_027');assert.equal(current().stageId,'solved');
+ c=markTavernRumorRead(c,solved);c=JSON.parse(JSON.stringify(c));assert.equal(current(),undefined);assert.equal(history().description.length,4);
+});
+test('cat rumor preserves read base after combat-route report and uses owned cat for legacy peaceful saves',()=>{
+ let c=createInitialCharacter({name:'旧記録',job:'mage'});c.highestDungeonDepthReached=69;c.quests.active.guild_027={progress:0};
+ let r=getUnreadTavernRumors(c).find(r=>r.rumorId==='rumor_015');c=markTavernRumorRead(c,r);delete c.quests.active.guild_027;c.quests.completedQuestIds.push('guild_027');
+ assert.ok(getPastTavernRumors(c).some(r=>r.id==='rumor_015'));assert.equal(getUnreadTavernRumors(c).some(r=>r.rumorId==='rumor_015'),false);
+ c.eventFlags.sphinx_b69f_peaceful=true;assert.equal(getUnreadTavernRumors(c).some(r=>r.rumorId==='rumor_015'),false);
+ c.keyItems={owned:{johanna_calico_cat:{count:1,acquiredAt:1}},acquisitionOrder:['johanna_calico_cat']};assert.equal(getUnreadTavernRumors(c).find(r=>r.rumorId==='rumor_015').stageId,'solved');
+});

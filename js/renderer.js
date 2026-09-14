@@ -1,3 +1,4 @@
+import { getRoamingRevealFrame } from './roaming-reveal.js';
 import {
   FOV,
   RAYS,
@@ -490,12 +491,32 @@ function drawOverlayEvent() {
   if (!event?.showOverlay) return;
   if (event.type === "randomEncounter") return;
   if (event.imageId && event.image) loadCharacterImage(event.imageId, event.image);
+  if (event.revealImageId && event.revealImage) loadCharacterImage(event.revealImageId, event.revealImage);
   const image = event.imageId ? renderer.characterImages.get(event.imageId) : null;
 
   ctx.save();
   ctx.fillStyle = "rgba(0,0,0,.8)";
   ctx.fillRect(0, 0, W, H);
 
+  if (event.type === 'roamingEncounter' && event.revealDurationMs) {
+    const silhouette = renderer.characterImages.get(event.revealImageId);
+    const ready = image?.complete && image.naturalWidth > 0 && silhouette?.complete && silhouette.naturalWidth > 0;
+    if (ready && !Number.isFinite(event.revealStartedAt)) event.revealStartedAt = performance.now();
+    const frame = getRoamingRevealFrame(ready ? performance.now() - event.revealStartedAt : 0,
+      event.revealDurationMs, Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches));
+    event.revealComplete = Boolean(ready && frame.complete);
+    const drawLayer = (source, alpha, blur) => {
+      if (!source?.complete || !source.naturalWidth || alpha <= 0) return;
+      const scale = Math.min(W * .68 / source.naturalWidth, H * .86 / source.naturalHeight);
+      const width = source.naturalWidth * scale, height = source.naturalHeight * scale;
+      ctx.save();ctx.globalAlpha = alpha;ctx.filter = `blur(${blur}px)`;
+      ctx.drawImage(source, (W - width) / 2, H * .52 - height / 2, width, height);ctx.restore();
+    };
+    drawLayer(silhouette, frame.silhouetteOpacity, frame.blur * .4);
+    drawLayer(image, ready ? frame.opacity : 0, frame.blur);
+    ctx.restore();
+    return;
+  }
   if (event.type === "b100FinalPrelude") {
     const drawLayer = (layer, { alpha = 1, scaleMultiplier = 1, blur = 0, fit = "cover" } = {}) => {
       if (!layer?.complete || layer.naturalWidth <= 0) return;

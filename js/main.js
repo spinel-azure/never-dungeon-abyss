@@ -1678,9 +1678,9 @@ import {
         innKeeperId: save.world?.town?.innKeeperId
       });
     } else {
+      closeTown();
       startBgm(selectDungeonBgm());
       setPlayerInputEnabled(true);
-      closeTown();
       const resumeJohannaFlowerHandoff = currentDepth === 57
         && getJohannaRescueSpringMode(character) === "flowerHandoff";
       if (resumeJohannaFlowerHandoff) {
@@ -2673,6 +2673,7 @@ import {
     if (definition.encounterImage) {
       startOverlayEvent({ type: 'roamingEncounter', instanceId,
         imageId: definition.encounterImageId, image: definition.encounterImage,
+        revealImageId: definition.imageId, revealImage: definition.image, revealDurationMs: 1800,
         message: definition.encounterMessage, canCancel: false });
       return true;
     }
@@ -2975,6 +2976,9 @@ import {
   }
 
   function selectDungeonBgm() {
+    const roaming = getActiveRoamingEnemy();
+    const presenceBgm = roaming?.status === 'active' ? getRoamingEnemyDefinition(roaming)?.explorationBgmKey : '';
+    if (presenceBgm) return presenceBgm;
     if (currentDepth >= 50 && currentDepth <= 59) return "jungleZone";
     if (currentDepth >= 60 && currentDepth <= 69) return "desertZone";
     return currentDepth >= 101 ? "deepDungeon" : "dungeon";
@@ -4813,11 +4817,11 @@ import {
         eventFlags: { ...(character.eventFlags || {}), transfer_portal_b70f_unlocked: true }
       };
     }
-    startBgm(selectDungeonBgm());
     setDungeonColors(resolveCurrentFloorTheme());
     applyCurrentFloorMist();
     floorStartedAt = descendedAt;
     resetDungeon("", nextStart);
+    startBgm(selectDungeonBgm());
     startFloorLapNotice(currentDepth);
     if (marathonCompleted) {
       say("――長い、長い旅路の果てに、\nあなたは一度も地上へ戻ることなくB42Fへ到達した。\n\nZカード「カプリコーン」を手に入れた！");

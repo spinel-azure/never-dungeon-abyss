@@ -1,5 +1,6 @@
 // Normalized image-space emitters: x, y, width, rise. No boss-ID checks or image edits.
 export const ENEMY_AMBIENT_EFFECTS = Object.freeze({
+  'blood-drip': Object.freeze({ kind: 'bloodDrip', emitters: Object.freeze([[.235, .565], [.105, .63]]) }),
   "tentacle-sway": Object.freeze({
     kind: "spriteDeform",
     period: 3.6,
@@ -261,6 +262,10 @@ function flame(ctx, emitter, time, seed, strength) {
 
 export function drawEnemyAmbientFrame(entry, seconds, fps, reducedMotion = false) {
   const { profile, concealed } = entry;
+  if (profile.kind === 'bloodDrip') {
+    drawBloodDripFrame(entry, seconds, reducedMotion);
+    return;
+  }
   if (profile.kind === "spriteDeform") {
     drawSpriteDeformationFrame(entry, seconds, reducedMotion);
     return;
@@ -361,4 +366,30 @@ export function drawSpriteDeformationFrame(entry, seconds, reducedMotion = false
   ctx.restore();
   canvas.classList.toggle("is-hit", image.classList.contains("is-hit"));
   canvas.classList.toggle("is-concealed", Boolean(concealed));
+}
+
+// Image-relative droplets: follow object-fit/resize through the shared canvas layout.
+export function getBloodDripParticles(seconds, emitters, reducedMotion = false) {
+  if (reducedMotion) return [];
+  return emitters.flatMap(([x, y], source) => [0, 1, 2].map(index => {
+    const age = ((Math.max(0, seconds) / 2.2 + index / 3 + source * .17) % 1);
+    return { x: x + Math.sin(index * 2.3 + source) * .003 * age,
+      y: y + .18 * age * age, radius: .005 + .001 * (1 - age),
+      alpha: .95 * Math.min(1, age * 12) * Math.min(1, (1 - age) * 4), length: .009 + .025 * age };
+  }));
+}
+export function drawBloodDripFrame(entry, seconds, reducedMotion = false) {
+  for (const canvas of [entry.back, entry.front]) canvas.getContext('2d')?.clearRect(0, 0, canvas.width, canvas.height);
+  if (entry.concealed || reducedMotion) return;
+  const canvas = entry.front, ctx = canvas.getContext('2d');if (!ctx) return;
+  ctx.save();
+  ctx.setTransform(canvas.width / 1.3, 0, 0, canvas.height / 1.3, canvas.width * .15 / 1.3, canvas.height * .22 / 1.3);
+  ctx.globalCompositeOperation = 'source-over';
+  for (const p of getBloodDripParticles(seconds, entry.profile.emitters)) {
+    ctx.globalAlpha = p.alpha;ctx.strokeStyle = '#6e0710';ctx.lineWidth = p.radius * .8;
+    ctx.beginPath();ctx.moveTo(p.x, p.y - p.length);ctx.lineTo(p.x, p.y);ctx.stroke();
+    ctx.fillStyle = '#b51b25';ctx.beginPath();ctx.ellipse(p.x, p.y, p.radius, p.radius * 1.7, 0, 0, Math.PI * 2);ctx.fill();
+    ctx.fillStyle = '#ef6060';ctx.beginPath();ctx.ellipse(p.x - p.radius * .25, p.y - p.radius * .4, p.radius * .25, p.radius * .6, 0, 0, Math.PI * 2);ctx.fill();
+  }
+  ctx.restore();
 }

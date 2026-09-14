@@ -1,7 +1,7 @@
 export const ROAMING_ENEMY_DEFINITIONS = Object.freeze([Object.freeze({
   id: 'verfolger', enemyId: 'verfolger', imageId: 'verfolger_silhouette',
   image: 'images/npc/NPC_event_27.avif', minDepth: 90, maxDepth: 98,
-  escapeRate: 1, renderScale: 1.5, maxHeightRatio: .6,
+  explorationBgmKey: 'verfolgerPresence', escapeRate: 1, renderScale: 1.5, maxHeightRatio: .6,
   encounterImageId: 'verfolger_revealed', encounterImage: 'images/bosses/boss_22b.avif',
   encounterMessage: '黒い影が、ゆっくりと身を起こした。\n追ってきていたのは――こいつだ。\n＊Aボタン：戦闘開始'
 })]);
@@ -21,6 +21,7 @@ export function normalizeRoamingEnemyDefinition(definition = {}) {
     maxHeightRatio: Math.max(0, Math.min(1, Number(definition.maxHeightRatio) || 0)),
     encounterImageId: String(definition.encounterImageId || ''),
     encounterImage: String(definition.encounterImage || ''),
+    explorationBgmKey: String(definition.explorationBgmKey || ''),
     encounterMessage: String(definition.encounterMessage || ''),
     floors,
     minDepth,

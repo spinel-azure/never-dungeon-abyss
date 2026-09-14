@@ -1485,6 +1485,7 @@ export function handleOverlayEventInput(action) {
   }
   if (action === "confirm") {
     if (state.overlayEvent.type === 'roamingEncounter') {
+      if (state.overlayEvent.revealDurationMs && !state.overlayEvent.revealComplete) return true;
       const event = state.overlayEvent;
       state.overlayEvent = null;
       hooks.say('');

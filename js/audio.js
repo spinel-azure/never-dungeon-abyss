@@ -52,6 +52,7 @@ const audio = {
     ["normalBattle", "bgm/mazieru-shitou.mp3"],
     ["floorBoss", "bgm/sentou-two.mp3"],
     ["eventBoss", "bgm/battle-of-galfer.mp3"],
+    ['verfolgerPresence', 'bgm/chikayoru-mugai-kiki.mp3'],
     ["temple", "bgm/kyoukai.mp3"],
     ["registration", "bgm/skip-melzo.mp3"],
     ["townFacilities", "bgm/tabidachi-junbi.mp3"],

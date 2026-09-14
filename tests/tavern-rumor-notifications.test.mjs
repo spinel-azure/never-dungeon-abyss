@@ -231,3 +231,11 @@ test('Lichtbringer notification switches to ownership stage without reading it',
  first.character.keyItems={owned:{lichtbringer:{acquiredAt:1,count:1}},acquisitionOrder:['lichtbringer']};const next=syncTavernRumorNotifications(first.character);
  assert.ok(next.removedIds.includes('rumor_014:base'));assert.ok(next.addedIds.includes('rumor_014:lichtbringer'));assert.equal(Boolean(next.character.eventFlags.tavern_rumor_014_lichtbringer_read),false);
 });
+test('cat rumor notification requires the accepted quest and switches only after peaceful resolution',()=>{
+ const c=makeCharacter('三毛猫');c.highestDungeonDepthReached=69;
+ assert.equal(syncTavernRumorNotifications(c).addedIds.includes('rumor_015:base'),false);
+ c.quests.active.guild_027={progress:0};const base=syncTavernRumorNotifications(c);assert.ok(base.addedIds.includes('rumor_015:base'));
+ base.character.eventFlags.johanna_cat_borrow_transition=true;assert.equal(syncTavernRumorNotifications(base.character).addedIds.includes('rumor_015:solved'),false);
+ base.character.eventFlags.sphinx_b69f_peaceful=true;const solved=syncTavernRumorNotifications(base.character);assert.ok(solved.removedIds.includes('rumor_015:base'));assert.ok(solved.addedIds.includes('rumor_015:solved'));
+ assert.equal(Boolean(solved.character.eventFlags.tavern_rumor_015_solved_read),false);
+});

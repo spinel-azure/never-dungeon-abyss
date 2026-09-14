@@ -796,6 +796,7 @@ export function createEnemyCombatant(enemy) {
     resonanceTrait: structuredClone(enemy.resonanceTrait || null),
     reservedActionBreakTrait: structuredClone(enemy.reservedActionBreakTrait || null),
     noDrop: Boolean(enemy.noDrop),
+    ambientEffect: enemy.ambientEffect || '',
     isBoss: Boolean(enemy.isBoss),
     alive: true
   };

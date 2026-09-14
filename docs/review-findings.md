@@ -1,4 +1,17 @@
 # Repository review findings
+### 2026-09-14 フェルフォルガー演出・在階BGM・噂015
+
+- 状態: 対応済み。着手時main、HEAD／ローカルorigin/mainは05c98e4で一致、作業ツリーはクリーン。作業中に追加されたユーザーのbgm/README.txt差分とbgm/chikayoru-mugai-kiki.mp3を保護して利用。コミット／pushなし。
+- 接触演出: 共通overlayにrevealImage／revealDurationMsを渡し、NPC_event_27.avifからboss_22b.avifへ1,800msの滑らかなクロスフェードとぼかしを描画。画像ロード後に開始し、演出中のA入力は戦闘を開始しない。終了後は従来のA入力で戦闘へ。prefers-reduced-motionでは完成状態を表示。時間計算はjs/roaming-reveal.jsへ分離し、元画像は編集していない。
+- 血: 既存createEnemyAmbientEffectsにblood-dripプロファイルを追加。フェルフォルガーの口元／舌先を画像内の正規化座標で指定し、時間から計算する6粒の滴と細い軌跡を前面Canvasへ描く。画像のobject-fit・端末サイズへ追従、既存30／60fpsスケジューラを利用。正体不明表示・動きを減らす設定では非描画。戦闘終了／逃走・撃破時は既存の破棄処理を利用。戦闘能力・行動率・報酬は変更なし。
+- 在階BGM: 徘徊定義のexplorationBgmKeyへverfolgerPresenceを追加、js/audio.jsにbgm/chikayoru-mugai-kiki.mp3を登録。現在フロアの個体statusがactiveならこの探索曲を選ぶ。戦闘はbattle-of-galfer.mp3、逃走後は在階曲、討伐・不在フロアは通常探索曲。フロア生成前に旧個体で選曲していた階段移動は生成後の選曲へ、ロード時にcloseTownが開始直後の曲を停止していた順序はcloseTown→探索曲開始へ修正した。
+- 噂015「ヨハンナの愛猫の噂」: B69F以上かつguild_027受注中で初回解禁。johanna_cat_borrow_transition（旧セーブはjohanna_calico_cat所持も可）とsphinx_b69f_peacefulの両方でsolved段階へ。猫を借りただけ／戦闘でスピンクス撃破では続きにしない。返却後は貸出記録で維持。依頼報告後は条件達成済みの続きと既読履歴を維持し、未読の初回噂を新しく解禁しない。指定の客2台詞・ローザ・続きは既存タイプライター、通知、読了既読、最新段階と履歴、保存方式を利用。
+- 検証: tests/verfolger-effects.test.mjsでクロスフェード境界、血プロファイルの戦闘引継ぎ・有界粒子・時間変化、正体不明／reduced-motion時の消去を検証。噂・通知で階層／受注のAND条件、猫だけ／戦闘討伐の除外、謎解き、返却・報告・旧セーブ・既読履歴・通知切替を確認。計6件追加。
+- ブラウザ: tests/browser/verfolger.mjsを拡張し、PC1280×900／スマホ相当390×844でシルエット・中間ぼかし・完成画像、早押し抑止と画面A入力、Canvasの血ピクセル・reduced-motion時の非描画・逃走後破棄を確認。血の表示確認はテスト内で正体不明表示を解除。噂013～015の初回・続き・読了前未読・履歴を両端末相当で確認。BGMはロード時の在階曲、戦闘、逃走後、討伐後、階段で未討伐階へ移動、B99ロード時の通常曲を実ハンドラーで確認。pageerror／console errorは0件。証跡artifacts/verfolger-effects/。既存artifacts/verfolger/は保持。
+- 結果: Node全1,314件成功・失敗0（--test-concurrency=1）。Python21成功・警告0・失敗0・スキップ2。変更JS／MJS構文検査・git diff --check成功。ブラウザ既存の二重報酬検査は実時間で変動するplayTimeSecondsのみ比較から除外し、他の状態を比較する。
+- 未確認: iPhone Safari／Android実機、実スピーカーでの曲・SEバランス。Canvas描画とBGMキー／URLをブラウザで確認したもので、実音声を聴いた検証ではない。
+- 日付: LAST UPDATE 2026-09-14を維持、main.jsキャッシュ20260914-2。内部importへ?vは追加せず、公開READMEへ個別仕様を書いていない。ユーザーによるbgm/README.txt変更は別の差分として保護した。
+
 ### 2026-09-14 フェルフォルガー本番実装・噂013／014
 
 - 状態: 対応済み。開始時main、HEAD／ローカルorigin/mainはa0ff138で一致、作業ツリーはクリーン。既存素材を変更せず利用。コミット／pushは実施していない。
