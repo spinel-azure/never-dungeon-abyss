@@ -121,7 +121,7 @@ try {
       await page.locator('[data-adventure-records-nav="next"]').click();
     }
     const achievementRows = achievementPages.flatMap(entry => entry.rows);
-    assert.ok(achievementRows.some(row => row.text.includes("？？？？？？――死毒の主")));
+    assert.ok(achievementRows.some(row => row.text.includes("？？？？？？――蠍座の守護者")));
     assert.ok(achievementRows.some(row => row.text.includes("？？？？？？――黄金の稲穂の女神")));
     assert.ok(achievementRows.some(row => row.text.includes("？？？？？？――豊穣感謝際")));
     assert.ok(achievementRows.some(row => row.text.includes("？？？？？？――お得意様")));

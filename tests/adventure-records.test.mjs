@@ -1,3 +1,4 @@
+import { CARDS } from "../data/cards.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 
@@ -247,7 +248,7 @@ test("the post-Fleischfresser chronicle uses durable progression flags and reque
   const character = createInitialCharacter({ name: "深層踏破者", job: "mage" });
   const hidden = getAdventureChronicle(character);
   const hiddenLabels = {
-    todesScorpio: "？？？？？？――死毒の主",
+    todesScorpio: "？？？？？？――蠍座の守護者",
     finalLongMarch: "？？？？？？――前人未踏",
     luminaRevival: "？？？？？？――黄金の稲穂の女神",
     anastasiaOutfit: "？？？？？？――豊穣感謝際",
@@ -259,6 +260,8 @@ test("the post-Fleischfresser chronicle uses durable progression flags and reque
     assert.equal(hidden.find(entry => entry.id === id)?.label, label, id);
   }
 
+  character.level = 197;
+  character.cards.ownedCardCounts = Object.fromEntries(CARDS.filter(card => card.category === "zodiac").map(card => [card.id, 1]));
   character.highestDungeonDepthReached = 100;
   Object.assign(character.eventFlags, {
     boss_todes_scorpio_b64f_defeated: true,
@@ -302,6 +305,8 @@ test("legacy Amayenak clears retain the B100F guardian achievement", () => {
 
 test("the completion achievement unlocks only after every other chronicle entry", () => {
   const character = createInitialCharacter({ name: "やりこみ", job: "warrior" });
+  character.level = 197;
+  character.cards.ownedCardCounts = Object.fromEntries(CARDS.filter(card => card.category === "zodiac").map(card => [card.id, 1]));
   character.highestDungeonDepthReached = 100;
   character.eventFlags = new Proxy(
     { maikaefer_defeat_count: 10 },
@@ -345,4 +350,28 @@ test("Johanna medicine achievement unlocks only after quest 031 is reported", ()
   achievement = getAdventureChronicle(character).find(entry => entry.id === "johannaMedicine");
   assert.equal(achievement.achieved, true);
   assert.equal(achievement.label, "ヨハンナに薬を届けた");
+});
+
+test("new guardian, twelve zodiac kinds and maximum level use independent achievement conditions", () => {
+  const c = createInitialCharacter({ name: "実績", job: "warrior" });
+  const entry = id => getAdventureChronicle(c).find(e => e.id === id);
+  assert.equal(entry("zentaurin").label, "？？？？？？――射手座の守護者");
+  assert.equal(entry("allZodiacCards").label, "？？？？？？――黄道十二宮");
+  assert.equal(entry("level197").label, "？？？？？？――完璧で究極の冒険者");
+  c.level = 196;
+  assert.equal(entry("level197").achieved, false);
+  c.level = 197;
+  assert.equal(entry("level197").label, "最大レベル197に到達した");
+  const zodiac = CARDS.filter(card => card.category === "zodiac");
+  assert.equal(zodiac.length, 12);
+  c.cards.ownedCardCounts = { [zodiac[0].id]: 12 };
+  assert.equal(entry("allZodiacCards").achieved, false);
+  c.cards.ownedCardCounts = Object.fromEntries(zodiac.slice(0, 11).map(card => [card.id, 1]));
+  assert.equal(entry("allZodiacCards").achieved, false);
+  c.cards.ownedCardCounts[zodiac[11].id] = 1;
+  assert.equal(entry("allZodiacCards").label, "ゾディアックカードを12枚全て集めた");
+  assert.equal(entry("zentaurin").achieved, false);
+  c.eventFlags.achievement_zentaurin_defeated = true;
+  assert.equal(entry("zentaurin").label, "ツェンタウリンを撃破した");
+  assert.deepEqual(getAdventureChronicle(JSON.parse(JSON.stringify(c))), getAdventureChronicle(c));
 });

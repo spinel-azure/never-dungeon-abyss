@@ -227,7 +227,7 @@ test("fresh retries reset HP and stance, while first-victory reward and flag are
 test("victory unlocks the Eiskrabbe achievement and event-boss compendium entry", () => {
   const initial = createInitialCharacter({ name: "RECORD", job: "warrior" });
   const hidden = getAdventureChronicle(initial).find(entry => entry.id === "eiskrabbe");
-  assert.equal(hidden.label, "？？？？？？――巨大な氷鋏");
+  assert.equal(hidden.label, "？？？？？？――蟹座の守護者");
 
   const victory = applyBossVictory(initial, "eiskrabbe_b47f");
   let character = victory.character;

@@ -1,3 +1,4 @@
+import { countOwnedZodiacCardKinds } from "./cards.js";
 import { BOSSES } from "./bosses.js";
 import { getCharacterClass } from "./classes.js";
 import {
@@ -97,7 +98,7 @@ export function getAdventureChronicle(character) {
     ["marathon42", "深淵への大行軍", flags.b1_b42_marathon_completed, "一度も帰還せず、転送門を使わずにB1FからB42Fへ到達した。", "？？？？？？――地上を忘れし旅人"],
     ["b45Survey", "B45Fを100マス踏破した", flags.achievement_b45f_100_cells || completedQuests.has(B45F_SURVEY_QUEST_ID), "途中帰還することなくB45Fを100マス踏破した。", "？？？？？？――凍土を踏破する者"],
     ["glacies", "グラキエスを撃破した", flags.boss_glacies_event_boss_defeated, "氷の巨人グラキエスを撃破した。", "？？？？？？――氷巨人への挑戦"],
-    ["eiskrabbe", "エイスクラッベを倒した", flags.boss_eiskrabbe_b47f_defeated, "B47Fに潜む巨大な氷の蟹エイスクラッベを倒した。", "？？？？？？――巨大な氷鋏"],
+    ["eiskrabbe", "エイスクラッベを倒した", flags.boss_eiskrabbe_b47f_defeated, "B47Fに潜む巨大な氷の蟹エイスクラッベを倒した。", "？？？？？？――蟹座の守護者"],
     ["eiskoenigin", "エイスケーニギンを撃破した", flags.boss_eiskoenigin_b49f_defeated, "B49Fの赤い扉の奥でエイスケーニギンを撃破した。", "？？？？？？――凍てつく女王"],
     ["b50", "B50Fへ到達した", flags.boss_eiskoenigin_b49f_defeated && depth >= 50, "エイスケーニギンを倒し、B50Fへ到達した。", "？？？？？？――極寒の果て"],
     ["priestBackRecovery", "司祭のぎっくり腰を治療した", flags.achievement_priest_back_recovered, "密林区域で特効薬の素材を集め、司祭アーヴァインのぎっくり腰を治療した。", "？？？？？？――魔女の一撃"],
@@ -105,7 +106,7 @@ export function getAdventureChronicle(character) {
     ["abyssMusk", "奈落麝香の材料を入手した", completedQuestIds.includes("guild_021"), "ムスクビーストを倒し、奈落麝香の材料となる芳香嚢を入手した。", "？？？？？？――淑女の悩み"],
     ["fleischfresser", "フライシュフレッサーを倒した", flags.boss_fleischfresser_b59f_defeated, "B59Fの赤い扉の奥でフライシュフレッサーを倒した。"],
     ["b60", "B60Fへ到達した", depth >= 60 || flags.transfer_portal_b60f_unlocked, "奈落の迷宮地下60階へ到達し、転送門を解放した。"],
-    ["todesScorpio", "トーデス・スコルピオを撃破した", flags.boss_todes_scorpio_b64f_defeated, "B64Fに潜む死毒の主トーデス・スコルピオを撃破した。", "？？？？？？――死毒の主"],
+    ["todesScorpio", "トーデス・スコルピオを撃破した", flags.boss_todes_scorpio_b64f_defeated, "B64Fに潜む死毒の主トーデス・スコルピオを撃破した。", "？？？？？？――蠍座の守護者"],
     ["sphinx", "スピンクスの試練を越えた", flags.sphinx_b69f_route_fixed, "B69Fでスピンクスの試練を乗り越えた。", "？？？？？？――砂漠の問い"],
     ["b70", "B70Fへ到達した", depth >= 70 || flags.transfer_portal_b70f_unlocked, "奈落の迷宮地下70階へ到達し、転送門を解放した。"],
     ["jirene", "ジレーネを撃破した", flags.boss_jirene_b79f_defeated, "B79Fで魔性の歌声を操るジレーネを撃破した。", "？？？？？？――魔性の歌声"],
@@ -127,6 +128,9 @@ export function getAdventureChronicle(character) {
     ["luminaRevival", "復活時に女神ルミナの姿を見た", flags.achievement_lumina_revival_seen, "復活の祈りの中で、黄金の稲穂の女神ルミナの姿を見た。", "？？？？？？――黄金の稲穂の女神"],
     ["anastasiaOutfit", "アナスタシアの特別な衣装を見た", flags.anastasia_festival_outfit_unlocked, "寺院でアナスタシアの特別な衣装を見た。", "？？？？？？――豊穣感謝際"],
     ["discountPass", "ディスカウントパスを入手した", hasKeyItem(character?.keyItems, "discount_pass"), "商店のお得意様としてディスカウントパスを入手した。", "？？？？？？――お得意様"],
+    ["zentaurin", "ツェンタウリンを撃破した", flags.achievement_zentaurin_defeated, "ツェンタウリンを撃破した。", "？？？？？？――射手座の守護者"],
+    ["allZodiacCards", "ゾディアックカードを12枚全て集めた", countOwnedZodiacCardKinds(character?.cards) >= 12, "12種類すべてのゾディアックカードを所持した。", "？？？？？？――黄道十二宮"],
+    ["level197", "最大レベル197に到達した", Number(character?.level) >= 197, "最大レベル197に到達した。", "？？？？？？――完璧で究極の冒険者"],
     ["playTime100", "プレイ時間が100時間を突破した", Number(character?.adventureStats?.playTimeSeconds) >= PLAY_TIME_100_HOURS_SECONDS, "冒険記録のプレイ時間が100時間に到達した。", "？？？？？？――悠久の冒険者"]
   ];
   milestones.push([
