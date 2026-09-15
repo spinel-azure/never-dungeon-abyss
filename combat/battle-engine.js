@@ -1,4 +1,5 @@
 import { getPlayerWeaponElement } from "./weapon-element.js";
+import { PISCES_STATUS, applyCombatHpDamage, isPiscesInvincible, protectedCombatDamage, resolvePlayerSurvival, finishPiscesTurn } from "./pisces.js";
 export { getPlayerWeaponElement } from "./weapon-element.js";
 import { ELEMENT_LABELS } from "./item-elements.js";
 import { collectStats } from "./collect-stats.js";
@@ -75,6 +76,7 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
   ));
   const sphinxBarrier = sphinxBarrierAmount + guardStoneBarrier;
   const player = cloneCombatant(character);
+  player.statuses = player.statuses.filter(status => (status.id || status.statusId) !== PISCES_STATUS);
   const zentaurinOpening = getZentaurinOpening(selectedEnemy, character?.cards?.deckSlots);
   player.battleSkillSealed = Boolean(zentaurinOpening?.sealed);
   const lifeBoosterRecoveryPotential = hasCardEffect(character?.cards?.deckSlots, "life_booster")
@@ -94,6 +96,8 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     phase: "command",
     outcome: null,
     player,
+    piscesActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_pisces"),
+    piscesUsed: false,
     zentaurinOpening,
     enemy: selectedEnemy,
     ...(enemyParty ? { enemies: enemyParty, targetIndex: selectedTargetIndex, lastPlayerTargetIndex: selectedTargetIndex } : {}),
@@ -156,6 +160,7 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
       rng
     });
     finishAction(next, "enemy");
+    if (next.outcome) finishPiscesTurn(next);
     return { battle: next, accepted: true };
   }
   const order = applyAriesOpeningPriority(next, resolveTurnOrder([
@@ -207,6 +212,7 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
     if (opportunity.skipped) {
       next.log.push(`${actor.name}は動けない！`);
       finishAction(next, entry.side);
+      updateOutcome(next);
       continue;
     }
     const targetHpBefore = target.hp;
@@ -237,6 +243,11 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
   if (!next.outcome) applyNpcTurnEnd(next, rng);
   advanceNpcWallProtection(next);
   advanceNpcChargeState(next, { allowCharge: !next.outcome });
+  if (!next.outcome) {
+    if (Array.isArray(next.enemies)) updateMultiOutcome(next);
+    else updateOutcome(next);
+  }
+  finishPiscesTurn(next);
   if (!next.outcome) {
     next.turn += 1;
     next.phase = "command";
@@ -401,6 +412,11 @@ export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.rand
   if (!next.outcome) applyNpcTurnEnd(next, rng);
   advanceNpcWallProtection(next);
   advanceNpcChargeState(next, { allowCharge: !next.outcome });
+  if (!next.outcome) {
+    if (Array.isArray(next.enemies)) updateMultiOutcome(next);
+    else updateOutcome(next);
+  }
+  finishPiscesTurn(next);
   if (!next.outcome) {
     next.turn += 1;
     next.phase = "command";
@@ -672,10 +688,12 @@ function applyPlayerTurnEndChargeEffects(battle) {
 
 export function resolveEnemyAmbush({ battle, rng = Math.random } = {}) {
   const next = structuredClone(battle);
+  next.resolvingAmbush = true;
   if (next.ariesActiveAtStart) {
     next.log = ["エアリーズの力が敵の不意打ちを打ち消した！"];
     next.presentationEvents = [];
     next.phase = "command";
+    delete next.resolvingAmbush;
     return { battle: next, accepted: true, prevented: true };
   }
   const opportunity = resolveActionOpportunity(next.enemy.statuses);
@@ -697,6 +715,8 @@ export function resolveEnemyAmbush({ battle, rng = Math.random } = {}) {
   }
   finishAction(next, "enemy");
   updateOutcome(next);
+  delete next.resolvingAmbush;
+  if (next.outcome) finishPiscesTurn(next);
   next.phase = next.outcome ? "complete" : "command";
   return { battle: next, accepted: true };
 }
@@ -968,7 +988,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
   }
   if (action.actionType === "chargeDebuff") {
     const successRate = target.isBoss ? Number(action.bossSuccessRate) : Number(action.normalSuccessRate);
-    const success = Number(rng()) < Math.max(0, Math.min(1, successRate || 0));
+    const success = !isPiscesInvincible(target) && Number(rng()) < Math.max(0, Math.min(1, successRate || 0));
     target.statuses = applyStatusApplications(target.statuses, [{
       statusId: action.statusId, success, skipInitialDecrement: true
     }]);
@@ -1053,7 +1073,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
       } else if (effect.id === "cure_all_ailments") {
         actor.statuses = cureAllNegativeStatuses(actor.statuses);
       } else if (effect.id === "banish_undead") {
-        target.hp = 0;
+        applyCombatHpDamage(target, target.hp);
         target.alive = false;
         target.experienceReward = 0;
         target.dropItemId = null;
@@ -1084,7 +1104,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
         ];
       } else if (effect.id === "strong_herbicide") {
         if (target.id === "giant_vine_obstacle") {
-          target.hp = 0;
+          applyCombatHpDamage(target, target.hp);
           target.alive = false;
           battle.log.push("強力除草剤を巨大蔓へ散布した！ 巨大蔓は見る見るうちに枯れていった！");
           if (action.item.id === "strong_herbicide_trial") actor.herbicideTrialUses = (Number(actor.herbicideTrialUses) || 0) + 1;
@@ -1094,13 +1114,13 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
               || FLEISCHFRESSER_REGAIN_SUPPRESSION_TURNS
           ));
           const alreadySuppressed = Number(target.regainSuppressedTurns) > 0;
-          const fixedDamage = Math.max(0, Math.floor(Number(effect.value) || 0));
+          const fixedDamage = protectedCombatDamage(target, Math.max(0, Math.floor(Number(effect.value) || 0)));
           const useMessage = `${action.item.name}を散布した！`;
           const damageMessage = `${target.name}に${fixedDamage}の固定ダメージ！`;
           const suppressionMessage = alreadySuppressed
             ? `${target.name}の再生停止時間が${suppressionTurns}ターンに延長された！`
             : `${target.name}の再生能力が${suppressionTurns}ターン停止した！`;
-          target.hp = Math.max(0, target.hp - fixedDamage);
+          applyCombatHpDamage(target, fixedDamage);
           target.alive = target.hp > 0;
           target.regainSuppressedTurns = suppressionTurns;
           battle.log.push(useMessage, damageMessage, suppressionMessage);
@@ -1148,8 +1168,8 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
       } else if (effect.id === "thrown_fixed_damage") {
         const hitRate = calculatePhysicalHitRate({ attacker: actor, defender: target, attack: {} });
         if (battle.throwingItemGuaranteedHitAtStart || Number(rng()) < hitRate) {
-          const damage = Math.min(Math.max(0, Number(target.hp) || 0), Math.max(0, Math.floor(Number(effect.value) || 0)));
-          target.hp = Math.max(0, target.hp - damage);
+          const damage = protectedCombatDamage(target, Math.min(Math.max(0, Number(target.hp) || 0), Math.max(0, Math.floor(Number(effect.value) || 0))));
+          applyCombatHpDamage(target, damage);
           if (target.hp <= 0) target.alive = false;
           battle.log.push(`${action.item.name}が${target.name}に命中した！ ${damage}のダメージ！`);
           battle.presentationEvents.push({ type: "damage", actorSide, targetSide, amount: damage, message: `${damage} DAMAGE` });
@@ -1256,7 +1276,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
   }
   if (action.actionType === "sacrificialCure") {
     actor.statuses = (actor.statuses || []).filter(status => (status.statusId || status.id) !== action.statusId);
-    const damage = Math.floor(Math.max(0, Number(actor.maxHp) || 0) * (Number(action.damageRate) || 0));
+    const damage = protectedCombatDamage(actor, Math.floor(Math.max(0, Number(actor.maxHp) || 0) * (Number(action.damageRate) || 0)));
     actor.hp = Math.max(1, actor.hp - damage);
     actor.condition = getConditionLabel(actor.statuses);
     battle.log.push(`${actor.name}は${action.name}を使った。毒が消え、${damage}ダメージを受けた。`);
@@ -1267,7 +1287,11 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     return;
   }
   if (action.actionType === "banishUndead") {
-    target.hp = 0;
+    if (isPiscesInvincible(target)) {
+      battle.log.push("双魚の加護が即死を防いだ！");
+      return;
+    }
+    applyCombatHpDamage(target, target.hp);
     target.alive = false;
     target.experienceReward = 0;
     target.dropItemId = null;
@@ -1331,7 +1355,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     )) : 0
   }));
   if (actorSide === "enemy" && targetSide === "player" && battle.mirageFirstAttackAvailable
-    && ["physicalAttack", "spell"].includes(action.actionType)) {
+    && !isPiscesInvincible(target) && ["physicalAttack", "spell"].includes(action.actionType)) {
     battle.mirageFirstAttackAvailable = false;
     if (rng() < 0.5) {
       presentedHits = presentedHits.map(hit => ({ ...hit, hit: false, damage: 0, mirageEvaded: true }));
@@ -1381,6 +1405,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     }));
     battle.vorpalExecution = true;
   }
+  if (isPiscesInvincible(target)) presentedHits = presentedHits.map(hit => ({ ...hit, damage: 0 }));
   let actualDamage = presentedHits.reduce((total, hit) => total + hit.damage, 0);
   const npcWall = targetSide === "player"
     ? target.statuses?.find(status => (status.id || status.statusId) === "npc_johan_wall" && status.active !== false)
@@ -1442,7 +1467,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     if (battle.sphinxBarrier <= 0) battle.log.push("障壁が砕け散った！");
   }
   const targetHpBeforeDamage = Math.max(0, Number(target.hp) || 0);
-  target.hp = Math.max(0, target.hp - actualDamage);
+  applyCombatHpDamage(target, actualDamage);
   const actualHpLoss = Math.max(0, targetHpBeforeDamage - target.hp);
   if (actorSide === "enemy" && actor.id === ZENTAURIN_ID && action.afterDamageStatus && actualHpLoss > 0 && target.hp > 0) {
     const applications = resolveEffects({ effects: [action.afterDamageStatus], trigger: "perAction", attacker: actorStats, defender: targetStats, rng });
@@ -1517,7 +1542,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     actualHpLoss
   });
   const allLandedHitsBlockedByNpcWall = landedHits.length > 0 && landedHits.every(hit => hit.blockedByNpcWall);
-  const applications = barrier || allLandedHitsBlockedByNpcWall || !target.alive ? [] : [
+  const applications = isPiscesInvincible(target) || barrier || allLandedHitsBlockedByNpcWall || !target.alive ? [] : [
     ...resolvedHits.flatMap(hit => hit.effects || []),
     ...(result.actionEffects || [])
   ];
@@ -1665,7 +1690,7 @@ export function applyCancerDoubleReturn({
   if (Number(rng?.()) >= rate) return 0;
   const damage = Math.max(0, Math.floor(loss * (Number(cancer?.doubleReturnMultiplier) || 0)));
   if (damage <= 0) return 0;
-  attacker.hp = Math.max(0, attacker.hp - damage);
+  applyCombatHpDamage(attacker, damage);
   attacker.alive = attacker.hp > 0;
   const message = `キャンサーの加護！ 倍返しで${attacker.name}に${damage}のダメージ！`;
   battle.log.push(message);
@@ -1686,7 +1711,7 @@ export function applyCancerDoubleReturn({
 export function applyFixedFollowUpDamage(battle, target, targetIndex = null) {
   const damage = Math.max(0, Math.floor(Number(battle?.followUpDamageAtStart) || 0));
   if (!battle || !target?.alive || target.hp <= 0 || damage <= 0) return 0;
-  target.hp = Math.max(0, target.hp - damage);
+  applyCombatHpDamage(target, damage);
   target.alive = target.hp > 0;
   battle.log.push(`追撃！ ${damage}ダメージ！`);
   battle.presentationEvents.push({
@@ -1874,8 +1899,8 @@ function finishCombatantAction(battle, actor, side, targetIndex = null) {
 }
 
 function updateMultiOutcome(battle) {
+  resolvePlayerSurvival(battle, applyNpcLethalProtection);
   if (battle.player.hp <= 0) {
-    if (applyNpcLethalProtection(battle)) return;
     battle.player.alive = false;
     battle.outcome = "defeat";
     battle.phase = "complete";
@@ -1886,6 +1911,12 @@ function updateMultiOutcome(battle) {
   battle.outcome = "victory";
   battle.phase = "complete";
   battle.log.push("敵の一団を倒した！");
+}
+
+export function resolveBattleOutcome(battle) {
+  if (Array.isArray(battle.enemies)) updateMultiOutcome(battle);
+  else updateOutcome(battle);
+  return battle;
 }
 
 function markUltimateUsed(actor, action) {
@@ -1904,6 +1935,14 @@ function updateOutcome(battle) {
     battle.outcome = null;
     return;
   }
+  resolvePlayerSurvival(battle, applyNpcLethalProtection);
+  if (battle.player.hp <= 0) {
+    battle.player.alive = false;
+    battle.outcome = "defeat";
+    battle.phase = "complete";
+    battle.log.push(`${battle.player.name}は倒れた……`);
+    return;
+  }
   if (battle.enemy.hp <= 0 && battle.enemy.capturePuzzle) {
     battle.enemy.hp = 0;
     battle.enemy.alive = false;
@@ -1920,12 +1959,6 @@ function updateOutcome(battle) {
     battle.outcome = "victory";
     battle.phase = "complete";
     battle.log.push(`${battle.enemy.name}を倒した！`);
-  } else if (battle.player.hp <= 0) {
-    if (applyNpcLethalProtection(battle)) return;
-    battle.player.alive = false;
-    battle.outcome = "defeat";
-    battle.phase = "complete";
-    battle.log.push(`${battle.player.name}は倒れた……`);
   }
 }
 

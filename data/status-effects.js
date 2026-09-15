@@ -1,4 +1,7 @@
 export const STATUS_EFFECTS = Object.freeze({
+  pisces_invincible: Object.freeze({
+    id: "pisces_invincible", name: "双魚の加護（完全無敵）", kind: "buff", expiresAfterBattle: true
+  }),
   magic_wall: Object.freeze({
     id: "magic_wall",
     name: "魔力の壁",

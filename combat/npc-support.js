@@ -3,6 +3,7 @@ import { resolveSpell } from "./resolve-spell.js";
 import { resolveInstantDeath } from "./resolve-status-effect.js";
 import { getNpcStagePassive, NPC_ADVANCED_GROWTH } from "../data/npc-passives.js";
 import { getConditionLabel } from "./condition-label.js";
+import { resolvePlayerSurvival } from "./pisces.js";
 
 export const NPC_SUPPORT_BALANCE = Object.freeze({
   alec: Object.freeze({ attackRate: 0.8, growthAttack: 3, guardBase: 0.15, guardPerStage: 0.02, guardMaximum: 0.35 }),
@@ -489,6 +490,14 @@ function applyNpcDamage(battle, { npcId, damage, actionName = "", message, hitIn
 }
 
 function setNpcVictory(battle) {
+  resolvePlayerSurvival(battle, applyNpcLethalProtection);
+  if (battle.player.hp <= 0) {
+    battle.player.alive = false;
+    battle.outcome = "defeat";
+    battle.phase = "complete";
+    battle.log.push(`${battle.player.name}は倒れた……`);
+    return;
+  }
   battle.enemy.hp = 0;
   battle.enemy.alive = false;
   if (Array.isArray(battle.enemies) && battle.enemies.some(enemy => enemy.alive && enemy.hp > 0)) return;

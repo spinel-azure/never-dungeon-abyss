@@ -1,7 +1,9 @@
 import { getStatusEffect } from "../data/status-effects.js";
+import { isPiscesInvincible, isOrdinaryNegativeStatus } from "./pisces.js";
 
 export function applyStatus(statuses = [], application = {}) {
   if (!application?.success) return cloneStatuses(statuses);
+  if (isPiscesInvincible({ statuses }) && isOrdinaryNegativeStatus(application.statusId)) return cloneStatuses(statuses);
   const definition = getStatusEffect(application.statusId);
   if (!definition) return cloneStatuses(statuses);
   const next = cloneStatuses(statuses);
@@ -79,6 +81,7 @@ export function resolveEndOfAction({ statuses = [], maxHp = 0 } = {}) {
     status.remainingTurns -= 1;
     if (status.remainingTurns > 0) next.push(status);
   }
+  if (isPiscesInvincible({ statuses })) return { statuses: next, poisonDamage: 0, bleedingDamage: 0, deadlyPoisonDamage: 0, deathPoisonDamage: 0 };
   return { statuses: next, poisonDamage, bleedingDamage, deadlyPoisonDamage, deathPoisonDamage };
 }
 

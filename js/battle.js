@@ -16,6 +16,7 @@ import { showZentaurinArrow } from "./zentaurin-opening.js";
 import { getItem } from "../data/items.js";
 import { getItemUnavailableReason } from "../combat/resolve-item-use.js";
 import { getConditionLabel } from "../combat/condition-label.js";
+import { isPiscesInvincible } from "../combat/pisces.js";
 import { ENEMY_DISPLAY_SIZES, getEnemyDisplaySize } from "../combat/enemy-display-size.js";
 import {
   isEnemyVanishPending,
@@ -430,6 +431,7 @@ async function executeCommand(command) {
     battleUi.messageEl.textContent = messages[resolved.reason] || "現在使用できません。";
     return;
   }
+  battleUi.presentationPisces = isPiscesInvincible(battleUi.battle.player);
   battleUi.battle = resolved.battle;
   battleUi.presenting = battleUi.battle.presentationEvents?.length > 0;
   battleUi.presentationHp = battleUi.presenting ? startingHp : null;
@@ -563,6 +565,8 @@ async function playPresentationEvents() {
       markEnemyVanishPending(vanishImage);
     }
     if (event.type === "barrierDamage") battleUi.presentationBarrier = Math.max(0, Number(event.remaining) || 0);
+    if (event.piscesRevival) battleUi.presentationPisces = true;
+    if (event.type === "piscesProtectionEnd") battleUi.presentationPisces = false;
     if (event.npcId) battleUi.onNpcSupport(event.npcId);
     renderBattleVitals();
     if (event.targetSide === "player") {
@@ -676,6 +680,10 @@ function applyPresentationHp(event) {
 export function applyHpPresentationEvent(presentationHp, battle, event) {
   if (!presentationHp || !["player", "enemy"].includes(event?.targetSide)) return presentationHp;
   const next = { ...presentationHp };
+  if (event.piscesRevival) {
+    next.player = Math.max(1, Math.floor(Number(event.restoredHp) || 1));
+    return next;
+  }
   if (Array.isArray(presentationHp.enemies)) next.enemies = [...presentationHp.enemies];
   const amount = Math.max(0, Math.floor(Number(event.damage ?? event.amount) || 0));
   if (event.targetSide === "enemy" && Array.isArray(next.enemies) && battle?.enemies) {
@@ -1053,11 +1061,25 @@ function renderBattleVitals() {
   const enemyHp = battleUi.presentationHp?.enemy ?? battle.enemy.hp;
   setText("battlePlayerHp", `${playerHp} / ${battle.player.maxHp}`);
   renderSphinxBarrier();
+  renderPiscesStatus();
   renderWeaponElementStatus(battle.player);
   setText("battleEnemyHp", `${enemyHp} / ${battle.enemy.maxHp}`);
   renderBossHpMeter({ ...battle.enemy, hp: enemyHp });
   if (battle.enemies) renderEnemyParty(battle);
   syncEnemyAmbientEffects();
+}
+
+function renderPiscesStatus() {
+  let status = battleUi.root.querySelector("#piscesStatus");
+  if (!status) {
+    status = document.createElement("span");
+    status.id = "piscesStatus";
+    status.setAttribute("role", "status");
+    status.textContent = "双魚の加護：完全無敵";
+    status.style.cssText = "position:absolute;left:12px;bottom:14px;padding:4px 8px;border:1px solid #8ae8ff;border-radius:5px;background:#07222ee6;color:#b9f3ff;font-size:clamp(12px,2.8vw,16px);pointer-events:none;z-index:5";
+    battleUi.root.append(status);
+  }
+  status.hidden = !(battleUi.presenting ? battleUi.presentationPisces : isPiscesInvincible(battleUi.battle?.player));
 }
 
 const WEAKNESS_ICONS = Object.freeze({

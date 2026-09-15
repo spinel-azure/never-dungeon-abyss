@@ -1,4 +1,5 @@
 import { COMBAT_CONFIG, clamp } from "./combat-config.js";
+import { isPiscesInvincible, isOrdinaryNegativeStatus } from "./pisces.js";
 
 export function resolveStatusEffect({
   attacker = {},
@@ -7,6 +8,7 @@ export function resolveStatusEffect({
   rng = Math.random
 } = {}) {
   const resistance = getResistance(defender, effect.statusId);
+  if (isPiscesInvincible(defender) && isOrdinaryNegativeStatus(effect.statusId)) return statusResult(effect, false, 0, true);
   if (resistance.immune) {
     return statusResult(effect, false, 0, true);
   }
@@ -39,6 +41,7 @@ export function resolveInstantDeath({
   rng = Math.random
 } = {}) {
   const resistance = getResistance(defender, "instantDeath");
+  if (isPiscesInvincible(defender)) return { success: false, rate: 0, immune: true };
   if (resistance.immune || defender.isBoss) {
     return { success: false, rate: 0, immune: true };
   }

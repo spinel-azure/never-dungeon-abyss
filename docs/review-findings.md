@@ -1,5 +1,17 @@
 # Repository review findings
 
+### 2026-09-16 Zパイシーズの戦闘中復活・完全無敵
+
+- 着手時main／ローカルorigin/mainはdbb5c44で一致、作業ツリーはクリーン。作業中に追加された未追跡images/bosses/boss_25.avifは未編集。既存zodiac_piscesを使用し、Z／コスト8／所持・セット上限1を維持。指定説明文を登録。入手経路・イベント・噂・READMEは変更していない。コミット／pushなし。
+- combat/pisces.jsのresolvePlayerSurvivalを単体・複数敵の勝敗判定とNPC撃破判定から使用。攻撃一式と行動終了処理後、次の行動より前に復活。発動済みを先に確定し、有効maxHpの50％切捨て・最低1、SP・チャージは変更しない。HPを1残すアレクのジークフリート→パイシーズ→通常敗北の順。女神系の経験値保護や寺院蘇生は通常敗北へ進んだ場合の既存処理を維持。
+- 通常状態の分類kind=ailment/debuffだけを解除：毒・猛毒・死毒・出血・行動不能・感電、armor_break、crystal_cracked、resonance_collapse、crystal_accuracy_down、action_seal、speed_down、todes_scorpio_chilled、charge_defense_down_15/25、charge_blindness。有利状態とsystem分類は維持し、battleSkillSealed（封印の矢）も解除しない。
+- 無敵マーカーpisces_invincibleは行動ごとのremainingTurnsを持たず、戦闘側のpiscesProtectedThroughTurnで管理。通常は復活ターン+1、開幕不意打ちは最初のコマンドターン。全行動・ターン末処理の後に解除し、無効入力では減らない。戦闘終了と通常の状態保存正規化で除去、新戦闘で発動済みフラグを新規初期化。ジレーネの非致死イベントは既存進行を維持。
+- 直接ダメージの集計後・障壁消費前に0化。共通HP減少ゲート、継続ダメージ、即死・通常の状態付与にも無敵を適用。キャンサーの被害依存反撃や障壁消費は発生させない。双方HP0は復活判定後に決着し、復活できなければ単体／複数とも敗北。HP表示は復活イベントの絶対HPを採用し、多段やダメージ数値のない即死でも表示を一致させる。
+- 現行戦闘HTMLにはbattlePlayerCondition表示先がないため、戦闘枠内に状態由来の「双魚の加護：完全無敵」を表示。演出中の復活・終了イベントに同期し、終了後は非表示。
+- tests/pisces.test.mjsで24件追加。通常・多段・呪文・固定・即死・猛毒／死毒、先制・先後手・ターン末・複数敵、状態分類・SP・最低HP・優先順・無効コマンド・連戦・イベント・早期敵逃走・HP演出を確認。通常の毒／出血は既存の非致死仕様を維持。敵からプレイヤーへの反射攻撃は現行未実装のため、反射・割合ダメージは共通HP減少ゲートへの注入で検証し、反射攻撃そのものは追加していない。
+- Node全1368件成功、Python21件成功／警告0／失敗0／2件スキップ。JS/MJS構文・git diff --check成功。PC1280×900・スマホ相当390×844の実ブラウザで復活ログ・HP・無敵表示・次コマンド・終了表示を確認。PCはDOMボタンclick、スマホはタップ。画像artifacts/pisces。実端末・実ゲームパッドは未確認。
+- LAST UPDATE2026-09-16維持、main.jsキャッシュ20260916-2。
+
 ### 2026-09-16 結晶塊・闇球・光闇の武装
 
 - 着手時mainとローカルorigin/mainは4662d5d。既存のse/README.txt差分と未追跡のNPC_event_30/31.avif、boon.wav、zushaa.wavを保護。READMEへの仕様追記なし、コミット／pushなし。

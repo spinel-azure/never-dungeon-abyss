@@ -538,6 +538,11 @@ const ZODIAC_CARDS = [
   longBattleMaximumStacks: 3,
   longBattleDamagePerStack: 0.1,
   longBattleReductionPerStack: 0.1
+} : card.id === "zodiac_pisces" ? {
+  ...card,
+  concept: "1戦闘1回／HP50％復活／次ターン末まで完全無敵",
+  descriptionJa: "1戦闘に1回、戦闘不能時に最大HPの50％で復活し、通常の状態異常を解除する。さらに、次のターン終了まで完全無敵になる。",
+  detailDescriptionJa: "1戦闘に1回、戦闘不能時に\n最大HPの50％で復活し、\n通常の状態異常を解除する。\nさらに、次のターン終了まで\n完全無敵になる。"
 } : card.id === "zodiac_sagittarius" ? {
   ...card,
   concept: "必中／物理DEF無視／呪文の属性耐性無視",
