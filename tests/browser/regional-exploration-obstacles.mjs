@@ -273,6 +273,7 @@ try {
           const obstacleId = layout.branch === "oil" ? "giant_ice_block" : "fire_pillar";
           const oilId = obstacleId === "fire_pillar" ? "ice_lizard_oil" : "fire_lizard_oil";
           character.inventory = inventory.grantItem(character.inventory, oilId, 2).inventory;
+          character.cards.deckSlots = [obstacleId === "fire_pillar" ? "sr_ice_armament" : "sr_flame_armament"];
           if (layout.branch === "johan") {
             character.npcSystem = { registeredIds: ["johan"], activeIds: ["johan"], records: {} };
           }
@@ -360,7 +361,7 @@ try {
       assert.deepEqual(marker.position, [1, 1]);
       assert.equal(marker.after.at(-1)?.value, "▲");
       assert.equal(marker.after.at(-1)?.color, color);
-      assert.match(marker.message, /迂回するしかなさそうだ。$/);
+      assert.match(marker.message, /[氷炎]属性を帯びた武器なら、この(火柱を消|氷塊を溶か)せそうだ。$/);
       await page.locator(".game").screenshot({ path: path.join(output, `${layout.name}-${obstacleId}-minimap-contact.png`) });
     }
 
@@ -385,7 +386,7 @@ try {
     assert.equal(result.obstacle, null);
     if (layout.branch === "mage") {
       assert.equal(result.sp, 20);
-      assert.equal(result.oil, 1);
+      assert.equal(result.oil, 2);
       assert.equal(result.soundEffects.filter(key => key === "explorationObstacleOil").length, 1);
     } else if (layout.branch === "johan") {
       assert.equal(result.sp, 20);
@@ -393,7 +394,7 @@ try {
       assert.equal(result.soundEffects.includes("explorationObstacleOil"), false);
     } else {
       assert.equal(result.sp, 20);
-      assert.equal(result.oil, 1);
+      assert.equal(result.oil, 2);
       assert.equal(result.soundEffects.filter(key => key === "explorationObstacleOil").length, 1);
     }
     results.push({

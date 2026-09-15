@@ -1,4 +1,9 @@
 import { hasCardEffect } from "../data/cards.js";
+import { getWeapon } from "../data/weapons.js";
+export function getEquippedWeaponElement(character) {
+  const equipment = character?.equipment || {};
+  return getPlayerWeaponElement(character, { weapon: getWeapon(equipment.rightArmId || equipment.weaponId, equipment.rightArmEnhancement || 0) });
+}
 export function getPlayerWeaponElement(player, action = {}) {
   const actionElement = String(action.element || "physical");
   if (actionElement !== "physical") return actionElement;
@@ -13,4 +18,3 @@ export function getPlayerWeaponElement(player, action = {}) {
   if (hasCardEffect(player?.cards?.deckSlots, "weapon_lightning_imbue")) return "lightning";
   return "physical";
 }
-

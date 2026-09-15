@@ -1,5 +1,4 @@
-import { getPlayerWeaponElement } from "../combat/weapon-element.js";
-import { getWeapon } from "../data/weapons.js";
+import { getEquippedWeaponElement } from "../combat/weapon-element.js";
 import { ELEMENT_LABELS } from "../combat/item-elements.js";
 const ICONS = { fire: "01", ice: "02", lightning: "03", holy: "04", dark: "05" };
 export function renderWeaponElementStatus(character) {
@@ -11,8 +10,7 @@ export function renderWeaponElementStatus(character) {
     icon.style.cssText = "width:1em;height:1em;object-fit:contain;flex:0 0 1em;margin-left:.15em;align-self:center";
     job.after(icon);
   }
-  const equipment = character?.equipment || {};
-  const element = getPlayerWeaponElement(character, { weapon: getWeapon(equipment.rightArmId || equipment.weaponId, equipment.rightArmEnhancement || 0) });
+  const element = getEquippedWeaponElement(character);
   icon.hidden = !ICONS[element];
   if (!icon.hidden) {
     icon.src = `images/ui/effect_${ICONS[element]}.webp`;

@@ -46,7 +46,7 @@ import { getBossById } from "../data/bosses.js";
 import { getFloorZoneName } from "../data/floor-zone-names.js";
 import {
   getExplorationObstacleMethodPrompt,
-  getExplorationObstacleOilPrompt
+  getExplorationObstacleWeaponPrompt
 } from "../data/exploration-obstacles.js";
 import { onExplorationStep, resetPresence } from "./presence.js";
 import { getRapidCurrentForcedPath, RAPID_CURRENT, RAPID_CURRENT_DIRECTIONS } from "../data/rapid-currents.js";
@@ -1141,17 +1141,17 @@ function startExplorationObstacleEvent(obstacle, obstacleGX, obstacleGY, moveAmo
     });
     return;
   }
-  if (options.canUseMagic && options.canUseOil) {
+  if (options.canUseMagic && options.canUseWeapon) {
     startOverlayEvent({
       type: "explorationObstacle",
       phase: "methodChoice",
       obstacle,
       obstacleGX,
       obstacleGY,
-      oilCount: options.oilCount,
+
       canCancel: true,
       showOverlay: false,
-      message: getExplorationObstacleMethodPrompt(obstacle, options.oilCount)
+      message: getExplorationObstacleMethodPrompt(obstacle)
     });
     return;
   }
@@ -1159,13 +1159,13 @@ function startExplorationObstacleEvent(obstacle, obstacleGX, obstacleGY, moveAmo
     startExplorationObstacleConfirmation({ obstacle, obstacleGX, obstacleGY }, "magic");
     return;
   }
-  if (options.canUseOil) {
+  if (options.canUseWeapon) {
     startExplorationObstacleConfirmation({
       obstacle,
       obstacleGX,
       obstacleGY,
-      oilCount: options.oilCount
-    }, "oil");
+
+    }, "weapon");
     return;
   }
   hooks.say(obstacle.blockedMessage);
@@ -1182,7 +1182,7 @@ function startExplorationObstacleConfirmation(event, method) {
     showOverlay: false,
     message: method === "magic"
       ? obstacle.magicConfirmMessage
-      : getExplorationObstacleOilPrompt(obstacle, event.oilCount)
+      : getExplorationObstacleWeaponPrompt(obstacle)
   });
 }
 
@@ -1213,7 +1213,7 @@ function advanceExplorationObstacleEvent() {
     hooks.onStateChanged();
     return;
   }
-  if (method === "oil") hooks.playSe("explorationObstacleOil");
+  if (method === "weapon") hooks.playSe("explorationObstacleOil");
   event.phase = "result";
   event.canCancel = false;
   event.method = method;
@@ -1221,7 +1221,7 @@ function advanceExplorationObstacleEvent() {
     ? event.obstacle.johanResultMessage
     : method === "magic"
       ? event.obstacle.magicResultMessage
-      : event.obstacle.oilResultMessage;
+      : event.obstacle.weaponResultMessage;
   hooks.say(`${resultMessage}\n＊Aボタン：次へ`);
   hooks.onStateChanged();
 }
@@ -1476,7 +1476,7 @@ export function handleOverlayEventInput(action) {
   if (action === "cancel"
     && state.overlayEvent.type === "explorationObstacle"
     && state.overlayEvent.phase === "methodChoice") {
-    startExplorationObstacleConfirmation(state.overlayEvent, "oil");
+    startExplorationObstacleConfirmation(state.overlayEvent, "weapon");
     return true;
   }
   if (action === "cancel") {

@@ -1,0 +1,27 @@
+✔ Glut and Frost floors place three safe, separated exploration obstacles except survey floors (467.6974ms)
+✔ fixed generation input reproduces obstacle coordinates and preserves B39F/B49F boss rooms (81.7091ms)
+✔ obstacle definitions use the requested assets and floor-zone exclusions (7.6711ms)
+✔ walking into an unavailable obstacle does not move or change facing (3.272ms)
+✔ regional obstacles use contact-only red and cyan triangle minimap markers (0.2089ms)
+✔ a mage spends ten SP only after confirming the matching spell (2.5216ms)
+✔ SP9 cannot remove an obstacle by magic but the matching weapon element remains selectable (0.9792ms)
+✔ a mage can deliberately choose an elemental weapon without spending SP (0.5531ms)
+✔ an accompanying Johan always removes the obstacle without consuming player resources (0.5053ms)
+✔ registered but non-accompanying Johan does not grant free removal (0.5085ms)
+✔ only the matching weapon element removes each obstacle and opposite or lightning elements cannot (1.0994ms)
+✔ removal immediately updates traversal and auto-return pathfinding (0.4136ms)
+✔ obstacle discovery and removal persist in saved floor snapshots (114.8517ms)
+✔ B35F and B45F survey quests still complete on a fully explored map (1.6117ms)
+✔ obstacle effects animate inside the shared renderer and remain reduced-motion safe (0.4675ms)
+✔ matching weapon element removal uses the registered sliding2 sound once (4.2016ms)
+✔ elemental oils keep their battle-only prices and shop unlock contract (0.3694ms)
+✔ renderer, minimap, save restore, and shared input paths include exploration obstacles (4.7164ms)
+✔ oil ownership alone is rejected; equipment priority and confirmation recheck match the icon (0.5151ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 909.4013

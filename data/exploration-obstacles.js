@@ -1,5 +1,5 @@
 import { getFloorZone } from "./floor-zone-names.js";
-import { consumeItem, getItemCount } from "./inventory.js";
+import { getEquippedWeaponElement } from "../combat/weapon-element.js";
 
 export const EXPLORATION_OBSTACLE_TARGET_COUNT = 3;
 export const EXPLORATION_OBSTACLE_MAGIC_SP_COST = 10;
@@ -20,16 +20,16 @@ export const EXPLORATION_OBSTACLES = Object.freeze({
     renderEffect: "fire-waver",
     minimapMarker: "▲",
     minimapColor: "#ff554f",
-    oilItemId: "ice_lizard_oil",
-    oilName: "氷蜥蜴の油",
-    blockedMessage: "激しく燃え上がる火柱が行く手を遮っている。\nこのままでは通れそうにない。迂回するしかなさそうだ。",
+    requiredWeaponElement: "ice",
+    weaponElementLabel: "氷",
+    blockedMessage: "激しく燃え上がる火柱が行く手を遮っている。\n氷属性を帯びた武器なら、この火柱を消せそうだ。",
     magicName: "氷の術式",
     magicConfirmMessage: "氷の術式で火柱を消しますか？\n必要SP：10\n＊Aボタン：はい　Bボタン：いいえ",
     magicResultMessage: "氷の術式を放つと、火柱は白い蒸気を上げて消え去った！",
     johanMessage: "ヨハン「この程度なら、俺に任せろ。」",
     johanResultMessage: "ヨハンが氷の術式を組み上げると、火柱は白い蒸気を上げて消え去った！",
-    oilAction: "火柱を消し",
-    oilResultMessage: "氷蜥蜴の油を振りかけると、火柱は白い蒸気を上げて消え去った！"
+    weaponAction: "火柱を消し",
+    weaponResultMessage: "氷をまとった武器を振るうと、火柱は白い蒸気を上げて消え去った！"
   }),
   giant_ice_block: Object.freeze({
     id: "giant_ice_block",
@@ -42,16 +42,16 @@ export const EXPLORATION_OBSTACLES = Object.freeze({
     renderEffect: "ice-sparkle",
     minimapMarker: "▲",
     minimapColor: "#7fe3ff",
-    oilItemId: "fire_lizard_oil",
-    oilName: "火蜥蜴の油",
-    blockedMessage: "巨大な氷塊が行く手を塞いでいる。\nこのままでは通れそうにない。迂回するしかなさそうだ。",
+    requiredWeaponElement: "fire",
+    weaponElementLabel: "炎",
+    blockedMessage: "巨大な氷塊が行く手を塞いでいる。\n炎属性を帯びた武器なら、この氷塊を溶かせそうだ。",
     magicName: "炎の術式",
     magicConfirmMessage: "炎の術式で巨大氷塊を溶かしますか？\n必要SP：10\n＊Aボタン：はい　Bボタン：いいえ",
     magicResultMessage: "炎の術式を放つと、巨大氷塊は音を立てて崩れ落ちた！",
     johanMessage: "ヨハン「これなら、すぐに溶かせそうだ。」",
     johanResultMessage: "ヨハンが炎の術式を放つと、巨大氷塊は音を立てて崩れ落ちた！",
-    oilAction: "巨大氷塊を溶かし",
-    oilResultMessage: "火蜥蜴の油を振りかけると、巨大氷塊は音を立てて崩れ落ちた！"
+    weaponAction: "巨大氷塊を溶かし",
+    weaponResultMessage: "炎をまとった武器を振るうと、巨大氷塊は音を立てて崩れ落ちた！"
   })
 });
 
@@ -75,7 +75,7 @@ export function getExplorationObstacleRemovalOptions(character, obstacleId) {
   const johan = activeNpcIds.includes("johan");
   const mage = String(character?.job || "") === "mage";
   const sp = Math.max(0, Math.floor(Number(character?.sp) || 0));
-  const oilCount = obstacle ? getItemCount(character?.inventory, obstacle.oilItemId) : 0;
+  const weaponElement = getEquippedWeaponElement(character);
   return {
     obstacle,
     johan,
@@ -83,21 +83,20 @@ export function getExplorationObstacleRemovalOptions(character, obstacleId) {
     sp,
     magicSpCost: EXPLORATION_OBSTACLE_MAGIC_SP_COST,
     canUseMagic: Boolean(obstacle && !johan && mage && sp >= EXPLORATION_OBSTACLE_MAGIC_SP_COST),
-    oilCount,
-    canUseOil: Boolean(obstacle && !johan && oilCount > 0)
+    weaponElement,
+    canUseWeapon: Boolean(obstacle && !johan && weaponElement === obstacle.requiredWeaponElement)
   };
 }
 
-export function getExplorationObstacleOilPrompt(obstacle, oilCount) {
+export function getExplorationObstacleWeaponPrompt(obstacle) {
   if (!obstacle) return "";
-  return `「${obstacle.oilName}」を使って${obstacle.oilAction}ますか？\n所持数：${Math.max(0, Math.floor(Number(oilCount) || 0))}個\n＊Aボタン：はい　Bボタン：いいえ`;
+  return `${obstacle.weaponElementLabel}をまとった武器で${obstacle.weaponAction}ますか？\n＊Aボタン：はい　Bボタン：いいえ`;
 }
 
-export function getExplorationObstacleMethodPrompt(obstacle, oilCount) {
+export function getExplorationObstacleMethodPrompt(obstacle) {
   if (!obstacle) return "";
-  return `${obstacle.name}を解除する方法を選んでください。\n＊Aボタン：${obstacle.magicName}　Bボタン：「${obstacle.oilName}」（${Math.max(0, Math.floor(Number(oilCount) || 0))}個）`;
+  return `${obstacle.name}を解除する方法を選んでください。\n＊Aボタン：${obstacle.magicName}　Bボタン：${obstacle.weaponElementLabel}属性の武器`;
 }
-
 export function resolveExplorationObstacleRemoval(character, obstacleId, method) {
   const options = getExplorationObstacleRemovalOptions(character, obstacleId);
   if (!options.obstacle) return { accepted: false, reason: "unknownObstacle", character };
@@ -116,16 +115,9 @@ export function resolveExplorationObstacleRemoval(character, obstacleId, method)
       character: { ...character, sp: options.sp - options.magicSpCost }
     };
   }
-  if (method === "oil") {
-    if (!options.canUseOil) return { accepted: false, reason: "notOwned", character };
-    const consumed = consumeItem(character.inventory, options.obstacle.oilItemId, 1);
-    if (consumed.consumed !== 1) return { accepted: false, reason: consumed.reason || "notOwned", character };
-    return {
-      accepted: true,
-      reason: "",
-      method,
-      character: { ...character, inventory: consumed.inventory }
-    };
+  if (method === "weapon") {
+    if (!options.canUseWeapon) return { accepted: false, reason: "wrongWeaponElement", character };
+    return { accepted: true, reason: "", method, character };
   }
   return { accepted: false, reason: "invalidMethod", character };
 }

@@ -10,7 +10,7 @@ import {
   getExplorationObstacleById,
   getExplorationObstacleForDepth,
   getExplorationObstacleRemovalOptions,
-  getExplorationObstacleOilPrompt,
+  getExplorationObstacleWeaponPrompt,
   resolveExplorationObstacleRemoval
 } from "../data/exploration-obstacles.js";
 import { getItem, getShopItemIdsForCharacter } from "../data/items.js";
@@ -85,6 +85,7 @@ function createObstacleCharacter(job = "warrior", sp = 20, itemId = "", amount =
   const character = createInitialCharacter({ name: "TEST", job });
   character.sp = sp;
   if (itemId && amount > 0) character.inventory = grantItem(character.inventory, itemId, amount).inventory;
+  if (itemId && amount > 0) character.cards.deckSlots = [{ fire_lizard_oil: "sr_flame_armament", ice_lizard_oil: "sr_ice_armament", lightning_lizard_oil: "sr_lightning_armament" }[itemId]];
   return character;
 }
 
@@ -200,7 +201,7 @@ test("walking into an unavailable obstacle does not move or change facing", () =
   assert.equal(state.overlayEvent, null);
   assert.equal(cells[1][2].explorationObstacleDiscovered, true);
   assert.equal(shouldDrawExplorationObstacleMarker(cells[1][2]), true);
-  assert.equal(interaction.messages.at(-1), "激しく燃え上がる火柱が行く手を遮っている。\nこのままでは通れそうにない。迂回するしかなさそうだ。");
+  assert.equal(interaction.messages.at(-1), "激しく燃え上がる火柱が行く手を遮っている。\n氷属性を帯びた武器なら、この火柱を消せそうだ。");
 });
 
 test("regional obstacles use contact-only red and cyan triangle minimap markers", () => {
@@ -237,29 +238,29 @@ test("a mage spends ten SP only after confirming the matching spell", () => {
   assert.ok(state.anim);
 });
 
-test("SP9 cannot remove an obstacle by magic but the matching oil remains selectable", () => {
+test("SP9 cannot remove an obstacle by magic but the matching weapon element remains selectable", () => {
   let interaction = prepareObstacleInteraction(createObstacleCharacter("mage", 9), "giant_ice_block");
   manualMove(1);
   assert.equal(state.overlayEvent, null);
   assert.equal(interaction.character.sp, 9);
-  assert.equal(interaction.messages.at(-1), "巨大な氷塊が行く手を塞いでいる。\nこのままでは通れそうにない。迂回するしかなさそうだ。");
+  assert.equal(interaction.messages.at(-1), "巨大な氷塊が行く手を塞いでいる。\n炎属性を帯びた武器なら、この氷塊を溶かせそうだ。");
 
   interaction = prepareObstacleInteraction(createObstacleCharacter("mage", 9, "fire_lizard_oil", 1), "giant_ice_block");
   manualMove(1);
-  assert.equal(state.overlayEvent?.method, "oil");
-  assert.equal(interaction.messages.at(-1), "「火蜥蜴の油」を使って巨大氷塊を溶かしますか？\n所持数：1個\n＊Aボタン：はい　Bボタン：いいえ");
+  assert.equal(state.overlayEvent?.method, "weapon");
+  assert.equal(interaction.messages.at(-1), "炎をまとった武器で巨大氷塊を溶かしますか？\n＊Aボタン：はい　Bボタン：いいえ");
 });
 
-test("a mage can deliberately choose oil without spending SP", () => {
+test("a mage can deliberately choose an elemental weapon without spending SP", () => {
   const interaction = prepareObstacleInteraction(createObstacleCharacter("mage", 20, "ice_lizard_oil", 2), "fire_pillar");
   manualMove(1);
   assert.equal(state.overlayEvent?.phase, "methodChoice");
   handleOverlayEventInput("cancel");
-  assert.equal(state.overlayEvent?.method, "oil");
-  assert.equal(interaction.messages.at(-1), getExplorationObstacleOilPrompt(getExplorationObstacleById("fire_pillar"), 2));
+  assert.equal(state.overlayEvent?.method, "weapon");
+  assert.equal(interaction.messages.at(-1), getExplorationObstacleWeaponPrompt(getExplorationObstacleById("fire_pillar"), 2));
   handleOverlayEventInput("confirm");
   assert.equal(interaction.character.sp, 20);
-  assert.equal(getItemCount(interaction.character.inventory, "ice_lizard_oil"), 1);
+  assert.equal(getItemCount(interaction.character.inventory, "ice_lizard_oil"), 2);
   assert.equal(getExplorationObstacleAt(2, 1), null);
   assert.equal(interaction.soundEffects.filter(key => key === "explorationObstacleOil").length, 1);
 });
@@ -289,19 +290,19 @@ test("registered but non-accompanying Johan does not grant free removal", () => 
   const options = getExplorationObstacleRemovalOptions(character, "fire_pillar");
   assert.equal(options.johan, false);
   assert.equal(options.canUseMagic, false);
-  assert.equal(options.canUseOil, false);
+  assert.equal(options.canUseWeapon, false);
 });
 
-test("only the matching oil removes each obstacle and opposite or lightning oil cannot", () => {
+test("only the matching weapon element removes each obstacle and opposite or lightning elements cannot", () => {
   const oils = ["fire_lizard_oil", "ice_lizard_oil", "lightning_lizard_oil"];
   for (const [obstacleId, matchingOil] of [["fire_pillar", "ice_lizard_oil"], ["giant_ice_block", "fire_lizard_oil"]]) {
     for (const oilId of oils) {
       const character = createObstacleCharacter("warrior", 0, oilId, 1);
       const options = getExplorationObstacleRemovalOptions(character, obstacleId);
-      assert.equal(options.canUseOil, oilId === matchingOil, `${obstacleId}/${oilId}`);
-      const result = resolveExplorationObstacleRemoval(character, obstacleId, "oil");
+      assert.equal(options.canUseWeapon, oilId === matchingOil, `${obstacleId}/${oilId}`);
+      const result = resolveExplorationObstacleRemoval(character, obstacleId, "weapon");
       assert.equal(result.accepted, oilId === matchingOil, `${obstacleId}/${oilId}`);
-      if (result.accepted) assert.equal(getItemCount(result.character.inventory, matchingOil), 0);
+      if (result.accepted) assert.equal(getItemCount(result.character.inventory, matchingOil), 1);
     }
   }
 });
@@ -386,7 +387,7 @@ test("obstacle effects animate inside the shared renderer and remain reduced-mot
   assert.ok(reducedIce.sparkles.every(entry => entry.alpha === .48));
 });
 
-test("matching oil removal uses the registered sliding2 sound once", async () => {
+test("matching weapon element removal uses the registered sliding2 sound once", async () => {
   assert.equal(SE.explorationObstacleOil, "sliding2.mp3");
   await readFile(new URL("../se/sliding2.mp3", import.meta.url));
 
@@ -410,8 +411,8 @@ test("elemental oils keep their battle-only prices and shop unlock contract", ()
     assert.equal(item.sellPrice, 250);
     assert.deepEqual(item.usableIn, ["battle"]);
   }
-  assert.equal(getExplorationObstacleById("fire_pillar").oilItemId, "ice_lizard_oil");
-  assert.equal(getExplorationObstacleById("giant_ice_block").oilItemId, "fire_lizard_oil");
+  assert.equal(getExplorationObstacleById("fire_pillar").requiredWeaponElement, "ice");
+  assert.equal(getExplorationObstacleById("giant_ice_block").requiredWeaponElement, "fire");
   const locked = getShopItemIdsForCharacter({ eventFlags: {} });
   assert.equal(locked.includes("fire_lizard_oil"), false);
   assert.equal(locked.includes("ice_lizard_oil"), false);
@@ -433,4 +434,27 @@ test("renderer, minimap, save restore, and shared input paths include exploratio
   assert.match(main, /cells\[y\]\[x\]\.explorationObstacleId = savedCell\.explorationObstacleId \|\| null[\s\S]*explorationObstacleDiscovered = Boolean\(savedCell\.explorationObstacleDiscovered\)/);
   assert.match(input, /handleOverlayInput\("confirm"\)/);
   assert.match(input, /handleOverlayInput\("cancel"\)/);
+});
+
+test("oil ownership alone is rejected; equipment priority and confirmation recheck match the icon", () => {
+  const character = createObstacleCharacter("warrior", 20, "ice_lizard_oil", 2);
+  character.cards.deckSlots = [];
+  assert.equal(getExplorationObstacleRemovalOptions(character, "fire_pillar").canUseWeapon, false);
+  assert.equal(resolveExplorationObstacleRemoval(character, "fire_pillar", "oil").accepted, false);
+  character.equipment.rightArmId = "glacies_hammer";
+  character.cards.deckSlots = ["sr_flame_armament"];
+  assert.equal(getExplorationObstacleRemovalOptions(character, "fire_pillar").canUseWeapon, true);
+  assert.equal(getExplorationObstacleRemovalOptions(character, "giant_ice_block").canUseWeapon, false);
+  const removed = resolveExplorationObstacleRemoval(character, "fire_pillar", "weapon");
+  assert.equal(removed.accepted, true);
+  assert.equal(removed.character, character);
+  character.equipment.rightArmId = "";
+  character.cards.deckSlots = ["sr_ice_armament"];
+  const interaction = prepareObstacleInteraction(character, "fire_pillar");
+  manualMove(1);
+  assert.equal(state.overlayEvent.method, "weapon");
+  character.cards.deckSlots = [];
+  handleOverlayEventInput("confirm");
+  assert.equal(getExplorationObstacleAt(2, 1)?.id, "fire_pillar");
+  assert.equal(getItemCount(interaction.character.inventory, "ice_lizard_oil"), 2);
 });
