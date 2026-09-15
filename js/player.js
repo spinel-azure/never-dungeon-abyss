@@ -1128,16 +1128,17 @@ function startExplorationObstacleEvent(obstacle, obstacleGX, obstacleGY, moveAmo
   const options = hooks.getExplorationObstacleRemovalOptions(obstacle.id) || {};
   state.shake = moveAmount > 0 ? -8 : 6;
   hooks.playSe("blocked");
-  if (options.johan) {
+  if (options.johan || options.erika) {
     startOverlayEvent({
       type: "explorationObstacle",
       phase: "johanIntro",
+      helperId: options.erika ? "erika" : "johan",
       obstacle,
       obstacleGX,
       obstacleGY,
       canCancel: false,
       showOverlay: false,
-      message: `${obstacle.johanMessage}\n＊Aボタン：次へ`
+      message: `${options.erika ? obstacle.helperMessage : obstacle.johanMessage}\n＊Aボタン：次へ`
     });
     return;
   }
@@ -1199,7 +1200,7 @@ function advanceExplorationObstacleEvent() {
     hooks.onStateChanged();
     return;
   }
-  const method = event.phase === "johanIntro" ? "johan" : event.method;
+  const method = event.phase === "johanIntro" ? event.helperId || "johan" : event.method;
   if (!method) return;
   const result = hooks.resolveExplorationObstacleRemoval({
     obstacleId: event.obstacle.id,
@@ -1213,11 +1214,12 @@ function advanceExplorationObstacleEvent() {
     hooks.onStateChanged();
     return;
   }
-  if (method === "weapon") hooks.playSe("explorationObstacleOil");
+  if (event.obstacle.removalSe) hooks.playSe(event.obstacle.removalSe);
+  else if (method === "weapon") hooks.playSe("explorationObstacleOil");
   event.phase = "result";
   event.canCancel = false;
   event.method = method;
-  const resultMessage = method === "johan"
+  const resultMessage = method === "erika" ? event.obstacle.helperResultMessage : method === "johan"
     ? event.obstacle.johanResultMessage
     : method === "magic"
       ? event.obstacle.magicResultMessage

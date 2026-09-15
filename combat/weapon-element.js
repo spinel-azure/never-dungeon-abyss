@@ -16,5 +16,7 @@ export function getPlayerWeaponElement(player, action = {}) {
   if (hasCardEffect(player?.cards?.deckSlots, "weapon_fire_imbue")) return "fire";
   if (hasCardEffect(player?.cards?.deckSlots, "weapon_ice_imbue")) return "ice";
   if (hasCardEffect(player?.cards?.deckSlots, "weapon_lightning_imbue")) return "lightning";
+  if (hasCardEffect(player?.cards?.deckSlots, "weapon_holy_imbue")) return "holy";
+  if (hasCardEffect(player?.cards?.deckSlots, "weapon_dark_imbue")) return "dark";
   return "physical";
 }

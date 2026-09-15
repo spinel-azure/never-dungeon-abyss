@@ -81,6 +81,62 @@ function placedObstacles() {
   return cells.flat().filter(cell => cell.explorationObstacleId);
 }
 
+test("late-region obstacles preserve reserved rooms and place crystal purple chests in empty rooms", () => {
+  for(let depth=80;depth<=99;depth++) {
+    const report=buildSeededFloor(depth);
+    assert.equal(report.valid,true,`B${depth}: ${report.errors}`);
+    const obstacles=placedObstacles();
+    assert.ok(obstacles.length>0 && obstacles.length<=3,`B${depth}`);
+    for(const cell of obstacles) {
+      assert.equal(cell.explorationObstacleId,depth<90?'crystal_cluster':'dark_orb');
+      assert.equal(Boolean(cell.npc||cell.treasure||cell.specialRoom||cell.bossId||cell.questEvent),false);
+    }
+    if(depth<90) {
+      const purple=cells.flat().filter(cell=>cell.treasure==='purple');
+      assert.equal(purple.length,1,`B${depth}`);
+      assert.ok(purple[0].specialRoom);
+      assert.equal(Boolean(purple[0].specialRoom.content),false);
+    }
+  }
+});
+
+test("crystal contact, cancellation and confirmation spend SP only once and play boon", () => {
+  const c=createObstacleCharacter('mage',5);
+  c.npcSystem={activeIds:['johan']};
+  let interaction=prepareObstacleInteraction(c,'crystal_cluster');
+  manualMove(1);
+  assert.equal(state.overlayEvent.phase,'confirm');
+  assert.match(interaction.messages.at(-1),/砕きますか？Aボタン：はい　Bボタン：いいえ/);
+  handleOverlayEventInput('cancel');
+  assert.equal(interaction.character.sp,5);
+  assert.equal(getExplorationObstacleAt(2,1)?.id,'crystal_cluster');
+  interaction=prepareObstacleInteraction(c,'crystal_cluster');
+  manualMove(1);handleOverlayEventInput('confirm');
+  assert.equal(interaction.character.sp,0);
+  assert.equal(getExplorationObstacleAt(2,1),null);
+  assert.equal(interaction.messages.at(-1),'結晶塊は淡く光って砕け散った！…砕ける際、脱力感に襲われた！\n＊Aボタン：次へ');
+  handleOverlayEventInput('confirm');
+  assert.equal(interaction.soundEffects.filter(x=>x==='crystalObstacleBreak').length,1);
+  assert.equal(SE.crystalObstacleBreak,'boon.wav');
+});
+
+test("Erika and holy weapon remove dark orb through the actual input flow", () => {
+  for(const helper of [false,true]) {
+    const c=createObstacleCharacter('warrior',5);
+    c.cards.deckSlots=helper?[]:['sr_holy_armament'];
+    c.npcSystem={activeIds:helper?['erika']:[]};
+    const interaction=prepareObstacleInteraction(c,'dark_orb');
+    manualMove(1);handleOverlayEventInput('confirm');
+    assert.equal(getExplorationObstacleAt(2,1),null);
+    assert.equal(interaction.character.sp,5);
+    assert.match(interaction.messages.at(-1),/闇球.*消え去った/);
+    assert.equal(interaction.soundEffects.filter(x=>x==='darkObstacleDispel').length,1);
+  }
+  assert.equal(SE.darkObstacleDispel,'zushaa.wav');
+  assert.notDeepEqual(resolveExplorationObstacleEffectFrame('dark-waver',0,false),resolveExplorationObstacleEffectFrame('dark-waver',500,false));
+  assert.deepEqual(resolveExplorationObstacleEffectFrame('dark-waver',0,true),resolveExplorationObstacleEffectFrame('dark-waver',500,true));
+});
+
 function createObstacleCharacter(job = "warrior", sp = 20, itemId = "", amount = 0) {
   const character = createInitialCharacter({ name: "TEST", job });
   character.sp = sp;

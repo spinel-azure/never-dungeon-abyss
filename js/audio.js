@@ -35,6 +35,8 @@ export const SE = Object.freeze({
   rapidCurrentSplash: "minamo.mp3",
   rapidCurrentFlow: "suiryuu.mp3",
   explorationObstacleOil: "sliding2.mp3",
+  crystalObstacleBreak: "boon.wav",
+  darkObstacleDispel: "zushaa.wav",
   rumorBell: "nda_rumor_bell_3.wav",
   fixedWarp: "warp.wav"
 });
@@ -113,6 +115,8 @@ const PLAYBACK_POLICIES = {
   rapidCurrentSplash: { mode: "restart", priority: 3 },
   rapidCurrentFlow: { mode: "restart", priority: 2 },
   explorationObstacleOil: { mode: "complete", priority: 3 },
+  crystalObstacleBreak: { mode: "complete", priority: 3 },
+  darkObstacleDispel: { mode: "complete", priority: 3 },
   rumorBell: { mode: "complete", priority: 3 },
   fixedWarp: { mode: "complete", priority: 3 }
 };

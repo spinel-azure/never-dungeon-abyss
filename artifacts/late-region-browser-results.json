@@ -1,0 +1,114 @@
+{
+  "results": [
+    {
+      "layout": "pc",
+      "before": {
+        "obstacle": "crystal_cluster",
+        "phase": "confirm",
+        "sp": 20,
+        "oil": 0,
+        "message": "行く手を結晶塊が阻んでいるが、衝撃を与えれば簡単に砕けそうだ。\n砕きますか？Aボタン：はい　Bボタン：いいえ",
+        "moveCalls": 1,
+        "position": [
+          1,
+          1
+        ],
+        "direction": 1,
+        "soundEffects": [
+          "blocked"
+        ]
+      },
+      "after": {
+        "obstacle": null,
+        "phase": "result",
+        "sp": 10,
+        "oil": 0,
+        "message": "結晶塊は淡く光って砕け散った！…砕ける際、脱力感に襲われた！\n＊Aボタン：次へ",
+        "moveCalls": 1,
+        "position": [
+          1,
+          1
+        ],
+        "direction": 1,
+        "soundEffects": [
+          "blocked",
+          "crystalObstacleBreak"
+        ]
+      }
+    },
+    {
+      "layout": "mobile",
+      "before": {
+        "obstacle": "dark_orb",
+        "phase": "johanIntro",
+        "sp": 20,
+        "oil": 0,
+        "message": "エリカ「光の奇蹟で、この闇を払いましょう。」\n＊Aボタン：次へ",
+        "moveCalls": 1,
+        "position": [
+          1,
+          1
+        ],
+        "direction": 1,
+        "soundEffects": [
+          "blocked"
+        ]
+      },
+      "after": {
+        "obstacle": null,
+        "phase": "result",
+        "sp": 20,
+        "oil": 0,
+        "message": "エリカが光の奇蹟を唱えると、闇球は光に包まれて消え去った！\n＊Aボタン：次へ",
+        "moveCalls": 1,
+        "position": [
+          1,
+          1
+        ],
+        "direction": 1,
+        "soundEffects": [
+          "blocked",
+          "darkObstacleDispel"
+        ]
+      }
+    },
+    {
+      "layout": "tablet",
+      "before": {
+        "obstacle": "dark_orb",
+        "phase": "confirm",
+        "sp": 20,
+        "oil": 0,
+        "message": "光をまとった武器で闇球を払いますか？\n＊Aボタン：はい　Bボタン：いいえ",
+        "moveCalls": 1,
+        "position": [
+          1,
+          1
+        ],
+        "direction": 1,
+        "soundEffects": [
+          "blocked"
+        ]
+      },
+      "after": {
+        "obstacle": null,
+        "phase": "result",
+        "sp": 20,
+        "oil": 0,
+        "message": "光をまとった武器を振るうと、闇球は光に包まれて消え去った！\n＊Aボタン：次へ",
+        "moveCalls": 1,
+        "position": [
+          1,
+          1
+        ],
+        "direction": 1,
+        "soundEffects": [
+          "blocked",
+          "darkObstacleDispel"
+        ]
+      }
+    }
+  ],
+  "errors": [],
+  "screenshots": "E:/GitHub/never-dungeon-abyss/artifacts/late-region-obstacles"
+}

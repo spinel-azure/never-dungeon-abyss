@@ -255,6 +255,13 @@ export function rollRedChestLoot(rng = Math.random, depth = 1) {
 
 export const PURPLE_CHEST_LOOT_TABLES = Object.freeze([
   Object.freeze({
+    minDepth: 80, maxDepth: 89,
+    entries: Object.freeze([
+      Object.freeze({ upperBound: 0.5, cardId: "sr_holy_armament", rarity: "SR" }),
+      Object.freeze({ upperBound: 1, cardId: "sr_dark_armament", rarity: "SR" })
+    ])
+  }),
+  Object.freeze({
     minDepth: 1,
     maxDepth: 9,
     entries: Object.freeze([

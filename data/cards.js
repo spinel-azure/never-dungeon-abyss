@@ -340,6 +340,22 @@ const STANDARD_CARDS = [
     acquisition: Object.freeze({ type: "rareEnemy", enemyId: "maikaefer", dropRate: 0.01 })
   },
   {
+    id: "sr_holy_armament", rarity: "SR", cost: 4,
+    name: "Holy Armament", nameJa: "光の武装", concept: "物理攻撃に光属性付与",
+    descriptionJa: "通常攻撃と物理攻撃スキルに光属性を付与する。武器固有属性と戦闘中の属性油が優先される。",
+    category: "ability", effectId: "weapon_holy_imbue", effectValue: "holy",
+    exclusiveGroup: "weapon_element_imbue", iconId: "flame-sword",
+    maxOwned: 1, maxCopies: 1, sellPrice: 5000, buybackPrice: 50000
+  },
+  {
+    id: "sr_dark_armament", rarity: "SR", cost: 4,
+    name: "Dark Armament", nameJa: "闇の武装", concept: "物理攻撃に闇属性付与",
+    descriptionJa: "通常攻撃と物理攻撃スキルに闇属性を付与する。武器固有属性と戦闘中の属性油が優先される。",
+    category: "ability", effectId: "weapon_dark_imbue", effectValue: "dark",
+    exclusiveGroup: "weapon_element_imbue", iconId: "flame-sword",
+    maxOwned: 1, maxCopies: 1, sellPrice: 5000, buybackPrice: 50000
+  },
+  {
     id: "sr_flame_armament", rarity: "SR", cost: 4,
     name: "Flame Armament", nameJa: "炎の武装", concept: "物理攻撃に炎属性付与",
     descriptionJa: "通常攻撃と物理攻撃スキルに炎属性を付与する。武器固有属性と戦闘中の属性油が優先される。",

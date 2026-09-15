@@ -1480,7 +1480,7 @@ const ICE_OBSTACLE_SPARKLES = Object.freeze([
 
 export function resolveExplorationObstacleEffectFrame(effectId, timestamp = 0, reducedMotion = false) {
   const now = Number(timestamp) || 0;
-  if (effectId === "fire-waver") {
+  if (effectId === "fire-waver" || effectId === "dark-waver") {
     if (reducedMotion) {
       return { offsetXRatio: 0, scaleX: 1, scaleY: 1, glowAlpha: .42, sparkles: [] };
     }
@@ -1573,7 +1573,7 @@ function drawNpcEvent(ctx, event, now = 0) {
   if (event.npc.silhouette) {
     ctx.filter = "brightness(0) drop-shadow(0 0 3px rgba(225,252,255,.98)) drop-shadow(0 0 10px rgba(128,235,255,.9))";
   }
-  ctx.shadowColor = event.npc.renderEffect === "fire-waver"
+  ctx.shadowColor = event.npc.renderEffect === "dark-waver" ? "rgba(153,65,235," + effect.glowAlpha + ")" : event.npc.renderEffect === "fire-waver"
     ? "rgba(255,105,34," + effect.glowAlpha + ")"
     : event.npc.renderEffect === "ice-sparkle"
       ? "rgba(151,231,255," + effect.glowAlpha + ")"
