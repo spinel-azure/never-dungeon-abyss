@@ -1,0 +1,11 @@
+import {writeFile} from 'node:fs/promises';
+import {pathToFileURL} from 'node:url';
+import path from 'node:path';
+const repo=process.argv[2]||'E:/GitHub/never-dungeon-abyss';
+const {ITEMS}=await import(pathToFileURL(path.join(repo,'data/items.js')));
+const {KEY_ITEMS}=await import(pathToFileURL(path.join(repo,'data/key-items.js')));
+const labels={shop:'商店購入',temple:'寺院購入',drop:'敵ドロップ',treasure:'宝箱入手',quest:'依頼入手',event:'イベント入手',keyItem:'イベント入手',dungeon:'探索入手',special:'特殊入手（経路要確認）'};
+const items=ITEMS.map(i=>({id:i.id,name:i.name,kind:'アイテム',source:labels[i.source]||'入手経路要確認',price:['shop','temple'].includes(i.source)?i.buyPrice:null}));
+for(const i of Object.values(KEY_ITEMS))if(!items.some(r=>r.id===i.id||r.name===i.name))items.push({id:i.id,name:i.name,kind:'貴重品',source:'入手経路要確認',price:null});
+await writeFile(new URL('./catalog.js',import.meta.url),'window.NDA_ITEM_CATALOG = '+JSON.stringify({updated:new Date().toISOString().slice(0,10),items},null,2)+';\n','utf8');
+console.log(`${items.length} items exported`);

@@ -1,0 +1,40 @@
+.item-compendium-panel {
+  width: 100%; min-height: 0; height: 100%;
+  padding: 14px 18px 12px; display: grid; grid-template-rows: auto auto minmax(0,1fr) auto; gap: 8px;
+  background: linear-gradient(#10241e,#020707); font-family: "PixelFont",monospace;
+}
+.item-compendium-panel .menu-title { font: 28px "PixelFont",monospace; margin: 0 0 6px; }
+.item-compendium-tabs { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 5px; }
+.item-compendium-panel button { border: 1px solid #426455; background: #071510; color: #e6f6ef; font: 16px "PixelFont",monospace; padding: 9px 4px; cursor: pointer; }
+.item-compendium-tabs [aria-pressed="true"] { border-color: #9affd5; background: #204b38; box-shadow: 0 0 7px #467e63; }
+.item-compendium-content { min-height: 0; overflow: auto; }
+.item-compendium-list button { display: block; width: 100%; text-align: left; padding: 12px; margin-bottom: 6px; }
+.item-compendium-list p { color: #aebfb4; text-align: center; padding-top: 30px; }
+.item-compendium-pager { display: grid; grid-template-columns: 1.5fr 1fr auto 1fr; gap: 7px; align-items: center; text-align: center; }
+.item-compendium-panel button:disabled { opacity: .3; cursor: default; }
+.item-compendium-detail {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 18px 12px;
+  overflow: auto;
+  color: #e5eee9;
+  background: radial-gradient(ellipse at 80% 0, #244137 0, transparent 65%), #07100f;
+  font-family: "PixelFont", monospace;
+}
+.item-compendium-header { display: flex; justify-content: space-between; gap: 10px; color: #9fbeb0; font-size: 15px; }
+.item-compendium-category { border: 1px solid #577766; padding: 2px 12px; border-radius: 3px; }
+.item-compendium-name { font-size: clamp(23px, 3vw, 32px); font-weight: normal; color: #f2d995; margin: 26px 0; }
+.item-compendium-facts { display: grid; grid-template-columns: 5em 1fr; gap: 12px 20px; font-size: 18px; line-height: 1.5; }
+.item-compendium-facts dt { color: #92b5a4; }
+.item-compendium-facts dd { margin: 0; overflow-wrap: anywhere; }
+.item-compendium-description { border-top: 1px solid #496253; padding-top: 22px; margin-top: 24px; font-size: 20px; line-height: 1.8; white-space: pre-wrap; overflow-wrap: anywhere; }
+@media(max-width:600px) {
+  .item-compendium-panel { padding: 9px 8px 7px; gap: 5px; }
+  .item-compendium-panel .menu-title { font-size: 23px; }
+  .item-compendium-panel button { font-size: 13px; }
+  .item-compendium-header { font-size: 12px; }
+  .item-compendium-name { margin: 18px 0; }
+  .item-compendium-facts { font-size: 14px; gap: 8px 10px; }
+  .item-compendium-description { font-size: 16px; line-height: 1.8; margin-top: 18px; padding-top: 16px; }
+}
