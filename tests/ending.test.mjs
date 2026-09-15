@@ -78,10 +78,10 @@ test("assets exist, epilogue is ordered and ending collaborators precede product
   assert.match(EPILOGUE[0], /^――かくして/);
   assert.equal(EPILOGUE.at(-1), "その勲章には、女王の加護が宿っているといいます。");
   assert.match(EPILOGUE_AFTER_MEDAL, /末永く語り継がれてゆくことでしょう――。$/);
-  assert.deepEqual(ENDING_TEST_PLAYERS, ["・ALC(@ALCHE0274)"]);
+  assert.deepEqual(ENDING_TEST_PLAYERS, ["・ALC(@ALCHE0274)", "・奏良(@deep_red_fairy)"]);
   assert.deepEqual(ENDING_SPECIAL_THANKS, ["・みかにゃ(@RllCQzwYqrjFWrg)"]);
   assert.deepEqual(getEndingCredits().slice(-3), [
-    ["実機テストプレイ・デバッグ協力（敬称略）", ["・ALC(@ALCHE0274)"]],
+    ["実機テストプレイ・デバッグ協力（敬称略）", ["・ALC(@ALCHE0274)", "・奏良(@deep_red_fairy)"]],
     ["SPECIAL THANKS（敬称略）", ["・みかにゃ(@RllCQzwYqrjFWrg)"]],
     ["制作", ["@Spinel_azure"]]
   ]);

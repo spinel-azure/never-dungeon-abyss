@@ -115,6 +115,8 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
     lock: Object.freeze({ mode: "alwaysSuccess", attempts: 1 }),
     content: Object.freeze({
       type: "eventBoss", bossId: "zentaurin_b96f",
+      requiredZodiacCount: 4,
+      accessBlockedMessage: "扉は固く閉ざされている。表面には12星座の紋様が刻まれている……。",
       accessConfirmMessage: "扉の向こうに強い気配を感じる。中に入りますか？\n＊Aボタン：はい　Bボタン：いいえ",
       confirmAfterUnlock: true, minimapMarker: "E", revealBeforeExploration: true
     })

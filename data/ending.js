@@ -23,7 +23,7 @@ export const EPILOGUE = Object.freeze([
   "その勲章には、女王の加護が宿っているといいます。"
 ]);
 export const EPILOGUE_AFTER_MEDAL = "あなたが成し遂げた偉業は、\n猫の国《カッツェンラント》の歴史とともに、\n末永く語り継がれてゆくことでしょう――。";
-export const ENDING_TEST_PLAYERS = Object.freeze(["・ALC(@ALCHE0274)"]);
+export const ENDING_TEST_PLAYERS = Object.freeze(["・ALC(@ALCHE0274)", "・奏良(@deep_red_fairy)"]);
 export const ENDING_SPECIAL_THANKS = Object.freeze(["・みかにゃ(@RllCQzwYqrjFWrg)"]);
 export function getEndingCredits(testPlayers = ENDING_TEST_PLAYERS, specialThanks = ENDING_SPECIAL_THANKS) {
   return [

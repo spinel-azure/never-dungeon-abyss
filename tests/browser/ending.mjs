@@ -180,6 +180,7 @@ try {
     assert.equal(await page.getByText("GitHub / GitHub Pages", { exact: true }).count(), 1);
     assert.equal(await page.getByText("実機テストプレイ・デバッグ協力（敬称略）", { exact: true }).count(), 1);
     assert.equal(await page.getByText("・ALC(@ALCHE0274)", { exact: true }).count(), 1);
+    assert.equal(await page.getByText("・奏良(@deep_red_fairy)", { exact: true }).count(), 1);
     assert.equal(await page.getByText("SPECIAL THANKS（敬称略）", { exact: true }).count(), 1);
     assert.equal(await page.getByText("・みかにゃ(@RllCQzwYqrjFWrg)", { exact: true }).count(), 1);
     await advance(page, 15000);

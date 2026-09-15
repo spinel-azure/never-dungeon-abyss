@@ -19,6 +19,30 @@ import {
 import { shouldDrawSpecialRoomMarker } from "../js/minimap.js";
 import { countOwnedZodiacCardKinds } from "../data/cards.js";
 
+test("B96 uses the live door access gate with four distinct owned Zodiac cards", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const source = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
+  const body = source.split("  function getCurrentSpecialDoorAccessBlock() {")[1]
+    .split("\n  function attemptCurrentSpecialDoorUnlock")[0];
+  const gate = new Function("character", "getSpecialRoomDefinition", "getSpecialRoomAccessRestriction",
+    "getForcedEnemyId", "countOwnedZodiacCardKinds",
+    "const currentDepth = 96; return (function () {" + body + ")();");
+  const access = cards => gate({ cards }, getSpecialRoomDefinition, getSpecialRoomAccessRestriction,
+    () => null, countOwnedZodiacCardKinds);
+  const three = { zodiac_taurus: 1, zodiac_libra: 1, zodiac_scorpio: 1 };
+  assert.equal(access({ ownedCardCounts: three, deckSlots: [] }).blocked, true);
+  assert.equal(access({ ownedCardCounts: { ...three, zodiac_taurus: 4 } }).blocked, true);
+  const four = { ...three, zodiac_cancer: 1 };
+  const result = access({ ownedCardCounts: four, deckSlots: [] });
+  assert.equal(result.blocked, false);
+  assert.equal(result.confirmAfterUnlock, true);
+  assert.equal(access(JSON.parse(JSON.stringify({ ownedCardCounts: four, deckSlots: [] }))).blocked, false);
+  assert.equal(access({ ownedCardCounts: {}, deckSlots: Object.keys(four) }).blocked, true);
+  assert.match(access({ ownedCardCounts: three }).message, /12星座/);
+  assert.equal(getSpecialRoomDefinition(47).content.requiredZodiacCount, 3);
+  assert.equal(getSpecialRoomDefinition(64).content.requiredZodiacCount, 2);
+});
+
 test("B2 special room contains the repeatable lingering ghost event boss", () => {
   assert.deepEqual(getSpecialRoomDefinition(2).content, {
     type: "repeatableBoss",
