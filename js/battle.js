@@ -1,3 +1,4 @@
+import { renderWeaponElementStatus } from "./weapon-element-status.js";
 import {
   createBattleState,
   isCaptureAvailable,
@@ -568,6 +569,7 @@ async function playPresentationEvents() {
       const hp = battleUi.presentationHp?.player ?? battleUi.battle.player.hp;
       battleUi.onCharacterChanged({ hp, alive: hp > 0 });
     }
+    renderWeaponElementStatus(battleUi.battle.player);
     battleUi.messageEl.textContent = formatPresentationMessage(event);
     const dedicatedPresentationPlayed = event.targetSide === "enemy" && event.hit
       ? await playBattleSkillPresentation({
@@ -862,6 +864,7 @@ function closeBattle() {
   delete battleUi.commandRoot.dataset.battleComplete;
   battleUi.messageEl.classList.remove("is-skill-description");
   battleUi.battle = null;
+  renderWeaponElementStatus(battleUi.getCharacter());
   const barrier = document.getElementById("sphinxBarrierStatus");
   if (barrier) barrier.hidden = true;
 }
@@ -1050,6 +1053,7 @@ function renderBattleVitals() {
   const enemyHp = battleUi.presentationHp?.enemy ?? battle.enemy.hp;
   setText("battlePlayerHp", `${playerHp} / ${battle.player.maxHp}`);
   renderSphinxBarrier();
+  renderWeaponElementStatus(battle.player);
   setText("battleEnemyHp", `${enemyHp} / ${battle.enemy.maxHp}`);
   renderBossHpMeter({ ...battle.enemy, hp: enemyHp });
   if (battle.enemies) renderEnemyParty(battle);

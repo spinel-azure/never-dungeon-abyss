@@ -1,0 +1,19 @@
+✔ fire oil flows through use, attack, physical skill and rejection (20.8117ms)
+✔ ice oil flows through use, attack, physical skill and rejection (4.2319ms)
+✔ lightning oil flows through use, attack, physical skill and rejection (2.4897ms)
+✔ item presentation includes actual healing and barrier reduction (1.8083ms)
+✔ invalid oil and barrier elements are not silently converted to fire (0.1869ms)
+✔ elemental oils cost 500G and unlock together after quest 013 reporting (1.8492ms)
+✔ elemental armament cards are exclusive SR cost-four cards with future sale values (3.127ms)
+✔ every card follows the fixed rarity cost table (0.225ms)
+✔ physical attack element priority is skill, oil, weapon, card, then physical (0.9403ms)
+✔ elemental oil lasts for the battle, rejects the same oil, and another oil overwrites it (10.394ms)
+✔ deck UI uses the shared warning effect for elemental conflicts (7.817ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 235.1414

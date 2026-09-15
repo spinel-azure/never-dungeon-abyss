@@ -1,3 +1,4 @@
+import { renderWeaponElementStatus } from "./weapon-element-status.js";
 import { CHARACTER_JOBS, TOWN_FACILITIES, getTownFacility } from "../data/town.js";
 import {
   formatCompactQuickName,
@@ -3318,6 +3319,7 @@ function showRegistrationRequired() {
 
 export function renderCharacterStatus() {
   const character = town.getCharacter();
+  renderWeaponElementStatus(character);
   const quickName = character?.name || "NO_NAME";
   const values = {
     quickName,

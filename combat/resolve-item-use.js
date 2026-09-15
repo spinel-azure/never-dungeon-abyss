@@ -1,4 +1,5 @@
 import { canUseItemIn, getItem } from "../data/items.js";
+import { hasValidItemElements } from "./item-elements.js";
 import { consumeItem, getItemCount } from "../data/inventory.js";
 import { getStatusEffect } from "../data/status-effects.js";
 import { getConditionLabel } from "./condition-label.js";
@@ -28,6 +29,7 @@ export function cureAllNegativeStatuses(statuses = []) {
 export function getItemUnavailableReason({ character, itemId, context, enemy, torchFuel = 0, treasureCompassActive = false } = {}) {
   const item = getItem(itemId);
   if (!item) return "unknownItem";
+  if (!hasValidItemElements(item)) return "noEffect";
   const owned = item.keyItemId
     ? hasKeyItem(character?.keyItems, item.keyItemId)
     : getItemCount(character?.inventory, itemId) > 0;

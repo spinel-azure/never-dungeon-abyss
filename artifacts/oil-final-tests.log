@@ -1,0 +1,33 @@
+✔ new characters see the deck tutorial while legacy recipients do not repeat it (5.7611ms)
+✔ deck tutorial isolates and highlights the inn deck command (0.7607ms)
+✔ lucky charm acquisition starts one locked three-second tutorial (0.624ms)
+✔ the quest notice reuses the bell layout with distinct blue presentation (3.5308ms)
+✔ persistent state changes, reload resume, and guild rendering recheck quest notices (3.3403ms)
+✔ notification assets use the current cache revision (0.6364ms)
+✔ the truth staff is a unique unsellable key item (1.622ms)
+✔ Michaela restoration preserves all six requested dialogue pages (0.796ms)
+✔ Michaela dialogue measures the message box, splits naturally, and always shows the A prompt (0.8332ms)
+✔ Amayenak victory persists recovery flags and returns to the B100F entrance (1.4401ms)
+✔ the real battle completion snapshot reaches the restoration bridge with Amayenak's ID (4.5125ms)
+✔ restoration overlay uses the cat and both Michaela portraits (3.2439ms)
+✔ restoration returns silently without an unrelated floor transition message (0.7852ms)
+✔ main.js keeps the current top-level cache buster without versioned module imports (1.1659ms)
+✔ fire oil flows through use, attack, physical skill and rejection (18.2987ms)
+✔ ice oil flows through use, attack, physical skill and rejection (4.6125ms)
+✔ lightning oil flows through use, attack, physical skill and rejection (2.8986ms)
+✔ item presentation includes actual healing and barrier reduction (1.831ms)
+✔ invalid oil and barrier elements are not silently converted to fire (0.1865ms)
+✔ elemental oils cost 500G and unlock together after quest 013 reporting (2.0297ms)
+✔ elemental armament cards are exclusive SR cost-four cards with future sale values (3.0573ms)
+✔ every card follows the fixed rarity cost table (0.2183ms)
+✔ physical attack element priority is skill, oil, weapon, card, then physical (0.9674ms)
+✔ elemental oil lasts for the battle, rejects the same oil, and another oil overwrites it (10.9207ms)
+✔ deck UI uses the shared warning effect for elemental conflicts (7.0493ms)
+ℹ tests 25
+ℹ suites 0
+ℹ pass 25
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 264.8567

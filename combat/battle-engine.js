@@ -1,3 +1,6 @@
+import { getPlayerWeaponElement } from "./weapon-element.js";
+export { getPlayerWeaponElement } from "./weapon-element.js";
+import { ELEMENT_LABELS } from "./item-elements.js";
 import { collectStats } from "./collect-stats.js";
 import { createNormalAttack, createSkillAttack } from "./create-attack.js";
 import { calculatePhysicalHitRate, resolvePhysicalAttack } from "./resolve-physical-attack.js";
@@ -995,6 +998,8 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     return;
   }
   if (action.actionType === "item") {
+    const itemPresentation = { type: "itemUse", actorSide, message: `${action.item.name}を使用した！` };
+    battle.presentationEvents.push(itemPresentation);
     if (!action.item.reusable) actor.inventory = consumeItem(actor.inventory, action.item.id).inventory;
     let healing = 0;
     let spHealing = 0;
@@ -1054,7 +1059,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
         target.dropItemId = null;
         target.noDrop = true;
       } else if (effect.id === "element_barrier") {
-        const element = effect.element === "ice" ? "ice" : "fire";
+        const element = effect.element;
         actor.statuses = [
           ...(actor.statuses || []).filter(status => (status.id || status.statusId) !== `${element}_barrier`),
           {
@@ -1066,7 +1071,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
           }
         ];
       } else if (effect.id === "weapon_element_imbue") {
-        const element = effect.element === "ice" ? "ice" : "fire";
+        const element = effect.element;
         actor.statuses = [
           ...(actor.statuses || []).filter(status => (status.id || status.statusId) !== "weapon_element_imbue"),
           {
@@ -1164,7 +1169,15 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
       actor.sp += healingItemSpReturn;
       spHealing += healingItemSpReturn;
     }
-    if (!itemUsageLogged) battle.log.push(`${actor.name}は${action.item.name}を使った。`);
+    const itemEffects = [];
+    const oilEffect = action.item.effects.find(effect => effect.id === "weapon_element_imbue");
+    if (oilEffect) itemEffects.push(`武器に${ELEMENT_LABELS[oilEffect.element]}属性が付与された！`);
+    const barrierEffect = action.item.effects.find(effect => effect.id === "element_barrier");
+    if (barrierEffect) itemEffects.push(`${ELEMENT_LABELS[barrierEffect.element]}属性のダメージを${Math.round(Math.max(0, Math.min(.75, Number(barrierEffect.value) || 0)) * 100)}％軽減！`);
+    if (healing > 0) itemEffects.push(`HP${healing}回復！`);
+    if (spHealing > 0) itemEffects.push(`SP${spHealing}回復！`);
+    itemPresentation.message += itemEffects.length ? `\n${itemEffects.join(" ")}` : "";
+    if (!itemUsageLogged) battle.log.push(itemPresentation.message);
     if (action.item.id === "allheilmittel") {
       actor.statuses = [
         ...(actor.statuses || []).filter(status => (status.id || status.statusId) !== "allheilmittel_used"),
@@ -1189,11 +1202,6 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     }
     if (action.item.id === "holy_water") {
       battle.log.push(`${target.name}は聖なる光により消滅した。`);
-    }
-    const imbue = action.item.effects.find(effect => effect.id === "weapon_element_imbue");
-    if (imbue) {
-      const elementLabel = { fire: "炎", ice: "氷", lightning: "雷" }[imbue.element] || "属性";
-      battle.log.push(`武器に${elementLabel}の力が宿った！`);
     }
     return;
   }
@@ -1709,21 +1717,6 @@ export function applyBattleVictoryCardEffects(battle) {
     message
   });
   return recovered;
-}
-
-export function getPlayerWeaponElement(player, action = {}) {
-  const actionElement = String(action.element || "physical");
-  if (actionElement !== "physical") return actionElement;
-  const oil = (player?.statuses || []).find(status => (
-    (status.id || status.statusId) === "weapon_element_imbue" && status.active !== false
-  ));
-  if (["fire", "ice", "lightning"].includes(oil?.element)) return oil.element;
-  const weaponElement = String(action.weapon?.element || "physical");
-  if (weaponElement !== "physical") return weaponElement;
-  if (hasCardEffect(player?.cards?.deckSlots, "weapon_fire_imbue")) return "fire";
-  if (hasCardEffect(player?.cards?.deckSlots, "weapon_ice_imbue")) return "ice";
-  if (hasCardEffect(player?.cards?.deckSlots, "weapon_lightning_imbue")) return "lightning";
-  return "physical";
 }
 
 function applyPlayerWeaponElement(player, action) {
