@@ -1,5 +1,12 @@
 # Repository review findings
 
+### 2026-09-15 ツェンタウリン入室時の退出案内
+
+- 前回の未コミット差分・検証画像を保護。入室時の案内を「＊Aボタンで次へ　Bボタンで部屋から出る」へ変更。
+- 既存のbossPromptはcanCancel有効・retreatOnCancel有効で、B入力はcancelOverlayEventへ接続することをコード確認。A確定後の戦闘開始処理は変更なし。
+- 関連テスト・構文検査・git diff --check成功。今回の文言変更後のブラウザ・実端末確認は未実施。
+- LAST UPDATEは2026-09-15維持、main.jsキャッシュ20260915-2。README変更・コミット／pushなし。
+
 ### 2026-09-15 エンドロール協力者追加・B96F入室条件
 
 - 着手時main、HEAD／ローカルorigin/mainはec31206で一致、作業ツリーはクリーン。

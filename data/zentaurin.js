@@ -30,7 +30,7 @@ export const ZENTAURIN = Object.freeze({
       reservedAction: { id: "zentaurin_star_arrow", name: "星穿ちの矢", actionType: "physicalAttack", hitCount: 1, powerPerHit: 2, turnPriority: -100 } } }
   ],
   event: {
-    prompt: "扉を開けて中に入ると、部屋の中央に女性のケンタウロスが静かに座っていた。\n逞しく、引き締まった肢体を露わにする一方で兜で顔を覆い、表情を伺い知る事は出来ない。\n＊Aボタンで次へ",
+    prompt: "扉を開けて中に入ると、部屋の中央に女性のケンタウロスが静かに座っていた。\n逞しく、引き締まった肢体を露わにする一方で兜で顔を覆い、表情を伺い知る事は出来ない。\n＊Aボタンで次へ　Bボタンで部屋から出る",
     start: "彼女はこちらに気付くと、おもむろに矢を番えた！",
     autoStartDelay: 3000, reserveMessageLines: 7,
     remains: "部屋は静まり返っている。ツェンタウリンの姿はもうない。\n＊Aボタン：次へ"

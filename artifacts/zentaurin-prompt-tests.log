@@ -1,0 +1,29 @@
+✔ new characters see the deck tutorial while legacy recipients do not repeat it (8.4525ms)
+✔ deck tutorial isolates and highlights the inn deck command (0.5768ms)
+✔ lucky charm acquisition starts one locked three-second tutorial (0.4155ms)
+✔ the quest notice reuses the bell layout with distinct blue presentation (3.1255ms)
+✔ persistent state changes, reload resume, and guild rendering recheck quest notices (2.7459ms)
+✔ notification assets use the current cache revision (0.5812ms)
+✔ the truth staff is a unique unsellable key item (1.4496ms)
+✔ Michaela restoration preserves all six requested dialogue pages (1.5369ms)
+✔ Michaela dialogue measures the message box, splits naturally, and always shows the A prompt (0.7785ms)
+✔ Amayenak victory persists recovery flags and returns to the B100F entrance (1.4861ms)
+✔ the real battle completion snapshot reaches the restoration bridge with Amayenak's ID (4.6866ms)
+✔ restoration overlay uses the cat and both Michaela portraits (2.3151ms)
+✔ restoration returns silently without an unrelated floor transition message (0.7973ms)
+✔ main.js keeps the current top-level cache buster without versioned module imports (1.1559ms)
+✔ seal snapshots equipped Aries only; no opening damage or resource/charge consumption (12.593ms)
+✔ action weights and pride last three subsequent opportunities with no restacking (6.4305ms)
+✔ triple bleeding is one successful after-damage application; misses and barrier absorption exclude it (2.4412ms)
+✔ star arrow is reserved, has a fresh command opportunity, and guard reduces its damage (2.0367ms)
+✔ Sagittarius preserves immunity and weaknesses while bypassing elemental resistance and DEF (1.6556ms)
+✔ Sagittarius applies through real multi-target physical skills and spell actions (4.8119ms)
+✔ B96 fixed room, neighboring rooms, first victory, old ownership and saved achievement (14.125ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 357.2887
