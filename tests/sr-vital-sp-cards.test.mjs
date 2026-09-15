@@ -128,6 +128,7 @@ test("B70-B79 purple chests use vacant event rooms and never replace fixed or ra
  for(let depth=70;depth<=79;depth++){
   buildBoundaryWallMap(depth,()=>.5,{maikaeferNestRoll:1});
   const room=cells.flat().find(c=>c.specialRoom);assert.ok(room,`B${depth}`);
+  if(depth===76){assert.equal(room.specialRoom.content.bossId,'tiefstrom_b76f');assert.equal(room.treasure,null);continue;}
   assert.equal(room.specialRoom.content,null);assert.equal(room.treasure,"purple");
   assert.equal(cells.flat().filter(c=>c.treasure==="purple").length,1);
   room.treasure=null;room.specialRoom.content={type:"eventBoss",bossId:"test_only"};

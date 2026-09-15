@@ -354,6 +354,20 @@ export const ITEMS = Object.freeze([
     effects: Object.freeze([]),
     description: "《換金アイテム》\n水底に沈んだ王国の金貨が詰まった袋。今は失われた王の横顔が刻まれている。",
     maxOwned: 99, repurchasable: false, iconId: "sunken-kingdom-coin-pouch", version: 1
+  }),
+  Object.freeze({
+    number: 54, id: "wurfmesser", name: "ヴルフメッサー", category: "battle",
+    buyPrice: 1500, sellPrice: 750, source: "shop", usableIn: Object.freeze(["battle"]),
+    effects: Object.freeze([{ id: "thrown_fixed_damage", value: 60, hitCount: 3, hitRate: .4, thiefDexHitBonus: .01 }]),
+    description: "投げナイフで固定60ダメージ×3回攻撃。各回の命中率40％。盗賊はDEX1につき命中率＋1ポイント。",
+    maxOwned: 99, iconId: "stone", version: 1, shopUnlockDepth: 70
+  }),
+  Object.freeze({
+    number: 55, id: "wurfspeer", name: "ヴルフシュペーア", category: "battle",
+    buyPrice: 0, sellPrice: 0, source: "special", usableIn: Object.freeze(["battle"]),
+    effects: Object.freeze([{ id: "thrown_fixed_damage", value: 500, hitRate: .6, thiefDexHitBonus: .01 }]),
+    description: "投げ槍で固定500ダメージ。命中率60％。盗賊はDEX1につき命中率＋1ポイント。", maxOwned: 99,
+    repurchasable: false, iconId: "stone", version: 1
   })
 ]);
 
@@ -370,6 +384,7 @@ export function getShopItemIdsForDepth(depth = 1) {
     ...(reached >= 30 ? ["antidote_medium"] : []),
     ...(reached >= 50 ? ["strong_healing_potion_small", "strong_antidote"] : []),
     ...(reached >= 70 ? ["strong_healing_potion_medium"] : []),
+    ...(reached >= 70 ? ["wurfmesser"] : []),
     ...BASE_SHOP_ITEM_IDS.slice(1)
   ];
 }
@@ -384,6 +399,7 @@ export function getShopItemIdsForCharacter(character) {
     ...(flags.shop_stock_b30f_unlocked && flags.boss_iron_maiden_b29f_defeated ? ["antidote_medium"] : []),
     ...(flags.transfer_portal_b50f_unlocked ? ["strong_healing_potion_small", "strong_antidote"] : []),
     ...(flags.transfer_portal_b70f_unlocked ? ["strong_healing_potion_medium"] : []),
+    ...(Number(character?.highestDungeonDepthReached) >= 70 || flags.transfer_portal_b70f_unlocked ? ["wurfmesser"] : []),
     ...(flags.scorching_barrier_shop_unlocked ? ["scorching_barrier"] : []),
     ...(flags.extreme_cold_barrier_shop_unlocked ? ["extreme_cold_barrier"] : []),
     ...(flags.weapon_imbue_oils_shop_unlocked || quest013Reported ? ["fire_lizard_oil", "ice_lizard_oil"] : []),

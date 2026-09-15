@@ -111,6 +111,15 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
       revealBeforeExploration: true
     })
   }),
+  76: Object.freeze({
+    lock: Object.freeze({ mode: "alwaysSuccess", attempts: 1 }),
+    content: Object.freeze({
+      type: "eventBoss", bossId: "tiefstrom_b76f", requiredZodiacCount: 3,
+      accessBlockedMessage: "扉は固く閉ざされている。表面には12星座の紋様が刻まれている……。",
+      accessConfirmMessage: "扉の向こうから、激しい波音と巨大な生き物の気配を感じる。中に入りますか？\n＊Aボタン：はい　Bボタン：いいえ",
+      confirmAfterUnlock: true, minimapMarker: "E", revealBeforeExploration: true
+    })
+  }),
   96: Object.freeze({
     lock: Object.freeze({ mode: "alwaysSuccess", attempts: 1 }),
     content: Object.freeze({

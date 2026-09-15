@@ -1,4 +1,4 @@
-import { getPlayerWeaponElement } from "./weapon-element.js";
+import { getPlayerWeaponElement, getEquippedWeaponElement } from "./weapon-element.js";
 import { PISCES_STATUS, applyCombatHpDamage, isPiscesInvincible, protectedCombatDamage, resolvePlayerSurvival, finishPiscesTurn } from "./pisces.js";
 export { getPlayerWeaponElement } from "./weapon-element.js";
 import { ELEMENT_LABELS } from "./item-elements.js";
@@ -47,6 +47,7 @@ import {
 import { applyPlayerChargeAction, isPlayerChargeReady } from "./player-charge.js";
 import { getWeapon } from "../data/weapons.js";
 import { getZentaurinOpening, ZENTAURIN_ID } from "../data/zentaurin.js";
+import { cannotReachTarget, DISTANT_MESSAGE, synchronizeTwinState, canPrepareWhirlpool, reserveWhirlpool, executeTwinAction } from "./tiefstrom.js";
 
 const FLEISCHFRESSER_REGAIN_SUPPRESSION_TURNS = 5;
 
@@ -129,6 +130,7 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     slashExecution: null,
     log: [
       enemyParty ? `${enemyParty.map(member => member.name).join("、")}が現れた！` : `${enemy.name}が現れた！`,
+      ...(selectedEnemy?.battleIntro ? [selectedEnemy.battleIntro] : []),
       ...(zentaurinOpening ? [zentaurinOpening.message] : []),
       ...(sphinxBarrierAmount > 0 ? ["スピンクスの威容が障壁を展開した！"] : []),
       ...(guardStoneBarrier > 0 ? ["護りの魔石が障壁を展開した！"] : []),
@@ -853,6 +855,7 @@ export function createEnemyAction(enemy, rng = Math.random, context = {}) {
 
 function selectWeightedEnemyAction(actionTable, enemy, rng, context) {
   const weighted = actionTable
+    .filter(entry => entry.action?.id !== "tiefstrom_prepare" || canPrepareWhirlpool(context?.battle, enemy))
     .filter(entry => actionConditionMatches(entry?.when, enemy, context))
     .map(entry => ({
       action: entry?.action || entry,
@@ -864,7 +867,10 @@ function selectWeightedEnemyAction(actionTable, enemy, rng, context) {
   let roll = Math.max(0, Math.min(0.999999999999, Number(rng?.()) || 0)) * total;
   for (const entry of weighted) {
     roll -= entry.weight;
-    if (roll < 0) return entry.action;
+    if (roll < 0) {
+      reserveWhirlpool(context?.battle, enemy, entry.action);
+      return entry.action;
+    }
   }
   return weighted.at(-1)?.action || null;
 }
@@ -906,6 +912,18 @@ function buildEnemyAction(action, normalAttack) {
 }
 
 function executeAction({ battle, action, actor, actorSide, actorIndex = null, target, targetSide, deferFollowUp = false, magicFocus = null, rng }) {
+  if (actorSide === "player" && cannotReachTarget(target, action)) {
+    battle.log.push(DISTANT_MESSAGE);
+    battle.presentationEvents.push({ type: "message", message: DISTANT_MESSAGE });
+    return;
+  }
+  if (actorSide === "enemy" && actor.twinWhirlpool) {
+    synchronizeTwinState(battle);
+    executeTwinAction(battle, actor, action);
+    if (actor.twinEnraged && action.actionType === "physicalAttack") {
+      action = { ...action, weapon: { ...action.weapon, attack: Number(actor.attack) * 1.2 } };
+    }
+  }
   if (actorSide === "player" && ["physicalAttack", "spell"].includes(action.actionType)
     && hasCardEffect(actor.cards?.deckSlots, "zodiac_sagittarius")) {
     action = { ...action, unavoidable: true,
@@ -984,6 +1002,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
   if (action.actionType === "prepareAction" && actorSide === "enemy") {
     actor.reservedEnemyAction = structuredClone(action.reservedAction || null);
     battle.log.push(action.prepareMessage || `${actor.name}は次の攻撃に備えた！`);
+    if (actor.twinWhirlpool) battle.presentationEvents.push({ type: "message", message: action.prepareMessage });
     return;
   }
   if (action.actionType === "chargeDebuff") {
@@ -1166,15 +1185,23 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
           }
         }
       } else if (effect.id === "thrown_fixed_damage") {
-        const hitRate = calculatePhysicalHitRate({ attacker: actor, defender: target, attack: {} });
-        if (battle.throwingItemGuaranteedHitAtStart || Number(rng()) < hitRate) {
-          const damage = protectedCombatDamage(target, Math.min(Math.max(0, Number(target.hp) || 0), Math.max(0, Math.floor(Number(effect.value) || 0))));
-          applyCombatHpDamage(target, damage);
-          if (target.hp <= 0) target.alive = false;
-          battle.log.push(`${action.item.name}が${target.name}に命中した！ ${damage}のダメージ！`);
-          battle.presentationEvents.push({ type: "damage", actorSide, targetSide, amount: damage, message: `${damage} DAMAGE` });
-        } else {
-          battle.log.push(`${action.item.name}は${target.name}に当たらなかった！`);
+        const element = getEquippedWeaponElement(actor);
+        const elementMultiplier = element === "physical" ? 1 : Math.max(0, Number(target.elementMultipliers?.[element] ?? 1));
+        const hitRate = Number.isFinite(effect.hitRate)
+          ? Math.min(.99, Math.max(0, effect.hitRate + (actor.job === "thief" ? Math.max(0, Number(actorStats.dex) || 0) * (Number(effect.thiefDexHitBonus) || 0) : 0)))
+          : calculatePhysicalHitRate({ attacker: actor, defender: target, attack: {} });
+        const hitCount = Math.max(1, Math.floor(Number(effect.hitCount) || 1));
+        for (let hitIndex = 0; hitIndex < hitCount && target.hp > 0; hitIndex += 1) {
+          if (battle.throwingItemGuaranteedHitAtStart || Number(rng()) < hitRate) {
+            const damage = protectedCombatDamage(target, Math.min(Math.max(0, Number(target.hp) || 0), Math.max(0, Math.floor((Number(effect.value) || 0) * elementMultiplier))));
+            applyCombatHpDamage(target, damage);
+            if (target.hp <= 0) target.alive = false;
+            battle.log.push(`${action.item.name}が${target.name}に命中した！ ${damage}のダメージ！`);
+            battle.presentationEvents.push({ type: "damage", actorSide, targetSide, amount: damage, element, hitIndex, hitCount, message: `${action.item.name}：${damage}ダメージ！` });
+          } else {
+            battle.log.push(`${action.item.name}は${target.name}に当たらなかった！`);
+            battle.presentationEvents.push({ type: "message", actorSide, targetSide, message: `${action.item.name}は${target.name}に当たらなかった！` });
+          }
         }
       }
     }
@@ -1312,7 +1339,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
       getPhysicalDamageReduction(target.statuses),
       Math.max(0, Math.min(0.95, Number(target.physicalDamageReduction) || 0))
     )
-    : 0;
+    : action.guardable ? getPhysicalDamageReduction((target.statuses || []).filter(status => (status.id || status.statusId) === "guard")) : 0;
   let resolvedHits = result.hits;
   let passiveExecution = null;
   if (actorSide === "player" && action.passiveInstantDeathId && !target.capturePuzzle) {
@@ -1469,7 +1496,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
   const targetHpBeforeDamage = Math.max(0, Number(target.hp) || 0);
   applyCombatHpDamage(target, actualDamage);
   const actualHpLoss = Math.max(0, targetHpBeforeDamage - target.hp);
-  if (actorSide === "enemy" && actor.id === ZENTAURIN_ID && action.afterDamageStatus && actualHpLoss > 0 && target.hp > 0) {
+  if (actorSide === "enemy" && action.afterDamageStatus && actualHpLoss > 0 && target.hp > 0) {
     const applications = resolveEffects({ effects: [action.afterDamageStatus], trigger: "perAction", attacker: actorStats, defender: targetStats, rng });
     target.statuses = applyStatusApplications(target.statuses, applications);
     if (applications.some(application => application.success)) battle.log.push(`${target.name}は出血した！`);
@@ -1899,6 +1926,7 @@ function finishCombatantAction(battle, actor, side, targetIndex = null) {
 }
 
 function updateMultiOutcome(battle) {
+  synchronizeTwinState(battle);
   resolvePlayerSurvival(battle, applyNpcLethalProtection);
   if (battle.player.hp <= 0) {
     battle.player.alive = false;

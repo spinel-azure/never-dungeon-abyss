@@ -1570,6 +1570,10 @@ function drawNpcEvent(ctx, event, now = 0) {
     ctx.clip();
   }
   ctx.globalAlpha = event.alpha;
+  if (event.npc.id === "crystal_cluster" || event.npc.renderEffect === "dark-waver") {
+    const halo = Math.max(3, event.size * .035);
+    ctx.filter = `drop-shadow(0 0 ${halo}px rgba(230,210,255,.95)) drop-shadow(0 0 ${halo * 3}px rgba(175,95,255,.9))`;
+  }
   if (event.npc.silhouette) {
     ctx.filter = "brightness(0) drop-shadow(0 0 3px rgba(225,252,255,.98)) drop-shadow(0 0 10px rgba(128,235,255,.9))";
   }

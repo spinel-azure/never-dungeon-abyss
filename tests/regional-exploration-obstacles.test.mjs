@@ -114,7 +114,7 @@ test("crystal contact, cancellation and confirmation spend SP only once and play
   manualMove(1);handleOverlayEventInput('confirm');
   assert.equal(interaction.character.sp,0);
   assert.equal(getExplorationObstacleAt(2,1),null);
-  assert.equal(interaction.messages.at(-1),'結晶塊は淡く光って砕け散った！…砕ける際、脱力感に襲われた！\n＊Aボタン：次へ');
+  assert.equal(interaction.messages.at(-1),'結晶塊は淡く光って砕け散った！…砕ける際、脱力感に襲われた！\nSPが5減少した！\n＊Aボタン：次へ');
   handleOverlayEventInput('confirm');
   assert.equal(interaction.soundEffects.filter(x=>x==='crystalObstacleBreak').length,1);
   assert.equal(SE.crystalObstacleBreak,'boon.wav');

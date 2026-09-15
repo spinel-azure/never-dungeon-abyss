@@ -22,13 +22,13 @@ function seeded(seed) {
 }
 
 test("B70 red chest exact 50/30/15/5 boundaries yield one item", () => {
-  for (const [roll, itemId] of [[0,potion],[0.499999,potion],[0.5,"blue_pearl"],[0.799999,"blue_pearl"],[0.8,"crystal_coral"],[0.949999,"crystal_coral"],[0.95,"sunken_kingdom_coin_pouch"],[0.999999,"sunken_kingdom_coin_pouch"]]) {
+  for (const [roll, itemId] of [[0,"wurfspeer"],[0.499999,"wurfspeer"],[0.5,"blue_pearl"],[0.799999,"blue_pearl"],[0.8,"crystal_coral"],[0.949999,"crystal_coral"],[0.95,"sunken_kingdom_coin_pouch"],[0.999999,"sunken_kingdom_coin_pouch"]]) {
     const result=rollRedChestLoot(()=>roll,70);
-    assert.deepEqual(result,{kind:"item",itemId,amount:1,unidentifiedName:itemId===potion?"？薬":"？アイテム"});
+    assert.deepEqual(result,{kind:"item",itemId,amount:1,unidentifiedName:"？アイテム"});
   }
   const counts={};
   for(let n=0;n<10000;n++) {const id=rollRedChestLoot(()=>n/10000,70).itemId;counts[id]=(counts[id]||0)+1;}
-  assert.deepEqual(counts,{[potion]:5000,blue_pearl:3000,crystal_coral:1500,sunken_kingdom_coin_pouch:500});
+  assert.deepEqual(counts,{wurfspeer:5000,blue_pearl:3000,crystal_coral:1500,sunken_kingdom_coin_pouch:500});
 });
 
 test("the existing medium strong potion is reused without changing its price or effects",()=>{

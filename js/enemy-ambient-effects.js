@@ -1,5 +1,6 @@
 // Normalized image-space emitters: x, y, width, rise. No boss-ID checks or image edits.
 export const ENEMY_AMBIENT_EFFECTS = Object.freeze({
+  'water-splash': Object.freeze({ kind: 'waterSplash' }),
   'arrow-glint': Object.freeze({ kind: 'arrowGlint', point: Object.freeze([.972, .287]) }),
   'blood-drip': Object.freeze({ kind: 'bloodDrip', emitters: Object.freeze([[.235, .565], [.105, .63]]) }),
   "tentacle-sway": Object.freeze({
@@ -263,6 +264,29 @@ function flame(ctx, emitter, time, seed, strength) {
 
 export function drawEnemyAmbientFrame(entry, seconds, fps, reducedMotion = false) {
   const { profile, concealed } = entry;
+  if (profile.kind === 'waterSplash') {
+    for (const canvas of [entry.back, entry.front]) {
+      const ctx = canvas.getContext('2d');
+      if (!ctx) continue;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+      ctx.setTransform(canvas.width / 1.3, 0, 0, canvas.height / 1.3, canvas.width * .15 / 1.3, canvas.height * .22 / 1.3);
+      ctx.globalAlpha = concealed ? .22 : .85;
+      ctx.strokeStyle = '#9deaff'; ctx.fillStyle = '#e3faff'; ctx.lineWidth = .009;
+      for (let i = 0; i < (reducedMotion ? 3 : fps === 30 ? 12 : 20); i++) {
+        const phase = reducedMotion ? .5 : (seconds * .8 + i * .618) % 1;
+        const base = .12 + (i % 7) * .125;
+        const x = base + Math.sin(i * 5.3) * phase * .2;
+        const y = .92 - Math.sin(phase * Math.PI) * (.12 + (i % 4) * .06);
+        ctx.globalAlpha = (concealed ? .22 : .85) * Math.sin(Math.PI * phase);
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + .008, y + .028); ctx.stroke();
+      }
+      ctx.globalAlpha = concealed ? .15 : .55;
+      ctx.beginPath();ctx.ellipse(.5,.94,.4,.025,0,0,Math.PI*2);ctx.stroke();
+      ctx.restore();
+    }
+    return;
+  }
   if (profile.kind === 'arrowGlint') {
     drawArrowGlintFrame(entry, seconds, reducedMotion);
     return;

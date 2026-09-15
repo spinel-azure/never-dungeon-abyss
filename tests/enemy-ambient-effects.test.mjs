@@ -86,9 +86,11 @@ function harness({ rate = 60, mobile = false, reduced = false } = {}) {
   };
 }
 
-test("all three configured bosses retain their ambient effect through combat cloning", () => {
+test("configured bosses retain their ambient effect through combat cloning", () => {
   assert.deepEqual(Object.values(BOSSES).filter(b => b.ambientEffect).map(b => [b.id, b.ambientEffect]), [
     ["zentaurin_b96f", "arrow-glint"],
+    ["tiefstrom_b76f", "water-splash"],
+    ["tiefstrom_b76f_b", "water-splash"],
     ["wicker_man_b39f", "wicker-flame"],
     ["fleischfresserknospe_b57f", "tentacle-sway"],
     ["brass_bull_event_boss", "brass-heat"]
@@ -106,6 +108,18 @@ test("all three configured bosses retain their ambient effect through combat clo
     && ENEMY_AMBIENT_EFFECTS["tentacle-sway"].period <= 4);
   assert.ok(ENEMY_AMBIENT_EFFECTS["tentacle-sway"].amplitude >= .003
     && ENEMY_AMBIENT_EFFECTS["tentacle-sway"].amplitude <= .005);
+});
+
+test('water splash moves over time and stays static with reduced motion',()=>{
+ const paint=(time,reduced=false)=>{
+  const ctx=drawingContext();ctx.stroke=()=>ctx.calls.push(['stroke']);ctx.ellipse=(...args)=>ctx.calls.push(['ellipse',...args]);
+  const canvas={width:390,height:390,getContext:()=>ctx};
+  drawEnemyAmbientFrame({back:canvas,front:canvas,profile:ENEMY_AMBIENT_EFFECTS['water-splash']},time,30,reduced);
+  return ctx.calls;
+ };
+ assert.notDeepEqual(paint(0),paint(.5));
+ assert.deepEqual(paint(0,true),paint(10,true));
+ assert.equal(paint(0).filter(c=>c[0]==='ellipse').length,2);
 });
 
 test("PC supports 60/30; phones and tablets cap even a 60fps setting at 30", () => {

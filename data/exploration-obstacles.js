@@ -144,7 +144,7 @@ export function resolveExplorationObstacleRemoval(character, obstacleId, method)
   if (method === "weapon") {
     if (!options.canUseWeapon) return { accepted: false, reason: "wrongWeaponElement", character };
     if (options.obstacle.removalKind === "smash") return {
-      accepted: true, reason: "", method, character: { ...character, sp: Math.max(0, options.sp - 10) }
+      accepted: true, reason: "", method, spLost: Math.min(10, options.sp), character: { ...character, sp: Math.max(0, options.sp - 10) }
     };
     return { accepted: true, reason: "", method, character };
   }

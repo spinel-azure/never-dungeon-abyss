@@ -933,6 +933,10 @@ body.battle-active .viewport > #treasureCanvas {
 .battle-enemy-member.is-defeated { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 900ms ease-out, visibility 0s linear 900ms; }
 .battle-enemy-member-hp { display: none; width: 90%; height: 8px; margin: 0 auto; border: 1px solid #b8d7e3; background: #071017; }
 .battle-enemy-member-hp > i { display: block; height: 100%; background: #e4253d; }
+.battle-enemy-member.is-tiefstrom { width: 40%; height: 95%; }
+.battle-enemy-member.is-tiefstrom .battle-enemy-member-name { font-size: clamp(11px, 3vw, 22px); white-space: nowrap; }
+.battle-enemy-member.is-tiefstrom .battle-enemy-member-image { height: 65%; }
+.battle-enemy-member.is-tiefstrom .battle-enemy-member-hp { display: block; }
 .battle-enemy-member .battle-number-layer { inset: 38% 0 auto; }
 
 .battle-enemy-vanish-canvas {

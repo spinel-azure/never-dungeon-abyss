@@ -1224,7 +1224,8 @@ function advanceExplorationObstacleEvent() {
     : method === "magic"
       ? event.obstacle.magicResultMessage
       : event.obstacle.weaponResultMessage;
-  hooks.say(`${resultMessage}\n＊Aボタン：次へ`);
+  const spMessage = Number.isFinite(result.spLost) ? `\nSPが${result.spLost}減少した！` : "";
+  hooks.say(`${resultMessage}${spMessage}\n＊Aボタン：次へ`);
   hooks.onStateChanged();
 }
 

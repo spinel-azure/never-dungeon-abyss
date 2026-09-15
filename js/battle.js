@@ -1010,12 +1010,22 @@ function renderEnemyParty(battle) {
       button.className = "battle-enemy-member";
       button.dataset.index = String(index);
       button.innerHTML = '<strong class="battle-enemy-member-name"></strong><span class="battle-enemy-member-weakness"></span><img class="battle-enemy-member-image" alt=""><span class="battle-enemy-member-hp"><i></i></span><span class="battle-number-layer" aria-hidden="true"></span>';
-      button.addEventListener("click", () => selectEnemyTarget(index));
+      let lastTouch = 0;
+      button.addEventListener("touchend", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        lastTouch = Date.now();
+        selectEnemyTarget(index);
+      }, { passive: false });
+      button.addEventListener("click", () => {
+        if (Date.now() - lastTouch > 500) selectEnemyTarget(index);
+      });
       return button;
     }));
   }
   [...party.children].forEach((member, index) => {
     const enemy = battle.enemies[index];
+    member.classList.toggle("is-tiefstrom", Boolean(enemy.twinWhirlpool));
     const presentedHp = battleUi.presentationHp?.enemies?.[index];
     const displayEnemy = Number.isFinite(presentedHp) ? { ...enemy, hp: presentedHp } : enemy;
     const selectedIndex = battleUi.mode === "targets" ? battleUi.selectedIndex : battle.targetIndex;
@@ -1026,6 +1036,15 @@ function renderEnemyParty(battle) {
     member.setAttribute("aria-hidden", hideDefeated ? "true" : "false");
     member.disabled = !enemy.alive;
     member.querySelector(".battle-enemy-member-name").textContent = battleUi.concealed ? "？？？？？" : enemy.name;
+    let preparation = member.querySelector(".battle-enemy-preparation");
+    if (!preparation) {
+      preparation = document.createElement("span");
+      preparation.className = "battle-enemy-preparation";
+      preparation.style.cssText = "position:absolute;bottom:18px;left:0;right:0;color:#b8f3ff;background:#071923dd;font-size:clamp(10px,2.5vw,14px);pointer-events:none";
+      member.append(preparation);
+    }
+    preparation.textContent = enemy.twinWhirlpool && enemy.reservedEnemyAction ? "深淵の大渦：準備中" : "";
+    preparation.hidden = !preparation.textContent;
     renderWeaknessIcons(member.querySelector(".battle-enemy-member-weakness"), enemy);
     const img = member.querySelector(".battle-enemy-member-image");
     img.src = enemy.image || "";

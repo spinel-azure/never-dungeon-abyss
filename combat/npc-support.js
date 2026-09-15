@@ -4,6 +4,7 @@ import { resolveInstantDeath } from "./resolve-status-effect.js";
 import { getNpcStagePassive, NPC_ADVANCED_GROWTH } from "../data/npc-passives.js";
 import { getConditionLabel } from "./condition-label.js";
 import { resolvePlayerSurvival } from "./pisces.js";
+import { cannotReachTarget, DISTANT_MESSAGE } from "./tiefstrom.js";
 
 export const NPC_SUPPORT_BALANCE = Object.freeze({
   alec: Object.freeze({ attackRate: 0.8, growthAttack: 3, guardBase: 0.15, guardPerStage: 0.02, guardMaximum: 0.35 }),
@@ -298,7 +299,7 @@ function applyRebeccaSupport(battle, rng) {
   for (let hitIndex = 0; hitIndex < 2 && !battle.outcome; hitIndex += 1) {
     applyNpcDamage(battle, { npcId: "rebecca", damage, message: `${hitIndex + 1}撃目：${damage}ダメージ！`, hitIndex, hitCount: 2, rng });
   }
-  if (!battle.outcome && Number(rng()) < (stage7?.debuffRate ?? config.debuffRate)) {
+  if (!battle.outcome && !battle.enemy.distantTarget && Number(rng()) < (stage7?.debuffRate ?? config.debuffRate)) {
     battle.enemy.statuses = [
       ...(battle.enemy.statuses || []).filter(status => (status.id || status.statusId) !== "npc_defense_down"),
       { id: "npc_defense_down", statusId: "npc_defense_down", active: true,
@@ -324,7 +325,7 @@ function applyJohanSupport(battle, rng) {
     rng
   });
   const damage = Math.max(0, Math.floor(result.totalDamage || result.hits?.[0]?.damage || 0));
-  applyNpcDamage(battle, { npcId: "johan", damage, message: `ヨハンが攻撃呪文を放った！ ${damage}ダメージ！` });
+  applyNpcDamage(battle, { npcId: "johan", damage, range: "ranged", message: `ヨハンが攻撃呪文を放った！ ${damage}ダメージ！` });
   if (stage7 && !battle.outcome && Number(rng()) < stage7.debuffRate) {
     battle.enemy.statuses = [
       ...(battle.enemy.statuses || []).filter(status => (status.id || status.statusId) !== "npc_johan_magic_exposure"),
@@ -347,7 +348,7 @@ function applyAlecChargeSkill(battle, config, rng) {
   const damage = Math.max(1, Math.floor(normalDamage * (upgrade?.damageMultiplier || config.damageMultiplier)));
   const actionName = upgrade?.name || config.name;
   applyNpcDamage(battle, { npcId: "alec", damage, actionName, message: `${actionName}！ ${damage}ダメージ！`, rng });
-  if (upgrade && !battle.outcome) {
+  if (upgrade && !battle.outcome && !battle.enemy.distantTarget) {
     battle.enemy.statuses = [
       ...(battle.enemy.statuses || []).filter(status => (status.id || status.statusId) !== "npc_alec_defense_down"),
       { id: "npc_alec_defense_down", statusId: "npc_alec_defense_down", active: true,
@@ -443,8 +444,13 @@ function getNpcChargeRecord(player, npcId) {
   return record;
 }
 
-function applyNpcDamage(battle, { npcId, damage, actionName = "", message, hitIndex = 0, hitCount = 1, rng = Math.random }) {
+function applyNpcDamage(battle, { npcId, damage, range = "melee", actionName = "", message, hitIndex = 0, hitCount = 1, rng = Math.random }) {
   if (battle.outcome || battle.enemy.hp <= 0) return 0;
+  if (cannotReachTarget(battle.enemy, { actionType: "physicalAttack", range })) {
+    battle.log.push(DISTANT_MESSAGE);
+    battle.presentationEvents.push({ type: "npcSupport", npcId, message: DISTANT_MESSAGE });
+    return 0;
+  }
   const hpBefore = battle.enemy.hp;
   const actual = Math.min(battle.enemy.hp, Math.max(0, Math.floor(damage)));
   battle.enemy.hp -= actual;

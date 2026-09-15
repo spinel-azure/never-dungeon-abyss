@@ -1,0 +1,13 @@
+✔ throwing weapons keep fixed damage, individual accuracy, and one-item consumption for every job (17.1218ms)
+✔ throwing inherits lightning card or oil and applies weakness per hit without changing accuracy (4.9642ms)
+✔ elemental throws respect resistance and immunity and still consume only one item (3.8423ms)
+✔ normal and thief DEX30 accuracy boundaries for both new items (4.6513ms)
+✔ knives unlock on B70 arrival, spear remains unavailable, saved quantities and caps survive (2.9595ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 220.3347

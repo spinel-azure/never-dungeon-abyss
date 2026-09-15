@@ -1,0 +1,25 @@
+✔ configured bosses retain their ambient effect through combat cloning (3.4771ms)
+✔ water splash moves over time and stays static with reduced motion (1.0836ms)
+✔ PC supports 60/30; phones and tablets cap even a 60fps setting at 30 (0.1611ms)
+✔ contain geometry follows actual sprite at PC/mobile widths, including party borders (0.3648ms)
+✔ ordinary/unknown/dead enemies allocate neither canvas nor animation/listeners (0.6803ms)
+✔ multiple targets and repeated sync share exactly one RAF and two layers per enemy (1.3263ms)
+✔ tentacle deformation uses the sprite bounds and toggles its host presentation class (0.3624ms)
+✔ 60/30 caps work on 60/120Hz RAF without slowing real-time animation (1.7125ms)
+✔ 30fps switches live, lowers backing resolution and preserves time (0.3644ms)
+✔ hidden document or scene stops all updates; reopening resets scheduling (1.6503ms)
+✔ death removes only that target immediately; vanish flags cannot resurrect fire (0.3278ms)
+✔ unloaded images wait for load and detached enemies release their scheduler (0.2469ms)
+✔ repeated end/restart cycles do not leave RAF, canvases or image listeners (0.3463ms)
+✔ reduced-motion draws a static glow once without a permanent loop (0.1609ms)
+✔ actual painter halves sparks at 30fps and keeps identical time-based tongue positions (1.6605ms)
+✔ tentacle painter deforms only its two clipped regions and stays static for reduced motion (1.7165ms)
+✔ battle integration tears down before vanish and close; normal render uses presentation HP (11.28ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 231.1054

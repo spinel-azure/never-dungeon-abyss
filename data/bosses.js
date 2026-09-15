@@ -1,7 +1,10 @@
 import { ZENTAURIN } from "./zentaurin.js";
+import { TIEFSTROM, TIEFSTROM_SECOND } from "./tiefstrom.js";
 
 export const BOSSES = Object.freeze({
   zentaurin_b96f: ZENTAURIN,
+  tiefstrom_b76f: TIEFSTROM,
+  tiefstrom_b76f_b: TIEFSTROM_SECOND,
   lingering_ghost_b2f: Object.freeze({
     id: "lingering_ghost_b2f",
     name: "未練ある亡霊",

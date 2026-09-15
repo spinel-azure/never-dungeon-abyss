@@ -925,6 +925,7 @@ import {
         return { accepted: false, reason: "obstacleMissing", character };
       }
       character = result.character;
+      if (Number.isFinite(result.spLost)) showStepSpDamage(result.spLost, true);
       updateCharacterUi();
       saveGame();
       return result;
@@ -3113,12 +3114,12 @@ import {
     popup.addEventListener("animationend", () => popup.remove(), { once: true });
   }
 
-  function showStepSpDamage(amount) {
+  function showStepSpDamage(amount, obstacle = false) {
     const layer = document.getElementById("crystalStepSpDamage");
     if (!layer || amount <= 0) return;
     const popup = document.createElement("i");
     popup.className = "is-sp-damage";
-    popup.textContent = `SP－${amount}`;
+    popup.textContent = obstacle ? `-SP${amount}` : `SP－${amount}`;
     layer.append(popup);
     popup.addEventListener("animationend", () => popup.remove(), { once: true });
   }
