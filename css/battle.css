@@ -956,3 +956,16 @@ body.battle-active .viewport > #treasureCanvas {
   .battle-enemy-member.is-defeated { transition-duration: 1ms, 0s; transition-delay: 0s; }
 }
 .is-tiefstrom .battle-enemy-member-image{transition:translate .85s ease-in,opacity .85s ease-in}.battle-enemy-member-image.is-whirlpool-diving{translate:0 55%;opacity:0!important}@media(prefers-reduced-motion:reduce){.is-tiefstrom .battle-enemy-member-image{transition:none}}
+
+@media (max-width: 560px) {
+  .battle-enemy-stage:has(> #bossMagicBarrierMeter:not([hidden])) {
+    inset: 6% 8% 8%;
+  }
+  .battle-enemy-stage:has(> #bossMagicBarrierMeter:not([hidden])) > .battle-enemy-heading {
+    flex-shrink: 0;
+  }
+  .battle-enemy-stage:has(> #bossMagicBarrierMeter:not([hidden])) > .battle-enemy-image {
+    max-height: calc(100% - 70px);
+    object-fit: contain;
+  }
+}
