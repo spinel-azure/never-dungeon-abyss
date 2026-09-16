@@ -92,7 +92,7 @@ sliding2.mp3
 ループ：OFF
 
 boon.wav
-用途：結晶塊を砕いた時
+用途：結晶塊を砕いた時／アクエリアスの壁で攻撃を防いだ時
 ループ：OFF
 
 zushaa.wav
