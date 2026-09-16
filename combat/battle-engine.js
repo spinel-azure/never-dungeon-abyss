@@ -1,3 +1,4 @@
+import { absorbBossMagicBarrier, absorbPlayerMagic } from "./boss-magic-barrier.js";
 import { getPlayerWeaponElement, getEquippedWeaponElement } from "./weapon-element.js";
 import { initializeMagicBarrier, getMagicBarrier, magicBarrierAmount } from './aquarius.js';
 import { PISCES_STATUS, applyCombatHpDamage, isPiscesInvincible, protectedCombatDamage, resolvePlayerSurvival, finishPiscesTurn } from "./pisces.js";
@@ -917,6 +918,11 @@ function buildEnemyAction(action, normalAttack) {
 }
 
 function executeAction({ battle, action, actor, actorSide, actorIndex = null, target, targetSide, deferFollowUp = false, magicFocus = null, rng }) {
+  const actionPresentationStart = battle.presentationEvents.length;
+  if (action.actionType === "bossMagicAbsorb" && actor.bossMagicBarrierMax > 0) {
+    absorbPlayerMagic(battle, actor, target, action);
+    return {followUpEligible:false,actualDamage:0,landedHitCount:0};
+  }
   if (actorSide === "player" && cannotReachTarget(target, action)) {
     battle.log.push(DISTANT_MESSAGE);
     battle.presentationEvents.push({ type: "message", outOfRange: true, message: DISTANT_MESSAGE });
@@ -1196,13 +1202,14 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
           ? Math.min(.99, Math.max(0, effect.hitRate + (actor.job === "thief" ? Math.max(0, Number(actorStats.dex) || 0) * (Number(effect.thiefDexHitBonus) || 0) : 0)))
           : calculatePhysicalHitRate({ attacker: actor, defender: target, attack: {} });
         const hitCount = Math.max(1, Math.floor(Number(effect.hitCount) || 1));
+        const shieldAtStart = target.bossMagicBarrier > 0;
         for (let hitIndex = 0; hitIndex < hitCount && target.hp > 0; hitIndex += 1) {
           if (battle.throwingItemGuaranteedHitAtStart || Number(rng()) < hitRate) {
-            const damage = protectedCombatDamage(target, Math.min(Math.max(0, Number(target.hp) || 0), Math.max(0, Math.floor((Number(effect.value) || 0) * elementMultiplier))));
+            const damage = absorbBossMagicBarrier(battle, target, protectedCombatDamage(target, Math.min(Math.max(0, Number(target.hp) || 0), Math.max(0, Math.floor((Number(effect.value) || 0) * elementMultiplier)))), shieldAtStart);
             applyCombatHpDamage(target, damage);
             if (target.hp <= 0) target.alive = false;
             battle.log.push(`${action.item.name}が${target.name}に命中した！ ${damage}のダメージ！`);
-            battle.presentationEvents.push({ type: "damage", hit: true, actorSide, targetSide, amount: damage, element, hitIndex, hitCount, message: `${action.item.name}：${damage}ダメージ！` });
+            battle.presentationEvents.push({ type: "damage", hit: true, bossBarrierBlocked:shieldAtStart, actorSide, targetSide, amount: damage, element, hitIndex, hitCount, message: `${action.item.name}：${damage}ダメージ！` });
           } else {
             battle.log.push(`${action.item.name}は${target.name}に当たらなかった！`);
             battle.presentationEvents.push({ type: "message", throwingMiss: true, actorSide, targetSide, hitIndex, hitCount, message: `${action.item.name}は${target.name}に当たらなかった！` });
@@ -1210,6 +1217,8 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
         }
       }
     }
+    const barrierEvents = battle.presentationEvents.slice(actionPresentationStart).filter(e => e.type === 'bossMagicBarrier' && e.absorbed);
+    barrierEvents.forEach((e,i) => { e.silent = i > 0; });
     const healingItemSpReturn = calculateHealingItemSpReturn({
       item: action.item,
       actualHpHealing: healing,
@@ -1513,6 +1522,11 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     battle.log.push(message);
     battle.presentationEvents.push({type:'magicBarrierDamage',targetSide:'player',amount:absorbed,remaining:barrier.amount,message});
   }
+  const bossBarrierBlocked = targetSide === "enemy" && target.bossMagicBarrier > 0 && actualDamage > 0;
+  if (bossBarrierBlocked) {
+    actualDamage = absorbBossMagicBarrier(battle, target, actualDamage);
+    presentedHits = presentedHits.map(hit => ({...hit, damage:0, bossBarrierBlocked:true}));
+  }
   const targetHpBeforeDamage = Math.max(0, Number(target.hp) || 0);
   applyCombatHpDamage(target, actualDamage);
   const actualHpLoss = Math.max(0, targetHpBeforeDamage - target.hp);
@@ -1527,7 +1541,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
   battle.log.push(`${actor.name}の${action.name || "攻撃"}！`);
   presentedHits.forEach((hit, index) => {
     const prefix = isMultiHit ? `${index + 1}撃目：` : "";
-    const message = hit.vorpalExecution
+    const message = hit.bossBarrierBlocked ? "魔力障壁が攻撃を受け止めた！" : hit.vorpalExecution
       ? "ヴォーパル・スウォードが光り輝き、\nジャバウォックを一刀両断した！"
       : hit.blockedByNpcWall
       ? `${prefix}ヨハンの壁が攻撃を防いだ！`
@@ -1546,6 +1560,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
       hit: hit.hit,
       damage: hit.damage,
       critical: hit.critical,
+      bossBarrierBlocked: Boolean(hit.bossBarrierBlocked),
       vorpalExecution: Boolean(hit.vorpalExecution),
       slashExecution: Boolean(hit.slashExecution),
       passiveExecutionId: hit.passiveExecutionId || null,
@@ -1590,7 +1605,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     actualHpLoss
   });
   const allLandedHitsBlockedByNpcWall = landedHits.length > 0 && landedHits.every(hit => hit.blockedByNpcWall);
-  const applications = isPiscesInvincible(target) || barrier || allLandedHitsBlockedByNpcWall || !target.alive ? [] : [
+  const applications = isPiscesInvincible(target) || bossBarrierBlocked || barrier || allLandedHitsBlockedByNpcWall || !target.alive ? [] : [
     ...resolvedHits.flatMap(hit => hit.effects || []),
     ...(result.actionEffects || [])
   ];
@@ -1602,7 +1617,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
   for (const applied of applications.filter(item => item.success)) {
     battle.log.push(`${target.name}は${statusName(applied.statusId)}状態になった。`);
   }
-  if (actorSide === "player" && battle.scorpioActiveAtStart && landedHits.length > 0 && target.alive
+  if (actorSide === "player" && battle.scorpioActiveAtStart && !bossBarrierBlocked && landedHits.length > 0 && target.alive
     && !target.capturePuzzle) {
     const scorpio = getCardById("zodiac_scorpio");
     const rate = getScorpioDeathPoisonRate(target);
@@ -1738,6 +1753,7 @@ export function applyCancerDoubleReturn({
   if (Number(rng?.()) >= rate) return 0;
   const damage = Math.max(0, Math.floor(loss * (Number(cancer?.doubleReturnMultiplier) || 0)));
   if (damage <= 0) return 0;
+  if (attacker.bossMagicBarrier > 0) { absorbBossMagicBarrier(battle,attacker,damage); return 0; }
   applyCombatHpDamage(attacker, damage);
   attacker.alive = attacker.hp > 0;
   const message = `キャンサーの加護！ 倍返しで${attacker.name}に${damage}のダメージ！`;
@@ -1881,6 +1897,11 @@ function finishCombatantAction(battle, actor, side, targetIndex = null) {
   if (actor.id === ZENTAURIN_ID && actor.zentaurinPrideActions > 0) actor.zentaurinPrideActions -= 1;
   const end = resolveEndOfAction({ statuses: actor.statuses, maxHp: actor.maxHp });
   actor.statuses = end.statuses;
+  if (actor.bossMagicBarrier > 0) {
+    const dot = ['poisonDamage','bleedingDamage','deadlyPoisonDamage','deathPoisonDamage'];
+    absorbBossMagicBarrier(battle,actor,dot.reduce((sum,key)=>sum+(end[key]||0),0));
+    for (const key of dot) end[key]=0;
+  }
   if (end.poisonDamage > 0 && actor.hp > 0) {
     const actualPoisonDamage = getNonlethalPoisonDamage(actor.hp, end.poisonDamage);
     actor.hp -= actualPoisonDamage;

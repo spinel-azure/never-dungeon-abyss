@@ -86,6 +86,11 @@ export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
       revealBeforeExploration: true
     })
   }),
+  18: Object.freeze({
+    lock: Object.freeze({mode: "alwaysSuccess", attempts: 1}),
+    content: Object.freeze({type: "eventBoss", bossId: "wassermannfrau_b18f", minimapMarker: "E", revealBeforeExploration: true,
+      doorConfirmMessage: "扉には十二星座の紋様が刻まれている。中からは澄んだ水の流れる音が聞こえてくる。\n扉を開けますか？\n＊Aボタン：はい　Bボタン：いいえ"})
+  }),
   27: Object.freeze({
     lock: Object.freeze({ mode: "alwaysSuccess", attempts: 1 }),
     content: Object.freeze({ type: "eventBoss", bossId: "thief_leader_event_boss",

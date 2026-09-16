@@ -103,7 +103,7 @@ test("Musa's Crown exposes DEF while retaining hidden future temptation immunity
 
 test("B8 hive and B58 Kirke house use the supplied event art", async () => {
   assert.equal(getSpecialRoomDefinition(8).content.type, "waspHive");
-  assert.equal(getSpecialRoomDefinition(18).content, null);
+  assert.equal(getSpecialRoomDefinition(18).content.bossId, "wassermannfrau_b18f");
   assert.equal(getSpecialRoomDefinition(58).content.type, "kirkeHouse");
   await Promise.all([
     access(new URL("../images/background/dungeon_event_10.avif", import.meta.url)),

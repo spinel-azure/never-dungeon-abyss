@@ -109,6 +109,7 @@ export function getAdventureChronicle(character) {
     ["todesScorpio", "トーデス・スコルピオを撃破した", flags.boss_todes_scorpio_b64f_defeated, "B64Fに潜む死毒の主トーデス・スコルピオを撃破した。", "？？？？？？――蠍座の守護者"],
     ["sphinx", "スピンクスの試練を越えた", flags.sphinx_b69f_route_fixed, "B69Fでスピンクスの試練を乗り越えた。", "？？？？？？――砂漠の問い"],
     ["b70", "B70Fへ到達した", depth >= 70 || flags.transfer_portal_b70f_unlocked, "奈落の迷宮地下70階へ到達し、転送門を解放した。"],
+    ["wassermannfrau", "ヴァッサーマンフラウを撃破した", flags.boss_wassermannfrau_b18f_defeated, "ヴァッサーマンフラウを撃破した。", "？？？？？？――水瓶座の守護者"],
     ["tiefstrom", "タイフシュトロームを倒した！", flags.boss_tiefstrom_b76f_defeated, "タイフシュトローム二体を倒した。", "？？？？？？――魚座の守護者"],
     ["jirene", "ジレーネを撃破した", flags.boss_jirene_b79f_defeated, "B79Fで魔性の歌声を操るジレーネを撃破した。", "？？？？？？――魔性の歌声"],
     ["b80", "B80Fへ到達した", depth >= 80 || flags.floor_b80_reached || flags.transfer_portal_b80f_unlocked, "奈落の迷宮地下80階へ到達した。"],

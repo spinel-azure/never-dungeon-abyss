@@ -4989,6 +4989,7 @@ import {
       forcedEnemyId: getForcedEnemyId(character, { depth: currentDepth })
     });
     if (forcedAccess.blocked) return forcedAccess;
+    if (room?.content?.doorConfirmMessage) return { blocked: false, confirmMessage: room.content.doorConfirmMessage };
     if (room?.content?.requiredZodiacCount) {
       const required = Math.max(1, Math.floor(Number(room.content.requiredZodiacCount) || 1));
       const owned = countOwnedZodiacCardKinds(character?.cards);

@@ -1,3 +1,4 @@
+import { absorbBossMagicBarrier } from "./boss-magic-barrier.js";
 import { NPC_SUPPORT_ENABLED, getNpcDefinition } from "../data/npc-definitions.js";
 import { resolveSpell } from "./resolve-spell.js";
 import { resolveInstantDeath } from "./resolve-status-effect.js";
@@ -449,6 +450,14 @@ function applyNpcDamage(battle, { npcId, damage, range = "melee", actionName = "
   if (cannotReachTarget(battle.enemy, { actionType: "physicalAttack", range })) {
     battle.log.push(DISTANT_MESSAGE);
     battle.presentationEvents.push({ type: "npcSupport", outOfRange: true, npcId, message: DISTANT_MESSAGE });
+    return 0;
+  }
+  if (hitIndex === 0) battle.enemy.npcBarrierHeld = battle.enemy.bossMagicBarrier > 0;
+  if (battle.enemy.npcBarrierHeld || battle.enemy.bossMagicBarrier > 0) {
+    const start = battle.presentationEvents.length;
+    absorbBossMagicBarrier(battle,battle.enemy,damage,battle.enemy.npcBarrierHeld);
+    for (const e of battle.presentationEvents.slice(start)) e.silent = hitIndex > 0;
+    if (hitIndex === hitCount-1) delete battle.enemy.npcBarrierHeld;
     return 0;
   }
   const hpBefore = battle.enemy.hp;

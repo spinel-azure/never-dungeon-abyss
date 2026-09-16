@@ -76,7 +76,7 @@ function birdlimeBattleCharacter({ stones = 0 } = {}) {
 test("quest 029 hive moves to B8 and starts from active quest state without rumor 007", () => {
   assert.equal(getSpecialRoomDefinition(8).content.type, "waspHive");
   assert.equal(getSpecialRoomDefinition(8).content.image, "images/background/dungeon_event_10.avif");
-  assert.equal(getSpecialRoomDefinition(18).content, null);
+  assert.equal(getSpecialRoomDefinition(18).content.bossId, "wassermannfrau_b18f");
 
   let character = questReadyCharacter();
   character.eventFlags.jirene_scripted_defeat_seen = true;

@@ -431,6 +431,7 @@ function drawEncounterMessage() {
   const { ctx, W, H, state } = renderer;
   const event = state.overlayEvent;
   document.body.classList.toggle("event-message-expanded", Number(event?.reserveMessageLines) >= 4);
+  document.body.classList.toggle("wassermannfrau-event", event?.bossId === "wassermannfrau_b18f");
   if (!event) return;
   const message = event.encounterLabel || (
     event.encounterType === "ambush" ? "AMBUSH!!" : "ENCOUNTER!!"
@@ -487,6 +488,7 @@ function drawOverlayEvent() {
   ctx.clearRect(0, 0, W, H);
   const event = state.overlayEvent;
   document.body.classList.toggle("event-message-expanded", Number(event?.reserveMessageLines) >= 4);
+  document.body.classList.toggle("wassermannfrau-event", event?.bossId === "wassermannfrau_b18f");
   renderer.eventOverlayCanvas.style.pointerEvents = event?.type === "floorLap" ? "auto" : "none";
   if (!event?.showOverlay) return;
   if (event.type === "randomEncounter") return;

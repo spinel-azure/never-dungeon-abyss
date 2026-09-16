@@ -1,5 +1,6 @@
 // Normalized image-space emitters: x, y, width, rise. No boss-ID checks or image edits.
 export const ENEMY_AMBIENT_EFFECTS = Object.freeze({
+  'aquarius-shield': Object.freeze({kind:'aquariusShield'}),
   'water-splash': Object.freeze({ kind: 'waterSplash' }),
   'arrow-glint': Object.freeze({ kind: 'arrowGlint', point: Object.freeze([.972, .287]) }),
   'blood-drip': Object.freeze({ kind: 'bloodDrip', emitters: Object.freeze([[.235, .565], [.105, .63]]) }),
@@ -229,6 +230,7 @@ export function createEnemyAmbientEffects({
       }
       entry.preparing = Boolean(target.preparing);
       image.classList.toggle("is-whirlpool-diving", entry.preparing);
+      entry.barrierAmount = target.barrierAmount ?? enemy.bossMagicBarrier;
       entry.profile = profile;
       entry.concealed = concealed;
       entry.ready = visible() && layout(entry);
@@ -271,6 +273,15 @@ function flame(ctx, emitter, time, seed, strength) {
 
 export function drawEnemyAmbientFrame(entry, seconds, fps, reducedMotion = false) {
   const { profile, concealed } = entry;
+  if (profile.kind === 'aquariusShield') {
+    for(const canvas of [entry.back,entry.front]) canvas.getContext('2d')?.clearRect(0,0,canvas.width,canvas.height);
+    if (!(entry.barrierAmount > 0)) return;
+    const canvas=entry.front,ctx=canvas.getContext('2d');if(!ctx)return;
+    ctx.save();ctx.setTransform(canvas.width,0,0,canvas.height,0,0);
+    ctx.globalAlpha=concealed ? .15 : reducedMotion ? .28 : .28+Math.sin(seconds*2)*.035;
+    ctx.fillStyle='#64ceff';ctx.strokeStyle='#c3f5ff';ctx.lineWidth=.006;
+    ctx.beginPath();ctx.ellipse(.5,.53,.38,.43,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();return;
+  }
   if (profile.kind === 'waterSplash' && entry.preparing) {
     drawWhirlpoolFrame(entry, seconds, reducedMotion);
     return;

@@ -88,6 +88,7 @@ function harness({ rate = 60, mobile = false, reduced = false } = {}) {
 
 test("configured bosses retain their ambient effect through combat cloning", () => {
   assert.deepEqual(Object.values(BOSSES).filter(b => b.ambientEffect).map(b => [b.id, b.ambientEffect]), [
+    ["wassermannfrau_b18f", "aquarius-shield"],
     ["zentaurin_b96f", "arrow-glint"],
     ["tiefstrom_b76f", "water-splash"],
     ["tiefstrom_b76f_b", "water-splash"],

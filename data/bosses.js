@@ -1,7 +1,9 @@
+import { WASSERMANNFRAU } from "./wassermannfrau.js";
 import { ZENTAURIN } from "./zentaurin.js";
 import { TIEFSTROM, TIEFSTROM_SECOND } from "./tiefstrom.js";
 
 export const BOSSES = Object.freeze({
+  wassermannfrau_b18f: WASSERMANNFRAU,
   zentaurin_b96f: ZENTAURIN,
   tiefstrom_b76f: TIEFSTROM,
   tiefstrom_b76f_b: TIEFSTROM_SECOND,

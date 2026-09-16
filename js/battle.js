@@ -409,6 +409,7 @@ function isCommandTargetAvailable(command, enemy) {
 
 async function executeCommand(command) {
   battleUi.presentationWhirlpools = Object.fromEntries((battleUi.battle.enemies || []).map(e => [e.id, Boolean(e.reservedEnemyAction)]));
+  battleUi.presentationBossBarrier = battleUi.battle.enemy.bossMagicBarrier;
   const startingHp = {
     player: battleUi.battle.player.hp,
     enemy: battleUi.battle.enemy.hp,
@@ -497,6 +498,7 @@ function scheduleJireneScriptedRound(delayMs = 700) {
 async function executeAmbushOpening() {
   battleUi.presentationMagicBarrier = magicBarrierAmount(battleUi.battle.player);
   battleUi.presentationWhirlpools = Object.fromEntries((battleUi.battle.enemies || []).map(e => [e.id, Boolean(e.reservedEnemyAction)]));
+  battleUi.presentationBossBarrier = battleUi.battle.enemy.bossMagicBarrier;
   const startingHp = {
     player: battleUi.battle.player.hp,
     enemy: battleUi.battle.enemy.hp
@@ -574,6 +576,12 @@ async function playPresentationEvents() {
       battleUi.ambientEffects?.remove(vanishImage);
       markEnemyVanishPending(vanishImage);
     }
+    if (event.type === 'bossMagicBarrier') {
+      battleUi.presentationBossBarrier = event.remaining;
+      if (Number.isFinite(event.playerSp)) battleUi.onCharacterChanged({sp:event.playerSp});
+      if (event.absorbed && !event.silent) battleUi.playSe('crystalObstacleBreak');
+      syncEnemyAmbientEffects();
+    }
     if (event.type === "barrierDamage") battleUi.presentationBarrier = Math.max(0, Number(event.remaining) || 0);
     if (event.type === 'magicBarrierDamage') battleUi.presentationMagicBarrier = event.remaining;
     if (event.piscesRevival) battleUi.presentationPisces = true;
@@ -607,7 +615,7 @@ async function playPresentationEvents() {
       battleUi.playSe("heal");
     } else if (event.type === "barrierDamage") {
       showBattleNumber("player", event.amount, "barrier");
-    } else if (!dedicatedPresentationPlayed && (event.hit || event.type === "damage" || event.type === "followUpDamage" || event.type === "poisonDamage" || event.type === "bleedingDamage")) {
+    } else if (!event.bossBarrierBlocked && !dedicatedPresentationPlayed && (event.hit || event.type === "damage" || event.type === "followUpDamage" || event.type === "poisonDamage" || event.type === "bleedingDamage")) {
       showBattleNumber(
         event.targetSide,
         event.damage ?? event.amount,
@@ -622,7 +630,7 @@ async function playPresentationEvents() {
       : image;
     if (event.type === "capture" && event.image && targetImage) targetImage.src = event.image;
     if (event.throwingMiss || event.outOfRange) battleUi.playSe("attackMiss");
-    if (event.targetSide === "enemy" && event.hit && !dedicatedPresentationPlayed) {
+    if (event.targetSide === "enemy" && event.hit && !event.bossBarrierBlocked && !dedicatedPresentationPlayed) {
       targetImage?.classList.remove("is-hit");
       if (targetImage) void targetImage.offsetWidth;
       targetImage?.classList.add("is-hit");
@@ -1017,7 +1025,7 @@ function syncEnemyAmbientEffects() {
       image: battleUi.root.querySelector(`.battle-enemy-member[data-index="${index}"] .battle-enemy-member-image`)
     }))
     : [{
-      enemy: battle.enemy, concealed,
+      enemy: battle.enemy, concealed, barrierAmount: battleUi.presenting ? battleUi.presentationBossBarrier : battle.enemy.bossMagicBarrier,
       hp: battleUi.presentationHp?.enemy ?? battle.enemy.hp,
       image: battleUi.root.querySelector("#battleEnemyImage")
     }];
@@ -1184,6 +1192,19 @@ function renderBossHpMeter(enemy) {
   const meter = battleUi.root.querySelector("#battleBossHpMeter");
   const fill = battleUi.root.querySelector("#battleBossHpFill");
   if (!meter || !fill) return;
+  let shield = battleUi.root.querySelector('#bossMagicBarrierMeter');
+  if (!shield) {
+    shield = document.createElement('div');shield.id='bossMagicBarrierMeter';
+    shield.style.cssText='position:relative;z-index:3;flex:0 0 22px;width:min(55%,300px);height:22px;box-sizing:border-box;border:1px solid #b189ff;border-radius:4px;color:#edddff;background:#102b3e;font-size:clamp(10px,2.6vw,15px);text-align:center;margin-top:4px';
+    shield.setAttribute('role','progressbar');shield.setAttribute('aria-label','魔力障壁');meter.after(shield);
+  }
+  shield.hidden = !(enemy?.bossMagicBarrierMax > 0);
+  if (!shield.hidden) {
+    const value = battleUi.presenting ? battleUi.presentationBossBarrier ?? enemy.bossMagicBarrier : enemy.bossMagicBarrier;
+    shield.textContent = `♒ ${value} / ${enemy.bossMagicBarrierMax}`;
+    shield.style.background = `linear-gradient(to right,#375e9d ${value/enemy.bossMagicBarrierMax*100}%,#10202b 0)`;
+    shield.setAttribute('aria-valuemin','0');shield.setAttribute('aria-valuemax',String(enemy.bossMagicBarrierMax));shield.setAttribute('aria-valuenow',String(value));
+  }
   const isBoss = Boolean(enemy?.isBoss);
   meter.hidden = !isBoss;
   if (!isBoss) return;
