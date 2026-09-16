@@ -100,7 +100,11 @@ export function createEnemyAmbientEffects({
     const { image, host, back, front } = entry;
     if (!image.complete || !image.naturalWidth || !image.naturalHeight) return false;
     const rect = host.getBoundingClientRect();
-    const bounds = getAmbientImageBounds(image.getBoundingClientRect(), {
+    const imageRect = image.getBoundingClientRect();
+    const translate = windowRef.getComputedStyle?.(image)?.translate?.split(/\s+/)[1] || '0';
+    const shift = parseFloat(translate) || 0;
+    const offsetY = translate.endsWith('%') ? imageRect.height * shift / 100 : shift;
+    const bounds = getAmbientImageBounds({ left: imageRect.left, top: imageRect.top - offsetY, width: imageRect.width, height: imageRect.height }, {
       left: rect.left, top: rect.top,
       borderLeft: host.clientLeft, borderTop: host.clientTop
     }, image.naturalWidth, image.naturalHeight);
@@ -171,6 +175,7 @@ export function createEnemyAmbientEffects({
     resizeObserver?.unobserve(entry.image);
     entry.back.remove();
     entry.front.remove();
+    entry.image.classList.remove("is-whirlpool-diving");
     entry.host.classList.remove("has-enemy-ambient");
     entry.host.classList.remove("has-enemy-deform");
     entries.delete(image);
@@ -222,6 +227,8 @@ export function createEnemyAmbientEffects({
         entries.set(image, entry);
         resizeObserver?.observe(image);
       }
+      entry.preparing = Boolean(target.preparing);
+      image.classList.toggle("is-whirlpool-diving", entry.preparing);
       entry.profile = profile;
       entry.concealed = concealed;
       entry.ready = visible() && layout(entry);
@@ -264,6 +271,10 @@ function flame(ctx, emitter, time, seed, strength) {
 
 export function drawEnemyAmbientFrame(entry, seconds, fps, reducedMotion = false) {
   const { profile, concealed } = entry;
+  if (profile.kind === 'waterSplash' && entry.preparing) {
+    drawWhirlpoolFrame(entry, seconds, reducedMotion);
+    return;
+  }
   if (profile.kind === 'waterSplash') {
     for (const canvas of [entry.back, entry.front]) {
       const ctx = canvas.getContext('2d');
@@ -448,6 +459,30 @@ export function drawBloodDripFrame(entry, seconds, reducedMotion = false) {
     ctx.beginPath();ctx.moveTo(p.x, p.y - p.length);ctx.lineTo(p.x, p.y);ctx.stroke();
     ctx.fillStyle = '#b51b25';ctx.beginPath();ctx.ellipse(p.x, p.y, p.radius, p.radius * 1.7, 0, 0, Math.PI * 2);ctx.fill();
     ctx.fillStyle = '#ef6060';ctx.beginPath();ctx.ellipse(p.x - p.radius * .25, p.y - p.radius * .4, p.radius * .25, p.radius * .6, 0, 0, Math.PI * 2);ctx.fill();
+  }
+  ctx.restore();
+}
+
+export function drawWhirlpoolFrame(entry, seconds, reducedMotion = false) {
+  entry.back.getContext('2d')?.clearRect(0, 0, entry.back.width, entry.back.height);
+  const canvas = entry.front, ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.save();
+  ctx.setTransform(canvas.width / 1.3, 0, 0, canvas.height / 1.3, canvas.width * .15 / 1.3, canvas.height * .22 / 1.3);
+  ctx.globalAlpha = entry.concealed ? .25 : .95;
+  const glow = ctx.createRadialGradient(.5,.78,.01,.5,.78,.46);
+  glow.addColorStop(0,'#020f23');glow.addColorStop(.65,'#126586');glow.addColorStop(1,'rgba(73,195,240,0)');
+  ctx.fillStyle=glow;ctx.beginPath();ctx.ellipse(.5,.78,.46,.17,0,0,Math.PI*2);ctx.fill();
+  for(let arm=0;arm<7;arm++){
+    ctx.beginPath();
+    for(let step=0;step<=64;step++){
+      const progress=step/64, radius=.025+.42*progress;
+      const angle=arm*Math.PI*2/7+progress*6-(reducedMotion?0:seconds*2.4);
+      const x=.5+Math.cos(angle)*radius,y=.78+Math.sin(angle)*radius*.35;
+      if(step===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle=arm%2?'#b9f5ff':'#48b9e6';ctx.lineWidth=.006;ctx.stroke();
   }
   ctx.restore();
 }

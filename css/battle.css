@@ -955,3 +955,4 @@ body.battle-active .viewport > #treasureCanvas {
   .battle-enemy-member,
   .battle-enemy-member.is-defeated { transition-duration: 1ms, 0s; transition-delay: 0s; }
 }
+.is-tiefstrom .battle-enemy-member-image{transition:translate .85s ease-in,opacity .85s ease-in}.battle-enemy-member-image.is-whirlpool-diving{translate:0 55%;opacity:0!important}@media(prefers-reduced-motion:reduce){.is-tiefstrom .battle-enemy-member-image{transition:none}}

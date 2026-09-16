@@ -407,6 +407,7 @@ function isCommandTargetAvailable(command, enemy) {
 }
 
 async function executeCommand(command) {
+  battleUi.presentationWhirlpools = Object.fromEntries((battleUi.battle.enemies || []).map(e => [e.id, Boolean(e.reservedEnemyAction)]));
   const startingHp = {
     player: battleUi.battle.player.hp,
     enemy: battleUi.battle.enemy.hp,
@@ -494,6 +495,7 @@ function scheduleJireneScriptedRound(delayMs = 700) {
 
 async function executeAmbushOpening() {
   battleUi.presentationMagicBarrier = magicBarrierAmount(battleUi.battle.player);
+  battleUi.presentationWhirlpools = Object.fromEntries((battleUi.battle.enemies || []).map(e => [e.id, Boolean(e.reservedEnemyAction)]));
   const startingHp = {
     player: battleUi.battle.player.hp,
     enemy: battleUi.battle.enemy.hp
@@ -583,6 +585,11 @@ async function playPresentationEvents() {
     }
     renderWeaponElementStatus(battleUi.battle.player);
     battleUi.messageEl.textContent = formatPresentationMessage(event);
+    if (event.whirlpoolActorId) {
+      battleUi.presentationWhirlpools[event.whirlpoolActorId] = event.whirlpoolPreparing;
+      renderEnemyParty(battleUi.battle);
+      syncEnemyAmbientEffects();
+    }
     const dedicatedPresentationPlayed = event.targetSide === "enemy" && event.hit
       ? await playBattleSkillPresentation({
         root: battleUi.root,
@@ -990,6 +997,10 @@ function renderBattle() {
   syncEnemyAmbientEffects();
 }
 
+function isWhirlpoolPreparing(enemy) {
+  return Boolean(enemy.twinWhirlpool && (battleUi.presenting ? battleUi.presentationWhirlpools?.[enemy.id] : enemy.reservedEnemyAction));
+}
+
 function syncEnemyAmbientEffects() {
   const battle = battleUi.battle;
   if (!battleUi.active || !battle || (battle.outcome && !battleUi.presenting)) {
@@ -999,7 +1010,7 @@ function syncEnemyAmbientEffects() {
   const concealed = battleUi.concealed || battleUi.phantom;
   const targets = battle.enemies
     ? battle.enemies.map((enemy, index) => ({
-      enemy, concealed,
+      enemy, concealed, preparing: isWhirlpoolPreparing(enemy),
       hp: battleUi.presentationHp?.enemies?.[index] ?? enemy.hp,
       image: battleUi.root.querySelector(`.battle-enemy-member[data-index="${index}"] .battle-enemy-member-image`)
     }))
@@ -1055,7 +1066,7 @@ function renderEnemyParty(battle) {
       preparation.style.cssText = "position:absolute;bottom:18px;left:0;right:0;color:#b8f3ff;background:#071923dd;font-size:clamp(10px,2.5vw,14px);pointer-events:none";
       member.append(preparation);
     }
-    preparation.textContent = enemy.twinWhirlpool && enemy.reservedEnemyAction ? "深淵の大渦：準備中" : "";
+    preparation.textContent = isWhirlpoolPreparing(enemy) ? "深淵の大渦：準備中" : "";
     preparation.hidden = !preparation.textContent;
     renderWeaknessIcons(member.querySelector(".battle-enemy-member-weakness"), enemy);
     const img = member.querySelector(".battle-enemy-member-image");

@@ -66,6 +66,9 @@ try {for(const [label,width,height] of [['pc',1280,900],['mobile',390,844]]){
  await page.screenshot({path:`artifacts/tiefstrom/${label}-twins.png`});
  await page.evaluate(()=>{const b=fishBattle.state();b.enemies[0].reservedEnemyAction=structuredClone(b.enemies[0].actions[3].action.reservedAction);fishBattle.render();});
  assert.equal(await page.locator('.battle-enemy-preparation').first().isVisible(),true);
+ await page.waitForTimeout(1100);
+ assert.equal(await page.locator('.is-whirlpool-diving').count(),1);
+ assert.equal(await page.locator('.is-whirlpool-diving').evaluate(e=>getComputedStyle(e).opacity),'0');
  await page.screenshot({path:`artifacts/tiefstrom/${label}-preparation.png`});
  const boxes=await page.locator('.battle-enemy-member').evaluateAll(es=>es.map(e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom}}));
  assert.ok(boxes.every(r=>r.left>=0&&r.right<=width&&r.top>=0&&r.bottom<=height));

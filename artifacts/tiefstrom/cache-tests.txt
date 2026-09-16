@@ -1,0 +1,22 @@
+✔ new characters see the deck tutorial while legacy recipients do not repeat it (6.1119ms)
+✔ deck tutorial isolates and highlights the inn deck command (0.5626ms)
+✔ lucky charm acquisition starts one locked three-second tutorial (0.3728ms)
+✔ the quest notice reuses the bell layout with distinct blue presentation (2.6522ms)
+✔ persistent state changes, reload resume, and guild rendering recheck quest notices (2.2153ms)
+✔ notification assets use the current cache revision (0.4694ms)
+✔ the truth staff is a unique unsellable key item (1.598ms)
+✔ Michaela restoration preserves all six requested dialogue pages (0.9111ms)
+✔ Michaela dialogue measures the message box, splits naturally, and always shows the A prompt (0.8785ms)
+✔ Amayenak victory persists recovery flags and returns to the B100F entrance (1.509ms)
+✔ the real battle completion snapshot reaches the restoration bridge with Amayenak's ID (4.9702ms)
+✔ restoration overlay uses the cat and both Michaela portraits (2.4577ms)
+✔ restoration returns silently without an unrelated floor transition message (0.7896ms)
+✔ main.js keeps the current top-level cache buster without versioned module imports (1.162ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 289.8723

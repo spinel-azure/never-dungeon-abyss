@@ -74,7 +74,7 @@ function harness({ rate = 60, mobile = false, reduced = false } = {}) {
     const classList = fakeClassList();
     const host = { dataset: {}, classList, clientLeft: 0, clientTop: 0,
       getBoundingClientRect: () => ({ left: 10, top: 20 }), append() {} };
-    const image = { ...eventTarget(), classList: { contains: () => false },
+    const image = { ...eventTarget(), classList: fakeClassList(),
       complete: true, naturalWidth: 600, naturalHeight: 600, isConnected: true,
       getBoundingClientRect: () => ({ left: 100, top: 80, width: 300, height: 300 }),
       closest: () => host };

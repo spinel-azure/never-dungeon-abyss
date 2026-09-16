@@ -1007,7 +1007,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
   if (action.actionType === "prepareAction" && actorSide === "enemy") {
     actor.reservedEnemyAction = structuredClone(action.reservedAction || null);
     battle.log.push(action.prepareMessage || `${actor.name}は次の攻撃に備えた！`);
-    if (actor.twinWhirlpool) battle.presentationEvents.push({ type: "message", message: action.prepareMessage });
+    if (actor.twinWhirlpool) battle.presentationEvents.push({ type: "message", message: action.prepareMessage, whirlpoolActorId: actor.id, whirlpoolPreparing: true });
     return;
   }
   if (action.actionType === "chargeDebuff") {
@@ -1533,6 +1533,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     battle.presentationEvents.push({
       type: "attackHit",
       actorName: actor.name,
+      actionName: action.name,
       actorSide,
       targetSide,
       hitIndex: index,

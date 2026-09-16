@@ -50,10 +50,13 @@ test('melee cannot reach even with Sagittarius and follow-up; thrown item can',(
 test('preselection reserves only one whirlpool, alternates and allows guarding',()=>{
  let b=round(setup(),{type:'wait'},()=>.95);
  assert.equal(b.enemies.filter(e=>e.reservedEnemyAction).length,1);
+ assert.ok(b.presentationEvents.some(e=>e.whirlpoolPreparing===true));
  const owner=b.enemies.find(e=>e.reservedEnemyAction);assert.equal(b.whirlpoolOwner,owner.id);
  b.player.statusResistances={bleeding:{immune:true}};
  const normal=round(b),guard=round(b,{type:'guard'});assert.ok(guard.player.hp>normal.player.hp);
  assert.equal(normal.enemies.filter(e=>e.reservedEnemyAction).length,0);
+ assert.ok(normal.presentationEvents.some(e=>e.whirlpoolPreparing===false));
+ assert.ok(normal.presentationEvents.some(e=>e.type==="attackHit" && e.actionName==="深淵の大渦"));
  b=round(normal,{type:'wait'},()=>.95);assert.equal(b.enemies.filter(e=>e.reservedEnemyAction).length,1);
  assert.notEqual(b.whirlpoolOwner,owner.id);
 });

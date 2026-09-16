@@ -36,6 +36,7 @@ export function reserveWhirlpool(battle, enemy, action) {
 export function executeTwinAction(battle, enemy, action) {
   if (!enemy.twinWhirlpool) return;
   if (action.id === "tiefstrom_whirlpool") {
+    battle.presentationEvents?.push({ type: "message", message: "タイフシュトロームが「深淵の大渦」を放った！", whirlpoolActorId: enemy.id, whirlpoolPreparing: false });
     battle.whirlpoolOwner = null;
     battle.whirlpoolLastOwner = enemy.id;
     battle.whirlpoolBlockedTurn = battle.turn;
