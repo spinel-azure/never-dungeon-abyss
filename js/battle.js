@@ -1,3 +1,4 @@
+import { playWhirlpoolWave } from "./whirlpool-wave.js";
 import { renderWeaponElementStatus } from "./weapon-element-status.js";
 import { AQUARIUS_STATUS, magicBarrierAmount } from '../combat/aquarius.js';
 import {
@@ -589,6 +590,7 @@ async function playPresentationEvents() {
       battleUi.presentationWhirlpools[event.whirlpoolActorId] = event.whirlpoolPreparing;
       renderEnemyParty(battleUi.battle);
       syncEnemyAmbientEffects();
+      if (!event.whirlpoolPreparing) await playWhirlpoolWave(battleUi.root, () => battleUi.active);
     }
     const dedicatedPresentationPlayed = event.targetSide === "enemy" && event.hit
       ? await playBattleSkillPresentation({

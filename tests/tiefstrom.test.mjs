@@ -110,3 +110,26 @@ test('NPC melee including Erika holy strike cannot reach; Johan magic remains ef
 test('escape is guaranteed even at the highest roll',()=>{
  assert.equal(resolveEscapeAttempt({escapeRate:createBossCombatant(TIEFSTROM_ID).escapeRate,rng:()=>1}).success,true);
 });
+
+test('whirlpool percentage, guard, fixed wall and independent magic barrier',()=>{
+ const run=(maxHp,guard=false,wall=0,magic=0)=>{
+  const b=setup();b.player.hp=b.player.maxHp=maxHp;b.npcSupportSuppressed=true;
+  b.enemies[1].hp=0;b.enemies[1].alive=false;
+  const action=structuredClone(b.enemies[0].actions[3].action.reservedAction);
+  b.enemies[0].actions=[{weight:1,action}];
+  if(wall)b.player.statuses.push({id:'npc_johan_wall',active:true,npcWallTurns:3,npcWallDamageThreshold:wall,npcWallStrongDamageReduction:wall===40?.2:0});
+  if(magic)b.player.statuses.push({id:'aquarius_magic_barrier',active:true,amount:magic,expiresAfterBattle:true});
+  return round(b,{type:guard?'guard':'wait'},()=>.1);
+ };
+ assert.equal(run(600).player.hp,510);
+ assert.equal(run(600,true).player.hp,570);
+ assert.equal(run(588).player.hp,500);
+ assert.equal(run(600,false,40).player.hp,528);
+ assert.equal(run(600,true,40).player.hp,600);
+ assert.equal(run(600,true,20).player.hp,570);
+ assert.equal(run(800,true,40).player.hp,800);
+ assert.equal(run(820,true,40).player.hp,788);
+ const magic=run(600,false,0,10);
+ assert.equal(magic.player.hp,600);
+ assert.equal(magic.player.statuses.find(s=>s.id==='aquarius_magic_barrier').amount,0);
+});

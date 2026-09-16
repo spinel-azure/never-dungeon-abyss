@@ -314,7 +314,7 @@ test("Johan stages seven through nine strengthen magic support, the wall and Man
   applyNpcChargeSkills(battle, () => 0.99);
   applyNpcTurnStart(battle, () => rolls.shift() ?? 0.99);
   assert.ok(battle.presentationEvents.some(event => event.skillName === "壁よ、拒め！"));
-  assert.equal(battle.player.statuses.find(status => status.id === "npc_johan_wall")?.npcWallDamageThresholdRate, 0.2);
+  assert.equal(battle.player.statuses.find(status => status.id === "npc_johan_wall")?.npcWallDamageThreshold, 40);
   assert.equal(battle.player.statuses.find(status => status.id === "npc_johan_wall")?.npcWallStrongDamageReduction, 0.2);
   assert.equal(battle.enemy.statuses.find(status => status.id === "npc_johan_magic_exposure")?.magicDamageTakenBonus, 0.15);
 

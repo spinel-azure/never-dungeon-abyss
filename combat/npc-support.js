@@ -17,7 +17,7 @@ export const NPC_CHARGE_SKILLS = Object.freeze({
   alec: Object.freeze({ chargePerTurn: 16, name: "強撃", quote: "強撃！", cutIn: "images/battle_effects/NPC_01.avif", damageMultiplier: 1.5 }),
   rebecca: Object.freeze({ chargePerTurn: 25, name: "双連斬", quote: "双連斬！", cutIn: "images/battle_effects/NPC_02.avif", hitCount: 4, damageMultiplier: 0.9 }),
   erika: Object.freeze({ chargePerTurn: 20, name: "聖なる打撃", quote: "聖なる打撃！", cutIn: "images/battle_effects/NPC_03.avif", basePower: 18, growthPower: 3, undeadBossMultiplier: 3 }),
-  johan: Object.freeze({ chargePerTurn: 12, name: "壁よ、守りを！", quote: "壁よ、守りを！", cutIn: "images/battle_effects/NPC_04.avif", durationTurns: 3, damageThresholdRate: 0.15 })
+  johan: Object.freeze({ chargePerTurn: 12, name: "壁よ、守りを！", quote: "壁よ、守りを！", cutIn: "images/battle_effects/NPC_04.avif", durationTurns: 3, damageThreshold: 20 })
 });
 
 export function applyNpcChargeSkills(battle, rng = Math.random) {
@@ -421,7 +421,7 @@ function applyJohanChargeSkill(battle, config) {
       active: true,
       expiresAfterBattle: true,
       npcWallTurns: config.durationTurns,
-      npcWallDamageThresholdRate: upgrade?.damageThresholdRate || config.damageThresholdRate,
+      npcWallDamageThreshold: upgrade?.damageThreshold || config.damageThreshold,
       npcWallStrongDamageReduction: upgrade?.strongDamageReduction || 0
     }
   ];

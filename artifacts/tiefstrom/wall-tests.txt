@@ -1,0 +1,47 @@
+✔ four initial NPC definitions use stable IDs, jobs and existing image paths (2.2175ms)
+✔ legacy saves normalize to an empty independent NPC system (4.6207ms)
+✔ NPC charge state is backward compatible, clamped and independently persisted (0.3173ms)
+✔ stage six Erika and Johan passives recover one point every five successful steps (0.8259ms)
+✔ exploration HP and SP passive recovery both have popup hooks (1.8978ms)
+✔ stage five exploration NPCs do not receive stage six passives (0.6158ms)
+✔ Rebecca stage six charge skill checks assassination on every hit (4.4544ms)
+✔ registration is unique and hiring charges level times five at growth stage zero (0.8705ms)
+✔ NPC hiring fee scales with that NPC's growth stage through stage ten (0.5637ms)
+✔ party normalization enforces three slots, unique NPCs and unique NPC jobs (0.4535ms)
+✔ expedition growth is confirmed on return and renewal preserves the roster (1.2417ms)
+✔ NPC-free battle remains unchanged and active supports create presentation events (16.0873ms)
+✔ three NPC supports target roughly one and a half heroes of combined contribution (2.4835ms)
+✔ NPC stages seven and eight upgrade support, charge attacks and Erika recovery (4.3426ms)
+✔ stage nine advanced passives damage instant-death-immune bosses and improve Goddess Breath (3.5127ms)
+✔ stage ten capstones provide Vandervalke, Siegfried and Golden Wheat once per battle (8.2377ms)
+✔ Johan stages seven through nine strengthen magic support, the wall and Mana Activation (3.4132ms)
+✔ Der Zauberschild reduces a large hit before Siegfried and restores ten percent SP (2.8987ms)
+✔ charge rates follow thief, priest, warrior, mage and cooldown skips one full turn (0.9587ms)
+✔ Alec and Rebecca charge skills use the intended physical hit profiles (1.61ms)
+✔ Erika charge skill executes normal undead, preserves EXP and only deals triple damage to undead bosses (1.5886ms)
+✔ Johan charge wall blocks low per-hit damage for three turns but lets strong hits through (2.9221ms)
+✔ status page three derives each active NPC display from current support balance (2.4101ms)
+✔ NPC renewal hides background commands and restores its originating town screen (1.4811ms)
+✔ NPC management clears every storage-only overlay state before reuse (2.7194ms)
+✔ Pisces guardian achievement reads the persisted complete-victory flag (4.3377ms)
+✔ B76 fixed optional room preserves its content and shared zodiac gate (30.0037ms)
+✔ independent twins and complete victory reward are repeat-safe (4.2399ms)
+✔ melee cannot reach even with Sagittarius and follow-up; thrown item can (14.9491ms)
+✔ preselection reserves only one whirlpool, alternates and allows guarding (7.112ms)
+✔ dead preparation owner releases reservation; simultaneous deaths do not enrage (3.0598ms)
+✔ weight boundaries and fresh snapshot after escape (0.4206ms)
+✔ crystal reports actual SP loss including low and empty SP (1.5891ms)
+✔ AoE damages both, melee skills including holy strike fail, ranged miracles reach (6.2221ms)
+✔ stunned preparation remains reserved and excludes the other twin (2.7891ms)
+✔ bleed occurs once only on actual hits; total misses do not bleed (2.611ms)
+✔ NPC melee including Erika holy strike cannot reach; Johan magic remains effective (3.6909ms)
+✔ escape is guaranteed even at the highest roll (0.2521ms)
+✔ whirlpool percentage, guard, fixed wall and independent magic barrier (13.25ms)
+ℹ tests 39
+ℹ suites 0
+ℹ pass 39
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 336.8357

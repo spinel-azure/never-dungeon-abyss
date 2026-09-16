@@ -29,7 +29,7 @@ export const NPC_ADVANCED_GROWTH = Object.freeze({
   johan: Object.freeze({
     stage7: Object.freeze({ name: "マナ励起", spellDamageMultiplier: 1.2, debuffRate: 0.2,
       magicDamageTakenBonus: 0.15, debuffTurns: 2 }),
-    stage8: Object.freeze({ name: "壁よ、拒め！", damageThresholdRate: 0.2, strongDamageReduction: 0.2 }),
+    stage8: Object.freeze({ name: "壁よ、拒め！", damageThreshold: 40, strongDamageReduction: 0.2 }),
     stage9: Object.freeze({ name: "マナ活性化・極", description: "5歩ごとにSP2回復", spRecovery: 2 }),
     stage10: Object.freeze({ name: "デア・ツァウバーシルト", triggerDamageMaxHpRate: 0.3,
       damageReduction: 0.5, spRecoveryMaxSpRate: 0.1 })

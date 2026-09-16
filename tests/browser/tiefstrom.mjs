@@ -73,8 +73,13 @@ try {for(const [label,width,height] of [['pc',1280,900],['mobile',390,844]]){
  const boxes=await page.locator('.battle-enemy-member').evaluateAll(es=>es.map(e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom}}));
  assert.ok(boxes.every(r=>r.left>=0&&r.right<=width&&r.top>=0&&r.bottom<=height));
  await page.evaluate(()=>{fishBattle.spy();void fishBattle.use({type:'attack',targetIndex:1});});
+ await page.waitForSelector('.whirlpool-wave');
+ await page.waitForTimeout(400);
+ await page.screenshot({path:`artifacts/tiefstrom/${label}-wave.png`});
+ assert.equal(await page.locator('.is-whirlpool-diving').count(),0);
  await page.waitForFunction(()=>fishBattle.idle());
  assert.ok(await page.evaluate(()=>fishSounds.includes('attackMiss')));
+ assert.equal(await page.locator('.whirlpool-wave').count(),0);
  await page.evaluate(()=>{fishBattle.spy();Math.random=()=>.1;void fishBattle.use({type:'item',itemId:'wurfmesser',targetIndex:1});});
  await page.waitForFunction(()=>fishBattle.idle());
  assert.equal(await page.evaluate(()=>fishBattle.state().enemies[1].hp),3820);

@@ -1386,6 +1386,11 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
         * raceMultiplier
     )) : 0
   }));
+  if (actorSide === "enemy" && targetSide === "player" && action.id === "tiefstrom_whirlpool") {
+    const guarding = target.statuses?.some(status => (status.id || status.statusId) === "guard" && status.active !== false);
+    const damage = Math.max(1, Math.floor(target.maxHp * (guarding ? 0.05 : 0.15)));
+    presentedHits = presentedHits.map(hit => ({ ...hit, damage: hit.hit ? damage : 0, critical: false }));
+  }
   if (actorSide === "enemy" && targetSide === "player" && battle.mirageFirstAttackAvailable
     && !isPiscesInvincible(target) && ["physicalAttack", "spell"].includes(action.actionType)) {
     battle.mirageFirstAttackAvailable = false;
@@ -1443,7 +1448,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     ? target.statuses?.find(status => (status.id || status.statusId) === "npc_johan_wall" && status.active !== false)
     : null;
   const npcWallThreshold = npcWall
-    ? Math.max(1, Math.floor(target.maxHp * (Number(npcWall.npcWallDamageThresholdRate) || 0)))
+    ? Math.max(0, Math.floor(Number(npcWall.npcWallDamageThreshold) || 20))
     : 0;
   let npcWallBlocked = false;
   let npcWallReduced = false;
