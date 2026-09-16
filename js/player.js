@@ -1780,6 +1780,7 @@ function startBossRemainsEvent(bossId) {
     type: "bossRemains",
     bossId,
     imageId: boss?.defeatedEncounterImageId ?? "",
+    imageFit: boss?.defeatedEncounterImageFit,
     message: boss?.event?.remains || "粉々になった彫像が床一面に散らばっている。もう動き出す事はなさそうだ。\n＊Aボタン：次へ",
     canCancel: false
   });

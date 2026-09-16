@@ -1197,10 +1197,10 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
             applyCombatHpDamage(target, damage);
             if (target.hp <= 0) target.alive = false;
             battle.log.push(`${action.item.name}が${target.name}に命中した！ ${damage}のダメージ！`);
-            battle.presentationEvents.push({ type: "damage", actorSide, targetSide, amount: damage, element, hitIndex, hitCount, message: `${action.item.name}：${damage}ダメージ！` });
+            battle.presentationEvents.push({ type: "damage", hit: true, actorSide, targetSide, amount: damage, element, hitIndex, hitCount, message: `${action.item.name}：${damage}ダメージ！` });
           } else {
             battle.log.push(`${action.item.name}は${target.name}に当たらなかった！`);
-            battle.presentationEvents.push({ type: "message", actorSide, targetSide, message: `${action.item.name}は${target.name}に当たらなかった！` });
+            battle.presentationEvents.push({ type: "message", throwingMiss: true, actorSide, targetSide, hitIndex, hitCount, message: `${action.item.name}は${target.name}に当たらなかった！` });
           }
         }
       }

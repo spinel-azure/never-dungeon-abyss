@@ -19,6 +19,7 @@ test('throwing weapons keep fixed damage, individual accuracy, and one-item cons
  for(const job of ['warrior','thief','priest','mage']){
   const b=use('wurfmesser',job,.1);assert.equal(b.enemy.hp,3820);assert.equal(getItemCount(b.player.inventory,'wurfmesser'),1);
   assert.equal(b.presentationEvents.filter(e=>e.type==='damage').length,3);
+  assert.ok(b.presentationEvents.filter(e=>e.type==='damage').every(e=>e.hit===true));
   assert.equal(use('wurfspeer',job,.1).enemy.hp,3500);
  }
 });
@@ -41,6 +42,7 @@ test('elemental throws respect resistance and immunity and still consume only on
   assert.equal(getItemCount(b.player.inventory,'wurfspeer'),1);
  }
  assert.equal(use('wurfspeer','warrior',.9,['sr_lightning_armament']).enemy.hp,4000);
+ assert.equal(use('wurfmesser','warrior',.9).presentationEvents.filter(e=>e.throwingMiss).length,3);
 });
 test('normal and thief DEX30 accuracy boundaries for both new items',()=>{
  for(const [id,rate,damage] of [['wurfmesser',.4,180],['wurfspeer',.6,500]]){

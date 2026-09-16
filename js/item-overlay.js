@@ -4,11 +4,12 @@ import { hasKeyItem } from "../data/key-items.js";
 import { getItemUnavailableReason, getItemUnavailableReasonForEnemies } from "../combat/resolve-item-use.js";
 
 const BATTLE_ITEMS_PER_COLUMN = 6;
-const BATTLE_ITEMS_PER_PAGE = BATTLE_ITEMS_PER_COLUMN * 2;
+function battleRows() { return overlay.battleRows; }
+function battlePageSize() { return battleRows() * 2; }
 
 const overlay = {
   root: null, list: null, pageEl: null, prevButton: null, nextButton: null, backButton: null, messageEl: null,
-  active: false, selectedIndex: 0, page: 0, items: [], character: null, context: "dungeon",
+  battleRows: BATTLE_ITEMS_PER_COLUMN, active: false, selectedIndex: 0, page: 0, items: [], character: null, context: "dungeon",
   lastSelectionByContext: {},
   enemy: null, enemies: null, torchFuel: 0, treasureCompassActive: false, onUse: async () => ({ accepted: false }),
   onClose: () => {}, playSe: () => {}, previousMessage: ""
@@ -30,6 +31,8 @@ export function openItemOverlay({ context = "dungeon", character, enemy = null, 
   if (overlay.active || !character) return false;
   overlay.active = true;
   overlay.context = context;
+  overlay.battleRows = window.matchMedia("(max-width: 600px)").matches ? 4 : 6;
+  overlay.root.style.setProperty("--battle-item-rows", overlay.battleRows);
   overlay.character = character;
   overlay.enemy = enemy;
   overlay.enemies = enemies;
@@ -40,7 +43,7 @@ export function openItemOverlay({ context = "dungeon", character, enemy = null, 
       && item.usableIn?.includes(context)
   );
   overlay.selectedIndex = restoreSelectedIndex(overlay.items, overlay.lastSelectionByContext[context]);
-  overlay.page = context === "battle" ? Math.floor(overlay.selectedIndex / BATTLE_ITEMS_PER_PAGE) : 0;
+  overlay.page = context === "battle" ? Math.floor(overlay.selectedIndex / battlePageSize()) : 0;
   overlay.onUse = onUse || overlay.onUse;
   overlay.onClose = onClose || (() => {});
   overlay.previousMessage = overlay.messageEl.textContent;
@@ -97,8 +100,8 @@ function moveVertical(amount) {
     overlay.selectedIndex = amount < 0 ? start + items.length - 1 : start;
   } else {
     const local = overlay.selectedIndex - start;
-    const columnStart = Math.floor(local / BATTLE_ITEMS_PER_COLUMN) * BATTLE_ITEMS_PER_COLUMN;
-    const columnLength = Math.min(BATTLE_ITEMS_PER_COLUMN, items.length - columnStart);
+    const columnStart = Math.floor(local / battleRows()) * battleRows();
+    const columnLength = Math.min(battleRows(), items.length - columnStart);
     const row = local - columnStart;
     const nextRow = row + amount;
     overlay.selectedIndex = nextRow >= 0 && nextRow < columnLength
@@ -114,14 +117,14 @@ function moveHorizontal(amount) {
   const { start, items } = getCurrentPage();
   if (overlay.selectedIndex === overlay.items.length) return changePage(amount);
   const local = overlay.selectedIndex - start;
-  const targetLocal = local + amount * BATTLE_ITEMS_PER_COLUMN;
+  const targetLocal = local + amount * battleRows();
   if (targetLocal >= 0 && targetLocal < items.length) {
     overlay.selectedIndex = start + targetLocal;
     overlay.playSe("cursorMove");
     renderSelection();
     return;
   }
-  changePage(amount, local % BATTLE_ITEMS_PER_COLUMN);
+  changePage(amount, local % battleRows());
 }
 
 function selectBack() {
@@ -132,7 +135,7 @@ function selectBack() {
 
 function changePage(amount, preferredRow = 0) {
   if (overlay.context !== "battle") return false;
-  const pageCount = Math.max(1, Math.ceil(overlay.items.length / BATTLE_ITEMS_PER_PAGE));
+  const pageCount = Math.max(1, Math.ceil(overlay.items.length / battlePageSize()));
   if (pageCount <= 1) return false;
   overlay.page = (overlay.page + amount + pageCount) % pageCount;
   const { start, items } = getCurrentPage();
@@ -143,7 +146,7 @@ function changePage(amount, preferredRow = 0) {
 }
 
 function getCurrentPage() {
-  const pageSize = overlay.context === "battle" ? BATTLE_ITEMS_PER_PAGE : Math.max(1, overlay.items.length);
+  const pageSize = overlay.context === "battle" ? battlePageSize() : Math.max(1, overlay.items.length);
   const start = overlay.page * pageSize;
   return { start, items: overlay.items.slice(start, start + pageSize) };
 }
@@ -201,7 +204,7 @@ function render() {
     return button;
   });
   overlay.list.replaceChildren(...buttons);
-  const pageCount = overlay.context === "battle" ? Math.max(1, Math.ceil(overlay.items.length / BATTLE_ITEMS_PER_PAGE)) : 1;
+  const pageCount = overlay.context === "battle" ? Math.max(1, Math.ceil(overlay.items.length / battlePageSize())) : 1;
   overlay.pageEl.textContent = `${overlay.page + 1}/${pageCount}`;
   if (overlay.prevButton) overlay.prevButton.hidden = overlay.context !== "battle" || pageCount <= 1;
   if (overlay.nextButton) overlay.nextButton.hidden = overlay.context !== "battle" || pageCount <= 1;

@@ -94,6 +94,10 @@ test("Web Audio uses one context with independent cached SE and BGM gain paths",
   audio.stopBgm();
   assert.equal(bgmSource.stopped, true);
 
+  assert.equal(await audio.startBgm("eventBoss"), true);
+  assert.equal(sources.at(-1).loop, true);
+  audio.stopBgm();
+
   audio.setSeOptions({ enabled: false });
   assert.equal(await audio.playSe("confirm"), false);
   assert.equal(gainValues.at(-1), 0);

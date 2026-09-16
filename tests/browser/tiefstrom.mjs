@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 const {chromium}=createRequire(import.meta.url)('playwright');
 const main=await readFile(new URL('../../js/main.js',import.meta.url),'utf8');
 const battle=await readFile(new URL('../../js/battle.js',import.meta.url),'utf8');
+const player=await readFile(new URL('../../js/player.js',import.meta.url),'utf8');
 const hook=`window.crystalQa=async(sp)=>{
 document.querySelector('#titleScreen').hidden=true;document.body.classList.remove('title-active','menu-open');closeTown();worldLocation='dungeon';currentDepth=80;
 firstDungeonTutorialActive=false;deckTutorialActive=false;
@@ -31,10 +32,14 @@ try {for(const [label,width,height] of [['pc',1280,900],['mobile',390,844]]){
  const context=await browser.newContext({viewport:{width,height},hasTouch:label==='mobile'});
  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.route('**/js/main.js?*',r=>r.fulfill({contentType:'text/javascript',body:main.replace('  document.documentElement.dataset.ndaMainReady = "true";',hook+'\n  document.documentElement.dataset.ndaMainReady = "true";')}));
- await page.route('**/js/battle.js',r=>r.fulfill({contentType:'text/javascript',body:battle+'\nwindow.fishBattle={use:executeCommand,state:()=>battleUi.battle,idle:()=>!battleUi.presenting,render:renderBattle};'}));
+ await page.route('**/js/battle.js',r=>r.fulfill({contentType:'text/javascript',body:battle+'\nwindow.fishBattle={spy:()=>{window.fishSounds=[];battleUi.playSe=k=>fishSounds.push(k);},use:executeCommand,state:()=>battleUi.battle,idle:()=>!battleUi.presenting,render:renderBattle};'}));
+ await page.route('**/js/player.js',r=>r.fulfill({contentType:'text/javascript',body:player+'\nwindow.remainsQa=startBossRemainsEvent;'}));
  await page.goto('http://127.0.0.1:4179');await page.waitForFunction(()=>window.fishQa);
  const crystal=await page.evaluate(()=>crystalQa(7));assert.equal(crystal.sp,0);assert.match(crystal.popup,/-SP7/);assert.match(crystal.message,/SPが7減少した/);
  await page.screenshot({path:`artifacts/tiefstrom/${label}-sp-popup.png`});
+ await page.evaluate(()=>remainsQa('tiefstrom_b76f'));
+ await page.waitForTimeout(500);
+ await page.screenshot({path:`artifacts/tiefstrom/${label}-remains.png`});
  await page.evaluate(()=>fishQa.setup());
  assert.equal(await page.evaluate(()=>fishGateTwo.blocked),true);assert.equal(await page.evaluate(()=>fishGateThree.blocked),false);
  await page.locator('.battle-enemy-member-image').evaluateAll(imgs=>Promise.all(imgs.map(i=>i.decode())));
@@ -49,9 +54,10 @@ try {for(const [label,width,height] of [['pc',1280,900],['mobile',390,844]]){
  await page.screenshot({path:`artifacts/tiefstrom/${label}-preparation.png`});
  const boxes=await page.locator('.battle-enemy-member').evaluateAll(es=>es.map(e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom}}));
  assert.ok(boxes.every(r=>r.left>=0&&r.right<=width&&r.top>=0&&r.bottom<=height));
- await page.evaluate(()=>{Math.random=()=>.1;void fishBattle.use({type:'item',itemId:'wurfmesser',targetIndex:1});});
+ await page.evaluate(()=>{fishBattle.spy();Math.random=()=>.1;void fishBattle.use({type:'item',itemId:'wurfmesser',targetIndex:1});});
  await page.waitForFunction(()=>fishBattle.idle());
  assert.equal(await page.evaluate(()=>fishBattle.state().enemies[1].hp),3820);
+ assert.equal(await page.evaluate(()=>fishSounds.filter(k=>k==='attackHit').length),3);
  assert.equal(await page.evaluate(()=>fishBattle.state().player.inventory.counts.wurfmesser),1);
  await page.screenshot({path:`artifacts/tiefstrom/${label}-after-throw.png`});
  assert.deepEqual(errors,[]);console.log(label+' twins, HP, target selection and preparation passed');await context.close();

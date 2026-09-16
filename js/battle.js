@@ -604,6 +604,7 @@ async function playPresentationEvents() {
       ? battleUi.root.querySelector(`.battle-enemy-member[data-index="${event.targetIndex ?? battleUi.battle.targetIndex}"] .battle-enemy-member-image`)
       : image;
     if (event.type === "capture" && event.image && targetImage) targetImage.src = event.image;
+    if (event.throwingMiss) battleUi.playSe("attackMiss");
     if (event.targetSide === "enemy" && event.hit && !dedicatedPresentationPlayed) {
       targetImage?.classList.remove("is-hit");
       if (targetImage) void targetImage.offsetWidth;
