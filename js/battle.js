@@ -1,4 +1,5 @@
 import { renderWeaponElementStatus } from "./weapon-element-status.js";
+import { AQUARIUS_STATUS, magicBarrierAmount } from '../combat/aquarius.js';
 import {
   createBattleState,
   isCaptureAvailable,
@@ -58,6 +59,7 @@ const battleUi = {
   presenting: false,
   presentationHp: null,
   presentationBarrier: null,
+  presentationMagicBarrier: null,
   pendingCommand: null,
   ambientEffects: null,
   speedToggle: null,
@@ -411,6 +413,7 @@ async function executeCommand(command) {
     enemies: battleUi.battle.enemies?.map(enemy => enemy.hp) || null
   };
   const startingBarrier = Math.max(0, Math.floor(Number(battleUi.battle.sphinxBarrier) || 0));
+  const startingMagicBarrier = magicBarrierAmount(battleUi.battle.player);
   const resolved = battleUi.battle.scriptedBattleType === "jirene_first_encounter"
     ? resolveJireneScriptedRound({ battle: battleUi.battle })
     : resolveBattleRound({ battle: battleUi.battle, playerCommand: command });
@@ -438,6 +441,7 @@ async function executeCommand(command) {
   battleUi.presenting = battleUi.battle.presentationEvents?.length > 0;
   battleUi.presentationHp = battleUi.presenting ? startingHp : null;
   battleUi.presentationBarrier = battleUi.presenting ? startingBarrier : null;
+  battleUi.presentationMagicBarrier = battleUi.presenting ? startingMagicBarrier : null;
   battleUi.onCharacterChanged({
     hp: battleUi.presenting ? startingHp.player : battleUi.battle.player.hp,
     sp: battleUi.battle.player.sp,
@@ -489,6 +493,7 @@ function scheduleJireneScriptedRound(delayMs = 700) {
 }
 
 async function executeAmbushOpening() {
+  battleUi.presentationMagicBarrier = magicBarrierAmount(battleUi.battle.player);
   const startingHp = {
     player: battleUi.battle.player.hp,
     enemy: battleUi.battle.enemy.hp
@@ -567,6 +572,7 @@ async function playPresentationEvents() {
       markEnemyVanishPending(vanishImage);
     }
     if (event.type === "barrierDamage") battleUi.presentationBarrier = Math.max(0, Number(event.remaining) || 0);
+    if (event.type === 'magicBarrierDamage') battleUi.presentationMagicBarrier = event.remaining;
     if (event.piscesRevival) battleUi.presentationPisces = true;
     if (event.type === "piscesProtectionEnd") battleUi.presentationPisces = false;
     if (event.npcId) battleUi.onNpcSupport(event.npcId);
@@ -821,7 +827,7 @@ export function createPersistentBattlePlayerChanges(player) {
   return {
     hp: player.hp,
     sp: player.sp,
-    statuses: structuredClone(player.statuses),
+    statuses: structuredClone(player.statuses.filter(s=>(s.id || s.statusId)!==AQUARIUS_STATUS)),
     inventory: structuredClone(player.inventory),
     herbicideTrialUses: Number(player.herbicideTrialUses) || 0,
     alive: player.hp > 0,
@@ -878,6 +884,9 @@ function closeBattle() {
   renderWeaponElementStatus(battleUi.getCharacter());
   const barrier = document.getElementById("sphinxBarrierStatus");
   if (barrier) barrier.hidden = true;
+  const magic = document.getElementById('aquariusBarrierStatus');
+  if (magic) magic.hidden = true;
+  battleUi.presentationMagicBarrier = null;
 }
 
 function showCommandButtons() {
@@ -1142,6 +1151,14 @@ function renderEnemyWeakness(enemy) {
 function renderSphinxBarrier() {
   const root = document.getElementById("sphinxBarrierStatus");
   if (!root) return;
+  let magic = document.getElementById('aquariusBarrierStatus');
+  if (!magic) {
+    magic = document.createElement('span');magic.id='aquariusBarrierStatus';magic.className='sphinx-barrier-status';
+    magic.setAttribute('aria-label','魔力障壁');
+    magic.innerHTML = '<span class="aquarius-barrier-icon" aria-hidden="true">♒</span><output>0</output>';root.after(magic);
+  }
+  const magicAmount = battleUi.presenting ? (battleUi.presentationMagicBarrier ?? magicBarrierAmount(battleUi.battle?.player)) : magicBarrierAmount(battleUi.battle?.player);
+  magic.querySelector("output").textContent = String(magicAmount);magic.hidden=magicAmount<=0;
   const amount = Math.max(0, Math.floor(Number(
     battleUi.presentationBarrier ?? battleUi.battle?.sphinxBarrier
   ) || 0));

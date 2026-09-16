@@ -1,4 +1,5 @@
 import { getPlayerWeaponElement, getEquippedWeaponElement } from "./weapon-element.js";
+import { initializeMagicBarrier, getMagicBarrier, magicBarrierAmount } from './aquarius.js';
 import { PISCES_STATUS, applyCombatHpDamage, isPiscesInvincible, protectedCombatDamage, resolvePlayerSurvival, finishPiscesTurn } from "./pisces.js";
 export { getPlayerWeaponElement } from "./weapon-element.js";
 import { ELEMENT_LABELS } from "./item-elements.js";
@@ -77,6 +78,8 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
   ));
   const sphinxBarrier = sphinxBarrierAmount + guardStoneBarrier;
   const player = cloneCombatant(character);
+  const aquariusActiveAtStart = (character?.cards?.deckSlots || []).includes('zodiac_aquarius');
+  initializeMagicBarrier(player, aquariusActiveAtStart);
   player.statuses = player.statuses.filter(status => (status.id || status.statusId) !== PISCES_STATUS);
   const zentaurinOpening = getZentaurinOpening(selectedEnemy, character?.cards?.deckSlots);
   player.battleSkillSealed = Boolean(zentaurinOpening?.sealed);
@@ -123,6 +126,7 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     victoryCardEffectsApplied: false,
     mirageFirstAttackAvailable: hasCardEffect(character?.cards?.deckSlots, "mirage_first_attack_evasion"),
     sphinxBarrier,
+    aquariusActiveAtStart,
     sphinxBarrierMax: sphinxBarrier,
     lifeBoosterRecovery,
     manaBoosterRecovery,
@@ -134,6 +138,7 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
       ...(zentaurinOpening ? [zentaurinOpening.message] : []),
       ...(sphinxBarrierAmount > 0 ? ["スピンクスの威容が障壁を展開した！"] : []),
       ...(guardStoneBarrier > 0 ? ["護りの魔石が障壁を展開した！"] : []),
+      ...(magicBarrierAmount(player) > 0 ? ['魔力解放！ 魔力障壁を展開した！'] : []),
       ...(lifeBoosterRecovery > 0 ? [`ライフブースターがHPを${lifeBoosterRecovery}回復した！`] : []),
       ...(manaBoosterRecovery > 0 ? [`マナブースターがSPを${manaBoosterRecovery}回復した！`] : [])
     ],
@@ -162,7 +167,7 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
       rng
     });
     finishAction(next, "enemy");
-    if (next.outcome) finishPiscesTurn(next);
+    if (next.outcome) finishBattleDefenses(next);
     return { battle: next, accepted: true };
   }
   const order = applyAriesOpeningPriority(next, resolveTurnOrder([
@@ -249,7 +254,7 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
     if (Array.isArray(next.enemies)) updateMultiOutcome(next);
     else updateOutcome(next);
   }
-  finishPiscesTurn(next);
+  finishBattleDefenses(next);
   if (!next.outcome) {
     next.turn += 1;
     next.phase = "command";
@@ -418,7 +423,7 @@ export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.rand
     if (Array.isArray(next.enemies)) updateMultiOutcome(next);
     else updateOutcome(next);
   }
-  finishPiscesTurn(next);
+  finishBattleDefenses(next);
   if (!next.outcome) {
     next.turn += 1;
     next.phase = "command";
@@ -718,7 +723,7 @@ export function resolveEnemyAmbush({ battle, rng = Math.random } = {}) {
   finishAction(next, "enemy");
   updateOutcome(next);
   delete next.resolvingAmbush;
-  if (next.outcome) finishPiscesTurn(next);
+  if (next.outcome) finishBattleDefenses(next);
   next.phase = next.outcome ? "complete" : "command";
   return { battle: next, accepted: true };
 }
@@ -1478,7 +1483,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
   }
   if (actorSide === "enemy" && targetSide === "player" && actualDamage > 0 && Number(battle.sphinxBarrier) > 0) {
     const absorbed = Math.min(actualDamage, Math.max(0, Math.floor(Number(battle.sphinxBarrier) || 0)));
-    let remainingAbsorption = absorbed;
+    let remainingAbsorption = battle.aquariusActiveAtStart ? actualDamage : absorbed;
     presentedHits = presentedHits.map(hit => {
       if (!hit.hit || hit.damage <= 0 || remainingAbsorption <= 0) return hit;
       const hitAbsorbed = Math.min(hit.damage, remainingAbsorption);
@@ -1486,12 +1491,22 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
       return { ...hit, damage: hit.damage - hitAbsorbed, sphinxBarrierAbsorbed: hitAbsorbed };
     });
     battle.sphinxBarrier -= absorbed;
-    actualDamage -= absorbed;
+    actualDamage = battle.aquariusActiveAtStart ? 0 : actualDamage - absorbed;
     battle.log.push(`障壁が${absorbed}ダメージを防いだ！`);
     battle.presentationEvents.push({ type: "barrierDamage", actorSide, targetSide: "player",
       amount: absorbed, remaining: battle.sphinxBarrier,
       message: battle.sphinxBarrier > 0 ? `障壁 −${absorbed}` : `障壁 −${absorbed}\n障壁が砕け散った！` });
     if (battle.sphinxBarrier <= 0) battle.log.push("障壁が砕け散った！");
+  }
+  if (actorSide === 'enemy' && targetSide === 'player' && actualDamage > 0 && magicBarrierAmount(target) > 0) {
+    const barrier = getMagicBarrier(target);
+    const absorbed = Math.min(barrier.amount, actualDamage);
+    barrier.amount -= absorbed;
+    actualDamage = 0;
+    presentedHits = presentedHits.map(hit=>({...hit,damage:0}));
+    const message = barrier.amount > 0 ? `魔力障壁 −${absorbed}` : `魔力障壁 −${absorbed}\n魔力障壁が砕け散った！`;
+    battle.log.push(message);
+    battle.presentationEvents.push({type:'magicBarrierDamage',targetSide:'player',amount:absorbed,remaining:barrier.amount,message});
   }
   const targetHpBeforeDamage = Math.max(0, Number(target.hp) || 0);
   applyCombatHpDamage(target, actualDamage);
@@ -2104,4 +2119,9 @@ function statusName(id) {
     electrified: "感電",
     speed_down: "速度低下"
   })[id] || id;
+}
+
+function finishBattleDefenses(battle) {
+  finishPiscesTurn(battle);
+  if (battle.outcome) initializeMagicBarrier(battle.player, false);
 }

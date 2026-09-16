@@ -1,3 +1,4 @@
+import { syncShopNotifications, markShopNotificationsShown } from "../data/shop-notifications.js";
 import { ROAMING_ENEMY_DEFINITIONS } from '../data/roaming-enemies.js';
 import { recordVerfolgerDefeat, isVerfolgerDefeatedOnFloor, VERFOLGER_DEFEAT_MESSAGE } from '../data/verfolger.js';
 import {
@@ -190,6 +191,7 @@ import {
   syncGuildQuestNotifications
 } from "../data/guild-quest-notifications.js";
 import {
+  createPassiveBellNotificationController,
   createGuildQuestNotificationController,
   createPassiveNotificationCoordinator,
   createRumorNotificationController
@@ -545,6 +547,31 @@ import {
     stopBell: () => stopSe("rumorBell")
   });
 
+  const shopNotice = document.createElement("div");
+  shopNotice.className = "rumor-notification shop-stock-notification";
+  shopNotice.id = "shopStockNotification";
+  shopNotice.hidden = true;
+  shopNotice.setAttribute("role", "status");
+  shopNotice.setAttribute("aria-live", "polite");
+  shopNotice.setAttribute("aria-atomic", "true");
+  shopNotice.innerHTML = '<img class="rumor-notification-bell" src="images/screenshots/bell.avif" alt="" aria-hidden="true"><span class="rumor-notification-copy" hidden><strong>新商品入荷</strong><span class="shop-stock-detail"></span></span>';
+  document.body.append(shopNotice);
+  const shopNotificationController = createPassiveBellNotificationController({
+    root: shopNotice, bell: shopNotice.querySelector("img"),
+    copy: shopNotice.querySelector(".rumor-notification-copy"), detail: shopNotice.querySelector(".shop-stock-detail"),
+    coordinator: passiveNotificationCoordinator, queueId: "shop:new", channel: "shop",
+    getDetailText: () => "商店に商品が追加されました！",
+    getPending: () => {
+      const result = syncShopNotifications(character);
+      const changed = result.character !== character;
+      character = result.character;
+      if (changed) scheduleAutosave();
+      return result.pending;
+    },
+    markShown: ids => { character = markShopNotificationsShown(character, ids); },
+    save: saveGame, playBell: () => playSeToEnd("rumorBell"), stopBell: () => stopSe("rumorBell")
+  });
+
   function getCurrentTavernRumorContext() {
     return {
       mikanEncountered: Boolean(character?.eventFlags?.mikan_nyanko_encountered)
@@ -613,6 +640,7 @@ import {
     character = result.character;
     if (changed && persist) scheduleAutosave();
     guildQuestNotificationController.request();
+    shopNotificationController.request();
     passiveNotificationCoordinator.updateAvailability();
     return changed;
   }
@@ -633,6 +661,7 @@ import {
     passiveNotificationCoordinator.reset();
     rumorNotificationController.reset();
     guildQuestNotificationController.reset();
+    shopNotificationController.reset();
     stopSe("achievementUnlocked");
     stopSe("rumorBell");
   }

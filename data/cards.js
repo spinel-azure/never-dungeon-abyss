@@ -543,6 +543,11 @@ const ZODIAC_CARDS = [
   concept: "1戦闘1回／HP50％復活／次ターン末まで完全無敵",
   descriptionJa: "1戦闘に1回、戦闘不能時に最大HPの50％で復活し、通常の状態異常を解除する。さらに、次のターン終了まで完全無敵になる。",
   detailDescriptionJa: "1戦闘に1回、戦闘不能時に\n最大HPの50％で復活し、\n通常の状態異常を解除する。\nさらに、次のターン終了まで\n完全無敵になる。"
+} : card.id === "zodiac_aquarius" ? {
+  ...card,
+  concept: "魔力解放",
+  descriptionJa: "戦闘開始時、最大SPと同値の魔力障壁を展開する。\n魔力障壁が存在する間、スキル・呪文・奇蹟のSPを消費しない。",
+  detailDescriptionJa: "戦闘開始時、最大SPと同値の\n魔力障壁を展開する。\n障壁が存在する間、技のSP消費0。\n受け止めた攻撃の超過ダメージは\nHPへ貫通しない。"
 } : card.id === "zodiac_sagittarius" ? {
   ...card,
   concept: "必中／物理DEF無視／呪文の属性耐性無視",

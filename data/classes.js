@@ -1,3 +1,4 @@
+import { normalizeShopNotifications } from "./shop-notifications.js";
 import { getInitialEquipment } from "./equipment.js";
 import { normalizeEndingFlags } from "./ending.js";
 import { getDeckCostAtLevel, getLevelGrowth, normalizeExperience } from "./growth.js";
@@ -233,6 +234,7 @@ export function normalizeCharacter(character) {
     eventFlags,
     tavernRumorNotifications: normalizeTavernRumorNotificationState(character.tavernRumorNotifications),
     guildQuestNotifications: normalizeGuildQuestNotificationState(character.guildQuestNotifications),
+    shopNotifications: normalizeShopNotifications(character.shopNotifications),
     adventureStats: normalizeAdventureStats(character.adventureStats),
     marathonChallenge: normalizeMarathonChallenge(character.marathonChallenge),
     longMarchChallenge: isB80TransferUnlocked({ eventFlags })
