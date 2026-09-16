@@ -1,0 +1,35 @@
+✔ new characters see the deck tutorial while legacy recipients do not repeat it (5.9682ms)
+✔ deck tutorial isolates and highlights the inn deck command (0.8699ms)
+✔ lucky charm acquisition starts one locked three-second tutorial (0.5665ms)
+✔ the quest notice reuses the bell layout with distinct blue presentation (2.6562ms)
+✔ persistent state changes, reload resume, and guild rendering recheck quest notices (2.1005ms)
+✔ notification assets use the current cache revision (0.4867ms)
+✔ the truth staff is a unique unsellable key item (2.2059ms)
+✔ Michaela restoration preserves all six requested dialogue pages (0.8427ms)
+✔ Michaela dialogue measures the message box, splits naturally, and always shows the A prompt (0.8313ms)
+✔ Amayenak victory persists recovery flags and returns to the B100F entrance (1.4052ms)
+✔ the real battle completion snapshot reaches the restoration bridge with Amayenak's ID (5.5967ms)
+✔ restoration overlay uses the cat and both Michaela portraits (2.7257ms)
+✔ restoration returns silently without an unrelated floor transition message (0.7966ms)
+✔ main.js keeps the current top-level cache buster without versioned module imports (1.0996ms)
+✔ Pisces guardian achievement reads the persisted complete-victory flag (5.5207ms)
+✔ B76 fixed optional room preserves its content and shared zodiac gate (26.6575ms)
+✔ independent twins and complete victory reward are repeat-safe (4.7331ms)
+✔ melee cannot reach even with Sagittarius and follow-up; thrown item can (14.9542ms)
+✔ preselection reserves only one whirlpool, alternates and allows guarding (5.1905ms)
+✔ dead preparation owner releases reservation; simultaneous deaths do not enrage (2.6896ms)
+✔ weight boundaries and fresh snapshot after escape (0.394ms)
+✔ crystal reports actual SP loss including low and empty SP (1.4414ms)
+✔ AoE damages both, melee skills including holy strike fail, ranged miracles reach (6.5071ms)
+✔ stunned preparation remains reserved and excludes the other twin (2.5895ms)
+✔ bleed occurs once only on actual hits; total misses do not bleed (2.4396ms)
+✔ NPC melee including Erika holy strike cannot reach; Johan magic remains effective (3.5571ms)
+✔ escape is guaranteed even at the highest roll (0.2233ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 341.318

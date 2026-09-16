@@ -6,6 +6,7 @@ export const TIEFSTROM = Object.freeze({
   encounterImageId: "tiefstrom_event_b76f", encounterImage: "images/background/dungeon_event_16.avif",
   defeatedEncounterImageId: "tiefstrom_remains_b76f", defeatedEncounterImage: "images/background/dungeon_event_17.avif",
   defeatedEncounterImageFit: "cover",
+  defeatedEncounterOverlayOnly: true,
   encounterEnemyIds: [TIEFSTROM_ID, TIEFSTROM_SECOND_ID],
   battleSize: "large", race: "beast", maxHp: 4000,
   stats: { str: 30, int: 26, agi: 24, dex: 28, luc: 24 }, def: 30, attack: 38,

@@ -1179,7 +1179,7 @@ export function drawCellEvents(layer = "all", now = 0) {
       if (cell.bossRemainsId) {
         if (layer === "floor") continue;
         const boss = getBossById(cell.bossRemainsId);
-        if (boss) events.push({ ...projected, eventKind: "bossRemains", npc: { imageId: boss.defeatedEncounterImageId } });
+        if (boss && !boss.defeatedEncounterOverlayOnly) events.push({ ...projected, eventKind: "bossRemains", npc: { imageId: boss.defeatedEncounterImageId } });
       }
       if (cell.npc) {
         if (layer === "floor") continue;

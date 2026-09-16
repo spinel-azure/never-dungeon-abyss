@@ -37,7 +37,20 @@ try {for(const [label,width,height] of [['pc',1280,900],['mobile',390,844]]){
  await page.goto('http://127.0.0.1:4179');await page.waitForFunction(()=>window.fishQa);
  const crystal=await page.evaluate(()=>crystalQa(7));assert.equal(crystal.sp,0);assert.match(crystal.popup,/-SP7/);assert.match(crystal.message,/SPが7減少した/);
  await page.screenshot({path:`artifacts/tiefstrom/${label}-sp-popup.png`});
- await page.evaluate(()=>remainsQa('tiefstrom_b76f'));
+ await page.evaluate(async()=>{
+  const p=await import('/js/player.js'),d=await import('/js/dungeon.js');
+  p.handleOverlayEventInput('confirm');p.state.overlayEvent=null;
+  p.state.gridX=1;p.state.gridY=1;p.state.dir=1;d.setWall(1,1,'E',false);
+  d.cells[1][2].explorationObstacleId=null;d.cells[1][2].bossRemainsId='tiefstrom_b76f';
+  window.seaDraws=0;const original=CanvasRenderingContext2D.prototype.drawImage;
+  CanvasRenderingContext2D.prototype.drawImage=function(img,...args){if(img?.src?.includes('dungeon_event_17.avif'))window.seaDraws++;return original.call(this,img,...args);};
+ });
+ await page.waitForTimeout(500);
+ assert.equal(await page.evaluate(()=>seaDraws),0);
+ await page.screenshot({path:`artifacts/tiefstrom/${label}-outside-remains.png`});
+ await page.evaluate(async()=>{const p=await import('/js/player.js');p.setPlayerInputEnabled(true);p.manualMove(1);});
+ await page.waitForTimeout(500);
+ assert.ok(await page.evaluate(()=>seaDraws)>0);
  await page.waitForTimeout(500);
  await page.screenshot({path:`artifacts/tiefstrom/${label}-remains.png`});
  await page.evaluate(()=>fishQa.setup());
