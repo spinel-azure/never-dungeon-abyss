@@ -448,7 +448,7 @@ function applyNpcDamage(battle, { npcId, damage, range = "melee", actionName = "
   if (battle.outcome || battle.enemy.hp <= 0) return 0;
   if (cannotReachTarget(battle.enemy, { actionType: "physicalAttack", range })) {
     battle.log.push(DISTANT_MESSAGE);
-    battle.presentationEvents.push({ type: "npcSupport", npcId, message: DISTANT_MESSAGE });
+    battle.presentationEvents.push({ type: "npcSupport", outOfRange: true, npcId, message: DISTANT_MESSAGE });
     return 0;
   }
   const hpBefore = battle.enemy.hp;

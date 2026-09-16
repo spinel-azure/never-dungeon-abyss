@@ -272,14 +272,14 @@ export function drawEnemyAmbientFrame(entry, seconds, fps, reducedMotion = false
       ctx.save();
       ctx.setTransform(canvas.width / 1.3, 0, 0, canvas.height / 1.3, canvas.width * .15 / 1.3, canvas.height * .22 / 1.3);
       ctx.globalAlpha = concealed ? .22 : .85;
-      ctx.strokeStyle = '#9deaff'; ctx.fillStyle = '#e3faff'; ctx.lineWidth = .009;
-      for (let i = 0; i < (reducedMotion ? 3 : fps === 30 ? 12 : 20); i++) {
-        const phase = reducedMotion ? .5 : (seconds * .8 + i * .618) % 1;
+        ctx.strokeStyle = '#b9f2ff'; ctx.fillStyle = '#e3faff'; ctx.lineWidth = .012;
+        for (let i = 0; i < (reducedMotion ? 3 : fps === 30 ? 20 : 32); i++) {
+          const phase = reducedMotion ? .5 : (seconds * .9 + i * .618 + (canvas === entry.back ? .25 : 0)) % 1;
         const base = .12 + (i % 7) * .125;
         const x = base + Math.sin(i * 5.3) * phase * .2;
-        const y = .92 - Math.sin(phase * Math.PI) * (.12 + (i % 4) * .06);
+          const y = .92 - Math.sin(phase * Math.PI) * (.18 + (i % 4) * .07);
         ctx.globalAlpha = (concealed ? .22 : .85) * Math.sin(Math.PI * phase);
-        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + .008, y + .028); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + .01, y + .04); ctx.stroke();
       }
       ctx.globalAlpha = concealed ? .15 : .55;
       ctx.beginPath();ctx.ellipse(.5,.94,.4,.025,0,0,Math.PI*2);ctx.stroke();

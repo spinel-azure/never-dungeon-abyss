@@ -159,6 +159,8 @@ export function startBattle(enemy, {
   battleUi.concealed = Boolean(concealed);
   battleUi.phantom = Boolean(phantom);
   battleUi.ambientEffects?.clear();
+  // New image elements prevent decoded sprites from the previous party flashing while loading.
+  battleUi.root.querySelector("#battleEnemyParty")?.replaceChildren();
   resetEnemyVanishEffects(battleUi.root);
   clearAutoTimer();
   battleUi.battle = createBattleState({ character, enemy, enemies, targetIndex });
@@ -604,7 +606,7 @@ async function playPresentationEvents() {
       ? battleUi.root.querySelector(`.battle-enemy-member[data-index="${event.targetIndex ?? battleUi.battle.targetIndex}"] .battle-enemy-member-image`)
       : image;
     if (event.type === "capture" && event.image && targetImage) targetImage.src = event.image;
-    if (event.throwingMiss) battleUi.playSe("attackMiss");
+    if (event.throwingMiss || event.outOfRange) battleUi.playSe("attackMiss");
     if (event.targetSide === "enemy" && event.hit && !dedicatedPresentationPlayed) {
       targetImage?.classList.remove("is-hit");
       if (targetImage) void targetImage.offsetWidth;

@@ -53,7 +53,9 @@ try {for(const [label,width,height] of [['pc',1280,900],['mobile',390,844]]){
  assert.ok(await page.evaluate(()=>seaDraws)>0);
  await page.waitForTimeout(500);
  await page.screenshot({path:`artifacts/tiefstrom/${label}-remains.png`});
+ await page.evaluate(()=>{const party=document.querySelector('#battleEnemyParty');party.innerHTML='<button><img></button><button><img></button>';window.oldParty=[...party.children];});
  await page.evaluate(()=>fishQa.setup());
+ assert.equal(await page.evaluate(()=>oldParty.some(e=>e.isConnected)),false);
  assert.equal(await page.evaluate(()=>fishGateTwo.blocked),true);assert.equal(await page.evaluate(()=>fishGateThree.blocked),false);
  await page.locator('.battle-enemy-member-image').evaluateAll(imgs=>Promise.all(imgs.map(i=>i.decode())));
  assert.equal(await page.locator('.battle-enemy-member').count(),2);
@@ -67,6 +69,9 @@ try {for(const [label,width,height] of [['pc',1280,900],['mobile',390,844]]){
  await page.screenshot({path:`artifacts/tiefstrom/${label}-preparation.png`});
  const boxes=await page.locator('.battle-enemy-member').evaluateAll(es=>es.map(e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom}}));
  assert.ok(boxes.every(r=>r.left>=0&&r.right<=width&&r.top>=0&&r.bottom<=height));
+ await page.evaluate(()=>{fishBattle.spy();void fishBattle.use({type:'attack',targetIndex:1});});
+ await page.waitForFunction(()=>fishBattle.idle());
+ assert.ok(await page.evaluate(()=>fishSounds.includes('attackMiss')));
  await page.evaluate(()=>{fishBattle.spy();Math.random=()=>.1;void fishBattle.use({type:'item',itemId:'wurfmesser',targetIndex:1});});
  await page.waitForFunction(()=>fishBattle.idle());
  assert.equal(await page.evaluate(()=>fishBattle.state().enemies[1].hp),3820);

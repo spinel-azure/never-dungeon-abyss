@@ -914,7 +914,7 @@ function buildEnemyAction(action, normalAttack) {
 function executeAction({ battle, action, actor, actorSide, actorIndex = null, target, targetSide, deferFollowUp = false, magicFocus = null, rng }) {
   if (actorSide === "player" && cannotReachTarget(target, action)) {
     battle.log.push(DISTANT_MESSAGE);
-    battle.presentationEvents.push({ type: "message", message: DISTANT_MESSAGE });
+    battle.presentationEvents.push({ type: "message", outOfRange: true, message: DISTANT_MESSAGE });
     return;
   }
   if (actorSide === "enemy" && actor.twinWhirlpool) {
