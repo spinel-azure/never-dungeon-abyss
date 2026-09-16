@@ -275,9 +275,22 @@ export function drawEnemyAmbientFrame(entry, seconds, fps, reducedMotion = false
   const { profile, concealed } = entry;
   if (profile.kind === 'aquariusShield') {
     for(const canvas of [entry.back,entry.front]) canvas.getContext('2d')?.clearRect(0,0,canvas.width,canvas.height);
-    if (!(entry.barrierAmount > 0)) return;
     const canvas=entry.front,ctx=canvas.getContext('2d');if(!ctx)return;
     ctx.save();ctx.setTransform(canvas.width,0,0,canvas.height,0,0);
+    // The body glints are painted first, below the barrier, and persist when it breaks.
+    if (!concealed) {
+      const points = [[.39,.13],[.52,.19],[.45,.31],[.57,.39],[.42,.48],[.56,.59],[.33,.71],[.63,.78],[.48,.87]];
+      points.forEach(([x,y], index) => {
+        const glow = reducedMotion ? .35 : Math.pow(Math.max(0, Math.sin(seconds * 2.1 + index * 1.7)), 5);
+        if (glow < .04) return;
+        const size = .008 + glow * .018;
+        ctx.globalAlpha = glow;
+        ctx.strokeStyle = '#d9ffff';ctx.lineWidth = .004;
+        ctx.beginPath();ctx.moveTo(x-size,y);ctx.lineTo(x+size,y);ctx.moveTo(x,y-size);ctx.lineTo(x,y+size);ctx.stroke();
+        ctx.fillStyle = '#ffffff';ctx.fillRect(x-.003,y-.003,.006,.006);
+      });
+    }
+    if (!(entry.barrierAmount > 0)) { ctx.restore(); return; }
     ctx.globalAlpha=concealed ? .15 : reducedMotion ? .28 : .28+Math.sin(seconds*2)*.035;
     ctx.fillStyle='#64ceff';ctx.strokeStyle='#c3f5ff';ctx.lineWidth=.006;
     ctx.beginPath();ctx.ellipse(.5,.53,.38,.43,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();return;

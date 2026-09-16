@@ -1,3 +1,5 @@
+import { WASSERMANNFRAU_ACTIONS } from '../data/wassermannfrau.js';
+import { isWassermannfrau, selectWassermannfrauAction, synchronizeWassermannfrau, executeWassermannfrauUtility, finishWassermannfrauPlayerAction, cancelHighTide } from './wassermannfrau-ai.js';
 import { absorbBossMagicBarrier, absorbPlayerMagic } from "./boss-magic-barrier.js";
 import { getPlayerWeaponElement, getEquippedWeaponElement } from "./weapon-element.js";
 import { initializeMagicBarrier, getMagicBarrier, magicBarrierAmount } from './aquarius.js';
@@ -821,6 +823,7 @@ export function createEnemyAction(enemy, rng = Math.random, context = {}) {
       element: "physical"
     }
   });
+  if (isWassermannfrau(enemy)) return buildEnemyAction(selectWassermannfrauAction(enemy, context.battle?.player, rng), attack);
   if (enemy?.reservedEnemyAction) {
     const reserved = structuredClone(enemy.reservedEnemyAction);
     return {
@@ -919,6 +922,19 @@ function buildEnemyAction(action, normalAttack) {
 
 function executeAction({ battle, action, actor, actorSide, actorIndex = null, target, targetSide, deferFollowUp = false, magicFocus = null, rng }) {
   const actionPresentationStart = battle.presentationEvents.length;
+  if (actorSide === 'enemy' && isWassermannfrau(actor)) {
+    synchronizeWassermannfrau(battle);
+    if (actor.bossMagicBarrier < actor.bossMagicBarrierMax) cancelHighTide(battle, actor);
+    // Re-evaluate state after earlier actions: a broken barrier must override a preselected attack.
+    if (actor.magicExhausted || action.reservedEnemyActionId && !actor.reservedEnemyAction
+      || action.actionType === 'bossMagicAbsorb' && (!(target.sp > 0) || actor.bossMagicBarrier >= actor.bossMagicBarrierMax)) {
+      action = createEnemyAction(actor, rng, { battle });
+    }
+    if (actor.magicReleased && action.id === 'wassermannfrau_spell') {
+      action = { ...action, ...WASSERMANNFRAU_ACTIONS.greaterSpell };
+    }
+    if (executeWassermannfrauUtility(battle, actor, action)) return {followUpEligible:false,actualDamage:0,landedHitCount:0};
+  }
   if (action.actionType === "bossMagicAbsorb" && actor.bossMagicBarrierMax > 0) {
     absorbPlayerMagic(battle, actor, target, action);
     return {followUpEligible:false,actualDamage:0,landedHitCount:0};
@@ -1530,6 +1546,13 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
   const targetHpBeforeDamage = Math.max(0, Number(target.hp) || 0);
   applyCombatHpDamage(target, actualDamage);
   const actualHpLoss = Math.max(0, targetHpBeforeDamage - target.hp);
+  if (actorSide === 'enemy' && action.spDamageOnHpHit > 0 && actualHpLoss > 0) {
+    const amount = Math.min(Math.max(0, target.sp), action.spDamageOnHpHit);
+    target.sp -= amount;
+    const message = `水瓶の一撃でSPが${amount}減少した！`;
+    battle.log.push(message);
+    battle.presentationEvents.push({type:'spDamage',playerSp:target.sp,amount,message});
+  }
   if (actorSide === "enemy" && action.afterDamageStatus && actualHpLoss > 0 && target.hp > 0) {
     const applications = resolveEffects({ effects: [action.afterDamageStatus], trigger: "perAction", attacker: actorStats, defender: targetStats, rng });
     target.statuses = applyStatusApplications(target.statuses, applications);
@@ -1965,9 +1988,11 @@ function finishCombatantAction(battle, actor, side, targetIndex = null) {
       }
     }
   }
+  if (side === 'player' && (battle.enemies || [battle.enemy]).some(isWassermannfrau)) finishWassermannfrauPlayerAction(battle);
 }
 
 function updateMultiOutcome(battle) {
+  synchronizeWassermannfrau(battle);
   synchronizeTwinState(battle);
   resolvePlayerSurvival(battle, applyNpcLethalProtection);
   if (battle.player.hp <= 0) {
@@ -1997,6 +2022,7 @@ function markUltimateUsed(actor, action) {
 }
 
 function updateOutcome(battle) {
+  synchronizeWassermannfrau(battle);
   if (battle.scriptedNonlethal) {
     battle.player.hp = Math.max(1, battle.player.hp);
     battle.player.alive = true;

@@ -32,7 +32,7 @@ test('absorption ceilings SP, redeploys, caps and marks full transition; AI uses
  b.player.sp=1;absorbPlayerMagic(b,b.enemy,b.player,{});assert.equal(b.player.sp,0);assert.equal(b.enemy.bossMagicBarrier,102);
  b.player.sp=200;b.enemy.bossMagicBarrier=990;absorbPlayerMagic(b,b.enemy,b.player,{});assert.equal(b.enemy.bossMagicBarrier,1000);assert.equal(b.enemy.bossMagicBarrierFilled,true);
  b=setup();b.enemy.bossMagicBarrier=0;b.enemy.actions=[{weight:1,action:{id:'absorb',actionType:'bossMagicAbsorb'}}];
- b=resolveBattleRound({battle:b,playerCommand:{type:'wait'},rng:()=>.1}).battle;assert.equal(b.player.sp,150);assert.equal(b.enemy.bossMagicBarrier,100);
+ b=resolveBattleRound({battle:b,playerCommand:{type:'wait'},rng:()=>.99}).battle;assert.equal(b.player.sp,150);assert.equal(b.enemy.bossMagicBarrier,100);
 });
 test('escape never marks victory and fresh fight has full barrier',()=>{
  const b=setup();assert.equal(resolveEscapeAttempt({escapeRate:b.enemy.escapeRate,rng:()=>.99}).success,true);assert.equal(b.player.eventFlags.boss_wassermannfrau_b18f_defeated,undefined);assert.equal(setup().enemy.bossMagicBarrier,1000);
@@ -42,6 +42,7 @@ test('five-hit physical action and full misses retain HP; shield does not leak b
  let hit=resolveBattleRound({battle:b,playerCommand:{type:'attack'},rng:()=>.1}).battle;
  assert.equal(hit.enemy.hp,4000);assert.equal(hit.enemy.bossMagicBarrier,0);
  assert.equal(hit.presentationEvents.filter(e=>e.type==='attackHit'&&e.actorSide==='player').length,5);
+ b.player.sp=0;
  const miss=resolveBattleRound({battle:b,playerCommand:{type:'attack'},rng:()=>.999}).battle;
  assert.equal(miss.enemy.bossMagicBarrier,1);assert.equal(miss.presentationEvents.filter(e=>e.type==='bossMagicBarrier').length,0);
  assert.equal(setup().enemy.bossMagicBarrier,1000);

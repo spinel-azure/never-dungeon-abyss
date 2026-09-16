@@ -1,3 +1,4 @@
+import { playBarrierShatter } from './barrier-shatter.js';
 import { playWhirlpoolWave } from "./whirlpool-wave.js";
 import { renderWeaponElementStatus } from "./weapon-element-status.js";
 import { AQUARIUS_STATUS, magicBarrierAmount } from '../combat/aquarius.js';
@@ -576,6 +577,7 @@ async function playPresentationEvents() {
       battleUi.ambientEffects?.remove(vanishImage);
       markEnemyVanishPending(vanishImage);
     }
+    if (event.type === 'spDamage' && Number.isFinite(event.playerSp)) battleUi.onCharacterChanged({sp:event.playerSp});
     if (event.type === 'bossMagicBarrier') {
       battleUi.presentationBossBarrier = event.remaining;
       if (Number.isFinite(event.playerSp)) battleUi.onCharacterChanged({sp:event.playerSp});
@@ -600,6 +602,7 @@ async function playPresentationEvents() {
       syncEnemyAmbientEffects();
       if (!event.whirlpoolPreparing) await playWhirlpoolWave(battleUi.root, () => battleUi.active);
     }
+    if (event.broken) await playBarrierShatter(battleUi.root, image, () => battleUi.active);
     const dedicatedPresentationPlayed = event.targetSide === "enemy" && event.hit
       ? await playBattleSkillPresentation({
         root: battleUi.root,
