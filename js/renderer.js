@@ -1,4 +1,5 @@
 import { getRoamingRevealFrame } from './roaming-reveal.js';
+import { drawGeminiEvent } from './gemini-event-renderer.js';
 import {
   FOV,
   RAYS,
@@ -490,7 +491,12 @@ function drawOverlayEvent() {
   document.body.classList.toggle("event-message-expanded", Number(event?.reserveMessageLines) >= 4);
   document.body.classList.toggle("wassermannfrau-event", event?.bossId === "wassermannfrau_b18f");
   renderer.eventOverlayCanvas.style.pointerEvents = event?.type === "floorLap" ? "auto" : "none";
+  document.body.classList.toggle('gemini-event', event?.type === 'geminiEvent');
   if (!event?.showOverlay) return;
+  if (event.type === 'geminiEvent') {
+    drawGeminiEvent(ctx,event,W,H,renderer.characterImages,loadCharacterImage);
+    return;
+  }
   if (event.type === "randomEncounter") return;
   if (event.imageId && event.image) loadCharacterImage(event.imageId, event.image);
   if (event.revealImageId && event.revealImage) loadCharacterImage(event.revealImageId, event.revealImage);

@@ -106,6 +106,7 @@ import {
   setPassivePresenceIncreaseReduction
 } from "./presence.js";
 import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js";
+import { geminiProgress, resolveGeminiChoice, resetGeminiRetry } from '../data/gemini-event.js';
 import {
   configureAudio,
   setBgmOptions,
@@ -930,6 +931,12 @@ import {
     showTreasure,
     playTreasureOpening,
     hideTreasure,
+    getGeminiProgress: () => geminiProgress(character),
+    resolveGeminiChoice: choice => {
+      const changed = resolveGeminiChoice(character, choice);
+      if (changed) { updateCharacterUi(); saveGame(); }
+      return changed;
+    },
     resolveTreasureTrap: resolveCurrentTreasureTrap,
     awardTreasure: awardTreasureLoot,
     unlockBossDoor: unlockCurrentBossDoor,
@@ -4382,6 +4389,7 @@ import {
   }
 
   async function enterDungeonFromTown() {
+    resetGeminiRetry(character);
     if (!character) {
       openTown({ registrationRequired: true, facilityId: "guild" });
       return;
@@ -4416,6 +4424,7 @@ import {
   async function enterFloorFromTransfer(depth = 10) {
     const destination = Math.max(1, Math.floor(Number(depth) || 0));
     if (!isTransferDestinationUnlocked(character, destination)) return false;
+    resetGeminiRetry(character);
     setPlayerInputEnabled(false);
     await runSceneTransition({
       playAudio: () => playSeSequence("stairs", 3),
@@ -4985,6 +4994,12 @@ import {
 
   function getCurrentSpecialDoorAccessBlock() {
     const room = getSpecialRoomDefinition(currentDepth);
+    if (room?.content?.type === 'geminiPreview') {
+      const progress = geminiProgress(character);
+      if (progress.completed || progress.blocked) return {blocked:true,message:progress.completed
+        ? '姉妹の姿はない。また迷宮の先で会えるだろう。'
+        : '今は開けられないようだ。一度迷宮の外へ戻ろう。'};
+    }
     const forcedAccess = getSpecialRoomAccessRestriction({
       forcedEnemyId: getForcedEnemyId(character, { depth: currentDepth })
     });

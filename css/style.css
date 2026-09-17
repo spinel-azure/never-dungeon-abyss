@@ -1314,3 +1314,5 @@
   .deck-tutorial-highlight { animation: none; }
 }
 body.wassermannfrau-event .message{height:auto!important;min-height:0!important;overflow:visible;padding:10px;box-sizing:border-box}
+
+body.gemini-event .message{height:auto!important;min-height:0!important;overflow:visible}

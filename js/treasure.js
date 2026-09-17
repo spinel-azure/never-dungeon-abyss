@@ -41,7 +41,8 @@ export function configureTreasure({ canvas }) {
   window.addEventListener("resize", resize);
 }
 
-export async function showTreasure(type = "red") {
+export async function showTreasure(type = "red", options = {}) {
+  treasure.options = options;
   treasure.type = TYPES[type] ? type : "red";
   if (!treasure.canvas) return;
   treasure.canvas.style.visibility = "visible";
@@ -50,15 +51,16 @@ export async function showTreasure(type = "red") {
     await ensureThree();
     resetChest();
     applyType();
+    applyEmblem(options.emblem);
     startLoop();
   } catch (error) {
     console.warn("Three.js treasure failed to load:", error);
   }
 }
 
-export async function playTreasureOpening(type = "red", onComplete = () => {}) {
+export async function playTreasureOpening(type = "red", onComplete = () => {}, options = {}) {
   treasure.completion = onComplete;
-  await showTreasure(type);
+  await showTreasure(type, options);
   if (!treasure.renderer) {
     finishOpening();
     return;
@@ -242,7 +244,7 @@ function updateAnimation(now) {
   const animation = treasure.animation;
   if (!animation) return;
   const elapsed = now - animation.start;
-  if (treasure.type === "red") {
+  if (treasure.type === "red" || treasure.options?.plainOpening) {
     const openProgress = Math.min(1, elapsed / EVENT_OPEN_MS);
     treasure.lidPivot.rotation.x = -treasure.THREE.MathUtils.degToRad(MAX_LID_ANGLE) * easeOutCubic(openProgress);
     if (openProgress >= 1) finishOpening();
@@ -348,4 +350,30 @@ function easeInOutCubic(value) {
 
 function easeOutCubic(value) {
   return 1 - Math.pow(1 - value, 3);
+}
+
+function applyEmblem(symbol) {
+  if (treasure.emblem) {
+    treasure.chest.remove(treasure.emblem);
+    treasure.emblem.geometry.dispose();
+    treasure.emblem.material.map.dispose();
+    treasure.emblem.material.dispose();
+    treasure.emblem = null;
+  }
+  if (!['sun','moon'].includes(symbol)) return;
+  const canvas=document.createElement('canvas');canvas.width=canvas.height=256;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle=symbol==='sun' ? '#efd18a' : '#d9e7ff';
+  ctx.strokeStyle=ctx.fillStyle;ctx.lineWidth=12;
+  if (symbol==='sun') {
+    ctx.beginPath();ctx.arc(128,128,46,0,Math.PI*2);ctx.fill();
+    for(let i=0;i<12;i++) {const a=i*Math.PI/6;ctx.beginPath();ctx.moveTo(128+Math.cos(a)*61,128+Math.sin(a)*61);ctx.lineTo(128+Math.cos(a)*94,128+Math.sin(a)*94);ctx.stroke();}
+  } else {
+    ctx.beginPath();ctx.arc(128,128,88,0,Math.PI*2);ctx.fill();
+    ctx.globalCompositeOperation='destination-out';ctx.beginPath();ctx.arc(166,99,78,0,Math.PI*2);ctx.fill();
+  }
+  const THREE=treasure.THREE;
+  const texture=new THREE.CanvasTexture(canvas);
+  const mesh=new THREE.Mesh(new THREE.PlaneGeometry(1.15,1.15),new THREE.MeshBasicMaterial({map:texture,transparent:true,depthWrite:false}));
+  mesh.position.set(0,.75,.93);treasure.chest.add(mesh);treasure.emblem=mesh;
 }

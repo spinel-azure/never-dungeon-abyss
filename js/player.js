@@ -1,4 +1,5 @@
 import { inspectGeminiPreviewDoor } from './gemini-preview-door.js';
+import { GEMINI_PAGES } from '../data/gemini-event.js';
 import {
   TAU,
   STEP_MS,
@@ -677,7 +678,13 @@ function confirmSpecialRoomWarningEvent() {
 
 function startSpecialRoomContentEvent(content, fromGX, fromGY) {
   if (content?.type === "geminiPreview") {
-    hooks.say("双子座の部屋に入った。\nイベントは準備中です。");
+    const progress = hooks.getGeminiProgress?.() || {};
+    if (progress.completed || progress.blocked) {
+      hooks.say(progress.completed ? "姉妹の姿はない。また迷宮の先で会えるだろう。" : "今は開けられないようだ。一度迷宮の外へ戻ろう。");
+      startNpcRetreat({fromGX,fromGY});
+      return;
+    }
+    startGeminiEvent(fromGX, fromGY);
     return;
   }
   if (content?.type === "waspHive") {
@@ -1483,8 +1490,58 @@ function advanceKirkeMaerchentiereResultEvent() {
   if (Number.isInteger(event.fromGX) && Number.isInteger(event.fromGY)) startNpcRetreat(event);
 }
 
+export function startGeminiEvent(fromGX, fromGY) {
+  startOverlayEvent({type:'geminiEvent',page:0,phase:'dialogue',fromGX,fromGY,reserveMessageLines:6,
+    message:GEMINI_PAGES[0]+'\n＊Aボタンで次へ'});
+}
+
+function handleGeminiInput(action) {
+  const event = state.overlayEvent;
+  if (event.phase === 'opening') return true;
+  if (event.phase === 'choice' && ['confirm','cancel'].includes(action)) {
+    event.choice = action === 'confirm' ? 'sun' : 'moon';
+    event.phase = 'opening';
+    hooks.say(event.choice === 'sun' ? '太陽の箱を開けた。' : '月の箱を開けた。');
+    hooks.playSe('door');
+    hooks.playTreasureOpening('black', () => {
+      if (state.overlayEvent !== event) return;
+      hooks.resolveGeminiChoice(event.choice);
+      event.phase = 'opened';
+      hooks.say('＊Aボタンで次へ');
+      hooks.onStateChanged();
+    }, {emblem:event.choice,plainOpening:true});
+    return true;
+  }
+  if (action !== 'confirm') return true;
+  if (event.phase === 'opened') {
+    hooks.hideTreasure();
+    event.phase = 'result';
+    hooks.say((event.choice === 'sun'
+      ? '白衣のシュヴェスター「そう、確かめられる事実と、わたくしたちの言葉を照らし合わせるのですわ。また、お会いしましょう。」\n貴重品「紋様の片割れ」を入手した！'
+      : '赤衣のシュヴェスター「あらあら、残念。またいらっしゃいな。」')+'\n＊Aボタンで次へ');
+    return true;
+  }
+  if (event.phase === 'result') {
+    state.overlayEvent = null;
+    const dir = DIRS.find(d=>event.fromGX+d.dx===state.gridX && event.fromGY+d.dy===state.gridY);
+    if (dir) setDoor(event.fromGX,event.fromGY,dir.key,'closed','specialLocked');
+    hooks.say('');
+    startNpcRetreat(event);
+    hooks.onStateChanged();
+    return true;
+  }
+  event.page += 1;
+  if (event.page === 1) event.sistersFadeStart = performance.now();
+  if (event.page >= GEMINI_PAGES.length) {
+    event.phase = 'choice';
+    hooks.say('どちらの箱を開けますか？\nAボタン：太陽の箱　Bボタン：月の箱');
+  } else hooks.say(GEMINI_PAGES[event.page]+'\n＊Aボタンで次へ');
+  return true;
+}
+
 export function handleOverlayEventInput(action) {
   if (!state.overlayEvent) return false;
+  if (state.overlayEvent.type === 'geminiEvent') return handleGeminiInput(action);
   if (["stairsTransition", "fixedWarpTransition"].includes(state.overlayEvent.type)) return true;
   if (state.overlayEvent.type === "floorLap") {
     state.overlayEvent = null;
