@@ -1,3 +1,4 @@
+import { inspectGeminiPreviewDoor } from './gemini-preview-door.js';
 import {
   TAU,
   STEP_MS,
@@ -36,6 +37,7 @@ import {
   removeTreasureAt,
   discoverTreasureAt,
   getSpecialRoomEntryAt,
+  getSpecialRoomAtDoor,
   getSpecialRoomAt,
   getQuestEventAt,
   removeQuestEventAt
@@ -398,7 +400,7 @@ export function tryMove(amount, automated = false, specialEntryConfirmed = false
   if (currentDoorKind === "specialLocked" && !openDoorOnCell(state.gridX, state.gridY, currentDir.key)) {
     hooks.playSe("blocked");
     state.shake = amount > 0 ? -12 : 9;
-    startSpecialDoorLockEvent(state.gridX, state.gridY, currentDir.key);
+    startSpecialDoorLockEvent(state.gridX, state.gridY, currentDir.key, !automated && amount > 0);
     return;
   }
   if (closedDoorOnCell(state.gridX, state.gridY, currentDir.key)) {
@@ -570,11 +572,20 @@ function startDoorOpening(x, y, dirKey, message = "ギィ……") {
   hooks.say(message);
 }
 
-function startSpecialDoorLockEvent(x, y, dirKey) {
+function startSpecialDoorLockEvent(x, y, dirKey, bumped = false) {
   const access = hooks.getSpecialDoorAccessBlock({ x, y, dirKey }) || {};
   if (access.blocked) {
     hooks.playSe("blocked");
     hooks.say(access.message || "今はこの扉を開けられないようだ。");
+    return;
+  }
+  const preview = inspectGeminiPreviewDoor(getSpecialRoomAtDoor(x, y, dirKey), bumped);
+  if (preview) {
+    if (preview.unlocked) {
+      setDoor(x, y, dirKey, "closed", "specialUnlocked");
+      startDoorOpening(x, y, dirKey, "双子座の紋様が淡く輝き、扉が開いた。");
+      hooks.onStateChanged();
+    } else hooks.say(preview.message);
     return;
   }
   if (access.confirmAfterUnlock) {
@@ -665,6 +676,10 @@ function confirmSpecialRoomWarningEvent() {
 }
 
 function startSpecialRoomContentEvent(content, fromGX, fromGY) {
+  if (content?.type === "geminiPreview") {
+    hooks.say("双子座の部屋に入った。\nイベントは準備中です。");
+    return;
+  }
   if (content?.type === "waspHive") {
     const result = hooks.inspectWaspHive();
     startOverlayEvent({

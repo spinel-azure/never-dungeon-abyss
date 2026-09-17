@@ -986,7 +986,7 @@ export function getSpecialRoomLockInfo({ x, y, dirKey, dex = 0, guaranteed = fal
 export function attemptSpecialRoomUnlock({ x, y, dirKey, dex = 0, rng = Math.random, guaranteed = false } = {}) {
   const room = getSpecialRoomAtDoor(x, y, dirKey);
   const info = getSpecialRoomLockInfo({ x, y, dirKey, dex, guaranteed });
-  if (!room || !info || info.unlocked || info.remaining <= 0) return { accepted: false, ...info };
+  if (!room || !info || room.content?.type === "geminiPreview" || info.unlocked || info.remaining <= 0) return { accepted: false, ...info };
   room.attemptsRemaining = info.remaining - 1;
   const unlocked = Math.max(0, Math.min(0.999999999, Number(rng()) || 0)) < info.rate;
   if (unlocked) {

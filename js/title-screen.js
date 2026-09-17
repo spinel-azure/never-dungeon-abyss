@@ -8,6 +8,7 @@ import {
   importSaveArchive
 } from "./save-data.js";
 import { createPrologueController } from "./prologue.js";
+import { ENDING_ASSETS } from "../data/ending.js";
 
 const titleScreen = document.getElementById("titleScreen");
 const titleMenu = document.getElementById("titleMenu");
@@ -77,7 +78,18 @@ function renderLoadSlots() {
     button.type = "button";
     button.dataset.loadSlot = summary.slot;
     button.disabled = !summary.exists;
-    button.textContent = formatSummary(summary);
+    const caption = document.createElement("span");
+    caption.className = "title-load-caption";
+    caption.textContent = formatSummary(summary);
+    button.append(caption);
+    if (summary.exists && summary.hasRoyalCatMedal) {
+      const medal = document.createElement("img");
+      medal.className = "title-load-medal";
+      medal.src = ENDING_ASSETS.medal;
+      medal.alt = "猫勲章授与済み";
+      medal.title = "猫勲章授与済み";
+      button.append(medal);
+    }
     button.classList.toggle("is-selected", index === loadSelectedIndex);
     return button;
   }));

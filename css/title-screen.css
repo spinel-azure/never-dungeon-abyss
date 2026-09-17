@@ -177,3 +177,7 @@ body.title-active .shell{visibility:hidden}
   .title-description{opacity:.88;text-shadow:0 0 3px rgba(223,255,255,.5),0 0 8px rgba(83,224,255,.2)}
   .title-silhouette{opacity:.86;filter:drop-shadow(0 0 4px rgba(210,255,255,.58)) drop-shadow(0 0 10px rgba(69,231,255,.42))}
 }
+
+.title-load-slots button{display:flex;align-items:center;gap:8px;min-width:0}
+.title-load-caption{min-width:0;overflow-wrap:anywhere}
+.title-load-medal{width:auto;height:1.8em;max-width:2em;object-fit:contain;flex:0 0 auto;image-rendering:pixelated}

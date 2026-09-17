@@ -36,6 +36,13 @@ export const MAIKAEFER_NEST_CONTENT = Object.freeze({
 
 // Add only differences here when a floor receives an event, treasure or boss.
 export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
+  22: Object.freeze({
+    lock: Object.freeze({ mode: "alwaysFail", attempts: 1 }),
+    content: Object.freeze({
+      type: "geminiPreview",
+      accessBlockedMessage: "扉には十二星座のひとつ、双子座の紋様が刻まれている。しかし扉は開かない。今は開けられないようだ。"
+    })
+  }),
   2: Object.freeze({
     content: Object.freeze({
       type: "repeatableBoss",

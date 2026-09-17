@@ -134,6 +134,7 @@ export function getSaveSlotSummaries() {
       slot,
       label: slot === AUTO_SAVE_SLOT ? "オートセーブ" : `セーブ${index}`,
       exists: Boolean(save),
+      hasRoyalCatMedal: Boolean(save?.character?.eventFlags?.royal_cat_medal_awarded),
       name: save?.character?.name || "",
       level: Math.max(1, Math.floor(Number(save?.character?.level) || 1)),
       savedAt: save?.savedAt || ""

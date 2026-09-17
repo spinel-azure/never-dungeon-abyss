@@ -44,6 +44,17 @@ function makeSnapshot(name = "TEST", level = 8) {
 
 test.beforeEach(() => storage.clear());
 
+test("load summaries show cat medal only for the awarded save slot", () => {
+  const awarded = makeSnapshot("AWARDED");
+  awarded.character.eventFlags = { royal_cat_medal_awarded: true };
+  writeGame(awarded, "manual1");
+  writeGame(makeSnapshot("OLD SAVE"), "manual2");
+  assert.deepEqual(getSaveSlotSummaries().map(s => s.hasRoyalCatMedal), [false,true,false,false]);
+  awarded.character.eventFlags.royal_cat_medal_awarded = false;
+  writeGame(awarded, "manual1");
+  assert.equal(getSaveSlotSummaries().find(s=>s.slot === "manual1").hasRoyalCatMedal, false);
+});
+
 test("rumor notification state survives protected saves without crossing slots", () => {
   const auto = makeSnapshot("AUTO RUMOR");
   auto.character.tavernRumorNotifications = {
