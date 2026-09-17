@@ -1,5 +1,5 @@
 import { inspectGeminiPreviewDoor } from './gemini-preview-door.js';
-import { GEMINI_PAGES } from '../data/gemini-event.js';
+import { getGeminiFirstScenario, GEMINI_SECOND_PAGES, GEMINI_SECOND_HINT } from '../data/gemini-event.js';
 import {
   TAU,
   STEP_MS,
@@ -240,7 +240,7 @@ export function updateAnimation(now) {
   const gemini = state.overlayEvent;
   if (gemini?.type === 'geminiEvent' && gemini.phase === 'fading' && now >= gemini.sistersFadeOutStart + 1500) {
     gemini.phase = 'gone';
-    hooks.say('姉妹の姿はない。迷宮の先でまた会えるだろう。\n＊Bボタンで部屋から出る');
+    hooks.say(gemini.act === 2 ? 'ここにはもうあの姉妹はいない。燭台の火が静かに揺れている。\n＊Aボタンで次へ' : '姉妹の姿はない。迷宮の先でまた会えるだろう。\n＊Bボタンで部屋から出る');
   }
   const roamingAnimationResult = hooks.updateRoamingEnemyAnimation(now) || {};
   if (roamingAnimationResult.contact) return;
@@ -682,6 +682,16 @@ function confirmSpecialRoomWarningEvent() {
 }
 
 function startSpecialRoomContentEvent(content, fromGX, fromGY) {
+  if (content?.type === 'geminiSecond') {
+    const progress = hooks.getGeminiProgress?.() || {};
+    if (!progress.completed || progress.thirdCompleted) {
+      hooks.say('今はこの扉は開かないようだ。');
+      startNpcRetreat({fromGX,fromGY});
+      return;
+    }
+    startGeminiSecondEvent(fromGX, fromGY);
+    return;
+  }
   if (content?.type === "geminiPreview") {
     const progress = hooks.getGeminiProgress?.() || {};
     if (progress.completed || progress.blocked) {
@@ -1497,15 +1507,23 @@ function advanceKirkeMaerchentiereResultEvent() {
 
 export function startGeminiEvent(fromGX, fromGY) {
   hooks.markGeminiStarted?.();
-  startOverlayEvent({type:'geminiEvent',page:0,phase:'dialogue',fromGX,fromGY,reserveMessageLines:6,
-    message:GEMINI_PAGES[0]+'\n＊Aボタンで次へ'});
+  const scenario = getGeminiFirstScenario(hooks.getGeminiProgress?.().retryVariant);
+  startOverlayEvent({type:'geminiEvent',act:1,...scenario,page:0,phase:'dialogue',fromGX,fromGY,reserveMessageLines:6,
+    message:scenario.pages[0]+'\n＊Aボタンで次へ'});
+}
+
+export function startGeminiSecondEvent(fromGX, fromGY) {
+  const reminder = hooks.getGeminiProgress?.().secondCompleted;
+  startOverlayEvent({type:'geminiEvent',act:2,page:0,phase:reminder?'gone':'dialogue',fromGX,fromGY,
+    background:'images/background/dungeon_event_20.avif',sistersFadeStart:performance.now(),reserveMessageLines:6,
+    message:(reminder ? 'あなたは姉妹の言葉を反芻する…。\n'+GEMINI_SECOND_HINT : GEMINI_SECOND_PAGES[0])+'\n＊Aボタンで次へ'});
 }
 
 function handleGeminiInput(action) {
   const event = state.overlayEvent;
   if (event.phase === 'opening' || event.phase === 'fading') return true;
   if (event.phase === 'gone') {
-    if (action !== 'cancel') return true;
+    if (action !== (event.act === 2 ? 'confirm' : 'cancel')) return true;
     state.overlayEvent = null;
     const dir = DIRS.find(d=>event.fromGX+d.dx===state.gridX && event.fromGY+d.dy===state.gridY);
     if (dir) setDoor(event.fromGX,event.fromGY,dir.key,'closed','specialLocked');
@@ -1515,13 +1533,13 @@ function handleGeminiInput(action) {
     return true;
   }
   if (event.phase === 'choice' && ['confirm','cancel'].includes(action)) {
-    event.choice = action === 'confirm' ? 'sun' : 'moon';
+    event.choice = action === 'confirm' ? event.correctChoice : (event.correctChoice === 'sun' ? 'moon' : 'sun');
     event.phase = 'opening';
     hooks.say(event.choice === 'sun' ? '太陽の箱を開けた。' : '月の箱を開けた。');
     hooks.playSe('door');
     hooks.playTreasureOpening('black', () => {
       if (state.overlayEvent !== event) return;
-      event.rewardGranted = hooks.resolveGeminiChoice(event.choice) && event.choice === 'sun';
+      event.rewardGranted = hooks.resolveGeminiChoice(event.choice) && event.choice === event.correctChoice;
       event.phase = 'opened';
       hooks.say('＊Aボタンで次へ');
       hooks.onStateChanged();
@@ -1529,11 +1547,21 @@ function handleGeminiInput(action) {
     return true;
   }
   if (action !== 'confirm') return true;
+  if (event.act === 2) {
+    event.page += 1;
+    if (event.page >= GEMINI_SECOND_PAGES.length) {
+      hooks.completeGeminiSecond?.();
+      event.phase = 'fading';
+      event.sistersFadeOutStart = performance.now();
+      hooks.say('');
+    } else hooks.say(GEMINI_SECOND_PAGES[event.page]+'\n＊Aボタンで次へ');
+    return true;
+  }
   if (event.phase === 'opened') {
     hooks.hideTreasure();
     event.phase = 'result';
     if (event.rewardGranted) hooks.showGeminiReward?.();
-    hooks.say((event.choice === 'sun'
+    hooks.say((event.choice === event.correctChoice
       ? '白衣のシュヴェスター「そう、確かめられる事実と、わたくしたちの言葉を照らし合わせるのですわ。また、お会いしましょう。」'
       : '赤衣のシュヴェスター「あらあら、残念。またいらっしゃいな。」')+'\n＊Aボタンで次へ');
     return true;
@@ -1546,10 +1574,10 @@ function handleGeminiInput(action) {
   }
   event.page += 1;
   if (event.page === 1) event.sistersFadeStart = performance.now();
-  if (event.page >= GEMINI_PAGES.length) {
+  if (event.page >= event.pages.length) {
     event.phase = 'choice';
-    hooks.say('どちらの箱を開けますか？\nAボタン：太陽の箱　Bボタン：月の箱');
-  } else hooks.say(GEMINI_PAGES[event.page]+'\n＊Aボタンで次へ');
+    hooks.say(event.correctChoice === 'moon' ? 'どちらの箱を開けますか？\nAボタン：月の箱　Bボタン：太陽の箱' : 'どちらの箱を開けますか？\nAボタン：太陽の箱　Bボタン：月の箱');
+  } else hooks.say(event.pages[event.page]+'\n＊Aボタンで次へ');
   return true;
 }
 

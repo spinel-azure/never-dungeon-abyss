@@ -106,7 +106,7 @@ import {
   setPassivePresenceIncreaseReduction
 } from "./presence.js";
 import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js";
-import { geminiProgress, resolveGeminiChoice, resetGeminiRetry, markGeminiStarted } from '../data/gemini-event.js';
+import { geminiProgress, resolveGeminiChoice, resetGeminiRetry, markGeminiStarted, completeGeminiSecond } from '../data/gemini-event.js';
 import {
   configureAudio,
   setBgmOptions,
@@ -932,6 +932,7 @@ import {
     playTreasureOpening,
     hideTreasure,
     getGeminiProgress: () => geminiProgress(character),
+    completeGeminiSecond: () => { if (completeGeminiSecond(character)) saveGame(); },
     markGeminiStarted: () => { if (markGeminiStarted(character)) saveGame(); },
     showGeminiReward: () => showNamedItemGetEffect(['紋様の片割れ'], {important:true, acquisitionMessage:true}),
     resolveGeminiChoice: choice => {
@@ -4996,6 +4997,10 @@ import {
 
   function getCurrentSpecialDoorAccessBlock() {
     const room = getSpecialRoomDefinition(currentDepth);
+    if (room?.content?.type === 'geminiSecond') {
+      const progress = geminiProgress(character);
+      if (!progress.completed || progress.thirdCompleted) return {blocked:true,message:'今はこの扉は開かないようだ。'};
+    }
     if (room?.content?.type === 'geminiPreview') {
       const progress = geminiProgress(character);
       if (progress.completed || progress.blocked) return {blocked:true,message:progress.completed

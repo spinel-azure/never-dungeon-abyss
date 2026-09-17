@@ -1,10 +1,11 @@
 import { GEMINI_ASSETS } from '../data/gemini-event.js';
 export function drawGeminiEvent(ctx, event, width, height, images, load) {
-  for (const [key,path] of Object.entries(GEMINI_ASSETS)) load('gemini_'+key,path);
+  const assets = {...GEMINI_ASSETS,background:event.background || GEMINI_ASSETS.background};
+  for (const [key,path] of Object.entries(assets)) load(key === 'background' ? path : 'gemini_'+key,path);
   ctx.fillStyle='#050508';ctx.fillRect(0,0,width,height);
-  const background=images.get('gemini_background');
+  const background=images.get(assets.background);
   if (background?.complete && background.naturalWidth) ctx.drawImage(background,0,0,width,height);
-  if (event.page < 1 || event.phase === 'gone') return;
+  if ((event.act !== 2 && event.page < 1) || event.phase === 'gone') return;
   const ready=['white','red'].every(key=>images.get('gemini_'+key)?.naturalWidth>0);
   if (!ready) return;
   event.sistersReadyAt ??= performance.now();

@@ -16,7 +16,7 @@ test('Moon failure survives reload and blocks retries until a new expedition',()
   const saved=JSON.parse(JSON.stringify(c));assert.ok(geminiProgress(saved).blocked);
   assert.equal(resolveGeminiChoice(saved,'sun'),false);
   assert.ok(!hasKeyItem(saved.keyItems,'gemini_emblem_half'));
-  resetGeminiRetry(saved);assert.equal(resolveGeminiChoice(saved,'sun'),true);
+  resetGeminiRetry(saved);assert.equal(resolveGeminiChoice(saved,'moon'),true);
 });
 test('Gemini dialogue uses A, choice uses A/B, and opening ignores repeated input',()=>{
   for(const [input,symbol] of [['confirm','sun'],['cancel','moon']]) {
