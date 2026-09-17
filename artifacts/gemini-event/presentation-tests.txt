@@ -1,0 +1,26 @@
+✔ new characters see the deck tutorial while legacy recipients do not repeat it (5.7009ms)
+✔ deck tutorial isolates and highlights the inn deck command (0.5489ms)
+✔ lucky charm acquisition starts one locked three-second tutorial (0.3799ms)
+✔ Gemini sun grants a unique key item and persistent stage one completion (1.6458ms)
+✔ Moon failure survives reload and blocks retries until a new expedition (0.2467ms)
+✔ Gemini dialogue uses A, choice uses A/B, and opening ignores repeated input (2.1365ms)
+✔ B22 public preview opens only on twentieth forward bump; A and guaranteed unlock cannot bypass it (29.9146ms)
+✔ the quest notice reuses the bell layout with distinct blue presentation (2.5449ms)
+✔ persistent state changes, reload resume, and guild rendering recheck quest notices (2.1499ms)
+✔ notification assets use the current cache revision (0.5142ms)
+✔ the truth staff is a unique unsellable key item (1.4618ms)
+✔ Michaela restoration preserves all six requested dialogue pages (0.7642ms)
+✔ Michaela dialogue measures the message box, splits naturally, and always shows the A prompt (0.7619ms)
+✔ Amayenak victory persists recovery flags and returns to the B100F entrance (1.3876ms)
+✔ the real battle completion snapshot reaches the restoration bridge with Amayenak's ID (5.0247ms)
+✔ restoration overlay uses the cat and both Michaela portraits (3.0595ms)
+✔ restoration returns silently without an unrelated floor transition message (1.1185ms)
+✔ main.js keeps the current top-level cache buster without versioned module imports (1.4654ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 306.7575

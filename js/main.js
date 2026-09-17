@@ -932,6 +932,7 @@ import {
     playTreasureOpening,
     hideTreasure,
     getGeminiProgress: () => geminiProgress(character),
+    showGeminiReward: () => showNamedItemGetEffect(['紋様の片割れ'], {important:true, acquisitionMessage:true}),
     resolveGeminiChoice: choice => {
       const changed = resolveGeminiChoice(character, choice);
       if (changed) { updateCharacterUi(); saveGame(); }
@@ -1859,7 +1860,7 @@ import {
     showNamedItemGetEffect(items.map(item => item.name), { important });
   }
 
-  function showNamedItemGetEffect(itemNames, { important = false, amounts = [] } = {}) {
+  function showNamedItemGetEffect(itemNames, { important = false, amounts = [], acquisitionMessage = false } = {}) {
     if (!itemGetEffect || !itemGetItems || itemNames.length === 0) return;
     window.clearTimeout(itemGetTimer);
     const townPortraitFrame = townScreen?.querySelector(".town-portrait-frame");
@@ -1871,7 +1872,7 @@ import {
     itemGetItems.replaceChildren(...itemNames.map((itemName, index) => {
       const row = document.createElement("span");
       const amount = Math.max(1, Math.floor(Number(amounts[index]) || 1));
-      row.textContent = `${itemName} ×${amount}`;
+      row.textContent = acquisitionMessage ? `「${itemName}」を手に入れた！` : `${itemName} ×${amount}`;
       return row;
     }));
     itemGetEffect.hidden = false;

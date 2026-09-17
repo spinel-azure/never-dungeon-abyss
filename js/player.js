@@ -237,6 +237,11 @@ export function isPlayerInputEnabled() {
 }
 
 export function updateAnimation(now) {
+  const gemini = state.overlayEvent;
+  if (gemini?.type === 'geminiEvent' && gemini.phase === 'fading' && now >= gemini.sistersFadeOutStart + 1500) {
+    gemini.phase = 'gone';
+    hooks.say('姉妹の姿はない。迷宮の先でまた会えるだろう。\n＊Bボタンで部屋から出る');
+  }
   const roamingAnimationResult = hooks.updateRoamingEnemyAnimation(now) || {};
   if (roamingAnimationResult.contact) return;
   if (!state.anim) return;
@@ -1497,7 +1502,17 @@ export function startGeminiEvent(fromGX, fromGY) {
 
 function handleGeminiInput(action) {
   const event = state.overlayEvent;
-  if (event.phase === 'opening') return true;
+  if (event.phase === 'opening' || event.phase === 'fading') return true;
+  if (event.phase === 'gone') {
+    if (action !== 'cancel') return true;
+    state.overlayEvent = null;
+    const dir = DIRS.find(d=>event.fromGX+d.dx===state.gridX && event.fromGY+d.dy===state.gridY);
+    if (dir) setDoor(event.fromGX,event.fromGY,dir.key,'closed','specialLocked');
+    hooks.say('');
+    startNpcRetreat(event);
+    hooks.onStateChanged();
+    return true;
+  }
   if (event.phase === 'choice' && ['confirm','cancel'].includes(action)) {
     event.choice = action === 'confirm' ? 'sun' : 'moon';
     event.phase = 'opening';
@@ -1505,7 +1520,7 @@ function handleGeminiInput(action) {
     hooks.playSe('door');
     hooks.playTreasureOpening('black', () => {
       if (state.overlayEvent !== event) return;
-      hooks.resolveGeminiChoice(event.choice);
+      event.rewardGranted = hooks.resolveGeminiChoice(event.choice) && event.choice === 'sun';
       event.phase = 'opened';
       hooks.say('＊Aボタンで次へ');
       hooks.onStateChanged();
@@ -1516,18 +1531,16 @@ function handleGeminiInput(action) {
   if (event.phase === 'opened') {
     hooks.hideTreasure();
     event.phase = 'result';
+    if (event.rewardGranted) hooks.showGeminiReward?.();
     hooks.say((event.choice === 'sun'
-      ? '白衣のシュヴェスター「そう、確かめられる事実と、わたくしたちの言葉を照らし合わせるのですわ。また、お会いしましょう。」\n貴重品「紋様の片割れ」を入手した！'
+      ? '白衣のシュヴェスター「そう、確かめられる事実と、わたくしたちの言葉を照らし合わせるのですわ。また、お会いしましょう。」'
       : '赤衣のシュヴェスター「あらあら、残念。またいらっしゃいな。」')+'\n＊Aボタンで次へ');
     return true;
   }
   if (event.phase === 'result') {
-    state.overlayEvent = null;
-    const dir = DIRS.find(d=>event.fromGX+d.dx===state.gridX && event.fromGY+d.dy===state.gridY);
-    if (dir) setDoor(event.fromGX,event.fromGY,dir.key,'closed','specialLocked');
+    event.phase = 'fading';
+    event.sistersFadeOutStart = performance.now();
     hooks.say('');
-    startNpcRetreat(event);
-    hooks.onStateChanged();
     return true;
   }
   event.page += 1;
