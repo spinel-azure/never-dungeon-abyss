@@ -124,3 +124,6 @@ body.layout-mobile .guild-quest-entry{padding-inline:3px;font-size:10px;line-hei
 
 .guild-quest-notification{border-color:#5fd7ff;box-shadow:0 0 15px rgba(55,190,255,.4),0 5px 18px rgba(0,0,0,.6)}.guild-quest-notification .rumor-notification-copy{text-shadow:2px 2px #000,0 0 7px rgba(52,190,255,.46)}.guild-quest-notification .rumor-notification-copy strong{color:#67dcff}
 .shop-stock-notification{border-color:#ff626e;box-shadow:0 0 15px rgba(255,55,75,.4),0 5px 18px rgba(0,0,0,.6)}.shop-stock-notification .rumor-notification-copy strong{color:#ff8992}
+
+.transfer-destination-list button{position:relative;padding-inline:2em}
+.gemini-transfer-marker{position:absolute;right:.3em;top:50%;transform:translateY(-50%);width:1.2em;height:1.2em;pointer-events:none}

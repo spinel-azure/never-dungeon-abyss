@@ -1,4 +1,24 @@
-import { grantKeyItem } from './key-items.js';
+import { grantKeyItem, hasKeyItem } from './key-items.js';
+export function hasStartedGemini(character) {
+  const flags = character?.eventFlags || {};
+  return Boolean(flags.gemini_event_started || flags.gemini_first_completed || flags.gemini_retry_blocked
+    || hasKeyItem(character?.keyItems, 'gemini_emblem_half'));
+}
+export function markGeminiStarted(character) {
+  if (!character || character.eventFlags?.gemini_event_started) return false;
+  character.eventFlags ||= {};
+  character.eventFlags.gemini_event_started = true;
+  return true;
+}
+export function hasGeminiTransferMarker(character, depth) {
+  const canFind = character?.cards?.deckSlots?.includes('common_person_detection')
+    || hasKeyItem(character?.keyItems, 'queen_tiara')
+    || hasKeyItem(character?.keyItems, 'royal_cat_medal');
+  const progress = geminiProgress(character);
+  const sistersPresent = !progress.completed
+    && !hasKeyItem(character?.keyItems, 'gemini_emblem_half');
+  return Number(depth) === 20 && hasStartedGemini(character) && sistersPresent && Boolean(canFind);
+}
 export const GEMINI_PAGES = Object.freeze([
   '部屋に入ると、中央には火が灯された燭台とともに太陽と月の紋様が刻まれた箱が置かれており、蓋の部分にはこう記されていた。\n『姉妹のひとりは、いつも真実のみを語る\n姉妹のひとりは、いつも偽りのみを語る』',
   'あなたが二つの箱を見つめていると、いつの間にか二人の女性が立っていた。そして片方の女性が口を開く。',

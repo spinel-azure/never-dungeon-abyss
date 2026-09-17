@@ -1496,6 +1496,7 @@ function advanceKirkeMaerchentiereResultEvent() {
 }
 
 export function startGeminiEvent(fromGX, fromGY) {
+  hooks.markGeminiStarted?.();
   startOverlayEvent({type:'geminiEvent',page:0,phase:'dialogue',fromGX,fromGY,reserveMessageLines:6,
     message:GEMINI_PAGES[0]+'\n＊Aボタンで次へ'});
 }

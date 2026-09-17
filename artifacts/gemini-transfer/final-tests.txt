@@ -1,0 +1,13 @@
+✔ Gemini sun grants a unique key item and persistent stage one completion (1.6102ms)
+✔ Moon failure survives reload and blocks retries until a new expedition (0.2303ms)
+✔ Gemini dialogue uses A, choice uses A/B, and opening ignores repeated input (2.0603ms)
+✔ Gemini transfer marker requires contact plus one of the three explicit detection sources (2.4752ms)
+✔ Marker follows sisters presence; discovery persists across success and retry (0.3471ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 173.5802

@@ -106,7 +106,7 @@ import {
   setPassivePresenceIncreaseReduction
 } from "./presence.js";
 import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js";
-import { geminiProgress, resolveGeminiChoice, resetGeminiRetry } from '../data/gemini-event.js';
+import { geminiProgress, resolveGeminiChoice, resetGeminiRetry, markGeminiStarted } from '../data/gemini-event.js';
 import {
   configureAudio,
   setBgmOptions,
@@ -932,6 +932,7 @@ import {
     playTreasureOpening,
     hideTreasure,
     getGeminiProgress: () => geminiProgress(character),
+    markGeminiStarted: () => { if (markGeminiStarted(character)) saveGame(); },
     showGeminiReward: () => showNamedItemGetEffect(['紋様の片割れ'], {important:true, acquisitionMessage:true}),
     resolveGeminiChoice: choice => {
       const changed = resolveGeminiChoice(character, choice);
