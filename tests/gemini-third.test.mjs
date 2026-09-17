@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {geminiProgress,canEnterGeminiThird,completeGeminiThirdVisit,hasGeminiTransferMarker} from '../data/gemini-event.js';
+import {geminiProgress,getGeminiThirdAccess,canEnterGeminiThird,completeGeminiThirdVisit,hasGeminiTransferMarker} from '../data/gemini-event.js';
 import {getSpecialRoomDefinition,rollMaikaeferNestContent} from '../data/special-rooms.js';
 import {configurePlayer,state,startGeminiThirdEvent,handleOverlayEventInput,updateAnimation} from '../js/player.js';
 import {drawGeminiEvent} from '../js/gemini-event-renderer.js';
@@ -14,10 +14,12 @@ test('Third act gates, saves, fixed rooms and marker persist until red sister fi
  assert.equal(completeGeminiThirdVisit(c,'white'),true);
  const saved=JSON.parse(JSON.stringify(c));
  assert.equal(canEnterGeminiThird(saved,'red'),true);
+ assert.deepEqual(getGeminiThirdAccess(saved,'white'),{blocked:true,message:'もうここに姉妹はいない。迷宮の先で会えるだろう。'});
  assert.equal(hasGeminiTransferMarker(saved,40),true);
  assert.equal(completeGeminiThirdVisit(saved,'white'),false);
  assert.equal(completeGeminiThirdVisit(saved,'red'),true);
  assert.equal(geminiProgress(saved).thirdCompleted,true);
+ assert.deepEqual(getGeminiThirdAccess(saved,'red'),{blocked:true,message:'もうここに姉妹はいない。迷宮の先で会えるだろう。'});
  assert.equal(hasGeminiTransferMarker(saved,40),false);
  for(const [floor,sister] of [[44,'white'],[48,'red']]) {
   assert.equal(canEnterGeminiThird(saved,sister),false);

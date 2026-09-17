@@ -5,6 +5,11 @@ export function drawGeminiEvent(ctx, event, width, height, images, load) {
   ctx.fillStyle='#050508';ctx.fillRect(0,0,width,height);
   const background=images.get(assets.background);
   if (background?.complete && background.naturalWidth) ctx.drawImage(background,0,0,width,height);
+  if(event.phase === 'stoneChoice') {
+    ctx.save();ctx.strokeStyle='#c6ffff';ctx.lineWidth=Math.max(2,width/400);ctx.shadowColor='#44eaff';ctx.shadowBlur=18;
+    ctx.strokeRect(width*(.3+.2*event.selection-.085),height*.285,width*.17,height*.215);
+    ctx.restore();return;
+  }
   if ((event.act !== 2 && event.act !== 3 && event.page < 1) || event.phase === 'gone') return;
   const sisters=event.sister ? [event.sister] : ['white','red'];
   const ready=sisters.every(key=>images.get('gemini_'+key)?.naturalWidth>0);

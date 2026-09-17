@@ -1,0 +1,44 @@
+✔ new characters see the deck tutorial while legacy recipients do not repeat it (7.6159ms)
+✔ deck tutorial isolates and highlights the inn deck command (0.9106ms)
+✔ lucky charm acquisition starts one locked three-second tutorial (0.5739ms)
+✔ Gemini sun grants a unique key item and persistent stage one completion (2.817ms)
+✔ Moon failure survives reload and blocks retries until a new expedition (0.364ms)
+✔ Gemini dialogue uses A, choice uses A/B, and opening ignores repeated input (4.0045ms)
+✔ Gemini duplicates every eligible cast at half damage with one SP and charge payment (17.0384ms)
+✔ Gemini independently rolls poison and excludes charge, normal attacks and killed targets (7.7336ms)
+✔ Gemini copy does not inherit Aries opening boost and all-target copies skip dead enemies (4.5184ms)
+✔ Leo doubles normal attacks, triples at 25%, pays rounded snapshot HP only once (4.8789ms)
+✔ Leo multi-hit and automatic weapon repeat pay only once (1.9164ms)
+✔ Leo costs HP on misses and out-of-range; never on skills, skipped or invalid commands (3.1099ms)
+✔ Leo HP cost bypasses Aquarius and Pisces invincibility but cannot cause death (2.0781ms)
+✔ Leo snapshot is fresh after healing, applies with Aries, and does not persist into another battle (2.9061ms)
+✔ card IDs, rarity, cost and copy limits remain unchanged (0.2327ms)
+✔ B22 public preview opens only on twentieth forward bump; A and guaranteed unlock cannot bypass it (43.2012ms)
+✔ Retry scenes alternate on failure, survive save/load, and reward the displayed correct box (2.0079ms)
+✔ B31 fixed room and markers move from B20 to B30 to B40 with source condition intact (0.5685ms)
+✔ Second act fades after two pages, saves completion, and revisits show only reminder (1.844ms)
+✔ Retry A opens moon and produces reward with matching emblem (0.4493ms)
+✔ Third act gates, saves, fixed rooms and marker persist until red sister finishes (2.5999ms)
+✔ Single-sister dialogue fades, saves only at end and exits with A; white revisit recalls hint (2.0078ms)
+✔ Canvas draws only the selected sister on her original side and removes her after fading (0.6277ms)
+✔ Gemini transfer marker requires contact plus one of the three explicit detection sources (2.8298ms)
+✔ Marker follows sisters presence; discovery persists across success and retry (0.4549ms)
+✔ the quest notice reuses the bell layout with distinct blue presentation (3.6461ms)
+✔ persistent state changes, reload resume, and guild rendering recheck quest notices (3.0063ms)
+✔ notification assets use the current cache revision (0.5864ms)
+✔ the truth staff is a unique unsellable key item (1.166ms)
+✔ Michaela restoration preserves all six requested dialogue pages (0.6623ms)
+✔ Michaela dialogue measures the message box, splits naturally, and always shows the A prompt (0.5989ms)
+✔ Amayenak victory persists recovery flags and returns to the B100F entrance (1.1309ms)
+✔ the real battle completion snapshot reaches the restoration bridge with Amayenak's ID (3.8797ms)
+✔ restoration overlay uses the cat and both Michaela portraits (2.3485ms)
+✔ restoration returns silently without an unrelated floor transition message (0.798ms)
+✔ main.js keeps the current top-level cache buster without versioned module imports (1.0879ms)
+ℹ tests 36
+ℹ suites 0
+ℹ pass 36
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 416.8526

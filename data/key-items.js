@@ -1,4 +1,5 @@
 export const KEY_ITEMS = Object.freeze({
+  gemini_emblem_other_half: Object.freeze({id:'gemini_emblem_other_half',name:'もう一つの紋様の片割れ',description:'壁のくぼみで見つけた、最初の紋様と対になる紫色の石版。',sellable:false,consumable:false,version:1}),
   gemini_emblem_half: Object.freeze({id:'gemini_emblem_half',name:'紋様の片割れ',description:'シュヴェスターの試しを解いて得た紋様の片割れ。',sellable:false,consumable:false,version:1}),
   royal_cat_medal: Object.freeze({
     id: "royal_cat_medal", name: "ケーニクリヒャー・カッツェンオルデン",

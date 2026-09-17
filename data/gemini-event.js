@@ -15,7 +15,7 @@ export function hasGeminiTransferMarker(character, depth) {
     || hasKeyItem(character?.keyItems, 'queen_tiara')
     || hasKeyItem(character?.keyItems, 'royal_cat_medal');
   const progress = geminiProgress(character);
-  const target = progress.thirdCompleted ? null : progress.secondCompleted ? 40 : progress.completed ? 30 : 20;
+  const target = character?.eventFlags?.gemini_fourth_completed ? null : progress.thirdCompleted ? 50 : progress.secondCompleted ? 40 : progress.completed ? 30 : 20;
   return Number(depth) === target && hasStartedGemini(character) && Boolean(canFind);
 }
 export const GEMINI_PAGES = Object.freeze([
@@ -39,7 +39,14 @@ export const GEMINI_THIRD_SCENES = Object.freeze({
 });
 export function canEnterGeminiThird(character, sister) {
   const p=geminiProgress(character);
-  return p.secondCompleted && !p.thirdCompleted && (sister==='white' || (sister==='red' && p.thirdWhiteCompleted));
+  return p.secondCompleted && !p.thirdCompleted && ((sister==='white' && !p.thirdWhiteCompleted) || (sister==='red' && p.thirdWhiteCompleted));
+}
+export function getGeminiThirdAccess(character, sister) {
+  const p=geminiProgress(character);
+  const departed=p.thirdCompleted || (sister==='white' && p.thirdWhiteCompleted);
+  return {blocked:!canEnterGeminiThird(character,sister),message:departed
+    ? 'もうここに姉妹はいない。迷宮の先で会えるだろう。'
+    : '今はこの扉は開かないようだ。'};
 }
 export function completeGeminiThirdVisit(character, sister) {
   if (!canEnterGeminiThird(character,sister)) return false;
@@ -88,4 +95,37 @@ export function resetGeminiRetry(character) {
     character.eventFlags.gemini_retry_variant ??= Boolean(character.eventFlags.gemini_retry_blocked);
     delete character.eventFlags.gemini_retry_blocked;
   }
+}
+export const GEMINI_FOURTH_SYMBOLS = ['太陽','月','星'];
+export const GEMINI_FOURTH_QUESTIONS = [
+  {correct:2,truth:'月明かり',lie:'太陽'},
+  {correct:0,truth:'星明かり',lie:'月'},
+  {correct:1,truth:'太陽',lie:'星'}
+];
+export function getGeminiFourthAccess(character) {
+  const flags=character?.eventFlags || {};
+  const done=Boolean(flags.gemini_fourth_completed);
+  return {blocked:!flags.gemini_third_completed || done,message:done
+    ? 'もうここに姉妹はいない。迷宮の先で会えるだろう。' : '今はこの扉は開かないようだ。'};
+}
+export function getGeminiFourthQuestion(character) {
+  return Math.max(0,Math.min(2,Math.floor(Number(character?.eventFlags?.gemini_fourth_question)||0)));
+}
+export function resolveGeminiFourth(character, choice, roll=Math.random()) {
+  if (getGeminiFourthAccess(character).blocked || ![0,1,2].includes(choice)) return null;
+  const correct=choice===GEMINI_FOURTH_QUESTIONS[getGeminiFourthQuestion(character)].correct;
+  character.eventFlags ||= {};
+  if (correct) {
+    character.keyItems=grantKeyItem(character.keyItems,'gemini_emblem_other_half').keyItems;
+    character.eventFlags.gemini_fourth_completed=true;
+  } else character.eventFlags.gemini_fourth_question=Math.max(0,Math.min(2,Math.floor(roll*3)));
+  return {correct};
+}
+export function getGeminiFourthPages(question) {
+  const q=GEMINI_FOURTH_QUESTIONS[question];
+  return [
+    '部屋に入ると、奥の壁には3つのくぼみがあり、それぞれ太陽、月、星の紋様が刻まれた石の蓋で閉じられていた。何かの儀式で使う部屋なのだろうか？',
+    '白衣のシュヴェスター「お持ちの紋様と対になるものはこの部屋にございますわ。」\n赤衣のシュヴェスター「探したって無駄よ。この部屋にはないもの。」',
+    `白衣のシュヴェスター「…${q.truth}の元にはございませんわね。」\n赤衣のシュヴェスター「${q.lie}の光に照らされているわ…！ほら！」`
+  ];
 }

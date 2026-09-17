@@ -1,5 +1,5 @@
 import { inspectGeminiPreviewDoor } from './gemini-preview-door.js';
-import { getGeminiFirstScenario, GEMINI_SECOND_PAGES, GEMINI_SECOND_HINT, GEMINI_THIRD_SCENES } from '../data/gemini-event.js';
+import { getGeminiFirstScenario, GEMINI_SECOND_PAGES, GEMINI_SECOND_HINT, GEMINI_THIRD_SCENES, getGeminiFourthPages, GEMINI_FOURTH_SYMBOLS } from '../data/gemini-event.js';
 import {
   TAU,
   STEP_MS,
@@ -240,7 +240,7 @@ export function updateAnimation(now) {
   const gemini = state.overlayEvent;
   if (gemini?.type === 'geminiEvent' && gemini.phase === 'fading' && now >= gemini.sistersFadeOutStart + 1500) {
     gemini.phase = 'gone';
-    hooks.say(gemini.act === 3 ? GEMINI_THIRD_SCENES[gemini.sister].farewell+'\n＊Aボタンで次へ' : gemini.act === 2 ? 'ここにはもうあの姉妹はいない。燭台の火が静かに揺れている。\n＊Aボタンで次へ' : '姉妹の姿はない。迷宮の先でまた会えるだろう。\n＊Bボタンで部屋から出る');
+    hooks.say(gemini.act === 4 ? 'そう言い残すと、姉妹は静かに消えた。\n＊Aボタンで次へ' : gemini.act === 3 ? GEMINI_THIRD_SCENES[gemini.sister].farewell+'\n＊Aボタンで次へ' : gemini.act === 2 ? 'ここにはもうあの姉妹はいない。燭台の火が静かに揺れている。\n＊Aボタンで次へ' : '姉妹の姿はない。迷宮の先でまた会えるだろう。\n＊Bボタンで部屋から出る');
   }
   const roamingAnimationResult = hooks.updateRoamingEnemyAnimation(now) || {};
   if (roamingAnimationResult.contact) return;
@@ -682,9 +682,15 @@ function confirmSpecialRoomWarningEvent() {
 }
 
 function startSpecialRoomContentEvent(content, fromGX, fromGY) {
+  if (content?.type === 'geminiFourth') {
+    const access=hooks.getGeminiFourthAccess?.();
+    if (!access || access.blocked) { hooks.say(access?.message || '今はこの扉は開かないようだ。');startNpcRetreat({fromGX,fromGY});return; }
+    startGeminiFourthEvent(fromGX,fromGY);return;
+  }
   if (content?.type === 'geminiThird') {
-    if (!hooks.canEnterGeminiThird?.(content.sister)) {
-      hooks.say('今はこの扉は開かないようだ。');
+    const access=hooks.getGeminiThirdAccess?.(content.sister);
+    if (!access || access.blocked) {
+      hooks.say(access?.message || '今はこの扉は開かないようだ。');
       startNpcRetreat({fromGX,fromGY});
       return;
     }
@@ -1537,6 +1543,42 @@ export function startGeminiThirdEvent(fromGX,fromGY,sister) {
     message:(reminder ? 'あなたは姉妹の言葉を反芻する…。\n'+scene.pages[1] : scene.pages[0])+'\n＊Aボタンで次へ'});
 }
 
+export function startGeminiFourthEvent(fromGX,fromGY) {
+  const question=hooks.getGeminiFourthQuestion?.() || 0;
+  const pages=getGeminiFourthPages(question);
+  startOverlayEvent({type:'geminiEvent',act:4,page:0,phase:'dialogue',fromGX,fromGY,pages,selection:0,
+    background:'images/background/dungeon_event_23.avif',reserveMessageLines:6,message:pages[0]+'\n＊Aボタンで次へ'});
+}
+function handleGeminiFourthInput(event,action) {
+  if(event.phase==='stoneChoice') {
+    if(['left','right'].includes(action)) {
+      event.selection=(event.selection+(action==='left'?2:1))%3;hooks.playSe('cursorMove');
+      hooks.say('どの石蓋を調べますか？◀▶で選択　Aボタンで決定\n選択中：'+GEMINI_FOURTH_SYMBOLS[event.selection]);
+    } else if(action==='confirm') {
+      const result=hooks.resolveGeminiFourth?.(event.selection);
+      if(!result)return true;
+      event.correct=result.correct;event.phase='stoneResult';event.sistersReadyAt=performance.now();event.sistersFadeStart=performance.now();
+      if(result.correct) {
+        hooks.say(GEMINI_FOURTH_SYMBOLS[event.selection]+'の蓋を動かすと、奥から見覚えのある紫色の石版が現れた。\n＊Aボタンで次へ');
+        hooks.showGeminiFourthReward?.();
+      } else hooks.say('白衣のシュヴェスター「…あら、ございませんでしたわね。次こそは見つけてくださいませね。」\n＊Aボタンで次へ');
+    }
+    return true;
+  }
+  if(action!=='confirm')return true;
+  if(event.phase==='stoneResult' && event.correct) {
+    event.phase='stoneFarewell';hooks.say('白衣のシュヴェスター「その二つを大切にお持ちなさいな。その時はいずれ訪れますわ。」\n赤衣のシュヴェスター「その二つが揃ったところで、何も起こらないけどね。」\n＊Aボタンで次へ');return true;
+  }
+  if(['stoneResult','stoneFarewell'].includes(event.phase)) {
+    event.phase='fading';event.sistersFadeOutStart=performance.now();hooks.say('');return true;
+  }
+  event.page++;
+  if(event.page===1)event.sistersFadeStart=performance.now();
+  if(event.page>=event.pages.length) {
+    event.phase='stoneChoice';hooks.say('どの石蓋を調べますか？◀▶で選択　Aボタンで決定\n選択中：太陽');
+  } else hooks.say(event.pages[event.page]+'\n＊Aボタンで次へ');
+  return true;
+}
 function handleGeminiInput(action) {
   const event = state.overlayEvent;
   if (event.phase === 'opening' || event.phase === 'fading') return true;
@@ -1550,6 +1592,7 @@ function handleGeminiInput(action) {
     hooks.onStateChanged();
     return true;
   }
+  if (event.act === 4) return handleGeminiFourthInput(event,action);
   if (event.phase === 'choice' && ['confirm','cancel'].includes(action)) {
     event.choice = action === 'confirm' ? event.correctChoice : (event.correctChoice === 'sun' ? 'moon' : 'sun');
     event.phase = 'opening';

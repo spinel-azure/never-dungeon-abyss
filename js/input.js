@@ -1,4 +1,4 @@
-﻿export function configureInput({
+export function configureInput({
   forwardBtn,
   backBtn,
   leftBtn,
@@ -16,6 +16,7 @@
   handleItemInput = () => false,
   handleSkillInput = () => false,
   handleOverlayInput = () => false,
+  handleEventChoiceInput = () => false,
   handleBattleInput = () => false,
   handleTownInput = () => false,
   handleDoorInput = () => false,
@@ -40,6 +41,7 @@
     if (e.key === "ArrowRight" && handleTownInput("right")) { e.preventDefault(); return; }
     if (e.code === "KeyX" && handleTownInput("confirm")) { e.preventDefault(); return; }
     if (e.code === "KeyZ" && handleTownInput("cancel")) { e.preventDefault(); return; }
+    if (skillAction && handleEventChoiceInput(skillAction)) { e.preventDefault(); return; }
     if (handleOverlayInput("dismiss")) { e.preventDefault(); return; }
     if (e.key === "ArrowUp" && handleMenuInput("up")) { e.preventDefault(); return; }
     if (e.key === "ArrowDown" && handleMenuInput("down")) { e.preventDefault(); return; }
@@ -57,8 +59,8 @@
   const operate = handler => () => { onUserOperation(); return handler(); };
   bindControl(forwardBtn, operate(() => handleItemInput("up") || handleSkillInput("up") || handleOverlayInput("dismiss") || manualMove(1)));
   bindControl(backBtn, operate(() => handleItemInput("down") || handleSkillInput("down") || handleOverlayInput("dismiss") || manualMove(-1)));
-  bindControl(leftBtn, operate(() => handleItemInput("left") || handleSkillInput("left") || handleOverlayInput("dismiss") || manualTurn(-1)));
-  bindControl(rightBtn, operate(() => handleItemInput("right") || handleSkillInput("right") || handleOverlayInput("dismiss") || manualTurn(1)));
+  bindControl(leftBtn, operate(() => handleItemInput("left") || handleSkillInput("left") || handleEventChoiceInput("left") || handleOverlayInput("dismiss") || manualTurn(-1)));
+  bindControl(rightBtn, operate(() => handleItemInput("right") || handleSkillInput("right") || handleEventChoiceInput("right") || handleOverlayInput("dismiss") || manualTurn(1)));
   bindControl(autoReturnBtn, operate(() => handleItemInput("cancel") || handleSkillInput("cancel") || handleOverlayInput("dismiss") || startAutoReturn()));
   bindControl(randomGenerateBtn, operate(() => handleItemInput("cancel") || handleSkillInput("cancel") || handleOverlayInput("dismiss") || generateRandomDungeon()));
   bindControl(buttonA, operate(() => handleItemInput("confirm") || handleSkillInput("confirm") || handleBattleInput("confirm") || handleTownInput("confirm") || handleOverlayInput("confirm") || handleMenuInput("confirm") || handleDoorInput()));

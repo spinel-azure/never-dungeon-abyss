@@ -106,7 +106,7 @@ import {
   setPassivePresenceIncreaseReduction
 } from "./presence.js";
 import { configureTreasure, showTreasure, playTreasureOpening, hideTreasure } from "./treasure.js";
-import { geminiProgress, resolveGeminiChoice, resetGeminiRetry, markGeminiStarted, completeGeminiSecond, canEnterGeminiThird, completeGeminiThirdVisit } from '../data/gemini-event.js';
+import { geminiProgress, resolveGeminiChoice, resetGeminiRetry, markGeminiStarted, completeGeminiSecond, getGeminiThirdAccess, completeGeminiThirdVisit, getGeminiFourthAccess, getGeminiFourthQuestion, resolveGeminiFourth } from '../data/gemini-event.js';
 import {
   configureAudio,
   setBgmOptions,
@@ -931,8 +931,12 @@ import {
     showTreasure,
     playTreasureOpening,
     hideTreasure,
+    getGeminiFourthAccess: () => getGeminiFourthAccess(character),
+    getGeminiFourthQuestion: () => getGeminiFourthQuestion(character),
+    resolveGeminiFourth: choice => { const result=resolveGeminiFourth(character,choice); if(result){updateCharacterUi();saveGame();} return result; },
+    showGeminiFourthReward: () => showNamedItemGetEffect(['もう一つの紋様の片割れ'],{important:true,acquisitionMessage:true}),
     getGeminiProgress: () => geminiProgress(character),
-    canEnterGeminiThird: sister => canEnterGeminiThird(character,sister),
+    getGeminiThirdAccess: sister => getGeminiThirdAccess(character,sister),
     completeGeminiThirdVisit: sister => { if (completeGeminiThirdVisit(character,sister)) saveGame(); },
     completeGeminiSecond: () => { if (completeGeminiSecond(character)) saveGame(); },
     markGeminiStarted: () => { if (markGeminiStarted(character)) saveGame(); },
@@ -4999,8 +5003,10 @@ import {
 
   function getCurrentSpecialDoorAccessBlock() {
     const room = getSpecialRoomDefinition(currentDepth);
-    if (room?.content?.type === 'geminiThird' && !canEnterGeminiThird(character,room.content.sister)) {
-      return {blocked:true,message:'今はこの扉は開かないようだ。'};
+    if (room?.content?.type === 'geminiFourth') { const access=getGeminiFourthAccess(character); if(access.blocked)return access; }
+    if (room?.content?.type === 'geminiThird') {
+      const access=getGeminiThirdAccess(character,room.content.sister);
+      if (access.blocked) return access;
     }
     if (room?.content?.type === 'geminiSecond') {
       const progress = geminiProgress(character);
@@ -5145,6 +5151,7 @@ import {
     if (handleItemOverlayInput(action) || handleSkillOverlayInput(action) || handleBattleInput(action)) return true;
     if (sceneTransitionRunning || handleLootIdentifyInput(action) || handleExperienceSettlementInput(action) || handleTownInput(action)) return true;
     if (["up", "down", "left", "right"].includes(action)) {
+      if (state.overlayEvent?.act === 4 && handleOverlayEventInput(action)) return true;
       if (handleOverlayEventInput("dismiss") || handleMenuInput(action)) return true;
       if (action === "up") return manualMove(1);
       if (action === "down") return manualMove(-1);
@@ -5211,6 +5218,7 @@ import {
     },
     handleSkillInput: action => endingController.handleAction(action) || michaelaRestorationController.handleAction(action) || endingSequenceActive || handleBlockingTutorialInput(action) || handleSkillOverlayInput(action),
     handleItemInput: action => endingController.handleAction(action) || michaelaRestorationController.handleAction(action) || endingSequenceActive || handleBlockingTutorialInput(action) || handleItemOverlayInput(action),
+    handleEventChoiceInput: action => state.overlayEvent?.act === 4 && handleOverlayEventInput(action),
     handleOverlayInput: action => endingController.handleAction(action) || michaelaRestorationController.handleAction(action) || endingSequenceActive || handleBlockingTutorialInput(action) || handleOverlayEventInput(action),
     handleBattleInput: action => endingController.handleAction(action) || michaelaRestorationController.handleAction(action) || endingSequenceActive || handleBlockingTutorialInput(action) || handleBattleInput(action),
     handleTownInput: action => (
