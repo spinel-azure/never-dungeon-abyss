@@ -1,3 +1,4 @@
+import { prepareLeoAttack, payLeoAttackCost } from './leo.js';
 import { WASSERMANNFRAU_ACTIONS } from '../data/wassermannfrau.js';
 import { isWassermannfrau, selectWassermannfrauAction, synchronizeWassermannfrau, executeWassermannfrauUtility, finishWassermannfrauPlayerAction, cancelHighTide } from './wassermannfrau-ai.js';
 import { absorbBossMagicBarrier, absorbPlayerMagic } from "./boss-magic-barrier.js";
@@ -111,7 +112,8 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     vorpalSwordEquippedAtStart,
     ariesActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_aries"),
     ariesOpeningAttackAvailable: hasCardEffect(character?.cards?.deckSlots, "zodiac_aries"),
-    geminiDuplicationAvailable: hasCardEffect(character?.cards?.deckSlots, "zodiac_gemini"),
+    leoActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_leo"),
+    geminiActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_gemini"),
     cancerActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_cancer"),
     capricornActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_capricorn"),
     libraActiveAtStart: hasCardEffect(character?.cards?.deckSlots, "zodiac_libra"),
@@ -485,6 +487,8 @@ function executeRandomlyDistributedHits({ battle, action, actor, magicFocus = nu
 }
 
 function executeSinglePlayerActionSequence({ battle, action, repeatAction = action, command, actor, target, rng }) {
+  const leo = prepareLeoAttack(battle, command, action, repeatAction);
+  action = leo.action; repeatAction = leo.repeatAction;
   const magicFocus = getMagicFocusForCast(actor, action);
   const results = [executeAction({
     battle, action, actor, actorSide: "player", target, targetSide: "enemy", magicFocus, rng
@@ -500,11 +504,11 @@ function executeSinglePlayerActionSequence({ battle, action, repeatAction = acti
     }));
   }
   if (isGeminiEligible(battle, command, action)) {
-    battle.geminiDuplicationAvailable = false;
     if (target.alive && target.hp > 0) {
       battle.log.push("ジェミニが行動を複製した！");
+      battle.presentationEvents.push({type:'message',message:'♊ 双星の共鳴！'});
       results.push(executeAction({
-        battle, action: repeatAction, actor, actorSide: "player", target, targetSide: "enemy", rng
+        battle, action: { ...repeatAction, geminiDamageMultiplier: getCardById("zodiac_gemini").duplicateDamageMultiplier }, actor, actorSide: "player", target, targetSide: "enemy", rng
       }));
     }
   }
@@ -517,9 +521,12 @@ function executeSinglePlayerActionSequence({ battle, action, repeatAction = acti
     }));
   }
   applyNormalAttackRecovery(battle, actor, command, results);
+  payLeoAttackCost(battle, leo.cost);
 }
 
 function executeMultiPlayerActionSequence({ battle, action, repeatAction = action, command, actor, targetIndex, rng }) {
+  const leo = prepareLeoAttack(battle, command, action, repeatAction);
+  action = leo.action; repeatAction = leo.repeatAction;
   const resolvedTargetIndex = action.target === "allEnemies" || action.randomlyDistributeHits
     ? targetIndex
     : normalizeLivingTargetIndex(battle.enemies, targetIndex);
@@ -539,11 +546,11 @@ function executeMultiPlayerActionSequence({ battle, action, repeatAction = actio
     }));
   }
   if (isGeminiEligible(battle, command, action)) {
-    battle.geminiDuplicationAvailable = false;
     if (canRepeatMultiAction(battle, action, resolvedTargetIndex)) {
       battle.log.push("ジェミニが行動を複製した！");
+      battle.presentationEvents.push({type:'message',message:'♊ 双星の共鳴！'});
       results.push(...executeMultiPlayerActionPass({
-        battle, action: repeatAction, actor, targetIndex: resolvedTargetIndex, rng
+        battle, action: { ...repeatAction, geminiDamageMultiplier: getCardById("zodiac_gemini").duplicateDamageMultiplier }, actor, targetIndex: resolvedTargetIndex, rng
       }));
     }
   }
@@ -556,6 +563,7 @@ function executeMultiPlayerActionSequence({ battle, action, repeatAction = actio
     }));
   }
   applyNormalAttackRecovery(battle, actor, command, results);
+  payLeoAttackCost(battle, leo.cost);
 }
 
 function executeMultiPlayerActionPass({ battle, action, actor, targetIndex, magicFocus = null, rng }) {
@@ -602,7 +610,7 @@ function canRepeatMultiAction(battle, action, targetIndex) {
 }
 
 function isGeminiEligible(battle, command, action) {
-  return Boolean(battle.geminiDuplicationAvailable)
+  return battle.player.hp > 0 && Boolean(battle.geminiActiveAtStart)
     && command?.type === "skill"
     && ["physicalAttack", "spell"].includes(action?.actionType)
     && ["enemy", "allEnemies"].includes(action?.target)
@@ -1409,6 +1417,8 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
         * (magicFocus ? Number(magicFocus.attackSpellDamageMultiplier) || 1 : 1)
         * (manaAmplification ? Number(manaAmplification.attackSpellDamageMultiplier) || 1 : 1)
         * raceMultiplier
+        * (Number(action.geminiDamageMultiplier) || 1)
+        * (Number(action.leoDamageMultiplier) || 1)
     )) : 0
   }));
   if (actorSide === "enemy" && targetSide === "player" && action.id === "tiefstrom_whirlpool") {

@@ -562,9 +562,17 @@ const ZODIAC_CARDS = [
   openingUnavoidable: true
 } : card.id === "zodiac_gemini" ? {
   ...card,
-  concept: "最初の対象攻撃スキルを複製",
-  descriptionJa: "戦闘中、最初に使用した対象攻撃スキルまたは攻撃呪文を、SP消費なしでもう一度発動する。",
-  duplicateFirstTargetAttack: true
+  concept: "双星の共鳴",
+  descriptionJa: "攻撃スキル・攻撃呪文を使うたび、SP消費なしで威力50％の複製を発動する。状態異常は別に判定する。チャージ技は対象外。",
+  duplicateDamageMultiplier: 0.5
+} : card.id === "zodiac_leo" ? {
+  ...card,
+  concept: "獅子王の猛攻",
+  descriptionJa: "通常攻撃のダメージが2倍、HP25％以下では3倍になる。通常攻撃後、行動開始時の現在HPの10％を消費する。自傷ではHP1を下回らない。",
+  normalAttackDamageMultiplier: 2,
+  lowHpDamageMultiplier: 3,
+  lowHpThreshold: 0.25,
+  attackHpCostRate: 0.1
 } : card.id === "zodiac_taurus" ? {
   ...card,
   concept: "最大HP＋50％／深層ほどDEF上昇",

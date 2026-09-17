@@ -90,6 +90,6 @@ test("Magic Focus does not carry from the original casting into Gemini's extra c
   const events = playerDamageEvents(focusedGemini);
   assert.equal(events.length, 2);
   assert.equal(events[0].damage, Math.floor(playerDamageEvents(ordinary)[0].damage * 1.5));
-  assert.equal(events[1].damage, playerDamageEvents(ordinary)[0].damage);
-  assert.equal(focusedGemini.geminiDuplicationAvailable, false);
+  assert.equal(events[1].damage, Math.floor(playerDamageEvents(ordinary)[0].damage * .5));
+  assert.equal(focusedGemini.geminiActiveAtStart, true);
 });

@@ -177,7 +177,7 @@ test("Gemini keeps one follow-up per casting for C, SR and combined cards", () =
   for(const [cards,amount] of [[[C],10],[[SR],50],[[C,SR],60]]) {
     const battle=resolve(makeCharacter("mage",[...cards,"zodiac_gemini"]),makeEnemy(0,{hp:99999,maxHp:99999}),{type:"skill",skillId:"fireball"});
     assert.deepEqual(followUps(battle).map(e=>e.damage),[amount,amount]);
-    assert.equal(battle.geminiDuplicationAvailable,false);
+    assert.equal(battle.geminiActiveAtStart,true);
   }
 });
 

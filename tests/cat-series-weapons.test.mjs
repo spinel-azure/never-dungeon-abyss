@@ -358,7 +358,7 @@ test("Cat Whim recasts below thirty percent, stops at the boundary, and never ch
   assert.doesNotMatch(boundary.log.join("\n"), /猫の気まぐれ/);
 });
 
-test("Gemini duplicates first target attacks before Cat Whim without recursive copies", () => {
+test("Gemini duplicates every target attack before Cat Whim without recursive copies", () => {
   const character = equipWeapon("mage", "katzenstab");
   character.cards.deckSlots[0] = "zodiac_gemini";
   const battle = createBattleState({ character, enemy: dummyEnemy() });
@@ -366,15 +366,15 @@ test("Gemini duplicates first target attacks before Cat Whim without recursive c
     battle, playerCommand: { type: "skill", skillId: "fireball" }, rng: () => 0
   }).battle;
   assert.equal(playerAttackEvents(first).length, 3);
-  assert.equal(first.geminiDuplicationAvailable, false);
+  assert.equal(first.geminiActiveAtStart, true);
   assert.equal(character.sp - first.player.sp, getEffectiveSpCost(getSkill("fireball"), character));
   assert.ok(first.log.indexOf("ジェミニが行動を複製した！") < first.log.indexOf("猫の気まぐれでもう一度詠唱した！"));
 
   const second = resolveBattleRound({
     battle: first, playerCommand: { type: "skill", skillId: "fireball" }, rng: () => 0.3
   }).battle;
-  assert.equal(playerAttackEvents(second).length, 1);
-  assert.equal(second.geminiDuplicationAvailable, false);
+  assert.equal(playerAttackEvents(second).length, 2);
+  assert.equal(second.geminiActiveAtStart, true);
 });
 
 test("Cat Whim excludes support, healing, charge, and ultimate actions", () => {
