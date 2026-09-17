@@ -1,5 +1,5 @@
 import { inspectGeminiPreviewDoor } from './gemini-preview-door.js';
-import { getGeminiFirstScenario, GEMINI_SECOND_PAGES, GEMINI_SECOND_HINT } from '../data/gemini-event.js';
+import { getGeminiFirstScenario, GEMINI_SECOND_PAGES, GEMINI_SECOND_HINT, GEMINI_THIRD_SCENES } from '../data/gemini-event.js';
 import {
   TAU,
   STEP_MS,
@@ -240,7 +240,7 @@ export function updateAnimation(now) {
   const gemini = state.overlayEvent;
   if (gemini?.type === 'geminiEvent' && gemini.phase === 'fading' && now >= gemini.sistersFadeOutStart + 1500) {
     gemini.phase = 'gone';
-    hooks.say(gemini.act === 2 ? 'ここにはもうあの姉妹はいない。燭台の火が静かに揺れている。\n＊Aボタンで次へ' : '姉妹の姿はない。迷宮の先でまた会えるだろう。\n＊Bボタンで部屋から出る');
+    hooks.say(gemini.act === 3 ? GEMINI_THIRD_SCENES[gemini.sister].farewell+'\n＊Aボタンで次へ' : gemini.act === 2 ? 'ここにはもうあの姉妹はいない。燭台の火が静かに揺れている。\n＊Aボタンで次へ' : '姉妹の姿はない。迷宮の先でまた会えるだろう。\n＊Bボタンで部屋から出る');
   }
   const roamingAnimationResult = hooks.updateRoamingEnemyAnimation(now) || {};
   if (roamingAnimationResult.contact) return;
@@ -682,6 +682,15 @@ function confirmSpecialRoomWarningEvent() {
 }
 
 function startSpecialRoomContentEvent(content, fromGX, fromGY) {
+  if (content?.type === 'geminiThird') {
+    if (!hooks.canEnterGeminiThird?.(content.sister)) {
+      hooks.say('今はこの扉は開かないようだ。');
+      startNpcRetreat({fromGX,fromGY});
+      return;
+    }
+    startGeminiThirdEvent(fromGX,fromGY,content.sister);
+    return;
+  }
   if (content?.type === 'geminiSecond') {
     const progress = hooks.getGeminiProgress?.() || {};
     if (!progress.completed || progress.thirdCompleted) {
@@ -1519,11 +1528,20 @@ export function startGeminiSecondEvent(fromGX, fromGY) {
     message:(reminder ? 'あなたは姉妹の言葉を反芻する…。\n'+GEMINI_SECOND_HINT : GEMINI_SECOND_PAGES[0])+'\n＊Aボタンで次へ'});
 }
 
+export function startGeminiThirdEvent(fromGX,fromGY,sister) {
+  const scene=GEMINI_THIRD_SCENES[sister];
+  if (!scene) return;
+  const reminder=sister==='white' && hooks.getGeminiProgress?.().thirdWhiteCompleted;
+  startOverlayEvent({type:'geminiEvent',act:3,sister,page:0,phase:reminder?'gone':'dialogue',fromGX,fromGY,
+    background:'images/background/dungeon_event_20.avif',sistersFadeStart:performance.now(),reserveMessageLines:6,
+    message:(reminder ? 'あなたは姉妹の言葉を反芻する…。\n'+scene.pages[1] : scene.pages[0])+'\n＊Aボタンで次へ'});
+}
+
 function handleGeminiInput(action) {
   const event = state.overlayEvent;
   if (event.phase === 'opening' || event.phase === 'fading') return true;
   if (event.phase === 'gone') {
-    if (action !== (event.act === 2 ? 'confirm' : 'cancel')) return true;
+    if (action !== (event.act >= 2 ? 'confirm' : 'cancel')) return true;
     state.overlayEvent = null;
     const dir = DIRS.find(d=>event.fromGX+d.dx===state.gridX && event.fromGY+d.dy===state.gridY);
     if (dir) setDoor(event.fromGX,event.fromGY,dir.key,'closed','specialLocked');
@@ -1547,6 +1565,17 @@ function handleGeminiInput(action) {
     return true;
   }
   if (action !== 'confirm') return true;
+  if (event.act === 3) {
+    const scene=GEMINI_THIRD_SCENES[event.sister];
+    event.page += 1;
+    if (event.page >= scene.pages.length) {
+      hooks.completeGeminiThirdVisit?.(event.sister);
+      event.phase='fading';
+      event.sistersFadeOutStart=performance.now();
+      hooks.say('');
+    } else hooks.say(scene.pages[event.page]+'\n＊Aボタンで次へ');
+    return true;
+  }
   if (event.act === 2) {
     event.page += 1;
     if (event.page >= GEMINI_SECOND_PAGES.length) {

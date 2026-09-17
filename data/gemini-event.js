@@ -29,7 +29,25 @@ export function geminiProgress(character) {
   const flags = character?.eventFlags || {};
   return {completed:Boolean(flags.gemini_first_completed || hasKeyItem(character?.keyItems,'gemini_emblem_half')),
     blocked:Boolean(flags.gemini_retry_blocked), retryVariant:Boolean(flags.gemini_retry_variant ?? flags.gemini_retry_blocked),
-    secondCompleted:Boolean(flags.gemini_second_completed),thirdCompleted:Boolean(flags.gemini_third_completed)};
+    secondCompleted:Boolean(flags.gemini_second_completed),thirdWhiteCompleted:Boolean(flags.gemini_third_white_completed),thirdCompleted:Boolean(flags.gemini_third_completed)};
+}
+export const GEMINI_THIRD_SCENES = Object.freeze({
+  white: {pages:['白衣のシュヴェスター「…妹をお探しですの？」','白衣のシュヴェスター「…あの子なら、ここよりも4つ下の階におりましてよ。」'],
+    farewell:'そう言い残すと、白衣のシュヴェスターは静かに姿を消した。'},
+  red: {pages:['赤衣のシュヴェスター「…あら。よくここが分かったわね。」','赤衣のシュヴェスター「…姉様は私の居場所なんて知らないのに。」','赤衣のシュヴェスター「…もう一つの紋様なんて、私たち持っていないわ。」'],
+    farewell:'そう言い残すと、赤衣のシュヴェスターはクスクスと笑いながら姿を消した。'}
+});
+export function canEnterGeminiThird(character, sister) {
+  const p=geminiProgress(character);
+  return p.secondCompleted && !p.thirdCompleted && (sister==='white' || (sister==='red' && p.thirdWhiteCompleted));
+}
+export function completeGeminiThirdVisit(character, sister) {
+  if (!canEnterGeminiThird(character,sister)) return false;
+  const key=sister==='white'?'gemini_third_white_completed':'gemini_third_completed';
+  if (character.eventFlags?.[key]) return false;
+  character.eventFlags ||= {};
+  character.eventFlags[key]=true;
+  return true;
 }
 export const GEMINI_SECOND_HINT = '白衣のシュヴェスター「次にお会いする場所は、地下40階よりも深く、地下50階よりも浅いところですわ。」\n赤衣のシュヴェスター「その階を示す二つの数字は、それぞれ違う数字よ。」';
 export const GEMINI_SECOND_PAGES = Object.freeze([
