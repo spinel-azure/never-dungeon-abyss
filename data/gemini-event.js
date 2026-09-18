@@ -1,4 +1,5 @@
 import { grantKeyItem, hasKeyItem } from './key-items.js';
+import { hasCardEffect } from './cards.js';
 export function hasStartedGemini(character) {
   const flags = character?.eventFlags || {};
   return Boolean(flags.gemini_event_started || flags.gemini_first_completed || flags.gemini_retry_blocked
@@ -11,12 +12,13 @@ export function markGeminiStarted(character) {
   return true;
 }
 export function hasGeminiTransferMarker(character, depth) {
-  const canFind = character?.cards?.deckSlots?.includes('common_person_detection')
+  const astronomy = hasCardEffect(character?.cards?.deckSlots, 'zodiac_detection');
+  const canFind = astronomy || character?.cards?.deckSlots?.includes('common_person_detection')
     || hasKeyItem(character?.keyItems, 'queen_tiara')
     || hasKeyItem(character?.keyItems, 'royal_cat_medal');
   const progress = geminiProgress(character);
   const target = character?.eventFlags?.gemini_final_completed ? null : character?.eventFlags?.gemini_fourth_completed ? 70 : progress.thirdCompleted ? 50 : progress.secondCompleted ? 40 : progress.completed ? 30 : 20;
-  return Number(depth) === target && hasStartedGemini(character) && Boolean(canFind);
+  return Number(depth) === target && (astronomy || hasStartedGemini(character)) && Boolean(canFind);
 }
 export const GEMINI_PAGES = Object.freeze([
   '部屋に入ると、中央には火が灯された燭台とともに太陽と月の紋様が刻まれた箱が置かれており、蓋の部分にはこう記されていた。\n『姉妹のひとりは、いつも真実のみを語る\n姉妹のひとりは、いつも偽りのみを語る』',

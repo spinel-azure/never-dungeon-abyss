@@ -1,5 +1,5 @@
 import { renderWeaponElementStatus } from "./weapon-element-status.js";
-import { appendGeminiTransferMarker } from './gemini-transfer-marker.js';
+import { appendZodiacTransferMarkers } from './zodiac-transfer-markers.js';
 import { CHARACTER_JOBS, TOWN_FACILITIES, getTownFacility } from "../data/town.js";
 import {
   formatCompactQuickName,
@@ -1784,7 +1784,7 @@ function renderTransferDestinationList(destinations = getTransferDestinations())
     const button = document.createElement("button");
     button.type = "button";
     button.textContent = destination.label;
-    appendGeminiTransferMarker(button, town.getCharacter(), destination.depth);
+    appendZodiacTransferMarkers(button, town.getCharacter(), destination.depth);
     button.classList.toggle("is-selected", index === town.transferIndex);
     button.addEventListener("click", () => {
       if (town.transferPointerArmedIndex === index) {

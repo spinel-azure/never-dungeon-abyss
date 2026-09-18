@@ -1597,3 +1597,11 @@
 - Verified B1F gold and B22F purple rendering in tests/browser/leo-room.mjs. Added depth/door-kind isolation and sealed-door tests; updated former empty-B1F assumptions to B3F.
 - Full automated suite: 1451 passed, 0 failed. Main cache version 20260918-8.
 
+
+## 2026-09-18 Astronomy and zodiac transfer markers
+- Added SR Astronomy (sr_astronomy), cost 4, one copy, exploration effect zodiac_detection and a Canvas constellation icon.
+- Existing purple chest SR slots: B1-9 Astronomy 0.5% (Silent Steps 0.5%); B70-79 Astronomy 2.5% (Ability Boost 2.5%). Other rarity totals unchanged.
+- Equipped Astronomy shows unfinished guardian events by transfer region, using boss reward/defeat definitions and deduplicating twins. Gemini follows story progress and keeps NPC-card/tiara/cat-medal discovery compatibility. Astronomy can discover its first act before contact.
+- Virgo marks the active B95 quest objective until obtained. Marathon rewards, unreleased Leo, and B4 Libra (no matching transfer destination) have no visible transfer marker.
+- SVG paths avoid emoji/font dependence; multiple signs share a row. Narrow-screen transfer spacing adjusted to prevent title/list overlap.
+- Tests: full suite 1455 passed; cache tests 14 passed after version bump; PC/mobile browser checks passed for multiple markers, removal and legacy Gemini conditions. Cache versions: main/town CSS 20260918-9.

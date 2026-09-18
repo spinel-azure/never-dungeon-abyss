@@ -67,7 +67,7 @@ try{
    const used=await page.evaluate(()=>window.srUsed);assert.deepEqual(used,{accepted:true,sp:0});costs.push({mode,combined,expected,used});
   }
   const purpleAwards=[];
-  for(const [roll,id] of [[.1,'sr_sp_saver_plus'],[.4,'sr_vital_abundance'],[.7,'sr_spirit_abundance'],[.92,'sr_follow_up_plus'],[.98,'sr_ability_boost']]){
+  for(const [roll,id] of [[.1,'sr_sp_saver_plus'],[.4,'sr_vital_abundance'],[.7,'sr_spirit_abundance'],[.92,'sr_follow_up_plus'],[.96,'sr_ability_boost'],[.98,'sr_astronomy']]){
    await page.evaluate(()=>srQa.purpleSetup());
    await page.evaluate(async roll=>{srQa.purpleStart();window.srOriginalRandom=Math.random;Math.random=()=>roll;(await import('/js/player.js')).handleOverlayEventInput('confirm');},roll);
    await page.waitForFunction(id=>srQa.state().lootBag.cards[id]===1,id);

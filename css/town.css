@@ -127,3 +127,14 @@ body.layout-mobile .guild-quest-entry{padding-inline:3px;font-size:10px;line-hei
 
 .transfer-destination-list button{position:relative;padding-inline:2em}
 .gemini-transfer-marker{position:absolute;right:.3em;top:50%;transform:translateY(-50%);width:1.2em;height:1.2em;pointer-events:none}
+.zodiac-transfer-markers{position:absolute;right:.3em;top:50%;transform:translateY(-50%);display:flex;gap:.15em;pointer-events:none}
+.zodiac-transfer-marker{width:1.05em;height:1.05em;flex:none}
+@media(max-width:560px){
+ .transfer-destination-overlay{padding:5px 24px;gap:3px}
+ .transfer-destination-overlay h2{font-size:22px}
+ .transfer-destination-list{gap:3px}
+ .transfer-destination-list button{min-height:24px;font-size:17px}
+ .transfer-destination-pager{font-size:14px;gap:6px}
+ .transfer-destination-pager button{min-height:20px;padding:1px 10px;font-size:14px}
+ .transfer-destination-help{font-size:10px}
+}

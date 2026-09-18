@@ -113,14 +113,14 @@ test("protected save roundtrip retains new cards and original C/L-only saves",as
   }
  }finally{delete globalThis.localStorage;delete globalThis.window;delete globalThis.CustomEvent;}
 });
-test("rapid-current purple chest exact 30/30/30/5/5 boundaries and counts",async()=>{
+test("rapid-current purple chest exact 30/30/30/5/2.5/2.5 boundaries and counts",async()=>{
  const {rollPurpleChestLoot,getPurpleChestLootTable}=await import("../data/loot.js");
  for(const depth of [70,79]){
-  assert.deepEqual(getPurpleChestLootTable(depth).entries.map(e=>e.upperBound),[.3,.6,.9,.95,1]);
-  for(const [roll,id] of [[0,CUT],[.299999,CUT],[.3,HP],[.599999,HP],[.6,SP],[.899999,SP],[.9,"sr_follow_up_plus"],[.949999,"sr_follow_up_plus"],[.95,"sr_ability_boost"],[.999999,"sr_ability_boost"]])assert.deepEqual(rollPurpleChestLoot(()=>roll,depth),{kind:"card",cardId:id,rarity:"SR",amount:1,unidentifiedName:"？カード"});
+  assert.deepEqual(getPurpleChestLootTable(depth).entries.map(e=>e.upperBound),[.3,.6,.9,.95,.975,1]);
+  for(const [roll,id] of [[0,CUT],[.299999,CUT],[.3,HP],[.599999,HP],[.6,SP],[.899999,SP],[.9,"sr_follow_up_plus"],[.949999,"sr_follow_up_plus"],[.95,"sr_ability_boost"],[.974999,"sr_ability_boost"],[.975,"sr_astronomy"],[.999999,"sr_astronomy"]])assert.deepEqual(rollPurpleChestLoot(()=>roll,depth),{kind:"card",cardId:id,rarity:"SR",amount:1,unidentifiedName:"？カード"});
  }
  const counts={};for(let i=0;i<1000;i++){const id=rollPurpleChestLoot(()=>i/1000,70).cardId;counts[id]=(counts[id]||0)+1;}
- assert.deepEqual(counts,{[CUT]:300,[HP]:300,[SP]:300,sr_follow_up_plus:50,sr_ability_boost:50});
+ assert.deepEqual(counts,{[CUT]:300,[HP]:300,[SP]:300,sr_follow_up_plus:50,sr_ability_boost:25,sr_astronomy:25});
 });
 
 test("B70-B79 purple chests use vacant event rooms and never replace fixed or rare events",async()=>{

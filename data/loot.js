@@ -269,7 +269,8 @@ export const PURPLE_CHEST_LOOT_TABLES = Object.freeze([
       Object.freeze({ upperBound: 0.6, cardId: "common_person_detection", rarity: "C" }),
       Object.freeze({ upperBound: 0.9, cardId: "common_treasure_detection", rarity: "C" }),
       Object.freeze({ upperBound: 0.99, cardId: "rare_search_and_destroy", rarity: "R" }),
-      Object.freeze({ upperBound: 1, cardId: "sr_silent_steps", rarity: "SR" })
+      Object.freeze({ upperBound: 0.995, cardId: "sr_silent_steps", rarity: "SR" }),
+      Object.freeze({ upperBound: 1, cardId: "sr_astronomy", rarity: "SR" })
     ])
   }),
   Object.freeze({
@@ -290,7 +291,8 @@ export const PURPLE_CHEST_LOOT_TABLES = Object.freeze([
       Object.freeze({ upperBound: 0.6, cardId: "sr_vital_abundance", rarity: "SR" }),
       Object.freeze({ upperBound: 0.9, cardId: "sr_spirit_abundance", rarity: "SR" }),
       Object.freeze({ upperBound: 0.95, cardId: "sr_follow_up_plus", rarity: "SR" }),
-      Object.freeze({ upperBound: 1, cardId: "sr_ability_boost", rarity: "SR" })
+      Object.freeze({ upperBound: 0.975, cardId: "sr_ability_boost", rarity: "SR" }),
+      Object.freeze({ upperBound: 1, cardId: "sr_astronomy", rarity: "SR" })
     ])
   })
 ]);

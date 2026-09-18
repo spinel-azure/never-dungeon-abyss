@@ -17,6 +17,13 @@ export const VIRGO_CARD_ID = "zodiac_virgo";
 
 const STANDARD_CARDS = [
   {
+    id: "sr_astronomy", rarity: "SR", cost: 4,
+    name: "Astronomy", nameJa: "天体観測", concept: "転送門で星座イベントを探知",
+    descriptionJa: "転送門に、未完了のゾディアックイベントがある区域の星座マークを表示する。",
+    category: "exploration", effectId: "zodiac_detection", iconId: "astronomy",
+    maxOwned: 1, maxCopies: 1
+  },
+  {
     id: "common_strength_up", rarity: "C", cost: 1,
     name: "Strength Up", nameJa: "腕力上昇", concept: "STR +1",
     category: "ability", effectId: "strength_up", effectValue: 1,

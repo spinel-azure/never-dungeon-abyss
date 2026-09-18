@@ -1,4 +1,5 @@
 import { drawQuarteredShieldIcon } from "./icons/quartered-shield.js";
+import { drawAstronomyIcon } from './icons/astronomy.js';
 import { drawStrengthIcon } from "./icons/strength.js";
 import { drawKnowledgeIcon } from "./icons/knowledge.js";
 import { drawLuckIcon } from "./icons/luck.js";
@@ -19,6 +20,7 @@ import { drawTreasureDetectionIcon } from "./icons/treasure-detection.js";
 import { drawFlameSwordIcon, drawIceSwordIcon, drawLightningSwordIcon } from "./icons/elemental-sword.js";
 
 const iconDrawers = new Map([
+  ['astronomy', drawAstronomyIcon],
   ["strength", drawStrengthIcon],
   ["knowledge", drawKnowledgeIcon],
   ["luck", drawLuckIcon],

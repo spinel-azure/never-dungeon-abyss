@@ -109,9 +109,9 @@ test("B10F-B19F purple chest table uses the exact 33/33/33/1 boundaries", () => 
   assert.equal(rollPurpleChestLoot(() => 0, 20).kind, "none");
 });
 
-test("the original B1F-B9F purple table remains 30/30/30/9/1", () => {
+test("B1F-B9F purple table keeps rarity rates and shares its SR slot with Astronomy", () => {
   const table = getPurpleChestLootTable(1);
-  assert.deepEqual(table.entries.map(entry => entry.upperBound), [0.3, 0.6, 0.9, 0.99, 1]);
+  assert.deepEqual(table.entries.map(entry => entry.upperBound), [0.3, 0.6, 0.9, 0.99, 0.995, 1]);
   assert.deepEqual(
     [0, 0.3, 0.6, 0.9, 0.99].map(roll => rollPurpleChestLoot(() => roll, 9).cardId),
     ["common_stairs_detection", "common_person_detection", "common_treasure_detection", "rare_search_and_destroy", "sr_silent_steps"]
