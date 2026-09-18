@@ -1590,3 +1590,10 @@
 - Fixed the reward portrait inheriting the house background's cover fit. Switch to containBottom, preserving aspect ratio with the bottom flush to the viewport.
 - Verified PC (1280x900) and mobile (390x844) via tests/browser/kirke-portrait.mjs; both passed without page errors. Screenshots in artifacts/kirke-portrait/.
 
+
+## 2026-09-18 B1F Leo room preparation
+- B1F special doors select dungeon_door_gold_leo.webp using a separate texture key; all other depths and ordinary/boss doors retain existing textures.
+- Reserved B1F special content as leoPreparation, preventing random purple chest / insect replacement. Sealed access blocks interaction and movement even for previously unlocked/open special doors.
+- Verified B1F gold and B22F purple rendering in tests/browser/leo-room.mjs. Added depth/door-kind isolation and sealed-door tests; updated former empty-B1F assumptions to B3F.
+- Full automated suite: 1451 passed, 0 failed. Main cache version 20260918-8.
+

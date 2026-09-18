@@ -1,4 +1,5 @@
 import { getRoamingRevealFrame } from './roaming-reveal.js';
+import { getEventDoorTextureKind } from '../data/leo-room.js';
 import { drawGeminiEvent } from './gemini-event-renderer.js';
 import {
   FOV,
@@ -33,6 +34,7 @@ const renderer = {
   openDoorOnCell: () => false,
   getDoorState: () => null,
   getDoorKind: () => null,
+  getDepth: () => 0,
   handleOverlayInput: () => false,
   inBounds: () => false,
   updateAnimation: () => {},
@@ -225,6 +227,8 @@ export function configureRenderer(options) {
   loadDoorTexture(["normal", "locked"], "images/dungeon_effects/dungeon_door_normal.webp");
   loadDoorTexture(["boss", "bossUnlocked"], "images/dungeon_effects/dungeon_door_red.webp");
   loadDoorTexture(["specialLocked", "specialUnlocked"], "images/dungeon_effects/dungeon_door_purple.webp");
+  renderer.doorTextures.leo = makeDoorTexture("special");
+  loadDoorTexture(["leo"], "images/dungeon_effects/dungeon_door_gold_leo.webp");
   npcs.forEach(npc => loadCharacterImage(npc.imageId, npc.image));
   Object.values(BOSSES).forEach(boss => {
     if (boss.encounterImageId && boss.encounterImage) {
@@ -767,7 +771,7 @@ export function drawBoundaryWalls() {
     const shade = Math.max(0.18, 1 - hit.dist / MAX_DIST);
     const orientationShade = hit.side === 0 ? 0.82 : 0.68;
     const light = Math.min(1.12, shade * orientationShade + 0.13 + state.torch);
-    const doorTexture = doorTextures[hit.doorKind] || doorTextures.normal;
+    const doorTexture = doorTextures[getEventDoorTextureKind(renderer.getDepth(), hit.doorKind)] || doorTextures.normal;
 
     ctx.drawImage(activeWallTexture, wallSampleX, 0, 1, activeWallTexture.height, x, y1, Math.ceil(colW) + 1, wallH);
     ctx.fillStyle = `rgba(0,0,0,${1 - light})`;

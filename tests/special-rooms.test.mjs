@@ -50,7 +50,7 @@ test("B2 special room contains the repeatable lingering ghost event boss", () =>
     minimapMarker: "E",
     revealBeforeExploration: true
   });
-  assert.equal(getSpecialRoomDefinition(1).content, null);
+  assert.equal(getSpecialRoomDefinition(1).content.type, "leoPreparation");
 });
 
 test("The lingering ghost event marker is visible before exploration except at zero torch", () => {
@@ -254,7 +254,7 @@ test("each floor creates at most one sealed one-cell special room with an intern
 
 test("configured empty special rooms contain one purple card chest without replacing fixed events", () => {
   setStartPosition(0, 0);
-  buildBoundaryWallMap(1, seeded(101), {});
+  buildBoundaryWallMap(3, seeded(101), {});
   const earlyRoom = cells.flat().find(cell => cell.specialRoom);
   assert.equal(earlyRoom.specialRoom.content, null);
   assert.equal(earlyRoom.treasure, "purple");
@@ -279,7 +279,7 @@ test("configured empty special rooms contain one purple card chest without repla
 test("an eligible empty special room can become a Maikaefer nest instead of a purple chest", () => {
   assert.equal(MAIKAEFER_NEST_RATE, 0.02);
   setStartPosition(0, 0);
-  buildBoundaryWallMap(1, seeded(201), { maikaeferNestRoll: 0 });
+  buildBoundaryWallMap(3, seeded(201), { maikaeferNestRoll: 0 });
   const room = cells.flat().find(cell => cell.specialRoom);
   assert.equal(room.specialRoom.content.type, "rareEnemy");
   assert.equal(room.specialRoom.content.enemyId, "maikaefer");
@@ -297,7 +297,7 @@ test("Maikaefer nests never replace fixed or forced-quest special rooms", () => 
   assert.equal(cells.flat().find(cell => cell.specialRoom).specialRoom.content.bossId, "lingering_ghost_b2f");
 
   setStartPosition(0, 0);
-  buildBoundaryWallMap(1, seeded(203), { maikaeferNestRoll: 0, forcedEnemyId: "quest_enemy" });
+  buildBoundaryWallMap(3, seeded(203), { maikaeferNestRoll: 0, forcedEnemyId: "quest_enemy" });
   const forcedRoom = cells.flat().find(cell => cell.specialRoom);
   assert.equal(forcedRoom.specialRoom.content, null);
   assert.equal(forcedRoom.treasure, "purple");

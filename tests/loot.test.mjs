@@ -322,7 +322,7 @@ test("B1F to B4F keep one to three red chests alongside eligible purple special-
     buildBoundaryWallMap(depth, () => roll);
     const treasures = cells.flat().map(cell => cell.treasure).filter(Boolean);
     assert.equal(treasures.filter(type => type === "red").length, expected);
-    assert.equal(treasures.filter(type => type === "purple").length, depth === 1 ? 1 : 0);
+    assert.equal(treasures.filter(type => type === "purple").length, 0);
     assert.ok(treasures.every(type => type === "red" || type === "purple"));
   }
   buildBoundaryWallMap(5, () => 0);

@@ -1,3 +1,4 @@
+import { LEO_ROOM_CLOSED_MESSAGE } from '../data/leo-room.js';
 import {getGeminiFinalAccess,completeGeminiFinal} from '../data/gemini-final.js';
 import { syncShopNotifications, markShopNotificationsShown } from "../data/shop-notifications.js";
 import { ROAMING_ENEMY_DEFINITIONS } from '../data/roaming-enemies.js';
@@ -856,6 +857,7 @@ import {
     ctx,
     eventOverlayCanvas,
     eventOverlayCtx,
+    getDepth: () => currentDepth,
     state,
     wallOnCell,
     closedDoorOnCell,
@@ -5006,6 +5008,7 @@ import {
   }
 
   function getCurrentSpecialDoorAccessBlock() {
+    if (currentDepth === 1) return {blocked: true, sealed: true, message: LEO_ROOM_CLOSED_MESSAGE};
     const room = getSpecialRoomDefinition(currentDepth);
     if(room?.content?.type==='geminiFinal'){const access=getGeminiFinalAccess(character);if(access.blocked)return access;}
     if (room?.content?.type === 'geminiFourth') { const access=getGeminiFourthAccess(character); if(access.blocked)return access; }

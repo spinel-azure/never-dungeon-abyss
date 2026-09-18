@@ -405,6 +405,7 @@ export function tryMove(amount, automated = false, specialEntryConfirmed = false
   if (!automated) hooks.cancelAutoReturn(false);
   const currentDir = amount > 0 ? DIRS[state.dir] : DIRS[(state.dir + 2) % 4];
   const currentDoorKind = getDoorKind(state.gridX, state.gridY, currentDir.key);
+  if (blockSealedSpecialDoor(currentDoorKind)) return;
   if (currentDoorKind === "specialLocked" && !openDoorOnCell(state.gridX, state.gridY, currentDir.key)) {
     hooks.playSe("blocked");
     state.shake = amount > 0 ? -12 : 9;
@@ -548,6 +549,7 @@ export function openDoorAhead(automated = false) {
   if (state.overlayEvent || state.anim || (state.autoReturning && !automated)) return false;
   const dir = DIRS[state.dir];
   const doorKind = getDoorKind(state.gridX, state.gridY, dir.key);
+  if (blockSealedSpecialDoor(doorKind)) return true;
   if (doorKind === "specialLocked") {
     startSpecialDoorLockEvent(state.gridX, state.gridY, dir.key);
     return true;
@@ -578,6 +580,15 @@ function startDoorOpening(x, y, dirKey, message = "ギィ……") {
   };
   hooks.playSe("door");
   hooks.say(message);
+}
+
+function blockSealedSpecialDoor(doorKind) {
+  if (doorKind !== 'specialLocked' && doorKind !== 'specialUnlocked') return false;
+  const access = hooks.getSpecialDoorAccessBlock() || {};
+  if (!access.sealed || !access.blocked) return false;
+  hooks.playSe('blocked');
+  hooks.say(access.message);
+  return true;
 }
 
 function startSpecialDoorLockEvent(x, y, dirKey, bumped = false) {
