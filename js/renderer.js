@@ -603,6 +603,15 @@ function drawOverlayEvent() {
       ctx.restore();
       return;
     }
+    if (event.imageFit === "containBottom") {
+      const scale = Math.min(W / image.naturalWidth, H / image.naturalHeight);
+      const drawW = image.naturalWidth * scale;
+      const drawH = image.naturalHeight * scale;
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(image, (W - drawW) / 2, H - drawH, drawW, drawH);
+      ctx.restore();
+      return;
+    }
     if (event.imageFit === "containFull") {
       const scale = Math.min((W * .98) / image.naturalWidth, (H * .98) / image.naturalHeight);
       const drawW = image.naturalWidth * scale;

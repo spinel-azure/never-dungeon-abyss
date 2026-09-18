@@ -1585,3 +1585,8 @@
 - 最終幕ジェミニ初回取得のみ、既存ジングル／カードポップアップ終了後にimportantItem（juuyou-item.mp3）を再生。他カードは変更なし。
 - LAST UPDATEを2026-09-18、mainキャッシュを20260918-6へ更新。
 - タイマーを用いた再生順序・他カード回帰を含む関連18テスト成功。実音未確認。コミット・pushなし。
+
+## 2026-09-18 Kirke beeswax portrait
+- Fixed the reward portrait inheriting the house background's cover fit. Switch to containBottom, preserving aspect ratio with the bottom flush to the viewport.
+- Verified PC (1280x900) and mobile (390x844) via tests/browser/kirke-portrait.mjs; both passed without page errors. Screenshots in artifacts/kirke-portrait/.
+

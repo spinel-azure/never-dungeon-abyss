@@ -1374,6 +1374,7 @@ function advanceKirkeHouseEvent() {
       event.phase = "kirke";
       event.canDeliver = false;
       event.imageId = event.content.portraitId;
+      event.imageFit = "containBottom";
       hooks.say(`${result.message}\n＊Aボタン：戻る`);
       hooks.onStateChanged();
       return;
