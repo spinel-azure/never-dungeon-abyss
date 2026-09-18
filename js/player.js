@@ -1,3 +1,4 @@
+import {createGeminiFinalEvent,handleGeminiFinalInput,updateGeminiFinal} from './gemini-final-event.js';
 import { inspectGeminiPreviewDoor } from './gemini-preview-door.js';
 import { getGeminiFirstScenario, GEMINI_SECOND_PAGES, GEMINI_SECOND_HINT, GEMINI_THIRD_SCENES, getGeminiFourthPages, GEMINI_FOURTH_SYMBOLS } from '../data/gemini-event.js';
 import {
@@ -238,6 +239,7 @@ export function isPlayerInputEnabled() {
 
 export function updateAnimation(now) {
   const gemini = state.overlayEvent;
+  if(gemini?.act===5)updateGeminiFinal(gemini,now,hooks);
   if (gemini?.type === 'geminiEvent' && gemini.phase === 'fading' && now >= gemini.sistersFadeOutStart + 1500) {
     gemini.phase = 'gone';
     hooks.say(gemini.act === 4 ? 'そう言い残すと、姉妹は静かに消えた。\n＊Aボタンで次へ' : gemini.act === 3 ? GEMINI_THIRD_SCENES[gemini.sister].farewell+'\n＊Aボタンで次へ' : gemini.act === 2 ? 'ここにはもうあの姉妹はいない。燭台の火が静かに揺れている。\n＊Aボタンで次へ' : '姉妹の姿はない。迷宮の先でまた会えるだろう。\n＊Bボタンで部屋から出る');
@@ -682,6 +684,11 @@ function confirmSpecialRoomWarningEvent() {
 }
 
 function startSpecialRoomContentEvent(content, fromGX, fromGY) {
+  if(content?.type==='geminiFinal') {
+    const access=hooks.getGeminiFinalAccess?.();
+    if(!access || access.blocked){hooks.say(access?.message || '今はこの扉は開かないようだ。');startNpcRetreat({fromGX,fromGY});return;}
+    startGeminiFinalEvent(fromGX,fromGY);return;
+  }
   if (content?.type === 'geminiFourth') {
     const access=hooks.getGeminiFourthAccess?.();
     if (!access || access.blocked) { hooks.say(access?.message || '今はこの扉は開かないようだ。');startNpcRetreat({fromGX,fromGY});return; }
@@ -1579,6 +1586,7 @@ function handleGeminiFourthInput(event,action) {
   } else hooks.say(event.pages[event.page]+'\n＊Aボタンで次へ');
   return true;
 }
+export function startGeminiFinalEvent(fromGX,fromGY){startOverlayEvent(createGeminiFinalEvent(fromGX,fromGY));}
 function handleGeminiInput(action) {
   const event = state.overlayEvent;
   if (event.phase === 'opening' || event.phase === 'fading') return true;
@@ -1592,6 +1600,7 @@ function handleGeminiInput(action) {
     hooks.onStateChanged();
     return true;
   }
+  if(event.act===5)return handleGeminiFinalInput(event,action,hooks);
   if (event.act === 4) return handleGeminiFourthInput(event,action);
   if (event.phase === 'choice' && ['confirm','cancel'].includes(action)) {
     event.choice = action === 'confirm' ? event.correctChoice : (event.correctChoice === 'sun' ? 'moon' : 'sun');

@@ -6,7 +6,7 @@ import { buildBoundaryWallMap, cells, setDoor, attemptSpecialRoomUnlock } from '
 import { configurePlayer, state, tryMove, openDoorAhead, setPlayerInputEnabled } from '../js/player.js';
 import { DIRS } from '../js/config.js';
 
-test('B22 public preview opens only on twentieth forward bump; A and guaranteed unlock cannot bypass it',()=>{
+test('B22 released entrance opens immediately without twenty bumps',()=>{
   buildBoundaryWallMap();
   const room={...getSpecialRoomDefinition(22),attemptsRemaining:1};
   cells[2][3].specialRoom=room;
@@ -15,13 +15,9 @@ test('B22 public preview opens only on twentieth forward bump; A and guaranteed 
   let message='';
   configurePlayer({say:s=>message=s,playSe:()=>{},onStateChanged:()=>{},cancelAutoReturn:()=>{},getSpecialDoorAccessBlock:()=>({blocked:false})});
   setPlayerInputEnabled(true);
-  for(let i=0;i<25;i++) openDoorAhead();
-  assert.equal(state.anim,null);
-  assert.equal(attemptSpecialRoomUnlock({x:2,y:2,dirKey:'E',guaranteed:true}).accepted,false);
-  for(let i=0;i<19;i++){tryMove(1);assert.equal(state.anim,null);assert.equal(message,room.content.accessBlockedMessage);}
-  tryMove(1);assert.equal(state.anim.type,'door');
+  openDoorAhead();assert.equal(state.anim.type,'door');
   assert.equal(rollMaikaeferNestContent({room,roll:0}),null);
-  assert.equal(inspectGeminiPreviewDoor(structuredClone(room)).unlocked,false);
+  assert.equal(inspectGeminiPreviewDoor(structuredClone(room)).unlocked,true);
   assert.equal(inspectGeminiPreviewDoor(getSpecialRoomDefinition(31),true),null);
   state.anim=null;
 });

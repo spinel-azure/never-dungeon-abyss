@@ -1,3 +1,4 @@
+import {getGeminiFinalAccess,completeGeminiFinal} from '../data/gemini-final.js';
 import { syncShopNotifications, markShopNotificationsShown } from "../data/shop-notifications.js";
 import { ROAMING_ENEMY_DEFINITIONS } from '../data/roaming-enemies.js';
 import { recordVerfolgerDefeat, isVerfolgerDefeatedOnFloor, VERFOLGER_DEFEAT_MESSAGE } from '../data/verfolger.js';
@@ -931,6 +932,8 @@ import {
     showTreasure,
     playTreasureOpening,
     hideTreasure,
+    getGeminiFinalAccess: () => getGeminiFinalAccess(character),
+    completeGeminiFinal: slots => { const result=completeGeminiFinal(character,slots); if(result){updateCharacterUi();saveGame();if(result.gained)showCardGetEffect('zodiac_gemini');} return result; },
     getGeminiFourthAccess: () => getGeminiFourthAccess(character),
     getGeminiFourthQuestion: () => getGeminiFourthQuestion(character),
     resolveGeminiFourth: choice => { const result=resolveGeminiFourth(character,choice); if(result){updateCharacterUi();saveGame();} return result; },
@@ -5003,6 +5006,7 @@ import {
 
   function getCurrentSpecialDoorAccessBlock() {
     const room = getSpecialRoomDefinition(currentDepth);
+    if(room?.content?.type==='geminiFinal'){const access=getGeminiFinalAccess(character);if(access.blocked)return access;}
     if (room?.content?.type === 'geminiFourth') { const access=getGeminiFourthAccess(character); if(access.blocked)return access; }
     if (room?.content?.type === 'geminiThird') {
       const access=getGeminiThirdAccess(character,room.content.sister);
@@ -5151,7 +5155,7 @@ import {
     if (handleItemOverlayInput(action) || handleSkillOverlayInput(action) || handleBattleInput(action)) return true;
     if (sceneTransitionRunning || handleLootIdentifyInput(action) || handleExperienceSettlementInput(action) || handleTownInput(action)) return true;
     if (["up", "down", "left", "right"].includes(action)) {
-      if (state.overlayEvent?.act === 4 && handleOverlayEventInput(action)) return true;
+      if ([4,5].includes(state.overlayEvent?.act) && handleOverlayEventInput(action)) return true;
       if (handleOverlayEventInput("dismiss") || handleMenuInput(action)) return true;
       if (action === "up") return manualMove(1);
       if (action === "down") return manualMove(-1);
@@ -5218,7 +5222,7 @@ import {
     },
     handleSkillInput: action => endingController.handleAction(action) || michaelaRestorationController.handleAction(action) || endingSequenceActive || handleBlockingTutorialInput(action) || handleSkillOverlayInput(action),
     handleItemInput: action => endingController.handleAction(action) || michaelaRestorationController.handleAction(action) || endingSequenceActive || handleBlockingTutorialInput(action) || handleItemOverlayInput(action),
-    handleEventChoiceInput: action => state.overlayEvent?.act === 4 && handleOverlayEventInput(action),
+    handleEventChoiceInput: action => [4,5].includes(state.overlayEvent?.act) && handleOverlayEventInput(action),
     handleOverlayInput: action => endingController.handleAction(action) || michaelaRestorationController.handleAction(action) || endingSequenceActive || handleBlockingTutorialInput(action) || handleOverlayEventInput(action),
     handleBattleInput: action => endingController.handleAction(action) || michaelaRestorationController.handleAction(action) || endingSequenceActive || handleBlockingTutorialInput(action) || handleBattleInput(action),
     handleTownInput: action => (

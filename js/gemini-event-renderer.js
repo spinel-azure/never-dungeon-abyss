@@ -1,3 +1,4 @@
+import {drawGeminiFinalBoard} from './gemini-final-renderer.js';
 import { GEMINI_ASSETS } from '../data/gemini-event.js';
 export function drawGeminiEvent(ctx, event, width, height, images, load) {
   const assets = {...GEMINI_ASSETS,background:event.background || GEMINI_ASSETS.background};
@@ -5,6 +6,7 @@ export function drawGeminiEvent(ctx, event, width, height, images, load) {
   ctx.fillStyle='#050508';ctx.fillRect(0,0,width,height);
   const background=images.get(assets.background);
   if (background?.complete && background.naturalWidth) ctx.drawImage(background,0,0,width,height);
+  if(eFinal(event)) { drawGeminiFinalBoard(ctx,event,width,height,images,load); if(['finalSlots','finalPiece'].includes(event.phase))return; }
   if(event.phase === 'stoneChoice') {
     ctx.save();ctx.strokeStyle='#c6ffff';ctx.lineWidth=Math.max(2,width/400);ctx.shadowColor='#44eaff';ctx.shadowBlur=18;
     ctx.strokeRect(width*(.3+.2*event.selection-.085),height*.285,width*.17,height*.215);
@@ -16,7 +18,7 @@ export function drawGeminiEvent(ctx, event, width, height, images, load) {
   if (!ready) return;
   event.sistersReadyAt ??= performance.now();
   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  const alpha=event.phase === 'fading'
+  const alpha=['fading','finalLeaving','finalDeclineFade','finalRewardFade'].includes(event.phase)
     ? (reduced ? 0 : Math.max(0,1-(performance.now()-event.sistersFadeOutStart)/1500))
     : (reduced ? 1 : Math.min(1,(performance.now()-Math.max(event.sistersReadyAt,event.sistersFadeStart || 0))/1500));
   ctx.save();ctx.globalAlpha=alpha;
@@ -25,10 +27,17 @@ export function drawGeminiEvent(ctx, event, width, height, images, load) {
     const image=images.get('gemini_'+key);
     const scale=Math.min(height*.91/image.naturalHeight,width*.31/image.naturalWidth);
     const w=image.naturalWidth*scale,h=image.naturalHeight*scale;
-    ctx.drawImage(image,width*center-w/2,height*.97-h,w,h);
+        const merging=event.act===5 && ['finalMerging','finalSpeech','finalRewardFade'].includes(event.phase);
+    const t=merging ? Math.min(1,Math.max(0,(performance.now()-event.mergeStart)/2500)) : 0;
+    const destination=key==='white'?.39:.61;
+    const position=center+(destination-center)*t;
+    if(merging){ctx.shadowColor='#7be7e9';ctx.shadowBlur=12;}
+    ctx.drawImage(image,width*position-w/2,height*.97-h,w,h);
   }
   ctx.restore();
   if (['opening','opened'].includes(event.phase)) {
     ctx.fillStyle='rgba(0,0,0,.8)';ctx.fillRect(0,0,width,height);
   }
 }
+
+function eFinal(event){return event.act===5;}

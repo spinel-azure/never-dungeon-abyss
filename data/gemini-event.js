@@ -15,7 +15,7 @@ export function hasGeminiTransferMarker(character, depth) {
     || hasKeyItem(character?.keyItems, 'queen_tiara')
     || hasKeyItem(character?.keyItems, 'royal_cat_medal');
   const progress = geminiProgress(character);
-  const target = character?.eventFlags?.gemini_fourth_completed ? null : progress.thirdCompleted ? 50 : progress.secondCompleted ? 40 : progress.completed ? 30 : 20;
+  const target = character?.eventFlags?.gemini_final_completed ? null : character?.eventFlags?.gemini_fourth_completed ? 70 : progress.thirdCompleted ? 50 : progress.secondCompleted ? 40 : progress.completed ? 30 : 20;
   return Number(depth) === target && hasStartedGemini(character) && Boolean(canFind);
 }
 export const GEMINI_PAGES = Object.freeze([
