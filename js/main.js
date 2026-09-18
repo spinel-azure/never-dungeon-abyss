@@ -933,7 +933,7 @@ import {
     playTreasureOpening,
     hideTreasure,
     getGeminiFinalAccess: () => getGeminiFinalAccess(character),
-    completeGeminiFinal: slots => { const result=completeGeminiFinal(character,slots); if(result){updateCharacterUi();saveGame();if(result.gained)showCardGetEffect('zodiac_gemini');} return result; },
+    completeGeminiFinal: slots => { const result=completeGeminiFinal(character,slots); if(result){updateCharacterUi();saveGame();if(result.gained)showCardGetEffect('zodiac_gemini', { afterSeId: 'importantItem' });} return result; },
     getGeminiFourthAccess: () => getGeminiFourthAccess(character),
     getGeminiFourthQuestion: () => getGeminiFourthQuestion(character),
     resolveGeminiFourth: choice => { const result=resolveGeminiFourth(character,choice); if(result){updateCharacterUi();saveGame();} return result; },
@@ -1832,7 +1832,7 @@ import {
     return result.gained > 0;
   }
 
-  function showCardGetEffect(cardId, { seId = "battleVictory" } = {}) {
+  function showCardGetEffect(cardId, { seId = "battleVictory", afterSeId = null } = {}) {
     const card = getCardById(cardId);
     if (!cardGetEffect || !cardGetCanvas || !card) return;
     window.clearTimeout(cardGetTimer);
@@ -1850,6 +1850,7 @@ import {
     cardGetTimer = window.setTimeout(() => {
       cardGetEffect.classList.remove("is-active");
       cardGetEffect.hidden = true;
+      if (afterSeId) playSe(afterSeId);
       if (townPortraitFrame && cardGetEffect.parentElement !== townPortraitFrame) {
         townPortraitFrame.append(cardGetEffect);
       }
