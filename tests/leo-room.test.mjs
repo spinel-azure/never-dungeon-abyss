@@ -5,9 +5,11 @@ import {getSpecialRoomDefinition,rollMaikaeferNestContent} from '../data/special
 import {buildBoundaryWallMap,setDoor} from '../js/dungeon.js';
 import {configurePlayer,state,tryMove,openDoorAhead,setPlayerInputEnabled} from '../js/player.js';
 import {DIRS} from '../js/config.js';
-test('Only B1 special doors use Leo, all other floors and door types retain their textures',()=>{
+test('Leo and Gemini textures apply only to their own special doors; other doors retain their textures',()=>{
  for(let depth=1;depth<=100;depth++)for(const kind of ['normal','locked','boss','bossUnlocked','specialLocked','specialUnlocked']){
-  assert.equal(getEventDoorTextureKind(depth,kind),depth===1&&kind.startsWith('special')?'leo':kind);
+  const expected = !kind.startsWith('special') ? kind : depth === 1 ? 'leo'
+    : [22,31,44,48,59,73].includes(depth) ? 'gemini' : kind;
+  assert.equal(getEventDoorTextureKind(depth,kind),expected,`B${depth} ${kind}`);
  }
  const room=getSpecialRoomDefinition(1);
  assert.equal(room.content.type,'leoPreparation');

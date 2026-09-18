@@ -1605,3 +1605,8 @@
 - Virgo marks the active B95 quest objective until obtained. Marathon rewards, unreleased Leo, and B4 Libra (no matching transfer destination) have no visible transfer marker.
 - SVG paths avoid emoji/font dependence; multiple signs share a row. Narrow-screen transfer spacing adjusted to prevent title/list overlap.
 - Tests: full suite 1455 passed; cache tests 14 passed after version bump; PC/mobile browser checks passed for multiple markers, removal and legacy Gemini conditions. Cache versions: main/town CSS 20260918-9.
+
+## 2026-09-18 Gemini dedicated doors
+- B22/B31/B44/B48/B59/B73 specialLocked and specialUnlocked doors use the separate Gemini texture key and supplied dungeon_door_gold_gemini.webp. B1 Leo and all other door kinds/floors keep their own texture mappings.
+- Door access rules unchanged. Existing user edit to the Leo image preserved.
+- Verified all 100 depths against six door kinds; related tests 6 passed, cache tests 14 passed. Browser smoke check rendered six Gemini floors, B1, B18, B23 without page errors; B22/B18 screenshots visually checked. Main cache 20260918-10.

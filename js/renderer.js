@@ -229,6 +229,8 @@ export function configureRenderer(options) {
   loadDoorTexture(["specialLocked", "specialUnlocked"], "images/dungeon_effects/dungeon_door_purple.webp");
   renderer.doorTextures.leo = makeDoorTexture("special");
   loadDoorTexture(["leo"], "images/dungeon_effects/dungeon_door_gold_leo.webp");
+  renderer.doorTextures.gemini = makeDoorTexture("special");
+  loadDoorTexture(["gemini"], "images/dungeon_effects/dungeon_door_gold_gemini.webp");
   npcs.forEach(npc => loadCharacterImage(npc.imageId, npc.image));
   Object.values(BOSSES).forEach(boss => {
     if (boss.encounterImageId && boss.encounterImage) {
