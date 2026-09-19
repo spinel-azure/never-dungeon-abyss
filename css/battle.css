@@ -969,3 +969,9 @@ body.battle-active .viewport > #treasureCanvas {
     object-fit: contain;
   }
 }
+/* Reserve a heading and HP row inside the lion queen's mobile portrait frame. */
+@media (max-width: 560px) {
+  .battle-enemy-stage.is-lion-queen { inset: 7% 8% 10%; }
+  .battle-enemy-stage.is-lion-queen > .battle-enemy-heading { flex-shrink: 0; }
+  .battle-enemy-stage.is-lion-queen > .battle-enemy-image { max-height: calc(100% - 52px); object-fit: contain; }
+}

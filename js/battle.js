@@ -1,3 +1,4 @@
+import {presentLionPhase} from './lion-phase-presentation.js';
 import { playBarrierShatter } from './barrier-shatter.js';
 import { playWhirlpoolWave } from "./whirlpool-wave.js";
 import { renderWeaponElementStatus } from "./weapon-element-status.js";
@@ -409,6 +410,7 @@ function isCommandTargetAvailable(command, enemy) {
 }
 
 async function executeCommand(command) {
+  battleUi.presentationEnemyImage=battleUi.battle.enemy.image;
   battleUi.presentationWhirlpools = Object.fromEntries((battleUi.battle.enemies || []).map(e => [e.id, Boolean(e.reservedEnemyAction)]));
   battleUi.presentationBossBarrier = battleUi.battle.enemy.bossMagicBarrier;
   const startingHp = {
@@ -531,6 +533,11 @@ async function playPresentationEvents() {
   const image = battleUi.root.querySelector("#battleEnemyImage");
   for (const event of events) {
     if (!battleUi.active) return;
+    if(event.type === "lionPhase") {
+      battleUi.messageEl.textContent=event.message;
+      await presentLionPhase(image,event.image);
+      battleUi.presentationEnemyImage=event.image;continue;
+    }
     if (event.playerChargePresentationId && event.hitIndex === 0) {
       await playPlayerChargePresentation({
         root: battleUi.root,
@@ -978,7 +985,7 @@ function renderBattle() {
   enemyName?.classList.toggle("is-defense-down", hasEnemyDefenseDown(battle.enemy));
   setText("battleEnemyCondition", statusText(battle.enemy));
   const image = battleUi.root.querySelector("#battleEnemyImage");
-  image.src = battle.enemy.image || "";
+  image.src = (battleUi.presenting ? battleUi.presentationEnemyImage : battle.enemy.image) || "";
   image.alt = battleUi.concealed ? "正体不明の敵" : battle.enemy.name;
   const defeated = ["victory", "enemyEscaped", "maerchentiereEscaped"].includes(battle.outcome) && !battleUi.presenting;
   image.classList.toggle("is-defeated", defeated);
@@ -1002,6 +1009,7 @@ function renderBattle() {
   image.classList.toggle("is-amayenak", battle.enemy.id === "amayenak_b100f");
   const enemyStage = battleUi.root.querySelector(".battle-enemy-stage");
   enemyStage.hidden = Boolean(battle.enemies);
+  enemyStage.classList.toggle("is-lion-queen",battle.enemy.id==="loewenkoenigin_b1f");
   enemyStage?.classList.toggle("is-defeated", defeated);
   enemyStage?.classList.toggle("is-eiskoenigin", battle.enemy.id === "eiskoenigin_b49f" && !defeated && !battleUi.concealed);
   enemyStage?.classList.toggle("is-amayenak", battle.enemy.id === "amayenak_b100f");

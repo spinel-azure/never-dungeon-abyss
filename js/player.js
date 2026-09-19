@@ -1,3 +1,5 @@
+import {createLionIntro, createLionVictory, handleLionInput, updateLionEvent} from './lion-event.js';
+import {LOEWENKOENIGIN_ID} from '../data/loewenkoenigin.js';
 import {createGeminiFinalEvent,handleGeminiFinalInput,updateGeminiFinal} from './gemini-final-event.js';
 import { inspectGeminiPreviewDoor } from './gemini-preview-door.js';
 import { getGeminiFirstScenario, GEMINI_SECOND_PAGES, GEMINI_SECOND_HINT, GEMINI_THIRD_SCENES, getGeminiFourthPages, GEMINI_FOURTH_SYMBOLS } from '../data/gemini-event.js';
@@ -237,7 +239,11 @@ export function isPlayerInputEnabled() {
   return playerInputEnabled;
 }
 
+function lionHooks() { return {...hooks,isCurrent:e=>state.overlayEvent===e,close:()=>{state.overlayEvent=null;hooks.say("");hooks.onStateChanged();}}; }
+export function startLionVictoryEvent({gained}) {startOverlayEvent(createLionVictory(gained));}
+
 export function updateAnimation(now) {
+  if(state.overlayEvent?.type === "lionEvent") updateLionEvent(state.overlayEvent,now,lionHooks());
   const gemini = state.overlayEvent;
   if(gemini?.act===5)updateGeminiFinal(gemini,now,hooks);
   if (gemini?.type === 'geminiEvent' && gemini.phase === 'fading' && now >= gemini.sistersFadeOutStart + 1500) {
@@ -1676,6 +1682,7 @@ function handleGeminiInput(action) {
 
 export function handleOverlayEventInput(action) {
   if (!state.overlayEvent) return false;
+  if (state.overlayEvent.type === "lionEvent") return handleLionInput(state.overlayEvent,action,lionHooks());
   if (state.overlayEvent.type === 'geminiEvent') return handleGeminiInput(action);
   if (["stairsTransition", "fixedWarpTransition"].includes(state.overlayEvent.type)) return true;
   if (state.overlayEvent.type === "floorLap") {
@@ -1858,6 +1865,7 @@ function finishFixedFloorEvent() {
 export function startBossEvent(bossId, fromGX, fromGY) {
   const boss = getBossById(bossId);
   state.bossEncounterOrigin = { x: fromGX, y: fromGY };
+  if(bossId===LOEWENKOENIGIN_ID){startOverlayEvent(createLionIntro(fromGX,fromGY));return;}
   if (bossId === "erzdaemonin_b100f") {
     startOverlayEvent({
       type: "b100FinalPrelude",

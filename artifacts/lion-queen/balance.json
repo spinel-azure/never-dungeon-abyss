@@ -1,0 +1,1122 @@
+[
+  {
+    "build": "warrior-no-poison",
+    "seed": 1,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "defeat",
+    "turns": 673,
+    "enemyHp": 44123,
+    "phases": {
+      "1": 1,
+      "2": 605
+    },
+    "guards": 82,
+    "heals": 99,
+    "maxHit": 150,
+    "poison": 0,
+    "self": 0
+  },
+  {
+    "build": "warrior-no-poison",
+    "seed": 2,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "defeat",
+    "turns": 703,
+    "enemyHp": 43207,
+    "phases": {
+      "1": 1,
+      "2": 632
+    },
+    "guards": 91,
+    "heals": 99,
+    "maxHit": 158,
+    "poison": 0,
+    "self": 0
+  },
+  {
+    "build": "warrior-no-poison",
+    "seed": 3,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "defeat",
+    "turns": 686,
+    "enemyHp": 42227,
+    "phases": {
+      "1": 1,
+      "2": 603
+    },
+    "guards": 81,
+    "heals": 99,
+    "maxHit": 158,
+    "poison": 0,
+    "self": 0
+  },
+  {
+    "build": "warrior-no-poison",
+    "seed": 4,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "defeat",
+    "turns": 685,
+    "enemyHp": 43191,
+    "phases": {
+      "1": 1,
+      "2": 609
+    },
+    "guards": 81,
+    "heals": 99,
+    "maxHit": 156,
+    "poison": 0,
+    "self": 0
+  },
+  {
+    "build": "warrior-no-poison",
+    "seed": 5,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "defeat",
+    "turns": 677,
+    "enemyHp": 41436,
+    "phases": {
+      "1": 1,
+      "2": 583
+    },
+    "guards": 72,
+    "heals": 99,
+    "maxHit": 158,
+    "poison": 0,
+    "self": 0
+  },
+  {
+    "build": "warrior-no-poison",
+    "seed": 6,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "defeat",
+    "turns": 699,
+    "enemyHp": 42420,
+    "phases": {
+      "1": 1,
+      "2": 629
+    },
+    "guards": 91,
+    "heals": 99,
+    "maxHit": 162,
+    "poison": 0,
+    "self": 0
+  },
+  {
+    "build": "warrior-no-poison",
+    "seed": 7,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "defeat",
+    "turns": 682,
+    "enemyHp": 42298,
+    "phases": {
+      "1": 1,
+      "2": 606
+    },
+    "guards": 93,
+    "heals": 99,
+    "maxHit": 162,
+    "poison": 0,
+    "self": 0
+  },
+  {
+    "build": "warrior-no-poison",
+    "seed": 8,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "defeat",
+    "turns": 720,
+    "enemyHp": 40524,
+    "phases": {
+      "1": 1,
+      "2": 619
+    },
+    "guards": 108,
+    "heals": 99,
+    "maxHit": 162,
+    "poison": 0,
+    "self": 0
+  },
+  {
+    "build": "warrior-no-poison",
+    "seed": 9,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "defeat",
+    "turns": 694,
+    "enemyHp": 44273,
+    "phases": {
+      "1": 1,
+      "2": 632
+    },
+    "guards": 83,
+    "heals": 99,
+    "maxHit": 156,
+    "poison": 0,
+    "self": 0
+  },
+  {
+    "build": "warrior-no-poison",
+    "seed": 10,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "defeat",
+    "turns": 688,
+    "enemyHp": 44955,
+    "phases": {
+      "1": 1,
+      "2": 627
+    },
+    "guards": 83,
+    "heals": 99,
+    "maxHit": 152,
+    "poison": 0,
+    "self": 0
+  },
+  {
+    "build": "warrior-no-poison",
+    "seed": 11,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "defeat",
+    "turns": 712,
+    "enemyHp": 41560,
+    "phases": {
+      "1": 1,
+      "2": 623
+    },
+    "guards": 100,
+    "heals": 99,
+    "maxHit": 156,
+    "poison": 0,
+    "self": 0
+  },
+  {
+    "build": "warrior-no-poison",
+    "seed": 12,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "defeat",
+    "turns": 676,
+    "enemyHp": 43497,
+    "phases": {
+      "1": 1,
+      "2": 612
+    },
+    "guards": 79,
+    "heals": 99,
+    "maxHit": 152,
+    "poison": 0,
+    "self": 0
+  },
+  {
+    "build": "warrior-no-poison",
+    "seed": 13,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "defeat",
+    "turns": 693,
+    "enemyHp": 43353,
+    "phases": {
+      "1": 1,
+      "2": 621
+    },
+    "guards": 90,
+    "heals": 99,
+    "maxHit": 145,
+    "poison": 0,
+    "self": 0
+  },
+  {
+    "build": "warrior-no-poison",
+    "seed": 14,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "defeat",
+    "turns": 667,
+    "enemyHp": 43510,
+    "phases": {
+      "1": 1,
+      "2": 608
+    },
+    "guards": 78,
+    "heals": 99,
+    "maxHit": 158,
+    "poison": 0,
+    "self": 0
+  },
+  {
+    "build": "warrior-no-poison",
+    "seed": 15,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "defeat",
+    "turns": 695,
+    "enemyHp": 42074,
+    "phases": {
+      "1": 1,
+      "2": 613
+    },
+    "guards": 92,
+    "heals": 99,
+    "maxHit": 158,
+    "poison": 0,
+    "self": 0
+  },
+  {
+    "build": "warrior-no-poison",
+    "seed": 16,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "defeat",
+    "turns": 681,
+    "enemyHp": 45094,
+    "phases": {
+      "1": 1,
+      "2": 617
+    },
+    "guards": 81,
+    "heals": 99,
+    "maxHit": 162,
+    "poison": 0,
+    "self": 0
+  },
+  {
+    "build": "warrior-no-poison",
+    "seed": 17,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "defeat",
+    "turns": 672,
+    "enemyHp": 42556,
+    "phases": {
+      "1": 1,
+      "2": 610
+    },
+    "guards": 76,
+    "heals": 99,
+    "maxHit": 158,
+    "poison": 0,
+    "self": 0
+  },
+  {
+    "build": "warrior-no-poison",
+    "seed": 18,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "defeat",
+    "turns": 689,
+    "enemyHp": 42987,
+    "phases": {
+      "1": 1,
+      "2": 601
+    },
+    "guards": 88,
+    "heals": 99,
+    "maxHit": 162,
+    "poison": 0,
+    "self": 0
+  },
+  {
+    "build": "warrior-no-poison",
+    "seed": 19,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "defeat",
+    "turns": 662,
+    "enemyHp": 43926,
+    "phases": {
+      "1": 1,
+      "2": 587
+    },
+    "guards": 81,
+    "heals": 99,
+    "maxHit": 146,
+    "poison": 0,
+    "self": 0
+  },
+  {
+    "build": "warrior-no-poison",
+    "seed": 20,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "defeat",
+    "turns": 704,
+    "enemyHp": 43347,
+    "phases": {
+      "1": 1,
+      "2": 625
+    },
+    "guards": 95,
+    "heals": 99,
+    "maxHit": 142,
+    "poison": 0,
+    "self": 0
+  },
+  {
+    "build": "warrior-scorpio",
+    "seed": 1,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "victory",
+    "turns": 87,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 50,
+      "3": 73
+    },
+    "guards": 10,
+    "heals": 16,
+    "maxHit": 207,
+    "poison": 83001,
+    "self": 10320
+  },
+  {
+    "build": "warrior-scorpio",
+    "seed": 2,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "victory",
+    "turns": 94,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 57,
+      "3": 81
+    },
+    "guards": 13,
+    "heals": 18,
+    "maxHit": 217,
+    "poison": 82637,
+    "self": 11000
+  },
+  {
+    "build": "warrior-scorpio",
+    "seed": 3,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "victory",
+    "turns": 112,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 76,
+      "3": 99
+    },
+    "guards": 14,
+    "heals": 20,
+    "maxHit": 228,
+    "poison": 79001,
+    "self": 11556
+  },
+  {
+    "build": "warrior-scorpio",
+    "seed": 4,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "victory",
+    "turns": 96,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 59,
+      "3": 82
+    },
+    "guards": 15,
+    "heals": 18,
+    "maxHit": 217,
+    "poison": 82001,
+    "self": 10348
+  },
+  {
+    "build": "warrior-scorpio",
+    "seed": 5,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "victory",
+    "turns": 87,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 50,
+      "3": 73
+    },
+    "guards": 9,
+    "heals": 18,
+    "maxHit": 204,
+    "poison": 82000,
+    "self": 10000
+  },
+  {
+    "build": "warrior-scorpio",
+    "seed": 6,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "victory",
+    "turns": 105,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 69,
+      "3": 92
+    },
+    "guards": 13,
+    "heals": 19,
+    "maxHit": 207,
+    "poison": 80108,
+    "self": 11000
+  },
+  {
+    "build": "warrior-scorpio",
+    "seed": 7,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "victory",
+    "turns": 115,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 78,
+      "3": 101
+    },
+    "guards": 15,
+    "heals": 21,
+    "maxHit": 217,
+    "poison": 80001,
+    "self": 10753
+  },
+  {
+    "build": "warrior-scorpio",
+    "seed": 8,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "victory",
+    "turns": 85,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 49,
+      "3": 71
+    },
+    "guards": 11,
+    "heals": 15,
+    "maxHit": 237,
+    "poison": 82001,
+    "self": 10185
+  },
+  {
+    "build": "warrior-scorpio",
+    "seed": 9,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "victory",
+    "turns": 83,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 46,
+      "3": 70
+    },
+    "guards": 11,
+    "heals": 17,
+    "maxHit": 189,
+    "poison": 82001,
+    "self": 10250
+  },
+  {
+    "build": "warrior-scorpio",
+    "seed": 10,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "victory",
+    "turns": 86,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 50,
+      "3": 73
+    },
+    "guards": 13,
+    "heals": 16,
+    "maxHit": 207,
+    "poison": 81820,
+    "self": 10000
+  },
+  {
+    "build": "warrior-scorpio",
+    "seed": 11,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "victory",
+    "turns": 84,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 48,
+      "3": 71
+    },
+    "guards": 13,
+    "heals": 16,
+    "maxHit": 210,
+    "poison": 82001,
+    "self": 10657
+  },
+  {
+    "build": "warrior-scorpio",
+    "seed": 12,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "victory",
+    "turns": 97,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 61,
+      "3": 84
+    },
+    "guards": 15,
+    "heals": 17,
+    "maxHit": 198,
+    "poison": 80489,
+    "self": 10000
+  },
+  {
+    "build": "warrior-scorpio",
+    "seed": 13,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "victory",
+    "turns": 94,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 59,
+      "3": 82
+    },
+    "guards": 11,
+    "heals": 20,
+    "maxHit": 210,
+    "poison": 79643,
+    "self": 11000
+  },
+  {
+    "build": "warrior-scorpio",
+    "seed": 14,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "victory",
+    "turns": 89,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 53,
+      "3": 75
+    },
+    "guards": 11,
+    "heals": 16,
+    "maxHit": 153,
+    "poison": 81317,
+    "self": 10000
+  },
+  {
+    "build": "warrior-scorpio",
+    "seed": 15,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "victory",
+    "turns": 129,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 93,
+      "3": 116
+    },
+    "guards": 14,
+    "heals": 23,
+    "maxHit": 198,
+    "poison": 78202,
+    "self": 11000
+  },
+  {
+    "build": "warrior-scorpio",
+    "seed": 16,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "victory",
+    "turns": 89,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 52,
+      "3": 76
+    },
+    "guards": 9,
+    "heals": 17,
+    "maxHit": 210,
+    "poison": 82001,
+    "self": 11513
+  },
+  {
+    "build": "warrior-scorpio",
+    "seed": 17,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "victory",
+    "turns": 91,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 54,
+      "3": 77
+    },
+    "guards": 11,
+    "heals": 17,
+    "maxHit": 195,
+    "poison": 82001,
+    "self": 10679
+  },
+  {
+    "build": "warrior-scorpio",
+    "seed": 18,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "victory",
+    "turns": 86,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 50,
+      "3": 73
+    },
+    "guards": 13,
+    "heals": 15,
+    "maxHit": 237,
+    "poison": 81581,
+    "self": 10000
+  },
+  {
+    "build": "warrior-scorpio",
+    "seed": 19,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "victory",
+    "turns": 93,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 56,
+      "3": 80
+    },
+    "guards": 12,
+    "heals": 19,
+    "maxHit": 201,
+    "poison": 81001,
+    "self": 11162
+  },
+  {
+    "build": "warrior-scorpio",
+    "seed": 20,
+    "hp": 690,
+    "sp": 357,
+    "outcome": "victory",
+    "turns": 103,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 67,
+      "3": 90
+    },
+    "guards": 14,
+    "heals": 19,
+    "maxHit": 210,
+    "poison": 81001,
+    "self": 10320
+  },
+  {
+    "build": "mage-scorpio",
+    "seed": 1,
+    "hp": 357,
+    "sp": 552,
+    "outcome": "victory",
+    "turns": 96,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 58,
+      "3": 82
+    },
+    "guards": 9,
+    "heals": 30,
+    "maxHit": 147,
+    "poison": 84223,
+    "self": 11000
+  },
+  {
+    "build": "mage-scorpio",
+    "seed": 2,
+    "hp": 357,
+    "sp": 552,
+    "outcome": "victory",
+    "turns": 98,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 60,
+      "3": 85
+    },
+    "guards": 17,
+    "heals": 29,
+    "maxHit": 210,
+    "poison": 84001,
+    "self": 11940
+  },
+  {
+    "build": "mage-scorpio",
+    "seed": 3,
+    "hp": 357,
+    "sp": 552,
+    "outcome": "victory",
+    "turns": 95,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 57,
+      "3": 81
+    },
+    "guards": 8,
+    "heals": 32,
+    "maxHit": 202,
+    "poison": 84304,
+    "self": 11000
+  },
+  {
+    "build": "mage-scorpio",
+    "seed": 4,
+    "hp": 357,
+    "sp": 552,
+    "outcome": "victory",
+    "turns": 96,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 58,
+      "3": 82
+    },
+    "guards": 14,
+    "heals": 27,
+    "maxHit": 216,
+    "poison": 84317,
+    "self": 11000
+  },
+  {
+    "build": "mage-scorpio",
+    "seed": 5,
+    "hp": 357,
+    "sp": 552,
+    "outcome": "victory",
+    "turns": 86,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 49,
+      "3": 73
+    },
+    "guards": 9,
+    "heals": 26,
+    "maxHit": 192,
+    "poison": 84001,
+    "self": 11864
+  },
+  {
+    "build": "mage-scorpio",
+    "seed": 6,
+    "hp": 357,
+    "sp": 552,
+    "outcome": "victory",
+    "turns": 92,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 54,
+      "3": 78
+    },
+    "guards": 12,
+    "heals": 23,
+    "maxHit": 219,
+    "poison": 84212,
+    "self": 11000
+  },
+  {
+    "build": "mage-scorpio",
+    "seed": 7,
+    "hp": 357,
+    "sp": 552,
+    "outcome": "victory",
+    "turns": 97,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 59,
+      "3": 84
+    },
+    "guards": 13,
+    "heals": 31,
+    "maxHit": 210,
+    "poison": 84525,
+    "self": 11000
+  },
+  {
+    "build": "mage-scorpio",
+    "seed": 8,
+    "hp": 357,
+    "sp": 552,
+    "outcome": "victory",
+    "turns": 88,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 50,
+      "3": 74
+    },
+    "guards": 14,
+    "heals": 25,
+    "maxHit": 225,
+    "poison": 85001,
+    "self": 10987
+  },
+  {
+    "build": "mage-scorpio",
+    "seed": 9,
+    "hp": 357,
+    "sp": 552,
+    "outcome": "victory",
+    "turns": 87,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 49,
+      "3": 73
+    },
+    "guards": 11,
+    "heals": 28,
+    "maxHit": 201,
+    "poison": 85018,
+    "self": 11000
+  },
+  {
+    "build": "mage-scorpio",
+    "seed": 10,
+    "hp": 357,
+    "sp": 552,
+    "outcome": "victory",
+    "turns": 91,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 52,
+      "3": 76
+    },
+    "guards": 14,
+    "heals": 28,
+    "maxHit": 202,
+    "poison": 86001,
+    "self": 10029
+  },
+  {
+    "build": "mage-scorpio",
+    "seed": 11,
+    "hp": 357,
+    "sp": 552,
+    "outcome": "victory",
+    "turns": 89,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 50,
+      "3": 74
+    },
+    "guards": 17,
+    "heals": 23,
+    "maxHit": 201,
+    "poison": 86001,
+    "self": 10010
+  },
+  {
+    "build": "mage-scorpio",
+    "seed": 12,
+    "hp": 357,
+    "sp": 552,
+    "outcome": "victory",
+    "turns": 98,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 59,
+      "3": 83
+    },
+    "guards": 14,
+    "heals": 28,
+    "maxHit": 213,
+    "poison": 85199,
+    "self": 10000
+  },
+  {
+    "build": "mage-scorpio",
+    "seed": 13,
+    "hp": 357,
+    "sp": 552,
+    "outcome": "victory",
+    "turns": 90,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 52,
+      "3": 76
+    },
+    "guards": 14,
+    "heals": 25,
+    "maxHit": 204,
+    "poison": 85902,
+    "self": 10000
+  },
+  {
+    "build": "mage-scorpio",
+    "seed": 14,
+    "hp": 357,
+    "sp": 552,
+    "outcome": "victory",
+    "turns": 91,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 52,
+      "3": 77
+    },
+    "guards": 12,
+    "heals": 29,
+    "maxHit": 216,
+    "poison": 85931,
+    "self": 10000
+  },
+  {
+    "build": "mage-scorpio",
+    "seed": 15,
+    "hp": 357,
+    "sp": 552,
+    "outcome": "victory",
+    "turns": 96,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 59,
+      "3": 83
+    },
+    "guards": 12,
+    "heals": 30,
+    "maxHit": 219,
+    "poison": 83308,
+    "self": 12000
+  },
+  {
+    "build": "mage-scorpio",
+    "seed": 16,
+    "hp": 357,
+    "sp": 552,
+    "outcome": "victory",
+    "turns": 87,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 48,
+      "3": 72
+    },
+    "guards": 14,
+    "heals": 26,
+    "maxHit": 198,
+    "poison": 86001,
+    "self": 10107
+  },
+  {
+    "build": "mage-scorpio",
+    "seed": 17,
+    "hp": 357,
+    "sp": 552,
+    "outcome": "victory",
+    "turns": 88,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 50,
+      "3": 74
+    },
+    "guards": 9,
+    "heals": 29,
+    "maxHit": 234,
+    "poison": 85443,
+    "self": 11000
+  },
+  {
+    "build": "mage-scorpio",
+    "seed": 18,
+    "hp": 357,
+    "sp": 552,
+    "outcome": "victory",
+    "turns": 89,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 50,
+      "3": 75
+    },
+    "guards": 11,
+    "heals": 26,
+    "maxHit": 192,
+    "poison": 85001,
+    "self": 10478
+  },
+  {
+    "build": "mage-scorpio",
+    "seed": 19,
+    "hp": 357,
+    "sp": 552,
+    "outcome": "victory",
+    "turns": 92,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 54,
+      "3": 78
+    },
+    "guards": 14,
+    "heals": 27,
+    "maxHit": 207,
+    "poison": 85897,
+    "self": 10000
+  },
+  {
+    "build": "mage-scorpio",
+    "seed": 20,
+    "hp": 357,
+    "sp": 552,
+    "outcome": "victory",
+    "turns": 90,
+    "enemyHp": 0,
+    "phases": {
+      "1": 1,
+      "2": 52,
+      "3": 76
+    },
+    "guards": 15,
+    "heals": 26,
+    "maxHit": 225,
+    "poison": 85001,
+    "self": 10953
+  }
+]

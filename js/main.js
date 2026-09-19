@@ -1,4 +1,4 @@
-import { LEO_ROOM_CLOSED_MESSAGE } from '../data/leo-room.js';
+import {LOEWENKOENIGIN_ID, getLeoDoorAccess} from '../data/loewenkoenigin.js';
 import {getGeminiFinalAccess,completeGeminiFinal} from '../data/gemini-final.js';
 import { syncShopNotifications, markShopNotificationsShown } from "../data/shop-notifications.js";
 import { ROAMING_ENEMY_DEFINITIONS } from '../data/roaming-enemies.js';
@@ -35,6 +35,7 @@ import {
 import {
   state,
   configurePlayer,
+  startLionVictoryEvent,
   resetPlayer,
   refillTorch,
   setTorchFuelDisabled,
@@ -935,6 +936,11 @@ import {
     playTreasureOpening,
     hideTreasure,
     getGeminiFinalAccess: () => getGeminiFinalAccess(character),
+    playLeoReward: async () => {
+      await playSeToEnd('itemGet');
+      await new Promise(resolve=>showCardGetEffect('zodiac_leo',{seId:null,onComplete:resolve}));
+      await playSeToEnd('importantItem');
+    },
     completeGeminiFinal: slots => { const result=completeGeminiFinal(character,slots); if(result){updateCharacterUi();saveGame();if(result.gained)showCardGetEffect('zodiac_gemini', { afterSeId: 'importantItem' });} return result; },
     getGeminiFourthAccess: () => getGeminiFourthAccess(character),
     getGeminiFourthQuestion: () => getGeminiFourthQuestion(character),
@@ -1834,16 +1840,16 @@ import {
     return result.gained > 0;
   }
 
-  function showCardGetEffect(cardId, { seId = "battleVictory", afterSeId = null } = {}) {
+  function showCardGetEffect(cardId, { seId = "battleVictory", afterSeId = null, onComplete = null } = {}) {
     const card = getCardById(cardId);
-    if (!cardGetEffect || !cardGetCanvas || !card) return;
+    if (!cardGetEffect || !cardGetCanvas || !card) {onComplete?.();return;}
     window.clearTimeout(cardGetTimer);
     const townPortraitFrame = townScreen?.querySelector(".town-portrait-frame");
     const viewport = document.querySelector(".viewport");
     if (townScreen?.hidden && viewport && cardGetEffect.parentElement !== viewport) {
       viewport.append(cardGetEffect);
     }
-    playSe(seId);
+    if(seId) playSe(seId);
     drawCardCanvas(cardGetCanvas, card);
     cardGetEffect.hidden = false;
     cardGetEffect.classList.remove("is-active");
@@ -1853,6 +1859,7 @@ import {
       cardGetEffect.classList.remove("is-active");
       cardGetEffect.hidden = true;
       if (afterSeId) playSe(afterSeId);
+      onComplete?.();
       if (townPortraitFrame && cardGetEffect.parentElement !== townPortraitFrame) {
         townPortraitFrame.append(cardGetEffect);
       }
@@ -3581,6 +3588,7 @@ import {
     );
     const reward = calculateBattleExperienceReward(character, baseReward);
     let bossRewardMessage = "";
+    let lionRewardGained = false;
     const nextBoss = battle?.enemy?.nextBossId ? getBossById(battle.enemy.nextBossId) : null;
     if (character && battle?.enemy?.isDungeonObstacle) {
       removeBossAt(state.gridX, state.gridY);
@@ -3676,7 +3684,8 @@ import {
           );
           character = { ...character, cards: cardReward.cards };
           const card = getCardById(victory.reward.cardId);
-          if (cardReward.gained > 0) {
+          if(battle.enemy.id===LOEWENKOENIGIN_ID) lionRewardGained=cardReward.gained>0;
+          if (cardReward.gained > 0 && battle.enemy.id!==LOEWENKOENIGIN_ID) {
             setTimeout(() => showCardGetEffect(victory.reward.cardId, { seId: "itemGet" }), 120);
           }
           bossRewardMessage = cardReward.gained > 0
@@ -3763,6 +3772,10 @@ import {
       : "";
     const victoryMessage = `${defeatedEnemyId === "verfolger" ? VERFOLGER_DEFEAT_MESSAGE + "\n" : ""}${reward > 0 ? `戦闘に勝利した。${reward}EXPを獲得した。` : "戦闘に勝利した。"}${bossRewardMessage}${questCollectionMessage}${dropMessage ? `\n${dropMessage}` : ""}${defeatQuestProgressMessage}${chainedBattleMessage}`;
     resetPresence();
+    if(defeatedEnemyId===LOEWENKOENIGIN_ID) {
+      setPlayerInputEnabled(true);state.autoReturnPaused=true;
+      updateCharacterUi();saveGame();startLionVictoryEvent({gained:lionRewardGained});return;
+    }
     if (startMichaelaRestoration) {
       setPlayerInputEnabled(false);
       state.autoReturnPaused = true;
@@ -5008,7 +5021,7 @@ import {
   }
 
   function getCurrentSpecialDoorAccessBlock() {
-    if (currentDepth === 1) return {blocked: true, sealed: true, message: LEO_ROOM_CLOSED_MESSAGE};
+    if (currentDepth === 1) return getLeoDoorAccess(character);
     const room = getSpecialRoomDefinition(currentDepth);
     if(room?.content?.type==='geminiFinal'){const access=getGeminiFinalAccess(character);if(access.blocked)return access;}
     if (room?.content?.type === 'geminiFourth') { const access=getGeminiFourthAccess(character); if(access.blocked)return access; }

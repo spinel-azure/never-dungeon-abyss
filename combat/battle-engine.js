@@ -1,3 +1,4 @@
+import { isLionQueen, selectLionAction, prepareLionAction, payLionSelfDamage, capLionDamageOverTime, synchronizeLionQueen } from './loewenkoenigin.js';
 import { prepareLeoAttack, payLeoAttackCost } from './leo.js';
 import { WASSERMANNFRAU_ACTIONS } from '../data/wassermannfrau.js';
 import { isWassermannfrau, selectWassermannfrauAction, synchronizeWassermannfrau, executeWassermannfrauUtility, finishWassermannfrauPlayerAction, cancelHighTide } from './wassermannfrau-ai.js';
@@ -854,6 +855,7 @@ export function createEnemyAction(enemy, rng = Math.random, context = {}) {
     (status.id || status.statusId) === "action_seal" && status.active !== false
   );
   if (actionSealed) return attack;
+  if (isLionQueen(enemy)) return buildEnemyAction(selectLionAction(enemy, rng), attack);
   if (actionTable.length > 0) {
     const selected = selectWeightedEnemyAction(actionTable, enemy, rng, context);
     if (selected) return buildEnemyAction(selected, attack);
@@ -930,6 +932,7 @@ function buildEnemyAction(action, normalAttack) {
 
 function executeAction({ battle, action, actor, actorSide, actorIndex = null, target, targetSide, deferFollowUp = false, magicFocus = null, rng }) {
   const actionPresentationStart = battle.presentationEvents.length;
+  if (actorSide === "enemy") action = prepareLionAction(battle, actor, action);
   if (actorSide === 'enemy' && isWassermannfrau(actor)) {
     synchronizeWassermannfrau(battle);
     if (actor.bossMagicBarrier < actor.bossMagicBarrierMax) cancelHighTide(battle, actor);
@@ -1037,6 +1040,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
   if (action.actionType === "prepareAction" && actorSide === "enemy") {
     actor.reservedEnemyAction = structuredClone(action.reservedAction || null);
     battle.log.push(action.prepareMessage || `${actor.name}は次の攻撃に備えた！`);
+    if (isLionQueen(actor)) battle.presentationEvents.push({type:"message",message:action.prepareMessage});
     if (actor.twinWhirlpool) battle.presentationEvents.push({ type: "message", message: action.prepareMessage, whirlpoolActorId: actor.id, whirlpoolPreparing: true });
     return;
   }
@@ -1419,6 +1423,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
         * raceMultiplier
         * (Number(action.geminiDamageMultiplier) || 1)
         * (Number(action.leoDamageMultiplier) || 1)
+        * (Number(action.lionDamageMultiplier) || 1)
     )) : 0
   }));
   if (actorSide === "enemy" && targetSide === "player" && action.id === "tiefstrom_whirlpool") {
@@ -1928,7 +1933,8 @@ function finishAction(battle, side) {
 
 function finishCombatantAction(battle, actor, side, targetIndex = null) {
   if (actor.id === ZENTAURIN_ID && actor.zentaurinPrideActions > 0) actor.zentaurinPrideActions -= 1;
-  const end = resolveEndOfAction({ statuses: actor.statuses, maxHp: actor.maxHp });
+  payLionSelfDamage(battle, actor, targetIndex);
+  const end = capLionDamageOverTime(actor, resolveEndOfAction({ statuses: actor.statuses, maxHp: actor.maxHp }));
   actor.statuses = end.statuses;
   if (actor.bossMagicBarrier > 0) {
     const dot = ['poisonDamage','bleedingDamage','deadlyPoisonDamage','deathPoisonDamage'];
@@ -2002,6 +2008,7 @@ function finishCombatantAction(battle, actor, side, targetIndex = null) {
 }
 
 function updateMultiOutcome(battle) {
+  synchronizeLionQueen(battle);
   synchronizeWassermannfrau(battle);
   synchronizeTwinState(battle);
   resolvePlayerSurvival(battle, applyNpcLethalProtection);
@@ -2032,6 +2039,7 @@ function markUltimateUsed(actor, action) {
 }
 
 function updateOutcome(battle) {
+  synchronizeLionQueen(battle);
   synchronizeWassermannfrau(battle);
   if (battle.scriptedNonlethal) {
     battle.player.hp = Math.max(1, battle.player.hp);

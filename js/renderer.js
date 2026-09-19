@@ -1,3 +1,4 @@
+import {drawLionEvent} from './lion-event.js';
 import { getRoamingRevealFrame } from './roaming-reveal.js';
 import { getEventDoorTextureKind } from '../data/leo-room.js';
 import { drawGeminiEvent } from './gemini-event-renderer.js';
@@ -499,6 +500,7 @@ function drawOverlayEvent() {
   renderer.eventOverlayCanvas.style.pointerEvents = event?.type === "floorLap" ? "auto" : "none";
   document.body.classList.toggle('gemini-event', event?.type === 'geminiEvent');
   if (!event?.showOverlay) return;
+  if (event.type === 'lionEvent') {drawLionEvent(ctx,event,W,H,renderer.characterImages,loadCharacterImage);return;}
   if (event.type === 'geminiEvent') {
     drawGeminiEvent(ctx,event,W,H,renderer.characterImages,loadCharacterImage);
     return;

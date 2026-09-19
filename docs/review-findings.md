@@ -1610,3 +1610,10 @@
 - B22/B31/B44/B48/B59/B73 specialLocked and specialUnlocked doors use the separate Gemini texture key and supplied dungeon_door_gold_gemini.webp. B1 Leo and all other door kinds/floors keep their own texture mappings.
 - Door access rules unchanged. Existing user edit to the Leo image preserved.
 - Verified all 100 depths against six door kinds; related tests 6 passed, cache tests 14 passed. Browser smoke check rendered six Gemini floors, B1, B18, B23 without page errors; B22/B18 screenshots visually checked. Main cache 20260918-10.
+## 2026-09-19 Leo guardian implementation (entrance remains sealed)
+- Added Loewenkoenigin's 100,000 HP / three phases, weighted AI, telegraphed judgment, one self-cost per attack, and queen-only DOT caps. Existing barrier/survival handling is reused.
+- Added intro, decoded-image crossfade, defeated portrait glow/fade, and sequential jingle → card popup → important-item sound. Defeat and reward are saved together; escape/retry resets battle state.
+- B1F retains `leoPreparation` and the disabled release flag. Testing entry points are inserted only by Playwright routes. Eleven other distinct Z cards are checked for future entry, but do not unlock it now.
+- Full suite: 1467 passed / 0 failed. Edge PC 1280×900 and mobile 390×844 / 320×720 flows passed; PC crossfade/reduced-motion checks passed. Mobile heading overflow fixed only for this boss. Real-device/audio listening not performed.
+- 60 seeded balance probes found a major poison/non-poison gap. HP remains as requested; see `docs/lion-queen-playtest.md` and `artifacts/lion-queen/balance.json` before release.
+- LAST UPDATE and main/battle CSS cache revisions updated to 2026-09-19. No commit/push.
