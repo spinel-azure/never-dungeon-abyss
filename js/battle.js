@@ -1,3 +1,4 @@
+import { clearLionOpenings } from '../combat/loewenkoenigin.js';
 import {presentLionPhase} from './lion-phase-presentation.js';
 import { playBarrierShatter } from './barrier-shatter.js';
 import { playWhirlpoolWave } from "./whirlpool-wave.js";
@@ -807,6 +808,7 @@ function attemptEscape() {
       playerCharge: { ...battleUi.battle.player.playerCharge }
     });
     battleUi.battle.outcome = "escaped";
+    clearLionOpenings(battleUi.battle);
     battleUi.battle.phase = "complete";
     battleUi.battle.log = ["戦闘から逃げ切った！"];
     renderBattle();
@@ -1008,6 +1010,14 @@ function renderBattle() {
   image.classList.toggle("is-jirene", battle.enemy.id === "jirene_b79f");
   image.classList.toggle("is-amayenak", battle.enemy.id === "amayenak_b100f");
   const enemyStage = battleUi.root.querySelector(".battle-enemy-stage");
+  let lionOpening = enemyStage.querySelector('.battle-lion-opening');
+  if (!lionOpening && battle.enemy.id === 'loewenkoenigin_b1f') {
+    lionOpening = document.createElement('span');
+    lionOpening.className = 'battle-lion-opening';
+    lionOpening.textContent = '王者の隙';
+    enemyStage.append(lionOpening);
+  }
+  if (lionOpening) lionOpening.hidden = !battle.enemy.lionOpening || battleUi.presenting || Boolean(battle.outcome);
   enemyStage.hidden = Boolean(battle.enemies);
   enemyStage.classList.toggle("is-lion-queen",battle.enemy.id==="loewenkoenigin_b1f");
   enemyStage?.classList.toggle("is-defeated", defeated);

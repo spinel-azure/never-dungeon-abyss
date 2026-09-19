@@ -1,4 +1,4 @@
-import { isLionQueen, selectLionAction, prepareLionAction, payLionSelfDamage, capLionDamageOverTime, synchronizeLionQueen } from './loewenkoenigin.js';
+import { isLionQueen, selectLionAction, prepareLionAction, payLionSelfDamage, capLionDamageOverTime, synchronizeLionQueen, exposeLionQueen, prepareLionOpening, finishLionPlayerAction, clearLionOpenings } from './loewenkoenigin.js';
 import { prepareLeoAttack, payLeoAttackCost } from './leo.js';
 import { WASSERMANNFRAU_ACTIONS } from '../data/wassermannfrau.js';
 import { isWassermannfrau, selectWassermannfrauAction, synchronizeWassermannfrau, executeWassermannfrauUtility, finishWassermannfrauPlayerAction, cancelHighTide } from './wassermannfrau-ai.js';
@@ -74,6 +74,7 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     ? normalizeLivingTargetIndex(enemyParty, targetIndex)
     : 0;
   const selectedEnemy = enemyParty ? enemyParty[selectedTargetIndex] : cloneCombatant(enemy);
+  clearLionOpenings({enemy:selectedEnemy, ...(enemyParty ? {enemies:enemyParty} : {})});
   const sphinxBarrierRate = Math.max(0, sumCardEffectValues(character?.cards?.deckSlots, "sphinx_battle_barrier"));
   const sphinxBarrierAmount = sphinxBarrierRate > 0
     ? Math.max(1, Math.ceil(Math.max(1, Number(character?.maxHp) || 1) * sphinxBarrierRate))
@@ -205,6 +206,7 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
         targetSide: "enemy",
         rng
       });
+      finishLionPlayerAction(next);
       playerActionExecuted = true;
     }
     finishAction(next, "player");
@@ -363,6 +365,7 @@ export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.rand
         targetSide: "enemy",
         rng
       });
+      finishLionPlayerAction(next);
       playerActionExecuted = true;
     }
     finishCombatantAction(next, next.player, "player");
@@ -489,7 +492,7 @@ function executeRandomlyDistributedHits({ battle, action, actor, magicFocus = nu
 
 function executeSinglePlayerActionSequence({ battle, action, repeatAction = action, command, actor, target, rng }) {
   const leo = prepareLeoAttack(battle, command, action, repeatAction);
-  action = leo.action; repeatAction = leo.repeatAction;
+  action = prepareLionOpening(battle, leo.action); repeatAction = prepareLionOpening(battle, leo.repeatAction);
   const magicFocus = getMagicFocusForCast(actor, action);
   const results = [executeAction({
     battle, action, actor, actorSide: "player", target, targetSide: "enemy", magicFocus, rng
@@ -523,11 +526,12 @@ function executeSinglePlayerActionSequence({ battle, action, repeatAction = acti
   }
   applyNormalAttackRecovery(battle, actor, command, results);
   payLeoAttackCost(battle, leo.cost);
+  finishLionPlayerAction(battle);
 }
 
 function executeMultiPlayerActionSequence({ battle, action, repeatAction = action, command, actor, targetIndex, rng }) {
   const leo = prepareLeoAttack(battle, command, action, repeatAction);
-  action = leo.action; repeatAction = leo.repeatAction;
+  action = prepareLionOpening(battle, leo.action); repeatAction = prepareLionOpening(battle, leo.repeatAction);
   const resolvedTargetIndex = action.target === "allEnemies" || action.randomlyDistributeHits
     ? targetIndex
     : normalizeLivingTargetIndex(battle.enemies, targetIndex);
@@ -565,6 +569,7 @@ function executeMultiPlayerActionSequence({ battle, action, repeatAction = actio
   }
   applyNormalAttackRecovery(battle, actor, command, results);
   payLeoAttackCost(battle, leo.cost);
+  finishLionPlayerAction(battle);
 }
 
 function executeMultiPlayerActionPass({ battle, action, actor, targetIndex, magicFocus = null, rng }) {
@@ -1482,6 +1487,12 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     }));
     battle.vorpalExecution = true;
   }
+  const openingMultiplier = actorSide === "player" && isLionQueen(target)
+    ? Math.max(1, Number(action.lionOpeningMultiplier) || 1) : 1;
+  presentedHits = presentedHits.map(hit => ({...hit,
+    damageBeforeLionOpening: hit.damage,
+    damage: Math.floor(hit.damage * openingMultiplier)
+  }));
   if (isPiscesInvincible(target)) presentedHits = presentedHits.map(hit => ({ ...hit, damage: 0 }));
   let actualDamage = presentedHits.reduce((total, hit) => total + hit.damage, 0);
   const npcWall = targetSide === "player"
@@ -1577,7 +1588,10 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
   const hitCount = presentedHits.filter(hit => hit.hit).length;
   const isMultiHit = presentedHits.length > 1;
   battle.log.push(`${actor.name}の${action.name || "攻撃"}！`);
+  let remainingHitHp = targetHpBeforeDamage;
   presentedHits.forEach((hit, index) => {
+    const actualHitHpLoss = Math.min(remainingHitHp, hit.damage);
+    remainingHitHp -= actualHitHpLoss;
     const prefix = isMultiHit ? `${index + 1}撃目：` : "";
     const message = hit.bossBarrierBlocked ? "魔力障壁が攻撃を受け止めた！" : hit.vorpalExecution
       ? "ヴォーパル・スウォードが光り輝き、\nジャバウォックを一刀両断した！"
@@ -1591,6 +1605,12 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
       type: "attackHit",
       actorName: actor.name,
       actionName: action.name,
+      actionType: action.actionType,
+      geminiCopy: Boolean(action.geminiDamageMultiplier),
+      lionOpeningMultiplier: openingMultiplier,
+      damageBeforeLionOpening: hit.damageBeforeLionOpening,
+      actualHpLoss: actualHitHpLoss,
+      lionOpeningExtraDamage: Math.max(0, actualHitHpLoss - Math.min(actualHitHpLoss, hit.damageBeforeLionOpening)),
       actorSide,
       targetSide,
       hitIndex: index,
@@ -1711,6 +1731,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     rng
   });
   markUltimateUsed(actor, action);
+  if (actorSide === "enemy") exposeLionQueen(battle, actor, action);
   return { followUpEligible, actualDamage, landedHitCount: landedHits.length };
 }
 
@@ -2194,5 +2215,5 @@ function statusName(id) {
 
 function finishBattleDefenses(battle) {
   finishPiscesTurn(battle);
-  if (battle.outcome) initializeMagicBarrier(battle.player, false);
+  if (battle.outcome) { initializeMagicBarrier(battle.player, false); clearLionOpenings(battle); }
 }

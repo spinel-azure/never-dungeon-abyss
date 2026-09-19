@@ -14,6 +14,7 @@ export const LION_CONFIG = Object.freeze({
   phaseThreeRate: .25,
   defMultipliers: [1, .75, .5],
   damageMultipliers: [1, 2, 3],
+  openingMultipliers: [3, 4, 5],
   selfDamageRate: .01,
   transitionMs: 800,
   wavePower: 50,

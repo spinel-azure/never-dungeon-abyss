@@ -1617,3 +1617,10 @@
 - Full suite: 1467 passed / 0 failed. Edge PC 1280×900 and mobile 390×844 / 320×720 flows passed; PC crossfade/reduced-motion checks passed. Mobile heading overflow fixed only for this boss. Real-device/audio listening not performed.
 - 60 seeded balance probes found a major poison/non-poison gap. HP remains as requested; see `docs/lion-queen-playtest.md` and `artifacts/lion-queen/balance.json` before release.
 - LAST UPDATE and main/battle CSS cache revisions updated to 2026-09-19. No commit/push.
+
+## 2026-09-19 Lion Queen opening and pre-release balance validation
+- Added combat-local King's Opening after an executed judgment, provisional phase multipliers 3/4/5. One actual player action expires it; misses use it, guards/items/heals expire it, skipped/invalid actions preserve it. Multi-hit/repeats snapshot the multiplier; only player direct hits against the queen qualify.
+- Verified Gemini, Aries, Sagittarius, Capricorn and both Libra directions; DOT, Cancer, self-cost, NPC and throwing items stay unchanged. Added an HP-gauge label with PC/390px/320px layout checks and escape cleanup.
+- Compared five legal Lv197 builds, four multiplier settings (including baseline), 100 seeds each: all 2,000 victories. At 3/4/5, mean turns A/B/C/D/E = 90.13/518.73/342.38/282.72/136.43. Magic reaches the 100–180 target; tested physical builds do not. Recommend retaining 3/4/5 provisionally, without final balance approval.
+- Full automated suite: 1496 passed, 0 failed. Existing browser flow plus opening display/expiry/escape checks passed at 1280/390/320 widths. Real handheld testing not performed.
+- B1F leoPreparation and LEO_EVENT_RELEASED=false preserved. No commit/push/release. Detailed report: docs/lion-opening-balance.md; reproducible results: artifacts/lion-opening/comparison.json.

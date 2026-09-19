@@ -1,0 +1,210 @@
+{
+  "setup": {
+    "hp": 2062,
+    "sp": 650,
+    "stats": {
+      "str": 30,
+      "int": 2,
+      "agi": 5,
+      "dex": 12,
+      "luc": 4,
+      "def": 60,
+      "hitBonus": 0,
+      "healingMiracleMultiplier": 1,
+      "evasionBonus": 0,
+      "criticalBonus": 0,
+      "speedBonus": 0,
+      "defensePenetration": 0,
+      "statusPowerBonus": 0,
+      "statusResistanceBonus": 0,
+      "attackSpellDamageBonus": 0,
+      "passiveInstantDeathRateBonus": 0,
+      "poisonResistance": 0,
+      "bleedingResistance": 0,
+      "actionSkipResistance": 0.1,
+      "deadlyPoisonResistance": 0,
+      "temptationResistance": 0,
+      "magicDamageReduction": 0.15000000000000002,
+      "fireDamageReduction": 0,
+      "iceDamageReduction": 0.15,
+      "nonElementalMagicDamageReduction": 0,
+      "elementalMagicDamageReduction": 0,
+      "fireSpellDamageBonus": 0,
+      "iceSpellDamageBonus": 0,
+      "fireDamageTakenBonus": 0,
+      "iceDamageTakenBonus": 0,
+      "instantDeathResistance": 0,
+      "surpriseResistance": 0
+    },
+    "deck": [
+      {
+        "id": "zodiac_scorpio",
+        "name": "スコルピオ"
+      },
+      {
+        "id": "zodiac_libra",
+        "name": "リーブラ"
+      },
+      {
+        "id": "zodiac_sagittarius",
+        "name": "サジタリウス"
+      },
+      {
+        "id": "zodiac_taurus",
+        "name": "トーラス"
+      },
+      {
+        "id": "zodiac_cancer",
+        "name": "キャンサー"
+      },
+      {
+        "id": "zodiac_pisces",
+        "name": "パイシーズ"
+      }
+    ]
+  },
+  "summaries": [
+    {
+      "policy": "normal",
+      "runs": 100,
+      "wins": 100,
+      "turnRange": [
+        82,
+        125
+      ],
+      "meanTurns": 92.45,
+      "remainingHpRange": [
+        764,
+        1827
+      ],
+      "minimumRoundEndHp": 681,
+      "revivals": 0,
+      "itemUsage": {
+        "healing_potion": [
+          0,
+          0
+        ],
+        "antidote": [
+          0,
+          0
+        ],
+        "healing_potion_medium": [
+          0,
+          0
+        ],
+        "healing_potion_large": [
+          0,
+          0
+        ],
+        "styptic": [
+          0,
+          0
+        ],
+        "antidote_medium": [
+          0,
+          0
+        ],
+        "strong_healing_potion_small": [
+          0,
+          0
+        ],
+        "strong_antidote": [
+          0,
+          0
+        ],
+        "active_healing_potion_small": [
+          0,
+          0
+        ],
+        "strong_healing_potion_medium": [
+          2,
+          4
+        ],
+        "allheilmittel": [
+          0,
+          0
+        ]
+      },
+      "poisonDamageRange": [
+        77001,
+        83020
+      ],
+      "selfDamageRange": [
+        9766,
+        12000
+      ],
+      "maxEnemyActionDamage": 170
+    },
+    {
+      "policy": "charge",
+      "runs": 100,
+      "wins": 100,
+      "turnRange": [
+        78,
+        133
+      ],
+      "meanTurns": 88.78,
+      "remainingHpRange": [
+        733,
+        1763
+      ],
+      "minimumRoundEndHp": 717,
+      "revivals": 0,
+      "itemUsage": {
+        "healing_potion": [
+          0,
+          0
+        ],
+        "antidote": [
+          0,
+          0
+        ],
+        "healing_potion_medium": [
+          0,
+          0
+        ],
+        "healing_potion_large": [
+          0,
+          0
+        ],
+        "styptic": [
+          0,
+          0
+        ],
+        "antidote_medium": [
+          0,
+          0
+        ],
+        "strong_healing_potion_small": [
+          0,
+          0
+        ],
+        "strong_antidote": [
+          0,
+          0
+        ],
+        "active_healing_potion_small": [
+          0,
+          0
+        ],
+        "strong_healing_potion_medium": [
+          2,
+          4
+        ],
+        "allheilmittel": [
+          0,
+          0
+        ]
+      },
+      "poisonDamageRange": [
+        71001,
+        79001
+      ],
+      "selfDamageRange": [
+        9110,
+        12000
+      ],
+      "maxEnemyActionDamage": 170
+    }
+  ]
+}

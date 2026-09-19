@@ -40,3 +40,32 @@ export function capLionDamageOverTime(enemy,end){
  for(const [key,rate]of Object.entries(C.dotRates))end[key]=Math.min(end[key],Math.floor(enemy.maxHp*rate));
  return end;
 }
+
+// Combat-local state only: a completed judgment exposes the queen until the
+// player's next executed action. Incapacitation/cancelled commands do not act.
+export function exposeLionQueen(battle, enemy, action) {
+ if (!isLionQueen(enemy) || action.id !== 'lion_judgment' || enemy.hp <= 0) return;
+ enemy.lionOpening = true;
+ const message='レーヴェンケーニギンは大斧を振り抜き、大きく体勢を崩した！';
+ battle.log.push(message);
+ battle.presentationEvents.push({type:'message',lionOpeningCreated:true,message});
+}
+export function prepareLionOpening(battle, action) {
+ if (!['physicalAttack','spell'].includes(action.actionType)) return action;
+ const enemy=(battle.enemies || [battle.enemy]).find(e=>isLionQueen(e) && e.lionOpening && e.hp>0);
+ if (!enemy) return action;
+ // Snapshot at action start: every hit and Gemini/recast uses this same factor,
+ // even if the original attack changes the queen's phase.
+ return {...action, lionOpeningMultiplier:C.openingMultipliers[lionPhase(enemy)-1]};
+}
+export function finishLionPlayerAction(battle) {
+ for (const enemy of battle.enemies || [battle.enemy]) {
+  if (!isLionQueen(enemy) || !enemy.lionOpening) continue;
+  const used=battle.presentationEvents.some(e=>e.type==='attackHit' && e.lionOpeningMultiplier>1);
+  delete enemy.lionOpening;
+  battle.presentationEvents.push({type:'lionOpeningEnded',used});
+ }
+}
+export function clearLionOpenings(battle) {
+ for (const enemy of battle.enemies || [battle.enemy]) if (enemy) delete enemy.lionOpening;
+}

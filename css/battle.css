@@ -975,3 +975,23 @@ body.battle-active .viewport > #treasureCanvas {
   .battle-enemy-stage.is-lion-queen > .battle-enemy-heading { flex-shrink: 0; }
   .battle-enemy-stage.is-lion-queen > .battle-enemy-image { max-height: calc(100% - 52px); object-fit: contain; }
 }
+
+.battle-lion-opening {
+  position: relative;
+  flex: 0 0 auto;
+  margin-top: 6px;
+  z-index: 4;
+  padding: 1px 10px;
+  border: 1px solid #f1d581;
+  border-radius: 4px;
+  color: #ffe9a6;
+  background: #241807e8;
+  font-size: 12px;
+  line-height: 16px;
+  pointer-events: none;
+}
+.battle-lion-opening[hidden] { display: none; }
+
+.battle-enemy-stage.is-lion-queen:has(> .battle-lion-opening:not([hidden])) > .battle-enemy-image {
+  max-height: calc(100% - 78px);
+}

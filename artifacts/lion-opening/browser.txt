@@ -1,0 +1,3 @@
+pc: sealed entrance, intro, forms, escape/retry, reward/audio/farewell passed
+mobile: sealed entrance, intro, forms, escape/retry, reward/audio/farewell passed
+small: sealed entrance, intro, forms, escape/retry, reward/audio/farewell passed
