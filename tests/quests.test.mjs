@@ -734,9 +734,9 @@ test("Helen's herbicide reward uses the important item popup", async () => {
 });
 
 test("active 100-cell surveys guarantee only their target floor special door", () => {
-  const character = { quests: { active: { [FLOOR_SURVEY_QUEST_ID]: { progress: 99 } }, completed: {} } };
-  assert.equal(hasActiveFullFloorSurvey(character, 1), true);
-  assert.equal(hasActiveFullFloorSurvey(character, 2), false);
-  character.quests.active[FLOOR_SURVEY_QUEST_ID].progress = 100;
-  assert.equal(hasActiveFullFloorSurvey(character, 1), false);
+  const character = { quests: { active: { [B35F_SURVEY_QUEST_ID]: { progress: 99 } }, completed: {} } };
+  assert.equal(hasActiveFullFloorSurvey(character, 35), true);
+  assert.equal(hasActiveFullFloorSurvey(character, 34), false);
+  character.quests.active[B35F_SURVEY_QUEST_ID].progress = 100;
+  assert.equal(hasActiveFullFloorSurvey(character, 35), false);
 });

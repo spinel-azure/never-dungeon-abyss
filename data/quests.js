@@ -128,8 +128,8 @@ export const QUESTS = Object.freeze([
     client: "ギルドマスター",
     objectiveType: "exploreFloor",
     targetDepth: 1,
-    objectiveLabel: "B1Fを全て踏破する",
-    requiredCount: 100,
+    objectiveLabel: "B1Fを99マス踏破する",
+    requiredCount: 99,
     reward: Object.freeze({
       type: "card",
       cardId: "common_sp_up",
