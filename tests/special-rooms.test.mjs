@@ -50,7 +50,7 @@ test("B2 special room contains the repeatable lingering ghost event boss", () =>
     minimapMarker: "E",
     revealBeforeExploration: true
   });
-  assert.equal(getSpecialRoomDefinition(1).content.type, "leoPreparation");
+  assert.equal(getSpecialRoomDefinition(1).content.bossId, "loewenkoenigin_b1f");
 });
 
 test("The lingering ghost event marker is visible before exploration except at zero torch", () => {
@@ -58,7 +58,7 @@ test("The lingering ghost event marker is visible before exploration except at z
   assert.equal(shouldDrawSpecialRoomMarker(room, false, 100), true);
   assert.equal(shouldDrawSpecialRoomMarker(room, false, 1), true);
   assert.equal(shouldDrawSpecialRoomMarker(room, false, 0), false);
-  assert.equal(shouldDrawSpecialRoomMarker(getSpecialRoomDefinition(1), true, 100), false);
+  assert.equal(shouldDrawSpecialRoomMarker(getSpecialRoomDefinition(1), true, 100), true);
 });
 
 test("B6 special room is the quest-gated one-time mimic event", () => {
@@ -315,7 +315,7 @@ test("the Maikaefer nest event is consumed before battle and keeps its escape fl
 
 test("special-room lock gets three attempts with a lower rate after each failure", () => {
   setStartPosition(0, 0);
-  buildBoundaryWallMap(1, seeded(31), {});
+  buildBoundaryWallMap(3, seeded(31), {});
   const edge = findSpecialDoorEdge();
   const first = getSpecialRoomLockInfo({ ...edge, dex: 10 });
   assert.equal(first.remaining, 3);

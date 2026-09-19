@@ -7,8 +7,8 @@ import {collectStats} from '../combat/collect-stats.js';
 import {isPlayerChargeReady} from '../combat/player-charge.js';
 import {magicBarrierAmount} from '../combat/aquarius.js';
 import {getSkill} from '../data/skills.js';
-import {LION_CONFIG as C,LEO_EVENT_RELEASED} from '../data/loewenkoenigin.js';
-assert.equal(LEO_EVENT_RELEASED,false);
+import {LION_CONFIG as C} from '../data/loewenkoenigin.js';
+// Balance simulation is independent of public entrance progression.
 const z=ids=>ids.split(',').map(id=>'zodiac_'+id);
 const mageGear=[['rightArmId','comet_booster',0],['headId','astral_crystal_hat',3],['bodyId','astral_crystal_robe',3],['footId','astral_crystal_shoes',3],['accessoryId','frost_giant_talisman',2]];
 const builds=[

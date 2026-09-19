@@ -36,7 +36,8 @@ export const MAIKAEFER_NEST_CONTENT = Object.freeze({
 
 // Add only differences here when a floor receives an event, treasure or boss.
 export const SPECIAL_ROOM_FLOOR_OVERRIDES = Object.freeze({
-  1: Object.freeze({content: Object.freeze({type: 'leoPreparation'})}),
+  1: Object.freeze({lock: Object.freeze({mode: 'alwaysSuccess', attempts: 1}),
+    content: Object.freeze({type: 'eventBoss', bossId: 'loewenkoenigin_b1f', minimapMarker: 'E', revealBeforeExploration: true})}),
   73: Object.freeze({lock:Object.freeze({mode:'alwaysSuccess',attempts:1}),content:Object.freeze({type:'geminiFinal',minimapMarker:'E',revealBeforeExploration:true})}),
   59: Object.freeze({lock:Object.freeze({mode:'alwaysSuccess',attempts:1}),
     content:Object.freeze({type:'geminiFourth',minimapMarker:'E',revealBeforeExploration:true})}),

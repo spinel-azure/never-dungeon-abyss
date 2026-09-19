@@ -970,6 +970,10 @@ function startSpecialRoomContentEvent(content, fromGX, fromGY) {
     hooks.onStateChanged();
     return;
   }
+  if (boss.id === LOEWENKOENIGIN_ID) {
+    startBossEvent(boss.id, fromGX, fromGY);
+    return;
+  }
   if (boss.event?.immediateStart) {
     const event = {
       type: "specialRoomBoss",

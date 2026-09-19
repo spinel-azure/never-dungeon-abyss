@@ -1,0 +1,2 @@
+pc: rumor/typewriter/read flag, actual door cancel/entry, intro/battle BGM, victory/follow-up/history passed
+mobile: rumor/typewriter/read flag, actual door cancel/entry, intro/battle BGM, victory/follow-up/history passed

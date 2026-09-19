@@ -12,7 +12,8 @@ test('Leo and Gemini textures apply only to their own special doors; other doors
   assert.equal(getEventDoorTextureKind(depth,kind),expected,`B${depth} ${kind}`);
  }
  const room=getSpecialRoomDefinition(1);
- assert.equal(room.content.type,'leoPreparation');
+ assert.equal(room.content.type,'eventBoss');
+ assert.equal(room.content.bossId,'loewenkoenigin_b1f');
  assert.equal(rollMaikaeferNestContent({room,roll:0}),null);
 });
 test('Sealed Leo entrance rejects movement and interaction even for previously opened doors',()=>{

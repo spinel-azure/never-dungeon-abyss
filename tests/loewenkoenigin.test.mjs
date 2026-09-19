@@ -92,11 +92,12 @@ test('queen-only damage over time caps preserve status and other enemy damage',(
     b.enemy.id='ordinary';const other=round(forced(b,LION_ACTIONS[3]));assert.ok(other.enemy.hp<r.enemy.hp);
   }
 });
-test('eleven distinct owned cards qualify, but public gate stays sealed',()=>{
+test('eleven distinct owned cards and the heard rumor unlock the public gate',()=>{
   const c=createInitialCharacter({name:'QA',job:'mage'});
   const cards=CARDS.filter(c=>c.rarity==='Z'&&c.id!=='zodiac_leo');assert.equal(cards.length,11);
   c.cards.ownedCardCounts=Object.fromEntries(cards.map(c=>[c.id,1]));c.cards.deckSlots=[];
-  assert.equal(hasLeoQualification(c),true);assert.equal(getLeoDoorAccess(c).blocked,true);assert.equal(getLeoDoorAccess(c,true).blocked,false);
+  assert.equal(hasLeoQualification(c),true);assert.equal(getLeoDoorAccess(c).blocked,true);assert.equal(getLeoDoorAccess(c,true).blocked,true);
+  c.eventFlags.tavern_rumor_016_base_read=true;assert.equal(getLeoDoorAccess(c).blocked,false);assert.equal(getLeoDoorAccess(c,false).blocked,true);
   delete c.cards.ownedCardCounts[cards[0].id];c.cards.ownedCardCounts.zodiac_leo=11;assert.equal(hasLeoQualification(c),false);
 });
 test('escape has no reward; retry resets state; victory flags and reward are one-time',()=>{

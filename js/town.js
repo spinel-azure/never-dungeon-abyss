@@ -709,6 +709,7 @@ function handleTavernRumorInput(action) {
     town.messageEl.textContent = town.rumorDialogue[town.rumorDialogueIndex];
     return true;
   }
+  document.body.classList.remove("facility-talk-message-expanded");
   town.onCompleteRumor(town.activeRumor);
   town.activeRumor = null;
   town.rumorDialogue = [];
@@ -1932,6 +1933,7 @@ function activateFacilityService(command) {
     town.rumorDialogue = [...rumor.dialogue];
     town.rumorDialogueIndex = 0;
     town.mode = "tavernRumor";
+    document.body.classList.add("facility-talk-message-expanded");
     town.messageEl.textContent = town.rumorDialogue[0];
     return true;
   }

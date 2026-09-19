@@ -1,8 +1,9 @@
 import { CARDS } from './cards.js';
 import { LEO_ROOM_CLOSED_MESSAGE } from './leo-room.js';
 export const LOEWENKOENIGIN_ID = 'loewenkoenigin_b1f';
-// Keep the public entrance sealed until playtesting is approved.
-export const LEO_EVENT_RELEASED = false;
+// Entry still requires all eleven other zodiac cards and the tavern rumor.
+export const LEO_EVENT_RELEASED = true;
+export const LION_RUMOR_READ_FLAG = 'tavern_rumor_016_base_read';
 export const LION_CONFIG = Object.freeze({
   maxHp: 100000,
   level: 125,
@@ -45,7 +46,7 @@ export function hasLeoQualification(character) {
  return CARDS.filter(c=>c.rarity==='Z'&&c.id!=='zodiac_leo').every(c=>Number(character?.cards?.ownedCardCounts?.[c.id])>0);
 }
 export function getLeoDoorAccess(character, released=LEO_EVENT_RELEASED) {
- if(!released||!hasLeoQualification(character))return {blocked:true,sealed:true,message:LEO_ROOM_CLOSED_MESSAGE};
+ if(!released||!hasLeoQualification(character)||!character?.eventFlags?.[LION_RUMOR_READ_FLAG])return {blocked:true,sealed:true,message:LEO_ROOM_CLOSED_MESSAGE};
  if(character?.eventFlags?.boss_loewenkoenigin_b1f_defeated)return {blocked:true,sealed:true,message:'獅子の女王は去った。玉座の間は静まり返っている。'};
  return {blocked:false,confirmMessage:'扉に触れると11枚のゾディアックカードが輝き始めた！\n扉に刻まれた獅子座の紋様が、それに呼応するように光を放つ。\n\n扉の奥から、凄まじい咆哮が響く……。\n扉を開けますか？\n＊Aボタン：はい　Bボタン：いいえ'};
 }
@@ -61,7 +62,7 @@ export const LOEWENKOENIGIN=Object.freeze({
  imageId:LOEWENKOENIGIN_ID,image:LION_IMAGES[0],encounterImageId:'lion_throne',encounterImage:LION_BACKGROUND,
  defeatedEncounterImageId:'lion_empty_throne',defeatedEncounterImage:LION_EMPTY_BACKGROUND,defeatedEncounterImageFit:'cover',defeatedEncounterOverlayOnly:true,
  battleSize:'large',race:'human',stats:{str:C.str,int:C.int,agi:C.agi,dex:C.dex,luc:C.luc},attack:C.attack,def:C.def,
- experienceReward:100000,escapeRate:1,surpriseRate:0,surpriseRateMaximum:0,noDrop:true,isBoss:true,bossKind:'event',battleBgmKey:'eventBoss',
+ experienceReward:100000,escapeRate:1,surpriseRate:0,surpriseRateMaximum:0,noDrop:true,isBoss:true,bossKind:'event',battleBgmKey:'finalBoss',
  defeatedFlag:'boss_loewenkoenigin_b1f_defeated',reward:{type:'card',cardId:'zodiac_leo',amount:1},
  elementMultipliers:{fire:1,ice:1,lightning:1,holy:1,dark:1,arcane:1},
  statusResistances:{instantDeath:{immune:true,resistancePoints:100},poison:{resistancePoints:50},deadly_poison:{resistancePoints:50},death_poison:{resistancePoints:50},bleeding:{resistancePoints:50},action_skip:{resistancePoints:90},speed_down:{resistancePoints:70}},

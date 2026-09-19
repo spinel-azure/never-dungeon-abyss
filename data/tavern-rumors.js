@@ -1,3 +1,4 @@
+import {hasLeoQualification, LION_RUMOR_READ_FLAG} from './loewenkoenigin.js';
 import { hasKeyItem } from './key-items.js';
 import { characterOwnsEquipment } from "./equipment-inventory.js";
 import { GOLD_CHEST_WEAPONS_BY_JOB } from "./loot.js";
@@ -351,6 +352,22 @@ export const TAVERN_RUMORS = Object.freeze([
         rosa: 'ヨハンナさんの三毛猫ちゃんにそんな特技があるなんて…。',
         rosaContinuation: 'えっ！？ヨハンナさんの三毛猫ちゃんを借りたですって！？借りてどうしたのかしら？' })
     ])
+  }),
+  Object.freeze({
+    id: 'rumor_016', verbatimCustomers: true,
+    title: '獅子の咆哮の噂',
+    unlock: context => context.leoQualified,
+    customerLead: 'おい、知ってるか？奈落B1Fから獅子の雄叫びが聞こえるらしいぞ。',
+    customerReply: 'ああ。「獅子」の紋様が刻まれた金色の扉の中からだってな。',
+    phases: Object.freeze([
+      Object.freeze({id: 'base', readFlag: LION_RUMOR_READ_FLAG,
+        unlock: context => !context.leoObtainedAfterVictory,
+        rosa: 'まぁ…！奈落の入口のすぐ近くでそんな事が…？怖いわ…。'}),
+      Object.freeze({id: 'defeated', readFlag: 'tavern_rumor_016_defeated_read',
+        unlock: context => context.leoObtainedAfterVictory,
+        rosa: 'まぁ…！奈落の入口のすぐ近くでそんな事が…？怖いわ…。',
+        rosaContinuation: 'えっ！獅子の女王がいたですって！？しかも倒した！？あなた本当に何者なの…？'})
+    ])
   })
 ]);
 
@@ -374,6 +391,8 @@ function normalizeRumorContext(character, context = {}) {
   const completedQuestIds = character?.quests?.completedQuestIds || [];
   const eventFlags = character?.eventFlags || {};
   return {
+    leoQualified: hasLeoQualification(character),
+    leoObtainedAfterVictory: Boolean(eventFlags.boss_loewenkoenigin_b1f_defeated && Number(character?.cards?.ownedCardCounts?.zodiac_leo) > 0),
     mikanEncountered: Boolean(context.mikanEncountered ?? eventFlags.mikan_nyanko_encountered),
     lingeringGhostDefeated: Boolean(context.lingeringGhostDefeated ?? eventFlags.lingering_ghost_b2f_defeated_once),
     otherworldlyWisdomDefeated: Boolean(context.otherworldlyWisdomDefeated ?? eventFlags.boss_otherworldly_wisdom_b4f_defeated),
