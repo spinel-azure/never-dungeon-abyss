@@ -1,3 +1,4 @@
+import {syncLionBath} from './lion-bath.js';
 import {drawLionEvent} from './lion-event.js';
 import { getRoamingRevealFrame } from './roaming-reveal.js';
 import { getEventDoorTextureKind } from '../data/leo-room.js';
@@ -495,6 +496,8 @@ function drawOverlayEvent() {
   if (!ctx) return;
   ctx.clearRect(0, 0, W, H);
   const event = state.overlayEvent;
+  syncLionBath(event);
+  document.body.classList.toggle('lion-aftermath-event',Boolean(event?.aftermath));
   document.body.classList.toggle("event-message-expanded", Number(event?.reserveMessageLines) >= 4);
   document.body.classList.toggle("wassermannfrau-event", event?.bossId === "wassermannfrau_b18f");
   renderer.eventOverlayCanvas.style.pointerEvents = event?.type === "floorLap" ? "auto" : "none";

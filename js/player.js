@@ -1,3 +1,4 @@
+import {createLionAftermath, syncLionBath, disposeLionBath} from './lion-bath.js';
 import {createLionIntro, createLionVictory, handleLionInput, updateLionEvent} from './lion-event.js';
 import {LOEWENKOENIGIN_ID} from '../data/loewenkoenigin.js';
 import {createGeminiFinalEvent,handleGeminiFinalInput,updateGeminiFinal} from './gemini-final-event.js';
@@ -205,6 +206,7 @@ export function resetPlayer(startDir) {
   state.autoPath = [];
   state.autoWalkerActive = false;
   state.autoReturnPaused = false;
+  disposeLionBath();
   state.overlayEvent = null;
   state.npcAwarenessShown = false;
   state.stairsPromptDismissed = false;
@@ -239,10 +241,11 @@ export function isPlayerInputEnabled() {
   return playerInputEnabled;
 }
 
-function lionHooks() { return {...hooks,isCurrent:e=>state.overlayEvent===e,close:()=>{state.overlayEvent=null;hooks.say("");hooks.onStateChanged();}}; }
+function lionHooks() { return {...hooks,retreat:e=>{disposeLionBath();state.overlayEvent=null;hooks.say('');startNpcRetreat(e);hooks.onStateChanged();},isCurrent:e=>state.overlayEvent===e,close:()=>{state.overlayEvent=null;hooks.say("");hooks.onStateChanged();}}; }
 export function startLionVictoryEvent({gained}) {startOverlayEvent(createLionVictory(gained));}
 
 export function updateAnimation(now) {
+  syncLionBath(state.overlayEvent);
   if(state.overlayEvent?.type === "lionEvent") updateLionEvent(state.overlayEvent,now,lionHooks());
   const gemini = state.overlayEvent;
   if(gemini?.act===5)updateGeminiFinal(gemini,now,hooks);
@@ -604,6 +607,10 @@ function startSpecialDoorLockEvent(x, y, dirKey, bumped = false) {
     hooks.say(access.message || "今はこの扉を開けられないようだ。");
     return;
   }
+  if (access.unlocked) {
+    setDoor(x,y,dirKey,'closed','specialUnlocked');
+    startDoorOpening(x,y,dirKey);hooks.onStateChanged();return;
+  }
   const preview = inspectGeminiPreviewDoor(getSpecialRoomAtDoor(x, y, dirKey), bumped);
   if (preview) {
     if (preview.unlocked) {
@@ -959,6 +966,9 @@ function startSpecialRoomContentEvent(content, fromGX, fromGY) {
   }
   if (!["repeatableBoss", "eventBoss", "multiEnemyBoss"].includes(content?.type)) return;
   const boss = getBossById(content.bossId);
+  if (boss?.id === LOEWENKOENIGIN_ID && hooks.isBossDefeated(boss.id)) {
+    startOverlayEvent(createLionAftermath(fromGX,fromGY));return;
+  }
   if (!boss || hooks.isBossDefeated(boss.id)) return;
   if (hooks.isBossRetryBlocked(boss.id)) {
     state.gridX = fromGX;

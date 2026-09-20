@@ -936,6 +936,7 @@ import {
     playTreasureOpening,
     hideTreasure,
     getGeminiFinalAccess: () => getGeminiFinalAccess(character),
+    markLionBathSeen: () => {character={...character,eventFlags:{...character.eventFlags,achievement_lion_bath_seen:true}};updateCharacterUi();saveGame();detectAchievementUnlocks();},
     playLeoReward: async () => {
       await playSeToEnd('itemGet');
       await new Promise(resolve=>showCardGetEffect('zodiac_leo',{seId:null,onComplete:resolve}));

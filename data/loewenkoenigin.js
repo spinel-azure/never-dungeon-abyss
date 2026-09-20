@@ -46,8 +46,8 @@ export function hasLeoQualification(character) {
  return CARDS.filter(c=>c.rarity==='Z'&&c.id!=='zodiac_leo').every(c=>Number(character?.cards?.ownedCardCounts?.[c.id])>0);
 }
 export function getLeoDoorAccess(character, released=LEO_EVENT_RELEASED) {
+ if(character?.eventFlags?.boss_loewenkoenigin_b1f_defeated)return {blocked:false,unlocked:true};
  if(!released||!hasLeoQualification(character)||!character?.eventFlags?.[LION_RUMOR_READ_FLAG])return {blocked:true,sealed:true,message:LEO_ROOM_CLOSED_MESSAGE};
- if(character?.eventFlags?.boss_loewenkoenigin_b1f_defeated)return {blocked:true,sealed:true,message:'獅子の女王は去った。玉座の間は静まり返っている。'};
  return {blocked:false,confirmMessage:'扉に触れると11枚のゾディアックカードが輝き始めた！\n扉に刻まれた獅子座の紋様が、それに呼応するように光を放つ。\n\n扉の奥から、凄まじい咆哮が響く……。\n扉を開けますか？\n＊Aボタン：はい　Bボタン：いいえ'};
 }
 const C=LION_CONFIG;

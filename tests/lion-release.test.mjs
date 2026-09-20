@@ -36,7 +36,7 @@ test('continuation requires both defeat and Leo; reading it moves full dialogue 
  c.cards.ownedCardCounts.zodiac_leo=1;let r=rumor(c);assert.equal(r.stageId,'defeated');assert.equal(r.dialogue.length,4);
  assert.equal(getTavernRumorTypewriterParts(r.dialogue[3]).dialogue,'えっ！獅子の女王がいたですって！？しかも倒した！？あなた本当に何者なの…？');
  assert.ok(syncTavernRumorNotifications(c).addedIds.includes('rumor_016:defeated'));
- c=markTavernRumorRead(c,r);assert.equal(rumor(c),undefined);assert.equal(past(c).description.length,4);assert.equal(getLeoDoorAccess(c).blocked,true);
+ c=markTavernRumorRead(c,r);assert.equal(rumor(c),undefined);assert.equal(past(c).description.length,4);assert.equal(getLeoDoorAccess(c).blocked,false);
 });
 test('legacy saves and JSON normalization preserve new flags without migration',()=>{
  assert.equal(getLeoDoorAccess({}).blocked,true);assert.equal(rumor({}),undefined);

@@ -1,0 +1,45 @@
+✔ quest history and adventure record descriptions reserve fixed line counts (7.0813ms)
+✔ rumor history reserves more lines and scrolls long dialogue (1.0408ms)
+✔ adventure records summarize values already stored in the save (21.7443ms)
+✔ adventure statistics include the original entries and new activity counters (0.5581ms)
+✔ play time uses an hour counter that can exceed one day (0.1488ms)
+✔ play time stops for hidden tabs and after five minutes without input (0.17ms)
+✔ play time preserves MVP saves and safely resets when the era changes (0.8388ms)
+✔ chronicle restores achieved milestones from existing progress flags (1.5184ms)
+✔ B1F survey achievement follows quest 003's one-hundred-cell flag (0.4182ms)
+✔ reported survey quests rescue all three one-hundred-cell achievements (0.4864ms)
+✔ unachieved stable and Otherworldly Wisdom milestones show their hints (0.4532ms)
+✔ Mimic and ten-Maikaefer achievements expose their requested hidden hints (0.7553ms)
+✔ midgame chronicle includes the seven new boss, floor, and survey achievements (0.3894ms)
+✔ deep cold chronicle includes B45F, both ice bosses, B50F, and the second long march (0.4492ms)
+✔ new deep-cold achievements conceal their names behind hints until achieved (0.4653ms)
+✔ priest recovery achievement keeps its hidden hint until quest 016 is reported (0.371ms)
+✔ jungle achievements follow the requested order and preserve the musk hint (0.5721ms)
+✔ the post-Fleischfresser chronicle uses durable progression flags and requested hints (0.7499ms)
+✔ the final long march is placed between B100F arrival and the guardian gauntlet (0.2785ms)
+✔ legacy Amayenak clears retain the B100F guardian achievement (0.2437ms)
+✔ the completion achievement is revoked while new item compendium achievement is reserved (0.4822ms)
+✔ mobile achievement labels stay on one line with a reduced dedicated font (6.4114ms)
+✔ rare-event and long-play achievements use the existing immediate notification path (1.6895ms)
+✔ Johanna medicine achievement unlocks only after quest 031 is reported (0.4363ms)
+✔ new guardian, twelve zodiac kinds and maximum level use independent achievement conditions (1.0755ms)
+✔ defeated queen door stays passable even without qualification; new players remain blocked (1.1232ms)
+✔ each entry rolls 0.05 percent, exact boundary is ordinary empty throne (0.301ms)
+✔ timeline holds throne, fades 700ms, blacks out 300ms, blurs 28 to 22 to zero (1.1126ms)
+✔ locked loading/reveal ignores repeated A/B, achievement only after reveal and 400ms hold (0.3336ms)
+✔ cancel prompt and ordinary throne exit; reduced motion reaches unblurred final frame (0.207ms)
+✔ five achievements: kill and bath separate, 50 insects, complete public bestiary, item placeholder locked (2.0296ms)
+✔ all eleven distinct non-Leo cards unlock rumor but not the door (5.7047ms)
+✔ only completed reading opens the door; notification alone does not (1.4052ms)
+✔ exact customer and Rosa text uses the shared typewriter format (1.2251ms)
+✔ continuation requires both defeat and Leo; reading it moves full dialogue to history (0.6995ms)
+✔ legacy saves and JSON normalization preserve new flags without migration (4.436ms)
+✔ B1 room connects queen intro, golden door remains isolated, battle selects holy-war music (1.0874ms)
+ℹ tests 37
+ℹ suites 0
+ℹ pass 37
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 231.5493

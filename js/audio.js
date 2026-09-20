@@ -1,4 +1,5 @@
 export const SE = Object.freeze({
+  lionBathWater: "ofuro_mizu.mp3",
   battleStart: "battle_start.wav",
   attackHit: "damage.wav",
   spellAttack: "fire_attack.wav",

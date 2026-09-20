@@ -303,7 +303,7 @@ test("legacy Amayenak clears retain the B100F guardian achievement", () => {
   assert.equal(getAdventureChronicle(character).find(entry => entry.id === "b100Gauntlet")?.achieved, true);
 });
 
-test("the completion achievement unlocks only after every other chronicle entry", () => {
+test("the completion achievement is revoked while new item compendium achievement is reserved", () => {
   const character = createInitialCharacter({ name: "やりこみ", job: "warrior" });
   character.level = 197;
   character.cards.ownedCardCounts = Object.fromEntries(CARDS.filter(card => card.category === "zodiac").map(card => [card.id, 1]));
@@ -316,7 +316,7 @@ test("the completion achievement unlocks only after every other chronicle entry"
   character.adventureStats.playTimeSeconds = PLAY_TIME_100_HOURS_SECONDS;
   character.keyItems = grantKeyItem(character.keyItems, "discount_pass").keyItems;
   let completion = getAdventureChronicle(character).find(entry => entry.id === "allAchievements");
-  assert.equal(completion.achieved, true);
+  assert.equal(completion.achieved, false);
   character.adventureStats.playTimeSeconds -= 1;
   completion = getAdventureChronicle(character).find(entry => entry.id === "allAchievements");
   assert.equal(completion.achieved, false);

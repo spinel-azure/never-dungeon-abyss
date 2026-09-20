@@ -1,6 +1,8 @@
 import {LOEWENKOENIGIN_ID, LION_CONFIG, LION_INTRO, LION_VICTORY, LION_FAREWELL,
   LION_BACKGROUND, LION_EMPTY_BACKGROUND, LION_DEFEATED_IMAGE} from '../data/loewenkoenigin.js';
 
+import {handleLionBathInput,updateLionBath,drawLionBath} from './lion-bath.js';
+
 const NEXT = '\n＊Aボタンで次へ';
 export function createLionIntro(fromGX, fromGY) {
   return {type:'lionEvent', bossId:LOEWENKOENIGIN_ID, phase:'intro', page:0,
@@ -11,6 +13,7 @@ export function createLionVictory(gained) {
     reserveMessageLines:6, background:LION_EMPTY_BACKGROUND, message:LION_VICTORY+NEXT};
 }
 export function handleLionInput(event, action, hooks, now=performance.now()) {
+  if(event.aftermath)return handleLionBathInput(event,action,hooks,now);
   if(action!=='confirm') return true;
   if(event.phase==='intro') {
     event.page++;
@@ -30,6 +33,7 @@ export function handleLionInput(event, action, hooks, now=performance.now()) {
   return true;
 }
 export function updateLionEvent(event, now, hooks) {
+  if(event.aftermath){updateLionBath(event,now,hooks);return;}
   if(event.phase==='challenge' && now>=event.startAt+LION_CONFIG.introDelayMs) {
     event.phase='battle';hooks.close();hooks.beginBossBattle(LOEWENKOENIGIN_ID);
   } else if(event.phase==='farewell' && now>=event.fadeStart+LION_CONFIG.fadeMs) {
@@ -37,6 +41,7 @@ export function updateLionEvent(event, now, hooks) {
   }
 }
 export function drawLionEvent(ctx,event,width,height,images,load,now=performance.now()) {
+  if(event.aftermath){drawLionBath(ctx,event,width,height,images,load,now);return;}
   load(event.background,event.background);
   load(LION_DEFEATED_IMAGE,LION_DEFEATED_IMAGE);
   ctx.save();ctx.fillStyle='#060506';ctx.fillRect(0,0,width,height);

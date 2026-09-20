@@ -75,6 +75,7 @@ export function getAdventureChronicle(character) {
   const depth = Math.max(1, Math.floor(Number(character?.highestDungeonDepthReached) || 1));
   const hasQueenRegalia = ["queen_tiara", "queen_earring", "queen_necklace"]
     .every(itemId => hasKeyItem(character?.keyItems, itemId));
+  const monsterCompletion = getMonsterCompendiumCompletion(character);
   const milestones = [
     ["registered", "冒険者として登録した", true, "ギルドで冒険者としての第一歩を踏み出した。"],
     ["stable", "馬小屋に宿泊した", flags.inn_stable_stayed, "宿屋の馬小屋で夜露をしのいだ。", "？？？？？？――朝の目覚め"],
@@ -133,6 +134,11 @@ export function getAdventureChronicle(character) {
     ["zentaurin", "ツェンタウリンを撃破した", flags.achievement_zentaurin_defeated, "ツェンタウリンを撃破した。", "？？？？？？――射手座の守護者"],
     ["allZodiacCards", "ゾディアックカードを12枚全て集めた", countOwnedZodiacCardKinds(character?.cards) >= 12, "12種類すべてのゾディアックカードを所持した。", "？？？？？？――黄道十二宮"],
     ["level197", "最大レベル197に到達した", Number(character?.level) >= 197, "最大レベル197に到達した。", "？？？？？？――完璧で究極の冒険者"],
+    ["lionQueen", "レーヴェンケーニギンを撃破した", flags.boss_loewenkoenigin_b1f_defeated, "獅子座の守護者を撃破した。", "？？？？？？――獅子座の守護者"],
+    ["lionBath", "レーヴェンケーニギンの沐浴を目撃した", flags.achievement_lion_bath_seen, "激闘のあと、女王の沐浴を目撃した。", "？？？？？？――激闘のあとに"],
+    ["itemCompendium", "アイテム図鑑をコンプリートした", false, "アイテム図鑑を完成させた。", "？？？？？？――こだわりフレーバー"], // Reserved until the item compendium is released.
+    ["maikaeferMaster", "メイケーファーを50匹倒した", Number(flags.maikaefer_defeat_count)>=50, "希少な虫を累計50匹討伐した。", "？？？？？？――虫取り名人"],
+    ["monsterCompendium", "魔物図鑑をコンプリートした", monsterCompletion.total>0&&monsterCompletion.defeated===monsterCompletion.total, "通常図鑑枠の魔物をすべて討伐した。", "？？？？？？――魔物マニア"],
     ["playTime100", "プレイ時間が100時間を突破した", Number(character?.adventureStats?.playTimeSeconds) >= PLAY_TIME_100_HOURS_SECONDS, "冒険記録のプレイ時間が100時間に到達した。", "？？？？？？――悠久の冒険者"]
   ];
   milestones.push([

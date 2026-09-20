@@ -46,7 +46,7 @@ try{for(const [label,width,height]of [['pc',1280,900],['mobile',390,844]]){
  await page.evaluate(()=>{lb.state().enemy.hp=1;Math.random=()=>.2;void lb.use({type:'skill',skillId:'lightning_bolt'});});await page.waitForFunction(()=>lb.idle());
  await page.evaluate(()=>lb.finish());await page.waitForFunction(()=>lp.state.overlayEvent?.phase==='victory');
  assert.equal(await page.evaluate(()=>lrelease.character().cards.ownedCardCounts.zodiac_leo),1);
- assert.equal(await page.evaluate(()=>lrelease.access().blocked),true);
+ assert.equal(await page.evaluate(()=>lrelease.access().blocked),false);
  await page.evaluate(()=>{lp.state.overlayEvent=null;lt.open();});await page.waitForFunction(()=>!lt.state().typing);
  for(let i=0;i<3;i++){await page.evaluate(()=>lt.advance());await page.waitForFunction(()=>!lt.state().typing);}
  assert.ok(await page.evaluate(()=>lt.state().text.includes('あなた本当に何者')));

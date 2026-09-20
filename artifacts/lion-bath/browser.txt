@@ -1,0 +1,3 @@
+pc: defeated door entry/exit, empty throne, cancel, reveal, input lock, achievement, repeat and reset cleanup passed
+mobile: defeated door entry/exit, empty throne, cancel, reveal, input lock, achievement, repeat and reset cleanup passed
+reduced: defeated door entry/exit, empty throne, cancel, reveal, input lock, achievement, repeat and reset cleanup passed
