@@ -1,3 +1,4 @@
+import {resetLionBathVisits} from './lion-bath.js';
 import {LOEWENKOENIGIN_ID, getLeoDoorAccess} from '../data/loewenkoenigin.js';
 import {getGeminiFinalAccess,completeGeminiFinal} from '../data/gemini-final.js';
 import { syncShopNotifications, markShopNotificationsShown } from "../data/shop-notifications.js";
@@ -936,6 +937,7 @@ import {
     playTreasureOpening,
     hideTreasure,
     getGeminiFinalAccess: () => getGeminiFinalAccess(character),
+    hasSeenLionBath: () => Boolean(character?.eventFlags?.achievement_lion_bath_seen),
     markLionBathSeen: () => {character={...character,eventFlags:{...character.eventFlags,achievement_lion_bath_seen:true}};updateCharacterUi();saveGame();detectAchievementUnlocks();},
     playLeoReward: async () => {
       await playSeToEnd('itemGet');
@@ -1780,6 +1782,7 @@ import {
     resetDungeon("", null, true);
     character = null;
     setTransferUnlocked(false);
+    resetLionBathVisits();
     worldLocation = "town";
     state.treasureCompassActive = false;
     stopBgm();
@@ -3883,6 +3886,7 @@ import {
       if (!await waitForEnding(1500)) { mainEndingStarting = false; return false; }
       returnToTown({ ending: true });
     } else {
+      resetLionBathVisits();
       worldLocation = "town";
       openTown({ registrationRequired: false });
     }
@@ -4008,6 +4012,7 @@ import {
       character = recordFloorExploration(character, { depth: 0, explored: [] });
       character = beginNpcRenewal(character, `defeat-${Date.now()}`);
     }
+    resetLionBathVisits();
     worldLocation = "town";
     clearPresenceIncreaseReduction();
     state.treasureCompassActive = false;
@@ -4557,6 +4562,7 @@ import {
       character = beginNpcRenewal(character, `return-${Date.now()}`);
       updateCharacterUi();
     }
+    resetLionBathVisits();
     worldLocation = "town";
     clearPresenceIncreaseReduction();
     state.treasureCompassActive = false;

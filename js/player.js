@@ -1,4 +1,4 @@
-import {createLionAftermath, syncLionBath, disposeLionBath} from './lion-bath.js';
+import {createLionAftermath, resetLionBathVisits, syncLionBath, disposeLionBath} from './lion-bath.js';
 import {createLionIntro, createLionVictory, handleLionInput, updateLionEvent} from './lion-event.js';
 import {LOEWENKOENIGIN_ID} from '../data/loewenkoenigin.js';
 import {createGeminiFinalEvent,handleGeminiFinalInput,updateGeminiFinal} from './gemini-final-event.js';
@@ -91,6 +91,7 @@ const hooks = {
   attemptSpecialDoorUnlock: () => ({ accepted: false }),
   isBossDefeated: () => false,
   isBossRematch: () => false,
+  hasSeenLionBath: () => false,
   isBossRetryBlocked: () => false,
   getBossEncounterImageId: boss => boss?.encounterImageId || boss?.imageId || "",
   getBossEncounterPrompt: boss => boss?.event?.prompt,
@@ -191,6 +192,7 @@ export function createPlayerState(startDir) {
 }
 
 export function resetPlayer(startDir) {
+  resetLionBathVisits();
   cancelRapidCurrentTransition();
   stopNpcTypewriter();
   const start = getStartPosition();
@@ -967,7 +969,7 @@ function startSpecialRoomContentEvent(content, fromGX, fromGY) {
   if (!["repeatableBoss", "eventBoss", "multiEnemyBoss"].includes(content?.type)) return;
   const boss = getBossById(content.bossId);
   if (boss?.id === LOEWENKOENIGIN_ID && hooks.isBossDefeated(boss.id)) {
-    startOverlayEvent(createLionAftermath(fromGX,fromGY));return;
+    startOverlayEvent(createLionAftermath(fromGX,fromGY,Math.random(),hooks.hasSeenLionBath()));return;
   }
   if (!boss || hooks.isBossDefeated(boss.id)) return;
   if (hooks.isBossRetryBlocked(boss.id)) {
@@ -2418,6 +2420,7 @@ export function startOverlayEvent(event) {
     showOverlay: true,
     ...event
   };
+  syncLionBath(state.overlayEvent);
   state.npcAwarenessShown = false;
   hooks.cancelAutoReturn(false);
   if (state.overlayEvent.message) hooks.say(state.overlayEvent.message);

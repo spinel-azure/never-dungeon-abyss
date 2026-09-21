@@ -1,7 +1,17 @@
 import {LION_EMPTY_BACKGROUND} from '../data/loewenkoenigin.js';
 import {startLoopSe,stopLoopSe} from './audio.js';
 export const LION_BATH_IMAGE='images/background/dungeon_event_24c.avif';
-export const LION_BATH_CHANCE=0.0005;
+export const LION_BATH_CHANCE=0.05;
+export const LION_BATH_REPEAT_CHANCE=0.005;
+export const LION_BATH_PROMPT_LOCK_MS=3000;
+let visits=0;
+export function resetLionBathVisits(){visits=0;}
+export function rollLionBath(seen,roll=Math.random()){
+ visits++;
+ const rare=roll<(seen?LION_BATH_REPEAT_CHANCE:LION_BATH_CHANCE)||visits>=(seen?200:50);
+ if(rare)visits=0;
+ return rare;
+}
 const NEXT='\n＊Aボタンで次へ';
 const EMPTY='玉座の間は静まり返り、誰もいないようだ。';
 const PAGES=[
@@ -9,10 +19,10 @@ const PAGES=[
  'レーヴェンケーニギン「…貴様か。そのままでよい。妾を打ち破り「リーオー」を得た貴様になら、見られても構わぬ。他の者であれば八つ裂きであっただろうがな。\n獅子神さまへ祈りを捧げる前に、こうして身体を清めておる。」',
  'レーヴェンケーニギン「妾はまだ終わってはおらぬ。更に力をつけ、いつの日か再び貴様と相見えようぞ。それまで待っておれ…！」'
 ];
-export function createLionAftermath(fromGX,fromGY,roll=Math.random()) {
- const rare=roll<LION_BATH_CHANCE;
- return {type:'lionEvent',aftermath:true,rare,fromGX,fromGY,phase:rare?'bathPrompt':'empty',background:LION_EMPTY_BACKGROUND,reserveMessageLines:6,
- message:rare?'玉座の間は静まり返り、誰もいないようだ…いや、耳を澄ますと水の流れる音が聞こえる…どうやら玉座の間の奥からのようだ。\n奥へ行ってみますか？\n＊Aボタン：はい　Bボタン：いいえ':EMPTY+NEXT};
+export function createLionAftermath(fromGX,fromGY,roll=Math.random(),seen=false,now=performance.now()) {
+ const rare=rollLionBath(seen,roll);
+ return {type:'lionEvent',aftermath:true,rare,fromGX,fromGY,promptReadyAt:now+LION_BATH_PROMPT_LOCK_MS,phase:rare?'bathPromptLocked':'empty',background:LION_EMPTY_BACKGROUND,reserveMessageLines:6,
+ message:rare?'玉座の間は静まり返り、誰もいないようだ…いや、耳を澄ますと水の流れる音が聞こえる…どうやら玉座の間の奥からのようだ。\n奥へ行ってみますか？':EMPTY+NEXT};
 }
 const clamp=v=>Math.max(0,Math.min(1,v));
 // Frame-driven: no queued timers survive a load, retreat or scene replacement.
@@ -26,12 +36,30 @@ export function getLionBathFrame(time,reduced=false) {
  return {throne:0,opacity:1,blur:22*(1-ease),scale:1.05-.05*ease};
 }
 let session=null;
-export function disposeLionBath(){if(!session)return;session.layer?.remove();session=null;stopLoopSe('lionBathWater');}
+function installPromptGuard(owner){
+ const held=new Set();let swallowClick=false;
+ const guard=e=>{
+  if(!['bathPromptLocked','bathPrompt'].includes(owner.event.phase))return;
+  const locked=owner.event.phase==='bathPromptLocked';
+  const key=e.pointerId??e.changedTouches?.[0]?.identifier??'pointer';
+  let block=locked;
+  if(e.type==='keydown')block=locked||e.repeat;
+  if(['pointerdown','touchstart'].includes(e.type)){swallowClick=locked;if(locked)held.add(key);}
+  if(['pointerup','pointercancel','touchend','touchcancel'].includes(e.type)){block=locked||held.has(key);if(block)swallowClick=true;held.delete(key);}
+  if(e.type==='click'){block=locked||swallowClick;swallowClick=false;}
+  if(block){e.preventDefault();e.stopImmediatePropagation();}
+ };
+ const types=['keydown','pointerdown','pointerup','pointercancel','touchstart','touchend','touchcancel','click'];
+ types.forEach(t=>window.addEventListener(t,guard,{capture:true,passive:false}));
+ owner.removeGuard=()=>types.forEach(t=>window.removeEventListener(t,guard,true));
+}
+export function disposeLionBath(){if(!session)return;session.layer?.remove();session.removeGuard?.();session=null;stopLoopSe('lionBathWater');}
 export function syncLionBath(event){
  if(session&&session.event!==event)disposeLionBath();
- if(event?.aftermath&&event.rare&&!session){session={event,layer:null};void startLoopSe('lionBathWater');}
+ if(event?.aftermath&&event.rare&&!session){session={event,layer:null};if(typeof window!=='undefined')installPromptGuard(session);void startLoopSe('lionBathWater');}
 }
 export function handleLionBathInput(event,action,hooks,now){
+ if(action==='dismiss')return !['empty','bathPrompt','bathTalk'].includes(event.phase);
  if(event.phase==='empty'&&action==='confirm')hooks.retreat(event);
  else if(event.phase==='bathPrompt'){
   if(action==='cancel')hooks.retreat(event);
@@ -44,6 +72,7 @@ export function handleLionBathInput(event,action,hooks,now){
  return true;
 }
 export function updateLionBath(event,now,hooks){
+ if(event.phase==='bathPromptLocked'&&now>=event.promptReadyAt){event.phase='bathPrompt';event.message+='\n＊Aボタン：はい　Bボタン：いいえ';hooks.say(event.message);}
  if(event.loadFailed){event.loadFailed=false;hooks.say(event.message);}
  if(event.phase==='bathReveal'&&now-event.startAt>=(event.reduced?900:4900)){
   event.phase='bathTalk';event.page=0;hooks.markLionBathSeen();hooks.say(PAGES[0]+NEXT);
