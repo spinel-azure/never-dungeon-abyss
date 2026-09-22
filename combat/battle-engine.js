@@ -1625,8 +1625,8 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
       playerChargePresentationId: actorSide === "player" && action.chargeSkill
         ? action.presentationId || action.id
         : null,
-      battlePresentationId: actorSide === "player" && !action.chargeSkill
-        ? action.presentationId || null
+      battlePresentationId: actorSide === "player"
+        ? action.presentationId || action.id || null
         : null,
       blockedByNpcWall: Boolean(hit.blockedByNpcWall),
       mirageEvaded: Boolean(hit.mirageEvaded),

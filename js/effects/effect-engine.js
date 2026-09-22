@@ -1,3 +1,4 @@
+import { EffectAudio } from "./effect-audio.js";
 import { normalizeEffectDefinition } from "./effect-schema.js";
 
 const EASINGS = {
@@ -8,7 +9,7 @@ const EASINGS = {
 };
 
 export class EffectEngine {
-  constructor(canvas, { transparent = false, backdrop = true } = {}) {
+  constructor(canvas, { transparent = false, backdrop = true, getTarget = null, onShake = null, audio = {} } = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
     this.effect = normalizeEffectDefinition();
@@ -17,6 +18,7 @@ export class EffectEngine {
     this.transparent = Boolean(transparent);
     this.backdrop = Boolean(backdrop);
     this.imageCache = new Map();
+    this.getTarget=getTarget;this.onShake=onShake;this.playGeneration=0;this.audio=new EffectAudio({getEffect:()=>this.effect,...audio});
   }
 
   setRenderMode({ transparent = this.transparent, backdrop = this.backdrop } = {}) {
@@ -26,6 +28,7 @@ export class EffectEngine {
   }
 
   load(definition) {
+    this.stop(false);
     this.effect = normalizeEffectDefinition(definition);
     this.canvas.width = this.effect.width;
     this.canvas.height = this.effect.height;
@@ -39,28 +42,48 @@ export class EffectEngine {
     return this.load(await response.json());
   }
 
-  play({ speed = 1, onComplete = null } = {}) {
-    this.stop(false);
-    let previous = performance.now();
-    const frame = now => {
-      this.time += (now - previous) * Math.max(.01, Number(speed) || 1);
-      previous = now;
-      if (this.time >= this.effect.duration) {
-        this.seek(this.effect.duration);
-        this.animationFrame = 0;
-        onComplete?.();
-        return;
-      }
-      this.render();
-      this.animationFrame = requestAnimationFrame(frame);
-    };
-    this.animationFrame = requestAnimationFrame(frame);
+  async prepare() {
+    await Promise.all(this.effect.parts.filter(p=>p.enabled&&p.type==='cutin').map(p=>{
+      const src=p.imageData||p.imageSrc;
+      if(!src)throw new Error('Missing cutin image: '+p.fileName);
+      let image=this.imageCache.get(src);
+      if(!image){image=new Image();image.src=src;this.imageCache.set(src,image)}
+      return image.decode();
+    }));
+    if(globalThis.document?.fonts){await Promise.all(['Game','GameFont','Pixel','PixelFont'].map(font=>document.fonts.load('72px '+font)));await document.fonts.ready;}
   }
 
-  stop(reset = true) {
-    if (this.animationFrame) cancelAnimationFrame(this.animationFrame);
-    this.animationFrame = 0;
-    if (reset) this.seek(0);
+  play({speed=1,onComplete=null}={}) {
+    this.stop(false);const generation=this.playGeneration;const rate=Math.max(.01,Number(speed)||1);
+    return new Promise(resolve=>{
+      const visibility=()=>{if(document.hidden)this.audio.pause()};globalThis.document?.addEventListener('visibilitychange',visibility);
+      this.finishPlayback=result=>{globalThis.document?.removeEventListener('visibilitychange',visibility);this.finishPlayback=null;this.audio.pause();this.onShake?.({x:0,y:0});onComplete?.(result);resolve(result)};
+      (async()=>{
+        try{
+          await this.prepare();
+          if(generation!==this.playGeneration)return;
+          if(!await this.audio.start(this.time,rate))throw new Error('Effect audio could not be loaded');
+          if(generation!==this.playGeneration)return;
+          let previous=performance.now(),resuming=false;
+          const frame=now=>{
+            if(generation!==this.playGeneration)return;
+            if(globalThis.document?.hidden){previous=now;this.audio.pause();this.animationFrame=requestAnimationFrame(frame);return}
+            if(!this.audio.running){previous=now;if(!resuming){resuming=true;this.audio.start(this.time,rate).then(ok=>{resuming=false;if(!ok&&generation===this.playGeneration)this.stop(false)})}this.animationFrame=requestAnimationFrame(frame);return}
+            this.time=Math.min(this.effect.duration,this.time+(now-previous)*rate);previous=now;
+            this.render();this.audio.sync(this.time,rate);
+            if(this.time>=this.effect.duration){this.animationFrame=0;this.finishPlayback?.(true);return}
+            this.animationFrame=requestAnimationFrame(frame);
+          };this.animationFrame=requestAnimationFrame(frame);
+        }catch(error){if(generation===this.playGeneration){console.warn('Effect playback failed',error);this.finishPlayback?.(false)}}
+      })();
+    });
+  }
+
+  stop(reset=true) {
+    this.playGeneration++;
+    if(this.animationFrame)cancelAnimationFrame(this.animationFrame);
+    this.animationFrame=0;this.audio.pause();this.finishPlayback?.(false);this.onShake?.({x:0,y:0});
+    if(reset)this.seek(0);
   }
 
   seek(milliseconds) {
@@ -70,6 +93,7 @@ export class EffectEngine {
 
   render() {
     const { ctx, effect } = this;
+    this.renderTarget=this.getTarget?.();
     ctx.save();
     if (this.transparent) ctx.clearRect(0, 0, effect.width, effect.height);
     else {
@@ -78,7 +102,7 @@ export class EffectEngine {
     }
     if (this.backdrop) drawBackdrop(ctx, effect.width, effect.height);
     const shake = calculateShake(effect.parts, this.time);
-    ctx.translate(shake.x, shake.y);
+    if(this.onShake)this.onShake(shake);else ctx.translate(shake.x, shake.y);
     for (const part of effect.parts) this.renderPart(part);
     ctx.restore();
   }
@@ -87,21 +111,25 @@ export class EffectEngine {
     if (!part.enabled || this.time < part.start || this.time > part.start + part.duration || part.type === "shake") return;
     const raw = Math.min(1, Math.max(0, (this.time - part.start) / part.duration));
     const progress = (EASINGS[part.easing] || EASINGS.linear)(raw);
+    this.ctx.save();
+    const offset=getAnchorOffset(part,this.effect,this.renderTarget);this.ctx.translate(offset.x,offset.y);
     if (part.type === "cutin") this.drawCutin(part, progress, raw);
     else {
       const draw = DRAWERS[part.type];
       if (draw) draw(this.ctx, part, progress, raw);
     }
+    this.ctx.restore();
   }
 
   drawCutin(part, progress, raw) {
-    if (!part.imageData) return;
-    let image = this.imageCache.get(part.imageData);
+    const source=part.imageData||part.imageSrc;
+    if (!source) return;
+    let image = this.imageCache.get(source);
     if (!image) {
       image = new Image();
       image.onload = () => this.render();
-      image.src = part.imageData;
-      this.imageCache.set(part.imageData, image);
+      image.src = source;
+      this.imageCache.set(source, image);
     }
     if (!image.complete || !image.naturalWidth) return;
     const elapsed = raw * part.duration;
@@ -231,7 +259,7 @@ const DRAWERS = {
   },
   popup(ctx, p, t) {
     const displayText = p.valueSource === "fixed" || !/^\{.+\}$/.test(p.text) ? p.text : p.previewText;
-    const font = { game: 'Game, "Yu Gothic UI", sans-serif', pixel: 'Pixel, monospace', sans: '"Yu Gothic UI", sans-serif', serif: '"Yu Mincho", serif' }[p.fontFamily] || '"Yu Gothic UI", sans-serif';
+    const font = { game: 'Game, GameFont, "Yu Gothic UI", sans-serif', pixel: 'Pixel, PixelFont, monospace', sans: '"Yu Gothic UI", sans-serif', serif: '"Yu Mincho", serif' }[p.fontFamily] || '"Yu Gothic UI", sans-serif';
     ctx.save(); ctx.globalAlpha = Math.min(1, t * 5) * (1 - Math.max(0, (t - .75) / .25)); ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.font = `bold ${p.fontSize}px ${font}`; ctx.lineWidth = Math.max(3, p.fontSize / 12); ctx.strokeStyle = p.outlineColor; ctx.fillStyle = p.color; const y = p.y - p.rise * t; ctx.strokeText(displayText, p.x, y); ctx.fillText(displayText, p.x, y); ctx.restore();
   }
 };
@@ -293,3 +321,8 @@ function calculateShake(parts, time) {
 }
 
 function mulberry32(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+export function getAnchorOffset(part,effect,target){
+  if(part.anchor!=='enemy'||!target||!Number.isFinite(target.x)||!Number.isFinite(target.y)||['shake','whiteout','blackout','blizzard'].includes(part.type))return {x:0,y:0};
+  return {x:target.x-effect.width/2,y:target.y-effect.height/2};
+}

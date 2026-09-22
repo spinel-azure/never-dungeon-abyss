@@ -1624,3 +1624,10 @@
 - Compared five legal Lv197 builds, four multiplier settings (including baseline), 100 seeds each: all 2,000 victories. At 3/4/5, mean turns A/B/C/D/E = 90.13/518.73/342.38/282.72/136.43. Magic reaches the 100–180 target; tested physical builds do not. Recommend retaining 3/4/5 provisionally, without final balance approval.
 - Full automated suite: 1496 passed, 0 failed. Existing browser flow plus opening display/expiry/escape checks passed at 1280/390/320 widths. Real handheld testing not performed.
 - B1F leoPreparation and LEO_EVENT_RELEASED=false preserved. No commit/push/release. Detailed report: docs/lion-opening-balance.md; reproducible results: artifacts/lion-opening/comparison.json.
+
+### 2026-09-22 バトルエフェクト共通化と敵位置追随
+
+- ジェネレーターと本編で座標・描画・振動・音声を共有。敵画像中心へ毎フレーム追随し、複数敵は命中対象を選択。既存JSONは画面基準を維持。
+- 素材の事前読込、音声保持、チャージ技のJSON登録、終了・中断の後片付けを追加。完成済みプリセットの本編への自動割当はしていない。
+- Node 1520件成功、ブラウザー170フレーム全画素一致、実再生アダプターで画像・無音SE/BGM・停止・中断を確認。実機端末・実音聴感は未検証。詳細：docs/effect-runtime-parity.md。
+- LAST UPDATEを2026-09-22、main.jsキャッシュを20260922-1へ更新。コミット・pushなし。

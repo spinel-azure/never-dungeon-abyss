@@ -14,7 +14,7 @@ import {
 import { getEquipmentAdjustedEscapeRate, resolveEscapeAttempt } from "../combat/resolve-escape.js";
 import { clearBattleOnlyStatuses } from "../combat/status-lifecycle.js";
 import { playPlayerChargePresentation } from "./player-charge-presentation.js";
-import { playBattleSkillPresentation } from "./battle-skill-presentation.js";
+import { playBattleSkillPresentation, stopBattleSkillPresentation } from "./battle-skill-presentation.js";
 import { createEnemyAmbientEffects } from "./enemy-ambient-effects.js";
 import { getSkill } from "../data/skills.js";
 import { showZentaurinArrow } from "./zentaurin-opening.js";
@@ -614,10 +614,11 @@ async function playPresentationEvents() {
     const dedicatedPresentationPlayed = event.targetSide === "enemy" && event.hit
       ? await playBattleSkillPresentation({
         root: battleUi.root,
-        presentationId: event.battlePresentationId,
-        damage: event.damage
+        presentationId: event.battlePresentationId || event.playerChargePresentationId,
+        damage: event.damage, targetIndex: event.targetIndex ?? battleUi.battle.targetIndex
       })
       : false;
+    if (!battleUi.active) return;
     if (event.type === "healing") {
       showBattleNumber(event.targetSide, event.amount, "healing");
       battleUi.playSe("heal");
@@ -889,6 +890,7 @@ function updateBattleSpeedToggle() {
 
 function closeBattle() {
   battleUi.ambientEffects?.clear();
+  stopBattleSkillPresentation();
   clearAutoTimer();
   if (battleUi.speedToggleTouchResetTimer) {
     window.clearTimeout(battleUi.speedToggleTouchResetTimer);

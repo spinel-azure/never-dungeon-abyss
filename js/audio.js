@@ -604,3 +604,10 @@ function warnAudio(message, error) {
 function isTouchLayout() {
   return document.body.classList.contains("layout-mobile") || document.body.classList.contains("layout-tablet");
 }
+
+// Route timeline audio through the existing SE/BGM mute and volume controls.
+export async function createEffectAudioRouting() {
+  const context=await resumeAudioContext();
+  if(!context)throw new Error('Web Audio is unavailable');
+  return {options:{context,destination:kind=>kind==='bgm'?audio.bgmMasterGain:audio.seMasterGain},release(){}};
+}

@@ -1,0 +1,38 @@
+<!doctype html><html lang="ja"><meta charset="utf-8"><title>Effect runtime parity QA</title>
+<link rel="stylesheet" href="../../css/style.css"><link rel="stylesheet" href="../../css/effects.css">
+<style>body{display:block;background:#111;color:white;padding:20px}canvas{width:480px;height:270px}#battleScreen{position:relative;width:480px;height:270px;background:#222}#battleEnemyImage{position:absolute;width:60px;height:80px;left:210px;top:95px}pre{white-space:pre-wrap}</style>
+<button id="run">再現性テストを実行</button><pre id="result">準備完了（セーブデータは使用しません）</pre>
+<div id="battleScreen"><img id="battleEnemyImage" alt="テスト敵"><canvas id="battleSkillEffectCanvas" width="960" height="540" hidden></canvas></div>
+<canvas id="generator" width="960" height="540"></canvas><canvas id="runtime" width="960" height="540"></canvas>
+<script type="module">
+import {EffectEngine} from '../../js/effects/effect-engine.js';
+import {EFFECT_PART_TYPES,createEffectPart} from '../../js/effects/effect-schema.js';
+import {prepareBattleSkillEffect,playBattleSkillPresentation,getBattleEffectTarget,stopBattleSkillPresentation} from '../../js/battle-skill-presentation.js';
+import {setSeOptions,setBgmOptions} from '../../js/audio.js';
+const result=document.querySelector('#result'),root=document.querySelector('#battleScreen'),canvas=root.querySelector('canvas'),sprite=document.querySelector('#battleEnemyImage');
+const icon=document.createElement('canvas');icon.width=60;icon.height=80;const paint=icon.getContext('2d');paint.fillStyle='#80cfff';paint.fillRect(5,5,50,70);const imageData=icon.toDataURL();sprite.src=imageData;
+function assert(value,message){if(!value)throw new Error(message)}
+function silence(){const data=new Uint8Array(1644),view=new DataView(data.buffer);const text=(s,o)=>[...s].forEach((c,i)=>data[o+i]=c.charCodeAt(0));text('RIFF',0);view.setUint32(4,1636,true);text('WAVEfmt ',8);view.setUint32(16,16,true);view.setUint16(20,1,true);view.setUint16(22,1,true);view.setUint32(24,8000,true);view.setUint32(28,16000,true);view.setUint16(32,2,true);view.setUint16(34,16,true);text('data',36);view.setUint32(40,1600,true);return 'data:audio/wav;base64,'+btoa(String.fromCharCode(...data))}
+document.querySelector('#run').onclick=async()=>{
+ result.textContent='実行中…';
+ try{
+  const target={x:650,y:210};const a=new EffectEngine(document.querySelector('#generator'),{transparent:true,backdrop:false,getTarget:()=>target});
+  const b=new EffectEngine(document.querySelector('#runtime'),{transparent:true,backdrop:false,getTarget:()=>target});
+  let frames=0;
+  for(const type of Object.keys(EFFECT_PART_TYPES))for(const anchor of ['screen','enemy']){
+   const part={...createEffectPart(type),anchor,start:0,duration:1000,seed:7};
+   if(type==='cutin')part.imageData=imageData;
+   const definition={width:960,height:540,duration:1000,parts:[part]};
+   a.load(definition);b.load(prepareBattleSkillEffect(JSON.parse(JSON.stringify(definition)),999,999));await Promise.all([a.prepare(),b.prepare()]);
+   for(const time of [0,125,500,875,1000]){a.seek(time);b.seek(time);const x=a.ctx.getImageData(0,0,960,540).data,y=b.ctx.getImageData(0,0,960,540).data;assert(x.every((v,i)=>v===y[i]),`${type}/${anchor}/${time}: pixels differ`);frames++}
+  }
+  canvas.hidden=false;await sprite.decode();const before=getBattleEffectTarget(root,canvas);sprite.style.left='310px';const after=getBattleEffectTarget(root,canvas);assert(Math.abs(after.x-before.x-200)<.1,'Enemy movement was not followed');
+  setSeOptions({enabled:true,volume:0});setBgmOptions({enabled:true,volume:0});
+  const audioData=silence();
+  const def={duration:220,parts:[{...createEffectPart('cutin'),start:0,duration:220,imageData,anchor:'enemy'},{...createEffectPart('shake'),start:0,duration:220}],audioTracks:[{kind:'se',enabled:true,start:0,duration:200,volume:80,loop:true,fadeIn:30,fadeOut:30,audioData},{kind:'bgm',enabled:true,start:50,duration:170,volume:40,loop:true,audioData}]};
+  assert(await playBattleSkillPresentation({root,definition:def,damage:42}),'Actual battle adapter playback failed');assert(canvas.hidden,'Canvas was not hidden after completion');assert(!root.style.translate,'Shake was not restored');
+  const pending=playBattleSkillPresentation({root,definition:{...def,duration:3000}});setTimeout(stopBattleSkillPresentation,50);assert(await pending===false,'Cancellation did not settle');assert(canvas.hidden,'Cancelled canvas remains visible');
+  result.textContent=`PASS: ${frames} pixel-identical frames (all ${Object.keys(EFFECT_PART_TYPES).length} part types, both anchors).\nPASS: moving DOM enemy / embedded image preload / embedded SE+BGM decoding and playback / completion cleanup / cancellation.\nNo player save loaded or modified.`;
+ }catch(error){result.textContent='FAIL: '+error.stack;console.error(error)}
+};
+</script></html>
