@@ -1,0 +1,60 @@
+[
+  {
+    "label": "pc",
+    "id": "tunguska",
+    "played": [
+      {
+        "id": "tunguska",
+        "damage": 154,
+        "popup": "154"
+      }
+    ]
+  },
+  {
+    "label": "pc",
+    "id": "apocalypse",
+    "played": [
+      {
+        "id": "apocalypse",
+        "damage": 940,
+        "targetIndex": 0,
+        "popup": "940"
+      },
+      {
+        "id": "apocalypse",
+        "damage": 1069,
+        "targetIndex": 1,
+        "popup": "1069"
+      }
+    ]
+  },
+  {
+    "label": "mobile",
+    "id": "tunguska",
+    "played": [
+      {
+        "id": "tunguska",
+        "damage": 137,
+        "popup": "137"
+      }
+    ]
+  },
+  {
+    "label": "mobile",
+    "id": "apocalypse",
+    "played": [
+      {
+        "id": "apocalypse",
+        "damage": 1034,
+        "targetIndex": 0,
+        "popup": "1034"
+      },
+      {
+        "id": "apocalypse",
+        "damage": 1083,
+        "targetIndex": 1,
+        "popup": "1083"
+      }
+    ]
+  }
+]
