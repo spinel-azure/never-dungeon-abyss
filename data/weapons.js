@@ -412,7 +412,7 @@ export const WEAPONS = Object.freeze({
     element: "physical", allowedJobs: Object.freeze(["mage"]), twoHanded: true,
     statBonuses: Object.freeze({ int: 14, maxSp: 80, attackSpellDamageBonus: 0.2 }),
     grantedSkillIds: Object.freeze(["fall_the_meteor"]),
-    description: "攻撃呪文＋20％／「墜ちよ、隕石」使用可能",
+    description: "攻撃呪文＋20％／「フォール・ザ・ミーティア」使用可能",
     showDescriptionInStatus: false,
     compactStatusBonuses: true,
     hiddenStatBonusKeys: Object.freeze(["attackSpellDamageBonus"]),

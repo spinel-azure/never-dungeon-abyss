@@ -121,3 +121,28 @@ test('ice spell uses one enemy-relative orbit with screen damage and the request
  assert.deepEqual(effect.audioTracks.map(t=>[t.src,t.start,t.duration,t.volume,t.loop]),[['se/water_attack.wav',0,100,80,false]]);
  const wav=await readFile(new URL('../se/water_attack.wav',import.meta.url));assert.equal(wav.toString('ascii',0,4),'RIFF');
 });
+
+test('meteor export keeps all 116 parts and resolves damage through the equipment skill registration', async () => {
+  const { getSkill } = await import('../data/skills.js');
+  const { getWeapon } = await import('../data/weapons.js');
+  const registry = JSON.parse(await readFile(new URL('../data/effects/battle-presentations.json', import.meta.url), 'utf8'));
+  const skill = getSkill('fall_the_meteor');
+  assert.equal(registry[skill.presentationId || skill.id], 'data/effects/meteor.json');
+  assert.ok(getWeapon('comet_booster').grantedSkillIds.includes(skill.id));
+  assert.ok(getWeapon('comet_booster').description.includes(skill.name));
+  const source = JSON.parse(await readFile(new URL('../data/effects/meteor.json', import.meta.url), 'utf8'));
+  const effect = normalizeEffectDefinition(prepareBattleSkillEffect(source, 4321));
+  assert.equal(effect.duration, 5800);
+  assert.equal(effect.parts.length, 116);
+  assert.equal(effect.audioTracks.length, 0);
+  for (let i = 0; i < source.parts.length; i++) {
+    for (const [key, value] of Object.entries(source.parts[i])) {
+      if (key !== 'text' && key !== 'valueSource') assert.deepEqual(effect.parts[i][key], value, `${source.parts[i].id}.${key}`);
+    }
+  }
+  const popup = effect.parts.find(part => part.type === 'popup');
+  assert.equal(popup.text, '4321');
+  assert.equal(popup.start, 4700);
+  assert.equal(popup.start + popup.duration, 5700);
+  assert.equal(source.parts.at(-1).text, '{damage}');
+});
