@@ -1,3 +1,5 @@
 {
-  "fire_ball": "data/effects/fire_ball.json"
+  "fire_ball": "data/effects/fire_ball.json",
+  "lightning_pierce": "data/effects/lightning.json",
+  "lightning_bolt": "data/effects/lightning.json"
 }

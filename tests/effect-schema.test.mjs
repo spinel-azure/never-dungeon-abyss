@@ -22,12 +22,12 @@ test("fire ball uses its data-driven depth orb timeline and runtime damage popup
   assert.equal(effect.id, "fire_ball");
   assert.equal(effect.name, "炎よ、燃やせ！");
   assert.equal(effect.description, "魔術師向けの炎属性魔法スキル。");
-  assert.equal(effect.duration, 1300);
+  assert.equal(effect.duration, 1600);
   assert.deepEqual(effect.parts.map(part => [part.type, part.start, part.duration]), [
-    ["depthOrb", 0, 600],
-    ["explosion", 600, 300],
-    ["popup", 900, 500],
-    ["shake", 900, 300]
+    ["depthOrb", 0, 500],
+    ["explosion", 483, 500],
+    ["shake", 483, 300],
+    ["popup", 700, 500]
   ]);
   assert.equal(effect.parts.find(part => part.type === "popup").text, "321");
   assert.equal(effect.parts.find(part => part.type === "popup").valueSource, "fixed");
@@ -84,4 +84,27 @@ test("inventory, equipment selection, status, and lot bag share equipment highli
     getEquipmentHighlightClass({ enhancement: 3 }, { lotBagHighlight: "orange" }),
     getLotEquipmentHighlightClass({ enhancement: 3 }, { lotBagHighlight: "orange" })
   );
+});
+
+test('lightning spells share the requested temporary enemy-following timeline', async () => {
+  const registry=JSON.parse(await readFile(new URL('../data/effects/battle-presentations.json',import.meta.url),'utf8'));
+  assert.equal(registry.lightning_pierce,'data/effects/lightning.json');
+  assert.equal(registry.lightning_bolt,registry.lightning_pierce);
+  const source=JSON.parse(await readFile(new URL('../data/effects/lightning.json',import.meta.url),'utf8'));
+  const effect=normalizeEffectDefinition(prepareBattleSkillEffect(source,456));
+  assert.equal(effect.duration,1600);
+  assert.deepEqual(effect.parts.map(p=>[p.type,p.anchor,p.start,p.duration]),[
+    ['lightning','enemy',0,500],['spark','enemy',180,500],['shake','screen',200,300],['popup','enemy',220,500]
+  ]);
+  assert.equal(effect.parts[0].width,50);assert.equal(effect.parts[0].lineWidth,8);
+  assert.equal(effect.parts[3].text,'456');assert.equal(effect.parts[3].fontFamily,'pixel');assert.equal(effect.parts[3].fontSize,42);
+});
+
+test('fire export preserves its screen trajectory, enemy impact and 100ms SE', async () => {
+  const effect=JSON.parse(await readFile(new URL('../data/effects/fire_ball.json',import.meta.url),'utf8'));
+  assert.equal(effect.parts[0].anchor,'screen');assert.equal(effect.parts[0].pathPoints,'314,527;395,46;481,280');
+  assert.equal(effect.parts[0].depthDirection,'nearToFar');assert.equal(effect.parts[1].anchor,'enemy');
+  assert.equal(effect.parts[3].anchor,'enemy');assert.equal(effect.parts[3].fontFamily,'pixel');
+  assert.deepEqual(effect.audioTracks.map(t=>[t.src,t.start,t.duration,t.volume,t.loop]),[['se/fire_attack.wav',0,100,80,false]]);
+  const wav=await readFile(new URL('../se/fire_attack.wav',import.meta.url));assert.equal(wav.toString('ascii',0,4),'RIFF');assert.equal(wav.toString('ascii',8,12),'WAVE');
 });
