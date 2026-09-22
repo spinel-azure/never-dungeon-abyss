@@ -1347,6 +1347,7 @@ function openDeckPicker() {
     ? Math.floor((menu.deckPickerCursor - 1) / DECK_PICKER_PAGE_SIZE)
     : 0;
   menu.deckPickerOpen = true;
+  menu.deckPanel.scrollTop = 0;
   menu.deckPickerPointerArmedIndex = -1;
   renderDeckPicker();
 }
@@ -1709,6 +1710,13 @@ function renderDeckPicker() {
     const note = document.createElement("small");
     note.textContent = "所持カードがありません。";
     list.append(note);
+  }
+  const selected = list.querySelector(".is-selected");
+  if (selected) {
+    const bounds = list.getBoundingClientRect();
+    const selection = selected.getBoundingClientRect();
+    if (selection.top < bounds.top) list.scrollTop += selection.top - bounds.top;
+    else if (selection.bottom > bounds.bottom) list.scrollTop += selection.bottom - bounds.bottom;
   }
   const pageCount = getDeckPickerPageCount();
   picker.querySelector("[data-deck-picker-page]").textContent = `${menu.deckPickerPage + 1}/${pageCount}`;

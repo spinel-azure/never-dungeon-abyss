@@ -1,0 +1,22 @@
+[
+  {
+    "label": "pc",
+    "passed": true
+  },
+  {
+    "label": "pc-short",
+    "passed": true
+  },
+  {
+    "label": "tablet-portrait",
+    "passed": true
+  },
+  {
+    "label": "tablet-landscape",
+    "passed": true
+  },
+  {
+    "label": "mobile",
+    "passed": true
+  }
+]

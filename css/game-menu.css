@@ -142,3 +142,16 @@ body.menu-open.input-touch .touch-dpad{z-index:40}
 .deck-inspect{display:block;width:100%;max-width:640px;min-height:34px;margin:6px auto 0;padding:5px;border:1px solid #62ddff;background:#09232d;color:#d7faff;font:14px/1.4 "GameFont",sans-serif}
 .deck-inspect:disabled{opacity:.4}
 @media(max-width:540px){.deck-slot .deck-slot-name{font-size:13px}.deck-card-detail{font-size:12px}.deck-inspect{font-size:12px}}
+
+/* Reserve space for the picker heading and pager even with a full page. */
+.deck-picker{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.deck-picker[hidden]{display:none}
+.deck-picker>p,.deck-picker-pager{flex:none}
+.deck-picker-list{flex:1;min-height:0;grid-auto-rows:minmax(48px,1fr);overflow:auto}
+.deck-picker-list button{min-width:0;min-height:0;overflow:hidden}
+.deck-picker-list button canvas{width:48px;height:100%;max-height:72px;min-height:0;object-fit:contain}
+.deck-picker-list button>span{min-width:0;overflow-wrap:anywhere}
+@media(max-width:420px){.deck-picker-list button canvas{width:32px;max-height:48px}}
+
+body.menu-open .deck-panel:has(.deck-picker:not([hidden])){overflow:hidden}
+body.menu-open.input-touch .deck-panel:has(.deck-picker:not([hidden])){overflow:hidden}
