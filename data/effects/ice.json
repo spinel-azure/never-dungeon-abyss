@@ -1,0 +1,81 @@
+{
+  "version": 3,
+  "id": "ice",
+  "name": "氷攻撃",
+  "description": "魔術師呪文",
+  "width": 960,
+  "height": 540,
+  "duration": 900,
+  "audioTracks": [
+    {
+      "id": "audio_1790085208474_0",
+      "kind": "se",
+      "fileName": "water_attack.wav",
+      "audioData": "",
+      "enabled": true,
+      "start": 0,
+      "duration": 100,
+      "volume": 80,
+      "loop": false,
+      "fadeIn": 0,
+      "fadeOut": 0,
+      "src": "se/water_attack.wav"
+    }
+  ],
+  "background": "#10151b",
+  "parts": [
+    {
+      "id": "fire_slash_ice_1",
+      "type": "ice",
+      "anchor": "enemy",
+      "enabled": true,
+      "start": 0,
+      "duration": 700,
+      "x": 480,
+      "y": 270,
+      "easing": "linear",
+      "seed": 1,
+      "color": "#b9f4ff",
+      "secondaryColor": "#54bfff",
+      "count": 18,
+      "radius": 170,
+      "size": 22,
+      "rotation": 20,
+      "spinTurns": 1
+    },
+    {
+      "id": "fire_slash_shake_1",
+      "type": "shake",
+      "anchor": "screen",
+      "enabled": true,
+      "start": 180,
+      "duration": 300,
+      "x": 480,
+      "y": 270,
+      "easing": "easeOutCubic",
+      "seed": 2,
+      "strength": 14,
+      "frequency": 28
+    },
+    {
+      "id": "fire_slash_popup_1",
+      "type": "popup",
+      "anchor": "screen",
+      "enabled": true,
+      "start": 200,
+      "duration": 800,
+      "x": 480,
+      "y": 270,
+      "easing": "easeOutCubic",
+      "seed": 3,
+      "color": "#ff0000",
+      "valueSource": "damage",
+      "text": "{damage}",
+      "previewText": "999",
+      "fontSize": 42,
+      "rise": 50,
+      "outlineColor": "#ffffff",
+      "fontFamily": "pixel"
+    }
+  ]
+}

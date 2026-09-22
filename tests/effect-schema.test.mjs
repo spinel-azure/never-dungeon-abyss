@@ -108,3 +108,16 @@ test('fire export preserves its screen trajectory, enemy impact and 100ms SE', a
   assert.deepEqual(effect.audioTracks.map(t=>[t.src,t.start,t.duration,t.volume,t.loop]),[['se/fire_attack.wav',0,100,80,false]]);
   const wav=await readFile(new URL('../se/fire_attack.wav',import.meta.url));assert.equal(wav.toString('ascii',0,4),'RIFF');assert.equal(wav.toString('ascii',8,12),'WAVE');
 });
+
+test('ice spell uses one enemy-relative orbit with screen damage and the requested cutoff',async()=>{
+ const registry=JSON.parse(await readFile(new URL('../data/effects/battle-presentations.json',import.meta.url),'utf8'));
+ assert.equal(registry[SPELLS.ice_bind.presentationId||SPELLS.ice_bind.id],'data/effects/ice.json');
+ const source=JSON.parse(await readFile(new URL('../data/effects/ice.json',import.meta.url),'utf8'));
+ const effect=normalizeEffectDefinition(prepareBattleSkillEffect(source,654));
+ assert.equal(effect.duration,900);
+ assert.deepEqual(effect.parts.map(p=>[p.type,p.anchor,p.start,p.duration]),[['ice','enemy',0,700],['shake','screen',180,300],['popup','screen',200,800]]);
+ assert.equal(effect.parts[0].spinTurns,1);assert.equal(effect.parts[0].easing,'linear');
+ assert.equal(effect.parts[2].text,'654');assert.equal(effect.parts[2].fontFamily,'pixel');
+ assert.deepEqual(effect.audioTracks.map(t=>[t.src,t.start,t.duration,t.volume,t.loop]),[['se/water_attack.wav',0,100,80,false]]);
+ const wav=await readFile(new URL('../se/water_attack.wav',import.meta.url));assert.equal(wav.toString('ascii',0,4),'RIFF');
+});

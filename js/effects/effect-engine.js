@@ -198,7 +198,7 @@ const DRAWERS = {
   },
   ice(ctx, p, t) {
     const rng = mulberry32(Number(p.seed) || 1), reveal = Math.min(1, t * 2.2), fade = 1 - Math.max(0, (t - .68) / .32);
-    ctx.save(); ctx.translate(p.x, p.y); ctx.globalAlpha = fade; ctx.shadowColor = p.secondaryColor; ctx.shadowBlur = 12;
+    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate((Number(p.spinTurns)||0)*Math.PI*2*t); ctx.globalAlpha = fade; ctx.shadowColor = p.secondaryColor; ctx.shadowBlur = 12;
     for (let i = 0; i < Math.max(1, Math.floor(p.count)); i++) {
       const angle = rng() * Math.PI * 2 + p.rotation * Math.PI / 180, distance = p.radius * reveal * (.35 + rng() * .65), size = p.size * (.55 + rng() * .9) * reveal;
       ctx.save(); ctx.rotate(angle); ctx.translate(distance, 0); ctx.rotate(angle * .35); ctx.fillStyle = i % 3 ? p.color : p.secondaryColor;

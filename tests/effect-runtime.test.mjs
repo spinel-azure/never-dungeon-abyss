@@ -44,3 +44,17 @@ test('stopping while assets prepare settles playback instead of leaving the batt
  let result;const playing=engine.play({onComplete:value=>{result=value}});engine.stop(false);
  assert.equal(await playing,false);assert.equal(result,false);
 });
+
+test('ice orbit rotation is animated, reversible and backward compatible',()=>{
+  assert.equal(normalizeEffectDefinition({parts:[{type:'ice'}]}).parts[0].spinTurns,0);
+  for(const turns of [1,-1,.5]){
+    const angles=[];
+    const ctx=new Proxy({}, {get:(_,key)=>key==='rotate'?angle=>angles.push(angle):()=>{},set:()=>true});
+    const engine=new EffectEngine({getContext:()=>ctx});
+    const effect=normalizeEffectDefinition({duration:1000,parts:[{type:'ice',start:0,duration:1000,easing:'linear',spinTurns:turns}]});
+    assert.equal(normalizeEffectDefinition(JSON.parse(JSON.stringify(effect))).parts[0].spinTurns,turns);
+    engine.effect=effect;engine.time=250;engine.renderPart(effect.parts[0]);
+    assert.equal(angles[0],turns*Math.PI/2);
+    angles.length=0;engine.time=500;engine.renderPart(effect.parts[0]);assert.equal(angles[0],turns*Math.PI);
+  }
+});
