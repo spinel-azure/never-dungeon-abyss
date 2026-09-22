@@ -1,0 +1,14 @@
+[
+  {
+    "label": "pc",
+    "passed": true
+  },
+  {
+    "label": "mobile",
+    "passed": true
+  },
+  {
+    "label": "narrow",
+    "passed": true
+  }
+]

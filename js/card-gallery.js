@@ -64,7 +64,8 @@ export function configureCardGallery({ root, getCharacter, playSe, onClose }) {
   bindGalleryControls();
 }
 
-export function openCardGallery() {
+export function openCardGallery({ cardId = null } = {}) {
+  cancelCardFlip();
   gallery.active = true;
   gallery.filter = "ALL";
   gallery.cardIndex = 0;
@@ -72,6 +73,7 @@ export function openCardGallery() {
   gallery.pointer = { x: 0.5, y: 0.45 };
   gallery.flashStartedAt = performance.now();
   refreshOwnedCards();
+  if (cardId) gallery.cardIndex = Math.max(0, gallery.cards.findIndex(card => card.id === cardId));
   updateGalleryInformation();
   drawGalleryCard(performance.now());
   startGalleryAnimation();

@@ -52,6 +52,7 @@ const menu = {
   deckPickerOpen: false, deckPickerCursor: 0, deckPickerItems: [], deckPickerPage: 0,
   deckCostOverEl: null, deckCostOverTimer: 0,
   deckPointerArmedIndex: -1, deckPickerPointerArmedIndex: -1,
+  cardGalleryReturnView: "dungeon",
   saveCursor: 0,
   inventoryTab: "items", inventoryCursor: 0, inventoryPage: 0, inventoryMode: "list", inventorySlot: null, inventoryFocus: "list",
   inventoryPurpose: "manage", inventorySaleStage: "list", inventorySaleQuantity: 1,
@@ -132,7 +133,9 @@ export function configureMenu(options) {
     playSe: key => menu.playSe(key),
     onClose: () => {
       closeCardGallery();
-      menu.view = "dungeon";
+      menu.view = menu.cardGalleryReturnView;
+      menu.cardGalleryReturnView = "dungeon";
+      if (menu.view === "deck") renderDeck();
       updateView();
     }
   });
@@ -300,6 +303,7 @@ export function openAdventureRecords() {
   updateView();
 }
 export function openLibraryCardGallery() {
+  menu.cardGalleryReturnView = "dungeon";
   menu.view = "cardGallery";
   updateView();
   openCardGallery();
@@ -1291,7 +1295,18 @@ function handleDeck(action) {
   if (action === "right") menu.deckCursor = row * columns + (column + 1) % columns;
   if (action === "up" || action === "down") menu.deckCursor = ((row + 1) % 2) * columns + column;
   if (action === "confirm" && menu.deckEditable) openDeckPicker();
+  else if (action === "confirm") openDeckCardDetails();
   renderDeckSelection();
+}
+
+function openDeckCardDetails() {
+  const cardId = menu.deckSlots[menu.deckCursor];
+  if (!cardId || menu.deckPickerOpen) return;
+  menu.deckPointerArmedIndex = -1;
+  menu.cardGalleryReturnView = "deck";
+  menu.view = "cardGallery";
+  updateView();
+  openCardGallery({ cardId });
 }
 
 function handleManualSave(action) {
@@ -1492,6 +1507,10 @@ function triggerAction(key, action) { menu.actionActive[key] = true; updateDebug
 function bindCommands() { menu.commands.forEach(button => button.addEventListener("click", () => { menu.commandIndex = menu.commands.indexOf(button); updateSelection(); if (isCommandUnavailable(button)) return; menu.playSe("confirm"); openCommand(button.dataset.command); })); }
 function bindStatus() { menu.statusPanel.querySelectorAll("[data-status-nav]").forEach(button => button.addEventListener("click", () => { menu.playSe(button.dataset.statusNav === "back" ? "cancel" : "confirm"); statusNavigate(button.dataset.statusNav); })); }
 function bindDeck() {
+  menu.deckPanel.querySelector("[data-deck-inspect]").addEventListener("click", () => {
+    menu.playSe("confirm");
+    openDeckCardDetails();
+  });
   menu.deckPanel.querySelector("[data-deck-back]").addEventListener("click", () => { menu.playSe("cancel"); closeDeckView(); });
   menu.deckPanel.querySelector("[data-deck-add]").addEventListener("click", () => {
     if (!menu.deckEditable) return;
@@ -1568,6 +1587,7 @@ function bindDebug() {
 function renderEmptyStats() { const rows = ["STR", "INT", "AGI", "DEX", "LUC", "DEF"].map(label => { const row = document.createElement("div"); row.className = "nde-stat-row"; const name = document.createElement("strong"); name.textContent = label; const gauge = document.createElement("span"); gauge.className = "nde-empty-gauge"; for (let index = 0; index < 30; index += 1) gauge.append(document.createElement("i")); const value = document.createElement("output"); value.textContent = "--"; row.append(name, gauge, value); return row; }); menu.root.querySelector("#ndeStatRows").replaceChildren(...rows); }
 
 function updateView() {
+  if (menu.view !== "cardGallery") closeCardGallery();
   const screenOpen = ["status", "deck", "inventory", "questHistory", "rumorHistory", "adventureRecords", "monsterCompendium", "cardGallery", "save", "options", "debug"].includes(menu.view);
   document.body.classList.toggle("menu-open", screenOpen); document.body.classList.toggle("command-open", menu.view === "commands");
   document.body.classList.toggle("deck-open", menu.view === "deck");
@@ -1595,8 +1615,19 @@ function renderDeck() {
     button.innerHTML = card
       ? `<canvas width="180" height="260" aria-label="${card.nameJa}"></canvas>`
       : `<strong>${menu.deckEditable ? "ADD CARD" : "EMPTY"}</strong>`;
-    if (card) drawCardCanvas(button.querySelector("canvas"), card);
+    if (card) {
+      drawCardCanvas(button.querySelector("canvas"), card);
+      const name = document.createElement("span");
+      name.className = "deck-slot-name";
+      name.textContent = card.nameJa || card.name;
+      button.append(name);
+    }
     button.addEventListener("click", () => {
+      if (menu.deckPointerArmedIndex === index && !menu.deckEditable && card) {
+        menu.playSe("confirm");
+        openDeckCardDetails();
+        return;
+      }
       if (menu.deckPointerArmedIndex === index && menu.deckEditable) {
         menu.playSe("confirm");
         menu.deckPointerArmedIndex = -1;
@@ -1716,6 +1747,7 @@ function changeDeckPickerPage(amount) {
 function renderDeckSelection() {
   menu.deckPanel.querySelectorAll("[data-deck-slot]").forEach((button, index) => button.classList.toggle("is-selected", index === menu.deckCursor));
   const card = getCardById(menu.deckSlots[menu.deckCursor]);
+  menu.deckPanel.querySelector("[data-deck-inspect]").disabled = !card;
   menu.deckPanel.querySelector("[data-deck-remove]").disabled = !menu.deckEditable || !card;
   menu.deckPanel.querySelector("[data-deck-detail]").textContent = card
     ? `[${card.rarity}] ${card.nameJa} / ${card.concept} / COST ${card.cost}`
