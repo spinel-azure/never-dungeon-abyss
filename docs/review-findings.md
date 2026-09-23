@@ -1699,3 +1699,9 @@
 - Node全1534件成功・失敗0。新規5件で1%境界、階層と職業、報酬とロード、装備中限定・全体攻撃とSP、属性倍率と耐性、80パーツ正規化を検証。既存の両手武器全件テストへ新武器を追加し、左手解除と再装備禁止を確認。Python28成功・警告0・失敗0・既存2skip。変更JS構文・git diff --check成功。
 - tests/browser/night-banquet-staff.mjsでPC1280×900／スマホ相当390×844の実装備からの2体戦闘、実ダメージ表示、背景振動、正常終了と途中中断を確認。画像・結果はartifacts/night-banquet-staff/。実機・Safari・長時間負荷は未確認。
 - LAST UPDATEは2026-09-23維持。main.jsキャッシュ20260923-5へ更新、CSSと内部importは変更なし。READMEへ秘密抽選を記載していない。コミット・pushなし。
+
+### 2026-09-23 4呪文のダメージ数字フォント統一
+
+- 着手時クリーン。ツングースカ／アポカリプス／ヴァルプルギスナハトのpopup.fontFamilyをsansからpixelへ変更。フォール・ザ・ミーティアは既にpixelだったため変更なし。共通EffectEngineのpixel設定は本編PixelFont（fonts/k8x12.woff2）を使用し、再生前のフォント読み込みも既存対応。
+- HEADとのJSON比較で4演出のフォント以外の値が不変であることを確認。関連Node23件成功、git diff --check成功。全Node・ブラウザ・実機の再検証は今回未実施。
+- LAST UPDATEは2026-09-23維持、main.jsキャッシュを20260923-6へ更新。内部import、README、戦闘計算は変更なし。コミット・pushなし。
