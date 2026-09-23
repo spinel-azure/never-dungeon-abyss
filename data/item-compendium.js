@@ -4,6 +4,23 @@ export function filterItemCompendiumEntries(entries, tab = "すべて") {
   return entries.filter(entry => tab === "すべて" || entry.category === tab);
 }
 export const ITEM_COMPENDIUM_ENTRIES = Object.freeze({
+  trapezohedron: Object.freeze({
+    "id": "trapezohedron",
+    "name": "トラペツォエーダー",
+    "category": "貴重品",
+    "acquisition": "依頼030「異界の混沌」",
+    "purchasePrice": null,
+    "description": "怪しげな男から託された多面体。結晶区域の最奥にある祭壇で捧げる事により、「クリーヒェンデス・カーオス」を降臨させた。可視光の99.9％を吸収する物質で出来ており、まるで闇そのものを感じさせる。別の世界では「トラペゾヘドロン」とも呼ばれ、「這い寄る混沌」なる異形を呼び出す為に用いられたとも言われる。"
+  }),
+  royal_cat_medal: Object.freeze({
+    "id": "royal_cat_medal",
+    "name": "ケーニクリヒャー・カッツェンオルデン",
+    "category": "貴重品",
+    "acquisition": "エンドロール鑑賞後",
+    "purchasePrice": null,
+    "imageSrc": "images/screenshots/medal_01.avif",
+    "description": "ドゥンケルマギーア・アマイェナクを倒し、真実の杖を取り戻した功績を称えるべく女王ミカエラから授与された勲章。名前の意味はドイツ語で「王立猫勲章」。ステータス画面及びデータロード画面で表示される。なお、この勲章を所持していると「女王のティアラ」「女王のイヤリング」「女王の首飾り」と同じ効果がある。"
+  }),
   queen_necklace: Object.freeze({
     id: "queen_necklace",
     name: "女王の首飾り",
