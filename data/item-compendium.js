@@ -4,6 +4,30 @@ export function filterItemCompendiumEntries(entries, tab = "すべて") {
   return entries.filter(entry => tab === "すべて" || entry.category === tab);
 }
 export const ITEM_COMPENDIUM_ENTRIES = Object.freeze({
+  queen_necklace: Object.freeze({
+    id: "queen_necklace",
+    name: "女王の首飾り",
+    category: "貴重品",
+    acquisition: "依頼032「女王の影を追え――その3」",
+    purchasePrice: null,
+    description: "カッツェンラントの女王が身に着けていたと言われる首飾り。柑橘系の匂いがする。所持しているだけでそのフロアのミニマップを全て表示する。ただしB100Fでは無効。"
+  }),
+  warding_incense: Object.freeze({
+    "id": "warding_incense",
+    "name": "魔除けのお香",
+    "category": "消耗品",
+    "acquisition": "イベント入手",
+    "purchasePrice": null,
+    "description": "迷宮探検家トレリーレンから譲り受けたお香。使用すると気配ゲージが上昇しなくなる。帰還または、別区域に移動するまで効果が持続する。このお香のおかげで、彼女は危険な奈落を安全に闊歩出来るのである。"
+  }),
+  queen_earring: Object.freeze({
+    "id": "queen_earring",
+    "name": "女王のイヤリング",
+    "category": "貴重品",
+    "acquisition": "依頼024「女王の影を追え――その2」",
+    "purchasePrice": null,
+    "description": "カッツェンラントの女王が身に着けていたと言われるイヤリング。柑橘系の匂いがする。所持しているだけで「階段探知」および「宝箱探知」と同じ効果がある。"
+  }),
   lichtbringer: Object.freeze({
     id: "lichtbringer",
     name: "リヒトブリンガー",

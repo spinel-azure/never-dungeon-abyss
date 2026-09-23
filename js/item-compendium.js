@@ -63,6 +63,12 @@ export function renderItemCompendiumDetail(root, entry) {
   const header = add("header", "item-compendium-header", "");
   add("span", "", "アイテム図鑑", header);
   add("span", "item-compendium-category", entry.category, header);
+  const imageSource=entry.imageData || entry.imageSrc;
+  if(imageSource){
+    const image=document.createElement('img');image.className='item-compendium-image';
+    image.alt=entry.name;image.width=100;image.height=100;
+    image.addEventListener('error',()=>image.remove(),{once:true});image.src=imageSource;root.append(image);
+  }
   add("h2", "item-compendium-name", entry.name);
   const facts = add("dl", "item-compendium-facts", "");
   add("dt", "", "入手方法", facts);
