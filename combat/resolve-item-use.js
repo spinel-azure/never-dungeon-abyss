@@ -1,3 +1,4 @@
+import { applyWingGift, wingGiftUses } from "../data/wing-gift.js";
 import { canUseItemIn, getItem } from "../data/items.js";
 import { hasValidItemElements } from "./item-elements.js";
 import { consumeItem, getItemCount } from "../data/inventory.js";
@@ -28,6 +29,10 @@ export function cureAllNegativeStatuses(statuses = []) {
 
 export function getItemUnavailableReason({ character, itemId, context, enemy, torchFuel = 0, treasureCompassActive = false } = {}) {
   if (itemId === "warding_incense" && character?.incenseZone) return "alreadyActive";
+  if (itemId === "wing_gift") {
+    if (wingGiftUses(character) >= 4) return "wingGiftLimit";
+    if (character?.sp >= character?.maxSp) return "fullSp";
+  }
   const item = getItem(itemId);
   if (!item) return "unknownItem";
   if (!hasValidItemElements(item)) return "noEffect";
@@ -152,6 +157,8 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
       next.statuses = cureAllNegativeStatuses(next.statuses);
     } else if (effect.id === "restore_torch") {
       environment.torchFuel = effect.value;
+    } else if (effect.id === "wing_gift") {
+      applyWingGift(next);
     } else if (effect.id === "warding_incense") {
       environment.wardingIncense = true;
     } else if (effect.id === "reset_presence") {

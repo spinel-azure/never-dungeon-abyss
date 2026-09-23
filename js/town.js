@@ -3413,7 +3413,8 @@ export function renderCharacterStatus() {
   const spMax = document.querySelector("#quickSpMax");
   const quickNameElement = document.querySelector("#quickName");
   const quickNameCompact = document.querySelector("#quickNameCompact");
-  hpMax?.classList.toggle("vital-max-bonus", hasMaxVitalBonus(character, "maxHp"));
+  hpMax?.classList.toggle("vital-max-bonus", !character?.wingGiftUses && hasMaxVitalBonus(character, "maxHp"));
+  hpMax?.classList.toggle("vital-max-reduced", character?.wingGiftUses > 0);
   hpCurrent?.classList.toggle("vital-critical", isCriticalHp(character?.hp, character?.maxHp));
   spMax?.classList.toggle("vital-max-bonus", hasMaxVitalBonus(character, "maxSp"));
   quickNameElement?.classList.toggle("condition-poison", ["POISON", "TOXIC", "DEATH POISON"].includes(character?.condition));

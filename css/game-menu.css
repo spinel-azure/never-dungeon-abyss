@@ -157,3 +157,5 @@ body.menu-open .deck-panel:has(.deck-picker:not([hidden])){overflow:hidden}
 body.menu-open.input-touch .deck-panel:has(.deck-picker:not([hidden])){overflow:hidden}
 
 .deck-inspect.is-selected{border-color:#b0f4ff;box-shadow:0 0 12px rgba(120,230,255,.8),inset 0 0 8px rgba(120,230,255,.25)}
+
+.vital-max-reduced{color:#59aaff!important}

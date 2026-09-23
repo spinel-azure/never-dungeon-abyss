@@ -1,3 +1,4 @@
+import { applyWingGift } from "../data/wing-gift.js";
 import { isLionQueen, selectLionAction, prepareLionAction, payLionSelfDamage, capLionDamageOverTime, synchronizeLionQueen, exposeLionQueen, prepareLionOpening, finishLionPlayerAction, clearLionOpenings } from './loewenkoenigin.js';
 import { prepareLeoAttack, payLeoAttackCost } from './leo.js';
 import { WASSERMANNFRAU_ACTIONS } from '../data/wassermannfrau.js';
@@ -1128,6 +1129,8 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
         const amount = Math.max(0, actor.maxSp - actor.sp);
         actor.sp = actor.maxSp;
         spHealing += amount;
+      } else if (effect.id === "wing_gift") {
+        applyWingGift(actor);
       } else if (effect.id === "restore_sp_rate") {
         const requested = Math.max(1, Math.ceil(actor.maxSp * (Number(effect.value) || 0)));
         const amount = Math.min(requested, actor.maxSp - actor.sp);

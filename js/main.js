@@ -1721,7 +1721,7 @@ import {
     updateCharacterUi();
     const savedLocation = save.world?.location === "town" ? "town" : "dungeon";
     character.trelirenRun = normalizeTrelirenRun(character.trelirenRun);
-    if (savedLocation === "town") character.trelirenRun = normalizeTrelirenRun();
+    if (savedLocation === "town") {character.trelirenRun = normalizeTrelirenRun();character.wingGiftUses=0;character=normalizeCharacter(character);}
     setIncenseActive(syncIncenseZone(character,currentDepth,savedLocation === "town"));
     if (savedLocation === "town") clearPresenceIncreaseReduction();
     worldLocation = savedLocation;
@@ -2416,7 +2416,7 @@ import {
     const vitals = document.querySelector(".nde-status-vitals");
     if (vitals) {
       if (character) {
-        const hpClass = hasMaxVitalBonus(character, "maxHp") ? "vital-max-bonus" : "";
+        const hpClass = character.wingGiftUses > 0 ? "vital-max-reduced" : hasMaxVitalBonus(character, "maxHp") ? "vital-max-bonus" : "";
         const spClass = hasMaxVitalBonus(character, "maxSp") ? "vital-max-bonus" : "";
         const currentHpClass = isCriticalHp(character.hp, character.maxHp) ? "vital-critical" : "";
         vitals.innerHTML = `<span>HP <strong class="${currentHpClass}">${character.hp}</strong> / <strong class="${hpClass}">${character.maxHp}</strong></span><span>SP ${character.sp} / <strong class="${spClass}">${character.maxSp}</strong></span><span>DECK COST : ${character.deckCost}</span>`;
@@ -4616,7 +4616,7 @@ import {
 
   function resetTrelirenAdventure() {
     trelirenDialogue.cleanup();
-    if(character){character.trelirenRun=normalizeTrelirenRun();delete character.incenseZone;}
+    if(character){character.trelirenRun=normalizeTrelirenRun();delete character.incenseZone;character.wingGiftUses=0;character=normalizeCharacter(character);}
     setIncenseActive(false);
     clearTimeout(itemGetTimer);itemGetEffect.hidden=true;
   }

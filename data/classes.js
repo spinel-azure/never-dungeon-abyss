@@ -1,3 +1,4 @@
+import { wingGiftUses, wingGiftMaxHp } from "./wing-gift.js";
 import { normalizeShopNotifications } from "./shop-notifications.js";
 import { getInitialEquipment } from "./equipment.js";
 import { normalizeEndingFlags } from "./ending.js";
@@ -171,7 +172,8 @@ export function normalizeCharacter(character) {
   const maxHpBeforeMultipliers = growth.hp
     + Math.max(0, Math.floor(Number(equipmentStatBonuses.maxHp) || 0))
     + Math.max(0, Math.floor(Number(cardStatBonuses.maxHp) || 0));
-  const maxHp = applyCardVitalMultipliers(cards.deckSlots, "maxHp", maxHpBeforeMultipliers);
+  const wingGiftBaseMaxHp = applyCardVitalMultipliers(cards.deckSlots, "maxHp", maxHpBeforeMultipliers);
+  const maxHp = wingGiftMaxHp(wingGiftBaseMaxHp, wingGiftUses(character));
   const maxSpBeforeMultipliers = growth.sp
     + Math.max(0, Math.floor(Number(equipmentStatBonuses.maxSp) || 0))
     + Math.max(0, Math.floor(Number(cardStatBonuses.maxSp) || 0));
@@ -270,6 +272,8 @@ export function normalizeCharacter(character) {
       { johannaBonusUnlocked: Boolean(eventFlags.johanna_bonus_unlocked) }
     ),
     maxHp,
+    wingGiftBaseMaxHp,
+    wingGiftUses: wingGiftUses(character),
     maxSp,
     hp: legacyCharacter ? maxHp : clampInteger(character.hp, 0, maxHp, maxHp),
     sp: legacyCharacter ? maxSp : clampInteger(character.sp, 0, maxSp, maxSp),

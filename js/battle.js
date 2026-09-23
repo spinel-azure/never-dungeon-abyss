@@ -437,6 +437,7 @@ async function executeCommand(command) {
       chargeNotReady: "チャージが満タンではない。",
       oncePerBattle: "活性回復薬（小）は1戦闘に1回だけ使用できる。",
       allheilmittelOncePerBattle: "アルハイルミッテルは1戦闘に1回だけ使用できる。",
+      wingGiftLimit: "ウィングギフトは1回の冒険で4回までだ。",
       fullSp: "SPは満タンだ。"
     };
     if (resolved.reason === "deadlyPoisonNotCurable") battleUi.playSe("costOver");
@@ -452,6 +453,7 @@ async function executeCommand(command) {
   battleUi.onCharacterChanged({
     hp: battleUi.presenting ? startingHp.player : battleUi.battle.player.hp,
     sp: battleUi.battle.player.sp,
+    wingGiftUses: battleUi.battle.player.wingGiftUses,
     statuses: structuredClone(battleUi.battle.player.statuses),
     inventory: structuredClone(battleUi.battle.player.inventory),
     herbicideTrialUses: Number(battleUi.battle.player.herbicideTrialUses) || 0,
@@ -514,6 +516,7 @@ async function executeAmbushOpening() {
   battleUi.onCharacterChanged({
     hp: startingHp.player,
     sp: battleUi.battle.player.sp,
+    wingGiftUses: battleUi.battle.player.wingGiftUses,
     statuses: structuredClone(battleUi.battle.player.statuses),
     inventory: structuredClone(battleUi.battle.player.inventory),
     herbicideTrialUses: Number(battleUi.battle.player.herbicideTrialUses) || 0,
@@ -857,6 +860,7 @@ export function createPersistentBattlePlayerChanges(player) {
   return {
     hp: player.hp,
     sp: player.sp,
+    wingGiftUses: player.wingGiftUses,
     statuses: structuredClone(player.statuses.filter(s=>(s.id || s.statusId)!==AQUARIUS_STATUS)),
     inventory: structuredClone(player.inventory),
     herbicideTrialUses: Number(player.herbicideTrialUses) || 0,
@@ -1135,6 +1139,8 @@ function renderBattleVitals() {
   const playerHp = battleUi.presentationHp?.player ?? battle.player.hp;
   const enemyHp = battleUi.presentationHp?.enemy ?? battle.enemy.hp;
   setText("battlePlayerHp", `${playerHp} / ${battle.player.maxHp}`);
+  const hpLabel=document.getElementById("battlePlayerHp");
+  if(hpLabel && battle.player.wingGiftUses>0) hpLabel.innerHTML=`${playerHp} / <span class="vital-max-reduced">${battle.player.maxHp}</span>`;
   renderSphinxBarrier();
   renderPiscesStatus();
   renderWeaponElementStatus(battle.player);

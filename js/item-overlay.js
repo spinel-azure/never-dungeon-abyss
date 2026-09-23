@@ -238,6 +238,7 @@ function showReason(reason) {
   overlay.messageEl.classList.remove("is-skill-description");
   overlay.messageEl.textContent = ({
     fullHp: "HPは満タンだ。",
+    wingGiftLimit: "ウィングギフトは1回の冒険で4回までだ。",
     fullSp: "SPは満タンだ。",
     noEffect: "今使っても効果がない。",
     deadlyPoisonNotCurable: "解毒剤では猛毒を治療できません。",
