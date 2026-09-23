@@ -65,3 +65,14 @@ test("Malicious permanently leaves the town passersby after quest 011 is accepte
   character.quests.active.guild_011 = { progress: 0 };
   assert.equal(isTownPasserbyVisible("malicious", character), false);
 });
+
+
+test("Treliren requires both the explorer rumor and completed dungeon meeting", () => {
+  for (const heard of [false,true]) for (const met of [false,true]) {
+    const character={eventFlags:{tavern_rumor_017_base_read:heard,treliren_met:met}};
+    assert.equal(isTownPasserbyVisible('treliren',character),heard&&met);
+  }
+  assert.equal(isTownPasserbyVisible('treliren',null),false);
+  assert.equal(getTownPasserbyImageSource('treliren',null),'images/npc/NPC_27e.avif');
+  assert.ok(existsSync(new URL('../images/npc/NPC_27e.avif',import.meta.url)));
+});

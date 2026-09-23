@@ -1,3 +1,4 @@
+import { TRELIREN_READ_FLAG, TRELIREN_MET_FLAG } from "../data/treliren.js";
 import { isAnastasiaFestivalSunday } from "../data/anastasia-event.js";
 import {
   getQuestProgress,
@@ -8,6 +9,13 @@ import {
 } from "../data/quests.js";
 
 const PASSERBY_CONFIGS = Object.freeze([
+  Object.freeze({
+    id: "treliren", src: "images/npc/NPC_27e.avif",
+    speed: 32, bobAmplitude: 1, walkPeriod: 660,
+    spawnInterval: Object.freeze([18000, 28000]),
+    initialDelay: 6500, initialPhase: 170, initialDirection: 1,
+    heightRatio: 0.75, sourceFacing: "left"
+  }),
   Object.freeze({
     id: "energeticTownGirl",
     src: "images/npc/NPC_15.avif",
@@ -339,6 +347,7 @@ export function getTownPasserbyImageSource(id, character) {
 }
 
 export function isTownPasserbyVisible(id, character) {
+  if (id === "treliren") return Boolean(character?.eventFlags?.[TRELIREN_READ_FLAG] && character?.eventFlags?.[TRELIREN_MET_FLAG]);
   const config = PASSERBY_CONFIGS.find(entry => entry.id === id);
   if (!config) return false;
   if (!config.hiddenAfterFlag) return true;
