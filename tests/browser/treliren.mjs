@@ -35,6 +35,10 @@ try{for(const [label,width,height,touch]of[['pc',1280,900,false],['mobile',390,8
  const page=await browser.newPage({viewport:{width,height},hasTouch:touch,isMobile:touch}),errors=[];
  page.on('pageerror',e=>errors.push(e.message));
  await page.addInitScript(()=>{
+  // Keep the user's connected controller from steering the automated test.
+  navigator.getGamepads=()=>[];
+  const fill=CanvasRenderingContext2D.prototype.fillText;window.hatDraws=0;
+  CanvasRenderingContext2D.prototype.fillText=function(text,...args){if(text==='👒')window.hatDraws++;return fill.call(this,text,...args);};
   const original=CanvasRenderingContext2D.prototype.drawImage;window.portraitDraws=[];
   CanvasRenderingContext2D.prototype.drawImage=function(img,...args){
    if(/NPC_27[cd]\.avif/.test(img?.src||''))window.portraitDraws.push({src:img.src,args,w:this.canvas.width,h:this.canvas.height});
@@ -45,14 +49,19 @@ try{for(const [label,width,height,touch]of[['pc',1280,900,false],['mobile',390,8
  await page.route('**/js/title-screen.js?*',async r=>r.fulfill({contentType:'text/javascript',body:(await readFile('js/title-screen.js','utf8'))+'\ntitleOpen=false;'}));
  await page.goto('http://127.0.0.1:4173');await page.waitForFunction(()=>window.tQa);
  await page.evaluate(()=>document.fonts.ready);
- await page.evaluate(async()=>{tQa.setup();await tQa.approach();});await page.waitForTimeout(700);await page.screenshot({path:`artifacts/treliren/${label}-exploration.png`});await page.evaluate(()=>tQa.walk());await page.waitForSelector('.town-talk-hint');
+ await page.evaluate(()=>tQa.setup());await page.waitForFunction(()=>hatDraws>0);
+ await page.screenshot({path:`artifacts/treliren/${label}-unexplored-hat.png`});
+ await page.evaluate(()=>tQa.approach());await page.waitForTimeout(700);await page.screenshot({path:`artifacts/treliren/${label}-exploration.png`});await page.evaluate(()=>tQa.walk());await page.waitForSelector('.town-talk-hint');
  assert.equal((await page.evaluate(()=>tQa.status())).event,'trelirenTalk');
  await page.waitForFunction(()=>portraitDraws.length>0);
  let rewardSave=null,steps=0;
  while((await page.evaluate(()=>tQa.status())).event==='trelirenTalk'&&steps++<45){
   const status=await page.evaluate(()=>tQa.status());
   if(status.run.phase===3&&!rewardSave){
+   assert.equal(await page.locator('#itemGetEffect').evaluate(el=>el.hidden),false);
+   assert.equal(await page.locator('.town-talk-body').textContent(),'');
    await page.waitForFunction(()=>document.querySelector('.town-talk-hint')?.textContent.includes('A'));
+   assert.equal(await page.locator('.town-talk-body').textContent(),'「魔除けのお香」を手に入れた！');
    rewardSave=await page.evaluate(()=>tQa.snapshot());
    assert.equal((await page.evaluate(()=>tQa.status())).count,1);
    await page.evaluate(s=>tQa.load(s),rewardSave);

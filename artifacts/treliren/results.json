@@ -2,16 +2,16 @@
   {
     "label": "pc",
     "steps": 5,
-    "portraitFrames": 275
+    "portraitFrames": 278
   },
   {
     "label": "mobile",
     "steps": 8,
-    "portraitFrames": 155
+    "portraitFrames": 154
   },
   {
     "label": "small",
     "steps": 10,
-    "portraitFrames": 163
+    "portraitFrames": 165
   }
 ]

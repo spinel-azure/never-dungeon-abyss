@@ -2714,10 +2714,7 @@ import {
       updateCharacterUi();
     },
     playReward: async () => {
-      const run = character.trelirenRun;
-      await playSeToEnd("itemGet");
-      if (character?.trelirenRun !== run || state.overlayEvent?.type !== 'trelirenTalk') return;
-      showNamedItemGetEffect(["魔除けのお香"], {playSound:false, acquisitionMessage:true});
+      showNamedItemGetEffect(["魔除けのお香"]);
       await wait(3400);
     },
     finish: () => {

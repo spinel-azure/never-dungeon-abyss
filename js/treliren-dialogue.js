@@ -18,7 +18,7 @@ export function createTrelirenDialogue({messageEl,getRun,startOverlay,getEvent,c
  }
  function show(){body.textContent=pages[page]||'';hint.textContent=locked?'':'＊Aボタンで次へ';}
  async function reward(){
-  const token=epoch;locked=true;show();
+  const token=epoch;locked=true;body.textContent='';hint.textContent='';
   if(!getRun().rewardGiven){grantReward();save();await playReward();}
   if(token!==epoch)return;
   locked=false;render();

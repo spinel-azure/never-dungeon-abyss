@@ -43,7 +43,9 @@ test('patrol never chases, alternates foot image on movement, survives reload an
  const saved=serializeRoamingEnemyState();
  restoreRoamingEnemyState(saved,{grid:cells,definitions:[TRELIREN_DEFINITION]});
  assert.equal(getActiveRoamingEnemy().stepCount,saved.stepCount);
- assert.equal(shouldDrawRoamingEnemyMarker(saved,[]),false);
+ assert.equal(shouldDrawRoamingEnemyMarker(saved,[]),true);
+ assert.equal(shouldDrawRoamingEnemyMarker({...saved,definitionId:'verfolger'},[]),false);
+ assert.equal(shouldDrawRoamingEnemyMarker({...saved,status:'departed'},[]),false);
  const explored=[];explored[saved.y]=[];explored[saved.y][saved.x]=true;
  assert.equal(shouldDrawRoamingEnemyMarker(saved,explored),true);
 });

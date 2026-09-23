@@ -103,7 +103,7 @@ export function drawMinimap(ctx, {
   }
 
   if (shouldDrawRoamingEnemyMarker(roamingEnemy, explored)) {
-    if (roamingEnemy.definitionId === "treliren") drawTextMark(ctx, "T", ox + roamingEnemy.x * cell, oy + roamingEnemy.y * cell, cell, "#72efc5");
+    if (roamingEnemy.definitionId === "treliren") drawTextMark(ctx, "👒", ox + roamingEnemy.x * cell, oy + roamingEnemy.y * cell, cell, "#72efc5");
     else drawRoamingEnemyMark(
       ctx,
       ox + roamingEnemy.x * cell,
@@ -152,7 +152,7 @@ export function shouldDrawRoamingEnemyMarker(roamingEnemy, explored = []) {
     roamingEnemy?.status === "active"
     && Number.isInteger(roamingEnemy.x)
     && Number.isInteger(roamingEnemy.y)
-    && explored[roamingEnemy.y]?.[roamingEnemy.x]
+    && (roamingEnemy.definitionId === "treliren" || explored[roamingEnemy.y]?.[roamingEnemy.x])
   );
 }
 
