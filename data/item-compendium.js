@@ -4,6 +4,14 @@ export function filterItemCompendiumEntries(entries, tab = "すべて") {
   return entries.filter(entry => tab === "すべて" || entry.category === tab);
 }
 export const ITEM_COMPENDIUM_ENTRIES = Object.freeze({
+  lichtbringer: Object.freeze({
+    id: "lichtbringer",
+    name: "リヒトブリンガー",
+    category: "貴重品",
+    acquisition: "イベント入手",
+    purchasePrice: null,
+    description: "ドイツ語で「光もたらすもの」を意味する光の球。完全なる闇に閉ざされた漆黒区域を照らし出す。英語でライトブリンガーでも良かったんだけど、こっちの方が何となく語感がいいじゃない？ｗ"
+  }),
   wing_gift: Object.freeze({
     id: "wing_gift",
     name: "ウィングギフト",

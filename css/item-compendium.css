@@ -41,3 +41,10 @@
 
 .item-compendium-panel[hidden]{display:none!important}
 .item-compendium-panel button:focus-visible{outline:2px solid #9affd5;outline-offset:-2px}
+
+/* Japanese reading text uses the 16px game face instead of narrow numeric pixels. */
+.item-compendium-panel button,.item-compendium-header,.item-compendium-name,.item-compendium-facts,.item-compendium-description{font-family:"GameFont","Yu Gothic",sans-serif;font-weight:400;letter-spacing:normal;text-shadow:none}
+.item-compendium-panel button,.item-compendium-header,.item-compendium-facts{font-size:16px}
+.item-compendium-name{font-size:24px;line-height:1.5}
+.item-compendium-description{font-size:16px;line-height:2;max-width:100%}
+.item-compendium-content{overscroll-behavior:contain}
