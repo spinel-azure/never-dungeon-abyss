@@ -5,5 +5,6 @@
   "ice_bind": "data/effects/ice.json",
   "fall_the_meteor": "data/effects/meteor.json",
   "tunguska": "data/effects/tunguska.json",
-  "apocalypse": "data/effects/apocalypse.json"
+  "apocalypse": "data/effects/apocalypse.json",
+  "walpurgisnacht": "data/effects/walpurgisnacht.json"
 }

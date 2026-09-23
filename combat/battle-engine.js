@@ -2155,6 +2155,7 @@ function combatStats(combatant) {
     fireSpellDamageBonus: collected.fireSpellDamageBonus,
     iceSpellDamageBonus: collected.iceSpellDamageBonus,
     attackSpellDamageBonus: collected.attackSpellDamageBonus,
+    darkSpellDamageMultiplier: collected.darkSpellDamageMultiplier,
     passiveInstantDeathRateBonus: collected.passiveInstantDeathRateBonus,
     fireDamageTakenBonus: collected.fireDamageTakenBonus,
     iceDamageTakenBonus: collected.iceDamageTakenBonus,

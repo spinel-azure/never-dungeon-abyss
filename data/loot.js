@@ -51,6 +51,7 @@ export function rollEnemyDrop(enemy, rng = Math.random) {
 
 export function getGoldChestWeaponId(job, depth = 50) {
   const floor = Math.max(1, Math.floor(Number(depth) || 1));
+  if (floor >= 70 && floor <= 78) return job === "mage" ? "night_banquet_staff" : null;
   const table = floor >= 90 && floor <= 98
     ? CAT_GOLD_CHEST_WEAPONS_BY_JOB
     : floor >= 50 && floor <= 58 ? GOLD_CHEST_WEAPONS_BY_JOB : null;
@@ -75,7 +76,7 @@ export function rollGoldChestLoot(character, depth = 50) {
     equipmentId,
     slot: "rightArmId",
     enhancement: 0,
-    unidentifiedName: equipmentId === "katzenstab" ? "？両手杖" : "？武器"
+    unidentifiedName: ["katzenstab", "night_banquet_staff"].includes(equipmentId) ? "？両手杖" : "？武器"
   };
 }
 

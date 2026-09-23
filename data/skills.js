@@ -529,6 +529,13 @@ export const SKILLS = Object.freeze({
     element: "arcane", spellPower: 0, intelligenceMultiplier: 10, powerMultiplier: 1,
     unavoidable: true, equipmentGranted: true, effects: Object.freeze([])
   }),
+  walpurgisnacht: Object.freeze({
+    id: "walpurgisnacht", name: "ヴァルプルギスナハト",
+    description: "夜宴の杖装備中のみ使用可能。\n敵全体へINT×8の闇属性魔法攻撃（杖の闇補正×1.5）。",
+    actionType: "spell", category: "spell", spCost: 55, target: "allEnemies",
+    element: "dark", spellPower: 0, intelligenceMultiplier: 8, powerMultiplier: 1,
+    unavoidable: true, equipmentGranted: true, presentationId: "walpurgisnacht", effects: Object.freeze([])
+  }),
   fireball: SPELLS.fireball,
   ice_bind: SPELLS.ice_bind,
   lightning_pierce: SPELLS.lightning_pierce

@@ -420,6 +420,19 @@ export const WEAPONS = Object.freeze({
     lotBagHighlight: "orange",
     sellPrice: 0
   }),
+  night_banquet_staff: Object.freeze({
+    id: "night_banquet_staff", name: "夜宴の杖", type: "staff", weaponTypeLabel: "両手杖", attack: 1,
+    element: "physical", allowedJobs: Object.freeze(["mage"]), twoHanded: true,
+    statBonuses: Object.freeze({ int: 15, maxSp: 110, attackSpellDamageBonus: 0.25, darkSpellDamageMultiplier: 1.5 }),
+    grantedSkillIds: Object.freeze(["walpurgisnacht"]),
+    description: "攻撃呪文＋25％／闇属性呪文×1.5／「ヴァルプルギスナハト」使用可能",
+    hiddenStatBonusKeys: Object.freeze(["darkSpellDamageMultiplier"]),
+    showDescriptionInStatus: false,
+    compactStatusBonuses: true,
+    statusHiddenStatBonusKeys: Object.freeze(["attackSpellDamageBonus", "darkSpellDamageMultiplier"]),
+    flavorText: "夜の宴へと鬼火を招く両手杖。\n紫の円舞が静まるとき、闇の炎が獲物を包む。",
+    unique: true, lotBagHighlight: "orange", sellPrice: 0
+  }),
   katzbalger: Object.freeze({
     id: "katzbalger", name: "カッツバルゲル", type: "longsword", weaponTypeLabel: "片手剣", attack: 42,
     element: "physical", allowedJobs: Object.freeze(["warrior"]),

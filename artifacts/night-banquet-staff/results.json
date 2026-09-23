@@ -1,0 +1,38 @@
+[
+  {
+    "label": "pc",
+    "id": "walpurgisnacht",
+    "played": [
+      {
+        "id": "walpurgisnacht",
+        "damage": 380,
+        "targetIndex": 0,
+        "popup": "380"
+      },
+      {
+        "id": "walpurgisnacht",
+        "damage": 335,
+        "targetIndex": 1,
+        "popup": "335"
+      }
+    ]
+  },
+  {
+    "label": "mobile",
+    "id": "walpurgisnacht",
+    "played": [
+      {
+        "id": "walpurgisnacht",
+        "damage": 386,
+        "targetIndex": 0,
+        "popup": "386"
+      },
+      {
+        "id": "walpurgisnacht",
+        "damage": 387,
+        "targetIndex": 1,
+        "popup": "387"
+      }
+    ]
+  }
+]

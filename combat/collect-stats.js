@@ -39,6 +39,8 @@ export function collectStats(source = {}) {
     defensePenetration: numeric(source.defensePenetration),
     statusPowerBonus: numeric(source.statusPowerBonus),
     statusResistanceBonus: numeric(source.statusResistanceBonus),
+    darkSpellDamageMultiplier: positiveMultiplier(source.darkSpellDamageMultiplier)
+      * positiveMultiplier(equipment.darkSpellDamageMultiplier),
     attackSpellDamageBonus: numeric(source.attackSpellDamageBonus)
       + numeric(equipment.attackSpellDamageBonus),
     passiveInstantDeathRateBonus: numeric(source.passiveInstantDeathRateBonus)

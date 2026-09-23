@@ -23,6 +23,7 @@ const EXPECTED_TWO_HANDED_WEAPON_IDS = Object.freeze([
   "glacies_hammer",
   "sylvan_emera",
   "comet_booster",
+  "night_banquet_staff",
   "katzenstab"
 ]);
 
