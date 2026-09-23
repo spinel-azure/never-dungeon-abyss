@@ -16,18 +16,24 @@ await mkdir('artifacts/deck-details',{recursive:true});
 const browser=await chromium.launch({channel:'msedge',headless:true});
 const results=[];
 try{
- for(const [label,width,height,touch,motion] of [['pc',1280,900,false,'no-preference'],['mobile',390,844,true,'no-preference'],['narrow',320,720,true,'reduce']]){
+ for(const [label,width,height,touch,motion] of [['pc',1280,900,false,'no-preference'],['mobile',390,844,true,'no-preference'],['narrow',320,720,true,'reduce'],['tablet',820,1180,true,'no-preference']]){
  const context=await browser.newContext({viewport:{width,height},hasTouch:touch,isMobile:touch,reducedMotion:motion});
- const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const page=await context.newPage();await page.addInitScript(()=>{window.qaPad={index:0,id:'QA standard',mapping:'standard',connected:true,axes:[0,0],buttons:Array.from({length:16},()=>({pressed:false,value:0}))};navigator.getGamepads=()=>[window.qaPad];});const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.route('**/js/main.js?*',r=>r.fulfill({contentType:'text/javascript',body:source.replace('  document.documentElement.dataset.ndaMainReady = "true";',hook+'\n  document.documentElement.dataset.ndaMainReady = "true";')}));
  await page.route('**/js/menu.js',r=>r.fulfill({contentType:'text/javascript',body:menu+'\nwindow.deckMenuQa={input:handleMenuInput,readonly(){menu.deckEditable=false;renderDeck();},view:()=>menu.view};'}));
  await page.goto(origin);await page.waitForFunction(()=>window.deckQa);await page.evaluate(()=>deckQa.setup());
  await page.evaluate(()=>document.fonts.ready);
+ const press=async i=>{await page.evaluate(i=>qaPad.buttons[i]={pressed:true,value:1},i);await page.waitForTimeout(80);await page.evaluate(i=>qaPad.buttons[i]={pressed:false,value:0},i);await page.waitForTimeout(80);};
+ await page.waitForTimeout(200);
  const before=await page.evaluate(()=>deckQa.cards());
  await page.locator('[data-deck-slot="1"]').click();
  await page.screenshot({path:`artifacts/deck-details/${label}-deck.png`});
  assert.ok(await page.locator('.deck-slot-name').first().evaluate(el=>parseFloat(getComputedStyle(el).fontSize)>=13));
- await page.locator('[data-deck-inspect]').click();
+ await press(13);await press(13);
+ assert.equal(await page.locator('[data-deck-inspect]').evaluate(el=>el.classList.contains('is-selected')),true);
+ await page.evaluate(()=>deckMenuQa.input('down'));
+ assert.equal(await page.locator('[data-deck-slot="1"]').evaluate(el=>el.classList.contains('is-selected')),true);
+ await press(12);await press(0);
  const canvas=page.locator('[data-card-gallery-canvas]');
  assert.match(await canvas.getAttribute('aria-label'),/精神充実/);
  if(touch)await canvas.tap();else await canvas.click();
@@ -35,7 +41,8 @@ try{
  await page.screenshot({path:`artifacts/deck-details/${label}-back.png`});
  await page.evaluate(()=>deckMenuQa.input('cancel'));
  assert.equal(await page.evaluate(()=>deckMenuQa.view()),'deck');
- assert.equal(await page.locator('[data-deck-slot="1"]').evaluate(el=>el.classList.contains('is-selected')),true);
+ assert.equal(await page.locator('[data-deck-inspect]').evaluate(el=>el.classList.contains('is-selected')),true);
+ await page.evaluate(()=>deckMenuQa.input('down'));
  assert.equal(await page.evaluate(()=>deckQa.cards()),before);
  await page.locator('[data-deck-add]').click();assert.equal(await page.locator('[data-deck-picker]').isVisible(),true);
  await page.evaluate(()=>deckMenuQa.input('cancel'));

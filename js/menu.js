@@ -48,7 +48,7 @@ const EQUIPMENT_JOB_LABELS = Object.freeze({ warrior: "戦士", thief: "盗賊",
 const menu = {
   root: null, commandRoot: null, statusPanel: null, deckPanel: null, inventoryPanel: null, questHistoryPanel: null, rumorHistoryPanel: null, adventureRecordsPanel: null, monsterCompendiumPanel: null, cardGalleryPanel: null, savePanel: null, optionsPanel: null, debugPanel: null,
   commands: [], enabledCommands: [], commandIndex: 0, statusPage: 0,
-  deckCursor: 0, deckSlots: [], deckEditable: false, deckReturnView: "commands",
+  deckInspectFocused: false, deckCursor: 0, deckSlots: [], deckEditable: false, deckReturnView: "commands",
   deckPickerOpen: false, deckPickerCursor: 0, deckPickerItems: [], deckPickerPage: 0,
   deckCostOverEl: null, deckCostOverTimer: 0,
   deckPointerArmedIndex: -1, deckPickerPointerArmedIndex: -1,
@@ -268,7 +268,7 @@ export function openDeckEditor() {
   menu.deckEditable = true;
   menu.deckReturnView = "town";
   menu.deckPickerOpen = false;
-  menu.deckCursor = 0;
+  menu.deckCursor = 0; menu.deckInspectFocused = false;
   menu.deckPointerArmedIndex = -1;
   menu.deckPickerPointerArmedIndex = -1;
   renderDeck();
@@ -388,7 +388,7 @@ function isCommandUnavailable(button) {
   return button?.dataset.unavailable === "true"
     || (button?.dataset.command === "save" && !menu.canManualSave());
 }
-function openCommand(key) { if (key === "status") { menu.view = "status"; menu.statusPage = 0; menu.onStatusOpened(); updateView(); } else if (key === "deck") { menu.view = "deck"; menu.deckEditable = false; menu.deckReturnView = "commands"; menu.deckPickerOpen = false; menu.deckCursor = 0; renderDeck(); updateView(); } else if (key === "items") openInventory(); else if (key === "skills") menu.openSkills(); else if (key === "options") setOptionPage(0); else if (key === "save" && menu.canManualSave()) { menu.view = "save"; menu.saveCursor = 0; renderManualSave(); updateView(); } }
+function openCommand(key) { if (key === "status") { menu.view = "status"; menu.statusPage = 0; menu.onStatusOpened(); updateView(); } else if (key === "deck") { menu.view = "deck"; menu.deckEditable = false; menu.deckReturnView = "commands"; menu.deckPickerOpen = false; menu.deckCursor = 0; menu.deckInspectFocused = false; renderDeck(); updateView(); } else if (key === "items") openInventory(); else if (key === "skills") menu.openSkills(); else if (key === "options") setOptionPage(0); else if (key === "save" && menu.canManualSave()) { menu.view = "save"; menu.saveCursor = 0; renderManualSave(); updateView(); } }
 
 export function openTitleOptions() {
   menu.view = "options";
@@ -1288,12 +1288,21 @@ function handleDeck(action) {
     return;
   }
   if (action === "cancel") { closeDeckView(); return; }
+  if (menu.deckInspectFocused) {
+    if (action === "confirm") { openDeckCardDetails(); return; }
+    if (action === "up" || action === "down") {
+      menu.deckInspectFocused = false;
+      menu.deckCursor = (action === "up" ? 3 : 0) + menu.deckCursor % 3;
+    }
+    renderDeckSelection(); return;
+  }
   const columns = 3;
   const row = Math.floor(menu.deckCursor / columns);
   const column = menu.deckCursor % columns;
   if (action === "left") menu.deckCursor = row * columns + (column + columns - 1) % columns;
   if (action === "right") menu.deckCursor = row * columns + (column + 1) % columns;
-  if (action === "up" || action === "down") menu.deckCursor = ((row + 1) % 2) * columns + column;
+  if ((action === "down" && row === 1) || (action === "up" && row === 0)) menu.deckInspectFocused = true;
+  else if (action === "up" || action === "down") menu.deckCursor = ((row + 1) % 2) * columns + column;
   if (action === "confirm" && menu.deckEditable) openDeckPicker();
   else if (action === "confirm") openDeckCardDetails();
   renderDeckSelection();
@@ -1636,6 +1645,7 @@ function renderDeck() {
         return;
       }
       menu.playSe("cursorMove");
+      menu.deckInspectFocused = false;
       menu.deckCursor = index;
       menu.deckPointerArmedIndex = index;
       renderDeckSelection();
@@ -1753,8 +1763,9 @@ function changeDeckPickerPage(amount) {
 }
 
 function renderDeckSelection() {
-  menu.deckPanel.querySelectorAll("[data-deck-slot]").forEach((button, index) => button.classList.toggle("is-selected", index === menu.deckCursor));
+  menu.deckPanel.querySelectorAll("[data-deck-slot]").forEach((button, index) => button.classList.toggle("is-selected", index === menu.deckCursor && !menu.deckInspectFocused));
   const card = getCardById(menu.deckSlots[menu.deckCursor]);
+  menu.deckPanel.querySelector("[data-deck-inspect]").classList.toggle("is-selected", menu.deckInspectFocused);
   menu.deckPanel.querySelector("[data-deck-inspect]").disabled = !card;
   menu.deckPanel.querySelector("[data-deck-remove]").disabled = !menu.deckEditable || !card;
   menu.deckPanel.querySelector("[data-deck-detail]").textContent = card

@@ -10,5 +10,9 @@
   {
     "label": "narrow",
     "passed": true
+  },
+  {
+    "label": "tablet",
+    "passed": true
   }
 ]

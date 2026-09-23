@@ -47,6 +47,7 @@ import {
   setPlayerInputEnabled as setRawPlayerInputEnabled,
   isPlayerInputEnabled,
   updateAnimation,
+  retreatFromTreliren,
   manualMove,
   manualTurn,
   openDoorAhead,
@@ -888,6 +889,8 @@ import {
         roamingEnemy: serializeRoamingEnemyState(),
         state: {
           ...state,
+          trelirenDetectionActive: hasCardEffect(character?.cards?.deckSlots, "npc_detection")
+            || hasKeyItem(character?.keyItems, "queen_tiara") || hasKeyItem(character?.keyItems, "royal_cat_medal"),
           fullMapRevealActive: regaliaEffects.fullMapRevealActive,
           floorDetectionActive: hasCardEffect(character?.cards?.deckSlots, "floor_detection"),
           stairsDetectionActive: hasCardEffect(character?.cards?.deckSlots, "stairs_detection")
@@ -2720,6 +2723,13 @@ import {
     finish: () => {
       character.trelirenRun.encountered = true; character.trelirenRun.phase = -1;
       character.eventFlags = {...character.eventFlags, [TRELIREN_MET_FLAG]:true};
+    },
+    onCancel: () => {
+      clearTimeout(itemGetTimer);itemGetEffect.hidden=true;
+      character.trelirenRun.phase=-1;
+      const npc=serializeRoamingEnemyState();
+      if(npc?.definitionId==='treliren') restoreRoamingEnemyState({...npc,status:'active'}, {grid:cells,definitions:[...ROAMING_ENEMY_DEFINITIONS,TRELIREN_DEFINITION],moveDuration:STEP_MS});
+      retreatFromTreliren();
     },
     onClose: () => {say("");setPlayerInputEnabled(true);updateCharacterUi();}
   });

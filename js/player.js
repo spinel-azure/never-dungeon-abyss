@@ -2545,3 +2545,10 @@ export function normalize(a) {
 export function angleDelta(from, to) {
   return normalize(to - from);
 }
+
+export function retreatFromTreliren() {
+  const dir = DIRS[(state.dir + 2) % 4];
+  const x = state.gridX + dir.dx, y = state.gridY + dir.dy;
+  if (state.anim || !inBounds(x,y) || wallOnCell(state.gridX,state.gridY,dir.key) || closedDoorOnCell(state.gridX,state.gridY,dir.key) || getCellType(x,y) !== 'floor') return false;
+  startNpcRetreat({fromGX:x,fromGY:y});return true;
+}

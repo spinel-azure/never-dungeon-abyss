@@ -1,6 +1,6 @@
 import {paginateMessageToFit} from './message-pagination.js';
 import {TRELIREN_DIALOGUES} from '../data/treliren.js';
-export function createTrelirenDialogue({messageEl,getRun,startOverlay,getEvent,clearOverlay,save,grantReward,playReward,finish,onClose}){
+export function createTrelirenDialogue({messageEl,getRun,startOverlay,getEvent,clearOverlay,save,grantReward,playReward,finish,onClose,onCancel}){
  let pages=[],page=0,body=null,hint=null,locked=false,epoch=0;
  function cleanup(){
   epoch++;locked=false;pages=[];body=hint=null;
@@ -32,6 +32,7 @@ export function createTrelirenDialogue({messageEl,getRun,startOverlay,getEvent,c
   },
   handle(action){
    if(getEvent()?.type!=='trelirenTalk'||action==='dismiss')return false;
+   if(action==='cancel'){cleanup();onCancel();onClose();save();return true;}
    if(locked||action!=='confirm')return true;
    if(++page<pages.length){show();return true;}
    const run=getRun();

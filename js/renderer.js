@@ -1150,7 +1150,7 @@ export function drawCellEvents(layer = "all", now = 0) {
           eventKind: "roamingEnemy",
           npc: {
             imageId: roaming.definition.imageId,
-            renderScale: roaming.definition.renderScale, maxHeightRatio: roaming.definition.maxHeightRatio, breathing: roaming.definition.friendly && !roaming.transition
+            friendly: roaming.definition.friendly, renderScale: roaming.definition.renderScale, maxHeightRatio: roaming.definition.maxHeightRatio, breathing: roaming.definition.friendly && !roaming.transition
           }
         });
       }
@@ -1581,9 +1581,13 @@ function drawNpcEvent(ctx, event, now = 0) {
   const obstacleHeightLimit = event.eventKind === 'roamingEnemy' && event.npc.maxHeightRatio
     ? renderer.H * event.npc.maxHeightRatio
     : event.eventKind === "explorationObstacle" ? renderer.H * .76 : Infinity;
-  const spriteH = isOneStepAway
+  let spriteH = isOneStepAway
     ? Math.min(scaledSpriteH, renderer.H * .82)
     : Math.min(scaledSpriteH, obstacleHeightLimit);
+  if (event.npc.friendly && event.footprints?.length) {
+    const ceiling = Math.min(...event.footprints.flatMap(footprint => footprint.ceiling.map(point => point.y)));
+    spriteH = Math.min(spriteH, Math.max(1, event.floorY - ceiling - 5));
+  }
   const reducedMotion = Boolean(
     event.npc.renderEffect && window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches
   );
