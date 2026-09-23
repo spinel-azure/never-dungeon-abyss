@@ -1,3 +1,4 @@
+import { paginateMessageToFit } from "./message-pagination.js";
 import { renderWeaponElementStatus } from "./weapon-element-status.js";
 import { appendZodiacTransferMarkers } from './zodiac-transfer-markers.js';
 import { CHARACTER_JOBS, TOWN_FACILITIES, getTownFacility } from "../data/town.js";
@@ -129,6 +130,7 @@ const town = {
   questClientPortrait: "",
   questClientPortraitStartIndex: 0,
   activeRumor: null,
+  compactTalk: null,
   facilityTalkDialogue: [],
   facilityTalkDialogueIndex: 0,
   facilityTalkCompletionFlag: "",
@@ -376,7 +378,7 @@ export function configureTown(options) {
     const button = document.createElement("button");
     button.type = "button";
     button.addEventListener("click", () => {
-      if (button.classList.contains("is-empty")) return;
+      if (town.compactTalk || button.classList.contains("is-empty")) return;
       const command = button.dataset.facilityCommand;
       const alreadyPrepared = town.facilityCommandIndex === index
         && town.facilityPreviewCommand === command;
@@ -505,6 +507,7 @@ export function openTown({
   firstTownArrivalPending = false,
   innKeeperId = null
 } = {}) {
+  clearCompactTalk();
   clearJohannaCatTransitionTimers();
   document.body.classList.remove("johanna-cat-message-expanded");
   document.body.classList.remove("facility-talk-message-expanded");
@@ -540,6 +543,7 @@ export function openTown({
 }
 
 export function closeTown() {
+  clearCompactTalk();
   town.active = false;
   clearJohannaCatTransitionTimers();
   document.body.classList.remove("johanna-cat-message-expanded");
@@ -595,6 +599,7 @@ export function handleTownInput(action) {
     completeTownTypewriter();
     return true;
   }
+  if (town.compactTalk) return handleCompactTalkInput(action);
   if (town.mode === "shopCategory") return handleShopCategoryInput(action);
   if (town.mode === "innStayConfirm") return handleInnStayConfirmationInput(action);
   if (town.mode === "templeHealConfirm") return handleTempleHealConfirmationInput(action);
@@ -717,6 +722,58 @@ function handleTavernRumorInput(action) {
   renderFacility();
   return true;
 }
+
+function clearCompactTalk() {
+  clearTownTypewriter();
+  town.compactTalk = null;
+  town.messageEl?.classList.remove("town-compact-talk");
+}
+
+function startCompactTalk(result, voiceProfile) {
+  clearCompactTalk();
+  const body = document.createElement("span");
+  body.className = "town-talk-body";
+  const hint = document.createElement("span");
+  hint.className = "town-talk-hint";
+  town.messageEl.classList.add("town-compact-talk");
+  town.messageEl.replaceChildren(body, hint);
+  const pages = paginateMessageToFit({ element: body, text: result.message });
+  town.compactTalk = { pages, index: 0, body, hint, onComplete: result.onComplete, focusCommand: result.focusCommand };
+  town.pendingVoiceFacility = voiceProfile ? innVoice(voiceProfile, "talkVoice") : "";
+  showCompactTalkPage();
+}
+
+function showCompactTalkPage() {
+  const talk = town.compactTalk;
+  clearTownTypewriter();
+  talk.body.textContent = talk.pages[talk.index] || "";
+  talk.hint.textContent = "";
+  townTypewriter.lastRenderedText = "";
+}
+
+function updateCompactTalkHint() {
+  const talk = town.compactTalk;
+  if (talk) talk.hint.textContent = townTypewriter.active ? "" : talk.index < talk.pages.length - 1
+    ? "＊Aボタンで次へ" : "＊Aボタンで閉じる";
+}
+
+function handleCompactTalkInput(action) {
+  if (action !== "confirm") return true;
+  const talk = town.compactTalk;
+  town.playSe("confirm");
+  if (++talk.index < talk.pages.length) { showCompactTalkPage(); return true; }
+  const { onComplete, focusCommand } = talk;
+  clearCompactTalk();
+  renderFacility();
+  if (focusCommand) {
+    const index = town.facilityCommandButtons.findIndex(button => button.dataset.facilityCommand === focusCommand);
+    if (index >= 0) { town.facilityCommandIndex = index; renderFacilityCommandSelection(); }
+  }
+  onComplete?.();
+  return true;
+}
+
+function townMessageTarget() { return town.compactTalk?.body || town.messageEl; }
 
 function handleFacilityTalkInput(action) {
   if (town.transitioning) return true;
@@ -904,12 +961,13 @@ function beginInnMedicineDeliveryTransition() {
 function configureTownMessageObserver() {
   townTypewriter.observer?.disconnect();
   townTypewriter.observer = new MutationObserver(() => {
-    const text = town.messageEl?.textContent || "";
+    const text = townMessageTarget()?.textContent || "";
     if (text === townTypewriter.lastRenderedText) return;
     clearTownTypewriter();
     const rumorParts = town.mode === "tavernRumor" ? getTavernRumorTypewriterParts(text) : null;
-    if (!town.active || !townTypewriter.enabled || (!isNpcTownMessage(text) && !rumorParts)) {
+    if (!town.active || !townTypewriter.enabled || (!town.compactTalk && !isNpcTownMessage(text) && !rumorParts)) {
       townTypewriter.lastRenderedText = text;
+      updateCompactTalkHint();
       playPendingFacilityVoice();
       return;
     }
@@ -937,9 +995,10 @@ function renderTownTypewriter() {
   townTypewriter.visibleLength = Math.min(townTypewriter.visibleLength + 1, characters.length);
   const completed = townTypewriter.visibleLength >= characters.length;
   townTypewriter.lastRenderedText = `${townTypewriter.prefixText}${characters.slice(0, townTypewriter.visibleLength).join("")}${completed ? townTypewriter.suffixText : ""}`;
-  town.messageEl.textContent = townTypewriter.lastRenderedText;
+  townMessageTarget().textContent = townTypewriter.lastRenderedText;
   if (completed) {
     townTypewriter.active = false;
+    updateCompactTalkHint();
     townTypewriter.timer = 0;
     playPendingFacilityVoice();
     return;
@@ -957,7 +1016,8 @@ function completeTownTypewriter() {
   townTypewriter.visibleLength = Array.from(townTypewriter.typingText).length;
   townTypewriter.lastRenderedText = townTypewriter.sourceText;
   townTypewriter.active = false;
-  town.messageEl.textContent = townTypewriter.sourceText;
+  townMessageTarget().textContent = townTypewriter.sourceText;
+  updateCompactTalkHint();
   playPendingFacilityVoice();
 }
 
@@ -2003,6 +2063,11 @@ function activateFacilityService(command) {
           : {})
       }
       : null;
+    if (message && result?.compactTalk) {
+      startCompactTalk(result, voiceProfile);
+      town.onStateChanged();
+      return true;
+    }
     if (message) {
       if (facility.id === "inn") {
         setInnMessage(message, voiceProfile, "talkVoice", { forceVoice: true });

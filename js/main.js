@@ -2070,16 +2070,17 @@ import {
         saveGame();
         return {
           message: "ギルドマスター：ふっ…。俺以外にもお節介がいたようだな。…ところで、お前に仕事を頼みたい。",
+          compactTalk: true,
           focusCommand: "accept"
         };
       }
       if (hasActiveQuest(character)) {
-        return "ギルドマスター：依頼の件、頼んだぞ。";
+        return { message: "ギルドマスター：依頼の件、頼んだぞ。", compactTalk: true };
       }
       if (character.eventFlags?.guild_first_request_unlocked) {
-        return "ギルドマスター：仕事の話だ。依頼受注を選んでくれ。";
+        return { message: "ギルドマスター：仕事の話だ。依頼受注を選んでくれ。", compactTalk: true };
       }
-      return "ギルドマスター：これを持っていけ。ついでに町を見て回ったらどうだ？一通り回ったら、また戻ってこい。";
+      return { message: "ギルドマスター：これを持っていけ。ついでに町を見て回ったらどうだ？一通り回ったら、また戻ってこい。", compactTalk: true };
     }
     if (facilityId === "temple" && isAnastasiaAssigned(character)) {
       if (!character.eventFlags?.anastasia_first_talk_completed) {
@@ -2140,10 +2141,12 @@ import {
       updateCharacterUi();
       saveGame();
     }
-    if (gained && facilityId === "inn" && !character?.deckTutorialSeen) {
-      window.setTimeout(() => showDeckTutorial(reward.first), 0);
-    }
-    return gained ? reward.first : reward.repeat;
+    const startDeckTutorial = gained && facilityId === "inn" && !character?.deckTutorialSeen;
+    return {
+      message: gained ? reward.first : reward.repeat,
+      compactTalk: true,
+      onComplete: startDeckTutorial ? () => showDeckTutorial() : null
+    };
   }
 
   function acceptGuildRequest(questId) {

@@ -138,3 +138,9 @@ body.layout-mobile .guild-quest-entry{padding-inline:3px;font-size:10px;line-hei
  .transfer-destination-pager button{min-height:20px;padding:1px 10px;font-size:14px}
  .transfer-destination-help{font-size:10px}
 }
+
+/* Initial facility conversations reserve exactly two body lines and one hint. */
+.message.town-compact-talk{height:calc(1.35em * 3 + 20px)!important;min-height:0!important;max-height:calc(1.35em * 3 + 20px);box-sizing:border-box;overflow:hidden;line-height:1.35}
+.town-talk-body{display:block;height:2.7em;overflow:hidden;white-space:pre-wrap}
+.town-talk-hint{display:block;height:1.35em;white-space:nowrap}
+body.layout-mobile .message.town-compact-talk,body.layout-tablet .message.town-compact-talk{height:calc(1.35em * 3 + 18px)!important;max-height:calc(1.35em * 3 + 18px)}
