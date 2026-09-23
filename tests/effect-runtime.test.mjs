@@ -13,7 +13,7 @@ test('export/import retains target anchoring, image assets and all audio setting
 test('every positional part follows a moving target and old parts remain screen anchored',()=>{
  for(const type of Object.keys(EFFECT_PART_TYPES)){
   const part=normalizeEffectDefinition({parts:[{type,anchor:'enemy'}]}).parts[0];
-  const wide=['shake','whiteout','blackout','blizzard'].includes(type);
+  const wide=['shake','whiteout','blackout','blizzard','message'].includes(type);
   assert.deepEqual(getAnchorOffset(part,{width:960,height:540},{x:700,y:180}),wide?{x:0,y:0}:{x:220,y:-90});
   assert.deepEqual(getAnchorOffset({...part,anchor:'screen'},{width:960,height:540},{x:700,y:180}),{x:0,y:0});
  }
@@ -57,4 +57,34 @@ test('ice orbit rotation is animated, reversible and backward compatible',()=>{
     assert.equal(angles[0],turns*Math.PI/2);
     angles.length=0;engine.time=500;engine.renderPart(effect.parts[0]);assert.equal(angles[0],turns*Math.PI);
   }
+});
+
+test('editor can preview empty cutin slots while runtime and invalid images remain strict', async()=>{
+ const engine=new EffectEngine({getContext:()=>({})});
+ engine.effect=normalizeEffectDefinition({parts:[{type:'cutin',fileName:'unassigned'}]});
+ await assert.rejects(engine.prepare(), /Missing cutin image/);
+ await engine.prepare({allowMissingImages:true});
+ engine.effect.parts[0].imageSrc='broken.png';
+ engine.imageCache.set('broken.png',{decode:async()=>{throw new Error('decode failed')}});
+ await assert.rejects(engine.prepare({allowMissingImages:true}), /decode failed/);
+ engine.imageCache.set('broken.png',{decode:async()=>{}});
+ await engine.prepare({allowMissingImages:true});
+});
+
+test('messages seek deterministically, clear in gaps and preserve multiline text',()=>{
+ const seen=[];const ctx=new Proxy({}, {get:()=>()=>{}});
+ const engine=new EffectEngine({getContext:()=>ctx},{transparent:true,backdrop:false,onMessage:text=>seen.push(text)});
+ engine.load({duration:1000,parts:[{type:'message',start:0,duration:400,text:'ルミナ！\n呼んだ！'},{type:'message',start:200,duration:300,text:'ノクティア！'}]});
+ for(const t of [250,600,100])engine.seek(t);
+ assert.deepEqual(seen,['ルミナ！\n呼んだ！','ノクティア！',null,'ルミナ！\n呼んだ！']);
+});
+test('magic circle image survives JSON and draws with its dimensions; new popup defaults to k8x12',async()=>{
+ const calls=[];const ctx=new Proxy({}, {get:(_,key)=> (...args)=>{if(key==='drawImage')calls.push(args)}});
+ const engine=new EffectEngine({getContext:()=>ctx},{transparent:true,backdrop:false});
+ const circle={...createEffectPart('magicCircle'),imageSrc:'circle.png',width:320,height:180,start:0,duration:1000};
+ engine.imageCache.set('circle.png',{complete:true,naturalWidth:320,decode:async()=>{}});
+ engine.load(JSON.parse(JSON.stringify({duration:1000,parts:[circle]})));await engine.prepare();engine.seek(500);
+ assert.deepEqual(calls.at(-1).slice(1),[-160,-90,320,180]);
+ assert.equal(createEffectPart('popup').fontFamily,'pixel');
+ assert.equal(normalizeEffectDefinition({parts:[{type:'popup',fontFamily:'serif'}]}).parts[0].fontFamily,'serif');
 });

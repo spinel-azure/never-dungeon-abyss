@@ -1,3 +1,6 @@
+import { mountItemCompendium } from "./item-compendium.js";
+import { ITEM_COMPENDIUM_ENTRIES } from "../data/item-compendium.js";
+let itemCompendiumController = null;
 import { calculateDeckCost, DECK_SLOT_COUNT, getDeckSlotRejectionReason, setDeckSlot } from "../data/deck.js";
 import { getCardById } from "../data/cards.js";
 import { drawCardCanvas } from "./card-canvas.js";
@@ -308,6 +311,15 @@ export function openLibraryCardGallery() {
   updateView();
   openCardGallery();
 }
+export function openLibraryItemCompendium() {
+  menu.view="itemCompendium";
+  const root=menu.root.querySelector('[data-menu-view="itemCompendium"]');
+  itemCompendiumController?.();
+  itemCompendiumController=mountItemCompendium(root,Object.values(ITEM_COMPENDIUM_ENTRIES),()=>{
+    menu.view="dungeon";updateView();
+  });
+  updateView();
+}
 export function openLibraryMonsterCompendium() {
   menu.view = "monsterCompendium";
   updateView();
@@ -355,6 +367,7 @@ export function handleMenuInput(action) {
   else if (menu.view === "questHistory") handleQuestHistory(action);
   else if (menu.view === "rumorHistory") handleRumorHistory(action);
   else if (menu.view === "adventureRecords") handleAdventureRecords(action);
+  else if (menu.view === "itemCompendium") itemCompendiumController?.handleInput(action);
   else if (menu.view === "monsterCompendium") handleMonsterCompendiumInput(action);
   else if (menu.view === "cardGallery") handleCardGalleryInput(action);
   else if (menu.view === "save") handleManualSave(action);
@@ -1597,8 +1610,11 @@ function bindDebug() {
 function renderEmptyStats() { const rows = ["STR", "INT", "AGI", "DEX", "LUC", "DEF"].map(label => { const row = document.createElement("div"); row.className = "nde-stat-row"; const name = document.createElement("strong"); name.textContent = label; const gauge = document.createElement("span"); gauge.className = "nde-empty-gauge"; for (let index = 0; index < 30; index += 1) gauge.append(document.createElement("i")); const value = document.createElement("output"); value.textContent = "--"; row.append(name, gauge, value); return row; }); menu.root.querySelector("#ndeStatRows").replaceChildren(...rows); }
 
 function updateView() {
+  const itemPanel=menu.root.querySelector('[data-menu-view="itemCompendium"]');
+  if(itemPanel)itemPanel.hidden=menu.view!=="itemCompendium";
+  if(menu.view!=="itemCompendium"&&itemCompendiumController){itemCompendiumController();itemCompendiumController=null;}
   if (menu.view !== "cardGallery") closeCardGallery();
-  const screenOpen = ["status", "deck", "inventory", "questHistory", "rumorHistory", "adventureRecords", "monsterCompendium", "cardGallery", "save", "options", "debug"].includes(menu.view);
+  const screenOpen = ["status", "deck", "inventory", "questHistory", "rumorHistory", "adventureRecords", "monsterCompendium", "itemCompendium", "cardGallery", "save", "options", "debug"].includes(menu.view);
   document.body.classList.toggle("menu-open", screenOpen); document.body.classList.toggle("command-open", menu.view === "commands");
   document.body.classList.toggle("deck-open", menu.view === "deck");
   document.body.classList.toggle("inventory-open", menu.view === "inventory");

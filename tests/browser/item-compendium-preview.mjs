@@ -34,7 +34,7 @@ try {
     await page.screenshot({path:`${out}/${label}.png`,fullPage:true});
     await page.getByRole('button',{name:'一覧へ戻る',exact:true}).click();
     assert.equal(await page.getByRole('button',{name:'貴重品',exact:true}).getAttribute('aria-pressed'),'true');
-    await page.getByRole('button',{name:'消耗品',exact:true}).click();
+    await page.getByRole('button',{name:'換金・素材',exact:true}).click();
     assert.match(await page.locator('.item-compendium-content').innerText(),/まだ登録がありません/);
     assert.deepEqual(errors,[]);console.log(label+": fits, complete text, no page errors");await page.close();
   }

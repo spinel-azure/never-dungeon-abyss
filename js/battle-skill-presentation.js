@@ -30,11 +30,12 @@ export function getBattleEffectTarget(root, canvas, targetIndex) {
 
 export function stopBattleSkillPresentation() {requestGeneration++;if(activeEngine){activeEngine.canvas.hidden=true;activeEngine.stop(false)}activeEngine=null;}
 
-export async function playBattleSkillPresentation({root,presentationId,damage,healing,targetIndex,definition}={}) {
+export async function playBattleSkillPresentation({root,presentationId,damage,healing,targetIndex,definition,messageElement}={}) {
   const canvas=root?.querySelector?.('#battleSkillEffectCanvas');
   if(!canvas||(!definition&&!presentationId))return false;
   const request=++requestGeneration;
   let engine=null, routing=null;
+  const originalMessage=messageElement?.textContent;
   try {
     if(!definition){
       const registry=await loadRegistry();
@@ -50,6 +51,7 @@ export async function playBattleSkillPresentation({root,presentationId,damage,he
     engine=new EffectEngine(canvas,{transparent:true,backdrop:false,
       getTarget:()=>getBattleEffectTarget(root,canvas,targetIndex),
       onShake:shake,
+      onMessage:text=>{if(messageElement)messageElement.textContent=text??originalMessage},
       audio:routing?.options||{}
     });
     activeEngine=engine;
@@ -59,7 +61,7 @@ export async function playBattleSkillPresentation({root,presentationId,damage,he
   }catch(error){console.warn('Battle presentation failed',error);return false}
   finally{
     routing?.release();
-    if(activeEngine===engine){engine?.stop(false);canvas.hidden=true;activeEngine=null}
+    if(activeEngine===engine){if(messageElement)messageElement.textContent=originalMessage;engine?.stop(false);canvas.hidden=true;activeEngine=null}
   }
 }
 

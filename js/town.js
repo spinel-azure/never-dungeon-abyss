@@ -185,6 +185,7 @@ const town = {
   onRenewNpc: () => ({ accepted: false }),
   onOpenAdventureRecords: () => {},
   onOpenMonsterCompendium: () => {},
+  onOpenItemCompendium: () => {},
   onOpenCardGallery: () => {},
   facilityPreviewCommand: "",
   getUnreadRumor: () => null,
@@ -1378,7 +1379,7 @@ function activateFacility(facility) {
 }
 
 function isLibraryPreviewCommand(command) {
-  return currentFacility().id === "library" && ["monsters", "records", "cards"].includes(command);
+  return currentFacility().id === "library" && ["monsters", "records", "cards", "items"].includes(command);
 }
 
 function previewLibraryCommand(command) {
@@ -1388,6 +1389,8 @@ function previewLibraryCommand(command) {
   }
   town.messageEl.textContent = command === "monsters"
     ? "司書イライザ：奈落で出会った魔物の記録よ。討伐した相手ほど、詳しい情報が読めるようになっているわ。"
+    : command === "items"
+      ? "司書イライザ：道具にまつわる読み物を集めたわ。登録済みの項目から、気になるものを選んでね。"
     : command === "records"
       ? "司書イライザ：あなたの冒険の記録をまとめておいたわ。積み重ねてきた足跡を、ゆっくり振り返ってみて。"
       : "司書イライザ：あなたが手にしたカードを記録してあるわ。気になる一枚を選んでみて。";
@@ -1889,7 +1892,7 @@ function showFacilityCommands(facilityId) {
       || (facilityId === "guild" && id === "accept" && requestUnlocked)
       || (facilityId === "guild" && id === "report" && reportAvailable)
       || (facilityId === "guild" && ["history", "tavern"].includes(id))
-      || (facilityId === "library" && ["monsters", "records", "cards"].includes(id))
+      || (facilityId === "library" && ["monsters", "records", "cards", "items"].includes(id))
       || (facilityId === "tavern" && id === "npc-hire" && NPC_SUPPORT_ENABLED)
       || (facilityId === "npcHire" && ["npc-search", "npc-roster", "npc-hire-return"].includes(id))
       || (facilityId === "tavern" && id === "rumors" && Boolean(town.getUnreadRumor()))
@@ -1943,6 +1946,10 @@ function activateFacilityService(command) {
     if (currentFacility().id !== "tavern") return false;
     town.onOpenRumorHistory();
     return true;
+  }
+  if (command === "items" && currentFacility().id === "library") {
+    town.messageEl.textContent="司書イライザ：道具の記録を、ゆっくり読んでいってね。";
+    town.onOpenItemCompendium();return true;
   }
   if (command === "monsters") {
     if (currentFacility().id !== "library") return false;

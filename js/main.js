@@ -88,7 +88,7 @@ import { configureInput } from "./input.js";
 import { configureGamepadInput } from "./gamepad-input.js";
 import { configureFloatingStick } from "./floating-stick.js";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, getDungeonMistOptions, setDungeonColors, getGamepadBindings, getGamepadCaptureAction, completeGamepadBinding, setGamepadPressedButtons, getTouchControlsMode, getTouchMovementMode, getBattleSpeedMode, setBattleSpeedMode, isMenuOpen, openItemInventory, openStatusMenu, openDeckEditor, openQuestHistory, openRumorHistory, openAdventureRecords, openLibraryMonsterCompendium, openLibraryCardGallery, openTitleOptions, refreshAdventureRecordsPlayTime, openShopSellInventory, openShopPurchaseInventory, closeCampMenu, resetDebugSettingsForNewGame } from "./menu.js";
+import { configureMenu, handleMenuInput, getDungeonColors, getDungeonMistOptions, setDungeonColors, getGamepadBindings, getGamepadCaptureAction, completeGamepadBinding, setGamepadPressedButtons, getTouchControlsMode, getTouchMovementMode, getBattleSpeedMode, setBattleSpeedMode, isMenuOpen, openItemInventory, openStatusMenu, openDeckEditor, openQuestHistory, openRumorHistory, openAdventureRecords, openLibraryMonsterCompendium, openLibraryItemCompendium, openLibraryCardGallery, openTitleOptions, refreshAdventureRecordsPlayTime, openShopSellInventory, openShopPurchaseInventory, closeCampMenu, resetDebugSettingsForNewGame } from "./menu.js";
 import { isForcedTorchZeroFloor, resolveFloorTheme } from "./floorTheme.js";
 import { applyCrystalFloorSpStep } from "../data/crystal-floor.js";
 import {
@@ -1280,6 +1280,7 @@ import {
     },
     onOpenAdventureRecords: openAdventureRecords,
     onOpenMonsterCompendium: openLibraryMonsterCompendium,
+    onOpenItemCompendium: openLibraryItemCompendium,
     onOpenCardGallery: openLibraryCardGallery,
     getUnreadRumor: () => getUnreadTavernRumor(character, getCurrentTavernRumorContext()),
     onCompleteRumor: rumor => {

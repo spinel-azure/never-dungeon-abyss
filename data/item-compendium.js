@@ -1,9 +1,17 @@
-// Display-only drafts. Not connected to the public library menu yet.
+// Display-only catalog entries; item mechanics remain in items.js / key-items.js.
 export const ITEM_COMPENDIUM_TABS = Object.freeze(["すべて", "消耗品", "換金・素材", "貴重品"]);
 export function filterItemCompendiumEntries(entries, tab = "すべて") {
   return entries.filter(entry => tab === "すべて" || entry.category === tab);
 }
 export const ITEM_COMPENDIUM_ENTRIES = Object.freeze({
+  wing_gift: Object.freeze({
+    id: "wing_gift",
+    name: "ウィングギフト",
+    category: "消耗品",
+    acquisition: "商店購入",
+    purchasePrice: 10000,
+    description: "飲むと何かを授けられそうな滋養飲料。使用するとSPが50%回復するがその冒険中、ベース最大HPが20％減算される。効果は累積し最大4回まで使用可。カフェインの取り過ぎにはご用心…。"
+  }),
   queen_tiara: Object.freeze({
     id: "queen_tiara",
     name: "女王のティアラ",

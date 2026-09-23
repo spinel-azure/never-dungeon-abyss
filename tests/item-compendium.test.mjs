@@ -15,11 +15,17 @@ test("tiara draft has exact display copy without altering the real item", () => 
   assert.equal(getItemCompendiumEntry("missing"), null);
 });
 
-test("draft detail is not wired into the shipped game", async () => {
-  for (const file of ["../index.html", "../js/main.js", "../js/town.js"]) {
-    const source = await readFile(new URL(file, import.meta.url), "utf8");
-    assert.doesNotMatch(source, /(?:import.*|src=.*|href=.*)item-compendium/);
-  }
-  const town = await readFile(new URL("../js/town.js", import.meta.url), "utf8");
-  assert.match(town, /\["monsters", "records", "cards"\]\.includes\(command\)/);
+test("library item catalog is wired into the menu", async () => {
+  const main=await readFile(new URL('../js/main.js',import.meta.url),'utf8');
+  const town=await readFile(new URL('../js/town.js',import.meta.url),'utf8');
+  const html=await readFile(new URL('../index.html',import.meta.url),'utf8');
+  assert.ok(main.includes('onOpenItemCompendium: openLibraryItemCompendium'));
+  assert.ok(town.includes('town.onOpenItemCompendium()'));
+  assert.ok(html.includes('data-menu-view="itemCompendium"'));
+});
+test("wing gift catalog preserves the requested wording and display price",()=>{
+  const entry=getItemCompendiumEntry('wing_gift');
+  assert.equal(entry.category,'消耗品');
+  assert.equal(entry.acquisition,'商店購入');assert.equal(entry.purchasePrice,10000);
+  assert.equal(entry.description,'飲むと何かを授けられそうな滋養飲料。使用するとSPが50%回復するがその冒険中、ベース最大HPが20％減算される。効果は累積し最大4回まで使用可。カフェインの取り過ぎにはご用心…。');
 });

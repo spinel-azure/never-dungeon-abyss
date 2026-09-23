@@ -617,6 +617,7 @@ async function playPresentationEvents() {
     const dedicatedPresentationPlayed = event.targetSide === "enemy" && event.hit
       ? await playBattleSkillPresentation({
         root: battleUi.root,
+        messageElement: battleUi.messageEl,
         presentationId: event.battlePresentationId || event.playerChargePresentationId,
         damage: event.damage, targetIndex: event.targetIndex ?? battleUi.battle.targetIndex
       })

@@ -3,7 +3,7 @@
 import { ITEM_COMPENDIUM_TABS, filterItemCompendiumEntries } from "../data/item-compendium.js";
 
 export function mountItemCompendium(root, entries, onClose = () => {}) {
-  let tab = "すべて", page = 0;
+  let tab = "すべて", page = 0, currentEntry = null, cursor = 0;
   const pageSize = 8;
   root.classList.add("menu-panel", "item-compendium-panel");
   const button = (text, action) => {
@@ -12,6 +12,7 @@ export function mountItemCompendium(root, entries, onClose = () => {}) {
     return node;
   };
   function render(entry = null) {
+    currentEntry=entry;cursor=0;
     root.replaceChildren();
     const title = document.createElement("h1"); title.className = "menu-title"; title.textContent = "ITEM COMPENDIUM"; root.append(title);
     const tabs = document.createElement("nav"); tabs.className = "item-compendium-tabs"; tabs.setAttribute("aria-label", "アイテム図鑑の分類");
@@ -36,7 +37,17 @@ export function mountItemCompendium(root, entries, onClose = () => {}) {
     root.append(footer);
   }
   render();
-  return () => root.replaceChildren();
+  const dispose=()=>root.replaceChildren();
+  dispose.handleInput=action=>{
+    if(action==='cancel'){if(currentEntry)render();else onClose();return;}
+    const buttons=[...root.querySelectorAll('button:not(:disabled)')];
+    if(!buttons.length)return;
+    const focused=buttons.indexOf(document.activeElement);if(focused>=0)cursor=focused;
+    if(action==='up'||action==='left')cursor=(cursor-1+buttons.length)%buttons.length;
+    if(action==='down'||action==='right')cursor=(cursor+1)%buttons.length;
+    if(action==='confirm')buttons[cursor]?.click();else buttons[cursor]?.focus();
+  };
+  return dispose;
 }
 export function renderItemCompendiumDetail(root, entry) {
   root.replaceChildren();
