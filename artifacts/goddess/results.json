@@ -1,0 +1,24 @@
+[
+  {
+    "label": "pc",
+    "id": "call_goddess_name",
+    "played": [
+      {
+        "id": "goddess",
+        "damage": 638,
+        "popup": "638"
+      }
+    ]
+  },
+  {
+    "label": "mobile",
+    "id": "call_goddess_name",
+    "played": [
+      {
+        "id": "goddess",
+        "damage": 613,
+        "popup": "613"
+      }
+    ]
+  }
+]

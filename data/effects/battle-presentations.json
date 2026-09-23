@@ -6,5 +6,6 @@
   "fall_the_meteor": "data/effects/meteor.json",
   "tunguska": "data/effects/tunguska.json",
   "apocalypse": "data/effects/apocalypse.json",
-  "walpurgisnacht": "data/effects/walpurgisnacht.json"
+  "walpurgisnacht": "data/effects/walpurgisnacht.json",
+  "call_goddess_name": "data/effects/goddess.json"
 }

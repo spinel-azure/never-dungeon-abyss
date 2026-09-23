@@ -18,7 +18,7 @@ export const ITEM_COMPENDIUM_ENTRIES = Object.freeze({
     "category": "貴重品",
     "acquisition": "エンドロール鑑賞後",
     "purchasePrice": null,
-    "imageSrc": "images/screenshots/medal_01.avif",
+    "imageSrc": "images/item-compendium/royal_cat_medal.avif",
     "description": "ドゥンケルマギーア・アマイェナクを倒し、真実の杖を取り戻した功績を称えるべく女王ミカエラから授与された勲章。名前の意味はドイツ語で「王立猫勲章」。ステータス画面及びデータロード画面で表示される。なお、この勲章を所持していると「女王のティアラ」「女王のイヤリング」「女王の首飾り」と同じ効果がある。"
   }),
   queen_necklace: Object.freeze({
@@ -55,6 +55,7 @@ export const ITEM_COMPENDIUM_ENTRIES = Object.freeze({
   }),
   wing_gift: Object.freeze({
     id: "wing_gift",
+    imageSrc: "images/item-compendium/wing_gift.avif",
     name: "ウィングギフト",
     category: "消耗品",
     acquisition: "商店購入",
