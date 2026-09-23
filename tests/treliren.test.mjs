@@ -71,3 +71,14 @@ test('rumor unlocks at B10, switches after meeting and retains titled history',(
  const done=markTavernRumorRead(read,met);assert.equal(getUnreadTavernRumor(done),null);
  assert.equal(getPastTavernRumors(done).find(r=>r.id==='rumor_017').title,'迷宮探検家の噂');
 });
+
+
+test('entrance camp requires a completed meeting and a roll strictly below twenty percent', async()=>{
+ const {selectTrelirenEntranceImage:select}=await import('../data/treliren.js');
+ const base='images/background/dungeon_01.avif',camp='images/background/dungeon_01b.avif';
+ assert.equal(select(null,()=>0),base);
+ assert.equal(select({eventFlags:{tavern_rumor_017_base_read:true}},()=>0),base);
+ const c={eventFlags:{treliren_met:true}};
+ assert.equal(select(c,()=>0),camp);assert.equal(select(c,()=>.199999),camp);
+ assert.equal(select(c,()=>.2),base);assert.equal(select(c,()=>.999999),base);
+});

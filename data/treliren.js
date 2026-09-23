@@ -49,3 +49,8 @@ export const TRELIREN_DIALOGUES=Object.freeze({
  '「魔除けのお香」を手に入れた！',
  '「それじゃあ、あたしはもう行くね！また会おうね！」']
 });
+
+export function selectTrelirenEntranceImage(character, rng = Math.random) {
+  return character?.eventFlags?.[TRELIREN_MET_FLAG] && rng() < 0.2
+    ? "images/background/dungeon_01b.avif" : "images/background/dungeon_01.avif";
+}

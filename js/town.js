@@ -1,3 +1,4 @@
+import { selectTrelirenEntranceImage } from "../data/treliren.js";
 import { paginateMessageToFit } from "./message-pagination.js";
 import { renderWeaponElementStatus } from "./weapon-element-status.js";
 import { appendZodiacTransferMarkers } from './zodiac-transfer-markers.js';
@@ -137,6 +138,7 @@ const town = {
   suppressFestivalPortraitUntilTempleExit: false,
   questAcceptanceRewardMessage: "",
   entranceIndex: 0,
+  entranceImage: "images/background/dungeon_01.avif",
   transferIndex: 0,
   transferPage: 0,
   facilityCommandIndex: 0,
@@ -1358,6 +1360,7 @@ function activateFacility(facility) {
     return;
   }
   if (facility.id === "dungeon") {
+    town.entranceImage = selectTrelirenEntranceImage(town.getCharacter());
     town.mode = "dungeonEntrance";
     town.entranceIndex = 0;
     renderDungeonEntrance();
@@ -1756,7 +1759,7 @@ function renderDungeonEntrance() {
   updateEntranceLabels();
   town.root.classList.remove("is-town-view");
   town.mosaic.hidden = true;
-  town.background.src = "images/background/dungeon_01.avif";
+  town.background.src = town.entranceImage;
   town.background.alt = "ダンジョン入口";
   town.background.hidden = false;
   town.portrait.hidden = true;
