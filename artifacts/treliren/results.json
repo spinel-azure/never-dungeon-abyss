@@ -1,0 +1,17 @@
+[
+  {
+    "label": "pc",
+    "steps": 5,
+    "portraitFrames": 275
+  },
+  {
+    "label": "mobile",
+    "steps": 8,
+    "portraitFrames": 155
+  },
+  {
+    "label": "small",
+    "steps": 10,
+    "portraitFrames": 163
+  }
+]

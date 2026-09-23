@@ -27,6 +27,7 @@ export function cureAllNegativeStatuses(statuses = []) {
 }
 
 export function getItemUnavailableReason({ character, itemId, context, enemy, torchFuel = 0, treasureCompassActive = false } = {}) {
+  if (itemId === "warding_incense" && character?.incenseZone) return "alreadyActive";
   const item = getItem(itemId);
   if (!item) return "unknownItem";
   if (!hasValidItemElements(item)) return "noEffect";
@@ -151,6 +152,8 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
       next.statuses = cureAllNegativeStatuses(next.statuses);
     } else if (effect.id === "restore_torch") {
       environment.torchFuel = effect.value;
+    } else if (effect.id === "warding_incense") {
+      environment.wardingIncense = true;
     } else if (effect.id === "reset_presence") {
       environment.resetPresence = true;
     } else if (effect.id === "suppress_presence_steps") {

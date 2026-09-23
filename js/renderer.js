@@ -517,6 +517,15 @@ function drawOverlayEvent() {
   ctx.fillStyle = "rgba(0,0,0,.8)";
   ctx.fillRect(0, 0, W, H);
 
+  if (event.type === 'trelirenTalk') {
+    if (image?.complete && image.naturalWidth > 0) {
+      const scale = Math.min(W*.9/image.naturalWidth,H/image.naturalHeight);
+      const width=image.naturalWidth*scale,height=image.naturalHeight*scale;
+      ctx.globalAlpha=event.fadeStartedAt?Math.max(0,1-(performance.now()-event.fadeStartedAt)/500):1;
+      ctx.drawImage(image,(W-width)/2,H-height,width,height);
+    }
+    ctx.restore();return;
+  }
   if (event.type === 'roamingEncounter' && event.revealDurationMs) {
     const silhouette = renderer.characterImages.get(event.revealImageId);
     const ready = image?.complete && image.naturalWidth > 0 && silhouette?.complete && silhouette.naturalWidth > 0;
@@ -1141,7 +1150,7 @@ export function drawCellEvents(layer = "all", now = 0) {
           eventKind: "roamingEnemy",
           npc: {
             imageId: roaming.definition.imageId,
-            renderScale: roaming.definition.renderScale, maxHeightRatio: roaming.definition.maxHeightRatio
+            renderScale: roaming.definition.renderScale, maxHeightRatio: roaming.definition.maxHeightRatio, breathing: roaming.definition.friendly && !roaming.transition
           }
         });
       }
@@ -1581,7 +1590,9 @@ function drawNpcEvent(ctx, event, now = 0) {
   const effect = resolveExplorationObstacleEffectFrame(event.npc.renderEffect, now, reducedMotion);
   const drawH = spriteH * effect.scaleY;
   const fallbackW = drawH * .64;
-  const top = event.floorY - drawH;
+  const breathing = event.npc.breathing && !window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches
+    ? Math.sin(now / 550) * 1.5 * renderer.H / Math.max(1, renderer.eventOverlayCanvas.clientHeight) : 0;
+  const top = event.floorY - drawH + breathing;
 
   ctx.save();
   if (event.eventKind === "roamingEnemy" && event.footprints?.length) {

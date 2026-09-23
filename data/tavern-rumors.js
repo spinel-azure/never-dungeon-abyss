@@ -368,6 +368,19 @@ export const TAVERN_RUMORS = Object.freeze([
         rosa: 'まぁ…！奈落の入口のすぐ近くでそんな事が…？怖いわ…。',
         rosaContinuation: 'えっ！獅子の女王がいたですって！？しかも倒した！？あなた本当に何者なの…？'})
     ])
+  }),
+  Object.freeze({
+    id: 'rumor_017', title: '迷宮探検家の噂', verbatimCustomers: true,
+    unlock: context => context.depthReached >= 10,
+    customerLead: 'おい、知ってるか？最近、リュックを背負った女の子を迷宮で見かけるらしい。',
+    customerReply: 'ああ。なんでも「迷宮探検家」を名乗ってるそうだな。',
+    phases: Object.freeze([
+      Object.freeze({id:'base',readFlag:'tavern_rumor_017_base_read',unlock:c=>!c.trelirenMet,
+        rosa:'まぁ、あんな所に女の子が一人で…。大丈夫なのかしら…？'}),
+      Object.freeze({id:'met',readFlag:'tavern_rumor_017_met_read',unlock:c=>c.trelirenMet,
+        rosa:'まぁ、あんな所に女の子が一人で…。大丈夫なのかしら…？',
+        rosaContinuation:'…えっ？もう会ったですって？「魔除けのお香」を焚いてた？それなら安心ね…。'})
+    ])
   })
 ]);
 
@@ -391,6 +404,7 @@ function normalizeRumorContext(character, context = {}) {
   const completedQuestIds = character?.quests?.completedQuestIds || [];
   const eventFlags = character?.eventFlags || {};
   return {
+    trelirenMet: Boolean(eventFlags.treliren_met),
     leoQualified: hasLeoQualification(character),
     leoObtainedAfterVictory: Boolean(eventFlags.boss_loewenkoenigin_b1f_defeated && Number(character?.cards?.ownedCardCounts?.zodiac_leo) > 0),
     mikanEncountered: Boolean(context.mikanEncountered ?? eventFlags.mikan_nyanko_encountered),

@@ -131,7 +131,8 @@ test("priest rumor requires quest 019 plus one hundred donations and updates aft
     tavern_rumor_002_base_read: true,
     tavern_rumor_003_base_read: true,
     tavern_rumor_009_base_read: true,
-    tavern_rumor_010_base_read: true
+    tavern_rumor_010_base_read: true,
+    tavern_rumor_017_base_read: true
   };
   character.highestDungeonDepthReached = 50;
   character.adventureStats.templeDonationCount = 100;

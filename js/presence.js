@@ -6,6 +6,8 @@ const DARK_STEP_MAX = 10;
 const ENCOUNTER_MESSAGE = "＊　何者かと遭遇した！　＊";
 
 let presence = 0;
+let incenseActive = false;
+export function setIncenseActive(active) { incenseActive = Boolean(active); }
 let suppressedSteps = 0;
 let increaseReduction = 0;
 let passiveIncreaseReduction = 0;
@@ -53,6 +55,7 @@ export function restorePresence(value, suppression = 0, reduction = 0) {
 }
 
 export function addPresence(amount) {
+  if (incenseActive) return false;
   if (presenceDisabled) return false;
   if (encounterActive) return false;
   const increase = Math.max(0, Math.floor((Number(amount) || 0) * (1 - getEffectivePresenceIncreaseReduction())));

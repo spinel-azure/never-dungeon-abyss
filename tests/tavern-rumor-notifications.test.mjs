@@ -176,7 +176,8 @@ test("the B42 marathon follow-up replaces the pending B40 rumor stage", () => {
     ...character.eventFlags,
     tavern_rumor_001_base_read: true,
     tavern_rumor_002_base_read: true,
-    tavern_rumor_003_base_read: true
+    tavern_rumor_003_base_read: true,
+    tavern_rumor_017_base_read: true
   };
 
   const unlocked = syncTavernRumorNotifications(character);
@@ -199,6 +200,7 @@ test("new relic and long-march rumor stages use the shared notification queue", 
     tavern_rumor_001_base_read: true,
     tavern_rumor_002_base_read: true,
     tavern_rumor_003_base_read: true,
+    tavern_rumor_017_base_read: true,
     tavern_rumor_009_marathon_read: true,
     b1_b42_marathon_completed: true,
     b1_b84_long_march_completed: true,

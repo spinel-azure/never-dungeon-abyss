@@ -142,6 +142,7 @@ export function placeRoamingEnemyForFloor({
     mode: "patrol",
     lastSeen: null,
     previous: null,
+    stepCount: 0,
     status: ACTIVE,
     inBattle: false,
     rewardGranted: false,
@@ -156,6 +157,7 @@ export function serializeRoamingEnemyState(enemy = roamingEnemy) {
   return {
     instanceId: String(enemy.instanceId || ""),
     definitionId: String(enemy.definitionId || ""),
+    stepCount: Math.max(0, Number(enemy.stepCount) || 0),
     x: Math.floor(Number(enemy.x)),
     y: Math.floor(Number(enemy.y)),
     mode: ["patrol", "chase", "investigate"].includes(enemy.mode) ? enemy.mode : "patrol",
@@ -204,6 +206,7 @@ export function restoreRoamingEnemyState(saved, {
     return roamingEnemy;
   }
   roamingEnemy = {
+    stepCount: Math.max(0, Number(saved.stepCount) || 0),
     instanceId: String(saved.instanceId || `roaming:${definition.id}:restored`),
     definitionId: definition.id,
     x,
@@ -288,8 +291,9 @@ function getTargetsForPoint(grid, point) {
 
 export function planRoamingEnemyMove(grid, enemy, player = {}, rng = Math.random) {
   if (!isRoamingEnemyActive(enemy)) return null;
+  if (getRoamingEnemyDefinition(enemy)?.patrolOnly) {enemy.mode = "patrol";enemy.lastSeen = null;}
   const playerPoint = { x: Math.floor(Number(player.x)), y: Math.floor(Number(player.y)) };
-  const playerVisible = hasRoamingEnemyLineOfSight(grid, enemy, playerPoint);
+  const playerVisible = !getRoamingEnemyDefinition(enemy)?.patrolOnly && hasRoamingEnemyLineOfSight(grid, enemy, playerPoint);
   if (playerVisible) {
     enemy.mode = "chase";
     enemy.lastSeen = playerPoint;
@@ -340,6 +344,7 @@ export function advanceRoamingEnemyForPlayerStep({
   if (!next) return { moved: false, contact: false, pendingContact: false };
   const from = { x: enemy.x, y: enemy.y };
   enemy.previous = from;
+  enemy.stepCount = (enemy.stepCount || 0) + 1;
   enemy.x = next.x;
   enemy.y = next.y;
   const pendingContact = next.x === px && next.y === py;
@@ -373,7 +378,9 @@ export function getRoamingEnemyRenderState(now = 0, enemy = roamingEnemy) {
     x = transition.fromX + (transition.toX - transition.fromX) * eased;
     y = transition.fromY + (transition.toY - transition.fromY) * eased;
   }
-  return { ...enemy, renderX: x + 0.5, renderY: y + 0.5, definition };
+  const displayDefinition = definition.alternateImage && enemy.stepCount % 2
+    ? {...definition, imageId: `${definition.imageId}_alternate`, image: definition.alternateImage} : definition;
+  return { ...enemy, renderX: x + 0.5, renderY: y + 0.5, definition: displayDefinition };
 }
 
 export function completeRoamingEnemyAnimation(now = 0) {

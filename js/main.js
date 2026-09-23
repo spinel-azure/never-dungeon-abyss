@@ -1,3 +1,6 @@
+import {prepareTrelirenFloor,normalizeTrelirenRun,syncIncenseZone,TRELIREN_DEFINITION,TRELIREN_MET_FLAG,INCENSE_ID} from '../data/treliren.js';
+import {getFloorZone} from '../data/floor-zone-names.js';
+import {createTrelirenDialogue} from './treliren-dialogue.js';
 import {resetLionBathVisits} from './lion-bath.js';
 import {LOEWENKOENIGIN_ID, getLeoDoorAccess} from '../data/loewenkoenigin.js';
 import {getGeminiFinalAccess,completeGeminiFinal} from '../data/gemini-final.js';
@@ -71,6 +74,7 @@ import {
   defeatRoamingEnemy,
   departRoamingEnemy,
   getActiveRoamingEnemy,
+  placeRoamingEnemyForFloor,
   getRoamingEnemyDefinition,
   getRoamingEnemyRenderState,
   isRoamingEnemyAt,
@@ -98,6 +102,7 @@ import { configureEvents, messageFor, say } from "./events.js";
 import { configureDevice } from "./device.js";
 import {
   configurePresence,
+  setIncenseActive,
   getPresence,
   getPresenceIncreaseReduction,
   getPresenceSuppressedSteps,
@@ -1209,6 +1214,7 @@ import {
     onDungeonStep: handleDungeonStep,
     onRoamingEnemyPlayerStep: resolveRoamingEnemyPlayerStep,
     onRoamingEnemyEncounterConfirm: launchRoamingEnemyBattle,
+    onTrelirenInput: action => trelirenDialogue.handle(action),
     updateRoamingEnemyAnimation: updateCurrentRoamingEnemyAnimation,
     onRoamingEnemyForcedMovementComplete: resolveRoamingEnemyForcedMovementContact,
     onStateChanged: handlePersistentStateChanged
@@ -1544,6 +1550,7 @@ import {
   }
 
   function restoreGame(save) {
+    trelirenDialogue.cleanup();clearTimeout(itemGetTimer);itemGetEffect.hidden=true;
     resetPassiveNotifications();
     activeRoamingEnemyInstanceId = null;
     cancelRapidCurrentTransition();
@@ -1653,6 +1660,7 @@ import {
     } else {
       const restoredRoamingEnemy = restoreRoamingEnemyState(dungeon.roamingEnemy, {
         grid: cells,
+        definitions: [...ROAMING_ENEMY_DEFINITIONS, TRELIREN_DEFINITION],
         moveDuration: STEP_MS
       });
       if (restoredRoamingEnemy && isRoamingEnemyAt(state.gridX, state.gridY, restoredRoamingEnemy)) {
@@ -1709,6 +1717,9 @@ import {
     updateHud();
     updateCharacterUi();
     const savedLocation = save.world?.location === "town" ? "town" : "dungeon";
+    character.trelirenRun = normalizeTrelirenRun(character.trelirenRun);
+    if (savedLocation === "town") character.trelirenRun = normalizeTrelirenRun();
+    setIncenseActive(syncIncenseZone(character,currentDepth,savedLocation === "town"));
     if (savedLocation === "town") clearPresenceIncreaseReduction();
     worldLocation = savedLocation;
     if (restoredLongMarchReward || restoredFinalLongMarchReward.claimed) {
@@ -1762,6 +1773,9 @@ import {
         window.setTimeout(() => void runMichaelaRestoration(), 150);
       }
     }
+    if (savedLocation === "dungeon" && character.trelirenRun.phase >= 0 && !character.trelirenRun.encountered) {
+      setPlayerInputEnabled(false);trelirenDialogue.start();
+    }
     if (restoredLongMarchReward) {
       setTimeout(() => showCardGetEffect(LONG_MARCH_REWARD_CARD_ID, { seId: "itemGet" }), 120);
     }
@@ -1784,6 +1798,7 @@ import {
     setTransferUnlocked(false);
     resetLionBathVisits();
     worldLocation = "town";
+    resetTrelirenAdventure();
     state.treasureCompassActive = false;
     stopBgm();
     setPlayerInputEnabled(false);
@@ -1885,7 +1900,7 @@ import {
     showNamedItemGetEffect(items.map(item => item.name), { important });
   }
 
-  function showNamedItemGetEffect(itemNames, { important = false, amounts = [], acquisitionMessage = false } = {}) {
+  function showNamedItemGetEffect(itemNames, { important = false, amounts = [], acquisitionMessage = false, playSound = true } = {}) {
     if (!itemGetEffect || !itemGetItems || itemNames.length === 0) return;
     window.clearTimeout(itemGetTimer);
     const townPortraitFrame = townScreen?.querySelector(".town-portrait-frame");
@@ -1893,7 +1908,7 @@ import {
     if (townScreen?.hidden && viewport && itemGetEffect.parentElement !== viewport) {
       viewport.append(itemGetEffect);
     }
-    playSe(important ? "importantItem" : "itemGet");
+    if(playSound) playSe(important ? "importantItem" : "itemGet");
     itemGetItems.replaceChildren(...itemNames.map((itemName, index) => {
       const row = document.createElement("span");
       const amount = Math.max(1, Math.floor(Number(amounts[index]) || 1));
@@ -2688,8 +2703,50 @@ import {
     return true;
   }
 
+  const trelirenDialogue = createTrelirenDialogue({
+    messageEl: msgEl, getRun: () => character.trelirenRun,
+    startOverlay: startOverlayEvent, getEvent: () => state.overlayEvent,
+    clearOverlay: () => {state.overlayEvent = null;},
+    save: () => saveGame(),
+    grantReward: () => {
+      character = grantItemWithOverflow(character, INCENSE_ID, 1).character;
+      character.trelirenRun.rewardGiven = true;
+      updateCharacterUi();
+    },
+    playReward: async () => {
+      const run = character.trelirenRun;
+      await playSeToEnd("itemGet");
+      if (character?.trelirenRun !== run || state.overlayEvent?.type !== 'trelirenTalk') return;
+      showNamedItemGetEffect(["魔除けのお香"], {playSound:false, acquisitionMessage:true});
+      await wait(3400);
+    },
+    finish: () => {
+      character.trelirenRun.encountered = true; character.trelirenRun.phase = -1;
+      character.eventFlags = {...character.eventFlags, [TRELIREN_MET_FLAG]:true};
+    },
+    onClose: () => {say("");setPlayerInputEnabled(true);updateCharacterUi();}
+  });
+  function beginTrelirenEncounter(instanceId) {
+    if (state.overlayEvent || !character) return false;
+    character.trelirenRun = normalizeTrelirenRun(character.trelirenRun);
+    if (character.trelirenRun.encountered) return false;
+    if (character.trelirenRun.phase < 0) {
+      character.trelirenRun.phase = 0;
+      character.trelirenRun.firstEncounter = !character.eventFlags?.[TRELIREN_MET_FLAG];
+    }
+    departRoamingEnemy(instanceId);
+    pendingEncounter = null; cancelAutoReturn(false); setPlayerInputEnabled(false);
+    trelirenDialogue.start(); return true;
+  }
+
   function resolveRoamingEnemyPlayerStep({ x, y, now } = {}) {
     if (!character || worldLocation !== "dungeon" || isBattleActive()) return { handled: false };
+    // Closed doors can initially leave no safe spawn cell. Keep the assigned floor
+    // and retry placement when exploration opens a reachable area.
+    if (!getActiveRoamingEnemy()) {
+      const definitions = prepareTrelirenFloor(character, currentDepth);
+      if (definitions.length) placeRoamingEnemyForFloor({ depth: currentDepth, grid: cells, player: { x, y }, definitions, moveDuration: STEP_MS });
+    }
     const result = advanceRoamingEnemyForPlayerStep({
       grid: cells,
       player: { x, y },
@@ -2726,6 +2783,7 @@ import {
     const mapEnemy = getActiveRoamingEnemy();
     if (!mapEnemy || mapEnemy.instanceId !== instanceId) return false;
     const definition = getRoamingEnemyDefinition(mapEnemy);
+    if (definition?.friendly) return beginTrelirenEncounter(instanceId);
     const enemyData = definition ? getEnemyById(definition.enemyId) : null;
     if (!definition || !enemyData) {
       departRoamingEnemy(instanceId);
@@ -3514,6 +3572,9 @@ import {
   }
 
   async function useFieldItem(itemId) {
+    if(itemId === INCENSE_ID && syncIncenseZone(character,currentDepth,isTownOpen())) {
+      say("魔除けのお香の効果はまだ続いている。");return {accepted:false,reason:"alreadyActive"};
+    }
     const context = isTownOpen() ? "town" : "dungeon";
     if (context === "dungeon"
       && itemId === "guiding_torch"
@@ -3542,6 +3603,7 @@ import {
     if (Number.isFinite(result.environment.torchFuel)) {
       state.torchFuel = result.environment.torchFuel;
     }
+    if (result.environment.wardingIncense) {character.incenseZone=getFloorZone(currentDepth)?.name;setIncenseActive(true);}
     if (result.environment.resetPresence) resetPresence();
     if (result.environment.suppressPresenceSteps) {
       suppressPresence(result.environment.suppressPresenceSteps);
@@ -3891,6 +3953,7 @@ import {
     } else {
       resetLionBathVisits();
       worldLocation = "town";
+      resetTrelirenAdventure();
       openTown({ registrationRequired: false });
     }
     try {
@@ -4017,6 +4080,7 @@ import {
     }
     resetLionBathVisits();
     worldLocation = "town";
+    resetTrelirenAdventure();
     clearPresenceIncreaseReduction();
     state.treasureCompassActive = false;
     stopBgm();
@@ -4543,8 +4607,15 @@ import {
     return skillIds.map(id => getSkill(id)?.name).filter(Boolean).map(name => `\n${name}を習得した！`).join("");
   }
 
+  function resetTrelirenAdventure() {
+    trelirenDialogue.cleanup();
+    if(character){character.trelirenRun=normalizeTrelirenRun();delete character.incenseZone;}
+    setIncenseActive(false);
+    clearTimeout(itemGetTimer);itemGetEffect.hidden=true;
+  }
   function returnToTown({ ending = false } = {}) {
     escapedSpecialBossesThisExploration.clear();
+    resetTrelirenAdventure();
     b100GauntletDefeatedThisExploration.clear();
     cancelRapidCurrentTransition();
     const returnFloor = currentDepth;
@@ -4567,6 +4638,7 @@ import {
     }
     resetLionBathVisits();
     worldLocation = "town";
+    resetTrelirenAdventure();
     clearPresenceIncreaseReduction();
     state.treasureCompassActive = false;
     stopBgm();
@@ -4967,13 +5039,15 @@ import {
   }
 
   function getDungeonProgress() {
+    setIncenseActive(syncIncenseZone(character,currentDepth));
+    const trelirenDefinitions = prepareTrelirenFloor(character,currentDepth);
     const floorBoss = getFloorBossByDepth(currentDepth);
     const room = floorBoss?.room || {};
     const queenShadowQuest = getQuestProgress(character, "guild_008");
     const secondQueenShadowQuest = getQuestProgress(character, "guild_024");
     const thirdQueenShadowQuest = getQuestProgress(character, "guild_032");
     return {
-      roamingEnemyDefinitions: ROAMING_ENEMY_DEFINITIONS.filter(definition => definition.enemyId !== 'verfolger' || !isVerfolgerDefeatedOnFloor(character, currentDepth)),
+      roamingEnemyDefinitions: [...trelirenDefinitions, ...ROAMING_ENEMY_DEFINITIONS.filter(definition => definition.enemyId !== 'verfolger' || !isVerfolgerDefeatedOnFloor(character, currentDepth))],
       bossDefeated: isBossDefeated(character, "strange_knight_statue_b9f"),
       bossDefeatedById: {
         ...(floorBoss ? { [floorBoss.id]: isBossDefeated(character, floorBoss) } : {}),

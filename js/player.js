@@ -1698,6 +1698,7 @@ function handleGeminiInput(action) {
 
 export function handleOverlayEventInput(action) {
   if (!state.overlayEvent) return false;
+  if (state.overlayEvent.type === "trelirenTalk") return hooks.onTrelirenInput?.(action) ?? true;
   if (state.overlayEvent.type === "lionEvent") return handleLionInput(state.overlayEvent,action,lionHooks());
   if (state.overlayEvent.type === 'geminiEvent') return handleGeminiInput(action);
   if (["stairsTransition", "fixedWarpTransition"].includes(state.overlayEvent.type)) return true;

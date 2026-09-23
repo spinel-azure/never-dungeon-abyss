@@ -103,7 +103,8 @@ export function drawMinimap(ctx, {
   }
 
   if (shouldDrawRoamingEnemyMarker(roamingEnemy, explored)) {
-    drawRoamingEnemyMark(
+    if (roamingEnemy.definitionId === "treliren") drawTextMark(ctx, "T", ox + roamingEnemy.x * cell, oy + roamingEnemy.y * cell, cell, "#72efc5");
+    else drawRoamingEnemyMark(
       ctx,
       ox + roamingEnemy.x * cell,
       oy + roamingEnemy.y * cell,

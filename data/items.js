@@ -1,5 +1,11 @@
 export const ITEMS = Object.freeze([
   Object.freeze({
+    number: 56, id: "warding_incense", name: "魔除けのお香", category: "exploration",
+    buyPrice: 0, sellPrice: 1, repurchasable: false, source: "event", usableIn: Object.freeze(["dungeon"]),
+    effects: Object.freeze([{id: "warding_incense", value: 1}]), maxOwned: 99, iconId: "exorcism-talisman", version: 1,
+    description: "気配ゲージが上昇しなくなる。帰還または別区域への移動で効果終了。"
+  }),
+  Object.freeze({
     number: 1, id: "healing_potion", name: "回復薬（小）", category: "recovery",
     buyPrice: 20, sellPrice: 10, source: "shop", usableIn: Object.freeze(["town", "dungeon", "battle"]),
     effects: Object.freeze([{ id: "heal_hp", value: 30 }]),
