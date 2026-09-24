@@ -1,3 +1,4 @@
+import { resumeDungeonEntrance } from "./town.js";
 import {prepareTrelirenFloor,normalizeTrelirenRun,syncIncenseZone,TRELIREN_DEFINITION,TRELIREN_MET_FLAG,INCENSE_ID} from '../data/treliren.js';
 import {getFloorZone} from '../data/floor-zone-names.js';
 import {createTrelirenDialogue} from './treliren-dialogue.js';
@@ -5420,7 +5421,9 @@ import {
     },
     openItems: openFieldItems,
     onReturnToDungeon: () => {
-      if (isTownOpen()) showTownArrival();
+      if (isTownOpen()) {
+        if (!resumeDungeonEntrance()) showTownArrival();
+      }
       else resumeDismissedStairsPrompt();
     }
   });

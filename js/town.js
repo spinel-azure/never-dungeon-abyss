@@ -362,9 +362,10 @@ export function configureTown(options) {
     button.type = "button";
     button.dataset.entranceCommand = item.id;
     button.textContent = item.label;
-    button.disabled = Boolean(item.empty);
+    button.disabled = false;
+    if (item.empty) button.setAttribute("aria-label", `空欄 ${index - 2}`);
     button.classList.toggle("is-empty", Boolean(item.empty));
-    if (!item.empty) {
+    {
       button.addEventListener("click", () => {
         town.playSe("confirm");
         if (town.mode === "transferCircle") {
@@ -372,6 +373,7 @@ export function configureTown(options) {
           return;
         }
         town.entranceIndex = index;
+        renderEntranceSelection();
         activateEntranceCommand(item.id);
       });
     }
@@ -1242,15 +1244,16 @@ function handleRegistrationInput(action) {
 
 function handleEntranceInput(action) {
   if (action === "cancel") {
-    town.playSe("cancel");
-    showTownArrival({ playNameBanner: true });
-    return true;
+    showGameCommands();
+    return false;
   }
-  if (action === "left" || action === "right") {
+  if (["left", "right", "up", "down"].includes(action)) {
     town.playSe("cursorMove");
-    town.entranceIndex = (
-      town.entranceIndex + (action === "right" ? 1 : 2)
-    ) % 3;
+    const row = Math.floor(town.entranceIndex / 3);
+    const column = town.entranceIndex % 3;
+    town.entranceIndex = action === "up" || action === "down"
+      ? (1 - row) * 3 + column
+      : row * 3 + (column + (action === "right" ? 1 : 2)) % 3;
     renderEntranceSelection();
     return true;
   }
@@ -1407,6 +1410,12 @@ function beginFacilitySelection() {
   town.mode = "selection";
   town.selectedIndex = nearestSelectableIndex(town.selectedIndex, 1);
   renderTownView();
+}
+
+export function resumeDungeonEntrance() {
+  if (!town.active || town.mode !== "dungeonEntrance") return false;
+  renderDungeonEntrance();
+  return true;
 }
 
 export function showTownArrival({ playNameBanner = false, firstVisit = false } = {}) {
