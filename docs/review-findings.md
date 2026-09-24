@@ -1823,3 +1823,12 @@
 - .github/workflows/node-tests.ymlを追加。mainへのpushとmain向けPRで、Node lts/*、外部パッケージインストールなしでnode --test tests/*.test.mjsを実行。contents:read。Pythonワークフローは不変、Playwrightは含めない。GitHub上での実行は未確認。
 - 指定Nodeコマンドを2回実行。1回目1553成功/1失敗（rumor-notificationのベル終了待ち、tests/rumor-notification.test.mjs:90）、2回目1554成功/失敗0。重複importとトレリーレン巡回テストは両回成功。失敗した噂通知ファイルを単独再実行し9成功/失敗0。6ms待機後に12msのベルが未完了であることを期待する実時間依存テストで、負荷による待機遅延の影響が考えられるが原因は未確定。今回範囲外のため変更せず記録。
 - Pythonデータ検証29成功、警告0、失敗0、既存2skip。node --check js/main.jsとgit diff --check成功。コミット/pushなし。
+
+
+### 2026-09-25 噂通知テストのフレーク再現確認
+
+- 着手HEAD 70d395a、作業ツリーはクリーン。前回修正は既にユーザー側でコミット済み。Windows/Node v24.19.0で検証。
+- 前回失敗の正確な対象：tests/rumor-notification.test.mjs:66の「one rumor rings once, reveals copy after the bell, and completes once」。90行目のassert.equal(view.copy.hidden,true,"copy must wait for the actual bell completion")でactual:false/expected:true。
+- node --test tests/rumor-notification.test.mjsを別プロセスで順番に20回実行し、全20回が9成功/失敗0。続いてnode --test tests/*.test.mjsを順番に3回実行し、全3回が1554成功/失敗0。噂通知とトレリーレン巡回も全回成功。今回再現なし。
+- 要望どおり推測によるコード修正は行っていない。原因確定・恒久的な安定性の保証には至らない。CIのリトライ/失敗無視も追加していない。変更は本記録のみ。ゲーム処理・保存形式・日付・キャッシュ・CI不変、コミット/pushなし。git diff --check成功。
+- 各回の生ログはTEMP/nda-rumor-repeat-1.log～20.log、TEMP/nda-flake-all-1.log～3.log。終了コード一覧はTEMP/nda-rumor-repeat-results.json、TEMP/nda-flake-all-results.json。
