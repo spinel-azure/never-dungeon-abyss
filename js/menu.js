@@ -1,3 +1,4 @@
+import { getItemCompendiumDisplayEntries } from "../data/item-discovery.js";
 import { mountItemCompendium } from "./item-compendium.js";
 import { ITEM_COMPENDIUM_ENTRIES } from "../data/item-compendium.js";
 let itemCompendiumController = null;
@@ -315,7 +316,7 @@ export function openLibraryItemCompendium() {
   menu.view="itemCompendium";
   const root=menu.root.querySelector('[data-menu-view="itemCompendium"]');
   itemCompendiumController?.();
-  itemCompendiumController=mountItemCompendium(root,Object.values(ITEM_COMPENDIUM_ENTRIES),()=>{
+  itemCompendiumController=mountItemCompendium(root,getItemCompendiumDisplayEntries(Object.values(ITEM_COMPENDIUM_ENTRIES),menu.getCharacter()),()=>{
     menu.view="dungeon";updateView();
   });
   updateView();

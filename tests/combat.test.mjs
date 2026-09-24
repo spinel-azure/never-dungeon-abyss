@@ -624,7 +624,7 @@ test("fireball is unavoidable, immunity is zero and weakness is 1.5x", () => {
 test("Ice, Pierce uses explicit self and enemy turn-order wording", () => {
   const ice = getSkill("ice_bind");
   assert.equal(ice.name, "氷よ、貫け！");
-  assert.equal(ice.spCost, 5);
+  assert.equal(ice.spCost, 4);
   assert.match(ice.description, /自身の行動順－5/);
   assert.match(ice.description, /敵の行動順－20（3ターン持続）/);
 });
@@ -633,12 +633,12 @@ test("the three basic elemental spells use their revised costs and Lightning, Pi
   assert.equal(getSkill("fireball").spCost, 3);
   const lightning = getSkill("lightning_pierce");
   assert.equal(lightning.name, "雷よ、穿て！");
-  assert.equal(lightning.spCost, 7);
+  assert.equal(lightning.spCost, 5);
   assert.equal(lightning.element, "lightning");
   assert.equal(lightning.unavoidable, true);
   assert.equal(lightning.speedModifier, -5);
   assert.equal(lightning.effects[0].statusId, "electrified");
-  assert.equal(lightning.effects[0].baseRate, 0.3);
+  assert.equal(lightning.effects[0].baseRate, 0.4);
   assert.equal(getLevelUnlockedSkillIds("mage", 7).includes(lightning.id), false);
   assert.equal(getLevelUnlockedSkillIds("mage", 8).includes(lightning.id), true);
 });
@@ -1086,7 +1086,7 @@ test("electrified skips the next action and uses LUC plus action-disable resista
     effect,
     rng: () => 0.19
   });
-  assert.equal(application.rate, 0.2);
+  assert.equal(application.rate, 0.3);
   assert.equal(application.success, true);
   const statuses = applyStatusApplications([], [application]);
   assert.equal(statuses[0].name, "感電");
@@ -2367,4 +2367,16 @@ test("B50F black-chest weapons retain their job roles through plus three", () =>
   assert.deepEqual([thief.attack, thief.statBonuses.dex], [15, 6]);
   assert.deepEqual([priest.attack, priest.statBonuses.luc], [19, 5]);
   assert.deepEqual([mage.statBonuses.int, mage.twoHanded], [11, true]);
+});
+
+
+test('basic spells scale with INT 1.5 and spend revised SP in real rounds',()=>{
+ for(const [id,cost,damage8,damage30] of [['fireball',3,22,55],['ice_bind',4,16,42],['lightning_pierce',5,16,42]]){
+  const spell=getSkill(id);
+  for(const [int,damage] of [[8,damage8],[30,damage30]]) assert.equal(resolveSpell({attacker:{int},defender:{},spell,rng:()=>.5}).totalDamage,damage);
+  const c=createInitialCharacter({name:'QA',job:'mage'});c.skillIds=[...new Set([...c.skillIds,id])];c.sp=c.maxSp=50;
+  const enemy={...createEnemyCombatant(getEnemyById('abyss_rat')),hp:9999,maxHp:9999,actions:[{weight:1,action:{id:'wait',actionType:'wait'}}]};
+  const result=resolveBattleRound({battle:createBattleState({character:c,enemy}),playerCommand:{type:'skill',skillId:id},rng:()=>.5});
+  assert.equal(result.accepted,true);assert.equal(result.battle.player.sp,50-cost);
+ }
 });

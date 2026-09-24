@@ -84,7 +84,7 @@ test("locked equipment cannot be sold and retains its lock through normalization
 test("legacy characters receive an empty normalized inventory", () => {
   const character = createInitialCharacter({ name: "TEST", job: "warrior" });
   delete character.inventory;
-  assert.deepEqual(normalizeCharacter(character).inventory, { counts: {} });
+  assert.deepEqual(normalizeCharacter(character).inventory, { counts: {}, discoveredItemIds: [] });
 });
 
 test("shop equipment costs 100G and creates an individual weapon instance", () => {

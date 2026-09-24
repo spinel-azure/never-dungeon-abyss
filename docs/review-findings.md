@@ -1832,3 +1832,20 @@
 - node --test tests/rumor-notification.test.mjsを別プロセスで順番に20回実行し、全20回が9成功/失敗0。続いてnode --test tests/*.test.mjsを順番に3回実行し、全3回が1554成功/失敗0。噂通知とトレリーレン巡回も全回成功。今回再現なし。
 - 要望どおり推測によるコード修正は行っていない。原因確定・恒久的な安定性の保証には至らない。CIのリトライ/失敗無視も追加していない。変更は本記録のみ。ゲーム処理・保存形式・日付・キャッシュ・CI不変、コミット/pushなし。git diff --check成功。
 - 各回の生ログはTEMP/nda-rumor-repeat-1.log～20.log、TEMP/nda-flake-all-1.log～3.log。終了コード一覧はTEMP/nda-rumor-repeat-results.json、TEMP/nda-flake-all-results.json。
+
+
+### 2026-09-25 初級3呪文の威力・消費SP・感電調整
+
+- 未追跡のdungeon_01d/e/f.avifを保護。fireball/ice_bind/lightning_pierceの各定義にintelligenceMultiplier:1.5を指定。共通係数0.5と他スキルは不変。火SP3、氷SP4、雷SP5。雷の基本感電率0.4へ変更し説明文も40%へ更新。氷の70%行動順低下、威力10/8/8、倍率1/.8/.8、属性耐性、必中・DEF無視・速度補正・習得条件は維持。
+- 無補正・乱数1でINT8時22/16/16、INT30時55/42/42。既存LUC/耐性補正後の感電判定を維持。実戦闘経路のSP消費3/4/5を検証。旧仕様に依存するテスト期待値を更新。
+- Node全1555成功・失敗0、Python29成功・警告0・失敗0・既存2skip。構文・diff検査成功。ブラウザ/実機と通しプレイのバランス検証は今回未実施。
+- 当日最初の本体変更としてLAST UPDATEを2026-09-25へ、main.jsキャッシュ20260925-1へ更新。CSS/README変更なし。コミット/pushなし。
+
+
+### 2026-09-25 アイテム図鑑の入手連動解禁
+
+- 既存の初級呪文調整差分と未追跡のdungeon_01d/e/f.avifを保護。図書館のアイテム図鑑を、キャラクター別の入手済み記録と現在所有している品に連動。未入手は「？？？？？？」で詳細ボタンを無効化し、名前・画像・説明を表示用データへ渡さない。
+- 既存compendium.items/keyItemsのobtained記録を利用。inventory/keyItemsへ入手ID履歴を補助保存し、共通grant/consume経由の購入・報酬・使用・売却・納品で入手記録を維持。normalize/save時に既存compendiumへ統合。旧セーブは所持品・倉庫・戦利品・貴重品・買戻し品も反映。過去に使い切り、入手記録も残っていない品は復元できず再入手が必要。図鑑完成実績の条件は変更なし。
+- Node全1559成功・失敗0。購入直後の売却/消費、貴重品消費、旧記録と現所有の移行、未入手情報遮断、キャラクター分離を回帰検証。Python29成功・警告0・失敗0・既存2skip。構文/diff検査成功。
+- tests/browser/item-discovery.mjsで実際のメニュー経路をPC1280x900・スマートフォン相当390x844で確認。未入手行クリック不可、入手/消費後の詳細解禁、本編save/load後の保持を確認。画像はartifacts/item-discovery/。実端末は未確認。
+- LAST UPDATEは2026-09-25維持、main.jsキャッシュを20260925-2へ更新。README変更なし、コミット/pushなし。

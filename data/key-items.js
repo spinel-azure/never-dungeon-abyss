@@ -1,3 +1,4 @@
+import { mergeItemDiscovery } from "./item-discovery.js";
 export const KEY_ITEMS = Object.freeze({
   gemini_emblem_other_half: Object.freeze({id:'gemini_emblem_other_half',name:'もう一つの紋様の片割れ',description:'壁のくぼみで見つけた、最初の紋様と対になる紫色の石版。',sellable:false,consumable:false,version:1}),
   gemini_emblem_half: Object.freeze({id:'gemini_emblem_half',name:'紋様の片割れ',description:'シュヴェスターの試しを解いて得た紋様の片割れ。',sellable:false,consumable:false,version:1}),
@@ -184,7 +185,7 @@ export function getKeyItem(id) {
 }
 
 export function createInitialKeyItemState() {
-  return { owned: {}, acquisitionOrder: [] };
+  return { owned: {}, acquisitionOrder: [], discoveredItemIds: [] };
 }
 
 export function normalizeKeyItemState(state) {
@@ -207,7 +208,7 @@ export function normalizeKeyItemState(state) {
   for (const id of Object.keys(owned)) {
     if (!acquisitionOrder.includes(id)) acquisitionOrder.push(id);
   }
-  return { owned, acquisitionOrder };
+  return { owned, acquisitionOrder, discoveredItemIds: mergeItemDiscovery(state?.discoveredItemIds||[],Object.keys(owned)) };
 }
 
 export function hasKeyItem(state, keyItemId) {
@@ -228,6 +229,7 @@ export function grantKeyItem(state, keyItemId, acquiredAt = Date.now(), amount =
   if (nextCount <= current) return { keyItems: source, gained: false, amount: 0, reason: "alreadyOwned" };
   return {
     keyItems: {
+      discoveredItemIds: mergeItemDiscovery(source.discoveredItemIds,[item.id]),
       owned: { ...source.owned, [item.id]: {
         acquiredAt: source.owned[item.id]?.acquiredAt ?? Math.max(0, Math.floor(Number(acquiredAt) || 0)),
         count: nextCount
@@ -251,7 +253,7 @@ export function consumeKeyItem(state, keyItemId, amount = 1) {
   if (current === requested) delete owned[id];
   else owned[id] = { ...owned[id], count: current - requested };
   return {
-    keyItems: { owned, acquisitionOrder: current === requested ? source.acquisitionOrder.filter(ownedId => ownedId !== id) : source.acquisitionOrder },
+    keyItems: { ...source, owned, acquisitionOrder: current === requested ? source.acquisitionOrder.filter(ownedId => ownedId !== id) : source.acquisitionOrder },
     consumed: true,
     amount: requested,
     reason: ""

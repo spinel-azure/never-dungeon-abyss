@@ -120,6 +120,12 @@ export function recordEquipmentObtained(compendium, equipmentId) {
 
 export function backfillCompendiumFromCharacter(compendium, character = {}) {
   let next = normalizeCompendium(compendium);
+  for (const itemId of character.inventory?.discoveredItemIds || []) {
+    next = backfillItem(next, itemId, 1);
+  }
+  for (const keyItemId of character.keyItems?.discoveredItemIds || []) {
+    next = recordKeyItemObtained(next, keyItemId);
+  }
   for (const [itemId, count] of Object.entries(character.inventory?.counts || {})) {
     next = backfillItem(next, itemId, count);
   }

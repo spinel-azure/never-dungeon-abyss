@@ -26,7 +26,7 @@ export function mountItemCompendium(root, entries, onClose = () => {}) {
     if (entry) renderItemCompendiumDetail(content, entry);
     else {
       content.classList.add("item-compendium-list");
-      filtered.slice(page * pageSize, (page + 1) * pageSize).forEach(item => content.append(button(item.name, () => render(item))));
+      filtered.slice(page * pageSize, (page + 1) * pageSize).forEach(item => { const node=button(item.locked ? "？？？？？？" : item.name, () => {if(!item.locked)render(item);});node.disabled=!!item.locked;content.append(node); });
       if (!filtered.length) { const empty = document.createElement("p"); empty.textContent = "この分類には、まだ登録がありません。"; content.append(empty); }
     }
     const footer = document.createElement("nav"); footer.className = "item-compendium-pager";
@@ -51,7 +51,7 @@ export function mountItemCompendium(root, entries, onClose = () => {}) {
 }
 export function renderItemCompendiumDetail(root, entry) {
   root.replaceChildren();
-  if (!entry) return;
+  if (!entry || entry.locked) return;
   root.classList.add("item-compendium-detail");
   const add = (tag, className, text, parent = root) => {
     const node = document.createElement(tag);

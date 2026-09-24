@@ -1,10 +1,11 @@
+import { mergeItemDiscovery } from "./item-discovery.js";
 import { getItem } from "./items.js";
 import { getCardById } from "./cards.js";
 import { grantCard } from "./deck.js";
 import { getEquipmentItem } from "./equipment.js";
 
 export function createInitialInventory() {
-  return { counts: {} };
+  return { counts: {}, discoveredItemIds: [] };
 }
 
 export function createInitialWarehouse() {
@@ -23,7 +24,7 @@ export function normalizeInventory(inventory) {
     const count = Math.max(0, Math.min(item.maxOwned, Math.floor(Number(rawCount) || 0)));
     if (count > 0) counts[id] = count;
   }
-  return { counts };
+  return { counts, discoveredItemIds: mergeItemDiscovery(inventory?.discoveredItemIds||[],Object.keys(counts)) };
 }
 
 export function getItemCount(inventory, itemId) {
@@ -37,7 +38,7 @@ export function grantItem(inventory, itemId, amount = 1) {
   const current = getItemCount(source, itemId);
   const next = Math.min(item.maxOwned, current + Math.max(0, Math.floor(Number(amount) || 0)));
   return {
-    inventory: { counts: { ...source.counts, ...(next > 0 ? { [itemId]: next } : {}) } },
+    inventory: { discoveredItemIds: mergeItemDiscovery(source.discoveredItemIds, next>current?[itemId]:[]), counts: { ...source.counts, ...(next > 0 ? { [itemId]: next } : {}) } },
     gained: next - current,
     reason: next === current ? "maxOwned" : ""
   };
@@ -50,7 +51,7 @@ export function consumeItem(inventory, itemId, amount = 1) {
   const counts = { ...source.counts };
   if (current - consumed > 0) counts[itemId] = current - consumed;
   else delete counts[itemId];
-  return { inventory: { counts }, consumed, reason: consumed > 0 ? "" : "notOwned" };
+  return { inventory: { ...source, counts }, consumed, reason: consumed > 0 ? "" : "notOwned" };
 }
 
 export function normalizeWarehouse(warehouse) {
