@@ -4,6 +4,15 @@ export function filterItemCompendiumEntries(entries, tab = "すべて") {
   return entries.filter(entry => tab === "すべて" || entry.category === tab);
 }
 export const ITEM_COMPENDIUM_ENTRIES = Object.freeze({
+  kirke_special_birdlime: Object.freeze({
+    id: "kirke_special_birdlime",
+    name: "キルケ特製とりもち",
+    category: "貴重品",
+    acquisition: "依頼026「メルヒェンティーレ」",
+    purchasePrice: null,
+    imageSrc: "images/item-compendium/kirke_special_birdlime.avif",
+    description: "いたずら動物トリオのメルヒェンティーレに手を焼いた魔女キルケが作った特製のとりもち。強力な粘着力で対象を拘束する。なお、メルヒェンティーレの3匹にはそれぞれ、「ブレッセ（白ぶち）」「カニンヒェン（うさぎ）」「ニートリヒ（小さい、可愛い）」という名前があるが、あまり深く考えてはいけない。…いいね？"
+  }),
   trapezohedron: Object.freeze({
     "id": "trapezohedron",
     "name": "トラペツォエーダー",
