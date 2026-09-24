@@ -1815,3 +1815,11 @@
 - 15パーツ・20294ms、三女神の6画像・台詞・座標・加減速・時間・popup設定を維持。magic_circle.avifは埋込画像とバイト一致を確認し外部パスへ切替、他6画像も実在。音声トラックなし。共通EffectEngineで実ダメージ代入・pixelフォント表示。全体攻撃時は既存の対象別演出方式を維持。
 - 全Node1551成功・失敗0。新規2件でJSON正規化時の値保持・実ダメージ置換・実戦闘からの演出イベントを確認。ブラウザPC1280×900／390×844でスキル発動、画像/台詞、実ダメージ、終了と中断時のCanvas解除を確認。artifacts/goddess/。実機/Safariと複数対象のブラウザ再検証は未実施。
 - LAST UPDATEは既存差分の2026-09-24を維持、main.jsキャッシュを20260924-2へ更新。README・内部import・共通エンジン変更なし。コミット/pushなし。
+
+
+### 2026-09-25 重複import修正・Node CI追加
+
+- 着手HEAD eb298ac、作業ツリーはクリーン。main.js先頭のresumeDungeonEntrance単独importを削除し、既存town.jsまとめimportへ統合。処理内容・セーブ形式・日付・キャッシュを変更していない。
+- .github/workflows/node-tests.ymlを追加。mainへのpushとmain向けPRで、Node lts/*、外部パッケージインストールなしでnode --test tests/*.test.mjsを実行。contents:read。Pythonワークフローは不変、Playwrightは含めない。GitHub上での実行は未確認。
+- 指定Nodeコマンドを2回実行。1回目1553成功/1失敗（rumor-notificationのベル終了待ち、tests/rumor-notification.test.mjs:90）、2回目1554成功/失敗0。重複importとトレリーレン巡回テストは両回成功。失敗した噂通知ファイルを単独再実行し9成功/失敗0。6ms待機後に12msのベルが未完了であることを期待する実時間依存テストで、負荷による待機遅延の影響が考えられるが原因は未確定。今回範囲外のため変更せず記録。
+- Pythonデータ検証29成功、警告0、失敗0、既存2skip。node --check js/main.jsとgit diff --check成功。コミット/pushなし。

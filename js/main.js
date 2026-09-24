@@ -1,4 +1,3 @@
-import { resumeDungeonEntrance } from "./town.js";
 import {prepareTrelirenFloor,normalizeTrelirenRun,syncIncenseZone,TRELIREN_DEFINITION,TRELIREN_MET_FLAG,INCENSE_ID} from '../data/treliren.js';
 import {getFloorZone} from '../data/floor-zone-names.js';
 import {createTrelirenDialogue} from './treliren-dialogue.js';
@@ -134,7 +133,7 @@ import {
 import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
 import { EffectEngine } from "./effects/effect-engine.js";
 import { getEquipmentHighlightClass, getLotEquipmentHighlightClass, hasUncertainLoot, isHighlightedLotCardRarity } from "./loot-identification.js";
-import { configureTown, INN_MEDICINE_DELIVERY_TRANSITION_FLAG, setTownEndingSuspended, openPendingNpcRenewal, openTown, closeTown, getTownState, handleTownInput as handleRawTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js";
+import { configureTown, resumeDungeonEntrance, INN_MEDICINE_DELIVERY_TRANSITION_FLAG, setTownEndingSuspended, openPendingNpcRenewal, openTown, closeTown, getTownState, handleTownInput as handleRawTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js";
 import { flashNpcPartyStatus, renderNpcPartyStatus, renderNpcStatusPage, setNpcPartyCharge } from "./npc-party-ui.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { applyNpcExplorationPassives, beginNpcRenewal, hireNpc, recordNpcExpeditionDepth, registerNpc, resolveNpcRenewal } from "../data/npc-party.js";
