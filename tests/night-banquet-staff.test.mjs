@@ -22,7 +22,7 @@ const enemy={id:'dummy',name:'DUMMY',hp:999999,maxHp:999999,stats:{str:1,int:1,a
 test('night staff gold replacement has a strict 1% boundary only at B70-78 and requires eligibility',()=>{
  for(let depth=70;depth<=78;depth++){
   assert.equal(getGoldChestWeaponId('mage',depth),id);
-  assert.equal(getGoldChestWeaponId('warrior',depth),null);
+  assert.equal(getGoldChestWeaponId('warrior',depth),'fulgura');
   for(const [roll,eligible,expected] of [[.009999,true,'gold'],[.01,true,'black'],[0,false,'black']]){
    buildBoundaryWallMap(depth,()=>roll,{blackChestsUnlocked:true,goldWeaponEligible:eligible});
    assert.equal(cells.flat().filter(c=>c.treasure===expected).length,1);

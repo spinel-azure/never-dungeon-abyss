@@ -1414,6 +1414,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
   const raceMultiplier = Number(action.raceDamageMultipliers?.[target.race]) || 1;
   let presentedHits = resolvedHits.map((hit, index) => ({
     index,
+    element: hit.element || result.element,
     hit: hit.hit,
     critical: hit.critical,
     damage: hit.hit ? Math.max(0, Math.floor(
@@ -1423,7 +1424,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
         * getCapricornReceivedDamageMultiplier(battle, targetSide)
         * getLibraDamageMultiplier(battle, actorSide, actor, target)
         * getLibraReceivedDamageMultiplier(battle, targetSide, actor, target)
-        * getSphinxWeaknessDamageMultiplier(battle, actorSide, result.elementMultiplier)
+        * getSphinxWeaknessDamageMultiplier(battle, actorSide, hit.elementMultiplier ?? result.elementMultiplier)
         * (actorSide === "player" && action.actionType === "physicalAttack" ? Number(target.physicalTypeMultipliers?.[action.weapon?.physicalDamageType || action.weapon?.type]) || 1 : 1)
         * (Number(action.ariesOpeningDamageMultiplier) || 1)
         * (magicFocus ? Number(magicFocus.attackSpellDamageMultiplier) || 1 : 1)
@@ -1595,6 +1596,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
   presentedHits.forEach((hit, index) => {
     const actualHitHpLoss = Math.min(remainingHitHp, hit.damage);
     remainingHitHp -= actualHitHpLoss;
+    hit.actualHpLoss = actualHitHpLoss;
     const prefix = isMultiHit ? `${index + 1}撃目：` : "";
     const message = hit.bossBarrierBlocked ? "魔力障壁が攻撃を受け止めた！" : hit.vorpalExecution
       ? "ヴォーパル・スウォードが光り輝き、\nジャバウォックを一刀両断した！"
@@ -1616,6 +1618,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
       lionOpeningExtraDamage: Math.max(0, actualHitHpLoss - Math.min(actualHitHpLoss, hit.damageBeforeLionOpening)),
       actorSide,
       targetSide,
+      element: hit.element || result.element,
       hitIndex: index,
       hitCount: presentedHits.length,
       hit: hit.hit,
@@ -1656,14 +1659,14 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     && Number(battle.followUpDamageAtStart) > 0;
   if (followUpEligible && !deferFollowUp) applyFixedFollowUpDamage(battle, target);
   const landedHits = presentedHits.filter(hit => hit.hit);
-  breakReservedEnemyActionOnElementHit({
+  for (const element of new Set(landedHits.map(hit => hit.element))) breakReservedEnemyActionOnElementHit({
     battle,
     enemy: target,
     actorSide,
     targetSide,
-    element: result.element,
-    landedHitCount: landedHits.length,
-    actualHpLoss
+    element,
+    landedHitCount: landedHits.filter(hit => hit.element === element).length,
+    actualHpLoss: landedHits.filter(hit => hit.element === element).reduce((sum, hit) => sum + hit.actualHpLoss, 0)
   });
   const allLandedHitsBlockedByNpcWall = landedHits.length > 0 && landedHits.every(hit => hit.blockedByNpcWall);
   const applications = isPiscesInvincible(target) || bossBarrierBlocked || barrier || allLandedHitsBlockedByNpcWall || !target.alive ? [] : [
@@ -1699,7 +1702,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
       battle.log.push(`${target.name}の水晶装甲にひびが入った！`);
     }
   }
-  if (actorSide === "player" && actualDamage > 0 && target.resonanceTrait && result.element === target.resonanceTrait.element) {
+  if (actorSide === "player" && actualDamage > 0 && target.resonanceTrait && landedHits.some(hit => hit.element === target.resonanceTrait.element && hit.damage > 0)) {
     const active = target.statuses.some(status => (status.id || status.statusId) === target.resonanceTrait.statusId);
     if (!active && Number(rng()) < Math.max(0, Math.min(1, Number(target.resonanceTrait.rate) || 0))) {
       target.statuses = applyStatusApplications(target.statuses, [{ statusId: target.resonanceTrait.statusId, success: true, skipInitialDecrement: true }]);
@@ -1709,7 +1712,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
   }
   const elementalReaction = target.elementalReactionTrait;
   if (actorSide === "player" && landedHits.length > 0 && target.alive
-    && elementalReaction && result.element === elementalReaction.element) {
+    && elementalReaction && landedHits.some(hit => hit.element === elementalReaction.element)) {
     target.statuses = applyStatusApplications(target.statuses, [{
       statusId: elementalReaction.statusId,
       success: true,

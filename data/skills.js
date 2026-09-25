@@ -522,6 +522,27 @@ export const SKILLS = Object.freeze({
     unavoidable: true, ignoresMagicResistance: true, chargeSkill: true,
     ultimateChargeSkill: true, presentationId: "apocalypse", effects: Object.freeze([])
   }),
+  golden_rice_sea: Object.freeze({
+    id: "golden_rice_sea", name: "黄金の稲穂の海",
+    description: "フルグラ装備中のみ。敵単体へ聖2撃・雷2撃。",
+    actionType: "physicalAttack", category: "combatArt", target: "enemy", spCost: 40,
+    hitCount: 4, powerPerHit: 1, element: "holy", hitElements: Object.freeze(["holy", "holy", "lightning", "lightning"]),
+    equipmentGranted: true, effects: Object.freeze([])
+  }),
+  twilight_dew_rain: Object.freeze({
+    id: "twilight_dew_rain", name: "宵闇の夜露の雨",
+    description: "ヨルムンガンド装備中のみ。敵単体へ闇2撃・氷2撃。",
+    actionType: "physicalAttack", category: "combatArt", target: "enemy", spCost: 40,
+    hitCount: 4, powerPerHit: 1, element: "dark", hitElements: Object.freeze(["dark", "dark", "ice", "ice"]),
+    equipmentGranted: true, effects: Object.freeze([])
+  }),
+  dominus_lux_aeterna: Object.freeze({
+    id: "dominus_lux_aeterna", name: "ドミヌス・ルクス・エテルナ",
+    description: "ククルスドミニ装備中のみ。敵全体へINT×8の聖属性奇蹟。DEF無視。",
+    actionType: "spell", category: "miracle", target: "allEnemies", spCost: 40,
+    element: "holy", spellPower: 0, intelligenceMultiplier: 8, powerMultiplier: 1,
+    unavoidable: true, equipmentGranted: true, effects: Object.freeze([])
+  }),
   fall_the_meteor: Object.freeze({
     id: "fall_the_meteor", name: "フォール・ザ・ミーティア",
     description: "コメットブースター装備中のみ使用可能。\n敵全体へINT×10の無属性魔法攻撃。",

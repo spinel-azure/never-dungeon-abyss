@@ -32,21 +32,24 @@ export function resolvePhysicalAttack({
   const hitRate = calculatePhysicalHitRate({ attacker, defender, attack });
   const criticalRate = calculateCriticalRate({ attacker, attack });
   const element = String(attack.element || attack.weapon?.element || "physical");
-  const elementMultiplier = element === "physical"
-    ? 1
-    : Math.max(0, Number(defender.elementMultipliers?.[element] ?? 1));
-  const elementalReduction = element === "fire"
-    ? Math.max(0, Math.min(0.75, Number(defender.fireDamageReduction) || 0))
-    : element === "ice"
-      ? Math.max(0, Math.min(0.75, Number(defender.iceDamageReduction) || 0))
-      : 0;
+  const elementMultiplier = element === "physical" ? 1 : Math.max(0, Number(defender.elementMultipliers?.[element] ?? 1));
   const hits = [];
   let firstHitEffectsResolved = false;
 
   for (let index = 0; index < hitCount; index += 1) {
+    const element = attack.hitElements?.[index] || String(attack.element || attack.weapon?.element || "physical");
+    const elementMultiplier = element === "physical"
+      ? 1
+      : Math.max(0, Number(defender.elementMultipliers?.[element] ?? 1));
+    const elementalReduction = element === "fire"
+      ? Math.max(0, Math.min(0.75, Number(defender.fireDamageReduction) || 0))
+      : element === "ice"
+        ? Math.max(0, Math.min(0.75, Number(defender.iceDamageReduction) || 0))
+        : 0;
     const hit = attack.unavoidable ? true : roll(rng) < hitRate;
     if (!hit) {
       hits.push({
+        element, elementMultiplier,
         hit: false,
         damage: 0,
         critical: false,
@@ -87,7 +90,7 @@ export function resolvePhysicalAttack({
       }));
       firstHitEffectsResolved = true;
     }
-    hits.push({ hit: true, damage, critical, effects });
+    hits.push({ hit: true, damage, critical, effects, element, elementMultiplier });
   }
 
   const anyHit = hits.some(hit => hit.hit);

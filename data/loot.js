@@ -51,7 +51,7 @@ export function rollEnemyDrop(enemy, rng = Math.random) {
 
 export function getGoldChestWeaponId(job, depth = 50) {
   const floor = Math.max(1, Math.floor(Number(depth) || 1));
-  if (floor >= 70 && floor <= 78) return job === "mage" ? "night_banquet_staff" : null;
+  if (floor >= 70 && floor <= 78) return ({ warrior: "fulgura", thief: "jormungandr", priest: "cucullus_domini", mage: "night_banquet_staff" })[job] || null;
   const table = floor >= 90 && floor <= 98
     ? CAT_GOLD_CHEST_WEAPONS_BY_JOB
     : floor >= 50 && floor <= 58 ? GOLD_CHEST_WEAPONS_BY_JOB : null;
