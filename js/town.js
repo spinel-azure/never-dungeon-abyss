@@ -20,6 +20,9 @@ import { getItem, getShopItemIdsForCharacter } from "../data/items.js";
 import { getEquipmentInstanceDefinition, getEquipmentInstanceName } from "../data/equipment-inventory.js";
 import { getShopEquipmentStock } from "../data/shop-stock.js";
 import { configureTownPassersby } from "./town-passersby.js";
+import { isExplorerTestEnabled, onExplorerTestChanged } from "./explorer-preview.js";
+import { createExplorerPreviewUI } from "./explorer-preview-ui.js";
+let explorerPreview = null;
 import { getInnStayFee } from "./character-services.js";
 import { getGuildQuestPageSize, getVisibleGuildQuestIndexes } from "./guild-quest-pagination.js";
 import { getTavernRumorTypewriterParts } from "../data/tavern-rumors.js";
@@ -354,8 +357,8 @@ export function configureTown(options) {
     { id: "enter", label: "中に入る" },
     { id: "circle", label: "？？？" },
     { id: "return", label: "町に戻る" },
-    { id: "empty-1", label: "", empty: true },
-    { id: "empty-2", label: "", empty: true },
+    { id: "explorerTent", label: "？？？" },
+    { id: "mapExploration", label: "？？？" },
     { id: "empty-3", label: "", empty: true }
   ].map((item, index) => {
     const button = document.createElement("button");
@@ -548,6 +551,7 @@ export function openTown({
 }
 
 export function closeTown() {
+  explorerPreview?.close();
   clearCompactTalk();
   town.active = false;
   clearJohannaCatTransitionTimers();
@@ -591,7 +595,7 @@ export function getTownState() {
     facilityId: currentFacility().id,
     registrationRequired: town.registrationRequired,
     firstTownArrivalPending: town.firstTownArrivalPending,
-    mode: town.mode,
+    mode: town.mode === "explorerPreview" ? "dungeonEntrance" : town.mode,
     innKeeperId: currentFacility().id === "inn" ? town.innKeeperId || null : null
   };
 }
@@ -600,6 +604,7 @@ export function handleTownInput(action) {
   if (!town.active) return false;
   if (town.transitioning) return true;
   if (town.isMenuOpen()) return false;
+  if (town.mode === "explorerPreview") return explorerPreview?.input(action) ?? true;
   if (townTypewriter.active && action === "confirm") {
     completeTownTypewriter();
     return true;
@@ -1254,6 +1259,9 @@ function handleEntranceInput(action) {
     town.entranceIndex = action === "up" || action === "down"
       ? (1 - row) * 3 + column
       : row * 3 + (column + (action === "right" ? 1 : 2)) % 3;
+    for (let attempt = 0; attempt < 6 && town.entranceButtons[town.entranceIndex]?.disabled; attempt++) {
+      town.entranceIndex = (town.entranceIndex + (action === "left" || action === "up" ? 5 : 1)) % 6;
+    }
     renderEntranceSelection();
     return true;
   }
@@ -1266,6 +1274,17 @@ function handleEntranceInput(action) {
 }
 
 function activateEntranceCommand(command) {
+  if (command === "explorerTent" || command === "mapExploration") {
+    if (!isExplorerTestEnabled()) return;
+    if (!explorerPreview) explorerPreview = createExplorerPreviewUI({
+      host: town.background.parentElement, commands: town.commandRoot, background: town.background,
+      message: town.messageEl, playSe: key => town.playSe(key),
+      onExit: () => {town.mode = "dungeonEntrance";renderDungeonEntrance();}
+    });
+    town.mode = "explorerPreview";
+    explorerPreview.open(command === "explorerTent" ? "tent" : "maps");
+    return;
+  }
   if (command === "enter") {
     if (town.transitioning) return;
     town.transitioning = true;
@@ -1822,7 +1841,7 @@ function renderEntranceSelection() {
     const unavailable = town.mode !== "transferCircle"
       && button.dataset.entranceCommand === "circle" && !town.transferUnlocked;
     button.classList.toggle("is-unavailable", unavailable);
-    button.setAttribute("aria-disabled", String(unavailable));
+    button.setAttribute("aria-disabled", String(unavailable || button.disabled));
   });
 }
 
@@ -3312,7 +3331,24 @@ function renderFacilityCommandSelection() {
 function updateEntranceLabels() {
   const transferButton = town.entranceButtons.find(button => button.dataset.entranceCommand === "circle");
   if (transferButton) transferButton.textContent = town.transferUnlocked ? "転送門" : "？？？";
+  for (const [id,label] of [["explorerTent","探検家テント"],["mapExploration","地図探索"]]) {
+    const button = town.entranceButtons.find(button => button.dataset.entranceCommand === id);
+    if (!button) continue;
+    button.textContent = isExplorerTestEnabled() ? label : "？？？";
+    button.disabled = !isExplorerTestEnabled();
+    button.classList.toggle("is-locked", button.disabled);
+    button.setAttribute("aria-disabled", String(button.disabled));
+  }
+  if (town.entranceButtons[town.entranceIndex]?.disabled) town.entranceIndex = 0;
 }
+
+onExplorerTestChanged(() => {
+  updateEntranceLabels();
+  if (!isExplorerTestEnabled() && town.mode === "explorerPreview") {
+    explorerPreview?.close();town.mode = "dungeonEntrance";
+    if (town.active) renderDungeonEntrance();
+  } else if (town.active && town.mode === "dungeonEntrance" && !town.isMenuOpen()) renderEntranceSelection();
+});
 
 function renderMosaicBackground(src) {
   const source = town.backgroundPreloads.find(image => image.src.endsWith(src));

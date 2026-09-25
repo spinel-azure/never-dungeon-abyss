@@ -1,3 +1,4 @@
+import { isExplorerTestEnabled, setExplorerTestEnabled } from "./explorer-preview.js";
 import { getItemCompendiumDisplayEntries } from "../data/item-discovery.js";
 import { mountItemCompendium } from "./item-compendium.js";
 import { ITEM_COMPENDIUM_ENTRIES } from "../data/item-compendium.js";
@@ -1502,10 +1503,11 @@ function handleDebug(action) {
     else executeDebug(menu.debugItems[menu.debugCursor].dataset.debug, action === "left" ? -1 : 1);
   }
 }
-function setDebugPage(page) { menu.view = "debug"; menu.debugPage = Math.max(0, Math.min(1, page)); menu.debugCursor = 0; updateDebugItems(); updateView(); }
+function setDebugPage(page) { menu.view = "debug"; menu.debugPage = Math.max(0, Math.min(menu.debugPages.length - 1, page)); menu.debugCursor = 0; updateDebugItems(); updateView(); }
 function updateDebugItems() { menu.debugPages.forEach((page, index) => { page.hidden = index !== menu.debugPage; }); menu.debugItems = [...menu.debugPages[menu.debugPage].querySelectorAll("[data-debug]")]; }
-function executeDebugNav(key) { if (key === "back") { if (menu.debugPage === 0) closeCampMenu("back"); else setDebugPage(0); } else if (menu.debugPage === 0) setDebugPage(1); else closeCampMenu("main"); }
+function executeDebugNav(key) { if (key === "back") { if (menu.debugPage === 0) closeCampMenu("back"); else setDebugPage(menu.debugPage - 1); } else if (menu.debugPage < menu.debugPages.length - 1) setDebugPage(menu.debugPage + 1); else closeCampMenu("main"); }
 function executeDebug(key, amount = 1) {
+  if (key === "explorerTest") { setExplorerTestEnabled(!isExplorerTestEnabled()); updateDebugStates(); return; }
   if (key === "compass") { menu.compassVisible = !menu.compassVisible; applyDisplayOptions(); updateDebugStates(); persistSettings(); return; }
   if (key === "readout") { menu.readoutVisible = !menu.readoutVisible; applyDisplayOptions(); updateDebugStates(); persistSettings(); return; }
   if (key === "presenceDisabled") { menu.presenceDisabled = !menu.presenceDisabled; menu.setPresenceDisabled(menu.presenceDisabled); updateDebugStates(); persistSettings(); return; }
@@ -1892,7 +1894,7 @@ function updateStatus() {
   next.classList.toggle("is-selected", menu.statusPage === lastPage);
 }
 function updatePager() { menu.optionsPanel.querySelector("[data-page-indicator]").textContent = `${menu.optionPage + 1}/${menu.optionPages.length}`; menu.optionNavButtons.find(button => button.dataset.optionNav === "next").textContent = menu.optionPage < menu.optionPages.length - 1 ? "NEXT" : "MAIN"; }
-function updateDebugPager() { menu.debugPanel.querySelector("[data-debug-indicator]").textContent = `${menu.debugPage + 1}/2`; menu.debugNavButtons.find(button => button.dataset.debugNav === "next").textContent = menu.debugPage === 0 ? "NEXT" : "MAIN"; }
+function updateDebugPager() { menu.debugPanel.querySelector("[data-debug-indicator]").textContent = `${menu.debugPage + 1}/${menu.debugPages.length}`; menu.debugNavButtons.find(button => button.dataset.debugNav === "next").textContent = menu.debugPage < menu.debugPages.length - 1 ? "NEXT" : "MAIN"; }
 function updateSelection() { menu.commands.forEach((button, index) => { const unavailable = isCommandUnavailable(button); button.classList.toggle("is-selected", menu.view === "commands" && index === menu.commandIndex); button.classList.toggle("is-unavailable", unavailable); button.setAttribute("aria-disabled", String(unavailable)); }); menu.optionItems.forEach((item, index) => item.classList.toggle("is-selected", menu.view === "options" && index === menu.optionCursor)); menu.optionNavButtons.forEach((button, index) => button.classList.toggle("is-selected", menu.view === "options" && menu.optionCursor === menu.optionItems.length + index)); menu.debugItems.forEach((item, index) => item.classList.toggle("is-selected", menu.view === "debug" && index === menu.debugCursor)); menu.debugNavButtons.forEach((button, index) => button.classList.toggle("is-selected", menu.view === "debug" && menu.debugCursor === menu.debugItems.length + index)); updateOptionStates(); updateDebugStates(); }
 function updateOptionStates() {
   const shake = menu.root.querySelector('[data-option-state="screenShake"]');
@@ -1932,6 +1934,8 @@ function updateOptionStates() {
   }
 }
 function updateDebugStates() {
+  const explorerState = menu.debugPanel.querySelector('[data-debug-state="explorerTest"]');
+  if (explorerState) explorerState.textContent = isExplorerTestEnabled() ? "🔘ON　⚫OFF" : "⚫ON　🔘OFF";
   const values = { compass: menu.compassVisible, readout: menu.readoutVisible, torchFuelDisabled: menu.torchFuelDisabled, presenceDisabled: menu.presenceDisabled, stairsDownVisible: menu.stairsDownVisible, npcsVisible: menu.npcsVisible, treasuresVisible: menu.treasuresVisible, mistEnabled: menu.mistEnabled };
   Object.entries(values).forEach(([key, enabled]) => {
     const state = menu.root.querySelector(`[data-debug-state="${key}"]`);
@@ -1979,6 +1983,7 @@ function applyRenderOptions() {
 }
 function applyMinimapRevealOptions() { menu.setMinimapRevealOptions({ stairsDown: menu.stairsDownVisible, npcs: menu.npcsVisible, treasures: menu.treasuresVisible }); }
 export function resetDebugSettingsForNewGame() {
+  setExplorerTestEnabled(false);
   Object.assign(menu, DEFAULT_DEBUG_SETTINGS);
   Object.keys(menu.actionActive).forEach(key => { menu.actionActive[key] = false; });
   applyDisplayOptions();

@@ -1,0 +1,27 @@
+/* Phase 1 only. Keep transfer styles and state untouched. */
+.explorer-preview{padding:20px 40px;gap:8px;background:rgba(0,0,0,.78)}
+.explorer-preview h2{font-size:32px}
+.explorer-preview .transfer-destination-list{gap:6px;min-height:0}
+.explorer-preview .transfer-destination-list button{display:flex;align-items:center;gap:8px;padding:6px 10px;min-height:36px;font-size:20px;min-width:0;text-align:left}
+.explorer-map-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
+.explorer-map-level{flex:none;font-size:.85em}
+.explorer-footer{display:flex;justify-content:center;gap:12px}
+.explorer-footer button,.explorer-preview>button{font:16px GameFont,sans-serif;padding:5px 12px;min-height:30px}
+.explorer-preview button.is-selected{border-color:#aef6ff;background:#14313a;box-shadow:0 0 10px #5fe2ff99}
+.explorer-detail{min-height:0;overflow:auto}
+.explorer-detail h3{font-size:20px;overflow-wrap:anywhere;margin:0 0 10px}
+.explorer-detail p{margin:5px 0;font-size:17px}
+.explorer-preview>p{margin:0;font-size:16px;line-height:1.4}
+@media(max-width:680px){
+ .explorer-preview{padding:5px 10px;gap:3px}
+ .explorer-preview h2{font-size:21px}
+ .explorer-preview .transfer-destination-list{gap:3px}
+ .explorer-preview .transfer-destination-list button{min-height:23px;font-size:14px;padding:2px 6px;line-height:1.2}
+ .explorer-preview .transfer-destination-pager{font-size:14px;gap:4px}
+ .explorer-preview .transfer-destination-pager button{min-height:23px;padding:2px 8px;font-size:13px}
+ .explorer-footer{gap:8px}
+ .explorer-footer button,.explorer-preview>button{font-size:12px;min-height:23px;padding:2px 8px}
+ .explorer-detail h3{font-size:15px;margin:0 0 5px;line-height:1.25}
+ .explorer-detail p{font-size:13px;margin:3px 0}
+ .explorer-preview>p{font-size:13px}
+}

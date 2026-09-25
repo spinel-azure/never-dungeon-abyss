@@ -25,6 +25,7 @@
   <link rel="preload" as="image" href="images/npc/NPC_19b.avif" type="image/avif">
   <link rel="preload" as="image" href="images/screenshots/bell.avif" type="image/avif">
   <link rel="stylesheet" href="css/ending.css">
+  <link rel="stylesheet" href="css/explorer-preview.css">
 </head>
 <body class="title-active">
   <section id="titleScreen" class="title-screen" aria-label="NEVER DUNGEON : ABYSS タイトル画面">
@@ -588,7 +589,10 @@
           <label class="option-item debug-slider-row" data-debug="mistDistance"><span>・霧の距離</span><input id="mistDistance" type="range" min="3" max="9" step="1" value="9"><output data-debug-value="mistDistance">9マス</output></label>
           <p class="debug-mist-note">霧は環境演出として独立しています。黒い暗闇はたいまつ50%未満から強まり、霧より優先して表示されます。</p>
         </div>
-        <div class="debug-pager"><button type="button" class="menu-footer" data-debug-nav="back">BACK</button><span class="page-indicator" data-debug-indicator>1/2</span><button type="button" class="menu-footer" data-debug-nav="next">NEXT</button></div>
+        <div class="debug-list" data-debug-page="2" hidden>
+          <button type="button" class="option-item option-with-description" data-debug="explorerTest"><span class="option-heading"><span>探検家テスト</span><b data-debug-state="explorerTest">⚫ON　🔘OFF</b></span><small>Phase 1の仮画面を解禁します。本編の進行・地図は変更しません。再読み込みでOFFになります。</small></button>
+        </div>
+        <div class="debug-pager"><button type="button" class="menu-footer" data-debug-nav="back">BACK</button><span class="page-indicator" data-debug-indicator>1/3</span><button type="button" class="menu-footer" data-debug-nav="next">NEXT</button></div>
       </div>
     </section>
   </section>
