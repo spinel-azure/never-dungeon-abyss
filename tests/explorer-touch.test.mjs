@@ -2,6 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
+import {normalizeSpecialMaps, SPECIAL_MAP_RULESET, describeTestMap,discoverTestMap} from '../data/special-maps.js';
+const fixture=()=>normalizeSpecialMaps({discovererName:'†ルル',registered:Array.from({length:10},(_,i)=>({seed:i*36,rulesetVersion:SPECIAL_MAP_RULESET,discovererName:'†ルル'}))});
+const label=i=>{const m=describeTestMap(fixture().registered[i]);return m.name+'Lv.'+m.level;};
 import {createExplorerPreviewUI} from '../js/explorer-preview-ui.js';
 
 // Minimal DOM for exercising the real controller's handlers and the document
@@ -19,29 +22,49 @@ class Element {
   }
   ancestor(name){for(let e=this;e;e=e.parent)if(e.className?.split(' ').includes(name))return true;return false;}
 }
-function setup(t,layout='layout-mobile'){
+function setup(t,layout='layout-mobile',initial=fixture()){
   const handlers={},hint=new Element(),document={createElement:tag=>new Element(tag),querySelector:()=>hint,querySelectorAll:()=>[],body:{classList:{contains:v=>v===layout}},addEventListener:(type,fn)=>{(handlers[type]??=[]).push(fn);}};
   const previous=globalThis.document;globalThis.document=document;t.after(()=>{if(previous===undefined)delete globalThis.document;else globalThis.document=previous;});
   const source=readFileSync(new URL('../js/input.js',import.meta.url),'utf8');
   vm.runInNewContext(source.slice(source.indexOf('function configureTouchGuards()'))+'\nconfigureTouchGuards();',{document,Element,Date});
   const host=new Element(),commands=new Element(),background=new Element(),message=new Element();let exits=0;
   commands.className='dungeon-commands';
-  const ui=createExplorerPreviewUI({host,commands,background,message,playSe(){},onExit(){exits++;}});
+  let state=initial,saveFails=false;
+  const ui=createExplorerPreviewUI({host,commands,background,message,getMaps:()=>state,updateMaps:operation=>{const result=operation(state);if(saveFails)return {ok:false,error:'保存に失敗しました。'};if(result.ok)state=result.state;return result;},playSe(){},onExit(){exits++;}});
   const all=e=>[e,...e.children.flatMap(all)];
   const find=label=>all(host).find(e=>e.tag==='button'&&!e.disabled&&e.textContent===label);
   function touch(target){let cancelled=false;for(const type of ['touchstart','touchend'])for(const fn of handlers[type]||[])fn({target,preventDefault(){cancelled=true;},stopPropagation(){}});if(!cancelled&&!target.disabled)target.onclick?.();return cancelled;}
-  return {ui,host,commands,message,find,touch,exits:()=>exits,all};
+  return {ui,host,commands,message,find,touch,exits:()=>exits,all,state:()=>state,failSave:()=>{saveFails=true;}};
 }
 for(const layout of ['layout-mobile','layout-tablet'])test(`${layout}: native taps select twice, explicit actions execute once`,t=>{
   const v=setup(t,layout);v.ui.open('maps');
-  assert.equal(v.touch(v.find('呪われし奈落の地図Lv.18')),false);
-  assert.ok(v.find('仮データ 10 / 10件'),'first tap remains in list');
-  assert.equal(v.touch(v.find('呪われし奈落の地図Lv.18')),false);
-  assert.ok(v.find('探索する（A）'),'second tap opens detail');
-  v.touch(v.find('探索する（A）'));assert.match(v.message.textContent,/状態は変更しません/);
-  v.touch(v.find('戻る（B）'));assert.ok(v.find('仮データ 10 / 10件'));
-  assert.ok(v.find('呪われし奈落の地図Lv.18').classes.has('is-selected'));
+  assert.equal(v.touch(v.find(label(2))),false);
+  assert.ok(v.find(label(0)),'first tap remains in list');
+  assert.equal(v.touch(v.find(label(2))),false);
+  assert.ok(v.host.textContent.includes('挑戦条件：未実装'),'second tap opens detail');
+
+  v.touch(v.find('戻る（B）'));assert.ok(v.find(label(0)));
+  assert.ok(v.find(label(2)).classes.has('is-selected'));
   v.touch(v.find('戻る（B）'));assert.equal(v.exits(),1);
+});
+test('appraisal touch sequence saves only after final confirmation and then opens registered detail',t=>{
+ const initial=discoverTestMap(normalizeSpecialMaps({discovererName:'†ルル'}),{seed:()=>123,id:()=>'found'}).state;
+ const v=setup(t,'layout-mobile',initial);v.ui.open('tent');v.ui.input('confirm');
+ v.touch(v.find('未鑑定の地図 1'));v.touch(v.find('未鑑定の地図 1'));
+ for(let i=0;i<2;i++){v.touch(v.find('確認（A）'));assert.equal(v.state().unidentified.length,1);}
+ v.touch(v.find('確認（A）'));assert.equal(v.state().registered.length,1);assert.equal(v.state().unidentified.length,0);assert.match(v.message.textContent,/登録しました/);assert.match(v.host.textContent,/発見者：†ルル/);
+});
+test('duplicate appraisal can be cancelled without consumption even with ten registered maps',t=>{
+ const initial=discoverTestMap(fixture(),{seed:()=>0,id:()=>'repeat'}).state;
+ const v=setup(t,'layout-mobile',initial);v.ui.open('tent');v.ui.input('confirm');v.ui.input('confirm');assert.match(v.host.textContent,/以前にも発見/);
+ v.ui.input('cancel');assert.equal(v.state().unidentified.length,1);
+ v.ui.input('confirm');v.ui.input('confirm');assert.equal(v.state().registered.length,10);assert.equal(v.state().unidentified.length,0);
+});
+test('failed UI appraisal keeps unidentified map and reports failure rather than success',t=>{
+ const initial=discoverTestMap(normalizeSpecialMaps({discovererName:'†ルル'}),{seed:()=>123,id:()=>'found'}).state;
+ const v=setup(t,'layout-mobile',initial);v.failSave();v.ui.open('tent');
+ for(const action of ['confirm','confirm','confirm','confirm','confirm'])v.ui.input(action);
+ assert.equal(v.state().unidentified.length,1);assert.equal(v.state().registered.length,0);assert.match(v.message.textContent,/保存に失敗/);assert.ok(v.find('未鑑定の地図 1'));
 });
 test('touch guard still protects the game surface and preserves existing command exemptions',t=>{
   const v=setup(t);assert.equal(v.touch(new Element('button')),true);
@@ -49,8 +72,8 @@ test('touch guard still protects the game surface and preserves existing command
 });
 test('keyboard/gamepad action routing retains paging and detail return position',t=>{
   const v=setup(t);v.ui.open('maps');for(const action of ['right','down','down','confirm'])v.ui.input(action);
-  assert.ok(v.find('探索する（A）'));v.ui.input('cancel');
-  assert.ok(v.find('薄明の地図Lv.8').classes.has('is-selected'));
+  assert.ok(v.host.textContent.includes('挑戦条件：未実装'));v.ui.input('cancel');
+  assert.ok(v.find(label(7)).classes.has('is-selected'));
   assert.match(v.host.textContent,/2 \/ 2/);
 });
 test('appraisal, registration and management actions need only one tap',t=>{
@@ -61,7 +84,7 @@ test('appraisal, registration and management actions need only one tap',t=>{
   v.touch(v.find('戻る（B）'));assert.equal(v.commands.hidden,false);
  }
  v.touch(command('地図整理'));
- v.touch(v.find('甲虫の地図Lv.1'));v.touch(v.find('甲虫の地図Lv.1'));
- v.touch(v.find('管理機能を確認（A）'));assert.match(v.message.textContent,/状態は変更しません/);
- v.touch(v.find('戻る（B）'));assert.ok(v.find('仮データ 10 / 10件'));
+ v.touch(v.find(label(0)));v.touch(v.find(label(0)));
+ assert.match(v.host.textContent,/発見者：†ルル/);
+ v.touch(v.find('戻る（B）'));assert.ok(v.find(label(0)));
 });

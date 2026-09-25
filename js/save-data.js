@@ -106,7 +106,9 @@ export function writeGame(snapshot, slot = AUTO_SAVE_SLOT) {
 
   try {
     writeValidatedSave(save, keys);
-    window.dispatchEvent(new CustomEvent("nda:save-changed"));
+    // The current save has committed. Notification failure must not report a
+    // failed transaction and cause a caller to roll back already-saved rewards.
+    try { window.dispatchEvent(new CustomEvent("nda:save-changed")); } catch {}
     return true;
   } catch (error) {
     console.warn(`NDA game data could not be saved (${slot}).`, error);
@@ -124,7 +126,8 @@ function writeValidatedSave(save, keys) {
   const current = localStorage.getItem(keys.current);
   if (current && readSerializedSave(current)) localStorage.setItem(keys.backup, current);
   localStorage.setItem(keys.current, serialized);
-  localStorage.removeItem(keys.temp);
+  // Cleanup is after the commit point and is not a failed save.
+  try { localStorage.removeItem(keys.temp); } catch {}
 }
 
 export function getSaveSlotSummaries() {

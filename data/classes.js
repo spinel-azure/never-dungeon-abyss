@@ -1,4 +1,5 @@
 import { wingGiftUses, wingGiftMaxHp } from "./wing-gift.js";
+import { normalizeSpecialMaps } from "./special-maps.js";
 import { normalizeShopNotifications } from "./shop-notifications.js";
 import { getInitialEquipment } from "./equipment.js";
 import { normalizeEndingFlags } from "./ending.js";
@@ -93,6 +94,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
   const equipmentCollection = normalizeEquipmentInventory(null, equipment, null, characterClass.id);
   return {
     name: String(name || "").trim().slice(0, 12),
+    specialMaps: normalizeSpecialMaps(),
     job: characterClass.id,
     jobLabel: jobLabel || characterClass.label,
     level: 1,
@@ -223,6 +225,7 @@ export function normalizeCharacter(character) {
   });
   return {
     ...character,
+    specialMaps: normalizeSpecialMaps(character.specialMaps),
     job: characterClass.id,
     jobLabel: character.jobLabel || characterClass.label,
     level,

@@ -12,6 +12,10 @@
 .explorer-detail h3{font-size:20px;overflow-wrap:anywhere;margin:0 0 10px}
 .explorer-detail p{margin:5px 0;font-size:17px}
 .explorer-preview>p{margin:0;font-size:16px;line-height:1.4}
+.explorer-signature{display:flex;flex-direction:column;gap:10px;min-height:0}
+.explorer-signature label{display:flex;flex-direction:column;gap:5px}
+.explorer-signature input{font:18px GameFont,sans-serif;min-height:34px;min-width:0;width:100%;box-sizing:border-box;color:#fff;background:#080b0c;border:1px solid #aef6ff}
+.explorer-signature button{align-self:center}
 @media(max-width:680px){
  .explorer-preview{padding:1px 10px;gap:2px}
  .explorer-preview h2{font-size:18px}
@@ -27,7 +31,8 @@
  /* Keep the hit box while shrinking only the visible action surface.
     Explicit specificity overrides the mobile game's general 22px button rule. */
  body .explorer-preview .explorer-footer button,
- body .explorer-preview>button{
+ body .explorer-preview>button,
+ body .explorer-preview .explorer-signature button{
   min-height:38px;min-width:44px;padding:0;border:0;background:transparent;
   box-shadow:none;font-size:18px;line-height:1;align-self:center;
   display:flex;align-items:center;justify-content:center;touch-action:manipulation;

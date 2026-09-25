@@ -136,6 +136,7 @@ import { getEquipmentHighlightClass, getLotEquipmentHighlightClass, hasUncertain
 import { configureTown, resumeDungeonEntrance, INN_MEDICINE_DELIVERY_TRANSITION_FLAG, setTownEndingSuspended, openPendingNpcRenewal, openTown, closeTown, getTownState, handleTownInput as handleRawTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js";
 import { flashNpcPartyStatus, renderNpcPartyStatus, renderNpcStatusPage, setNpcPartyCharge } from "./npc-party-ui.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
+import { transactSpecialMaps, discoverTestMap } from "../data/special-maps.js";
 import { applyNpcExplorationPassives, beginNpcRenewal, hireNpc, recordNpcExpeditionDepth, registerNpc, resolveNpcRenewal } from "../data/npc-party.js";
 import { getActivePlayTimeDelta, normalizeAdventureStats, recordInnStay, recordShopPurchase, recordTempleDonation } from "../data/adventure-stats.js";
 import { getAdventureChronicle, PLAY_TIME_100_HOURS_SECONDS } from "../data/adventure-records.js";
@@ -1223,6 +1224,7 @@ import {
     onStateChanged: handlePersistentStateChanged
   });
   configureTown({
+    updateSpecialMaps: operation => transactSpecialMaps({getCharacter:()=>character,setCharacter:next=>{character=next;},save:()=>saveGame()},operation),
     root: townScreen,
     messageEl: msgEl,
     commandRoot: dungeonCommands,
@@ -5343,6 +5345,7 @@ import {
   });
   let virtualStickController = null;
   configureMenu({
+    discoverSpecialMap: () => transactSpecialMaps({getCharacter:()=>character,setCharacter:next=>{character=next;},save:()=>saveGame()},discoverTestMap),
     root: menuScreen,
     commandRoot: dungeonCommands,
     getCharacter: () => character,

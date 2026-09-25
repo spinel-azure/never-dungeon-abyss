@@ -203,6 +203,7 @@ const town = {
   onFacilityVoice: () => {},
   pendingVoiceFacility: "",
   onStateChanged: () => {},
+  updateSpecialMaps: () => ({ok:false,error:'保存処理に接続されていません。'}),
   isMenuOpen: () => false,
   playSe: () => {}
 };
@@ -1278,6 +1279,8 @@ function activateEntranceCommand(command) {
     if (!isExplorerTestEnabled()) return;
     if (!explorerPreview) explorerPreview = createExplorerPreviewUI({
       host: town.background.parentElement, commands: town.commandRoot, background: town.background,
+      getMaps: () => town.getCharacter()?.specialMaps,
+      updateMaps: operation => town.updateSpecialMaps(operation),
       message: town.messageEl, playSe: key => town.playSe(key),
       onExit: () => {town.mode = "dungeonEntrance";renderDungeonEntrance();}
     });

@@ -1507,6 +1507,12 @@ function setDebugPage(page) { menu.view = "debug"; menu.debugPage = Math.max(0, 
 function updateDebugItems() { menu.debugPages.forEach((page, index) => { page.hidden = index !== menu.debugPage; }); menu.debugItems = [...menu.debugPages[menu.debugPage].querySelectorAll("[data-debug]")]; }
 function executeDebugNav(key) { if (key === "back") { if (menu.debugPage === 0) closeCampMenu("back"); else setDebugPage(menu.debugPage - 1); } else if (menu.debugPage < menu.debugPages.length - 1) setDebugPage(menu.debugPage + 1); else closeCampMenu("main"); }
 function executeDebug(key, amount = 1) {
+  if (key === "discoverSpecialMap") {
+    const result = isExplorerTestEnabled() ? menu.discoverSpecialMap?.() : {ok:false,error:"探検家テストをONにしてください。"};
+    const status = menu.debugPanel.querySelector('[data-map-debug-status]');
+    if (status) status.textContent = result?.ok ? '未鑑定の地図を発見しました！ ' + result.state.unidentified.length + ' / 3（保存済み）' : result?.error || "地図を入手できません。";
+    return;
+  }
   if (key === "explorerTest") { setExplorerTestEnabled(!isExplorerTestEnabled()); updateDebugStates(); return; }
   if (key === "compass") { menu.compassVisible = !menu.compassVisible; applyDisplayOptions(); updateDebugStates(); persistSettings(); return; }
   if (key === "readout") { menu.readoutVisible = !menu.readoutVisible; applyDisplayOptions(); updateDebugStates(); persistSettings(); return; }
