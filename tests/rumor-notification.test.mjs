@@ -63,17 +63,20 @@ function createController({
   return { ...elements, coordinator, controller };
 }
 
-test("one rumor rings once, reveals copy after the bell, and completes once", async () => {
+test("one rumor rings once, reveals copy after the bell, and completes once", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const settle = () => new Promise(resolve => setImmediate(resolve));
+  let finishBell;
+  const bellPlayback = new Promise(resolve => { finishBell = resolve; });
   const pending = [{ notificationId: "rumor_001:base" }];
   let bellCount = 0;
   let marked = [];
   let saveCount = 0;
   const view = createController({
     pending,
-    playBell: async () => {
+    playBell: () => {
       bellCount += 1;
-      await delay(12);
-      return true;
+      return bellPlayback;
     },
     ringDurationMs: 4,
     messageDurationMs: 6,
@@ -81,21 +84,32 @@ test("one rumor rings once, reveals copy after the bell, and completes once", as
     onMarked: ids => { marked = ids; pending.length = 0; },
     onSaved: () => { saveCount += 1; }
   });
+  t.after(() => view.coordinator.dispose());
 
   assert.equal(view.controller.request(), true);
-  await waitUntil(() => !view.root.hidden);
+  await settle();
+  assert.equal(view.root.hidden, false);
   assert.equal(view.copy.hidden, true);
   assert.equal(view.root.classList.contains("is-ringing"), true);
-  await delay(6);
+  // Advance beyond the minimum ring interval while playback is still pending.
+  // Real 6ms/12ms timers can both expire before CI resumes the assertion.
+  t.mock.timers.tick(6);
+  await settle();
   assert.equal(view.copy.hidden, true, "copy must wait for the actual bell completion");
-  await waitUntil(() => !view.copy.hidden);
+  finishBell(true);
+  await settle();
+  assert.equal(view.copy.hidden, false);
   assert.equal(view.detail.textContent, "酒場で新しい噂が聞けます");
-  await waitUntil(() => marked.length === 1);
+  t.mock.timers.tick(6);
+  await settle();
+  assert.equal(view.root.classList.contains("is-fading"), true);
+  assert.deepEqual(marked, []);
+  t.mock.timers.tick(4);
+  await settle();
   assert.equal(bellCount, 1);
   assert.deepEqual(marked, ["rumor_001:base"]);
   assert.equal(saveCount, 1);
   assert.equal(view.root.hidden, true);
-  view.coordinator.dispose();
 });
 
 test("multiple pending stages are deduplicated into one plural notification", async () => {
