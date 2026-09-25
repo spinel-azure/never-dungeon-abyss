@@ -172,6 +172,9 @@ function configureTouchGuards() {
       && !target.closest(".loot-identify-list")
       && !target.closest(".dungeon-commands button")
       && !target.closest(".menu-screen")
+      // These native buttons use click for both pointer and touch activation.
+      // Cancelling touchstart here prevents Safari from generating that click.
+      && !target.closest(".explorer-preview button")
       && !!target.closest(guardedSelector);
   }
 

@@ -9,7 +9,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
   host.append(panel);
   let view = 'tent', cursor = 0, detailOrigin = 'maps', sample = createMapPreview(), tentImage = '', active = false;
   const make = (tag, text, className) => {const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(className)el.className=className;return el;};
-  const button = (text, action, selected=false) => {const b=make('button',text);b.type='button';b.classList.toggle('is-selected',selected);b.onclick=()=>{playSe('confirm');action();};return b;};
+  const button = (text, action, selected=false) => {const b=make('button');if(text)b.append(make('span',text,'explorer-button-label'));b.type='button';b.classList.toggle('is-selected',selected);b.onclick=()=>{playSe('confirm');action();};return b;};
   const exit = () => {close();onExit();};
   const notice = () => {message.textContent='Phase 1：画面確認のみです。地図・セーブ・冒険者の状態は変更しません。';};
   function renderTent() {
