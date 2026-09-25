@@ -29,3 +29,15 @@ for(const failure of ['cleanup','event'])test(`post-commit ${failure} error does
  const s=setup(t);s.run(v=>discoverTestMap(v,{seed:()=>42,id:()=> 'found'}));s.fail(failure);
  assert.equal(s.run(v=>appraiseMap(v,'found')).ok,true);s.load();assert.equal(s.get().specialMaps.registered.length,1);assert.equal(s.get().specialMaps.unidentified.length,0);
 });
+
+test('shared import, favorite and deletion survive real protected save reload',async t=>{
+ const {registerSharedMap,toggleMapFavorite,deleteRegisteredMap,SPECIAL_MAP_RULESET}=await import('../data/special-maps.js');
+ const s=setup(t),map={seed:123,rulesetVersion:SPECIAL_MAP_RULESET,discovererName:'ALC'};
+ const added=s.run(v=>registerSharedMap(v,map));assert.equal(added.ok,true);s.load();
+ assert.equal(s.get().specialMaps.registered[0].discovererName,'ALC');assert.equal(s.get().specialMaps.registered[0].acquisitionMethod,'shared');
+ s.run(v=>toggleMapFavorite(v,added.map.id));s.load();assert.equal(s.get().specialMaps.registered[0].favorite,true);
+ s.run(v=>toggleMapFavorite(v,added.map.id));s.fail('.current');
+ assert.equal(s.run(v=>deleteRegisteredMap(v,added.map.id)).ok,false);s.load();assert.equal(s.get().specialMaps.registered.length,1);
+ s.fail('');assert.equal(s.run(v=>deleteRegisteredMap(v,added.map.id)).ok,true);s.load();assert.equal(s.get().specialMaps.registered.length,0);
+ assert.equal(s.run(v=>registerSharedMap(v,map)).ok,true);s.load();assert.equal(s.get().specialMaps.registered[0].favorite,false);
+});

@@ -13,6 +13,7 @@ export function validateMapSignature(input) {
 export function mapOriginalId(map) {
   return JSON.stringify([map.rulesetVersion,map.seed,map.discovererName]);
 }
+export function mapContentId(map) { return JSON.stringify([map.rulesetVersion,map.seed]); }
 function normalizeOriginal(map) {
   if(!map || !Number.isInteger(map.seed) || map.seed<0 || map.seed>65535 || typeof map.rulesetVersion!=='string' || !map.rulesetVersion) return null;
   const signature=validateMapSignature(map.discovererName);
@@ -22,7 +23,7 @@ function normalizeOriginal(map) {
 export function normalizeSpecialMaps(input) {
   const signature=validateMapSignature(input?.discovererName);
   const clean=list=>(Array.isArray(list)?list:[]).map(normalizeOriginal).filter(Boolean);
-  const registered=[...new Map(clean(input?.registered).map(map=>[mapOriginalId(map),{...map,id:mapOriginalId(map)}])).values()].slice(0,REGISTERED_LIMIT);
+  const registered=[...new Map(clean(input?.registered).map(map=>[mapOriginalId(map),{...map,id:mapOriginalId(map),acquisitionMethod:map.acquisitionMethod==='shared'?'shared':'discovered'}])).values()].slice(0,REGISTERED_LIMIT);
   const unidentified=clean(input?.unidentified).slice(0,UNIDENTIFIED_LIMIT).map((map,index)=>({...map,discoveryId:typeof map.discoveryId==='string'&&map.discoveryId?map.discoveryId:`legacy-${index}-${mapOriginalId(map)}`}));
   return {dataVersion:1,discovererName:signature.ok?signature.value:'',unidentified,registered};
 }
@@ -51,12 +52,33 @@ export function inspectAppraisal(state,discoveryId) {
   if(existing)return {ok:true,map:existing,duplicate:true};
   if(state.registered.length>=REGISTERED_LIMIT)return {ok:false,error:'地図帳がいっぱいです。登録済みの地図を整理してから鑑定してください。'};
   if(!describeTestMap(map))return {ok:false,error:'この生成ルール版の鑑定には対応していません。'};
-  return {ok:true,map:{...map,id:mapOriginalId(map),cleared:false},duplicate:false};
+  return {ok:true,map:{...map,id:mapOriginalId(map),cleared:false,acquisitionMethod:'discovered'},duplicate:false};
 }
 export function appraiseMap(state,discoveryId) {
   const result=inspectAppraisal(state,discoveryId);
   if(!result.ok)return result;
   return {...result,state:{...state,unidentified:state.unidentified.filter(m=>m.discoveryId!==discoveryId),registered:result.duplicate?state.registered:[...state.registered,result.map]}};
+}
+export function registerSharedMap(state,original,{confirmSameContent=false}={}) {
+  const map=normalizeOriginal(original);
+  if(!map || !describeTestMap(map))return {ok:false,error:'この地図は現在のバージョンでは読み込めません。'};
+  const existing=state.registered.find(m=>mapOriginalId(m)===mapOriginalId(map));
+  if(existing)return {ok:true,state,map:existing,duplicate:true};
+  if(state.registered.length>=REGISTERED_LIMIT)return {ok:false,error:'地図帳がいっぱいです。登録済みの地図を整理してから登録してください。'};
+  const same=state.registered.find(m=>mapContentId(m)===mapContentId(map));
+  if(same&&!confirmSameContent)return {ok:false,needsConfirmation:true,discoverer:same.discovererName};
+  const entry={rulesetVersion:map.rulesetVersion,seed:map.seed,discovererName:map.discovererName,id:mapOriginalId(map),cleared:false,favorite:false,memo:'',acquisitionMethod:'shared'};
+  return {ok:true,state:{...state,registered:[...state.registered,entry]},map:entry};
+}
+export function deleteRegisteredMap(state,id) {
+  const map=state.registered.find(m=>m.id===id);
+  if(!map)return {ok:false,error:'地図が見つかりません。'};
+  if(map.favorite)return {ok:false,error:'お気に入り登録を解除してから削除してください。'};
+  return {ok:true,state:{...state,registered:state.registered.filter(m=>m.id!==id)}};
+}
+export function toggleMapFavorite(state,id) {
+  if(!state.registered.some(m=>m.id===id))return {ok:false,error:'地図が見つかりません。'};
+  return {ok:true,state:{...state,registered:state.registered.map(m=>m.id===id?{...m,favorite:!m.favorite}:m)}};
 }
 
 // Publish the entire new character snapshot, then roll back on a failed commit.

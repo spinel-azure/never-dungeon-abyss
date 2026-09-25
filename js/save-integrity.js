@@ -60,7 +60,7 @@ function constantTimeEqual(left, right) {
   return difference === 0;
 }
 
-function hmacSha256(key, message) {
+export function hmacSha256(key, message) {
   const blockSize = 64;
   let keyBytes = new TextEncoder().encode(key);
   if (keyBytes.length > blockSize) keyBytes = hexToBytes(sha256(keyBytes));

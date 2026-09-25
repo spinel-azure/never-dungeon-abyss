@@ -51,3 +51,16 @@
  }
  body .explorer-preview button{touch-action:manipulation}
 }
+/* Share/form controls retain selectable text and visible gamepad focus. */
+body .explorer-preview input.is-selected{outline:2px solid #aef6ff;box-shadow:0 0 8px #5fe2ff99}
+body .explorer-preview textarea{box-sizing:border-box;width:100%;min-width:0;font:16px monospace;white-space:pre-wrap;overflow-wrap:anywhere;resize:none;user-select:text;-webkit-user-select:text;touch-action:manipulation;caret-color:auto;color:#eee;background:#080b09;border:1px solid #777;border-radius:4px}
+body .explorer-preview textarea.is-selected{outline:2px solid #aef6ff}
+.explorer-share-code{min-height:64px}
+.explorer-preview .explorer-footer{flex-wrap:wrap}
+.explorer-preview .explorer-signature{min-height:0;overflow:auto}
+@media(max-width:680px){
+ body .explorer-preview .explorer-footer button{flex:1 1 auto;font-size:15px}
+ .explorer-preview .explorer-signature{gap:3px;font-size:13px}
+ body .explorer-preview textarea{font-size:16px;min-height:44px}
+ .explorer-preview .explorer-footer{gap:2px 6px}
+}

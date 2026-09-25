@@ -101,3 +101,19 @@ test("Gamepad API unsupported environments return a harmless cleanup", () => {
     Object.defineProperty(globalThis, "navigator", { configurable: true, value: originalNavigator });
   }
 });
+
+test('focused special-map forms allow real gamepad polling while ordinary text fields remain protected',t=>{
+ const names=['navigator','window','document','Element','requestAnimationFrame','cancelAnimationFrame'];const originals=new Map(names.map(n=>[n,Object.getOwnPropertyDescriptor(globalThis,n)]));
+ t.after(()=>{for(const [n,d] of originals){if(d)Object.defineProperty(globalThis,n,d);else delete globalThis[n];}});
+ let optIn=false,frame,controller=pad({mapping:'standard'});const dispatched=[];
+ class Field{closest(selector){return selector.includes('data-gamepad-form')?(optIn?this:null):this;}}
+ const values={navigator:{getGamepads:()=>[controller]},Element:Field,window:{addEventListener(){},removeEventListener(){}},document:{activeElement:new Field(),visibilityState:'visible',addEventListener(){},removeEventListener(){}},requestAnimationFrame:fn=>{frame=fn;return 1;},cancelAnimationFrame(){}};
+ for(const [n,value] of Object.entries(values))Object.defineProperty(globalThis,n,{value,configurable:true});
+ const stop=configureGamepadInput({dispatchAction:a=>dispatched.push(a)});frame(0);
+ controller=pad({mapping:'standard',pressed:[0]});frame(16);assert.deepEqual(dispatched,[]);
+ controller=pad({mapping:'standard'});frame(32);optIn=true;
+ controller=pad({mapping:'standard',pressed:[13]});frame(48);
+ controller=pad({mapping:'standard'});frame(64);
+ controller=pad({mapping:'standard',pressed:[0]});frame(80);
+ assert.deepEqual(dispatched,['down','confirm']);stop();
+});

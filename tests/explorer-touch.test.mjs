@@ -88,3 +88,33 @@ test('appraisal, registration and management actions need only one tap',t=>{
  assert.match(v.host.textContent,/発見者：†ルル/);
  v.touch(v.find('戻る（B）'));assert.ok(v.find(label(0)));
 });
+
+test('signature gamepad navigates input, register, back without losing typed signature',t=>{
+ const v=setup(t,'layout-desktop',normalizeSpecialMaps());v.ui.open('tent');
+ const field=v.all(v.host).find(e=>e.tag==='input');field.value='†ルル';
+ v.ui.input('confirm');v.ui.input('down');assert.ok(v.find('署名を登録（A）').classes.has('is-selected'));
+ v.ui.input('confirm');assert.equal(v.state().discovererName,'†ルル');assert.equal(v.commands.hidden,false);
+});
+test('management delete confirmation clamps six maps to first page and save failure retains map',t=>{
+ const initial=fixture();initial.registered=initial.registered.slice(0,6);
+ const v=setup(t,'layout-mobile',initial);v.ui.open('maps');v.ui.input('right');v.ui.input('confirm');v.ui.input('confirm');
+ v.touch(v.find('地図を削除'));v.ui.input('cancel');assert.equal(v.state().registered.length,6);
+ v.touch(v.find('地図を削除'));v.touch(v.find('削除する（A）'));assert.equal(v.state().registered.length,5);assert.match(v.host.textContent,/1 \/ 1/);
+ v.ui.input('confirm');v.ui.input('confirm');v.touch(v.find('地図を削除'));v.failSave();v.touch(v.find('削除する（A）'));
+ assert.equal(v.state().registered.length,5);assert.match(v.message.textContent,/保存に失敗/);
+});
+test('share display/import uses original discoverer and duplicate keeps ten slots',async t=>{
+ const {encodeMapCode}=await import('../data/special-map-code.js');
+ const v=setup(t);v.ui.open('tent');v.touch(v.commands.children[1]);
+ let field=v.all(v.host).find(e=>e.tag==='textarea');field.value=encodeMapCode(fixture().registered[2]);
+ v.touch(v.find('地図を登録（A）'));assert.match(v.message.textContent,/すでに登録/);assert.equal(v.state().registered.length,10);
+ v.touch(v.find('管理機能を確認（A）'));v.touch(v.find('共有コードを表示'));
+ field=v.all(v.host).find(e=>e.tag==='textarea');assert.equal(field.value,encodeMapCode(fixture().registered[2]));
+});
+
+test('clipboard failure retains visible selectable code and reports a manual-copy fallback',async t=>{
+ const prior=Object.getOwnPropertyDescriptor(globalThis,'navigator');t.after(()=>Object.defineProperty(globalThis,'navigator',prior));
+ Object.defineProperty(globalThis,'navigator',{configurable:true,value:{clipboard:{writeText:()=>Promise.reject(Error('denied'))}}});
+ const v=setup(t);v.ui.open('maps');v.ui.input('confirm');v.ui.input('confirm');v.touch(v.find('共有コードをコピー'));await Promise.resolve();
+ assert.match(v.message.textContent,/手動でコピー/);assert.ok(v.all(v.host).some(e=>e.tag==='textarea'&&e.value.startsWith('NDA16:')));
+});

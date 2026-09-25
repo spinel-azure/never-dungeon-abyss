@@ -216,5 +216,7 @@ export function configureGamepadInput({ dispatchAction, toggleMinimap, onConnect
 }
 
 function defaultTextInputFocused() {
-  return document.activeElement instanceof Element && Boolean(document.activeElement.closest("input, select, textarea"));
+  return document.activeElement instanceof Element
+    && !document.activeElement.closest('[data-gamepad-form="special-map"]')
+    && Boolean(document.activeElement.closest("input, select, textarea"));
 }
