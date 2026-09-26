@@ -147,11 +147,11 @@ body.menu-open.input-touch .touch-dpad{z-index:40}
 .deck-picker{display:flex;flex-direction:column;min-height:0;overflow:hidden}
 .deck-picker[hidden]{display:none}
 .deck-picker>p,.deck-picker-pager{flex:none}
-.deck-picker-list{flex:1;min-height:0;grid-auto-rows:minmax(48px,1fr);overflow:auto}
+.deck-picker-list{flex:1;min-height:0;grid-template-rows:repeat(6,minmax(48px,1fr));overflow:auto}
 .deck-picker-list button{min-width:0;min-height:0;overflow:hidden}
 .deck-picker-list button canvas{width:48px;height:100%;max-height:72px;min-height:0;object-fit:contain}
 .deck-picker-list button>span{min-width:0;overflow-wrap:anywhere}
-@media(max-width:420px){.deck-picker-list button canvas{width:32px;max-height:48px}}
+@media(max-width:420px){.deck-picker-list{grid-template-rows:repeat(3,minmax(48px,1fr))}.deck-picker-list button canvas{width:32px;max-height:48px}}
 
 body.menu-open .deck-panel:has(.deck-picker:not([hidden])){overflow:hidden}
 body.menu-open.input-touch .deck-panel:has(.deck-picker:not([hidden])){overflow:hidden}
@@ -159,3 +159,9 @@ body.menu-open.input-touch .deck-panel:has(.deck-picker:not([hidden])){overflow:
 .deck-inspect.is-selected{border-color:#b0f4ff;box-shadow:0 0 12px rgba(120,230,255,.8),inset 0 0 8px rgba(120,230,255,.25)}
 
 .vital-max-reduced{color:#59aaff!important}
+
+.inventory-panel.has-inventory-sort{grid-template-rows:auto auto auto minmax(0,1fr) auto auto auto auto}
+.inventory-sort{padding:5px 8px;border:1px solid #31434b;background:#050708;color:#f7fbff;font:14px "GameFont",sans-serif;text-align:center}
+.inventory-sort[hidden]{display:none!important}
+.inventory-sort.is-selected{border-color:#aef6ff;background:#14313a;box-shadow:0 0 10px rgba(95,226,255,.65)}
+@media(max-width:540px){.inventory-sort{padding:3px 6px;font-size:12px}}

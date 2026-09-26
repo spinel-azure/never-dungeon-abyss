@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';import {readFile,mkdtemp} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join} from 'node:path';import {createRequire} from 'node:module';
+const {chromium}=createRequire(import.meta.url)('playwright');const main=await readFile('js/main.js','utf8'),menu=await readFile('js/menu.js','utf8');
+const output=await mkdtemp(join(tmpdir(),'nda-inventory-sort-'));
+const hook=`window.sortQa={async setup(){document.querySelector('#titleScreen').hidden=true;document.body.classList.remove('title-active');character=createInitialCharacter({name:'QA',job:'mage'});const {ITEMS}=await import('/data/items.js');const {grantItem}=await import('/data/inventory.js');character.inventory=grantItem(character.inventory,'warding_incense',2).inventory;for(const item of ITEMS)character.inventory=grantItem(character.inventory,item.id,2).inventory;character.deckTutorialSeen=true;worldLocation='dungeon';updateCharacterUi();openItemInventory();},counts:()=>JSON.stringify(character.inventory.counts)};`;
+const browser=await chromium.launch({channel:'msedge',headless:true});
+try{for(const [label,width,height] of [['pc',1280,900],['tablet',768,1024],['mobile',390,844]]){const page=await browser.newPage({viewport:{width,height}});const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.addInitScript(()=>navigator.getGamepads=()=>[]);
+await page.route('**/js/main.js?*',r=>r.fulfill({contentType:'text/javascript',body:main.replace('  document.documentElement.dataset.ndaMainReady = "true";',hook+'\n document.documentElement.dataset.ndaMainReady = "true";')}));
+await page.route('**/js/menu.js',r=>r.fulfill({contentType:'text/javascript',body:menu+'\nwindow.sortInput=handleMenuInput;window.sortState=()=>({id:inventoryEntries()[menu.inventoryCursor]?.item?.id,focus:menu.inventoryFocus,mode:menu.inventorySort});'}));
+await page.goto('http://127.0.0.1:4173');await page.waitForFunction(()=>window.sortQa);await page.evaluate(()=>sortQa.setup());
+const button=page.locator('[data-inventory-sort]');assert.match(await button.innerText(),/カテゴリ順/);assert.equal(await page.locator('[data-inventory-list] button').count(),label==='mobile'?8:9);
+assert.equal((await page.evaluate(()=>sortState())).id,'healing_potion');const before=await page.evaluate(()=>sortQa.counts());
+await page.evaluate(()=>sortInput('right'));const selected=(await page.evaluate(()=>sortState())).id;
+await page.evaluate(()=>sortInput('up'));assert.equal((await page.evaluate(()=>sortState())).focus,'sort');
+for(const mode of ['obtained','id','category']){await page.evaluate(()=>sortInput('confirm'));const state=await page.evaluate(()=>sortState());assert.equal(state.mode,mode);assert.equal(state.id,selected);}
+await page.evaluate(()=>sortInput('down'));assert.equal((await page.evaluate(()=>sortState())).id,selected);
+await button.click();assert.equal((await page.evaluate(()=>sortState())).id,selected);assert.equal(await page.evaluate(()=>sortQa.counts()),before);
+const rects=await page.locator('[data-menu-view="inventory"]').evaluate(el=>{const a=el.getBoundingClientRect(),b=el.querySelector('.inventory-pager').getBoundingClientRect();return {bottom:a.bottom,pager:b.bottom,overflow:el.scrollHeight-el.clientHeight};});assert.ok(rects.pager<=rects.bottom+1,JSON.stringify(rects));assert.ok(rects.overflow<=2,JSON.stringify(rects));
+await page.screenshot({path:join(output,label+'.png')});await page.locator('[data-inventory-tab="equipment"]').click();assert.equal(await button.isVisible(),false);assert.deepEqual(errors,[]);console.log(label+' passed');await page.close();}}finally{await browser.close();}console.log('QA output: '+output);

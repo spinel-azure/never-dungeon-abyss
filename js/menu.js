@@ -1,3 +1,4 @@
+import { INVENTORY_SORT_MODES, INVENTORY_SORT_LABELS, sortInventoryEntries } from "../data/inventory-sort.js";
 import { isExplorerTestEnabled, setExplorerTestEnabled } from "./explorer-preview.js";
 import { getItemCompendiumDisplayEntries } from "../data/item-discovery.js";
 import { mountItemCompendium } from "./item-compendium.js";
@@ -62,6 +63,7 @@ const menu = {
   inventoryTab: "items", inventoryCursor: 0, inventoryPage: 0, inventoryMode: "list", inventorySlot: null, inventoryFocus: "list",
   inventoryPurpose: "manage", inventorySaleStage: "list", inventorySaleQuantity: 1,
   inventoryNewStockIds: new Set(),
+  inventorySort: "category",
   questHistoryCursor: 0, questHistoryPage: 0, questHistoryFocus: "list",
   rumorHistoryCursor: 0, rumorHistoryPage: 0, rumorHistoryFocus: "list",
   adventureRecordsTab: "statistics", adventureRecordsCursor: 0, adventureRecordsPage: 0, adventureRecordsFocus: "list",
@@ -445,14 +447,31 @@ function inventoryEntries() {
       .map(shopEquipment => ({ shopEquipment }));
     return [];
   }
-  if (menu.inventoryTab === "items") return ITEMS
+  if (menu.inventoryTab === "items") return sortInventoryEntries(ITEMS
     .filter(item => Number(character?.inventory?.counts?.[item.id]) > 0)
     .filter(item => menu.inventoryPurpose !== "sell" || Number(item.sellPrice) > 0)
-    .map(item => ({ item, count: character.inventory.counts[item.id] }));
+    .map(item => ({ item, count: character.inventory.counts[item.id] })), menu.inventorySort, character.inventory?.discoveredItemIds || []);
   if (menu.inventoryTab === "keyItems") return menu.inventoryPurpose === "sell"
     ? []
     : listOwnedKeyItems(character?.keyItems).map(keyItem => ({ keyItem }));
   return listEquipmentInstances(character).map(instance => ({ instance }));
+}
+
+function canSortInventory() {
+  return menu.inventoryMode === "list" && menu.inventoryTab === "items" && menu.inventoryPurpose !== "buy";
+}
+function inventoryPageSize() {
+  const size = getInventoryPageSize();
+  return canSortInventory() && size === INVENTORY_DESKTOP_PAGE_SIZE ? size - 1 : size;
+}
+function cycleInventorySort() {
+  if (!canSortInventory() || menu.inventorySaleStage !== "list") return;
+  const selectedId = inventoryEntries()[menu.inventoryCursor]?.item?.id;
+  menu.inventorySort = INVENTORY_SORT_MODES[(INVENTORY_SORT_MODES.indexOf(menu.inventorySort) + 1) % INVENTORY_SORT_MODES.length];
+  const entries = inventoryEntries();
+  menu.inventoryCursor = Math.max(0, entries.findIndex(entry => entry.item.id === selectedId));
+  menu.inventoryFocus = "sort";
+  renderInventory();
 }
 
 function availableInventoryTabs() {
@@ -489,7 +508,7 @@ function handleInventory(action) {
   }
 
   const entries = inventoryEntries();
-  const pageSize = getInventoryPageSize();
+  const pageSize = inventoryPageSize();
   const pages = Math.max(1, Math.ceil(entries.length / pageSize));
   const switchTab = offset => {
     if (menu.inventoryMode !== "list") return false;
@@ -518,10 +537,18 @@ function handleInventory(action) {
     switchTab(action === "pageRight" ? 1 : -1);
     return;
   }
+  if (menu.inventoryFocus === "sort") {
+    if (action === "confirm" || action === "left" || action === "right") cycleInventorySort();
+    else if (action === "up" || action === "down") {
+      menu.inventoryFocus = action === "up" ? "tabs" : entries.length ? "list" : "back";
+      renderInventory();
+    }
+    return;
+  }
   if (menu.inventoryFocus === "tabs") {
     if (action === "left" || action === "right") switchTab(action === "right" ? 1 : -1);
     else if (action === "down") {
-      menu.inventoryFocus = entries.length ? "list" : "back";
+      menu.inventoryFocus = canSortInventory() ? "sort" : entries.length ? "list" : "back";
       menu.inventoryCursor = menu.inventoryPage * pageSize;
       renderInventory();
     } else if (action === "up") {
@@ -565,7 +592,7 @@ function handleInventory(action) {
   if ((action === "up" || action === "down") && entries.length) {
     const pageStart = menu.inventoryPage * pageSize;
     const pageEnd = Math.min(entries.length - 1, pageStart + pageSize - 1);
-    if (action === "up" && menu.inventoryCursor === pageStart) menu.inventoryFocus = menu.inventoryMode === "list" ? "tabs" : "back";
+    if (action === "up" && menu.inventoryCursor === pageStart) menu.inventoryFocus = canSortInventory() ? "sort" : menu.inventoryMode === "list" ? "tabs" : "back";
     else if (action === "down" && menu.inventoryCursor === pageEnd) menu.inventoryFocus = "back";
     else menu.inventoryCursor += action === "down" ? 1 : -1;
     renderInventory(); return;
@@ -1067,16 +1094,17 @@ export function refreshAdventureRecordsPlayTime() {
 }
 
 function bindInventory() {
+  menu.inventoryPanel.querySelector("[data-inventory-sort]")?.addEventListener("click", cycleInventorySort);
   menu.inventoryPanel.querySelectorAll("[data-inventory-tab]").forEach(button => button.addEventListener("click", () => {
     Object.assign(menu, { inventoryTab: button.dataset.inventoryTab, inventoryMode: "list", inventoryCursor: 0, inventoryPage: 0, inventoryFocus: "tabs", inventorySaleStage: "list", inventorySaleQuantity: 1 }); renderInventory();
   }));
   menu.inventoryPanel.querySelector('[data-inventory-nav="back"]').addEventListener("click", () => {
-    const pageSize = getInventoryPageSize();
+    const pageSize = inventoryPageSize();
     menu.inventoryFocus = "back";
     if (menu.inventoryPage > 0) { menu.inventoryPage -= 1; menu.inventoryCursor = menu.inventoryPage * pageSize; menu.inventoryFocus = "list"; renderInventory(); }
   });
   menu.inventoryPanel.querySelector('[data-inventory-nav="next"]').addEventListener("click", () => {
-    const pageSize = getInventoryPageSize();
+    const pageSize = inventoryPageSize();
     menu.inventoryFocus = "next";
     const pages = Math.max(1, Math.ceil(inventoryEntries().length / pageSize));
     if (menu.inventoryPage < pages - 1) { menu.inventoryPage += 1; menu.inventoryCursor = menu.inventoryPage * pageSize; renderInventory(); }
@@ -1088,7 +1116,7 @@ function bindInventory() {
 
 function renderInventory() {
   const panel = menu.inventoryPanel, character = menu.getCharacter(), entries = inventoryEntries();
-  const pageSize = getInventoryPageSize();
+  const pageSize = inventoryPageSize();
   const pages = Math.max(1, Math.ceil(entries.length / pageSize));
   menu.inventoryCursor = entries.length ? Math.min(menu.inventoryCursor, entries.length - 1) : 0;
   menu.inventoryPage = entries.length ? Math.min(pages - 1, Math.floor(menu.inventoryCursor / pageSize)) : 0;
@@ -1102,6 +1130,13 @@ function renderInventory() {
     button.classList.toggle("is-cursor", menu.inventoryFocus === "tabs" && button.dataset.inventoryTab === menu.inventoryTab);
     if (button.dataset.inventoryTab === "items") button.textContent = menu.inventoryPurpose === "sell" || menu.inventoryPurpose === "buy" ? "道具" : "アイテム";
   });
+  const sortButton = panel.querySelector("[data-inventory-sort]");
+  if (sortButton) {
+    sortButton.hidden = !canSortInventory();
+    sortButton.textContent = "並び順：" + INVENTORY_SORT_LABELS[menu.inventorySort];
+    sortButton.classList.toggle("is-selected", menu.inventoryFocus === "sort");
+  }
+  panel.classList.toggle("has-inventory-sort", canSortInventory());
   const equippedIds = new Set(Object.values(character?.equippedInstanceIds || {}));
   const list = panel.querySelector("[data-inventory-list]");
   list.style.setProperty("--inventory-page-size", String(pageSize));

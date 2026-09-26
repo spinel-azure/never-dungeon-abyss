@@ -426,6 +426,7 @@ export const WEAPONS = Object.freeze({
     allowedJobs: Object.freeze(["warrior"]), twoHanded: true,
     statBonuses: Object.freeze({ str: 9 }), defensePenetration: 0.4,
     grantedSkillIds: Object.freeze(["golden_rice_sea"]),
+    showDescriptionInStatus: false,
     description: "聖・雷の2連撃／DEF40％無視／黄金の稲穂の海",
     flavorText: "ルミナの双剣を模したレプリカ。聖なる光と雷を宿す。",
     unique: true, compactStatusBonuses: true, lotBagHighlight: "orange", sellPrice: 0
@@ -436,6 +437,7 @@ export const WEAPONS = Object.freeze({
     allowedJobs: Object.freeze(["thief"]), twoHanded: true,
     statBonuses: Object.freeze({ dex: 9, agi: 6 }), defensePenetration: 0.4,
     grantedSkillIds: Object.freeze(["twilight_dew_rain"]),
+    showDescriptionInStatus: false,
     description: "闇・氷の2連撃／DEF40％無視／宵闇の夜露の雨",
     flavorText: "ノクティアの双鎌を模したレプリカ。闇夜と氷の冷たさを宿す。",
     unique: true, compactStatusBonuses: true, lotBagHighlight: "orange", sellPrice: 0
@@ -446,6 +448,7 @@ export const WEAPONS = Object.freeze({
     allowedJobs: Object.freeze(["priest"]), twoHanded: true,
     statBonuses: Object.freeze({ int: 9, maxSp: 80 }),
     grantedSkillIds: Object.freeze(["dominus_lux_aeterna"]),
+    showDescriptionInStatus: false,
     description: "聖属性2連撃／通常攻撃DEF無視／ドミヌス・ルクス・エテルナ",
     flavorText: "聖堂教会のバトルシスターが携える、聖なる両手セプター。",
     unique: true, compactStatusBonuses: true, lotBagHighlight: "orange", sellPrice: 0

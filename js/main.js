@@ -2612,7 +2612,8 @@ import {
           healingMiracleBonus: "回復奇蹟威力",
           passiveInstantDeathRateBonus: "一閃・暗殺術",
           poisonResistance: "毒・猛毒・死毒耐性",
-          bleedingResistance: "出血耐性"
+          bleedingResistance: "出血耐性",
+          surpriseResistance: "奇襲耐性"
         };
         return percentLabels[key]
           ? `${percentLabels[key]}${spacer}${Number(value) >= 0 ? "+" : ""}${Math.round(Number(value) * 100)}%`
