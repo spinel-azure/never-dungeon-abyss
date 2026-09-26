@@ -81,6 +81,17 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     if(!copied){error('コピーできませんでした。コードを手動でコピーしてください。');return;}
     Promise.resolve(copied).then(()=>{if(active&&view==='share')error('共有コードをコピーしました！');},()=>{if(active&&view==='share')error('コピーできませんでした。コードを手動でコピーしてください。');});
   }
+  async function pasteCode(){
+    const target=input;
+    try{
+      const text=await globalThis.navigator.clipboard.readText();
+      if(!active||view!=='register'||input!==target)return;
+      target.value=text;codeDraft=text;
+      message.textContent='共有コードを貼り付けました。内容を確認して登録してください。';
+    }catch{
+      if(active&&view==='register'&&input===target)error('クリップボードを読み取れませんでした。入力欄を長押しして貼り付けてください。');
+    }
+  }
   function actionButtons(items){
     actions=items.map(item=>item[1]);actionCursor=Math.min(actionCursor,items.length-1);
     const footer=make('div',undefined,'explorer-footer');
@@ -113,12 +124,16 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       form.dataset.gamepadForm='special-map';
       const label=make('label',isSignature?'地図に記録する名前（1～4文字）':'共有コードを入力／貼り付け');
       input=make(isSignature?'input':'textarea');if(isSignature)input.type='text';input.value=isSignature?'':codeDraft;input.autocomplete='off';input.spellcheck=false;
+      if(!isSignature){input.setAttribute('autocapitalize','off');input.setAttribute('autocorrect','off');}
       input.setAttribute('aria-label',isSignature?'地図署名':'共有コード入力');
       input.oninput=()=>{if(!isSignature)codeDraft=input.value;};
       label.append(input);form.append(label);
       const submit=button(isSignature?'署名を登録（A）':'地図を登録（A）',submitAction),cancel=button('戻る（B）',back);
-      formControls=[input,submit,cancel];formControls.forEach((e,i)=>{e.classList.toggle('is-selected',i===formCursor);e.onfocus=()=>{formCursor=i;formControls.forEach((c,j)=>c.classList.toggle('is-selected',i===j));};});
-      form.append(submit,cancel);form.onsubmit=e=>{e.preventDefault();submitAction();};
+      const paste=isSignature?null:button('貼り付け',pasteCode);
+      formControls=isSignature?[input,submit,cancel]:[input,paste,submit,cancel];formControls.forEach((e,i)=>{e.classList.toggle('is-selected',i===formCursor);e.onfocus=()=>{formCursor=i;formControls.forEach((c,j)=>c.classList.toggle('is-selected',i===j));};});
+      const formActions=make('div',undefined,'explorer-form-actions');
+      if(paste)formActions.append(paste);formActions.append(submit,cancel);form.append(formActions);
+      form.onsubmit=e=>{e.preventDefault();submitAction();};
       input.onkeydown=e=>{if(e.isComposing)return;if(e.key==='Escape'){e.preventDefault();back();}else if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();submitAction();}};
       panel.append(form);
       if(isSignature)message.textContent='トレリーレン「発見した人の名前も地図に残すんだけど……なんて書いておけばいい？」';return;
@@ -186,8 +201,8 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     if(!active)return false;
     if(action==='cancel'){back();return true;}
     if(view==='signature'||view==='register'){
-      if(['up','down','left','right'].includes(action)){formCursor=(formCursor+(['down','right'].includes(action)?1:2))%3;focusForm();}
-      else if(action==='confirm'){if(formCursor===0)input.focus?.();else if(formCursor===1){if(view==='signature')signature();else importCode();}else back();}
+      if(['up','down','left','right'].includes(action)){formCursor=(formCursor+(['down','right'].includes(action)?1:formControls.length-1))%formControls.length;focusForm();}
+      else if(action==='confirm'){if(formCursor===0)input.focus?.();else formControls[formCursor]?.onclick?.();}
       return true;
     }
     if(actions.length){

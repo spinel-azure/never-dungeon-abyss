@@ -116,5 +116,22 @@ test('clipboard failure retains visible selectable code and reports a manual-cop
  const prior=Object.getOwnPropertyDescriptor(globalThis,'navigator');t.after(()=>Object.defineProperty(globalThis,'navigator',prior));
  Object.defineProperty(globalThis,'navigator',{configurable:true,value:{clipboard:{writeText:()=>Promise.reject(Error('denied'))}}});
  const v=setup(t);v.ui.open('maps');v.ui.input('confirm');v.ui.input('confirm');v.touch(v.find('共有コードをコピー'));await Promise.resolve();
- assert.match(v.message.textContent,/手動でコピー/);assert.ok(v.all(v.host).some(e=>e.tag==='textarea'&&e.value.startsWith('NDA16:')));
+ assert.match(v.message.textContent,/手動でコピー/);assert.ok(v.all(v.host).some(e=>e.tag==='textarea'&&e.value.startsWith('NDA:')));
+});
+
+for(const mode of ['success','denied','unavailable'])test(`paste ${mode}: never auto-registers and keeps manual input usable`,async t=>{
+ const prior=Object.getOwnPropertyDescriptor(globalThis,'navigator');t.after(()=>Object.defineProperty(globalThis,'navigator',prior));
+ Object.defineProperty(globalThis,'navigator',{configurable:true,value:mode==='unavailable'?{}:{clipboard:{readText:()=>mode==='success'?Promise.resolve('nda:aBc-_123'):Promise.reject(Error('denied'))}}});
+ const v=setup(t);v.ui.open('tent');v.touch(v.commands.children[1]);const field=v.all(v.host).find(e=>e.tag==='textarea');field.value='manual';
+ v.ui.input('down');assert.ok(v.find('貼り付け').classes.has('is-selected'));v.ui.input('confirm');await Promise.resolve();
+ assert.equal(field.value,mode==='success'?'nda:aBc-_123':'manual');assert.equal(v.state().registered.length,10);
+ assert.match(v.message.textContent,mode==='success'?/内容を確認/:/長押し/);
+ v.ui.input('down');assert.ok(v.find('地図を登録（A）').classes.has('is-selected'));
+ assert.equal(field.attrs.autocapitalize,'off');
+});
+test('late clipboard response cannot replace input on another screen',async t=>{
+ const prior=Object.getOwnPropertyDescriptor(globalThis,'navigator');t.after(()=>Object.defineProperty(globalThis,'navigator',prior));let resolve;
+ Object.defineProperty(globalThis,'navigator',{configurable:true,value:{clipboard:{readText:()=>new Promise(r=>resolve=r)}}});
+ const v=setup(t);v.ui.open('tent');v.touch(v.commands.children[1]);v.touch(v.find('貼り付け'));v.ui.input('cancel');v.touch(v.commands.children[1]);
+ const field=v.all(v.host).find(e=>e.tag==='textarea');field.value='new input';resolve('old clipboard');await Promise.resolve();assert.equal(field.value,'new input');
 });

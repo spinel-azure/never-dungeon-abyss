@@ -1,7 +1,7 @@
 import {hmacSha256} from '../js/save-integrity.js';
 import {SPECIAL_MAP_RULESET,validateMapSignature} from './special-maps.js';
 
-export const MAP_CODE_PREFIX='NDA16:';
+export const MAP_CODE_PREFIX='NDA:';
 // Public client-side deterrent, isolated from save protection; not identity proof.
 const KEY='NDA::SPECIAL-MAP-CODE::16BIT::2026::V1';
 const encode=bytes=>btoa(String.fromCharCode(...bytes)).replaceAll('+','-').replaceAll('/','_').replace(/=+$/,'');
@@ -21,9 +21,12 @@ export function encodeMapCode(map) {
 export function decodeMapCode(input) {
   const fail=error=>({ok:false,error});
   if(typeof input!=='string'||input.length>512)return fail('地図コードの長さが正しくありません。');
-  const code=input.replace(/[ \t\r\n]/g,'');
-  if(!code.startsWith(MAP_CODE_PREFIX))return fail('地図コードの接頭辞が正しくありません。NDA16: から始まるコードを入力してください。');
-  const payload=code.slice(MAP_CODE_PREFIX.length);
+  const text=input.trim();
+  const prefix=/^NDA(?:16)?:/i.exec(text);
+  if(!prefix)return fail('地図コードの接頭辞が正しくありません。NDA: から始まるコードを入力してください。');
+  // Only the prefix is case-insensitive. Never repair or normalize the payload.
+  const payload=text.slice(prefix[0].length);
+  const code=MAP_CODE_PREFIX+payload;
   if(!/^[A-Za-z0-9_-]+$/.test(payload))return fail('地図コードの文字形式が正しくありません。');
   let bytes;
   try {bytes=Uint8Array.from(atob(payload.replaceAll('-','+').replaceAll('_','/')+'='.repeat((4-payload.length%4)%4)),c=>c.charCodeAt(0));}catch{return fail('地図コードの長さ・形式が正しくありません。');}

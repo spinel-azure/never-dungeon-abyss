@@ -8,10 +8,10 @@ const payload=code=>Buffer.from(code.slice(MAP_CODE_PREFIX.length),'base64url');
 const forged=body=>MAP_CODE_PREFIX+Buffer.concat([body,createHmac('sha256','NDA::SPECIAL-MAP-CODE::16BIT::2026::V1').update('map-original-v1:'+body.toString('base64url')).digest().subarray(0,8)]).toString('base64url');
 test('code is canonical, bounded, preserves every original field and excludes owner metadata',()=>{
  for(const seed of [0,1,32768,65535])for(const name of ['A','ALC','†ルル','スピネル']){
-  const map=original(seed,name),code=encodeMapCode(map);assert.ok(code.length<=34);
+  const map=original(seed,name),code=encodeMapCode(map);assert.ok(code.length<=32);
   assert.deepEqual(decodeMapCode(code).map,map);
   assert.equal(encodeMapCode({...map,cleared:true,favorite:true,memo:'secret',acquisitionMethod:'shared'}),code);
-  assert.equal(decodeMapCode(' \n'+code.slice(0,9)+'\r\n'+code.slice(9)+'\t').code,code);
+  assert.equal(decodeMapCode(' \n'+code+'\t').code,code);
   assert.equal(forged(payload(code).subarray(0,-8)),code,'independent Node HMAC agrees');
  }
 });
@@ -27,7 +27,7 @@ test('URL alphabet hyphens and underscores are real data; every single-character
 });
 test('reject malformed format, unsupported versions, invalid signature and out of range seed',()=>{
  const code=encodeMapCode(original());
- for(const invalid of ['',code+'=',code.replace(':','-'),code.toLowerCase(),code+'!',code.slice(0,-1),'NDA1:'+code,code.replace('NDA16:','NDA16:\u200b')])assert.equal(decodeMapCode(invalid).ok,false);
+ for(const invalid of ['',code+'=',code.replace(':','-'),code.toLowerCase(),code+'!',code.slice(0,-1),'NDA1:'+code,code.replace('NDA:','NDA:\u200b')])assert.equal(decodeMapCode(invalid).ok,false);
  for(const [offset,value] of [[0,2],[1,1],[4,5],[5,0],[6,0]]){
   const body=payload(code).subarray(0,-8);body[offset]=value;assert.equal(decodeMapCode(forged(body)).ok,false);
  }
@@ -56,4 +56,17 @@ test('failed import/delete/favorite saves preserve complete previous character',
   const result=transactSpecialMaps({getCharacter:()=>character,setCharacter:v=>character=v,save:()=>false},operation);
   assert.equal(result.ok,false);assert.equal(character,initial);
  }
+});
+
+test('new and legacy prefix cases preserve payload and share original identity',()=>{
+ const map=original(),code=encodeMapCode(map),body=code.slice(4);assert.ok(code.startsWith('NDA:'));
+ let state=normalizeSpecialMaps();
+ for(const prefix of ['NDA:','nda:','Nda:','nDa:','NDA16:','nda16:','Nda16:']){
+  const decoded=decodeMapCode(prefix+body);assert.equal(decoded.ok,true);assert.equal(decoded.code,code);assert.deepEqual(decoded.map,map);
+  const result=registerSharedMap(state,decoded.map);assert.equal(Boolean(result.duplicate),state.registered.length===1);state=result.state;assert.equal(state.registered.length,1);
+ }
+ for(const changed of [body.toLowerCase(),body.toUpperCase(),body.slice(0,7)+' '+body.slice(7),body.slice(0,7)+'\n'+body.slice(7)])assert.equal(decodeMapCode('nda:'+changed).ok,false);
+ state=deleteRegisteredMap(state,state.registered[0].id).state;
+ const restored=registerSharedMap(state,decodeMapCode('nda16:'+body).map).map;
+ assert.deepEqual(describeTestMap(restored),describeTestMap(map));assert.equal(restored.seed,map.seed);assert.equal(restored.discovererName,map.discovererName);
 });
