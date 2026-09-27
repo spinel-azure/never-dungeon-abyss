@@ -1,0 +1,4327 @@
+{
+  "revision": "v1-candidate-1",
+  "status": "PROVISIONAL — pending distribution approval",
+  "ruleset": "special-map-v1",
+  "seeds": 65536,
+  "countWeights": [
+    20,
+    2000,
+    3500,
+    3000,
+    1480
+  ],
+  "pools": {
+    "slate": [
+      {
+        "monsterId": "abyss_rat",
+        "baseWeight": 164167
+      },
+      {
+        "monsterId": "cave_slime",
+        "baseWeight": 164167
+      },
+      {
+        "monsterId": "bouncing_coin",
+        "baseWeight": 85992
+      },
+      {
+        "monsterId": "abyss_rabbit",
+        "baseWeight": 127685
+      },
+      {
+        "monsterId": "wandering_dead",
+        "baseWeight": 127685
+      },
+      {
+        "monsterId": "poison_slime",
+        "baseWeight": 127685
+      },
+      {
+        "monsterId": "vampire_bat",
+        "baseWeight": 109444
+      },
+      {
+        "monsterId": "viper",
+        "baseWeight": 78175
+      },
+      {
+        "monsterId": "maikaefer",
+        "baseWeight": 15000
+      }
+    ],
+    "magic": [
+      {
+        "monsterId": "junghexe",
+        "baseWeight": 127620
+      },
+      {
+        "monsterId": "merseburg_spell",
+        "baseWeight": 290810
+      },
+      {
+        "monsterId": "geistflamme",
+        "baseWeight": 263448
+      },
+      {
+        "monsterId": "tanzlichter",
+        "baseWeight": 303122
+      },
+      {
+        "monsterId": "maikaefer",
+        "baseWeight": 15000
+      }
+    ],
+    "torture": [
+      {
+        "monsterId": "morgenstern",
+        "baseWeight": 488782
+      },
+      {
+        "monsterId": "inquisitorin",
+        "baseWeight": 261237
+      },
+      {
+        "monsterId": "folterzange",
+        "baseWeight": 174304
+      },
+      {
+        "monsterId": "folterpanzer",
+        "baseWeight": 60677
+      },
+      {
+        "monsterId": "maikaefer",
+        "baseWeight": 15000
+      }
+    ],
+    "red": [
+      {
+        "monsterId": "fire_spirit",
+        "baseWeight": 492500
+      },
+      {
+        "monsterId": "fire_lizard",
+        "baseWeight": 295500
+      },
+      {
+        "monsterId": "loren_lava",
+        "baseWeight": 147750
+      },
+      {
+        "monsterId": "cassowary",
+        "baseWeight": 49250
+      },
+      {
+        "monsterId": "maikaefer",
+        "baseWeight": 15000
+      }
+    ],
+    "blue": [
+      {
+        "monsterId": "ice_spirit",
+        "baseWeight": 492500
+      },
+      {
+        "monsterId": "ice_lizard",
+        "baseWeight": 295500
+      },
+      {
+        "monsterId": "ice_vogel",
+        "baseWeight": 147750
+      },
+      {
+        "monsterId": "ice_bear",
+        "baseWeight": 49250
+      },
+      {
+        "monsterId": "maikaefer",
+        "baseWeight": 15000
+      }
+    ],
+    "green": [
+      {
+        "monsterId": "abyss_tiger",
+        "baseWeight": 328334
+      },
+      {
+        "monsterId": "abyss_panther",
+        "baseWeight": 328333
+      },
+      {
+        "monsterId": "abyss_mushroom",
+        "baseWeight": 328333
+      },
+      {
+        "monsterId": "maikaefer",
+        "baseWeight": 15000
+      }
+    ],
+    "yellow": [
+      {
+        "monsterId": "abyss_lizard",
+        "baseWeight": 328334
+      },
+      {
+        "monsterId": "abyss_giant_scorpion",
+        "baseWeight": 328333
+      },
+      {
+        "monsterId": "cobra_gator",
+        "baseWeight": 328333
+      },
+      {
+        "monsterId": "maikaefer",
+        "baseWeight": 15000
+      }
+    ],
+    "water": [
+      {
+        "monsterId": "abyss_piranha",
+        "baseWeight": 623833
+      },
+      {
+        "monsterId": "abgrund_krabbe",
+        "baseWeight": 172375
+      },
+      {
+        "monsterId": "abgrund_aal",
+        "baseWeight": 123125
+      },
+      {
+        "monsterId": "abyss_giant_catfish",
+        "baseWeight": 65667
+      },
+      {
+        "monsterId": "maikaefer",
+        "baseWeight": 15000
+      }
+    ],
+    "crystal": [
+      {
+        "monsterId": "abyss_crystal_beetle",
+        "baseWeight": 477725
+      },
+      {
+        "monsterId": "prism_moth",
+        "baseWeight": 231475
+      },
+      {
+        "monsterId": "amethyst_golem",
+        "baseWeight": 177300
+      },
+      {
+        "monsterId": "crystal_mimic",
+        "baseWeight": 98500
+      },
+      {
+        "monsterId": "maikaefer",
+        "baseWeight": 15000
+      }
+    ],
+    "black": [
+      {
+        "monsterId": "sensenmann",
+        "baseWeight": 281429
+      },
+      {
+        "monsterId": "wraith",
+        "baseWeight": 140714
+      },
+      {
+        "monsterId": "will_o_wisp",
+        "baseWeight": 422143
+      },
+      {
+        "monsterId": "schleipnir",
+        "baseWeight": 140714
+      },
+      {
+        "monsterId": "maikaefer",
+        "baseWeight": 15000
+      }
+    ]
+  },
+  "failures": {
+    "generation": 0,
+    "emptySpecies": 0,
+    "duplicateMonster": 0,
+    "invalidMonster": 0,
+    "outsideTheme": 0,
+    "weightSum": 0,
+    "nonPositiveWeight": 0,
+    "regenerationMismatch": 0,
+    "identity": 0,
+    "speciesCount": 0,
+    "fingerprint": 0
+  },
+  "failureExamples": [],
+  "counts": {
+    "1": 133,
+    "2": 13007,
+    "3": 22951,
+    "4": 21698,
+    "5+": 7747
+  },
+  "dominance": {
+    "70": 29278,
+    "80": 20572,
+    "90": 12770,
+    "95": 8447,
+    "100": 133
+  },
+  "themes": {
+    "slate": {
+      "seeds": 6663,
+      "singleSpecies": 17,
+      "speciesSum": 22519,
+      "maxWeight": 10000,
+      "maxSeed": 4196,
+      "averageSpecies": 3.379708839861924
+    },
+    "magic": {
+      "seeds": 6521,
+      "singleSpecies": 10,
+      "speciesSum": 22234,
+      "maxWeight": 10000,
+      "maxSeed": 6316,
+      "averageSpecies": 3.409599754638859
+    },
+    "torture": {
+      "seeds": 6571,
+      "singleSpecies": 12,
+      "speciesSum": 22353,
+      "maxWeight": 10000,
+      "maxSeed": 6392,
+      "averageSpecies": 3.4017653325216863
+    },
+    "red": {
+      "seeds": 6297,
+      "singleSpecies": 16,
+      "speciesSum": 21405,
+      "maxWeight": 10000,
+      "maxSeed": 829,
+      "averageSpecies": 3.399237732253454
+    },
+    "blue": {
+      "seeds": 6636,
+      "singleSpecies": 11,
+      "speciesSum": 22540,
+      "maxWeight": 10000,
+      "maxSeed": 4682,
+      "averageSpecies": 3.3966244725738397
+    },
+    "green": {
+      "seeds": 6545,
+      "singleSpecies": 15,
+      "speciesSum": 21200,
+      "maxWeight": 10000,
+      "maxSeed": 1332,
+      "averageSpecies": 3.2391138273491213
+    },
+    "yellow": {
+      "seeds": 6600,
+      "singleSpecies": 13,
+      "speciesSum": 21463,
+      "maxWeight": 10000,
+      "maxSeed": 6020,
+      "averageSpecies": 3.251969696969697
+    },
+    "water": {
+      "seeds": 6506,
+      "singleSpecies": 12,
+      "speciesSum": 22014,
+      "maxWeight": 10000,
+      "maxSeed": 8961,
+      "averageSpecies": 3.383645865355057
+    },
+    "crystal": {
+      "seeds": 6622,
+      "singleSpecies": 11,
+      "speciesSum": 22462,
+      "maxWeight": 10000,
+      "maxSeed": 2051,
+      "averageSpecies": 3.39202657807309
+    },
+    "black": {
+      "seeds": 6575,
+      "singleSpecies": 16,
+      "speciesSum": 22337,
+      "maxWeight": 10000,
+      "maxSeed": 2559,
+      "averageSpecies": 3.3972623574144487
+    }
+  },
+  "monsters": {
+    "abyss_rat": {
+      "name": "奈落ネズミ",
+      "included": 3461,
+      "maxWeight": 10000,
+      "singleSpecies": 3,
+      "atLeast90": 214,
+      "soloSeeds": [
+        17915,
+        41432,
+        45478
+      ],
+      "biasedSeeds": [
+        1204,
+        1572,
+        1733
+      ]
+    },
+    "cave_slime": {
+      "name": "洞窟スライム",
+      "included": 3467,
+      "maxWeight": 9999,
+      "singleSpecies": 0,
+      "atLeast90": 190,
+      "soloSeeds": [],
+      "biasedSeeds": [
+        178,
+        331,
+        391
+      ]
+    },
+    "bouncing_coin": {
+      "name": "跳ねるコイン",
+      "included": 2064,
+      "maxWeight": 10000,
+      "singleSpecies": 2,
+      "atLeast90": 107,
+      "soloSeeds": [
+        25395,
+        50685
+      ],
+      "biasedSeeds": [
+        65,
+        963,
+        1856
+      ]
+    },
+    "abyss_rabbit": {
+      "name": "奈落ウサギ",
+      "included": 2891,
+      "maxWeight": 9999,
+      "singleSpecies": 0,
+      "atLeast90": 149,
+      "soloSeeds": [],
+      "biasedSeeds": [
+        756,
+        768,
+        1285
+      ]
+    },
+    "wandering_dead": {
+      "name": "さまよう亡者",
+      "included": 2876,
+      "maxWeight": 10000,
+      "singleSpecies": 4,
+      "atLeast90": 190,
+      "soloSeeds": [
+        11602,
+        24560,
+        26427,
+        39824
+      ],
+      "biasedSeeds": [
+        329,
+        1624,
+        2473
+      ]
+    },
+    "poison_slime": {
+      "name": "ポイズンスライム",
+      "included": 2827,
+      "maxWeight": 10000,
+      "singleSpecies": 5,
+      "atLeast90": 166,
+      "soloSeeds": [
+        4196,
+        9958,
+        17086,
+        57236,
+        63586
+      ],
+      "biasedSeeds": [
+        76,
+        772,
+        913
+      ]
+    },
+    "vampire_bat": {
+      "name": "吸血コウモリ",
+      "included": 2550,
+      "maxWeight": 10000,
+      "singleSpecies": 1,
+      "atLeast90": 148,
+      "soloSeeds": [
+        9063
+      ],
+      "biasedSeeds": [
+        95,
+        286,
+        525
+      ]
+    },
+    "viper": {
+      "name": "ヴァイパー",
+      "included": 1966,
+      "maxWeight": 10000,
+      "singleSpecies": 2,
+      "atLeast90": 98,
+      "soloSeeds": [
+        34103,
+        57206
+      ],
+      "biasedSeeds": [
+        990,
+        1172,
+        1737
+      ]
+    },
+    "maikaefer": {
+      "name": "マイケーファー",
+      "included": 18153,
+      "maxWeight": 9999,
+      "singleSpecies": 0,
+      "atLeast90": 437,
+      "soloSeeds": [],
+      "biasedSeeds": [
+        102,
+        104,
+        640
+      ]
+    },
+    "junghexe": {
+      "name": "ユングヘクセ",
+      "included": 4267,
+      "maxWeight": 10000,
+      "singleSpecies": 1,
+      "atLeast90": 181,
+      "soloSeeds": [
+        15579
+      ],
+      "biasedSeeds": [
+        108,
+        219,
+        415
+      ]
+    },
+    "merseburg_spell": {
+      "name": "メルゼブルクの呪文",
+      "included": 5500,
+      "maxWeight": 10000,
+      "singleSpecies": 3,
+      "atLeast90": 330,
+      "soloSeeds": [
+        11985,
+        19941,
+        50128
+      ],
+      "biasedSeeds": [
+        301,
+        316,
+        332
+      ]
+    },
+    "geistflamme": {
+      "name": "ガイストフラメ",
+      "included": 5446,
+      "maxWeight": 10000,
+      "singleSpecies": 3,
+      "atLeast90": 361,
+      "soloSeeds": [
+        6316,
+        9147,
+        19770
+      ],
+      "biasedSeeds": [
+        18,
+        58,
+        92
+      ]
+    },
+    "tanzlichter": {
+      "name": "タンツロイヒター",
+      "included": 5550,
+      "maxWeight": 10000,
+      "singleSpecies": 3,
+      "atLeast90": 325,
+      "soloSeeds": [
+        11772,
+        25671,
+        44742
+      ],
+      "biasedSeeds": [
+        167,
+        218,
+        536
+      ]
+    },
+    "morgenstern": {
+      "name": "モルゲンシュテルン",
+      "included": 6190,
+      "maxWeight": 10000,
+      "singleSpecies": 5,
+      "atLeast90": 429,
+      "soloSeeds": [
+        32362,
+        39592,
+        41018,
+        46782,
+        60605
+      ],
+      "biasedSeeds": [
+        945,
+        1506,
+        1683
+      ]
+    },
+    "inquisitorin": {
+      "name": "インクイジトーリン",
+      "included": 5719,
+      "maxWeight": 10000,
+      "singleSpecies": 7,
+      "atLeast90": 365,
+      "soloSeeds": [
+        6392,
+        15224,
+        18800,
+        31711,
+        32062,
+        44198,
+        59880
+      ],
+      "biasedSeeds": [
+        158,
+        232,
+        459
+      ]
+    },
+    "folterzange": {
+      "name": "フォルターツァンゲ",
+      "included": 5209,
+      "maxWeight": 9999,
+      "singleSpecies": 0,
+      "atLeast90": 321,
+      "soloSeeds": [],
+      "biasedSeeds": [
+        210,
+        478,
+        782
+      ]
+    },
+    "folterpanzer": {
+      "name": "フォルターパンツァー",
+      "included": 3546,
+      "maxWeight": 9999,
+      "singleSpecies": 0,
+      "atLeast90": 145,
+      "soloSeeds": [],
+      "biasedSeeds": [
+        881,
+        1985,
+        3000
+      ]
+    },
+    "fire_spirit": {
+      "name": "火の精霊",
+      "included": 5979,
+      "maxWeight": 10000,
+      "singleSpecies": 4,
+      "atLeast90": 444,
+      "soloSeeds": [
+        829,
+        5166,
+        18799,
+        42753
+      ],
+      "biasedSeeds": [
+        63,
+        87,
+        148
+      ]
+    },
+    "fire_lizard": {
+      "name": "火トカゲ",
+      "included": 5605,
+      "maxWeight": 10000,
+      "singleSpecies": 6,
+      "atLeast90": 364,
+      "soloSeeds": [
+        7494,
+        11415,
+        14271,
+        27150,
+        51239,
+        62969
+      ],
+      "biasedSeeds": [
+        12,
+        127,
+        498
+      ]
+    },
+    "loren_lava": {
+      "name": "ロレンラヴァ",
+      "included": 4842,
+      "maxWeight": 10000,
+      "singleSpecies": 4,
+      "atLeast90": 255,
+      "soloSeeds": [
+        12239,
+        14684,
+        32049,
+        48215
+      ],
+      "biasedSeeds": [
+        45,
+        81,
+        177
+      ]
+    },
+    "cassowary": {
+      "name": "ヒクイドリ",
+      "included": 3264,
+      "maxWeight": 10000,
+      "singleSpecies": 2,
+      "atLeast90": 111,
+      "soloSeeds": [
+        24774,
+        50494
+      ],
+      "biasedSeeds": [
+        304,
+        1838,
+        2477
+      ]
+    },
+    "ice_spirit": {
+      "name": "氷の精霊",
+      "included": 6291,
+      "maxWeight": 10000,
+      "singleSpecies": 6,
+      "atLeast90": 462,
+      "soloSeeds": [
+        4682,
+        8826,
+        9110,
+        23353,
+        48805,
+        60941
+      ],
+      "biasedSeeds": [
+        126,
+        240,
+        394
+      ]
+    },
+    "ice_lizard": {
+      "name": "氷トカゲ",
+      "included": 5963,
+      "maxWeight": 9999,
+      "singleSpecies": 0,
+      "atLeast90": 387,
+      "soloSeeds": [],
+      "biasedSeeds": [
+        155,
+        338,
+        528
+      ]
+    },
+    "ice_vogel": {
+      "name": "アイスフォーゲル",
+      "included": 5123,
+      "maxWeight": 10000,
+      "singleSpecies": 4,
+      "atLeast90": 274,
+      "soloSeeds": [
+        16537,
+        40342,
+        50039,
+        64754
+      ],
+      "biasedSeeds": [
+        418,
+        731,
+        838
+      ]
+    },
+    "ice_bear": {
+      "name": "氷熊",
+      "included": 3365,
+      "maxWeight": 10000,
+      "singleSpecies": 1,
+      "atLeast90": 125,
+      "soloSeeds": [
+        39234
+      ],
+      "biasedSeeds": [
+        298,
+        366,
+        1230
+      ]
+    },
+    "abyss_tiger": {
+      "name": "奈落ティーガー",
+      "included": 6002,
+      "maxWeight": 10000,
+      "singleSpecies": 6,
+      "atLeast90": 428,
+      "soloSeeds": [
+        1751,
+        22499,
+        38144,
+        42485,
+        42514,
+        52517
+      ],
+      "biasedSeeds": [
+        137,
+        408,
+        541
+      ]
+    },
+    "abyss_panther": {
+      "name": "奈落パンター",
+      "included": 6011,
+      "maxWeight": 10000,
+      "singleSpecies": 4,
+      "atLeast90": 446,
+      "soloSeeds": [
+        28578,
+        34159,
+        37719,
+        43200
+      ],
+      "biasedSeeds": [
+        36,
+        49,
+        116
+      ]
+    },
+    "abyss_mushroom": {
+      "name": "奈落キノコ",
+      "included": 6010,
+      "maxWeight": 10000,
+      "singleSpecies": 5,
+      "atLeast90": 406,
+      "soloSeeds": [
+        1332,
+        22783,
+        34360,
+        51048,
+        53017
+      ],
+      "biasedSeeds": [
+        8,
+        579,
+        624
+      ]
+    },
+    "abyss_lizard": {
+      "name": "奈落トカゲ",
+      "included": 6121,
+      "maxWeight": 10000,
+      "singleSpecies": 5,
+      "atLeast90": 415,
+      "soloSeeds": [
+        18482,
+        29612,
+        35586,
+        39988,
+        51792
+      ],
+      "biasedSeeds": [
+        55,
+        73,
+        134
+      ]
+    },
+    "abyss_giant_scorpion": {
+      "name": "奈落オオサソリ",
+      "included": 6083,
+      "maxWeight": 10000,
+      "singleSpecies": 4,
+      "atLeast90": 427,
+      "soloSeeds": [
+        6020,
+        27582,
+        47016,
+        60994
+      ],
+      "biasedSeeds": [
+        7,
+        140,
+        174
+      ]
+    },
+    "cobra_gator": {
+      "name": "コブラゲーター",
+      "included": 6071,
+      "maxWeight": 10000,
+      "singleSpecies": 4,
+      "atLeast90": 417,
+      "soloSeeds": [
+        42369,
+        48271,
+        53153,
+        57786
+      ],
+      "biasedSeeds": [
+        9,
+        385,
+        517
+      ]
+    },
+    "abyss_piranha": {
+      "name": "奈落ピラニア",
+      "included": 6330,
+      "maxWeight": 10000,
+      "singleSpecies": 9,
+      "atLeast90": 487,
+      "soloSeeds": [
+        8961,
+        23560,
+        26312,
+        28614,
+        31208,
+        35506,
+        46141,
+        57481,
+        58565
+      ],
+      "biasedSeeds": [
+        39,
+        723,
+        794
+      ]
+    },
+    "abgrund_krabbe": {
+      "name": "アプグルントクラッベ",
+      "included": 5338,
+      "maxWeight": 10000,
+      "singleSpecies": 1,
+      "atLeast90": 295,
+      "soloSeeds": [
+        47015
+      ],
+      "biasedSeeds": [
+        82,
+        105,
+        275
+      ]
+    },
+    "abgrund_aal": {
+      "name": "アプグルントアール",
+      "included": 4884,
+      "maxWeight": 10000,
+      "singleSpecies": 1,
+      "atLeast90": 256,
+      "soloSeeds": [
+        27921
+      ],
+      "biasedSeeds": [
+        90,
+        682,
+        1151
+      ]
+    },
+    "abyss_giant_catfish": {
+      "name": "奈落オオナマズ",
+      "included": 3752,
+      "maxWeight": 10000,
+      "singleSpecies": 1,
+      "atLeast90": 159,
+      "soloSeeds": [
+        23676
+      ],
+      "biasedSeeds": [
+        10,
+        53,
+        162
+      ]
+    },
+    "abyss_crystal_beetle": {
+      "name": "奈落水晶虫",
+      "included": 6168,
+      "maxWeight": 10000,
+      "singleSpecies": 5,
+      "atLeast90": 404,
+      "soloSeeds": [
+        37631,
+        39623,
+        44142,
+        57230,
+        64869
+      ],
+      "biasedSeeds": [
+        28,
+        544,
+        950
+      ]
+    },
+    "prism_moth": {
+      "name": "プリズムモス",
+      "included": 5472,
+      "maxWeight": 10000,
+      "singleSpecies": 3,
+      "atLeast90": 370,
+      "soloSeeds": [
+        2051,
+        10863,
+        38191
+      ],
+      "biasedSeeds": [
+        122,
+        164,
+        540
+      ]
+    },
+    "amethyst_golem": {
+      "name": "アメジストゴーレム",
+      "included": 5135,
+      "maxWeight": 10000,
+      "singleSpecies": 2,
+      "atLeast90": 289,
+      "soloSeeds": [
+        16590,
+        55399
+      ],
+      "biasedSeeds": [
+        100,
+        553,
+        633
+      ]
+    },
+    "crystal_mimic": {
+      "name": "クリスタルミミック",
+      "included": 4158,
+      "maxWeight": 10000,
+      "singleSpecies": 1,
+      "atLeast90": 204,
+      "soloSeeds": [
+        59247
+      ],
+      "biasedSeeds": [
+        294,
+        317,
+        680
+      ]
+    },
+    "sensenmann": {
+      "name": "ゼンゼンマン",
+      "included": 5611,
+      "maxWeight": 10000,
+      "singleSpecies": 5,
+      "atLeast90": 345,
+      "soloSeeds": [
+        13840,
+        15316,
+        28313,
+        44094,
+        46626
+      ],
+      "biasedSeeds": [
+        133,
+        212,
+        511
+      ]
+    },
+    "wraith": {
+      "name": "レイス",
+      "included": 4637,
+      "maxWeight": 10000,
+      "singleSpecies": 2,
+      "atLeast90": 218,
+      "soloSeeds": [
+        43066,
+        43703
+      ],
+      "biasedSeeds": [
+        211,
+        236,
+        2200
+      ]
+    },
+    "will_o_wisp": {
+      "name": "ウィルオーウィスプ",
+      "included": 6027,
+      "maxWeight": 10000,
+      "singleSpecies": 8,
+      "atLeast90": 403,
+      "soloSeeds": [
+        2559,
+        6241,
+        17024,
+        18732,
+        30314,
+        41392,
+        61881,
+        65307
+      ],
+      "biasedSeeds": [
+        555,
+        581,
+        601
+      ]
+    },
+    "schleipnir": {
+      "name": "シュライプニール",
+      "included": 4603,
+      "maxWeight": 10000,
+      "singleSpecies": 1,
+      "atLeast90": 223,
+      "soloSeeds": [
+        61879
+      ],
+      "biasedSeeds": [
+        30,
+        139,
+        198
+      ]
+    }
+  },
+  "singleSpecies": [
+    {
+      "seed": 829,
+      "themeId": "red",
+      "monsterId": "fire_spirit",
+      "weight": 10000
+    },
+    {
+      "seed": 1332,
+      "themeId": "green",
+      "monsterId": "abyss_mushroom",
+      "weight": 10000
+    },
+    {
+      "seed": 1751,
+      "themeId": "green",
+      "monsterId": "abyss_tiger",
+      "weight": 10000
+    },
+    {
+      "seed": 2051,
+      "themeId": "crystal",
+      "monsterId": "prism_moth",
+      "weight": 10000
+    },
+    {
+      "seed": 2559,
+      "themeId": "black",
+      "monsterId": "will_o_wisp",
+      "weight": 10000
+    },
+    {
+      "seed": 4196,
+      "themeId": "slate",
+      "monsterId": "poison_slime",
+      "weight": 10000
+    },
+    {
+      "seed": 4682,
+      "themeId": "blue",
+      "monsterId": "ice_spirit",
+      "weight": 10000
+    },
+    {
+      "seed": 5166,
+      "themeId": "red",
+      "monsterId": "fire_spirit",
+      "weight": 10000
+    },
+    {
+      "seed": 6020,
+      "themeId": "yellow",
+      "monsterId": "abyss_giant_scorpion",
+      "weight": 10000
+    },
+    {
+      "seed": 6241,
+      "themeId": "black",
+      "monsterId": "will_o_wisp",
+      "weight": 10000
+    },
+    {
+      "seed": 6316,
+      "themeId": "magic",
+      "monsterId": "geistflamme",
+      "weight": 10000
+    },
+    {
+      "seed": 6392,
+      "themeId": "torture",
+      "monsterId": "inquisitorin",
+      "weight": 10000
+    },
+    {
+      "seed": 7494,
+      "themeId": "red",
+      "monsterId": "fire_lizard",
+      "weight": 10000
+    },
+    {
+      "seed": 8826,
+      "themeId": "blue",
+      "monsterId": "ice_spirit",
+      "weight": 10000
+    },
+    {
+      "seed": 8961,
+      "themeId": "water",
+      "monsterId": "abyss_piranha",
+      "weight": 10000
+    },
+    {
+      "seed": 9063,
+      "themeId": "slate",
+      "monsterId": "vampire_bat",
+      "weight": 10000
+    },
+    {
+      "seed": 9110,
+      "themeId": "blue",
+      "monsterId": "ice_spirit",
+      "weight": 10000
+    },
+    {
+      "seed": 9147,
+      "themeId": "magic",
+      "monsterId": "geistflamme",
+      "weight": 10000
+    },
+    {
+      "seed": 9958,
+      "themeId": "slate",
+      "monsterId": "poison_slime",
+      "weight": 10000
+    },
+    {
+      "seed": 10863,
+      "themeId": "crystal",
+      "monsterId": "prism_moth",
+      "weight": 10000
+    },
+    {
+      "seed": 11415,
+      "themeId": "red",
+      "monsterId": "fire_lizard",
+      "weight": 10000
+    },
+    {
+      "seed": 11602,
+      "themeId": "slate",
+      "monsterId": "wandering_dead",
+      "weight": 10000
+    },
+    {
+      "seed": 11772,
+      "themeId": "magic",
+      "monsterId": "tanzlichter",
+      "weight": 10000
+    },
+    {
+      "seed": 11985,
+      "themeId": "magic",
+      "monsterId": "merseburg_spell",
+      "weight": 10000
+    },
+    {
+      "seed": 12239,
+      "themeId": "red",
+      "monsterId": "loren_lava",
+      "weight": 10000
+    },
+    {
+      "seed": 13840,
+      "themeId": "black",
+      "monsterId": "sensenmann",
+      "weight": 10000
+    },
+    {
+      "seed": 14271,
+      "themeId": "red",
+      "monsterId": "fire_lizard",
+      "weight": 10000
+    },
+    {
+      "seed": 14684,
+      "themeId": "red",
+      "monsterId": "loren_lava",
+      "weight": 10000
+    },
+    {
+      "seed": 15224,
+      "themeId": "torture",
+      "monsterId": "inquisitorin",
+      "weight": 10000
+    },
+    {
+      "seed": 15316,
+      "themeId": "black",
+      "monsterId": "sensenmann",
+      "weight": 10000
+    },
+    {
+      "seed": 15579,
+      "themeId": "magic",
+      "monsterId": "junghexe",
+      "weight": 10000
+    },
+    {
+      "seed": 16537,
+      "themeId": "blue",
+      "monsterId": "ice_vogel",
+      "weight": 10000
+    },
+    {
+      "seed": 16590,
+      "themeId": "crystal",
+      "monsterId": "amethyst_golem",
+      "weight": 10000
+    },
+    {
+      "seed": 17024,
+      "themeId": "black",
+      "monsterId": "will_o_wisp",
+      "weight": 10000
+    },
+    {
+      "seed": 17086,
+      "themeId": "slate",
+      "monsterId": "poison_slime",
+      "weight": 10000
+    },
+    {
+      "seed": 17915,
+      "themeId": "slate",
+      "monsterId": "abyss_rat",
+      "weight": 10000
+    },
+    {
+      "seed": 18482,
+      "themeId": "yellow",
+      "monsterId": "abyss_lizard",
+      "weight": 10000
+    },
+    {
+      "seed": 18732,
+      "themeId": "black",
+      "monsterId": "will_o_wisp",
+      "weight": 10000
+    },
+    {
+      "seed": 18799,
+      "themeId": "red",
+      "monsterId": "fire_spirit",
+      "weight": 10000
+    },
+    {
+      "seed": 18800,
+      "themeId": "torture",
+      "monsterId": "inquisitorin",
+      "weight": 10000
+    },
+    {
+      "seed": 19770,
+      "themeId": "magic",
+      "monsterId": "geistflamme",
+      "weight": 10000
+    },
+    {
+      "seed": 19941,
+      "themeId": "magic",
+      "monsterId": "merseburg_spell",
+      "weight": 10000
+    },
+    {
+      "seed": 22499,
+      "themeId": "green",
+      "monsterId": "abyss_tiger",
+      "weight": 10000
+    },
+    {
+      "seed": 22783,
+      "themeId": "green",
+      "monsterId": "abyss_mushroom",
+      "weight": 10000
+    },
+    {
+      "seed": 23353,
+      "themeId": "blue",
+      "monsterId": "ice_spirit",
+      "weight": 10000
+    },
+    {
+      "seed": 23560,
+      "themeId": "water",
+      "monsterId": "abyss_piranha",
+      "weight": 10000
+    },
+    {
+      "seed": 23676,
+      "themeId": "water",
+      "monsterId": "abyss_giant_catfish",
+      "weight": 10000
+    },
+    {
+      "seed": 24560,
+      "themeId": "slate",
+      "monsterId": "wandering_dead",
+      "weight": 10000
+    },
+    {
+      "seed": 24774,
+      "themeId": "red",
+      "monsterId": "cassowary",
+      "weight": 10000
+    },
+    {
+      "seed": 25395,
+      "themeId": "slate",
+      "monsterId": "bouncing_coin",
+      "weight": 10000
+    },
+    {
+      "seed": 25671,
+      "themeId": "magic",
+      "monsterId": "tanzlichter",
+      "weight": 10000
+    },
+    {
+      "seed": 26312,
+      "themeId": "water",
+      "monsterId": "abyss_piranha",
+      "weight": 10000
+    },
+    {
+      "seed": 26427,
+      "themeId": "slate",
+      "monsterId": "wandering_dead",
+      "weight": 10000
+    },
+    {
+      "seed": 27150,
+      "themeId": "red",
+      "monsterId": "fire_lizard",
+      "weight": 10000
+    },
+    {
+      "seed": 27582,
+      "themeId": "yellow",
+      "monsterId": "abyss_giant_scorpion",
+      "weight": 10000
+    },
+    {
+      "seed": 27921,
+      "themeId": "water",
+      "monsterId": "abgrund_aal",
+      "weight": 10000
+    },
+    {
+      "seed": 28313,
+      "themeId": "black",
+      "monsterId": "sensenmann",
+      "weight": 10000
+    },
+    {
+      "seed": 28578,
+      "themeId": "green",
+      "monsterId": "abyss_panther",
+      "weight": 10000
+    },
+    {
+      "seed": 28614,
+      "themeId": "water",
+      "monsterId": "abyss_piranha",
+      "weight": 10000
+    },
+    {
+      "seed": 29612,
+      "themeId": "yellow",
+      "monsterId": "abyss_lizard",
+      "weight": 10000
+    },
+    {
+      "seed": 30314,
+      "themeId": "black",
+      "monsterId": "will_o_wisp",
+      "weight": 10000
+    },
+    {
+      "seed": 31208,
+      "themeId": "water",
+      "monsterId": "abyss_piranha",
+      "weight": 10000
+    },
+    {
+      "seed": 31711,
+      "themeId": "torture",
+      "monsterId": "inquisitorin",
+      "weight": 10000
+    },
+    {
+      "seed": 32049,
+      "themeId": "red",
+      "monsterId": "loren_lava",
+      "weight": 10000
+    },
+    {
+      "seed": 32062,
+      "themeId": "torture",
+      "monsterId": "inquisitorin",
+      "weight": 10000
+    },
+    {
+      "seed": 32362,
+      "themeId": "torture",
+      "monsterId": "morgenstern",
+      "weight": 10000
+    },
+    {
+      "seed": 34103,
+      "themeId": "slate",
+      "monsterId": "viper",
+      "weight": 10000
+    },
+    {
+      "seed": 34159,
+      "themeId": "green",
+      "monsterId": "abyss_panther",
+      "weight": 10000
+    },
+    {
+      "seed": 34360,
+      "themeId": "green",
+      "monsterId": "abyss_mushroom",
+      "weight": 10000
+    },
+    {
+      "seed": 35506,
+      "themeId": "water",
+      "monsterId": "abyss_piranha",
+      "weight": 10000
+    },
+    {
+      "seed": 35586,
+      "themeId": "yellow",
+      "monsterId": "abyss_lizard",
+      "weight": 10000
+    },
+    {
+      "seed": 37631,
+      "themeId": "crystal",
+      "monsterId": "abyss_crystal_beetle",
+      "weight": 10000
+    },
+    {
+      "seed": 37719,
+      "themeId": "green",
+      "monsterId": "abyss_panther",
+      "weight": 10000
+    },
+    {
+      "seed": 38144,
+      "themeId": "green",
+      "monsterId": "abyss_tiger",
+      "weight": 10000
+    },
+    {
+      "seed": 38191,
+      "themeId": "crystal",
+      "monsterId": "prism_moth",
+      "weight": 10000
+    },
+    {
+      "seed": 39234,
+      "themeId": "blue",
+      "monsterId": "ice_bear",
+      "weight": 10000
+    },
+    {
+      "seed": 39592,
+      "themeId": "torture",
+      "monsterId": "morgenstern",
+      "weight": 10000
+    },
+    {
+      "seed": 39623,
+      "themeId": "crystal",
+      "monsterId": "abyss_crystal_beetle",
+      "weight": 10000
+    },
+    {
+      "seed": 39824,
+      "themeId": "slate",
+      "monsterId": "wandering_dead",
+      "weight": 10000
+    },
+    {
+      "seed": 39988,
+      "themeId": "yellow",
+      "monsterId": "abyss_lizard",
+      "weight": 10000
+    },
+    {
+      "seed": 40342,
+      "themeId": "blue",
+      "monsterId": "ice_vogel",
+      "weight": 10000
+    },
+    {
+      "seed": 41018,
+      "themeId": "torture",
+      "monsterId": "morgenstern",
+      "weight": 10000
+    },
+    {
+      "seed": 41392,
+      "themeId": "black",
+      "monsterId": "will_o_wisp",
+      "weight": 10000
+    },
+    {
+      "seed": 41432,
+      "themeId": "slate",
+      "monsterId": "abyss_rat",
+      "weight": 10000
+    },
+    {
+      "seed": 42369,
+      "themeId": "yellow",
+      "monsterId": "cobra_gator",
+      "weight": 10000
+    },
+    {
+      "seed": 42485,
+      "themeId": "green",
+      "monsterId": "abyss_tiger",
+      "weight": 10000
+    },
+    {
+      "seed": 42514,
+      "themeId": "green",
+      "monsterId": "abyss_tiger",
+      "weight": 10000
+    },
+    {
+      "seed": 42753,
+      "themeId": "red",
+      "monsterId": "fire_spirit",
+      "weight": 10000
+    },
+    {
+      "seed": 43066,
+      "themeId": "black",
+      "monsterId": "wraith",
+      "weight": 10000
+    },
+    {
+      "seed": 43200,
+      "themeId": "green",
+      "monsterId": "abyss_panther",
+      "weight": 10000
+    },
+    {
+      "seed": 43703,
+      "themeId": "black",
+      "monsterId": "wraith",
+      "weight": 10000
+    },
+    {
+      "seed": 44094,
+      "themeId": "black",
+      "monsterId": "sensenmann",
+      "weight": 10000
+    },
+    {
+      "seed": 44142,
+      "themeId": "crystal",
+      "monsterId": "abyss_crystal_beetle",
+      "weight": 10000
+    },
+    {
+      "seed": 44198,
+      "themeId": "torture",
+      "monsterId": "inquisitorin",
+      "weight": 10000
+    },
+    {
+      "seed": 44742,
+      "themeId": "magic",
+      "monsterId": "tanzlichter",
+      "weight": 10000
+    },
+    {
+      "seed": 45478,
+      "themeId": "slate",
+      "monsterId": "abyss_rat",
+      "weight": 10000
+    },
+    {
+      "seed": 46141,
+      "themeId": "water",
+      "monsterId": "abyss_piranha",
+      "weight": 10000
+    },
+    {
+      "seed": 46626,
+      "themeId": "black",
+      "monsterId": "sensenmann",
+      "weight": 10000
+    },
+    {
+      "seed": 46782,
+      "themeId": "torture",
+      "monsterId": "morgenstern",
+      "weight": 10000
+    },
+    {
+      "seed": 47015,
+      "themeId": "water",
+      "monsterId": "abgrund_krabbe",
+      "weight": 10000
+    },
+    {
+      "seed": 47016,
+      "themeId": "yellow",
+      "monsterId": "abyss_giant_scorpion",
+      "weight": 10000
+    },
+    {
+      "seed": 48215,
+      "themeId": "red",
+      "monsterId": "loren_lava",
+      "weight": 10000
+    },
+    {
+      "seed": 48271,
+      "themeId": "yellow",
+      "monsterId": "cobra_gator",
+      "weight": 10000
+    },
+    {
+      "seed": 48805,
+      "themeId": "blue",
+      "monsterId": "ice_spirit",
+      "weight": 10000
+    },
+    {
+      "seed": 50039,
+      "themeId": "blue",
+      "monsterId": "ice_vogel",
+      "weight": 10000
+    },
+    {
+      "seed": 50128,
+      "themeId": "magic",
+      "monsterId": "merseburg_spell",
+      "weight": 10000
+    },
+    {
+      "seed": 50494,
+      "themeId": "red",
+      "monsterId": "cassowary",
+      "weight": 10000
+    },
+    {
+      "seed": 50685,
+      "themeId": "slate",
+      "monsterId": "bouncing_coin",
+      "weight": 10000
+    },
+    {
+      "seed": 51048,
+      "themeId": "green",
+      "monsterId": "abyss_mushroom",
+      "weight": 10000
+    },
+    {
+      "seed": 51239,
+      "themeId": "red",
+      "monsterId": "fire_lizard",
+      "weight": 10000
+    },
+    {
+      "seed": 51792,
+      "themeId": "yellow",
+      "monsterId": "abyss_lizard",
+      "weight": 10000
+    },
+    {
+      "seed": 52517,
+      "themeId": "green",
+      "monsterId": "abyss_tiger",
+      "weight": 10000
+    },
+    {
+      "seed": 53017,
+      "themeId": "green",
+      "monsterId": "abyss_mushroom",
+      "weight": 10000
+    },
+    {
+      "seed": 53153,
+      "themeId": "yellow",
+      "monsterId": "cobra_gator",
+      "weight": 10000
+    },
+    {
+      "seed": 55399,
+      "themeId": "crystal",
+      "monsterId": "amethyst_golem",
+      "weight": 10000
+    },
+    {
+      "seed": 57206,
+      "themeId": "slate",
+      "monsterId": "viper",
+      "weight": 10000
+    },
+    {
+      "seed": 57230,
+      "themeId": "crystal",
+      "monsterId": "abyss_crystal_beetle",
+      "weight": 10000
+    },
+    {
+      "seed": 57236,
+      "themeId": "slate",
+      "monsterId": "poison_slime",
+      "weight": 10000
+    },
+    {
+      "seed": 57481,
+      "themeId": "water",
+      "monsterId": "abyss_piranha",
+      "weight": 10000
+    },
+    {
+      "seed": 57786,
+      "themeId": "yellow",
+      "monsterId": "cobra_gator",
+      "weight": 10000
+    },
+    {
+      "seed": 58565,
+      "themeId": "water",
+      "monsterId": "abyss_piranha",
+      "weight": 10000
+    },
+    {
+      "seed": 59247,
+      "themeId": "crystal",
+      "monsterId": "crystal_mimic",
+      "weight": 10000
+    },
+    {
+      "seed": 59880,
+      "themeId": "torture",
+      "monsterId": "inquisitorin",
+      "weight": 10000
+    },
+    {
+      "seed": 60605,
+      "themeId": "torture",
+      "monsterId": "morgenstern",
+      "weight": 10000
+    },
+    {
+      "seed": 60941,
+      "themeId": "blue",
+      "monsterId": "ice_spirit",
+      "weight": 10000
+    },
+    {
+      "seed": 60994,
+      "themeId": "yellow",
+      "monsterId": "abyss_giant_scorpion",
+      "weight": 10000
+    },
+    {
+      "seed": 61879,
+      "themeId": "black",
+      "monsterId": "schleipnir",
+      "weight": 10000
+    },
+    {
+      "seed": 61881,
+      "themeId": "black",
+      "monsterId": "will_o_wisp",
+      "weight": 10000
+    },
+    {
+      "seed": 62969,
+      "themeId": "red",
+      "monsterId": "fire_lizard",
+      "weight": 10000
+    },
+    {
+      "seed": 63586,
+      "themeId": "slate",
+      "monsterId": "poison_slime",
+      "weight": 10000
+    },
+    {
+      "seed": 64754,
+      "themeId": "blue",
+      "monsterId": "ice_vogel",
+      "weight": 10000
+    },
+    {
+      "seed": 64869,
+      "themeId": "crystal",
+      "monsterId": "abyss_crystal_beetle",
+      "weight": 10000
+    },
+    {
+      "seed": 65307,
+      "themeId": "black",
+      "monsterId": "will_o_wisp",
+      "weight": 10000
+    }
+  ],
+  "biasedExamples": [
+    {
+      "seed": 7,
+      "themeId": "yellow",
+      "species": [
+        {
+          "monsterId": "cobra_gator",
+          "weight": 414
+        },
+        {
+          "monsterId": "abyss_giant_scorpion",
+          "weight": 9586
+        }
+      ],
+      "fingerprint": "a0c6a19d"
+    },
+    {
+      "seed": 8,
+      "themeId": "green",
+      "species": [
+        {
+          "monsterId": "abyss_mushroom",
+          "weight": 9973
+        },
+        {
+          "monsterId": "abyss_tiger",
+          "weight": 27
+        }
+      ],
+      "fingerprint": "5dd66919"
+    },
+    {
+      "seed": 9,
+      "themeId": "yellow",
+      "species": [
+        {
+          "monsterId": "abyss_lizard",
+          "weight": 211
+        },
+        {
+          "monsterId": "cobra_gator",
+          "weight": 9789
+        }
+      ],
+      "fingerprint": "15e1db26"
+    },
+    {
+      "seed": 10,
+      "themeId": "water",
+      "species": [
+        {
+          "monsterId": "abyss_piranha",
+          "weight": 922
+        },
+        {
+          "monsterId": "abgrund_aal",
+          "weight": 10
+        },
+        {
+          "monsterId": "abyss_giant_catfish",
+          "weight": 9068
+        }
+      ],
+      "fingerprint": "c2d93b2a"
+    },
+    {
+      "seed": 12,
+      "themeId": "red",
+      "species": [
+        {
+          "monsterId": "fire_spirit",
+          "weight": 358
+        },
+        {
+          "monsterId": "fire_lizard",
+          "weight": 9641
+        },
+        {
+          "monsterId": "loren_lava",
+          "weight": 1
+        }
+      ],
+      "fingerprint": "e0f9a863"
+    },
+    {
+      "seed": 18,
+      "themeId": "magic",
+      "species": [
+        {
+          "monsterId": "junghexe",
+          "weight": 31
+        },
+        {
+          "monsterId": "geistflamme",
+          "weight": 9164
+        },
+        {
+          "monsterId": "merseburg_spell",
+          "weight": 805
+        }
+      ],
+      "fingerprint": "1ff5e528"
+    },
+    {
+      "seed": 28,
+      "themeId": "crystal",
+      "species": [
+        {
+          "monsterId": "prism_moth",
+          "weight": 243
+        },
+        {
+          "monsterId": "crystal_mimic",
+          "weight": 485
+        },
+        {
+          "monsterId": "abyss_crystal_beetle",
+          "weight": 9272
+        }
+      ],
+      "fingerprint": "3fd38939"
+    },
+    {
+      "seed": 30,
+      "themeId": "black",
+      "species": [
+        {
+          "monsterId": "schleipnir",
+          "weight": 9208
+        },
+        {
+          "monsterId": "sensenmann",
+          "weight": 792
+        }
+      ],
+      "fingerprint": "cd3a6e24"
+    },
+    {
+      "seed": 36,
+      "themeId": "green",
+      "species": [
+        {
+          "monsterId": "abyss_panther",
+          "weight": 9845
+        },
+        {
+          "monsterId": "abyss_tiger",
+          "weight": 155
+        }
+      ],
+      "fingerprint": "42fe6bb4"
+    },
+    {
+      "seed": 39,
+      "themeId": "water",
+      "species": [
+        {
+          "monsterId": "abyss_piranha",
+          "weight": 9984
+        },
+        {
+          "monsterId": "abgrund_krabbe",
+          "weight": 10
+        },
+        {
+          "monsterId": "abgrund_aal",
+          "weight": 6
+        }
+      ],
+      "fingerprint": "6c9b47d3"
+    },
+    {
+      "seed": 45,
+      "themeId": "red",
+      "species": [
+        {
+          "monsterId": "fire_spirit",
+          "weight": 163
+        },
+        {
+          "monsterId": "fire_lizard",
+          "weight": 138
+        },
+        {
+          "monsterId": "loren_lava",
+          "weight": 9180
+        },
+        {
+          "monsterId": "cassowary",
+          "weight": 519
+        }
+      ],
+      "fingerprint": "66733a49"
+    },
+    {
+      "seed": 49,
+      "themeId": "green",
+      "species": [
+        {
+          "monsterId": "abyss_mushroom",
+          "weight": 252
+        },
+        {
+          "monsterId": "abyss_panther",
+          "weight": 9722
+        },
+        {
+          "monsterId": "abyss_tiger",
+          "weight": 26
+        }
+      ],
+      "fingerprint": "40e7fd2f"
+    },
+    {
+      "seed": 53,
+      "themeId": "water",
+      "species": [
+        {
+          "monsterId": "abgrund_krabbe",
+          "weight": 1
+        },
+        {
+          "monsterId": "abyss_piranha",
+          "weight": 81
+        },
+        {
+          "monsterId": "abgrund_aal",
+          "weight": 910
+        },
+        {
+          "monsterId": "abyss_giant_catfish",
+          "weight": 9008
+        }
+      ],
+      "fingerprint": "87d206ca"
+    },
+    {
+      "seed": 55,
+      "themeId": "yellow",
+      "species": [
+        {
+          "monsterId": "cobra_gator",
+          "weight": 422
+        },
+        {
+          "monsterId": "abyss_giant_scorpion",
+          "weight": 340
+        },
+        {
+          "monsterId": "abyss_lizard",
+          "weight": 9166
+        },
+        {
+          "monsterId": "maikaefer",
+          "weight": 72
+        }
+      ],
+      "fingerprint": "9bf1d189"
+    },
+    {
+      "seed": 58,
+      "themeId": "magic",
+      "species": [
+        {
+          "monsterId": "junghexe",
+          "weight": 37
+        },
+        {
+          "monsterId": "geistflamme",
+          "weight": 9963
+        }
+      ],
+      "fingerprint": "860f1bdd"
+    },
+    {
+      "seed": 63,
+      "themeId": "red",
+      "species": [
+        {
+          "monsterId": "fire_spirit",
+          "weight": 9971
+        },
+        {
+          "monsterId": "fire_lizard",
+          "weight": 29
+        }
+      ],
+      "fingerprint": "f119c1e6"
+    },
+    {
+      "seed": 65,
+      "themeId": "slate",
+      "species": [
+        {
+          "monsterId": "abyss_rabbit",
+          "weight": 5
+        },
+        {
+          "monsterId": "vampire_bat",
+          "weight": 34
+        },
+        {
+          "monsterId": "bouncing_coin",
+          "weight": 9961
+        }
+      ],
+      "fingerprint": "e0ca6a0f"
+    },
+    {
+      "seed": 73,
+      "themeId": "yellow",
+      "species": [
+        {
+          "monsterId": "abyss_lizard",
+          "weight": 9941
+        },
+        {
+          "monsterId": "cobra_gator",
+          "weight": 59
+        }
+      ],
+      "fingerprint": "6576b03b"
+    },
+    {
+      "seed": 76,
+      "themeId": "slate",
+      "species": [
+        {
+          "monsterId": "viper",
+          "weight": 68
+        },
+        {
+          "monsterId": "abyss_rabbit",
+          "weight": 58
+        },
+        {
+          "monsterId": "poison_slime",
+          "weight": 9874
+        }
+      ],
+      "fingerprint": "62f77b51"
+    },
+    {
+      "seed": 81,
+      "themeId": "red",
+      "species": [
+        {
+          "monsterId": "fire_spirit",
+          "weight": 28
+        },
+        {
+          "monsterId": "loren_lava",
+          "weight": 9972
+        }
+      ],
+      "fingerprint": "a88cd1b6"
+    },
+    {
+      "seed": 82,
+      "themeId": "water",
+      "species": [
+        {
+          "monsterId": "abyss_piranha",
+          "weight": 53
+        },
+        {
+          "monsterId": "abgrund_krabbe",
+          "weight": 9947
+        }
+      ],
+      "fingerprint": "68ade83f"
+    },
+    {
+      "seed": 87,
+      "themeId": "red",
+      "species": [
+        {
+          "monsterId": "fire_spirit",
+          "weight": 9125
+        },
+        {
+          "monsterId": "fire_lizard",
+          "weight": 875
+        }
+      ],
+      "fingerprint": "228cb18c"
+    },
+    {
+      "seed": 90,
+      "themeId": "water",
+      "species": [
+        {
+          "monsterId": "abyss_piranha",
+          "weight": 1
+        },
+        {
+          "monsterId": "abgrund_aal",
+          "weight": 9999
+        }
+      ],
+      "fingerprint": "3d47f219"
+    },
+    {
+      "seed": 92,
+      "themeId": "magic",
+      "species": [
+        {
+          "monsterId": "junghexe",
+          "weight": 610
+        },
+        {
+          "monsterId": "tanzlichter",
+          "weight": 23
+        },
+        {
+          "monsterId": "geistflamme",
+          "weight": 9367
+        }
+      ],
+      "fingerprint": "863ac5cd"
+    },
+    {
+      "seed": 95,
+      "themeId": "slate",
+      "species": [
+        {
+          "monsterId": "abyss_rat",
+          "weight": 1
+        },
+        {
+          "monsterId": "cave_slime",
+          "weight": 7
+        },
+        {
+          "monsterId": "abyss_rabbit",
+          "weight": 12
+        },
+        {
+          "monsterId": "vampire_bat",
+          "weight": 9980
+        }
+      ],
+      "fingerprint": "43ad8135"
+    },
+    {
+      "seed": 100,
+      "themeId": "crystal",
+      "species": [
+        {
+          "monsterId": "abyss_crystal_beetle",
+          "weight": 774
+        },
+        {
+          "monsterId": "amethyst_golem",
+          "weight": 9226
+        }
+      ],
+      "fingerprint": "fd544191"
+    },
+    {
+      "seed": 102,
+      "themeId": "water",
+      "species": [
+        {
+          "monsterId": "abgrund_aal",
+          "weight": 223
+        },
+        {
+          "monsterId": "abyss_piranha",
+          "weight": 43
+        },
+        {
+          "monsterId": "abgrund_krabbe",
+          "weight": 223
+        },
+        {
+          "monsterId": "maikaefer",
+          "weight": 9511
+        }
+      ],
+      "fingerprint": "fe44fb69"
+    },
+    {
+      "seed": 104,
+      "themeId": "crystal",
+      "species": [
+        {
+          "monsterId": "maikaefer",
+          "weight": 9563
+        },
+        {
+          "monsterId": "abyss_crystal_beetle",
+          "weight": 437
+        }
+      ],
+      "fingerprint": "3faca880"
+    },
+    {
+      "seed": 105,
+      "themeId": "water",
+      "species": [
+        {
+          "monsterId": "abgrund_krabbe",
+          "weight": 9573
+        },
+        {
+          "monsterId": "abyss_piranha",
+          "weight": 198
+        },
+        {
+          "monsterId": "abgrund_aal",
+          "weight": 229
+        }
+      ],
+      "fingerprint": "f48b47d9"
+    },
+    {
+      "seed": 108,
+      "themeId": "magic",
+      "species": [
+        {
+          "monsterId": "geistflamme",
+          "weight": 779
+        },
+        {
+          "monsterId": "junghexe",
+          "weight": 9098
+        },
+        {
+          "monsterId": "tanzlichter",
+          "weight": 123
+        }
+      ],
+      "fingerprint": "c6ab3eb5"
+    },
+    {
+      "seed": 116,
+      "themeId": "green",
+      "species": [
+        {
+          "monsterId": "abyss_tiger",
+          "weight": 18
+        },
+        {
+          "monsterId": "abyss_panther",
+          "weight": 9735
+        },
+        {
+          "monsterId": "abyss_mushroom",
+          "weight": 247
+        }
+      ],
+      "fingerprint": "6e3b9833"
+    },
+    {
+      "seed": 122,
+      "themeId": "crystal",
+      "species": [
+        {
+          "monsterId": "prism_moth",
+          "weight": 9222
+        },
+        {
+          "monsterId": "abyss_crystal_beetle",
+          "weight": 5
+        },
+        {
+          "monsterId": "amethyst_golem",
+          "weight": 773
+        }
+      ],
+      "fingerprint": "56d35793"
+    },
+    {
+      "seed": 126,
+      "themeId": "blue",
+      "species": [
+        {
+          "monsterId": "ice_spirit",
+          "weight": 9845
+        },
+        {
+          "monsterId": "ice_vogel",
+          "weight": 155
+        }
+      ],
+      "fingerprint": "b36131d2"
+    },
+    {
+      "seed": 127,
+      "themeId": "red",
+      "species": [
+        {
+          "monsterId": "fire_lizard",
+          "weight": 9843
+        },
+        {
+          "monsterId": "fire_spirit",
+          "weight": 2
+        },
+        {
+          "monsterId": "loren_lava",
+          "weight": 155
+        }
+      ],
+      "fingerprint": "4d5f0414"
+    },
+    {
+      "seed": 133,
+      "themeId": "black",
+      "species": [
+        {
+          "monsterId": "schleipnir",
+          "weight": 398
+        },
+        {
+          "monsterId": "sensenmann",
+          "weight": 9602
+        }
+      ],
+      "fingerprint": "a54231a2"
+    },
+    {
+      "seed": 134,
+      "themeId": "yellow",
+      "species": [
+        {
+          "monsterId": "cobra_gator",
+          "weight": 321
+        },
+        {
+          "monsterId": "abyss_lizard",
+          "weight": 9679
+        }
+      ],
+      "fingerprint": "fc8839b3"
+    },
+    {
+      "seed": 137,
+      "themeId": "green",
+      "species": [
+        {
+          "monsterId": "abyss_panther",
+          "weight": 406
+        },
+        {
+          "monsterId": "abyss_tiger",
+          "weight": 9067
+        },
+        {
+          "monsterId": "abyss_mushroom",
+          "weight": 527
+        }
+      ],
+      "fingerprint": "a4b982de"
+    },
+    {
+      "seed": 139,
+      "themeId": "black",
+      "species": [
+        {
+          "monsterId": "schleipnir",
+          "weight": 9563
+        },
+        {
+          "monsterId": "will_o_wisp",
+          "weight": 437
+        }
+      ],
+      "fingerprint": "3d94dd74"
+    },
+    {
+      "seed": 140,
+      "themeId": "yellow",
+      "species": [
+        {
+          "monsterId": "abyss_giant_scorpion",
+          "weight": 9995
+        },
+        {
+          "monsterId": "abyss_lizard",
+          "weight": 2
+        },
+        {
+          "monsterId": "cobra_gator",
+          "weight": 3
+        }
+      ],
+      "fingerprint": "519cc7de"
+    },
+    {
+      "seed": 148,
+      "themeId": "red",
+      "species": [
+        {
+          "monsterId": "fire_spirit",
+          "weight": 9932
+        },
+        {
+          "monsterId": "fire_lizard",
+          "weight": 68
+        }
+      ],
+      "fingerprint": "76977964"
+    },
+    {
+      "seed": 155,
+      "themeId": "blue",
+      "species": [
+        {
+          "monsterId": "ice_vogel",
+          "weight": 24
+        },
+        {
+          "monsterId": "ice_spirit",
+          "weight": 56
+        },
+        {
+          "monsterId": "ice_lizard",
+          "weight": 9920
+        }
+      ],
+      "fingerprint": "6cab6192"
+    },
+    {
+      "seed": 158,
+      "themeId": "torture",
+      "species": [
+        {
+          "monsterId": "morgenstern",
+          "weight": 614
+        },
+        {
+          "monsterId": "folterpanzer",
+          "weight": 12
+        },
+        {
+          "monsterId": "inquisitorin",
+          "weight": 9374
+        }
+      ],
+      "fingerprint": "37c9108e"
+    },
+    {
+      "seed": 162,
+      "themeId": "water",
+      "species": [
+        {
+          "monsterId": "abyss_giant_catfish",
+          "weight": 9953
+        },
+        {
+          "monsterId": "abyss_piranha",
+          "weight": 47
+        }
+      ],
+      "fingerprint": "49327c04"
+    },
+    {
+      "seed": 164,
+      "themeId": "crystal",
+      "species": [
+        {
+          "monsterId": "prism_moth",
+          "weight": 9994
+        },
+        {
+          "monsterId": "amethyst_golem",
+          "weight": 6
+        }
+      ],
+      "fingerprint": "8654eb42"
+    },
+    {
+      "seed": 167,
+      "themeId": "magic",
+      "species": [
+        {
+          "monsterId": "geistflamme",
+          "weight": 859
+        },
+        {
+          "monsterId": "tanzlichter",
+          "weight": 9140
+        },
+        {
+          "monsterId": "merseburg_spell",
+          "weight": 1
+        }
+      ],
+      "fingerprint": "87d4ba8b"
+    },
+    {
+      "seed": 174,
+      "themeId": "yellow",
+      "species": [
+        {
+          "monsterId": "abyss_lizard",
+          "weight": 1
+        },
+        {
+          "monsterId": "abyss_giant_scorpion",
+          "weight": 9999
+        }
+      ],
+      "fingerprint": "2805baea"
+    },
+    {
+      "seed": 177,
+      "themeId": "red",
+      "species": [
+        {
+          "monsterId": "fire_lizard",
+          "weight": 6
+        },
+        {
+          "monsterId": "fire_spirit",
+          "weight": 61
+        },
+        {
+          "monsterId": "loren_lava",
+          "weight": 9933
+        }
+      ],
+      "fingerprint": "17aff369"
+    },
+    {
+      "seed": 178,
+      "themeId": "slate",
+      "species": [
+        {
+          "monsterId": "maikaefer",
+          "weight": 334
+        },
+        {
+          "monsterId": "cave_slime",
+          "weight": 9446
+        },
+        {
+          "monsterId": "abyss_rabbit",
+          "weight": 15
+        },
+        {
+          "monsterId": "vampire_bat",
+          "weight": 205
+        }
+      ],
+      "fingerprint": "b815c9dd"
+    },
+    {
+      "seed": 198,
+      "themeId": "black",
+      "species": [
+        {
+          "monsterId": "will_o_wisp",
+          "weight": 63
+        },
+        {
+          "monsterId": "sensenmann",
+          "weight": 301
+        },
+        {
+          "monsterId": "schleipnir",
+          "weight": 9036
+        },
+        {
+          "monsterId": "wraith",
+          "weight": 600
+        }
+      ],
+      "fingerprint": "602a9090"
+    },
+    {
+      "seed": 210,
+      "themeId": "torture",
+      "species": [
+        {
+          "monsterId": "morgenstern",
+          "weight": 375
+        },
+        {
+          "monsterId": "folterzange",
+          "weight": 9625
+        }
+      ],
+      "fingerprint": "a324a232"
+    },
+    {
+      "seed": 211,
+      "themeId": "black",
+      "species": [
+        {
+          "monsterId": "sensenmann",
+          "weight": 47
+        },
+        {
+          "monsterId": "wraith",
+          "weight": 9953
+        }
+      ],
+      "fingerprint": "80acf1b1"
+    },
+    {
+      "seed": 212,
+      "themeId": "black",
+      "species": [
+        {
+          "monsterId": "wraith",
+          "weight": 1
+        },
+        {
+          "monsterId": "will_o_wisp",
+          "weight": 486
+        },
+        {
+          "monsterId": "schleipnir",
+          "weight": 32
+        },
+        {
+          "monsterId": "sensenmann",
+          "weight": 9199
+        },
+        {
+          "monsterId": "maikaefer",
+          "weight": 282
+        }
+      ],
+      "fingerprint": "e8c789df"
+    },
+    {
+      "seed": 218,
+      "themeId": "magic",
+      "species": [
+        {
+          "monsterId": "merseburg_spell",
+          "weight": 833
+        },
+        {
+          "monsterId": "tanzlichter",
+          "weight": 9030
+        },
+        {
+          "monsterId": "junghexe",
+          "weight": 137
+        }
+      ],
+      "fingerprint": "9080c734"
+    },
+    {
+      "seed": 219,
+      "themeId": "magic",
+      "species": [
+        {
+          "monsterId": "merseburg_spell",
+          "weight": 19
+        },
+        {
+          "monsterId": "geistflamme",
+          "weight": 75
+        },
+        {
+          "monsterId": "junghexe",
+          "weight": 9906
+        }
+      ],
+      "fingerprint": "dd810400"
+    },
+    {
+      "seed": 232,
+      "themeId": "torture",
+      "species": [
+        {
+          "monsterId": "morgenstern",
+          "weight": 870
+        },
+        {
+          "monsterId": "inquisitorin",
+          "weight": 9130
+        }
+      ],
+      "fingerprint": "96b52024"
+    },
+    {
+      "seed": 236,
+      "themeId": "black",
+      "species": [
+        {
+          "monsterId": "sensenmann",
+          "weight": 2
+        },
+        {
+          "monsterId": "will_o_wisp",
+          "weight": 130
+        },
+        {
+          "monsterId": "wraith",
+          "weight": 9173
+        },
+        {
+          "monsterId": "schleipnir",
+          "weight": 501
+        },
+        {
+          "monsterId": "maikaefer",
+          "weight": 194
+        }
+      ],
+      "fingerprint": "a2ca7eb1"
+    },
+    {
+      "seed": 240,
+      "themeId": "blue",
+      "species": [
+        {
+          "monsterId": "ice_lizard",
+          "weight": 179
+        },
+        {
+          "monsterId": "ice_spirit",
+          "weight": 9263
+        },
+        {
+          "monsterId": "ice_vogel",
+          "weight": 558
+        }
+      ],
+      "fingerprint": "de5aa235"
+    },
+    {
+      "seed": 275,
+      "themeId": "water",
+      "species": [
+        {
+          "monsterId": "abyss_piranha",
+          "weight": 1
+        },
+        {
+          "monsterId": "abgrund_krabbe",
+          "weight": 9141
+        },
+        {
+          "monsterId": "abyss_giant_catfish",
+          "weight": 354
+        },
+        {
+          "monsterId": "abgrund_aal",
+          "weight": 504
+        }
+      ],
+      "fingerprint": "662e791a"
+    },
+    {
+      "seed": 286,
+      "themeId": "slate",
+      "species": [
+        {
+          "monsterId": "abyss_rabbit",
+          "weight": 4
+        },
+        {
+          "monsterId": "vampire_bat",
+          "weight": 9996
+        }
+      ],
+      "fingerprint": "86dc066b"
+    },
+    {
+      "seed": 294,
+      "themeId": "crystal",
+      "species": [
+        {
+          "monsterId": "abyss_crystal_beetle",
+          "weight": 40
+        },
+        {
+          "monsterId": "crystal_mimic",
+          "weight": 9960
+        }
+      ],
+      "fingerprint": "492a6722"
+    },
+    {
+      "seed": 298,
+      "themeId": "blue",
+      "species": [
+        {
+          "monsterId": "ice_spirit",
+          "weight": 45
+        },
+        {
+          "monsterId": "ice_vogel",
+          "weight": 537
+        },
+        {
+          "monsterId": "ice_bear",
+          "weight": 9418
+        }
+      ],
+      "fingerprint": "501e13c9"
+    },
+    {
+      "seed": 301,
+      "themeId": "magic",
+      "species": [
+        {
+          "monsterId": "geistflamme",
+          "weight": 479
+        },
+        {
+          "monsterId": "merseburg_spell",
+          "weight": 9180
+        },
+        {
+          "monsterId": "maikaefer",
+          "weight": 341
+        }
+      ],
+      "fingerprint": "13817149"
+    },
+    {
+      "seed": 304,
+      "themeId": "red",
+      "species": [
+        {
+          "monsterId": "loren_lava",
+          "weight": 155
+        },
+        {
+          "monsterId": "fire_spirit",
+          "weight": 2
+        },
+        {
+          "monsterId": "cassowary",
+          "weight": 9843
+        }
+      ],
+      "fingerprint": "bfc47370"
+    },
+    {
+      "seed": 316,
+      "themeId": "magic",
+      "species": [
+        {
+          "monsterId": "tanzlichter",
+          "weight": 13
+        },
+        {
+          "monsterId": "merseburg_spell",
+          "weight": 9986
+        },
+        {
+          "monsterId": "geistflamme",
+          "weight": 1
+        }
+      ],
+      "fingerprint": "805c0397"
+    },
+    {
+      "seed": 317,
+      "themeId": "crystal",
+      "species": [
+        {
+          "monsterId": "abyss_crystal_beetle",
+          "weight": 132
+        },
+        {
+          "monsterId": "crystal_mimic",
+          "weight": 9868
+        }
+      ],
+      "fingerprint": "13b54ac5"
+    },
+    {
+      "seed": 329,
+      "themeId": "slate",
+      "species": [
+        {
+          "monsterId": "cave_slime",
+          "weight": 823
+        },
+        {
+          "monsterId": "wandering_dead",
+          "weight": 9177
+        }
+      ],
+      "fingerprint": "21156948"
+    },
+    {
+      "seed": 331,
+      "themeId": "slate",
+      "species": [
+        {
+          "monsterId": "abyss_rabbit",
+          "weight": 28
+        },
+        {
+          "monsterId": "viper",
+          "weight": 170
+        },
+        {
+          "monsterId": "cave_slime",
+          "weight": 9061
+        },
+        {
+          "monsterId": "vampire_bat",
+          "weight": 529
+        },
+        {
+          "monsterId": "abyss_rat",
+          "weight": 212
+        }
+      ],
+      "fingerprint": "e7045ed8"
+    },
+    {
+      "seed": 332,
+      "themeId": "magic",
+      "species": [
+        {
+          "monsterId": "merseburg_spell",
+          "weight": 9622
+        },
+        {
+          "monsterId": "tanzlichter",
+          "weight": 377
+        },
+        {
+          "monsterId": "junghexe",
+          "weight": 1
+        }
+      ],
+      "fingerprint": "c8c37ae7"
+    },
+    {
+      "seed": 338,
+      "themeId": "blue",
+      "species": [
+        {
+          "monsterId": "ice_bear",
+          "weight": 338
+        },
+        {
+          "monsterId": "ice_spirit",
+          "weight": 124
+        },
+        {
+          "monsterId": "ice_lizard",
+          "weight": 9538
+        }
+      ],
+      "fingerprint": "67615b8b"
+    },
+    {
+      "seed": 366,
+      "themeId": "blue",
+      "species": [
+        {
+          "monsterId": "ice_lizard",
+          "weight": 144
+        },
+        {
+          "monsterId": "ice_spirit",
+          "weight": 727
+        },
+        {
+          "monsterId": "ice_bear",
+          "weight": 9129
+        }
+      ],
+      "fingerprint": "75a50f4e"
+    },
+    {
+      "seed": 385,
+      "themeId": "yellow",
+      "species": [
+        {
+          "monsterId": "cobra_gator",
+          "weight": 9961
+        },
+        {
+          "monsterId": "abyss_lizard",
+          "weight": 5
+        },
+        {
+          "monsterId": "abyss_giant_scorpion",
+          "weight": 34
+        }
+      ],
+      "fingerprint": "fbe1547d"
+    },
+    {
+      "seed": 391,
+      "themeId": "slate",
+      "species": [
+        {
+          "monsterId": "cave_slime",
+          "weight": 9998
+        },
+        {
+          "monsterId": "abyss_rat",
+          "weight": 2
+        }
+      ],
+      "fingerprint": "d233c125"
+    },
+    {
+      "seed": 394,
+      "themeId": "blue",
+      "species": [
+        {
+          "monsterId": "ice_lizard",
+          "weight": 233
+        },
+        {
+          "monsterId": "ice_spirit",
+          "weight": 9753
+        },
+        {
+          "monsterId": "ice_vogel",
+          "weight": 14
+        }
+      ],
+      "fingerprint": "b2a86d35"
+    },
+    {
+      "seed": 408,
+      "themeId": "green",
+      "species": [
+        {
+          "monsterId": "abyss_panther",
+          "weight": 28
+        },
+        {
+          "monsterId": "abyss_tiger",
+          "weight": 9834
+        },
+        {
+          "monsterId": "abyss_mushroom",
+          "weight": 137
+        },
+        {
+          "monsterId": "maikaefer",
+          "weight": 1
+        }
+      ],
+      "fingerprint": "3a5025a6"
+    },
+    {
+      "seed": 415,
+      "themeId": "magic",
+      "species": [
+        {
+          "monsterId": "merseburg_spell",
+          "weight": 31
+        },
+        {
+          "monsterId": "junghexe",
+          "weight": 9969
+        }
+      ],
+      "fingerprint": "0f48c05f"
+    },
+    {
+      "seed": 418,
+      "themeId": "blue",
+      "species": [
+        {
+          "monsterId": "ice_lizard",
+          "weight": 471
+        },
+        {
+          "monsterId": "ice_vogel",
+          "weight": 9529
+        }
+      ],
+      "fingerprint": "124444e9"
+    },
+    {
+      "seed": 459,
+      "themeId": "torture",
+      "species": [
+        {
+          "monsterId": "folterpanzer",
+          "weight": 161
+        },
+        {
+          "monsterId": "morgenstern",
+          "weight": 53
+        },
+        {
+          "monsterId": "inquisitorin",
+          "weight": 9310
+        },
+        {
+          "monsterId": "folterzange",
+          "weight": 476
+        }
+      ],
+      "fingerprint": "7500ada2"
+    },
+    {
+      "seed": 478,
+      "themeId": "torture",
+      "species": [
+        {
+          "monsterId": "inquisitorin",
+          "weight": 321
+        },
+        {
+          "monsterId": "folterzange",
+          "weight": 9679
+        }
+      ],
+      "fingerprint": "efa8b1aa"
+    },
+    {
+      "seed": 498,
+      "themeId": "red",
+      "species": [
+        {
+          "monsterId": "fire_lizard",
+          "weight": 9855
+        },
+        {
+          "monsterId": "fire_spirit",
+          "weight": 145
+        }
+      ],
+      "fingerprint": "e7264294"
+    },
+    {
+      "seed": 511,
+      "themeId": "black",
+      "species": [
+        {
+          "monsterId": "wraith",
+          "weight": 191
+        },
+        {
+          "monsterId": "schleipnir",
+          "weight": 9
+        },
+        {
+          "monsterId": "will_o_wisp",
+          "weight": 191
+        },
+        {
+          "monsterId": "sensenmann",
+          "weight": 9609
+        }
+      ],
+      "fingerprint": "46a8ee21"
+    },
+    {
+      "seed": 517,
+      "themeId": "yellow",
+      "species": [
+        {
+          "monsterId": "abyss_lizard",
+          "weight": 105
+        },
+        {
+          "monsterId": "cobra_gator",
+          "weight": 9895
+        }
+      ],
+      "fingerprint": "ef0746b2"
+    },
+    {
+      "seed": 525,
+      "themeId": "slate",
+      "species": [
+        {
+          "monsterId": "abyss_rat",
+          "weight": 5
+        },
+        {
+          "monsterId": "vampire_bat",
+          "weight": 9995
+        }
+      ],
+      "fingerprint": "13d8e426"
+    },
+    {
+      "seed": 528,
+      "themeId": "blue",
+      "species": [
+        {
+          "monsterId": "ice_spirit",
+          "weight": 883
+        },
+        {
+          "monsterId": "ice_lizard",
+          "weight": 9117
+        }
+      ],
+      "fingerprint": "b27684ef"
+    },
+    {
+      "seed": 536,
+      "themeId": "magic",
+      "species": [
+        {
+          "monsterId": "tanzlichter",
+          "weight": 9974
+        },
+        {
+          "monsterId": "geistflamme",
+          "weight": 2
+        },
+        {
+          "monsterId": "merseburg_spell",
+          "weight": 24
+        }
+      ],
+      "fingerprint": "44185ae7"
+    },
+    {
+      "seed": 540,
+      "themeId": "crystal",
+      "species": [
+        {
+          "monsterId": "abyss_crystal_beetle",
+          "weight": 324
+        },
+        {
+          "monsterId": "prism_moth",
+          "weight": 9676
+        }
+      ],
+      "fingerprint": "dac8bdeb"
+    },
+    {
+      "seed": 541,
+      "themeId": "green",
+      "species": [
+        {
+          "monsterId": "abyss_mushroom",
+          "weight": 26
+        },
+        {
+          "monsterId": "abyss_tiger",
+          "weight": 9553
+        },
+        {
+          "monsterId": "abyss_panther",
+          "weight": 421
+        }
+      ],
+      "fingerprint": "d81a0500"
+    },
+    {
+      "seed": 544,
+      "themeId": "crystal",
+      "species": [
+        {
+          "monsterId": "abyss_crystal_beetle",
+          "weight": 9145
+        },
+        {
+          "monsterId": "crystal_mimic",
+          "weight": 636
+        },
+        {
+          "monsterId": "prism_moth",
+          "weight": 219
+        }
+      ],
+      "fingerprint": "38cdbc00"
+    },
+    {
+      "seed": 553,
+      "themeId": "crystal",
+      "species": [
+        {
+          "monsterId": "prism_moth",
+          "weight": 316
+        },
+        {
+          "monsterId": "amethyst_golem",
+          "weight": 9606
+        },
+        {
+          "monsterId": "crystal_mimic",
+          "weight": 78
+        }
+      ],
+      "fingerprint": "54b44599"
+    },
+    {
+      "seed": 555,
+      "themeId": "black",
+      "species": [
+        {
+          "monsterId": "sensenmann",
+          "weight": 2
+        },
+        {
+          "monsterId": "will_o_wisp",
+          "weight": 9998
+        }
+      ],
+      "fingerprint": "30e20c69"
+    },
+    {
+      "seed": 579,
+      "themeId": "green",
+      "species": [
+        {
+          "monsterId": "abyss_mushroom",
+          "weight": 9845
+        },
+        {
+          "monsterId": "abyss_panther",
+          "weight": 155
+        }
+      ],
+      "fingerprint": "ad1064c9"
+    },
+    {
+      "seed": 581,
+      "themeId": "black",
+      "species": [
+        {
+          "monsterId": "will_o_wisp",
+          "weight": 9960
+        },
+        {
+          "monsterId": "sensenmann",
+          "weight": 40
+        }
+      ],
+      "fingerprint": "fbe04081"
+    },
+    {
+      "seed": 601,
+      "themeId": "black",
+      "species": [
+        {
+          "monsterId": "will_o_wisp",
+          "weight": 9997
+        },
+        {
+          "monsterId": "sensenmann",
+          "weight": 3
+        }
+      ],
+      "fingerprint": "6981342b"
+    },
+    {
+      "seed": 624,
+      "themeId": "green",
+      "species": [
+        {
+          "monsterId": "abyss_mushroom",
+          "weight": 9990
+        },
+        {
+          "monsterId": "abyss_panther",
+          "weight": 10
+        }
+      ],
+      "fingerprint": "7eae6e39"
+    },
+    {
+      "seed": 633,
+      "themeId": "crystal",
+      "species": [
+        {
+          "monsterId": "crystal_mimic",
+          "weight": 1
+        },
+        {
+          "monsterId": "abyss_crystal_beetle",
+          "weight": 749
+        },
+        {
+          "monsterId": "amethyst_golem",
+          "weight": 9250
+        }
+      ],
+      "fingerprint": "93dc9128"
+    },
+    {
+      "seed": 640,
+      "themeId": "blue",
+      "species": [
+        {
+          "monsterId": "ice_spirit",
+          "weight": 21
+        },
+        {
+          "monsterId": "ice_lizard",
+          "weight": 346
+        },
+        {
+          "monsterId": "ice_vogel",
+          "weight": 13
+        },
+        {
+          "monsterId": "maikaefer",
+          "weight": 9620
+        }
+      ],
+      "fingerprint": "b0807ee6"
+    },
+    {
+      "seed": 680,
+      "themeId": "crystal",
+      "species": [
+        {
+          "monsterId": "prism_moth",
+          "weight": 66
+        },
+        {
+          "monsterId": "abyss_crystal_beetle",
+          "weight": 65
+        },
+        {
+          "monsterId": "crystal_mimic",
+          "weight": 9869
+        }
+      ],
+      "fingerprint": "006df7fe"
+    },
+    {
+      "seed": 682,
+      "themeId": "water",
+      "species": [
+        {
+          "monsterId": "abyss_piranha",
+          "weight": 854
+        },
+        {
+          "monsterId": "abgrund_aal",
+          "weight": 9146
+        }
+      ],
+      "fingerprint": "0729bdd4"
+    },
+    {
+      "seed": 723,
+      "themeId": "water",
+      "species": [
+        {
+          "monsterId": "abgrund_aal",
+          "weight": 119
+        },
+        {
+          "monsterId": "abyss_piranha",
+          "weight": 9881
+        }
+      ],
+      "fingerprint": "be187120"
+    },
+    {
+      "seed": 731,
+      "themeId": "blue",
+      "species": [
+        {
+          "monsterId": "ice_lizard",
+          "weight": 730
+        },
+        {
+          "monsterId": "ice_spirit",
+          "weight": 2
+        },
+        {
+          "monsterId": "ice_vogel",
+          "weight": 9268
+        }
+      ],
+      "fingerprint": "191bd0fe"
+    },
+    {
+      "seed": 756,
+      "themeId": "slate",
+      "species": [
+        {
+          "monsterId": "abyss_rabbit",
+          "weight": 9716
+        },
+        {
+          "monsterId": "abyss_rat",
+          "weight": 284
+        }
+      ],
+      "fingerprint": "0d86909f"
+    },
+    {
+      "seed": 768,
+      "themeId": "slate",
+      "species": [
+        {
+          "monsterId": "bouncing_coin",
+          "weight": 99
+        },
+        {
+          "monsterId": "abyss_rabbit",
+          "weight": 9100
+        },
+        {
+          "monsterId": "vampire_bat",
+          "weight": 786
+        },
+        {
+          "monsterId": "cave_slime",
+          "weight": 15
+        }
+      ],
+      "fingerprint": "71313d79"
+    },
+    {
+      "seed": 772,
+      "themeId": "slate",
+      "species": [
+        {
+          "monsterId": "viper",
+          "weight": 266
+        },
+        {
+          "monsterId": "poison_slime",
+          "weight": 9282
+        },
+        {
+          "monsterId": "vampire_bat",
+          "weight": 14
+        },
+        {
+          "monsterId": "wandering_dead",
+          "weight": 438
+        }
+      ],
+      "fingerprint": "f6a5dea5"
+    },
+    {
+      "seed": 782,
+      "themeId": "torture",
+      "species": [
+        {
+          "monsterId": "folterzange",
+          "weight": 9996
+        },
+        {
+          "monsterId": "morgenstern",
+          "weight": 3
+        },
+        {
+          "monsterId": "inquisitorin",
+          "weight": 1
+        }
+      ],
+      "fingerprint": "19cd88c8"
+    },
+    {
+      "seed": 794,
+      "themeId": "water",
+      "species": [
+        {
+          "monsterId": "abyss_piranha",
+          "weight": 9994
+        },
+        {
+          "monsterId": "abgrund_krabbe",
+          "weight": 6
+        }
+      ],
+      "fingerprint": "f8ad5f3d"
+    },
+    {
+      "seed": 838,
+      "themeId": "blue",
+      "species": [
+        {
+          "monsterId": "ice_vogel",
+          "weight": 9942
+        },
+        {
+          "monsterId": "ice_lizard",
+          "weight": 58
+        }
+      ],
+      "fingerprint": "13d7df99"
+    },
+    {
+      "seed": 881,
+      "themeId": "torture",
+      "species": [
+        {
+          "monsterId": "morgenstern",
+          "weight": 135
+        },
+        {
+          "monsterId": "folterpanzer",
+          "weight": 9865
+        }
+      ],
+      "fingerprint": "045eb5dd"
+    },
+    {
+      "seed": 913,
+      "themeId": "slate",
+      "species": [
+        {
+          "monsterId": "abyss_rabbit",
+          "weight": 70
+        },
+        {
+          "monsterId": "poison_slime",
+          "weight": 9930
+        }
+      ],
+      "fingerprint": "be880a88"
+    },
+    {
+      "seed": 945,
+      "themeId": "torture",
+      "species": [
+        {
+          "monsterId": "inquisitorin",
+          "weight": 156
+        },
+        {
+          "monsterId": "morgenstern",
+          "weight": 9300
+        },
+        {
+          "monsterId": "folterzange",
+          "weight": 176
+        },
+        {
+          "monsterId": "maikaefer",
+          "weight": 368
+        }
+      ],
+      "fingerprint": "cb76359c"
+    },
+    {
+      "seed": 950,
+      "themeId": "crystal",
+      "species": [
+        {
+          "monsterId": "amethyst_golem",
+          "weight": 629
+        },
+        {
+          "monsterId": "abyss_crystal_beetle",
+          "weight": 9371
+        }
+      ],
+      "fingerprint": "101720f8"
+    },
+    {
+      "seed": 963,
+      "themeId": "slate",
+      "species": [
+        {
+          "monsterId": "wandering_dead",
+          "weight": 632
+        },
+        {
+          "monsterId": "bouncing_coin",
+          "weight": 9359
+        },
+        {
+          "monsterId": "abyss_rat",
+          "weight": 1
+        },
+        {
+          "monsterId": "viper",
+          "weight": 8
+        }
+      ],
+      "fingerprint": "dea33c88"
+    },
+    {
+      "seed": 990,
+      "themeId": "slate",
+      "species": [
+        {
+          "monsterId": "vampire_bat",
+          "weight": 27
+        },
+        {
+          "monsterId": "wandering_dead",
+          "weight": 8
+        },
+        {
+          "monsterId": "abyss_rat",
+          "weight": 206
+        },
+        {
+          "monsterId": "viper",
+          "weight": 9759
+        }
+      ],
+      "fingerprint": "c6000828"
+    },
+    {
+      "seed": 1151,
+      "themeId": "water",
+      "species": [
+        {
+          "monsterId": "abyss_piranha",
+          "weight": 85
+        },
+        {
+          "monsterId": "abgrund_krabbe",
+          "weight": 191
+        },
+        {
+          "monsterId": "abgrund_aal",
+          "weight": 9724
+        }
+      ],
+      "fingerprint": "8332d722"
+    },
+    {
+      "seed": 1172,
+      "themeId": "slate",
+      "species": [
+        {
+          "monsterId": "abyss_rat",
+          "weight": 240
+        },
+        {
+          "monsterId": "vampire_bat",
+          "weight": 35
+        },
+        {
+          "monsterId": "viper",
+          "weight": 9725
+        }
+      ],
+      "fingerprint": "607d6f8b"
+    },
+    {
+      "seed": 1204,
+      "themeId": "slate",
+      "species": [
+        {
+          "monsterId": "abyss_rabbit",
+          "weight": 254
+        },
+        {
+          "monsterId": "abyss_rat",
+          "weight": 9746
+        }
+      ],
+      "fingerprint": "19109a1c"
+    },
+    {
+      "seed": 1230,
+      "themeId": "blue",
+      "species": [
+        {
+          "monsterId": "ice_vogel",
+          "weight": 698
+        },
+        {
+          "monsterId": "ice_spirit",
+          "weight": 13
+        },
+        {
+          "monsterId": "ice_bear",
+          "weight": 9289
+        }
+      ],
+      "fingerprint": "337a9d7f"
+    },
+    {
+      "seed": 1285,
+      "themeId": "slate",
+      "species": [
+        {
+          "monsterId": "bouncing_coin",
+          "weight": 358
+        },
+        {
+          "monsterId": "abyss_rabbit",
+          "weight": 9642
+        }
+      ],
+      "fingerprint": "a418d832"
+    },
+    {
+      "seed": 1506,
+      "themeId": "torture",
+      "species": [
+        {
+          "monsterId": "inquisitorin",
+          "weight": 873
+        },
+        {
+          "monsterId": "morgenstern",
+          "weight": 9127
+        }
+      ],
+      "fingerprint": "9b4c9c2c"
+    },
+    {
+      "seed": 1572,
+      "themeId": "slate",
+      "species": [
+        {
+          "monsterId": "abyss_rat",
+          "weight": 9601
+        },
+        {
+          "monsterId": "poison_slime",
+          "weight": 399
+        }
+      ],
+      "fingerprint": "592d7db8"
+    },
+    {
+      "seed": 1624,
+      "themeId": "slate",
+      "species": [
+        {
+          "monsterId": "abyss_rat",
+          "weight": 155
+        },
+        {
+          "monsterId": "wandering_dead",
+          "weight": 9845
+        }
+      ],
+      "fingerprint": "13a5bbdf"
+    },
+    {
+      "seed": 1683,
+      "themeId": "torture",
+      "species": [
+        {
+          "monsterId": "folterzange",
+          "weight": 874
+        },
+        {
+          "monsterId": "morgenstern",
+          "weight": 9126
+        }
+      ],
+      "fingerprint": "b3e39c2f"
+    },
+    {
+      "seed": 1733,
+      "themeId": "slate",
+      "species": [
+        {
+          "monsterId": "poison_slime",
+          "weight": 16
+        },
+        {
+          "monsterId": "abyss_rabbit",
+          "weight": 95
+        },
+        {
+          "monsterId": "cave_slime",
+          "weight": 1
+        },
+        {
+          "monsterId": "abyss_rat",
+          "weight": 9888
+        }
+      ],
+      "fingerprint": "09ce8a1e"
+    },
+    {
+      "seed": 1737,
+      "themeId": "slate",
+      "species": [
+        {
+          "monsterId": "poison_slime",
+          "weight": 65
+        },
+        {
+          "monsterId": "viper",
+          "weight": 9858
+        },
+        {
+          "monsterId": "wandering_dead",
+          "weight": 77
+        }
+      ],
+      "fingerprint": "0052b7c1"
+    },
+    {
+      "seed": 1838,
+      "themeId": "red",
+      "species": [
+        {
+          "monsterId": "fire_lizard",
+          "weight": 819
+        },
+        {
+          "monsterId": "fire_spirit",
+          "weight": 27
+        },
+        {
+          "monsterId": "cassowary",
+          "weight": 9154
+        }
+      ],
+      "fingerprint": "8cbcfafa"
+    },
+    {
+      "seed": 1856,
+      "themeId": "slate",
+      "species": [
+        {
+          "monsterId": "bouncing_coin",
+          "weight": 9186
+        },
+        {
+          "monsterId": "cave_slime",
+          "weight": 286
+        },
+        {
+          "monsterId": "viper",
+          "weight": 528
+        }
+      ],
+      "fingerprint": "8f8a26bf"
+    },
+    {
+      "seed": 1985,
+      "themeId": "torture",
+      "species": [
+        {
+          "monsterId": "folterpanzer",
+          "weight": 9289
+        },
+        {
+          "monsterId": "morgenstern",
+          "weight": 698
+        },
+        {
+          "monsterId": "folterzange",
+          "weight": 13
+        }
+      ],
+      "fingerprint": "b3bc3e5c"
+    },
+    {
+      "seed": 2200,
+      "themeId": "black",
+      "species": [
+        {
+          "monsterId": "wraith",
+          "weight": 9631
+        },
+        {
+          "monsterId": "sensenmann",
+          "weight": 369
+        }
+      ],
+      "fingerprint": "52df152b"
+    },
+    {
+      "seed": 2473,
+      "themeId": "slate",
+      "species": [
+        {
+          "monsterId": "wandering_dead",
+          "weight": 9192
+        },
+        {
+          "monsterId": "abyss_rat",
+          "weight": 808
+        }
+      ],
+      "fingerprint": "6145963a"
+    },
+    {
+      "seed": 2477,
+      "themeId": "red",
+      "species": [
+        {
+          "monsterId": "cassowary",
+          "weight": 9641
+        },
+        {
+          "monsterId": "fire_lizard",
+          "weight": 358
+        },
+        {
+          "monsterId": "loren_lava",
+          "weight": 1
+        }
+      ],
+      "fingerprint": "1d360032"
+    },
+    {
+      "seed": 3000,
+      "themeId": "torture",
+      "species": [
+        {
+          "monsterId": "morgenstern",
+          "weight": 80
+        },
+        {
+          "monsterId": "folterpanzer",
+          "weight": 9920
+        }
+      ],
+      "fingerprint": "3bb81ac0"
+    }
+  ],
+  "examples": [
+    {
+      "revision": "v1-candidate-1",
+      "ruleset": "special-map-v1",
+      "seed": 0,
+      "themeId": "magic",
+      "species": [
+        {
+          "monsterId": "merseburg_spell",
+          "weight": 1598
+        },
+        {
+          "monsterId": "tanzlichter",
+          "weight": 6976
+        },
+        {
+          "monsterId": "junghexe",
+          "weight": 5
+        },
+        {
+          "monsterId": "geistflamme",
+          "weight": 1421
+        }
+      ],
+      "fingerprint": "8adad526",
+      "topologyFingerprint": "085620c1"
+    },
+    {
+      "revision": "v1-candidate-1",
+      "ruleset": "special-map-v1",
+      "seed": 1,
+      "themeId": "red",
+      "species": [
+        {
+          "monsterId": "fire_spirit",
+          "weight": 2
+        },
+        {
+          "monsterId": "fire_lizard",
+          "weight": 49
+        },
+        {
+          "monsterId": "loren_lava",
+          "weight": 3064
+        },
+        {
+          "monsterId": "cassowary",
+          "weight": 4475
+        },
+        {
+          "monsterId": "maikaefer",
+          "weight": 2410
+        }
+      ],
+      "fingerprint": "5464dd16",
+      "topologyFingerprint": "487444ba"
+    },
+    {
+      "revision": "v1-candidate-1",
+      "ruleset": "special-map-v1",
+      "seed": 12345,
+      "themeId": "torture",
+      "species": [
+        {
+          "monsterId": "morgenstern",
+          "weight": 930
+        },
+        {
+          "monsterId": "folterzange",
+          "weight": 1989
+        },
+        {
+          "monsterId": "folterpanzer",
+          "weight": 2429
+        },
+        {
+          "monsterId": "maikaefer",
+          "weight": 4652
+        }
+      ],
+      "fingerprint": "fa8d0653",
+      "topologyFingerprint": "65bbb4f0"
+    },
+    {
+      "revision": "v1-candidate-1",
+      "ruleset": "special-map-v1",
+      "seed": 32768,
+      "themeId": "crystal",
+      "species": [
+        {
+          "monsterId": "abyss_crystal_beetle",
+          "weight": 992
+        },
+        {
+          "monsterId": "prism_moth",
+          "weight": 8567
+        },
+        {
+          "monsterId": "crystal_mimic",
+          "weight": 441
+        }
+      ],
+      "fingerprint": "fc66809c",
+      "topologyFingerprint": "e7e9d2c5"
+    },
+    {
+      "revision": "v1-candidate-1",
+      "ruleset": "special-map-v1",
+      "seed": 65535,
+      "themeId": "crystal",
+      "species": [
+        {
+          "monsterId": "crystal_mimic",
+          "weight": 343
+        },
+        {
+          "monsterId": "abyss_crystal_beetle",
+          "weight": 2738
+        },
+        {
+          "monsterId": "amethyst_golem",
+          "weight": 5136
+        },
+        {
+          "monsterId": "prism_moth",
+          "weight": 1783
+        }
+      ],
+      "fingerprint": "b6e364f1",
+      "topologyFingerprint": "26ac1209"
+    }
+  ],
+  "sha256": "33f521694198da8fd73de895fd844c6042d8c88f364c1465aa3c181968dc20a4",
+  "seconds": 8.4524311
+}
