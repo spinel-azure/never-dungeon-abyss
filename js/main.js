@@ -133,7 +133,7 @@ import {
 import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
 import { EffectEngine } from "./effects/effect-engine.js";
 import { getEquipmentHighlightClass, getLotEquipmentHighlightClass, hasUncertainLoot, isHighlightedLotCardRarity } from "./loot-identification.js";
-import { configureTown, resumeDungeonEntrance, INN_MEDICINE_DELIVERY_TRANSITION_FLAG, setTownEndingSuspended, openPendingNpcRenewal, openTown, closeTown, getTownState, handleTownInput as handleRawTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js";
+import { handleSpecialMapInput, configureTown, resumeDungeonEntrance, INN_MEDICINE_DELIVERY_TRANSITION_FLAG, setTownEndingSuspended, openPendingNpcRenewal, openTown, closeTown, getTownState, handleTownInput as handleRawTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js";
 import { flashNpcPartyStatus, renderNpcPartyStatus, renderNpcStatusPage, setNpcPartyCharge } from "./npc-party-ui.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { transactSpecialMaps, discoverTestMap } from "../data/special-maps.js";
@@ -5248,6 +5248,7 @@ import {
       window.dispatchEvent(new CustomEvent("nda:title-input", { detail: { action } }));
       return true;
     }
+    if (handleSpecialMapInput(action)) return true;
     if (endingController.handleAction(action)) return true;
     if (michaelaRestorationController.handleAction(action)) return true;
     if (endingSequenceActive) return true;
@@ -5314,6 +5315,7 @@ import {
   });
 
   configureInput({
+    handleExplorationInput:handleSpecialMapInput,
     forwardBtn,
     backBtn,
     leftBtn,
@@ -5328,6 +5330,7 @@ import {
     buttonB,
     commandRoot: dungeonCommands,
     openStatusMenu: () => {
+      if (handleSpecialMapInput('status')) return true;
       if (endingSequenceActive) return true;
       if (handleBlockingTutorialInput("dismiss")) return true;
       return openStatusMenu();

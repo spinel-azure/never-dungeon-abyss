@@ -1117,6 +1117,7 @@ function rgba([r, g, b], alpha) {
 }
 
 export function drawCellEvents(layer = "all", now = 0) {
+  if(renderer.state?.kind==='specialMap')return;
   const { ctx, W, H, state } = renderer;
   const {
     MAP_W,
@@ -1978,4 +1979,15 @@ export function isOpenDoorFrameSample(u) {
 
 export function getOpenDoorSample(u) {
   return Math.max(0, Math.min(1, (u - .69) / .44));
+}
+
+// Temporary render source: no normal dungeon state is copied into the session.
+// Dispose on return/load/new game to restore the exact previous dependencies.
+export function useSpecialMapRenderSource(options,themeId){
+ const keys=[...Object.keys(options),'wallColor','floorColor','wallTexture','minimapOverlayVisible'];
+ const previous=Object.fromEntries(keys.map(key=>[key,renderer[key]]));
+ Object.assign(renderer,options);renderer.minimapOverlayVisible=false;
+ setWallColor(themeId);setFloorColor(themeId);
+ let disposed=false;
+ return ()=>{if(disposed)return;disposed=true;Object.assign(renderer,previous);};
 }

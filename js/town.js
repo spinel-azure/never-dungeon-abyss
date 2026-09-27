@@ -22,7 +22,11 @@ import { getShopEquipmentStock } from "../data/shop-stock.js";
 import { configureTownPassersby } from "./town-passersby.js";
 import { isExplorerTestEnabled, onExplorerTestChanged } from "./explorer-preview.js";
 import { createExplorerPreviewUI } from "./explorer-preview-ui.js";
+import { startSpecialMapExploration } from "./special-map/exploration-ui.js";
 let explorerPreview = null;
+export function handleSpecialMapInput(action){
+  return town.active&&town.mode==='explorerPreview' ? (explorerPreview?.input(action)??false) : false;
+}
 import { getInnStayFee } from "./character-services.js";
 import { getGuildQuestPageSize, getVisibleGuildQuestIndexes } from "./guild-quest-pagination.js";
 import { getTavernRumorTypewriterParts } from "../data/tavern-rumors.js";
@@ -1282,6 +1286,7 @@ function activateEntranceCommand(command) {
       getMaps: () => town.getCharacter()?.specialMaps,
       updateMaps: operation => town.updateSpecialMaps(operation),
       message: town.messageEl, playSe: key => town.playSe(key),
+      startExploration: startSpecialMapExploration,
       onExit: () => {town.mode = "dungeonEntrance";renderDungeonEntrance();}
     });
     town.mode = "explorerPreview";

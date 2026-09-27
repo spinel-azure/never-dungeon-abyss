@@ -66,3 +66,11 @@ body .explorer-preview textarea.is-selected{outline:2px solid #aef6ff}
 }
 .explorer-form-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;min-width:0}
 @media(max-width:680px){body .explorer-preview .explorer-form-actions button{font-size:15px;min-height:44px}}
+.special-map-runtime{position:absolute;inset:0;z-index:20;background:#080a08;color:#fff}
+.special-map-runtime canvas{display:block;width:100%;height:100%;object-fit:contain}
+.special-map-hud{position:absolute;left:10px;top:8px;padding:4px 8px;background:#000a;font-size:16px;border-radius:4px}
+.special-map-controls{position:absolute;left:10px;bottom:8px;display:flex;gap:8px}
+.special-map-controls button,.special-map-exit button{font:16px GameFont,sans-serif;min-height:44px;padding:5px 12px;touch-action:manipulation}
+.special-map-exit{position:absolute;inset:25% 10%;background:#080b09ee;border:1px solid #aef6ff;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px;text-align:center}
+.special-map-exit[hidden]{display:none}
+@media(max-width:680px){.special-map-hud{font-size:12px;left:4px;top:4px}.special-map-controls{bottom:2px;left:4px}.special-map-controls button,.special-map-exit button{font-size:14px;padding:2px 7px}}

@@ -22,7 +22,7 @@ class Element {
   }
   ancestor(name){for(let e=this;e;e=e.parent)if(e.className?.split(' ').includes(name))return true;return false;}
 }
-function setup(t,layout='layout-mobile',initial=fixture()){
+function setup(t,layout='layout-mobile',initial=fixture(),extra={}){
   const handlers={},hint=new Element(),document={createElement:tag=>new Element(tag),querySelector:()=>hint,querySelectorAll:()=>[],body:{classList:{contains:v=>v===layout}},addEventListener:(type,fn)=>{(handlers[type]??=[]).push(fn);}};
   const previous=globalThis.document;globalThis.document=document;t.after(()=>{if(previous===undefined)delete globalThis.document;else globalThis.document=previous;});
   const source=readFileSync(new URL('../js/input.js',import.meta.url),'utf8');
@@ -30,7 +30,7 @@ function setup(t,layout='layout-mobile',initial=fixture()){
   const host=new Element(),commands=new Element(),background=new Element(),message=new Element();let exits=0;
   commands.className='dungeon-commands';
   let state=initial,saveFails=false;
-  const ui=createExplorerPreviewUI({host,commands,background,message,getMaps:()=>state,updateMaps:operation=>{const result=operation(state);if(saveFails)return {ok:false,error:'保存に失敗しました。'};if(result.ok)state=result.state;return result;},playSe(){},onExit(){exits++;}});
+  const ui=createExplorerPreviewUI({host,commands,background,message,getMaps:()=>state,updateMaps:operation=>{const result=operation(state);if(saveFails)return {ok:false,error:'保存に失敗しました。'};if(result.ok)state=result.state;return result;},playSe(){},onExit(){exits++;},...extra});
   const all=e=>[e,...e.children.flatMap(all)];
   const find=label=>all(host).find(e=>e.tag==='button'&&!e.disabled&&e.textContent===label);
   function touch(target){let cancelled=false;for(const type of ['touchstart','touchend'])for(const fn of handlers[type]||[])fn({target,preventDefault(){cancelled=true;},stopPropagation(){}});if(!cancelled&&!target.disabled)target.onclick?.();return cancelled;}
@@ -76,6 +76,18 @@ test('keyboard/gamepad action routing retains paging and detail return position'
   assert.ok(v.find(label(7)).classes.has('is-selected'));
   assert.match(v.host.textContent,/2 \/ 2/);
 });
+
+test('exploration confirms registered selection, routes runtime input and disposes on return',t=>{
+ let started,disposed=0;const inputs=[];
+ const v=setup(t,'layout-mobile',fixture(),{startExploration:options=>{started=options;return {input:a=>{inputs.push(a);if(a==='cancel')options.onExit();return true;},close:()=>disposed++};}});
+ v.ui.open('maps');for(const a of ['right','down','down','confirm','confirm'])v.ui.input(a);
+ assert.equal(started,undefined);assert.ok(v.find('はい（A／ENTER）'));
+ v.ui.input('cancel');v.ui.input('cancel');assert.ok(v.find(label(7)).classes.has('is-selected'));
+ for(const a of ['confirm','confirm','confirm'])v.ui.input(a);
+ assert.equal(started.registered.length,10);assert.equal(v.host.children[0].hidden,true);
+ v.ui.input('up');v.ui.input('cancel');assert.deepEqual(inputs,['up','cancel']);assert.equal(disposed,1);assert.equal(v.exits(),1);
+ assert.equal(v.state().registered.length,10);
+});
 test('appraisal, registration and management actions need only one tap',t=>{
  const v=setup(t);v.ui.open('tent');
  const command=label=>v.commands.children.find(e=>e.textContent===label);
@@ -97,7 +109,7 @@ test('signature gamepad navigates input, register, back without losing typed sig
 });
 test('management delete confirmation clamps six maps to first page and save failure retains map',t=>{
  const initial=fixture();initial.registered=initial.registered.slice(0,6);
- const v=setup(t,'layout-mobile',initial);v.ui.open('maps');v.ui.input('right');v.ui.input('confirm');v.ui.input('confirm');
+ const v=setup(t,'layout-mobile',initial);v.ui.open('organize');v.ui.input('right');v.ui.input('confirm');v.ui.input('confirm');
  v.touch(v.find('地図を削除'));v.ui.input('cancel');assert.equal(v.state().registered.length,6);
  v.touch(v.find('地図を削除'));v.touch(v.find('削除する（A）'));assert.equal(v.state().registered.length,5);assert.match(v.host.textContent,/1 \/ 1/);
  v.ui.input('confirm');v.ui.input('confirm');v.touch(v.find('地図を削除'));v.failSave();v.touch(v.find('削除する（A）'));
@@ -115,7 +127,7 @@ test('share display/import uses original discoverer and duplicate keeps ten slot
 test('clipboard failure retains visible selectable code and reports a manual-copy fallback',async t=>{
  const prior=Object.getOwnPropertyDescriptor(globalThis,'navigator');t.after(()=>Object.defineProperty(globalThis,'navigator',prior));
  Object.defineProperty(globalThis,'navigator',{configurable:true,value:{clipboard:{writeText:()=>Promise.reject(Error('denied'))}}});
- const v=setup(t);v.ui.open('maps');v.ui.input('confirm');v.ui.input('confirm');v.touch(v.find('共有コードをコピー'));await Promise.resolve();
+ const v=setup(t);v.ui.open('organize');v.ui.input('confirm');v.ui.input('confirm');v.touch(v.find('共有コードをコピー'));await Promise.resolve();
  assert.match(v.message.textContent,/手動でコピー/);assert.ok(v.all(v.host).some(e=>e.tag==='textarea'&&e.value.startsWith('NDA:')));
 });
 

@@ -19,6 +19,7 @@ export function configureInput({
   handleEventChoiceInput = () => false,
   handleBattleInput = () => false,
   handleTownInput = () => false,
+  handleExplorationInput = () => false,
   handleDoorInput = () => false,
   onUserOperation = () => {},
   handleMenuInput
@@ -26,6 +27,7 @@ export function configureInput({
   window.addEventListener("keydown", (e) => {
     if (e.target instanceof Element && e.target.closest("input, select, textarea")) return;
     const skillAction = keyAction(e);
+    if((skillAction||e.key==='Enter')&&handleExplorationInput(skillAction||'confirm')){e.preventDefault();return;}
     if (skillAction) onUserOperation();
     if (skillAction && handleItemInput(skillAction)) { e.preventDefault(); return; }
     if (skillAction && handleSkillInput(skillAction)) { e.preventDefault(); return; }
@@ -57,14 +59,14 @@ export function configureInput({
   }, { passive: false });
 
   const operate = handler => () => { onUserOperation(); return handler(); };
-  bindControl(forwardBtn, operate(() => handleItemInput("up") || handleSkillInput("up") || handleOverlayInput("dismiss") || manualMove(1)));
-  bindControl(backBtn, operate(() => handleItemInput("down") || handleSkillInput("down") || handleOverlayInput("dismiss") || manualMove(-1)));
-  bindControl(leftBtn, operate(() => handleItemInput("left") || handleSkillInput("left") || handleEventChoiceInput("left") || handleOverlayInput("dismiss") || manualTurn(-1)));
-  bindControl(rightBtn, operate(() => handleItemInput("right") || handleSkillInput("right") || handleEventChoiceInput("right") || handleOverlayInput("dismiss") || manualTurn(1)));
-  bindControl(autoReturnBtn, operate(() => handleItemInput("cancel") || handleSkillInput("cancel") || handleOverlayInput("dismiss") || startAutoReturn()));
-  bindControl(randomGenerateBtn, operate(() => handleItemInput("cancel") || handleSkillInput("cancel") || handleOverlayInput("dismiss") || generateRandomDungeon()));
-  bindControl(buttonA, operate(() => handleItemInput("confirm") || handleSkillInput("confirm") || handleBattleInput("confirm") || handleTownInput("confirm") || handleOverlayInput("confirm") || handleMenuInput("confirm") || handleDoorInput()));
-  bindControl(buttonB, operate(() => handleItemInput("cancel") || handleSkillInput("cancel") || handleBattleInput("cancel") || handleTownInput("cancel") || handleOverlayInput("cancel") || handleMenuInput("cancel")));
+  bindControl(forwardBtn, operate(() => handleExplorationInput("up") || handleItemInput("up") || handleSkillInput("up") || handleOverlayInput("dismiss") || manualMove(1)));
+  bindControl(backBtn, operate(() => handleExplorationInput("down") || handleItemInput("down") || handleSkillInput("down") || handleOverlayInput("dismiss") || manualMove(-1)));
+  bindControl(leftBtn, operate(() => handleExplorationInput("left") || handleItemInput("left") || handleSkillInput("left") || handleEventChoiceInput("left") || handleOverlayInput("dismiss") || manualTurn(-1)));
+  bindControl(rightBtn, operate(() => handleExplorationInput("right") || handleItemInput("right") || handleSkillInput("right") || handleEventChoiceInput("right") || handleOverlayInput("dismiss") || manualTurn(1)));
+  bindControl(autoReturnBtn, operate(() => handleExplorationInput("cancel") || handleItemInput("cancel") || handleSkillInput("cancel") || handleOverlayInput("dismiss") || startAutoReturn()));
+  bindControl(randomGenerateBtn, operate(() => handleExplorationInput("blocked") || handleItemInput("cancel") || handleSkillInput("cancel") || handleOverlayInput("dismiss") || generateRandomDungeon()));
+  bindControl(buttonA, operate(() => handleExplorationInput("confirm") || handleItemInput("confirm") || handleSkillInput("confirm") || handleBattleInput("confirm") || handleTownInput("confirm") || handleOverlayInput("confirm") || handleMenuInput("confirm") || handleDoorInput()));
+  bindControl(buttonB, operate(() => handleExplorationInput("cancel") || handleItemInput("cancel") || handleSkillInput("cancel") || handleBattleInput("cancel") || handleTownInput("cancel") || handleOverlayInput("cancel") || handleMenuInput("cancel")));
   configureCommandMouseButtons({
     commandRoot,
     confirm: operate(() => handleItemInput("confirm") || handleSkillInput("confirm") || handleBattleInput("confirm") || handleTownInput("confirm") || handleOverlayInput("confirm") || handleMenuInput("confirm") || handleDoorInput()),
@@ -175,6 +177,7 @@ function configureTouchGuards() {
       // These native buttons use click for both pointer and touch activation.
       // Cancelling touchstart here prevents Safari from generating that click.
       && !target.closest(".explorer-preview button")
+      && !target.closest(".special-map-runtime button")
       && !!target.closest(guardedSelector);
   }
 

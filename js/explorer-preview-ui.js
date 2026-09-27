@@ -2,7 +2,7 @@ import {getTentBackground} from './explorer-preview.js';
 import {normalizeSpecialMaps, describeTestMap, setMapSignature, inspectAppraisal, appraiseMap, registerSharedMap, deleteRegisteredMap, toggleMapFavorite} from '../data/special-maps.js';
 import {encodeMapCode,decodeMapCode} from '../data/special-map-code.js';
 
-export function createExplorerPreviewUI({host, commands, background, message, playSe, onExit, getMaps=()=>null, updateMaps=()=>({ok:false,error:'保存処理に接続されていません。'})}) {
+export function createExplorerPreviewUI({host, commands, background, message, playSe, onExit, startExploration, getMaps=()=>null, updateMaps=()=>({ok:false,error:'保存処理に接続されていません。'})}) {
   const panel=document.createElement('section');
   panel.className='transfer-destination-overlay explorer-preview';panel.hidden=true;
   panel.setAttribute('aria-label','特殊地図');host.append(panel);
@@ -11,15 +11,17 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
   let index=0,page=0,armed=-1,appraisalIndex=0,appraisalArmed=-1,discoveryId='',step=0,detailId='',input=null;
   const maps=()=>normalizeSpecialMaps(getMaps());
   let formControls=[],formCursor=0,actions=[],actionCursor=0,pendingMap=null,codeDraft='';
+  let exploration=null;
   const selectedMap=()=>maps().registered.find(m=>m.id===detailId);
   const make=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
   const button=(label,action,selected=false)=>{const b=make('button');b.type='button';if(label)b.append(make('span',label,'explorer-button-label'));b.classList.toggle('is-selected',selected);b.onclick=()=>{playSe('confirm');action();};return b;};
   const error=text=>{message.textContent=text;};
   const countText=()=>`未鑑定の地図 ${maps().unidentified.length} / 3　登録済み地図 ${maps().registered.length} / 10`;
-  function close(){if(active&&hint)hint.textContent=previousHint;active=false;panel.hidden=true;commands.hidden=false;}
+  function close(){exploration?.close();exploration=null;if(active&&hint)hint.textContent=previousHint;active=false;panel.hidden=true;commands.hidden=false;}
   function exit(){close();onExit();}
   function back(){
-    if(['manage','share','delete'].includes(view)){view=view==='manage'?'detail':'manage';actionCursor=0;}
+    if(view==='enter'){view='detail';actionCursor=0;}
+    else if(['manage','share','delete'].includes(view)){view=view==='manage'?'detail':'manage';actionCursor=0;}
     else if(view==='sameContent')view='register';
     else if(view==='signature')view='tent';
     else if(view==='detail'){view=origin;armed=-1;}
@@ -56,6 +58,13 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     formCursor=0;codeDraft='';appraisalArmed=armed=-1;render();
   }
   function changeView(next){view=next;actionCursor=0;render();}
+  function enterMap(){
+    try{
+      if(!startExploration)throw Error('探索機能に接続されていません。');
+      exploration=startExploration({host,registered:maps().registered,mapKey:detailId,message,onExit:exit});
+      panel.hidden=true;commands.hidden=true;view='exploring';
+    }catch(e){error(e.message);}
+  }
   function registered(result){
     if(!result.ok){error(result.error);return;}
     detailId=result.map.id;index=maps().registered.findIndex(m=>m.id===detailId);page=Math.floor(index/5);
@@ -117,7 +126,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       commands.setAttribute('aria-label','探検家テント');
       commands.replaceChildren(...['地図鑑定','地図登録','地図整理','戻る','',''].map((label,i)=>{const b=button(label,()=>{cursor=i;activateTent();},i===cursor);b.disabled=!label;return b;}));return;
     }
-    panel.append(make('h2',({maps:'MAP EXPLORATION',organize:'地図整理',detail:'地図詳細',signature:'地図署名',appraise:'地図鑑定',appraisal:'地図鑑定',duplicate:'地図鑑定',register:'地図登録',manage:'地図管理',share:'共有コード',delete:'地図削除',sameContent:'地図登録の確認'})[view]));
+    panel.append(make('h2',({maps:'MAP EXPLORATION',organize:'地図整理',detail:'地図詳細',signature:'地図署名',appraise:'地図鑑定',appraisal:'地図鑑定',duplicate:'地図鑑定',register:'地図登録',manage:'地図管理',share:'共有コード',delete:'地図削除',sameContent:'地図登録の確認',enter:'特殊地図探索'})[view]));
     if(view==='signature'||view==='register'){
       const isSignature=view==='signature',submitAction=isSignature?signature:()=>importCode();
       const form=make('form',undefined,'explorer-signature');
@@ -143,7 +152,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       const list=make('div',undefined,'transfer-destination-list');
       if(!entries.length)list.append(make('p','登録されている地図はありません。'));
       entries.slice(page*5,page*5+5).forEach((map,offset)=>{
-        const i=page*5+offset,info=describeTestMap(map)||{name:'未対応の生成ルール',level:'?'};
+        const i=page*5+offset,info=describeTestMap(map)||{name:map.rulesetVersion==='special-map-v1'?'特殊地図':'未対応の生成ルール',level:'?'};
         const b=button('',()=>{if(armed===i)openDetail(map);else{index=i;armed=i;render();}},i===index);
         b.title=info.name;b.setAttribute('aria-label',`${info.name} Lv.${info.level}`);
         b.append(make('span',info.name,'explorer-map-name'),make('span',`Lv.${info.level}`,'explorer-map-level'));list.append(b);
@@ -170,10 +179,14 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     }
     if(view==='detail'){
       const map=maps().registered.find(m=>m.id===detailId);if(!map){view=origin;render();return;}
-      const info=describeTestMap(map)||{name:'未対応の生成ルール',level:'?'};
+      const info=describeTestMap(map)||{name:map.rulesetVersion==='special-map-v1'?'特殊地図':'未対応の生成ルール',level:'?'};
       const body=make('div',undefined,'explorer-detail');
       body.append(make('h3',`${info.name} Lv.${info.level}`),make('p',`発見者：${map.discovererName}`),make('p',`踏破状況：${map.cleared?'踏破済み':'未踏破'}`),make('p','挑戦条件：未実装（Phase 2A仮地図）'));
-      panel.append(body);actionButtons([['管理機能を確認（A）',()=>changeView('manage')],['戻る（B）',back]]);return;
+      panel.append(body);actionButtons(origin==='maps'?[['探索する（A）',()=>changeView('enter')],['戻る（B）',back]]:[['管理機能を確認（A）',()=>changeView('manage')],['戻る（B）',back]]);return;
+    }
+    if(view==='enter'){
+      panel.append(make('p','この地図を探索しますか？'),make('p','敵・宝箱・報酬はありません。探索途中の状態は保存されません。'));
+      actionButtons([['はい（A／ENTER）',enterMap],['いいえ（B）',back]]);return;
     }
     if(view==='sameContent'){
       const existing=maps().registered.find(m=>m.rulesetVersion===pendingMap.rulesetVersion&&m.seed===pendingMap.seed);
@@ -181,7 +194,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       actionButtons([['登録する（A）',()=>importCode(true)],['やめる（B）',back]]);return;
     }
     const map=selectedMap();if(!map){view='organize';render();return;}
-    const info=describeTestMap(map)||{name:'未対応の生成ルール',level:'?'};
+    const info=describeTestMap(map)||{name:map.rulesetVersion==='special-map-v1'?'特殊地図':'未対応の生成ルール',level:'?'};
     panel.append(make('p',`${info.name} Lv.${info.level}　発見者：${map.discovererName}`));
     if(view==='manage'){
       actionButtons([['共有コードを表示',()=>changeView('share')],['共有コードをコピー',()=>{changeView('share');try{copyCode(encodeMapCode(map));}catch(e){error(e.message);}}],
@@ -199,6 +212,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
   }
   function inputAction(action){
     if(!active)return false;
+    if(exploration)return exploration.input(action);
     if(action==='cancel'){back();return true;}
     if(view==='signature'||view==='register'){
       if(['up','down','left','right'].includes(action)){formCursor=(formCursor+(['down','right'].includes(action)?1:formControls.length-1))%formControls.length;focusForm();}
