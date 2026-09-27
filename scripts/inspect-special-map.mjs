@@ -6,3 +6,6 @@ const {walls,...info}=map;console.log({...info,fingerprint:specialMapFingerprint
 const ecology=generateSpecialMapEcology(map.ruleset,map.seed,map);
 console.log(`\necology (${ecology.revision}, provisional): ${ecology.fingerprint}`);
 for(const {monsterId,weight} of ecology.species)console.log(`${monsterId}\t${getEnemyById(monsterId)?.name??''}\t${weight}\t${(weight/100).toFixed(2)}%`);
+
+import {generateSpecialMapDoors} from '../js/special-map/doors.js';
+console.log('doors (provisional)',generateSpecialMapDoors(map.ruleset,map.seed,map));

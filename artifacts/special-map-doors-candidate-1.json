@@ -1,0 +1,365 @@
+{
+  "status": "Candidate 1 — provisional; not frozen",
+  "seeds": 65536,
+  "failures": 0,
+  "counts": {
+    "0": 0,
+    "6": 13033,
+    "7": 13228,
+    "8": 12982,
+    "9": 13292,
+    "10": 13001,
+    "1-5": 0
+  },
+  "shortfall": 0,
+  "totalDoors": 524288,
+  "spatial": {
+    "minimumEndpointManhattan": {
+      "1": 58075,
+      "2": 6840,
+      "3": 595,
+      "4": 26
+    },
+    "maxDoorsPerAnchorRow": {
+      "1": 4222,
+      "2": 43301,
+      "3": 16346,
+      "4": 1597,
+      "5": 67,
+      "6": 3
+    },
+    "maxDoorsPerAnchorColumn": {
+      "1": 4241,
+      "2": 43484,
+      "3": 16181,
+      "4": 1554,
+      "5": 75,
+      "6": 1
+    },
+    "entranceNearestEdgeDistance": {
+      "1": 12987,
+      "2": 12842,
+      "3": 10789,
+      "4": 8719,
+      "5": 6454,
+      "6": 4615,
+      "7": 3245,
+      "8": 2125,
+      "9": 1343,
+      "10": 853,
+      "11": 562,
+      "12": 360,
+      "13": 234,
+      "14": 154,
+      "15": 105,
+      "16": 55,
+      "17": 24,
+      "18": 24,
+      "19": 9,
+      "20": 12,
+      "21": 13,
+      "22": 6,
+      "23": 1,
+      "24": 1,
+      "25": 1,
+      "26": 2,
+      "28": 1
+    },
+    "exitNearestEdgeDistance": {
+      "1": 8272,
+      "2": 8620,
+      "3": 7957,
+      "4": 7508,
+      "5": 6394,
+      "6": 5594,
+      "7": 4715,
+      "8": 3945,
+      "9": 3042,
+      "10": 2471,
+      "11": 1906,
+      "12": 1440,
+      "13": 1025,
+      "14": 804,
+      "15": 560,
+      "16": 371,
+      "17": 254,
+      "18": 199,
+      "19": 143,
+      "20": 97,
+      "21": 71,
+      "22": 53,
+      "23": 29,
+      "24": 22,
+      "25": 20,
+      "26": 10,
+      "27": 6,
+      "28": 4,
+      "29": 2,
+      "31": 1,
+      "34": 1
+    }
+  },
+  "examples": [
+    {
+      "revision": "v1-door-candidate-1",
+      "ruleset": "special-map-v1",
+      "seed": 0,
+      "targetCount": 8,
+      "doors": [
+        {
+          "key": "4,1,S",
+          "x": 4,
+          "y": 1,
+          "dir": "S",
+          "kind": "normal"
+        },
+        {
+          "key": "0,2,E",
+          "x": 0,
+          "y": 2,
+          "dir": "E",
+          "kind": "normal"
+        },
+        {
+          "key": "2,2,E",
+          "x": 2,
+          "y": 2,
+          "dir": "E",
+          "kind": "normal"
+        },
+        {
+          "key": "8,2,S",
+          "x": 8,
+          "y": 2,
+          "dir": "S",
+          "kind": "normal"
+        },
+        {
+          "key": "1,4,E",
+          "x": 1,
+          "y": 4,
+          "dir": "E",
+          "kind": "normal"
+        },
+        {
+          "key": "5,4,S",
+          "x": 5,
+          "y": 4,
+          "dir": "S",
+          "kind": "normal"
+        },
+        {
+          "key": "1,8,E",
+          "x": 1,
+          "y": 8,
+          "dir": "E",
+          "kind": "normal"
+        },
+        {
+          "key": "8,8,E",
+          "x": 8,
+          "y": 8,
+          "dir": "E",
+          "kind": "normal"
+        }
+      ],
+      "fingerprint": "ed476a8b",
+      "topologyFingerprint": "085620c1"
+    },
+    {
+      "revision": "v1-door-candidate-1",
+      "ruleset": "special-map-v1",
+      "seed": 1,
+      "targetCount": 10,
+      "doors": [
+        {
+          "key": "1,0,E",
+          "x": 1,
+          "y": 0,
+          "dir": "E",
+          "kind": "normal"
+        },
+        {
+          "key": "8,0,E",
+          "x": 8,
+          "y": 0,
+          "dir": "E",
+          "kind": "normal"
+        },
+        {
+          "key": "1,1,S",
+          "x": 1,
+          "y": 1,
+          "dir": "S",
+          "kind": "normal"
+        },
+        {
+          "key": "1,3,E",
+          "x": 1,
+          "y": 3,
+          "dir": "E",
+          "kind": "normal"
+        },
+        {
+          "key": "5,4,E",
+          "x": 5,
+          "y": 4,
+          "dir": "E",
+          "kind": "normal"
+        },
+        {
+          "key": "8,6,S",
+          "x": 8,
+          "y": 6,
+          "dir": "S",
+          "kind": "normal"
+        },
+        {
+          "key": "6,7,E",
+          "x": 6,
+          "y": 7,
+          "dir": "E",
+          "kind": "normal"
+        },
+        {
+          "key": "0,9,E",
+          "x": 0,
+          "y": 9,
+          "dir": "E",
+          "kind": "normal"
+        },
+        {
+          "key": "2,9,E",
+          "x": 2,
+          "y": 9,
+          "dir": "E",
+          "kind": "normal"
+        },
+        {
+          "key": "8,9,E",
+          "x": 8,
+          "y": 9,
+          "dir": "E",
+          "kind": "normal"
+        }
+      ],
+      "fingerprint": "0e9292b3",
+      "topologyFingerprint": "487444ba"
+    },
+    {
+      "revision": "v1-door-candidate-1",
+      "ruleset": "special-map-v1",
+      "seed": 12345,
+      "targetCount": 7,
+      "doors": [
+        {
+          "key": "8,0,S",
+          "x": 8,
+          "y": 0,
+          "dir": "S",
+          "kind": "normal"
+        },
+        {
+          "key": "1,3,E",
+          "x": 1,
+          "y": 3,
+          "dir": "E",
+          "kind": "normal"
+        },
+        {
+          "key": "8,3,E",
+          "x": 8,
+          "y": 3,
+          "dir": "E",
+          "kind": "normal"
+        },
+        {
+          "key": "6,4,E",
+          "x": 6,
+          "y": 4,
+          "dir": "E",
+          "kind": "normal"
+        },
+        {
+          "key": "6,5,E",
+          "x": 6,
+          "y": 5,
+          "dir": "E",
+          "kind": "normal"
+        },
+        {
+          "key": "5,7,S",
+          "x": 5,
+          "y": 7,
+          "dir": "S",
+          "kind": "normal"
+        },
+        {
+          "key": "8,7,E",
+          "x": 8,
+          "y": 7,
+          "dir": "E",
+          "kind": "normal"
+        }
+      ],
+      "fingerprint": "04ec0371",
+      "topologyFingerprint": "65bbb4f0"
+    },
+    {
+      "revision": "v1-door-candidate-1",
+      "ruleset": "special-map-v1",
+      "seed": 65535,
+      "targetCount": 6,
+      "doors": [
+        {
+          "key": "5,0,E",
+          "x": 5,
+          "y": 0,
+          "dir": "E",
+          "kind": "normal"
+        },
+        {
+          "key": "7,1,E",
+          "x": 7,
+          "y": 1,
+          "dir": "E",
+          "kind": "normal"
+        },
+        {
+          "key": "6,3,E",
+          "x": 6,
+          "y": 3,
+          "dir": "E",
+          "kind": "normal"
+        },
+        {
+          "key": "4,4,E",
+          "x": 4,
+          "y": 4,
+          "dir": "E",
+          "kind": "normal"
+        },
+        {
+          "key": "7,4,S",
+          "x": 7,
+          "y": 4,
+          "dir": "S",
+          "kind": "normal"
+        },
+        {
+          "key": "3,9,E",
+          "x": 3,
+          "y": 9,
+          "dir": "E",
+          "kind": "normal"
+        }
+      ],
+      "fingerprint": "ce88814e",
+      "topologyFingerprint": "26ac1209"
+    }
+  ],
+  "averageDoors": 8,
+  "sha256": "6a625e0aac5a8c87367c2ab52e46570dcb195e4260ecb7cacc4f1167c81f693f",
+  "topologySha256": "b985066f1fb5720c8f27c56d925e58d700af9d637d90cd2c6e0fc33ce0920e58",
+  "ecologySha256": "04c4c6902ef72c567a2166d4b4bd41d83b7ca89eab99a8926b0ceaa5d7c96a8a"
+}

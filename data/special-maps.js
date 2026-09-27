@@ -1,3 +1,4 @@
+import {normalizeSurveyMask,mergeSurvey,surveyCount} from './special-map-survey.js';
 // Phase 2A ownership data. This ruleset is deliberately NOT the future dungeon V1.
 export const SPECIAL_MAP_RULESET = 'phase2a-1';
 export const UNIDENTIFIED_LIMIT = 3;
@@ -23,7 +24,7 @@ function normalizeOriginal(map) {
 export function normalizeSpecialMaps(input) {
   const signature=validateMapSignature(input?.discovererName);
   const clean=list=>(Array.isArray(list)?list:[]).map(normalizeOriginal).filter(Boolean);
-  const registered=[...new Map(clean(input?.registered).map(map=>[mapOriginalId(map),{...map,id:mapOriginalId(map),acquisitionMethod:map.acquisitionMethod==='shared'?'shared':'discovered'}])).values()].slice(0,REGISTERED_LIMIT);
+  const registered=[...new Map(clean(input?.registered).map(map=>[mapOriginalId(map),{...map,id:mapOriginalId(map),surveyedMask:normalizeSurveyMask(map.surveyedMask),surveyComplete:surveyCount(map.surveyedMask)===100,acquisitionMethod:map.acquisitionMethod==='shared'?'shared':'discovered'}])).values()].slice(0,REGISTERED_LIMIT);
   const unidentified=clean(input?.unidentified).slice(0,UNIDENTIFIED_LIMIT).map((map,index)=>({...map,discoveryId:typeof map.discoveryId==='string'&&map.discoveryId?map.discoveryId:`legacy-${index}-${mapOriginalId(map)}`}));
   return {dataVersion:1,discovererName:signature.ok?signature.value:'',unidentified,registered};
 }
@@ -52,7 +53,7 @@ export function inspectAppraisal(state,discoveryId) {
   if(existing)return {ok:true,map:existing,duplicate:true};
   if(state.registered.length>=REGISTERED_LIMIT)return {ok:false,error:'地図帳がいっぱいです。登録済みの地図を整理してから鑑定してください。'};
   if(!describeTestMap(map))return {ok:false,error:'この生成ルール版の鑑定には対応していません。'};
-  return {ok:true,map:{...map,id:mapOriginalId(map),cleared:false,acquisitionMethod:'discovered'},duplicate:false};
+  return {ok:true,map:{...map,id:mapOriginalId(map),surveyedMask:normalizeSurveyMask(null),surveyComplete:false,cleared:false,acquisitionMethod:'discovered'},duplicate:false};
 }
 export function appraiseMap(state,discoveryId) {
   const result=inspectAppraisal(state,discoveryId);
@@ -67,7 +68,7 @@ export function registerSharedMap(state,original,{confirmSameContent=false}={}) 
   if(state.registered.length>=REGISTERED_LIMIT)return {ok:false,error:'地図帳がいっぱいです。登録済みの地図を整理してから登録してください。'};
   const same=state.registered.find(m=>mapContentId(m)===mapContentId(map));
   if(same&&!confirmSameContent)return {ok:false,needsConfirmation:true,discoverer:same.discovererName};
-  const entry={rulesetVersion:map.rulesetVersion,seed:map.seed,discovererName:map.discovererName,id:mapOriginalId(map),cleared:false,favorite:false,memo:'',acquisitionMethod:'shared'};
+  const entry={rulesetVersion:map.rulesetVersion,seed:map.seed,discovererName:map.discovererName,id:mapOriginalId(map),surveyedMask:normalizeSurveyMask(null),surveyComplete:false,cleared:false,favorite:false,memo:'',acquisitionMethod:'shared'};
   return {ok:true,state:{...state,registered:[...state.registered,entry]},map:entry};
 }
 export function deleteRegisteredMap(state,id) {
@@ -94,4 +95,11 @@ export function transactSpecialMaps({getCharacter,setCharacter,save},operation) 
   } catch {}
   setCharacter(previous);
   return {ok:false,error:'保存に失敗しました。地図は変更していません。空き容量を確認してから、もう一度お試しください。'};
+}
+
+export function updateMapSurvey(state,id,mask){
+ const map=state.registered.find(m=>mapOriginalId(m)===id);
+ if(!map)return {ok:false,error:'登録済みの地図が見つかりません。'};
+ const surveyedMask=mergeSurvey(map.surveyedMask,mask),entry={...map,surveyedMask,surveyComplete:surveyCount(surveyedMask)===100};
+ return {ok:true,map:entry,state:{...state,registered:state.registered.map(m=>mapOriginalId(m)===id?entry:m)}};
 }

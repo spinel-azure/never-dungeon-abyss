@@ -1,5 +1,6 @@
+import {surveyCount} from '../data/special-map-survey.js';
 import {getTentBackground} from './explorer-preview.js';
-import {normalizeSpecialMaps, describeTestMap, setMapSignature, inspectAppraisal, appraiseMap, registerSharedMap, deleteRegisteredMap, toggleMapFavorite} from '../data/special-maps.js';
+import {normalizeSpecialMaps, describeTestMap, setMapSignature, inspectAppraisal, appraiseMap, registerSharedMap, deleteRegisteredMap, toggleMapFavorite, updateMapSurvey} from '../data/special-maps.js';
 import {encodeMapCode,decodeMapCode} from '../data/special-map-code.js';
 
 export function createExplorerPreviewUI({host, commands, background, message, playSe, onExit, startExploration, getMaps=()=>null, updateMaps=()=>({ok:false,error:'保存処理に接続されていません。'})}) {
@@ -61,7 +62,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
   function enterMap(){
     try{
       if(!startExploration)throw Error('探索機能に接続されていません。');
-      exploration=startExploration({host,registered:maps().registered,mapKey:detailId,message,onExit:exit});
+      exploration=startExploration({host,registered:maps().registered,mapKey:detailId,message,onExit:exit,playSe,saveSurvey:mask=>updateMaps(state=>updateMapSurvey(state,detailId,mask))});
       panel.hidden=true;commands.hidden=true;view='exploring';
     }catch(e){error(e.message);}
   }
@@ -181,7 +182,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       const map=maps().registered.find(m=>m.id===detailId);if(!map){view=origin;render();return;}
       const info=describeTestMap(map)||{name:map.rulesetVersion==='special-map-v1'?'特殊地図':'未対応の生成ルール',level:'?'};
       const body=make('div',undefined,'explorer-detail');
-      body.append(make('h3',`${info.name} Lv.${info.level}`),make('p',`発見者：${map.discovererName}`),make('p',`踏破状況：${map.cleared?'踏破済み':'未踏破'}`),make('p','挑戦条件：未実装（Phase 2A仮地図）'));
+      body.append(make('h3',`${info.name} Lv.${info.level}`),make('p',`発見者：${map.discovererName}`),make('p',surveyCount(map.surveyedMask)===100?'調査完了':`調査率 ${surveyCount(map.surveyedMask)} / 100`),make('p','挑戦条件：未実装（Phase 2A仮地図）'));
       panel.append(body);actionButtons(origin==='maps'?[['探索する（A）',()=>changeView('enter')],['戻る（B）',back]]:[['管理機能を確認（A）',()=>changeView('manage')],['戻る（B）',back]]);return;
     }
     if(view==='enter'){
@@ -206,7 +207,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       panel.append(field);actionButtons([['コードをコピー（A）',()=>copyCode(code)],['戻る（B）',back]]);return;
     }
     if(view==='delete'){
-      panel.append(make('p','この地図を削除しますか？'),make('p','踏破記録・お気に入り・メモ・探索途中の状態も失われます。再登録には共有コードが必要です。'));
+      panel.append(make('p','この地図を削除しますか？'),make('p','調査記録・踏破記録・お気に入り・メモ・探索途中の状態も失われます。再登録には共有コードが必要です。'));
       actionButtons([['削除する（A）',removeMap],['やめる（B）',back]]);
     }
   }

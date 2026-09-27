@@ -1,9 +1,10 @@
-import {generateSpecialMap} from './generator.js';
-import {streamV1,chooseIndexV1,hash32V1} from './random-v1.js';
-import {ECOLOGY_V1_POOLS} from './ecology-pools-v1.js';
+// Archived Candidate 1 for offline A/B audit only. Never imported by gameplay.
+import {generateSpecialMap} from '../../js/special-map/generator.js';
+import {streamV1,chooseIndexV1,hash32V1} from '../../js/special-map/random-v1.js';
+import {ECOLOGY_V1_POOLS} from '../../js/special-map/ecology-pools-v1.js';
 
 // Review candidate only. Approval is required before declaring ecology V1 frozen.
-export const ECOLOGY_REVISION='v1-candidate-2';
+export const ECOLOGY_REVISION='v1-candidate-1';
 export const ECOLOGY_TOTAL_WEIGHT=10000;
 export const SPECIES_COUNT_WEIGHTS=Object.freeze([20,2000,3500,3000,1480]);
 export const ECOLOGY_STREAMS=Object.freeze(['ecology-species-count','ecology-species','ecology-weights']);
@@ -44,9 +45,9 @@ export function generateSpecialMapEcology(ruleset,seed,generatedMap){
  const count=Math.min(pool.length,1+weightedIndex(countRng,SPECIES_COUNT_WEIGHTS));
  const remaining=[...pool],selected=[];
  for(let i=0;i<count;i++)selected.push(remaining.splice(weightedIndex(speciesRng,remaining.map(s=>s.baseWeight)),1)[0]);
- // Candidate 2 changes only the raw weight transform: uniform r, rather than r cubed.
+ // Cubing a uniform integer permits strong skew without species-specific rules.
  // Maximum numerator is below 1e10: all products remain exact JS integers.
- const weights=normalizeEcologyWeights(selected.map(()=>{const n=1+chooseIndexV1(weightRng,100);return n;}));
+ const weights=normalizeEcologyWeights(selected.map(()=>{const n=1+chooseIndexV1(weightRng,100);return n*n*n;}));
  const ecology={revision:ECOLOGY_REVISION,ruleset,seed,themeId:map.themeId,species:selected.map((s,i)=>({monsterId:s.monsterId,weight:weights[i]}))};
  return {...ecology,fingerprint:ecologyFingerprint(ecology)};
 }
