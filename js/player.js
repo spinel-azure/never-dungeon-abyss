@@ -8,6 +8,7 @@ import {
   TAU,
   STEP_MS,
   TURN_MS,
+  DOOR_OPEN_MS,
   DIRS
 } from "./config.js";
 import {
@@ -138,7 +139,6 @@ const NPC_AWARENESS_MESSAGE = "前方に何かいるようだ";
 
 const TORCH_FUEL_MAX = 100;
 const TORCH_FUEL_STEP = 1;
-const DOOR_OPEN_MS = 520;
 const NPC_TYPEWRITER_DELAYS = { slow: 75, normal: 42, fast: 20 };
 const npcTypewriter = { enabled: true, speed: "normal", timer: 0 };
 let torchFuelDisabled = false;

@@ -6,6 +6,7 @@ export const MAP_W = 10;
 export const MAP_H = 10;
 export const STEP_MS = 170;
 export const TURN_MS = 150;
+export const DOOR_OPEN_MS = 520;
 export const EXTRA_OPENINGS = 14;
 export const NORMAL_DOOR_COUNT = 6;
 export const BOSS_DOOR_COUNT = 1;

@@ -33,10 +33,12 @@ test('closed door blocks both sides; only adjacent front opens; animation then p
  assert.ok(s.openedDoors.has(key));assert.equal(specialDoorState(s,nx,ny,dir==='E'?'W':'N'),'open');
  assert.equal(s.cells[y][x].doors[dir],'open');assert.equal(s.cells[ny][nx].doors[dir==='E'?'W':'N'],'open');
  assert.equal(actSpecialMap(s,'up',521),true);updateSpecialMotion(s,691);assert.equal(s.playerX,nx);assert.equal(s.playerY,ny);
- assert.equal(actSpecialMap(s,'down',692),true);updateSpecialMotion(s,862);assert.equal(s.playerX,x);assert.equal(s.playerY,y);
+ assert.equal(specialDoorState(s,x,y,dir),'closed');
+ s.direction=(d+2)%4;assert.equal(openSpecialDoorAhead(s,691),true);updateSpecialMotion(s,1211);s.direction=d;
+ assert.equal(actSpecialMap(s,'down',1212),true);updateSpecialMotion(s,1382);assert.equal(s.playerX,x);assert.equal(s.playerY,y);
  const again=create();assert.deepEqual(again.doorLayout,s.doorLayout);assert.equal(again.openedDoors.size,0);
  assert.deepEqual(create({...original,discovererName:'ALC'}).doorLayout,s.doorLayout);
- s.exitReached=true;assert.equal(openSpecialDoorAhead(s,900),false);
+ s.direction=(d+2)%4;s.exitReached=true;assert.equal(openSpecialDoorAhead(s,1400),false);
 });
 import {drawMinimap} from '../js/minimap.js';
 test('minimap hides unseen doors and uses existing closed/open colors from either explored side',()=>{

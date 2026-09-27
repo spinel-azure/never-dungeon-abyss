@@ -5305,6 +5305,7 @@ import {
     onButtonPreviewChange: setGamepadPressedButtons,
     onConnectionChange: showGamepadConnectionNotification,
     toggleMinimap: () => {
+      if (handleSpecialMapInput("map")) return true;
       if (endingSequenceActive || michaelaRestorationController.isActive()) return true;
       if (handleBlockingTutorialInput("dismiss")) return true;
       recordUserInput();

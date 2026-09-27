@@ -153,6 +153,8 @@ export function getEffectiveFrameRate() {
   return renderer.isMobileDevice() ? 30 : 60;
 }
 
+export function isMinimapOverlayVisible() { return renderer.minimapOverlayVisible; }
+
 export function toggleMinimapOverlay() {
   if (!renderer.state || !hasEffectiveMinimap(renderer.state)) {
     renderer.minimapOverlayVisible = false;
@@ -1988,6 +1990,11 @@ export function useSpecialMapRenderSource(options,themeId){
  const previous=Object.fromEntries(keys.map(key=>[key,renderer[key]]));
  Object.assign(renderer,options);renderer.minimapOverlayVisible=false;
  setWallColor(themeId);setFloorColor(themeId);
+ options.canvas?.addEventListener("pointerup",handleCanvasPointerUp);
+ options.canvas?.addEventListener("touchend",handleCanvasTouchEnd,{passive:false});
  let disposed=false;
- return ()=>{if(disposed)return;disposed=true;Object.assign(renderer,previous);};
+ return ()=>{if(disposed)return;disposed=true;
+  options.canvas?.removeEventListener("pointerup",handleCanvasPointerUp);
+  options.canvas?.removeEventListener("touchend",handleCanvasTouchEnd);
+  Object.assign(renderer,previous);};
 }

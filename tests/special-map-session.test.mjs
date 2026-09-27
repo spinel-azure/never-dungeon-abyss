@@ -54,21 +54,23 @@ test('renderer binding restores exact normal references and theme after immediat
 
 test('runtime controller exits immediately, restores renderer, and never invokes normal gameplay',()=>{
  const source=readFileSync(new URL('../js/special-map/exploration-ui.js',import.meta.url),'utf8');
- let bound,restored=0,exited=0;const listeners=new Map();
+ let bound,restored=0,exited=0,mapToggles=0;const sounds=[];const listeners=new Map();
  class Node{constructor(){this.children=[];this.dataset={};}setAttribute(){}append(...nodes){this.children.push(...nodes);}getContext(){return {};}remove(){this.removed=true;}}
- const context={createSpecialMapSession,actSpecialMap,updateSpecialMotion,specialWall,specialDoorState,openSpecialDoorAhead,flushSpecialSurvey,drawMinimap,getMinimapBounds(){},toggleMinimapOverlay(){},performance:{now:()=>0},
+ const context={drawCompass(){},isMinimapOverlayVisible:()=>mapToggles%2===1,createSpecialMapSession,actSpecialMap,updateSpecialMotion,specialWall,specialDoorState,openSpecialDoorAhead,flushSpecialSurvey,drawMinimap,getMinimapBounds(){},toggleMinimapOverlay(){mapToggles++;},performance:{now:()=>0},
   useSpecialMapRenderSource:options=>{bound=options;return ()=>restored++;},
   document:{createElement:()=>new Node(),createTextNode:text=>text},window:{addEventListener:(key,fn)=>listeners.set(key,fn),removeEventListener:key=>listeners.delete(key)}};
  vm.runInNewContext(source.replace(/^import .*;\r?\n/gm,'').replace('export function','function')+';this.start=startSpecialMapExploration;',context);
- const host=new Node(),message={};const options={saveSurvey:()=>({ok:true}),host,registered:[map],mapKey:mapOriginalId(map),message,onExit:()=>exited++};
+ const host=new Node(),message={};const options={playSe:id=>sounds.push(id),saveSurvey:()=>({ok:true}),host,registered:[map],mapKey:mapOriginalId(map),message,onExit:()=>exited++};
  const ui=context.start(options);assert.equal(bound.state,ui.session.renderState);assert.equal(bound.eventOverlayCtx,null);assert.equal(bound.getRoamingEnemyRenderState(),null);
- ui.input('up');assert.ok(ui.session.motion);ui.input('cancel');assert.equal(restored,1);assert.equal(exited,1);assert.equal(host.children[0].removed,true);assert.equal(listeners.size,0);
+ ui.input('map');bound.updateHud();assert.equal(mapToggles,1);assert.equal(host.children[0].dataset.mapExpanded,'true');
+ host.children[0].children[2].children[1].onclick();assert.equal(mapToggles,2);
+ ui.input('up');assert.deepEqual(sounds,['step']);assert.ok(ui.session.motion);ui.input('cancel');assert.equal(restored,1);assert.equal(exited,1);assert.equal(host.children[0].removed,true);assert.equal(listeners.size,0);
  ui.close();assert.equal(restored,1);
  const next=context.start(options);assert.equal(next.session.playerX,0);assert.equal(next.session.playerY,2);
  const door=next.session.doorLayout.doors[0];next.session.playerX=door.x;next.session.playerY=door.y;next.session.direction=door.dir==='E'?1:2;
  assert.equal(bound.wallOnCell(door.x,door.y,door.dir),true);assert.equal(bound.getDoorKind(door.x,door.y,door.dir),'normal');
  // Native touch/click button and keyboard use the same controller as gamepad.
- const runtime=host.children.at(-1);runtime.children[2].children[2].onclick();assert.equal(next.session.renderState.anim.type,'door');bound.updateAnimation(520);
+ const runtime=host.children.at(-1);sounds.length=0;runtime.children[2].children[2].onclick();runtime.children[2].children[2].onclick();assert.deepEqual(sounds,['door']);assert.equal(next.session.renderState.anim.type,'door');bound.updateAnimation(520);
  assert.equal(bound.wallOnCell(door.x,door.y,door.dir),false);assert.equal(bound.openDoorOnCell(door.x,door.y,door.dir),true);
  next.session.openedDoors.clear();listeners.get('keydown')({key:'Enter',preventDefault(){},stopImmediatePropagation(){}});assert.equal(next.session.renderState.anim.type,'door');bound.updateAnimation(520);
  next.session.exitReached=true;bound.updateHud();assert.match(message.textContent,/出口を発見/);next.input('confirm');assert.equal(exited,1);next.input('cancel');assert.equal(exited,2);assert.equal(restored,2);

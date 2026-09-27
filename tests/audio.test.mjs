@@ -101,4 +101,11 @@ test("Web Audio uses one context with independent cached SE and BGM gain paths",
   audio.setSeOptions({ enabled: false });
   assert.equal(await audio.playSe("confirm"), false);
   assert.equal(gainValues.at(-1), 0);
+  assert.equal(await audio.playSe("step"), false);
+  audio.setSeOptions({enabled:true,volume:1});
+  document.body.classList.contains = () => true;
+  assert.equal(await audio.playSe("step"), false, "touch layout suppresses footsteps");
+  assert.equal(await audio.playSe("blocked"), false, "touch layout keeps existing collision policy");
+  document.body.classList.contains = () => false;
+  assert.equal(await audio.playSe("step"), true, "desktop uses the normal step sound");
 });

@@ -17,8 +17,8 @@ export function configureCompass({ canvas, state }) {
   }
 }
 
-export function drawCompass(now = performance.now()) {
-  const { canvas, ctx, state, size } = compass;
+export function drawCompass(now = performance.now(), source = compass) {
+  const { canvas, ctx, state, size } = source;
   if (!canvas || !ctx || !state) return;
 
   const cx = size / 2;
