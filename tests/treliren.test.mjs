@@ -9,7 +9,7 @@ import {sellItem} from '../data/commerce.js';
 import {setIncenseActive,restorePresence,getPresence,addPresence} from '../js/presence.js';
 import {getUnreadTavernRumor,markTavernRumorRead,getPastTavernRumors} from '../data/tavern-rumors.js';
 import {buildBoundaryWallMap,cells} from '../js/dungeon.js';
-import {getActiveRoamingEnemy,advanceRoamingEnemyForPlayerStep,getRoamingEnemyRenderState,serializeRoamingEnemyState,restoreRoamingEnemyState,canRoamingEnemyOccupyCell} from '../js/roaming-enemies.js';
+import {placeRoamingEnemyForFloor,getRoamingEnemyNeighbors,getActiveRoamingEnemy,advanceRoamingEnemyForPlayerStep,getRoamingEnemyRenderState,serializeRoamingEnemyState,restoreRoamingEnemyState,canRoamingEnemyOccupyCell} from '../js/roaming-enemies.js';
 import {shouldDrawRoamingEnemyMarker} from '../js/minimap.js';
 function hero(){const c=createInitialCharacter({name:'QA',job:'mage'});c.eventFlags.tavern_rumor_017_base_read=true;return c;}
 test('regional assignment is stable across floors, zones and saved games, with one meeting per expedition',()=>{
@@ -32,13 +32,22 @@ test('all eight regions exclude boss floors, inaccessible ranges and unread rumo
  for(const d of [1,9,90,99,100,101])assert.deepEqual(prepareTrelirenFloor(hero(),d),[]);
  const c=hero();delete c.eventFlags.tavern_rumor_017_base_read;assert.deepEqual(prepareTrelirenFloor(c,10),[]);
 });
-test('patrol never chases, alternates foot image on movement, survives reload and obeys marker exploration',()=>{
+// A four-cell corridor gives a visible player and a guaranteed patrol step.
+// Do not use normal dungeon generation: its internal shuffles use Math.random.
+function patrolGrid(){return [Array.from({length:4},(_,x)=>({x,y:0,type:'floor',walls:{N:true,E:x===3,S:true,W:x===0},doors:{},doorKinds:{}}))];}
+
+test('patrol never chases, alternates foot image on movement, survives reload and obeys marker exploration',t=>{
  const c=hero(),definitions=prepareTrelirenFloor(c,10,()=>0);
- buildBoundaryWallMap(10,()=>.4,{roamingEnemyDefinitions:definitions});
+ const cells=patrolGrid(),player={x:0,y:0};
+ t.mock.method(Math,'random',()=>{throw Error('Patrol fixture must be deterministic');});
+ placeRoamingEnemyForFloor({depth:10,grid:cells,player,rng:()=>.4,definitions});
  const npc=getActiveRoamingEnemy();assert.equal(npc.definitionId,'treliren');assert.equal(canRoamingEnemyOccupyCell(cells[npc.y][npc.x]),true);
- let before=getRoamingEnemyRenderState(0).definition.image;
- const result=advanceRoamingEnemyForPlayerStep({grid:cells,player:{x:0,y:0},now:0,rng:()=>.3});
- assert.equal(result.moved,true);assert.equal(npc.mode,'patrol');
+ assert.deepEqual({x:npc.x,y:npc.y},{x:3,y:0});
+ assert.deepEqual(getRoamingEnemyNeighbors(cells,npc.x,npc.y),[{x:2,y:0,dirKey:'W'}]);
+ const before=getRoamingEnemyRenderState(0).definition.image;
+ const result=advanceRoamingEnemyForPlayerStep({grid:cells,player,now:0,rng:()=>.3});
+ assert.equal(result.moved,true);assert.equal(result.contact,false);assert.equal(npc.mode,'patrol');
+ assert.deepEqual({x:npc.x,y:npc.y},{x:2,y:0});
  assert.notEqual(getRoamingEnemyRenderState(999).definition.image,before);
  const saved=serializeRoamingEnemyState();
  restoreRoamingEnemyState(saved,{grid:cells,definitions:[TRELIREN_DEFINITION]});
@@ -81,4 +90,15 @@ test('entrance camp requires a completed meeting and a roll strictly below twent
  const c={eventFlags:{treliren_met:true}};
  assert.equal(select(c,()=>0),camp);assert.equal(select(c,()=>.199999),camp);
  assert.equal(select(c,()=>.2),base);assert.equal(select(c,()=>.999999),base);
+});
+
+test('patrol contact and blocked neighbors are distinct legitimate non-movement outcomes',()=>{
+ const grid=patrolGrid();placeRoamingEnemyForFloor({depth:10,grid,player:{x:0,y:0},rng:()=>.4,definitions:[TRELIREN_DEFINITION]});
+ const npc=getActiveRoamingEnemy();assert.equal(getRoamingEnemyNeighbors(grid,npc.x,npc.y).length,1);
+ const contact=advanceRoamingEnemyForPlayerStep({grid,player:{x:npc.x,y:npc.y},rng:()=>.3});
+ assert.equal(contact.moved,false);assert.equal(contact.contact,true);assert.equal(npc.stepCount,0);
+ grid[0][3].walls.W=true;grid[0][2].walls.E=true;
+ assert.equal(getRoamingEnemyNeighbors(grid,npc.x,npc.y).length,0);
+ const blocked=advanceRoamingEnemyForPlayerStep({grid,player:{x:0,y:0},rng:()=>.3});
+ assert.equal(blocked.moved,false);assert.equal(blocked.contact,false);assert.equal(npc.stepCount,0);
 });
