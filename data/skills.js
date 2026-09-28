@@ -557,6 +557,18 @@ export const SKILLS = Object.freeze({
     element: "dark", spellPower: 0, intelligenceMultiplier: 8, powerMultiplier: 1,
     unavoidable: true, equipmentGranted: true, presentationId: "walpurgisnacht", effects: Object.freeze([])
   }),
+  causality_alteration: Object.freeze({
+    id: "causality_alteration", name: "因果律改変",
+    description: "HPが0になると1冒険に1回、状態異常を治し\n最大HP50％で復活する。SPは維持。",
+    actionType: "passive", category: "supportSpell", target: "self", spCost: 0,
+    defeatRecovery: true, effects: Object.freeze([])
+  }),
+  reincarnation: Object.freeze({
+    id: "reincarnation", name: "リィンカーネーション",
+    description: "HPが0になると1冒険に1回、状態異常を治し\n最大HP50％で復活する。SPは維持。",
+    actionType: "passive", category: "miracle", target: "self", spCost: 0,
+    defeatRecovery: true, effects: Object.freeze([])
+  }),
   fireball: SPELLS.fireball,
   ice_bind: SPELLS.ice_bind,
   lightning_pierce: SPELLS.lightning_pierce
@@ -612,7 +624,9 @@ export const LEVEL_SKILL_UNLOCKS = Object.freeze([
   Object.freeze({ job: "warrior", level: 80, skillId: "drachen_fang" }),
   Object.freeze({ job: "thief", level: 80, skillId: "acht_streich" }),
   Object.freeze({ job: "priest", level: 80, skillId: "call_goddess_name" }),
-  Object.freeze({ job: "mage", level: 80, skillId: "apocalypse" })
+  Object.freeze({ job: "mage", level: 80, skillId: "apocalypse" }),
+  Object.freeze({ job: "mage", level: 90, skillId: "causality_alteration" }),
+  Object.freeze({ job: "priest", level: 90, skillId: "reincarnation" })
 ]);
 
 export function getLevelUnlockedSkillIds(job, level) {

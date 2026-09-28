@@ -55,6 +55,7 @@ import { applyPlayerChargeAction, isPlayerChargeReady } from "./player-charge.js
 import { getWeapon } from "../data/weapons.js";
 import { getZentaurinOpening, ZENTAURIN_ID } from "../data/zentaurin.js";
 import { cannotReachTarget, DISTANT_MESSAGE, synchronizeTwinState, canPrepareWhirlpool, reserveWhirlpool, executeTwinAction } from "./tiefstrom.js";
+import { resolveClassDefeatRecovery } from "./resolve-defeat-recovery.js";
 
 const FLEISCHFRESSER_REGAIN_SUPPRESSION_TURNS = 5;
 
@@ -2034,11 +2035,31 @@ function finishCombatantAction(battle, actor, side, targetIndex = null) {
   if (side === 'player' && (battle.enemies || [battle.enemy]).some(isWassermannfrau)) finishWassermannfrauPlayerAction(battle);
 }
 
+function resolveClassRecovery(battle) {
+  if (!battle?.player || battle.player.hp > 0) return false;
+  const recovery = resolveClassDefeatRecovery({ character: battle.player, battle });
+  if (!recovery.recovered) return false;
+  Object.assign(battle.player, recovery.character);
+  const message = `${recovery.sourceName}が発動した！`;
+  battle.log.push(message);
+  battle.presentationEvents.push({
+    type: "defeatRecovery",
+    actorSide: null,
+    targetSide: "player",
+    amount: battle.player.hp,
+    restoredHp: battle.player.hp,
+    sourceId: recovery.sourceId,
+    message
+  });
+  return true;
+}
+
 function updateMultiOutcome(battle) {
   synchronizeLionQueen(battle);
   synchronizeWassermannfrau(battle);
   synchronizeTwinState(battle);
   resolvePlayerSurvival(battle, applyNpcLethalProtection);
+  resolveClassRecovery(battle);
   if (battle.player.hp <= 0) {
     battle.player.alive = false;
     battle.outcome = "defeat";
@@ -2077,6 +2098,7 @@ function updateOutcome(battle) {
     return;
   }
   resolvePlayerSurvival(battle, applyNpcLethalProtection);
+  resolveClassRecovery(battle);
   if (battle.player.hp <= 0) {
     battle.player.alive = false;
     battle.outcome = "defeat";

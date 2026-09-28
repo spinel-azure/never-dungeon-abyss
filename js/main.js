@@ -155,7 +155,6 @@ import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { resolveTreasureTrap } from "../combat/resolve-trap.js";
 import { collectStats } from "../combat/collect-stats.js";
 import { resolveSurprise } from "../combat/resolve-environment-save.js";
-import { resolveDefeatRecovery } from "../combat/resolve-defeat-recovery.js";
 import {
   createDepthReturnSettlement,
   formatDepthReturnSettlement
@@ -3990,19 +3989,6 @@ import {
       });
       activeRoamingEnemyInstanceId = null;
     }
-    const recovery = resolveDefeatRecovery({
-      character,
-      battle,
-      recoveryResolvers: getDefeatRecoveryResolvers()
-    });
-    if (recovery.recovered) {
-      character = recovery.character;
-      setPlayerInputEnabled(true);
-      startBgm(selectDungeonBgm());
-      updateCharacterUi();
-      saveGame();
-      return;
-    }
     stopBgm();
     await runDefeatPresentation();
     await completeDungeonDefeat();
@@ -4057,13 +4043,6 @@ import {
     }
   }
 
-  function getDefeatRecoveryResolvers() {
-    // Future effects such as causality alteration or reincarnation plug in here.
-    // A resolver must return a living character with HP above zero to suppress
-    // the final defeat presentation.
-    return [];
-  }
-
   async function completeDungeonDefeat() {
     let lostExperience = 0;
     let preservedExperience = 0;
@@ -4071,6 +4050,7 @@ import {
     let bag = null;
     let settled = null;
     if (character) {
+      character.adventureDefeatRecoveryUsed = false;
       character = invalidateMarathonChallenge(character);
       character = invalidateLongMarchChallenge(character);
       character = invalidateFinalLongMarchChallenge(character);
@@ -4520,6 +4500,7 @@ import {
         escapedSpecialBossesThisExploration.clear();
         b100GauntletDefeatedThisExploration.clear();
         currentDepth = 1;
+        character.adventureDefeatRecoveryUsed = false;
         character = startMarathonChallenge(character);
         character = startLongMarchChallenge(character);
         character = startFinalLongMarchChallenge(character);
@@ -4550,6 +4531,7 @@ import {
         escapedSpecialBossesThisExploration.clear();
         b100GauntletDefeatedThisExploration.clear();
         currentDepth = destination;
+        character.adventureDefeatRecoveryUsed = false;
         character = invalidateMarathonChallenge(character);
         character = invalidateLongMarchChallenge(character);
         character = invalidateFinalLongMarchChallenge(character);
@@ -4639,6 +4621,7 @@ import {
     let bag = null;
     let settled = null;
     if (character) {
+      character.adventureDefeatRecoveryUsed = false;
       character = invalidateMarathonChallenge(character);
       character = invalidateLongMarchChallenge(character);
       character = invalidateFinalLongMarchChallenge(character);

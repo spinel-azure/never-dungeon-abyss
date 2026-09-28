@@ -658,6 +658,7 @@ async function playPresentationEvents() {
       ? battleUi.root.querySelector(`.battle-enemy-member[data-index="${event.targetIndex ?? battleUi.battle.targetIndex}"] .battle-enemy-member-image`)
       : image;
     if (event.type === "capture" && event.image && targetImage) targetImage.src = event.image;
+    if (event.type === "defeatRecovery") await playDefeatRecoveryFlash();
     if (event.throwingMiss || event.outOfRange) battleUi.playSe("attackMiss");
     if (event.targetSide === "enemy" && event.hit && !event.bossBarrierBlocked && !dedicatedPresentationPlayed) {
       targetImage?.classList.remove("is-hit");
@@ -735,6 +736,10 @@ function applyPresentationHp(event) {
 export function applyHpPresentationEvent(presentationHp, battle, event) {
   if (!presentationHp || !["player", "enemy"].includes(event?.targetSide)) return presentationHp;
   const next = { ...presentationHp };
+  if (event.type === "defeatRecovery") {
+    next.player = Math.max(1, Math.floor(Number(event.restoredHp) || 1));
+    return next;
+  }
   if (event.piscesRevival) {
     next.player = Math.max(1, Math.floor(Number(event.restoredHp) || 1));
     return next;
@@ -760,6 +765,16 @@ export function applyHpPresentationEvent(presentationHp, battle, event) {
     next[event.targetSide] = Math.max(minimum, next[event.targetSide] - amount);
   }
   return next;
+}
+
+async function playDefeatRecoveryFlash() {
+  const flash = battleUi.root.querySelector("#battleDefeatRecoveryFlash");
+  if (!flash) return;
+  flash.classList.remove("is-active");
+  void flash.offsetWidth;
+  flash.classList.add("is-active");
+  await delay(900);
+  flash.classList.remove("is-active");
 }
 
 function formatPresentationMessage(event) {
@@ -878,6 +893,7 @@ export function createPersistentBattlePlayerChanges(player) {
     statuses: structuredClone(player.statuses.filter(s=>(s.id || s.statusId)!==AQUARIUS_STATUS)),
     inventory: structuredClone(player.inventory),
     herbicideTrialUses: Number(player.herbicideTrialUses) || 0,
+    adventureDefeatRecoveryUsed: Boolean(player.adventureDefeatRecoveryUsed),
     alive: player.hp > 0,
     npcSystem: structuredClone(player.npcSystem),
     playerCharge: structuredClone(player.playerCharge)

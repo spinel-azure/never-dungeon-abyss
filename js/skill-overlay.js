@@ -239,7 +239,7 @@ function render() {
     const reason = unavailableReason(skill, character);
     button.disabled = Boolean(reason);
     button.classList.toggle("is-charge-ready", Boolean(skill.chargeSkill && !reason));
-    button.innerHTML = `<span>${skill.name}</span><small>${skill.chargeSkill ? "CHARGE" : `SP${getEffectiveSpCost(skill, character)}`}</small>`;
+    button.innerHTML = `<span>${skill.name}</span><small>${getSkillStateLabel(skill, character)}</small>`;
     button.addEventListener("click", () => {
       overlay.selectedIndex = index;
       renderSelection();
@@ -268,7 +268,20 @@ function renderSelection() {
   overlay.messageEl.classList.toggle("is-skill-description", !backSelected);
   overlay.messageEl.textContent = backSelected
     ? "スキル選択を終了する。"
-    : skill?.description || "スキルを選択してください。";
+    : getSkillDescription(skill, overlay.getCharacter());
+}
+
+function getSkillStateLabel(skill, character) {
+  if (skill.defeatRecovery) return character?.adventureDefeatRecoveryUsed ? "使用済み" : "発動可能";
+  if (skill.actionType === "passive") return "常時発動";
+  return skill.chargeSkill ? "CHARGE" : `SP${getEffectiveSpCost(skill, character)}`;
+}
+
+function getSkillDescription(skill, character) {
+  if (!skill) return "スキルを選択してください。";
+  if (!skill.defeatRecovery) return skill.description;
+  const state = character?.adventureDefeatRecoveryUsed ? "使用済み" : "発動可能";
+  return `${skill.description}\n状態：${state}`;
 }
 
 function unavailableReason(skill, character) {

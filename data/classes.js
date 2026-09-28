@@ -114,6 +114,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     finalLongMarchChallenge: createInitialFinalLongMarchChallenge(),
     npcSystem: createInitialNpcSystem(),
     playerCharge: createInitialPlayerCharge(),
+    adventureDefeatRecoveryUsed: false,
     firstDungeonTutorialSeen: false,
     deckTutorialSeen: false,
     lootBagTutorialSeen: false,
@@ -248,6 +249,7 @@ export function normalizeCharacter(character) {
     finalLongMarchChallenge: normalizeFinalLongMarchChallenge(character.finalLongMarchChallenge),
     npcSystem: normalizeNpcSystem(character.npcSystem),
     playerCharge: normalizePlayerCharge(character.playerCharge),
+    adventureDefeatRecoveryUsed: Boolean(character.adventureDefeatRecoveryUsed),
     firstDungeonTutorialSeen: typeof character.firstDungeonTutorialSeen === "boolean"
       ? character.firstDungeonTutorialSeen
       : true,

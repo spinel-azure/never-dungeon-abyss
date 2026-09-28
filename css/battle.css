@@ -995,3 +995,26 @@ body.battle-active .viewport > #treasureCanvas {
 .battle-enemy-stage.is-lion-queen:has(> .battle-lion-opening:not([hidden])) > .battle-enemy-image {
   max-height: calc(100% - 78px);
 }
+
+.battle-defeat-recovery-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.battle-defeat-recovery-flash.is-active {
+  animation: battle-defeat-recovery-whiteout 900ms ease-in-out both;
+}
+
+@keyframes battle-defeat-recovery-whiteout {
+  0% { opacity: 0; }
+  28%, 55% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .battle-defeat-recovery-flash.is-active { animation-duration: 360ms; }
+}
