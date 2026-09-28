@@ -1,0 +1,191 @@
+{
+  "revision": "v2-structure-candidate-2",
+  "ruleset": "special-map-v2",
+  "seed": 12345,
+  "level": 1,
+  "rarity": "WHITE",
+  "structureFingerprint": "5a0826f6",
+  "links": [
+    {
+      "upper": {
+        "floor": 1,
+        "x": 7,
+        "y": 7
+      },
+      "lower": {
+        "floor": 2,
+        "x": 8,
+        "y": 9
+      }
+    },
+    {
+      "upper": {
+        "floor": 2,
+        "x": 1,
+        "y": 5
+      },
+      "lower": {
+        "floor": 3,
+        "x": 6,
+        "y": 9
+      }
+    }
+  ]
+}
+{
+  "floor": 1,
+  "width": 10,
+  "height": 10,
+  "stairsUp": {
+    "x": 0,
+    "y": 3
+  },
+  "stairsDown": {
+    "x": 7,
+    "y": 7
+  },
+  "entranceSide": "W",
+  "startDirection": "S",
+  "themeId": "crystal",
+  "bossRoom": null
+}
++---+---+---+---+---+---+---+---+---+---+
+|       |                       |       |
++---+   +---+---+   +   +   +   +   +   +
+|   |                   |   |       |   |
++   +   +---+---+   +   +   +---+   +   +
+|       |           |       |       |   |
++   +   +   +---+   +---+---+   +   +   +
+| U |       |       |       |   |       |
++   +---+   +   +   +---+   +   +   +   +
+|           |   |           |   |       |
++   +   +   +   +---+---+---+   +---+   +
+|       |   |                   |       |
++---+---+   +---+---+---+---+---+   +---+
+|       |               |               |
++   +   +   +---+   +   +---+   +   +   +
+|           |       |       | D     |   |
++   +---+   +   +   +---+   +---+---+   +
+|       |       |       |   |           |
++---+   +   +   +---+   +   +   +---+   +
+|       |           |           |       |
++---+---+---+---+---+---+---+---+---+---+
+{
+  "floor": 2,
+  "width": 10,
+  "height": 10,
+  "stairsUp": {
+    "x": 8,
+    "y": 9
+  },
+  "stairsDown": {
+    "x": 1,
+    "y": 5
+  },
+  "entranceSide": "S",
+  "startDirection": "N",
+  "themeId": "crystal",
+  "bossRoom": null
+}
++---+---+---+---+---+---+---+---+---+---+
+|                   |                   |
++---+---+---+---+   +   +   +   +---+   +
+|           |       |       |           |
++---+   +   +   +---+   +   +---+---+   +
+|       |           |   |               |
++   +---+---+---+   +   +   +   +   +   +
+|   |           |   |   |       |   |   |
++   +   +   +---+   +   +   +   +---+   +
+|       |       |   |   |   |   |       |
++   +---+---+   +   +   +---+   +   +   +
+|   | D     |   |   |           |   |   |
++   +   +   +   +   +---+   +   +   +   +
+|   |       |   |       |           |   |
++   +---+   +   +---+   +   +   +---+   +
+|       |   |       |       |           |
++---+   +   +---+   +   +   +---+---+   +
+|       |       |       |   |       |   |
++   +   +---+   +   +   +---+   +   +   +
+|               |                 U     |
++---+---+---+---+---+---+---+---+---+---+
+{
+  "floor": 3,
+  "width": 10,
+  "height": 10,
+  "stairsUp": {
+    "x": 6,
+    "y": 9
+  },
+  "stairsDown": null,
+  "entranceSide": null,
+  "startDirection": "W",
+  "themeId": "torture",
+  "bossRoom": {
+    "direction": "N",
+    "cells": [
+      {
+        "x": 6,
+        "y": 1
+      },
+      {
+        "x": 6,
+        "y": 0
+      }
+    ],
+    "approach": {
+      "x": 6,
+      "y": 2
+    },
+    "bossCell": {
+      "x": 6,
+      "y": 0
+    },
+    "doorEdge": {
+      "x": 6,
+      "y": 1,
+      "direction": "S",
+      "key": "floor-3:6,1,S",
+      "kind": "boss",
+      "initialState": "locked",
+      "lock": {
+        "keyId": "special-map-v2:rusted-boss-key",
+        "scope": "specialMapSession"
+      }
+    }
+  },
+  "keyChest": {
+    "id": "floor-3:rusted-key-chest",
+    "x": 9,
+    "y": 8,
+    "kind": "gold",
+    "contents": {
+      "type": "sessionKey",
+      "keyId": "special-map-v2:rusted-boss-key",
+      "name": "赤錆びた鍵",
+      "scope": "specialMapSession"
+    }
+  }
+}
++---+---+---+---+---+---+---+---+---+---+
+|           |           | B |           |
++---+---+   +---+---+   +   +   +---+   +
+|       |       |       | r |   |       |
++   +   +   +   +   +---+   +   +---+---+
+|   |       |   |                       |
++   +   +   +   +---+---+---+---+---+   +
+|       |   |                       |   |
++   +   +   +---+   +---+---+   +   +   +
+|       |                       |       |
++   +   +---+   +---+---+   +---+---+   +
+|   |       |   |           |           |
++   +   +   +   +   +---+---+   +---+   +
+|   |               |           |       |
++   +   +   +   +---+   +   +   +---+   +
+|       |   |       |   |   |           |
++   +---+   +   +   +   +   +---+   +   +
+|       |       |                   | K |
++---+   +---+---+---+---+---+   +---+   +
+|                         U |           |
++---+---+---+---+---+---+---+---+---+---+
+U = up stair / map entrance; D = down stair; r = antechamber; B = boss location; K = gold chest with session key.
+Room doorEdge describes a locked gate. Key/lock metadata only; no gameplay/save/code integration.

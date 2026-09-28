@@ -10,6 +10,6 @@ try {
     console.log(JSON.stringify(floor, null, 2));
     console.log(specialMapV2Ascii({...floor, walls}));
   }
-  console.log('U = up stair / map entrance; D = down stair; r = antechamber; B = boss location only (no enemy).');
-  console.log('Room doorEdge is a reserved gate, not a runtime lock. No gameplay/save/code integration.');
+  console.log('U = up stair / map entrance; D = down stair; r = antechamber; B = boss location; K = gold chest with session key.');
+  console.log('Room doorEdge describes a locked gate. Key/lock metadata only; no gameplay/save/code integration.');
 } catch (error) {console.error(error.message); process.exitCode = 1;}

@@ -7,16 +7,18 @@ import {generateSpecialMap, specialMapFingerprint} from '../js/special-map/gener
 import {generateSpecialMapDoors} from '../js/special-map/doors.js';
 import {generateSpecialMapEcology} from '../js/special-map/ecology.js';
 import {encodeMapCode, decodeMapCode} from '../data/special-map-code.js';
-import {checkV2Structure} from './special-map-v2-structure-helper.mjs';
+import {checkV2Structure, checkV2KeyAccess} from './special-map-v2-structure-helper.mjs';
+import {generateSpecialMapV2 as generateCandidate1, specialMapV2StructureFingerprint as candidate1Fingerprint} from './fixtures/special-map-v2-candidate-1.mjs';
+import {KEY_ITEMS} from '../data/key-items.js';
 
 const input = (seed, level = 1, rarity = 'WHITE') => ({ruleset: SPECIAL_DUNGEON_V2, seed, level, rarity});
 const seeds = [0, 1, 12345, 32768, 65535];
 // Candidate comparison snapshots, not a declaration that V2 has been released.
-const fingerprints = ['8cc6ed66', '3cdc3767', 'f69172cd', '3c07b720', '9c6552d9'];
+const fingerprints = ['ff8e2d5e', '10a7c000', '5a0826f6', '7d9192d0', '43f0e785'];
 
-test('V2: three reachable floors, reciprocal stairs and terminal 1x3 boss chamber repeat 100 times', () => {
+test('V2 Candidate 2: three floors, reciprocal stairs, 1x2 room and reachable key chest repeat 100 times', () => {
   for (const seed of seeds) {
-    const map = generateSpecialMapV2(input(seed)); checkV2Structure(map);
+    const map = generateSpecialMapV2(input(seed)); checkV2Structure(map); checkV2KeyAccess(map);
     assert.equal(specialMapV2StructureFingerprint(map), fingerprints[seeds.indexOf(seed)]);
     for (let i = 0; i < 100; i++) assert.deepEqual(generateSpecialMapV2(input(seed)), map);
     assert.equal(specialMapV2StructureFingerprint(Object.fromEntries(Object.entries(map).reverse())), specialMapV2StructureFingerprint(map));
@@ -52,8 +54,8 @@ test('V2: no Math.random; new purpose streams and discoverer names never change 
   const before = generateSpecialMapV2(input(12345)), random = Math.random;
   try {
     Math.random = () => {throw Error('random forbidden');};
-    for (const seed of seeds) checkV2Structure(generateSpecialMapV2(input(seed)));
-    for (const purpose of ['floor-1-ecology', 'floor-2-doors', 'floor-3-boss', 'boss', 'map-rarity']) {
+    for (const seed of seeds) {const m = generateSpecialMapV2(input(seed)); checkV2Structure(m); checkV2KeyAccess(m);}
+    for (const purpose of ['floor-1-ecology', 'floor-2-doors', 'floor-3-key-chest', 'floor-3-boss', 'boss', 'map-rarity']) {
       const next = streamV1(SPECIAL_DUNGEON_V2, 12345, purpose);
       for (let i = 0; i < 100; i++) next();
     }
@@ -66,6 +68,8 @@ test('V2: inputs are not mutated and generated floor/room/link objects are not s
   const options = Object.freeze(input(12345)), baseline = generateSpecialMapV2(options);
   const dirty = generateSpecialMapV2(options);
   dirty.floors[2].bossRoom.cells[0].x = 100;
+  dirty.floors[2].bossRoom.doorEdge.lock.keyId = 'red_rust_key_b9f';
+  dirty.floors[2].keyChest.contents.keyId = 'red_rust_key_b9f';
   dirty.floors[0].walls[0][0] = false;
   dirty.links[0].lower.x = 100;
   dirty.floors[0].stairsDown.x = 100;
@@ -82,7 +86,63 @@ test('V2: ASCII inspector identifies both stairs and the final boss cell without
     assert.equal((ascii.match(/U/g) ?? []).length, 1);
     assert.equal((ascii.match(/D/g) ?? []).length, i < 2 ? 1 : 0);
     assert.equal((ascii.match(/B/g) ?? []).length, i === 2 ? 1 : 0);
-    assert.equal((ascii.match(/r/g) ?? []).length, i === 2 ? 2 : 0);
+    assert.equal((ascii.match(/r/g) ?? []).length, i === 2 ? 1 : 0);
+    assert.equal((ascii.match(/K/g) ?? []).length, i === 2 ? 1 : 0);
+  }
+});
+
+test('V2 Candidate 1 comparison fixture retains fingerprints and unchanged first two floors', () => {
+  const oldFingerprints = ['8cc6ed66', '3cdc3767', 'f69172cd', '3c07b720', '9c6552d9'];
+  for (const [i, seed] of seeds.entries()) {
+    const old = generateCandidate1(input(seed)), current = generateSpecialMapV2(input(seed));
+    assert.equal(candidate1Fingerprint(old), oldFingerprints[i]);
+    assert.equal(old.floors[2].bossRoom.cells.length, 3);
+    assert.equal(old.floors[2].keyChest, undefined);
+    assert.deepEqual(current.floors.slice(0, 2), old.floors.slice(0, 2));
+    assert.deepEqual(current.floors.map(f => f.themeId), old.floors.map(f => f.themeId));
+  }
+});
+
+test('V2 key is session-scoped, not a normal B9 inventory item; no survey/runtime is created', () => {
+  for (const seed of seeds) {
+    const map = generateSpecialMapV2(input(seed)), floor = map.floors[2];
+    assert.equal(floor.keyChest.contents.name, '赤錆びた鍵');
+    assert.equal(KEY_ITEMS[floor.keyChest.contents.keyId], undefined);
+    assert.notEqual(floor.keyChest.contents.keyId, KEY_ITEMS.red_rust_key_b9f.id);
+    assert.deepEqual(floor.bossRoom.bossCell, floor.bossRoom.cells[1]);
+    assert.equal(floor.walls.length, 100);
+    assert.doesNotMatch(JSON.stringify(map), /survey|explored|openedDoors|activeSession|red_rust_key_b9f/);
+    checkV2KeyAccess(map);
+  }
+});
+
+test('V2 audit rejects a key behind its own locked door, a near-stair key, overlaps and wrong locks', () => {
+  for (const location of ['stairsUp', 'bossCell', 'approach', 'adjacent', 'wallAdjacent']) {
+    const map = generateSpecialMapV2(input(12345)), f = map.floors[2];
+    let point = location === 'stairsUp' ? f.stairsUp : f.bossRoom[location];
+    if (location === 'adjacent') {
+      const d = f.walls[f.stairsUp.y * 10 + f.stairsUp.x].indexOf(false);
+      point = {x: f.stairsUp.x + [0,1,0,-1][d], y: f.stairsUp.y + [-1,0,1,0][d]};
+    }
+    if (location === 'wallAdjacent') {
+      assert.equal(f.walls[f.stairsUp.y * 10 + f.stairsUp.x][1], true);
+      point = {x: f.stairsUp.x + 1, y: f.stairsUp.y};
+    }
+    Object.assign(f.keyChest, point);
+    assert.throws(() => checkV2KeyAccess(map));
+  }
+  const map = generateSpecialMapV2(input(12345));
+  map.floors[2].bossRoom.doorEdge.lock.keyId = 'red_rust_key_b9f';
+  assert.throws(() => checkV2Structure(map));
+  assert.throws(() => checkV2KeyAccess(map));
+});
+
+test('V2 Candidate 2 fingerprint covers key chest placement, contents and locked door metadata', () => {
+  const map = generateSpecialMapV2(input(12345)), original = specialMapV2StructureFingerprint(map);
+  for (const mutate of [m => m.floors[2].keyChest.x++, m => m.floors[2].keyChest.contents.keyId = 'other',
+    m => m.floors[2].bossRoom.doorEdge.initialState = 'open', m => m.floors[2].bossRoom.doorEdge.lock.scope = 'global']) {
+    const copy = structuredClone(map); mutate(copy);
+    assert.notEqual(specialMapV2StructureFingerprint(copy), original);
   }
 });
 

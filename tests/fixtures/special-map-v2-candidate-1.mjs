@@ -1,11 +1,9 @@
-import {streamV1, chooseIndexV1, hash32V1} from './random-v1.js';
+import {streamV1, chooseIndexV1, hash32V1} from '../../js/special-map/random-v1.js';
 
-// V2 structural candidate 2. Deliberately not connected to issuance, saves or gameplay.
+// V2 structural candidate 1. Deliberately not connected to issuance, saves or gameplay.
 // Reuse the frozen integer PRNG, never the single-floor V1 generator/dispatcher.
 export const SPECIAL_DUNGEON_V2 = 'special-map-v2';
-export const V2_STRUCTURE_REVISION = 'v2-structure-candidate-2';
-export const V2_KEY_CHEST_MIN_DISTANCE = 10;
-export const V2_BOSS_KEY_ID = 'special-map-v2:rusted-boss-key';
+export const V2_STRUCTURE_REVISION = 'v2-structure-candidate-1';
 export const V2_SIZE = 10;
 export const V2_FLOOR_COUNT = 3;
 export const V2_EXTRA_PASSAGES = 14;
@@ -18,15 +16,13 @@ function neighbor(index, direction) {
   const {x, y} = point(index), nx = x + DX[direction], ny = y + DY[direction];
   return nx < 0 || nx >= 10 || ny < 0 || ny >= 10 ? -1 : ny * 10 + nx;
 }
-function distances(walls, start, blockedEdge = null) {
+function distances(walls, start) {
   const result = Array(100).fill(-1), queue = [start];
   result[start] = 0;
   for (const cell of queue) for (let d = 0; d < 4; d++) {
     if (walls[cell][d]) continue;
     const next = neighbor(cell, d);
     if (next < 0) throw Error('V2 boundary breach');
-    if (blockedEdge && ((cell === blockedEdge[0] && next === blockedEdge[1])
-      || (cell === blockedEdge[1] && next === blockedEdge[0]))) continue;
     if (result[next] < 0) {result[next] = result[cell] + 1; queue.push(next);}
   }
   return result;
@@ -38,20 +34,21 @@ function open(walls, cell, direction) {
   walls[next][(direction + 2) % 4] = false;
 }
 
-// Finite, seed-independent geometry candidates. The remaining 98 cells must form
+// Finite, seed-independent geometry candidates. The remaining 97 cells must form
 // a connected grid before carving; no random retries or repairs are necessary.
 function roomCandidates() {
   const result = [];
   for (let first = 0; first < 100; first++) for (let d = 0; d < 4; d++) {
     const approach = neighbor(first, (d + 2) % 4), second = neighbor(first, d);
-    if (approach < 0 || second < 0) continue;
-    const cells = [first, second], reserved = new Set(cells);
+    const third = second < 0 ? -1 : neighbor(second, d);
+    if (approach < 0 || third < 0) continue;
+    const cells = [first, second, third], reserved = new Set(cells);
     const reached = new Set([approach]), queue = [approach];
     for (const cell of queue) for (let side = 0; side < 4; side++) {
       const next = neighbor(cell, side);
       if (next >= 0 && !reserved.has(next) && !reached.has(next)) {reached.add(next); queue.push(next);}
     }
-    if (reached.size === 98) result.push({cells, approach, direction: d});
+    if (reached.size === 97) result.push({cells, approach, direction: d});
   }
   return result;
 }
@@ -86,6 +83,7 @@ function carveFloor(next, room) {
   if (room) {
     open(walls, room.approach, room.direction);
     open(walls, room.cells[0], room.direction);
+    open(walls, room.cells[1], room.direction);
   }
   return walls;
 }
@@ -101,32 +99,16 @@ function farthest(walls, start, forbidden, next) {
   return candidates.length === 1 ? candidates[0] : candidates[chooseIndexV1(next, candidates.length)];
 }
 function roomDescription(room) {
-  // One canonical internal E/S edge, scoped to floor 3. Lock metadata describes
-  // a future session-local key; it never references normal-dungeon key inventory.
+  // One canonical internal E/S edge, scoped to floor 3. This is a placement
+  // reservation only: no lock, enemy, door animation or combat is implemented.
   let anchor = room.approach, direction = room.direction;
   if (direction === 0 || direction === 3) {anchor = room.cells[0]; direction = (direction + 2) % 4;}
   const p = point(anchor), dir = DIRECTIONS[direction];
   return {
     direction: DIRECTIONS[room.direction], cells: room.cells.map(point),
-    approach: point(room.approach), bossCell: point(room.cells[1]),
-    doorEdge: {...p, direction: dir, key: `floor-3:${p.x},${p.y},${dir}`,
-      kind: 'boss', initialState: 'locked', lock: {keyId: V2_BOSS_KEY_ID, scope: 'specialMapSession'}},
+    approach: point(room.approach), bossCell: point(room.cells[2]),
+    doorEdge: {...p, direction: dir, key: `floor-3:${p.x},${p.y},${dir}`},
   };
-}
-function placeKeyChest(walls, up, room, next) {
-  // Measure the actual walkable graph with the gate CLOSED, without changing walls.
-  const ds = distances(walls, up, [room.approach, room.cells[0]]);
-  const excluded = new Set([up, room.approach, ...room.cells]);
-  const candidates = [];
-  ds.forEach((distance, cell) => {
-    const adjacent = Math.abs(cell % 10 - up % 10) + Math.abs(Math.floor(cell / 10) - Math.floor(up / 10)) <= 1;
-    if (distance >= V2_KEY_CHEST_MIN_DISTANCE && !excluded.has(cell) && !adjacent) candidates.push(cell);
-  });
-  // Never weaken the distance or place behind the gate as a fallback.
-  if (!candidates.length) throw Error('V2 no reachable distant key chest candidate');
-  const cell = candidates[chooseIndexV1(next, candidates.length)];
-  return {id: 'floor-3:rusted-key-chest', ...point(cell), kind: 'gold',
-    contents: {type: 'sessionKey', keyId: V2_BOSS_KEY_ID, name: '赤錆びた鍵', scope: 'specialMapSession'}};
 }
 function generateFloor(seed, floor) {
   const stream = purpose => streamV1(SPECIAL_DUNGEON_V2, seed, `floor-${floor}-${purpose}`);
@@ -156,7 +138,6 @@ function generateFloor(seed, floor) {
     entranceSide, startDirection: DIRECTIONS[facing],
     themeId: V2_THEMES[chooseIndexV1(stream('theme'), V2_THEMES.length)],
     bossRoom: room ? roomDescription(room) : null,
-    ...(room ? {keyChest: placeKeyChest(walls, up, room, stream('key-chest'))} : {}),
   };
 }
 
@@ -186,10 +167,7 @@ export function canonicalV2Structure(map) {
     f.entranceSide, f.startDirection, f.themeId,
     f.bossRoom === null ? null : [f.bossRoom.direction, f.bossRoom.cells.map(xy),
       xy(f.bossRoom.approach), xy(f.bossRoom.bossCell), xy(f.bossRoom.doorEdge),
-      f.bossRoom.doorEdge.direction, f.bossRoom.doorEdge.key, f.bossRoom.doorEdge.kind,
-      f.bossRoom.doorEdge.initialState, f.bossRoom.doorEdge.lock.keyId, f.bossRoom.doorEdge.lock.scope],
-    f.keyChest ? [f.keyChest.id, xy(f.keyChest), f.keyChest.kind, f.keyChest.contents.type,
-      f.keyChest.contents.keyId, f.keyChest.contents.name, f.keyChest.contents.scope] : null,
+      f.bossRoom.doorEdge.direction, f.bossRoom.doorEdge.key],
   ]), map.links.map(l => [[l.upper.floor, l.upper.x, l.upper.y], [l.lower.floor, l.lower.x, l.lower.y]])]);
 }
 export function specialMapV2StructureFingerprint(map) {
@@ -203,8 +181,7 @@ export function specialMapV2Ascii(floor) {
     for (let x = 0; x < 10; x++) {
       const walls = floor.walls[y * 10 + x];
       const marker = at(floor.stairsUp, x, y) ? 'U' : at(floor.stairsDown, x, y) ? 'D'
-        : at(floor.bossRoom?.bossCell, x, y) ? 'B' : at(floor.keyChest, x, y) ? 'K'
-        : floor.bossRoom?.cells.some(p => at(p, x, y)) ? 'r' : ' ';
+        : at(floor.bossRoom?.bossCell, x, y) ? 'B' : floor.bossRoom?.cells.some(p => at(p, x, y)) ? 'r' : ' ';
       top += (walls[0] ? '---' : '   ') + '+';
       middle += ` ${marker} ` + (walls[1] ? '|' : ' ');
     }
