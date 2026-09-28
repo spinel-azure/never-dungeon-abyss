@@ -267,6 +267,10 @@ export function setDungeonColors({ wall, floor } = {}, { save = false } = {}) {
   updateDebugStates();
   if (save) persistSettings();
 }
+export function setSpecialMapMenuMode(enabled){
+ const button=menu.commands.find(b=>['save','return'].includes(b.dataset.command));
+ if(button){button.dataset.command=enabled?'return':'save';button.textContent=enabled?'帰還':'セーブ';}
+}
 export function openCampMenu() { menu.view = "commands"; menu.commandIndex = 0; updateView(); }
 export function openStatusMenu() { menu.playSe("confirm"); menu.view = "status"; menu.statusPage = 0; menu.onStatusOpened(); updateView(); }
 export function openDeckEditor() {
@@ -405,7 +409,7 @@ function isCommandUnavailable(button) {
   return button?.dataset.unavailable === "true"
     || (button?.dataset.command === "save" && !menu.canManualSave());
 }
-function openCommand(key) { if (key === "status") { menu.view = "status"; menu.statusPage = 0; menu.onStatusOpened(); updateView(); } else if (key === "deck") { menu.view = "deck"; menu.deckEditable = false; menu.deckReturnView = "commands"; menu.deckPickerOpen = false; menu.deckCursor = 0; menu.deckInspectFocused = false; renderDeck(); updateView(); } else if (key === "items") openInventory(); else if (key === "skills") menu.openSkills(); else if (key === "options") setOptionPage(0); else if (key === "save" && menu.canManualSave()) { menu.view = "save"; menu.saveCursor = 0; renderManualSave(); updateView(); } }
+function openCommand(key) { if(key === "return"){menu.emergencyEscape();return;} if (key === "status") { menu.view = "status"; menu.statusPage = 0; menu.onStatusOpened(); updateView(); } else if (key === "deck") { menu.view = "deck"; menu.deckEditable = false; menu.deckReturnView = "commands"; menu.deckPickerOpen = false; menu.deckCursor = 0; menu.deckInspectFocused = false; renderDeck(); updateView(); } else if (key === "items") openInventory(); else if (key === "skills") menu.openSkills(); else if (key === "options") setOptionPage(0); else if (key === "save" && menu.canManualSave()) { menu.view = "save"; menu.saveCursor = 0; renderManualSave(); updateView(); } }
 
 export function openTitleOptions() {
   menu.view = "options";
@@ -608,7 +612,10 @@ function handleInventory(action) {
     return;
   }
   if (menu.inventoryMode === "equip") { applyEquipmentCandidate(entry); return; }
-  if (entry.item) { Promise.resolve(menu.onUseInventoryItem(entry.item.id)).then(renderInventory); return; }
+  if (entry.item) { Promise.resolve(menu.onUseInventoryItem(entry.item.id)).then(result=>{
+    renderInventory();
+    if(!result?.accepted&&result?.message)menu.inventoryPanel.querySelector('[data-inventory-description]').textContent=result.message;
+  }); return; }
   if (menu.getInventoryContext() === "dungeon") {
     menu.inventoryPanel.querySelector("[data-inventory-description]").textContent = "ダンジョン探索中は装備を変更できません。"; return;
   }

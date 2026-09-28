@@ -1,4 +1,5 @@
-﻿import {
+import {findKnownPath} from './known-path.js';
+import {
   DIRS
 } from "./config.js";
 import {
@@ -112,39 +113,10 @@ export function updateAutoReturnButton() {
 }
 
 export function findExploredPathToStart() {
-  const start = getStartPosition();
-  const startKey = `${state.gridX},${state.gridY}`;
-  const goalKey = `${start.x},${start.y}`;
-  const queue = [{ x: state.gridX, y: state.gridY }];
-  const prev = new Map([[startKey, null]]);
-
-  for (let i = 0; i < queue.length; i++) {
-    const cur = queue[i];
-    if (`${cur.x},${cur.y}` === goalKey) break;
-    for (const dir of DIRS) {
-      const nx = cur.x + dir.dx;
-      const ny = cur.y + dir.dy;
-      const key = `${nx},${ny}`;
-      if (!inBounds(nx, ny)) continue;
-      if (!explored[ny][nx]) continue;
-      if (getExplorationObstacleAt(nx, ny)) continue;
-      const doorState = getDoorState(cur.x, cur.y, dir.key);
-      const doorKind = getDoorKind(cur.x, cur.y, dir.key);
-      if (doorState && (doorKind === "locked" || doorKind === "boss" || doorKind === "specialLocked")) continue;
-      if (!doorState && wallOnCell(cur.x, cur.y, dir.key)) continue;
-      if (prev.has(key)) continue;
-      prev.set(key, { x: cur.x, y: cur.y, dir: dir.key });
-      queue.push({ x: nx, y: ny });
-    }
-  }
-
-  if (!prev.has(goalKey)) return [];
-  const reversed = [];
-  let key = goalKey;
-  while (key !== startKey) {
-    const step = prev.get(key);
-    reversed.push(step.dir);
-    key = `${step.x},${step.y}`;
-  }
-  return reversed.reverse();
+ return findKnownPath({x:state.gridX,y:state.gridY},getStartPosition(),(from,to,dir)=>{
+  if(!inBounds(to.x,to.y)||!explored[to.y][to.x]||getExplorationObstacleAt(to.x,to.y))return false;
+  const door=getDoorState(from.x,from.y,dir),kind=getDoorKind(from.x,from.y,dir);
+  if(door&&['locked','boss','specialLocked'].includes(kind))return false;
+  return Boolean(door)||!wallOnCell(from.x,from.y,dir);
+ });
 }

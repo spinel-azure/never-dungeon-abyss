@@ -1,3 +1,6 @@
+import {configureSpecialMapHost,getSpecialMapContext,getSpecialMapBgmKey} from './special-map/context.js';
+import {resolveSpecialFieldItem,resolveSpecialFieldSkill,applySpecialFieldEnvironment} from './special-map/field-environment.js';
+import {flushSpecialSurvey,startSpecialAutoWalker} from './special-map/session.js';
 import {prepareTrelirenFloor,normalizeTrelirenRun,syncIncenseZone,TRELIREN_DEFINITION,TRELIREN_MET_FLAG,INCENSE_ID} from '../data/treliren.js';
 import {getFloorZone} from '../data/floor-zone-names.js';
 import {createTrelirenDialogue} from './treliren-dialogue.js';
@@ -88,7 +91,7 @@ import { configureInput } from "./input.js";
 import { configureGamepadInput } from "./gamepad-input.js";
 import { configureFloatingStick } from "./floating-stick.js";
 import { configureCompass, drawCompass } from "./compass.js";
-import { configureMenu, handleMenuInput, getDungeonColors, getDungeonMistOptions, setDungeonColors, getGamepadBindings, getGamepadCaptureAction, completeGamepadBinding, setGamepadPressedButtons, getTouchControlsMode, getTouchMovementMode, getBattleSpeedMode, setBattleSpeedMode, isMenuOpen, openItemInventory, openStatusMenu, openDeckEditor, openQuestHistory, openRumorHistory, openAdventureRecords, openLibraryMonsterCompendium, openLibraryItemCompendium, openLibraryCardGallery, openTitleOptions, refreshAdventureRecordsPlayTime, openShopSellInventory, openShopPurchaseInventory, closeCampMenu, resetDebugSettingsForNewGame } from "./menu.js";
+import { openCampMenu, setSpecialMapMenuMode, configureMenu, handleMenuInput, getDungeonColors, getDungeonMistOptions, setDungeonColors, getGamepadBindings, getGamepadCaptureAction, completeGamepadBinding, setGamepadPressedButtons, getTouchControlsMode, getTouchMovementMode, getBattleSpeedMode, setBattleSpeedMode, isMenuOpen, openItemInventory, openStatusMenu, openDeckEditor, openQuestHistory, openRumorHistory, openAdventureRecords, openLibraryMonsterCompendium, openLibraryItemCompendium, openLibraryCardGallery, openTitleOptions, refreshAdventureRecordsPlayTime, openShopSellInventory, openShopPurchaseInventory, closeCampMenu, resetDebugSettingsForNewGame } from "./menu.js";
 import { isForcedTorchZeroFloor, resolveFloorTheme } from "./floorTheme.js";
 import { applyCrystalFloorSpStep } from "../data/crystal-floor.js";
 import {
@@ -133,7 +136,7 @@ import {
 import { getSaveSlotSummaries, loadGame, writeGame } from "./save-data.js";
 import { EffectEngine } from "./effects/effect-engine.js";
 import { getEquipmentHighlightClass, getLotEquipmentHighlightClass, hasUncertainLoot, isHighlightedLotCardRarity } from "./loot-identification.js";
-import { handleSpecialMapInput, configureTown, resumeDungeonEntrance, INN_MEDICINE_DELIVERY_TRANSITION_FLAG, setTownEndingSuspended, openPendingNpcRenewal, openTown, closeTown, getTownState, handleTownInput as handleRawTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js";
+import { showGameCommands, handleSpecialMapInput, configureTown, resumeDungeonEntrance, INN_MEDICINE_DELIVERY_TRANSITION_FLAG, setTownEndingSuspended, openPendingNpcRenewal, openTown, closeTown, getTownState, handleTownInput as handleRawTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js";
 import { flashNpcPartyStatus, renderNpcPartyStatus, renderNpcStatusPage, setNpcPartyCharge } from "./npc-party-ui.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
 import { transactSpecialMaps, discoverTestMap } from "../data/special-maps.js";
@@ -515,6 +518,7 @@ import {
   }
 
   function handleTownInput(action) {
+    if(getSpecialMapContext())return handleSpecialMapInput(action);
     const handled = handleRawTownInput(action);
     passiveNotificationCoordinator.updateAvailability();
     return handled;
@@ -3520,6 +3524,7 @@ import {
   }
 
   async function useFieldSkill(skillId) {
+    if(getSpecialMapContext())return useSpecialFieldEffect("skill",skillId);
     if (["staff_light", "grain_glow"].includes(skillId)
       && isForcedTorchZeroFloor(currentDepth)
       && !hasKeyItem(character?.keyItems, "lichtbringer")) {
@@ -3570,19 +3575,20 @@ import {
   }
 
   function openFieldItems() {
-    const context = isTownOpen() ? "town" : "dungeon";
+    const context = getSpecialMapContext() ? "dungeon" : isTownOpen() ? "town" : "dungeon";
     (context === "town" ? townPortraitFrame : viewportEl).append(itemOverlay);
     return openItemOverlay({
       context,
       character,
-      torchFuel: state.torchFuel,
-      treasureCompassActive: state.treasureCompassActive,
+      torchFuel: getSpecialMapContext()?.session.renderState.torchFuel ?? state.torchFuel,
+      treasureCompassActive: getSpecialMapContext() ? false : state.treasureCompassActive,
       onUse: useFieldItem,
       onClose: () => viewportEl.append(itemOverlay)
     });
   }
 
   async function useFieldItem(itemId) {
+    if(getSpecialMapContext())return useSpecialFieldEffect("item",itemId);
     if(itemId === INCENSE_ID && syncIncenseZone(character,currentDepth,isTownOpen())) {
       say("魔除けのお香の効果はまだ続いている。");return {accepted:false,reason:"alreadyActive"};
     }
@@ -5193,6 +5199,17 @@ import {
   }
 
   function updateHud() {
+    const special=getSpecialMapContext();
+    if(special){
+      const s=special.session;
+      depthEl.textContent='特殊地図';posEl.textContent=`X:${s.playerX} Y:${s.playerY}`;
+      const chip=document.getElementById('specialSurveyChip');if(chip)chip.textContent=s.surveyComplete?'調査完了':`調査 ${s.surveyedCount} / 100`;
+      torchMeterEl.style.width=`${s.renderState.torchFuel}%`;torchMeterEl.parentElement.classList.toggle('is-critical',s.renderState.torchFuel<=20);
+      presenceMeterEl.style.setProperty('--presence','0%');presenceMeterEl.setAttribute('aria-valuenow','0');
+      drawCompass(performance.now(),{canvas:compassCanvas,ctx:compassCanvas.getContext('2d'),state:s.renderState,size:compassCanvas.width});
+      if(fpsIndicator)fpsIndicator.textContent=`${getEffectiveFrameRate()}fps`;
+      stopwatchEl.textContent=formatElapsedTime(performance.now()-runStartedAt);return;
+    }
     const lightbringerOwned = currentDepth >= 90 && currentDepth <= 99
       && hasKeyItem(character?.keyItems, "lichtbringer");
     state.lightbringerActive = false;
@@ -5348,6 +5365,49 @@ import {
     onUserOperation: recordUserInput,
     handleMenuInput: action => endingController.handleAction(action) || michaelaRestorationController.handleAction(action) || endingSequenceActive || handleMenuInput(action)
   });
+  async function useSpecialFieldEffect(kind,id){
+    const context=getSpecialMapContext();if(!context)return {accepted:false};
+    const session=context.session;
+    const result=kind==='item'?resolveSpecialFieldItem({character,itemId:id,session}):resolveSpecialFieldSkill({character,skillId:id,session});
+    if(!result.accepted){say(result.message||'今は使用する必要がない。');return result;}
+    if(result.environment?.emergencyEscape&&!flushSpecialSurvey(session)){say(session.surveyError);return {accepted:false,reason:'saveFailed'};}
+    if(!applySpecialFieldEnvironment(session,result.environment))return {accepted:false,reason:'noPath'};
+    character=result.character;updateCharacterUi();saveGame();updateHud();
+    say(result.message||'スキルを使用した。');playSe(result.healing>0?'heal':'confirm');
+    if(result.environment?.startAutoWalker)closeCampMenu('special');
+    if(result.environment?.emergencyEscape){closeCampMenu('special');context.finish();}
+    return result;
+  }
+  configureSpecialMapHost({
+    viewport:viewportEl,status:viewportEl.querySelector('.status'),updateHud,
+    isPaused:()=>isMenuOpen()||!itemOverlay.hidden||!skillOverlay.hidden,
+    openMenu:()=>{getSpecialMapContext().session.autoPath=null;showGameCommands();openCampMenu();},
+    handleInput:action=>{
+      if(handleItemOverlayInput(action)||handleSkillOverlayInput(action))return true;
+      if(isMenuOpen())return handleMenuInput(action);
+      if(action==='items')return openItemInventory();
+      if(action==='status'){openStatusMenu();return true;}
+      return false;
+    },
+    enter:({session})=>{
+      townScreen.hidden=true;document.body.classList.remove('town-active');document.body.classList.add('special-map-active');
+      showGameCommands();setSpecialMapMenuMode(true);closeCampMenu('special');
+      const chip=document.createElement('span');chip.id='specialSurveyChip';chip.className='chip';posEl.parentElement.append(chip);
+      stopLoopSe('townAmbience');startBgm(getSpecialMapBgmKey(session.generatedMap.themeId));updateHud();
+    },
+    beforeReturn:()=>{
+      // Wing Gift belongs to the adventurer but expires on this return too.
+      // Do not call normal returnToTown(), which resets abyss progress/effects.
+      if(!character?.wingGiftUses)return true;
+      const previous=character;character=normalizeCharacter({...character,wingGiftUses:0});
+      if(!saveGame()){character=previous;say('帰還前の保存に失敗しました。もう一度お試しください。');return false;}
+      updateCharacterUi();return true;
+    },
+    leave:()=>{
+      document.getElementById('specialSurveyChip')?.remove();setSpecialMapMenuMode(false);closeCampMenu('special');
+      document.body.classList.remove('special-map-active');document.body.classList.add('town-active');townScreen.hidden=false;stopBgm();
+    }
+  });
   let virtualStickController = null;
   configureMenu({
     discoverSpecialMap: () => transactSpecialMaps({getCharacter:()=>character,setCharacter:next=>{character=next;},save:()=>saveGame()},discoverTestMap),
@@ -5358,7 +5418,7 @@ import {
     canReplayEnding: () => worldLocation === "town" && Boolean(character?.eventFlags?.ending_credits_watched),
     replayEnding: () => void runMainEnding({ replay: true }),
     getRumorHistory: () => getPastTavernRumors(character, getCurrentTavernRumorContext()),
-    getInventoryContext: () => isTownOpen() ? "town" : "dungeon",
+    getInventoryContext: () => getSpecialMapContext() ? "dungeon" : isTownOpen() ? "town" : "dungeon",
     onUseInventoryItem: useFieldItem,
     onEquipmentChanged: next => {
       character = next;
@@ -5381,9 +5441,9 @@ import {
       updateCharacterUi();
       scheduleAutosave();
     },
-    generateRandomDungeon,
-    startAutoReturn,
-    refillTorch,
+    generateRandomDungeon: () => {if(!getSpecialMapContext())generateRandomDungeon();},
+    startAutoReturn: () => {const special=getSpecialMapContext();if(special)startSpecialAutoWalker(special.session);else startAutoReturn();},
+    refillTorch: () => {const special=getSpecialMapContext();if(special)special.session.renderState.torchFuel=100;else refillTorch();},
     setTorchFuelDisabled,
     setScreenShakeEnabled,
     setTorchFlickerEnabled,
@@ -5406,6 +5466,7 @@ import {
     setStopwatchVisible,
     resetStopwatch,
     emergencyEscape: () => {
+      const special=getSpecialMapContext();if(special){if(!flushSpecialSurvey(special.session)){say(special.session.surveyError);return false;}closeCampMenu("special");return special.finish();}
       if (worldLocation !== "dungeon") return false;
       returnToTown();
       say("緊急脱出を実行し、ダンジョン入口へ戻った。");
@@ -5415,7 +5476,7 @@ import {
     canManualSave: () => worldLocation === "town",
     getSaveSlotSummaries,
     openSkills: () => {
-      if (isTownOpen()) townPortraitFrame.append(skillOverlay);
+      if (isTownOpen()&&!getSpecialMapContext()) townPortraitFrame.append(skillOverlay);
       else viewportEl.append(skillOverlay);
       const opened = openSkillOverlay({
         context: "field",
@@ -5428,6 +5489,7 @@ import {
     },
     openItems: openFieldItems,
     onReturnToDungeon: () => {
+      if(getSpecialMapContext()){updateHud();return;}
       if (isTownOpen()) {
         if (!resumeDungeonEntrance()) showTownArrival();
       }

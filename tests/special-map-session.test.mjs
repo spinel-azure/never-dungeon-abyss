@@ -24,16 +24,16 @@ test('collision, animation, exploration and BFS exit work without touching norma
  for(let k=0;k<route.length;k++){
   while(s.direction!==route[k])step(s,'right');if(openSpecialDoorAhead(s,0))updateSpecialMotion(s,520);const priorX=s.renderState.x;
   assert.equal(actSpecialMap(s,'up',0),true);assert.equal(s.renderState.x,priorX);assert.equal(actSpecialMap(s,'up',1),false);updateSpecialMotion(s,170);
-  assert.equal(s.exitReached,k===route.length-1);
+  assert.equal('exitReached' in s,false);
  }
  assert.ok(s.explored.flat().filter(Boolean).length>1);assert.deepEqual(normal,before);assert.deepEqual(map,original);
- const again=create();assert.deepEqual(again.generatedMap,s.generatedMap);assert.equal(again.explored.flat().filter(Boolean).length,1);assert.equal(again.exitReached,false);
+ const again=create();assert.deepEqual(again.generatedMap,s.generatedMap);assert.equal(again.explored.flat().filter(Boolean).length,1);assert.equal('exitReached' in again,false);
 });
 test('shared origins and different discoverers use only ruleset and seed for terrain',()=>{
  const original={...map,rulesetVersion:'phase2a-1'};const imported=registerSharedMap(normalizeSpecialMaps({discovererName:'ALC'}),decodeMapCode(encodeMapCode(original)).map).map;
  assert.deepEqual(create(original).generatedMap,create(imported).generatedMap);
  assert.deepEqual(create({...original,discovererName:'ALC'}).generatedMap,create(original).generatedMap);
- assert.ok(create(original).cells.flat().every(c=>c.type==='floor'&&!c.npc&&!c.treasure&&!c.bossId));
+ assert.ok(create(original).cells.flat().every(c=>['floor','stairsUp'].includes(c.type)&&!c.npc&&!c.treasure&&!c.bossId));
 });
 import {drawMinimap} from '../js/minimap.js';
 import {readFileSync} from 'node:fs';
@@ -41,7 +41,7 @@ import vm from 'node:vm';
 test('real minimap accepts session cells without revealing unknown exits',()=>{
  const s=create();const ctx=new Proxy({},{get:(o,k)=>o[k]??(()=>{})});
  assert.doesNotThrow(()=>drawMinimap(ctx,{W:960,MAP_W:10,MAP_H:10,cells:s.cells,explored:s.explored,state:s.renderState,roundRect(){}}));
- assert.ok(s.cells.flat().every(c=>c.type==='floor'));assert.equal(s.renderState.fullMapRevealActive,undefined);
+ assert.equal(s.cells.flat().filter(c=>c.type==='stairsUp').length,1);assert.equal(s.cells[s.generatedMap.exit.y][s.generatedMap.exit.x].type,'floor');assert.equal(s.renderState.fullMapRevealActive,undefined);
 });
 test('renderer binding restores exact normal references and theme after immediate disposal',()=>{
  const source=readFileSync(new URL('../js/renderer.js',import.meta.url),'utf8');
@@ -52,34 +52,27 @@ test('renderer binding restores exact normal references and theme after immediat
  assert.equal(renderer.state,s.renderState);assert.equal(renderer.wallColor,'torture');dispose();dispose();assert.deepEqual(renderer,normal);
 });
 
-test('runtime controller exits immediately, restores renderer, and never invokes normal gameplay',()=>{
+test('runtime controller uses ordinary menu, pauses movement, and flushes before return',()=>{
  const source=readFileSync(new URL('../js/special-map/exploration-ui.js',import.meta.url),'utf8');
- let bound,restored=0,exited=0,mapToggles=0;const sounds=[];const listeners=new Map();
- class Node{constructor(){this.children=[];this.dataset={};}setAttribute(){}append(...nodes){this.children.push(...nodes);}getContext(){return {};}remove(){this.removed=true;}}
- const context={drawCompass(){},isMinimapOverlayVisible:()=>mapToggles%2===1,createSpecialMapSession,actSpecialMap,updateSpecialMotion,specialWall,specialDoorState,openSpecialDoorAhead,flushSpecialSurvey,drawMinimap,getMinimapBounds(){},toggleMinimapOverlay(){mapToggles++;},performance:{now:()=>0},
-  useSpecialMapRenderSource:options=>{bound=options;return ()=>restored++;},
-  document:{createElement:()=>new Node(),createTextNode:text=>text},window:{addEventListener:(key,fn)=>listeners.set(key,fn),removeEventListener:key=>listeners.delete(key)}};
+ let bound,restored=0,exited=0,mapToggles=0,menu=false;const sounds=[],listeners=new Map();
+ class Node{constructor(){this.children=[];this.dataset={};}setAttribute(){}append(...nodes){for(const n of nodes){n.parentElement=this;this.children.push(n);}}getContext(){return {};}remove(){this.removed=true;}addEventListener(){}}
+ const viewport=new Node(),status=new Node();viewport.append(status);
+ const host={viewport,status,isPaused:()=>menu,openMenu:()=>{menu=true;},handleInput:a=>{if(!menu)return false;if(a==='cancel')menu=false;return true;}};
+ const context={mapOriginalId,getSpecialMapHost:()=>host,attachSpecialMap:()=>()=>{},describeTestMap:()=>({name:'地図'}),continueSpecialAutoWalker(){},createSpecialMapSession,actSpecialMap,updateSpecialMotion,specialWall,specialDoorState,openSpecialDoorAhead,flushSpecialSurvey,drawMinimap,getMinimapBounds(){},toggleMinimapOverlay(){mapToggles++;},performance:{now:()=>0},
+  useSpecialMapRenderSource:options=>{bound=options;return ()=>restored++;},document:{createElement:()=>new Node()},window:{addEventListener:(key,fn)=>listeners.set(key,fn),removeEventListener:key=>listeners.delete(key)}};
  vm.runInNewContext(source.replace(/^import .*;\r?\n/gm,'').replace('export function','function')+';this.start=startSpecialMapExploration;',context);
- const host=new Node(),message={};const options={playSe:id=>sounds.push(id),saveSurvey:()=>({ok:true}),host,registered:[map],mapKey:mapOriginalId(map),message,onExit:()=>exited++};
- const ui=context.start(options);assert.equal(bound.state,ui.session.renderState);assert.equal(bound.eventOverlayCtx,null);assert.equal(bound.getRoamingEnemyRenderState(),null);
- ui.input('map');bound.updateHud();assert.equal(mapToggles,1);assert.equal(host.children[0].dataset.mapExpanded,'true');
- host.children[0].children[2].children[1].onclick();assert.equal(mapToggles,2);
- ui.input('up');assert.deepEqual(sounds,['step']);assert.ok(ui.session.motion);ui.input('cancel');assert.equal(restored,1);assert.equal(exited,1);assert.equal(host.children[0].removed,true);assert.equal(listeners.size,0);
- ui.close();assert.equal(restored,1);
- const next=context.start(options);assert.equal(next.session.playerX,0);assert.equal(next.session.playerY,2);
- const door=next.session.doorLayout.doors[0];next.session.playerX=door.x;next.session.playerY=door.y;next.session.direction=door.dir==='E'?1:2;
- assert.equal(bound.wallOnCell(door.x,door.y,door.dir),true);assert.equal(bound.getDoorKind(door.x,door.y,door.dir),'normal');
- // Native touch/click button and keyboard use the same controller as gamepad.
- const runtime=host.children.at(-1);sounds.length=0;runtime.children[2].children[2].onclick();runtime.children[2].children[2].onclick();assert.deepEqual(sounds,['door']);assert.equal(next.session.renderState.anim.type,'door');bound.updateAnimation(520);
- assert.equal(bound.wallOnCell(door.x,door.y,door.dir),false);assert.equal(bound.openDoorOnCell(door.x,door.y,door.dir),true);
- next.session.openedDoors.clear();listeners.get('keydown')({key:'Enter',preventDefault(){},stopImmediatePropagation(){}});assert.equal(next.session.renderState.anim.type,'door');bound.updateAnimation(520);
- next.session.exitReached=true;bound.updateHud();assert.match(message.textContent,/出口を発見/);next.input('confirm');assert.equal(exited,1);next.input('cancel');assert.equal(exited,2);assert.equal(restored,2);
- let completionMessages=0;const completionMessage={set textContent(value){if(value.includes('地図の調査が完了した'))completionMessages++;}};
- // Only entrance is missing: the entry visit must commit and notify once.
- const almost='fffffe'+'f'.repeat(19),completeUi=context.start({...options,registered:[{...map,surveyedMask:almost}],message:completionMessage});
- bound.updateHud();bound.updateHud();assert.equal(completionMessages,1);assert.equal(completeUi.session.surveyedCount,100);
- assert.equal(bound.getMinimapOptions().explored.flat().filter(Boolean).length,100);assert.equal(completeUi.session.explored.flat().filter(Boolean).length,1);completeUi.close();
- const failed=context.start({...options,saveSurvey:()=>({ok:false})});const priorExit=exited;failed.input('cancel');assert.equal(exited,priorExit);assert.ok(failed.session.surveyError);failed.close();
+ const options={playSe:id=>sounds.push(id),saveSurvey:()=>({ok:true}),registered:[map],mapKey:mapOriginalId(map),message:{},onExit:()=>exited++};
+ const ui=context.start(options);assert.equal(bound.state,ui.session.renderState);assert.equal(bound.getRoamingEnemyRenderState(),null);
+ assert.equal(viewport.children.at(-1).children.length,2,'only canvas and shared HUD, no dedicated buttons');
+ assert.equal(ui.session.renderState.overlayEvent.specialMapTitle,true);ui.input('confirm');
+ ui.input('map');assert.equal(mapToggles,1);
+ ui.session.autoPath=['E'];ui.input('up');assert.equal(ui.session.autoPath,null);assert.deepEqual(sounds,['step']);ui.input('cancel');assert.equal(menu,true);assert.equal(exited,0);
+ bound.updateAnimation(170);assert.ok(ui.session.motion,'menu pauses exploration');ui.input('cancel');bound.updateAnimation(170);assert.equal(ui.session.motion,null);
+ assert.ok(ui.finish());assert.equal(exited,1);assert.equal(restored,1);assert.equal(listeners.size,0);ui.close();assert.equal(restored,1);
+ let notices=0;const almost='fffffe'+'f'.repeat(19);
+ const complete=context.start({...options,registered:[{...map,surveyedMask:almost}],message:{set textContent(text){if(text.includes('地図の調査が完了した'))notices++;}}});
+ bound.updateHud();bound.updateHud();assert.equal(notices,1);assert.equal(complete.session.surveyedCount,100);assert.equal(bound.getMinimapOptions().explored.flat().filter(Boolean).length,100);assert.equal(complete.session.explored.flat().filter(Boolean).length,1);complete.close();
+ const failed=context.start({...options,saveSurvey:()=>({ok:false})});assert.equal(failed.finish(),false);assert.equal(exited,1);assert.ok(failed.session.surveyError);failed.close();
 });
 
 test('backward travel and left turns preserve facing and mark only visited cells',()=>{

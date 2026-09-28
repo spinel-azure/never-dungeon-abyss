@@ -20,7 +20,7 @@ test('actual walk surveys 100 unique cells, exit is not terminal, completion tra
  const f=setup(),s=f.create();assert.equal(s.surveyedCount,1);let notices=0,exitSeen=false;
  for(const d of routeAll(s)){
   const old=s.surveyedCount;move(s,d);assert.ok(s.surveyedCount===old||s.surveyedCount===old+1);
-  if(s.exitReached){exitSeen=true;assert.ok(s.surveyedCount<=100);}
+  if(s.playerX===s.generatedMap.exit.x&&s.playerY===s.generatedMap.exit.y){exitSeen=true;assert.ok(s.surveyedCount<=100);}
   if(s.surveyCompletionPending){notices++;s.surveyCompletionPending=false;}
  }
  assert.ok(exitSeen);assert.equal(notices,1);assert.equal(s.surveyComplete,true);assert.equal(s.surveyedCount,100);assert.equal(s.explored.flat().filter(Boolean).length,100);

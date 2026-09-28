@@ -484,7 +484,12 @@ function drawFloorLapMessage() {
   ctx.textBaseline = "middle";
   ctx.font = `400 ${Math.max(54, Math.floor(H * .15))}px PixelFont, monospace`;
   const titleY = subtitle ? H * .46 : H / 2;
-  ctx.fillText(title, W / 2, titleY);
+  if(state.overlayEvent?.specialMapTitle){
+    const size=Math.max(24,Math.min(Math.max(54,Math.floor(H*.15)),(W*.88/Math.max(1,ctx.measureText(title).width))*Math.max(54,Math.floor(H*.15))));
+    ctx.font=`400 ${size}px PixelFont, monospace`;
+  }
+  if(state.overlayEvent?.specialMapTitle)ctx.fillText(title,W/2,titleY,W*.88);
+  else ctx.fillText(title, W / 2, titleY);
   if (subtitle) {
     ctx.fillStyle = "#bbb5aa";
     ctx.font = `400 ${Math.max(18, Math.floor(H * .045))}px PixelFont, monospace`;
@@ -1119,7 +1124,7 @@ function rgba([r, g, b], alpha) {
 }
 
 export function drawCellEvents(layer = "all", now = 0) {
-  if(renderer.state?.kind==='specialMap')return;
+
   const { ctx, W, H, state } = renderer;
   const {
     MAP_W,
@@ -1162,6 +1167,7 @@ export function drawCellEvents(layer = "all", now = 0) {
   for (let y = 0; y < MAP_H; y++) {
     for (let x = 0; x < MAP_W; x++) {
       const cell = cells[y][x];
+      if(state.kind==='specialMap'&&cell.type!=='stairsUp')continue;
       const projected = projectCellCenter(x, y);
       if (!projected) continue;
       const hasSprite = isSpriteEventCell(cell);

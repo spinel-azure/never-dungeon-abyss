@@ -3520,7 +3520,7 @@ function showEntranceCommands() {
   town.commandRoot.setAttribute("aria-label", "ダンジョン入口");
 }
 
-function showGameCommands() {
+export function showGameCommands() {
   if (!town.commandRoot) return;
   town.commandRoot.hidden = false;
   if (town.transferOverlay) town.transferOverlay.hidden = true;

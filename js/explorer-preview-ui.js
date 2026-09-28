@@ -63,7 +63,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     try{
       if(!startExploration)throw Error('探索機能に接続されていません。');
       exploration=startExploration({host,registered:maps().registered,mapKey:detailId,message,onExit:exit,playSe,saveSurvey:mask=>updateMaps(state=>updateMapSurvey(state,detailId,mask))});
-      panel.hidden=true;commands.hidden=true;view='exploring';
+      panel.hidden=true;view='exploring';
     }catch(e){error(e.message);}
   }
   function registered(result){
@@ -186,7 +186,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       panel.append(body);actionButtons(origin==='maps'?[['探索する（A）',()=>changeView('enter')],['戻る（B）',back]]:[['管理機能を確認（A）',()=>changeView('manage')],['戻る（B）',back]]);return;
     }
     if(view==='enter'){
-      panel.append(make('p','この地図を探索しますか？'),make('p','敵・宝箱・報酬はありません。探索途中の状態は保存されません。'));
+      panel.append(make('p','この地図を探索しますか？'),make('p','調査した地図は保存されます。再入場時は入口から探索を始めます。'));
       actionButtons([['はい（A／ENTER）',enterMap],['いいえ（B）',back]]);return;
     }
     if(view==='sameContent'){
