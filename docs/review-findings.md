@@ -1880,3 +1880,13 @@
 - data/inventory-sort.jsへ規則を分離。Node全1610成功/失敗0、Python29成功/警告0/失敗0/既存2skip。tests/browser/inventory-sort.mjsでPC1280x900/タブレット768x1024/スマホ390x844の表示、共通入力経由切替、選択ID維持、誤使用なし、別タブではボタン非表示を確認。実端末・物理ゲームパッド未確認。
 - 今回の新しい画像はTEMP/nda-inventory-sort-wJHNiUへ保存、リポジトリへ追加しない。既存artifactsは620ファイル/約207MiB。docs/qa-artifact-policy.mdへ今後の保存先と既存成果物の整理手順を記録。既存成果物の削除/追跡解除/履歴改変/外部アップロード/CI変更なし。
 - LAST UPDATE2026-09-26維持、main.jsキャッシュ20260926-3、game-menu.cssキャッシュ20260926-2。コミット/pushなし。
+
+
+### 2026-09-28 戦闘開始時の敵画像混入修正
+
+- 着手HEAD41e599c、追跡差分なし。未追跡images/karte_enemies/を保護。現行executeAmbushOpeningはpresentationEnemyImageを初期化せず、startBattle/closeBattleにも初期化がなかった。
+- 修正前コードをブラウザへ差し替え、初戦不意打ちのsrc空文字と、Aで攻撃→B不意打ちでAのsrc/naturalWidth120が残ることを再現。通常戦の画像要素使い回しだけによる旧bitmap残留は今回のEdgeで再現せず（新src待機中naturalWidth0）。
+- startBattleでcreateBattleState直後に演出用画像を現在敵へ初期化し、不意打ち入口でも設定。closeBattleで破棄。常時演出clear/消滅演出reset後、単体imgを新規生成し置換。戦闘中は同じ要素を保持し、形態変化等の参照を維持。追加のload/decode待機やコールバックなし。失敗した画像は表示できないが操作を待たせない。
+- Node全1676成功/失敗0（画像初期化順序・参照解放後の交換の回帰2件追加）。tests/browser/battle-opening-image.mjsでPC1280x900/スマホ相当390x844：初戦不意打ち、A攻撃後B通常/不意打ち、画像1.5秒遅延、未完了画像を残して終了→次戦、単体/複数切替、シルエット/幻影クラス、同一要素での獅子形態切替演出、攻撃/消滅、画像404でも攻撃可能、逃走完了→再戦を確認。テスト画像は識別用SVGであり、全ボスの実進行通し・実端末は未確認。
+- 常時演出は開始時clear後にrenderBattleが新要素をqueryしてsync。専用スキル演出も都度query。スクショ・生ログはTEMP/nda-battle-images-*とTEMP/nda-image-before-*.log等へ保存。リポジトリへ画像追加なし。構文/diff検査成功。
+- 戦闘ロジック/能力/報酬/速度/経験値精算は変更なし。LAST UPDATE2026-09-28、main.jsキャッシュ20260928-1へ更新。README変更なし。コミット/pushなし。

@@ -168,8 +168,20 @@ export function startBattle(enemy, {
   // New image elements prevent decoded sprites from the previous party flashing while loading.
   battleUi.root.querySelector("#battleEnemyParty")?.replaceChildren();
   resetEnemyVanishEffects(battleUi.root);
+  // A fresh element cannot paint a previous battle's decoded bitmap while its src loads.
+  // Replace only between battles, after ambient/vanish effects release their references.
+  const previousImage = battleUi.root.querySelector("#battleEnemyImage");
+  if (previousImage) {
+    const image = previousImage.ownerDocument.createElement("img");
+    image.id = "battleEnemyImage";
+    image.className = "battle-enemy-image";
+    image.alt = "";
+    previousImage.replaceWith(image);
+  }
   clearAutoTimer();
   battleUi.battle = createBattleState({ character, enemy, enemies, targetIndex });
+  battleUi.presenting = false;
+  battleUi.presentationEnemyImage = battleUi.battle.enemy.image || "";
   battleUi.battle.roamingEnemyInstanceId = String(roamingEnemyInstanceId || "");
   if (scriptedBattleType) {
     battleUi.battle.scriptedBattleType = scriptedBattleType;
@@ -502,6 +514,7 @@ function scheduleJireneScriptedRound(delayMs = 700) {
 }
 
 async function executeAmbushOpening() {
+  battleUi.presentationEnemyImage = battleUi.battle.enemy.image || "";
   battleUi.presentationMagicBarrier = magicBarrierAmount(battleUi.battle.player);
   battleUi.presentationWhirlpools = Object.fromEntries((battleUi.battle.enemies || []).map(e => [e.id, Boolean(e.reservedEnemyAction)]));
   battleUi.presentationBossBarrier = battleUi.battle.enemy.bossMagicBarrier;
@@ -917,6 +930,7 @@ function closeBattle() {
   delete battleUi.commandRoot.dataset.battleComplete;
   battleUi.messageEl.classList.remove("is-skill-description");
   battleUi.battle = null;
+  battleUi.presentationEnemyImage = "";
   renderWeaponElementStatus(battleUi.getCharacter());
   const barrier = document.getElementById("sphinxBarrierStatus");
   if (barrier) barrier.hidden = true;
