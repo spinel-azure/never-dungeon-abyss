@@ -1,0 +1,104 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {generateSpecialMapV2, SPECIAL_DUNGEON_V2, V2_RARITIES, canonicalV2Structure,
+  specialMapV2StructureFingerprint, specialMapV2Ascii} from '../js/special-map/generator-v2.js';
+import {streamV1} from '../js/special-map/random-v1.js';
+import {generateSpecialMap, specialMapFingerprint} from '../js/special-map/generator.js';
+import {generateSpecialMapDoors} from '../js/special-map/doors.js';
+import {generateSpecialMapEcology} from '../js/special-map/ecology.js';
+import {encodeMapCode, decodeMapCode} from '../data/special-map-code.js';
+import {checkV2Structure} from './special-map-v2-structure-helper.mjs';
+
+const input = (seed, level = 1, rarity = 'WHITE') => ({ruleset: SPECIAL_DUNGEON_V2, seed, level, rarity});
+const seeds = [0, 1, 12345, 32768, 65535];
+// Candidate comparison snapshots, not a declaration that V2 has been released.
+const fingerprints = ['8cc6ed66', '3cdc3767', 'f69172cd', '3c07b720', '9c6552d9'];
+
+test('V2: three reachable floors, reciprocal stairs and terminal 1x3 boss chamber repeat 100 times', () => {
+  for (const seed of seeds) {
+    const map = generateSpecialMapV2(input(seed)); checkV2Structure(map);
+    assert.equal(specialMapV2StructureFingerprint(map), fingerprints[seeds.indexOf(seed)]);
+    for (let i = 0; i < 100; i++) assert.deepEqual(generateSpecialMapV2(input(seed)), map);
+    assert.equal(specialMapV2StructureFingerprint(Object.fromEntries(Object.entries(map).reverse())), specialMapV2StructureFingerprint(map));
+    assert.equal(new Set(map.floors.map(f => JSON.stringify(f.walls))).size, 3);
+  }
+  assert.equal(new Set(seeds.map(s => specialMapV2StructureFingerprint(generateSpecialMapV2(input(s))))).size, seeds.length);
+});
+
+test('V2: all 100 levels and all rarities preserve structural coverage; identity inputs remain explicit', () => {
+  for (const seed of [0, 12345, 65535]) {
+    const expected = canonicalV2Structure(generateSpecialMapV2(input(seed)));
+    for (let level = 1; level <= 100; level++) for (const rarity of V2_RARITIES) {
+      const map = generateSpecialMapV2(input(seed, level, rarity));
+      assert.equal(map.level, level); assert.equal(map.rarity, rarity);
+      assert.equal(canonicalV2Structure(map), expected);
+    }
+  }
+});
+
+test('V2: rejects unsupported versions, non-16bit seeds, invalid levels and colors without coercion', () => {
+  for (const ruleset of [undefined, null, 2, 'special-map-v1', 'phase2a-1', 'latest'])
+    assert.throws(() => generateSpecialMapV2({...input(0), ruleset}), RangeError);
+  for (const seed of [undefined, null, '0', -1, 65536, 0.5, NaN, Infinity])
+    assert.throws(() => generateSpecialMapV2({...input(0), seed}), RangeError);
+  for (const level of [undefined, null, '1', 0, 101, 1.5, NaN, Infinity])
+    assert.throws(() => generateSpecialMapV2({...input(0), level}), RangeError);
+  for (const rarity of [undefined, null, 0, 'white', 'PLATINUM', ''])
+    assert.throws(() => generateSpecialMapV2({...input(0), rarity}), RangeError);
+  assert.throws(() => generateSpecialMapV2(), RangeError);
+});
+
+test('V2: no Math.random; new purpose streams and discoverer names never change structure', () => {
+  const before = generateSpecialMapV2(input(12345)), random = Math.random;
+  try {
+    Math.random = () => {throw Error('random forbidden');};
+    for (const seed of seeds) checkV2Structure(generateSpecialMapV2(input(seed)));
+    for (const purpose of ['floor-1-ecology', 'floor-2-doors', 'floor-3-boss', 'boss', 'map-rarity']) {
+      const next = streamV1(SPECIAL_DUNGEON_V2, 12345, purpose);
+      for (let i = 0; i < 100; i++) next();
+    }
+    assert.deepEqual(generateSpecialMapV2({...input(12345), discovererName: '†ルル'}), before);
+    assert.deepEqual(generateSpecialMapV2({...input(12345), discovererName: 'スピネ'}), before);
+  } finally {Math.random = random;}
+});
+
+test('V2: inputs are not mutated and generated floor/room/link objects are not shared', () => {
+  const options = Object.freeze(input(12345)), baseline = generateSpecialMapV2(options);
+  const dirty = generateSpecialMapV2(options);
+  dirty.floors[2].bossRoom.cells[0].x = 100;
+  dirty.floors[0].walls[0][0] = false;
+  dirty.links[0].lower.x = 100;
+  dirty.floors[0].stairsDown.x = 100;
+  assert.deepEqual(generateSpecialMapV2(options), baseline);
+  assert.equal(options.seed, 12345);
+  assert.notStrictEqual(baseline.links[0].upper, baseline.floors[0].stairsDown);
+});
+
+test('V2: ASCII inspector identifies both stairs and the final boss cell without an exit marker', () => {
+  const map = generateSpecialMapV2(input(12345));
+  for (const [i, floor] of map.floors.entries()) {
+    const ascii = specialMapV2Ascii(floor);
+    assert.equal(ascii.split('\n').length, 21);
+    assert.equal((ascii.match(/U/g) ?? []).length, 1);
+    assert.equal((ascii.match(/D/g) ?? []).length, i < 2 ? 1 : 0);
+    assert.equal((ascii.match(/B/g) ?? []).length, i === 2 ? 1 : 0);
+    assert.equal((ascii.match(/r/g) ?? []).length, i === 2 ? 2 : 0);
+  }
+});
+
+test('V2: generating blueprints does not alter V1, legacy codes, doors or ecology; live API stays V1', () => {
+  const original = {rulesetVersion: 'phase2a-1', seed: 12345, discovererName: '†ルル'};
+  const code = encodeMapCode(original), v1 = generateSpecialMap('special-map-v1', 12345);
+  const doors = generateSpecialMapDoors(v1.ruleset, v1.seed, v1);
+  const ecology = generateSpecialMapEcology(v1.ruleset, v1.seed, v1);
+  for (const seed of seeds) generateSpecialMapV2(input(seed));
+  assert.deepEqual(generateSpecialMap('special-map-v1', 12345), v1);
+  assert.equal(specialMapFingerprint(v1), '65bbb4f0');
+  assert.equal(doors.fingerprint, '04ec0371');
+  assert.deepEqual(generateSpecialMapDoors(v1.ruleset, v1.seed, v1), doors);
+  assert.deepEqual(generateSpecialMapEcology(v1.ruleset, v1.seed, v1), ecology);
+  assert.equal(encodeMapCode(original), code);
+  assert.deepEqual(decodeMapCode(code).map, original);
+  assert.throws(() => generateSpecialMap(SPECIAL_DUNGEON_V2, 12345), RangeError);
+  assert.throws(() => encodeMapCode({...original, rulesetVersion: SPECIAL_DUNGEON_V2, level: 1, rarity: 'WHITE'}));
+});

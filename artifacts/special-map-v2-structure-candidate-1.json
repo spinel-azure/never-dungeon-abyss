@@ -1,0 +1,898 @@
+{
+  "revision": "v2-structure-candidate-1",
+  "status": "PROVISIONAL — structure only, not a released V2 compatibility value",
+  "ruleset": "special-map-v2",
+  "seedsAttempted": 65536,
+  "validSets": 65536,
+  "validFloors": 196608,
+  "failures": {
+    "generation": 0,
+    "structure": 0,
+    "repeat": 0,
+    "levelRarityIndependence": 0,
+    "legacy": 0
+  },
+  "failureExamples": [],
+  "coverage": {
+    "structure": "All 65536 seeds at Lv1 WHITE; three 100-cell floors; all 300 cells reachable in both directions via stairs.",
+    "identity": "Every seed regenerated identically, then regenerated at a rotating Lv1..100 and WHITE/SILVER/GOLD. Structural equality excludes only Lv/color.",
+    "limitation": "No V2 ecology, enemy, boss selection, ordinary doors, runtime, save, reward or codec audit. Those systems are not implemented here."
+  },
+  "stairsDistances": [
+    {
+      "14": 16,
+      "15": 177,
+      "16": 770,
+      "17": 2160,
+      "18": 4196,
+      "19": 6017,
+      "20": 7264,
+      "21": 7493,
+      "22": 6799,
+      "23": 5795,
+      "24": 4948,
+      "25": 3975,
+      "26": 3212,
+      "27": 2463,
+      "28": 2031,
+      "29": 1645,
+      "30": 1292,
+      "31": 1056,
+      "32": 891,
+      "33": 719,
+      "34": 570,
+      "35": 446,
+      "36": 370,
+      "37": 262,
+      "38": 221,
+      "39": 202,
+      "40": 139,
+      "41": 92,
+      "42": 66,
+      "43": 59,
+      "44": 63,
+      "45": 31,
+      "46": 26,
+      "47": 18,
+      "48": 15,
+      "49": 18,
+      "50": 6,
+      "51": 2,
+      "52": 4,
+      "53": 3,
+      "54": 3,
+      "56": 1
+    },
+    {
+      "14": 9,
+      "15": 151,
+      "16": 756,
+      "17": 2062,
+      "18": 4045,
+      "19": 6203,
+      "20": 7232,
+      "21": 7365,
+      "22": 6939,
+      "23": 5863,
+      "24": 4923,
+      "25": 4035,
+      "26": 3179,
+      "27": 2522,
+      "28": 2018,
+      "29": 1665,
+      "30": 1257,
+      "31": 1130,
+      "32": 862,
+      "33": 708,
+      "34": 579,
+      "35": 468,
+      "36": 364,
+      "37": 273,
+      "38": 207,
+      "39": 176,
+      "40": 133,
+      "41": 97,
+      "42": 79,
+      "43": 62,
+      "44": 58,
+      "45": 32,
+      "46": 29,
+      "47": 19,
+      "48": 11,
+      "49": 9,
+      "50": 5,
+      "52": 4,
+      "53": 3,
+      "54": 1,
+      "55": 2,
+      "58": 1
+    }
+  ],
+  "floor3BossDistances": {
+    "14": 29,
+    "15": 188,
+    "16": 582,
+    "17": 1424,
+    "18": 2402,
+    "19": 3803,
+    "20": 4900,
+    "21": 5814,
+    "22": 6405,
+    "23": 6573,
+    "24": 5769,
+    "25": 5317,
+    "26": 4213,
+    "27": 3636,
+    "28": 2741,
+    "29": 2286,
+    "30": 1781,
+    "31": 1536,
+    "32": 1102,
+    "33": 1066,
+    "34": 786,
+    "35": 655,
+    "36": 532,
+    "37": 491,
+    "38": 310,
+    "39": 308,
+    "40": 191,
+    "41": 175,
+    "42": 118,
+    "43": 99,
+    "44": 89,
+    "45": 48,
+    "46": 44,
+    "47": 39,
+    "48": 19,
+    "49": 20,
+    "50": 16,
+    "51": 11,
+    "52": 8,
+    "53": 4,
+    "54": 4,
+    "55": 1,
+    "59": 1
+  },
+  "entranceToBossDistances": {
+    "50": 1,
+    "51": 2,
+    "52": 11,
+    "53": 20,
+    "54": 44,
+    "55": 70,
+    "56": 134,
+    "57": 245,
+    "58": 417,
+    "59": 572,
+    "60": 885,
+    "61": 1216,
+    "62": 1578,
+    "63": 1892,
+    "64": 2325,
+    "65": 2675,
+    "66": 2891,
+    "67": 3127,
+    "68": 3297,
+    "69": 3390,
+    "70": 3427,
+    "71": 3337,
+    "72": 3265,
+    "73": 3166,
+    "74": 2855,
+    "75": 2661,
+    "76": 2540,
+    "77": 2315,
+    "78": 2148,
+    "79": 1872,
+    "80": 1723,
+    "81": 1565,
+    "82": 1366,
+    "83": 1203,
+    "84": 1046,
+    "85": 886,
+    "86": 806,
+    "87": 701,
+    "88": 603,
+    "89": 493,
+    "90": 479,
+    "91": 374,
+    "92": 341,
+    "93": 282,
+    "94": 219,
+    "95": 199,
+    "96": 150,
+    "97": 145,
+    "98": 102,
+    "99": 79,
+    "100": 81,
+    "101": 63,
+    "102": 42,
+    "103": 41,
+    "104": 33,
+    "105": 34,
+    "106": 14,
+    "107": 20,
+    "108": 11,
+    "109": 11,
+    "110": 4,
+    "111": 9,
+    "112": 9,
+    "113": 5,
+    "114": 2,
+    "115": 2,
+    "116": 4,
+    "117": 2,
+    "118": 1,
+    "119": 3,
+    "121": 1,
+    "122": 2,
+    "127": 1,
+    "140": 1
+  },
+  "roomDirections": {
+    "W": 16427,
+    "N": 16405,
+    "E": 16456,
+    "S": 16248
+  },
+  "themesByFloor": [
+    {
+      "crystal": 6606,
+      "magic": 6532,
+      "yellow": 6611,
+      "black": 6554,
+      "blue": 6569,
+      "water": 6569,
+      "green": 6526,
+      "red": 6556,
+      "slate": 6376,
+      "torture": 6637
+    },
+    {
+      "magic": 6609,
+      "crystal": 6573,
+      "red": 6616,
+      "water": 6460,
+      "slate": 6451,
+      "torture": 6555,
+      "yellow": 6617,
+      "blue": 6576,
+      "black": 6463,
+      "green": 6616
+    },
+    {
+      "green": 6530,
+      "slate": 6577,
+      "torture": 6565,
+      "red": 6574,
+      "blue": 6402,
+      "crystal": 6678,
+      "yellow": 6526,
+      "black": 6412,
+      "water": 6615,
+      "magic": 6657
+    }
+  ],
+  "examples": [
+    {
+      "seed": 0,
+      "structureFingerprint": "8cc6ed66",
+      "stairsDistances": [
+        22,
+        34
+      ],
+      "bossDistance": 24,
+      "entranceToBoss": 82,
+      "roomDirection": "W",
+      "floors": [
+        {
+          "floor": 1,
+          "width": 10,
+          "height": 10,
+          "stairsUp": {
+            "x": 4,
+            "y": 0
+          },
+          "stairsDown": {
+            "x": 9,
+            "y": 7
+          },
+          "entranceSide": "N",
+          "startDirection": "E",
+          "themeId": "crystal",
+          "bossRoom": null
+        },
+        {
+          "floor": 2,
+          "width": 10,
+          "height": 10,
+          "stairsUp": {
+            "x": 2,
+            "y": 0
+          },
+          "stairsDown": {
+            "x": 8,
+            "y": 2
+          },
+          "entranceSide": "N",
+          "startDirection": "E",
+          "themeId": "magic",
+          "bossRoom": null
+        },
+        {
+          "floor": 3,
+          "width": 10,
+          "height": 10,
+          "stairsUp": {
+            "x": 2,
+            "y": 9
+          },
+          "stairsDown": null,
+          "entranceSide": null,
+          "startDirection": "E",
+          "themeId": "green",
+          "bossRoom": {
+            "direction": "W",
+            "cells": [
+              {
+                "x": 6,
+                "y": 9
+              },
+              {
+                "x": 5,
+                "y": 9
+              },
+              {
+                "x": 4,
+                "y": 9
+              }
+            ],
+            "approach": {
+              "x": 7,
+              "y": 9
+            },
+            "bossCell": {
+              "x": 4,
+              "y": 9
+            },
+            "doorEdge": {
+              "x": 6,
+              "y": 9,
+              "direction": "E",
+              "key": "floor-3:6,9,E"
+            }
+          }
+        }
+      ],
+      "links": [
+        {
+          "upper": {
+            "floor": 1,
+            "x": 9,
+            "y": 7
+          },
+          "lower": {
+            "floor": 2,
+            "x": 2,
+            "y": 0
+          }
+        },
+        {
+          "upper": {
+            "floor": 2,
+            "x": 8,
+            "y": 2
+          },
+          "lower": {
+            "floor": 3,
+            "x": 2,
+            "y": 9
+          }
+        }
+      ]
+    },
+    {
+      "seed": 1,
+      "structureFingerprint": "3cdc3767",
+      "stairsDistances": [
+        19,
+        26
+      ],
+      "bossDistance": 20,
+      "entranceToBoss": 67,
+      "roomDirection": "N",
+      "floors": [
+        {
+          "floor": 1,
+          "width": 10,
+          "height": 10,
+          "stairsUp": {
+            "x": 6,
+            "y": 0
+          },
+          "stairsDown": {
+            "x": 8,
+            "y": 7
+          },
+          "entranceSide": "N",
+          "startDirection": "E",
+          "themeId": "magic",
+          "bossRoom": null
+        },
+        {
+          "floor": 2,
+          "width": 10,
+          "height": 10,
+          "stairsUp": {
+            "x": 9,
+            "y": 7
+          },
+          "stairsDown": {
+            "x": 2,
+            "y": 2
+          },
+          "entranceSide": "E",
+          "startDirection": "W",
+          "themeId": "crystal",
+          "bossRoom": null
+        },
+        {
+          "floor": 3,
+          "width": 10,
+          "height": 10,
+          "stairsUp": {
+            "x": 1,
+            "y": 4
+          },
+          "stairsDown": null,
+          "entranceSide": null,
+          "startDirection": "S",
+          "themeId": "slate",
+          "bossRoom": {
+            "direction": "N",
+            "cells": [
+              {
+                "x": 8,
+                "y": 3
+              },
+              {
+                "x": 8,
+                "y": 2
+              },
+              {
+                "x": 8,
+                "y": 1
+              }
+            ],
+            "approach": {
+              "x": 8,
+              "y": 4
+            },
+            "bossCell": {
+              "x": 8,
+              "y": 1
+            },
+            "doorEdge": {
+              "x": 8,
+              "y": 3,
+              "direction": "S",
+              "key": "floor-3:8,3,S"
+            }
+          }
+        }
+      ],
+      "links": [
+        {
+          "upper": {
+            "floor": 1,
+            "x": 8,
+            "y": 7
+          },
+          "lower": {
+            "floor": 2,
+            "x": 9,
+            "y": 7
+          }
+        },
+        {
+          "upper": {
+            "floor": 2,
+            "x": 2,
+            "y": 2
+          },
+          "lower": {
+            "floor": 3,
+            "x": 1,
+            "y": 4
+          }
+        }
+      ]
+    },
+    {
+      "seed": 12345,
+      "structureFingerprint": "f69172cd",
+      "stairsDistances": [
+        21,
+        29
+      ],
+      "bossDistance": 26,
+      "entranceToBoss": 78,
+      "roomDirection": "S",
+      "floors": [
+        {
+          "floor": 1,
+          "width": 10,
+          "height": 10,
+          "stairsUp": {
+            "x": 0,
+            "y": 3
+          },
+          "stairsDown": {
+            "x": 7,
+            "y": 7
+          },
+          "entranceSide": "W",
+          "startDirection": "S",
+          "themeId": "crystal",
+          "bossRoom": null
+        },
+        {
+          "floor": 2,
+          "width": 10,
+          "height": 10,
+          "stairsUp": {
+            "x": 8,
+            "y": 9
+          },
+          "stairsDown": {
+            "x": 1,
+            "y": 5
+          },
+          "entranceSide": "S",
+          "startDirection": "N",
+          "themeId": "crystal",
+          "bossRoom": null
+        },
+        {
+          "floor": 3,
+          "width": 10,
+          "height": 10,
+          "stairsUp": {
+            "x": 2,
+            "y": 8
+          },
+          "stairsDown": null,
+          "entranceSide": null,
+          "startDirection": "S",
+          "themeId": "torture",
+          "bossRoom": {
+            "direction": "S",
+            "cells": [
+              {
+                "x": 7,
+                "y": 1
+              },
+              {
+                "x": 7,
+                "y": 2
+              },
+              {
+                "x": 7,
+                "y": 3
+              }
+            ],
+            "approach": {
+              "x": 7,
+              "y": 0
+            },
+            "bossCell": {
+              "x": 7,
+              "y": 3
+            },
+            "doorEdge": {
+              "x": 7,
+              "y": 0,
+              "direction": "S",
+              "key": "floor-3:7,0,S"
+            }
+          }
+        }
+      ],
+      "links": [
+        {
+          "upper": {
+            "floor": 1,
+            "x": 7,
+            "y": 7
+          },
+          "lower": {
+            "floor": 2,
+            "x": 8,
+            "y": 9
+          }
+        },
+        {
+          "upper": {
+            "floor": 2,
+            "x": 1,
+            "y": 5
+          },
+          "lower": {
+            "floor": 3,
+            "x": 2,
+            "y": 8
+          }
+        }
+      ]
+    },
+    {
+      "seed": 32768,
+      "structureFingerprint": "3c07b720",
+      "stairsDistances": [
+        21,
+        27
+      ],
+      "bossDistance": 20,
+      "entranceToBoss": 70,
+      "roomDirection": "S",
+      "floors": [
+        {
+          "floor": 1,
+          "width": 10,
+          "height": 10,
+          "stairsUp": {
+            "x": 8,
+            "y": 9
+          },
+          "stairsDown": {
+            "x": 0,
+            "y": 8
+          },
+          "entranceSide": "S",
+          "startDirection": "N",
+          "themeId": "water",
+          "bossRoom": null
+        },
+        {
+          "floor": 2,
+          "width": 10,
+          "height": 10,
+          "stairsUp": {
+            "x": 0,
+            "y": 0
+          },
+          "stairsDown": {
+            "x": 0,
+            "y": 9
+          },
+          "entranceSide": "W",
+          "startDirection": "E",
+          "themeId": "magic",
+          "bossRoom": null
+        },
+        {
+          "floor": 3,
+          "width": 10,
+          "height": 10,
+          "stairsUp": {
+            "x": 2,
+            "y": 6
+          },
+          "stairsDown": null,
+          "entranceSide": null,
+          "startDirection": "S",
+          "themeId": "green",
+          "bossRoom": {
+            "direction": "S",
+            "cells": [
+              {
+                "x": 6,
+                "y": 4
+              },
+              {
+                "x": 6,
+                "y": 5
+              },
+              {
+                "x": 6,
+                "y": 6
+              }
+            ],
+            "approach": {
+              "x": 6,
+              "y": 3
+            },
+            "bossCell": {
+              "x": 6,
+              "y": 6
+            },
+            "doorEdge": {
+              "x": 6,
+              "y": 3,
+              "direction": "S",
+              "key": "floor-3:6,3,S"
+            }
+          }
+        }
+      ],
+      "links": [
+        {
+          "upper": {
+            "floor": 1,
+            "x": 0,
+            "y": 8
+          },
+          "lower": {
+            "floor": 2,
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "upper": {
+            "floor": 2,
+            "x": 0,
+            "y": 9
+          },
+          "lower": {
+            "floor": 3,
+            "x": 2,
+            "y": 6
+          }
+        }
+      ]
+    },
+    {
+      "seed": 65535,
+      "structureFingerprint": "9c6552d9",
+      "stairsDistances": [
+        24,
+        20
+      ],
+      "bossDistance": 32,
+      "entranceToBoss": 78,
+      "roomDirection": "W",
+      "floors": [
+        {
+          "floor": 1,
+          "width": 10,
+          "height": 10,
+          "stairsUp": {
+            "x": 2,
+            "y": 0
+          },
+          "stairsDown": {
+            "x": 8,
+            "y": 6
+          },
+          "entranceSide": "N",
+          "startDirection": "S",
+          "themeId": "slate",
+          "bossRoom": null
+        },
+        {
+          "floor": 2,
+          "width": 10,
+          "height": 10,
+          "stairsUp": {
+            "x": 4,
+            "y": 0
+          },
+          "stairsDown": {
+            "x": 9,
+            "y": 5
+          },
+          "entranceSide": "N",
+          "startDirection": "E",
+          "themeId": "water",
+          "bossRoom": null
+        },
+        {
+          "floor": 3,
+          "width": 10,
+          "height": 10,
+          "stairsUp": {
+            "x": 0,
+            "y": 0
+          },
+          "stairsDown": null,
+          "entranceSide": null,
+          "startDirection": "S",
+          "themeId": "yellow",
+          "bossRoom": {
+            "direction": "W",
+            "cells": [
+              {
+                "x": 6,
+                "y": 0
+              },
+              {
+                "x": 5,
+                "y": 0
+              },
+              {
+                "x": 4,
+                "y": 0
+              }
+            ],
+            "approach": {
+              "x": 7,
+              "y": 0
+            },
+            "bossCell": {
+              "x": 4,
+              "y": 0
+            },
+            "doorEdge": {
+              "x": 6,
+              "y": 0,
+              "direction": "E",
+              "key": "floor-3:6,0,E"
+            }
+          }
+        }
+      ],
+      "links": [
+        {
+          "upper": {
+            "floor": 1,
+            "x": 8,
+            "y": 6
+          },
+          "lower": {
+            "floor": 2,
+            "x": 4,
+            "y": 0
+          }
+        },
+        {
+          "upper": {
+            "floor": 2,
+            "x": 9,
+            "y": 5
+          },
+          "lower": {
+            "floor": 3,
+            "x": 0,
+            "y": 0
+          }
+        }
+      ]
+    }
+  ],
+  "sha256": {
+    "v2Structure": "19f8f3aad737c8ab9e91c7e673e892ab810b7938b182cab63e77d3b9601750b1",
+    "v1Topology": "b985066f1fb5720c8f27c56d925e58d700af9d637d90cd2c6e0fc33ce0920e58",
+    "legacyTopology": "3d92b41f2e2994ca08e40626cd85e498a20c8c0dfc1a135c32472641805df592",
+    "v1Doors": "6a625e0aac5a8c87367c2ab52e46570dcb195e4260ecb7cacc4f1167c81f693f",
+    "v1Ecology": "04c4c6902ef72c567a2166d4b4bd41d83b7ca89eab99a8926b0ceaa5d7c96a8a"
+  },
+  "legacyExample": {
+    "seed": 12345,
+    "topologyFingerprint": "65bbb4f0",
+    "doorFingerprint": "04ec0371"
+  },
+  "legacyHashesUnchanged": true,
+  "seconds": 88.337,
+  "passed": true,
+  "distanceRanges": {
+    "stairs": [
+      {
+        "min": 14,
+        "max": 56
+      },
+      {
+        "min": 14,
+        "max": 58
+      }
+    ],
+    "floor3Boss": {
+      "min": 14,
+      "max": 59
+    },
+    "entranceToBoss": {
+      "min": 50,
+      "max": 140
+    }
+  }
+}
