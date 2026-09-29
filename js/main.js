@@ -1,4 +1,4 @@
-import { AKASHIC_PHANTOM_IDS, QUEEN_PROJECTION_MESSAGES } from "../data/akashic-phantoms.js";
+import { isAkashicRematchUnlocked, AKASHIC_PHANTOM_IDS, QUEEN_PROJECTION_MESSAGES } from "../data/akashic-phantoms.js";
 import { getKirkeFinalDialogue } from "../data/endgame-quests.js";
 import {configureSpecialMapHost,getSpecialMapContext,getSpecialMapBgmKey} from './special-map/context.js';
 import {resolveSpecialFieldItem,resolveSpecialFieldSkill,applySpecialFieldEnvironment} from './special-map/field-environment.js';
@@ -1681,6 +1681,7 @@ import {
     character = normalizeCharacter(save.character);
     if (currentDepth === 100 && character.eventFlags?.ending_story_completed) {
       for (const cell of cells.flat()) if (cell.fixedEvent) {
+        if (!isAkashicRematchUnlocked(character.eventFlags)) { cell.fixedEvent = null; continue; }
         Object.assign(cell.fixedEvent, { imageId: "NPC_01c", projection: true, description: QUEEN_PROJECTION_MESSAGES[cell.fixedEvent.eventKey === "queen_shadow_warning_1" ? 0 : 1] });
       }
       refreshB100FinalBoss(character.eventFlags, [...b100GauntletDefeatedThisExploration]);
@@ -1803,7 +1804,7 @@ import {
     resumePassiveNotifications();
     // A save made between the two phantom battles resumes the second battle,
     // rather than placing the player on top of its blocking cell.
-    if (savedLocation === "dungeon" && currentDepth === 100 && character.eventFlags?.ending_story_completed
+    if (savedLocation === "dungeon" && currentDepth === 100 && isAkashicRematchUnlocked(character.eventFlags)
       && b100GauntletDefeatedThisExploration.has(AKASHIC_PHANTOM_IDS[0])
       && cells[state.gridY]?.[state.gridX]?.bossId === AKASHIC_PHANTOM_IDS[1]) {
       beginBossBattle(AKASHIC_PHANTOM_IDS[1]);
@@ -3007,7 +3008,7 @@ import {
       || currentDepth !== 57 || isBattleActive() || !canEnterJohannaRescueSpring(character)) return false;
     const boss = getBossById("fleischfresserknospe_b57f");
     if (!boss || isCurrentBossDefeated(boss.id)) return false;
-    if (boss.akashicPhantom && (currentDepth !== 100 || !character.eventFlags?.ending_story_completed)) return false;
+    if (boss.akashicPhantom && (currentDepth !== 100 || !isAkashicRematchUnlocked(character.eventFlags))) return false;
     cancelAutoReturn(false);
     setPlayerInputEnabled(false);
     pendingEncounter = null;
@@ -3047,7 +3048,7 @@ import {
     if (!character || worldLocation !== "dungeon" || isBattleActive()) return false;
     const boss = getBossById(bossId);
     if (!boss || isCurrentBossDefeated(boss.id)) return false;
-    if (boss.akashicPhantom && (currentDepth !== 100 || !character.eventFlags?.ending_story_completed)) return false;
+    if (boss.akashicPhantom && (currentDepth !== 100 || !isAkashicRematchUnlocked(character.eventFlags))) return false;
     const summonKeyItemId = boss.room?.summonKeyItemId;
     const alreadySummoned = summonKeyItemId && character.eventFlags?.boss_b89f_summoned;
     if (currentDepth === 89 && summonKeyItemId && !alreadySummoned) {

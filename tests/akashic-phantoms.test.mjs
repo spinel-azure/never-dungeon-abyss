@@ -27,7 +27,7 @@ function passive(battle) {
   battle.enemy.apocalypseUsed = true; return battle;
 }
 test('ending replay still requires all ten guardians and resets both final phantoms each exploration', () => {
-  const flags = { ending_story_completed: true, boss_erzdaemonin_b100f_defeated: true, boss_amayenak_b100f_defeated: true };
+  const flags = { ending_story_completed: true, tavern_rumor_018_base_read: true, boss_erzdaemonin_b100f_defeated: true, boss_amayenak_b100f_defeated: true };
   const boss = () => cells[3][4].bossId;
   buildBoundaryWallMap(100, () => .5, { eventFlags: flags });
   assert.equal(cells.flat().filter(c => c.bossId).length, 10);
@@ -132,4 +132,16 @@ test('NPC lethal damage cannot bypass causality', () => {
   b.player.npcSystem = { activeIds: ['johan'], growth: {} };
   applyNpcTurnStart(b, () => 0);
   assert.equal(b.enemy.causalityUsed, true); assert.ok(b.enemy.hp > 0); assert.ok(!b.outcome);
+});
+
+
+test('ending alone does not unlock projections or final phantoms before hearing the rumor', () => {
+  const flags = { ending_story_completed: true, ending_credits_watched: true };
+  buildBoundaryWallMap(100, () => .5, { eventFlags: flags, b100GauntletDefeatedBossIds: B100_GAUNTLET_BOSS_IDS });
+  assert.equal(cells.flat().filter(c => c.fixedEvent).length, 0);
+  assert.equal(cells[3][4].bossId, null);
+  assert.equal(refreshB100FinalBoss(flags, B100_GAUNTLET_BOSS_IDS), false);
+  flags.tavern_rumor_018_base_read = true;
+  assert.equal(refreshB100FinalBoss(flags, B100_GAUNTLET_BOSS_IDS), true);
+  assert.equal(cells[3][4].bossId, IDS[0]);
 });

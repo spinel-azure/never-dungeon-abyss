@@ -487,3 +487,33 @@ test('cat rumor preserves read base after combat-route report and uses owned cat
  c.eventFlags.sphinx_b69f_peaceful=true;assert.equal(getUnreadTavernRumors(c).some(r=>r.rumorId==='rumor_015'),false);
  c.keyItems={owned:{johanna_calico_cat:{count:1,acquiredAt:1}},acquisitionOrder:['johanna_calico_cat']};assert.equal(getUnreadTavernRumors(c).find(r=>r.rumorId==='rumor_015').stageId,'solved');
 });
+
+test("abyss disturbance rumor requires credits and level 130, then follows phantom victory into history", () => {
+  const get = c => getUnreadTavernRumors(c).find(r => r.rumorId === "rumor_018");
+  let c = { ...createInitialCharacter({name:"TEST", job:"priest"}), level:130,
+    eventFlags: { ending_story_completed:true } };
+  assert.equal(get(c), undefined);
+  c.eventFlags.ending_credits_watched = true;
+  assert.equal(get({...c,level:129}), undefined);
+  assert.equal(get({...c,eventFlags:{ending_credits_watched:true}}), undefined);
+  const rumor = get(c);
+  assert.equal(rumor.title, "奈落最深部異変の噂");
+  assert.equal(rumor.stageId, "base");
+  assert.match(getTavernRumorTypewriterParts(rumor.dialogue[0]).dialogue, /奈落の最深部で異変/);
+  assert.match(getTavernRumorTypewriterParts(rumor.dialogue[2]).dialogue, /女王様も戻られた/);
+  c = markTavernRumorRead(c, rumor);
+  assert.equal(c.eventFlags.tavern_rumor_018_base_read, true);
+  assert.equal(get(c), undefined);
+  assert.ok(getPastTavernRumors(c).some(r=>r.title===rumor.title));
+  c.eventFlags.achievement_amayenak_phantom_defeated = true;
+  const solved = get(c);
+  assert.equal(solved.stageId, "solved");
+  assert.match(solved.dialogue.at(-1), /もう驚かないわよ/);
+  c = markTavernRumorRead(c, solved);
+  assert.equal(get(c), undefined);
+  assert.match(getPastTavernRumors(c).find(r=>r.id==="rumor_018").description.join(""), /もう解決した/);
+  const old = {...c,eventFlags:{ending_story_completed:true,ending_credits_watched:true,achievement_amayenak_phantom_defeated:true}};
+  const rescued = markTavernRumorRead(old,get(old));
+  assert.equal(rescued.eventFlags.tavern_rumor_018_base_read,true);
+  assert.equal(rescued.eventFlags.tavern_rumor_018_solved_read,true);
+});

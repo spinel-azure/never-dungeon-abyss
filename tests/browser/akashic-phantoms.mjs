@@ -13,7 +13,7 @@ const hook = `window.akashicQa = {
  setup() {
   document.querySelector('#titleScreen').hidden=true;document.body.classList.remove('title-active');
   character=createInitialCharacter({name:'スピネル',job:'thief'}); character.hp=character.maxHp=10000;
-  character.sp=character.maxSp=999; character.eventFlags={ending_story_completed:true,michaela_restored:true,boss_amayenak_b100f_defeated:true,boss_erzdaemonin_b100f_defeated:true};
+  character.sp=character.maxSp=999; character.eventFlags={ending_story_completed:true,tavern_rumor_018_base_read:true,michaela_restored:true,boss_amayenak_b100f_defeated:true,boss_erzdaemonin_b100f_defeated:true};
   character.eventFlags.boss_b99f_defeated=true;
   for(const id of ['queen_tiara','queen_earring','queen_necklace'])character.keyItems=grantKeyItem(character.keyItems,id).keyItems;
   worldLocation='dungeon';currentDepth=100;closeCampMenu();closeTown();b100GauntletDefeatedThisExploration.clear();

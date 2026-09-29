@@ -1,4 +1,4 @@
-import { getAkashicBossId, QUEEN_PROJECTION_MESSAGES } from "../data/akashic-phantoms.js";
+import { isAkashicRematchUnlocked, getAkashicBossId, QUEEN_PROJECTION_MESSAGES } from "../data/akashic-phantoms.js";
 import {
   MAP_W,
   MAP_H,
@@ -208,6 +208,7 @@ export function buildFixedFloorMap(map = B100_FIXED_FLOOR_MAP, progress = {}) {
     };
   });
   map.events.forEach(event => {
+    if (progress.eventFlags?.ending_story_completed && !isAkashicRematchUnlocked(progress.eventFlags)) return;
     const position = fixedMapPointToInternal(map, event);
     cells[position.y][position.x].fixedEvent = { ...structuredClone(event), ...(progress.eventFlags?.ending_story_completed ? { imageId: "NPC_01c", projection: true, description: QUEEN_PROJECTION_MESSAGES[event.eventKey === "queen_shadow_warning_1" ? 0 : 1] } : {}) };
   });
@@ -388,7 +389,8 @@ export function validateDungeonLayout({ depth = 1, progress = {} } = {}) {
     if (flat.filter(cell => cell.fixedWarp).length !== B100_FIXED_FLOOR_MAP.warps.length) errors.push("B100F warp count mismatch");
     if (flat.filter(cell => cell.fixedReturnPortal).length !== B100_FIXED_FLOOR_MAP.returnPortals.length) errors.push("B100F return portal count mismatch");
     if (flat.filter(cell => cell.fountain).length !== B100_FIXED_FLOOR_MAP.healingFountains.length) errors.push("B100F healing fountain count mismatch");
-    if (flat.filter(cell => cell.fixedEvent).length !== B100_FIXED_FLOOR_MAP.events.length) errors.push("B100F fixed event count mismatch");
+    const expectedEventCount = progress.eventFlags?.ending_story_completed && !isAkashicRematchUnlocked(progress.eventFlags) ? 0 : B100_FIXED_FLOOR_MAP.events.length;
+    if (flat.filter(cell => cell.fixedEvent).length !== expectedEventCount) errors.push("B100F fixed event count mismatch");
     const fromEntrance = fixedMapReachableCellKeys(startPosition.x, startPosition.y);
     const canReturnToEntrance = fixedMapReachableCellKeys(startPosition.x, startPosition.y, true);
     if (fromEntrance.size !== MAP_W * MAP_H) errors.push(`B100F reachable cells ${fromEntrance.size}/${MAP_W * MAP_H}`);

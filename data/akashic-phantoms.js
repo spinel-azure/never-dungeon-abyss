@@ -6,8 +6,12 @@ export const QUEEN_PROJECTION_MESSAGES = Object.freeze([
   '…ますか…聞こえますか…。真実の杖が異常を告げています…。どうやらアカシックレコードが暴走している様なのです…。今一度最奥へと赴き、調査をお願い…しま…す…。',
   '…ますか…聞こえますか…。最奥から増大する闇の魔力を感じます…！これは…もし…や…アマイェ…。'
 ]);
+export function isAkashicRematchUnlocked(flags) {
+  return Boolean(flags?.ending_story_completed && (flags?.tavern_rumor_018_base_read || flags?.tavern_rumor_018_solved_read));
+}
 export function getAkashicBossId(flags, defeated) {
   if (!flags?.ending_story_completed) return undefined;
+  if (!isAkashicRematchUnlocked(flags)) return null;
   return AKASHIC_PHANTOM_IDS.find(id => !defeated.has(id)) || null;
 }
 export function createAkashicBosses(bosses) {

@@ -381,6 +381,19 @@ export const TAVERN_RUMORS = Object.freeze([
         rosa:'まぁ、あんな所に女の子が一人で…。大丈夫なのかしら…？',
         rosaContinuation:'…えっ？もう会ったですって？「魔除けのお香」を焚いてた？それなら安心ね…。'})
     ])
+  }),
+  Object.freeze({
+    id: 'rumor_018', title: '奈落最深部異変の噂', verbatimCustomers: true,
+    unlock: c => c.endingCreditsWatched && c.level >= 130,
+    customerLead: 'おい、知ってるか？奈落の最深部で異変が起こったらしいな。',
+    customerReply: 'ああ。最深部の更に最奥だそうだ。一体何が起こっているんだ…。',
+    phases: Object.freeze([
+      Object.freeze({ id: 'base', readFlag: 'tavern_rumor_018_base_read', unlock: c => !c.amayenakPhantomDefeated,
+        rosa: '奈落の最深部ですって…。女王様も戻られたのに…。' }),
+      Object.freeze({ id: 'solved', readFlag: 'tavern_rumor_018_solved_read', unlock: c => c.amayenakPhantomDefeated,
+        rosa: '奈落の最深部ですって…。女王様も戻られたのに…。',
+        rosaContinuation: 'えっ！？原因を突き止めて、もう解決した！？うふふ。もう驚かないわよ…！' })
+    ])
   })
 ]);
 
@@ -404,6 +417,9 @@ function normalizeRumorContext(character, context = {}) {
   const completedQuestIds = character?.quests?.completedQuestIds || [];
   const eventFlags = character?.eventFlags || {};
   return {
+    endingCreditsWatched: Boolean(eventFlags.ending_story_completed && eventFlags.ending_credits_watched),
+    level: Number(character?.level) || 1,
+    amayenakPhantomDefeated: Boolean(eventFlags.achievement_amayenak_phantom_defeated),
     trelirenMet: Boolean(eventFlags.treliren_met),
     leoQualified: hasLeoQualification(character),
     leoObtainedAfterVictory: Boolean(eventFlags.boss_loewenkoenigin_b1f_defeated && Number(character?.cards?.ownedCardCounts?.zodiac_leo) > 0),
