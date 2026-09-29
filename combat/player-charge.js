@@ -1,3 +1,4 @@
+import { getChargeGain } from "./charge-gain.js";
 export const PLAYER_CHARGE_MAX = 100;
 export const PLAYER_CHARGE_GAINS = Object.freeze({ guard: 1, item: 1, attack: 5, spSkill: 15 });
 
@@ -8,7 +9,7 @@ export function createInitialPlayerCharge() {
 export function normalizePlayerCharge(value) {
   const source = value && typeof value === "object" ? value : {};
   return {
-    value: clampInteger(source.value, 0, PLAYER_CHARGE_MAX),
+    value: Math.max(0, Math.min(PLAYER_CHARGE_MAX, Number(source.value) || 0)),
     cooldown: clampInteger(source.cooldown, 0, 1)
   };
 }
@@ -27,7 +28,7 @@ export function applyPlayerChargeAction(character, { commandType, spCost = 0, ch
     : commandType === "item" ? PLAYER_CHARGE_GAINS.item
     : commandType === "attack" ? PLAYER_CHARGE_GAINS.attack
       : commandType === "skill" && spCost > 0 ? PLAYER_CHARGE_GAINS.spSkill : 0;
-  return { ...character, playerCharge: { ...state, value: Math.min(PLAYER_CHARGE_MAX, state.value + gain) } };
+  return { ...character, playerCharge: { ...state, value: Math.min(PLAYER_CHARGE_MAX, state.value + getChargeGain(character, gain)) } };
 }
 
 export function resetPlayerCharge(character) {

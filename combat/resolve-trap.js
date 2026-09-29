@@ -1,6 +1,7 @@
 import { collectStats } from "./collect-stats.js";
 import { clamp } from "./combat-config.js";
 import { applyStatus } from "./status-lifecycle.js";
+import { getStatusEffect } from "../data/status-effects.js";
 import { getTrapById } from "../data/traps.js";
 
 export function resolveTreasureTrap({
@@ -29,7 +30,7 @@ export function resolveTreasureTrap({
   }
 
   const saved = normalizedRoll(rng) < trap.baseSaveRate;
-  const effect = applyTrapEffect(character, trap, saved);
+  const effect = applyTrapEffect(character, trap, saved, rng);
   return {
     ...effect,
     trap,
@@ -45,7 +46,7 @@ export function getDisarmRate(character, treasureType) {
   return clamp(stats.dex * 0.02 + numeric(character?.trapDisarmBonus), 0, 1);
 }
 
-function applyTrapEffect(character, trap, saved) {
+function applyTrapEffect(character, trap, saved, rng) {
   if (trap.effect.type === "damage") {
     if (saved && trap.saveSuccessEffect === "avoid") {
       return {
@@ -76,6 +77,11 @@ function applyTrapEffect(character, trap, saved) {
         damage: 0,
         message: `${trap.name}が作動したが、間一髪で回避した！`
       };
+    }
+    const multiplier = collectStats(character).ordinaryStatusRateMultiplier;
+    if (getStatusEffect(trap.effect.statusId)?.kind === "ailment"
+      && multiplier < 1 && normalizedRoll(rng) >= multiplier) {
+      return { character, damage: 0, message: `${trap.name}が作動したが、護符が状態異常を防いだ！` };
     }
     const statuses = applyStatus(character.statuses || [], {
       statusId: trap.effect.statusId,

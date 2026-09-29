@@ -1,3 +1,4 @@
+import { getKirkeFinalDialogue } from "../data/endgame-quests.js";
 import {configureSpecialMapHost,getSpecialMapContext,getSpecialMapBgmKey} from './special-map/context.js';
 import {resolveSpecialFieldItem,resolveSpecialFieldSkill,applySpecialFieldEnvironment} from './special-map/field-environment.js';
 import {flushSpecialSurvey,startSpecialAutoWalker} from './special-map/session.js';
@@ -2186,7 +2187,7 @@ import {
     };
     updateCharacterUi();
     saveGame();
-    if (result.acceptanceSupplyItemId) {
+    if (result.acceptanceSupplyItemId && questId !== "guild_035") {
       const supplyItemName = getItem(result.acceptanceSupplyItemId)?.name || result.acceptanceSupplyItemId;
       setTimeout(() => showNamedItemGetEffect(
         [supplyItemName],
@@ -2200,7 +2201,14 @@ import {
     return {
       ...result,
       character,
-      ...(questId === "guild_029" ? {
+      ...(questId === 'guild_035' ? {
+        paginateClientDialogue:true,clientName:'キルケ',clientPortrait:'images/npc/NPC_23.avif',
+        clientDialogue:getKirkeFinalDialogue(character),
+        onClientDialogueComplete: result.acceptanceSupplyItemId ? () => {
+          showNamedItemGetEffect(['アルハイルミッテル'],{important:true,amounts:[1]});
+          msgEl.textContent='「アルハイルミッテル」を手に入れた！';
+        } : null
+      } : questId === "guild_029" ? {
         clientName: "ギルドマスター",
         clientPortrait: "images/npc/NPC_10.avif",
         clientDialogue: [
@@ -2344,7 +2352,7 @@ import {
       if (eventRewardCardId || rewardEquipmentId || rewardItemId || rewardItems.length) await wait(3400);
     }
     if (rewardEquipmentId) {
-      const equipment = getEquipmentItem(rewardEquipmentId, "footId");
+      const equipment = getEquipmentItem(rewardEquipmentId);
       showNamedItemGetEffect([equipment?.name || rewardEquipmentId], { important: true });
       if (eventRewardCardId) await wait(3400);
     }

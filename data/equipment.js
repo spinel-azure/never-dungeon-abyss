@@ -17,6 +17,10 @@ export const ANTI_MAGIC_SET_EQUIPMENT_IDS = Object.freeze([
 export const ANTI_MAGIC_SET_MAGIC_DAMAGE_REDUCTION = 0.1;
 
 export const EQUIPMENT = Object.freeze({
+  kirke_amulet: item('kirke_amulet','キルケの護符','accessoryId',{ordinaryStatusRateMultiplier:.5},{
+    description:'魔女キルケが守りの祈りを込めた護符。通常の状態異常を受ける確率を半減する。',
+    hiddenStatBonusKeys:Object.freeze(['ordinaryStatusRateMultiplier']),unique:true,sellPrice:0
+  }),
   musa_crown: item("musa_crown", "ムーサの冠", "accessoryId", { def: 6, temptationResistance: 1 }, {
     sellPrice: 0,
     hiddenStatBonusKeys: Object.freeze(["temptationResistance"]),

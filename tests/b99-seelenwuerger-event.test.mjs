@@ -17,7 +17,7 @@ import {
 } from "../js/player.js";
 
 const WITHOUT_LIGHTBRINGER = "「ククク…！この漆黒の中で私に抗う事など出来ぬ。さぁ、この鎌で切り裂いてやろう！」\n＊Aボタンで次へ";
-const WITH_LIGHTBRINGER = "「リヒトブリンガー？…忌々しい…！そんな物で吾輩を打ち破ろうなどとはゆめゆめ思わぬ事だ…！\nドゥンケルマギーア様の邪魔はさせぬ。さぁ、この鎌で切り裂いてやろう！」\n＊Aボタンで次へ";
+const WITH_LIGHTBRINGER = "「リヒトブリンガー？…忌々しい…！そんな物で吾輩を打ち破ろうなどとはゆめゆめ思わぬ事だ…！\nドゥンケルマギアー様の邪魔はさせぬ。さぁ、この鎌で切り裂いてやろう！」\n＊Aボタンで次へ";
 
 test("B99F Seelenwuerger uses the requested before/after event art and conditional dialogue", async () => {
   const boss = getBossById("seelenwuerger_b99f");

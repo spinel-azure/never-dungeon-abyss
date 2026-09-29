@@ -23,7 +23,7 @@ export function normalizeNpcSystem(value) {
     records[id] = {
       maxDepth,
       growthStage: Math.max(0, Math.min(10, Math.floor(maxDepth / 10))),
-      charge: Math.max(0, Math.min(100, Math.floor(Number(record.charge) || 0))),
+      charge: Math.max(0, Math.min(100, (Number(record.charge) || 0))),
       chargeCooldown: Math.max(0, Math.min(2, Math.floor(Number(record.chargeCooldown) || 0))),
       passiveStepCount: Math.max(0, Math.floor(Number(record.passiveStepCount) || 0)) % 5
     };

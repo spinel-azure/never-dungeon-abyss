@@ -1,3 +1,4 @@
+import { getEndgameQuestProgress } from "./endgame-quests.js";
 import { grantCard } from "./deck.js";
 import { grantEquipmentInstance } from "./equipment-inventory.js";
 import { grantItemWithOverflow } from "./inventory.js";
@@ -854,16 +855,32 @@ export const QUESTS = Object.freeze([
     reward: Object.freeze({ type: "card", label: "デッキカード×1", amount: 1, cardId: "legendary_vital_surge" }),
     descriptionLabel: "内容",
     description: Object.freeze([
-      "光に照らされた漆黒区域で女王らしき姿を目撃した",
+      "漆黒区域で女王らしき姿を目撃した",
       "という情報が入った。今度こそ本物の女王かも",
       "知れない。真偽を確かめてくれ。頼んだぞ。",
       ""
     ]),
-    prerequisiteQuestIds: Object.freeze([LICHTBRINGER_QUEST_ID]),
+    prerequisiteQuestIds: Object.freeze([CREEPING_CHAOS_QUEST_ID, SECOND_QUEEN_SHADOW_QUEST_ID]),
+    minimumDepthReached: 90,
     persistentProgressFlags: THIRD_QUEEN_SHADOW_PROGRESS_FLAGS,
     progressMode: "matchedFlags",
     ownedKeyItemCompletionId: "queen_necklace",
     available: true
+  }),
+  Object.freeze({
+    id:'guild_034',number:'034',title:'魂喰い',client:'ギルドマスター',category:'other',
+    objectiveType:'custom',targetDepth:100,requiredCount:2,objectiveHeading:'目的',objectiveLabel:'ゼーレンヴュルガー討伐とB100F到達',
+    reward:Object.freeze({type:'card',label:'Lカード「闘気上昇」',amount:1,cardId:'legendary_fighting_spirit'}),
+    descriptionLabel:'内容',description:Object.freeze(['B99Fのゼーレンヴュルガーを倒し、','B100Fへ到達してくれ。']),
+    prerequisiteQuestIds:Object.freeze(['guild_032']),available:true
+  }),
+  Object.freeze({
+    id:'guild_035',number:'035',title:'真実の杖',client:'キルケ',category:'other',
+    objectiveType:'custom',targetDepth:100,requiredCount:2,objectiveHeading:'目的',objectiveLabel:'闇の魔術師討伐と真実の杖の入手',
+    reward:Object.freeze({type:'equipment',label:'キルケの護符',equipmentId:'kirke_amulet',slot:'accessoryId',amount:1}),
+    descriptionLabel:'内容',description:Object.freeze(['B100F最奥の闇の魔術師、','ドゥンケルマギアー・アマイェナクを倒し、','真実の杖を取り戻しておくれ。']),
+    prerequisiteQuestIds:Object.freeze(['guild_034']),available:true,
+    reportMessage:'キルケ「まったく、おぬしは危なっかしくて見ておれん。これでも身につけておくのじゃ。」'
   })
 ]);
 
@@ -1005,7 +1022,9 @@ export function getQuestProgress(character, questId) {
       ? countMatchedProgressFlags(character, quest.persistentProgressFlags)
       : countSequentialProgressFlags(character, quest.persistentProgressFlags)
     : 0;
-  const progress = targetAlreadyCompleted
+  const progress = ["guild_034", "guild_035"].includes(questId)
+    ? getEndgameQuestProgress(character, questId)
+    : targetAlreadyCompleted
     ? quest.requiredCount
     : Math.max(savedProgress, Math.min(quest?.requiredCount || 0, persistentProgress));
   return {
@@ -1087,6 +1106,17 @@ export function acceptQuest(character, questId) {
   let acceptanceSupplyItemId = null;
   let acceptanceSupplyAmount = 0;
   let acceptanceKeyItemId = null;
+  if (quest.id === "guild_035" && !next.eventFlags?.quest_035_supply_received) {
+    const supply = grantItemWithOverflow(next, "allheilmittel", 1);
+    if (supply.gained + supply.stored !== 1) return result(character, false, "inventoryFull");
+    // Save the grant and receipt together; the dialogue only delays its presentation.
+    next = {
+      ...supply.character,
+      eventFlags: { ...supply.character.eventFlags, quest_035_supply_received: true }
+    };
+    acceptanceSupplyItemId = "allheilmittel";
+    acceptanceSupplyAmount = 1;
+  }
   if (quest.id === CREEPING_CHAOS_QUEST_ID && !next.eventFlags?.[CREEPING_CHAOS_ITEM_FLAG]) {
     const granted = grantKeyItem(next.keyItems, "trapezohedron");
     next = {
@@ -1445,6 +1475,7 @@ export function reportQuest(character, questId) {
       progress.quest.reward.equipmentId,
       progress.quest.reward.slot || "rightArmId"
     );
+    if (!reward.accepted && questId === "guild_035") return result(character, false, reward.reason);
     if (reward.accepted) {
       next = reward.character;
       rewardEquipmentId = progress.quest.reward.equipmentId;

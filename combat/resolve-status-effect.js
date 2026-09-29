@@ -1,3 +1,4 @@
+import { getStatusEffect } from "../data/status-effects.js";
 import { COMBAT_CONFIG, clamp } from "./combat-config.js";
 import { isPiscesInvincible, isOrdinaryNegativeStatus } from "./pisces.js";
 
@@ -28,7 +29,8 @@ export function resolveStatusEffect({
       - numeric(defender.statusResistanceBonus),
     COMBAT_CONFIG.statusRateMinimum,
     COMBAT_CONFIG.statusRateMaximum
-  );
+  ) * (getStatusEffect(effect.statusId)?.kind === "ailment"
+    ? Math.max(0, Math.min(1, Number(defender.ordinaryStatusRateMultiplier) || 1)) : 1);
   return statusResult(effect, roll(rng) < rate, rate, false);
 }
 

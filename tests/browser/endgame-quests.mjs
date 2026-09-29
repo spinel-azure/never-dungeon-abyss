@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import {readFile,mkdtemp} from 'node:fs/promises';
+import {tmpdir} from 'node:os';import {join} from 'node:path';import {createRequire} from 'node:module';
+const {chromium}=createRequire(import.meta.url)('playwright');
+const main=await readFile('js/main.js','utf8'),town=await readFile('js/town.js','utf8');
+const output=await mkdtemp(join(tmpdir(),'nda-endgame-'));
+const hook=`window.endgameQa={setup(cleared){document.querySelector('#titleScreen').hidden=true;document.body.classList.remove('title-active');closeTown();character=createInitialCharacter({name:'QA',job:'mage'});character.quests.completedQuestIds=['guild_001_abyss_rat','guild_002_cave_slime','guild_003_b1f_survey','guild_024','guild_030','guild_032','guild_034'];character.eventFlags={guild_first_request_unlocked:true,...(cleared?{ending_story_completed:true}:{})};worldLocation='town';setBgmOptions({enabled:false});setSeOptions({enabled:false});updateCharacterUi();},reward034(){character.quests.completedQuestIds=character.quests.completedQuestIds.filter(id=>id!=='guild_034');character.eventFlags.boss_b99f_defeated=true;character.highestDungeonDepthReached=100;acceptGuildRequest('guild_034');return reportGuildRequest('guild_034').accepted;},read(){return character;}};`;
+const ui=`window.endgameUi={detail(id){openTown({facilityId:'guild',mode:'facilityMenu'});openGuildQuestList('accept');town.mode='questAcceptDetail';const q=QUESTS.find(q=>q.id===id);renderQuestDetail(q,getQuestProgress(town.getCharacter(),id));return {overflow:town.guildQuestDetail.getBoundingClientRect().bottom-town.guildQuestOverlay.getBoundingClientRect().bottom,width:town.guildQuestDetail.scrollWidth-town.guildQuestDetail.clientWidth};},start(){openTown({facilityId:'guild',mode:'facilityMenu'});townTypewriter.enabled=false;town.questIndex=QUESTS.findIndex(q=>q.id==='guild_035');town.mode='questAcceptDetail';handleQuestInput('confirm');},next(){handleTownInput('confirm');},report(){town.questIndex=QUESTS.findIndex(q=>q.id==='guild_035');town.mode='questReportConfirm';handleQuestInput('confirm');},read(){return {mode:town.mode,pages:town.questClientDialogue,index:town.questClientDialogueIndex,overflow:town.messageEl.scrollHeight-town.messageEl.clientHeight,text:town.messageEl.textContent,compact:town.compactTalk?{pages:town.compactTalk.pages,index:town.compactTalk.index}:null};}};`;
+const browser=await chromium.launch({channel:'msedge',headless:true});
+try{for(const [label,width,height] of [['pc',1280,900],['mobile',390,844]]){
+ const page=await browser.newPage({viewport:{width,height}}),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.addInitScript(()=>navigator.getGamepads=()=>[]);
+ await page.route('**/js/main.js?*',r=>r.fulfill({contentType:'text/javascript',body:main.replace('  document.documentElement.dataset.ndaMainReady = "true";',hook+'\n document.documentElement.dataset.ndaMainReady = "true";')}));
+ await page.route('**/js/town.js',r=>r.fulfill({contentType:'text/javascript',body:town+'\n'+ui}));
+ await page.goto('http://127.0.0.1:4173');await page.waitForFunction(()=>window.endgameQa);
+ for(const cleared of [false,true]){
+ await page.evaluate(c=>endgameQa.setup(c),cleared);
+ for(const id of ['guild_034','guild_035']) {const detail=await page.evaluate(id=>endgameUi.detail(id),id);assert.ok(detail.overflow<=1&&detail.width<=1,JSON.stringify({id,...detail}));await page.screenshot({path:join(output,label+'-'+id+'-detail.png')});}
+ await page.evaluate(()=>endgameUi.start());await page.waitForTimeout(150);
+ let data=await page.evaluate(()=>endgameUi.read());assert.equal(data.mode,'questClientDialogue');const n=data.pages.length;
+ for(let i=0;i<n;i++){data=await page.evaluate(()=>endgameUi.read());assert.ok(data.overflow<=1,JSON.stringify(data));if(i===0)await page.screenshot({path:join(output,`${label}-${cleared?'cleared':'before'}-dialogue.png`)});await page.evaluate(()=>endgameUi.next());}
+ await page.waitForTimeout(1000);assert.equal(await page.evaluate(()=>endgameQa.read().inventory.counts.allheilmittel),1);await page.screenshot({path:join(output,`${label}-${cleared?'cleared':'before'}-supply.png`)});
+ if(cleared){await page.waitForTimeout(3500);await page.evaluate(()=>endgameUi.report());await page.waitForTimeout(100);assert.equal(await page.evaluate(()=>endgameQa.read().equipmentInventory.instances.filter(x=>x.equipmentId==='kirke_amulet').length),1);await page.waitForTimeout(4400);await page.screenshot({path:join(output,label+'-reward.png')});assert.match(await page.locator('body').innerText(),/キルケの護符/);data=await page.evaluate(()=>endgameUi.read());assert.ok(data.compact);for(let i=0;i<data.compact.pages.length;i++){assert.ok((await page.evaluate(()=>endgameUi.read())).overflow<=1);await page.evaluate(()=>endgameUi.next());}}
+ await page.waitForTimeout(3500);console.log(label+' '+(cleared?'cleared':'before')+': '+n+' pages, supply and report passed');
+ }
+ await page.evaluate(()=>{endgameQa.setup(false);endgameUi.detail('guild_034');});assert.equal(await page.evaluate(()=>endgameQa.reward034()),true);await page.waitForTimeout(4500);await page.screenshot({path:join(output,label+'-charge-card.png')});assert.equal(await page.evaluate(()=>endgameQa.read().cards.ownedCardCounts.legendary_fighting_spirit),1);
+ assert.deepEqual(errors,[]);await page.close();
+}}finally{await browser.close();}console.log('QA output: '+output);

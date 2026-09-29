@@ -1,3 +1,4 @@
+import { getChargeGain } from "./charge-gain.js";
 import { absorbBossMagicBarrier } from "./boss-magic-barrier.js";
 import { NPC_SUPPORT_ENABLED, getNpcDefinition } from "../data/npc-definitions.js";
 import { resolveSpell } from "./resolve-spell.js";
@@ -65,7 +66,7 @@ export function advanceNpcChargeState(battle, { allowCharge = true } = {}) {
       record.chargeCooldown -= 1;
       continue;
     }
-    if (allowCharge) record.charge = Math.min(100, record.charge + config.chargePerTurn);
+    if (allowCharge) record.charge = Math.min(100, record.charge + getChargeGain(battle.player, config.chargePerTurn));
   }
   return battle;
 }
@@ -440,7 +441,7 @@ function getNpcChargeRecord(player, npcId) {
   const records = player?.npcSystem?.records;
   if (!records || !records[npcId]) return null;
   const record = records[npcId];
-  record.charge = Math.max(0, Math.min(100, Math.floor(Number(record.charge) || 0)));
+  record.charge = Math.max(0, Math.min(100, (Number(record.charge) || 0)));
   record.chargeCooldown = Math.max(0, Math.min(2, Math.floor(Number(record.chargeCooldown) || 0)));
   return record;
 }

@@ -557,6 +557,7 @@ export function openTown({
 
 export function closeTown() {
   explorerPreview?.close();
+  town.questClientDialogueComplete = null;
   clearCompactTalk();
   town.active = false;
   clearJohannaCatTransitionTimers();
@@ -1061,11 +1062,14 @@ function handleQuestInput(action) {
       town.messageEl.textContent = town.questClientDialogue[town.questClientDialogueIndex];
       return true;
     }
+    const onComplete = town.questClientDialogueComplete;
+    town.questClientDialogueComplete = null;
     town.questClientDialogue = [];
     town.questClientDialogueIndex = 0;
     town.questClientPortrait = "";
     town.questClientPortraitStartIndex = 0;
     renderFacility();
+    onComplete?.();
     return true;
   }
   if (town.mode === "questAcceptanceReward") {
@@ -1115,6 +1119,7 @@ function handleQuestInput(action) {
       if (result.clientDialogue?.length) {
         town.mode = "questClientDialogue";
         town.questClientDialogue = result.clientDialogue;
+        town.questClientDialogueComplete = result.onClientDialogueComplete;
         town.questClientDialogueIndex = 0;
         town.questClientPortrait = result.clientPortrait;
         town.questClientPortraitStartIndex = Math.max(0, Math.floor(Number(result.clientPortraitStartIndex) || 0));
@@ -1153,9 +1158,16 @@ function handleQuestInput(action) {
         : quest?.id === "guild_001_abyss_rat"
           ? "ギルドマスター：よくやってくれた！これなら先に進んでも大丈夫だろう。もっとも、生き残れるかはお前次第、だがな。"
           : "ギルドマスター：依頼達成、よくやってくれた！また頼むぜ。");
+      if (quest?.id === "guild_035" && result.message) {
+        town.portrait.src = "images/npc/NPC_23.avif";
+        town.portrait.alt = "キルケ";
+        startCompactTalk({ message: result.message });
+      }
     } else {
       openGuildQuestList("report");
-      town.messageEl.textContent = "ギルドマスター：まだ達成条件を満たしていないようだな。";
+      town.messageEl.textContent = result?.reason === "inventoryFull"
+        ? questFailureMessage(result.reason)
+        : "ギルドマスター：まだ達成条件を満たしていないようだな。";
     }
     town.onStateChanged();
     return true;
@@ -3284,6 +3296,8 @@ function activateSelectedQuest() {
 }
 
 function renderQuestDetail(quest, progress) {
+  const pager = town.root.querySelector("#guildQuestPager");
+  if (pager) pager.hidden = true;
   town.guildQuestTitle.textContent = `${quest.number}:${quest.title}`;
   town.guildQuestList.hidden = true;
   town.guildQuestDetail.hidden = false;
@@ -3330,6 +3344,7 @@ function divider() {
 }
 
 function questFailureMessage(reason) {
+  if (reason === "inventoryFull") return "支給品を受け取る空きを作ってから、もう一度依頼を受けてください。";
   if (reason === "activeLimit") return "ギルドマスター：同時に受けられる依頼は3件までだ。";
   if (reason === "alreadyAccepted") return "ギルドマスター：その依頼はもう受注しているぞ。";
   if (reason === "completed") return "ギルドマスター：その依頼はもう完了している。";

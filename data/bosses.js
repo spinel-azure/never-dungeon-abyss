@@ -974,7 +974,7 @@ export const BOSSES = Object.freeze({
     event: Object.freeze({
       prompt: "「ククク…！この漆黒の中で私に抗う事など出来ぬ。さぁ、この鎌で切り裂いてやろう！」\n＊Aボタンで次へ",
       promptWithoutLightbringer: "「ククク…！この漆黒の中で私に抗う事など出来ぬ。さぁ、この鎌で切り裂いてやろう！」\n＊Aボタンで次へ",
-      promptWithLightbringer: "「リヒトブリンガー？…忌々しい…！そんな物で吾輩を打ち破ろうなどとはゆめゆめ思わぬ事だ…！\nドゥンケルマギーア様の邪魔はさせぬ。さぁ、この鎌で切り裂いてやろう！」\n＊Aボタンで次へ",
+      promptWithLightbringer: "「リヒトブリンガー？…忌々しい…！そんな物で吾輩を打ち破ろうなどとはゆめゆめ思わぬ事だ…！\nドゥンケルマギアー様の邪魔はさせぬ。さぁ、この鎌で切り裂いてやろう！」\n＊Aボタンで次へ",
       start: "ゼーレンヴュルガーが魂を引き裂く絶叫を放った！",
       startBattleOnConfirm: true,
       reserveMessageLines: 4,
@@ -1024,7 +1024,7 @@ export const BOSSES = Object.freeze({
     })
   }),
   amayenak_b100f: Object.freeze({
-    id: "amayenak_b100f", name: "ドゥンケルマギーア・アマイェナク", level: 120, floor: 100,
+    id: "amayenak_b100f", name: "ドゥンケルマギアー・アマイェナク", level: 120, floor: 100,
     imageId: "amayenak_b100f", image: "images/bosses/boss_19.avif", battleSize: "huge-wide",
     encounterImageId: "amayenak_b100f", encounterImage: "images/bosses/boss_19.avif",
     race: "human", maxHp: 36000,
@@ -1065,7 +1065,7 @@ export const BOSSES = Object.freeze({
     room: Object.freeze({ doorStartsUnlocked: true }),
     event: Object.freeze({
       prompt: "真実の杖を手にした大魔導師アマイェナクが、静かにこちらを見据えている。\n＊Aボタンで次へ",
-      start: "女王ミカエラから真実の杖を奪った張本人――ドゥンケルマギーア・アマイェナクとの最終決戦が始まる！",
+      start: "女王ミカエラから真実の杖を奪った張本人――ドゥンケルマギアー・アマイェナクとの最終決戦が始まる！",
       autoStartDelay: 2400
     })
   }),

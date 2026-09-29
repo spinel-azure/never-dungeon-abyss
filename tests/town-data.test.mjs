@@ -23,7 +23,8 @@ test("shop greeting and guild quest client names stay synchronized", () => {
     ["guild_029", "キルケ"],
     ["guild_030", "怪しげな男"],
     [JOHANNA_RESCUE_QUEST_ID, "アンナ"],
-    ["guild_033", "キルケ"]
+    ["guild_033", "キルケ"],
+    ["guild_035", "キルケ"]
   ]);
   assert.ok(QUESTS.every(quest => quest.client === (specialClients.get(quest.id) || "ギルドマスター")));
 });

@@ -502,6 +502,12 @@ const STANDARD_CARDS = [
     iconId: "power-pose", maxOwned: 99, maxCopies: 3
   },
   {
+    id:'legendary_fighting_spirit',rarity:'L',cost:6,name:'Fighting Spirit',nameJa:'闘気上昇',
+    concept:'自身と同行NPCのチャージ上昇量＋25％',descriptionJa:'装備中、自身と同行NPCの通常のチャージ上昇量が25％増加する。',
+    category:'battle',effectId:'charge_gain_up',effectValue:.25,iconId:'power-pose',maxOwned:1,maxCopies:1,
+    acquisition:Object.freeze({type:'questReward',questId:'guild_034'})
+  },
+  {
     id: "legendary_vital_surge", rarity: "L", cost: 6,
     name: "Vital Surge", nameJa: "生命躍動", concept: "MAX HP +100",
     descriptionJa: "最大HPが100上昇する。",

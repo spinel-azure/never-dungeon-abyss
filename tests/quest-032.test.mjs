@@ -19,12 +19,13 @@ const playerSource = fs.readFileSync(new URL("../js/player.js", import.meta.url)
 function questReadyCharacter() {
   const character = createInitialCharacter({ name: "TEST", job: "mage" });
   character.quests.completedQuestIds.push(
-    "guild_001_abyss_rat", "guild_002_cave_slime", "guild_003_b1f_survey", "guild_033"
+    "guild_001_abyss_rat", "guild_002_cave_slime", "guild_003_b1f_survey", "guild_030", "guild_024"
   );
+  character.highestDungeonDepthReached = 90;
   return character;
 }
 
-test("quest 032 unlocks after quest 033 and preserves an already-owned necklace", () => {
+test("quest 032 unlocks after quests 030 and 024 at B90F without quest 033 and preserves an already-owned necklace", () => {
   const locked = createInitialCharacter({ name: "TEST", job: "mage" });
   assert.equal(isQuestAvailable(locked, "guild_032"), false);
   const ready = questReadyCharacter();
