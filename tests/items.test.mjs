@@ -986,3 +986,39 @@ test("guild request unlocks only after every town introduction event", () => {
   const repeated = unlockGuildRequest(complete.character);
   assert.equal(repeated.unlocked, false);
 });
+
+
+test("Strong Healing Potion L unlocks at B90 and restores 75 percent with an HP cap", () => {
+  const id = "strong_healing_potion_large";
+  assert.equal(getItem(id).buyPrice, 15000);
+  assert.equal(getItem(id).sellPrice, 7500);
+  for (const depth of [89, 90, 100]) {
+    const c = { ...characterWith(id), highestDungeonDepthReached: depth };
+    assert.equal(getShopItemIdsForCharacter(c).includes(id), depth >= 90);
+    assert.equal(getShopItemIdsForDepth(depth).includes(id), depth >= 90);
+  }
+  for (const context of ["town", "dungeon"]) {
+    const c = { ...characterWith(id), maxHp: 400, hp: 10 };
+    const result = resolveFieldItemUse({ character: c, itemId: id, context });
+    assert.equal(result.accepted, true);
+    assert.equal(result.character.hp, 310);
+    assert.equal(getItemCount(result.character.inventory, id), 0);
+    const capped = resolveFieldItemUse({ character: { ...c, hp: 300 }, itemId: id, context });
+    assert.equal(capped.character.hp, 400);
+  }
+});
+
+
+test("Strong Healing Potion L purchases and works through battle item use", () => {
+  const id = "strong_healing_potion_large";
+  const c = { ...createInitialCharacter({ name: "TEST", job: "priest" }), gold: 15000, highestDungeonDepthReached: 90 };
+  const bought = purchaseItem(c, id);
+  assert.equal(bought.accepted, true);
+  assert.equal(bought.character.gold, 0);
+  const battle = createBattleState({ character: bought.character, enemy: { id: "test", name: "TEST", hp: 999, maxHp: 999, attack: 0, def: 0, agi: 1, dex: 1, actions: [{ weight: 1, action: { actionType: "wait" } }] } });
+  battle.player.hp = 1; battle.player.maxHp = 400;
+  const result = resolveBattleRound({ battle, playerCommand: { type: "item", itemId: id }, rng: () => 0.99 });
+  assert.equal(result.accepted, true);
+  assert.equal(result.battle.player.hp, 301);
+  assert.equal(getItemCount(result.battle.player.inventory, id), 0);
+});

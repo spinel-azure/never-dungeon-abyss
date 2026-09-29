@@ -1026,7 +1026,7 @@ test("death poison deals ten percent lethally and is cleared after battle", () =
   assert.equal(resolveEndOfAction({ statuses, maxHp: 999 }).deathPoisonDamage, 99);
   assert.deepEqual(clearBattleOnlyStatuses(statuses), []);
   const strongAntidote = getSkill("die_antidote");
-  assert.equal(strongAntidote.statusIds.includes("death_poison"), false);
+  assert.equal(strongAntidote.statusIds.includes("death_poison"), true);
   const character = createInitialCharacter("mage");
   character.statuses = statuses;
   assert.equal(normalizeCharacter(character).statuses.some(status => status.statusId === "death_poison"), false);
@@ -2066,7 +2066,7 @@ test("Die Triage unlocks at level 40 and resolves before NPC charge skills", () 
   assert.equal(healingIndex, 0);
   assert.ok(npcChargeIndex > healingIndex);
   assert.match(result.battle.presentationEvents[healingIndex].message,
-    /^ディー・トリアージュで最速治療！HPが\d+回復した！$/);
+    /^ホーホ・トリアージュで最速治療！HPが\d+回復した！$/);
   assert.equal(resolveFieldSkill({ character: priest, skillId: skill.id }).reason, "battleOnly");
 });
 
@@ -2104,19 +2104,19 @@ test("Antidote cures poison for 3 SP without restoring HP", () => {
   assert.equal(resolveFieldSkill({ character: result.character, skillId: "antidote" }).reason, "noEffect");
 });
 
-test("Die Antidote is learned at level 25 and cures poison plus deadly poison for 5 SP", () => {
+test("Die Antidote is learned at level 25 and cures all three poisons for 10 SP", () => {
   const level24 = normalizeCharacter({ ...createInitialCharacter({ name: "TEST", job: "priest" }), level: 24 });
   assert.equal(level24.skillIds.includes("die_antidote"), false);
   const priest = normalizeCharacter({ ...level24, level: 25 });
   assert.equal(priest.skillIds.includes("die_antidote"), true);
-  priest.statuses = [{ statusId: "poison" }, { statusId: "deadly_poison" }];
+  priest.statuses = [{ statusId: "poison" }, { statusId: "deadly_poison" }, { statusId: "death_poison" }];
   priest.condition = "POISON";
   const result = resolveFieldSkill({ character: priest, skillId: "die_antidote" });
   assert.equal(result.accepted, true);
-  assert.equal(result.character.sp, priest.sp - 5);
+  assert.equal(result.character.sp, priest.sp - 10);
   assert.equal(result.character.statuses.length, 0);
   assert.equal(result.character.condition, "GOOD");
-  assert.equal(getSkill("die_antidote").name, "ディー・アンチドート");
+  assert.equal(getSkill("die_antidote").name, "フォル・ゲーゲンシフト");
 });
 
 test("the three jobs learn their new dungeon skills at the intended levels", () => {
@@ -2379,4 +2379,46 @@ test('basic spells scale with INT 1.5 and spend revised SP in real rounds',()=>{
   const result=resolveBattleRound({battle:createBattleState({character:c,enemy}),playerCommand:{type:'skill',skillId:id},rng:()=>.5});
   assert.equal(result.accepted,true);assert.equal(result.battle.player.sp,50-cost);
  }
+});
+
+
+test("Maximal Triage unlocks at 65 and fully heals before enemies for 50 SP", () => {
+  const skill = getSkill("maximal_triage");
+  const before = normalizeCharacter({ ...createInitialCharacter({ name: "TEST", job: "priest" }), level: 64 });
+  const priest = normalizeCharacter({ ...before, level: 65 });
+  assert.equal(before.skillIds.includes(skill.id), false);
+  assert.equal(priest.skillIds.includes(skill.id), true);
+  assert.equal(getLevelUnlockedSkillIds("mage", 99).includes(skill.id), false);
+  assert.equal(getSkill("antidote").name, "ゲーゲンシフト");
+  assert.equal(getSkill("triage").name, "トリアージュ");
+  assert.equal(getSkill("die_triage").name, "ホーホ・トリアージュ");
+  for (const maxHp of [1, 161, 999]) {
+    assert.equal(resolveHealing({ caster: { int: 1, healingMiracleMultiplier: 0.5 }, target: { hp: 0, maxHp }, healing: skill }).actualHealing, maxHp);
+  }
+  priest.hp = 1;
+  priest.sp = priest.maxSp = 100;
+  const enemy = createEnemyCombatant(getEnemyById("abyss_rat"));
+  enemy.agi = 999; enemy.hp = enemy.maxHp = 999;
+  const battle = createBattleState({ character: priest, enemy });
+  const initialSp = battle.player.sp;
+  const result = resolveBattleRound({ battle, playerCommand: { type: "skill", skillId: skill.id }, rng: () => 0.99 });
+  assert.equal(result.accepted, true);
+  assert.equal(result.battle.presentationEvents[0].type, "healing");
+  assert.equal(result.battle.presentationEvents[0].amount, battle.player.maxHp - 1);
+  assert.equal(result.battle.player.sp, initialSp - 50);
+  assert.equal(resolveFieldSkill({ character: priest, skillId: skill.id }).reason, "battleOnly");
+  priest.sp = 49;
+  assert.equal(resolveBattleRound({ battle: createBattleState({ character: priest, enemy }), playerCommand: { type: "skill", skillId: skill.id } }).accepted, false);
+});
+
+test("Voll Gegengift removes death poison in battle without curing bleeding", () => {
+  const priest = normalizeCharacter({ ...createInitialCharacter({ name: "TEST", job: "priest" }), level: 65 });
+  const battle = createBattleState({ character: priest, enemy: createEnemyCombatant(getEnemyById("abyss_rat")) });
+  battle.player.statuses = ["poison", "deadly_poison", "death_poison", "bleeding"].map(id => ({ id, statusId: id, remaining: 5 }));
+  const sp = battle.player.sp;
+  const result = resolveBattleRound({ battle, playerCommand: { type: "skill", skillId: "die_antidote" }, rng: () => 0.99 });
+  assert.equal(result.accepted, true);
+  assert.equal(result.battle.player.sp, sp - 10);
+  assert.equal(result.battle.player.statuses.some(s => ["poison", "deadly_poison", "death_poison"].includes(s.id || s.statusId)), false);
+  assert.equal(result.battle.player.statuses.some(s => (s.id || s.statusId) === "bleeding"), true);
 });

@@ -5,7 +5,7 @@ export function resolveHealing({
   target = {},
   healing = {}
 } = {}) {
-  const calculatedHealing = Math.max(
+  const calculatedHealing = healing.fullHealing ? Math.max(0, numeric(target.maxHp)) : Math.max(
     0,
     Math.floor(
       (numeric(healing.baseHealing)

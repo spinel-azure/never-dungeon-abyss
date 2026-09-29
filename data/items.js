@@ -1,4 +1,12 @@
 export const ITEMS = Object.freeze([
+  Object.freeze({
+    number: 58, id: "strong_healing_potion_large", name: "強回復薬（大）", category: "recovery",
+    buyPrice: 15000, sellPrice: 7500, source: "shop", shopUnlockDepth: 90,
+    usableIn: Object.freeze(["town", "dungeon", "battle"]),
+    effects: Object.freeze([{ id: "heal_hp_rate", value: 0.75 }]),
+    description: "最大HPの75％を回復する。B90F到達後に商店へ入荷する。",
+    maxOwned: 99, iconId: "healing-potion", version: 1
+  }),
   Object.freeze({ number: 57, id: "wing_gift", name: "ウィングギフト", category: "recovery", buyPrice: 10000, sellPrice: 5000, source: "shop", shopUnlockDepth: 80, usableIn: Object.freeze(["dungeon", "battle"]), effects: Object.freeze([{id:"restore_sp_rate",value:0.5},{id:"wing_gift",value:0.2}]), description: "最大SPの50％を回復。帰還まで通常の最大HPの20％ずつを失う。1冒険4回まで。", maxOwned:99, repurchasable:false, iconId:"antidote", version:1 }),
   Object.freeze({
     number: 56, id: "warding_incense", name: "魔除けのお香", category: "exploration",
@@ -392,6 +400,7 @@ export function getShopItemIdsForDepth(depth = 1) {
     ...(reached >= 50 ? ["strong_healing_potion_small", "strong_antidote"] : []),
     ...(reached >= 70 ? ["strong_healing_potion_medium"] : []),
     ...(reached >= 70 ? ["wurfmesser"] : []),
+    ...(reached >= 90 ? ["strong_healing_potion_large"] : []),
     ...(reached >= 80 ? ["wing_gift"] : []),
     ...BASE_SHOP_ITEM_IDS.slice(1)
   ];
@@ -402,6 +411,7 @@ export function getShopItemIdsForCharacter(character) {
   const quest013Reported = character?.quests?.completedQuestIds?.includes("guild_013");
   return [
     "healing_potion",
+    ...(Number(character?.highestDungeonDepthReached) >= 90 ? ["strong_healing_potion_large"] : []),
     ...(Number(character?.highestDungeonDepthReached) >= 80 ? ["wing_gift"] : []),
     ...(flags.transfer_portal_b10f_unlocked ? ["healing_potion_medium"] : []),
     ...(flags.shop_stock_b20f_unlocked ? ["healing_potion_large"] : []),

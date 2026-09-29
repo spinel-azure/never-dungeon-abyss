@@ -257,7 +257,7 @@ export const SKILLS = Object.freeze({
   }),
   die_triage: Object.freeze({
     id: "die_triage",
-    name: "ディー・トリアージュ",
+    name: "ホーホ・トリアージュ",
     description: "最優先で自分のHPを大きく回復する。\n回復量は40＋最大HPの40％＋INT×1.0。",
     actionType: "healing",
     category: "miracle",
@@ -270,9 +270,15 @@ export const SKILLS = Object.freeze({
     speedModifier: 0,
     battleOnly: true
   }),
+  maximal_triage: Object.freeze({
+    id: "maximal_triage", name: "マキシマール・トリアージュ",
+    description: "最優先で自分のHPを完全に回復する。\n戦闘中のみ使用できる。",
+    actionType: "healing", category: "miracle", spCost: 50, target: "self",
+    fullHealing: true, turnPriority: 100, speedModifier: 0, battleOnly: true
+  }),
   antidote: Object.freeze({
     id: "antidote",
-    name: "アンチドート",
+    name: "ゲーゲンシフト",
     description: "毒状態を回復する。\nHPは回復しない。",
     actionType: "cureStatus",
     category: "miracle",
@@ -284,13 +290,13 @@ export const SKILLS = Object.freeze({
   }),
   die_antidote: Object.freeze({
     id: "die_antidote",
-    name: "ディー・アンチドート",
-    description: "毒および猛毒状態を回復する。\nHPは回復しない。",
+    name: "フォル・ゲーゲンシフト",
+    description: "毒・猛毒・死毒状態を回復する。\nHPは回復しない。",
     actionType: "cureStatus",
     category: "miracle",
-    spCost: 5,
+    spCost: 10,
     target: "self",
-    statusIds: Object.freeze(["poison", "deadly_poison"]),
+    statusIds: Object.freeze(["poison", "deadly_poison", "death_poison"]),
     speedModifier: 0,
     effects: Object.freeze([])
   }),
@@ -615,6 +621,7 @@ export const LEVEL_SKILL_UNLOCKS = Object.freeze([
   Object.freeze({ job: "priest", level: 7, skillId: "hemostasis" }),
   Object.freeze({ job: "priest", level: 25, skillId: "die_antidote" }),
   Object.freeze({ job: "priest", level: 40, skillId: "die_triage" }),
+  Object.freeze({ job: "priest", level: 65, skillId: "maximal_triage" }),
   Object.freeze({ job: "thief", level: 8, skillId: "conceal_presence" }),
   Object.freeze({ job: "thief", level: 38, skillId: "assassination" }),
   Object.freeze({ job: "warrior", level: 55, skillId: "falcon_schnitt" }),
