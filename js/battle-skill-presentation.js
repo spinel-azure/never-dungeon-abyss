@@ -15,6 +15,19 @@ export function prepareBattleSkillEffect(definition, damage = 0, healing = 0) {
       : {...part})};
 }
 
+export function prepareAreaSkillEffect(definition, targets) {
+  const prepared = prepareBattleSkillEffect(definition);
+  prepared.parts = (definition.parts || []).flatMap(part => {
+    if (part.type !== 'popup' || part.valueSource !== 'damage') return [{...part}];
+    return targets.map((target,index) => ({
+      ...prepareBattleSkillEffect({parts:[part]},target.damage).parts[0],
+      id: 'area_damage_'+index+'_'+part.id, anchor:'enemy',
+      x:definition.width/2, y:definition.height/2
+    }));
+  });
+  return prepared;
+}
+
 // Rectangles are measured together, so CSS animation, viewport scaling and parent
 // shake are accounted for without feeding the shake back into the target position.
 export function getBattleEffectTarget(root, canvas, targetIndex) {
@@ -30,7 +43,7 @@ export function getBattleEffectTarget(root, canvas, targetIndex) {
 
 export function stopBattleSkillPresentation() {requestGeneration++;if(activeEngine){activeEngine.canvas.hidden=true;activeEngine.stop(false)}activeEngine=null;}
 
-export async function playBattleSkillPresentation({root,presentationId,damage,healing,targetIndex,definition,messageElement}={}) {
+export async function playBattleSkillPresentation({root,presentationId,damage,healing,targetIndex,definition,messageElement,targets,onImpact}={}) {
   const canvas=root?.querySelector?.('#battleSkillEffectCanvas');
   if(!canvas||(!definition&&!presentationId))return false;
   const request=++requestGeneration;
@@ -48,14 +61,20 @@ export async function playBattleSkillPresentation({root,presentationId,damage,he
     if(request!==requestGeneration){routing?.release();return false}
     const surface=root.closest('.viewport');
     const shake=createStageShake(surface?[...surface.children]:[root],root,()=>engine.effect);
+    const prepared = targets?.length ? prepareAreaSkillEffect(definition, targets) : prepareBattleSkillEffect(definition,damage,healing);
+    const popupStarts = prepared.parts.filter(p=>p.enabled!==false && p.type==='popup').map(p=>p.start);
+    const impactTime = popupStarts.length ? Math.min(...popupStarts) : prepared.duration;
+    let impacted = false;
     engine=new EffectEngine(canvas,{transparent:true,backdrop:false,
-      getTarget:()=>getBattleEffectTarget(root,canvas,targetIndex),
+      getTarget:part=>getBattleEffectTarget(root,canvas,
+        part?.id?.startsWith('area_damage_') ? targets?.[Number(part.id.split('_')[2])]?.targetIndex : targetIndex),
+      onFrame:time=>{if(!impacted && time>=impactTime){impacted=true;onImpact?.();}},
       onShake:shake,
       onMessage:text=>{if(messageElement)messageElement.textContent=text??originalMessage},
       audio:routing?.options||{}
     });
     activeEngine=engine;
-    engine.load(prepareBattleSkillEffect(definition,damage,healing));
+    engine.load(prepared);
     canvas.hidden=false;
     return await engine.play();
   }catch(error){console.warn('Battle presentation failed',error);return false}

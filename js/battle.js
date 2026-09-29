@@ -1,3 +1,4 @@
+import { getAreaPresentationGroup } from "./area-skill-presentation.js";
 import { clearLionOpenings } from '../combat/loewenkoenigin.js';
 import {presentLionPhase} from './lion-phase-presentation.js';
 import { playBarrierShatter } from './barrier-shatter.js';
@@ -548,8 +549,16 @@ async function executeAmbushOpening() {
 async function playPresentationEvents() {
   const events = battleUi.battle.presentationEvents || [];
   const image = battleUi.root.querySelector("#battleEnemyImage");
+  const playedAreaHits = new Set();
   for (const event of events) {
     if (!battleUi.active) return;
+    if (playedAreaHits.has(event)) continue;
+    const areaHits = getAreaPresentationGroup(events, event);
+    if (areaHits.length > 1) {
+      areaHits.forEach(hit => playedAreaHits.add(hit));
+      await playAreaSkillPresentation(areaHits);
+      continue;
+    }
     if(event.type === "lionPhase") {
       battleUi.messageEl.textContent=event.message;
       await presentLionPhase(image,event.image);
@@ -682,6 +691,51 @@ async function playPresentationEvents() {
       renderBattleVitals();
     }
   }
+}
+
+async function playAreaSkillPresentation(events) {
+  const battle = battleUi.battle;
+  const current = () => battleUi.active && battleUi.battle === battle;
+  const targets = events.filter(event => Number(battleUi.presentationHp?.enemies?.[event.targetIndex]) > 0);
+  if (!targets.length) return;
+  const first = targets[0];
+  if (first.playerChargePresentationId) {
+    await playPlayerChargePresentation({root:battleUi.root, skillId:first.playerChargePresentationId, playSe:battleUi.playSe});
+  }
+  if (!current()) return;
+  battleUi.messageEl.textContent = `${first.actorName || 'プレイヤー'}の${first.actionName || '全体攻撃'}！`;
+  const vanishing = [];
+  let impacted = false;
+  const impact = () => {
+    if (impacted || !current()) return;
+    impacted = true;
+    for (const event of targets) {
+      const image = battleUi.root.querySelector('.battle-enemy-member[data-index="'+event.targetIndex+'"] .battle-enemy-member-image');
+      applyPresentationHp(event);
+      if (battleUi.presentationHp.enemies[event.targetIndex] <= 0 && image) {
+        battleUi.ambientEffects?.remove(image);
+        markEnemyVanishPending(image);
+        vanishing.push({image,enemy:battle.enemies[event.targetIndex],event});
+      }
+    }
+    renderBattleVitals();
+  };
+  const played = await playBattleSkillPresentation({root:battleUi.root,messageElement:battleUi.messageEl,
+    presentationId:first.battlePresentationId, targets:targets.map(event=>({targetIndex:event.targetIndex,damage:event.damage})),
+    onImpact:impact});
+  if (!current()) return;
+  impact();
+  if (!played) {
+    for (const event of targets) showBattleNumber('enemy',event.damage,'damage',event.hitIndex,event.hitCount,event.targetIndex);
+    battleUi.playSe('attackHit');
+    await delay(getBattlePresentationDelay(360,battleUi.speedMode));
+  } else await delay(getBattleDedicatedPresentationDwell(battleUi.speedMode));
+  if (!current()) return;
+  await Promise.all(vanishing.map(async ({image,enemy,event}) => {
+    if (event.slashExecution) await playSlashEffect(image,{restoreImage:false});
+    if (current()) await playEnemyVanish({image,enemy});
+  }));
+  if (current()) renderBattleVitals();
 }
 
 async function playNpcChargeCutIn(event) {

@@ -9,7 +9,7 @@ const EASINGS = {
 };
 
 export class EffectEngine {
-  constructor(canvas, { transparent = false, backdrop = true, getTarget = null, onShake = null, onMessage = null, audio = {} } = {}) {
+  constructor(canvas, { transparent = false, backdrop = true, getTarget = null, onShake = null, onMessage = null, onFrame = null, audio = {} } = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
     this.effect = normalizeEffectDefinition();
@@ -18,7 +18,7 @@ export class EffectEngine {
     this.transparent = Boolean(transparent);
     this.backdrop = Boolean(backdrop);
     this.imageCache = new Map();
-    this.onMessage=onMessage;this.getTarget=getTarget;this.onShake=onShake;this.playGeneration=0;this.audio=new EffectAudio({getEffect:()=>this.effect,...audio});
+    this.onFrame=onFrame;this.onMessage=onMessage;this.getTarget=getTarget;this.onShake=onShake;this.playGeneration=0;this.audio=new EffectAudio({getEffect:()=>this.effect,...audio});
   }
 
   setRenderMode({ transparent = this.transparent, backdrop = this.backdrop } = {}) {
@@ -93,6 +93,7 @@ export class EffectEngine {
 
   render() {
     const { ctx, effect } = this;
+    this.onFrame?.(this.time);
     this.renderTarget=this.getTarget?.();
     ctx.save();
     if (this.transparent) ctx.clearRect(0, 0, effect.width, effect.height);
@@ -115,7 +116,8 @@ export class EffectEngine {
     const raw = Math.min(1, Math.max(0, (this.time - part.start) / part.duration));
     const progress = (EASINGS[part.easing] || EASINGS.linear)(raw);
     this.ctx.save();
-    const offset=getAnchorOffset(part,this.effect,this.renderTarget);this.ctx.translate(offset.x,offset.y);
+    const target = part.anchor === "enemy" ? this.getTarget?.(part) || this.renderTarget : this.renderTarget;
+    const offset=getAnchorOffset(part,this.effect,target);this.ctx.translate(offset.x,offset.y);
     if (part.type === "magicCircle" && (part.imageData || part.imageSrc)) {
       this.ctx.translate(part.x,part.y);this.ctx.rotate((part.rotation||0)*Math.PI/180*progress);
       this.drawCutin({...part,fromX:0,toX:0,fromY:0,toY:0,opacity:1,fadeIn:200,fadeOut:300},progress,raw);

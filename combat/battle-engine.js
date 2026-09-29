@@ -580,6 +580,7 @@ function executeMultiPlayerActionPass({ battle, action, actor, targetIndex, magi
     return [];
   }
   const results = [];
+  const presentationStart = battle.presentationEvents.length;
   const targetIndexes = action.target === "allEnemies"
     ? livingEnemyIndexes(battle.enemies)
     : [Math.max(0, Math.min(battle.enemies.length - 1, Math.floor(Number(targetIndex) || 0)))];
@@ -590,6 +591,14 @@ function executeMultiPlayerActionPass({ battle, action, actor, targetIndex, magi
       battle, action, actor, actorSide: "player", target,
       targetSide: "enemy", targetIndex: currentTargetIndex, magicFocus, rng
     }));
+  }
+  if (action.target === "allEnemies") {
+    for (const event of battle.presentationEvents.slice(presentationStart)) {
+      if (event.type === "attackHit" && event.actorSide === "player"
+          && event.battlePresentationId === (action.presentationId || action.id)) {
+        event.areaPresentationGroup = presentationStart;
+      }
+    }
   }
   return results;
 }
