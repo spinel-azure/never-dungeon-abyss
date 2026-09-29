@@ -1,5 +1,6 @@
 export const CONDITION_LABELS = Object.freeze({
   good: "GOOD",
+  charm: "CHARM",
   poison: "POISON",
   deadlyPoison: "TOXIC",
   deathPoison: "DEATH POISON",
@@ -14,5 +15,6 @@ export function getConditionLabel(statuses = []) {
   if (statusIds.has("bleeding")) return CONDITION_LABELS.bleeding;
   if (statusIds.has("deadly_poison")) return CONDITION_LABELS.deadlyPoison;
   if (statusIds.has("poison")) return CONDITION_LABELS.poison;
+  if (statusIds.has("charm")) return CONDITION_LABELS.charm;
   return CONDITION_LABELS.good;
 }

@@ -1018,3 +1018,9 @@ body.battle-active .viewport > #treasureCanvas {
 @media (prefers-reduced-motion: reduce) {
   .battle-defeat-recovery-flash.is-active { animation-duration: 360ms; }
 }
+
+/* Phantom rematches reserve title and HP space even in the short mobile frame. */
+.is-akashic-battle .battle-enemy-stage { inset: 7% 3% 12%; }
+.is-akashic-battle .battle-enemy-heading { flex-shrink: 0; }
+.is-akashic-battle .battle-enemy-image { min-height: 0; max-height: calc(100% - 54px); }
+.is-akashic-battle .battle-enemy-name { font-size: clamp(17px, 4.4vw, 26px); }

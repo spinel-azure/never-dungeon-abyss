@@ -1,3 +1,4 @@
+import { createAkashicBosses } from "./akashic-phantoms.js";
 import { LOEWENKOENIGIN } from './loewenkoenigin.js';
 import { WASSERMANNFRAU } from "./wassermannfrau.js";
 import { ZENTAURIN } from "./zentaurin.js";
@@ -1522,8 +1523,10 @@ export const BOSSES = Object.freeze({
   })
 });
 
+const AKASHIC_BOSSES = createAkashicBosses(BOSSES);
+
 export function getBossById(id) {
-  return BOSSES[String(id || "")] || null;
+  return AKASHIC_BOSSES[String(id || "")] || BOSSES[String(id || "")] || null;
 }
 
 export function resolveBossEncounterPrompt(bossOrId, { lightbringerOwned = false } = {}) {

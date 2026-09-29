@@ -21,6 +21,7 @@ export function applyStatus(statuses = [], application = {}) {
     active: true
   };
   const index = next.findIndex(item => (item.id || item.statusId) === definition.id);
+  if (definition.id === "charm" && index >= 0 && next[index].active !== false && next[index].remainingTurns > 0) return next;
   if (index >= 0) next[index] = status;
   else next.push(status);
   return next;

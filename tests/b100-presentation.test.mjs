@@ -32,7 +32,7 @@ test("new B100F, zone, reserved boss, and ending audio assets are registered", (
 test("zone and B100F final boss BGM selectors use their dedicated tracks", () => {
   assert.match(main, /currentDepth >= 50 && currentDepth <= 59[\s\S]*?return "jungleZone"/);
   assert.match(main, /currentDepth >= 60 && currentDepth <= 69[\s\S]*?return "desertZone"/);
-  assert.match(main, /\["erzdaemonin_b100f", "amayenak_b100f"\][\s\S]*?return "finalBoss"/);
+  assert.match(main, /\["erzdaemonin_b100f", "amayenak_b100f", \.\.\.AKASHIC_PHANTOM_IDS\][\s\S]*?return "finalBoss"/);
   assert.match(main, /enemyData\?\.battleBgmKey/);
 });
 
@@ -80,7 +80,7 @@ test("B100F guardian progress is per exploration while repeat victories award ze
 
 test("Amayenak receives a dedicated enlarged battle image without consuming the vital area", () => {
   assert.match(battle, /is-amayenak"[^\n]*amayenak_b100f/);
-  assert.match(battle, /enemyStage\?\.classList\.toggle\("is-amayenak", battle\.enemy\.id === "amayenak_b100f"\)/);
+  assert.match(battle, /enemyStage\?\.classList\.toggle\("is-amayenak", \["amayenak_b100f", "amayenak_phantom_b100f"\]\.includes\(battle\.enemy\.id\)\)/);
   assert.match(battleCss, /\.battle-enemy-image\.is-amayenak[\s\S]*?max-height: calc\(100% - 54px\)/);
   assert.match(battleCss, /\.battle-enemy-stage\.is-amayenak \{ inset: 7% 3% 15%; \}/);
 });

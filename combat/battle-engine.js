@@ -1,3 +1,4 @@
+import { isCharmed, charmAction, getAkashicPreparation, capAkashicDot, reviveAkashicEnemy } from "./akashic-phantoms.js";
 import { applyWingGift } from "../data/wing-gift.js";
 import { isLionQueen, selectLionAction, prepareLionAction, payLionSelfDamage, capLionDamageOverTime, synchronizeLionQueen, exposeLionQueen, prepareLionOpening, finishLionPlayerAction, clearLionOpenings } from './loewenkoenigin.js';
 import { prepareLeoAttack, payLeoAttackCost } from './leo.js';
@@ -76,6 +77,7 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     ? normalizeLivingTargetIndex(enemyParty, targetIndex)
     : 0;
   const selectedEnemy = enemyParty ? enemyParty[selectedTargetIndex] : cloneCombatant(enemy);
+  if (selectedEnemy.akashicPhantom) { selectedEnemy.causalityUsed = false; selectedEnemy.apocalypseUsed = false; delete selectedEnemy.reservedEnemyAction; }
   clearLionOpenings({enemy:selectedEnemy, ...(enemyParty ? {enemies:enemyParty} : {})});
   const sphinxBarrierRate = Math.max(0, sumCardEffectValues(character?.cards?.deckSlots, "sphinx_battle_barrier"));
   const sphinxBarrierAmount = sphinxBarrierRate > 0
@@ -158,6 +160,7 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
 export function resolveBattleRound({ battle, playerCommand, rng = Math.random } = {}) {
   if (Array.isArray(battle?.enemies)) return resolveMultiBattleRound({ battle, playerCommand, rng });
   const next = structuredClone(battle);
+  if (isCharmed(next.player)) playerCommand = { type: "wait" };
   const playerAction = createPlayerAction(next.player, playerCommand, next.enemy);
   if (!playerAction.ok) return { battle: next, accepted: false, reason: playerAction.reason };
   const enemyAction = createEnemyAction(next.enemy, rng, { battle: next });
@@ -234,7 +237,12 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
     }
     const targetHpBefore = target.hp;
     const action = applyAriesOpeningAttack(next, entry.action, entry.side);
-    if (entry.side === "player") {
+    if (entry.side === "player" && isCharmed(actor)) {
+      actor.sp = Math.min(actor.maxSp, actor.sp + playerAction.spCost);
+      playerAction.spCost = 0;
+      playerCommand = { type: "wait" };
+      executeAction({ battle: next, action: charmAction(rng), actor, actorSide: "player", target, targetSide, rng });
+    } else if (entry.side === "player") {
       executeSinglePlayerActionSequence({
         battle: next, action, repeatAction: entry.action,
         command: playerCommand, actor, target, rng
@@ -330,6 +338,7 @@ export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.rand
   const next = structuredClone(battle);
   next.targetIndex = normalizeLivingTargetIndex(next.enemies, playerCommand?.targetIndex ?? next.targetIndex);
   next.enemy = next.enemies[next.targetIndex];
+  if (isCharmed(next.player)) playerCommand = { type: "wait" };
   const playerAction = createPlayerAction(next.player, playerCommand, next.enemy);
   if (!playerAction.ok) return { battle: next, accepted: false, reason: playerAction.reason };
   const orderEntries = [{ side: "player", actor: combatStats(next.player), action: playerAction.action }];
@@ -399,7 +408,11 @@ export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.rand
     }
     if (entry.side === "player") {
       const action = applyAriesOpeningAttack(next, entry.action, "player");
-      executeMultiPlayerActionSequence({
+      if (isCharmed(actor)) {
+        actor.sp = Math.min(actor.maxSp, actor.sp + playerAction.spCost);
+        playerAction.spCost = 0; playerCommand = { type: "wait" };
+        executeAction({ battle: next, action: charmAction(rng), actor, actorSide: "player", target: next.enemy, targetSide: "enemy", rng });
+      } else executeMultiPlayerActionSequence({
         battle: next, action, repeatAction: entry.action, command: playerCommand, actor,
         targetIndex: next.targetIndex, rng
       });
@@ -872,6 +885,8 @@ export function createEnemyAction(enemy, rng = Math.random, context = {}) {
   );
   if (actionSealed) return attack;
   if (isLionQueen(enemy)) return buildEnemyAction(selectLionAction(enemy, rng), attack);
+  const akashicPreparation = getAkashicPreparation(enemy);
+  if (akashicPreparation) return buildEnemyAction(akashicPreparation, attack);
   if (actionTable.length > 0) {
     const selected = selectWeightedEnemyAction(actionTable, enemy, rng, context);
     if (selected) return buildEnemyAction(selected, attack);
@@ -1054,6 +1069,10 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     return;
   }
   if (action.actionType === "prepareAction" && actorSide === "enemy") {
+    if (action.id === "phantom_apocalypse_prepare") {
+      actor.apocalypseUsed = true;
+      battle.presentationEvents.push({ type: "message", message: action.prepareMessage });
+    }
     actor.reservedEnemyAction = structuredClone(action.reservedAction || null);
     battle.log.push(action.prepareMessage || `${actor.name}は次の攻撃に備えた！`);
     if (isLionQueen(actor)) battle.presentationEvents.push({type:"message",message:action.prepareMessage});
@@ -1089,6 +1108,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
   }
   if (action.actionType === "wait") {
     battle.log.push(action.waitMessage || `${actor.name}は隙を見せた。`);
+    if (isCharmed(actor)) battle.presentationEvents.push({ type: "message", message: action.waitMessage });
     return;
   }
   if (action.actionType === "item") {
@@ -1507,6 +1527,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     damageBeforeLionOpening: hit.damage,
     damage: Math.floor(hit.damage * openingMultiplier)
   }));
+  if (actor.akashicPhantom) presentedHits = presentedHits.map(hit => ({ ...hit, damage: Math.min(Math.floor(hit.damage * 1.2), action.maxHpDamageCap ? Math.floor(target.maxHp * action.maxHpDamageCap) : Infinity) }));
   if (isPiscesInvincible(target)) presentedHits = presentedHits.map(hit => ({ ...hit, damage: 0 }));
   let actualDamage = presentedHits.reduce((total, hit) => total + hit.damage, 0);
   const npcWall = targetSide === "player"
@@ -1641,7 +1662,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
       playerChargePresentationId: actorSide === "player" && action.chargeSkill
         ? action.presentationId || action.id
         : null,
-      battlePresentationId: actorSide === "player"
+      battlePresentationId: actorSide === "player" || action.presentationId
         ? action.presentationId || action.id || null
         : null,
       blockedByNpcWall: Boolean(hit.blockedByNpcWall),
@@ -1971,7 +1992,7 @@ function finishAction(battle, side) {
 function finishCombatantAction(battle, actor, side, targetIndex = null) {
   if (actor.id === ZENTAURIN_ID && actor.zentaurinPrideActions > 0) actor.zentaurinPrideActions -= 1;
   payLionSelfDamage(battle, actor, targetIndex);
-  const end = capLionDamageOverTime(actor, resolveEndOfAction({ statuses: actor.statuses, maxHp: actor.maxHp }));
+  const end = capAkashicDot(actor, capLionDamageOverTime(actor, resolveEndOfAction({ statuses: actor.statuses, maxHp: actor.maxHp })));
   actor.statuses = end.statuses;
   if (actor.bossMagicBarrier > 0) {
     const dot = ['poisonDamage','bleedingDamage','deadlyPoisonDamage','deathPoisonDamage'];
@@ -2076,6 +2097,7 @@ function updateMultiOutcome(battle) {
     battle.log.push(`${battle.player.name}は倒れた……`);
     return;
   }
+  battle.enemies.forEach((enemy, index) => reviveAkashicEnemy(battle, enemy, index));
   if (livingEnemyIndexes(battle.enemies).length > 0) return;
   battle.outcome = "victory";
   battle.phase = "complete";
@@ -2115,6 +2137,7 @@ function updateOutcome(battle) {
     battle.log.push(`${battle.player.name}は倒れた……`);
     return;
   }
+  reviveAkashicEnemy(battle, battle.enemy);
   if (battle.enemy.hp <= 0 && battle.enemy.capturePuzzle) {
     battle.enemy.hp = 0;
     battle.enemy.alive = false;
@@ -2237,6 +2260,7 @@ function getCuredStatusIds(action = {}) {
 
 function statusName(id) {
   return ({
+    charm: "魅了",
     armor_break: "DEF低下",
     crystal_cracked: "ひび割れ",
     resonance_collapse: "共鳴崩壊",

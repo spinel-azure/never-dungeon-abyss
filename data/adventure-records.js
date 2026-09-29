@@ -135,6 +135,7 @@ export function getAdventureChronicle(character) {
     ["allZodiacCards", "ゾディアックカードを12枚全て集めた", countOwnedZodiacCardKinds(character?.cards) >= 12, "12種類すべてのゾディアックカードを所持した。", "？？？？？？――黄道十二宮"],
     ["level197", "最大レベル197に到達した", Number(character?.level) >= 197, "最大レベル197に到達した。", "？？？？？？――完璧で究極の冒険者"],
     ["lionQueen", "レーヴェンケーニギンを撃破した", flags.boss_loewenkoenigin_b1f_defeated, "獅子座の守護者を撃破した。", "？？？？？？――獅子座の守護者"],
+    ["amayenakPhantom", "アマイェナクの幻影を倒した", flags.achievement_amayenak_phantom_defeated, "暴走する因果記録庫の幻影を倒した。", "？？？？？？――因果記録庫暴走"],
     ["lionBath", "レーヴェンケーニギンの沐浴を目撃した", flags.achievement_lion_bath_seen, "激闘のあと、女王の沐浴を目撃した。", "？？？？？？――激闘のあとに"],
     ["itemCompendium", "アイテム図鑑をコンプリートした", false, "アイテム図鑑を完成させた。", "？？？？？？――こだわりフレーバー"], // Reserved until the item compendium is released.
     ["maikaeferMaster", "メイケーファーを50匹倒した", Number(flags.maikaefer_defeat_count)>=50, "希少な虫を累計50匹討伐した。", "？？？？？？――虫取り名人"],

@@ -1,4 +1,5 @@
 export const STATUS_EFFECTS = Object.freeze({
+  charm: Object.freeze({ id: "charm", name: "魅了", kind: "ailment", duration: 3, expiresAfterBattle: true }),
   pisces_invincible: Object.freeze({
     id: "pisces_invincible", name: "双魚の加護（完全無敵）", kind: "buff", expiresAfterBattle: true
   }),

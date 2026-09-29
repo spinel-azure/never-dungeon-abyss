@@ -165,3 +165,7 @@ body.menu-open.input-touch .deck-panel:has(.deck-picker:not([hidden])){overflow:
 .inventory-sort[hidden]{display:none!important}
 .inventory-sort.is-selected{border-color:#aef6ff;background:#14313a;box-shadow:0 0 10px rgba(95,226,255,.65)}
 @media(max-width:540px){.inventory-sort{padding:3px 6px;font-size:12px}}
+
+.condition-charm{color:#ff85bb!important;text-shadow:0 0 6px #ff65a766!important}
+#quickCharm{flex:none;margin-left:.12em}
+#quickCharm[hidden]{display:none}

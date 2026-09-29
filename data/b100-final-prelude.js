@@ -1,4 +1,6 @@
 export const B100_FINAL_PRELUDE_ASSETS = Object.freeze({
+  runaway: Object.freeze({ id: "b100_akashic_runaway", image: "images/background/dungeon_event_00b.avif" }),
+  queenProjection: Object.freeze({ id: "NPC_01c", image: "images/npc/NPC_01c.avif" }),
   altar: Object.freeze({ id: "b100_final_altar", image: "images/background/dungeon_event_00.avif" }),
   masterAndDemon: Object.freeze({ id: "b100_final_master_and_demon", image: "images/npc/NPC_event_19.avif" }),
   demonAdvancing: Object.freeze({ id: "b100_final_demon_advancing", image: "images/npc/NPC_event_20.avif" })

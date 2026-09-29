@@ -1,3 +1,4 @@
+import { renderCharmStatus } from "./akashic-presentation.js";
 import { selectTrelirenEntranceImage } from "../data/treliren.js";
 import { paginateMessageToFit } from "./message-pagination.js";
 import { renderWeaponElementStatus } from "./weapon-element-status.js";
@@ -3476,6 +3477,7 @@ function showRegistrationRequired() {
 export function renderCharacterStatus() {
   const character = town.getCharacter();
   renderWeaponElementStatus(character);
+  renderCharmStatus(character);
   const quickName = character?.name || "NO_NAME";
   const values = {
     quickName,

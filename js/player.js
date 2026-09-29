@@ -1,3 +1,5 @@
+import { AKASHIC_PHANTOM_IDS, AKASHIC_INTRO } from "../data/akashic-phantoms.js";
+import { paginateMessageToFit } from "./message-pagination.js";
 import {createLionAftermath, resetLionBathVisits, syncLionBath, disposeLionBath} from './lion-bath.js';
 import {createLionIntro, createLionVictory, handleLionInput, updateLionEvent} from './lion-event.js';
 import {LOEWENKOENIGIN_ID} from '../data/loewenkoenigin.js';
@@ -1853,15 +1855,22 @@ function startStairsPrompt(cellType) {
   });
 }
 
+function akashicPages(text) {
+  if (typeof document !== "undefined") document.body.classList.remove("event-message-expanded");
+  return paginateMessageToFit({ element: typeof document === "undefined" ? null : document.getElementById("message"), text, formatPage: value => `${value}\n＊Aボタンで次へ` });
+}
+
 function startFixedFloorEvent(eventDefinition) {
   const message = hooks.onFixedFloorEvent(eventDefinition) || eventDefinition?.description || "何かの気配を感じる…。";
+  const pages = eventDefinition.projection ? akashicPages(message) : [message];
   startOverlayEvent({
     type: "fixedFloorEvent",
-    imageId: "NPC_01b",
-    message: `${message}\n＊Aボタンで次へ`,
+    imageId: eventDefinition.imageId || "NPC_01b",
+    projection: Boolean(eventDefinition.projection), pages, page: 0, imageFit: "containBottom",
+    message: `${pages[0]}\n＊Aボタンで次へ`,
     canCancel: false,
     fadeOut: Boolean(eventDefinition?.fadeOut),
-    reserveMessageLines: 5,
+    reserveMessageLines: eventDefinition.projection ? 0 : 5,
     phase: "message"
   });
 }
@@ -1869,6 +1878,10 @@ function startFixedFloorEvent(eventDefinition) {
 function finishFixedFloorEvent() {
   const event = state.overlayEvent;
   if (!event || event.type !== "fixedFloorEvent") return;
+  if (event.phase === "fading") return;
+  if (event.pages && event.page < event.pages.length - 1) {
+    event.page++; hooks.say(`${event.pages[event.page]}\n＊Aボタンで次へ`); hooks.onStateChanged(); return;
+  }
   if (event.fadeOut && event.phase !== "fading") {
     event.phase = "fading";
     event.fadeStartedAt = performance.now();
@@ -1891,6 +1904,14 @@ export function startBossEvent(bossId, fromGX, fromGY) {
   const boss = getBossById(bossId);
   state.bossEncounterOrigin = { x: fromGX, y: fromGY };
   if(bossId===LOEWENKOENIGIN_ID){startOverlayEvent(createLionIntro(fromGX,fromGY));return;}
+  if (bossId === AKASHIC_PHANTOM_IDS[0]) {
+    const pages = akashicPages(AKASHIC_INTRO);
+    startOverlayEvent({ type: "b100FinalPrelude", bossId, fromGX, fromGY, phase: "altar", page: 0, pages,
+      phantom: true, backgroundImageId: B100_FINAL_PRELUDE_ASSETS.runaway.id,
+      foregroundImageId: B100_FINAL_PRELUDE_ASSETS.masterAndDemon.id,
+      message: `${pages[0]}\n＊Aボタンで次へ`, canCancel: false });
+    return;
+  }
   if (bossId === "erzdaemonin_b100f") {
     startOverlayEvent({
       type: "b100FinalPrelude",
@@ -1992,6 +2013,21 @@ function confirmBossEvent() {
 function advanceB100FinalPrelude() {
   const event = state.overlayEvent;
   if (!event || event.type !== "b100FinalPrelude" || event.phase === "battleStarting") return;
+  if (event.phantom) {
+    if (event.page < event.pages.length - 1) {
+      event.page++; hooks.say(`${event.pages[event.page]}\n＊Aボタンで次へ`); hooks.onStateChanged(); return;
+    }
+    event.phase = "battleStarting";
+    event.outgoingImageId = event.foregroundImageId;
+    event.foregroundImageId = B100_FINAL_PRELUDE_ASSETS.demonAdvancing.id;
+    event.transitionStartedAt = performance.now();
+    hooks.say("影が襲いかかってくる…！"); hooks.onStateChanged();
+    event.autoStartTimer = window.setTimeout(() => {
+      if (state.overlayEvent !== event) return;
+      state.overlayEvent = null; hooks.say(""); hooks.beginBossBattle(event.bossId);
+    }, B100_FINAL_PRELUDE_BATTLE_DELAY_MS);
+    return;
+  }
   if (event.page < B100_FINAL_PRELUDE_MESSAGES.length - 1) {
     event.page += 1;
     event.phase = ["amayenakOne", "amayenakTwo", "demonRises", "demonAdvances"][event.page - 1];

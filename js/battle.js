@@ -1,3 +1,5 @@
+import { isCharmed } from "../combat/akashic-phantoms.js";
+import { renderCharmStatus, mountAkashicBackground } from "./akashic-presentation.js";
 import { getAreaPresentationGroup } from "./area-skill-presentation.js";
 import { clearLionOpenings } from '../combat/loewenkoenigin.js';
 import {presentLionPhase} from './lion-phase-presentation.js';
@@ -180,6 +182,8 @@ export function startBattle(enemy, {
     previousImage.replaceWith(image);
   }
   clearAutoTimer();
+  battleUi.akashicCleanup?.();
+  battleUi.akashicCleanup = enemy.akashicPhantom ? mountAkashicBackground(battleUi.root) : null;
   battleUi.battle = createBattleState({ character, enemy, enemies, targetIndex });
   battleUi.presenting = false;
   battleUi.presentationEnemyImage = battleUi.battle.enemy.image || "";
@@ -219,6 +223,7 @@ export function startBattle(enemy, {
   if (scriptedBattleType === "jirene_first_encounter") scheduleJireneScriptedRound(900);
   else if (battleUi.battle.zentaurinOpening) void presentZentaurinOpening();
   else if (ambush) void executeAmbushOpening();
+  else if (isCharmed(battleUi.battle.player)) scheduleCharmRound();
   return true;
 }
 
@@ -246,7 +251,7 @@ export function isJireneScriptedBattleActive() {
 }
 
 export function openBattleItems() {
-  if (!battleUi.active || battleUi.presenting || battleUi.battle?.outcome || battleUi.autoActive) return false;
+  if (!battleUi.active || battleUi.presenting || battleUi.battle?.outcome || battleUi.autoActive || isCharmed(battleUi.battle?.player)) return false;
   battleUi.playSe("confirm");
   battleUi.openItems({ character: battleUi.battle.player, enemy: battleUi.battle.enemy, enemies: battleUi.battle.enemies, onUse: useBattleItem });
   return true;
@@ -254,11 +259,12 @@ export function openBattleItems() {
 
 export function handleBattleInput(action) {
   if (!battleUi.active || document.body.classList.contains("menu-open")) return false;
+  if (!battleUi.battle?.outcome && isCharmed(battleUi.battle?.player)) return true;
   if (battleUi.autoActive) {
     if (action === "cancel") stopAutoBattle();
     return true;
   }
-  if (battleUi.presenting) return true;
+  if (battleUi.presenting || (!battleUi.battle?.outcome && isCharmed(battleUi.battle?.player))) return true;
   if (battleUi.battle?.outcome) {
     if (action === "confirm") finishBattle();
     return true;
@@ -330,6 +336,7 @@ function moveSelection(action) {
 }
 
 function activateSelected() {
+  if (!battleUi.battle?.outcome && isCharmed(battleUi.battle?.player)) return;
   const button = battleUi.battleButtons[battleUi.selectedIndex];
   if (!button || button.disabled) return;
   battleUi.playSe("confirm");
@@ -498,10 +505,19 @@ async function executeCommand(command) {
   battleUi.presentationHp = null;
   battleUi.presentationBarrier = null;
   renderBattle();
-  if (battleUi.autoActive && !battleUi.battle.outcome) scheduleAutoRound();
+  if (!battleUi.battle.outcome && isCharmed(battleUi.battle.player)) scheduleCharmRound();
+  else if (battleUi.autoActive && !battleUi.battle.outcome) scheduleAutoRound();
   else if (battleUi.battle.scriptedBattleType === "jirene_first_encounter" && !battleUi.battle.outcome) {
     scheduleJireneScriptedRound(700);
   }
+}
+
+function scheduleCharmRound() {
+  clearAutoTimer();
+  battleUi.autoTimer = window.setTimeout(() => {
+    battleUi.autoTimer = 0;
+    if (battleUi.active && !battleUi.presenting && !battleUi.battle?.outcome && isCharmed(battleUi.battle.player)) void executeCommand({ type: "wait" });
+  }, getBattlePresentationDelay(900, battleUi.speedMode));
 }
 
 function scheduleJireneScriptedRound(delayMs = 700) {
@@ -544,6 +560,7 @@ async function executeAmbushOpening() {
   battleUi.presenting = false;
   battleUi.presentationHp = null;
   renderBattle();
+  if (!battleUi.battle.outcome && isCharmed(battleUi.battle.player)) scheduleCharmRound();
 }
 
 async function playPresentationEvents() {
@@ -600,7 +617,8 @@ async function playPresentationEvents() {
       : battleUi.battle.enemies && Array.isArray(battleUi.presentationHp?.enemies)
         ? battleUi.presentationHp.enemies[vanishTargetIndex]
         : battleUi.presentationHp?.enemy;
-    const shouldPlayVanish = Number(enemyHpBefore) > 0 && Number(enemyHpAfter) <= 0;
+    const revivalPending = events.slice(events.indexOf(event) + 1).some(next => next.causalityRevival && next.targetIndex === event.targetIndex);
+    const shouldPlayVanish = Number(enemyHpBefore) > 0 && Number(enemyHpAfter) <= 0 && !revivalPending;
     const vanishImage = shouldPlayVanish
       ? battleUi.battle.enemies
         ? battleUi.root.querySelector(`.battle-enemy-member[data-index="${vanishTargetIndex}"] .battle-enemy-member-image`)
@@ -636,7 +654,7 @@ async function playPresentationEvents() {
       if (!event.whirlpoolPreparing) await playWhirlpoolWave(battleUi.root, () => battleUi.active);
     }
     if (event.broken) await playBarrierShatter(battleUi.root, image, () => battleUi.active);
-    const dedicatedPresentationPlayed = event.targetSide === "enemy" && event.hit
+    const dedicatedPresentationPlayed = (event.targetSide === "enemy" || event.battlePresentationId === "apocalypse") && event.hit
       ? await playBattleSkillPresentation({
         root: battleUi.root,
         messageElement: battleUi.messageEl,
@@ -645,6 +663,7 @@ async function playPresentationEvents() {
       })
       : false;
     if (!battleUi.active) return;
+    if (event.causalityRevival) await playDefeatRecoveryFlash();
     if (event.type === "healing") {
       showBattleNumber(event.targetSide, event.amount, "healing");
       battleUi.playSe("heal");
@@ -978,6 +997,9 @@ function updateBattleSpeedToggle() {
 
 function closeBattle() {
   battleUi.ambientEffects?.clear();
+  battleUi.akashicCleanup?.();
+  battleUi.akashicCleanup = null;
+  renderCharmStatus(null);
   stopBattleSkillPresentation();
   clearAutoTimer();
   if (battleUi.speedToggleTouchResetTimer) {
@@ -1061,7 +1083,8 @@ function renderBattle() {
   if (!battle) return;
   if (battle.outcome) hideBattleCommands();
   battleUi.messageEl.classList.remove("is-skill-description");
-  setText("battlePlayerName", `${battle.player.name} [${battle.player.jobLabel || battle.player.job}]`);
+  setText("battlePlayerName", `${battle.player.name} [${battle.player.jobLabel || battle.player.job}]${isCharmed(battle.player) ? "♥" : ""}`);
+  renderCharmStatus(battle.player);
   battleUi.root.querySelector("#battlePlayerName")?.classList.toggle(
     "condition-poison",
     ["POISON", "TOXIC", "DEATH POISON"].includes(getConditionLabel(battle.player.statuses))
@@ -1099,7 +1122,7 @@ function renderBattle() {
   image.classList.toggle("is-todes-scorpio", battle.enemy.id === "todes_scorpio_b64f");
   image.classList.toggle("is-sphinx", battle.enemy.id === "sphinx_b69f");
   image.classList.toggle("is-jirene", battle.enemy.id === "jirene_b79f");
-  image.classList.toggle("is-amayenak", battle.enemy.id === "amayenak_b100f");
+  image.classList.toggle("is-amayenak", ["amayenak_b100f", "amayenak_phantom_b100f"].includes(battle.enemy.id));
   const enemyStage = battleUi.root.querySelector(".battle-enemy-stage");
   let lionOpening = enemyStage.querySelector('.battle-lion-opening');
   if (!lionOpening && battle.enemy.id === 'loewenkoenigin_b1f') {
@@ -1113,7 +1136,7 @@ function renderBattle() {
   enemyStage.classList.toggle("is-lion-queen",battle.enemy.id==="loewenkoenigin_b1f");
   enemyStage?.classList.toggle("is-defeated", defeated);
   enemyStage?.classList.toggle("is-eiskoenigin", battle.enemy.id === "eiskoenigin_b49f" && !defeated && !battleUi.concealed);
-  enemyStage?.classList.toggle("is-amayenak", battle.enemy.id === "amayenak_b100f");
+  enemyStage?.classList.toggle("is-amayenak", ["amayenak_b100f", "amayenak_phantom_b100f"].includes(battle.enemy.id));
   enemyStage?.classList.toggle("is-zentaurin", battle.enemy.id === "zentaurin_b96f");
   battleUi.messageEl.textContent = formatBattleMessage(battle);
   syncEnemyAmbientEffects();

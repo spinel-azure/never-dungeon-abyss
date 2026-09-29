@@ -1,3 +1,4 @@
+import { AKASHIC_PHANTOM_IDS, QUEEN_PROJECTION_MESSAGES } from "../data/akashic-phantoms.js";
 import { getKirkeFinalDialogue } from "../data/endgame-quests.js";
 import {configureSpecialMapHost,getSpecialMapContext,getSpecialMapBgmKey} from './special-map/context.js';
 import {resolveSpecialFieldItem,resolveSpecialFieldSkill,applySpecialFieldEnvironment} from './special-map/field-environment.js';
@@ -1575,7 +1576,7 @@ import {
     b100GauntletDefeatedThisExploration.clear();
     if (!rebuildB100FixedMap && currentDepth === 100) {
       for (const bossId of dungeon.b100GauntletDefeatedBossIds || []) {
-        if (B100_GAUNTLET_BOSS_IDS.includes(bossId)) b100GauntletDefeatedThisExploration.add(bossId);
+        if ([...B100_GAUNTLET_BOSS_IDS, ...AKASHIC_PHANTOM_IDS].includes(bossId)) b100GauntletDefeatedThisExploration.add(bossId);
       }
     }
     if (rebuildB100FixedMap) {
@@ -1678,6 +1679,12 @@ import {
       }
     }
     character = normalizeCharacter(save.character);
+    if (currentDepth === 100 && character.eventFlags?.ending_story_completed) {
+      for (const cell of cells.flat()) if (cell.fixedEvent) {
+        Object.assign(cell.fixedEvent, { imageId: "NPC_01c", projection: true, description: QUEEN_PROJECTION_MESSAGES[cell.fixedEvent.eventKey === "queen_shadow_warning_1" ? 0 : 1] });
+      }
+      refreshB100FinalBoss(character.eventFlags, [...b100GauntletDefeatedThisExploration]);
+    }
     const resumeMichaelaRestoration = Boolean(
       character?.eventFlags?.boss_amayenak_b100f_defeated
       && !character?.eventFlags?.michaela_restored
@@ -1794,6 +1801,13 @@ import {
       setTimeout(() => showCardGetEffect(FINAL_LONG_MARCH_REWARD_CARD_ID, { seId: "itemGet" }), delay);
     }
     resumePassiveNotifications();
+    // A save made between the two phantom battles resumes the second battle,
+    // rather than placing the player on top of its blocking cell.
+    if (savedLocation === "dungeon" && currentDepth === 100 && character.eventFlags?.ending_story_completed
+      && b100GauntletDefeatedThisExploration.has(AKASHIC_PHANTOM_IDS[0])
+      && cells[state.gridY]?.[state.gridX]?.bossId === AKASHIC_PHANTOM_IDS[1]) {
+      beginBossBattle(AKASHIC_PHANTOM_IDS[1]);
+    }
     return true;
   }
 
@@ -2993,6 +3007,7 @@ import {
       || currentDepth !== 57 || isBattleActive() || !canEnterJohannaRescueSpring(character)) return false;
     const boss = getBossById("fleischfresserknospe_b57f");
     if (!boss || isCurrentBossDefeated(boss.id)) return false;
+    if (boss.akashicPhantom && (currentDepth !== 100 || !character.eventFlags?.ending_story_completed)) return false;
     cancelAutoReturn(false);
     setPlayerInputEnabled(false);
     pendingEncounter = null;
@@ -3018,7 +3033,7 @@ import {
   }
 
   function isB100GauntletBossId(bossId) {
-    return currentDepth === 100 && B100_GAUNTLET_BOSS_IDS.includes(bossId);
+    return currentDepth === 100 && [...B100_GAUNTLET_BOSS_IDS, ...AKASHIC_PHANTOM_IDS].includes(bossId);
   }
 
   function isCurrentBossDefeated(bossId) {
@@ -3032,6 +3047,7 @@ import {
     if (!character || worldLocation !== "dungeon" || isBattleActive()) return false;
     const boss = getBossById(bossId);
     if (!boss || isCurrentBossDefeated(boss.id)) return false;
+    if (boss.akashicPhantom && (currentDepth !== 100 || !character.eventFlags?.ending_story_completed)) return false;
     const summonKeyItemId = boss.room?.summonKeyItemId;
     const alreadySummoned = summonKeyItemId && character.eventFlags?.boss_b89f_summoned;
     if (currentDepth === 89 && summonKeyItemId && !alreadySummoned) {
@@ -3057,7 +3073,7 @@ import {
     const lightbringerActive = boss.id === "seelenwuerger_b99f"
       && hasKeyItem(character.keyItems, "lichtbringer");
     const bossCombatant = createBossCombatant(boss, { lightbringerActive });
-    if (isB100GauntletBossId(boss.id) && character?.eventFlags?.[getB100GauntletFlag(boss.id)]) {
+    if (isB100GauntletBossId(boss.id) && (character?.eventFlags?.ending_story_completed || character?.eventFlags?.[getB100GauntletFlag(boss.id)])) {
       bossCombatant.experienceReward = 0;
     }
     const encounterEnemies = Array.isArray(boss.encounterEnemyIds)
@@ -3133,7 +3149,7 @@ import {
 
   function selectBattleBgm(enemyData) {
     if (enemyData?.battleBgmKey) return enemyData.battleBgmKey;
-    if (["erzdaemonin_b100f", "amayenak_b100f"].includes(enemyData?.id)) return "finalBoss";
+    if (["erzdaemonin_b100f", "amayenak_b100f", ...AKASHIC_PHANTOM_IDS].includes(enemyData?.id)) return "finalBoss";
     if (enemyData?.isEventBoss || enemyData?.bossKind === "event") return "eventBoss";
     if (enemyData?.isBoss) return "floorBoss";
     return "normalBattle";
@@ -3728,6 +3744,7 @@ import {
           };
         }
         if (b100Rematch) b100GauntletDefeatedThisExploration.add(battle.enemy.id);
+        if (battle.enemy.id === AKASHIC_PHANTOM_IDS[1]) character.eventFlags.achievement_amayenak_phantom_defeated = true;
         character = recordBossDefeat(character, battle.enemy.id, currentDepth);
         if (!b100Rematch && battle.enemy.id === "sphinx_b69f") {
           character = {
@@ -3861,7 +3878,7 @@ import {
       };
     }
     const dropMessage = drop.kind === "redChest" ? "" : addRolledLoot(drop);
-    const chainedBattleMessage = nextBoss && !isBossDefeated(character, nextBoss)
+    const chainedBattleMessage = nextBoss && !isCurrentBossDefeated(nextBoss.id)
       ? `\nしかし、その奥から${nextBoss.name}が姿を現した――！`
       : "";
     const victoryMessage = `${defeatedEnemyId === "verfolger" ? VERFOLGER_DEFEAT_MESSAGE + "\n" : ""}${reward > 0 ? `戦闘に勝利した。${reward}EXPを獲得した。` : "戦闘に勝利した。"}${bossRewardMessage}${questCollectionMessage}${dropMessage ? `\n${dropMessage}` : ""}${defeatQuestProgressMessage}${chainedBattleMessage}`;
@@ -3904,11 +3921,17 @@ import {
     }
     updateCharacterUi();
     saveGame();
-    if (nextBoss && !isBossDefeated(character, nextBoss)) {
+    if (nextBoss && !isCurrentBossDefeated(nextBoss.id)) {
       setPlayerInputEnabled(false);
+      const canContinueChain = () => !nextBoss.akashicPhantom || (
+        worldLocation === "dungeon" && currentDepth === 100 && !isBattleActive()
+        && cells[state.gridY]?.[state.gridX]?.bossId === nextBoss.id
+        && !isCurrentBossDefeated(nextBoss.id)
+      );
       window.setTimeout(() => {
+        if (!canContinueChain()) return;
         say(nextBoss.event?.start || `${nextBoss.name}が現れた！`);
-        window.setTimeout(() => beginBossBattle(nextBoss.id), 1800);
+        window.setTimeout(() => { if (canContinueChain()) beginBossBattle(nextBoss.id); }, 1800);
       }, 900);
     }
   }

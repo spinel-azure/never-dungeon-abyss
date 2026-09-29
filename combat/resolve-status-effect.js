@@ -10,6 +10,7 @@ export function resolveStatusEffect({
 } = {}) {
   const resistance = getResistance(defender, effect.statusId);
   if (isPiscesInvincible(defender) && isOrdinaryNegativeStatus(effect.statusId)) return statusResult(effect, false, 0, true);
+  if (effect.statusId === "charm" && Number(defender.temptationResistance) >= 1) return statusResult(effect, false, 0, true);
   if (resistance.immune) {
     return statusResult(effect, false, 0, true);
   }

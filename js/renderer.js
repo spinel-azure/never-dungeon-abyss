@@ -1,3 +1,4 @@
+import { drawQueenProjection } from "./akashic-presentation.js";
 import {syncLionBath} from './lion-bath.js';
 import {drawLionEvent} from './lion-event.js';
 import { getRoamingRevealFrame } from './roaming-reveal.js';
@@ -564,6 +565,7 @@ function drawOverlayEvent() {
       ctx.save();
       ctx.globalAlpha = alpha;
       if (blur > 0) ctx.filter = `blur(${blur}px)`;
+      if (event.phantom && fit === "contain") ctx.filter = "brightness(0) drop-shadow(0 0 7px #be8cff)";
       ctx.drawImage(layer, (W - drawW) / 2, (H - drawH) / 2, drawW, drawH);
       ctx.restore();
     };
@@ -616,6 +618,10 @@ function drawOverlayEvent() {
       ctx.globalAlpha = Math.max(0, 1 - mirageProgress);
       ctx.filter = `blur(${Math.floor(mirageProgress * 5)}px)`;
       if (!reducedMotion) ctx.translate(Math.sin(mirageProgress * Math.PI * 12) * (3 + mirageProgress * 15), 0);
+    }
+    if (event.projection) {
+      drawQueenProjection(ctx, image, W, H, event, performance.now(), reducedMotion);
+      ctx.restore(); return;
     }
     if (event.type === "fixedFloorEvent" && event.phase === "fading") {
       const fadeProgress = Math.max(0, Math.min(1, (performance.now() - Number(event.fadeStartedAt || 0)) / 650));

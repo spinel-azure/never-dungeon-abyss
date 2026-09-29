@@ -1,3 +1,4 @@
+import { getAkashicBossId, QUEEN_PROJECTION_MESSAGES } from "../data/akashic-phantoms.js";
 import {
   MAP_W,
   MAP_H,
@@ -208,7 +209,7 @@ export function buildFixedFloorMap(map = B100_FIXED_FLOOR_MAP, progress = {}) {
   });
   map.events.forEach(event => {
     const position = fixedMapPointToInternal(map, event);
-    cells[position.y][position.x].fixedEvent = structuredClone(event);
+    cells[position.y][position.x].fixedEvent = { ...structuredClone(event), ...(progress.eventFlags?.ending_story_completed ? { imageId: "NPC_01c", projection: true, description: QUEEN_PROJECTION_MESSAGES[event.eventKey === "queen_shadow_warning_1" ? 0 : 1] } : {}) };
   });
   map.healingFountains.forEach(fountain => {
     const position = fixedMapPointToInternal(map, fountain);
@@ -228,7 +229,7 @@ export function buildFixedFloorMap(map = B100_FIXED_FLOOR_MAP, progress = {}) {
     const position = fixedMapPointToInternal(map, map.finalBoss);
     const firstBoss = getBossById(map.finalBoss.bossId);
     const nextBoss = firstBoss?.nextBossId ? getBossById(firstBoss.nextBossId) : null;
-    cells[position.y][position.x].bossId = !flags[firstBoss.defeatedFlag]
+    cells[position.y][position.x].bossId = flags.ending_story_completed ? getAkashicBossId(flags, defeatedThisExploration) : !flags[firstBoss.defeatedFlag]
       ? firstBoss.id
       : nextBoss && !flags[nextBoss.defeatedFlag]
         ? nextBoss.id
@@ -243,7 +244,7 @@ export function refreshB100FinalBoss(eventFlags = {}, defeatedBossIds = []) {
   const position = fixedMapPointToInternal(B100_FIXED_FLOOR_MAP, B100_FIXED_FLOOR_MAP.finalBoss);
   const firstBoss = getBossById(B100_FIXED_FLOOR_MAP.finalBoss.bossId);
   const nextBoss = firstBoss?.nextBossId ? getBossById(firstBoss.nextBossId) : null;
-  cells[position.y][position.x].bossId = !eventFlags[firstBoss.defeatedFlag]
+  cells[position.y][position.x].bossId = eventFlags.ending_story_completed ? getAkashicBossId(eventFlags, defeatedThisExploration) : !eventFlags[firstBoss.defeatedFlag]
     ? firstBoss.id
     : nextBoss && !eventFlags[nextBoss.defeatedFlag]
       ? nextBoss.id
