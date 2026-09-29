@@ -23,7 +23,8 @@ export const EQUIPMENT = Object.freeze({
   }),
   musa_crown: item("musa_crown", "ムーサの冠", "accessoryId", { def: 6, temptationResistance: 1 }, {
     sellPrice: 0,
-    description: "女神ムーサの加護を宿す冠。魅了完全耐性。",
+    description: "魅了完全耐性。",
+    flavorText: "異界の女神の加護を宿す冠。",
     hiddenStatBonusKeys: Object.freeze(["temptationResistance"]),
     unique: true
   }),

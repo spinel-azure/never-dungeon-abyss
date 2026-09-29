@@ -118,3 +118,12 @@ test("equipment screens describe the expanded poison resistance and Glacies ice 
   assert.match(menuSource, /if \(definition\.description\) labels\.push\(definition\.description\)/);
   for (const source of [menuSource, mainSource, shopSource]) assert.match(source, /毒・猛毒・死毒耐性/);
 });
+
+
+test("death poison application uses a Japanese battle message", () => {
+  const enemy = createBossCombatant("todes_scorpio_b64f");
+  enemy.actions = [{weight:1, action:{ id:"test_death_poison", name:"試験", actionType:"spell", spellPower:1, unavoidable:true, effects:[{statusId:"death_poison", trigger:"perAction", guaranteed:true}] }}];
+  const result = resolveBattleRound({battle:createBattleState({character:durableWarrior(),enemy}),playerCommand:{type:"guard"},rng:()=>0});
+  assert.ok(result.battle.log.some(line=>line.includes("死毒を受けた！")));
+  assert.equal(result.battle.log.some(line=>line.includes("death_poison")),false);
+});

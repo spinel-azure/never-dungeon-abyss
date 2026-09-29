@@ -66,6 +66,7 @@ test("B100F warp and guardian prompts use large overlay imagery and phantom silh
   assert.match(battle, /classList\.toggle\("is-phantom", battleUi\.phantom\)/);
   assert.match(battle, /image\.style\.filter = battleUi\.phantom/);
   assert.match(renderer, /silhouette: Boolean\([\s\S]*?renderer\.state\?\.minimapBlocked && B100_GAUNTLET_BOSS_IDS\.includes\(cell\.bossId\)/);
+  assert.match(renderer, /boss\.akashicPhantom \|\| \(renderer\.state/);
   assert.match(renderer, /if \(event\.npc\.silhouette\)[\s\S]*?brightness\(0\)/);
   assert.match(battleCss, /\.battle-enemy-image\.is-phantom[\s\S]*?brightness\(0\)/);
 });

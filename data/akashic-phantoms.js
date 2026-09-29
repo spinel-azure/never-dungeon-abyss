@@ -3,8 +3,8 @@ export const AKASHIC_PHANTOM_IDS = Object.freeze(['erzdaemonin_phantom_b100f', '
 export const AKASHIC_BACKGROUND = 'images/background/dungeon_event_00b.avif';
 export const AKASHIC_INTRO = 'アカシックレコードからあふれ出る膨大な魔力を感じる。どうやら暴走している様だ。傍らにいた影が襲いかかってくる…！';
 export const QUEEN_PROJECTION_MESSAGES = Object.freeze([
-  '…ますか…聞こえますか…。真実の杖が異常を告げています…。どうやらアカシックレコードが暴走している様なのです…。今一度最奥へと赴き、調査をお願い…しま…す…。',
-  '…ますか…聞こえますか…。最奥から増大する闇の魔力を感じます…！これは…もし…や…アマイェ…。'
+  '女王ミカエラ「…ますか…聞こえますか…。真実の杖が異常を告げています…。どうやらアカシックレコードが暴走している様なのです…。今一度最奥へと赴き、調査をお願い…しま…す…。」',
+  '女王ミカエラ「…ますか…聞こえますか…。最奥から増大する闇の魔力を感じます…！これは…もし…や…アマイェ…。」'
 ]);
 export function isAkashicRematchUnlocked(flags) {
   return Boolean(flags?.ending_story_completed && (flags?.tavern_rumor_018_base_read || flags?.tavern_rumor_018_solved_read));

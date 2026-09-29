@@ -59,6 +59,19 @@ try {
    assert.equal(await page.evaluate(()=>playerQa.read()?.phase),'fading');
    await page.waitForFunction(()=>!playerQa.read());
   }
+  await page.evaluate(async()=>{
+   akashicQa.unlock(); const {state}=await import('/js/player.js');
+   Object.assign(state,{gridX:4,gridY:5,x:4.5,y:5.5,dir:0,angle:-Math.PI/2,anim:null,overlayEvent:null});
+   window.phantomDrawFilters=[];
+   const draw=CanvasRenderingContext2D.prototype.drawImage;
+   CanvasRenderingContext2D.prototype.drawImage=function(img,...args){
+    if(img?.src?.includes('boss_18.avif'))window.phantomDrawFilters.push(this.filter);
+    return draw.call(this,img,...args);
+   };
+  });
+  await page.waitForFunction(()=>phantomDrawFilters.some(f=>f.includes('brightness(0)')));
+  assert.ok(await page.evaluate(()=>phantomDrawFilters.every(f=>f.includes('brightness(0)'))));
+  await page.screenshot({path:join(output,`${label}-distant-phantom.png`)});
   await page.evaluate(()=>{akashicQa.unlock();playerQa.prelude('erzdaemonin_phantom_b100f',4,4);});
   await page.waitForTimeout(200);await page.screenshot({path:join(output,label+'-prelude.png')});
   while(await page.evaluate(()=>playerQa.read()?.phase!=='battleStarting')) await page.evaluate(()=>playerQa.input('confirm'));

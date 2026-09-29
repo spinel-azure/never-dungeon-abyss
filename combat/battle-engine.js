@@ -1710,7 +1710,9 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
       : application
   )));
   for (const applied of applications.filter(item => item.success)) {
-    battle.log.push(`${target.name}は${statusName(applied.statusId)}状態になった。`);
+    battle.log.push(applied.statusId === "death_poison"
+      ? `${target.name}は死毒を受けた！`
+      : `${target.name}は${statusName(applied.statusId)}状態になった。`);
   }
   if (actorSide === "player" && battle.scorpioActiveAtStart && !bossBarrierBlocked && landedHits.length > 0 && target.alive
     && !target.capturePuzzle) {
@@ -2268,6 +2270,7 @@ function statusName(id) {
     action_seal: "封技",
     poison: "毒",
     deadly_poison: "猛毒",
+    death_poison: "死毒",
     bleeding: "出血",
     action_skip: "行動不能",
     electrified: "感電",

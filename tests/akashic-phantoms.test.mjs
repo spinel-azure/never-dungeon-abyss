@@ -145,3 +145,11 @@ test('ending alone does not unlock projections or final phantoms before hearing 
   assert.equal(refreshB100FinalBoss(flags, B100_GAUNTLET_BOSS_IDS), true);
   assert.equal(cells[3][4].bossId, IDS[0]);
 });
+
+
+test('Musa crown separates concise effects from flavor and projections identify Michaela', () => {
+  const crown = getEquipmentItem('musa_crown');
+  assert.equal(crown.description, '魅了完全耐性。');
+  assert.equal(crown.flavorText, '異界の女神の加護を宿す冠。');
+  assert.ok(QUEEN_PROJECTION_MESSAGES.every(message => message.startsWith('女王ミカエラ「') && message.endsWith('」')));
+});

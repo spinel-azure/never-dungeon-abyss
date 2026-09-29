@@ -1234,7 +1234,7 @@ export function drawCellEvents(layer = "all", now = 0) {
             imageId: boss.encounterImageId,
             renderScale: boss.renderScale,
             silhouette: Boolean(
-              renderer.state?.minimapBlocked && B100_GAUNTLET_BOSS_IDS.includes(cell.bossId)
+              boss.akashicPhantom || (renderer.state?.minimapBlocked && B100_GAUNTLET_BOSS_IDS.includes(cell.bossId))
             )
           }
         });
