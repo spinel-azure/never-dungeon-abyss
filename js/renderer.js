@@ -1134,6 +1134,12 @@ export function drawCellEvents(layer = "all", now = 0) {
   if (!cells) return;
 
   const events = [];
+  const contact = state.overlayEvent;
+  if (layer !== "floor" && contact?.type === "npcContact" && contact.phase === "fading") {
+    const projected = projectContactForeground();
+    const opacity = Math.max(0, Math.min(1, 1 - (now - contact.fadeStartedAt) / contact.fadeDuration));
+    events.push({ ...projected, alpha: projected.alpha * opacity, eventKind: "npc", npc: contact.npc });
+  }
   if (layer !== "floor") {
     const roaming = renderer.getRoamingEnemyRenderState(now);
     if (roaming?.definition) {
@@ -1168,7 +1174,12 @@ export function drawCellEvents(layer = "all", now = 0) {
     for (let x = 0; x < MAP_W; x++) {
       const cell = cells[y][x];
       if(state.kind==='specialMap'&&cell.type!=='stairsUp')continue;
-      const projected = projectCellCenter(x, y);
+      // Keep contact sprites in view during the final quarter-cell of approach.
+      const approachingContact = getNpcById(cell.npc)?.contactFadeMs
+        && state.anim?.type === "move" && !state.anim.npcRetreat
+        && state.anim.toGX === x && state.anim.toGY === y
+        && Math.hypot(x + .5 - state.x, y + .5 - state.y) <= .3;
+      const projected = approachingContact ? projectContactForeground() : projectCellCenter(x, y);
       if (!projected) continue;
       const hasSprite = isSpriteEventCell(cell);
       if (hasSprite ? !isSpriteCellVisible(x, y) : !hasLineOfSightToCell(x, y)) continue;
@@ -1312,6 +1323,11 @@ function loadCharacterImage(id, src) {
   const image = new Image();
   image.src = src;
   renderer.characterImages.set(id, image);
+}
+
+function projectContactForeground() {
+  const { state } = renderer;
+  return projectWorldPoint(state.x + Math.cos(state.angle) * .3, state.y + Math.sin(state.angle) * .3);
 }
 
 function projectCellCenter(cellX, cellY) {

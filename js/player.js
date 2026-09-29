@@ -249,6 +249,13 @@ export function startLionVictoryEvent({gained}) {startOverlayEvent(createLionVic
 export function updateAnimation(now) {
   syncLionBath(state.overlayEvent);
   if(state.overlayEvent?.type === "lionEvent") updateLionEvent(state.overlayEvent,now,lionHooks());
+  const contact = state.overlayEvent;
+  if (contact?.type === "npcContact" && contact.phase === "fading"
+      && now >= contact.fadeStartedAt + contact.fadeDuration) {
+    contact.phase = "message";
+    hooks.say(contact.message);
+    hooks.onStateChanged();
+  }
   const gemini = state.overlayEvent;
   if(gemini?.act===5)updateGeminiFinal(gemini,now,hooks);
   if (gemini?.type === 'geminiEvent' && gemini.phase === 'fading' && now >= gemini.sistersFadeOutStart + 1500) {
@@ -1698,6 +1705,7 @@ function handleGeminiInput(action) {
 
 export function handleOverlayEventInput(action) {
   if (!state.overlayEvent) return false;
+  if (state.overlayEvent.type === "npcContact" && state.overlayEvent.phase === "fading") return true;
   if (state.overlayEvent.type === "trelirenTalk") return hooks.onTrelirenInput?.(action) ?? true;
   if (state.overlayEvent.type === "lionEvent") return handleLionInput(state.overlayEvent,action,lionHooks());
   if (state.overlayEvent.type === 'geminiEvent') return handleGeminiInput(action);
@@ -2078,9 +2086,14 @@ function startNpcTalkEvent(npc, fromGX, fromGY) {
     hooks.onNpcEncountered(npc);
     startOverlayEvent({
       type: "npcContact",
+      npc,
+      phase: npc.contactFadeMs ? "fading" : "message",
+      fadeStartedAt: performance.now(),
+      fadeDuration: npc.contactFadeMs || 0,
       showOverlay: false,
       message: `${npc.contactMessage || "ここに誰かがいたはずだが…？"}\n＊Aボタン：次へ`
     });
+    if (npc.contactFadeMs) hooks.say("");
     hooks.onStateChanged();
     return;
   }
@@ -2424,7 +2437,7 @@ export function startOverlayEvent(event) {
   syncLionBath(state.overlayEvent);
   state.npcAwarenessShown = false;
   hooks.cancelAutoReturn(false);
-  if (state.overlayEvent.message) hooks.say(state.overlayEvent.message);
+  if (state.overlayEvent.message && !(state.overlayEvent.type === "npcContact" && state.overlayEvent.phase === "fading")) hooks.say(state.overlayEvent.message);
   return state.overlayEvent;
 }
 

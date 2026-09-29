@@ -1118,6 +1118,15 @@ function handleQuestInput(action) {
         town.questClientDialogueIndex = 0;
         town.questClientPortrait = result.clientPortrait;
         town.questClientPortraitStartIndex = Math.max(0, Math.floor(Number(result.clientPortraitStartIndex) || 0));
+        if (result.paginateClientDialogue) {
+          const hint = "\n＊Aボタンで次へ";
+          const groups = result.clientDialogue.map(text => paginateMessageToFit({
+            element: town.messageEl, text: text.replace(/\n＊Aボタンで次へ$/, ""),
+            formatPage: page => page + hint
+          }).map(page => page + hint));
+          town.questClientPortraitStartIndex = groups.slice(0, town.questClientPortraitStartIndex).flat().length;
+          town.questClientDialogue = groups.flat();
+        }
         if (town.questClientPortraitStartIndex === 0) town.portrait.src = result.clientPortrait;
         town.portrait.alt = result.clientName || quest.client;
         town.portrait.hidden = false;
