@@ -13,7 +13,7 @@ test('export/import retains target anchoring, image assets and all audio setting
 test('every positional part follows a moving target and old parts remain screen anchored',()=>{
  for(const type of Object.keys(EFFECT_PART_TYPES)){
   const part=normalizeEffectDefinition({parts:[{type,anchor:'enemy'}]}).parts[0];
-  const wide=['shake','whiteout','blackout','blizzard','message'].includes(type);
+  const wide=['shake','whiteout','blackout','blizzard','message','backgroundImage','gaussianBlur','tvOff'].includes(type);
   assert.deepEqual(getAnchorOffset(part,{width:960,height:540},{x:700,y:180}),wide?{x:0,y:0}:{x:220,y:-90});
   assert.deepEqual(getAnchorOffset({...part,anchor:'screen'},{width:960,height:540},{x:700,y:180}),{x:0,y:0});
  }

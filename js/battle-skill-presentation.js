@@ -1,4 +1,4 @@
-import { createStageShake } from "./effects/effect-stage.js";
+import { createStageShake, createStageFilter } from "./effects/effect-stage.js";
 import { EffectEngine } from "./effects/effect-engine.js";
 import { createEffectAudioRouting } from "./audio.js";
 
@@ -70,6 +70,7 @@ export async function playBattleSkillPresentation({root,presentationId,damage,he
         part?.id?.startsWith('area_damage_') ? targets?.[Number(part.id.split('_')[2])]?.targetIndex : targetIndex),
       onFrame:time=>{if(!impacted && time>=impactTime){impacted=true;onImpact?.();}},
       onShake:shake,
+      onScreen:createStageFilter(surface||root,()=>engine.effect),
       onMessage:text=>{if(messageElement)messageElement.textContent=text??originalMessage},
       audio:routing?.options||{}
     });

@@ -66,10 +66,10 @@ test("loot and no-loot defeat paths clear the message until the revival prayer f
   const start = source.indexOf("async function completeDungeonDefeat()");
   const end = source.indexOf("async function runDefeatPresentation()", start);
   const defeat = source.slice(start, end);
-  const lootBranch = defeat.indexOf("if (character && bagHasLoot(bag))");
+  const lootBranch = defeat.indexOf("if (pending.loot)");
   const clear = defeat.indexOf('say("");');
   const prayer = defeat.indexOf("await runRevivalPrayer();");
-  const dialogue = defeat.indexOf("say(getTempleRevivalMessage(character, experienceMessage));");
+  const dialogue = defeat.indexOf('say(getTempleRevivalMessage(character, pending.experienceMessage || ""));');
   assert.ok(lootBranch >= 0 && clear > lootBranch, "both loot branches converge before the message is cleared");
   assert.ok(prayer > clear, "the prayer begins only after the previous town message is cleared");
   assert.ok(dialogue > prayer, "the keeper dialogue appears only after the prayer has finished");

@@ -5,6 +5,7 @@ import {
 } from "../data/growth.js";
 import { grantItemWithOverflow } from "../data/inventory.js";
 import {
+  createDepthReturnSettlement,
   calculateDepthReturnSettlement,
   normalizeDepthReturnSettlement
 } from "../data/experience-settlement.js";
@@ -48,6 +49,23 @@ export function calculateBattleExperienceReward(character, amount) {
   return Math.floor(baseReward * multiplier);
 }
 
+// Experience is committed on return; lodging alone updates the level.
+export function settleReturnExperience(character, returnFloor, { legacy = false } = {}) {
+  const settlement = (legacy && normalizeDepthReturnSettlement(
+    character.pendingExperienceSettlement, character.carriedExperience
+  )) || (legacy
+    ? calculateDepthReturnSettlement({ baseSettlementExp: character.carriedExperience })
+    : createDepthReturnSettlement(character, returnFloor));
+  return {
+    settlement,
+    changes: {
+      experience: normalizeExperience((Number(character.experience) || 0) + settlement.finalSettlementExp),
+      carriedExperience: 0,
+      pendingExperienceSettlement: null
+    }
+  };
+}
+
 export function resolveInnStay(character) {
   const persistentStatuses = retainPoisonStatuses(character);
   const baseSettlementExp = Math.max(
@@ -66,7 +84,8 @@ export function resolveInnStay(character) {
     isGoddessGraceEquipped: false,
     johannaBonusUnlocked
   });
-  const gainedExperience = settlement.finalSettlementExp;
+  const guildExperience = Math.max(0, Math.floor(Number(character.guildExperiencePool) || 0));
+  const gainedExperience = settlement.finalSettlementExp + guildExperience;
   const experience = normalizeExperience((Number(character.experience) || 0) + gainedExperience);
   const previousLevel = Math.max(1, Math.floor(Number(character.level) || 1));
   const level = getLevelForExperience(experience);
@@ -83,6 +102,7 @@ export function resolveInnStay(character) {
   return {
     changes: {
       experience,
+      guildExperiencePool: 0,
       carriedExperience: 0,
       pendingExperienceSettlement: null,
       level,
@@ -97,6 +117,7 @@ export function resolveInnStay(character) {
       skillIds
     },
     settlement,
+    guildExperience,
     hadPendingSettlement: Boolean(pendingSettlement),
     gainedExperience,
     levelsGained: Math.max(0, level - previousLevel),
@@ -190,9 +211,9 @@ export function resolveTemplePoisonTreatment(character) {
   return { character: next, success: true, reason: "treated", fee };
 }
 
-export function resolveDungeonDefeat(character, { preserveExperience = false } = {}) {
+export function resolveDungeonDefeat(character, { preserveExperience = false, deferRevival = false } = {}) {
   return {
-    ...createTempleRevival(character),
+    ...(deferRevival ? { hp: 0, alive: false } : createTempleRevival(character)),
     carriedExperience: preserveExperience
       ? Math.max(0, Math.floor(Number(character?.carriedExperience) || 0))
       : 0,

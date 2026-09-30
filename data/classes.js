@@ -126,6 +126,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     highestDungeonDepthReached: 1,
     gold: 0,
     experience: 0,
+    guildExperiencePool: 0,
     carriedExperience: 0,
     pendingExperienceSettlement: null,
     hp: characterClass.maxHp,
@@ -270,6 +271,7 @@ export function normalizeCharacter(character) {
     ),
     gold: Math.max(0, Math.floor(Number(character.gold) || 0)),
     experience: normalizeExperience(character.experience),
+    guildExperiencePool: Math.max(0, Math.floor(Number(character.guildExperiencePool) || 0)),
     carriedExperience: Math.max(0, Math.floor(Number(character.carriedExperience) || 0)),
     pendingExperienceSettlement: normalizeDepthReturnSettlement(
       character.pendingExperienceSettlement,

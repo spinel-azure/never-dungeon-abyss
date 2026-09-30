@@ -1,3 +1,4 @@
+import { screenState } from './effect-stage.js';
 import { EffectAudio } from "./effect-audio.js";
 import { normalizeEffectDefinition } from "./effect-schema.js";
 
@@ -9,7 +10,7 @@ const EASINGS = {
 };
 
 export class EffectEngine {
-  constructor(canvas, { transparent = false, backdrop = true, getTarget = null, onShake = null, onMessage = null, onFrame = null, audio = {} } = {}) {
+  constructor(canvas, { transparent = false, backdrop = true, getTarget = null, onShake = null, onMessage = null, onFrame = null, onScreen = null, audio = {} } = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
     this.effect = normalizeEffectDefinition();
@@ -18,7 +19,7 @@ export class EffectEngine {
     this.transparent = Boolean(transparent);
     this.backdrop = Boolean(backdrop);
     this.imageCache = new Map();
-    this.onFrame=onFrame;this.onMessage=onMessage;this.getTarget=getTarget;this.onShake=onShake;this.playGeneration=0;this.audio=new EffectAudio({getEffect:()=>this.effect,...audio});
+    this.onScreen=onScreen;this.onFrame=onFrame;this.onMessage=onMessage;this.getTarget=getTarget;this.onShake=onShake;this.playGeneration=0;this.audio=new EffectAudio({getEffect:()=>this.effect,...audio});
   }
 
   setRenderMode({ transparent = this.transparent, backdrop = this.backdrop } = {}) {
@@ -43,7 +44,7 @@ export class EffectEngine {
   }
 
   async prepare({ allowMissingImages = false } = {}) {
-    await Promise.all(this.effect.parts.filter(p=>p.enabled&&(p.type==='cutin'||(p.type==='magicCircle'&&(p.imageData||p.imageSrc)))).map(p=>{
+    await Promise.all(this.effect.parts.filter(p=>p.enabled&&(p.type==='cutin'||(p.type==='backgroundImage'&&(p.imageData||p.imageSrc))||(p.type==='magicCircle'&&(p.imageData||p.imageSrc)))).map(p=>{
       const src=p.imageData||p.imageSrc;
       if(!src){if(allowMissingImages)return;throw new Error('Missing cutin image: '+p.fileName)}
       let image=this.imageCache.get(src);
@@ -57,7 +58,7 @@ export class EffectEngine {
     this.stop(false);const generation=this.playGeneration;const rate=Math.max(.01,Number(speed)||1);
     return new Promise(resolve=>{
       const visibility=()=>{if(document.hidden)this.audio.pause()};globalThis.document?.addEventListener('visibilitychange',visibility);
-      this.finishPlayback=result=>{globalThis.document?.removeEventListener('visibilitychange',visibility);this.finishPlayback=null;this.audio.pause();this.onShake?.({x:0,y:0});onComplete?.(result);resolve(result)};
+      this.finishPlayback=result=>{globalThis.document?.removeEventListener('visibilitychange',visibility);this.finishPlayback=null;this.audio.pause();this.onShake?.({x:0,y:0});this.onScreen?.(null);onComplete?.(result);resolve(result)};
       (async()=>{
         try{
           await this.prepare();
@@ -82,7 +83,7 @@ export class EffectEngine {
   stop(reset=true) {
     this.playGeneration++;
     if(this.animationFrame)cancelAnimationFrame(this.animationFrame);
-    this.animationFrame=0;this.audio.pause();this.finishPlayback?.(false);this.onShake?.({x:0,y:0});
+    this.animationFrame=0;this.audio.pause();this.finishPlayback?.(false);this.onShake?.({x:0,y:0});this.onScreen?.(null);
     if(reset)this.seek(0);
   }
 
@@ -107,7 +108,9 @@ export class EffectEngine {
     const messages=effect.parts.filter(p=>p.enabled&&p.type==='message'&&this.time>=p.start&&this.time<p.start+p.duration);
     messages.sort((a,b)=>a.start-b.start);
     this.onMessage?.(messages.at(-1)?.text ?? null);
-    for (const part of effect.parts) this.renderPart(part);
+    for(const part of effect.parts)if(part.type==='backgroundImage')this.renderPart(part);
+    for (const part of effect.parts)if(part.type!=='backgroundImage')this.renderPart(part);
+    this.onScreen?.(screenState(effect.parts,this.time));
     ctx.restore();
   }
 
@@ -118,7 +121,11 @@ export class EffectEngine {
     this.ctx.save();
     const target = part.anchor === "enemy" ? this.getTarget?.(part) || this.renderTarget : this.renderTarget;
     const offset=getAnchorOffset(part,this.effect,target);this.ctx.translate(offset.x,offset.y);
-    if (part.type === "magicCircle" && (part.imageData || part.imageSrc)) {
+    if(part.type==='backgroundImage'){
+      const src=part.imageData||part.imageSrc;let image=this.imageCache.get(src);
+      if(src&&!image){image=new Image();image.onload=()=>this.render();image.src=src;this.imageCache.set(src,image)}
+      if(image?.complete&&image.naturalWidth){const ratio=Math.max(this.effect.width/image.naturalWidth,this.effect.height/image.naturalHeight),w=image.naturalWidth*ratio,h=image.naturalHeight*ratio;this.ctx.globalAlpha=Math.max(0,Math.min(1,part.opacity))*Math.min(1,part.fadeIn?raw*part.duration/part.fadeIn:1,part.fadeOut?(1-raw)*part.duration/part.fadeOut:1);this.ctx.drawImage(image,(this.effect.width-w)/2,(this.effect.height-h)/2,w,h)}
+    } else if (part.type === "magicCircle" && (part.imageData || part.imageSrc)) {
       this.ctx.translate(part.x,part.y);this.ctx.rotate((part.rotation||0)*Math.PI/180*progress);
       this.drawCutin({...part,fromX:0,toX:0,fromY:0,toY:0,opacity:1,fadeIn:200,fadeOut:300},progress,raw);
     } else if (part.type === "cutin") this.drawCutin(part, progress, raw);

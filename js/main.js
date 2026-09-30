@@ -152,7 +152,7 @@ import { applyBossVictory, bossLeavesRemains, createBossCombatant, getBossById, 
 import { B100_GAUNTLET_BOSS_IDS, getB100GauntletFlag } from "../data/fixed-floor-maps.js";
 import { consumeKeyItem, getKeyItem, grantKeyItem, hasKeyItem } from "../data/key-items.js";
 import { configureBattle, createPersistentBattlePlayerChanges, handleBattleInput, isBattleActive, isJireneScriptedBattleActive, openBattleItems, startBattle } from "./battle.js";
-import { awardBattleExperience, calculateBattleExperienceReward, createTempleRevival, getInnStayFee, grantEventItems, resolveDungeonDefeat, resolveInnStableStay, resolveInnStay, resolveTemplePoisonTreatment, unlockGuildRequest } from "./character-services.js";
+import { settleReturnExperience, awardBattleExperience, calculateBattleExperienceReward, createTempleRevival, getInnStayFee, grantEventItems, resolveDungeonDefeat, resolveInnStableStay, resolveInnStay, resolveTemplePoisonTreatment, unlockGuildRequest } from "./character-services.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { resolveTreasureTrap } from "../combat/resolve-trap.js";
 import { collectStats } from "../combat/collect-stats.js";
@@ -485,6 +485,7 @@ import {
   let gamepadNotificationTimer = 0;
   let trapResultTimer = 0;
   let experienceSettlementCloseCallback = null;
+  let pendingReturnPresentationRunning = false;
   let pendingLootIdentification = null;
   let firstDungeonTutorialActive = false;
   let firstDungeonTutorialReady = false;
@@ -1756,6 +1757,7 @@ import {
       return true;
     }
     if (savedLocation === "town") {
+      migrateTownExperience();
       state.treasureCompassActive = false;
       stopBgm();
       setPlayerInputEnabled(false);
@@ -1766,6 +1768,7 @@ import {
         firstTownArrivalPending: save.world?.town?.firstTownArrivalPending,
         innKeeperId: save.world?.town?.innKeeperId
       });
+      void finishReturnPresentation();
     } else {
       closeTown();
       startBgm(selectDungeonBgm());
@@ -2042,8 +2045,7 @@ import {
         messageExpanded: true,
         dialogue: [
           "ヨハンナ：今回はあたしと娘が世話になったね。疲れが溜まっていたのかねぇ…？あの娘には苦労をかけちまったよ。\n＊Aボタンで次へ",
-          "本当に感謝してるよ。ありがとうね。\n＊Aボタンで次へ",
-          "これから宿屋で経験値を精算すると、『ヨハンナボーナス』が加算されます！\n＊Aボタンで戻る"
+          "本当に感謝してるよ。ありがとうね。\n＊Aボタンで戻る"
         ],
         completionFlag: JOHANNA_RESCUE_THANKS_SEEN_FLAG
       };
@@ -4008,7 +4010,10 @@ import {
     try {
       await endingController.start({ arrival: !replay && mode === "arrival", isReplay: replay });
       return true;
-    } finally { mainEndingStarting = false; }
+    } finally {
+      mainEndingStarting = false;
+      if (!replay && worldLocation === "town") void finishReturnPresentation();
+    }
   }
 
   async function finishBattleDefeat(battle) {
@@ -4099,12 +4104,18 @@ import {
         character.cards?.deckSlots,
         "goddess_mercy"
       ) ? "女神の慈愛" : "女神の恩寵";
-      Object.assign(character, resolveDungeonDefeat(character, { preserveExperience }));
+      Object.assign(character, resolveDungeonDefeat(character, { preserveExperience, deferRevival: true }));
       bag = structuredClone(character.lootBag);
       settled = settleLootBag(character);
       character = settled.character;
       lostExperience = preserveExperience ? 0 : carriedExperience;
       preservedExperience = preserveExperience ? carriedExperience : 0;
+      const experienceResult = settleReturnExperience(character, 0);
+      Object.assign(character, experienceResult.changes);
+      character.returnPresentation = {
+        settlement: preserveExperience ? experienceResult.settlement : null,
+        revival: true
+      };
       character = recordFloorExploration(character, { depth: 0, explored: [] });
       character = beginNpcRenewal(character, `defeat-${Date.now()}`);
     }
@@ -4122,27 +4133,57 @@ import {
       : lostExperience > 0
         ? `\n持ち帰るはずだった${lostExperience}EXPを失った。`
         : "";
+    character.returnPresentation.experienceMessage = experienceMessage;
+    rememberReturnLoot(bag, settled);
     saveGame();
-    if (character && bagHasLoot(bag)) {
-      openTown({ registrationRequired: false, facilityId: "temple", mode: "facilityMenu" });
-      updateCharacterUi();
-      await new Promise(resolve => showLootIdentification(bag, settled, {
-        playBgm: false,
-        onClose: () => {
-          prepareRevivalBlackout();
-          resolve();
-        }
-      }));
-    } else {
-      prepareRevivalBlackout();
-      openTown({ registrationRequired: false, facilityId: "temple", mode: "facilityMenu" });
-      updateCharacterUi();
+    openTown({ registrationRequired: false, facilityId: "temple", mode: "facilityMenu" });
+    updateCharacterUi();
+    await finishReturnPresentation();
+  }
+
+  function migrateTownExperience() {
+    if (!character || !(character.carriedExperience > 0 || character.pendingExperienceSettlement)) return;
+    const result = settleReturnExperience(character, 0, { legacy: true });
+    Object.assign(character, result.changes);
+    character.returnPresentation ||= { settlement: result.settlement, revival: false };
+    saveGame();
+  }
+
+  async function finishReturnPresentation() {
+    const pending = character?.returnPresentation;
+    if (pendingReturnPresentationRunning) return;
+    if (!pending) { openPendingNpcRenewal(); return; }
+    pendingReturnPresentationRunning = true;
+    try {
+      if (pending.loot) {
+        await new Promise(resolve => showLootIdentification(pending.loot.bag, pending.loot.settled, {
+          playBgm: !pending.revival, onClose: resolve
+        }));
+        pending.loot = null;
+        saveGame();
+      }
+      if (pending.settlement) {
+        await new Promise(resolve => showExperienceSettlement(pending.settlement, resolve));
+        pending.settlement = null;
+        saveGame();
+      }
+      if (pending.revival) {
+        openTown({ registrationRequired: false, facilityId: "temple", mode: "facilityMenu" });
+        prepareRevivalBlackout();
+        say("");
+        await runRevivalPrayer();
+        Object.assign(character, createTempleRevival(character));
+        updateCharacterUi();
+        pending.revival = false;
+        say(getTempleRevivalMessage(character, pending.experienceMessage || ""));
+        if (worldLocation === "town") startBgm("temple");
+      }
+      character.returnPresentation = null;
+      saveGame();
+      openPendingNpcRenewal();
+    } finally {
+      pendingReturnPresentationRunning = false;
     }
-    say("");
-    await runRevivalPrayer();
-    say(getTempleRevivalMessage(character, experienceMessage));
-    if (worldLocation === "town" && getTownState().facilityId === "temple") startBgm("temple");
-    window.setTimeout(() => openPendingNpcRenewal(), 0);
   }
 
   async function runDefeatPresentation() {
@@ -4319,6 +4360,44 @@ import {
     updateCharacterUi();
     saveGame();
 
+    await presentInnExperience(result);
+    await revealInnBlackout();
+    if (result.levelsGained <= 0) {
+      say(context.keeperId === "anna_sad"
+        ? "宿屋の娘アンナ：…おはようございます…。"
+        : ["anna", "anna_happy"].includes(context.keeperId)
+          ? "宿屋の娘アンナ：よく眠れましたかっ？"
+          : "女将ヨハンナ：ゆっくり休めたかい？");
+    }
+    if (worldLocation === "town" && getTownState().facilityId === "inn") startBgm("townFacilities");
+  }
+
+  async function presentInnExperience(result) {
+    // Reuse the existing overlays inside the blackout, above its black background.
+    const settlementParent = experienceSettlementOverlay.parentNode;
+    const levelParent = levelUpEffect.parentNode;
+    sceneTransition.append(experienceSettlementOverlay, levelUpEffect);
+    try {
+      if (result.guildExperience > 0) {
+        await new Promise(resolve => {
+          showExperienceSettlement({ baseSettlementExp: result.guildExperience,
+            finalSettlementExp: result.guildExperience, source: "guild" }, resolve);
+        });
+      } else if (result.hadPendingSettlement) {
+        await new Promise(resolve => showExperienceSettlement(result.settlement, resolve));
+      }
+      if (result.levelsGained > 0) {
+        const deckBonus = result.deckCostGained > 0 ? `、特別ボーナス DECK COST+${result.deckCostGained}` : "";
+        say(`LVが上がった！HP+${result.hpGained}、SP+${result.spGained}${deckBonus}${formatLearnedSkills(result.learnedSkillIds)}`);
+        await showLevelUpEffect();
+      }
+    } finally {
+      settlementParent.append(experienceSettlementOverlay);
+      levelParent.append(levelUpEffect);
+    }
+  }
+
+  async function revealInnBlackout() {
     sceneTransition.classList.add("is-revealing");
     sceneTransition.classList.remove("is-black");
     await wait(700);
@@ -4326,31 +4405,6 @@ import {
     sceneTransition.hidden = true;
     document.body.classList.remove("scene-transition-active");
     sceneTransitionRunning = false;
-
-    const finishPresentation = async () => {
-      const deckBonus = result.deckCostGained > 0
-        ? `、特別ボーナス DECK COST+${result.deckCostGained}`
-        : "";
-      if (result.levelsGained > 0) {
-        const levelUpPresentation = showLevelUpEffect();
-        say(`LVが上がった！HP+${result.hpGained}、SP+${result.spGained}${deckBonus}${formatLearnedSkills(result.learnedSkillIds)}`);
-        await levelUpPresentation;
-      } else {
-        say(context.keeperId === "anna_sad"
-          ? "宿屋の娘アンナ：…おはようございます…。"
-          : ["anna", "anna_happy"].includes(context.keeperId)
-            ? "宿屋の娘アンナ：よく眠れましたかっ？"
-            : "女将ヨハンナ：ゆっくり休めたかい？");
-      }
-      if (worldLocation === "town" && getTownState().facilityId === "inn") {
-        startBgm("townFacilities");
-      }
-    };
-    if (result.hadPendingSettlement) {
-      showExperienceSettlement(result.settlement, finishPresentation);
-    } else {
-      finishPresentation();
-    }
   }
 
   async function restAtHealingFountain() {
@@ -4385,6 +4439,13 @@ import {
     requestAnimationFrame(() => sceneTransition.classList.add("is-black"));
     await Promise.all([wait(6000), playSeSequence("goodNight", 1)]);
 
+    const result = resolveInnStableStay(character);
+    Object.assign(character, result.changes);
+    character.adventureStats = recordInnStay(character.adventureStats);
+    updateCharacterUi();
+    saveGame();
+    await presentInnExperience(result);
+
     const stableBackground = document.getElementById("townBackground");
     const stablePortrait = document.getElementById("townPortrait");
     const facilityBadge = document.getElementById("townFacilityName");
@@ -4412,29 +4473,7 @@ import {
     document.body.classList.remove("scene-transition-active");
     sceneTransitionRunning = false;
 
-    const result = resolveInnStableStay(character);
-    Object.assign(character, result.changes);
-    character.adventureStats = recordInnStay(character.adventureStats);
-    updateCharacterUi();
-    saveGame();
-
-    const finishPresentation = async () => {
-      const deckBonus = result.deckCostGained > 0
-        ? `、特別ボーナス DECK COST+${result.deckCostGained}`
-        : "";
-      if (result.levelsGained > 0) {
-        const levelUpPresentation = showLevelUpEffect();
-        say(`LVが上がった！HP+${result.hpGained}、SP+${result.spGained}${deckBonus}${formatLearnedSkills(result.learnedSkillIds)}`);
-        await levelUpPresentation;
-      } else {
-        say("馬小屋で夜露をしのぎ、少し身体を休めた。");
-      }
-    };
-    if (result.hadPendingSettlement) {
-      showExperienceSettlement(result.settlement, finishPresentation);
-    } else {
-      finishPresentation();
-    }
+    if (result.levelsGained <= 0) say("馬小屋で夜露をしのぎ、少し身体を休めた。");
   }
 
   function showExperienceSettlement(settlement, onClose = () => {}) {
@@ -4520,6 +4559,7 @@ import {
   }
 
   async function enterDungeonFromTown() {
+    migrateTownExperience();
     resetGeminiRetry(character);
     if (!character) {
       openTown({ registrationRequired: true, facilityId: "guild" });
@@ -4556,6 +4596,7 @@ import {
   async function enterFloorFromTransfer(depth = 10) {
     const destination = Math.max(1, Math.floor(Number(depth) || 0));
     if (!isTransferDestinationUnlocked(character, destination)) return false;
+    migrateTownExperience();
     resetGeminiRetry(character);
     setPlayerInputEnabled(false);
     await runSceneTransition({
@@ -4658,10 +4699,9 @@ import {
       character = invalidateMarathonChallenge(character);
       character = invalidateLongMarchChallenge(character);
       character = invalidateFinalLongMarchChallenge(character);
-      character.pendingExperienceSettlement = createDepthReturnSettlement(
-        character,
-        returnFloor
-      );
+      const experienceResult = settleReturnExperience(character, returnFloor);
+      Object.assign(character, experienceResult.changes);
+      character.returnPresentation = { settlement: experienceResult.settlement, revival: false };
       bag = structuredClone(character.lootBag);
       settled = settleLootBag(character);
       character = settled.character;
@@ -4678,13 +4718,18 @@ import {
     cancelAutoReturn(false);
     setPlayerInputEnabled(false);
     openTown(ending ? { registrationRequired: false } : { registrationRequired: !character, facilityId: "dungeon", mode: "dungeonEntrance" });
-    if (ending) return;
-    if (character && bagHasLoot(bag)) {
-      showLootIdentification(bag, settled, { onClose: () => openPendingNpcRenewal() });
-    } else {
-      window.setTimeout(() => openPendingNpcRenewal(), 0);
-    }
+    rememberReturnLoot(bag, settled);
     saveGame();
+    if (ending) return;
+    void finishReturnPresentation();
+  }
+
+  function rememberReturnLoot(bag, settled) {
+    if (!character?.returnPresentation || !bagHasLoot(bag)) return;
+    character.returnPresentation.loot = {
+      bag,
+      settled: { results: settled.results, cardResults: settled.cardResults, equipmentResults: settled.equipmentResults }
+    };
   }
 
   function bagHasLoot(bag) {
@@ -5299,7 +5344,7 @@ import {
     if (action === "pageLeft") action = "left";
     if (action === "pageRight") action = "right";
     if (handleItemOverlayInput(action) || handleSkillOverlayInput(action) || handleBattleInput(action)) return true;
-    if (sceneTransitionRunning || handleLootIdentifyInput(action) || handleExperienceSettlementInput(action) || handleTownInput(action)) return true;
+    if (handleExperienceSettlementInput(action) || sceneTransitionRunning || handleLootIdentifyInput(action) || handleTownInput(action)) return true;
     if (["up", "down", "left", "right"].includes(action)) {
       if ([4,5].includes(state.overlayEvent?.act) && handleOverlayEventInput(action)) return true;
       if (handleOverlayEventInput("dismiss") || handleMenuInput(action)) return true;
@@ -5375,7 +5420,7 @@ import {
     handleOverlayInput: action => endingController.handleAction(action) || michaelaRestorationController.handleAction(action) || endingSequenceActive || handleBlockingTutorialInput(action) || handleOverlayEventInput(action),
     handleBattleInput: action => endingController.handleAction(action) || michaelaRestorationController.handleAction(action) || endingSequenceActive || handleBlockingTutorialInput(action) || handleBattleInput(action),
     handleTownInput: action => (
-      endingController.handleAction(action) || michaelaRestorationController.handleAction(action) || endingSequenceActive || handleBlockingTutorialInput(action) || sceneTransitionRunning || handleLootIdentifyInput(action) || handleExperienceSettlementInput(action) || handleTownInput(action)
+      endingController.handleAction(action) || michaelaRestorationController.handleAction(action) || endingSequenceActive || handleBlockingTutorialInput(action) || handleExperienceSettlementInput(action) || sceneTransitionRunning || handleLootIdentifyInput(action) || handleTownInput(action)
     ),
     handleDoorInput: openDoorAhead,
     onUserOperation: recordUserInput,

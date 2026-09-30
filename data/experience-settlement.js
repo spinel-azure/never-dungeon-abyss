@@ -1,7 +1,7 @@
 import { DEEP_FLOOR_PROOF_CARD_ID, GODDESS_GRACE_CARD_ID, GODDESS_MERCY_CARD_ID } from "./cards.js";
 
 export const DEPTH_BONUS_DIVISOR = 200;
-export const JOHANNA_BONUS_RATE = 0.1;
+export const JOHANNA_BONUS_RATE = 0;
 
 export function calculateDepthReturnSettlement({
   baseSettlementExp = 0,
@@ -23,7 +23,7 @@ export function calculateDepthReturnSettlement({
   const depthBonusExp = goddessEquipped
     ? 0
     : Math.floor(base * depthBonusRate);
-  const johannaUnlocked = Boolean(johannaBonusUnlocked);
+  const johannaUnlocked = false; // Reward retired; retain legacy quest flags.
   const johannaBonusRate = johannaUnlocked ? JOHANNA_BONUS_RATE : 0;
   const johannaBonusExp = johannaUnlocked
     ? Math.floor(base * johannaBonusRate)
@@ -89,7 +89,9 @@ export function formatDepthReturnSettlement(settlement) {
   const lines = [
     `獲得経験値　　　　${value(settlement.baseSettlementExp)}`
   ];
-  if (settlement.isGoddessGraceEquipped) {
+  if (settlement.source === "guild") {
+    lines[0] = `依頼報酬経験値　　${value(settlement.baseSettlementExp)}`;
+  } else if (settlement.isGoddessGraceEquipped) {
     lines.push("深層帰還ボーナス　適用なし");
     lines.push(settlement.goddessProtectionName === "女神の慈愛"
       ? "女神の慈愛セット中"

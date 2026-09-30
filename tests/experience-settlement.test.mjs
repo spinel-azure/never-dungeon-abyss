@@ -70,7 +70,7 @@ test("settlement breakdown distinguishes normal bonus from Goddess suppression",
   assert.doesNotMatch(goddess, /－250/);
 });
 
-test("Johanna bonus adds ten percent of base experience with floor rounding", () => {
+test("retired Johanna bonus adds nothing even with legacy flags", () => {
   const zero = calculateDepthReturnSettlement({
     baseSettlementExp: 0,
     returnFloor: 80,
@@ -84,17 +84,17 @@ test("Johanna bonus adds ten percent of base experience with floor rounding", ()
     returnFloor: 0,
     johannaBonusUnlocked: true
   });
-  assert.equal(rounded.johannaBonusRate, 0.1);
-  assert.equal(rounded.johannaBonusExp, 1);
-  assert.equal(rounded.finalSettlementExp, 20);
+  assert.equal(rounded.johannaBonusRate, 0);
+  assert.equal(rounded.johannaBonusExp, 0);
+  assert.equal(rounded.finalSettlementExp, 19);
 
   const formatted = formatDepthReturnSettlement(rounded);
-  assert.match(formatted, /ヨハンナボーナス　＋10％/);
-  assert.match(formatted, /ヨハンナ加算経験値　1/);
-  assert.match(formatted, /精算経験値　　　　20/);
+  assert.doesNotMatch(formatted, /ヨハンナボーナス/);
+  assert.doesNotMatch(formatted, /ヨハンナ加算経験値/);
+  assert.match(formatted, /精算経験値　　　　19/);
 });
 
-test("Johanna bonus is independent of Deep Floor Proof and Goddess protection", () => {
+test("retired Johanna bonus preserves Deep Floor Proof and Goddess rules", () => {
   const initial = {
     ...createInitialCharacter({ name: "TEST", job: "priest" }),
     carriedExperience: 10_000,
@@ -108,8 +108,8 @@ test("Johanna bonus is independent of Deep Floor Proof and Goddess protection", 
   };
   const proofSettlement = createDepthReturnSettlement(proofCharacter, 80);
   assert.equal(proofSettlement.depthBonusExp, 5_000);
-  assert.equal(proofSettlement.johannaBonusExp, 1_000);
-  assert.equal(proofSettlement.finalSettlementExp, 16_000);
+  assert.equal(proofSettlement.johannaBonusExp, 0);
+  assert.equal(proofSettlement.finalSettlementExp, 15_000);
 
   const graceGrant = grantCard(proofCharacter.cards, GODDESS_GRACE_CARD_ID, 1, proofCharacter.deckCost);
   const protectedCharacter = {
@@ -118,11 +118,11 @@ test("Johanna bonus is independent of Deep Floor Proof and Goddess protection", 
   };
   const protectedSettlement = createDepthReturnSettlement(protectedCharacter, 80);
   assert.equal(protectedSettlement.depthBonusExp, 0);
-  assert.equal(protectedSettlement.johannaBonusExp, 1_000);
-  assert.equal(protectedSettlement.finalSettlementExp, 11_000);
+  assert.equal(protectedSettlement.johannaBonusExp, 0);
+  assert.equal(protectedSettlement.finalSettlementExp, 10_000);
 });
 
-test("unlocking Johanna bonus after return updates pending settlement and settles once", () => {
+test("legacy Johanna completion does not change pending settlement", () => {
   const returned = {
     ...createInitialCharacter({ name: "TEST", job: "warrior" }),
     carriedExperience: 10_000
@@ -139,8 +139,8 @@ test("unlocking Johanna bonus after return updates pending settlement and settle
   };
   const first = resolveInnStay(unlocked);
   assert.equal(first.settlement.depthBonusExp, 4_000);
-  assert.equal(first.settlement.johannaBonusExp, 1_000);
-  assert.equal(first.gainedExperience, 15_000);
+  assert.equal(first.settlement.johannaBonusExp, 0);
+  assert.equal(first.gainedExperience, 14_000);
 
   const settled = { ...unlocked, ...first.changes };
   const second = resolveInnStay(settled);
@@ -258,7 +258,7 @@ test("Deep Floor Proof settlement survives the protected save and load path", ()
   assert.equal(resolveInnStay(loaded).gainedExperience, 15_000);
 });
 
-test("Johanna bonus is restored without duplication through save normalization", () => {
+test("save normalization retires Johanna bonus without removing its flag", () => {
   const storage = new Map();
   globalThis.localStorage = {
     getItem: key => storage.get(key) ?? null,
@@ -286,12 +286,12 @@ test("Johanna bonus is restored without duplication through save normalization",
   assert.equal(writeGame(snapshot, "auto"), true);
   const loaded = normalizeCharacter(loadGame("auto").character);
   assert.equal(loaded.pendingExperienceSettlement.depthBonusExp, 4_000);
-  assert.equal(loaded.pendingExperienceSettlement.johannaBonusExp, 1_000);
-  assert.equal(loaded.pendingExperienceSettlement.finalSettlementExp, 15_000);
+  assert.equal(loaded.pendingExperienceSettlement.johannaBonusExp, 0);
+  assert.equal(loaded.pendingExperienceSettlement.finalSettlementExp, 14_000);
 
   const normalizedAgain = normalizeCharacter(structuredClone(loaded));
-  assert.equal(normalizedAgain.pendingExperienceSettlement.finalSettlementExp, 15_000);
-  assert.equal(resolveInnStay(normalizedAgain).gainedExperience, 15_000);
+  assert.equal(normalizedAgain.pendingExperienceSettlement.finalSettlementExp, 14_000);
+  assert.equal(resolveInnStay(normalizedAgain).gainedExperience, 14_000);
 });
 
 test("Goddess's Grace settlement effect is locked when returning from the dungeon", () => {

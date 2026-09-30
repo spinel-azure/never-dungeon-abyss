@@ -466,8 +466,6 @@ try {
     await pressA(page, touch);
     assert.match(await page.locator("#message").textContent(), /本当に感謝してるよ/u);
     await pressA(page, touch);
-    assert.match(await page.locator("#message").textContent(), /ヨハンナボーナス/u);
-    await pressA(page, touch);
     const afterThanks = await page.evaluate(() => quest031MainQa.state());
     assert.equal(afterThanks.eventFlags.quest_031_johanna_thanks_seen, true);
     assert.equal(afterThanks.eventFlags.johanna_bonus_unlocked, true);
@@ -483,11 +481,10 @@ try {
     assert.match(settlementText, /獲得経験値\s+10,000/u);
     assert.match(settlementText, /深層帰還ボーナス\s+＋40％/u);
     assert.match(settlementText, /ボーナス経験値\s+4,000/u);
-    assert.match(settlementText, /ヨハンナボーナス\s+＋10％/u);
-    assert.match(settlementText, /ヨハンナ加算経験値\s+1,000/u);
-    assert.match(settlementText, /精算経験値\s+15,000/u);
+    assert.doesNotMatch(settlementText, /ヨハンナボーナス/u);
+    assert.match(settlementText, /精算経験値\s+14,000/u);
     const settledState = await page.evaluate(() => quest031MainQa.state());
-    assert.equal(settledState.experience, 1_615_000);
+    assert.equal(settledState.experience, 1_614_000);
     assert.equal(settledState.carriedExperience, 0);
     assert.equal(settledState.pendingExperienceSettlement, null);
     assert.equal((await page.evaluate(() => quest031MainQa.town())).innKeeperId, "johanna");
