@@ -1,3 +1,4 @@
+import { getGuildExperienceReward, normalizeGuildExperienceRewardIds, grantGuildQuestExperience } from "./guild-experience.js";
 import { getEndgameQuestProgress } from "./endgame-quests.js";
 import { grantCard } from "./deck.js";
 import { grantEquipmentInstance } from "./equipment-inventory.js";
@@ -882,7 +883,7 @@ export const QUESTS = Object.freeze([
     prerequisiteQuestIds:Object.freeze(['guild_034']),available:true,
     reportMessage:'キルケ「まったく、おぬしは危なっかしくて見ておれん。これでも身につけておくのじゃ。」'
   })
-]);
+].map(quest => Object.freeze({ ...quest, reward: Object.freeze({ ...quest.reward, experience: getGuildExperienceReward(quest.id), label: `${quest.reward.label}／${getGuildExperienceReward(quest.id).toLocaleString("ja-JP")} EXP` }) })));
 
 export function recordQuestBeeswax(character, amount = 1) {
   const progress = getQuestProgress(character, BEESWAX_COLLECTION_QUEST_ID);
@@ -1004,7 +1005,7 @@ export function normalizeQuestState(candidate) {
   const completedQuestIds = Array.isArray(candidate?.completedQuestIds)
     ? [...new Set(candidate.completedQuestIds.filter(id => getQuestById(id)))]
     : [];
-  return { active, completedQuestIds };
+  return { active, completedQuestIds, experienceRewardQuestIds: normalizeGuildExperienceRewardIds(candidate?.experienceRewardQuestIds) };
 }
 
 export function getQuestProgress(character, questId) {
@@ -1513,9 +1514,11 @@ export function reportQuest(character, questId) {
       }
     };
   }
+  const experienceReward = grantGuildQuestExperience(next, [questId]);
   return {
-    character: next,
+    character: experienceReward.character,
     accepted: true,
+    experienceReward,
     rewardCardId,
     rewardCardIds,
     rewardEquipmentId,

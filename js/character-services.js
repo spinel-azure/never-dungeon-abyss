@@ -118,6 +118,7 @@ export function resolveInnStay(character) {
     },
     settlement,
     guildExperience,
+    guildExperienceApplied: Math.max(0, experience - normalizeExperience((Number(character.experience) || 0) + settlement.finalSettlementExp)),
     hadPendingSettlement: Boolean(pendingSettlement),
     gainedExperience,
     levelsGained: Math.max(0, level - previousLevel),

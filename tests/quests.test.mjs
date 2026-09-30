@@ -115,7 +115,7 @@ function unlockB2F(character) {
 test("quest state is normalized into character saves", () => {
   const character = createInitialCharacter({ name: "TEST", job: "warrior" });
   assert.equal(character.gold, 0);
-  assert.deepEqual(character.quests, { active: {}, completedQuestIds: [] });
+  assert.deepEqual(character.quests, { active: {}, completedQuestIds: [], experienceRewardQuestIds: [] });
   const normalized = normalizeCharacter({
     ...character,
     quests: { active: { [QUEST_ID]: { progress: 999 } } }
@@ -413,7 +413,7 @@ test("reporting a completed quest grants the C-rarity AGI card once", () => {
 test("invalid quest entries are discarded during normalization", () => {
   assert.deepEqual(
     normalizeQuestState({ active: { invalid: { progress: 3 } }, completedQuestIds: ["invalid"] }),
-    { active: {}, completedQuestIds: [] }
+    { active: {}, completedQuestIds: [], experienceRewardQuestIds: [] }
   );
 });
 

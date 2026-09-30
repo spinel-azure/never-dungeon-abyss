@@ -42,7 +42,7 @@ test("quest 033 copy, event room, client scene, and Virgo reward match the speci
   assert.ok(quest.description.every(line => Array.from(line).length <= 23));
   assert.deepEqual(quest.prerequisiteQuestIds, ["guild_030"]);
   assert.deepEqual(quest.reward, {
-    type: "card", label: "デッキカード×1", amount: 1, cardId: "zodiac_virgo"
+    type: "card", label: "デッキカード×1／30,000 EXP", experience: 30000, amount: 1, cardId: "zodiac_virgo"
   });
   const room = getSpecialRoomDefinition(95);
   assert.equal(room.content.type, "keyItemPickup");

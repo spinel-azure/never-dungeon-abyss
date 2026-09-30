@@ -91,6 +91,7 @@ export function formatDepthReturnSettlement(settlement) {
   ];
   if (settlement.source === "guild") {
     lines[0] = `依頼報酬経験値　　${value(settlement.baseSettlementExp)}`;
+    if (settlement.finalSettlementExp < settlement.baseSettlementExp) lines.push("経験値上限により制限");
   } else if (settlement.isGoddessGraceEquipped) {
     lines.push("深層帰還ボーナス　適用なし");
     lines.push(settlement.goddessProtectionName === "女神の慈愛"

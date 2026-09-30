@@ -1,3 +1,4 @@
+import { grantGuildQuestExperience, formatGuildExperienceReceipt } from "../data/guild-experience.js";
 import { isAkashicRematchUnlocked, AKASHIC_PHANTOM_IDS, QUEEN_PROJECTION_MESSAGES } from "../data/akashic-phantoms.js";
 import { getKirkeFinalDialogue } from "../data/endgame-quests.js";
 import {configureSpecialMapHost,getSpecialMapContext,getSpecialMapBgmKey} from './special-map/context.js';
@@ -1250,6 +1251,14 @@ import {
     onOpenPurchaseInventory: openShopPurchaseInventory,
     onEnterShop: enterShop,
     onEnterInn: enterInn,
+    onEnterGuild: () => {
+      const receipt = grantGuildQuestExperience(character);
+      if (!receipt.ids.length) return null;
+      character = receipt.character;
+      updateCharacterUi();
+      saveGame();
+      return { message: formatGuildExperienceReceipt(receipt, { compensation: true }) };
+    },
     getShopStockState: () => getShopStockState(character),
     onViewShopCategory: viewShopCategory,
     onWithdrawItem: withdrawTownItem,
@@ -2338,7 +2347,7 @@ import {
         eventRewardCardId
       });
     }, 0);
-    return { ...result, character, eventRewardCardId, message: result.reportMessage };
+    return { ...result, character, eventRewardCardId, message: result.reportMessage, experienceMessage: formatGuildExperienceReceipt(result.experienceReward) };
   }
 
   async function showGuildQuestRewardSequence({
@@ -4381,7 +4390,7 @@ import {
       if (result.guildExperience > 0) {
         await new Promise(resolve => {
           showExperienceSettlement({ baseSettlementExp: result.guildExperience,
-            finalSettlementExp: result.guildExperience, source: "guild" }, resolve);
+            finalSettlementExp: result.guildExperienceApplied, source: "guild" }, resolve);
         });
       } else if (result.hadPendingSettlement) {
         await new Promise(resolve => showExperienceSettlement(result.settlement, resolve));

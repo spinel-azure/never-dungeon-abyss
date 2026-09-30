@@ -179,6 +179,7 @@ const town = {
   onOpenPurchaseInventory: () => {},
   onEnterShop: () => null,
   onEnterInn: () => null,
+  onEnterGuild: () => null,
   getShopStockState: () => ({ newCategories: {} }),
   onViewShopCategory: () => {},
   onWithdrawItem: () => null,
@@ -1162,7 +1163,9 @@ function handleQuestInput(action) {
       if (quest?.id === "guild_035" && result.message) {
         town.portrait.src = "images/npc/NPC_23.avif";
         town.portrait.alt = "キルケ";
-        startCompactTalk({ message: result.message });
+        startCompactTalk({ message: [result.message, result.experienceMessage].filter(Boolean).join("\n") });
+      } else if (result.experienceMessage) {
+        startCompactTalk({ message: `${town.messageEl.textContent}\n${result.experienceMessage}` });
       }
     } else {
       openGuildQuestList("report");
@@ -1802,6 +1805,10 @@ function renderFacility() {
     requestAnimationFrame(() => {
       if (town.active && town.mode === "registration") focusRegistrationControl(0);
     });
+  }
+  if (facility.id === "guild" && !showRegistration) {
+    const notice = town.onEnterGuild();
+    if (notice?.message) startCompactTalk(notice);
   }
   town.onStateChanged();
 }

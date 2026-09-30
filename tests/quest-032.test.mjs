@@ -69,7 +69,7 @@ test("quest 032 copy, necklace, finale dialogue, and Vital Surge reward match th
   assert.equal(quest.objectiveLabel, "女王の影を見つける");
   assert.ok(quest.description.every(line => Array.from(line).length <= 23));
   assert.deepEqual(quest.reward, {
-    type: "card", label: "デッキカード×1", amount: 1, cardId: "legendary_vital_surge"
+    type: "card", label: "デッキカード×1／40,000 EXP", experience: 40000, amount: 1, cardId: "legendary_vital_surge"
   });
   assert.equal(getCardById("legendary_vital_surge").nameJa, "生命躍動");
   assert.equal(getKeyItem("queen_necklace").name, "女王の首飾り");

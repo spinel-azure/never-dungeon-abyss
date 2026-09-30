@@ -67,7 +67,7 @@ test("quest 024 copy, earring, reward, and finale dialogue match the specificati
   assert.equal(quest.title, "女王の影を追え――その2");
   assert.equal(quest.objectiveLabel, "砂漠区域で女王の影を見つける");
   assert.ok(quest.description.every(line => Array.from(line).length <= 23));
-  assert.deepEqual(quest.reward, { type: "card", label: "デッキカード×1", amount: 1, cardId: "sr_mirage" });
+  assert.deepEqual(quest.reward, { type: "card", label: "デッキカード×1／12,000 EXP", experience: 12000, amount: 1, cardId: "sr_mirage" });
   assert.equal(getKeyItem("queen_earring").name, "女王のイヤリング");
   assert.match(playerSource, /どこにいっても暑いにゃあ/);
   assert.match(playerSource, /「女王のイヤリング」を手に入れた！/);

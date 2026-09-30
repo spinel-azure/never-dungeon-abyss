@@ -44,7 +44,7 @@ test("quest 030 uses the requested copy and grants Life Booster plus forty thous
   assert.ok(quest.description.every(line => Array.from(line).length <= 23));
   assert.deepEqual(quest.prerequisiteQuestIds, ["guild_029"]);
   assert.deepEqual(quest.reward, {
-    type: "card", label: "デッキカード×1", amount: 1,
+    type: "card", label: "デッキカード×1／45,000 EXP", experience: 45000, amount: 1,
     cardId: "legendary_life_booster", bonusGold: 40000
   });
 

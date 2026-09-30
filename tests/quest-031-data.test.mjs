@@ -76,7 +76,7 @@ test("quest 031 has the requested unique paper and unlocks only after Anna expla
   assert.equal(quest.objectiveLabel, "ヨハンナの薬をアンナに届ける");
   assert.deepEqual(quest.prerequisiteQuestIds, [MAERCHENTIERE_QUEST_ID]);
   assert.deepEqual(quest.reward, {
-    type: "card", label: "デッキカード×1", amount: 1, cardId: RETURN_FAVOR_CARD_ID
+    type: "card", label: "デッキカード×1／18,000 EXP", experience: 18000, amount: 1, cardId: RETURN_FAVOR_CARD_ID
   });
   assert.deepEqual(quest.description, [
     "わたし、宿屋の娘アンナです。おかあさんの具合が",
