@@ -340,7 +340,7 @@ test("equipment bonuses are included in combat stats", () => {
 test("detail status derives current character percentages", () => {
   const warrior = deriveDetailStats(createInitialCharacter({ name: "TEST", job: "warrior" }));
   assert.deepEqual(warrior, {
-    physicalAttack: 12.5,
+    physicalAttack: 17,
     spellAttack: 1,
     physicalDamage: 100,
     spellDamage: 100,
@@ -365,7 +365,7 @@ test("detail status attack power includes weapon and equipment stats", () => {
 test("detail status includes the dagger DEX damage contribution", () => {
   const thief = createInitialCharacter({ name: "TEST", job: "thief" });
   const stats = collectStats(thief);
-  assert.equal(deriveDetailStats(thief).physicalAttack, 5 + stats.str * 0.5 + stats.dex * 0.25);
+  assert.equal(deriveDetailStats(thief).physicalAttack, 5 + stats.str + stats.dex * 0.25);
 });
 
 test("collected main stats are capped at 30", () => {

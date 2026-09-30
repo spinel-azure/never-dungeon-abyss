@@ -12,6 +12,7 @@ export { getPlayerWeaponElement } from "./weapon-element.js";
 import { ELEMENT_LABELS } from "./item-elements.js";
 import { collectStats } from "./collect-stats.js";
 import { createNormalAttack, createSkillAttack } from "./create-attack.js";
+import { preparePlayerPhysicalAttack } from "./player-physical-attack.js";
 import { calculatePhysicalHitRate, resolvePhysicalAttack } from "./resolve-physical-attack.js";
 import { resolveSpell } from "./resolve-spell.js";
 import { resolveHealing } from "./resolve-healing.js";
@@ -1413,7 +1414,8 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
   }
   const result = action.actionType === "spell"
     ? resolveSpell({ attacker: actorStats, defender: targetStats, spell: action, rng })
-    : resolvePhysicalAttack({ attacker: actorStats, defender: targetStats, attack: action, rng });
+    : resolvePhysicalAttack({ attacker: actorStats, defender: targetStats,
+      attack: actorSide === "player" ? preparePlayerPhysicalAttack(action, actorStats, actor.level) : action, rng });
   const reduction = action.actionType === "physicalAttack"
     ? Math.max(
       getPhysicalDamageReduction(target.statuses),

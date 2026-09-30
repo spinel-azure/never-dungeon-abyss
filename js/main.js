@@ -4367,7 +4367,7 @@ import {
         ? "宿屋の娘アンナ：…おはようございます…。"
         : ["anna", "anna_happy"].includes(context.keeperId)
           ? "宿屋の娘アンナ：よく眠れましたかっ？"
-          : "女将ヨハンナ：ゆっくり休めたかい？");
+          : "女将ヨハンナ：ゆっくりと休めたかい？疲れたらいつでもおいで。");
     }
     if (worldLocation === "town" && getTownState().facilityId === "inn") startBgm("townFacilities");
   }
@@ -4482,6 +4482,19 @@ import {
       return;
     }
     experienceSettlementDetail.textContent = formatDepthReturnSettlement(settlement);
+    let notice = experienceSettlementOverlay.querySelector(".experience-settlement-notice");
+    if (!notice) {
+      notice = document.createElement("span");
+      notice.className = "experience-settlement-notice";
+      notice.textContent = "＊ 宿屋に泊まる事でレベルアップ可能です ＊";
+      const prompt = document.createElement("span");
+      prompt.className = "experience-settlement-prompt";
+      prompt.textContent = "＊Aボタンで次へ";
+      experienceSettlementOverlay.append(notice, prompt);
+    }
+    notice.hidden = !(character && character.level < MAX_LEVEL
+      && character.experience >= getNextLevelExperience(character.level));
+    experienceSettlementOverlay.classList.remove("is-dismissing");
     experienceSettlementCloseCallback = onClose;
     experienceSettlementOverlay.hidden = false;
     experienceSettlementOverlay.focus({ preventScroll: true });
@@ -4491,16 +4504,21 @@ import {
     if (!experienceSettlementOverlay || experienceSettlementOverlay.hidden) return false;
     event?.preventDefault();
     event?.stopImmediatePropagation();
-    experienceSettlementOverlay.hidden = true;
+    if (experienceSettlementOverlay.classList.contains("is-dismissing")) return true;
+    experienceSettlementOverlay.classList.add("is-dismissing");
     const onClose = experienceSettlementCloseCallback;
-    experienceSettlementCloseCallback = null;
-    onClose?.();
+    setTimeout(() => {
+      experienceSettlementOverlay.hidden = true;
+      experienceSettlementOverlay.classList.remove("is-dismissing");
+      experienceSettlementCloseCallback = null;
+      onClose?.();
+    }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 650);
     return true;
   }
 
   function handleExperienceSettlementInput(action) {
     if (!experienceSettlementOverlay || experienceSettlementOverlay.hidden) return false;
-    if (action === "confirm" || action === "cancel") dismissExperienceSettlement();
+    if (action === "confirm") dismissExperienceSettlement();
     return true;
   }
 

@@ -3,6 +3,7 @@ import { COMBAT_CONFIG, clamp } from "./combat-config.js";
 import { getEquipmentItem } from "../data/equipment.js";
 import { getWeapon, getWeaponType } from "../data/weapons.js";
 import { createNormalAttack } from "./create-attack.js";
+import { preparePlayerPhysicalAttack } from "./player-physical-attack.js";
 
 export function deriveDetailStats(character = {}) {
   const stats = collectStats(character);
@@ -11,7 +12,8 @@ export function deriveDetailStats(character = {}) {
     ? getWeapon(weaponId, character.equipment?.rightArmEnhancement || 0)
     : getEquipmentItem(weaponId, "rightArmId");
   const weaponType = getWeaponType(weapon?.type);
-  const normalAttack = createNormalAttack({ weapon, skillIds: character.skillIds || [] });
+  const normalAttack = preparePlayerPhysicalAttack(
+    createNormalAttack({ weapon, skillIds: character.skillIds || [] }), stats, character.level);
   const normalAttackStatId = normalAttack.attackStat;
   const normalAttackStat = normalAttackStatId === "int" ? stats.int : stats.str;
   const normalAttackStatMultiplier = Number.isFinite(Number(normalAttack.attackStatMultiplier))
@@ -19,7 +21,7 @@ export function deriveDetailStats(character = {}) {
     : COMBAT_CONFIG.strengthMultiplier;
   return {
     physicalAttack: rounded(
-      numeric(weapon?.attack)
+      numeric(normalAttack.weapon?.attack)
         + normalAttackStat * normalAttackStatMultiplier
         + normalAttack.additionalAttackStats.reduce((total, addition) => (
           total + numeric(stats[addition.stat]) * numeric(addition.multiplier)

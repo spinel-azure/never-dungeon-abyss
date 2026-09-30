@@ -144,3 +144,11 @@ body.layout-mobile .guild-quest-entry{padding-inline:3px;font-size:10px;line-hei
 .town-talk-body{display:block;height:2.7em;overflow:hidden;white-space:pre-wrap}
 .town-talk-hint{display:block;height:1.35em;white-space:nowrap}
 body.layout-mobile .message.town-compact-talk,body.layout-tablet .message.town-compact-talk{height:calc(1.35em * 3 + 18px)!important;max-height:calc(1.35em * 3 + 18px)}
+.experience-settlement-overlay .experience-settlement-notice{color:#ffff00;font-size:clamp(12px,2.4vw,25px);text-align:center;white-space:normal;animation:settlement-notice-pulse 2.6s ease-in-out infinite}
+.experience-settlement-overlay .experience-settlement-notice[hidden]{display:none}
+.experience-settlement-overlay .experience-settlement-prompt{font-size:clamp(13px,1.8vw,20px);text-align:center}
+.experience-settlement-overlay.is-dismissing{animation:settlement-dismiss .65s ease-in forwards}
+@keyframes settlement-notice-pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes settlement-dismiss{to{filter:blur(18px);opacity:0}}
+@media(prefers-reduced-motion:reduce){.experience-settlement-overlay .experience-settlement-notice,.experience-settlement-overlay.is-dismissing{animation:none}}
+@media(max-width:700px){.experience-settlement-overlay{gap:6px;padding:8px}.experience-settlement-overlay strong{font-size:clamp(24px,7.5vw,40px)}#experienceSettlementDetail{font-size:clamp(13px,3.6vw,22px);line-height:1.3}.experience-settlement-overlay .experience-settlement-notice{font-size:clamp(11px,3vw,18px)}}

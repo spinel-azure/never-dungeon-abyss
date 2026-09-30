@@ -51,9 +51,32 @@ for(const [label,width,height] of [['pc',1280,900],['mobile',390,844]]) {
  await page.locator('#experienceSettlementOverlay').waitFor({state:'visible'});
  assert.match(await page.locator('#experienceSettlementDetail').textContent(),/10,500/);
  assert.equal((await page.evaluate(()=>returnQa.read())).level,1);
+ assert.equal(await page.locator('.experience-settlement-notice').isVisible(),true);
+ assert.equal(await page.locator('.experience-settlement-prompt').textContent(),'＊Aボタンで次へ');
+ await page.evaluate(()=>returnQa.input('cancel'));
+ assert.equal(await page.locator('#experienceSettlementOverlay').isVisible(),true);
+ const fits=await page.locator('#experienceSettlementOverlay').evaluate(e=>{
+  const outer=e.getBoundingClientRect();
+  return [...e.children].filter(c=>!c.hidden).every(c=>{const r=c.getBoundingClientRect();return r.top>=outer.top && r.bottom<=outer.bottom && r.left>=outer.left && r.right<=outer.right});
+ });
+ assert.equal(fits,true,'settlement content fits the main frame');
  await page.screenshot({path:join(output,label+'-settlement.png')});
  await page.evaluate(()=>returnQa.input('confirm'));
+ assert.equal(await page.locator('#experienceSettlementOverlay').evaluate(e=>e.classList.contains('is-dismissing')),true);
  await page.waitForFunction(()=>!returnQa.read().pending);
+ if(process.env.RETURN_NOTICE_ONLY) {
+  await page.evaluate(()=>{returnQa.setup({carry:0});returnQa.return()});
+  await page.locator('#experienceSettlementOverlay').waitFor({state:'visible'});
+  assert.equal(await page.locator('.experience-settlement-notice').isVisible(),false);
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.evaluate(()=>returnQa.input('confirm'));
+  await page.waitForFunction(()=>!returnQa.read().pending);
+  await page.evaluate(()=>{returnQa.setup({npc:true});returnQa.return()});
+  await page.locator('#experienceSettlementOverlay').waitFor({state:'visible'});
+  await page.evaluate(()=>{returnQa.input('confirm');returnQa.input('confirm')});
+  await page.waitForFunction(()=>document.querySelector('.is-npc-management')!==null);
+  assert.deepEqual(errors,[]);console.log(label+' notice passed');await page.close();continue;
+ }
  await page.evaluate(()=>returnQa.deep());
  await page.locator('#experienceSettlementOverlay').waitFor({state:'visible'});
  assert.equal((await page.evaluate(()=>returnQa.read())).experience,10500);
