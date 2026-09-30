@@ -5,7 +5,7 @@
   "description": "ルミナ、ノクティア、ゼレーナが一人ずつ降臨してフェードアウトし、同じ順番で後ろ姿で上昇して消える。最後に実ダメージ表示。6枚の画像・速度・加減速を個別設定。",
   "width": 960,
   "height": 540,
-  "duration": 20294,
+  "duration": 24000,
   "audioTracks": [],
   "background": "#10151b",
   "parts": [
@@ -295,6 +295,52 @@
       "rise": 100,
       "outlineColor": "#ffffff",
       "fontFamily": "pixel"
+    },
+    {
+      "id": "goddess_backgroundimage_1",
+      "type": "backgroundImage",
+      "start": 20293,
+      "duration": 3000,
+      "seed": 16,
+      "anchor": "screen",
+      "enabled": true,
+      "x": 480,
+      "y": 270,
+      "easing": "easeOutCubic",
+      "fileName": "goddess_bg.avif",
+      "imageData": "",
+      "imageSrc": "images/battle_effects/goddess_bg.avif",
+      "opacity": 1,
+      "fadeIn": 200,
+      "fadeOut": 200
+    },
+    {
+      "id": "goddess_gaussianblur_1",
+      "type": "gaussianBlur",
+      "start": 23000,
+      "duration": 1500,
+      "seed": 18,
+      "anchor": "screen",
+      "enabled": true,
+      "x": 480,
+      "y": 270,
+      "easing": "easeOutCubic",
+      "fromBlur": 0,
+      "toBlur": 18,
+      "transition": 800
+    },
+    {
+      "id": "goddess_tvoff_1",
+      "type": "tvOff",
+      "start": 23300,
+      "duration": 1500,
+      "seed": 17,
+      "anchor": "screen",
+      "enabled": true,
+      "x": 480,
+      "y": 270,
+      "easing": "easeOutCubic",
+      "collapse": 500
     }
   ]
 }

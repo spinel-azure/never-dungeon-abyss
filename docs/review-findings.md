@@ -1982,3 +1982,11 @@
 - tests/browser/return-experience.mjsでPC1280x900/スマホ相当390x844を検証。鑑定→精算、浅階帰還後の深階帰還でも経験値不変、宿泊までレベル据置、暗転中の成長と成長なし省略、恩寵/慈愛/保護なし死亡、鑑定中/精算中リロードで二重加算なし、復活後の雇用更新、馬小屋、将来のギルドプール精算を確認。状態を設定して本編コールバックを動かした検証であり通常プレイ全通しではない。実端末・実ゲームパッド・通常エンディング全通しは未確認。
 - QA画像TEMP/nda-return-enPrfu、途中ロード検証TEMP/nda-return-5eJLX2、復活延期の最終再確認TEMP/nda-return-yGUSrT。全NodeログTEMP/nda-return-node-final.log、PythonログTEMP/nda-return-python.log。既存演出関連5ファイル差分と未追跡effect-screen.test.mjsを保護。
 - LAST UPDATE2026-09-30維持、main.jsキャッシュ20260930-5。README変更なし、コミット/pushなし。
+
+### 2026-09-30 ムーサの冠の句点削除・三女神演出更新
+
+- 着手HEAD87737eb。追跡差分なし、ユーザー追加の未追跡images/battle_effects/goddess_bg.avifを保護し参照。冠の共通descriptionを「魅了完全耐性」へ変更し、装備一覧とステータス表示へ反映。DEF6/完全耐性/フレーバーは維持。冠のオレンジ表示は相談として賛成を回答し、変更はしていない。
+- 指定JSONに合わせgoddessを24000ms/18パーツへ更新。既存15パーツを維持し、背景画像20293ms/3000ms、ぼかし23000ms/1500ms、テレビ消灯23300ms/1500msを指定値で追加。後2パーツは全体時間を超える指定だが値は保持し、共通エンジンの規則で24000msに再生終了（消灯collapse500msは23800msで完了）。
+- 共通EffectEngineの既存対応とcall_goddess_nameの登録を利用。正式スキル名・威力・対象・詠唱単位の全体攻撃グループ・実ダメージ表示は変更なし。audioTracksは指定どおり空。探索/共通エンジンの変更なし。
+- Node全1748成功/失敗0、Python29成功/警告0/失敗0/既存2skip。ブラウザtests/browser/area-skill-presentation.mjsを拡張しPC1280x900/スマホ相当390x844で新背景読込と描画、ぼかし/消灯発火・終了時解除、4技の演出1回/複数数値同時/HP同期・中断・404フォールバックを確認。ブラウザ検証の再生速度のみ4倍、実端末・通常速度通しは未確認。冠の画面自体は今回ブラウザ撮影なし、共通description参照と回帰テストで確認。
+- QA画像TEMP/nda-area-effects-7pj7YS、ログTEMP/nda-goddess-update-node.logおよびnda-goddess-update-python.log。LAST UPDATE2026-09-30維持、main.jsキャッシュ20260930-6。README変更なし、コミット/pushなし。

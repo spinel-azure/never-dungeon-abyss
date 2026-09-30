@@ -7,14 +7,14 @@ import {createBattleState,resolveBattleRound,resolveMultiBattleRound} from '../c
 import {normalizeEffectDefinition} from '../js/effects/effect-schema.js';
 import {prepareBattleSkillEffect} from '../js/battle-skill-presentation.js';
 const read=p=>JSON.parse(readFileSync(new URL('../'+p,import.meta.url),'utf8'));
-for(const [id,duration,parts,popupTime] of [['call_goddess_name',20294,15,19194]]){
+for(const [id,duration,parts,popupTime] of [['call_goddess_name',24000,18,19194]]){
  test(`${id} retains supplied parameters and substitutes actual damage`,()=>{
  const skill=getSkill(id),registry=read('data/effects/battle-presentations.json');
  assert.equal(registry[skill.presentationId||skill.id],'data/effects/goddess.json');
  const source=read(registry[id]),normalized=normalizeEffectDefinition(source);
  assert.equal(source.duration,duration);assert.equal(source.parts.length,parts);assert.deepEqual(source.audioTracks,[]);
  for(let i=0;i<parts;i++)for(const [key,value] of Object.entries(source.parts[i]))assert.deepEqual(normalized.parts[i][key],value,`${id}/${i}/${key}`);
- const ready=prepareBattleSkillEffect(source,1234);assert.equal(ready.parts.at(-1).text,'1234');assert.equal(ready.parts.at(-1).start,popupTime);assert.equal(source.parts.at(-1).text,'{damage}');
+ const ready=prepareBattleSkillEffect(source,1234);assert.equal(ready.parts.find(p=>p.type==='popup').text,'1234');assert.equal(ready.parts.find(p=>p.type==='popup').start,popupTime);assert.equal(source.parts.find(p=>p.type==='popup').text,'{damage}');
  });
  test(`${id} real charge action emits registered presentation per actual target`,()=>{
  const c=createInitialCharacter({name:'Effects QA',job:'priest'});c.skillIds.push(id);c.sp=c.maxSp=200;c.int=30;c.agi=99;c.playerCharge={value:100,cooldown:0};
