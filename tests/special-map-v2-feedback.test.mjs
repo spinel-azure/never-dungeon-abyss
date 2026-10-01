@@ -6,17 +6,17 @@ import * as session from '../js/special-map/session.js';
 import * as v2 from '../js/special-map/session-v2.js';
 import {mapOriginalId} from '../data/special-maps.js';
 const original={rulesetVersion:'special-map-v2',seed:12345,level:50,rarity:'SILVER',discovererName:'†ルル'};
-function harness(){
+function harness({entry}={}){
  let bound,callback,exits=0,hides=0,openings=0,menus=0;
  class Node{constructor(){this.dataset={};}setAttribute(){}append(...nodes){for(const n of nodes)n.parentElement=this;}getContext(){return {};}remove(){}addEventListener(){}}
  const viewport=new Node(),status=new Node();viewport.append(status);
- const host={viewport,status,openMenu(){menus++;},playTreasureOpening(type,done){assert.equal(type,'gold');callback=done;openings++;},hideTreasure(){hides++;}};
+ const host={viewport,status,...(entry?{runEntryTransition:entry}:{}),openMenu(){menus++;},playTreasureOpening(type,done){assert.equal(type,'gold');callback=done;openings++;},hideTreasure(){hides++;}};
  const scope={...session,...v2,mapOriginalId,getSpecialMapContext:()=>null,getSpecialMapHost:()=>host,attachSpecialMap:()=>()=>{},describeTestMap:()=>({name:'地図'}),setWallColor(){},setFloorColor(){},drawMinimap(){},getMinimapBounds(){},toggleMinimapOverlay(){},performance:{now:()=>0},useSpecialMapRenderSource:o=>{bound=o;return ()=>{};},document:{createElement:()=>new Node()},window:{addEventListener(){},removeEventListener(){}}};
  const source=readFileSync(new URL('../js/special-map/exploration-ui.js',import.meta.url),'utf8');
  vm.runInNewContext(source.replace(/^import .*;\r?\n/gm,'').replace('export function','function')+';this.start=startSpecialMapExploration;',scope);
  const message={},ui=scope.start({registered:[original],mapKey:mapOriginalId(original),message,onExit(){exits++;}});
  ui.input('confirm');
- return {ui,host,message,bound,done:()=>callback(),stats:()=>({exits,hides,openings,menus})};
+ return {ui,host,message,get bound(){return bound;},done:()=>callback(),stats:()=>({exits,hides,openings,menus})};
 }
 function atChest(h){
  const s=h.ui.session;v2.switchV2Floor(s,s.blueprint.links[1].lower);
@@ -58,4 +58,22 @@ test('V2 chest cancellation/disposal cannot award a late key; failed animation c
  const retry=harness();atChest(retry);retry.host.playTreasureOpening=async()=>{throw Error('failed');};
  retry.ui.input('confirm');await new Promise(resolve=>setImmediate(resolve));assert.equal(retry.ui.session.bossKeyFound,false);assert.equal(retry.ui.session.transitioning,false);assert.match(retry.message.textContent,/もう一度/);
  assert.equal(v2.confirmV2Cell(retry.ui.session,0).openKeyChest,true);retry.ui.close();
+});
+
+test('V2 entry defers runtime until darkness, locks through reveal, then shows map title and restores input',async()=>{
+ let dark,release;
+ const h=harness({entry:fn=>{dark=fn;return new Promise(r=>release=r);}});
+ assert.equal(h.ui.session,undefined);
+ for(const action of ['up','confirm','cancel','items','map'])assert.equal(h.ui.input(action),true);
+ assert.equal(h.stats().menus,0);assert.equal(h.ui.finish(),false);
+ dark();const s=h.ui.session;assert.equal(s.currentFloor,0);assert.equal(s.transitioning,true);assert.equal(s.renderState.overlayEvent,null);
+ const xy=[s.playerX,s.playerY];h.ui.input('up');assert.deepEqual([s.playerX,s.playerY],xy);
+ release(true);await h.ui.ready;
+ assert.equal(s.transitioning,false);assert.equal(s.renderState.overlayEvent.overlayMessage,'地図');
+ h.ui.input('confirm');h.ui.input('up');assert.ok(s.motion);h.ui.close();
+});
+test('failed or cancelled V2 entry leaves no active runtime or banner',async()=>{
+ const failed=harness({entry:async()=>{throw Error('transition failed');}});await failed.ui.ready;assert.equal(failed.stats().exits,1);
+ let dark,release;const cancelled=harness({entry:fn=>{dark=fn;return new Promise(r=>release=r);}});
+ cancelled.ui.close();dark();release(true);await cancelled.ui.ready;assert.equal(cancelled.ui.session,undefined);
 });

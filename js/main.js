@@ -4663,6 +4663,7 @@ import {
 
   async function runSceneTransition({
     showEnteringTitle = false,
+    enteringMapDungeon = false,
     playAudio = () => Promise.resolve(),
     onDark = () => {},
     darkenMs = 2700,
@@ -4671,18 +4672,28 @@ import {
   } = {}) {
     if (sceneTransitionRunning) return false;
     sceneTransitionRunning = true;
+    const originalTitle = enteringMapDungeon ? sceneTransitionTitle.querySelector('strong').textContent : null;
     try {
       sceneTransition.hidden = false;
       sceneTransition.classList.remove("is-black", "is-revealing", "is-inn-stay", "is-defeat");
       sceneTransition.classList.add("is-running");
       sceneTransition.style.transitionDuration = `${darkenMs}ms`;
       document.body.classList.add("scene-transition-active");
-      sceneTransitionTitle.hidden = !showEnteringTitle;
+      sceneTransitionTitle.hidden = enteringMapDungeon || !showEnteringTitle;
+      if (enteringMapDungeon) {
+        sceneTransitionTitle.querySelector('strong').textContent = 'MAP DUNGEON';
+        sceneTransitionTitle.classList.add('map-dungeon-title');
+      }
       void sceneTransition.offsetWidth;
 
       const audioPromise = Promise.resolve().then(playAudio).catch(() => false);
       requestAnimationFrame(() => sceneTransition.classList.add("is-black"));
       await Promise.all([wait(darkenMs), audioPromise]);
+      if (enteringMapDungeon) {
+        sceneTransitionTitle.hidden = false;
+        await wait(1000);
+        sceneTransitionTitle.hidden = true;
+      }
       await onDark();
       await wait(holdMs);
 
@@ -4694,6 +4705,10 @@ import {
       return true;
     } finally {
       sceneTransitionTitle.hidden = true;
+      if (enteringMapDungeon) {
+        sceneTransitionTitle.querySelector('strong').textContent = originalTitle;
+        sceneTransitionTitle.classList.remove('map-dungeon-title');
+      }
       sceneTransition.classList.remove("is-black", "is-running", "is-revealing");
       sceneTransition.style.removeProperty("transition-duration");
       sceneTransition.hidden = true;
@@ -5294,7 +5309,7 @@ import {
     const special=getSpecialMapContext();
     if(special){
       const s=special.session;
-      depthEl.textContent=s.kind==='specialMapV2'?`特殊地図 第${s.currentFloor+1}層`:'特殊地図';posEl.textContent=`X:${s.playerX} Y:${s.playerY}`;
+      depthEl.textContent=s.kind==='specialMapV2'?`B${s.currentFloor+1}F`:'特殊地図';posEl.textContent=`X:${s.playerX} Y:${s.playerY}`;
       const chip=document.getElementById('specialSurveyChip');if(chip)chip.textContent=s.kind==='specialMapV2'?`今回探索 ${s.surveyedCount} / 100`:s.surveyComplete?'調査完了':`調査 ${s.surveyedCount} / 100`;
       torchMeterEl.style.width=`${s.renderState.torchFuel}%`;torchMeterEl.parentElement.classList.toggle('is-critical',s.renderState.torchFuel<=20);
       presenceMeterEl.style.setProperty('--presence','0%');presenceMeterEl.setAttribute('aria-valuenow','0');
@@ -5471,6 +5486,7 @@ import {
     return result;
   }
   configureSpecialMapHost({
+    runEntryTransition:onDark=>runSceneTransition({enteringMapDungeon:true,playAudio:()=>playSeSequence('stairs',3),onDark}),
     playTreasureOpening,hideTreasure,
     runStairsTransition:onDark=>runSceneTransition({playAudio:()=>playSeSequence('stairs',3),onDark}),
     floorChanged:({session})=>{startBgm(getSpecialMapBgmKey(session.generatedMap.themeId));updateHud();},

@@ -41,3 +41,5 @@ body.scene-transition-active .game>:not(.scene-transition){pointer-events:none}
 @keyframes michaela-queen-c-crossfade{from{opacity:1;filter:brightness(1) drop-shadow(0 0 5px rgba(223,252,255,.45))}to{opacity:0;filter:brightness(1)}}
 @media(max-width:600px){.michaela-restoration-cat{top:50%;width:76%;height:82%}.michaela-restoration-queen{top:50%;width:100%;height:100%}}
 @media(prefers-reduced-motion:reduce){.michaela-restoration.is-cat-rising .michaela-restoration-cat,.michaela-restoration.is-human-start .michaela-restoration-queen-c{animation-duration:.8s}.michaela-restoration.is-crossfade .michaela-restoration-queen-c,.michaela-restoration.is-crossfade .michaela-restoration-queen-d{transition-duration:.6s}}
+
+.scene-transition-title.map-dungeon-title{box-sizing:border-box;max-width:100%;font-family:"PixelFont",monospace}.map-dungeon-title strong{white-space:nowrap;font-size:clamp(24px,7vw,58px)}

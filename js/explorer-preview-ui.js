@@ -60,10 +60,11 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
   }
   function changeView(next){view=next;actionCursor=0;render();}
   function enterMap(){
+    if(exploration)return;
     try{
       if(!startExploration)throw Error('探索機能に接続されていません。');
-      exploration=startExploration({host,registered:maps().registered,mapKey:detailId,message,onExit:exit,playSe,saveSurvey:mask=>updateMaps(state=>updateMapSurvey(state,detailId,mask))});
-      panel.hidden=true;view='exploring';
+      exploration=startExploration({host,registered:maps().registered,mapKey:detailId,message,onEnter:()=>{panel.hidden=true;},onExit:exit,playSe,saveSurvey:mask=>updateMaps(state=>updateMapSurvey(state,detailId,mask))});
+      if(!exploration?.ready)panel.hidden=true;view='exploring';
     }catch(e){error(e.message);}
   }
   function registered(result){

@@ -4,7 +4,40 @@ import {createSpecialMapV2Session,isV2Session,confirmV2Cell,switchV2Floor,getV2S
 import {drawMinimap,getMinimapBounds} from '../minimap.js';
 import {attachSpecialMap,getSpecialMapHost,getSpecialMapContext} from './context.js';
 import {describeTestMap,mapOriginalId} from '../../data/special-maps.js';
-export function startSpecialMapExploration({registered,mapKey,message,onExit,playSe=()=>{},saveSurvey=()=>({ok:false})}){
+export function startSpecialMapExploration(options){
+ const host=getSpecialMapHost();
+ const original=options.registered.find(m=>mapOriginalId(m)===options.mapKey);
+ if(original?.rulesetVersion!=='special-map-v2'||!host.runEntryTransition)return createExploration(options);
+ if(getSpecialMapContext())throw Error('特殊地図はすでに探索中です。');
+ let controller=null,cancelled=false,locked=true;
+ const pending={
+  input:action=>locked?true:controller?.input(action)??true,
+  close(){cancelled=true;controller?.close();},
+  finish:()=>locked?false:controller?.finish()??false,
+  get session(){return controller?.session;},
+ };
+ pending.ready=(async()=>{
+  try{
+   const completed=await host.runEntryTransition(()=>{
+    if(cancelled)return;
+    controller=createExploration(options);
+    controller.session.transitioning=true;
+    controller.session.renderState.overlayEvent=null;
+   });
+   if(cancelled)return;
+   if(completed===false||!controller)throw Error('入場演出を開始できませんでした。');
+   let name='特殊地図';try{name=describeTestMap(original).name;}catch{}
+   controller.session.renderState.overlayEvent={type:'floorLap',showOverlay:false,overlayMessage:name,specialMapTitle:true};
+   controller.session.transitioning=false;locked=false;
+  }catch{
+   if(cancelled)return;
+   controller?.close();options.onExit();
+   options.message.textContent='特殊地図へ入場できませんでした。もう一度お試しください。';
+  }
+ })();
+ return pending;
+}
+function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},playSe=()=>{},saveSurvey=()=>({ok:false})}){
  if(getSpecialMapContext())throw Error('特殊地図はすでに探索中です。');
  const host=getSpecialMapHost();
  const original=registered.find(m=>mapOriginalId(m)===mapKey);
@@ -24,6 +57,7 @@ export function startSpecialMapExploration({registered,mapKey,message,onExit,pla
   stairPrompt=next;
  }
  function finish(){if(returned||session.transitioning)return false;if(!flushSpecialSurvey(session)){message.textContent=session.surveyError;return false;}if(host.beforeReturn?.()===false)return false;returned=true;close();onExit();return true;}
+ onEnter();
  const detach=attachSpecialMap({session,finish});
  session.renderState.overlayEvent={type:'floorLap',showOverlay:false,overlayMessage:name,specialMapTitle:true};
  const restore=useSpecialMapRenderSource({canvas,ctx:canvas.getContext('2d'),W:960,H:540,state:session.renderState,eventOverlayCtx:null,
@@ -58,8 +92,8 @@ export function startSpecialMapExploration({registered,mapKey,message,onExit,pla
     switchV2Floor(session,destination);
     setWallColor(session.generatedMap.themeId);setFloorColor(session.generatedMap.themeId);
     host.floorChanged?.({session});
-    session.renderState.overlayEvent={type:'floorLap',showOverlay:false,overlayMessage:`第${session.currentFloor+1}層`,specialMapTitle:true};
-    showStairNotice(`第${session.currentFloor+1}層へ移動した。\n`);
+    session.renderState.overlayEvent={type:'floorLap',showOverlay:false,overlayMessage:`B${session.currentFloor+1}F`,specialMapTitle:true};
+    showStairNotice(`B${session.currentFloor+1}Fへ移動した。\n`);
    };
    if(host.runStairsTransition)await host.runStairsTransition(onDark);else{playSe('stairs');onDark();}
   }catch{if(!disposed)message.textContent='階段の移動を完了できませんでした。';}

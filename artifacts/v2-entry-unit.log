@@ -1,0 +1,39 @@
+✔ V2 uses existing detail UI and passes its original to the exploration dispatcher (7.5649ms)
+✔ layout-mobile: native taps select twice, explicit actions execute once (5.8349ms)
+✔ layout-tablet: native taps select twice, explicit actions execute once (3.6676ms)
+✔ appraisal touch sequence saves only after final confirmation and then opens registered detail (2.4299ms)
+✔ duplicate appraisal can be cancelled without consumption even with ten registered maps (3.4553ms)
+✔ failed UI appraisal keeps unidentified map and reports failure rather than success (1.852ms)
+✔ touch guard still protects the game surface and preserves existing command exemptions (1.5287ms)
+✔ keyboard/gamepad action routing retains paging and detail return position (6.1215ms)
+✔ exploration confirms registered selection, routes runtime input and disposes on return (6.6131ms)
+✔ appraisal, registration and management actions need only one tap (5.5046ms)
+✔ signature gamepad navigates input, register, back without losing typed signature (1.5717ms)
+✔ management delete confirmation clamps six maps to first page and save failure retains map (3.4514ms)
+✔ share display/import uses original discoverer and duplicate keeps ten slots (6.3142ms)
+✔ V2 shared UI warns about matching content, not the first matching layout (3.5869ms)
+✔ clipboard failure retains visible selectable code and reports a manual-copy fallback (3.404ms)
+✔ paste success: never auto-registers and keeps manual input usable (2.2181ms)
+✔ paste denied: never auto-registers and keeps manual input usable (1.6778ms)
+✔ paste unavailable: never auto-registers and keeps manual input usable (2.3758ms)
+✔ late clipboard response cannot replace input on another screen (2.2407ms)
+✔ registered V1 starts at frozen entrance and direction with one explored cell (7.5562ms)
+✔ collision, animation, exploration and BFS exit work without touching normal save (129.8223ms)
+✔ shared origins and different discoverers use only ruleset and seed for terrain (6.9754ms)
+✔ real minimap accepts session cells without revealing unknown exits (3.5061ms)
+✔ renderer binding restores exact normal references and theme after immediate disposal (2.3118ms)
+✔ runtime controller uses ordinary menu, pauses movement, and flushes before return (4.8552ms)
+✔ backward travel and left turns preserve facing and mark only visited cells (0.9016ms)
+✔ keyboard and touch controls cannot fall through to normal movement or generation (1.7148ms)
+✔ V2 stair prompts on arrival; entrance A returns, merely arriving never does (11.2538ms)
+✔ V2 gold chest awards only on animation completion, locks repeat input, grants once (6.4247ms)
+✔ auto walker stops at stairs and leaves the same return prompt without automatic exit (4.834ms)
+✔ V2 chest cancellation/disposal cannot award a late key; failed animation can be retried (11.9583ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 336.4985
