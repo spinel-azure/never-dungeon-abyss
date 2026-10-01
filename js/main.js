@@ -1,3 +1,4 @@
+import { createCoalescedNotificationSync } from "./passive-notification-sync.js";
 import { grantGuildQuestExperience, formatGuildExperienceReceipt } from "../data/guild-experience.js";
 import { isAkashicRematchUnlocked, AKASHIC_PHANTOM_IDS, QUEEN_PROJECTION_MESSAGES } from "../data/akashic-phantoms.js";
 import { getKirkeFinalDialogue } from "../data/endgame-quests.js";
@@ -203,7 +204,6 @@ import {
   syncTavernRumorNotifications
 } from "../data/tavern-rumor-notifications.js";
 import {
-  getPendingGuildQuestNotifications,
   markGuildQuestNotificationsShown,
   syncGuildQuestNotifications
 } from "../data/guild-quest-notifications.js";
@@ -556,7 +556,7 @@ import {
       const changed = result.character !== character;
       character = result.character;
       if (changed) scheduleAutosave();
-      return getPendingGuildQuestNotifications(character);
+      return result.pendingQuests;
     },
     markShown: notificationIds => {
       character = markGuildQuestNotificationsShown(character, notificationIds);
@@ -658,19 +658,24 @@ import {
     const changed = result.character !== character;
     character = result.character;
     if (changed && persist) scheduleAutosave();
-    guildQuestNotificationController.request();
+    guildQuestNotificationController.request(result.pendingQuests);
     shopNotificationController.request();
     passiveNotificationCoordinator.updateAvailability();
     return changed;
   }
 
-  function handlePersistentStateChanged() {
-    scheduleAutosave();
+  const notificationSync = createCoalescedNotificationSync(() => {
     syncRumorNotifications();
     syncQuestNotifications();
+  });
+
+  function handlePersistentStateChanged() {
+    scheduleAutosave();
+    notificationSync.request();
   }
 
   function resetPassiveNotifications() {
+    notificationSync.cancel();
     passiveNotificationSession += 1;
     passiveNotificationsReady = false;
     achievementNotificationQueue.length = 0;
@@ -2470,8 +2475,7 @@ import {
     renderDetailStats(statusCharacter);
     renderExperience(statusCharacter);
     detectAchievementUnlocks();
-    syncRumorNotifications();
-    syncQuestNotifications();
+    notificationSync.request();
   }
 
   function detectAchievementUnlocks() {

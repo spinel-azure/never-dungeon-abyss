@@ -215,8 +215,8 @@ export function createPassiveBellNotificationController({
     return true;
   }
 
-  function request() {
-    if (disposed || !(getPending() || []).length) return false;
+  function request(pending = null) {
+    if (disposed || !(pending ?? getPending() ?? []).length) return false;
     return coordinator?.enqueue({ id: queueId, channel, play }) || false;
   }
 

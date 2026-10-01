@@ -984,8 +984,10 @@ export function completeMaerchentiereCapture(character) {
   return result(recordCustomQuestProgress(next, MAERCHENTIERE_QUEST_ID, 1), true);
 }
 
+const QUEST_BY_ID = new Map(QUESTS.map(quest => [quest.id, quest]));
+
 export function getQuestById(questId) {
-  return QUESTS.find(quest => quest.id === questId) || null;
+  return QUEST_BY_ID.get(questId) || null;
 }
 
 export function normalizeQuestState(candidate) {
@@ -1037,7 +1039,7 @@ export function getQuestProgress(character, questId) {
   };
 }
 
-export function isQuestAvailable(character, questOrId) {
+export function isQuestAvailable(character, questOrId, state = normalizeQuestState(character?.quests)) {
   const quest = typeof questOrId === "string" ? getQuestById(questOrId) : questOrId;
   if (!quest?.available) return false;
   if (quest.availableFlag && !character?.eventFlags?.[quest.availableFlag]) return false;
@@ -1048,7 +1050,7 @@ export function isQuestAvailable(character, questOrId) {
     ? quest.prerequisiteQuestIds
     : [];
   const prerequisites = [...new Set([...initialQuestGate, ...questPrerequisites])];
-  if (!prerequisites.every(questId => getQuestProgress(character, questId).completed)) return false;
+  if (!prerequisites.every(questId => state.completedQuestIds.includes(questId))) return false;
   const reachedDepth = Math.max(
     Math.floor(Number(character?.highestDungeonDepthReached) || 1),
     character?.eventFlags?.transfer_portal_b10f_unlocked ? 10 : 1

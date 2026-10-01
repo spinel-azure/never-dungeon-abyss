@@ -19,9 +19,9 @@ test("the quest notice reuses the bell layout with distinct blue presentation", 
 test("persistent state changes, reload resume, and guild rendering recheck quest notices", () => {
   const main = read("js/main.js");
   const town = read("js/town.js");
-  assert.match(main, /function handlePersistentStateChanged\(\)[\s\S]*?syncRumorNotifications\(\);[\s\S]*?syncQuestNotifications\(\);/);
+  assert.match(main, /function handlePersistentStateChanged\(\)[\s\S]*?notificationSync\.request\(\);/);
   assert.match(main, /function resumePassiveNotifications[\s\S]*?syncRumorNotifications\(\);[\s\S]*?syncQuestNotifications\(\);/);
-  assert.match(main, /function updateCharacterUi\(\)[\s\S]*?detectAchievementUnlocks\(\);[\s\S]*?syncRumorNotifications\(\);[\s\S]*?syncQuestNotifications\(\);/);
+  assert.match(main, /function updateCharacterUi\(\)[\s\S]*?detectAchievementUnlocks\(\);[\s\S]*?notificationSync\.request\(\);/);
   assert.match(main, /createGuildQuestNotificationController\(\{[\s\S]*?coordinator: passiveNotificationCoordinator/);
   assert.match(main, /resetPassiveNotifications\(\)[\s\S]*?guildQuestNotificationController\.reset\(\)/);
   assert.match(town, /function renderFacility\(\)[\s\S]*?town\.onStateChanged\(\);/);
@@ -30,5 +30,5 @@ test("persistent state changes, reload resume, and guild rendering recheck quest
 test("notification assets use the current cache revision", () => {
   const html = read("index.html");
   assert.match(html, /css\/town\.css\?v=20260923-4/);
-  assert.match(html, /js\/main\.js\?v=20260930-8/);
+  assert.match(html, /js\/main\.js\?v=20261001-1/);
 });

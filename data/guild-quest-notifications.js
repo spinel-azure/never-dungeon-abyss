@@ -1,4 +1,4 @@
-import { QUESTS, getQuestProgress, isQuestAvailable } from "./quests.js";
+import { QUESTS, normalizeQuestState, isQuestAvailable } from "./quests.js";
 
 const QUEST_IDS = new Set(QUESTS.map(quest => quest.id));
 
@@ -39,9 +39,10 @@ function withNotificationState(character, notificationState) {
 /** Returns quests that can currently be accepted at the guild. */
 export function getAvailableGuildQuestNotifications(character) {
   if (!character?.eventFlags?.guild_first_request_unlocked) return [];
+  const state = normalizeQuestState(character.quests);
+  const completed = new Set(state.completedQuestIds);
   return QUESTS.flatMap(quest => {
-    const progress = getQuestProgress(character, quest.id);
-    if (!isQuestAvailable(character, quest) || progress.active || progress.completed) return [];
+    if (state.active[quest.id] || completed.has(quest.id) || !isQuestAvailable(character, quest, state)) return [];
     return [{
       id: quest.id,
       questId: quest.id,
