@@ -38,6 +38,7 @@ test('shared origins and different discoverers use only ruleset and seed for ter
 import {drawMinimap} from '../js/minimap.js';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
+import {isV2Session,createSpecialMapV2Session,confirmV2Cell,switchV2Floor} from '../js/special-map/session-v2.js';
 test('real minimap accepts session cells without revealing unknown exits',()=>{
  const s=create();const ctx=new Proxy({},{get:(o,k)=>o[k]??(()=>{})});
  assert.doesNotThrow(()=>drawMinimap(ctx,{W:960,MAP_W:10,MAP_H:10,cells:s.cells,explored:s.explored,state:s.renderState,roundRect(){}}));
@@ -58,7 +59,7 @@ test('runtime controller uses ordinary menu, pauses movement, and flushes before
  class Node{constructor(){this.children=[];this.dataset={};}setAttribute(){}append(...nodes){for(const n of nodes){n.parentElement=this;this.children.push(n);}}getContext(){return {};}remove(){this.removed=true;}addEventListener(){}}
  const viewport=new Node(),status=new Node();viewport.append(status);
  const host={viewport,status,isPaused:()=>menu,openMenu:()=>{menu=true;},handleInput:a=>{if(!menu)return false;if(a==='cancel')menu=false;return true;}};
- const context={mapOriginalId,getSpecialMapHost:()=>host,attachSpecialMap:()=>()=>{},describeTestMap:()=>({name:'地図'}),continueSpecialAutoWalker(){},createSpecialMapSession,actSpecialMap,updateSpecialMotion,specialWall,specialDoorState,openSpecialDoorAhead,flushSpecialSurvey,drawMinimap,getMinimapBounds(){},toggleMinimapOverlay(){mapToggles++;},performance:{now:()=>0},
+ const context={mapOriginalId,isV2Session,createSpecialMapV2Session,confirmV2Cell,switchV2Floor,setWallColor(){},setFloorColor(){},getSpecialMapContext:()=>null,getSpecialMapHost:()=>host,attachSpecialMap:()=>()=>{},describeTestMap:()=>({name:'地図'}),continueSpecialAutoWalker(){},createSpecialMapSession,actSpecialMap,updateSpecialMotion,specialWall,specialDoorState,openSpecialDoorAhead,flushSpecialSurvey,drawMinimap,getMinimapBounds(){},toggleMinimapOverlay(){mapToggles++;},performance:{now:()=>0},
   useSpecialMapRenderSource:options=>{bound=options;return ()=>restored++;},document:{createElement:()=>new Node()},window:{addEventListener:(key,fn)=>listeners.set(key,fn),removeEventListener:key=>listeners.delete(key)}};
  vm.runInNewContext(source.replace(/^import .*;\r?\n/gm,'').replace('export function','function')+';this.start=startSpecialMapExploration;',context);
  const options={playSe:id=>sounds.push(id),saveSurvey:()=>({ok:true}),registered:[map],mapKey:mapOriginalId(map),message:{},onExit:()=>exited++};

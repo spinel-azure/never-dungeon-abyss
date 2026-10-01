@@ -37,13 +37,13 @@ function setup(t,layout='layout-mobile',initial=fixture(),extra={}){
   return {ui,host,commands,message,find,touch,exits:()=>exits,all,state:()=>state,failSave:()=>{saveFails=true;}};
 }
 
-test('V2 uses existing detail/share UI but never starts a single-floor exploration',t=>{
+test('V2 uses existing detail UI and passes its original to the exploration dispatcher',t=>{
  const initial=normalizeSpecialMaps({discovererName:'スピネ',registered:[{rulesetVersion:'special-map-v2',seed:12345,level:100,rarity:'GOLD',discovererName:'†ルル'}]});
- let starts=0;const v=setup(t,'layout-mobile',initial,{startExploration(){starts++;}});
+ let starts=0;const v=setup(t,'layout-mobile',initial,{startExploration({registered,mapKey}){starts++;assert.equal(registered.find(m=>m.id===mapKey).rulesetVersion,'special-map-v2');return {input(){},close(){}};}});
  v.ui.open('maps');v.ui.input('confirm');
  assert.match(v.host.textContent,/Lv\.100/);assert.match(v.host.textContent,/金地図/);assert.doesNotMatch(v.host.textContent,/調査率.*100/);
  v.ui.input('confirm');v.ui.input('confirm');
- assert.equal(starts,0);assert.match(v.message.textContent,/V2多層探索は準備中/);
+ assert.equal(starts,1);
 });
 for(const layout of ['layout-mobile','layout-tablet'])test(`${layout}: native taps select twice, explicit actions execute once`,t=>{
   const v=setup(t,layout);v.ui.open('maps');

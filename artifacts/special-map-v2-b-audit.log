@@ -1,0 +1,59 @@
+Audited 8192/65536 V2 sets and V1 compatibility
+Audited 16384/65536 V2 sets and V1 compatibility
+Audited 24576/65536 V2 sets and V1 compatibility
+Audited 32768/65536 V2 sets and V1 compatibility
+Audited 40960/65536 V2 sets and V1 compatibility
+Audited 49152/65536 V2 sets and V1 compatibility
+Audited 57344/65536 V2 sets and V1 compatibility
+Audited 65536/65536 V2 sets and V1 compatibility
+{
+  "passed": true,
+  "validSets": 65536,
+  "validFloors": 196608,
+  "failures": {
+    "generation": 0,
+    "structure": 0,
+    "keyAccess": 0,
+    "repeat": 0,
+    "levelRarityIndependence": 0,
+    "candidate1Comparison": 0,
+    "legacy": 0
+  },
+  "distanceRanges": {
+    "stairs": [
+      {
+        "min": 14,
+        "max": 56
+      },
+      {
+        "min": 14,
+        "max": 58
+      }
+    ],
+    "floor3Boss": {
+      "min": 13,
+      "max": 58
+    },
+    "entranceToBoss": {
+      "min": 50,
+      "max": 122
+    },
+    "keyChest": {
+      "min": 10,
+      "max": 53
+    },
+    "keyChestToGate": {
+      "min": 1,
+      "max": 47
+    }
+  },
+  "sha256": {
+    "v2Structure": "243b09bbd93f5ff783b1bf772c156e159132451d90a630a807a19b8d6fdd4db3",
+    "candidate1Structure": "19f8f3aad737c8ab9e91c7e673e892ab810b7938b182cab63e77d3b9601750b1",
+    "v1Topology": "b985066f1fb5720c8f27c56d925e58d700af9d637d90cd2c6e0fc33ce0920e58",
+    "legacyTopology": "3d92b41f2e2994ca08e40626cd85e498a20c8c0dfc1a135c32472641805df592",
+    "v1Doors": "6a625e0aac5a8c87367c2ab52e46570dcb195e4260ecb7cacc4f1167c81f693f",
+    "v1Ecology": "04c4c6902ef72c567a2166d4b4bd41d83b7ca89eab99a8926b0ceaa5d7c96a8a"
+  },
+  "seconds": 118.431
+}

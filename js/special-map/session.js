@@ -30,9 +30,10 @@ export function createSpecialMapSession(registered,mapKey,{persistSurvey=()=>({o
 export function specialWall(session,x,y,dir){return !session.cells[y]?.[x]||session.cells[y][x].walls[dir]!==false;}
 export function specialDoorState(session,x,y,dir){const key=doorKey(x,y,dir);return session.doorByKey.has(key)?(session.openedDoors.has(key)?'open':'closed'):null;}
 export function openSpecialDoorAhead(session,now){
- if(session.motion||session.renderState.anim)return false;
+ if(session.motion||session.renderState.anim||session.transitioning)return false;
  const x=session.playerX,y=session.playerY,dirKey=dirs[session.direction];
  if(specialDoorState(session,x,y,dirKey)!=='closed')return false;
+ if(session.canOpenDoor&&!session.canOpenDoor(x,y,dirKey))return false;
  // Existing renderer's normal door animation contract; same duration as player.js.
  session.renderState.anim={type:'door',start:now,duration:DOOR_OPEN_MS,x,y,dirKey,key:doorKey(x,y,dirKey)};return true;
 }
@@ -45,7 +46,7 @@ export function updateSpecialMotion(session,now){
  if(t===1){if(m.crossedDoor)session.openedDoors.delete(m.crossedDoor);if(m.isStep)session.renderState.torchFuel=Math.max(0,session.renderState.torchFuel-1);session.motion=null;}
 }
 export function actSpecialMap(session,action,now){
- if(session.motion||session.renderState.anim)return false;
+ if(session.motion||session.renderState.anim||session.transitioning)return false;
  const state=session.renderState;let x=session.playerX,y=session.playerY,angle=state.angle,crossedDoor=null,duration=STEP_MS;
  if(action==='left'||action==='right'){
   const turn=action==='left'?-1:1;session.direction=(session.direction+turn+4)%4;angle+=turn*Math.PI/2;duration=TURN_MS;state.shake=turn>0?2:-2;
@@ -67,10 +68,12 @@ export function actSpecialMap(session,action,now){
 }
 
 export function recordSpecialSurvey(session,x,y){
+ if(session.kind==='specialMapV2')return true; // V2-B knowledge is only runtime explored.
  session.pendingSurveyMask=surveyVisit(session.pendingSurveyMask,x,y);
  return flushSpecialSurvey(session);
 }
 export function flushSpecialSurvey(session){
+ if(session.kind==='specialMapV2')return true;
  if(session.pendingSurveyMask===session.surveyedMask)return true;
  let result;try{result=session.persistSurvey(session.pendingSurveyMask);}catch{}
  if(!result?.ok){session.surveyError='調査記録を保存できませんでした。Aまたは帰還で再試行できます。';return false;}
@@ -90,16 +93,16 @@ export function resolveSpecialStartDirection(map){
 }
 export function getSpecialAutoAvailability(s){
  if(s.autoPath)return {accepted:false,reason:'alreadyActive'};
- if(s.motion||s.renderState.anim)return {accepted:false,reason:'moving'};
+ if(s.motion||s.renderState.anim||s.transitioning)return {accepted:false,reason:'moving'};
  const entrance=s.generatedMap.entrance;
  if(s.playerX===entrance.x&&s.playerY===entrance.y)return {accepted:false,reason:'alreadyAtStart'};
- const path=findKnownPath({x:s.playerX,y:s.playerY},entrance,(p,q,d)=>q.x>=0&&q.x<10&&q.y>=0&&q.y<10&&s.surveyView[q.y][q.x]&&!specialWall(s,p.x,p.y,d));
+ const path=findKnownPath({x:s.playerX,y:s.playerY},entrance,(p,q,d)=>q.x>=0&&q.x<10&&q.y>=0&&q.y<10&&s.surveyView[q.y][q.x]&&!specialWall(s,p.x,p.y,d)&&!s.isDoorLocked?.(p.x,p.y,d));
  return {accepted:path.length>0,reason:path.length?'':'noPath',path};
 }
 export function startSpecialAutoWalker(s){const a=getSpecialAutoAvailability(s);if(!a.accepted)return false;s.autoPath=[...a.path];return true;}
 export function continueSpecialAutoWalker(s,now){
- if(!s.autoPath||s.motion||s.renderState.anim)return;
- if(!s.autoPath.length){s.autoPath=null;s.say('入口へ戻った。');return;}
+ if(!s.autoPath||s.motion||s.renderState.anim||s.transitioning)return;
+ if(!s.autoPath.length){s.autoPath=null;s.say(s.kind==='specialMapV2'&&s.currentFloor>0?'上り階段へ戻った。':'入口へ戻った。');return;}
  const d=dirs.indexOf(s.autoPath[0]);
  if(s.direction!==d){const diff=(d-s.direction+4)%4;actSpecialMap(s,diff===3?'left':'right',now);return;}
  if(specialDoorState(s,s.playerX,s.playerY,dirs[d])==='closed'){if(openSpecialDoorAhead(s,now))s.playSe('door');return;}

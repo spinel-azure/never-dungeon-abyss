@@ -1,0 +1,52 @@
+pc floor 2 77
+pc floor 1 77
+pc floor 2 77
+pc floor 3 48
+pc floor 2 81
+pc floor 3 81
+pc floor 2 23
+pc floor 1 85
+mobile floor 2 77
+mobile floor 1 77
+mobile floor 2 77
+mobile floor 3 48
+mobile floor 2 81
+mobile floor 3 81
+mobile floor 2 23
+mobile floor 1 85
+[
+  {
+    label: 'pc',
+    status: {
+      floor: 2,
+      fuel: 52,
+      key: true,
+      unlocked: true,
+      counts: [Array],
+      fp: '5a0826f6',
+      theme: 'torture',
+      xy: [Array],
+      doors: 0
+    },
+    overflow: false,
+    errors: [],
+    normalStateUnchanged: true
+  },
+  {
+    label: 'mobile',
+    status: {
+      floor: 2,
+      fuel: 52,
+      key: true,
+      unlocked: true,
+      counts: [Array],
+      fp: '5a0826f6',
+      theme: 'torture',
+      xy: [Array],
+      doors: 0
+    },
+    overflow: false,
+    errors: [],
+    normalStateUnchanged: true
+  }
+]
