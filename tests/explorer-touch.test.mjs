@@ -36,6 +36,15 @@ function setup(t,layout='layout-mobile',initial=fixture(),extra={}){
   function touch(target){let cancelled=false;for(const type of ['touchstart','touchend'])for(const fn of handlers[type]||[])fn({target,preventDefault(){cancelled=true;},stopPropagation(){}});if(!cancelled&&!target.disabled)target.onclick?.();return cancelled;}
   return {ui,host,commands,message,find,touch,exits:()=>exits,all,state:()=>state,failSave:()=>{saveFails=true;}};
 }
+
+test('V2 uses existing detail/share UI but never starts a single-floor exploration',t=>{
+ const initial=normalizeSpecialMaps({discovererName:'スピネ',registered:[{rulesetVersion:'special-map-v2',seed:12345,level:100,rarity:'GOLD',discovererName:'†ルル'}]});
+ let starts=0;const v=setup(t,'layout-mobile',initial,{startExploration(){starts++;}});
+ v.ui.open('maps');v.ui.input('confirm');
+ assert.match(v.host.textContent,/Lv\.100/);assert.match(v.host.textContent,/金地図/);assert.doesNotMatch(v.host.textContent,/調査率.*100/);
+ v.ui.input('confirm');v.ui.input('confirm');
+ assert.equal(starts,0);assert.match(v.message.textContent,/V2多層探索は準備中/);
+});
 for(const layout of ['layout-mobile','layout-tablet'])test(`${layout}: native taps select twice, explicit actions execute once`,t=>{
   const v=setup(t,layout);v.ui.open('maps');
   assert.equal(v.touch(v.find(label(2))),false);
@@ -122,6 +131,19 @@ test('share display/import uses original discoverer and duplicate keeps ten slot
  v.touch(v.find('地図を登録（A）'));assert.match(v.message.textContent,/すでに登録/);assert.equal(v.state().registered.length,10);
  v.touch(v.find('管理機能を確認（A）'));v.touch(v.find('共有コードを表示'));
  field=v.all(v.host).find(e=>e.tag==='textarea');assert.equal(field.value,encodeMapCode(fixture().registered[2]));
+});
+
+test('V2 shared UI warns about matching content, not the first matching layout',async t=>{
+ const {encodeMapCode}=await import('../data/special-map-code.js');
+ const map={rulesetVersion:'special-map-v2',seed:12345,level:50,rarity:'GOLD',discovererName:'†ルル'};
+ const initial=normalizeSpecialMaps({discovererName:'スピネ',registered:[{...map,level:1,discovererName:'先頭'},map]});
+ const incoming={...map,discovererName:'ALC'},code=encodeMapCode(incoming);
+ const v=setup(t,'layout-mobile',initial);v.ui.open('tent');v.touch(v.commands.children[1]);
+ v.all(v.host).find(e=>e.tag==='textarea').value=code;v.touch(v.find('地図を登録（A）'));
+ assert.match(v.host.textContent,/発見者：†ルル/);assert.doesNotMatch(v.host.textContent,/発見者：先頭/);
+ v.ui.input('confirm');assert.equal(v.state().registered.length,3);assert.match(v.host.textContent,/金地図/);
+ v.touch(v.find('管理機能を確認（A）'));v.touch(v.find('共有コードを表示'));
+ assert.equal(v.all(v.host).find(e=>e.tag==='textarea').value,code);
 });
 
 test('clipboard failure retains visible selectable code and reports a manual-copy fallback',async t=>{

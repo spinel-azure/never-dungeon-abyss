@@ -1,6 +1,11 @@
 import {normalizeSurveyMask,mergeSurvey,surveyCount} from './special-map-survey.js';
 // Phase 2A ownership data. This ruleset is deliberately NOT the future dungeon V1.
 export const SPECIAL_MAP_RULESET = 'phase2a-1';
+export const SPECIAL_MAP_V2 = 'special-map-v2';
+export const MAP_RARITIES = Object.freeze(['WHITE','SILVER','GOLD']);
+export const rarityLabel = rarity => ({WHITE:'白地図',SILVER:'銀地図',GOLD:'金地図'})[rarity];
+export const isV2Map = map => map?.rulesetVersion===SPECIAL_MAP_V2;
+export function validV2Parameters(map){return Number.isInteger(map.level)&&map.level>=1&&map.level<=100&&MAP_RARITIES.includes(map.rarity);}
 export const UNIDENTIFIED_LIMIT = 3;
 export const REGISTERED_LIMIT = 10;
 
@@ -12,23 +17,34 @@ export function validateMapSignature(input) {
     : {ok:false,error:'署名は日本語・英数字・☆ ★ † ・ ー ! ? の1～4文字で入力してください。絵文字・特殊な漢字は使えません。'};
 }
 export function mapOriginalId(map) {
-  return JSON.stringify([map.rulesetVersion,map.seed,map.discovererName]);
+  return JSON.stringify([...JSON.parse(mapContentId(map)),map.discovererName]);
 }
-export function mapContentId(map) { return JSON.stringify([map.rulesetVersion,map.seed]); }
+export function mapLayoutId(map) { return JSON.stringify([map.rulesetVersion,map.seed]); }
+export function mapContentId(map) { return isV2Map(map)?JSON.stringify([map.rulesetVersion,map.seed,map.level,map.rarity]):mapLayoutId(map); }
+function surveyFields(map){return isV2Map(map)?{}:{surveyedMask:normalizeSurveyMask(map.surveyedMask),surveyComplete:surveyCount(map.surveyedMask)===100};}
 function normalizeOriginal(map) {
   if(!map || !Number.isInteger(map.seed) || map.seed<0 || map.seed>65535 || typeof map.rulesetVersion!=='string' || !map.rulesetVersion) return null;
+  if(isV2Map(map)&&!validV2Parameters(map))return null;
   const signature=validateMapSignature(map.discovererName);
   if(!signature.ok)return null;
+  if(isV2Map(map)){
+    // Explicit ownership schema: never copy generated floors or single-floor survey.
+    const clean={rulesetVersion:map.rulesetVersion,seed:map.seed,level:map.level,rarity:map.rarity,discovererName:signature.value};
+    for(const key of ['id','discoveryId','acquisitionMethod','memo'])if(typeof map[key]==='string')clean[key]=map[key];
+    for(const key of ['favorite','cleared'])if(typeof map[key]==='boolean')clean[key]=map[key];
+    return clean;
+  }
   return {...map,discovererName:signature.value};
 }
 export function normalizeSpecialMaps(input) {
   const signature=validateMapSignature(input?.discovererName);
   const clean=list=>(Array.isArray(list)?list:[]).map(normalizeOriginal).filter(Boolean);
-  const registered=[...new Map(clean(input?.registered).map(map=>[mapOriginalId(map),{...map,id:mapOriginalId(map),surveyedMask:normalizeSurveyMask(map.surveyedMask),surveyComplete:surveyCount(map.surveyedMask)===100,acquisitionMethod:map.acquisitionMethod==='shared'?'shared':'discovered'}])).values()].slice(0,REGISTERED_LIMIT);
+  const registered=[...new Map(clean(input?.registered).map(map=>[mapOriginalId(map),{...map,id:mapOriginalId(map),...surveyFields(map),acquisitionMethod:map.acquisitionMethod==='shared'?'shared':'discovered'}])).values()].slice(0,REGISTERED_LIMIT);
   const unidentified=clean(input?.unidentified).slice(0,UNIDENTIFIED_LIMIT).map((map,index)=>({...map,discoveryId:typeof map.discoveryId==='string'&&map.discoveryId?map.discoveryId:`legacy-${index}-${mapOriginalId(map)}`}));
   return {dataVersion:1,discovererName:signature.ok?signature.value:'',unidentified,registered};
 }
 export function describeTestMap(map) {
+  if(isV2Map(map))return validV2Parameters(map)?{name:'三層の特殊地図',level:map.level,rarityLabel:rarityLabel(map.rarity)}:null;
   if(map.rulesetVersion!==SPECIAL_MAP_RULESET)return null;
   const prefixes=['ざわめく','残された','呪われし','見果てぬ','あらぶる','静寂の'];
   const themes=['甲虫','黄金','奈落','薄明','氷雪','残響'];
@@ -39,10 +55,10 @@ export function setMapSignature(state,input) {
   const result=validateMapSignature(input);
   return result.ok?{ok:true,state:{...state,discovererName:result.value}}:result;
 }
-export function discoverTestMap(state,{seed=()=>crypto.getRandomValues(new Uint16Array(1))[0],id=()=>crypto.randomUUID()}={}) {
+export function discoverTestMap(state,{seed=()=>crypto.getRandomValues(new Uint16Array(1))[0],id=()=>crypto.randomUUID(),rulesetVersion=SPECIAL_MAP_RULESET,level,rarity}={}) {
   if(!state.discovererName)return {ok:false,error:'先に探検家テントで地図署名を登録してください。'};
   if(state.unidentified.length>=UNIDENTIFIED_LIMIT)return {ok:false,error:'未鑑定の地図をこれ以上持てません。先に地図を鑑定してください。'};
-  const map={seed:seed(),rulesetVersion:SPECIAL_MAP_RULESET,discovererName:state.discovererName,discoveryId:id()};
+  const map={seed:seed(),rulesetVersion,...(rulesetVersion===SPECIAL_MAP_V2?{level,rarity}:{}),discovererName:state.discovererName,discoveryId:id()};
   if(!normalizeOriginal(map))return {ok:false,error:'地図の発見に失敗しました。'};
   return {ok:true,state:{...state,unidentified:[...state.unidentified,map]},map};
 }
@@ -53,7 +69,7 @@ export function inspectAppraisal(state,discoveryId) {
   if(existing)return {ok:true,map:existing,duplicate:true};
   if(state.registered.length>=REGISTERED_LIMIT)return {ok:false,error:'地図帳がいっぱいです。登録済みの地図を整理してから鑑定してください。'};
   if(!describeTestMap(map))return {ok:false,error:'この生成ルール版の鑑定には対応していません。'};
-  return {ok:true,map:{...map,id:mapOriginalId(map),surveyedMask:normalizeSurveyMask(null),surveyComplete:false,cleared:false,acquisitionMethod:'discovered'},duplicate:false};
+  return {ok:true,map:{...map,id:mapOriginalId(map),...surveyFields({rulesetVersion:map.rulesetVersion}),cleared:false,acquisitionMethod:'discovered'},duplicate:false};
 }
 export function appraiseMap(state,discoveryId) {
   const result=inspectAppraisal(state,discoveryId);
@@ -68,7 +84,7 @@ export function registerSharedMap(state,original,{confirmSameContent=false}={}) 
   if(state.registered.length>=REGISTERED_LIMIT)return {ok:false,error:'地図帳がいっぱいです。登録済みの地図を整理してから登録してください。'};
   const same=state.registered.find(m=>mapContentId(m)===mapContentId(map));
   if(same&&!confirmSameContent)return {ok:false,needsConfirmation:true,discoverer:same.discovererName};
-  const entry={rulesetVersion:map.rulesetVersion,seed:map.seed,discovererName:map.discovererName,id:mapOriginalId(map),surveyedMask:normalizeSurveyMask(null),surveyComplete:false,cleared:false,favorite:false,memo:'',acquisitionMethod:'shared'};
+  const entry={rulesetVersion:map.rulesetVersion,seed:map.seed,...(isV2Map(map)?{level:map.level,rarity:map.rarity}:{}),discovererName:map.discovererName,id:mapOriginalId(map),...surveyFields({rulesetVersion:map.rulesetVersion}),cleared:false,favorite:false,memo:'',acquisitionMethod:'shared'};
   return {ok:true,state:{...state,registered:[...state.registered,entry]},map:entry};
 }
 export function deleteRegisteredMap(state,id) {
@@ -100,6 +116,7 @@ export function transactSpecialMaps({getCharacter,setCharacter,save},operation) 
 export function updateMapSurvey(state,id,mask){
  const map=state.registered.find(m=>mapOriginalId(m)===id);
  if(!map)return {ok:false,error:'登録済みの地図が見つかりません。'};
+ if(isV2Map(map))return {ok:false,error:'V2多層探索は準備中です。'};
  const surveyedMask=mergeSurvey(map.surveyedMask,mask),entry={...map,surveyedMask,surveyComplete:surveyCount(surveyedMask)===100};
  return {ok:true,map:entry,state:{...state,registered:state.registered.map(m=>mapOriginalId(m)===id?entry:m)}};
 }

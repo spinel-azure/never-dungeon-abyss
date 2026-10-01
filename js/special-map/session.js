@@ -8,6 +8,7 @@ const dirs=['N','E','S','W'],dx=[0,1,0,-1],dy=[-1,0,1,0];
 export function createSpecialMapSession(registered,mapKey,{persistSurvey=()=>({ok:true}),playSe=()=>{},say=()=>{}}={}){
  const original=registered.find(map=>mapOriginalId(map)===mapKey);
  if(!original)throw Error('登録済みの地図が見つかりません。');
+ if(original.rulesetVersion==='special-map-v2')throw Error('V2多層探索は準備中です。');
  const generatedMap=generateRegisteredSpecialMap(original),{entrance,startDirection}=generatedMap;
  const resolvedDirection=resolveSpecialStartDirection(generatedMap);
  const explored=Array.from({length:10},()=>Array(10).fill(false));explored[entrance.y][entrance.x]=true;

@@ -1,0 +1,122 @@
+[
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 0,
+      "level": 1,
+      "rarity": "WHITE",
+      "discovererName": "A"
+    },
+    "code": "NDA:AgIAAAEAAQBBYJONvgbazgM"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 0,
+      "level": 50,
+      "rarity": "SILVER",
+      "discovererName": "†ルル"
+    },
+    "code": "NDA:AgIAADIBAyAgMOsw6-HjN-am8f8Y"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 0,
+      "level": 100,
+      "rarity": "GOLD",
+      "discovererName": "スピネル"
+    },
+    "code": "NDA:AgIAAGQCBDC5MNQwzTDr-7TZly63olw"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 1,
+      "level": 1,
+      "rarity": "WHITE",
+      "discovererName": "A"
+    },
+    "code": "NDA:AgIAAQEAAQBBv40DNMhnf5Q"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 1,
+      "level": 50,
+      "rarity": "SILVER",
+      "discovererName": "†ルル"
+    },
+    "code": "NDA:AgIAATIBAyAgMOsw6yK7srQOw0gw"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 1,
+      "level": 100,
+      "rarity": "GOLD",
+      "discovererName": "スピネル"
+    },
+    "code": "NDA:AgIAAWQCBDC5MNQwzTDrWf313lSPS2k"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 12345,
+      "level": 1,
+      "rarity": "WHITE",
+      "discovererName": "A"
+    },
+    "code": "NDA:AgIwOQEAAQBBruJzlz0Ysws"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 12345,
+      "level": 50,
+      "rarity": "SILVER",
+      "discovererName": "†ルル"
+    },
+    "code": "NDA:AgIwOTIBAyAgMOsw65QoofYQw8Ta"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 12345,
+      "level": 100,
+      "rarity": "GOLD",
+      "discovererName": "スピネル"
+    },
+    "code": "NDA:AgIwOWQCBDC5MNQwzTDrVJ9WLY-hAYE"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 65535,
+      "level": 1,
+      "rarity": "WHITE",
+      "discovererName": "A"
+    },
+    "code": "NDA:AgL__wEAAQBBe3mO69sDi8w"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 65535,
+      "level": 50,
+      "rarity": "SILVER",
+      "discovererName": "†ルル"
+    },
+    "code": "NDA:AgL__zIBAyAgMOsw6yfzVTQ5sCmc"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 65535,
+      "level": 100,
+      "rarity": "GOLD",
+      "discovererName": "スピネル"
+    },
+    "code": "NDA:AgL__2QCBDC5MNQwzTDrZQsDrFRsM5Q"
+  }
+]

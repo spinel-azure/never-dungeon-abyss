@@ -146,7 +146,7 @@ test('V2 Candidate 2 fingerprint covers key chest placement, contents and locked
   }
 });
 
-test('V2: generating blueprints does not alter V1, legacy codes, doors or ecology; live API stays V1', () => {
+test('V2: generating blueprints does not alter V1, legacy codes, doors or ecology; single-floor API stays V1', () => {
   const original = {rulesetVersion: 'phase2a-1', seed: 12345, discovererName: '†ルル'};
   const code = encodeMapCode(original), v1 = generateSpecialMap('special-map-v1', 12345);
   const doors = generateSpecialMapDoors(v1.ruleset, v1.seed, v1);
@@ -160,5 +160,6 @@ test('V2: generating blueprints does not alter V1, legacy codes, doors or ecolog
   assert.equal(encodeMapCode(original), code);
   assert.deepEqual(decodeMapCode(code).map, original);
   assert.throws(() => generateSpecialMap(SPECIAL_DUNGEON_V2, 12345), RangeError);
-  assert.throws(() => encodeMapCode({...original, rulesetVersion: SPECIAL_DUNGEON_V2, level: 1, rarity: 'WHITE'}));
+  const v2Original={...original, rulesetVersion: SPECIAL_DUNGEON_V2, level: 1, rarity: 'WHITE'};
+  assert.deepEqual(decodeMapCode(encodeMapCode(v2Original)).map,v2Original);
 });

@@ -15,6 +15,24 @@ function setup(t){
  const callbacks={getCharacter:()=>character,setCharacter:v=>{character=v;},save:()=>writeGame(snapshot())};
  return {run:op=>transactSpecialMaps(callbacks,op),fail:v=>{failure=v;},get:()=>character,load:()=>{character=loadGame().character;},storage};
 }
+
+test('V2 real protected save keeps acquisition, appraisal, deletion and rollback separate from V1',async t=>{
+ const {registerSharedMap,deleteRegisteredMap}=await import('../data/special-maps.js');
+ const s=setup(t),options={seed:()=>12345,id:()=>'v2',rulesetVersion:'special-map-v2',level:50,rarity:'SILVER'};
+ assert.equal(s.run(v=>discoverTestMap(v,options)).ok,true);s.load();
+ assert.equal(s.get().specialMaps.unidentified[0].level,50);
+ for(const failure of ['.temp','.backup','.current']){
+  const before=structuredClone(s.get());s.fail(failure);
+  assert.equal(s.run(v=>appraiseMap(v,'v2')).ok,false);assert.deepEqual(s.get(),before);s.load();assert.deepEqual(s.get(),before);
+ }
+ s.fail('');const registered=s.run(v=>appraiseMap(v,'v2'));assert.equal(registered.ok,true);s.load();
+ assert.equal(s.get().specialMaps.registered[0].rarity,'SILVER');assert.equal('surveyedMask' in s.get().specialMaps.registered[0],false);
+ s.fail('.current');assert.equal(s.run(v=>deleteRegisteredMap(v,registered.map.id)).ok,false);s.load();assert.equal(s.get().specialMaps.registered.length,1);
+ s.fail('');assert.equal(s.run(v=>deleteRegisteredMap(v,registered.map.id)).ok,true);s.load();
+ assert.equal(s.get().specialMaps.registered.length,0);
+ assert.equal(s.run(v=>registerSharedMap(v,registered.map)).ok,true);s.load();
+ const restored=s.get().specialMaps.registered[0];assert.equal(restored.acquisitionMethod,'shared');assert.equal(restored.discovererName,'†ルル');assert.equal(restored.level,50);assert.equal(restored.seed,12345);
+});
 test('real protected snapshot reload retains unidentified then appraised original',t=>{
  const s=setup(t);assert.equal(s.run(v=>discoverTestMap(v,{seed:()=>65535,id:()=> 'found'})).ok,true);
  s.load();assert.equal(s.get().specialMaps.unidentified[0].seed,65535);

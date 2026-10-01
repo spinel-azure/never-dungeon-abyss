@@ -1,6 +1,6 @@
 import {surveyCount} from '../data/special-map-survey.js';
 import {getTentBackground} from './explorer-preview.js';
-import {normalizeSpecialMaps, describeTestMap, setMapSignature, inspectAppraisal, appraiseMap, registerSharedMap, deleteRegisteredMap, toggleMapFavorite, updateMapSurvey} from '../data/special-maps.js';
+import {isV2Map, rarityLabel, mapContentId, normalizeSpecialMaps, describeTestMap, setMapSignature, inspectAppraisal, appraiseMap, registerSharedMap, deleteRegisteredMap, toggleMapFavorite, updateMapSurvey} from '../data/special-maps.js';
 import {encodeMapCode,decodeMapCode} from '../data/special-map-code.js';
 
 export function createExplorerPreviewUI({host, commands, background, message, playSe, onExit, startExploration, getMaps=()=>null, updateMaps=()=>({ok:false,error:'保存処理に接続されていません。'})}) {
@@ -61,6 +61,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
   function changeView(next){view=next;actionCursor=0;render();}
   function enterMap(){
     try{
+      if(isV2Map(selectedMap()))throw Error('V2多層探索は準備中です。');
       if(!startExploration)throw Error('探索機能に接続されていません。');
       exploration=startExploration({host,registered:maps().registered,mapKey:detailId,message,onExit:exit,playSe,saveSurvey:mask=>updateMaps(state=>updateMapSurvey(state,detailId,mask))});
       panel.hidden=true;view='exploring';
@@ -182,15 +183,15 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       const map=maps().registered.find(m=>m.id===detailId);if(!map){view=origin;render();return;}
       const info=describeTestMap(map)||{name:map.rulesetVersion==='special-map-v1'?'特殊地図':'未対応の生成ルール',level:'?'};
       const body=make('div',undefined,'explorer-detail');
-      body.append(make('h3',`${info.name} Lv.${info.level}`),make('p',`発見者：${map.discovererName}`),make('p',surveyCount(map.surveyedMask)===100?'調査完了':`調査率 ${surveyCount(map.surveyedMask)} / 100`),make('p','挑戦条件：未実装（Phase 2A仮地図）'));
-      panel.append(body);actionButtons(origin==='maps'?[['探索する（A）',()=>changeView('enter')],['戻る（B）',back]]:[['管理機能を確認（A）',()=>changeView('manage')],['戻る（B）',back]]);return;
+      body.append(make('h3',`${info.name} Lv.${info.level}`),make('p',`発見者：${map.discovererName}`),make('p',isV2Map(map)?`${rarityLabel(map.rarity)}・V2多層探索は準備中です。`:surveyCount(map.surveyedMask)===100?'調査完了':`調査率 ${surveyCount(map.surveyedMask)} / 100`),make('p',isV2Map(map)?'挑戦条件：未実装':'挑戦条件：未実装（Phase 2A仮地図）'));
+      panel.append(body);actionButtons(origin==='maps'?[['探索する（A）',()=>isV2Map(map)?error('V2多層探索は準備中です。'):changeView('enter')],['戻る（B）',back]]:[['管理機能を確認（A）',()=>changeView('manage')],['戻る（B）',back]]);return;
     }
     if(view==='enter'){
       panel.append(make('p','この地図を探索しますか？'),make('p','調査した地図は保存されます。再入場時は入口から探索を始めます。'));
       actionButtons([['はい（A／ENTER）',enterMap],['いいえ（B）',back]]);return;
     }
     if(view==='sameContent'){
-      const existing=maps().registered.find(m=>m.rulesetVersion===pendingMap.rulesetVersion&&m.seed===pendingMap.seed);
+      const existing=maps().registered.find(m=>mapContentId(m)===mapContentId(pendingMap));
       panel.append(make('p',`同じ内容の地図がすでに登録されています。発見者：${existing?.discovererName||''}`),make('p','発見者の異なる地図として登録しますか？'));
       actionButtons([['登録する（A）',()=>importCode(true)],['やめる（B）',back]]);return;
     }
