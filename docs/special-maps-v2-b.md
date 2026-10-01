@@ -1,5 +1,7 @@
 # V2-B: enemy-free three-floor runtime
 
+> 以下はV2-B初回実装時点の記録です。実機確認後の階段案内・入口帰還・Three.js金箱・地図共通テーマへの変更は [Candidate 3追補](special-maps-v2-structure-candidate3.md) を参照してください。
+
 V2 Candidate 2構造を変更せず、既存特殊地図探索UIに接続する。
 V2-C（300マスsurvey保存）・敵・戦闘・報酬には進まない。
 

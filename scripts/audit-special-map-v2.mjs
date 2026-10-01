@@ -11,12 +11,14 @@ import {checkStructure} from '../tests/special-map-structure-helper.mjs';
 import {generateSpecialMapV2 as generateCandidate1, canonicalV2Structure as canonicalCandidate1,
   specialMapV2StructureFingerprint as candidate1Fingerprint} from '../tests/fixtures/special-map-v2-candidate-1.mjs';
 
+import {generateSpecialMapV2 as generateCandidate2, canonicalV2Structure as canonicalCandidate2} from '../tests/fixtures/special-map-v2-candidate-2.mjs';
+const withoutTheme = ({themeId, ...rest}) => rest;
 const started = performance.now(), digest = () => createHash('sha256');
-const hashes = {v2Structure: digest(), candidate1Structure: digest(), v1Topology: digest(), legacyTopology: digest(), v1Doors: digest(), v1Ecology: digest()};
+const hashes = {v2Structure: digest(), candidate1Structure: digest(), candidate2Structure: digest(), v1Topology: digest(), legacyTopology: digest(), v1Doors: digest(), v1Ecology: digest()};
 const report = {
   revision: V2_STRUCTURE_REVISION, status: 'PROVISIONAL — structure only, not a released V2 compatibility value',
   ruleset: SPECIAL_DUNGEON_V2, seedsAttempted: 0, validSets: 0, validFloors: 0,
-  failures: {generation: 0, structure: 0, keyAccess: 0, repeat: 0, levelRarityIndependence: 0, candidate1Comparison: 0, legacy: 0}, failureExamples: [],
+  failures: {generation: 0, structure: 0, keyAccess: 0, repeat: 0, levelRarityIndependence: 0, candidate1Comparison: 0, candidate2Comparison: 0, legacy: 0}, failureExamples: [],
   coverage: {
     structure: 'All 65536 seeds at Lv1 WHITE. Gate open: all 300 cells reachable in both directions via stairs. Gate locked: 298 total / 98 floor-3 exterior cells reachable, room cells blocked, key chest reachable at least 10 steps from up stair, never geometrically adjacent to it.',
     identity: 'Every seed regenerated identically, then regenerated at a rotating Lv1..100 and WHITE/SILVER/GOLD. Structural equality excludes only Lv/color.',
@@ -53,9 +55,16 @@ try {
       try {
         old = generateCandidate1(input);
         hashes.candidate1Structure.update(canonicalCandidate1(old) + '\n');
-        assert.deepEqual(map.floors.slice(0, 2), old.floors.slice(0, 2));
-        assert.deepEqual(map.floors.map(f => f.themeId), old.floors.map(f => f.themeId));
+        assert.deepEqual(map.floors.slice(0, 2).map(withoutTheme), old.floors.slice(0, 2).map(withoutTheme));
       } catch (error) {failure('candidate1Comparison', seed, error);}
+      try {
+        const c2 = generateCandidate2(input);
+        hashes.candidate2Structure.update(canonicalCandidate2(c2) + '\n');
+        assert.deepEqual(map.floors.map(withoutTheme), c2.floors.map(withoutTheme));
+        assert.deepEqual(map.links, c2.links);
+        assert.equal(map.themeId, c2.floors[0].themeId);
+        assert.ok(map.floors.every(f => f.themeId === map.themeId));
+      } catch (error) {failure('candidate2Comparison', seed, error);}
       try {assert.deepEqual(generateSpecialMapV2(input), map);}
       catch (error) {failure('repeat', seed, error);}
       try {
@@ -105,14 +114,15 @@ const expected = {
 };
 report.legacyHashesUnchanged = Object.entries(expected).every(([key, value]) => report.sha256[key] === value);
 report.candidate1HashUnchanged = report.sha256.candidate1Structure === '19f8f3aad737c8ab9e91c7e673e892ab810b7938b182cab63e77d3b9601750b1';
+report.candidate2HashUnchanged = report.sha256.candidate2Structure === '243b09bbd93f5ff783b1bf772c156e159132451d90a630a807a19b8d6fdd4db3';
 report.seconds = Number(((performance.now() - started) / 1000).toFixed(3));
 report.passed = report.validSets === 65536 && report.validFloors === 196608
-  && Object.values(report.failures).every(n => n === 0) && report.legacyHashesUnchanged && report.candidate1HashUnchanged;
+  && Object.values(report.failures).every(n => n === 0) && report.legacyHashesUnchanged && report.candidate1HashUnchanged && report.candidate2HashUnchanged;
 const range = table => ({min: Math.min(...Object.keys(table).map(Number)), max: Math.max(...Object.keys(table).map(Number))});
 report.distanceRanges = {stairs: report.stairsDistances.map(range), floor3Boss: range(report.floor3BossDistances), entranceToBoss: range(report.entranceToBossDistances),
   keyChest: range(report.keyChestDistances), keyChestToGate: range(report.keyChestToGateDistances)};
 report.averageKeyChestDistance = Object.entries(report.keyChestDistances).reduce((sum, [distance, count]) => sum + Number(distance) * count, 0) / report.validSets;
-writeFileSync(new URL('../artifacts/special-map-v2-structure-candidate-2.json', import.meta.url), JSON.stringify(report, null, 2) + '\n');
+writeFileSync(new URL('../artifacts/special-map-v2-structure-candidate-3.json', import.meta.url), JSON.stringify(report, null, 2) + '\n');
 console.log(JSON.stringify({passed: report.passed, validSets: report.validSets, validFloors: report.validFloors,
   failures: report.failures, distanceRanges: report.distanceRanges, sha256: report.sha256, seconds: report.seconds}, null, 2));
 if (!report.passed) process.exitCode = 1;

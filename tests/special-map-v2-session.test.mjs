@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createSpecialMapV2Session,confirmV2Cell,getV2StairDestination,switchV2Floor} from '../js/special-map/session-v2.js';
+import {createSpecialMapV2Session,confirmV2Cell,getV2StairDestination,switchV2Floor,getV2StairPrompt,completeV2KeyChest,cancelV2KeyChest} from '../js/special-map/session-v2.js';
 import {actSpecialMap,updateSpecialMotion,openSpecialDoorAhead,specialDoorState,startSpecialAutoWalker,continueSpecialAutoWalker,getSpecialAutoAvailability,flushSpecialSurvey} from '../js/special-map/session.js';
 import {mapOriginalId} from '../data/special-maps.js';
 import {encodeMapCode,decodeMapCode} from '../data/special-map-code.js';
@@ -34,7 +34,7 @@ function stairs(s,down){
 
 test('V2 starts registered-only on floor 1, preserves blueprint and uses runtime-only knowledge',()=>{
  const s=create({persistSurvey(){throw Error('V2 must not save survey');}});
- assert.equal(s.kind,'specialMapV2');assert.equal(s.currentFloor,0);assert.equal(s.torchFuel,100);assert.equal(s.fingerprint,'5a0826f6');
+ assert.equal(s.kind,'specialMapV2');assert.equal(s.currentFloor,0);assert.equal(s.torchFuel,100);assert.equal(s.fingerprint,'3519b715');
  assert.equal(s.cells[s.playerY][s.playerX].type,'stairsUp');assert.equal(s.cells[s.playerY][s.playerX].walls[dirs[s.direction]],false);
  assert.deepEqual(s.floors.map(f=>f.explored.flat().filter(Boolean).length),[1,0,0]);
  assert.equal(getV2StairDestination(s),null);assert.equal(confirmV2Cell(s,0).destination,undefined);
@@ -71,7 +71,7 @@ test('key chest, locked gate, unlock, autoclose, boss cell and cross-floor key r
  go(s,room.approach);const first=room.cells[0];face(s,dirs.findIndex((_,d)=>s.playerX+dx[d]===first.x&&s.playerY+dy[d]===first.y));
  assert.equal(openSpecialDoorAhead(s,clock),false);assert.equal(act(s,'up'),false);assert.equal(s.bossDoorUnlocked,false);
  go(s,f.keyChest);assert.equal(s.cells[s.playerY][s.playerX].treasure,'gold');
- confirmV2Cell(s,clock);assert.equal(s.bossKeyFound,true);assert.equal(s.cells[s.playerY][s.playerX].treasure,null);
+ assert.equal(confirmV2Cell(s,clock).openKeyChest,true);assert.equal(s.bossKeyFound,false);assert.equal(s.transitioning,true);completeV2KeyChest(s);assert.equal(s.bossKeyFound,true);assert.equal(s.cells[s.playerY][s.playerX].treasure,null);
  confirmV2Cell(s,clock);assert.equal(sounds.filter(id=>id==='importantItem').length,1);
  stairs(s,false);stairs(s,true);assert.equal(s.bossKeyFound,true);assert.equal(s.floors[2].chestOpened,true);
  go(s,room.approach);face(s,dirs.findIndex((_,d)=>s.playerX+dx[d]===first.x&&s.playerY+dy[d]===first.y));

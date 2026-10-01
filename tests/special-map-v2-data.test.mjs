@@ -107,13 +107,13 @@ test('old saves are not promoted and V2 cannot inherit single-floor survey or en
  assert.deepEqual(normalizeSpecialMaps().registered,[]);
 });
 
-test('decoded V2 routes only to Candidate 2, reproduces layout independent of level/rarity/signature',()=>{
+test('decoded V2 routes only to Candidate 3, reproduces layout independent of level/rarity/signature',()=>{
  for(const {map,code} of fixtures){
   const generated=generateRegisteredSpecialMap(decodeMapCode(code).map);
   assert.equal(generated.ruleset,'special-map-v2');assert.equal(generated.floors.length,3);
   checkV2KeyAccess(generated);
   if(map.seed===12345){
-   assert.equal(specialMapV2StructureFingerprint(generated),'5a0826f6');
+   assert.equal(specialMapV2StructureFingerprint(generated),'3519b715');
    assert.equal(generated.floors[2].keyChest.x,9);assert.equal(generated.floors[2].keyChest.y,8);
   }
  }

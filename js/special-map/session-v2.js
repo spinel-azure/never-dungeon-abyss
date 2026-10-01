@@ -72,6 +72,30 @@ export function getV2StairDestination(s){
  return null;
 }
 
+export function getV2StairPrompt(s){
+ if(!isV2Session(s))return '';
+ const here={x:s.playerX,y:s.playerY},f=s.generatedMap;
+ if(same(here,f.stairsUp))return s.currentFloor===0
+  ?'上り階段がある。探索を終了して帰還しますか？\n＊A／Enterで帰還　移動で探索を続ける'
+  :'上り階段がある。上層に移動しますか？\n＊A／Enterで移動　移動で探索を続ける';
+ if(same(here,f.stairsDown))return '下り階段がある。下層に移動しますか？\n＊A／Enterで移動　移動で探索を続ける';
+ return '';
+}
+
+// Award only after the shared Three.js opening callback. No normal key inventory.
+export function completeV2KeyChest(s){
+ const f=s.chestOpening;
+ if(!f)return false;
+ s.chestOpening=null;s.transitioning=false;
+ f.chestOpened=true;s.bossKeyFound=true;
+ s.playSe('importantItem');s.say('金箱から赤錆びた鍵を手に入れた。');
+ return true;
+}
+export function cancelV2KeyChest(s){
+ if(!s.chestOpening)return;
+ s.chestOpening=null;s.transitioning=false;
+}
+
 export function switchV2Floor(s,destination){
  if(!isV2Session(s)||!s.blueprint.links.some(l=>[l.upper,l.lower].some(p=>p.floor===destination?.floor&&same(p,destination))))throw Error('不正な階段移動先です。');
  s.autoPath=null;
@@ -89,8 +113,9 @@ export function confirmV2Cell(s,now){
  const destination=getV2StairDestination(s);
  if(destination)return {handled:true,destination};
  const f=s.floors[s.currentFloor],point={x:s.playerX,y:s.playerY};
+ if(s.currentFloor===0&&same(point,f.generatedFloor.stairsUp))return {handled:true,returnToEntrance:true};
  if(same(point,f.generatedFloor.keyChest)){
-  if(!f.chestOpened){f.chestOpened=true;s.bossKeyFound=true;s.playSe('importantItem');s.say('金箱から赤錆びた鍵を手に入れた。');}
+  if(!f.chestOpened){s.chestOpening=f;s.transitioning=true;return {handled:true,openKeyChest:true};}
   else s.say('金箱は空だ。');
   return {handled:true};
  }

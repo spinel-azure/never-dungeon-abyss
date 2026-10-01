@@ -56,23 +56,31 @@ try{for(const [label,width,height,touch] of [['pc',1280,900,false],['mobile',390
  assert.equal((await page.evaluate(()=>v2Qa.status())).fuel,99);await page.keyboard.press('ArrowDown');await page.evaluate(()=>v2Qa.settled());
  await cancel();assert.ok(await page.evaluate(()=>v2Qa.menu()));await page.screenshot({path:`artifacts/special-map-v2-b/${label}-menu.png`});await page.evaluate(()=>v2Qa.input('cancel'));
  async function stair(down){await page.evaluate(d=>v2Qa.go(d?v2Qa.s().generatedMap.stairsDown:v2Qa.s().generatedMap.stairsUp),down);
-  const old=await page.evaluate(()=>v2Qa.status());await confirm();await page.waitForFunction(f=>v2Qa.s().currentFloor!==f&&!v2Qa.s().transitioning,old.floor);await confirm();const next=await page.evaluate(()=>v2Qa.status());assert.equal(next.fuel,old.fuel);console.log(label,'floor',next.floor+1,next.fuel);}
+  const old=await page.evaluate(()=>v2Qa.status());assert.match(await page.locator('#message').textContent(),down?/下り階段がある/:/上り階段がある/);await confirm();await page.waitForFunction(f=>v2Qa.s().currentFloor!==f&&!v2Qa.s().transitioning,old.floor);await confirm();const next=await page.evaluate(()=>v2Qa.status());assert.equal(next.fuel,old.fuel);assert.equal(next.theme,'crystal');console.log(label,'floor',next.floor+1,next.fuel);}
  await stair(true);await stair(false);await stair(true);await stair(true);
  await page.evaluate(async()=>{const s=v2Qa.s(),r=s.generatedMap.bossRoom;await v2Qa.go(r.approach);await v2Qa.face(['N','E','S','W'].findIndex((_,d)=>s.playerX+[0,1,0,-1][d]===r.cells[0].x&&s.playerY+[-1,0,1,0][d]===r.cells[0].y));});
  await confirm();assert.equal((await page.evaluate(()=>v2Qa.status())).unlocked,false);await page.screenshot({path:`artifacts/special-map-v2-b/${label}-locked.png`});
- await page.evaluate(()=>v2Qa.go(v2Qa.s().generatedMap.keyChest));await confirm();assert.equal((await page.evaluate(()=>v2Qa.status())).key,true);
+ await page.evaluate(()=>v2Qa.go(v2Qa.s().generatedMap.keyChest));await confirm();
+ assert.equal((await page.evaluate(()=>v2Qa.status())).key,false);
+ await page.waitForFunction(()=>document.querySelector('#treasureCanvas').style.visibility==='visible');
+ await page.waitForTimeout(1500);await page.screenshot({path:`artifacts/special-map-v2-b/${label}-gold-opening.png`});
+ const busy=await page.evaluate(()=>v2Qa.status());await confirm();await cancel();await page.evaluate(()=>v2Qa.input('up'));
+ assert.deepEqual((await page.evaluate(()=>v2Qa.status())).xy,busy.xy);assert.equal(await page.evaluate(()=>v2Qa.menu()),false);
+ await page.waitForFunction(()=>v2Qa.s().bossKeyFound&&!v2Qa.s().transitioning);
+ assert.equal(await page.locator('#treasureCanvas').evaluate(e=>e.style.visibility),'hidden');
+ assert.equal((await page.evaluate(()=>v2Qa.status())).key,true);
  await stair(false);await stair(true);
  await page.evaluate(async()=>{const s=v2Qa.s(),r=s.generatedMap.bossRoom;await v2Qa.go(r.approach);await v2Qa.face(['N','E','S','W'].findIndex((_,d)=>s.playerX+[0,1,0,-1][d]===r.cells[0].x&&s.playerY+[-1,0,1,0][d]===r.cells[0].y));});
  await confirm();await page.evaluate(()=>v2Qa.settled());assert.equal((await page.evaluate(()=>v2Qa.status())).unlocked,true);
  await page.evaluate(()=>v2Qa.go(v2Qa.s().generatedMap.bossRoom.bossCell));assert.equal((await page.evaluate(()=>v2Qa.status())).doors,0);
  await page.screenshot({path:`artifacts/special-map-v2-b/${label}-boss-cell.png`});
- const status=await page.evaluate(()=>v2Qa.status());assert.equal(status.fp,'5a0826f6');
+ const status=await page.evaluate(()=>v2Qa.status());assert.equal(status.fp,'3519b715');
  await page.evaluate(async()=>{const {startSpecialAutoWalker}=await import('/js/special-map/session.js');if(!startSpecialAutoWalker(v2Qa.s()))throw Error('auto failed');});
  await page.waitForFunction(()=>!v2Qa.s().autoPath,{},{timeout:40000});assert.equal((await page.evaluate(()=>v2Qa.status())).floor,2);
  await stair(false);await stair(false);
  assert.equal(await page.evaluate(()=>v2Qa.normal()),before);assert.ok(await page.evaluate(()=>window.treasureDraws>0));assert.ok(await page.evaluate(()=>window.redDoorDraws>0));
  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);assert.equal(overflow,false);
- await page.evaluate(()=>v2Qa.input('cancel'));await page.keyboard.press('ArrowDown');await page.keyboard.press('ArrowRight');await confirm();await page.waitForFunction(()=>!v2Qa.s());
+ await page.evaluate(()=>v2Qa.go(v2Qa.s().generatedMap.stairsUp));assert.match(await page.locator('#message').textContent(),/探索を終了して帰還しますか/);await page.screenshot({path:`artifacts/special-map-v2-b/${label}-entrance-return.png`});await confirm();await page.waitForFunction(()=>!v2Qa.s());
  assert.equal(await page.evaluate(()=>v2Qa.normal()),before);assert.equal(await page.locator('[data-entrance-command="mapExploration"]').isVisible(),true);
  assert.deepEqual(errors,[]);results.push({label,status,overflow,errors,normalStateUnchanged:true});await page.close();
 }await writeFile('artifacts/special-map-v2-b/browser.json',JSON.stringify(results,null,2));console.log(results);}finally{await browser.close();}

@@ -1,9 +1,9 @@
-import {streamV1, chooseIndexV1, hash32V1} from './random-v1.js';
+import {streamV1, chooseIndexV1, hash32V1} from '../../js/special-map/random-v1.js';
 
-// V2 structural candidate 3: one map-wide theme; Candidate 2 geometry is unchanged.
+// V2 structural candidate 2. Deliberately not connected to issuance, saves or gameplay.
 // Reuse the frozen integer PRNG, never the single-floor V1 generator/dispatcher.
 export const SPECIAL_DUNGEON_V2 = 'special-map-v2';
-export const V2_STRUCTURE_REVISION = 'v2-structure-candidate-3';
+export const V2_STRUCTURE_REVISION = 'v2-structure-candidate-2';
 export const V2_KEY_CHEST_MIN_DISTANCE = 10;
 export const V2_BOSS_KEY_ID = 'special-map-v2:rusted-boss-key';
 export const V2_SIZE = 10;
@@ -128,7 +128,7 @@ function placeKeyChest(walls, up, room, next) {
   return {id: 'floor-3:rusted-key-chest', ...point(cell), kind: 'gold',
     contents: {type: 'sessionKey', keyId: V2_BOSS_KEY_ID, name: '赤錆びた鍵', scope: 'specialMapSession'}};
 }
-function generateFloor(seed, floor, themeId) {
+function generateFloor(seed, floor) {
   const stream = purpose => streamV1(SPECIAL_DUNGEON_V2, seed, `floor-${floor}-${purpose}`);
   const room = floor === 3 ? ROOMS[chooseIndexV1(stream('boss-room'), ROOMS.length)] : null;
   const walls = carveFloor(stream('topology'), room);
@@ -154,7 +154,7 @@ function generateFloor(seed, floor, themeId) {
     floor, width: 10, height: 10, walls,
     stairsUp: point(up), stairsDown: down === null ? null : point(down),
     entranceSide, startDirection: DIRECTIONS[facing],
-    themeId,
+    themeId: V2_THEMES[chooseIndexV1(stream('theme'), V2_THEMES.length)],
     bossRoom: room ? roomDescription(room) : null,
     ...(room ? {keyChest: placeKeyChest(walls, up, room, stream('key-chest'))} : {}),
   };
@@ -169,19 +169,16 @@ export function generateSpecialMapV2({ruleset, seed, level, rarity} = {}) {
   if (!Number.isInteger(seed) || seed < 0 || seed > 65535) throw new RangeError('seed must be an integer from 0 to 65535');
   if (!Number.isInteger(level) || level < 1 || level > 100) throw new RangeError('level must be an integer from 1 to 100');
   if (!V2_RARITIES.includes(rarity)) throw new RangeError('Unsupported V2 rarity');
-  // Retain the original floor-1 theme stream as the map theme. No geometry stream changes.
-  const themeId = V2_THEMES[chooseIndexV1(streamV1(SPECIAL_DUNGEON_V2, seed, 'floor-1-theme'), V2_THEMES.length)];
-  const floors = [1, 2, 3].map(floor => generateFloor(seed, floor, themeId));
+  const floors = [1, 2, 3].map(floor => generateFloor(seed, floor));
   const links = [0, 1].map(i => ({
     upper: {floor: i + 1, ...floors[i].stairsDown},
     lower: {floor: i + 2, ...floors[i + 1].stairsUp},
   }));
-  return {ruleset, seed, level, rarity, floorCount: 3, themeId, floors, links};
+  return {ruleset, seed, level, rarity, floorCount: 3, floors, links};
 }
 
 // Explicit ordered fields: stable across object key order; survey, runtime and
-// future content layers are absent. Structural hashes intentionally omit Lv/rarity.
-// The common theme is serialized through each floor.themeId (map.themeId is its alias).
+// future content layers are absent. Structural hashes intentionally omit Lv/color.
 const xy = p => p === null ? null : [p.x, p.y];
 export function canonicalV2Structure(map) {
   return JSON.stringify([map.ruleset, map.seed, map.floorCount, map.floors.map(f => [

@@ -14,9 +14,10 @@ import {KEY_ITEMS} from '../data/key-items.js';
 const input = (seed, level = 1, rarity = 'WHITE') => ({ruleset: SPECIAL_DUNGEON_V2, seed, level, rarity});
 const seeds = [0, 1, 12345, 32768, 65535];
 // Candidate comparison snapshots, not a declaration that V2 has been released.
-const fingerprints = ['ff8e2d5e', '10a7c000', '5a0826f6', '7d9192d0', '43f0e785'];
+const fingerprints = ['d5a7a4aa', '43daa69d', '3519b715', '90f038f0', '54ac48a2'];
+const withoutTheme = ({themeId,...rest}) => rest;
 
-test('V2 Candidate 2: three floors, reciprocal stairs, 1x2 room and reachable key chest repeat 100 times', () => {
+test('V2 Candidate 3: three floors, reciprocal stairs, 1x2 room and reachable key chest repeat 100 times', () => {
   for (const seed of seeds) {
     const map = generateSpecialMapV2(input(seed)); checkV2Structure(map); checkV2KeyAccess(map);
     assert.equal(specialMapV2StructureFingerprint(map), fingerprints[seeds.indexOf(seed)]);
@@ -98,8 +99,9 @@ test('V2 Candidate 1 comparison fixture retains fingerprints and unchanged first
     assert.equal(candidate1Fingerprint(old), oldFingerprints[i]);
     assert.equal(old.floors[2].bossRoom.cells.length, 3);
     assert.equal(old.floors[2].keyChest, undefined);
-    assert.deepEqual(current.floors.slice(0, 2), old.floors.slice(0, 2));
-    assert.deepEqual(current.floors.map(f => f.themeId), old.floors.map(f => f.themeId));
+    assert.deepEqual(current.floors.slice(0, 2).map(withoutTheme), old.floors.slice(0, 2).map(withoutTheme));
+    assert.ok(current.floors.every(f => f.themeId === current.themeId));
+    assert.equal(current.themeId, old.floors[0].themeId);
   }
 });
 
@@ -162,4 +164,19 @@ test('V2: generating blueprints does not alter V1, legacy codes, doors or ecolog
   assert.throws(() => generateSpecialMap(SPECIAL_DUNGEON_V2, 12345), RangeError);
   const v2Original={...original, rulesetVersion: SPECIAL_DUNGEON_V2, level: 1, rarity: 'WHITE'};
   assert.deepEqual(decodeMapCode(encodeMapCode(v2Original)).map,v2Original);
+});
+
+import {generateSpecialMapV2 as generateCandidate2, specialMapV2StructureFingerprint as candidate2Fingerprint} from './fixtures/special-map-v2-candidate-2.mjs';
+test('Candidate 3 changes only themes, preserving Candidate 2 geometry, stairs, chest and gate',()=>{
+ const oldFingerprints=['ff8e2d5e','10a7c000','5a0826f6','7d9192d0','43f0e785'];
+ for(const [i,seed] of seeds.entries()){
+  const old=generateCandidate2(input(seed)),current=generateSpecialMapV2(input(seed));
+  assert.equal(candidate2Fingerprint(old),oldFingerprints[i]);
+  assert.deepEqual(current.floors.map(withoutTheme),old.floors.map(withoutTheme));
+  assert.deepEqual(current.links,old.links);
+  assert.equal(current.themeId,old.floors[0].themeId);
+  assert.ok(current.floors.every(f=>f.themeId===current.themeId));
+  const changed=structuredClone(current);changed.floors[2].themeId='invalid';
+  assert.notEqual(specialMapV2StructureFingerprint(changed),specialMapV2StructureFingerprint(current));
+ }
 });

@@ -1,0 +1,24 @@
+✔ V2 stair prompts on arrival; entrance A returns, merely arriving never does (9.478ms)
+✔ V2 gold chest awards only on animation completion, locks repeat input, grants once (5.5595ms)
+✔ auto walker stops at stairs and leaves the same return prompt without automatic exit (4.2339ms)
+✔ V2 chest cancellation/disposal cannot award a late key; failed animation can be retried (10.7814ms)
+✔ V2 Candidate 3: three floors, reciprocal stairs, 1x2 room and reachable key chest repeat 100 times (217.4026ms)
+✔ V2: all 100 levels and all rarities preserve structural coverage; identity inputs remain explicit (253.2811ms)
+✔ V2: rejects unsupported versions, non-16bit seeds, invalid levels and colors without coercion (0.922ms)
+✔ V2: no Math.random; new purpose streams and discoverer names never change structure (9.5798ms)
+✔ V2: inputs are not mutated and generated floor/room/link objects are not shared (4.8866ms)
+✔ V2: ASCII inspector identifies both stairs and the final boss cell without an exit marker (1.4454ms)
+✔ V2 Candidate 1 comparison fixture retains fingerprints and unchanged first two floors (10.0112ms)
+✔ V2 key is session-scoped, not a normal B9 inventory item; no survey/runtime is created (3.6086ms)
+✔ V2 audit rejects a key behind its own locked door, a near-stair key, overlaps and wrong locks (5.6129ms)
+✔ V2 Candidate 2 fingerprint covers key chest placement, contents and locked door metadata (1.9642ms)
+✔ V2: generating blueprints does not alter V1, legacy codes, doors or ecology; single-floor API stays V1 (7.6625ms)
+✔ Candidate 3 changes only themes, preserving Candidate 2 geometry, stairs, chest and gate (11.6043ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 708.4395

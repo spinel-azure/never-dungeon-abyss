@@ -5471,6 +5471,7 @@ import {
     return result;
   }
   configureSpecialMapHost({
+    playTreasureOpening,hideTreasure,
     runStairsTransition:onDark=>runSceneTransition({playAudio:()=>playSeSequence('stairs',3),onDark}),
     floorChanged:({session})=>{startBgm(getSpecialMapBgmKey(session.generatedMap.themeId));updateHud();},
     viewport:viewportEl,status:viewportEl.querySelector('.status'),updateHud,
