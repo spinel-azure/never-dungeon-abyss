@@ -434,6 +434,8 @@ async function executeCommand(command) {
   battleUi.presentationEnemyImage=battleUi.battle.enemy.image;
   battleUi.presentationWhirlpools = Object.fromEntries((battleUi.battle.enemies || []).map(e => [e.id, Boolean(e.reservedEnemyAction)]));
   battleUi.presentationBossBarrier = battleUi.battle.enemy.bossMagicBarrier;
+  const startingSp = battleUi.battle.player.sp;
+  battleUi.presentationSp = startingSp;
   const startingHp = {
     player: battleUi.battle.player.hp,
     enemy: battleUi.battle.enemy.hp,
@@ -472,7 +474,7 @@ async function executeCommand(command) {
   battleUi.presentationMagicBarrier = battleUi.presenting ? startingMagicBarrier : null;
   battleUi.onCharacterChanged({
     hp: battleUi.presenting ? startingHp.player : battleUi.battle.player.hp,
-    sp: battleUi.battle.player.sp,
+    sp: battleUi.presenting ? startingSp : battleUi.battle.player.sp,
     wingGiftUses: battleUi.battle.player.wingGiftUses,
     statuses: structuredClone(battleUi.battle.player.statuses),
     inventory: structuredClone(battleUi.battle.player.inventory),
@@ -491,9 +493,11 @@ async function executeCommand(command) {
   battleUi.mode = "commands";
   battleUi.selectedIndex = 0;
   showCommandButtons();
+  const presentingBattle = battleUi.battle;
+  battleUi.messageEl.textContent = "";
   renderBattle();
-  if (battleUi.presenting) await playPresentationEvents();
-  if (!battleUi.active) return;
+  if (battleUi.presenting) await playPresentationEvents(startingSp);
+  if (!battleUi.active || battleUi.battle !== presentingBattle) return;
   syncFinalPlayerState();
   if (battleUi.battle.outcome === "victory") battleUi.playSe("battleVictory");
   else if (battleUi.battle.outcome === "defeat") battleUi.playSe("playerDamage");
@@ -535,6 +539,8 @@ async function executeAmbushOpening() {
   battleUi.presentationMagicBarrier = magicBarrierAmount(battleUi.battle.player);
   battleUi.presentationWhirlpools = Object.fromEntries((battleUi.battle.enemies || []).map(e => [e.id, Boolean(e.reservedEnemyAction)]));
   battleUi.presentationBossBarrier = battleUi.battle.enemy.bossMagicBarrier;
+  const startingSp = battleUi.battle.player.sp;
+  battleUi.presentationSp = startingSp;
   const startingHp = {
     player: battleUi.battle.player.hp,
     enemy: battleUi.battle.enemy.hp
@@ -545,16 +551,18 @@ async function executeAmbushOpening() {
   battleUi.presentationHp = startingHp;
   battleUi.onCharacterChanged({
     hp: startingHp.player,
-    sp: battleUi.battle.player.sp,
+    sp: battleUi.presenting ? startingSp : battleUi.battle.player.sp,
     wingGiftUses: battleUi.battle.player.wingGiftUses,
     statuses: structuredClone(battleUi.battle.player.statuses),
     inventory: structuredClone(battleUi.battle.player.inventory),
     herbicideTrialUses: Number(battleUi.battle.player.herbicideTrialUses) || 0,
     alive: startingHp.player > 0
   });
+  const presentingBattle = battleUi.battle;
+  battleUi.messageEl.textContent = "";
   renderBattle();
-  if (battleUi.battle.presentationEvents?.length) await playPresentationEvents();
-  if (!battleUi.active) return;
+  if (battleUi.battle.presentationEvents?.length) await playPresentationEvents(startingSp);
+  if (!battleUi.active || battleUi.battle !== presentingBattle) return;
   syncFinalPlayerState();
   if (battleUi.battle.outcome === "defeat") battleUi.playSe("playerDamage");
   battleUi.presenting = false;
@@ -563,12 +571,27 @@ async function executeAmbushOpening() {
   if (!battleUi.battle.outcome && isCharmed(battleUi.battle.player)) scheduleCharmRound();
 }
 
-async function playPresentationEvents() {
+async function playPresentationEvents(startingSp) {
+  const battle = battleUi.battle;
+  const current = () => battleUi.active && battleUi.battle === battle;
+  let displayedSp = startingSp;
   const events = battleUi.battle.presentationEvents || [];
   const image = battleUi.root.querySelector("#battleEnemyImage");
   const playedAreaHits = new Set();
   for (const event of events) {
-    if (!battleUi.active) return;
+    if (!current()) return;
+    if (Number.isFinite(event.playerSp)) displayedSp = event.playerSp;
+    else if (event.type === "spHealing" && event.targetSide === "player") displayedSp += event.amount;
+    else if (event.type === "spDamage" && event.targetSide === "player") displayedSp -= event.amount;
+    if (Number.isFinite(displayedSp) && displayedSp !== battleUi.presentationSp) {
+      battleUi.presentationSp = displayedSp;
+      battleUi.onCharacterChanged({sp:displayedSp});
+      setText("battlePlayerSp", `${displayedSp} / ${battle.player.maxSp}`);
+    }
+    if (event.type === "skillActivation") {
+      battleUi.messageEl.textContent = event.message;
+      continue;
+    }
     if (playedAreaHits.has(event)) continue;
     const areaHits = getAreaPresentationGroup(events, event);
     if (areaHits.length > 1) {
@@ -579,6 +602,7 @@ async function playPresentationEvents() {
     if(event.type === "lionPhase") {
       battleUi.messageEl.textContent=event.message;
       await presentLionPhase(image,event.image);
+      if (!current()) return;
       battleUi.presentationEnemyImage=event.image;continue;
     }
     if (event.playerChargePresentationId && event.hitIndex === 0) {
@@ -588,12 +612,14 @@ async function playPresentationEvents() {
         playSe: battleUi.playSe
       });
     }
+    if (!current()) return;
     if (event.type === "npcChargeSkill") {
       battleUi.onNpcSupport(event.npcId);
       battleUi.onNpcCharge(event.npcId, 100);
       battleUi.messageEl.textContent = event.message;
       battleUi.messageEl.classList.add("is-npc-charge-skill");
       await playNpcChargeCutIn(event);
+      if (!current()) return;
       battleUi.messageEl.classList.remove("is-npc-charge-skill");
       battleUi.onNpcCharge(event.npcId, 0);
       continue;
@@ -611,6 +637,17 @@ async function playPresentationEvents() {
       && Number(enemyHpBefore) <= 0
       && (event.hit || ["damage", "followUpDamage", "poisonDamage", "bleedingDamage", "leoHpCost"].includes(event.type));
     if (defeatedTargetHasQueuedHit) continue;
+    if (!current()) return;
+    battleUi.messageEl.textContent = `${event.actorName || 'プレイヤー'}の${event.actionName || '攻撃'}！`;
+    const dedicatedPresentationPlayed = (event.targetSide === "enemy" || event.battlePresentationId === "apocalypse") && event.hit
+      ? await playBattleSkillPresentation({
+        root: battleUi.root,
+        messageElement: battleUi.messageEl,
+        presentationId: event.battlePresentationId || event.playerChargePresentationId,
+        damage: event.damage, targetIndex: event.targetIndex ?? battleUi.battle.targetIndex
+      })
+      : false;
+    if (!current()) return;
     applyPresentationHp(event);
     const enemyHpAfter = event.targetSide !== "enemy"
       ? null
@@ -628,10 +665,8 @@ async function playPresentationEvents() {
       battleUi.ambientEffects?.remove(vanishImage);
       markEnemyVanishPending(vanishImage);
     }
-    if (event.type === 'spDamage' && Number.isFinite(event.playerSp)) battleUi.onCharacterChanged({sp:event.playerSp});
     if (event.type === 'bossMagicBarrier') {
       battleUi.presentationBossBarrier = event.remaining;
-      if (Number.isFinite(event.playerSp)) battleUi.onCharacterChanged({sp:event.playerSp});
       if (event.absorbed && !event.silent) battleUi.playSe('crystalObstacleBreak');
       syncEnemyAmbientEffects();
     }
@@ -654,15 +689,6 @@ async function playPresentationEvents() {
       if (!event.whirlpoolPreparing) await playWhirlpoolWave(battleUi.root, () => battleUi.active);
     }
     if (event.broken) await playBarrierShatter(battleUi.root, image, () => battleUi.active);
-    const dedicatedPresentationPlayed = (event.targetSide === "enemy" || event.battlePresentationId === "apocalypse") && event.hit
-      ? await playBattleSkillPresentation({
-        root: battleUi.root,
-        messageElement: battleUi.messageEl,
-        presentationId: event.battlePresentationId || event.playerChargePresentationId,
-        damage: event.damage, targetIndex: event.targetIndex ?? battleUi.battle.targetIndex
-      })
-      : false;
-    if (!battleUi.active) return;
     if (event.causalityRevival) await playDefeatRecoveryFlash();
     if (event.type === "healing") {
       showBattleNumber(event.targetSide, event.amount, "healing");
@@ -672,7 +698,7 @@ async function playPresentationEvents() {
       battleUi.playSe("heal");
     } else if (event.type === "barrierDamage") {
       showBattleNumber("player", event.amount, "barrier");
-    } else if (!event.bossBarrierBlocked && !dedicatedPresentationPlayed && (event.hit || event.type === "damage" || event.type === "followUpDamage" || event.type === "poisonDamage" || event.type === "bleedingDamage" || event.type === "leoHpCost")) {
+    } else if (!event.bossBarrierBlocked && (event.hit || event.type === "damage" || event.type === "followUpDamage" || event.type === "poisonDamage" || event.type === "bleedingDamage" || event.type === "leoHpCost")) {
       showBattleNumber(
         event.targetSide,
         event.damage ?? event.amount,
@@ -697,12 +723,13 @@ async function playPresentationEvents() {
       battleUi.playSe("playerDamage");
     }
     const duration = dedicatedPresentationPlayed
-      ? getBattleDedicatedPresentationDwell(battleUi.speedMode)
+      ? Math.max(getBattleDedicatedPresentationDwell(battleUi.speedMode), getBattlePresentationDelay(360, battleUi.speedMode))
       : getBattlePresentationDelay(
         event.targetSide === "player" && event.hit ? 520 : event.hit ? 360 : 280,
         battleUi.speedMode
       );
     await delay(duration);
+    if (!current()) return;
     targetImage?.classList.remove("is-hit");
     if (event.slashExecution) await playSlashEffect(targetImage, { restoreImage: !vanishImage });
     if (vanishImage && vanishEnemy) {
@@ -741,14 +768,15 @@ async function playAreaSkillPresentation(events) {
   };
   const played = await playBattleSkillPresentation({root:battleUi.root,messageElement:battleUi.messageEl,
     presentationId:first.battlePresentationId, targets:targets.map(event=>({targetIndex:event.targetIndex,damage:event.damage})),
-    onImpact:impact});
+    });
   if (!current()) return;
   impact();
+  battleUi.messageEl.textContent = targets.map(event => event.message).join('\n');
+  for (const event of targets) showBattleNumber('enemy',event.damage,'damage',event.hitIndex,event.hitCount,event.targetIndex);
   if (!played) {
-    for (const event of targets) showBattleNumber('enemy',event.damage,'damage',event.hitIndex,event.hitCount,event.targetIndex);
     battleUi.playSe('attackHit');
     await delay(getBattlePresentationDelay(360,battleUi.speedMode));
-  } else await delay(getBattleDedicatedPresentationDwell(battleUi.speedMode));
+  } else await delay(Math.max(getBattleDedicatedPresentationDwell(battleUi.speedMode), getBattlePresentationDelay(360, battleUi.speedMode)));
   if (!current()) return;
   await Promise.all(vanishing.map(async ({image,enemy,event}) => {
     if (event.slashExecution) await playSlashEffect(image,{restoreImage:false});
@@ -1090,7 +1118,7 @@ function renderBattle() {
     ["POISON", "TOXIC", "DEATH POISON"].includes(getConditionLabel(battle.player.statuses))
   );
   renderBattleVitals();
-  setText("battlePlayerSp", `${battle.player.sp} / ${battle.player.maxSp}`);
+  setText("battlePlayerSp", `${battleUi.presenting ? battleUi.presentationSp : battle.player.sp} / ${battle.player.maxSp}`);
   setText("battlePlayerCondition", statusText(battle.player));
   const party = battleUi.root.querySelector("#battleEnemyParty");
   if (battle.enemies) renderEnemyParty(battle);
@@ -1138,7 +1166,7 @@ function renderBattle() {
   enemyStage?.classList.toggle("is-eiskoenigin", battle.enemy.id === "eiskoenigin_b49f" && !defeated && !battleUi.concealed);
   enemyStage?.classList.toggle("is-amayenak", ["amayenak_b100f", "amayenak_phantom_b100f"].includes(battle.enemy.id));
   enemyStage?.classList.toggle("is-zentaurin", battle.enemy.id === "zentaurin_b96f");
-  battleUi.messageEl.textContent = formatBattleMessage(battle);
+  if (!battleUi.presenting) battleUi.messageEl.textContent = formatBattleMessage(battle);
   syncEnemyAmbientEffects();
 }
 

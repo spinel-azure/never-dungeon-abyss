@@ -6,21 +6,26 @@ const browser=await chromium.launch({channel:'msedge',headless:true});try{
 for(const [label,width,height] of [['pc',1280,900],['mobile',390,844]]){
  const page=await browser.newPage({viewport:{width,height}}),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.addInitScript(()=>{navigator.getGamepads=()=>[];window.areaPlays=[];window.areaImpacts=[];});
  await page.route('**/js/main.js?*',r=>r.fulfill({contentType:'text/javascript',body:main.replace('  document.documentElement.dataset.ndaMainReady = "true";',setup+'\n document.documentElement.dataset.ndaMainReady = "true";')}));
- await page.route('**/js/battle.js',r=>r.fulfill({contentType:'text/javascript',body:battle+`\nwindow.areaBattle={close:closeBattle,idle:()=>!battleUi.presenting,read:()=>({hp:battleUi.presentationHp?.enemies,finalHp:battleUi.battle.enemies.map(e=>e.hp)}),cast(id,lethal=false){battleUi.battle.player.statuses=[];battleUi.battle.player.skillIds.push(id);battleUi.battle.player.sp=battleUi.battle.player.maxSp=999;battleUi.battle.player.playerCharge={value:100,cooldown:0};for(const enemy of battleUi.battle.enemies){enemy.race=lethal?'undead':'other';}executeCommand({type:'skill',skillId:id});}};`}));
- await page.route('**/js/battle-skill-presentation.js',r=>r.fulfill({contentType:'text/javascript',body:presentation.replace('engine.load(prepared);','window.areaPlays.push(prepared);engine.load(prepared);window.areaEngine=engine;const screenCallback=engine.onScreen;engine.onScreen=value=>{if(value?.blur>0)window.areaSawBlur=true;if(value?.tv)window.areaSawTv=true;screenCallback?.(value);};').replace('impacted=true;onImpact?.();','impacted=true;onImpact?.();window.areaImpacts.push(window.areaBattle.read());').replace('return await engine.play();','return await engine.play({speed:4});')}));
+ await page.route('**/js/battle.js',r=>r.fulfill({contentType:'text/javascript',body:battle.replace("  if (!played) {", "  window.areaImpacts.push(window.areaBattle.read());\n  if (!played) {")+`\nwindow.areaBattle={close:closeBattle,idle:()=>!battleUi.presenting,read:()=>({message:battleUi.messageEl.textContent,hp:battleUi.presentationHp?.enemies,finalHp:battleUi.battle.enemies.map(e=>e.hp)}),cast(id,lethal=false){battleUi.battle.player.statuses=[];battleUi.battle.player.skillIds.push(id);battleUi.battle.player.sp=battleUi.battle.player.maxSp=999;battleUi.battle.player.playerCharge={value:100,cooldown:0};for(const enemy of battleUi.battle.enemies){enemy.race=lethal?'undead':'other';}executeCommand({type:'skill',skillId:id});}};`}));
+ await page.route('**/js/battle-skill-presentation.js',r=>r.fulfill({contentType:'text/javascript',body:presentation.replace('engine.load(prepared);','window.areaPlays.push(prepared);engine.load(prepared);window.areaEngine=engine;const screenCallback=engine.onScreen;engine.onScreen=value=>{if(value?.blur>0)window.areaSawBlur=true;if(value?.tv)window.areaSawTv=true;screenCallback?.(value);};').replace('await engine.play();','await engine.play({speed:4});')}));
  await page.goto('http://127.0.0.1:4173');await page.waitForFunction(()=>window.areaQa);await page.evaluate(()=>areaQa.setup());
  for(const id of ['call_goddess_name','fall_the_meteor','apocalypse','walpurgisnacht']){
  await page.evaluate(()=>{areaPlays.length=0;areaImpacts.length=0;areaQa.start();});await page.evaluate(id=>areaBattle.cast(id,id==='call_goddess_name'),id);
- await page.waitForFunction(()=>areaImpacts.length===1,{},{timeout:30000}).catch(async e=>{console.log(id,await page.evaluate(()=>({plays:areaPlays.length,impacts:areaImpacts,read:areaBattle.read(),text:document.body.innerText.slice(-2000)})),errors);throw e;});
- const result=await page.evaluate(()=>({plays:areaPlays.length,popups:areaPlays[0].parts.filter(p=>p.type==='popup'),impact:areaImpacts[0]}));
- assert.equal(result.plays,1);assert.equal(result.popups.length,3);assert.deepEqual(result.impact.hp,result.impact.finalHp);
- assert.equal(new Set(result.popups.map(p=>p.start)).size,1);
- await page.screenshot({path:join(output,label+'-'+id+'.png')});
+ await page.waitForFunction(()=>window.areaEngine?.time>500 && !document.querySelector('#battleSkillEffectCanvas').hidden);
+ assert.ok((await page.evaluate(()=>areaBattle.read())).hp.every(hp=>hp===999999));
+ assert.equal(await page.evaluate(()=>document.querySelectorAll('.battle-enemy-member .battle-number.is-damage').length),0);
+ assert.equal(await page.evaluate(()=>/ダメージ|会心/.test(areaBattle.read().message)),false);
  if(id==='call_goddess_name') {
   await page.waitForFunction(()=>areaEngine.time>=20550);
+  assert.ok((await page.evaluate(()=>areaBattle.read())).hp.every(hp=>hp===999999));
   assert.equal(await page.evaluate(()=>areaEngine.imageCache.has('images/battle_effects/goddess_bg.avif')),true);
   await page.screenshot({path:join(output,label+'-goddess-background.png')});
  }
+ await page.waitForFunction(()=>areaImpacts.length===1,{},{timeout:30000}).catch(async e=>{console.log(id,await page.evaluate(()=>({plays:areaPlays.length,impacts:areaImpacts,read:areaBattle.read(),text:document.body.innerText.slice(-2000)})),errors);throw e;});
+ const result=await page.evaluate(()=>({plays:areaPlays.length,popups:areaPlays[0].parts.filter(p=>p.type==='popup'),impact:areaImpacts[0]}));
+ assert.equal(result.plays,1);assert.equal(result.popups.length,0);assert.deepEqual(result.impact.hp,result.impact.finalHp);
+ assert.equal(await page.evaluate(()=>document.querySelectorAll(".battle-enemy-member .battle-number.is-damage").length),3);
+ await page.screenshot({path:join(output,label+'-'+id+'.png')});
 await page.waitForFunction(()=>areaBattle.idle(),{},{timeout:30000});assert.equal(await page.evaluate(()=>areaPlays.length),1);
  if(id==='call_goddess_name') {
   assert.equal(await page.evaluate(()=>areaSawBlur&&areaSawTv),true);

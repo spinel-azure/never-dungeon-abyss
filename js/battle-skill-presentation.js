@@ -43,7 +43,7 @@ export function getBattleEffectTarget(root, canvas, targetIndex) {
 
 export function stopBattleSkillPresentation() {requestGeneration++;if(activeEngine){activeEngine.canvas.hidden=true;activeEngine.stop(false)}activeEngine=null;}
 
-export async function playBattleSkillPresentation({root,presentationId,damage,healing,targetIndex,definition,messageElement,targets,onImpact}={}) {
+export async function playBattleSkillPresentation({root,presentationId,damage,healing,targetIndex,definition,messageElement,targets}={}) {
   const canvas=root?.querySelector?.('#battleSkillEffectCanvas');
   if(!canvas||(!definition&&!presentationId))return false;
   const request=++requestGeneration;
@@ -61,14 +61,14 @@ export async function playBattleSkillPresentation({root,presentationId,damage,he
     if(request!==requestGeneration){routing?.release();return false}
     const surface=root.closest('.viewport');
     const shake=createStageShake(surface?[...surface.children]:[root],root,()=>engine.effect);
-    const prepared = targets?.length ? prepareAreaSkillEffect(definition, targets) : prepareBattleSkillEffect(definition,damage,healing);
-    const popupStarts = prepared.parts.filter(p=>p.enabled!==false && p.type==='popup').map(p=>p.start);
-    const impactTime = popupStarts.length ? Math.min(...popupStarts) : prepared.duration;
-    let impacted = false;
+    // Damage is revealed by the battle UI only after the entire effect finishes.
+    // Keep the source JSON intact for the editor and other effect users.
+    const visualDefinition = {...definition, parts:(definition.parts || []).filter(
+      part => !(part.type === 'popup' && part.valueSource === 'damage'))};
+    const prepared = prepareBattleSkillEffect(visualDefinition,damage,healing);
     engine=new EffectEngine(canvas,{transparent:true,backdrop:false,
       getTarget:part=>getBattleEffectTarget(root,canvas,
         part?.id?.startsWith('area_damage_') ? targets?.[Number(part.id.split('_')[2])]?.targetIndex : targetIndex),
-      onFrame:time=>{if(!impacted && time>=impactTime){impacted=true;onImpact?.();}},
       onShake:shake,
       onScreen:createStageFilter(surface||root,()=>engine.effect),
       onMessage:text=>{if(messageElement)messageElement.textContent=text??originalMessage},
@@ -77,11 +77,12 @@ export async function playBattleSkillPresentation({root,presentationId,damage,he
     activeEngine=engine;
     engine.load(prepared);
     canvas.hidden=false;
-    return await engine.play();
+    const completed = await engine.play();
+    return completed && request === requestGeneration;
   }catch(error){console.warn('Battle presentation failed',error);return false}
   finally{
     routing?.release();
-    if(activeEngine===engine){if(messageElement)messageElement.textContent=originalMessage;engine?.stop(false);canvas.hidden=true;activeEngine=null}
+    if(request===requestGeneration && activeEngine===engine){if(messageElement)messageElement.textContent=originalMessage;engine?.stop(false);canvas.hidden=true;activeEngine=null}
   }
 }
 

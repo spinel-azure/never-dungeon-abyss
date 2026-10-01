@@ -2022,7 +2022,8 @@ test("Triage resolves before NPC charge skills and uses its explicit healing mes
   const healingIndex = result.battle.presentationEvents.findIndex(event => event.type === "healing");
   const npcChargeIndex = result.battle.presentationEvents.findIndex(event => event.type === "npcChargeSkill");
   assert.equal(result.accepted, true);
-  assert.equal(healingIndex, 0);
+  assert.equal(healingIndex, 1);
+  assert.equal(result.battle.presentationEvents[0].type, "skillActivation");
   assert.ok(npcChargeIndex > healingIndex);
   assert.match(result.battle.presentationEvents[healingIndex].message, /^トリアージュで最速治療！HPが\d+回復した！$/);
 });
@@ -2063,7 +2064,8 @@ test("Die Triage unlocks at level 40 and resolves before NPC charge skills", () 
   const healingIndex = result.battle.presentationEvents.findIndex(event => event.type === "healing");
   const npcChargeIndex = result.battle.presentationEvents.findIndex(event => event.type === "npcChargeSkill");
   assert.equal(result.accepted, true);
-  assert.equal(healingIndex, 0);
+  assert.equal(healingIndex, 1);
+  assert.equal(result.battle.presentationEvents[0].type, "skillActivation");
   assert.ok(npcChargeIndex > healingIndex);
   assert.match(result.battle.presentationEvents[healingIndex].message,
     /^ホーホ・トリアージュで最速治療！HPが\d+回復した！$/);
@@ -2403,8 +2405,9 @@ test("Maximal Triage unlocks at 65 and fully heals before enemies for 50 SP", ()
   const initialSp = battle.player.sp;
   const result = resolveBattleRound({ battle, playerCommand: { type: "skill", skillId: skill.id }, rng: () => 0.99 });
   assert.equal(result.accepted, true);
-  assert.equal(result.battle.presentationEvents[0].type, "healing");
-  assert.equal(result.battle.presentationEvents[0].amount, battle.player.maxHp - 1);
+  assert.equal(result.battle.presentationEvents[0].type, "skillActivation");
+  assert.equal(result.battle.presentationEvents[1].type, "healing");
+  assert.equal(result.battle.presentationEvents[1].amount, battle.player.maxHp - 1);
   assert.equal(result.battle.player.sp, initialSp - 50);
   assert.equal(resolveFieldSkill({ character: priest, skillId: skill.id }).reason, "battleOnly");
   priest.sp = 49;

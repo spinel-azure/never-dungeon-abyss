@@ -195,14 +195,13 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
     && Number(playerAction.action.turnPriority) >= 100;
   applyNpcBattleStart(next, rng);
   if (!priorityPlayerAction) applyNpcChargeSkills(next, rng);
-  if (!next.outcome && playerAction.spCost > 0) next.player.sp -= playerAction.spCost;
   if (!next.outcome && playerCommand.type === "guard") applyNpcGuardSupport(next);
   if (!next.outcome && priorityPlayerAction) {
     const opportunity = resolveActionOpportunity(next.player.statuses);
     next.player.statuses = opportunity.statuses;
     if (opportunity.skipped) {
       next.log.push(`${next.player.name}は動けない！`);
-    } else {
+    } else if (consumePlayerActionSp(next, playerAction)) {
       executeAction({
         battle: next,
         action: playerAction.action,
@@ -239,11 +238,15 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
     const targetHpBefore = target.hp;
     const action = applyAriesOpeningAttack(next, entry.action, entry.side);
     if (entry.side === "player" && isCharmed(actor)) {
-      actor.sp = Math.min(actor.maxSp, actor.sp + playerAction.spCost);
       playerAction.spCost = 0;
       playerCommand = { type: "wait" };
       executeAction({ battle: next, action: charmAction(rng), actor, actorSide: "player", target, targetSide, rng });
     } else if (entry.side === "player") {
+      if (!consumePlayerActionSp(next, playerAction)) {
+        finishAction(next, "player");
+        updateOutcome(next);
+        continue;
+      }
       executeSinglePlayerActionSequence({
         battle: next, action, repeatAction: entry.action,
         command: playerCommand, actor, target, rng
@@ -280,6 +283,22 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
   }
   applyBattleVictoryCardEffects(next);
   return { battle: next, accepted: true };
+}
+
+// Pay once when the chosen action actually starts, including all-target/Gemini casts.
+function consumePlayerActionSp(battle, playerAction) {
+  const cost = playerAction.spCost;
+  if (!(cost > 0)) return true;
+  if (battle.player.sp < cost) {
+    const message = `${battle.player.name}はSPが足りず、${playerAction.action.name}を使えない！`;
+    battle.log.push(message);
+    battle.presentationEvents.push({type:"skillUnavailable", message});
+    return false;
+  }
+  battle.player.sp -= cost;
+  battle.presentationEvents.push({type:"skillActivation", playerSp:battle.player.sp,
+    message:`${battle.player.name}の${playerAction.action.name}！`});
+  return true;
 }
 
 export function getJireneScriptedCommand(battle, rng = Math.random) {
@@ -360,14 +379,13 @@ export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.rand
     applyNpcChargeSkills(next, rng);
     updateMultiOutcome(next);
   }
-  if (!next.outcome && playerAction.spCost > 0) next.player.sp -= playerAction.spCost;
   if (!next.outcome && playerCommand.type === "guard") applyNpcGuardSupport(next);
   if (!next.outcome && priorityPlayerAction) {
     const opportunity = resolveActionOpportunity(next.player.statuses);
     next.player.statuses = opportunity.statuses;
     if (opportunity.skipped) {
       next.log.push(`${next.player.name}は動けない！`);
-    } else {
+    } else if (consumePlayerActionSp(next, playerAction)) {
       executeAction({
         battle: next,
         action: playerAction.action,
@@ -410,13 +428,19 @@ export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.rand
     if (entry.side === "player") {
       const action = applyAriesOpeningAttack(next, entry.action, "player");
       if (isCharmed(actor)) {
-        actor.sp = Math.min(actor.maxSp, actor.sp + playerAction.spCost);
         playerAction.spCost = 0; playerCommand = { type: "wait" };
         executeAction({ battle: next, action: charmAction(rng), actor, actorSide: "player", target: next.enemy, targetSide: "enemy", rng });
-      } else executeMultiPlayerActionSequence({
-        battle: next, action, repeatAction: entry.action, command: playerCommand, actor,
-        targetIndex: next.targetIndex, rng
-      });
+      } else {
+        if (!consumePlayerActionSp(next, playerAction)) {
+          finishCombatantAction(next, actor, "player");
+          updateMultiOutcome(next);
+          continue;
+        }
+        executeMultiPlayerActionSequence({
+          battle: next, action, repeatAction: entry.action, command: playerCommand, actor,
+          targetIndex: next.targetIndex, rng
+        });
+      }
       playerActionExecuted = true;
       next.lastPlayerTargetIndex = normalizeLivingTargetIndex(next.enemies, next.targetIndex, { allowDefeated: true });
       finishCombatantAction(next, actor, "player");

@@ -2024,3 +2024,17 @@
 - Node全1763成功/失敗0。追加3テストで同一更新の統合/最新状態使用/旧セッション破棄、進行0/3/15/33件・深度/フラグ別の通知一致と正規化1回、同期結果利用と表示直前の再確認を検証。既存通知の条件変更/中断/セーブ互換テスト維持。Python29成功/警告0/失敗0/既存2skip、構文/diff成功。
 - tests/browser/guild-quest-notification.mjsでPC/スマホ相当通知確認成功・page/consoleエラーなし。QA画像TEMP/nda-guild-quest-notification-qa、ログTEMP/nda-walk-notice-browser.log・nda-walking-performance.log・nda-walk-node-final.log・nda-walk-python.log。実ユーザーセーブ、通常プレイ長時間、実端末/実ゲームパッドは未確認。残るもっさり感は実セーブの描画/保存等の別計測対象。
 - LAST UPDATE2026-10-01へ更新、main.jsキャッシュ20261001-1。README変更なし。コミット/pushなし。
+
+
+### 2026-10-01 戦闘演出終了時の結果表示・発動時SP消費
+
+- 着手main/8b43b57、作業ツリークリーン。単体攻撃では演出開始前のapplyPresentationHp/結果メッセージ、ラウンド開始renderBattleでは計算済みlogが結果を先出ししていた。全体攻撃もJSON内popup開始時にHPを反映していた。
+- 本編専用JSON再生時だけdamage popupを除外し、全演出終了後に既存battle-number/結果メッセージ/表示HPを同時更新。元JSONとエディタ用prepare関数は維持。三女神の背景・ぼかし・テレビ消灯まで再生してから結果を表示。全体攻撃は詠唱1回の演出・対象別同時数値・ジェミニ別詠唱を維持。高速設定でも結果表示の待ちを確保し、その後に消滅処理。読込失敗は通常表示へ戻り、中断したラウンドの継続処理は新戦闘へ反映しない。
+- プレイヤーのSP前払いをやめ、行動不能/魅了判定後、実行直前に一度だけ消費。単体/複数/最優先回復を同じ消費関数で処理。skillActivationイベントでSP表示を発動順へ同期し、選択時は開始SPを維持。SP吸収/回復/障壁反応もイベント順で表示。魅了時の旧前払い返金は不要となり削除。
+- 発動前の死亡・行動スキップでは選択技のSPを消費しない。先行敵のSP吸収で不足した場合は発動失敗を表示し、負数消費や技の実行を防止。全体対象/ジェミニ追加詠唱へ消費を重複させない。消費額、攻撃式、威力、経験値、探索処理は変更なし。
+- Node全1772成功/失敗0。追加9テストで単体/複数の先行SP吸収→発動、吸収後不足、行動スキップ、発動前死亡、最優先回復、全体ジェミニ消費1回を確認。既存回復テスト3件は先頭に発動イベントが入る期待値へ更新し、最優先回復順は維持。Python29成功/警告0/失敗0/既存2skip。構文/diff確認成功。
+- tests/browser/battle-result-timing.mjsでPC1280x900/スマホ相当390x844の単体ボス・三女神演出を検証。敵先行中SP不変、発動時のみ100消費、旧popup時刻以降もHPバー/数値/結果を先出ししない、全演出終了後に実数値/ログ/バー同期、途中終了後の次戦へSP反映なしを確認。QA画像TEMP/nda-battle-result-eKeigB。
+- QAは状態を設定して本編処理を動かし、EffectEngine再生のみ4倍速で検証。実端末・実ゲームパッド・通常速度の通常プレイ全通しは未確認。全NodeログTEMP/nda-battle-timing-node-final.log、PythonログTEMP/nda-battle-timing-python.log。ブラウザ起動/素材待ちの途中タイムアウトは成功扱いにせず、ローカルサーバーログをTEMPへ出力する形にして再確認。
+- LAST UPDATE2026-10-01維持、main.jsキャッシュ20261001-2。README変更なし、コミット/pushなし。
+
+- 最終tests/browser/area-skill-presentation.mjsもPC/スマホ相当で成功。4技の演出1回、途中のHP/結果非表示、終了時の3対象同時数値/HP更新、三女神の背景/ぼかし/消灯、中断後の次戦保護、JSON404時の通常表示を確認。QA画像TEMP/nda-area-effects-BUKw82、ログTEMP/nda-battle-area-timing-final.log。単体/全体のPC/スマホ画像を目視確認。
