@@ -4679,7 +4679,7 @@ import {
       sceneTransition.classList.add("is-running");
       sceneTransition.style.transitionDuration = `${darkenMs}ms`;
       document.body.classList.add("scene-transition-active");
-      sceneTransitionTitle.hidden = enteringMapDungeon || !showEnteringTitle;
+      sceneTransitionTitle.hidden = !(showEnteringTitle || enteringMapDungeon);
       if (enteringMapDungeon) {
         sceneTransitionTitle.querySelector('strong').textContent = 'MAP DUNGEON';
         sceneTransitionTitle.classList.add('map-dungeon-title');
@@ -4689,11 +4689,6 @@ import {
       const audioPromise = Promise.resolve().then(playAudio).catch(() => false);
       requestAnimationFrame(() => sceneTransition.classList.add("is-black"));
       await Promise.all([wait(darkenMs), audioPromise]);
-      if (enteringMapDungeon) {
-        sceneTransitionTitle.hidden = false;
-        await wait(1000);
-        sceneTransitionTitle.hidden = true;
-      }
       await onDark();
       await wait(holdMs);
 

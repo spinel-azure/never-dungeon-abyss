@@ -1,0 +1,18 @@
+{
+  "during": {
+    "depth": 1,
+    "world": "town",
+    "titleHidden": false,
+    "opacity": "0.364221",
+    "text": "ENTERING\nNEVER DUNGEON : ABYSS",
+    "running": true
+  },
+  "after": {
+    "depth": 1,
+    "world": "dungeon",
+    "titleHidden": true,
+    "opacity": "0",
+    "text": "\n        ENTERING\n        NEVER DUNGEON : ABYSS\n      ",
+    "running": false
+  }
+}
