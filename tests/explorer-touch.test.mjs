@@ -45,6 +45,13 @@ test('V2 uses existing detail UI and passes its original to the exploration disp
  v.ui.input('confirm');v.ui.input('confirm');
  assert.equal(starts,1);
 });
+for(const total of [0,100,300])test(`V2 detail displays persistent ${total}/300 independently of V1`,t=>{
+ const masks=Array.from({length:3},(_,i)=>(i<total/100?'f':'0').repeat(25));
+ const initial=normalizeSpecialMaps({discovererName:'スピネ',registered:[{rulesetVersion:'special-map-v2',seed:1,level:50,rarity:'SILVER',discovererName:'A',surveyedMasks:masks}]});
+ const v=setup(t,'layout-mobile',initial);v.ui.open('maps');v.ui.input('confirm');
+ assert.ok(v.host.textContent.includes(total===300?'調査完了':`調査 ${total} / 300`));
+ assert.doesNotMatch(v.host.textContent,/今回の入場中のみ/);
+});
 for(const layout of ['layout-mobile','layout-tablet'])test(`${layout}: native taps select twice, explicit actions execute once`,t=>{
   const v=setup(t,layout);v.ui.open('maps');
   assert.equal(v.touch(v.find(label(2))),false);

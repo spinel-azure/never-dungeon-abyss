@@ -5305,7 +5305,7 @@ import {
     if(special){
       const s=special.session;
       depthEl.textContent=s.kind==='specialMapV2'?`B${s.currentFloor+1}F`:'特殊地図';posEl.textContent=`X:${s.playerX} Y:${s.playerY}`;
-      const chip=document.getElementById('specialSurveyChip');if(chip)chip.textContent=s.kind==='specialMapV2'?`今回探索 ${s.surveyedCount} / 100`:s.surveyComplete?'調査完了':`調査 ${s.surveyedCount} / 100`;
+      const chip=document.getElementById('specialSurveyChip');if(chip)chip.textContent=s.kind==='specialMapV2'?`調査 ${s.surveyedCount} / 100 ・ ${s.surveyComplete?'調査完了':`総合 ${s.totalSurveyed} / 300`}`:s.surveyComplete?'調査完了':`調査 ${s.surveyedCount} / 100`;
       torchMeterEl.style.width=`${s.renderState.torchFuel}%`;torchMeterEl.parentElement.classList.toggle('is-critical',s.renderState.torchFuel<=20);
       presenceMeterEl.style.setProperty('--presence','0%');presenceMeterEl.setAttribute('aria-valuenow','0');
       drawCompass(performance.now(),{canvas:compassCanvas,ctx:compassCanvas.getContext('2d'),state:s.renderState,size:compassCanvas.width});

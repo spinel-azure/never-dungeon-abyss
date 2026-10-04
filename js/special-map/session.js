@@ -68,12 +68,12 @@ export function actSpecialMap(session,action,now){
 }
 
 export function recordSpecialSurvey(session,x,y){
- if(session.kind==='specialMapV2')return true; // V2-B knowledge is only runtime explored.
+ if(session.kind==='specialMapV2')return session.recordSurvey(x,y);
  session.pendingSurveyMask=surveyVisit(session.pendingSurveyMask,x,y);
  return flushSpecialSurvey(session);
 }
 export function flushSpecialSurvey(session){
- if(session.kind==='specialMapV2')return true;
+ if(session.kind==='specialMapV2')return session.flushSurvey();
  if(session.pendingSurveyMask===session.surveyedMask)return true;
  let result;try{result=session.persistSurvey(session.pendingSurveyMask);}catch{}
  if(!result?.ok){session.surveyError='調査記録を保存できませんでした。Aまたは帰還で再試行できます。';return false;}

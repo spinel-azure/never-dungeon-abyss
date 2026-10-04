@@ -78,11 +78,11 @@ test('mixed book, V2 duplicate before capacity, shared signature and deletion re
  state.registered[1].favorite=false;state=deleteRegisteredMap(state,result.map.id).state;
  result=registerSharedMap(state,decodeMapCode(encodeMapCode(original())).map,{confirmSameContent:true});
  assert.equal(result.map.cleared,false);assert.equal(result.map.favorite,false);assert.equal(result.map.memo,'');
- assert.equal('surveyedMask' in result.map,false);assert.equal('surveyedMasks' in result.map,false);
+ assert.equal('surveyedMask' in result.map,false);assert.deepEqual(result.map.surveyedMasks,Array(3).fill('0'.repeat(25)));
  assert.equal(mapOriginalId(result.map),mapOriginalId(original()));
 });
 
-test('V2 acquisition/appraisal fixes parameters, shares limits and does not introduce survey',()=>{
+test('V2 acquisition/appraisal fixes parameters, shares limits and initializes empty V2 survey',()=>{
  let state=empty();
  for(let i=0;i<3;i++)state=discoverTestMap(state,{seed:()=>i,id:()=>String(i),rulesetVersion:'special-map-v2',level:100,rarity:'GOLD'}).state;
  assert.equal(discoverTestMap(state,{seed:()=>{throw Error('must not draw');}}).ok,false);
@@ -96,13 +96,13 @@ test('V2 acquisition/appraisal fixes parameters, shares limits and does not intr
  full.registered[0]=result.map;assert.equal(appraiseMap(full,'0').duplicate,true);
 });
 
-test('old saves are not promoted and V2 cannot inherit single-floor survey or enter gameplay',()=>{
+test('old saves are not promoted and V2 cannot inherit single-floor survey or enter the V1 runtime',()=>{
  const legacy={rulesetVersion:'phase2a-1',seed:5,discovererName:'A',surveyedMask:'f'.repeat(25)};
  const v2=original({surveyedMask:'f'.repeat(25),surveyComplete:true,floors:[{walls:'do not persist'}],activeSession:{},surveyedMasks:['f'.repeat(25)]});
  const state=normalizeSpecialMaps({registered:[legacy,v2]});
  assert.equal(state.registered[0].rulesetVersion,'phase2a-1');assert.equal(state.registered[0].surveyComplete,true);assert.equal('level' in state.registered[0],false);
  assert.equal('surveyedMask' in state.registered[1],false);assert.equal('surveyComplete' in state.registered[1],false);
- for(const key of ['floors','activeSession','surveyedMasks'])assert.equal(key in state.registered[1],false);
+ for(const key of ['floors','activeSession'])assert.equal(key in state.registered[1],false);
  assert.throws(()=>createSpecialMapSession(state.registered,mapOriginalId(v2)),/V2多層探索は準備中/);
  assert.deepEqual(normalizeSpecialMaps().registered,[]);
 });

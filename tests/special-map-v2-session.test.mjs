@@ -32,13 +32,13 @@ function stairs(s,down){
  assert.equal(s.torchFuel,fuel);assert.equal(s.playerX,dest.x);assert.equal(s.playerY,dest.y);
 }
 
-test('V2 starts registered-only on floor 1, preserves blueprint and uses runtime-only knowledge',()=>{
- const s=create({persistSurvey(){throw Error('V2 must not save survey');}});
+test('V2 starts registered-only on floor 1, preserves blueprint and separates runtime from persistent knowledge',()=>{
+ const s=create();
  assert.equal(s.kind,'specialMapV2');assert.equal(s.currentFloor,0);assert.equal(s.torchFuel,100);assert.equal(s.fingerprint,'3519b715');
  assert.equal(s.cells[s.playerY][s.playerX].type,'stairsUp');assert.equal(s.cells[s.playerY][s.playerX].walls[dirs[s.direction]],false);
  assert.deepEqual(s.floors.map(f=>f.explored.flat().filter(Boolean).length),[1,0,0]);
  assert.equal(getV2StairDestination(s),null);assert.equal(confirmV2Cell(s,0).destination,undefined);
- assert.ok(flushSpecialSurvey(s));assert.equal('surveyedMasks' in s,false);assert.equal('surveyComplete' in s,false);
+ assert.ok(flushSpecialSurvey(s));assert.equal(s.totalSurveyed,1);assert.equal(s.surveyComplete,false);
  assert.throws(()=>createSpecialMapV2Session([],mapOriginalId(original)));
  const decoded=decodeMapCode(encodeMapCode(original)).map;
  assert.deepEqual(createSpecialMapV2Session([decoded],mapOriginalId(decoded)).blueprint,s.blueprint);
@@ -89,11 +89,11 @@ test('key chest, locked gate, unlock, autoclose, boss cell and cross-floor key r
 test('V2 auto walker only knows visited cells; locked doors excluded even with synthetic full knowledge',()=>{
  const s=create();assert.equal(startSpecialAutoWalker(s),false);
  const entrance=s.generatedMap.entrance;assert.ok(act(s,'up'));
- const visited=s.explored;assert.ok(getSpecialAutoAvailability(s).accepted);s.explored=Array.from({length:10},()=>Array(10).fill(false));
- assert.equal(getSpecialAutoAvailability(s).accepted,false);s.explored=visited;
+ const visited=s.surveyView.map(row=>[...row]);assert.ok(getSpecialAutoAvailability(s).accepted);s.surveyView.forEach(row=>row.fill(false));
+ assert.equal(getSpecialAutoAvailability(s).accepted,false);s.surveyView.forEach((row,y)=>row.splice(0,10,...visited[y]));
  assert.ok(startSpecialAutoWalker(s));for(let i=0;i<15&&s.autoPath;i++){clock+=600;updateSpecialMotion(s,clock);continueSpecialAutoWalker(s,clock);}
  assert.equal(s.playerX,entrance.x);assert.equal(s.playerY,entrance.y);
- stairs(s,true);stairs(s,true);s.explored.forEach(row=>row.fill(true));const boss=s.generatedMap.bossRoom.bossCell;s.playerX=boss.x;s.playerY=boss.y;
+ stairs(s,true);stairs(s,true);s.surveyView.forEach(row=>row.fill(true));const boss=s.generatedMap.bossRoom.bossCell;s.playerX=boss.x;s.playerY=boss.y;
  assert.equal(getSpecialAutoAvailability(s).accepted,false);
 });
 

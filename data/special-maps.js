@@ -1,4 +1,5 @@
 import {normalizeSurveyMask,mergeSurvey,surveyCount} from './special-map-survey.js';
+import {normalizeSurveyMasks,mergeSurveyV2} from './special-map-survey-v2.js';
 // Phase 2A ownership data. This ruleset is deliberately NOT the future dungeon V1.
 export const SPECIAL_MAP_RULESET = 'phase2a-1';
 export const SPECIAL_MAP_V2 = 'special-map-v2';
@@ -21,7 +22,7 @@ export function mapOriginalId(map) {
 }
 export function mapLayoutId(map) { return JSON.stringify([map.rulesetVersion,map.seed]); }
 export function mapContentId(map) { return isV2Map(map)?JSON.stringify([map.rulesetVersion,map.seed,map.level,map.rarity]):mapLayoutId(map); }
-function surveyFields(map){return isV2Map(map)?{}:{surveyedMask:normalizeSurveyMask(map.surveyedMask),surveyComplete:surveyCount(map.surveyedMask)===100};}
+function surveyFields(map){return isV2Map(map)?{surveyedMasks:normalizeSurveyMasks(map.surveyedMasks)}:{surveyedMask:normalizeSurveyMask(map.surveyedMask),surveyComplete:surveyCount(map.surveyedMask)===100};}
 function normalizeOriginal(map) {
   if(!map || !Number.isInteger(map.seed) || map.seed<0 || map.seed>65535 || typeof map.rulesetVersion!=='string' || !map.rulesetVersion) return null;
   if(isV2Map(map)&&!validV2Parameters(map))return null;
@@ -32,6 +33,7 @@ function normalizeOriginal(map) {
     const clean={rulesetVersion:map.rulesetVersion,seed:map.seed,level:map.level,rarity:map.rarity,discovererName:signature.value};
     for(const key of ['id','discoveryId','acquisitionMethod','memo'])if(typeof map[key]==='string')clean[key]=map[key];
     for(const key of ['favorite','cleared'])if(typeof map[key]==='boolean')clean[key]=map[key];
+    if(Array.isArray(map.surveyedMasks))clean.surveyedMasks=normalizeSurveyMasks(map.surveyedMasks);
     return clean;
   }
   return {...map,discovererName:signature.value};
@@ -116,7 +118,11 @@ export function transactSpecialMaps({getCharacter,setCharacter,save},operation) 
 export function updateMapSurvey(state,id,mask){
  const map=state.registered.find(m=>mapOriginalId(m)===id);
  if(!map)return {ok:false,error:'登録済みの地図が見つかりません。'};
- if(isV2Map(map))return {ok:false,error:'V2多層探索は準備中です。'};
+ if(isV2Map(map)){
+  if(!Array.isArray(mask)||mask.length!==3||mask.some(m=>typeof m!=='string'||!/^[0-9a-f]{25}$/i.test(m)))return {ok:false,error:'不正な3層調査データです。'};
+  const entry={...map,surveyedMasks:mergeSurveyV2(map.surveyedMasks,mask)};
+  return {ok:true,map:entry,state:{...state,registered:state.registered.map(m=>mapOriginalId(m)===id?entry:m)}};
+ }
  const surveyedMask=mergeSurvey(map.surveyedMask,mask),entry={...map,surveyedMask,surveyComplete:surveyCount(surveyedMask)===100};
  return {ok:true,map:entry,state:{...state,registered:state.registered.map(m=>mapOriginalId(m)===id?entry:m)}};
 }

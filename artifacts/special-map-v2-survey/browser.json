@@ -1,0 +1,68 @@
+[
+  {
+    "label": "pc",
+    "partial": [
+      25,
+      10,
+      0
+    ],
+    "complete": [
+      100,
+      100,
+      100
+    ],
+    "reset": {
+      "floor": 0,
+      "fuel": 100,
+      "key": false,
+      "unlocked": false,
+      "counts": [
+        1,
+        0,
+        0
+      ],
+      "fp": "3519b715",
+      "theme": "crystal",
+      "xy": [
+        0,
+        3
+      ],
+      "doors": 0
+    },
+    "normalUnchanged": true,
+    "errors": []
+  },
+  {
+    "label": "mobile",
+    "partial": [
+      25,
+      10,
+      0
+    ],
+    "complete": [
+      100,
+      100,
+      100
+    ],
+    "reset": {
+      "floor": 0,
+      "fuel": 100,
+      "key": false,
+      "unlocked": false,
+      "counts": [
+        1,
+        0,
+        0
+      ],
+      "fp": "3519b715",
+      "theme": "crystal",
+      "xy": [
+        0,
+        3
+      ],
+      "doors": 0
+    },
+    "normalUnchanged": true,
+    "errors": []
+  }
+]

@@ -1,0 +1,8 @@
+pc reload retained [ 25, 10, 0 ]
+pc B1F 100
+pc B2F 100
+pc passed
+mobile reload retained [ 25, 10, 0 ]
+mobile B1F 100
+mobile B2F 100
+mobile passed

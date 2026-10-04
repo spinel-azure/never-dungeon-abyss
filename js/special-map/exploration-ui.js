@@ -85,11 +85,12 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  },session.generatedMap.themeId);
  message.textContent=stairPrompt||'特殊地図を探索中。Bボタンでメニュー表示。';
  async function useStairs(destination){
+  if(!flushSpecialSurvey(session)){message.textContent=session.surveyError;return;}
   session.transitioning=true;
   try{
    const onDark=()=>{
     if(disposed)return;
-    switchV2Floor(session,destination);
+    if(!switchV2Floor(session,destination))return;
     setWallColor(session.generatedMap.themeId);setFloorColor(session.generatedMap.themeId);
     host.floorChanged?.({session});
     session.renderState.overlayEvent={type:'floorLap',showOverlay:false,overlayMessage:`B${session.currentFloor+1}F`,specialMapTitle:true};
@@ -131,7 +132,11 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  }
  const enter=e=>{if(e.key==='Enter'){e.preventDefault();e.stopImmediatePropagation();input('confirm');}};
  window.addEventListener('keydown',enter,true);
+ const saveOnHide=()=>{if(isV2Session(session))flushSpecialSurvey(session);};
+ const saveWhenHidden=()=>{if(document.visibilityState==='hidden')saveOnHide();};
+ window.addEventListener('pagehide',saveOnHide);
+ document.addEventListener('visibilitychange',saveWhenHidden);
  const dismiss=()=>{if(session.renderState.overlayEvent)session.renderState.overlayEvent=null;};canvas.addEventListener('click',dismiss);
- function close(){if(disposed)return;disposed=true;if(session.chestOpening){host.hideTreasure?.();cancelV2KeyChest(session);}restore();statusParent.append(host.status);container.remove();window.removeEventListener('keydown',enter,true);detach();}
+ function close(){if(disposed)return;disposed=true;session.disposeSurvey?.();window.removeEventListener('pagehide',saveOnHide);document.removeEventListener('visibilitychange',saveWhenHidden);if(session.chestOpening){host.hideTreasure?.();cancelV2KeyChest(session);}restore();statusParent.append(host.status);container.remove();window.removeEventListener('keydown',enter,true);detach();}
  return {input,close,session,finish};
 }

@@ -6,17 +6,17 @@ import * as session from '../js/special-map/session.js';
 import * as v2 from '../js/special-map/session-v2.js';
 import {mapOriginalId} from '../data/special-maps.js';
 const original={rulesetVersion:'special-map-v2',seed:12345,level:50,rarity:'SILVER',discovererName:'†ルル'};
-function harness({entry}={}){
- let bound,callback,exits=0,hides=0,openings=0,menus=0;
+function harness({entry,saveSurvey=()=>({ok:true})}={}){
+ let bound,callback,exits=0,hides=0,openings=0,menus=0;const events=new Map();
  class Node{constructor(){this.dataset={};}setAttribute(){}append(...nodes){for(const n of nodes)n.parentElement=this;}getContext(){return {};}remove(){}addEventListener(){}}
  const viewport=new Node(),status=new Node();viewport.append(status);
  const host={viewport,status,...(entry?{runEntryTransition:entry}:{}),openMenu(){menus++;},playTreasureOpening(type,done){assert.equal(type,'gold');callback=done;openings++;},hideTreasure(){hides++;}};
- const scope={...session,...v2,mapOriginalId,getSpecialMapContext:()=>null,getSpecialMapHost:()=>host,attachSpecialMap:()=>()=>{},describeTestMap:()=>({name:'地図'}),setWallColor(){},setFloorColor(){},drawMinimap(){},getMinimapBounds(){},toggleMinimapOverlay(){},performance:{now:()=>0},useSpecialMapRenderSource:o=>{bound=o;return ()=>{};},document:{createElement:()=>new Node()},window:{addEventListener(){},removeEventListener(){}}};
+ const scope={...session,...v2,mapOriginalId,getSpecialMapContext:()=>null,getSpecialMapHost:()=>host,attachSpecialMap:()=>()=>{},describeTestMap:()=>({name:'地図'}),setWallColor(){},setFloorColor(){},drawMinimap(){},getMinimapBounds(){},toggleMinimapOverlay(){},performance:{now:()=>0},useSpecialMapRenderSource:o=>{bound=o;return ()=>{};},document:{visibilityState:'hidden',addEventListener:(key,fn)=>events.set(key,fn),removeEventListener:key=>events.delete(key),createElement:()=>new Node()},window:{addEventListener:(key,fn)=>events.set(key,fn),removeEventListener:key=>events.delete(key)}};
  const source=readFileSync(new URL('../js/special-map/exploration-ui.js',import.meta.url),'utf8');
  vm.runInNewContext(source.replace(/^import .*;\r?\n/gm,'').replace('export function','function')+';this.start=startSpecialMapExploration;',scope);
- const message={},ui=scope.start({registered:[original],mapKey:mapOriginalId(original),message,onExit(){exits++;}});
+ const message={},ui=scope.start({registered:[original],mapKey:mapOriginalId(original),message,saveSurvey,onExit(){exits++;}});
  ui.input('confirm');
- return {ui,host,message,get bound(){return bound;},done:()=>callback(),stats:()=>({exits,hides,openings,menus})};
+ return {ui,host,message,events,get bound(){return bound;},done:()=>callback(),stats:()=>({exits,hides,openings,menus})};
 }
 function atChest(h){
  const s=h.ui.session;v2.switchV2Floor(s,s.blueprint.links[1].lower);
@@ -76,4 +76,24 @@ test('failed or cancelled V2 entry leaves no active runtime or banner',async()=>
  const failed=harness({entry:async()=>{throw Error('transition failed');}});await failed.ui.ready;assert.equal(failed.stats().exits,1);
  let dark,release;const cancelled=harness({entry:fn=>{dark=fn;return new Promise(r=>release=r);}});
  cancelled.ui.close();dark();release(true);await cancelled.ui.ready;assert.equal(cancelled.ui.session,undefined);
+});
+
+test('V2 failed flush blocks stairs and return, pagehide retries, and close removes lifecycle listeners',async()=>{
+ let fail=true,writes=0;const h=harness({saveSurvey:()=>{writes++;return {ok:!fail};}}),s=h.ui.session;
+ const down=s.generatedMap.stairsDown;s.playerX=down.x;s.playerY=down.y;
+ h.ui.input('confirm');await Promise.resolve();assert.equal(s.currentFloor,0);assert.match(s.surveyError,/保存できません/);
+ assert.equal(h.ui.finish(),false);assert.equal(h.stats().exits,0);
+ fail=false;h.events.get('pagehide')();assert.equal(s.surveyError,'');assert.ok(writes>=3);
+ h.ui.input('confirm');await Promise.resolve();assert.equal(s.currentFloor,1);
+ h.events.get('visibilitychange')();assert.equal(h.ui.finish(),true);
+ assert.equal(h.events.has('pagehide'),false);assert.equal(h.events.has('visibilitychange'),false);
+});
+test('opening a key chest or boss gate never surveys the cell beyond it',()=>{
+ const h=harness();atChest(h);const s=h.ui.session,before=s.totalSurveyed;
+ h.ui.input('confirm');h.done();assert.equal(s.totalSurveyed,before);
+ const room=s.generatedMap.bossRoom;s.playerX=room.approach.x;s.playerY=room.approach.y;
+ s.direction=['N','E','S','W'].findIndex((_,d)=>s.playerX+[0,1,0,-1][d]===room.cells[0].x&&s.playerY+[-1,0,1,0][d]===room.cells[0].y);
+ h.ui.input('confirm');session.updateSpecialMotion(s,1000);
+ assert.equal(s.bossDoorUnlocked,true);assert.equal(s.totalSurveyed,before);
+ assert.equal(s.surveyView[room.cells[0].y][room.cells[0].x],false);h.ui.close();
 });

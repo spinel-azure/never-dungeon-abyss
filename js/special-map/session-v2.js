@@ -3,6 +3,7 @@ import {generateRegisteredSpecialMap} from './generator.js';
 import {specialMapV2StructureFingerprint} from './generator-v2.js';
 import {doorKey} from './doors.js';
 import {resolveSpecialStartDirection,specialDoorState,openSpecialDoorAhead} from './session.js';
+import {attachV2Survey} from './survey-v2.js';
 
 const dirs=['N','E','S','W'];
 const same=(a,b)=>a&&b&&a.x===b.x&&a.y===b.y;
@@ -10,7 +11,8 @@ export const isV2Session=s=>s?.kind==='specialMapV2';
 
 // Owns three in-memory floor runtimes. The stable renderState facade is important:
 // the renderer/field-item bridge retains its reference across floor switches.
-export function createSpecialMapV2Session(registered,mapKey,{playSe=()=>{},say=()=>{}}={}){
+export function createSpecialMapV2Session(registered,mapKey,options={}){
+ const {playSe=()=>{},say=()=>{}}=options;
  const original=registered.find(m=>mapOriginalId(m)===mapKey);
  if(original?.rulesetVersion!=='special-map-v2')throw Error('登録済みV2地図が見つかりません。');
  const blueprint=generateRegisteredSpecialMap(original);
@@ -50,8 +52,7 @@ export function createSpecialMapV2Session(registered,mapKey,{playSe=()=>{},say=(
   get:(_,key)=>key==='torchFuel'?s.torchFuel:s.floors[s.currentFloor].renderState[key],
   set:(_,key,value)=>{if(key==='torchFuel')s.torchFuel=value;else s.floors[s.currentFloor].renderState[key]=value;return true;}
  });
- Object.defineProperty(s,'surveyView',{get:()=>s.explored}); // display/path adapter only; never persistent survey
- Object.defineProperty(s,'surveyedCount',{get:()=>s.explored.flat().filter(Boolean).length});
+ attachV2Survey(s,original,options);
  s.isDoorLocked=(x,y,d)=>s.doorByKey.has(doorKey(x,y,d))&&!s.bossDoorUnlocked;
  s.canOpenDoor=(x,y,d)=>{
   if(!s.isDoorLocked(x,y,d))return true;
@@ -59,6 +60,7 @@ export function createSpecialMapV2Session(registered,mapKey,{playSe=()=>{},say=(
   s.bossDoorUnlocked=true;return true;
  };
  s.explored[s.playerY][s.playerX]=true;
+ s.recordSurvey(s.playerX,s.playerY);
  return s;
 }
 
@@ -98,6 +100,7 @@ export function cancelV2KeyChest(s){
 
 export function switchV2Floor(s,destination){
  if(!isV2Session(s)||!s.blueprint.links.some(l=>[l.upper,l.lower].some(p=>p.floor===destination?.floor&&same(p,destination))))throw Error('不正な階段移動先です。');
+ if(!s.flushSurvey())return false;
  s.autoPath=null;
  s.currentFloor=destination.floor-1;
  s.playerX=destination.x;s.playerY=destination.y;
@@ -105,6 +108,8 @@ export function switchV2Floor(s,destination){
  s.renderState.x=destination.x+.5;s.renderState.y=destination.y+.5;s.renderState.angle=s.direction*Math.PI/2-Math.PI/2;
  s.renderState.anim=null;s.motion=null;s.autoPath=null;
  s.explored[destination.y][destination.x]=true;
+ s.recordSurvey(destination.x,destination.y);
+ return true;
 }
 
 // Returns the stair link for the UI's existing darken/audio/reveal sequence.

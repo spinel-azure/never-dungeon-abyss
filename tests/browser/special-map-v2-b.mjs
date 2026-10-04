@@ -6,7 +6,7 @@ const main=await readFile('js/main.js','utf8');
 const hook=`window.v2Qa={
  async setup(){
  document.querySelector('#titleScreen').hidden=true;document.body.classList.remove('title-active');
- character=createInitialCharacter({name:'V2確認',job:'mage'});
+ startNewGame();character=createInitialCharacter({name:'V2確認',job:'mage'});
  character.inventory.counts.guiding_torch=20;
  const {normalizeSpecialMaps}=await import('/data/special-maps.js');
  const {decodeMapCode}=await import('/data/special-map-code.js');
@@ -17,7 +17,7 @@ const hook=`window.v2Qa={
  },
  s:()=>getSpecialMapContext()?.session,
  input:handleSpecialMapInput,
- normal:()=>JSON.stringify({currentDepth,cells,explored,torch:state.torchFuel,presence:getPresence(),hp:character.hp,sp:character.sp,gold:character.gold,flags:character.eventFlags,keys:character.keyItems,maps:character.specialMaps}),
+ normal:()=>JSON.stringify({currentDepth,cells,explored,torch:state.torchFuel,presence:getPresence(),hp:character.hp,sp:character.sp,gold:character.gold,flags:character.eventFlags,keys:character.keyItems,maps:{...character.specialMaps,registered:character.specialMaps.registered.map(({surveyedMasks,...map})=>map)}}),
  save:makeSaveSnapshot,
  refill:()=>useFieldItem('guiding_torch'),
  menu:()=>isMenuOpen(),
