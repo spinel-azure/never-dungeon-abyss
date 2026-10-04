@@ -41,7 +41,7 @@ try{for(const [label,width,height,touch] of [['pc',1280,900,false],['mobile',390
  async function stair(down){await page.evaluate(d=>v2Qa.go(d?v2Qa.s().generatedMap.stairsDown:v2Qa.s().generatedMap.stairsUp),down);
  const old=await page.evaluate(()=>v2Qa.status());await confirm();await page.waitForFunction(f=>v2Qa.s().currentFloor!==f&&!v2Qa.s().transitioning,old.floor);
  assert.equal((await page.evaluate(()=>v2Qa.status())).fuel,old.fuel);await confirm();}
- async function leave(){await page.evaluate(()=>v2Qa.input('cancel'));await page.getByRole('button',{name:'帰還',exact:true}).dispatchEvent('click');await page.waitForFunction(()=>!v2Qa.s()).catch(async e=>{console.log('return debug',await page.evaluate(()=>({message:document.querySelector('#message').textContent,error:v2Qa.s()?.surveyError,menu:v2Qa.menu()})));throw e;});}
+ async function leave(){await page.evaluate(()=>{if(v2Qa.s().cellPrompt)v2Qa.input('cancel');v2Qa.input('cancel');});await page.getByRole('button',{name:'帰還',exact:true}).dispatchEvent('click');await page.waitForFunction(()=>!v2Qa.s()).catch(async e=>{console.log('return debug',await page.evaluate(()=>({message:document.querySelector('#message').textContent,error:v2Qa.s()?.surveyError,menu:v2Qa.menu()})));throw e;});}
  await enter();assert.deepEqual(await page.evaluate(()=>surveyQa.counts()),[1,0,0]);
  await page.evaluate(()=>surveyQa.fill(12));await stair(true);await page.evaluate(()=>surveyQa.fill(10));
  const partial=await page.evaluate(()=>surveyQa.counts());await leave();

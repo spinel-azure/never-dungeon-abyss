@@ -1,0 +1,106 @@
+pc stairs/chest input and Three.js verified
+mobile stairs/chest input and Three.js verified
+[
+  {
+    "label": "pc",
+    "width": 1280,
+    "stairsAndChest": true,
+    "threeJs": true,
+    "milestones": [
+      {
+        "before": 99,
+        "after": 100,
+        "calls": [
+          "battleVictory"
+        ],
+        "played": [
+          {
+            "key": "battleVictory",
+            "url": "se/fanfare.wav",
+            "played": true
+          }
+        ]
+      },
+      {
+        "before": 199,
+        "after": 200,
+        "calls": [
+          "battleVictory"
+        ],
+        "played": [
+          {
+            "key": "battleVictory",
+            "url": "se/fanfare.wav",
+            "played": true
+          }
+        ]
+      },
+      {
+        "before": 299,
+        "after": 300,
+        "calls": [
+          "importantItem"
+        ],
+        "played": [
+          {
+            "key": "importantItem",
+            "url": "se/juuyou-item.mp3",
+            "played": true
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "label": "mobile",
+    "width": 390,
+    "stairsAndChest": true,
+    "threeJs": true,
+    "milestones": [
+      {
+        "before": 99,
+        "after": 100,
+        "calls": [
+          "battleVictory"
+        ],
+        "played": [
+          {
+            "key": "battleVictory",
+            "url": "se/fanfare.wav",
+            "played": true
+          }
+        ]
+      },
+      {
+        "before": 199,
+        "after": 200,
+        "calls": [
+          "battleVictory"
+        ],
+        "played": [
+          {
+            "key": "battleVictory",
+            "url": "se/fanfare.wav",
+            "played": true
+          }
+        ]
+      },
+      {
+        "before": 299,
+        "after": 300,
+        "calls": [
+          "importantItem"
+        ],
+        "played": [
+          {
+            "key": "importantItem",
+            "url": "se/juuyou-item.mp3",
+            "played": true
+          }
+        ]
+      }
+    ],
+    "errors": []
+  }
+]

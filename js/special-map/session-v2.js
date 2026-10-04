@@ -53,6 +53,8 @@ export function createSpecialMapV2Session(registered,mapKey,options={}){
   set:(_,key,value)=>{if(key==='torchFuel')s.torchFuel=value;else s.floors[s.currentFloor].renderState[key]=value;return true;}
  });
  attachV2Survey(s,original,options);
+ s.cellPrompt=null;
+ s.onCellEntered=()=>beginV2CellPrompt(s);
  s.isDoorLocked=(x,y,d)=>s.doorByKey.has(doorKey(x,y,d))&&!s.bossDoorUnlocked;
  s.canOpenDoor=(x,y,d)=>{
   if(!s.isDoorLocked(x,y,d))return true;
@@ -77,11 +79,27 @@ export function getV2StairDestination(s){
 export function getV2StairPrompt(s){
  if(!isV2Session(s))return '';
  const here={x:s.playerX,y:s.playerY},f=s.generatedMap;
+ const hint=s.cellPrompt?'　Bでその場に留まる':'　移動で探索を続ける';
  if(same(here,f.stairsUp))return s.currentFloor===0
-  ?'上り階段がある。探索を終了して帰還しますか？\n＊A／Enterで帰還　移動で探索を続ける'
-  :'上り階段がある。上層に移動しますか？\n＊A／Enterで移動　移動で探索を続ける';
- if(same(here,f.stairsDown))return '下り階段がある。下層に移動しますか？\n＊A／Enterで移動　移動で探索を続ける';
+  ?'上り階段がある。探索を終了して帰還しますか？\n＊A／Enterで帰還'+hint
+  :'上り階段がある。上層に移動しますか？\n＊A／Enterで移動'+hint;
+ if(same(here,f.stairsDown))return '下り階段がある。下層に移動しますか？\n＊A／Enterで移動'+hint;
  return '';
+}
+
+export function getV2CellPromptMessage(s){
+ if(!isV2Session(s)||!s.cellPrompt)return '';
+ return s.cellPrompt==='stairs'?getV2StairPrompt(s):'金色の宝箱がある。開けますか？\n＊A／Enterで開ける　Bでその場に留まる';
+}
+export function beginV2CellPrompt(s){
+ const f=s.floors[s.currentFloor],here={x:s.playerX,y:s.playerY};
+ s.cellPrompt=getV2StairPrompt(s)?'stairs':same(here,f.generatedFloor.keyChest)&&!f.chestOpened?'chest':null;
+ if(s.cellPrompt){s.autoPath=null;s.say(getV2CellPromptMessage(s));}
+ return s.cellPrompt;
+}
+export function cancelV2CellPrompt(s){
+ if(!s.cellPrompt)return false;
+ s.cellPrompt=null;s.say('その場に留まった。A／Enterで再び調べられます。');return true;
 }
 
 // Award only after the shared Three.js opening callback. No normal key inventory.
@@ -101,6 +119,7 @@ export function cancelV2KeyChest(s){
 export function switchV2Floor(s,destination){
  if(!isV2Session(s)||!s.blueprint.links.some(l=>[l.upper,l.lower].some(p=>p.floor===destination?.floor&&same(p,destination))))throw Error('不正な階段移動先です。');
  if(!s.flushSurvey())return false;
+ s.cellPrompt=null;
  s.autoPath=null;
  s.currentFloor=destination.floor-1;
  s.playerX=destination.x;s.playerY=destination.y;
@@ -115,6 +134,7 @@ export function switchV2Floor(s,destination){
 // Returns the stair link for the UI's existing darken/audio/reveal sequence.
 export function confirmV2Cell(s,now){
  if(s.transitioning||s.motion||s.renderState.anim)return {handled:true};
+ s.cellPrompt=null;
  const destination=getV2StairDestination(s);
  if(destination)return {handled:true,destination};
  const f=s.floors[s.currentFloor],point={x:s.playerX,y:s.playerY};

@@ -4,9 +4,24 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import * as session from '../js/special-map/session.js';
 import * as v2 from '../js/special-map/session-v2.js';
+import {EMPTY_SURVEY,surveyVisit} from '../data/special-map-survey.js';
+import {getV2SurveyJingle} from '../js/special-map/survey-v2.js';
+import {createGamepadInputState,pollGamepadActions} from '../js/gamepad-input.js';
 import {mapOriginalId} from '../data/special-maps.js';
 const original={rulesetVersion:'special-map-v2',seed:12345,level:50,rarity:'SILVER',discovererName:'†ルル'};
-function harness({entry,saveSurvey=()=>({ok:true})}={}){
+// Place the player immediately beside a target, then use the real step lifecycle.
+function enterCell(h,p){
+ const s=h.ui.session,dirs=['N','E','S','W'],dx=[0,1,0,-1],dy=[-1,0,1,0];
+ const d=dirs.findIndex((dir,i)=>!s.cells[p.y][p.x].walls[dir]&&p.x+dx[i]>=0&&p.x+dx[i]<10&&p.y+dy[i]>=0&&p.y+dy[i]<10);
+ assert.ok(d>=0);v2.cancelV2CellPrompt(s);
+ s.playerX=p.x+dx[d];s.playerY=p.y+dy[d];s.direction=(d+2)%4;
+ s.renderState.x=s.playerX+.5;s.renderState.y=s.playerY+.5;s.renderState.angle=s.direction*Math.PI/2-Math.PI/2;
+ s.renderState.overlayEvent=null;
+ assert.ok(session.actSpecialMap(s,'up',0));
+ assert.equal(s.cellPrompt,null,'not locked before arrival');
+ h.bound.updateAnimation(170);
+}
+function harness({entry,map=original,playSe=()=>{},saveSurvey=()=>({ok:true})}={}){
  let bound,callback,exits=0,hides=0,openings=0,menus=0;const events=new Map();
  class Node{constructor(){this.dataset={};}setAttribute(){}append(...nodes){for(const n of nodes)n.parentElement=this;}getContext(){return {};}remove(){}addEventListener(){}}
  const viewport=new Node(),status=new Node();viewport.append(status);
@@ -14,7 +29,7 @@ function harness({entry,saveSurvey=()=>({ok:true})}={}){
  const scope={...session,...v2,mapOriginalId,getSpecialMapContext:()=>null,getSpecialMapHost:()=>host,attachSpecialMap:()=>()=>{},describeTestMap:()=>({name:'地図'}),setWallColor(){},setFloorColor(){},drawMinimap(){},getMinimapBounds(){},toggleMinimapOverlay(){},performance:{now:()=>0},useSpecialMapRenderSource:o=>{bound=o;return ()=>{};},document:{visibilityState:'hidden',addEventListener:(key,fn)=>events.set(key,fn),removeEventListener:key=>events.delete(key),createElement:()=>new Node()},window:{addEventListener:(key,fn)=>events.set(key,fn),removeEventListener:key=>events.delete(key)}};
  const source=readFileSync(new URL('../js/special-map/exploration-ui.js',import.meta.url),'utf8');
  vm.runInNewContext(source.replace(/^import .*;\r?\n/gm,'').replace('export function','function')+';this.start=startSpecialMapExploration;',scope);
- const message={},ui=scope.start({registered:[original],mapKey:mapOriginalId(original),message,saveSurvey,onExit(){exits++;}});
+ const message={},ui=scope.start({registered:[map],mapKey:mapOriginalId(map),message,saveSurvey,playSe,onExit(){exits++;}});
  ui.input('confirm');
  return {ui,host,message,events,get bound(){return bound;},done:()=>callback(),stats:()=>({exits,hides,openings,menus})};
 }
@@ -50,6 +65,7 @@ test('auto walker stops at stairs and leaves the same return prompt without auto
  assert.ok(session.startSpecialAutoWalker(s));
  for(let now=340;now<5000&&s.autoPath;now+=200)h.bound.updateAnimation(now);
  assert.equal(s.autoPath,null);assert.equal(h.stats().exits,0);
+ assert.equal(s.cellPrompt,'stairs');assert.equal(session.actSpecialMap(s,'left',5000),false);
  assert.match(h.message.textContent,/上り階段がある。探索を終了して帰還しますか/);
  h.ui.close();
 });
@@ -96,4 +112,81 @@ test('opening a key chest or boss gate never surveys the cell beyond it',()=>{
  h.ui.input('confirm');session.updateSpecialMotion(s,1000);
  assert.equal(s.bossDoorUnlocked,true);assert.equal(s.totalSurveyed,before);
  assert.equal(s.surveyView[room.cells[0].y][room.cells[0].x],false);h.ui.close();
+});
+
+test('stairs lock atomically on completed entry; B stays, unlocks; A transfers without destination relock',async()=>{
+ const h=harness(),s=h.ui.session;enterCell(h,s.generatedMap.stairsDown);
+ assert.equal(s.cellPrompt,'stairs');assert.equal(s.motion,null);
+ const pos=[s.playerX,s.playerY,s.direction],count=s.totalSurveyed;
+ for(const a of ['up','down','left','right','cancelMenu','items','menu','map'])h.ui.input(a);
+ assert.deepEqual([s.playerX,s.playerY,s.direction],pos);assert.equal(h.stats().menus,0);
+ assert.equal(session.startSpecialAutoWalker(s),false);assert.equal(s.totalSurveyed,count);
+ let blocked=0;h.events.get('pointerdown')({target:{closest:()=>true},preventDefault(){blocked++;},stopImmediatePropagation(){blocked++;}});assert.equal(blocked,2);
+ h.ui.input('cancel');assert.equal(s.cellPrompt,null);assert.deepEqual([s.playerX,s.playerY,s.direction],pos);
+ h.ui.input('right');assert.ok(s.motion);h.bound.updateAnimation(1000);
+ h.ui.input('confirm');await Promise.resolve();assert.equal(s.currentFloor,1);assert.equal(s.cellPrompt,null);
+ const dest=s.generatedMap.stairsUp;assert.deepEqual([s.playerX,s.playerY],[dest.x,dest.y]);
+ // Held keyboard decisions are swallowed before the shared input handler.
+ for(const key of [{key:'Enter'},{code:'KeyX'},{code:'KeyZ'}]){
+  let stopped=0;h.events.get('keydown')({...key,repeat:true,preventDefault(){stopped++;},stopImmediatePropagation(){stopped++;}});assert.equal(stopped,2);
+ }
+ h.ui.input('confirm');assert.equal(s.currentFloor,1,'first arrival action dismisses banner');
+ h.ui.input('up');assert.ok(s.motion,'ordinary exploration resumes');h.ui.close();
+});
+
+test('gamepad decision uses release edges rather than repeating on stair arrival',()=>{
+ const state=createGamepadInputState(),pad={mapping:'standard',axes:[0,0],buttons:Array.from({length:16},()=>({pressed:false,value:0}))};
+ pad.buttons[0]={pressed:true,value:1};assert.ok(pollGamepadActions(pad,state,0).includes('confirm'));
+ for(const time of [300,1000,3000])assert.ok(!pollGamepadActions(pad,state,time).includes('confirm'));
+ pad.buttons[0]={pressed:false,value:0};pollGamepadActions(pad,state,3100);
+ pad.buttons[0]={pressed:true,value:1};assert.ok(pollGamepadActions(pad,state,3200).includes('confirm'));
+});
+
+test('chest entry locks, cancellation stays, A awards after Three.js callback; opened revisit stays unlocked',()=>{
+ const h=harness();atChest(h);const s=h.ui.session,p=s.generatedMap.keyChest;
+ enterCell(h,p);assert.equal(s.cellPrompt,'chest');assert.match(h.message.textContent,/金色の宝箱/);
+ const pos=[s.playerX,s.playerY];for(const a of ['up','down','left','right','menu','items'])h.ui.input(a);
+ assert.deepEqual([s.playerX,s.playerY],pos);assert.equal(s.motion,null);assert.equal(h.stats().menus,0);
+ h.ui.input('cancel');assert.equal(s.cellPrompt,null);assert.deepEqual([s.playerX,s.playerY],pos);assert.equal(h.stats().openings,0);
+ h.ui.input('confirm');assert.equal(h.stats().openings,1);assert.equal(s.bossKeyFound,false);
+ h.done();assert.equal(s.bossKeyFound,true);enterCell(h,p);assert.equal(s.cellPrompt,null);assert.equal(h.stats().openings,1);h.ui.close();
+});
+
+test('survey jingles use total thresholds, suppress replay, and choose just the highest crossed milestone',()=>{
+ for(const [before,after,se] of [[99,100,'battleVictory'],[100,101,null],[199,200,'battleVictory'],[200,201,null],[299,300,'importantItem'],[300,300,null],[0,250,'battleVictory'],[0,300,'importantItem']])assert.equal(getV2SurveyJingle(before,after),se);
+ for(const before of [99,199,299]){
+  const probe=harness(),p=probe.ui.session.generatedMap.stairsDown,entry=probe.ui.session.generatedMap.stairsUp;probe.ui.close();
+  const masks=[EMPTY_SURVEY,EMPTY_SURVEY,EMPTY_SURVEY];masks[0]=surveyVisit(masks[0],entry.x,entry.y);let count=1;
+  for(let f=0;f<3;f++)for(let i=0;i<100&&count<before;i++){
+   if(f===0&&((i===p.y*10+p.x)||(i===entry.y*10+entry.x)))continue;
+   masks[f]=surveyVisit(masks[f],i%10,Math.floor(i/10));count++;
+  }
+  const sounds=[],h=harness({map:{...original,surveyedMasks:masks},playSe:k=>sounds.push(k)}),s=h.ui.session;
+  assert.equal(s.totalSurveyed,before);assert.deepEqual(sounds,[]);
+  enterCell(h,p);assert.equal(s.totalSurveyed,before+1);assert.equal(s.cellPrompt,'stairs');h.bound.updateHud();h.bound.updateHud();
+  const jingles=sounds.filter(k=>['battleVictory','importantItem'].includes(k));assert.deepEqual(jingles,[before===299?'importantItem':'battleVictory']);
+  if(before===299){assert.match(h.message.textContent,/地図の調査が完了した/);assert.match(h.message.textContent,/下り階段/);}
+  const saved=JSON.parse(JSON.stringify(s.surveyedMasks));h.ui.close();
+  const reloadSounds=[],reload=harness({map:{...original,surveyedMasks:saved},playSe:k=>reloadSounds.push(k)});reload.bound.updateHud();enterCell(reload,p);reload.bound.updateHud();
+  assert.deepEqual(reloadSounds.filter(k=>['battleVictory','importantItem'].includes(k)),[]);reload.ui.close();
+ }
+});
+
+for(const target of ['keyChest','bossCell'])test(`last ${target} records completion before event and plays importantItem once`,()=>{
+ const probe=harness();atChest(probe);const p=target==='keyChest'?probe.ui.session.generatedMap.keyChest:probe.ui.session.generatedMap.bossRoom.bossCell;probe.ui.close();
+ let mask=EMPTY_SURVEY;for(let i=0;i<100;i++)if(i!==p.y*10+p.x)mask=surveyVisit(mask,i%10,Math.floor(i/10));
+ const sounds=[],h=harness({map:{...original,surveyedMasks:['f'.repeat(25),'f'.repeat(25),mask]},playSe:k=>sounds.push(k)});
+ atChest(h);enterCell(h,p);h.bound.updateHud();h.bound.updateHud();assert.equal(h.ui.session.totalSurveyed,300);
+ assert.deepEqual(sounds.filter(k=>['battleVictory','importantItem'].includes(k)),['importantItem']);assert.match(h.message.textContent,/地図の調査が完了した/);
+ assert.equal(h.ui.session.cellPrompt,target==='keyChest'?'chest':null);h.ui.close();
+});
+
+test('failed completion save retains event lock and plays completion cue once after successful retry',()=>{
+ const probe=harness(),p=probe.ui.session.generatedMap.stairsDown;probe.ui.close();
+ let mask=EMPTY_SURVEY;for(let i=0;i<100;i++)if(i!==p.y*10+p.x)mask=surveyVisit(mask,i%10,Math.floor(i/10));
+ let ok=false;const sounds=[],h=harness({map:{...original,surveyedMasks:[mask,'f'.repeat(25),'f'.repeat(25)]},saveSurvey:()=>({ok}),playSe:k=>sounds.push(k)});
+ enterCell(h,p);h.bound.updateHud();assert.equal(h.ui.session.totalSurveyed,300);assert.equal(h.ui.session.cellPrompt,'stairs');
+ assert.deepEqual(sounds.filter(k=>['battleVictory','importantItem'].includes(k)),[]);
+ ok=true;h.ui.input('confirm');h.bound.updateHud();h.bound.updateHud();
+ assert.equal(h.ui.session.cellPrompt,'stairs');assert.deepEqual(sounds.filter(k=>['battleVictory','importantItem'].includes(k)),['importantItem']);h.ui.close();
 });

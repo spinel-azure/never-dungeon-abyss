@@ -30,6 +30,7 @@ const hook=`window.v2Qa={
  if(nx<0||ny<0||nx>=10||ny>=10||s.cells[y][x].walls[dirs[d]]||s.isDoorLocked(x,y,dirs[d])||seen.has(j))continue;seen.set(j,[...seen.get(i),d]);q.push(j);}}
  if(!seen.has(end))throw Error('no walk path');
  for(const d of seen.get(end)){
+  if(s.cellPrompt)this.input('cancel');
   if(s.torchFuel<10)this.refill();await this.face(d);
   if(s.cells[s.playerY][s.playerX].doors[dirs[d]]==='closed'){this.input('confirm');await this.settled();}
   const x=s.playerX,y=s.playerY;this.input('up');await this.settled();if(s.playerX===x&&s.playerY===y)throw Error('step blocked');
@@ -69,6 +70,7 @@ try{for(const [label,width,height,touch] of [['pc',1280,900,false],['mobile',390
  await page.screenshot({path:`artifacts/special-map-v2-entry/${label}-entry.png`});
  await confirm();await page.keyboard.press('ArrowUp');await page.evaluate(()=>v2Qa.settled());
  assert.equal((await page.evaluate(()=>v2Qa.status())).fuel,99);await page.keyboard.press('ArrowDown');await page.evaluate(()=>v2Qa.settled());
+ await cancel();assert.equal(await page.evaluate(()=>v2Qa.s().cellPrompt),null);
  await cancel();assert.ok(await page.evaluate(()=>v2Qa.menu()));await page.screenshot({path:`artifacts/special-map-v2-entry/${label}-menu.png`});await page.evaluate(()=>v2Qa.input('cancel'));
  async function stair(down){await page.evaluate(d=>v2Qa.go(d?v2Qa.s().generatedMap.stairsDown:v2Qa.s().generatedMap.stairsUp),down);
   const old=await page.evaluate(()=>v2Qa.status());assert.match(await page.locator('#message').textContent(),down?/下り階段がある/:/上り階段がある/);await confirm();await page.waitForFunction(f=>v2Qa.s().currentFloor!==f&&!v2Qa.s().transitioning,old.floor);const floor=await page.evaluate(()=>v2Qa.s().currentFloor+1);assert.equal(await page.locator('#depth').textContent(),`B${floor}F`);assert.equal(await page.evaluate(()=>v2Qa.s().renderState.overlayEvent.overlayMessage),`B${floor}F`);assert.equal(await page.evaluate(()=>window.v2EntryCount),1);await page.screenshot({path:`artifacts/special-map-v2-entry/${label}-B${floor}F.png`});await confirm();const next=await page.evaluate(()=>v2Qa.status());assert.equal(next.fuel,old.fuel);assert.equal(next.theme,'crystal');console.log(label,'floor',next.floor+1,next.fuel);}

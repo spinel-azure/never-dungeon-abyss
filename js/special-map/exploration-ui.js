@@ -1,6 +1,6 @@
 import {createSpecialMapSession,actSpecialMap,updateSpecialMotion,specialWall,specialDoorState,openSpecialDoorAhead,flushSpecialSurvey,continueSpecialAutoWalker} from './session.js';
 import {useSpecialMapRenderSource,toggleMinimapOverlay,setWallColor,setFloorColor} from '../renderer.js';
-import {createSpecialMapV2Session,isV2Session,confirmV2Cell,switchV2Floor,getV2StairPrompt,completeV2KeyChest,cancelV2KeyChest} from './session-v2.js';
+import {createSpecialMapV2Session,isV2Session,confirmV2Cell,switchV2Floor,getV2StairPrompt,getV2CellPromptMessage,cancelV2CellPrompt,completeV2KeyChest,cancelV2KeyChest} from './session-v2.js';
 import {drawMinimap,getMinimapBounds} from '../minimap.js';
 import {attachSpecialMap,getSpecialMapHost,getSpecialMapContext} from './context.js';
 import {describeTestMap,mapOriginalId} from '../../data/special-maps.js';
@@ -79,7 +79,12 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
    container.dataset.moving=String(Boolean(session.motion||session.renderState.anim));
    container.dataset.banner=String(Boolean(session.renderState.overlayEvent));
    host.updateHud?.();
-   if(session.surveyCompletionPending){session.surveyCompletionPending=false;message.textContent='地図の調査が完了した！ 完全地図が解放されました。';}
+   if(session.surveyCompletionPending){
+    session.surveyCompletionPending=false;
+    if(isV2Session(session))playSe('importantItem');
+    const prompt=isV2Session(session)?getV2CellPromptMessage(session):'';
+    message.textContent='地図の調査が完了した！ 完全地図が解放されました。'+(prompt?'\n'+prompt:'');
+   }
    if(session.surveyError)message.textContent=session.surveyError;
   }
  },session.generatedMap.themeId);
@@ -118,8 +123,13 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  function input(action){
   if(disposed)return false;
   if(session.transitioning)return true;
+  // Cell confirmation precedes menus and all ordinary exploration shortcuts.
+  if(session.cellPrompt){
+   if(action==='cancel'){cancelV2CellPrompt(session);return true;}
+   if(action!=='confirm')return true;
+  }
   // Ordinary menus/overlays own their inputs, before field movement.
-  if(host.handleInput?.(action))return true;
+  if(!session.cellPrompt&&host.handleInput?.(action))return true;
   if(session.renderState.overlayEvent){session.renderState.overlayEvent=null;return true;}
   if(action==='map'){toggleMinimapOverlay();return true;}
   if(['up','down','left','right','confirm','cancel'].includes(action))session.autoPath=null;
@@ -130,13 +140,21 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
   else actSpecialMap(session,action,performance.now());
   container.dataset.moving=String(Boolean(session.motion||session.renderState.anim));return true;
  }
- const enter=e=>{if(e.key==='Enter'){e.preventDefault();e.stopImmediatePropagation();input('confirm');}};
+ const enter=e=>{
+  // Gamepad A already uses pressed edges; touch A acts on release. Suppress
+  // keyboard repeats only in V2, so a held decision cannot bounce up the stairs.
+  if(isV2Session(session)&&e.repeat&&(e.key==='Enter'||e.code==='KeyX'||e.code==='KeyZ')){e.preventDefault();e.stopImmediatePropagation();return;}
+  if(e.key==='Enter'){e.preventDefault();e.stopImmediatePropagation();input('confirm');}
+ };
  window.addEventListener('keydown',enter,true);
  const saveOnHide=()=>{if(isV2Session(session))flushSpecialSurvey(session);};
  const saveWhenHidden=()=>{if(document.visibilityState==='hidden')saveOnHide();};
  window.addEventListener('pagehide',saveOnHide);
  document.addEventListener('visibilitychange',saveWhenHidden);
+ // Native command buttons can bypass the action router (mouse/touch shortcuts).
+ const guardCommands=e=>{if(isV2Session(session)&&(session.cellPrompt||session.transitioning)&&e.target?.closest?.('.dungeon-commands, .menu-screen')){e.preventDefault();e.stopImmediatePropagation();}};
+ for(const event of ['pointerdown','click','touchend'])document.addEventListener(event,guardCommands,true);
  const dismiss=()=>{if(session.renderState.overlayEvent)session.renderState.overlayEvent=null;};canvas.addEventListener('click',dismiss);
- function close(){if(disposed)return;disposed=true;session.disposeSurvey?.();window.removeEventListener('pagehide',saveOnHide);document.removeEventListener('visibilitychange',saveWhenHidden);if(session.chestOpening){host.hideTreasure?.();cancelV2KeyChest(session);}restore();statusParent.append(host.status);container.remove();window.removeEventListener('keydown',enter,true);detach();}
+ function close(){if(disposed)return;disposed=true;session.disposeSurvey?.();window.removeEventListener('pagehide',saveOnHide);document.removeEventListener('visibilitychange',saveWhenHidden);for(const event of ['pointerdown','click','touchend'])document.removeEventListener(event,guardCommands,true);if(session.chestOpening){host.hideTreasure?.();cancelV2KeyChest(session);}restore();statusParent.append(host.status);container.remove();window.removeEventListener('keydown',enter,true);detach();}
  return {input,close,session,finish};
 }

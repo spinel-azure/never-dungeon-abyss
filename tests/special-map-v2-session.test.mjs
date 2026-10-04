@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createSpecialMapV2Session,confirmV2Cell,getV2StairDestination,switchV2Floor,getV2StairPrompt,completeV2KeyChest,cancelV2KeyChest} from '../js/special-map/session-v2.js';
+import {createSpecialMapV2Session,confirmV2Cell,getV2StairDestination,switchV2Floor,getV2StairPrompt,completeV2KeyChest,cancelV2KeyChest,cancelV2CellPrompt} from '../js/special-map/session-v2.js';
 import {actSpecialMap,updateSpecialMotion,openSpecialDoorAhead,specialDoorState,startSpecialAutoWalker,continueSpecialAutoWalker,getSpecialAutoAvailability,flushSpecialSurvey} from '../js/special-map/session.js';
 import {mapOriginalId} from '../data/special-maps.js';
 import {encodeMapCode,decodeMapCode} from '../data/special-map-code.js';
@@ -13,6 +13,7 @@ let clock=0;
 function act(s,a){clock+=600;const result=actSpecialMap(s,a,clock);updateSpecialMotion(s,clock+600);return result;}
 function face(s,d){while(s.direction!==d)assert.ok(act(s,'right'));}
 function go(s,p){
+ cancelV2CellPrompt(s); // B: leave this event cell without using it.
  const start=s.playerY*10+s.playerX,end=p.y*10+p.x,queue=[start],seen=new Map([[start,[]]]);
  for(const i of queue){if(i===end)break;for(let d=0;d<4;d++){
   const x=i%10,y=Math.floor(i/10),nx=x+dx[d],ny=y+dy[d],j=ny*10+nx;
@@ -21,6 +22,7 @@ function go(s,p){
  }}
  assert.ok(seen.has(end),'reachable destination');
  for(const d of seen.get(end)){
+  cancelV2CellPrompt(s);
   face(s,d);if(specialDoorState(s,s.playerX,s.playerY,dirs[d])==='closed'){assert.ok(openSpecialDoorAhead(s,clock));updateSpecialMotion(s,clock+600);clock+=600;}
   assert.ok(act(s,'up'));
  }

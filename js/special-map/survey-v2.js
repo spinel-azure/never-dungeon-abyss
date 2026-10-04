@@ -1,5 +1,12 @@
 import {normalizeSurveyMasks,surveyCountsV2,surveyTotalV2,surveyVisitV2,surveyViewsV2} from '../../data/special-map-survey-v2.js';
 
+// Highest crossed milestone only; loading existing knowledge is not a visit.
+export function getV2SurveyJingle(before,after){
+ if(before<300&&after>=300)return 'importantItem';
+ if((before<200&&after>=200)||(before<100&&after>=100))return 'battleVictory';
+ return null;
+}
+
 // One coalesced write per burst of movement. Explicit stair/return/pagehide
 // flushes bypass the timer. Failed writes retain all dirty knowledge for retry.
 export function attachV2Survey(s,original,{persistSurvey=()=>({ok:true}),scheduleSurvey=fn=>setTimeout(fn,750),cancelSurvey=clearTimeout}={}){
@@ -25,9 +32,11 @@ export function attachV2Survey(s,original,{persistSurvey=()=>({ok:true}),schedul
   return true;
  };
  s.recordSurvey=(x,y)=>{
+  const before=s.totalSurveyed;
   const next=surveyVisitV2(s.surveyedMasks,s.currentFloor,x,y);
   if(next.every((mask,i)=>mask===s.surveyedMasks[i]))return true;
   s.surveyedMasks=next;views=surveyViewsV2(next);
+  if(getV2SurveyJingle(before,s.totalSurveyed)==='battleVictory')s.playSe('battleVictory');
   // Completion is committed immediately before announcing permanent unlock.
   if(s.surveyComplete)return s.flushSurvey();
   if(timer===null){timer=scheduleSurvey(()=>{timer=null;s.flushSurvey();});timer?.unref?.();}

@@ -30,7 +30,7 @@ export function createSpecialMapSession(registered,mapKey,{persistSurvey=()=>({o
 export function specialWall(session,x,y,dir){return !session.cells[y]?.[x]||session.cells[y][x].walls[dir]!==false;}
 export function specialDoorState(session,x,y,dir){const key=doorKey(x,y,dir);return session.doorByKey.has(key)?(session.openedDoors.has(key)?'open':'closed'):null;}
 export function openSpecialDoorAhead(session,now){
- if(session.motion||session.renderState.anim||session.transitioning)return false;
+ if(session.motion||session.renderState.anim||session.transitioning||session.cellPrompt)return false;
  const x=session.playerX,y=session.playerY,dirKey=dirs[session.direction];
  if(specialDoorState(session,x,y,dirKey)!=='closed')return false;
  if(session.canOpenDoor&&!session.canOpenDoor(x,y,dirKey))return false;
@@ -43,10 +43,21 @@ export function updateSpecialMotion(session,now){
  const m=session.motion;if(!m)return;
  const t=Math.max(0,Math.min(1,(now-m.started)/m.duration)),ease=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
  session.renderState.x=m.x+(m.toX-m.x)*ease;session.renderState.y=m.y+(m.toY-m.y)*ease;session.renderState.angle=m.angle+(m.toAngle-m.angle)*ease;
- if(t===1){if(m.crossedDoor)session.openedDoors.delete(m.crossedDoor);if(m.isStep)session.renderState.torchFuel=Math.max(0,session.renderState.torchFuel-1);session.motion=null;}
+ if(t===1){
+  if(m.crossedDoor)session.openedDoors.delete(m.crossedDoor);
+  if(m.isStep)session.renderState.torchFuel=Math.max(0,session.renderState.torchFuel-1);
+  session.motion=null;
+  // V2 visits/events commit on arrival, before an auto-walker can start its next step.
+  // Keep the established V1 visit timing unchanged.
+  if(m.isStep&&session.kind==='specialMapV2'){
+   session.explored[session.playerY][session.playerX]=true;
+   recordSpecialSurvey(session,session.playerX,session.playerY);
+   session.onCellEntered?.();
+  }
+ }
 }
 export function actSpecialMap(session,action,now){
- if(session.motion||session.renderState.anim||session.transitioning)return false;
+ if(session.motion||session.renderState.anim||session.transitioning||session.cellPrompt)return false;
  const state=session.renderState;let x=session.playerX,y=session.playerY,angle=state.angle,crossedDoor=null,duration=STEP_MS;
  if(action==='left'||action==='right'){
   const turn=action==='left'?-1:1;session.direction=(session.direction+turn+4)%4;angle+=turn*Math.PI/2;duration=TURN_MS;state.shake=turn>0?2:-2;
@@ -62,7 +73,8 @@ export function actSpecialMap(session,action,now){
   // after the step animation completes, just like the ordinary dungeon.
   if(specialDoorState(session,x,y,dirs[d])==='open')crossedDoor=doorKey(x,y,dirs[d]);
   session.playSe('step');state.shake=forward?3:-2;x=nextX;y=nextY;
-  session.playerX=x;session.playerY=y;session.explored[y][x]=true;recordSpecialSurvey(session,x,y);
+  session.playerX=x;session.playerY=y;
+  if(session.kind!=='specialMapV2'){session.explored[y][x]=true;recordSpecialSurvey(session,x,y);}
  }else return false;
  session.motion={x:state.x,y:state.y,angle:state.angle,toX:x+.5,toY:y+.5,toAngle:angle,started:now,duration,crossedDoor,isStep:action==='up'||action==='down'};return true;
 }
@@ -93,7 +105,7 @@ export function resolveSpecialStartDirection(map){
 }
 export function getSpecialAutoAvailability(s){
  if(s.autoPath)return {accepted:false,reason:'alreadyActive'};
- if(s.motion||s.renderState.anim||s.transitioning)return {accepted:false,reason:'moving'};
+ if(s.motion||s.renderState.anim||s.transitioning||s.cellPrompt)return {accepted:false,reason:'moving'};
  const entrance=s.generatedMap.entrance;
  if(s.playerX===entrance.x&&s.playerY===entrance.y)return {accepted:false,reason:'alreadyAtStart'};
  const path=findKnownPath({x:s.playerX,y:s.playerY},entrance,(p,q,d)=>q.x>=0&&q.x<10&&q.y>=0&&q.y<10&&s.surveyView[q.y][q.x]&&!specialWall(s,p.x,p.y,d)&&!s.isDoorLocked?.(p.x,p.y,d));
@@ -101,7 +113,7 @@ export function getSpecialAutoAvailability(s){
 }
 export function startSpecialAutoWalker(s){const a=getSpecialAutoAvailability(s);if(!a.accepted)return false;s.autoPath=[...a.path];return true;}
 export function continueSpecialAutoWalker(s,now){
- if(!s.autoPath||s.motion||s.renderState.anim||s.transitioning)return;
+ if(!s.autoPath||s.motion||s.renderState.anim||s.transitioning||s.cellPrompt)return;
  if(!s.autoPath.length){s.autoPath=null;s.say(s.kind==='specialMapV2'&&s.currentFloor>0?'上り階段へ戻った。':'入口へ戻った。');return;}
  const d=dirs.indexOf(s.autoPath[0]);
  if(s.direction!==d){const diff=(d-s.direction+4)%4;actSpecialMap(s,diff===3?'left':'right',now);return;}
