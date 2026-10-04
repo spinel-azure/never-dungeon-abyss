@@ -45,6 +45,30 @@ test('V2 uses existing detail UI and passes its original to the exploration disp
  v.ui.input('confirm');v.ui.input('confirm');
  assert.equal(starts,1);
 });
+
+test('development tent grants once, keeps names hidden before appraisal, and reveals one level plus separate signature',t=>{
+ const v=setup(t,'layout-mobile',normalizeSpecialMaps({discovererName:'†ルル'}),{canReceiveTestStarter:()=>true});
+ v.ui.open('tent');assert.ok(v.find('テスト用3枚を受け取る（A）'));v.touch(v.find('テスト用3枚を受け取る（A）'));
+ assert.equal(v.state().unidentified.length,3);assert.equal(v.state().starterMapsTestGranted,true);
+ assert.equal(v.state().starterMapsGranted,undefined);
+ const originals=structuredClone(v.state().unidentified);assert.equal(v.commands.children.some(e=>e.textContent==='【開発用】白地図を受け取る'),false);
+ v.commands.children[0].onclick();assert.doesNotMatch(v.host.textContent,/の地図 Lv\./);assert.ok(v.find('はじまりの白地図 1'));
+ v.ui.input('confirm');for(let i=0;i<3;i++)v.ui.input('confirm');
+ const name=describeTestMap(originals[0]).name;assert.ok(v.host.textContent.includes(name));assert.equal((v.host.textContent.match(/Lv\./g)||[]).length,1);
+ assert.match(v.host.textContent,/白地図/);assert.match(v.host.textContent,/発見者：†ルル/);assert.equal(v.state().registered[0].seed,originals[0].seed);
+ v.ui.close();v.ui.open('tent');assert.equal(v.find('テスト用3枚を受け取る（A）'),undefined);
+});
+
+test('starter grant save failure leaves all maps and entitlement untouched',t=>{
+ const v=setup(t,'layout-mobile',normalizeSpecialMaps({discovererName:'†ルル'}),{canReceiveTestStarter:()=>true});v.ui.open('tent');v.failSave();v.touch(v.find('テスト用3枚を受け取る（A）'));
+ assert.equal(v.state().starterMapsTestGranted,undefined);assert.equal(v.state().unidentified.length,0);assert.match(v.message.textContent,/保存に失敗/);
+});
+
+test('without development permission the tent has no starter grant controls',t=>{
+ const v=setup(t,'layout-mobile',normalizeSpecialMaps({discovererName:'†ルル'}));v.ui.open('tent');
+ assert.equal(v.find('テスト用3枚を受け取る（A）'),undefined);
+ assert.equal(v.commands.children.some(e=>e.textContent==='【開発用】白地図を受け取る'),false);
+});
 for(const total of [0,100,300])test(`V2 detail displays persistent ${total}/300 independently of V1`,t=>{
  const masks=Array.from({length:3},(_,i)=>(i<total/100?'f':'0').repeat(25));
  const initial=normalizeSpecialMaps({discovererName:'スピネ',registered:[{rulesetVersion:'special-map-v2',seed:1,level:50,rarity:'SILVER',discovererName:'A',surveyedMasks:masks}]});

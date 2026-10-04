@@ -33,7 +33,7 @@ try{for(const [label,width,height,touch] of [['pc',1280,900,false],['mobile',390
  const confirm=()=>touch?page.locator('#buttonA').tap():page.keyboard.press('Enter');
  async function enter(){
  await page.locator('[data-entrance-command="mapExploration"]').dispatchEvent('click');
- await page.getByRole('button',{name:/三層の特殊地図/}).click();await page.getByRole('button',{name:/三層の特殊地図/}).click();
+ await page.getByRole('button',{name:/荒れ果てた晶宮の地図 Lv.50/}).click();await page.getByRole('button',{name:/荒れ果てた晶宮の地図 Lv.50/}).click();
  await page.screenshot({path:`${dir}/${label}-detail.png`});
  await page.getByRole('button',{name:'探索する（A）',exact:true}).click();await page.getByRole('button',{name:'はい（A／ENTER）',exact:true}).click();
  await page.waitForFunction(()=>v2Qa.s()&&!v2Qa.s().transitioning);await confirm();

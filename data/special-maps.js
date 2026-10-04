@@ -1,5 +1,6 @@
 import {normalizeSurveyMask,mergeSurvey,surveyCount} from './special-map-survey.js';
 import {normalizeSurveyMasks,mergeSurveyV2} from './special-map-survey-v2.js';
+import {describeV2MapName} from './special-map-names-v2.js';
 // Phase 2A ownership data. This ruleset is deliberately NOT the future dungeon V1.
 export const SPECIAL_MAP_RULESET = 'phase2a-1';
 export const SPECIAL_MAP_V2 = 'special-map-v2';
@@ -43,10 +44,10 @@ export function normalizeSpecialMaps(input) {
   const clean=list=>(Array.isArray(list)?list:[]).map(normalizeOriginal).filter(Boolean);
   const registered=[...new Map(clean(input?.registered).map(map=>[mapOriginalId(map),{...map,id:mapOriginalId(map),...surveyFields(map),acquisitionMethod:map.acquisitionMethod==='shared'?'shared':'discovered'}])).values()].slice(0,REGISTERED_LIMIT);
   const unidentified=clean(input?.unidentified).slice(0,UNIDENTIFIED_LIMIT).map((map,index)=>({...map,discoveryId:typeof map.discoveryId==='string'&&map.discoveryId?map.discoveryId:`legacy-${index}-${mapOriginalId(map)}`}));
-  return {dataVersion:1,discovererName:signature.ok?signature.value:'',unidentified,registered};
+  return {dataVersion:1,discovererName:signature.ok?signature.value:'',unidentified,registered,...(input?.starterMapsGranted===true?{starterMapsGranted:true}:{}),...(input?.starterMapsTestGranted===true?{starterMapsTestGranted:true}:{})};
 }
 export function describeTestMap(map) {
-  if(isV2Map(map))return validV2Parameters(map)?{name:'三層の特殊地図',level:map.level,rarityLabel:rarityLabel(map.rarity)}:null;
+  if(isV2Map(map)){try{return {...describeV2MapName(map),level:map.level,rarityLabel:rarityLabel(map.rarity)};}catch{return null;}}
   if(map.rulesetVersion!==SPECIAL_MAP_RULESET)return null;
   const prefixes=['ざわめく','残された','呪われし','見果てぬ','あらぶる','静寂の'];
   const themes=['甲虫','黄金','奈落','薄明','氷雪','残響'];

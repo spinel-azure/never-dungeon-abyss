@@ -2,6 +2,23 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {writeGame,loadGame} from '../js/save-data.js';
 import {normalizeSpecialMaps,setMapSignature,discoverTestMap,appraiseMap,transactSpecialMaps} from '../data/special-maps.js';
+import {grantStarterMaps,grantTestStarterMaps} from '../data/special-map-starter.js';
+
+test('development batch survives protected reload without setting production receipt',t=>{
+ const s=setup(t);assert.equal(s.run(state=>grantTestStarterMaps(state,{random:()=>.2,id:()=> 'test'})).ok,true);s.load();
+ assert.equal(s.get().specialMaps.starterMapsTestGranted,true);assert.equal(s.get().specialMaps.starterMapsGranted,undefined);
+ for(const map of [...s.get().specialMaps.unidentified])assert.equal(s.run(state=>appraiseMap(state,map.discoveryId)).ok,true);
+ s.load();assert.equal(s.run(state=>grantStarterMaps(state,{random:()=>.2,id:()=> 'future'})).ok,true);
+ s.load();assert.equal(s.get().specialMaps.starterMapsGranted,true);assert.equal(s.get().specialMaps.unidentified.length,3);
+});
+
+for(const failure of ['.temp','.backup','.current'])test(`starter batch atomic grant and reload with ${failure} failure`,t=>{
+ const s=setup(t);s.run(state=>({ok:true,state}));const before=structuredClone(s.get());s.fail(failure);
+ const grant=state=>grantStarterMaps(state,{random:()=>.1,id:()=> 'save-fixture'});
+ assert.equal(s.run(grant).ok,false);assert.deepEqual(s.get(),before);s.load();assert.deepEqual(s.get(),before);
+ s.fail('');assert.equal(s.run(grant).ok,true);const received=structuredClone(s.get());s.load();assert.deepEqual(s.get(),received);
+ assert.equal(s.get().specialMaps.unidentified.length,3);assert.equal(s.run(grant).ok,false);
+});
 
 function setup(t){
  const storage=new Map();let failure='';

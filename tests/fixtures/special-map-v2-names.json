@@ -1,0 +1,92 @@
+[
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 12345,
+      "level": 1,
+      "rarity": "WHITE"
+    },
+    "name": "朽ちかけた晶宮の地図 Lv.1"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 12345,
+      "level": 20,
+      "rarity": "WHITE"
+    },
+    "name": "朽ちかけた晶宮の地図 Lv.20"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 12345,
+      "level": 21,
+      "rarity": "WHITE"
+    },
+    "name": "彷徨う晶宮の地図 Lv.21"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 12345,
+      "level": 40,
+      "rarity": "WHITE"
+    },
+    "name": "彷徨う晶宮の地図 Lv.40"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 12345,
+      "level": 41,
+      "rarity": "WHITE"
+    },
+    "name": "荒れ果てた晶宮の地図 Lv.41"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 12345,
+      "level": 60,
+      "rarity": "WHITE"
+    },
+    "name": "荒れ果てた晶宮の地図 Lv.60"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 12345,
+      "level": 61,
+      "rarity": "WHITE"
+    },
+    "name": "猛威の晶宮の地図 Lv.61"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 12345,
+      "level": 80,
+      "rarity": "WHITE"
+    },
+    "name": "猛威の晶宮の地図 Lv.80"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 12345,
+      "level": 81,
+      "rarity": "WHITE"
+    },
+    "name": "滅びの晶宮の地図 Lv.81"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 12345,
+      "level": 100,
+      "rarity": "WHITE"
+    },
+    "name": "滅びの晶宮の地図 Lv.100"
+  }
+]

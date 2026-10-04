@@ -23,7 +23,7 @@ test('debug gate starts off and only notifies UI subscribers',()=>{
 
 const townSource=readFileSync(new URL('../js/town.js',import.meta.url),'utf8');
 test('locked entrance preview buttons are skipped and cannot open a preview',()=>{
- const town={entranceIndex:0,mode:'dungeonEntrance',playSe(){},entranceButtons:['enter','circle','return','explorerTent','mapExploration','empty-3'].map((id,i)=>({disabled:i===3||i===4,dataset:{entranceCommand:id}}))};
+ const town={entranceIndex:0,mode:'dungeonEntrance',getCharacter:()=>({eventFlags:{treliren_met:true},specialMaps:{starterMapsTestGranted:true}}),playSe(){},entranceButtons:['enter','circle','return','explorerTent','mapExploration','empty-3'].map((id,i)=>({disabled:i===3||i===4,dataset:{entranceCommand:id}}))};
  const context=vm.createContext({town,isExplorerTestEnabled:()=>false,renderEntranceSelection(){}});
  vm.runInContext(townSource.slice(townSource.indexOf('function handleEntranceInput('),townSource.indexOf('function moveSelection(')),context);
  for(const action of ['down','left','up','right','down']){context.handleEntranceInput(action);assert.ok(!town.entranceButtons[town.entranceIndex].disabled);}

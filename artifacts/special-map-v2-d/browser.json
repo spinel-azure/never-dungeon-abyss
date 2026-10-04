@@ -1,0 +1,154 @@
+[
+  {
+    "label": "pc",
+    "width": 1280,
+    "testMode": true,
+    "productionGrantUntouched": true,
+    "fixture": "Treliren already met; no initial signature/maps",
+    "acquired": [
+      {
+        "rulesetVersion": "special-map-v2",
+        "seed": 16577,
+        "level": 2,
+        "rarity": "WHITE",
+        "discovererName": "†ルル"
+      },
+      {
+        "rulesetVersion": "special-map-v2",
+        "seed": 62855,
+        "level": 3,
+        "rarity": "WHITE",
+        "discovererName": "†ルル"
+      },
+      {
+        "rulesetVersion": "special-map-v2",
+        "seed": 1942,
+        "level": 4,
+        "rarity": "WHITE",
+        "discovererName": "†ルル"
+      }
+    ],
+    "names": [
+      "寂れた常闇洞の地図 Lv.2",
+      "古びた霜廟の地図 Lv.3",
+      "朽ちかけた水没宮の地図 Lv.4"
+    ],
+    "entered": [
+      {
+        "seed": 16577,
+        "level": 2,
+        "rarity": "WHITE",
+        "theme": "black",
+        "banner": "寂れた常闇洞の地図 Lv.2",
+        "floors": 3,
+        "floor": 0
+      },
+      {
+        "seed": 62855,
+        "level": 3,
+        "rarity": "WHITE",
+        "theme": "blue",
+        "banner": "古びた霜廟の地図 Lv.3",
+        "floors": 3,
+        "floor": 0
+      },
+      {
+        "seed": 1942,
+        "level": 4,
+        "rarity": "WHITE",
+        "theme": "water",
+        "banner": "朽ちかけた水没宮の地図 Lv.4",
+        "floors": 3,
+        "floor": 0
+      }
+    ],
+    "code": "NDA:AgJAwQIAAyAgMOsw6zwg_xuOfXry",
+    "shared": {
+      "map": {
+        "rulesetVersion": "special-map-v2",
+        "level": 2,
+        "rarity": "WHITE",
+        "seed": 16577,
+        "discovererName": "†ルル"
+      },
+      "name": "寂れた常闇洞の地図 Lv.2"
+    },
+    "errors": []
+  },
+  {
+    "label": "mobile",
+    "width": 390,
+    "testMode": true,
+    "productionGrantUntouched": true,
+    "fixture": "Treliren already met; no initial signature/maps",
+    "acquired": [
+      {
+        "rulesetVersion": "special-map-v2",
+        "seed": 44079,
+        "level": 1,
+        "rarity": "WHITE",
+        "discovererName": "†ルル"
+      },
+      {
+        "rulesetVersion": "special-map-v2",
+        "seed": 62626,
+        "level": 4,
+        "rarity": "WHITE",
+        "discovererName": "†ルル"
+      },
+      {
+        "rulesetVersion": "special-map-v2",
+        "seed": 48288,
+        "level": 2,
+        "rarity": "WHITE",
+        "discovererName": "†ルル"
+      }
+    ],
+    "names": [
+      "霞む熔岩廊の地図 Lv.1",
+      "寂れた黄塵窟の地図 Lv.4",
+      "淡き黄塵窟の地図 Lv.2"
+    ],
+    "entered": [
+      {
+        "seed": 44079,
+        "level": 1,
+        "rarity": "WHITE",
+        "theme": "red",
+        "banner": "霞む熔岩廊の地図 Lv.1",
+        "floors": 3,
+        "floor": 0
+      },
+      {
+        "seed": 62626,
+        "level": 4,
+        "rarity": "WHITE",
+        "theme": "yellow",
+        "banner": "寂れた黄塵窟の地図 Lv.4",
+        "floors": 3,
+        "floor": 0
+      },
+      {
+        "seed": 48288,
+        "level": 2,
+        "rarity": "WHITE",
+        "theme": "yellow",
+        "banner": "淡き黄塵窟の地図 Lv.2",
+        "floors": 3,
+        "floor": 0
+      }
+    ],
+    "code": "NDA:AgKsLwEAAyAgMOsw6z-ru1gR24sm",
+    "shared": {
+      "map": {
+        "rulesetVersion": "special-map-v2",
+        "level": 1,
+        "rarity": "WHITE",
+        "seed": 44079,
+        "discovererName": "†ルル"
+      },
+      "name": "霞む熔岩廊の地図 Lv.1"
+    },
+    "errors": []
+  }
+]

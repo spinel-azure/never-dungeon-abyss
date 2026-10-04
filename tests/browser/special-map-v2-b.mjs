@@ -50,7 +50,7 @@ try{for(const [label,width,height,touch] of [['pc',1280,900,false],['mobile',390
  await page.goto('http://127.0.0.1:4173');await page.waitForFunction(()=>window.v2Qa);await page.evaluate(()=>v2Qa.setup());
  const before=await page.evaluate(()=>v2Qa.normal());
  await page.locator('[data-entrance-command="mapExploration"]').dispatchEvent('click');await page.screenshot({path:`artifacts/special-map-v2-entry/${label}-list.png`});
- await page.getByRole('button',{name:/三層の特殊地図/}).click();await page.getByRole('button',{name:/三層の特殊地図/}).click();
+ await page.getByRole('button',{name:/荒れ果てた晶宮の地図 Lv.50/}).click();await page.getByRole('button',{name:/荒れ果てた晶宮の地図 Lv.50/}).click();
  await page.getByRole('button',{name:'探索する（A）',exact:true}).click();await page.getByRole('button',{name:'はい（A／ENTER）',exact:true}).click();
  await page.waitForFunction(()=>!document.querySelector('#sceneTransition').hidden);
  assert.equal(await page.evaluate(()=>!!v2Qa.s()),false);
@@ -66,7 +66,7 @@ try{for(const [label,width,height,touch] of [['pc',1280,900,false],['mobile',390
  await page.waitForFunction(()=>v2Qa.s()&&!v2Qa.s().transitioning);
  assert.equal(await page.locator('#depth').textContent(),'B1F');
  assert.equal(await page.locator('#sceneTransitionTitle').evaluate(e=>e.hidden),true);
- assert.equal(await page.evaluate(()=>v2Qa.s().renderState.overlayEvent.overlayMessage),'三層の特殊地図');
+ assert.equal(await page.evaluate(()=>v2Qa.s().renderState.overlayEvent.overlayMessage),'荒れ果てた晶宮の地図 Lv.50');
  await page.screenshot({path:`artifacts/special-map-v2-entry/${label}-entry.png`});
  await confirm();await page.keyboard.press('ArrowUp');await page.evaluate(()=>v2Qa.settled());
  assert.equal((await page.evaluate(()=>v2Qa.status())).fuel,99);await page.keyboard.press('ArrowDown');await page.evaluate(()=>v2Qa.settled());

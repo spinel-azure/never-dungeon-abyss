@@ -5,6 +5,7 @@
 .explorer-preview .transfer-destination-list button{display:flex;align-items:center;gap:8px;padding:6px 10px;min-height:36px;font-size:20px;min-width:0;text-align:left}
 .explorer-map-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
 .explorer-map-level{flex:none;font-size:.85em}
+.explorer-map-name-v2{white-space:normal;overflow-wrap:anywhere;text-overflow:clip}
 .explorer-footer{display:flex;justify-content:center;gap:12px}
 .explorer-footer button,.explorer-preview>button{font:16px GameFont,sans-serif;padding:5px 12px;min-height:30px}
 .explorer-preview button.is-selected{border-color:#aef6ff;background:#14313a;box-shadow:0 0 10px #5fe2ff99}

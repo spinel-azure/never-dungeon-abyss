@@ -1309,6 +1309,7 @@ function activateEntranceCommand(command) {
     if (!explorerPreview) explorerPreview = createExplorerPreviewUI({
       host: town.background.parentElement, commands: town.commandRoot, background: town.background,
       getMaps: () => town.getCharacter()?.specialMaps,
+      canReceiveTestStarter: isExplorerTestEnabled,
       updateMaps: operation => town.updateSpecialMaps(operation),
       message: town.messageEl, playSe: key => town.playSe(key),
       startExploration: startSpecialMapExploration,
