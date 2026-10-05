@@ -65,8 +65,8 @@
     "dusk": {
       "minMapLevel": 80,
       "walls": [
-        "images/dungeon_effects/dusk_wall.01.webp",
-        "images/dungeon_effects/dusk_wall.02.webp"
+        "images/dungeon_effects/dusk_wall_01.webp",
+        "images/dungeon_effects/dusk_wall_02.webp"
       ],
       "palette": "black",
       "id": "dusk",
@@ -524,7 +524,7 @@
   "rendering": {
     "normal": "Both dedicated walls",
     "failure": "slate wall fallback",
-    "duskActualPaths": "dusk_wall.01.webp / dusk_wall.02.webp (supplied files, unchanged)",
+    "duskActualPaths": "dusk_wall_01.webp / dusk_wall_02.webp",
     "bossStandard": 600,
     "actualDimensions": {
       "013": [

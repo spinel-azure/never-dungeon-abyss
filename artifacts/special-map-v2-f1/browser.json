@@ -1,0 +1,154 @@
+[
+  {
+    "label": "pc",
+    "width": 1280,
+    "testMode": true,
+    "productionGrantUntouched": true,
+    "fixture": "Treliren already met; no initial signature/maps",
+    "acquired": [
+      {
+        "rulesetVersion": "special-map-v2",
+        "seed": 57653,
+        "level": 1,
+        "rarity": "WHITE",
+        "discovererName": "†ルル"
+      },
+      {
+        "rulesetVersion": "special-map-v2",
+        "seed": 19816,
+        "level": 2,
+        "rarity": "WHITE",
+        "discovererName": "†ルル"
+      },
+      {
+        "rulesetVersion": "special-map-v2",
+        "seed": 11567,
+        "level": 3,
+        "rarity": "WHITE",
+        "discovererName": "†ルル"
+      }
+    ],
+    "names": [
+      "朽ちかけた晶宮の地図 Lv.1",
+      "淡き深水洞の地図 Lv.2",
+      "古びた冥窟の地図 Lv.3"
+    ],
+    "entered": [
+      {
+        "seed": 57653,
+        "level": 1,
+        "rarity": "WHITE",
+        "theme": "crystal",
+        "banner": "朽ちかけた晶宮の地図 Lv.1",
+        "floors": 3,
+        "floor": 0
+      },
+      {
+        "seed": 19816,
+        "level": 2,
+        "rarity": "WHITE",
+        "theme": "water",
+        "banner": "淡き深水洞の地図 Lv.2",
+        "floors": 3,
+        "floor": 0
+      },
+      {
+        "seed": 11567,
+        "level": 3,
+        "rarity": "WHITE",
+        "theme": "black",
+        "banner": "古びた冥窟の地図 Lv.3",
+        "floors": 3,
+        "floor": 0
+      }
+    ],
+    "code": "NDA:AgLhNQEAAyAgMOsw6xTkcGnMGQ1F",
+    "shared": {
+      "map": {
+        "rulesetVersion": "special-map-v2",
+        "level": 1,
+        "rarity": "WHITE",
+        "seed": 57653,
+        "discovererName": "†ルル"
+      },
+      "name": "朽ちかけた晶宮の地図 Lv.1"
+    },
+    "errors": []
+  },
+  {
+    "label": "mobile",
+    "width": 390,
+    "testMode": true,
+    "productionGrantUntouched": true,
+    "fixture": "Treliren already met; no initial signature/maps",
+    "acquired": [
+      {
+        "rulesetVersion": "special-map-v2",
+        "seed": 60616,
+        "level": 3,
+        "rarity": "WHITE",
+        "discovererName": "†ルル"
+      },
+      {
+        "rulesetVersion": "special-map-v2",
+        "seed": 27397,
+        "level": 1,
+        "rarity": "WHITE",
+        "discovererName": "†ルル"
+      },
+      {
+        "rulesetVersion": "special-map-v2",
+        "seed": 5516,
+        "level": 4,
+        "rarity": "WHITE",
+        "discovererName": "†ルル"
+      }
+    ],
+    "names": [
+      "静寂の晶窟の地図 Lv.3",
+      "霞む魔術廊の地図 Lv.1",
+      "忘れられた水晶洞の地図 Lv.4"
+    ],
+    "entered": [
+      {
+        "seed": 60616,
+        "level": 3,
+        "rarity": "WHITE",
+        "theme": "crystal",
+        "banner": "静寂の晶窟の地図 Lv.3",
+        "floors": 3,
+        "floor": 0
+      },
+      {
+        "seed": 27397,
+        "level": 1,
+        "rarity": "WHITE",
+        "theme": "magic",
+        "banner": "霞む魔術廊の地図 Lv.1",
+        "floors": 3,
+        "floor": 0
+      },
+      {
+        "seed": 5516,
+        "level": 4,
+        "rarity": "WHITE",
+        "theme": "crystal",
+        "banner": "忘れられた水晶洞の地図 Lv.4",
+        "floors": 3,
+        "floor": 0
+      }
+    ],
+    "code": "NDA:AgLsyAMAAyAgMOsw607G7mqhLlxW",
+    "shared": {
+      "map": {
+        "rulesetVersion": "special-map-v2",
+        "level": 3,
+        "rarity": "WHITE",
+        "seed": 60616,
+        "discovererName": "†ルル"
+      },
+      "name": "静寂の晶窟の地図 Lv.3"
+    },
+    "errors": []
+  }
+]

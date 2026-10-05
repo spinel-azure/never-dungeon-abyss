@@ -1,0 +1,16 @@
+[
+  {
+    "width": 1280,
+    "escape": true,
+    "defeat": true,
+    "saveFailureRetry": true,
+    "normalUnchanged": true
+  },
+  {
+    "width": 390,
+    "escape": true,
+    "defeat": true,
+    "saveFailureRetry": true,
+    "normalUnchanged": true
+  }
+]

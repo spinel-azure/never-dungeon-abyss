@@ -72,3 +72,7 @@ body .explorer-preview textarea.is-selected{outline:2px solid #aef6ff}
 /* The actual ordinary HUD is mounted here, retaining its responsive rules. */
 .special-map-runtime .readout{max-width:calc(100% - 68px)}
 #specialSurveyChip{white-space:nowrap}
+
+/* V2 survey follows the canvas minimap, including its expanded position. */
+.special-map-survey-readout{position:absolute;z-index:1;box-sizing:border-box;pointer-events:none;white-space:pre!important;text-align:right;font:14px/1.2 PixelFont,monospace;padding:2px 4px;color:#e2d7b7;background:rgba(5,6,6,.76);border-radius:3px}
+@media(max-width:680px){.special-map-survey-readout{font-size:12px}}

@@ -1,3 +1,5 @@
+import {resumeV2Encounter} from './special-map/encounter-v2.js';
+import {grantV2BattleRewards} from './special-map/battle-rewards-v2.js';
 import { createCoalescedNotificationSync } from "./passive-notification-sync.js";
 import { grantGuildQuestExperience, formatGuildExperienceReceipt } from "../data/guild-experience.js";
 import { isAkashicRematchUnlocked, AKASHIC_PHANTOM_IDS, QUEEN_PROJECTION_MESSAGES } from "../data/akashic-phantoms.js";
@@ -316,6 +318,7 @@ import {
   let character = null;
   let currentDepth = 1;
   function getContextualCharacter() {
+    if(getSpecialMapContext()?.session.kind==='specialMapV2')return character;
     return applyTaurusDepthBonus(character, {
       location: worldLocation,
       depth: currentDepth
@@ -3176,7 +3179,7 @@ import {
     const previousHerbicideUses = Math.max(0, Math.floor(Number(character.herbicideTrialUses) || 0));
     Object.assign(character, changes);
     const nextHerbicideUses = Math.max(previousHerbicideUses, Math.floor(Number(character.herbicideTrialUses) || 0));
-    if (nextHerbicideUses > previousHerbicideUses) {
+    if (!getSpecialMapContext() && nextHerbicideUses > previousHerbicideUses) {
       character = recordCustomQuestProgress(character, "guild_020", nextHerbicideUses - previousHerbicideUses);
     }
     character.condition = currentCondition(character);
@@ -3688,6 +3691,7 @@ import {
   }
 
   function finishBattleVictory(battle) {
+    if(battle?.explorationContext?.source==='special-map-v2')return finishV2Battle(battle,'victory');
     const defeatedRoamingEnemyInstanceId = battle?.roamingEnemyInstanceId || activeRoamingEnemyInstanceId;
     if (defeatedRoamingEnemyInstanceId) {
       if (!defeatRoamingEnemy(defeatedRoamingEnemyInstanceId)) return;
@@ -4030,6 +4034,7 @@ import {
   }
 
   async function finishBattleDefeat(battle) {
+    if(battle?.explorationContext?.source==='special-map-v2')return finishV2Battle(battle,'defeat');
     activeRareRoomEncounterId = null;
     const defeatedRoamingEnemyInstanceId = battle?.roamingEnemyInstanceId || activeRoamingEnemyInstanceId;
     if (defeatedRoamingEnemyInstanceId) {
@@ -4282,6 +4287,7 @@ import {
   }
 
   function finishBattleEscape(battle) {
+    if(battle?.explorationContext?.source==='special-map-v2')return finishV2Battle(battle,'escape');
     const roamingInstanceId = battle?.roamingEnemyInstanceId || activeRoamingEnemyInstanceId;
     if (roamingInstanceId) {
       activeRoamingEnemyInstanceId = null;
@@ -5305,9 +5311,9 @@ import {
     if(special){
       const s=special.session;
       depthEl.textContent=s.kind==='specialMapV2'?`B${s.currentFloor+1}F`:'特殊地図';posEl.textContent=`X:${s.playerX} Y:${s.playerY}`;
-      const chip=document.getElementById('specialSurveyChip');if(chip)chip.textContent=s.kind==='specialMapV2'?`調査 ${s.surveyedCount} / 100 ・ ${s.surveyComplete?'調査完了':`総合 ${s.totalSurveyed} / 300`}`:s.surveyComplete?'調査完了':`調査 ${s.surveyedCount} / 100`;
+      const chip=document.getElementById('specialSurveyChip');if(chip)chip.textContent=s.kind==='specialMapV2'?`調査${s.surveyedCount}/100\n総合${s.totalSurveyed}/300`:s.surveyComplete?'調査完了':`調査 ${s.surveyedCount} / 100`;
       torchMeterEl.style.width=`${s.renderState.torchFuel}%`;torchMeterEl.parentElement.classList.toggle('is-critical',s.renderState.torchFuel<=20);
-      presenceMeterEl.style.setProperty('--presence','0%');presenceMeterEl.setAttribute('aria-valuenow','0');
+      presenceMeterEl.style.setProperty('--presence',`${s.presence||0}%`);presenceMeterEl.setAttribute('aria-valuenow',String(s.presence||0));
       drawCompass(performance.now(),{canvas:compassCanvas,ctx:compassCanvas.getContext('2d'),state:s.renderState,size:compassCanvas.width});
       if(fpsIndicator)fpsIndicator.textContent=`${getEffectiveFrameRate()}fps`;
       stopwatchEl.textContent=formatElapsedTime(performance.now()-runStartedAt);return;
@@ -5480,13 +5486,52 @@ import {
     if(result.environment?.emergencyEscape){closeCampMenu('special');context.finish();}
     return result;
   }
+  async function beginV2Battle(session,enemyData,context){
+    session.renderState.overlayEvent={type:'randomEncounter',showOverlay:true,encounterType:'normal',encounterLabel:'ENCOUNTER!!',encounterAnimationStartedAt:performance.now(),message:''};
+    playSe('battleStart');say('＊　何者かと遭遇した！　＊');
+    await wait(1400);
+    if(getSpecialMapContext()?.session!==session||session.battleContext!==context)return;
+    session.renderState.overlayEvent=null;
+    startBgm('normalBattle');
+    if(!startBattle(createEnemyCombatant(enemyData),{playStartSe:false,explorationContext:context})){
+      resumeV2Encounter(session,context);startBgm(getSpecialMapBgmKey(session.generatedMap.themeId));
+    }
+  }
+  async function finishV2Battle(battle,outcome){
+    const active=getSpecialMapContext(),s=active?.session;
+    if(!s||s.mapKey!==battle.explorationContext.mapKey||!s.battleContext)return;
+    if(battle.player)updateCharacterFromBattle(createPersistentBattlePlayerChanges(battle.player));
+    if(outcome==='defeat'){
+      stopBgm();await runDefeatPresentation();
+      const retry=async()=>{
+        if(!flushSpecialSurvey(s)){say(s.surveyError+' A／Enterで保存を再試行します。');return;}
+        s.transitioning=false;
+        if(!active.finish()){s.transitioning=true;return;}
+        // Reuse character death/revival, without ordinary-depth or presence reset.
+        const carried=character.carriedExperience,pending=character.pendingExperienceSettlement;
+        Object.assign(character,resolveDungeonDefeat(character,{deferRevival:true}),{carriedExperience:carried,pendingExperienceSettlement:pending});
+        character.returnPresentation={revival:true};templeRevivalJinglePending=true;
+        worldLocation='town';saveGame();updateCharacterUi();
+        openTown({registrationRequired:false,facilityId:'temple',mode:'facilityMenu'});
+        await finishReturnPresentation();
+      };
+      s.defeatRetry=retry;await retry();return;
+    }
+    let message='戦闘を離れ、特殊地図の探索へ戻った。';
+    if(outcome==='victory'){const result=grantV2BattleRewards(character,battle);character=result.character;message=result.message;}
+    resumeV2Encounter(s,s.battleContext);
+    startBgm(getSpecialMapBgmKey(s.generatedMap.themeId));say(message);updateCharacterUi();updateHud();saveGame();
+  }
   configureSpecialMapHost({
+    onEncounter:(session,enemy,context)=>void beginV2Battle(session,enemy,context),
+    isBattleActive,
+    handleBattleInput:action=>handleItemOverlayInput(action)||handleSkillOverlayInput(action)||handleBattleInput(action),
     runEntryTransition:onDark=>runSceneTransition({enteringMapDungeon:true,playAudio:()=>playSeSequence('stairs',3),onDark}),
     playTreasureOpening,hideTreasure,
     runStairsTransition:onDark=>runSceneTransition({playAudio:()=>playSeSequence('stairs',3),onDark}),
     floorChanged:({session})=>{startBgm(getSpecialMapBgmKey(session.generatedMap.themeId));updateHud();},
     viewport:viewportEl,status:viewportEl.querySelector('.status'),updateHud,
-    isPaused:()=>isMenuOpen()||!itemOverlay.hidden||!skillOverlay.hidden,
+    isPaused:()=>isBattleActive()||isMenuOpen()||!itemOverlay.hidden||!skillOverlay.hidden,
     openMenu:()=>{getSpecialMapContext().session.autoPath=null;showGameCommands();openCampMenu();},
     handleInput:action=>{
       if(handleItemOverlayInput(action)||handleSkillOverlayInput(action))return true;
@@ -5498,7 +5543,8 @@ import {
     enter:({session})=>{
       townScreen.hidden=true;document.body.classList.remove('town-active');document.body.classList.add('special-map-active');
       showGameCommands();setSpecialMapMenuMode(true);closeCampMenu('special');
-      const chip=document.createElement('span');chip.id='specialSurveyChip';chip.className='chip';posEl.parentElement.append(chip);
+      const chip=document.createElement('span');chip.id='specialSurveyChip';chip.className=session.kind==='specialMapV2'?'special-map-survey-readout':'chip';
+      if(session.kind==='specialMapV2')viewportEl.querySelector('.special-map-runtime').append(chip);else posEl.parentElement.append(chip);
       stopLoopSe('townAmbience');startBgm(getSpecialMapBgmKey(session.generatedMap.themeId));updateHud();
     },
     beforeReturn:()=>{

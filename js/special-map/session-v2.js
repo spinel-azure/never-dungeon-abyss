@@ -1,3 +1,4 @@
+import {attachV2Encounters} from './encounter-v2.js';
 import {mapOriginalId} from '../../data/special-maps.js';
 import {generateRegisteredSpecialMap} from './generator.js';
 import {specialMapV2StructureFingerprint} from './generator-v2.js';
@@ -54,7 +55,8 @@ export function createSpecialMapV2Session(registered,mapKey,options={}){
  });
  attachV2Survey(s,original,options);
  s.cellPrompt=null;
- s.onCellEntered=()=>beginV2CellPrompt(s);
+ attachV2Encounters(s,options);
+ s.onCellEntered=()=>{beginV2CellPrompt(s);s.onEncounterStep();};
  s.isDoorLocked=(x,y,d)=>s.doorByKey.has(doorKey(x,y,d))&&!s.bossDoorUnlocked;
  s.canOpenDoor=(x,y,d)=>{
   if(!s.isDoorLocked(x,y,d))return true;

@@ -1,5 +1,5 @@
 import {createSpecialMapSession,actSpecialMap,updateSpecialMotion,specialWall,specialDoorState,openSpecialDoorAhead,flushSpecialSurvey,continueSpecialAutoWalker} from './session.js';
-import {useSpecialMapRenderSource,toggleMinimapOverlay,setWallColor,setFloorColor} from '../renderer.js';
+import {useSpecialMapRenderSource,toggleMinimapOverlay,getActiveMinimapBounds,setWallColor,setFloorColor} from '../renderer.js';
 import {createSpecialMapV2Session,isV2Session,confirmV2Cell,switchV2Floor,getV2StairPrompt,getV2CellPromptMessage,cancelV2CellPrompt,completeV2KeyChest,cancelV2KeyChest} from './session-v2.js';
 import {drawMinimap,getMinimapBounds} from '../minimap.js';
 import {attachSpecialMap,getSpecialMapHost,getSpecialMapContext} from './context.js';
@@ -42,7 +42,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  const host=getSpecialMapHost();
  const original=registered.find(m=>mapOriginalId(m)===mapKey);
  const createSession=original?.rulesetVersion==='special-map-v2'?createSpecialMapV2Session:createSpecialMapSession;
- const session=createSession(registered,mapKey,{persistSurvey:saveSurvey,playSe,say:text=>{message.textContent=text;}});
+ const session=createSession(registered,mapKey,{persistSurvey:saveSurvey,playSe,onEncounter:host.onEncounter,say:text=>{message.textContent=text;}});
  let name='特殊地図';try{name=describeTestMap(original).name;}catch{}
  const container=document.createElement('section');container.className='special-map-runtime';container.setAttribute('aria-label','特殊迷宮探索');
  const canvas=document.createElement('canvas');canvas.className='special-map-view';canvas.width=960;canvas.height=540;canvas.setAttribute('aria-label','特殊迷宮3D表示');
@@ -79,6 +79,19 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
    container.dataset.moving=String(Boolean(session.motion||session.renderState.anim));
    container.dataset.banner=String(Boolean(session.renderState.overlayEvent));
    host.updateHud?.();
+   if(isV2Session(session)){
+    const chip=document.getElementById('specialSurveyChip');
+    if(chip){
+     const bounds=getActiveMinimapBounds(),rect=canvas.getBoundingClientRect();
+     const scale=Math.min(rect.width/canvas.width,rect.height/canvas.height);
+     const offsetX=(rect.width-canvas.width*scale)/2,offsetY=(rect.height-canvas.height*scale)/2;
+     const width=Math.max(96,bounds.w*scale);
+     chip.style.width=width+'px';
+     chip.style.left=Math.max(0,offsetX+(bounds.x+bounds.w)*scale-width)+'px';
+     chip.style.top=(offsetY+(bounds.y+bounds.h)*scale+3)+'px';
+     chip.hidden=Boolean(host.isBattleActive?.()||session.renderState.overlayEvent?.type==='randomEncounter');
+    }
+   }
    if(session.surveyCompletionPending){
     session.surveyCompletionPending=false;
     if(isV2Session(session))playSe('importantItem');
@@ -122,6 +135,8 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  }
  function input(action){
   if(disposed)return false;
+  if(host.isBattleActive?.())return host.handleBattleInput?.(action)??true;
+  if(session.defeatRetry){if(action==='confirm')void session.defeatRetry();return true;}
   if(session.transitioning)return true;
   // Cell confirmation precedes menus and all ordinary exploration shortcuts.
   if(session.cellPrompt){
@@ -143,6 +158,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  const enter=e=>{
   // Gamepad A already uses pressed edges; touch A acts on release. Suppress
   // keyboard repeats only in V2, so a held decision cannot bounce up the stairs.
+  if(host.isBattleActive?.())return;
   if(isV2Session(session)&&e.repeat&&(e.key==='Enter'||e.code==='KeyX'||e.code==='KeyZ')){e.preventDefault();e.stopImmediatePropagation();return;}
   if(e.key==='Enter'){e.preventDefault();e.stopImmediatePropagation();input('confirm');}
  };
@@ -152,7 +168,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  window.addEventListener('pagehide',saveOnHide);
  document.addEventListener('visibilitychange',saveWhenHidden);
  // Native command buttons can bypass the action router (mouse/touch shortcuts).
- const guardCommands=e=>{if(isV2Session(session)&&(session.cellPrompt||session.transitioning)&&e.target?.closest?.('.dungeon-commands, .menu-screen')){e.preventDefault();e.stopImmediatePropagation();}};
+ const guardCommands=e=>{if(!host.isBattleActive?.()&&isV2Session(session)&&(session.cellPrompt||session.transitioning)&&e.target?.closest?.('.dungeon-commands, .menu-screen')){e.preventDefault();e.stopImmediatePropagation();}};
  for(const event of ['pointerdown','click','touchend'])document.addEventListener(event,guardCommands,true);
  const dismiss=()=>{if(session.renderState.overlayEvent)session.renderState.overlayEvent=null;};canvas.addEventListener('click',dismiss);
  function close(){if(disposed)return;disposed=true;session.disposeSurvey?.();window.removeEventListener('pagehide',saveOnHide);document.removeEventListener('visibilitychange',saveWhenHidden);for(const event of ['pointerdown','click','touchend'])document.removeEventListener(event,guardCommands,true);if(session.chestOpening){host.hideTreasure?.();cancelV2KeyChest(session);}restore();statusParent.append(host.status);container.remove();window.removeEventListener('keydown',enter,true);detach();}

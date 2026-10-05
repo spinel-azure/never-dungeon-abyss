@@ -155,7 +155,8 @@ export function startBattle(enemy, {
   enemies = null,
   targetIndex = 0,
   scriptedBattleType = "",
-  roamingEnemyInstanceId = ""
+  roamingEnemyInstanceId = "",
+  explorationContext = null
 } = {}) {
   const character = battleUi.getCharacter();
   if (!character || battleUi.active) return false;
@@ -185,6 +186,7 @@ export function startBattle(enemy, {
   battleUi.akashicCleanup?.();
   battleUi.akashicCleanup = enemy.akashicPhantom ? mountAkashicBackground(battleUi.root) : null;
   battleUi.battle = createBattleState({ character, enemy, enemies, targetIndex });
+  if(explorationContext)battleUi.battle.explorationContext=structuredClone(explorationContext);
   battleUi.presenting = false;
   battleUi.presentationEnemyImage = battleUi.battle.enemy.image || "";
   battleUi.battle.roamingEnemyInstanceId = String(roamingEnemyInstanceId || "");

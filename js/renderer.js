@@ -175,6 +175,11 @@ export function getEffectiveFrameRate() {
 }
 
 export function isMinimapOverlayVisible() { return renderer.minimapOverlayVisible; }
+export function getActiveMinimapBounds() {
+  if (!renderer.minimapOverlayVisible) return renderer.getMinimapBounds(renderer.W);
+  const size = Math.min(renderer.W * .58, renderer.H * .72, 360);
+  return {x:(renderer.W-size)/2-8,y:(renderer.H-size)/2-8-(renderer.state?.kind === "specialMapV2" ? 32 : 0),w:size+16,h:size+16};
+}
 
 export function toggleMinimapOverlay() {
   if (!renderer.state || !hasEffectiveMinimap(renderer.state)) {
@@ -444,7 +449,7 @@ function drawMinimapOverlay() {
   const { ctx, W, H } = renderer;
   const size = Math.min(W * .58, H * .72, 360);
   const ox = (W - size) / 2;
-  const oy = (H - size) / 2;
+  const oy = (H - size) / 2 - (renderer.state?.kind === "specialMapV2" ? 32 : 0);
   ctx.save();
   ctx.fillStyle = "rgba(0,0,0,.58)";
   ctx.fillRect(0, 0, W, H);

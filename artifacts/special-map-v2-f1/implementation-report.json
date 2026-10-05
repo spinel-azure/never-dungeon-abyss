@@ -1,0 +1,139 @@
+{
+  "phase": "V2-F1",
+  "scope": "General encounters only; no F2, boss battle, boss rewards, next-map drops or pendingReward.",
+  "changedFiles": [
+    "js/special-map/encounter-v2.js",
+    "js/special-map/battle-rewards-v2.js",
+    "js/special-map/session-v2.js",
+    "js/special-map/exploration-ui.js",
+    "js/battle.js",
+    "js/main.js",
+    "tests/special-map-encounter-v2.test.mjs",
+    "tests/browser/special-map-v2-f1.mjs",
+    "tests/browser/special-map-v2-f1-outcomes.mjs",
+    "scripts/simulate-special-map-v2-encounters.mjs",
+    "artifacts/special-map-v2-f1/",
+    "js/renderer.js",
+    "css/explorer-preview.css",
+    "tests/special-map-v2-feedback.test.mjs"
+  ],
+  "state": {
+    "scope": "V2 session only",
+    "presenceInitial": 0,
+    "litStepIncrease": [
+      4,
+      8
+    ],
+    "darkStepIncrease": [
+      5,
+      10
+    ],
+    "threshold": 100,
+    "frequencyMultiplier": 1,
+    "reset": "0 on victory/escape/blocked unsupported species; no encounter on resume",
+    "autoWalker": "Eligible successful steps charge; stop at encounter; never resume automatically",
+    "persistence": "Encounter context, gauge, session runtime remain memory-only. Existing survey persistence unchanged."
+  },
+  "ecology": {
+    "source": "generateV2EcologyCandidate2; once per session; currentFloor selects weights",
+    "roll": "integer uniform 0..9999 using play RNG; exact weights; no generator stream consumed",
+    "context": [
+      "source=special-map-v2",
+      "mapKey (original ID)",
+      "contentId",
+      "mapSeed",
+      "mapLevel",
+      "rarity",
+      "themeId",
+      "floorIndex",
+      "speciesId"
+    ],
+    "bossIds": "karte_boss_* rejected",
+    "exclusiveSpecies": "F1 option B: silberkaefer and maikaefer_koenig have no existing combat definition. Preserve selection, display message and console warning, skip battle without replacement.",
+    "specialThemes": "All four supported through the ecology API. Prior explicit-theme blueprint API remains separate from registered/share-code originals; this phase does not invent a persisted theme selector."
+  },
+  "flow": {
+    "entry": "Existing ENCOUNTER overlay shape, battleStart SE, 1400ms, shared startBattle/UI, normalBattle BGM",
+    "priority": "move complete -> torch/survey -> cell prompt -> eligible encounter",
+    "excluded": [
+      "all stairs including B1 entrance",
+      "key chest even opened",
+      "BOSS cell"
+    ],
+    "antechamber": "eligible",
+    "resume": "Retain the same session/floors in memory, never reconstruct from normal dungeon state. Reset only V2 gauge/lock and stop auto-walker.",
+    "defeat": "Shared defeat presentation, resolveDungeonDefeat and temple revival; V2 survey flush required before ending session. Failed flush retains session and locks exploration; A retries. Does not run ordinary depth/presence/quest reset.",
+    "rewards": "Existing enemy stats and EXP/card bonus calculation. Battle EXP and direct ordinary item/gold/equipment/card drops are settled separately, preserving ordinary carried EXP/lootBag. No map-Lv scaling.",
+    "redChestLimitation": "Ordinary redChest event rewards are not connected in F1 (depth-dependent event/trap flow); explicit result message, no fallback reroll. Direct drops remain enabled.",
+    "wardingItems": "Remain unavailable without item/SP consumption.",
+    "normalIsolation": "No ordinary currentDepth/highestDepth/cells/explored/torch/presence/boss/story/quest mutation. V1 remains without encounters."
+  },
+  "verification": {
+    "node": {
+      "passed": 1870,
+      "failed": 0,
+      "log": "node-tests.txt"
+    },
+    "browser": {
+      "victories": {
+        "pc": 8,
+        "mobile390": 7
+      },
+      "route": "Development grant -> appraisal/registration with reload -> three maps entered; first map B1/B2/B3, natural encounters and victories.",
+      "setup": "Isolated test browser saves and test-only hooks, not a user save. Completion commands automated. Escape RNG constrained; defeat uses ordinary RNG with test player HP 1.",
+      "victoryChecks": "Same floor/xy/direction/torch/survey/key/doors/explored; normal state unchanged",
+      "outcomes": "Escape and defeat/save-failure/retry/temple revival on PC and 390px; see outcomes.json",
+      "overflow": false,
+      "iphoneHardware": false
+    },
+    "simulation": {
+      "profiles": "seed12345 / WHITE / Lv5,60,100 / each of 3 floors / lit eligible cells only",
+      "stepsPerFloor": 1000,
+      "encountersRange": [
+        57,
+        59
+      ],
+      "meanEligibleStepsRange": [
+        16.949152542372882,
+        17.54385964912281
+      ],
+      "samplingRollsPerFloor": 100000,
+      "maxWeightDeviationPercentagePoints": 0.331,
+      "files": [
+        "simulation.json"
+      ]
+    },
+    "compatibility": {
+      "candidate3Fingerprint": "3519b715",
+      "candidate3Sha": "c1dbc28cf7bfc9f78fffa32281d8d001b4b0a1a8f1aa2f146cb5d0a5559f0e95",
+      "ecologyCandidate2Sha": "ab38d1e17e4f8d47c8fc89d895e20ed4eba33cc6e781db35cc0aac4a66a17dca",
+      "v1EcologySha": "04c4c6902ef72c567a2166d4b4bd41d83b7ca89eab99a8926b0ceaa5d7c96a8a",
+      "fullAudits": [
+        "structure-audit.json",
+        "ecology-audit.json"
+      ]
+    }
+  },
+  "untouched": [
+    "LAST UPDATE",
+    "commits",
+    "push",
+    "normal theme lottery",
+    "map generation",
+    "ecology generation",
+    "boss selection/combat",
+    "unique species AI/rewards",
+    "next map drops"
+  ],
+  "surveyHud": {
+    "scope": "V2 only",
+    "lines": [
+      "調査100/100",
+      "総合300/300"
+    ],
+    "placement": "Right-aligned immediately below current minimap bounds, including expanded map",
+    "expandedMap": "V2 expanded map raised 32 canvas pixels to reserve two-line readout on 390px",
+    "verification": "PC1280 and mobile390 normal/expanded maximum-count bounds assertions; screenshots survey-*.png",
+    "verified": true
+  }
+}

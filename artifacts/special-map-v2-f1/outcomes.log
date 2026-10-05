@@ -1,0 +1,18 @@
+OUTCOME escape escaped
+OUTCOME defeat defeat
+{
+  width: 1280,
+  escape: true,
+  defeat: true,
+  saveFailureRetry: true,
+  normalUnchanged: true
+}
+OUTCOME escape escaped
+OUTCOME defeat defeat
+{
+  width: 390,
+  escape: true,
+  defeat: true,
+  saveFailureRetry: true,
+  normalUnchanged: true
+}

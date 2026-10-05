@@ -1,17 +1,27 @@
 <!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="/">
 <title>開発用 特殊4テーマ</title>
-<style>*{box-sizing:border-box}body{background:#161c21;color:#eee;font:15px system-ui;margin:16px}h1{font-size:22px}select,input,button{font:inherit;padding:8px;max-width:100%}form{display:flex;gap:12px;flex-wrap:wrap}input{width:100px}canvas{width:100%;max-width:880px;image-rendering:pixelated}#boss{width:100%;max-width:430px;image-rendering:pixelated;background:repeating-conic-gradient(#333 0% 25%,#222 0% 50%) 0/24px 24px}pre{white-space:pre-wrap;overflow-wrap:anywhere}main{display:flex;flex-wrap:wrap;gap:20px}section{min-width:0;flex:1 1 360px}p{overflow-wrap:anywhere}</style>
+<style>*{box-sizing:border-box}body{background:#161c21;color:#eee;font:15px system-ui;margin:16px}h1{font-size:22px}select,input,button{font:inherit;padding:8px;max-width:100%}form{display:flex;gap:12px;flex-wrap:wrap}input{width:100px}canvas{width:100%;max-width:880px;image-rendering:pixelated}#boss-frame{position:relative;width:100%;max-width:430px}#sparkles{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}#boss{display:block;width:100%;max-width:430px;image-rendering:pixelated;background:repeating-conic-gradient(#333 0% 25%,#222 0% 50%) 0/24px 24px}pre{white-space:pre-wrap;overflow-wrap:anywhere}main{display:flex;flex-wrap:wrap;gap:20px}section{min-width:0;flex:1 1 360px}p{overflow-wrap:anywhere}</style>
 <h1>開発用：特殊テーマ／固定ボス</h1><p>明示指定の設計図プレビュー。登録・共有・survey・戦闘には接続しません。</p>
 <form><label>theme <select id="theme"><option>gold</option><option>rice</option><option>dusk</option><option>tender</option></select></label><label>Lv <input id="level" value="100" min="1" max="100" type="number"></label><label>floor <select id="floor"><option value="0">B1F</option><option value="1">B2F</option><option value="2">B3F</option></select></label><button>表示</button></form>
-<p id="summary"></p><canvas id="view" width="880" height="495"></canvas><main><section><h2 id="boss-name"></h2><img id="boss" alt="固定ボスの元画像"></section><section><pre id="details"></pre></section></main>
+<p id="summary"></p><canvas id="view" width="880" height="495"></canvas><main><section><h2 id="boss-name"></h2><div id="boss-frame"><img id="boss" alt="固定ボスの元画像"><canvas id="sparkles" width="600" height="600" aria-hidden="true"></canvas></div></section><section><pre id="details"></pre></section></main>
 <script type="module">
 import {generateExplicitSpecialMapV2,describeSpecialThemeMapName} from '/js/special-map/special-themes-v2.js';
 import {generateV2EcologyCandidate2} from '/js/special-map/ecology-v2-candidate-2.js';
 import {prepareSpecialThemeBoss} from '/js/special-map/boss-presentation.js';
 import {loadSpecialMapThemeTextures,useSpecialMapRenderSource,drawCeiling,drawFloor,drawBoundaryWalls} from '/js/renderer.js';
+import {drawSpecialBossSparkles} from '/js/special-map/boss-sparkles.js';
 const $=id=>document.getElementById(id);
+let sparkleFrame=0;
+function stopSparkles(){cancelAnimationFrame(sparkleFrame);$('sparkles').getContext('2d').clearRect(0,0,600,600);}
+function startSparkles(bossId){
+ stopSparkles();if(bossId!=='karte_boss_maikaefer_koenig')return;
+ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const frame=time=>{const ctx=$('sparkles').getContext('2d');ctx.clearRect(0,0,600,600);drawSpecialBossSparkles(ctx,bossId,time,{reducedMotion:reduced});if(!reduced)sparkleFrame=requestAnimationFrame(frame);};
+ frame(0);
+}
+addEventListener('pagehide',stopSparkles);
 async function render(){
- window.specialThemePreview=null;
+ window.specialThemePreview=null;stopSparkles();
  try{
   const input={ruleset:'special-map-v2',seed:12345,level:Number($('level').value),rarity:'WHITE',themeId:$('theme').value};
   const map=generateExplicitSpecialMapV2(input),f=map.floors[Number($('floor').value)],p=f.stairsUp;
@@ -23,7 +33,7 @@ async function render(){
   try{status=await loadSpecialMapThemeTextures(input.themeId);drawCeiling();drawFloor();drawBoundaryWalls();}finally{restore();}
   const presentation=await prepareSpecialThemeBoss(input);
   if(!presentation?.image)throw Error('Boss image unavailable');
-  $('boss').src=presentation.boss.image;$('boss-name').textContent=presentation.boss.name;
+  $('boss').src=presentation.boss.image;startSparkles(presentation.boss.id);$('boss-name').textContent=presentation.boss.name;
   const ecology=generateV2EcologyCandidate2(input);
   $('summary').textContent=`${describeSpecialThemeMapName(input).name} / ${input.themeId} B${Number($('floor').value)+1}F / ${status.fallback?'wall fallback: slate':'専用wall 2枚ロード済み'}`;
   $('details').textContent=JSON.stringify({boss:presentation.boss.id,image:presentation.boss.image,colorVariant:false,stats:presentation.boss.scaledStats,ecology:ecology.floors},null,2);

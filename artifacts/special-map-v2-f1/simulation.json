@@ -1,0 +1,341 @@
+[
+  {
+    "level": 5,
+    "floorIndex": 0,
+    "eligibleSteps": 1000,
+    "torch": "lit",
+    "battles": 58,
+    "blocked": 0,
+    "meanStepsPerRoll": 17.24137931034483,
+    "selected": {
+      "wandering_dead": 13,
+      "bouncing_coin": 24,
+      "cave_slime": 6,
+      "vampire_bat": 15
+    },
+    "species": [
+      {
+        "id": "bouncing_coin",
+        "weight": 4210
+      },
+      {
+        "id": "cave_slime",
+        "weight": 1158
+      },
+      {
+        "id": "vampire_bat",
+        "weight": 2878
+      },
+      {
+        "id": "wandering_dead",
+        "weight": 1754
+      }
+    ],
+    "sampledOutOf100000": {
+      "wandering_dead": 17598,
+      "vampire_bat": 29036,
+      "bouncing_coin": 41792,
+      "cave_slime": 11574
+    }
+  },
+  {
+    "level": 5,
+    "floorIndex": 1,
+    "eligibleSteps": 1000,
+    "torch": "lit",
+    "battles": 59,
+    "blocked": 0,
+    "meanStepsPerRoll": 16.949152542372882,
+    "selected": {
+      "cave_slime": 17,
+      "bouncing_coin": 26,
+      "abyss_rabbit": 16
+    },
+    "species": [
+      {
+        "id": "bouncing_coin",
+        "weight": 5425
+      },
+      {
+        "id": "cave_slime",
+        "weight": 2542
+      },
+      {
+        "id": "abyss_rabbit",
+        "weight": 2033
+      }
+    ],
+    "sampledOutOf100000": {
+      "abyss_rabbit": 20294,
+      "bouncing_coin": 54190,
+      "cave_slime": 25516
+    }
+  },
+  {
+    "level": 5,
+    "floorIndex": 2,
+    "eligibleSteps": 1000,
+    "torch": "lit",
+    "battles": 59,
+    "blocked": 0,
+    "meanStepsPerRoll": 16.949152542372882,
+    "selected": {
+      "bouncing_coin": 26,
+      "geistflamme": 15,
+      "merseburg_spell": 16,
+      "abyss_rat": 1,
+      "vampire_bat": 1
+    },
+    "species": [
+      {
+        "id": "bouncing_coin",
+        "weight": 4406
+      },
+      {
+        "id": "vampire_bat",
+        "weight": 185
+      },
+      {
+        "id": "merseburg_spell",
+        "weight": 3161
+      },
+      {
+        "id": "abyss_rat",
+        "weight": 51
+      },
+      {
+        "id": "geistflamme",
+        "weight": 2197
+      }
+    ],
+    "sampledOutOf100000": {
+      "bouncing_coin": 44385,
+      "merseburg_spell": 31342,
+      "geistflamme": 21908,
+      "vampire_bat": 1857,
+      "abyss_rat": 508
+    }
+  },
+  {
+    "level": 60,
+    "floorIndex": 0,
+    "eligibleSteps": 1000,
+    "torch": "lit",
+    "battles": 58,
+    "blocked": 0,
+    "meanStepsPerRoll": 17.24137931034483,
+    "selected": {
+      "geistflamme": 22,
+      "ice_spirit": 25,
+      "viper": 11
+    },
+    "species": [
+      {
+        "id": "ice_spirit",
+        "weight": 4486
+      },
+      {
+        "id": "geistflamme",
+        "weight": 3440
+      },
+      {
+        "id": "viper",
+        "weight": 2074
+      }
+    ],
+    "sampledOutOf100000": {
+      "ice_spirit": 45119,
+      "viper": 20812,
+      "geistflamme": 34069
+    }
+  },
+  {
+    "level": 60,
+    "floorIndex": 1,
+    "eligibleSteps": 1000,
+    "torch": "lit",
+    "battles": 58,
+    "blocked": 0,
+    "meanStepsPerRoll": 17.24137931034483,
+    "selected": {
+      "ice_spirit": 24,
+      "folterpanzer": 32,
+      "cave_slime": 2
+    },
+    "species": [
+      {
+        "id": "ice_spirit",
+        "weight": 4947
+      },
+      {
+        "id": "folterpanzer",
+        "weight": 4654
+      },
+      {
+        "id": "bouncing_coin",
+        "weight": 101
+      },
+      {
+        "id": "cave_slime",
+        "weight": 298
+      }
+    ],
+    "sampledOutOf100000": {
+      "ice_spirit": 49275,
+      "folterpanzer": 46655,
+      "cave_slime": 3026,
+      "bouncing_coin": 1044
+    }
+  },
+  {
+    "level": 60,
+    "floorIndex": 2,
+    "eligibleSteps": 1000,
+    "torch": "lit",
+    "battles": 58,
+    "blocked": 0,
+    "meanStepsPerRoll": 17.24137931034483,
+    "selected": {
+      "folterpanzer": 19,
+      "geistflamme": 5,
+      "ice_spirit": 34
+    },
+    "species": [
+      {
+        "id": "ice_spirit",
+        "weight": 5417
+      },
+      {
+        "id": "geistflamme",
+        "weight": 1150
+      },
+      {
+        "id": "folterpanzer",
+        "weight": 3376
+      },
+      {
+        "id": "abyss_rabbit",
+        "weight": 14
+      },
+      {
+        "id": "abyss_rat",
+        "weight": 43
+      }
+    ],
+    "sampledOutOf100000": {
+      "ice_spirit": 54183,
+      "folterpanzer": 33739,
+      "geistflamme": 11527,
+      "abyss_rat": 409,
+      "abyss_rabbit": 142
+    }
+  },
+  {
+    "level": 100,
+    "floorIndex": 0,
+    "eligibleSteps": 1000,
+    "torch": "lit",
+    "battles": 57,
+    "blocked": 0,
+    "meanStepsPerRoll": 17.54385964912281,
+    "selected": {
+      "crystal_mimic": 30,
+      "abyss_crystal_beetle": 8,
+      "amethyst_golem": 19
+    },
+    "species": [
+      {
+        "id": "amethyst_golem",
+        "weight": 4157
+      },
+      {
+        "id": "crystal_mimic",
+        "weight": 4032
+      },
+      {
+        "id": "abyss_crystal_beetle",
+        "weight": 1811
+      }
+    ],
+    "sampledOutOf100000": {
+      "amethyst_golem": 41632,
+      "abyss_crystal_beetle": 17945,
+      "crystal_mimic": 40423
+    }
+  },
+  {
+    "level": 100,
+    "floorIndex": 1,
+    "eligibleSteps": 1000,
+    "torch": "lit",
+    "battles": 58,
+    "blocked": 0,
+    "meanStepsPerRoll": 17.24137931034483,
+    "selected": {
+      "amethyst_golem": 35,
+      "abgrund_krabbe": 11,
+      "prism_moth": 12
+    },
+    "species": [
+      {
+        "id": "amethyst_golem",
+        "weight": 4874
+      },
+      {
+        "id": "poison_slime",
+        "weight": 13
+      },
+      {
+        "id": "prism_moth",
+        "weight": 2536
+      },
+      {
+        "id": "abgrund_krabbe",
+        "weight": 2577
+      }
+    ],
+    "sampledOutOf100000": {
+      "amethyst_golem": 48648,
+      "prism_moth": 25378,
+      "abgrund_krabbe": 25830,
+      "poison_slime": 144
+    }
+  },
+  {
+    "level": 100,
+    "floorIndex": 2,
+    "eligibleSteps": 1000,
+    "torch": "lit",
+    "battles": 58,
+    "blocked": 0,
+    "meanStepsPerRoll": 17.24137931034483,
+    "selected": {
+      "crystal_mimic": 37,
+      "amethyst_golem": 21
+    },
+    "species": [
+      {
+        "id": "amethyst_golem",
+        "weight": 3584
+      },
+      {
+        "id": "crystal_mimic",
+        "weight": 6413
+      },
+      {
+        "id": "vampire_bat",
+        "weight": 2
+      },
+      {
+        "id": "wandering_dead",
+        "weight": 1
+      }
+    ],
+    "sampledOutOf100000": {
+      "crystal_mimic": 64137,
+      "amethyst_golem": 35838,
+      "wandering_dead": 12,
+      "vampire_bat": 13
+    }
+  }
+]
