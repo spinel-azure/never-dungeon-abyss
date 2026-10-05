@@ -1,0 +1,18 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Development only — map boss variants</title>
+<style>body{margin:16px;background:#202128;color:#eee;font:14px monospace}*{box-sizing:border-box}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:16px}figure{margin:0;min-width:0}canvas{width:100%;height:auto;image-rendering:pixelated;background:repeating-conic-gradient(#484850 0% 25%,#323238 0% 50%) 0/24px 24px}pre{white-space:pre-wrap;overflow-wrap:anywhere}button{padding:10px}</style>
+<h1>開発用：ボス色違い比較</h1><p>本番画面には接続していません。元画像は変更しません。</p>
+<button id="refresh">キャッシュ解放・再生成</button><main></main><pre id="timing"></pre>
+<script type="module">
+import {KARTE_BOSS_IMAGES} from '../../data/karte-boss-images.js';
+import {getBossVariantImage,prepareBossVariantImage,clearBossVariantCache,computeBossVariantAdjustments} from '../../js/boss-color-variant.js';
+const definition=KARTE_BOSS_IMAGES.karte_boss_001;
+const image=new Image();image.src='../../'+definition.imagePath;await image.decode();
+const base={bossId:definition.id,imagePath:definition.imagePath,image,level:87,seed:12345,rarity:'GOLD'};
+function panel(source,label){const figure=document.createElement('figure'),canvas=document.createElement('canvas');canvas.width=canvas.height=600;const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;ctx.drawImage(source,0,0);const text=document.createElement('pre');text.textContent=label;figure.append(canvas,text);document.querySelector('main').append(figure);}
+function render(){clearBossVariantCache();document.querySelector('main').replaceChildren();panel(image,`Original ${image.naturalWidth}×${image.naturalHeight}`);
+for(const change of [{rarity:'WHITE'},{rarity:'SILVER'},{rarity:'GOLD'},{level:1},{level:50},{seed:42}]){const options={...base,...change};panel(getBossVariantImage(options),JSON.stringify({bossId:options.bossId,level:options.level,seed:options.seed,rarity:options.rarity,...computeBossVariantAdjustments(options)},null,2));}}
+render();document.querySelector('#refresh').onclick=render;
+// Exposed only by this unlinked developer page, not by the game.
+window.variantQa={base,getBossVariantImage,prepareBossVariantImage,clearBossVariantCache,image};
+</script>

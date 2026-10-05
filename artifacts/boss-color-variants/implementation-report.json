@@ -1,0 +1,143 @@
+{
+  "scope": "Map boss presentation utility only; no battle hookup, boss selection, stats or rewards.",
+  "files": [
+    "data/karte-boss-images.js",
+    "js/boss-color-variant.js",
+    "tests/boss-color-variant.test.mjs",
+    "tests/browser/boss-variants.html",
+    "tests/browser/boss-color-variants.mjs",
+    "artifacts/boss-color-variants/"
+  ],
+  "source": {
+    "path": "images/karte_bosses/karte_boss_001.avif",
+    "size": "600x600",
+    "sha256": "1DB521F9FF9BB6EFEC0F0F81EE67A448F0D346B12A262F533DB506985842C119",
+    "note": "User-provided, pre-existing untracked asset; unchanged. No variants exported."
+  },
+  "api": {
+    "compute": "computeBossVariantAdjustments(options)",
+    "pixels": "applyBossVariantPixels(Uint8ClampedArray, adjustments)",
+    "render": "renderBossVariant(image, adjustments)",
+    "cached": "getBossVariantImage({bossId,imagePath,image,level,seed,rarity})",
+    "preload": "await prepareBossVariantImage(options) after loading begins and before future battle display",
+    "clear": "clearBossVariantCache() at future session/battle teardown"
+  },
+  "variantVersion": 1,
+  "formula": {
+    "strength": "0.35 + 0.65 * (level - 1) / 99",
+    "random": "Independent streamV1(special-map-v2, seed, JSON([boss-variant, version, bossId, purpose])) for hue/saturation/lightness",
+    "rarity": {
+      "WHITE": [
+        0,
+        0,
+        0,
+        0.65
+      ],
+      "SILVER": [
+        -3,
+        -0.07,
+        0.025,
+        1
+      ],
+      "GOLD": [
+        3,
+        0.12,
+        0.02,
+        1
+      ]
+    },
+    "rarityTuple": "hue bias, saturation bias, lightness bias, random amplitude",
+    "hue": "clamp(roll * 17 * strength * amplitude + bias, -20, 20)",
+    "saturation": "clamp(1 + roll * .12 * strength * amplitude + bias, .85, 1.25)",
+    "lightness": "clamp(roll * .035 * strength * amplitude + bias - max(0, level-60)/40*.025, -.06, .06)",
+    "note": "Modest hue rotations do not universally move all source hues toward blue/yellow; saturation/lightness provide the main rarity tendencies."
+  },
+  "protection": "alpha unchanged; alpha=0 RGB also unchanged. correction multiplier clamp((L-.08)/.18,0,1)*clamp(S/.2,0,1). Dark outlines L<=.08 and true grayscale unchanged.",
+  "rendering": "600x600 native Canvas 2D; getImageData once, HSL transform, putImageData once; smoothing disabled. Destination renderer must also disable smoothing when scaling.",
+  "cache": "8-entry LRU (up to ~11 MiB pixel buffers excluding source/GPU storage). Includes version,bossId,imagePath,level,seed,rarity. Failure also cached; unloaded/wrong-sized image not cached. Clear removes references without invalidating canvases retained by callers.",
+  "fallback": "Invalid/unsupported input, non-opted-in boss/path, unavailable canvas, CORS/readback failures return source image. Missing image returns undefined. Decode failure returns original image for existing image-loading error handling.",
+  "performance": {
+    "browser": "154.0.4258.53",
+    "reports": [
+      {
+        "label": "pc",
+        "width": 600,
+        "height": 600,
+        "first": {
+          "meanMs": 44.715000002086164,
+          "maxMs": 45.80000001192093,
+          "samples": 20
+        },
+        "cached": {
+          "meanMs": 0.011099999994039536,
+          "maxMs": 5.100000023841858,
+          "samples": 1000
+        },
+        "alphaMismatch": 0,
+        "transparent": 127987,
+        "changed": 217401,
+        "hash": "1452fc51c59b05b2006cfe1d3e6cd674adbf405cec6e4ea16c98bd7d03f439f9",
+        "normalUnchanged": true,
+        "overflow": false
+      },
+      {
+        "label": "mobile",
+        "width": 600,
+        "height": 600,
+        "first": {
+          "meanMs": 44.79999999850988,
+          "maxMs": 46.900000005960464,
+          "samples": 20
+        },
+        "cached": {
+          "meanMs": 0.011500000029802322,
+          "maxMs": 4.800000011920929,
+          "samples": 1000
+        },
+        "alphaMismatch": 0,
+        "transparent": 127987,
+        "changed": 217401,
+        "hash": "1452fc51c59b05b2006cfe1d3e6cd674adbf405cec6e4ea16c98bd7d03f439f9",
+        "normalUnchanged": true,
+        "overflow": false
+      }
+    ]
+  },
+  "performanceNotes": "20 cold conversions after 3 warmups; 1000 cache calls. Browser timings include runtime scheduling/GC and timer precision. 390px is desktop Edge mobile emulation, not iPhone CPU. ~45ms first generation warrants preparation during a loading phase; prepare API supplied, battle hookup intentionally absent.",
+  "visualQa": "PC and 390px: WHITE/SILVER/GOLD, Lv1/50/87, seed12345/42 inspected. Alpha mismatches zero; no horizontal overflow; same pixel hash in both contexts. Ordinary boss registry/runtime untouched; ordinary boss API passthrough verified. No Safari/iPhone hardware test.",
+  "compatibility": {
+    "sha256": {
+      "v2Structure": "c1dbc28cf7bfc9f78fffa32281d8d001b4b0a1a8f1aa2f146cb5d0a5559f0e95",
+      "candidate1Structure": "19f8f3aad737c8ab9e91c7e673e892ab810b7938b182cab63e77d3b9601750b1",
+      "candidate2Structure": "243b09bbd93f5ff783b1bf772c156e159132451d90a630a807a19b8d6fdd4db3",
+      "v1Topology": "b985066f1fb5720c8f27c56d925e58d700af9d637d90cd2c6e0fc33ce0920e58",
+      "legacyTopology": "3d92b41f2e2994ca08e40626cd85e498a20c8c0dfc1a135c32472641805df592",
+      "v1Doors": "6a625e0aac5a8c87367c2ab52e46570dcb195e4260ecb7cacc4f1167c81f693f",
+      "v1Ecology": "04c4c6902ef72c567a2166d4b4bd41d83b7ca89eab99a8926b0ceaa5d7c96a8a"
+    },
+    "passed": true,
+    "sets": 65536,
+    "floors": 196608,
+    "failures": {
+      "generation": 0,
+      "structure": 0,
+      "keyAccess": 0,
+      "repeat": 0,
+      "levelRarityIndependence": 0,
+      "candidate1Comparison": 0,
+      "candidate2Comparison": 0,
+      "legacy": 0
+    },
+    "seed12345Fingerprint": "3519b715"
+  },
+  "tests": "1848 Node tests passed; six new unit tests. Browser harness passed.",
+  "unchanged": [
+    "LAST UPDATE",
+    "production battle/rendering",
+    "map naming",
+    "generators",
+    "source image"
+  ],
+  "commitOrPush": false,
+  "suggestedCommit": "Add deterministic HSL color variants and cached previews for map bosses"
+}

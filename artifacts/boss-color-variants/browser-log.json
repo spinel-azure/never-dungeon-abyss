@@ -1,0 +1,44 @@
+[
+  {
+    "label": "pc",
+    "width": 600,
+    "height": 600,
+    "first": {
+      "meanMs": 44.715000002086164,
+      "maxMs": 45.80000001192093,
+      "samples": 20
+    },
+    "cached": {
+      "meanMs": 0.011099999994039536,
+      "maxMs": 5.100000023841858,
+      "samples": 1000
+    },
+    "alphaMismatch": 0,
+    "transparent": 127987,
+    "changed": 217401,
+    "hash": "1452fc51c59b05b2006cfe1d3e6cd674adbf405cec6e4ea16c98bd7d03f439f9",
+    "normalUnchanged": true,
+    "overflow": false
+  },
+  {
+    "label": "mobile",
+    "width": 600,
+    "height": 600,
+    "first": {
+      "meanMs": 44.79999999850988,
+      "maxMs": 46.900000005960464,
+      "samples": 20
+    },
+    "cached": {
+      "meanMs": 0.011500000029802322,
+      "maxMs": 4.800000011920929,
+      "samples": 1000
+    },
+    "alphaMismatch": 0,
+    "transparent": 127987,
+    "changed": 217401,
+    "hash": "1452fc51c59b05b2006cfe1d3e6cd674adbf405cec6e4ea16c98bd7d03f439f9",
+    "normalUnchanged": true,
+    "overflow": false
+  }
+]
