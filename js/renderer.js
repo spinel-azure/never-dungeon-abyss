@@ -1,4 +1,5 @@
 import { drawQueenProjection } from "./akashic-presentation.js";
+import {SPECIAL_THEME_DEFINITIONS} from '../data/special-map-themes.js';
 import {syncLionBath} from './lion-bath.js';
 import {drawLionEvent} from './lion-event.js';
 import { getRoamingRevealFrame } from './roaming-reveal.js';
@@ -132,6 +133,25 @@ const FLOOR_PALETTES = {
   black: { near: "#010102", mid: "#08080a", far: "#111116", grid: "rgba(104,94,118,.06)" }
 };
 const DISTANCE_MIST_BASE_ALPHA = .8;
+// Special themes reuse existing floor palettes, but always load their own walls.
+for (const [id,definition] of Object.entries(SPECIAL_THEME_DEFINITIONS)) {
+  WALL_PALETTES[id] = WALL_PALETTES[definition.fallbackTheme];
+  FLOOR_PALETTES[id] = FLOOR_PALETTES[definition.palette];
+}
+const specialWallTextures = new Map(), specialWallLoads = new Map();
+export function loadSpecialMapThemeTextures(themeId) {
+  if (!Object.hasOwn(SPECIAL_THEME_DEFINITIONS,themeId)) return Promise.reject(new RangeError('Unknown special theme'));
+  if (!specialWallLoads.has(themeId)) {
+    const definition = SPECIAL_THEME_DEFINITIONS[themeId];
+    specialWallLoads.set(themeId,Promise.all(definition.walls.map(loadWallTextureImage)).then(images=>{
+      const textures = images.every(Boolean) ? images : [];
+      specialWallTextures.set(themeId,textures);
+      if (renderer.wallColor === themeId) renderer.wallTexture = textures[0] || renderer.midDungeonWallTextures[0] || makeWallTexture('slate');
+      return {themeId,loaded:textures.length,fallback:textures.length===0};
+    }));
+  }
+  return specialWallLoads.get(themeId);
+}
 
 export function setScreenShakeEnabled(enabled) {
   renderer.screenShakeEnabled = Boolean(enabled);
@@ -170,6 +190,7 @@ export function setMistEnabled(enabled) {
 }
 
 export function setWallColor(color) {
+  if (Object.hasOwn(SPECIAL_THEME_DEFINITIONS,color)) void loadSpecialMapThemeTextures(color);
   if (!WALL_PALETTES[color]) color = "default";
   if (renderer.wallColor === color && renderer.wallTexture) return;
   renderer.wallColor = color;
@@ -854,6 +875,7 @@ function getWallTextureForHit(hit, fallback) {
 }
 
 function getThemedWallTextures(color) {
+  if (Object.hasOwn(SPECIAL_THEME_DEFINITIONS,color)) return specialWallTextures.get(color)?.length ? specialWallTextures.get(color) : renderer.midDungeonWallTextures;
   if (color === "stone") return renderer.starterWallTextures;
   if (color === "red") return renderer.fireWallTextures;
   if (color === "blue") return renderer.iceWallTextures;

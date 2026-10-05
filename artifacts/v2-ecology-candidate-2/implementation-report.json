@@ -1,0 +1,567 @@
+{
+  "status": "Candidate 2 / provisional / no combat connection",
+  "changedFiles": [
+    "data/karte-boss-images.js",
+    "js/boss-color-variant.js",
+    "js/renderer.js",
+    "data/karte-special-bosses.js",
+    "data/special-map-themes.js",
+    "js/special-map/boss-presentation.js",
+    "js/special-map/ecology-v2-candidate-2.js",
+    "js/special-map/special-themes-v2.js",
+    "scripts/audit-special-map-ecology-v2-candidate-2.mjs",
+    "tests/special-map-special-themes.test.mjs",
+    "tests/browser/special-map-themes.html",
+    "tests/browser/special-map-themes.mjs",
+    "artifacts/v2-ecology-candidate-2/"
+  ],
+  "scope": {
+    "explicitAPI": "generateExplicitSpecialMapV2(input)",
+    "normalGenerator": "unchanged Candidate 3",
+    "specialThemePersistence": "Explicit blueprint/development preview only. Existing originals/share codes have no theme selector; special themes are not injected into registered originals or survey identity.",
+    "combat": false,
+    "encounters": false,
+    "rewards": false,
+    "commit": false,
+    "push": false,
+    "lastUpdateChanged": false,
+    "sourceImagesModified": false
+  },
+  "normalThemes": [
+    "slate",
+    "magic",
+    "torture",
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "water",
+    "crystal",
+    "black"
+  ],
+  "specialThemes": {
+    "gold": {
+      "minMapLevel": 1,
+      "walls": [
+        "images/dungeon_effects/gold_wall_01.webp",
+        "images/dungeon_effects/gold_wall_02.webp"
+      ],
+      "palette": "yellow",
+      "id": "gold",
+      "fallbackTheme": "slate",
+      "bgmKey": "dungeon"
+    },
+    "rice": {
+      "minMapLevel": 80,
+      "walls": [
+        "images/dungeon_effects/rice_wall_01.webp",
+        "images/dungeon_effects/rice_wall_02.webp"
+      ],
+      "palette": "light",
+      "id": "rice",
+      "fallbackTheme": "slate",
+      "bgmKey": "dungeon"
+    },
+    "dusk": {
+      "minMapLevel": 80,
+      "walls": [
+        "images/dungeon_effects/dusk_wall.01.webp",
+        "images/dungeon_effects/dusk_wall.02.webp"
+      ],
+      "palette": "black",
+      "id": "dusk",
+      "fallbackTheme": "slate",
+      "bgmKey": "dungeon"
+    },
+    "tender": {
+      "minMapLevel": 80,
+      "walls": [
+        "images/dungeon_effects/tender_wall_01.webp",
+        "images/dungeon_effects/tender_wall_02.webp"
+      ],
+      "palette": "green",
+      "id": "tender",
+      "fallbackTheme": "slate",
+      "bgmKey": "dungeon"
+    }
+  },
+  "bossRegistry": {
+    "karte_boss_lumina": {
+      "id": "karte_boss_lumina",
+      "name": "黄金の稲穂の女神・ルミナ",
+      "themeId": "rice",
+      "image": "images/karte_bosses/karte_boss_013.avif",
+      "allowColorVariant": false,
+      "minMapLevel": 80,
+      "imageSize": 600,
+      "tier": "endgame-superboss",
+      "baseLevel": 100,
+      "baseStats": {
+        "maxHp": 55000,
+        "maxSp": 9999,
+        "stats": {
+          "str": 115,
+          "int": 105,
+          "agi": 100,
+          "dex": 110,
+          "luc": 120
+        },
+        "def": 115,
+        "magicDefense": 105
+      },
+      "battleRole": "攻守万能型",
+      "resistanceProfile": {
+        "instantDeath": "immune",
+        "petrify": "immune",
+        "maxHpPercentDamage": "immune",
+        "incapacitation": "very-high",
+        "deadlyPoison": "very-high",
+        "otherAilments": "high",
+        "nonImmuneAilmentsMaySucceed": true,
+        "implementation": "design-only; probabilities deferred"
+      },
+      "design": {
+        "actions": [
+          "黄金雷閃",
+          "稲妻の双刃",
+          "黄金の稲穂",
+          "豊穣の光",
+          "天穹雷霆",
+          "解放の光"
+        ],
+        "phaseDesign": {
+          "hpRatioAtMost": 0.5,
+          "agilityMultiplier": 1.15,
+          "lightningMultiplier": 1.2,
+          "criticalRate": "increased; value TBD"
+        }
+      },
+      "battleEnabled": false
+    },
+    "karte_boss_noctia": {
+      "id": "karte_boss_noctia",
+      "name": "宵闇の夜露の女神・ノクティア",
+      "themeId": "dusk",
+      "image": "images/karte_bosses/karte_boss_014.avif",
+      "allowColorVariant": false,
+      "minMapLevel": 80,
+      "imageSize": 600,
+      "tier": "endgame-superboss",
+      "baseLevel": 100,
+      "baseStats": {
+        "maxHp": 48000,
+        "maxSp": 9999,
+        "stats": {
+          "str": 80,
+          "int": 130,
+          "agi": 125,
+          "dex": 115,
+          "luc": 105
+        },
+        "def": 95,
+        "magicDefense": 125
+      },
+      "battleRole": "高速・高火力魔法型",
+      "resistanceProfile": {
+        "instantDeath": "immune",
+        "petrify": "immune",
+        "maxHpPercentDamage": "immune",
+        "incapacitation": "very-high",
+        "deadlyPoison": "very-high",
+        "otherAilments": "high",
+        "nonImmuneAilmentsMaySucceed": true,
+        "implementation": "design-only; probabilities deferred"
+      },
+      "design": {
+        "actions": [
+          "ノクティス",
+          "夜露の雫",
+          "宵闇",
+          "月蝕",
+          "夜天星葬",
+          "夜の帳"
+        ],
+        "phaseDesign": {
+          "hpRatioAtMost": 0.3,
+          "intelligenceGrowth": "each turn; increment TBD"
+        }
+      },
+      "battleEnabled": false
+    },
+    "karte_boss_zelena": {
+      "id": "karte_boss_zelena",
+      "name": "新緑の若葉の女神・ゼレーナ",
+      "themeId": "tender",
+      "image": "images/karte_bosses/karte_boss_015.avif",
+      "allowColorVariant": false,
+      "minMapLevel": 80,
+      "imageSize": 600,
+      "tier": "endgame-superboss",
+      "baseLevel": 100,
+      "baseStats": {
+        "maxHp": 60000,
+        "maxSp": 9999,
+        "stats": {
+          "str": 95,
+          "int": 120,
+          "agi": 105,
+          "dex": 100,
+          "luc": 115
+        },
+        "def": 125,
+        "magicDefense": 115
+      },
+      "battleRole": "回復・障壁・再生を使う耐久型裏ボス",
+      "resistanceProfile": {
+        "instantDeath": "immune",
+        "petrify": "immune",
+        "maxHpPercentDamage": "immune",
+        "incapacitation": "very-high",
+        "deadlyPoison": "very-high",
+        "otherAilments": "high",
+        "nonImmuneAilmentsMaySucceed": true,
+        "implementation": "design-only; probabilities deferred"
+      },
+      "design": {
+        "actions": [
+          "シルワンエメラ",
+          "若葉の息吹",
+          "翠緑障壁",
+          "森羅の蔦",
+          "萌芽",
+          "大樹の審判"
+        ],
+        "phaseDesign": {
+          "reviveOnce": true,
+          "reviveRatio": 0.3,
+          "message": "若葉が舞い、失われた生命が再び芽吹く――。"
+        }
+      },
+      "battleEnabled": false
+    },
+    "karte_boss_maikaefer_koenig": {
+      "id": "karte_boss_maikaefer_koenig",
+      "name": "マイケーファーケーニヒ",
+      "themeId": "gold",
+      "image": "images/karte_bosses/karte_boss_016.avif",
+      "allowColorVariant": false,
+      "minMapLevel": 1,
+      "imageSize": 600,
+      "baseStats": null,
+      "battleRole": "gold固定ボス（戦闘仕様未定）",
+      "resistanceProfile": null,
+      "battleEnabled": false
+    }
+  },
+  "scaling": {
+    "levels80to89": 0.9,
+    "levels90to99": 0.95,
+    "level100": 1,
+    "rounding": "floor((value * integerPercent + 50) / 100)",
+    "sp": 9999,
+    "examples": {
+      "rice": [
+        {
+          "maxHp": 49500,
+          "maxSp": 9999,
+          "stats": {
+            "str": 104,
+            "int": 95,
+            "agi": 90,
+            "dex": 99,
+            "luc": 108
+          },
+          "def": 104,
+          "magicDefense": 95
+        },
+        {
+          "maxHp": 49500,
+          "maxSp": 9999,
+          "stats": {
+            "str": 104,
+            "int": 95,
+            "agi": 90,
+            "dex": 99,
+            "luc": 108
+          },
+          "def": 104,
+          "magicDefense": 95
+        },
+        {
+          "maxHp": 52250,
+          "maxSp": 9999,
+          "stats": {
+            "str": 109,
+            "int": 100,
+            "agi": 95,
+            "dex": 105,
+            "luc": 114
+          },
+          "def": 109,
+          "magicDefense": 100
+        },
+        {
+          "maxHp": 52250,
+          "maxSp": 9999,
+          "stats": {
+            "str": 109,
+            "int": 100,
+            "agi": 95,
+            "dex": 105,
+            "luc": 114
+          },
+          "def": 109,
+          "magicDefense": 100
+        },
+        {
+          "maxHp": 55000,
+          "maxSp": 9999,
+          "stats": {
+            "str": 115,
+            "int": 105,
+            "agi": 100,
+            "dex": 110,
+            "luc": 120
+          },
+          "def": 115,
+          "magicDefense": 105
+        }
+      ],
+      "dusk": [
+        {
+          "maxHp": 43200,
+          "maxSp": 9999,
+          "stats": {
+            "str": 72,
+            "int": 117,
+            "agi": 113,
+            "dex": 104,
+            "luc": 95
+          },
+          "def": 86,
+          "magicDefense": 113
+        },
+        {
+          "maxHp": 43200,
+          "maxSp": 9999,
+          "stats": {
+            "str": 72,
+            "int": 117,
+            "agi": 113,
+            "dex": 104,
+            "luc": 95
+          },
+          "def": 86,
+          "magicDefense": 113
+        },
+        {
+          "maxHp": 45600,
+          "maxSp": 9999,
+          "stats": {
+            "str": 76,
+            "int": 124,
+            "agi": 119,
+            "dex": 109,
+            "luc": 100
+          },
+          "def": 90,
+          "magicDefense": 119
+        },
+        {
+          "maxHp": 45600,
+          "maxSp": 9999,
+          "stats": {
+            "str": 76,
+            "int": 124,
+            "agi": 119,
+            "dex": 109,
+            "luc": 100
+          },
+          "def": 90,
+          "magicDefense": 119
+        },
+        {
+          "maxHp": 48000,
+          "maxSp": 9999,
+          "stats": {
+            "str": 80,
+            "int": 130,
+            "agi": 125,
+            "dex": 115,
+            "luc": 105
+          },
+          "def": 95,
+          "magicDefense": 125
+        }
+      ],
+      "tender": [
+        {
+          "maxHp": 54000,
+          "maxSp": 9999,
+          "stats": {
+            "str": 86,
+            "int": 108,
+            "agi": 95,
+            "dex": 90,
+            "luc": 104
+          },
+          "def": 113,
+          "magicDefense": 104
+        },
+        {
+          "maxHp": 54000,
+          "maxSp": 9999,
+          "stats": {
+            "str": 86,
+            "int": 108,
+            "agi": 95,
+            "dex": 90,
+            "luc": 104
+          },
+          "def": 113,
+          "magicDefense": 104
+        },
+        {
+          "maxHp": 57000,
+          "maxSp": 9999,
+          "stats": {
+            "str": 90,
+            "int": 114,
+            "agi": 100,
+            "dex": 95,
+            "luc": 109
+          },
+          "def": 119,
+          "magicDefense": 109
+        },
+        {
+          "maxHp": 57000,
+          "maxSp": 9999,
+          "stats": {
+            "str": 90,
+            "int": 114,
+            "agi": 100,
+            "dex": 95,
+            "luc": 109
+          },
+          "def": 119,
+          "magicDefense": 109
+        },
+        {
+          "maxHp": 60000,
+          "maxSp": 9999,
+          "stats": {
+            "str": 95,
+            "int": 120,
+            "agi": 105,
+            "dex": 100,
+            "luc": 115
+          },
+          "def": 125,
+          "magicDefense": 115
+        }
+      ]
+    }
+  },
+  "validation": {
+    "development": "assertSpecialThemeBoss / strict resolver rejects mismatches",
+    "production": "Returns the correct fixed boss for a valid theme/level, null for invalid theme/level",
+    "variantGuards": [
+      "Registry allowColorVariant=false",
+      "getBossVariantImage bypasses fixed boss IDs and special theme IDs",
+      "prepareSpecialThemeBoss loads only the registry-selected original image without HSL"
+    ]
+  },
+  "ecology": {
+    "normal": "Delegate directly to Candidate 1, including revision/fingerprint. No Candidate 1 files or fixtures changed.",
+    "special": "Dedicated Candidate 2 streams include ruleset, seed, level, rarity, theme and floor purpose. Shared dominant, 3-4 / 3-5 / 4-5 species, positive integer weights total 10000.",
+    "gates": "Existing silver min Lv10 / king min Lv60 retained; god themes require Lv80. No fixed bosses enter species pools.",
+    "gold": "Affinity 40 silver, 80 normal-species king; no 100% monoculture. Boss king uses separate ID.",
+    "normalComparedMaps": 393216,
+    "specialAuditedMaps": 1048576,
+    "totalAuditedFloors": 4325376,
+    "normalDifferences": 0,
+    "normalSha": "ac0cf99c1cb50d4c4b9dbd7533e5a2751ba4a8790f88637e22d1ee5a42fe8de0",
+    "statisticsFile": "audit.json",
+    "shaScope": "C1 six profiles in original order, then gold/rice/dusk/tender profiles as listed; seed ascending; canonicalV2Ecology + LF"
+  },
+  "naming": {
+    "locations": {
+      "gold": [
+        "黄金窟",
+        "黄金宮",
+        "金殿",
+        "金色廟"
+      ],
+      "rice": [
+        "稲穂宮",
+        "黄金田",
+        "豊穣殿",
+        "光穂廟"
+      ],
+      "dusk": [
+        "宵闇宮",
+        "夜露殿",
+        "黄昏廟",
+        "月影宮"
+      ],
+      "tender": [
+        "若葉宮",
+        "新緑殿",
+        "翠芽廟",
+        "萌芽宮"
+      ]
+    },
+    "prefix": "Existing level-band prefix unchanged",
+    "purpose": "map-name-special-location:<theme>",
+    "rarityAndDiscovererAffectName": false,
+    "normalNamesUnchanged": true
+  },
+  "audio": {
+    "specialFallback": "dungeon",
+    "newAudio": false
+  },
+  "rendering": {
+    "normal": "Both dedicated walls",
+    "failure": "slate wall fallback",
+    "duskActualPaths": "dusk_wall.01.webp / dusk_wall.02.webp (supplied files, unchanged)",
+    "bossStandard": 600,
+    "actualDimensions": {
+      "013": [
+        600,
+        600
+      ],
+      "014": [
+        600,
+        600
+      ],
+      "015": [
+        600,
+        600
+      ],
+      "016": [
+        400,
+        400
+      ]
+    },
+    "limitation": "016 is 400x400; preserved original file and colors. 600x600 asset standard is not satisfied by the supplied gold image."
+  },
+  "tests": {
+    "nodePassed": 1863,
+    "nodeFailed": 0,
+    "nodeLog": "node-tests.txt",
+    "browser": "Edge PC 1280x1000 / mobile emulation 390x844: all four themes and three floors, fixed images, overflow, four wall failure fallbacks passed",
+    "browserReport": "browser-report.json",
+    "iphoneHardware": false,
+    "structureAudit": "structure-audit.json"
+  },
+  "hashes": {
+    "candidate2Ecology": "ab38d1e17e4f8d47c8fc89d895e20ed4eba33cc6e781db35cc0aac4a66a17dca",
+    "candidate3Fingerprint12345": "3519b715",
+    "candidate3": "c1dbc28cf7bfc9f78fffa32281d8d001b4b0a1a8f1aa2f146cb5d0a5559f0e95",
+    "v1Topology": "b985066f1fb5720c8f27c56d925e58d700af9d637d90cd2c6e0fc33ce0920e58",
+    "legacyTopology": "3d92b41f2e2994ca08e40626cd85e498a20c8c0dfc1a135c32472641805df592",
+    "v1Doors": "6a625e0aac5a8c87367c2ab52e46570dcb195e4260ecb7cacc4f1167c81f693f",
+    "v1Ecology": "04c4c6902ef72c567a2166d4b4bd41d83b7ca89eab99a8926b0ceaa5d7c96a8a"
+  }
+}

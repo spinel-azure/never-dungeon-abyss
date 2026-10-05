@@ -1,5 +1,7 @@
 import {streamV1} from './special-map/random-v1.js';
 import {KARTE_BOSS_IMAGES} from '../data/karte-boss-images.js';
+import {KARTE_SPECIAL_BOSSES} from '../data/karte-special-bosses.js';
+import {SPECIAL_MAP_THEMES} from '../data/special-map-themes.js';
 
 export const BOSS_VARIANT_VERSION = 1;
 export const BOSS_VARIANT_SIZE = 600;
@@ -83,6 +85,7 @@ export function createBossVariantCache({maxEntries = 8, createCanvas} = {}) {
     getBossVariantImage(options = {}) {
       if (!options || typeof options !== 'object') return undefined;
       const {image, bossId, imagePath, level, seed, rarity} = options;
+      if (Object.hasOwn(KARTE_SPECIAL_BOSSES,bossId) || SPECIAL_MAP_THEMES.includes(options.themeId)) return image;
       const definition = KARTE_BOSS_IMAGES[bossId];
       // Explicit registry opt-in: ordinary abyss assets can never enter this path.
       if (!image || !definition?.allowColorVariant || definition.imagePath !== imagePath) return image;

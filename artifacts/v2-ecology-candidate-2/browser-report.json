@@ -1,0 +1,98 @@
+[
+  {
+    "label": "pc",
+    "themeId": "gold",
+    "passed": true,
+    "actualImageSize": [
+      400,
+      400
+    ],
+    "standard600": false
+  },
+  {
+    "label": "pc",
+    "themeId": "rice",
+    "passed": true,
+    "actualImageSize": [
+      600,
+      600
+    ],
+    "standard600": true
+  },
+  {
+    "label": "pc",
+    "themeId": "dusk",
+    "passed": true,
+    "actualImageSize": [
+      600,
+      600
+    ],
+    "standard600": true
+  },
+  {
+    "label": "pc",
+    "themeId": "tender",
+    "passed": true,
+    "actualImageSize": [
+      600,
+      600
+    ],
+    "standard600": true
+  },
+  {
+    "label": "mobile",
+    "themeId": "gold",
+    "passed": true,
+    "actualImageSize": [
+      400,
+      400
+    ],
+    "standard600": false
+  },
+  {
+    "label": "mobile",
+    "themeId": "rice",
+    "passed": true,
+    "actualImageSize": [
+      600,
+      600
+    ],
+    "standard600": true
+  },
+  {
+    "label": "mobile",
+    "themeId": "dusk",
+    "passed": true,
+    "actualImageSize": [
+      600,
+      600
+    ],
+    "standard600": true
+  },
+  {
+    "label": "mobile",
+    "themeId": "tender",
+    "passed": true,
+    "actualImageSize": [
+      600,
+      600
+    ],
+    "standard600": true
+  },
+  {
+    "themeId": "gold",
+    "wallFailureFallback": true
+  },
+  {
+    "themeId": "rice",
+    "wallFailureFallback": true
+  },
+  {
+    "themeId": "dusk",
+    "wallFailureFallback": true
+  },
+  {
+    "themeId": "tender",
+    "wallFailureFallback": true
+  }
+]
