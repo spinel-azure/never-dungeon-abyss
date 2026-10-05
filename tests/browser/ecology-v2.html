@@ -1,0 +1,33 @@
+<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>開発用 V2 Ecology Candidate 1</title>
+<style>body{background:#171b22;color:#eee;font:15px system-ui;margin:20px}*{box-sizing:border-box}h1{font-size:22px}form{display:flex;flex-wrap:wrap;gap:12px}input,select,button{font:inherit;max-width:100%;padding:8px}input{width:100px}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(290px,100%),1fr));gap:16px}section{padding:12px;background:#252e39;min-width:0}table{width:100%;font-size:14px}td:last-child{text-align:right}p{overflow-wrap:anywhere}#starters{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}</style>
+<h1>開発用：V2 Ecology Candidate 1</h1><p>通常UI・エンカウント未接続。値は暫定候補です。</p>
+<form><label>seed <input id="seed" type="number" min="0" max="65535" value="12345" required></label><label>Lv <input id="level" type="number" min="1" max="100" value="100" required></label><label>rarity <select id="rarity"><option>WHITE</option><option>SILVER</option><option>GOLD</option></select></label><button>生成</button></form>
+<p><button id="grant">開発用白地図3枚を生成して比較</button></p><div id="starters"></div><p id="summary"></p><main></main>
+<script type="module">
+import {generateV2Ecology,V2_ECOLOGY_SPECIES} from '../../js/special-map/ecology-v2.js';
+import {describeV2MapName} from '../../data/special-map-names-v2.js';
+import {grantTestStarterMaps} from '../../data/special-map-starter.js';
+const $=id=>document.getElementById(id);
+function render(){
+  const map={rulesetVersion:'special-map-v2',seed:Number($('seed').value),level:Number($('level').value),rarity:$('rarity').value};
+  try{
+    const name=describeV2MapName(map),ecology=generateV2Ecology({...map,ruleset:map.rulesetVersion,themeId:name.themeId});
+    $('summary').textContent=`${name.name} / theme: ${name.themeId} / 主力種: ${V2_ECOLOGY_SPECIES[ecology.dominantSpeciesId].name} / fingerprint: ${ecology.fingerprint}`;
+    document.querySelector('main').replaceChildren();
+    for(const f of ecology.floors){const section=document.createElement('section'),h=document.createElement('h2'),table=document.createElement('table');h.textContent=`B${f.floorIndex+1}F`;
+      for(const s of f.species){const row=table.insertRow();row.insertCell().textContent=V2_ECOLOGY_SPECIES[s.id].name;row.insertCell().textContent=`${(s.weight/100).toFixed(2)}%`;}
+      const tags=document.createElement('p');tags.textContent=`${f.ecologyTags.join(', ')} / rare ${(f.rareSpeciesRate/100).toFixed(2)}%`;section.append(h,table,tags);document.querySelector('main').append(section);
+    }
+    window.ecologyPreview=ecology;
+  }catch(e){$('summary').textContent=String(e);}
+}
+document.querySelector('form').onsubmit=e=>{e.preventDefault();render();};
+$('grant').onclick=()=>{
+  // Uses the real development grant API, in isolated in-memory state only.
+  const result=grantTestStarterMaps({discovererName:'確認',unidentified:[],registered:[]});
+  if(!result.ok)throw Error(result.error);window.ecologyStarterMaps=result.maps;$('starters').replaceChildren();
+  for(const map of result.maps){const button=document.createElement('button');button.textContent=describeV2MapName(map).name;button.onclick=()=>{$('seed').value=map.seed;$('level').value=map.level;$('rarity').value=map.rarity;render();};$('starters').append(button);}
+};
+render();
+</script></html>

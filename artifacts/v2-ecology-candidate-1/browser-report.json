@@ -1,0 +1,1107 @@
+[
+  {
+    "label": "pc",
+    "maps": [
+      {
+        "rulesetVersion": "special-map-v2",
+        "seed": 29609,
+        "level": 4,
+        "rarity": "WHITE",
+        "discovererName": "確認",
+        "discoveryId": "starter-7b1cd5e8-277e-4982-8e02-ed02d0788bea-0",
+        "acquisitionMethod": "starter"
+      },
+      {
+        "rulesetVersion": "special-map-v2",
+        "seed": 19015,
+        "level": 1,
+        "rarity": "WHITE",
+        "discovererName": "確認",
+        "discoveryId": "starter-5d0b3c3b-5310-489e-830d-01f8b65a9550-1",
+        "acquisitionMethod": "starter"
+      },
+      {
+        "rulesetVersion": "special-map-v2",
+        "seed": 47451,
+        "level": 3,
+        "rarity": "WHITE",
+        "discovererName": "確認",
+        "discoveryId": "starter-49dcf208-1d03-4d3b-b237-ebc7f7c75a75-2",
+        "acquisitionMethod": "starter"
+      }
+    ],
+    "samples": [
+      {
+        "revision": "v2-ecology-candidate-1",
+        "ruleset": "special-map-v2",
+        "seed": 29609,
+        "level": 4,
+        "rarity": "WHITE",
+        "themeId": "water",
+        "dominantSpeciesId": "poison_slime",
+        "floors": [
+          {
+            "floorIndex": 0,
+            "species": [
+              {
+                "id": "poison_slime",
+                "weight": 5200
+              },
+              {
+                "id": "bouncing_coin",
+                "weight": 2468
+              },
+              {
+                "id": "wandering_dead",
+                "weight": 165
+              },
+              {
+                "id": "abyss_rat",
+                "weight": 2167
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "medium-diversity"
+            ]
+          },
+          {
+            "floorIndex": 1,
+            "species": [
+              {
+                "id": "poison_slime",
+                "weight": 5321
+              },
+              {
+                "id": "cave_slime",
+                "weight": 772
+              },
+              {
+                "id": "abyss_rabbit",
+                "weight": 724
+              },
+              {
+                "id": "vampire_bat",
+                "weight": 354
+              },
+              {
+                "id": "viper",
+                "weight": 2829
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "high-diversity"
+            ]
+          },
+          {
+            "floorIndex": 2,
+            "species": [
+              {
+                "id": "poison_slime",
+                "weight": 5264
+              },
+              {
+                "id": "abyss_rabbit",
+                "weight": 1442
+              },
+              {
+                "id": "abyss_rat",
+                "weight": 1004
+              },
+              {
+                "id": "bouncing_coin",
+                "weight": 2290
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "medium-diversity"
+            ]
+          }
+        ],
+        "fingerprint": "d075f0b8"
+      },
+      {
+        "revision": "v2-ecology-candidate-1",
+        "ruleset": "special-map-v2",
+        "seed": 19015,
+        "level": 1,
+        "rarity": "WHITE",
+        "themeId": "yellow",
+        "dominantSpeciesId": "abyss_rat",
+        "floors": [
+          {
+            "floorIndex": 0,
+            "species": [
+              {
+                "id": "abyss_rat",
+                "weight": 4569
+              },
+              {
+                "id": "vampire_bat",
+                "weight": 2367
+              },
+              {
+                "id": "abyss_rabbit",
+                "weight": 3064
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "low-diversity"
+            ]
+          },
+          {
+            "floorIndex": 1,
+            "species": [
+              {
+                "id": "abyss_rat",
+                "weight": 5262
+              },
+              {
+                "id": "poison_slime",
+                "weight": 2343
+              },
+              {
+                "id": "bouncing_coin",
+                "weight": 1416
+              },
+              {
+                "id": "cave_slime",
+                "weight": 979
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "medium-diversity"
+            ]
+          },
+          {
+            "floorIndex": 2,
+            "species": [
+              {
+                "id": "abyss_rat",
+                "weight": 4103
+              },
+              {
+                "id": "cave_slime",
+                "weight": 349
+              },
+              {
+                "id": "viper",
+                "weight": 5000
+              },
+              {
+                "id": "vampire_bat",
+                "weight": 548
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "medium-diversity"
+            ]
+          }
+        ],
+        "fingerprint": "9fbccf14"
+      },
+      {
+        "revision": "v2-ecology-candidate-1",
+        "ruleset": "special-map-v2",
+        "seed": 47451,
+        "level": 3,
+        "rarity": "WHITE",
+        "themeId": "black",
+        "dominantSpeciesId": "abyss_rat",
+        "floors": [
+          {
+            "floorIndex": 0,
+            "species": [
+              {
+                "id": "abyss_rat",
+                "weight": 8282
+              },
+              {
+                "id": "vampire_bat",
+                "weight": 969
+              },
+              {
+                "id": "poison_slime",
+                "weight": 102
+              },
+              {
+                "id": "wandering_dead",
+                "weight": 647
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "dominant",
+              "medium-diversity"
+            ]
+          },
+          {
+            "floorIndex": 1,
+            "species": [
+              {
+                "id": "abyss_rat",
+                "weight": 7075
+              },
+              {
+                "id": "poison_slime",
+                "weight": 1718
+              },
+              {
+                "id": "bouncing_coin",
+                "weight": 1207
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "dominant",
+              "low-diversity"
+            ]
+          },
+          {
+            "floorIndex": 2,
+            "species": [
+              {
+                "id": "abyss_rat",
+                "weight": 9564
+              },
+              {
+                "id": "geistflamme",
+                "weight": 229
+              },
+              {
+                "id": "wandering_dead",
+                "weight": 62
+              },
+              {
+                "id": "viper",
+                "weight": 105
+              },
+              {
+                "id": "vampire_bat",
+                "weight": 40
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "dominant",
+              "high-diversity"
+            ]
+          }
+        ],
+        "fingerprint": "afd931a6"
+      },
+      {
+        "revision": "v2-ecology-candidate-1",
+        "ruleset": "special-map-v2",
+        "seed": 0,
+        "level": 1,
+        "rarity": "WHITE",
+        "themeId": "crystal",
+        "dominantSpeciesId": "cave_slime",
+        "floors": [
+          {
+            "floorIndex": 0,
+            "species": [
+              {
+                "id": "cave_slime",
+                "weight": 4099
+              },
+              {
+                "id": "bouncing_coin",
+                "weight": 1680
+              },
+              {
+                "id": "abyss_rat",
+                "weight": 1453
+              },
+              {
+                "id": "poison_slime",
+                "weight": 2768
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "medium-diversity"
+            ]
+          },
+          {
+            "floorIndex": 1,
+            "species": [
+              {
+                "id": "cave_slime",
+                "weight": 3929
+              },
+              {
+                "id": "vampire_bat",
+                "weight": 4047
+              },
+              {
+                "id": "abyss_rabbit",
+                "weight": 2024
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "low-diversity"
+            ]
+          },
+          {
+            "floorIndex": 2,
+            "species": [
+              {
+                "id": "cave_slime",
+                "weight": 4026
+              },
+              {
+                "id": "merseburg_spell",
+                "weight": 4653
+              },
+              {
+                "id": "wandering_dead",
+                "weight": 439
+              },
+              {
+                "id": "bouncing_coin",
+                "weight": 322
+              },
+              {
+                "id": "viper",
+                "weight": 560
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "high-diversity"
+            ]
+          }
+        ],
+        "fingerprint": "661b7580"
+      },
+      {
+        "revision": "v2-ecology-candidate-1",
+        "ruleset": "special-map-v2",
+        "seed": 1,
+        "level": 3,
+        "rarity": "WHITE",
+        "themeId": "magic",
+        "dominantSpeciesId": "wandering_dead",
+        "floors": [
+          {
+            "floorIndex": 0,
+            "species": [
+              {
+                "id": "wandering_dead",
+                "weight": 3969
+              },
+              {
+                "id": "bouncing_coin",
+                "weight": 1707
+              },
+              {
+                "id": "abyss_rat",
+                "weight": 4324
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "low-diversity"
+            ]
+          },
+          {
+            "floorIndex": 1,
+            "species": [
+              {
+                "id": "wandering_dead",
+                "weight": 4718
+              },
+              {
+                "id": "bouncing_coin",
+                "weight": 2641
+              },
+              {
+                "id": "vampire_bat",
+                "weight": 2641
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "low-diversity"
+            ]
+          },
+          {
+            "floorIndex": 2,
+            "species": [
+              {
+                "id": "wandering_dead",
+                "weight": 3996
+              },
+              {
+                "id": "merseburg_spell",
+                "weight": 1032
+              },
+              {
+                "id": "tanzlichter",
+                "weight": 775
+              },
+              {
+                "id": "geistflamme",
+                "weight": 4194
+              },
+              {
+                "id": "abyss_rabbit",
+                "weight": 3
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "high-diversity"
+            ]
+          }
+        ],
+        "fingerprint": "2599862e"
+      },
+      {
+        "revision": "v2-ecology-candidate-1",
+        "ruleset": "special-map-v2",
+        "seed": 12345,
+        "level": 5,
+        "rarity": "WHITE",
+        "themeId": "crystal",
+        "dominantSpeciesId": "bouncing_coin",
+        "floors": [
+          {
+            "floorIndex": 0,
+            "species": [
+              {
+                "id": "bouncing_coin",
+                "weight": 4210
+              },
+              {
+                "id": "cave_slime",
+                "weight": 1158
+              },
+              {
+                "id": "vampire_bat",
+                "weight": 2878
+              },
+              {
+                "id": "wandering_dead",
+                "weight": 1754
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "medium-diversity"
+            ]
+          },
+          {
+            "floorIndex": 1,
+            "species": [
+              {
+                "id": "bouncing_coin",
+                "weight": 5425
+              },
+              {
+                "id": "cave_slime",
+                "weight": 2542
+              },
+              {
+                "id": "abyss_rabbit",
+                "weight": 2033
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "low-diversity"
+            ]
+          },
+          {
+            "floorIndex": 2,
+            "species": [
+              {
+                "id": "bouncing_coin",
+                "weight": 4406
+              },
+              {
+                "id": "vampire_bat",
+                "weight": 185
+              },
+              {
+                "id": "merseburg_spell",
+                "weight": 3161
+              },
+              {
+                "id": "abyss_rat",
+                "weight": 51
+              },
+              {
+                "id": "geistflamme",
+                "weight": 2197
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "high-diversity"
+            ]
+          }
+        ],
+        "fingerprint": "b0469214"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "label": "mobile",
+    "maps": [
+      {
+        "rulesetVersion": "special-map-v2",
+        "seed": 59693,
+        "level": 2,
+        "rarity": "WHITE",
+        "discovererName": "確認",
+        "discoveryId": "starter-61cfac24-4e9c-476c-a5e5-12426a1a8354-0",
+        "acquisitionMethod": "starter"
+      },
+      {
+        "rulesetVersion": "special-map-v2",
+        "seed": 21898,
+        "level": 1,
+        "rarity": "WHITE",
+        "discovererName": "確認",
+        "discoveryId": "starter-f4b788ee-1539-4fe9-820b-53df7d42a8af-1",
+        "acquisitionMethod": "starter"
+      },
+      {
+        "rulesetVersion": "special-map-v2",
+        "seed": 17700,
+        "level": 4,
+        "rarity": "WHITE",
+        "discovererName": "確認",
+        "discoveryId": "starter-dfbf5e32-238b-4fc7-8e89-5fad376603e1-2",
+        "acquisitionMethod": "starter"
+      }
+    ],
+    "samples": [
+      {
+        "revision": "v2-ecology-candidate-1",
+        "ruleset": "special-map-v2",
+        "seed": 59693,
+        "level": 2,
+        "rarity": "WHITE",
+        "themeId": "water",
+        "dominantSpeciesId": "cave_slime",
+        "floors": [
+          {
+            "floorIndex": 0,
+            "species": [
+              {
+                "id": "cave_slime",
+                "weight": 4102
+              },
+              {
+                "id": "abyss_rat",
+                "weight": 1911
+              },
+              {
+                "id": "abyss_rabbit",
+                "weight": 3987
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "low-diversity"
+            ]
+          },
+          {
+            "floorIndex": 1,
+            "species": [
+              {
+                "id": "cave_slime",
+                "weight": 5106
+              },
+              {
+                "id": "poison_slime",
+                "weight": 1790
+              },
+              {
+                "id": "vampire_bat",
+                "weight": 606
+              },
+              {
+                "id": "viper",
+                "weight": 1917
+              },
+              {
+                "id": "wandering_dead",
+                "weight": 581
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "high-diversity"
+            ]
+          },
+          {
+            "floorIndex": 2,
+            "species": [
+              {
+                "id": "cave_slime",
+                "weight": 5126
+              },
+              {
+                "id": "poison_slime",
+                "weight": 407
+              },
+              {
+                "id": "vampire_bat",
+                "weight": 569
+              },
+              {
+                "id": "bouncing_coin",
+                "weight": 3898
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "medium-diversity"
+            ]
+          }
+        ],
+        "fingerprint": "0d0d97ec"
+      },
+      {
+        "revision": "v2-ecology-candidate-1",
+        "ruleset": "special-map-v2",
+        "seed": 21898,
+        "level": 1,
+        "rarity": "WHITE",
+        "themeId": "black",
+        "dominantSpeciesId": "wandering_dead",
+        "floors": [
+          {
+            "floorIndex": 0,
+            "species": [
+              {
+                "id": "wandering_dead",
+                "weight": 4850
+              },
+              {
+                "id": "vampire_bat",
+                "weight": 3649
+              },
+              {
+                "id": "abyss_rat",
+                "weight": 1300
+              },
+              {
+                "id": "abyss_rabbit",
+                "weight": 201
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "medium-diversity"
+            ]
+          },
+          {
+            "floorIndex": 1,
+            "species": [
+              {
+                "id": "wandering_dead",
+                "weight": 4502
+              },
+              {
+                "id": "vampire_bat",
+                "weight": 3625
+              },
+              {
+                "id": "poison_slime",
+                "weight": 1873
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "low-diversity"
+            ]
+          },
+          {
+            "floorIndex": 2,
+            "species": [
+              {
+                "id": "wandering_dead",
+                "weight": 4475
+              },
+              {
+                "id": "abyss_rabbit",
+                "weight": 412
+              },
+              {
+                "id": "cave_slime",
+                "weight": 1917
+              },
+              {
+                "id": "bouncing_coin",
+                "weight": 1461
+              },
+              {
+                "id": "abyss_rat",
+                "weight": 1735
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "high-diversity"
+            ]
+          }
+        ],
+        "fingerprint": "008ce7bc"
+      },
+      {
+        "revision": "v2-ecology-candidate-1",
+        "ruleset": "special-map-v2",
+        "seed": 17700,
+        "level": 4,
+        "rarity": "WHITE",
+        "themeId": "blue",
+        "dominantSpeciesId": "vampire_bat",
+        "floors": [
+          {
+            "floorIndex": 0,
+            "species": [
+              {
+                "id": "vampire_bat",
+                "weight": 5315
+              },
+              {
+                "id": "cave_slime",
+                "weight": 4281
+              },
+              {
+                "id": "abyss_rabbit",
+                "weight": 404
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "low-diversity"
+            ]
+          },
+          {
+            "floorIndex": 1,
+            "species": [
+              {
+                "id": "vampire_bat",
+                "weight": 3605
+              },
+              {
+                "id": "wandering_dead",
+                "weight": 4389
+              },
+              {
+                "id": "poison_slime",
+                "weight": 2006
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "low-diversity"
+            ]
+          },
+          {
+            "floorIndex": 2,
+            "species": [
+              {
+                "id": "vampire_bat",
+                "weight": 4999
+              },
+              {
+                "id": "cave_slime",
+                "weight": 54
+              },
+              {
+                "id": "geistflamme",
+                "weight": 4487
+              },
+              {
+                "id": "viper",
+                "weight": 363
+              },
+              {
+                "id": "poison_slime",
+                "weight": 97
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "high-diversity"
+            ]
+          }
+        ],
+        "fingerprint": "0fcf6b33"
+      },
+      {
+        "revision": "v2-ecology-candidate-1",
+        "ruleset": "special-map-v2",
+        "seed": 0,
+        "level": 1,
+        "rarity": "WHITE",
+        "themeId": "crystal",
+        "dominantSpeciesId": "cave_slime",
+        "floors": [
+          {
+            "floorIndex": 0,
+            "species": [
+              {
+                "id": "cave_slime",
+                "weight": 4099
+              },
+              {
+                "id": "bouncing_coin",
+                "weight": 1680
+              },
+              {
+                "id": "abyss_rat",
+                "weight": 1453
+              },
+              {
+                "id": "poison_slime",
+                "weight": 2768
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "medium-diversity"
+            ]
+          },
+          {
+            "floorIndex": 1,
+            "species": [
+              {
+                "id": "cave_slime",
+                "weight": 3929
+              },
+              {
+                "id": "vampire_bat",
+                "weight": 4047
+              },
+              {
+                "id": "abyss_rabbit",
+                "weight": 2024
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "low-diversity"
+            ]
+          },
+          {
+            "floorIndex": 2,
+            "species": [
+              {
+                "id": "cave_slime",
+                "weight": 4026
+              },
+              {
+                "id": "merseburg_spell",
+                "weight": 4653
+              },
+              {
+                "id": "wandering_dead",
+                "weight": 439
+              },
+              {
+                "id": "bouncing_coin",
+                "weight": 322
+              },
+              {
+                "id": "viper",
+                "weight": 560
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "high-diversity"
+            ]
+          }
+        ],
+        "fingerprint": "661b7580"
+      },
+      {
+        "revision": "v2-ecology-candidate-1",
+        "ruleset": "special-map-v2",
+        "seed": 1,
+        "level": 3,
+        "rarity": "WHITE",
+        "themeId": "magic",
+        "dominantSpeciesId": "wandering_dead",
+        "floors": [
+          {
+            "floorIndex": 0,
+            "species": [
+              {
+                "id": "wandering_dead",
+                "weight": 3969
+              },
+              {
+                "id": "bouncing_coin",
+                "weight": 1707
+              },
+              {
+                "id": "abyss_rat",
+                "weight": 4324
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "low-diversity"
+            ]
+          },
+          {
+            "floorIndex": 1,
+            "species": [
+              {
+                "id": "wandering_dead",
+                "weight": 4718
+              },
+              {
+                "id": "bouncing_coin",
+                "weight": 2641
+              },
+              {
+                "id": "vampire_bat",
+                "weight": 2641
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "low-diversity"
+            ]
+          },
+          {
+            "floorIndex": 2,
+            "species": [
+              {
+                "id": "wandering_dead",
+                "weight": 3996
+              },
+              {
+                "id": "merseburg_spell",
+                "weight": 1032
+              },
+              {
+                "id": "tanzlichter",
+                "weight": 775
+              },
+              {
+                "id": "geistflamme",
+                "weight": 4194
+              },
+              {
+                "id": "abyss_rabbit",
+                "weight": 3
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "high-diversity"
+            ]
+          }
+        ],
+        "fingerprint": "2599862e"
+      },
+      {
+        "revision": "v2-ecology-candidate-1",
+        "ruleset": "special-map-v2",
+        "seed": 12345,
+        "level": 5,
+        "rarity": "WHITE",
+        "themeId": "crystal",
+        "dominantSpeciesId": "bouncing_coin",
+        "floors": [
+          {
+            "floorIndex": 0,
+            "species": [
+              {
+                "id": "bouncing_coin",
+                "weight": 4210
+              },
+              {
+                "id": "cave_slime",
+                "weight": 1158
+              },
+              {
+                "id": "vampire_bat",
+                "weight": 2878
+              },
+              {
+                "id": "wandering_dead",
+                "weight": 1754
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "medium-diversity"
+            ]
+          },
+          {
+            "floorIndex": 1,
+            "species": [
+              {
+                "id": "bouncing_coin",
+                "weight": 5425
+              },
+              {
+                "id": "cave_slime",
+                "weight": 2542
+              },
+              {
+                "id": "abyss_rabbit",
+                "weight": 2033
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "low-diversity"
+            ]
+          },
+          {
+            "floorIndex": 2,
+            "species": [
+              {
+                "id": "bouncing_coin",
+                "weight": 4406
+              },
+              {
+                "id": "vampire_bat",
+                "weight": 185
+              },
+              {
+                "id": "merseburg_spell",
+                "weight": 3161
+              },
+              {
+                "id": "abyss_rat",
+                "weight": 51
+              },
+              {
+                "id": "geistflamme",
+                "weight": 2197
+              }
+            ],
+            "rareSpeciesRate": 0,
+            "ecologyTags": [
+              "high-diversity"
+            ]
+          }
+        ],
+        "fingerprint": "b0469214"
+      }
+    ],
+    "errors": []
+  }
+]

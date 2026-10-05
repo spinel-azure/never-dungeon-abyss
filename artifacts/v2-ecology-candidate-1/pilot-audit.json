@@ -1,0 +1,728 @@
+{
+  "revision": "v2-ecology-candidate-1",
+  "ordering": "profiles listed, seed ascending; canonicalV2Ecology + LF",
+  "reports": [
+    {
+      "level": 1,
+      "rarity": "WHITE",
+      "maps": 65536,
+      "floors": 196608,
+      "failures": {
+        "generation": 0,
+        "emptyPool": 0,
+        "invalidSpecies": 0,
+        "weight": 0,
+        "count": 0,
+        "duplicate": 0,
+        "repeat": 0,
+        "signature": 0
+      },
+      "rare": {
+        "silberkaefer": {
+          "candidateMaps": 0,
+          "includedMaps": 0,
+          "dominantMaps": 0,
+          "mapMaximum": {
+            "50": 0,
+            "70": 0,
+            "80": 0,
+            "90": 0,
+            "100": 0
+          }
+        },
+        "maikaefer_koenig": {
+          "candidateMaps": 0,
+          "includedMaps": 0,
+          "dominantMaps": 0,
+          "mapMaximum": {
+            "50": 0,
+            "70": 0,
+            "80": 0,
+            "90": 0,
+            "100": 0
+          }
+        }
+      },
+      "maxWeightFloors": {
+        "50": 58943,
+        "70": 3954,
+        "80": 2369,
+        "90": 848,
+        "100": 0
+      },
+      "maxWeightMaps": {
+        "50": 42006,
+        "70": 1318,
+        "80": 1236,
+        "90": 685,
+        "100": 0
+      },
+      "speciesCount": [
+        {
+          "3": 32499,
+          "4": 33037
+        },
+        {
+          "3": 21831,
+          "4": 21958,
+          "5": 21747
+        },
+        {
+          "4": 32806,
+          "5": 32730
+        }
+      ],
+      "identicalSetsAllFloors": 0,
+      "meanOrdinaryEncounterLevel": [
+        2.712012907816512,
+        2.7547383950762705,
+        3.493907468802937
+      ],
+      "ordinaryWeight": [
+        654528672,
+        654132929,
+        654201328
+      ],
+      "examples": [],
+      "themeCounts": {
+        "crystal": 6606,
+        "magic": 6532,
+        "yellow": 6611,
+        "black": 6554,
+        "blue": 6569,
+        "water": 6569,
+        "green": 6526,
+        "red": 6556,
+        "slate": 6376,
+        "torture": 6637
+      },
+      "sha256": "e2f49edb60387c062c6677e9c8abfe270d7965c79401219d2139c225816cd43f",
+      "passed": true
+    },
+    {
+      "level": 5,
+      "rarity": "WHITE",
+      "maps": 65536,
+      "floors": 196608,
+      "failures": {
+        "generation": 0,
+        "emptyPool": 0,
+        "invalidSpecies": 0,
+        "weight": 0,
+        "count": 0,
+        "duplicate": 0,
+        "repeat": 0,
+        "signature": 0
+      },
+      "rare": {
+        "silberkaefer": {
+          "candidateMaps": 0,
+          "includedMaps": 0,
+          "dominantMaps": 0,
+          "mapMaximum": {
+            "50": 0,
+            "70": 0,
+            "80": 0,
+            "90": 0,
+            "100": 0
+          }
+        },
+        "maikaefer_koenig": {
+          "candidateMaps": 0,
+          "includedMaps": 0,
+          "dominantMaps": 0,
+          "mapMaximum": {
+            "50": 0,
+            "70": 0,
+            "80": 0,
+            "90": 0,
+            "100": 0
+          }
+        }
+      },
+      "maxWeightFloors": {
+        "50": 58541,
+        "70": 3882,
+        "80": 2377,
+        "90": 894,
+        "100": 0
+      },
+      "maxWeightMaps": {
+        "50": 42010,
+        "70": 1294,
+        "80": 1218,
+        "90": 696,
+        "100": 0
+      },
+      "speciesCount": [
+        {
+          "3": 32793,
+          "4": 32743
+        },
+        {
+          "3": 21772,
+          "4": 21928,
+          "5": 21836
+        },
+        {
+          "4": 32704,
+          "5": 32832
+        }
+      ],
+      "identicalSetsAllFloors": 0,
+      "meanOrdinaryEncounterLevel": [
+        2.8109980111352364,
+        3.368074369491746,
+        4.426075735646477
+      ],
+      "ordinaryWeight": [
+        654635762,
+        654333583,
+        654296785
+      ],
+      "examples": [],
+      "themeCounts": {
+        "crystal": 6606,
+        "magic": 6532,
+        "yellow": 6611,
+        "black": 6554,
+        "blue": 6569,
+        "water": 6569,
+        "green": 6526,
+        "red": 6556,
+        "slate": 6376,
+        "torture": 6637
+      },
+      "sha256": "776cc99ecb8953db479808f93015416ffd3d905f589c2cc2abc6d71be6eed63a",
+      "passed": true
+    },
+    {
+      "level": 25,
+      "rarity": "SILVER",
+      "maps": 65536,
+      "floors": 196608,
+      "failures": {
+        "generation": 0,
+        "emptyPool": 0,
+        "invalidSpecies": 0,
+        "weight": 0,
+        "count": 0,
+        "duplicate": 0,
+        "repeat": 0,
+        "signature": 0
+      },
+      "rare": {
+        "silberkaefer": {
+          "candidateMaps": 65536,
+          "includedMaps": 24444,
+          "dominantMaps": 907,
+          "mapMaximum": {
+            "50": 673,
+            "70": 16,
+            "80": 15,
+            "90": 11,
+            "100": 0
+          }
+        },
+        "maikaefer_koenig": {
+          "candidateMaps": 0,
+          "includedMaps": 0,
+          "dominantMaps": 0,
+          "mapMaximum": {
+            "50": 0,
+            "70": 0,
+            "80": 0,
+            "90": 0,
+            "100": 0
+          }
+        }
+      },
+      "maxWeightFloors": {
+        "50": 58585,
+        "70": 3837,
+        "80": 2345,
+        "90": 900,
+        "100": 0
+      },
+      "maxWeightMaps": {
+        "50": 41976,
+        "70": 1279,
+        "80": 1197,
+        "90": 712,
+        "100": 0
+      },
+      "speciesCount": [
+        {
+          "3": 32990,
+          "4": 32546
+        },
+        {
+          "3": 21764,
+          "4": 22040,
+          "5": 21732
+        },
+        {
+          "4": 32834,
+          "5": 32702
+        }
+      ],
+      "identicalSetsAllFloors": 0,
+      "meanOrdinaryEncounterLevel": [
+        10.414866337727114,
+        12.406744182709177,
+        14.585486278970993
+      ],
+      "ordinaryWeight": [
+        643693341,
+        634052751,
+        626971745
+      ],
+      "examples": [
+        {
+          "id": "silberkaefer",
+          "seed": 2968,
+          "themeId": "yellow",
+          "weight": 9062,
+          "fingerprint": "7eb07135"
+        },
+        {
+          "id": "silberkaefer",
+          "seed": 11439,
+          "themeId": "red",
+          "weight": 9227,
+          "fingerprint": "d1694cd5"
+        },
+        {
+          "id": "silberkaefer",
+          "seed": 13882,
+          "themeId": "magic",
+          "weight": 9115,
+          "fingerprint": "681bf35d"
+        }
+      ],
+      "themeCounts": {
+        "crystal": 6606,
+        "magic": 6532,
+        "yellow": 6611,
+        "black": 6554,
+        "blue": 6569,
+        "water": 6569,
+        "green": 6526,
+        "red": 6556,
+        "slate": 6376,
+        "torture": 6637
+      },
+      "sha256": "69f8c3da15a158b97f851ed1565aa8169d8b99b4c9b0fb9c879fa97790005e7c",
+      "passed": true
+    },
+    {
+      "level": 60,
+      "rarity": "WHITE",
+      "maps": 65536,
+      "floors": 196608,
+      "failures": {
+        "generation": 0,
+        "emptyPool": 0,
+        "invalidSpecies": 0,
+        "weight": 0,
+        "count": 0,
+        "duplicate": 0,
+        "repeat": 0,
+        "signature": 0
+      },
+      "rare": {
+        "silberkaefer": {
+          "candidateMaps": 65536,
+          "includedMaps": 45116,
+          "dominantMaps": 5306,
+          "mapMaximum": {
+            "50": 3737,
+            "70": 107,
+            "80": 100,
+            "90": 61,
+            "100": 0
+          }
+        },
+        "maikaefer_koenig": {
+          "candidateMaps": 65536,
+          "includedMaps": 5543,
+          "dominantMaps": 321,
+          "mapMaximum": {
+            "50": 253,
+            "70": 12,
+            "80": 12,
+            "90": 8,
+            "100": 0
+          }
+        }
+      },
+      "maxWeightFloors": {
+        "50": 58727,
+        "70": 3852,
+        "80": 2380,
+        "90": 909,
+        "100": 0
+      },
+      "maxWeightMaps": {
+        "50": 42026,
+        "70": 1284,
+        "80": 1208,
+        "90": 717,
+        "100": 0
+      },
+      "speciesCount": [
+        {
+          "3": 32670,
+          "4": 32866
+        },
+        {
+          "3": 21864,
+          "4": 21847,
+          "5": 21825
+        },
+        {
+          "4": 32884,
+          "5": 32652
+        }
+      ],
+      "identicalSetsAllFloors": 0,
+      "meanOrdinaryEncounterLevel": [
+        20.93182566780847,
+        24.283647553412994,
+        23.604676078816425
+      ],
+      "ordinaryWeight": [
+        587552070,
+        592168129,
+        591135374
+      ],
+      "examples": [
+        {
+          "id": "silberkaefer",
+          "seed": 126,
+          "themeId": "torture",
+          "weight": 9179,
+          "fingerprint": "ba5c6ddc"
+        },
+        {
+          "id": "silberkaefer",
+          "seed": 315,
+          "themeId": "crystal",
+          "weight": 9387,
+          "fingerprint": "0818c0cb"
+        },
+        {
+          "id": "silberkaefer",
+          "seed": 590,
+          "themeId": "crystal",
+          "weight": 9363,
+          "fingerprint": "18391aed"
+        },
+        {
+          "id": "maikaefer_koenig",
+          "seed": 22172,
+          "themeId": "water",
+          "weight": 9525,
+          "fingerprint": "51a59edc"
+        },
+        {
+          "id": "maikaefer_koenig",
+          "seed": 32276,
+          "themeId": "torture",
+          "weight": 9094,
+          "fingerprint": "f1a47278"
+        },
+        {
+          "id": "maikaefer_koenig",
+          "seed": 35202,
+          "themeId": "water",
+          "weight": 9412,
+          "fingerprint": "d0fca7a4"
+        }
+      ],
+      "themeCounts": {
+        "crystal": 6606,
+        "magic": 6532,
+        "yellow": 6611,
+        "black": 6554,
+        "blue": 6569,
+        "water": 6569,
+        "green": 6526,
+        "red": 6556,
+        "slate": 6376,
+        "torture": 6637
+      },
+      "sha256": "57872352ab40cc336ede72ee45f47f1a3d02d5fabeff9c1fab4757b69ad5c9ee",
+      "passed": true
+    },
+    {
+      "level": 100,
+      "rarity": "WHITE",
+      "maps": 65536,
+      "floors": 196608,
+      "failures": {
+        "generation": 0,
+        "emptyPool": 0,
+        "invalidSpecies": 0,
+        "weight": 0,
+        "count": 0,
+        "duplicate": 0,
+        "repeat": 0,
+        "signature": 0
+      },
+      "rare": {
+        "silberkaefer": {
+          "candidateMaps": 65536,
+          "includedMaps": 35493,
+          "dominantMaps": 2160,
+          "mapMaximum": {
+            "50": 1639,
+            "70": 46,
+            "80": 44,
+            "90": 25,
+            "100": 0
+          }
+        },
+        "maikaefer_koenig": {
+          "candidateMaps": 65536,
+          "includedMaps": 3602,
+          "dominantMaps": 158,
+          "mapMaximum": {
+            "50": 123,
+            "70": 4,
+            "80": 4,
+            "90": 4,
+            "100": 0
+          }
+        }
+      },
+      "maxWeightFloors": {
+        "50": 58279,
+        "70": 3693,
+        "80": 2300,
+        "90": 848,
+        "100": 0
+      },
+      "maxWeightMaps": {
+        "50": 42001,
+        "70": 1231,
+        "80": 1161,
+        "90": 684,
+        "100": 0
+      },
+      "speciesCount": [
+        {
+          "3": 32746,
+          "4": 32790
+        },
+        {
+          "3": 21715,
+          "4": 21965,
+          "5": 21856
+        },
+        {
+          "4": 32768,
+          "5": 32768
+        }
+      ],
+      "identicalSetsAllFloors": 14,
+      "meanOrdinaryEncounterLevel": [
+        61.62107737394163,
+        55.384354468828526,
+        52.95385173702262
+      ],
+      "ordinaryWeight": [
+        624553383,
+        615697332,
+        613226873
+      ],
+      "examples": [
+        {
+          "id": "silberkaefer",
+          "seed": 7900,
+          "themeId": "torture",
+          "weight": 9589,
+          "fingerprint": "8f027e7b"
+        },
+        {
+          "id": "silberkaefer",
+          "seed": 11598,
+          "themeId": "magic",
+          "weight": 9336,
+          "fingerprint": "d2ebd9a7"
+        },
+        {
+          "id": "silberkaefer",
+          "seed": 11776,
+          "themeId": "blue",
+          "weight": 9073,
+          "fingerprint": "0f4e9025"
+        },
+        {
+          "id": "maikaefer_koenig",
+          "seed": 25738,
+          "themeId": "green",
+          "weight": 9296,
+          "fingerprint": "a74fdd9d"
+        },
+        {
+          "id": "maikaefer_koenig",
+          "seed": 37557,
+          "themeId": "slate",
+          "weight": 9563,
+          "fingerprint": "113cc1c1"
+        },
+        {
+          "id": "maikaefer_koenig",
+          "seed": 39957,
+          "themeId": "green",
+          "weight": 9138,
+          "fingerprint": "41fc01e2"
+        }
+      ],
+      "themeCounts": {
+        "crystal": 6606,
+        "magic": 6532,
+        "yellow": 6611,
+        "black": 6554,
+        "blue": 6569,
+        "water": 6569,
+        "green": 6526,
+        "red": 6556,
+        "slate": 6376,
+        "torture": 6637
+      },
+      "sha256": "c8aba0770900d21f3cc48391a147db581eac587ef7568de3e85cb35bb4ad409c",
+      "passed": true
+    },
+    {
+      "level": 100,
+      "rarity": "GOLD",
+      "maps": 65536,
+      "floors": 196608,
+      "failures": {
+        "generation": 0,
+        "emptyPool": 0,
+        "invalidSpecies": 0,
+        "weight": 0,
+        "count": 0,
+        "duplicate": 0,
+        "repeat": 0,
+        "signature": 0
+      },
+      "rare": {
+        "silberkaefer": {
+          "candidateMaps": 65536,
+          "includedMaps": 39118,
+          "dominantMaps": 2532,
+          "mapMaximum": {
+            "50": 1906,
+            "70": 51,
+            "80": 47,
+            "90": 27,
+            "100": 0
+          }
+        },
+        "maikaefer_koenig": {
+          "candidateMaps": 65536,
+          "includedMaps": 4268,
+          "dominantMaps": 187,
+          "mapMaximum": {
+            "50": 133,
+            "70": 3,
+            "80": 2,
+            "90": 1,
+            "100": 0
+          }
+        }
+      },
+      "maxWeightFloors": {
+        "50": 58688,
+        "70": 3972,
+        "80": 2461,
+        "90": 914,
+        "100": 0
+      },
+      "maxWeightMaps": {
+        "50": 41960,
+        "70": 1324,
+        "80": 1252,
+        "90": 730,
+        "100": 0
+      },
+      "speciesCount": [
+        {
+          "3": 32520,
+          "4": 33016
+        },
+        {
+          "3": 21941,
+          "4": 21840,
+          "5": 21755
+        },
+        {
+          "4": 32636,
+          "5": 32900
+        }
+      ],
+      "identicalSetsAllFloors": 24,
+      "meanOrdinaryEncounterLevel": [
+        61.61392811390881,
+        55.51937681840304,
+        52.895079198257996
+      ],
+      "ordinaryWeight": [
+        619418211,
+        610100237,
+        607101232
+      ],
+      "examples": [
+        {
+          "id": "silberkaefer",
+          "seed": 4159,
+          "themeId": "yellow",
+          "weight": 9581,
+          "fingerprint": "64740b11"
+        },
+        {
+          "id": "silberkaefer",
+          "seed": 5394,
+          "themeId": "slate",
+          "weight": 9409,
+          "fingerprint": "5010ac2e"
+        },
+        {
+          "id": "silberkaefer",
+          "seed": 18813,
+          "themeId": "magic",
+          "weight": 9562,
+          "fingerprint": "452e41e8"
+        },
+        {
+          "id": "maikaefer_koenig",
+          "seed": 48585,
+          "themeId": "blue",
+          "weight": 9098,
+          "fingerprint": "1b6c6187"
+        }
+      ],
+      "themeCounts": {
+        "crystal": 6606,
+        "magic": 6532,
+        "yellow": 6611,
+        "black": 6554,
+        "blue": 6569,
+        "water": 6569,
+        "green": 6526,
+        "red": 6556,
+        "slate": 6376,
+        "torture": 6637
+      },
+      "sha256": "fe2044c8b40df27b9ec5e78e8d14e6e562f05a13b2c01ab18d2dfb7af9a3c399",
+      "passed": true
+    }
+  ],
+  "sha256": "a808ffc369bfdd5ed31fd4fb297ade763a41067557424d9fdb124e8f6bb47fa2",
+  "seconds": 56.382234499999996,
+  "passed": true
+}
