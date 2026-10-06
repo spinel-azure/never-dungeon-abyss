@@ -1,0 +1,71 @@
+NDE Data Validation
+===================
+PASS: JSON�\�� [data/effects/apocalypse.json]
+
+PASS: JSON�\�� [data/effects/battle-presentations.json]
+
+PASS: JSON�\�� [data/effects/fire_ball.json]
+
+PASS: JSON�\�� [data/effects/goddess.json]
+
+PASS: JSON�\�� [data/effects/ice.json]
+
+PASS: JSON�\�� [data/effects/lightning.json]
+
+PASS: JSON�\�� [data/effects/lot_bag_identify.json]
+
+PASS: JSON�\�� [data/effects/meteor.json]
+
+PASS: JSON�\�� [data/effects/player_charge_skills.json]
+
+PASS: JSON�\�� [data/effects/tunguska.json]
+
+PASS: JSON�\�� [data/effects/walpurgisnacht.json]
+
+PASS: JSON�\�� [data/vanish-effects.json]
+
+PASS: �e�f�[�^�R���N�V��������ID�ɏd���͂���܂���
+
+PASS: �{�X�̕K�{���� [data/bosses.js]
+
+PASS: �G�̕K�{���� [data/enemies.js]
+
+PASS: ����̕K�{���� [data/weapons.js]
+
+PASS: �E�Ƃ̕K�{���� [data/classes.js]
+
+PASS: ��Z�̕K�{���� [data/skills.js]
+
+PASS: �����E��ւ̕K�{���� [data/spells.js]
+
+PASS: NPC�̕K�{���� [data/npcs.js]
+
+PASS: �A�C�e���̕K�{���� [data/items.js]
+
+PASS: ���l�^�Ɣ񕉐��i543���ځj
+
+PASS: �E�Ƃ��珉���X�L���ւ̎Q�� [data/classes.js]
+
+PASS: �X�L�������Ԍ��ʂւ̎Q�� [data/skills.js]
+
+PASS: ��������ID�̎Q�� [data/equipment.js]
+
+PASS: ���̓o�^�E��ID����E�ƃf�[�^�ւ̎Q�� [data/town.js]
+
+PASS: �摜�E�w�i�p�X�i84���j
+
+PASS: �J�[�h�̃��A���e�B�ʃR�X�g�i19���j
+
+PASS: Z�J�[�h��12��ށEID��ӁE�R�X�g8�ł�
+
+SKIP: �J�[�h�̉摜�E�A�C�R������
+Reason: �J�[�h��iconId�ƕ`��֐����W�X�g�����g�p���邽�߁A�P���ȃt�@�C���p�X���؂̑ΏۊO�ł�
+
+SKIP: �_���W�����������ʂ̓��B���E���z [js/dungeon.js]
+Reason: �����_�����������s�������ʂ��K�v�Ȃ��߁AJavaScript������JSON�o�͂���W�v�u���b�W���K�v�ł�
+
+Files checked: 29
+Passed: 29
+Warnings: 0
+Failed: 0
+Skipped: 2

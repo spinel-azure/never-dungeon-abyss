@@ -43,7 +43,7 @@ test("floor transition overlay renders the zone name beneath the floor number in
 
 test("entering through a transfer portal also shows the destination floor and zone", async () => {
   const main = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
-  const transferEntry = main.match(/async function enterFloorFromTransfer\(depth = 10\)[\s\S]*?return true;\n  }/)?.[0] || "";
+  const transferEntry = main.match(/async function enterFloorFromTransfer\(depth = 10\)[\s\S]*?return true;\r?\n  }/)?.[0] || "";
 
   assert.match(transferEntry, /await runSceneTransition\(/);
   assert.match(transferEntry, /startFloorLapNotice\(destination\);/);

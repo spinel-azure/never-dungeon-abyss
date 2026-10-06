@@ -1,0 +1,36 @@
+{
+  "scope": "V2 return settlement and exploration presentation polish",
+  "patch": "af10aea1f009f2e00b97fea974031eb192b56978 applied without commit",
+  "fixes": [
+    "Clone-safe session/battle identity and duplicate callback guard",
+    "Independent session EXP and loot; atomic saved return receipt; failed return rolls back character and retains balances",
+    "Existing LOT BAG then EXP SETTLEMENT, map-level bonus label",
+    "Goddess defeat protection and no-return-bonus rules reused",
+    "Emergency escape consumption rolls back on return failure",
+    "Closed Three.js gold chest preview on contact; A opening and B cancel",
+    "DotGothic16 via existing GameFont: desktop 18px, mobile 14px",
+    "Expanded minimap title, small minimap survey readout remains upper right",
+    "Per-floor first 100/100 fanfare, final 300/300 importantItem"
+  ],
+  "tests": {
+    "node": {
+      "pass": 1882,
+      "fail": 0
+    },
+    "python": {
+      "pass": 29,
+      "fail": 0,
+      "skip": 2
+    },
+    "browser": "1280 and 390px, isolated fixtures: real battle lifecycle with a weakened existing enemy for deterministic victory, 1000 EXP -> 1300 at map Lv60, deferred 20G, save failure/retry; separate escape/defeat/retry tests",
+    "device": "Desktop Edge automation; no physical iPhone test",
+    "diffCheck": true
+  },
+  "unchanged": [
+    "LAST UPDATE",
+    "normal abyss pending EXP/loot",
+    "V1 exploration",
+    "map/ecology generators",
+    "commits/push"
+  ]
+}

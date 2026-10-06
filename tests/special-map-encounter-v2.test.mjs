@@ -64,8 +64,10 @@ test('all special themes use C2; incomplete rare combatant is blocked, never rep
   assert.equal(s.onEncounterStep(),false);assert.equal(calls,0);assert.equal(warnings,1);assert.equal(s.battleContext,null);s.disposeSurvey();
  }
 });
-test('V2 rewards settle only battle EXP and loot without ordinary carried settlement',()=>{
+test('V2 rewards accumulate session EXP and settle loot without ordinary carried settlement',()=>{
  const c=createInitialCharacter({name:'試験',job:'warrior'});c.carriedExperience=123;c.pendingExperienceSettlement={test:true};const before=structuredClone(c);
- const {character:n,exp}=grantV2BattleRewards(c,{enemy:{experienceReward:100,dropGold:20}},()=>.5);
- assert.equal(exp,100);assert.equal(n.experience,c.experience+100);assert.equal(n.gold,c.gold+20);assert.equal(n.carriedExperience,123);assert.deepEqual(n.pendingExperienceSettlement,c.pendingExperienceSettlement);assert.deepEqual(n.lootBag,c.lootBag);assert.deepEqual(c,before);
+ const session=create();session.battleContext={source:'special-map-v2',sessionId:session.encounterSessionId,battleId:1,mapKey:session.mapKey,mapLevel:50};
+ const {character:n,exp}=grantV2BattleRewards(c,{enemy:{experienceReward:100,dropGold:20},explorationContext:session.battleContext},session,()=>.5);
+ assert.equal(session.battleExperience,100);session.disposeSurvey();
+ assert.equal(exp,100);assert.equal(n.experience,c.experience);assert.equal(n.gold,c.gold);assert.equal(session.lootBag.gold,20);assert.equal(n.carriedExperience,123);assert.deepEqual(n.pendingExperienceSettlement,c.pendingExperienceSettlement);assert.deepEqual(n.lootBag,c.lootBag);assert.deepEqual(c,before);
 });

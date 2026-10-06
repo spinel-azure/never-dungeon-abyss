@@ -19,6 +19,7 @@ export function createSpecialMapV2Session(registered,mapKey,options={}){
  const blueprint=generateRegisteredSpecialMap(original);
  const s={kind:'specialMapV2',mapKey,ruleset:original.rulesetVersion,seed:original.seed,level:original.level,rarity:original.rarity,
   blueprint,fingerprint:specialMapV2StructureFingerprint(blueprint),currentFloor:0,torchFuel:100,
+  battleExperience:0,experienceClosed:false,rewardedBattles:new Set(),lootBag:null,
   bossKeyFound:false,bossDoorUnlocked:false,transitioning:false,playSe,say};
  s.floors=blueprint.floors.map(f=>{
   const generatedMap={...f,entrance:f.stairsUp};

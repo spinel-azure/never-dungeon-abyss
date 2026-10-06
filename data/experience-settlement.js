@@ -43,13 +43,13 @@ export function calculateDepthReturnSettlement({
   };
 }
 
-export function createDepthReturnSettlement(character, returnFloor) {
+export function createDepthReturnSettlement(character, returnFloor, baseSettlementExp = character?.carriedExperience) {
   const deckSlots = Array.isArray(character?.cards?.deckSlots)
     ? character.cards.deckSlots
     : [];
   const mercyEquipped = deckSlots.includes(GODDESS_MERCY_CARD_ID);
   return calculateDepthReturnSettlement({
-    baseSettlementExp: character?.carriedExperience,
+    baseSettlementExp,
     returnFloor,
     isGoddessGraceEquipped: deckSlots.includes(GODDESS_GRACE_CARD_ID) || mercyEquipped,
     goddessProtectionName: mercyEquipped ? "女神の慈愛" : "",
@@ -86,6 +86,7 @@ export function normalizeDepthReturnSettlement(
 
 export function formatDepthReturnSettlement(settlement) {
   const value = amount => nonnegativeInteger(amount).toLocaleString("ja-JP");
+  const bonusLabel=settlement.source === "special-map-v2" ? "地図Lvボーナス" : "深層帰還ボーナス";
   const lines = [
     `獲得経験値　　　　${value(settlement.baseSettlementExp)}`
   ];
@@ -93,7 +94,7 @@ export function formatDepthReturnSettlement(settlement) {
     lines[0] = `依頼報酬経験値　　${value(settlement.baseSettlementExp)}`;
     if (settlement.finalSettlementExp < settlement.baseSettlementExp) lines.push("経験値上限により制限");
   } else if (settlement.isGoddessGraceEquipped) {
-    lines.push("深層帰還ボーナス　適用なし");
+    lines.push(`${bonusLabel}　適用なし`);
     lines.push(settlement.goddessProtectionName === "女神の慈愛"
       ? "女神の慈愛セット中"
       : "女神の恩寵セット中");
@@ -101,7 +102,7 @@ export function formatDepthReturnSettlement(settlement) {
     const percentValue = Math.max(0, Number(settlement.depthBonusRate) || 0) * 100;
     const percent = Number.isInteger(percentValue) ? String(percentValue) : percentValue.toFixed(1);
     lines.push(
-      `深層帰還ボーナス　＋${percent}％`,
+      `${bonusLabel}　＋${percent}％`,
       `ボーナス経験値　　${value(settlement.depthBonusExp)}`
     );
   }

@@ -1,5 +1,5 @@
-import {resumeV2Encounter} from './special-map/encounter-v2.js';
-import {grantV2BattleRewards} from './special-map/battle-rewards-v2.js';
+import {resumeV2Encounter,matchesV2Battle} from './special-map/encounter-v2.js';
+import {grantV2BattleRewards,settleV2ReturnExperience} from './special-map/battle-rewards-v2.js';
 import { createCoalescedNotificationSync } from "./passive-notification-sync.js";
 import { grantGuildQuestExperience, formatGuildExperienceReceipt } from "../data/guild-experience.js";
 import { isAkashicRematchUnlocked, AKASHIC_PHANTOM_IDS, QUEEN_PROJECTION_MESSAGES } from "../data/akashic-phantoms.js";
@@ -5480,10 +5480,14 @@ import {
     if(!result.accepted){say(result.message||'今は使用する必要がない。');return result;}
     if(result.environment?.emergencyEscape&&!flushSpecialSurvey(session)){say(session.surveyError);return {accepted:false,reason:'saveFailed'};}
     if(!applySpecialFieldEnvironment(session,result.environment))return {accepted:false,reason:'noPath'};
+    if(result.environment?.emergencyEscape){
+      const previous=character;character=result.character;
+      if(!context.finish()){character=previous;updateCharacterUi();return {accepted:false,reason:'saveFailed'};}
+      return result;
+    }
     character=result.character;updateCharacterUi();saveGame();updateHud();
     say(result.message||'スキルを使用した。');playSe(result.healing>0?'heal':'confirm');
     if(result.environment?.startAutoWalker)closeCampMenu('special');
-    if(result.environment?.emergencyEscape){closeCampMenu('special');context.finish();}
     return result;
   }
   async function beginV2Battle(session,enemyData,context){
@@ -5499,18 +5503,19 @@ import {
   }
   async function finishV2Battle(battle,outcome){
     const active=getSpecialMapContext(),s=active?.session;
-    if(!s||s.mapKey!==battle.explorationContext.mapKey||!s.battleContext)return;
+    if(!matchesV2Battle(s,battle.explorationContext)||s.experienceClosed||s.finishingBattle)return;
+    s.finishingBattle=true;
     if(battle.player)updateCharacterFromBattle(createPersistentBattlePlayerChanges(battle.player));
     if(outcome==='defeat'){
       stopBgm();await runDefeatPresentation();
       const retry=async()=>{
         if(!flushSpecialSurvey(s)){say(s.surveyError+' A／Enterで保存を再試行します。');return;}
         s.transitioning=false;
-        if(!active.finish()){s.transitioning=true;return;}
+        if(!active.finish({reason:'defeat'})){s.transitioning=true;return;}
         // Reuse character death/revival, without ordinary-depth or presence reset.
         const carried=character.carriedExperience,pending=character.pendingExperienceSettlement;
         Object.assign(character,resolveDungeonDefeat(character,{deferRevival:true}),{carriedExperience:carried,pendingExperienceSettlement:pending});
-        character.returnPresentation={revival:true};templeRevivalJinglePending=true;
+        character.returnPresentation={...character.returnPresentation,revival:true};templeRevivalJinglePending=true;
         worldLocation='town';saveGame();updateCharacterUi();
         openTown({registrationRequired:false,facilityId:'temple',mode:'facilityMenu'});
         await finishReturnPresentation();
@@ -5518,8 +5523,8 @@ import {
       s.defeatRetry=retry;await retry();return;
     }
     let message='戦闘を離れ、特殊地図の探索へ戻った。';
-    if(outcome==='victory'){const result=grantV2BattleRewards(character,battle);character=result.character;message=result.message;}
-    resumeV2Encounter(s,s.battleContext);
+    if(outcome==='victory'){const result=grantV2BattleRewards(character,battle,s);character=result.character;message=result.message;}
+    resumeV2Encounter(s,s.battleContext);s.finishingBattle=false;
     startBgm(getSpecialMapBgmKey(s.generatedMap.themeId));say(message);updateCharacterUi();updateHud();saveGame();
   }
   configureSpecialMapHost({
@@ -5527,7 +5532,7 @@ import {
     isBattleActive,
     handleBattleInput:action=>handleItemOverlayInput(action)||handleSkillOverlayInput(action)||handleBattleInput(action),
     runEntryTransition:onDark=>runSceneTransition({enteringMapDungeon:true,playAudio:()=>playSeSequence('stairs',3),onDark}),
-    playTreasureOpening,hideTreasure,
+    showTreasure,playTreasureOpening,hideTreasure,
     runStairsTransition:onDark=>runSceneTransition({playAudio:()=>playSeSequence('stairs',3),onDark}),
     floorChanged:({session})=>{startBgm(getSpecialMapBgmKey(session.generatedMap.themeId));updateHud();},
     viewport:viewportEl,status:viewportEl.querySelector('.status'),updateHud,
@@ -5547,14 +5552,21 @@ import {
       if(session.kind==='specialMapV2')viewportEl.querySelector('.special-map-runtime').append(chip);else posEl.parentElement.append(chip);
       stopLoopSe('townAmbience');startBgm(getSpecialMapBgmKey(session.generatedMap.themeId));updateHud();
     },
-    beforeReturn:()=>{
-      // Wing Gift belongs to the adventurer but expires on this return too.
-      // Do not call normal returnToTown(), which resets abyss progress/effects.
+    beforeReturn:({session,reason})=>{
+      // Save EXP and the expiring Wing Gift together; roll back on failure.
+      const commit=({changes,settlement,loot})=>{
+        const previous=character;
+        character={...normalizeCharacter({...character,...changes,wingGiftUses:0}),
+          carriedExperience:character.carriedExperience,pendingExperienceSettlement:character.pendingExperienceSettlement,lootBag:character.lootBag};
+        if(settlement||loot){character.returnPresentation={settlement,revival:reason==='defeat'};if(loot)rememberReturnLoot(loot.bag,loot.settled);}
+        if(!saveGame()){character=previous;say('帰還前の保存に失敗しました。もう一度お試しください。');return false;}
+        updateCharacterUi();return true;
+      };
+      if(session.kind==='specialMapV2')return settleV2ReturnExperience(character,session,commit,{reason});
       if(!character?.wingGiftUses)return true;
-      const previous=character;character=normalizeCharacter({...character,wingGiftUses:0});
-      if(!saveGame()){character=previous;say('帰還前の保存に失敗しました。もう一度お試しください。');return false;}
-      updateCharacterUi();return true;
+      return commit({changes:{}});
     },
+    afterReturn:({reason})=>{if(reason==='return')void finishReturnPresentation();},
     leave:()=>{
       document.getElementById('specialSurveyChip')?.remove();setSpecialMapMenuMode(false);closeCampMenu('special');
       document.body.classList.remove('special-map-active');document.body.classList.add('town-active');townScreen.hidden=false;stopBgm();

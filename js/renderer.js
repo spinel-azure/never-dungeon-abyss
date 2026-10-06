@@ -177,8 +177,8 @@ export function getEffectiveFrameRate() {
 export function isMinimapOverlayVisible() { return renderer.minimapOverlayVisible; }
 export function getActiveMinimapBounds() {
   if (!renderer.minimapOverlayVisible) return renderer.getMinimapBounds(renderer.W);
-  const size = Math.min(renderer.W * .58, renderer.H * .72, 360);
-  return {x:(renderer.W-size)/2-8,y:(renderer.H-size)/2-8-(renderer.state?.kind === "specialMapV2" ? 32 : 0),w:size+16,h:size+16};
+  const size = Math.min(renderer.W * .58, renderer.H * (renderer.state?.kind === "specialMapV2" ? .60 : .72), 360);
+  return {x:(renderer.W-size)/2-8,y:(renderer.H-size)/2-8,w:size+16,h:size+16};
 }
 
 export function toggleMinimapOverlay() {
@@ -447,14 +447,19 @@ function makeMinimapStaticFrames(bounds) {
 
 function drawMinimapOverlay() {
   const { ctx, W, H } = renderer;
-  const size = Math.min(W * .58, H * .72, 360);
+  const size = Math.min(W * .58, H * (renderer.state?.kind === "specialMapV2" ? .60 : .72), 360);
   const ox = (W - size) / 2;
-  const oy = (H - size) / 2 - (renderer.state?.kind === "specialMapV2" ? 32 : 0);
+  const oy = (H - size) / 2;
   ctx.save();
   ctx.fillStyle = "rgba(0,0,0,.58)";
   ctx.fillRect(0, 0, W, H);
+  const mapOptions=renderer.getMinimapOptions();
+  if(mapOptions.mapTitle){
+    ctx.font='32px PixelFont, monospace';ctx.textAlign='center';ctx.fillStyle='#fff';
+    ctx.fillText(mapOptions.mapTitle,W/2,oy-20,W*.74);
+  }
   renderer.drawMinimap(ctx, {
-    ...renderer.getMinimapOptions(),
+    ...mapOptions,
     H,
     roundRect,
     size,

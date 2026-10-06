@@ -73,7 +73,7 @@ test('main field dispatcher saves adventurer changes without accessing ordinary 
  const source=readFileSync(new URL('../js/main.js',import.meta.url),'utf8');
  const body=source.slice(source.indexOf('  async function useSpecialFieldEffect('),source.indexOf('  configureSpecialMapHost({'));
  const s=create();let saves=0,returns=0;const c=createInitialCharacter({name:'QA',job:'warrior'});c.hp=1;c.inventory.counts={healing_potion:2,exorcism_talisman:2,emergency_escape:2};
- const scope={character:c,getSpecialMapContext:()=>({session:s,finish:()=>returns++}),resolveSpecialFieldItem,resolveSpecialFieldSkill,applySpecialFieldEnvironment,flushSpecialSurvey:()=>true,
+ const scope={character:c,getSpecialMapContext:()=>({session:s,finish:()=>{returns++;return true;}}),resolveSpecialFieldItem,resolveSpecialFieldSkill,applySpecialFieldEnvironment,flushSpecialSurvey:()=>true,
   state:new Proxy({},{get(){assert.fail('ordinary dungeon accessed');},set(){assert.fail('ordinary dungeon changed');}}),say(){},playSe(){},updateCharacterUi(){},updateHud(){},saveGame:()=>{saves++;return true;},closeCampMenu(){}};
  vm.runInNewContext(body+';this.use=useSpecialFieldEffect;',scope);
  assert.equal((await scope.use('item','healing_potion')).accepted,true);assert.ok(scope.character.hp>1);assert.equal(saves,1);
@@ -83,11 +83,11 @@ test('main field dispatcher saves adventurer changes without accessing ordinary 
 });
 test('Wing Gift expires on special return; failed saving preserves the adventurer',()=>{
  const source=readFileSync(new URL('../js/main.js',import.meta.url),'utf8');
- const body=source.slice(source.indexOf('    beforeReturn:()=>{')+'    beforeReturn:()=>{'.length,source.indexOf('    leave:()=>{')).replace(/},\s*$/,'');
+ const body=source.slice(source.indexOf('    beforeReturn:({session,reason})=>{')+'    beforeReturn:({session,reason})=>{'.length,source.indexOf('    afterReturn:')).replace(/},\s*$/,'');
  const c=createInitialCharacter({name:'QA',job:'warrior'});c.sp=0;c.inventory.counts.wing_gift=1;
  const result=resolveSpecialFieldItem({character:c,itemId:'wing_gift',session:create()});assert.equal(result.character.wingGiftUses,1);
  const scope={character:result.character,normalizeCharacter,saveGame:()=>false,say(){},updateCharacterUi(){}};
- vm.runInNewContext('this.finish=()=>{'+body+'};',scope);const before=scope.character;
+ vm.runInNewContext("this.finish=({session={kind:'specialMap'},reason='return'}={})=>{"+body+'};',scope);const before=scope.character;
  assert.equal(scope.finish(),false);assert.equal(scope.character,before);
  scope.saveGame=()=>true;assert.equal(scope.finish(),true);assert.equal(scope.character.wingGiftUses,0);assert.equal(scope.character.maxHp,c.maxHp);
 });

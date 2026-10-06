@@ -1,3 +1,4 @@
+import {discardV2Experience} from '../js/special-map/battle-rewards-v2.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createSpecialMapSession,actSpecialMap,updateSpecialMotion,specialWall,specialDoorState,openSpecialDoorAhead,flushSpecialSurvey} from '../js/special-map/session.js';
@@ -59,7 +60,7 @@ test('runtime controller uses ordinary menu, pauses movement, and flushes before
  class Node{constructor(){this.children=[];this.dataset={};}setAttribute(){}append(...nodes){for(const n of nodes){n.parentElement=this;this.children.push(n);}}getContext(){return {};}remove(){this.removed=true;}addEventListener(){}}
  const viewport=new Node(),status=new Node();viewport.append(status);
  const host={viewport,status,isPaused:()=>menu,openMenu:()=>{menu=true;},handleInput:a=>{if(!menu)return false;if(a==='cancel')menu=false;return true;}};
- const context={mapOriginalId,isV2Session,createSpecialMapV2Session,confirmV2Cell,switchV2Floor,getV2StairPrompt,completeV2KeyChest,cancelV2KeyChest,setWallColor(){},setFloorColor(){},getSpecialMapContext:()=>null,getSpecialMapHost:()=>host,attachSpecialMap:()=>()=>{},describeTestMap:()=>({name:'地図'}),continueSpecialAutoWalker(){},createSpecialMapSession,actSpecialMap,updateSpecialMotion,specialWall,specialDoorState,openSpecialDoorAhead,flushSpecialSurvey,drawMinimap,getMinimapBounds(){},toggleMinimapOverlay(){mapToggles++;},performance:{now:()=>0},
+ const context={discardV2Experience,mapOriginalId,isV2Session,createSpecialMapV2Session,confirmV2Cell,switchV2Floor,getV2StairPrompt,completeV2KeyChest,cancelV2KeyChest,setWallColor(){},setFloorColor(){},getSpecialMapContext:()=>null,getSpecialMapHost:()=>host,attachSpecialMap:()=>()=>{},describeTestMap:()=>({name:'地図'}),continueSpecialAutoWalker(){},createSpecialMapSession,actSpecialMap,updateSpecialMotion,specialWall,specialDoorState,openSpecialDoorAhead,flushSpecialSurvey,drawMinimap,getMinimapBounds(){},toggleMinimapOverlay(){mapToggles++;},performance:{now:()=>0},
   useSpecialMapRenderSource:options=>{bound=options;return ()=>restored++;},document:{addEventListener(){},removeEventListener(){},createElement:()=>new Node()},window:{addEventListener:(key,fn)=>listeners.set(key,fn),removeEventListener:key=>listeners.delete(key)}};
  vm.runInNewContext(source.replace(/^import .*;\r?\n/gm,'').replace('export function','function')+';this.start=startSpecialMapExploration;',context);
  const options={playSe:id=>sounds.push(id),saveSurvey:()=>({ok:true}),registered:[map],mapKey:mapOriginalId(map),message:{},onExit:()=>exited++};

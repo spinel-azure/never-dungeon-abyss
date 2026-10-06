@@ -30,9 +30,9 @@ try{for(const width of [1280,390]){
   if(expanded)await p.evaluate(()=>v2Qa.input('map'));
   await p.waitForFunction(()=>document.querySelector('#specialSurveyChip').textContent==='調査100/100\n総合300/300');
   await p.waitForTimeout(80);
-  const bounds=await p.evaluate(async()=>{const {getActiveMinimapBounds}=await import('/js/renderer.js');const c=document.querySelector('.special-map-view'),r=c.getBoundingClientRect(),b=getActiveMinimapBounds(),scale=Math.min(r.width/c.width,r.height/c.height),chip=document.querySelector('#specialSurveyChip').getBoundingClientRect();return {mapBottom:r.top+(r.height-c.height*scale)/2+(b.y+b.h)*scale,top:chip.top,bottom:chip.bottom,viewportBottom:r.bottom,left:chip.left,right:chip.right,width:innerWidth};});
+  const bounds=await p.evaluate(async()=>{const {getMinimapBounds}=await import('/js/minimap.js');const c=document.querySelector('.special-map-view'),r=c.getBoundingClientRect(),b=getMinimapBounds(960),scale=Math.min(r.width/c.width,r.height/c.height),chip=document.querySelector('#specialSurveyChip').getBoundingClientRect();return {mapBottom:r.top+(r.height-c.height*scale)/2+(b.y+b.h)*scale,top:chip.top,bottom:chip.bottom,viewportBottom:r.bottom,left:chip.left,right:chip.right,width:innerWidth};});
   assert.ok(bounds.top>=bounds.mapBottom);assert.ok(bounds.bottom<=bounds.viewportBottom);assert.ok(bounds.left>=0&&bounds.right<=bounds.width);
-  await p.screenshot({path:'artifacts/special-map-v2-f1/survey-'+width+'-'+expanded+'.png'});
+  await p.screenshot({path:'artifacts/special-map-return-polish/survey-'+width+'-'+expanded+'.png'});
  }
  await p.evaluate(m=>{v2Qa.input('map');v2Qa.s().surveyedMasks=m;},masks);
  for(const outcome of ['escape','defeat']){
@@ -41,7 +41,7 @@ try{for(const width of [1280,390]){
   await p.waitForFunction(()=>outcomeQa.active());
   const before=await p.evaluate(()=>outcomeQa.snapshot());
   await p.waitForTimeout(800);
-  await p.screenshot({path:'artifacts/special-map-v2-f1/battle-'+width+'-'+outcome+'.png'});
+  await p.screenshot({path:'artifacts/special-map-return-polish/battle-'+width+'-'+outcome+'.png'});
   assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   if(outcome==='defeat')await p.evaluate(()=>outcomeQa.failSave());
   for(let i=0;i<80&&await p.evaluate(()=>outcomeQa.active());i++){
@@ -58,4 +58,4 @@ try{for(const width of [1280,390]){
   }
  }
  assert.deepEqual(errors,[]);results.push({width,escape:true,defeat:true,saveFailureRetry:true,normalUnchanged:true});console.log(results.at(-1));await p.close();
-}}finally{await browser.close();await writeFile('artifacts/special-map-v2-f1/outcomes.json',JSON.stringify(results,null,2));}
+}}finally{await browser.close();await writeFile('artifacts/special-map-return-polish/outcomes.json',JSON.stringify(results,null,2));}

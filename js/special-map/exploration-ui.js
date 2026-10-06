@@ -1,3 +1,4 @@
+import {discardV2Experience} from './battle-rewards-v2.js';
 import {createSpecialMapSession,actSpecialMap,updateSpecialMotion,specialWall,specialDoorState,openSpecialDoorAhead,flushSpecialSurvey,continueSpecialAutoWalker} from './session.js';
 import {useSpecialMapRenderSource,toggleMinimapOverlay,getActiveMinimapBounds,setWallColor,setFloorColor} from '../renderer.js';
 import {createSpecialMapV2Session,isV2Session,confirmV2Cell,switchV2Floor,getV2StairPrompt,getV2CellPromptMessage,cancelV2CellPrompt,completeV2KeyChest,cancelV2KeyChest} from './session-v2.js';
@@ -13,7 +14,7 @@ export function startSpecialMapExploration(options){
  const pending={
   input:action=>locked?true:controller?.input(action)??true,
   close(){cancelled=true;controller?.close();},
-  finish:()=>locked?false:controller?.finish()??false,
+  finish:options=>locked?false:controller?.finish(options)??false,
   get session(){return controller?.session;},
  };
  pending.ready=(async()=>{
@@ -48,7 +49,14 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  const canvas=document.createElement('canvas');canvas.className='special-map-view';canvas.width=960;canvas.height=540;canvas.setAttribute('aria-label','特殊迷宮3D表示');
  container.append(canvas);host.viewport.append(container);
  const statusParent=host.status.parentElement;container.append(host.status);
- let disposed=false,returned=false;
+ let disposed=false,returned=false,chestPreview=false;
+ function syncChestPreview(){
+  if(!isV2Session(session)||session.chestOpening)return;
+  const visible=session.cellPrompt==='chest';
+  if(visible===chestPreview)return;chestPreview=visible;
+  if(visible)Promise.resolve(host.showTreasure?.('gold')).then(()=>{if(disposed||(!session.chestOpening&&session.cellPrompt!=='chest'))host.hideTreasure?.();});
+  else host.hideTreasure?.();
+ }
  let stairPrompt=getV2StairPrompt(session);
  function showStairNotice(prefix=''){
   const next=getV2StairPrompt(session);
@@ -56,7 +64,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
   else if(stairPrompt&&message.textContent.includes(stairPrompt))message.textContent='特殊地図を探索中。Bボタンでメニュー表示。';
   stairPrompt=next;
  }
- function finish(){if(returned||session.transitioning)return false;if(!flushSpecialSurvey(session)){message.textContent=session.surveyError;return false;}if(host.beforeReturn?.()===false)return false;returned=true;close();onExit();return true;}
+ function finish({reason='return'}={}){if(disposed||returned||session.transitioning)return false;if(!flushSpecialSurvey(session)){message.textContent=session.surveyError;return false;}if(host.beforeReturn?.({session,reason})===false)return false;returned=true;close();onExit();host.afterReturn?.({session,reason});return true;}
  onEnter();
  const detach=attachSpecialMap({session,finish});
  session.renderState.overlayEvent={type:'floorLap',showOverlay:false,overlayMessage:name,specialMapTitle:true};
@@ -74,18 +82,19 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
     showStairNotice();
    }
   },drawMinimap,getMinimapBounds,
-  getMinimapOptions:()=>({W:960,MAP_W:10,MAP_H:10,cells:session.cells,explored:session.surveyView,state:session.renderState}),
+  getMinimapOptions:()=>({W:960,MAP_W:10,MAP_H:10,cells:session.cells,explored:session.surveyView,state:session.renderState,mapTitle:isV2Session(session)?name:null}),
   updateHud:()=>{
    container.dataset.moving=String(Boolean(session.motion||session.renderState.anim));
    container.dataset.banner=String(Boolean(session.renderState.overlayEvent));
    host.updateHud?.();
+   syncChestPreview();
    if(isV2Session(session)){
     const chip=document.getElementById('specialSurveyChip');
     if(chip){
-     const bounds=getActiveMinimapBounds(),rect=canvas.getBoundingClientRect();
+     const bounds=getMinimapBounds(960),rect=canvas.getBoundingClientRect();
      const scale=Math.min(rect.width/canvas.width,rect.height/canvas.height);
      const offsetX=(rect.width-canvas.width*scale)/2,offsetY=(rect.height-canvas.height*scale)/2;
-     const width=Math.max(96,bounds.w*scale);
+     const width=Math.max(120,bounds.w*scale);
      chip.style.width=width+'px';
      chip.style.left=Math.max(0,offsetX+(bounds.x+bounds.w)*scale-width)+'px';
      chip.style.top=(offsetY+(bounds.y+bounds.h)*scale+3)+'px';
@@ -140,7 +149,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
   if(session.transitioning)return true;
   // Cell confirmation precedes menus and all ordinary exploration shortcuts.
   if(session.cellPrompt){
-   if(action==='cancel'){cancelV2CellPrompt(session);return true;}
+   if(action==='cancel'){cancelV2CellPrompt(session);syncChestPreview();return true;}
    if(action!=='confirm')return true;
   }
   // Ordinary menus/overlays own their inputs, before field movement.
@@ -171,6 +180,6 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  const guardCommands=e=>{if(!host.isBattleActive?.()&&isV2Session(session)&&(session.cellPrompt||session.transitioning)&&e.target?.closest?.('.dungeon-commands, .menu-screen')){e.preventDefault();e.stopImmediatePropagation();}};
  for(const event of ['pointerdown','click','touchend'])document.addEventListener(event,guardCommands,true);
  const dismiss=()=>{if(session.renderState.overlayEvent)session.renderState.overlayEvent=null;};canvas.addEventListener('click',dismiss);
- function close(){if(disposed)return;disposed=true;session.disposeSurvey?.();window.removeEventListener('pagehide',saveOnHide);document.removeEventListener('visibilitychange',saveWhenHidden);for(const event of ['pointerdown','click','touchend'])document.removeEventListener(event,guardCommands,true);if(session.chestOpening){host.hideTreasure?.();cancelV2KeyChest(session);}restore();statusParent.append(host.status);container.remove();window.removeEventListener('keydown',enter,true);detach();}
+ function close(){if(disposed)return;disposed=true;if(chestPreview)host.hideTreasure?.();discardV2Experience(session);session.disposeSurvey?.();window.removeEventListener('pagehide',saveOnHide);document.removeEventListener('visibilitychange',saveWhenHidden);for(const event of ['pointerdown','click','touchend'])document.removeEventListener(event,guardCommands,true);if(session.chestOpening){host.hideTreasure?.();cancelV2KeyChest(session);}restore();statusParent.append(host.status);container.remove();window.removeEventListener('keydown',enter,true);detach();}
  return {input,close,session,finish};
 }

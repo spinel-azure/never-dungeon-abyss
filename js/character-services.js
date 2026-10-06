@@ -50,16 +50,32 @@ export function calculateBattleExperienceReward(character, amount) {
 }
 
 // Experience is committed on return; lodging alone updates the level.
+// Explicit amounts let independent expeditions share card/depth rules without
+// reading or consuming the ordinary abyss's carried/pending settlement.
+export function settleIndependentReturnExperience(character, amount, returnFloor) {
+  return applyExperienceSettlement(character, createDepthReturnSettlement(character, returnFloor, amount));
+}
+
+function applyExperienceSettlement(character, settlement) {
+  return {
+    settlement,
+    changes: {
+      experience: normalizeExperience((Number(character.experience) || 0) + settlement.finalSettlementExp)
+    }
+  };
+}
+
 export function settleReturnExperience(character, returnFloor, { legacy = false } = {}) {
   const settlement = (legacy && normalizeDepthReturnSettlement(
     character.pendingExperienceSettlement, character.carriedExperience
   )) || (legacy
     ? calculateDepthReturnSettlement({ baseSettlementExp: character.carriedExperience })
     : createDepthReturnSettlement(character, returnFloor));
+  const result = applyExperienceSettlement(character, settlement);
   return {
-    settlement,
+    ...result,
     changes: {
-      experience: normalizeExperience((Number(character.experience) || 0) + settlement.finalSettlementExp),
+      ...result.changes,
       carriedExperience: 0,
       pendingExperienceSettlement: null
     }

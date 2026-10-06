@@ -1,9 +1,9 @@
 import {normalizeSurveyMasks,surveyCountsV2,surveyTotalV2,surveyVisitV2,surveyViewsV2} from '../../data/special-map-survey-v2.js';
 
-// Highest crossed milestone only; loading existing knowledge is not a visit.
-export function getV2SurveyJingle(before,after){
+// A floor's first complete survey is a milestone, not a total step threshold.
+export function getV2SurveyJingle(before,after,beforeFloor,afterFloor){
  if(before<300&&after>=300)return 'importantItem';
- if((before<200&&after>=200)||(before<100&&after>=100))return 'battleVictory';
+ if(beforeFloor<100&&afterFloor===100)return 'battleVictory';
  return null;
 }
 
@@ -32,11 +32,11 @@ export function attachV2Survey(s,original,{persistSurvey=()=>({ok:true}),schedul
   return true;
  };
  s.recordSurvey=(x,y)=>{
-  const before=s.totalSurveyed;
+  const before=s.totalSurveyed,beforeFloor=s.surveyedCount;
   const next=surveyVisitV2(s.surveyedMasks,s.currentFloor,x,y);
   if(next.every((mask,i)=>mask===s.surveyedMasks[i]))return true;
   s.surveyedMasks=next;views=surveyViewsV2(next);
-  if(getV2SurveyJingle(before,s.totalSurveyed)==='battleVictory')s.playSe('battleVictory');
+  if(getV2SurveyJingle(before,s.totalSurveyed,beforeFloor,s.surveyedCount)==='battleVictory')s.playSe('battleVictory');
   // Completion is committed immediately before announcing permanent unlock.
   if(s.surveyComplete)return s.flushSurvey();
   if(timer===null){timer=scheduleSurvey(()=>{timer=null;s.flushSurvey();});timer?.unref?.();}

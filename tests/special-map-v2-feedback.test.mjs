@@ -1,3 +1,4 @@
+import {discardV2Experience} from '../js/special-map/battle-rewards-v2.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -22,21 +23,28 @@ function enterCell(h,p){
  h.bound.updateAnimation(170);
 }
 function harness({entry,map=original,playSe=()=>{},saveSurvey=()=>({ok:true})}={}){
- let bound,callback,exits=0,hides=0,openings=0,menus=0;const events=new Map();
+ let bound,callback,exits=0,hides=0,openings=0,menus=0,previews=0;const events=new Map();
  class Node{constructor(){this.dataset={};}setAttribute(){}append(...nodes){for(const n of nodes)n.parentElement=this;}getContext(){return {};}remove(){}addEventListener(){}}
  const viewport=new Node(),status=new Node();viewport.append(status);
- const host={viewport,status,...(entry?{runEntryTransition:entry}:{}),openMenu(){menus++;},playTreasureOpening(type,done){assert.equal(type,'gold');callback=done;openings++;},hideTreasure(){hides++;}};
- const scope={...session,...v2,mapOriginalId,getSpecialMapContext:()=>null,getSpecialMapHost:()=>host,attachSpecialMap:()=>()=>{},describeTestMap:()=>({name:'地図'}),setWallColor(){},setFloorColor(){},drawMinimap(){},getMinimapBounds(){},toggleMinimapOverlay(){},performance:{now:()=>0},useSpecialMapRenderSource:o=>{bound=o;return ()=>{};},document:{getElementById:()=>null,visibilityState:'hidden',addEventListener:(key,fn)=>events.set(key,fn),removeEventListener:key=>events.delete(key),createElement:()=>new Node()},window:{addEventListener:(key,fn)=>events.set(key,fn),removeEventListener:key=>events.delete(key)}};
+ const host={viewport,status,...(entry?{runEntryTransition:entry}:{}),openMenu(){menus++;},showTreasure(type){assert.equal(type,'gold');previews++;},playTreasureOpening(type,done){assert.equal(type,'gold');callback=done;openings++;},hideTreasure(){hides++;}};
+ const scope={discardV2Experience,...session,...v2,mapOriginalId,getSpecialMapContext:()=>null,getSpecialMapHost:()=>host,attachSpecialMap:()=>()=>{},describeTestMap:()=>({name:'地図'}),setWallColor(){},setFloorColor(){},drawMinimap(){},getMinimapBounds(){},toggleMinimapOverlay(){},performance:{now:()=>0},useSpecialMapRenderSource:o=>{bound=o;return ()=>{};},document:{getElementById:()=>null,visibilityState:'hidden',addEventListener:(key,fn)=>events.set(key,fn),removeEventListener:key=>events.delete(key),createElement:()=>new Node()},window:{addEventListener:(key,fn)=>events.set(key,fn),removeEventListener:key=>events.delete(key)}};
  const source=readFileSync(new URL('../js/special-map/exploration-ui.js',import.meta.url),'utf8');
  vm.runInNewContext(source.replace(/^import .*;\r?\n/gm,'').replace('export function','function')+';this.start=startSpecialMapExploration;',scope);
  const message={},ui=scope.start({registered:[map],mapKey:mapOriginalId(map),message,saveSurvey,playSe,onExit(){exits++;}});
  ui.input('confirm');
- return {ui,host,message,events,get bound(){return bound;},done:()=>callback(),stats:()=>({exits,hides,openings,menus})};
+ return {ui,host,message,events,get bound(){return bound;},done:()=>callback(),stats:()=>({exits,hides,openings,menus,previews})};
 }
 function atChest(h){
  const s=h.ui.session;v2.switchV2Floor(s,s.blueprint.links[1].lower);
  s.playerX=s.generatedMap.keyChest.x;s.playerY=s.generatedMap.keyChest.y;
 }
+test('closing V2 runtime aborts accumulated EXP and prevents a late return',()=>{
+ const h=harness(),s=h.ui.session;
+ s.battleExperience=123;
+ h.ui.close();assert.equal(s.battleExperience,0);assert.equal(s.experienceClosed,true);
+ assert.equal(h.ui.finish(),false);assert.equal(h.stats().exits,0);
+ h.ui.close();assert.equal(h.stats().exits,0);
+});
 test('V2 stair prompts on arrival; entrance A returns, merely arriving never does',()=>{
  const h=harness(),s=h.ui.session;
  assert.match(h.message.textContent,/探索を終了して帰還しますか/);
@@ -144,7 +152,7 @@ test('gamepad decision uses release edges rather than repeating on stair arrival
 
 test('chest entry locks, cancellation stays, A awards after Three.js callback; opened revisit stays unlocked',()=>{
  const h=harness();atChest(h);const s=h.ui.session,p=s.generatedMap.keyChest;
- enterCell(h,p);assert.equal(s.cellPrompt,'chest');assert.match(h.message.textContent,/金色の宝箱/);
+ enterCell(h,p);h.bound.updateHud();assert.equal(h.stats().previews,1);assert.equal(s.cellPrompt,'chest');assert.match(h.message.textContent,/金色の宝箱/);
  const pos=[s.playerX,s.playerY];for(const a of ['up','down','left','right','menu','items'])h.ui.input(a);
  assert.deepEqual([s.playerX,s.playerY],pos);assert.equal(s.motion,null);assert.equal(h.stats().menus,0);
  h.ui.input('cancel');assert.equal(s.cellPrompt,null);assert.deepEqual([s.playerX,s.playerY],pos);assert.equal(h.stats().openings,0);
@@ -152,8 +160,8 @@ test('chest entry locks, cancellation stays, A awards after Three.js callback; o
  h.done();assert.equal(s.bossKeyFound,true);enterCell(h,p);assert.equal(s.cellPrompt,null);assert.equal(h.stats().openings,1);h.ui.close();
 });
 
-test('survey jingles use total thresholds, suppress replay, and choose just the highest crossed milestone',()=>{
- for(const [before,after,se] of [[99,100,'battleVictory'],[100,101,null],[199,200,'battleVictory'],[200,201,null],[299,300,'importantItem'],[300,300,null],[0,250,'battleVictory'],[0,300,'importantItem']])assert.equal(getV2SurveyJingle(before,after),se);
+test('survey jingles use floor completion and suppress replay',()=>{
+ for(const [before,after,bf,af,se] of [[99,100,49,50,null],[199,200,70,71,null],[150,151,99,100,'battleVictory'],[299,300,99,100,'importantItem'],[300,300,100,100,null]])assert.equal(getV2SurveyJingle(before,after,bf,af),se);
  for(const before of [99,199,299]){
   const probe=harness(),p=probe.ui.session.generatedMap.stairsDown,entry=probe.ui.session.generatedMap.stairsUp;probe.ui.close();
   const masks=[EMPTY_SURVEY,EMPTY_SURVEY,EMPTY_SURVEY];masks[0]=surveyVisit(masks[0],entry.x,entry.y);let count=1;
