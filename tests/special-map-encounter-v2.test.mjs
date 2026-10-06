@@ -56,11 +56,11 @@ test('current floor, context and session state survive resume; abyss presence un
  }
  assert.equal(calls.length,3);assert.equal(getPresence(),47);s.disposeSurvey();restorePresence(0);
 });
-test('all special themes use C2; incomplete rare combatant is blocked, never replaced',()=>{
+test('all special themes use C2; unknown combatant is blocked, never replaced',()=>{
  for(const themeId of ['gold','rice','dusk','tender']){
   const s=create();s.level=100;s.generatedMap.themeId=themeId;let calls=0,warnings=0;
   attachV2Encounters(s,{random:()=>0,onEncounter:()=>calls++,onBlocked:()=>warnings++});ordinary(s);
-  s.ecology.floors[0].species=[{id:'maikaefer_koenig',weight:10000}];s.presence=99;
+  s.ecology.floors[0].species=[{id:'unknown_future_species',weight:10000}];s.presence=99;
   assert.equal(s.onEncounterStep(),false);assert.equal(calls,0);assert.equal(warnings,1);assert.equal(s.battleContext,null);s.disposeSurvey();
  }
 });

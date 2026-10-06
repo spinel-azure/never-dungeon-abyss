@@ -1,0 +1,391 @@
+{
+  "candidate": "V2-F2 combat Candidate 1",
+  "status": "provisional balance; F3 disconnected",
+  "definitions": [
+    {
+      "id": "silberkaefer",
+      "name": "ズィルバーケーファー",
+      "image": "images/karte_enemies/enemy_k02.avif",
+      "battleSize": "small",
+      "race": "insect",
+      "isBoss": false,
+      "randomEncounter": false,
+      "level": 10,
+      "maxHp": 24,
+      "stats": {
+        "str": 6,
+        "int": 6,
+        "agi": 18,
+        "dex": 14,
+        "luc": 12
+      },
+      "def": 12,
+      "attack": 3,
+      "evasionBonus": 0.05,
+      "actions": [
+        {
+          "id": "silver_attack",
+          "name": "通常攻撃",
+          "weight": 75,
+          "actionType": "physicalAttack",
+          "hitCount": 1,
+          "powerPerHit": 1,
+          "effects": []
+        },
+        {
+          "id": "silver_wait",
+          "name": "様子を見る",
+          "actionType": "wait",
+          "weight": 25
+        }
+      ],
+      "elementMultipliers": {
+        "fire": 1.25,
+        "ice": 1
+      },
+      "statusResistances": {
+        "poison": {
+          "resistancePoints": 20
+        },
+        "deadly_poison": {
+          "resistancePoints": 20
+        },
+        "action_skip": {
+          "resistancePoints": 20
+        },
+        "speed_down": {
+          "resistancePoints": 20
+        }
+      },
+      "escapeRate": 0.8,
+      "surpriseRate": 0,
+      "surpriseRateMaximum": 0,
+      "experienceReward": 220,
+      "dropGold": 60,
+      "fixedGoldPerDefeat": true,
+      "noDrop": true,
+      "dropItemId": null
+    },
+    {
+      "id": "maikaefer_koenig",
+      "name": "マイケーファーケーニヒ",
+      "image": "images/karte_enemies/enemy_k01.avif",
+      "battleSize": "small",
+      "race": "insect",
+      "isBoss": false,
+      "randomEncounter": false,
+      "level": 60,
+      "maxHp": 240,
+      "stats": {
+        "str": 25,
+        "int": 15,
+        "agi": 30,
+        "dex": 28,
+        "luc": 20
+      },
+      "def": 36,
+      "attack": 24,
+      "evasionBonus": 0.05,
+      "actions": [
+        {
+          "id": "king_attack",
+          "name": "通常攻撃",
+          "weight": 70,
+          "actionType": "physicalAttack",
+          "hitCount": 1,
+          "powerPerHit": 1,
+          "effects": []
+        },
+        {
+          "id": "king_strike",
+          "name": "甲角の強撃",
+          "weight": 25,
+          "actionType": "physicalAttack",
+          "hitCount": 1,
+          "powerPerHit": 1.4,
+          "effects": []
+        },
+        {
+          "id": "king_wait",
+          "name": "様子を見る",
+          "actionType": "wait",
+          "weight": 5
+        }
+      ],
+      "elementMultipliers": {
+        "fire": 1.25,
+        "ice": 1
+      },
+      "statusResistances": {
+        "poison": {
+          "resistancePoints": 40
+        },
+        "deadly_poison": {
+          "resistancePoints": 40
+        },
+        "action_skip": {
+          "resistancePoints": 40
+        },
+        "speed_down": {
+          "resistancePoints": 40
+        }
+      },
+      "escapeRate": 0.65,
+      "surpriseRate": 0,
+      "surpriseRateMaximum": 0,
+      "experienceReward": 2000,
+      "dropGold": 300,
+      "fixedGoldPerDefeat": true,
+      "noDrop": true,
+      "dropItemId": null
+    }
+  ],
+  "rewardPolicy": "EXP to V2 battleExperience; G to V2 lootBag. Return-only map-Lv bonus and existing card rules. No exclusive items/cards/red chests. No normal-depth reward scaling.",
+  "ordinaryRegistry": "Unchanged. New definitions are reachable only via getV2CombatEnemy.",
+  "enemyEscape": "Not adopted for either F2 species; player escape retained.",
+  "fixtures": [
+    {
+      "id": "silberkaefer",
+      "seed": 981,
+      "level": 10,
+      "themeId": "crystal",
+      "weights": [
+        8377,
+        7887,
+        9179
+      ],
+      "name": "霞む晶窟の地図 Lv.10",
+      "code": "NDA:AgID1QoAAyAgMOsw60e70dZzi-a2"
+    },
+    {
+      "id": "maikaefer_koenig",
+      "seed": 22172,
+      "level": 60,
+      "themeId": "water",
+      "weights": [
+        7823,
+        9061,
+        9525
+      ],
+      "name": "禍々しき深水洞の地図 Lv.60",
+      "code": "NDA:AgJWnDwAAyAgMOsw61LuOtzMRHnj"
+    }
+  ],
+  "pacing": [
+    {
+      "id": "silberkaefer",
+      "job": "warrior",
+      "trials": 100,
+      "victories": 100,
+      "playerFixture": "Lv10 initial equipment, no allocated stat points/cards/NPC",
+      "strategy": "normal attack",
+      "averageTurns": 3.56,
+      "maxTurns": 7
+    },
+    {
+      "id": "silberkaefer",
+      "job": "thief",
+      "trials": 100,
+      "victories": 89,
+      "playerFixture": "Lv10 initial equipment, no allocated stat points/cards/NPC",
+      "strategy": "normal attack",
+      "averageTurns": 14.26,
+      "maxTurns": 17
+    },
+    {
+      "id": "silberkaefer",
+      "job": "priest",
+      "trials": 100,
+      "victories": 100,
+      "playerFixture": "Lv10 initial equipment, no allocated stat points/cards/NPC",
+      "strategy": "normal attack",
+      "averageTurns": 5.44,
+      "maxTurns": 10
+    },
+    {
+      "id": "silberkaefer",
+      "job": "mage",
+      "trials": 100,
+      "victories": 100,
+      "playerFixture": "Lv10 initial equipment, no allocated stat points/cards/NPC",
+      "strategy": "fireball while SP >=3, then attack",
+      "averageTurns": 1,
+      "maxTurns": 1
+    },
+    {
+      "id": "maikaefer_koenig",
+      "job": "warrior",
+      "trials": 100,
+      "victories": 100,
+      "playerFixture": "Lv60 B60 pacing equipment +3, standard cards, no NPC",
+      "strategy": "normal attack",
+      "averageTurns": 4.77,
+      "maxTurns": 9
+    },
+    {
+      "id": "maikaefer_koenig",
+      "job": "thief",
+      "trials": 100,
+      "victories": 100,
+      "playerFixture": "Lv60 B60 pacing equipment +3, standard cards, no NPC",
+      "strategy": "normal attack",
+      "averageTurns": 7.06,
+      "maxTurns": 9
+    },
+    {
+      "id": "maikaefer_koenig",
+      "job": "priest",
+      "trials": 100,
+      "victories": 98,
+      "playerFixture": "Lv60 B60 pacing equipment +3, standard cards, no NPC",
+      "strategy": "normal attack",
+      "averageTurns": 7.05,
+      "maxTurns": 11
+    },
+    {
+      "id": "maikaefer_koenig",
+      "job": "mage",
+      "trials": 100,
+      "victories": 100,
+      "playerFixture": "Lv60 B60 pacing equipment +3, standard cards, no NPC",
+      "strategy": "fireball while SP >=3, then attack",
+      "averageTurns": 3,
+      "maxTurns": 3
+    }
+  ],
+  "browser": {
+    "engine": "Edge headless / Playwright",
+    "fixture": "Controlled ecology roll and test characters, unmodified enemy stats, healed between fights; no iPhone/USB gamepad claim",
+    "runs": [
+      {
+        "width": 1280,
+        "id": "silberkaefer",
+        "victories": 3,
+        "turns": [
+          7,
+          5,
+          3
+        ],
+        "escape": true,
+        "saveRetry": true,
+        "poolExperience": 660,
+        "gold": 180,
+        "normalUnchanged": true
+      },
+      {
+        "width": 1280,
+        "id": "maikaefer_koenig",
+        "victories": 3,
+        "turns": [
+          6,
+          6,
+          7
+        ],
+        "escape": true,
+        "saveRetry": true,
+        "poolExperience": 6000,
+        "gold": 900,
+        "normalUnchanged": true
+      },
+      {
+        "width": 390,
+        "id": "silberkaefer",
+        "victories": 3,
+        "turns": [
+          3,
+          4,
+          3
+        ],
+        "escape": true,
+        "saveRetry": true,
+        "poolExperience": 660,
+        "gold": 180,
+        "normalUnchanged": true
+      },
+      {
+        "width": 390,
+        "id": "maikaefer_koenig",
+        "victories": 3,
+        "turns": [
+          5,
+          5,
+          6
+        ],
+        "escape": true,
+        "saveRetry": true,
+        "poolExperience": 6000,
+        "gold": 900,
+        "normalUnchanged": true
+      }
+    ],
+    "defeat": "Node production callback tests cover both species, failed survey flush and character save, retry, retained survey, no duplicate return",
+    "visual": "400x400 transparent original assets, names and images fit PC/390px, two-line survey restored after battle"
+  },
+  "validation": {
+    "node": {
+      "tests": 1893,
+      "pass": 1893,
+      "fail": 0
+    },
+    "python": {
+      "passed": 29,
+      "failed": 0,
+      "skipped": 2
+    },
+    "diffCheck": "passed"
+  },
+  "structure": {
+    "seed12345Fingerprint": "3519b715",
+    "sets": 65536,
+    "floors": 196608,
+    "failures": {
+      "generation": 0,
+      "structure": 0,
+      "keyAccess": 0,
+      "repeat": 0,
+      "levelRarityIndependence": 0,
+      "candidate1Comparison": 0,
+      "candidate2Comparison": 0,
+      "legacy": 0
+    },
+    "sha256": {
+      "v2Structure": "c1dbc28cf7bfc9f78fffa32281d8d001b4b0a1a8f1aa2f146cb5d0a5559f0e95",
+      "candidate1Structure": "19f8f3aad737c8ab9e91c7e673e892ab810b7938b182cab63e77d3b9601750b1",
+      "candidate2Structure": "243b09bbd93f5ff783b1bf772c156e159132451d90a630a807a19b8d6fdd4db3",
+      "v1Topology": "b985066f1fb5720c8f27c56d925e58d700af9d637d90cd2c6e0fc33ce0920e58",
+      "legacyTopology": "3d92b41f2e2994ca08e40626cd85e498a20c8c0dfc1a135c32472641805df592",
+      "v1Doors": "6a625e0aac5a8c87367c2ab52e46570dcb195e4260ecb7cacc4f1167c81f693f",
+      "v1Ecology": "04c4c6902ef72c567a2166d4b4bd41d83b7ca89eab99a8926b0ceaa5d7c96a8a"
+    }
+  },
+  "ecology": {
+    "sha256": "ab38d1e17e4f8d47c8fc89d895e20ed4eba33cc6e781db35cc0aac4a66a17dca",
+    "normalSha": "ac0cf99c1cb50d4c4b9dbd7533e5a2751ba4a8790f88637e22d1ee5a42fe8de0",
+    "normalDifferences": 0,
+    "passed": true
+  },
+  "preserved": [
+    "normal dungeon",
+    "V1",
+    "Candidate 3",
+    "Ecology Candidate 2",
+    "map names/codes/survey",
+    "development gating",
+    "LAST UPDATE"
+  ],
+  "commit": false,
+  "push": false,
+  "changedFiles": [
+    "data/special-map-enemies.js",
+    "js/special-map/encounter-v2.js",
+    "tests/special-map-f2.test.mjs",
+    "tests/special-map-encounter-v2.test.mjs",
+    "tests/special-map-v2-experience.test.mjs",
+    "tests/fixtures/special-map-f2.mjs",
+    "tests/browser/special-map-f2.mjs",
+    "tools/simulate-special-map-f2.mjs",
+    "docs/special-maps-v2-experience.md",
+    "artifacts/special-map-f2-candidate-1.json"
+  ],
+  "testFixtureRepair": "Existing fixed-gold victory fixture lacked hp:0; added defeated state to prevent random-drop fallback and flaky assertions. Production reward calculation unchanged."
+}

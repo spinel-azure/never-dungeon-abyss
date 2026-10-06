@@ -11,6 +11,8 @@ import {createSpecialMapV2Session,switchV2Floor} from '../js/special-map/session
 import {resumeV2Encounter,matchesV2Battle} from '../js/special-map/encounter-v2.js';
 import {mapOriginalId} from '../data/special-maps.js';
 import {grantV2BattleRewards,settleV2ReturnExperience,discardV2Experience} from '../js/special-map/battle-rewards-v2.js';
+import {getV2CombatEnemy} from '../data/special-map-enemies.js';
+import {createEnemyCombatant} from '../data/enemies.js';
 
 const main=readFileSync(new URL('../js/main.js',import.meta.url),'utf8');
 const ui=readFileSync(new URL('../js/special-map/exploration-ui.js',import.meta.url),'utf8');
@@ -38,10 +40,25 @@ function harness(t,level=60,cards=[]){
  return {session,scope,get c(){return scope.character;},get saves(){return saves;},get exits(){return exits;},
   saveOk:v=>{saveOk=v;},surveyOk:v=>{surveyOk=v;},
   battle(exp=100){session.battleContext={source:'special-map-v2',sessionId:session.encounterSessionId,battleId:++session.encounterSequence,mapKey:session.mapKey,mapLevel:level};session.transitioning=true;
-   return {enemy:{experienceReward:exp,dropGold:20,fixedGoldPerDefeat:true},explorationContext:structuredClone(session.battleContext)};},
+   return {enemy:{hp:0,alive:false,experienceReward:exp,dropGold:20,fixedGoldPerDefeat:true},explorationContext:structuredClone(session.battleContext)};},
   async win(exp){const battle=this.battle(exp);await scope.outcome(battle,'victory');return battle;}};
 }
 const protectedState=c=>structuredClone({carried:c.carriedExperience,pending:c.pendingExperienceSettlement,guild:c.guildExperiencePool,loot:c.lootBag});
+
+for(const id of ['silberkaefer','maikaefer_koenig'])test(`${id}: production victory/escape/defeat callback with survey/save retry`,async t=>{
+ const h=harness(t),normal=protectedState(h.c),d=getV2CombatEnemy(id);
+ const battle=()=>({...h.battle(),enemy:createEnemyCombatant(d)});
+ const win=battle();win.enemy.hp=0;win.enemy.alive=false;
+ await h.scope.outcome(win,'victory');assert.equal(h.session.battleExperience,d.experienceReward);assert.equal(h.session.lootBag.gold,d.dropGold);
+ await h.scope.outcome(structuredClone(win),'victory');assert.equal(h.session.battleExperience,d.experienceReward);
+ await h.scope.outcome(battle(),'escape');assert.equal(h.session.battleExperience,d.experienceReward);assert.equal(h.session.lootBag.gold,d.dropGold);
+ const masks=[...h.session.surveyedMasks],loss=battle();h.surveyOk(false);
+ await h.scope.outcome(loss,'defeat');assert.equal(h.exits,0);assert.equal(h.session.battleExperience,d.experienceReward);
+ h.surveyOk(true);h.saveOk(false);await h.session.defeatRetry();assert.equal(h.exits,0);
+ h.saveOk(true);await h.session.defeatRetry();assert.equal(h.exits,1);assert.equal(h.session.battleExperience,0);
+ assert.equal(h.c.experience,1000);assert.deepEqual(h.session.surveyedMasks,masks);assert.deepEqual(protectedState(h.c),normal);
+ await h.scope.outcome(loss,'defeat');assert.equal(h.exits,1);
+});
 
 test('cloned outcomes match IDs, but other sessions and duplicate copies cannot award',async t=>{
  const a=harness(t),b=harness(t),battle=a.battle(100);

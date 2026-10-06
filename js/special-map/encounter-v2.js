@@ -1,5 +1,5 @@
 import {generateV2EcologyCandidate2} from './ecology-v2-candidate-2.js';
-import {getEnemyById} from '../../data/enemies.js';
+import {getV2CombatEnemy} from '../../data/special-map-enemies.js';
 import {mapContentId} from '../../data/special-maps.js';
 
 let nextSessionId=0;
@@ -26,8 +26,8 @@ export function attachV2Encounters(s,{onEncounter,random=Math.random,onBlocked=m
   s.presence=Math.min(100,s.presence+(dark?5:4)+Math.floor(random()*(dark?6:5)));
   if(s.presence<100)return false;
   const speciesId=rollV2Species(s.ecology.floors[s.currentFloor].species,random);
-  const enemy=getEnemyById(speciesId);
-  // F1 option B: preserve the ecology roll, never substitute another species.
+  const enemy=getV2CombatEnemy(speciesId);
+  // Preserve unknown-ID protection; never substitute or reroll the ecology pick.
   if(!enemy||enemy.isBoss){s.presence=0;s.autoPath=null;const message=`${speciesId}：戦闘定義未対応のため遭遇を保留しました。`;onBlocked(message);s.say(message);return false;}
   s.autoPath=null;
   s.battleContext={source:'special-map-v2',sessionId:s.encounterSessionId,battleId:++s.encounterSequence,mapKey:s.mapKey,contentId:mapContentId({rulesetVersion:s.ruleset,seed:s.seed,level:s.level,rarity:s.rarity}),mapSeed:s.seed,mapLevel:s.level,rarity:s.rarity,themeId:s.generatedMap.themeId,floorIndex:s.currentFloor,speciesId};
