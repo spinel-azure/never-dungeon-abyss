@@ -1,3 +1,4 @@
+import {createGoldMapBoss} from '../data/karte-gold-boss.js';
 import {beginNpcRenewal} from '../data/npc-party.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -55,9 +56,9 @@ test('V2 normal return schedules NPC renewal atomically with rewards, retry does
  const token=h.c.npcSystem.renewal.token;assert.equal(h.scope.finish(),false);assert.equal(h.c.npcSystem.renewal.token,token);
 });
 
-test('normal map boss production outcome: victory once, same runtime, defeat save retry and grace',async t=>{
+for(const source of ['special-map-v2-boss','special-map-v2-special-boss'])test(`${source} production outcome: victory once, same runtime, defeat save retry and grace`,async t=>{
  const h=harness(t,60,[GODDESS_GRACE_CARD_ID]),normal=protectedState(h.c);
- const make=()=>{const b=h.battle();h.session.battleContext.source='special-map-v2-boss';h.session.battleContext.bossId='karte_boss_001';b.explorationContext=structuredClone(h.session.battleContext);b.enemy=createEnemyCombatant(createNormalMapBoss({seed:12345,level:60,rarity:'WHITE',themeId:'crystal'}));return b;};
+ const make=()=>{const b=h.battle();h.session.battleContext.source=source;h.session.battleContext.bossId='karte_boss_001';b.explorationContext=structuredClone(h.session.battleContext);b.enemy=createEnemyCombatant(source==='special-map-v2-special-boss'?createGoldMapBoss({themeId:'gold',level:60}):createNormalMapBoss({seed:12345,level:60,rarity:'WHITE',themeId:'crystal'}));return b;};
  h.session.currentFloor=2;h.session.playerX=6;h.session.playerY=0;h.session.direction=1;h.session.torchFuel=63;h.session.bossKeyFound=h.session.bossDoorUnlocked=true;
  const before=JSON.stringify({x:h.session.playerX,y:h.session.playerY,dir:h.session.direction,torch:h.session.torchFuel,survey:h.session.surveyedMasks});
  const win=make();win.enemy.hp=0;win.enemy.alive=false;await h.scope.outcome(win,'victory');

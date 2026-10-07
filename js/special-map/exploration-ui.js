@@ -27,7 +27,7 @@ export function startSpecialMapExploration(options){
    });
    if(cancelled)return;
    if(completed===false||!controller)throw Error('入場演出を開始できませんでした。');
-   let name='特殊地図';try{name=describeTestMap(original).name;}catch{}
+   let name=options.developmentName||'特殊地図';try{if(!options.developmentName)name=describeTestMap(original).name;}catch{}
    controller.session.renderState.overlayEvent={type:'floorLap',showOverlay:false,overlayMessage:name,specialMapTitle:true};
    controller.session.transitioning=false;locked=false;
   }catch{
@@ -38,14 +38,14 @@ export function startSpecialMapExploration(options){
  })();
  return pending;
 }
-function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},playSe=()=>{},saveSurvey=()=>({ok:false})}){
+function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},playSe=()=>{},saveSurvey=()=>({ok:false}),developmentTheme,developmentName}){
  if(getSpecialMapContext())throw Error('特殊地図はすでに探索中です。');
  const host=getSpecialMapHost();
  const original=registered.find(m=>mapOriginalId(m)===mapKey);
  const createSession=original?.rulesetVersion==='special-map-v2'?createSpecialMapV2Session:createSpecialMapSession;
- const session=createSession(registered,mapKey,{persistSurvey:saveSurvey,playSe,onEncounter:host.onEncounter,onBossEncounter:host.onEncounter,say:text=>{message.textContent=text;}});
+ const session=createSession(registered,mapKey,{developmentTheme,persistSurvey:saveSurvey,playSe,onEncounter:host.onEncounter,onBossEncounter:host.onEncounter,say:text=>{message.textContent=text;}});
  if(isV2Session(session))session.torchConsumptionDisabled=()=>Boolean(host.getTorchCardEffects?.().consumptionDisabled);
- let name='特殊地図';try{name=describeTestMap(original).name;}catch{}
+ let name=developmentName||'特殊地図';try{if(!developmentName)name=describeTestMap(original).name;}catch{}
  const container=document.createElement('section');container.className='special-map-runtime';container.setAttribute('aria-label','特殊迷宮探索');
  const canvas=document.createElement('canvas');canvas.className='special-map-view';canvas.width=960;canvas.height=540;canvas.setAttribute('aria-label','特殊迷宮3D表示');
  container.append(canvas);host.viewport.append(container);
@@ -83,7 +83,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  }
  function finish({reason='return'}={}){if(disposed||returned||session.transitioning)return false;if(!flushSpecialSurvey(session)){message.textContent=session.surveyError;return false;}if(host.beforeReturn?.({session,reason})===false)return false;returned=true;close();onExit();host.afterReturn?.({session,reason});return true;}
  onEnter();
- const detach=attachSpecialMap({session,finish});
+ const detach=attachSpecialMap({session,finish,input});
  session.renderState.overlayEvent={type:'floorLap',showOverlay:false,overlayMessage:name,specialMapTitle:true};
  const restore=useSpecialMapRenderSource({canvas,ctx:canvas.getContext('2d'),W:960,H:540,state:session.renderState,eventOverlayCtx:null,
   wallOnCell:(x,y,d)=>specialWall(session,x,y,d)||specialDoorState(session,x,y,d)==='closed',closedDoorOnCell:(x,y,d)=>specialDoorState(session,x,y,d)==='closed',openDoorOnCell:(x,y,d)=>specialDoorState(session,x,y,d)==='open',getDoorState:(x,y,d)=>specialDoorState(session,x,y,d),getDoorKind:(x,y,d)=>session.cells[y]?.[x]?.doorKinds[d]??null,getDepth:()=>0,

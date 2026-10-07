@@ -21,10 +21,10 @@ test('normal lottery remains ten; explicit themes replace presentation only acro
  }
  assert.equal(specialMapV2StructureFingerprint(generateSpecialMapV2(base)),'3519b715');
 });
-test('goddess themes require 80..100; gold permits 1..100; invalid identity rejected',()=>{
+test('goddess themes require 80..100; gold runtime requires 60..100; invalid identity rejected',()=>{
  for(const themeId of SPECIAL_MAP_THEMES){for(const level of [0,101,NaN])assert.throws(()=>generateExplicitSpecialMapV2({...base,themeId,level}));
   if(themeId!=='gold')for(const level of [1,79])assert.throws(()=>generateExplicitSpecialMapV2({...base,themeId,level}));
-  else assert.equal(generateExplicitSpecialMapV2({...base,themeId,level:1}).themeId,'gold');
+  else {assert.throws(()=>generateExplicitSpecialMapV2({...base,themeId,level:59}));assert.equal(generateExplicitSpecialMapV2({...base,themeId,level:60}).themeId,'gold');}
  }
  assert.throws(()=>generateExplicitSpecialMapV2({...base,themeId:'unknown'}));
 });

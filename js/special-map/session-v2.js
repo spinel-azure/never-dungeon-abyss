@@ -9,6 +9,8 @@ import {attachV2Survey} from './survey-v2.js';
 import {selectNormalMapBoss} from '../../data/karte-normal-bosses.js';
 import {resolveSpecialThemeBoss} from '../../data/karte-special-bosses.js';
 import {NORMAL_MAP_THEMES} from '../../data/special-map-themes.js';
+import {generateExplicitSpecialMapV2} from './special-themes-v2.js';
+import {isExplorerTestEnabled} from '../explorer-preview.js';
 
 const dirs=['N','E','S','W'];
 const same=(a,b)=>a&&b&&a.x===b.x&&a.y===b.y;
@@ -20,7 +22,8 @@ export function createSpecialMapV2Session(registered,mapKey,options={}){
  const {playSe=()=>{},say=()=>{}}=options;
  const original=registered.find(m=>mapOriginalId(m)===mapKey);
  if(original?.rulesetVersion!=='special-map-v2')throw Error('登録済みV2地図が見つかりません。');
- const blueprint=generateRegisteredSpecialMap(original);
+ if(options.developmentTheme&&!isExplorerTestEnabled())throw Error('探検家テストをONにしてください。');
+ const blueprint=options.developmentTheme?generateExplicitSpecialMapV2({...original,ruleset:original.rulesetVersion,themeId:options.developmentTheme}):generateRegisteredSpecialMap(original);
  const s={kind:'specialMapV2',mapKey,ruleset:original.rulesetVersion,seed:original.seed,level:original.level,rarity:original.rarity,
   blueprint,fingerprint:specialMapV2StructureFingerprint(blueprint),currentFloor:0,torchFuel:100,
   battleExperience:0,experienceClosed:false,rewardedBattles:new Set(),lootBag:null,

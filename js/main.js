@@ -1,4 +1,6 @@
 import { renderItemGetItems } from "./item-get-presentation.js";
+import {developmentMapOptions} from './special-map/development-map.js';
+import {startSpecialMapExploration} from './special-map/exploration-ui.js';
 import {resumeV2Encounter,matchesV2Battle} from './special-map/encounter-v2.js';
 import {prepareNormalBossImage} from './special-map/normal-boss-presentation.js';
 import {grantV2BattleRewards,settleV2ReturnExperience} from './special-map/battle-rewards-v2.js';
@@ -3692,7 +3694,7 @@ import {
   }
 
   function finishBattleVictory(battle) {
-    if(['special-map-v2','special-map-v2-boss'].includes(battle?.explorationContext?.source))return finishV2Battle(battle,'victory');
+    if(['special-map-v2','special-map-v2-boss','special-map-v2-special-boss'].includes(battle?.explorationContext?.source))return finishV2Battle(battle,'victory');
     const defeatedRoamingEnemyInstanceId = battle?.roamingEnemyInstanceId || activeRoamingEnemyInstanceId;
     if (defeatedRoamingEnemyInstanceId) {
       if (!defeatRoamingEnemy(defeatedRoamingEnemyInstanceId)) return;
@@ -4035,7 +4037,7 @@ import {
   }
 
   async function finishBattleDefeat(battle) {
-    if(['special-map-v2','special-map-v2-boss'].includes(battle?.explorationContext?.source))return finishV2Battle(battle,'defeat');
+    if(['special-map-v2','special-map-v2-boss','special-map-v2-special-boss'].includes(battle?.explorationContext?.source))return finishV2Battle(battle,'defeat');
     activeRareRoomEncounterId = null;
     const defeatedRoamingEnemyInstanceId = battle?.roamingEnemyInstanceId || activeRoamingEnemyInstanceId;
     if (defeatedRoamingEnemyInstanceId) {
@@ -4288,7 +4290,7 @@ import {
   }
 
   function finishBattleEscape(battle) {
-    if(['special-map-v2','special-map-v2-boss'].includes(battle?.explorationContext?.source))return finishV2Battle(battle,'escape');
+    if(['special-map-v2','special-map-v2-boss','special-map-v2-special-boss'].includes(battle?.explorationContext?.source))return finishV2Battle(battle,'escape');
     const roamingInstanceId = battle?.roamingEnemyInstanceId || activeRoamingEnemyInstanceId;
     if (roamingInstanceId) {
       activeRoamingEnemyInstanceId = null;
@@ -5492,7 +5494,7 @@ import {
     return result;
   }
   async function beginV2Battle(session,enemyData,context){
-    const boss=context.source==='special-map-v2-boss';
+    const boss=['special-map-v2-boss','special-map-v2-special-boss'].includes(context.source);
     session.renderState.overlayEvent={type:'randomEncounter',showOverlay:true,encounterType:boss?'boss':'normal',encounterLabel:boss?'BOSS ENCOUNTER!!':'ENCOUNTER!!',encounterAnimationStartedAt:performance.now(),message:''};
     playSe('battleStart');say('＊　何者かと遭遇した！　＊');
     const prepared=boss?prepareNormalBossImage(enemyData,context):Promise.resolve(enemyData.image);
@@ -5526,7 +5528,7 @@ import {
       s.defeatRetry=retry;await retry();return;
     }
     let message='戦闘を離れ、特殊地図の探索へ戻った。';
-    if(outcome==='victory'){const result=grantV2BattleRewards(character,battle,s);character=result.character;message=result.message;if(battle.explorationContext.source==='special-map-v2-boss'){s.bossDefeated=true;message='地図の主を討伐した。ワープゲートが現れた。A／EnterでB1F入口へ移動。\n'+message;}}
+    if(outcome==='victory'){const result=grantV2BattleRewards(character,battle,s);character=result.character;message=result.message;if(['special-map-v2-boss','special-map-v2-special-boss'].includes(battle.explorationContext.source)){s.bossDefeated=true;message='地図の主を討伐した。ワープゲートが現れた。A／EnterでB1F入口へ移動。\n'+message;}}
     resumeV2Encounter(s,s.battleContext);s.finishingBattle=false;
     startBgm(getSpecialMapBgmKey(s.generatedMap.themeId));say(message);updateCharacterUi();updateHud();saveGame();
   }
@@ -5587,6 +5589,15 @@ import {
   });
   let virtualStickController = null;
   configureMenu({
+    startGoldTest:level=>{
+      if(worldLocation!=='town'||getSpecialMapContext()||isBattleActive()||sceneTransitionRunning)return {ok:false,error:'町で探索を終了してから開始してください。'};
+      try{
+        const options=developmentMapOptions({level});
+        closeCampMenu('special');
+        startSpecialMapExploration({...options,message:msgEl,playSe,onExit:()=>{if(!resumeDungeonEntrance())showTownArrival();}});
+        return {ok:true};
+      }catch(error){return {ok:false,error:error.message};}
+    },
     discoverSpecialMap: () => transactSpecialMaps({getCharacter:()=>character,setCharacter:next=>{character=next;},save:()=>saveGame()},discoverTestMap),
     root: menuScreen,
     commandRoot: dungeonCommands,

@@ -18,14 +18,16 @@ export const KARTE_SPECIAL_BOSSES=freeze({
   ['ノクティス','夜露の雫','宵闇','月蝕','夜天星葬','夜の帳'],{hpRatioAtMost:.3,intelligenceGrowth:'each turn; increment TBD'}),
  karte_boss_zelena:goddess('karte_boss_zelena','新緑の若葉の女神・ゼレーナ','tender','015',stats(60000,95,120,105,100,115,125,115),'回復・障壁・再生を使う耐久型裏ボス',
   ['シルワンエメラ','若葉の息吹','翠緑障壁','森羅の蔦','萌芽','大樹の審判'],{reviveOnce:true,reviveRatio:.30,message:'若葉が舞い、失われた生命が再び芽吹く――。'}),
- karte_boss_maikaefer_koenig:{id:'karte_boss_maikaefer_koenig',name:'マイケーファーケーニヒ',themeId:'gold',
-  image:'images/karte_bosses/karte_boss_016.avif',allowColorVariant:false,minMapLevel:1,imageSize:600,
-  baseStats:null,battleRole:'gold固定ボス（戦闘仕様未定）',resistanceProfile:null,battleEnabled:false},
+ karte_boss_maikaefer_koenig:{id:'karte_boss_maikaefer_koenig',name:'デアグローセ・ケーファーケーニヒ',themeId:'gold',
+  image:'images/karte_bosses/karte_boss_016.avif',allowColorVariant:false,minMapLevel:60,imageSize:600,
+  baseLevel:100,baseStats:{...stats(32000,110,35,120,115,130,140,35),maxSp:0},
+  battleRole:'高防御・高速の物理型特殊強敵',resistanceProfile:{instantDeath:'immune',petrify:'immune',otherAilments:'high'},battleEnabled:true},
 });
 export const SPECIAL_THEME_BOSS_IDS=freeze({gold:'karte_boss_maikaefer_koenig',rice:'karte_boss_lumina',dusk:'karte_boss_noctia',tender:'karte_boss_zelena'});
 export function assertSpecialThemeBoss(themeId,bossId,level){
  validateSpecialTheme(themeId,level);
  if(SPECIAL_THEME_BOSS_IDS[themeId]!==bossId)throw Error('Special theme/boss mismatch');
+ if(level<KARTE_SPECIAL_BOSSES[bossId].minMapLevel)throw RangeError('Gold boss requires Map Lv60 or higher');
  return true;
 }
 export function resolveSpecialThemeBoss(themeId,level,{bossId,strict=false}={}){
@@ -35,10 +37,11 @@ export function resolveSpecialThemeBoss(themeId,level,{bossId,strict=false}={}){
  if(strict&&bossId!==undefined)assertSpecialThemeBoss(themeId,bossId,level);
  // Production mismatch falls back to the theme's correct boss, never another boss.
  const boss=KARTE_SPECIAL_BOSSES[id];
+ if(level<boss.minMapLevel){if(strict)throw RangeError('Gold boss requires Map Lv60 or higher');return null;}
  if(!boss.baseStats)return {...boss,level,scaledStats:null};
- const percent=level===100?100:level>=90?95:90;
+ const percent=level===100?100:level>=90?95:themeId!=='gold'||level>=80?90:level>=70?80:70;
  const scale=v=>Math.floor((v*percent+50)/100);
- return {...boss,level,scaledStats:{maxHp:scale(boss.baseStats.maxHp),maxSp:9999,
+ return {...boss,level,scaledStats:{maxHp:scale(boss.baseStats.maxHp),maxSp:boss.baseStats.maxSp,
   stats:Object.fromEntries(Object.entries(boss.baseStats.stats).map(([k,v])=>[k,scale(v)])),
   def:scale(boss.baseStats.def),magicDefense:scale(boss.baseStats.magicDefense)}};
 }

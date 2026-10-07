@@ -1,0 +1,184 @@
+◆ 特殊地図ボス画像 共通ピクセルアート仕様 ◆
+
+このファイルは、
+images/karte_bosses/
+フォルダ内に格納する特殊地図ボス画像の共通スタイルガイドである。
+
+新規に karte_boss_***.avif を追加・生成する際は、
+README.txt に記載された各ボス固有の設定と合わせて、本ファイルの仕様を参照すること。
+
+README.txt
+→ ボス名、theme、専用区域、カラーバリエーション可否、specialBehavior等の個別設定
+
+本ファイル
+→ 共通の画風、解像度、ピクセル構造、構図、禁止事項
+
+という役割分担とする。
+
+個別ボスの設定と本ファイルが競合する場合は、
+ボス固有の内容についてはREADME.txtの明示指定を優先し、
+画風・ピクセル構造・出力仕様については本ファイルを優先する。
+
+────────────────────────────────
+
+GAME ART STYLE
+
+authentic hand-pixeled 16-bit / 32-bit fantasy JRPG boss sprite,
+classic Super Famicom / SNES and Neo Geo era pixel art,
+native low-resolution game sprite,
+NOT a high-resolution anime illustration,
+NOT a smooth digital painting converted into pixel art,
+
+PIXEL CONSTRUCTION
+
+designed natively on a 200×200 logical pixel grid,
+displayed at 400×400 using nearest-neighbor 2× scaling,
+every logical pixel clearly visible as a uniform square block,
+large deliberate pixel clusters,
+chunky stepped contours,
+strong jagged pixel silhouette,
+hard pixel edges,
+pixel-perfect construction,
+
+limited 32-color character palette,
+three to five discrete shades per material,
+cluster-based shading,
+solid shadow shapes,
+selective dithering only where necessary,
+strong readable highlights,
+dark deliberate outline clusters,
+
+NO gradients,
+NO smooth color transitions,
+NO anti-aliasing,
+NO smoothing,
+NO subpixel detail,
+NO semi-transparent edge pixels,
+NO soft airbrush shading,
+NO painterly rendering,
+NO vector-like curves,
+NO photorealistic skin,
+NO high-resolution anime rendering,
+NO tiny high-definition linework,
+NO excessive micro-detail,
+NO post-process pixelation filter,
+
+SPRITE DESIGN
+
+full-body fantasy RPG boss character,
+large readable silhouette,
+bold simplified shapes,
+details grouped into readable pixel clusters,
+face readable at game-sprite scale,
+costume details simplified to survive true low-resolution rendering,
+strong contrast between major materials,
+designed to look correct when viewed at actual 200×200 resolution,
+
+COMPOSITION
+
+single character only,
+character centered,
+entire body visible,
+generous empty margin around silhouette,
+pure solid white background,
+no scenery,
+no UI,
+no text,
+no frame,
+no shadow on background,
+
+OUTPUT
+
+400×400 px final image,
+created as native 200×200 pixel art and enlarged exactly 2× with nearest-neighbor scaling,
+perfectly square pixels,
+consistent pixel size across the entire image.
+
+────────────────────────────────
+
+◆ 運用上の注意 ◆
+
+・ボス画像は、見た目だけ高解像度のイラストを後からドット化するのではなく、
+  最初から低解像度ピクセルアートとして設計すること。
+
+・輪郭、陰影、ハイライトはピクセル単位の塊で構成し、
+  滑らかな線やグラデーションを使用しないこと。
+
+・キャラクターのシルエットは、
+  実ゲーム表示サイズでも一目で識別できること。
+
+・細部を描き込みすぎて、
+  200×200 logical pixel gridで潰れるデザインにしないこと。
+
+・白背景は完全な単色とし、
+  影、床、背景オブジェクト、演出エフェクトを置かないこと。
+
+・文字、ロゴ、UI、フレーム、説明文を画像内に入れないこと。
+
+・アンチエイリアス、スムージング、半透明の輪郭処理は禁止。
+
+・拡大時は必ず nearest-neighbor を使用すること。
+
+・元画像のピクセルサイズと表示上のピクセルサイズが混在しないこと。
+
+・同一画像内で不均一なピクセルサイズを使用しないこと。
+
+────────────────────────────────
+
+◆ 特殊地図ボス向け追加方針 ◆
+
+・各ボス固有の外見、役割、theme、specialBehaviorについてはREADME.txtを参照すること。
+
+・theme専用bossの場合は、指定themeの雰囲気に合わせたデザインを優先すること。
+
+・カラーバリエーション禁止bossは、
+  生成後のHSL自動変換を前提にせず、
+  元画像そのものを完成版の色として設計すること。
+
+・カラーバリエーション可能bossは、
+  HSL変換後も輪郭や主要素材の識別性が崩れにくい配色を意識すること。
+
+・黒輪郭、暗い陰影、無彩色部分は、
+  色変換後も形状認識に使えるよう十分に残すこと。
+
+・ボスごとの個性は、
+  小さな装飾の量ではなく、
+  シルエット、姿勢、武器、頭部、衣装形状、主要配色で表現すること。
+
+────────────────────────────────
+
+◆ 画像ファイルの基本方針 ◆
+
+保存先：
+images/karte_bosses/
+
+基本命名：
+karte_boss_001.avif
+karte_boss_002.avif
+karte_boss_003.avif
+...
+
+ボス固有情報：
+images/karte_bosses/README.txt を参照すること。
+
+共通画風：
+本ファイルを参照すること。
+
+────────────────────────────────
+
+◆ 最終チェックリスト ◆
+
+[ ] 400×400pxである
+[ ] native 200×200 → nearest-neighbor 2×として成立している
+[ ] 白背景である
+[ ] キャラクター全身が入っている
+[ ] シルエットが明瞭である
+[ ] ピクセルサイズが均一である
+[ ] アンチエイリアスがない
+[ ] スムージングがない
+[ ] グラデーションがない
+[ ] 半透明輪郭がない
+[ ] 背景演出がない
+[ ] 文字・UIがない
+[ ] 過剰な高精細描写がない
+[ ] README.txtの個別boss設定に矛盾していない

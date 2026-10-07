@@ -1,3 +1,4 @@
+import {getSpecialMapContext} from './special-map/context.js';
 import { renderCharmStatus } from "./akashic-presentation.js";
 import { selectTrelirenEntranceImage } from "../data/treliren.js";
 import { paginateMessageToFit } from "./message-pagination.js";
@@ -26,6 +27,7 @@ import { createExplorerPreviewUI } from "./explorer-preview-ui.js";
 import { startSpecialMapExploration } from "./special-map/exploration-ui.js";
 let explorerPreview = null;
 export function handleSpecialMapInput(action){
+  const context=getSpecialMapContext();if(context)return context.input(action);
   return town.active&&town.mode==='explorerPreview' ? (explorerPreview?.input(action)??false) : false;
 }
 import { getInnStayFee } from "./character-services.js";

@@ -81,6 +81,9 @@ themeName: 拷問
 exclusive: true
 colorVariant: true
 
+specialBehavior:
+- 出血攻撃を多用する
+
 [karte_boss_007.avif]
 name: グリミヒ・フライシュフレッサー
 theme: green
@@ -101,6 +104,10 @@ theme: water
 themeName: 激流
 exclusive: true
 colorVariant: true
+
+specialBehavior:
+- 猛毒攻撃を使用する
+- HP50%以下で魅了を使用する
 
 [karte_boss_010.avif]
 name: メヒティガー・ウィッカーマン
@@ -163,3 +170,39 @@ name: アッシェンプッテル
 theme: any-normal
 colorVariant: true
 note: エリア指定なしboss。
+
+[karte_boss_018.avif]
+name: ドクトル・ムンター
+theme: torture
+themeName: 拷問
+exclusive: true
+colorVariant: true
+
+specialBehavior:
+- 出血攻撃を多用する
+- 猛毒攻撃を使用する
+- HP50%以下で死毒攻撃を解禁する
+- 回復行動は行わない
+
+note:
+拷問エリア専用boss。torture以外では使用禁止。
+
+[karte_boss_019.avif]
+name: エリーテ・ツェンタウリン
+theme: any-normal
+colorVariant: true
+
+specialBehavior:
+- 封印の矢を使用する
+- 高AGI・高DEX型
+- 一定確率で必中攻撃を使用する
+- 低HP時に攻撃頻度が上昇する
+※封印の矢ギミックの解除方法は「ツェンタウリン」と同様とする。
+
+
+
+
+
+
+
+

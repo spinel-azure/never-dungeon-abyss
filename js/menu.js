@@ -1549,6 +1549,12 @@ function setDebugPage(page) { menu.view = "debug"; menu.debugPage = Math.max(0, 
 function updateDebugItems() { menu.debugPages.forEach((page, index) => { page.hidden = index !== menu.debugPage; }); menu.debugItems = [...menu.debugPages[menu.debugPage].querySelectorAll("[data-debug]")]; }
 function executeDebugNav(key) { if (key === "back") { if (menu.debugPage === 0) closeCampMenu("back"); else setDebugPage(menu.debugPage - 1); } else if (menu.debugPage < menu.debugPages.length - 1) setDebugPage(menu.debugPage + 1); else closeCampMenu("main"); }
 function executeDebug(key, amount = 1) {
+  if(/^goldTest(60|80|100)$/.test(key)){
+    const result=isExplorerTestEnabled()?menu.startGoldTest?.(Number(key.slice(8))):{ok:false,error:'探検家テストをONにしてください。'};
+    const status=menu.debugPanel.querySelector('[data-map-debug-status]');
+    if(status)status.textContent=result?.ok?'gold探索を開始します（調査はタブ内のみ保持）。':result?.error||'開始できません。';
+    return;
+  }
   if (key === "discoverSpecialMap") {
     const result = isExplorerTestEnabled() ? menu.discoverSpecialMap?.() : {ok:false,error:"探検家テストをONにしてください。"};
     const status = menu.debugPanel.querySelector('[data-map-debug-status]');

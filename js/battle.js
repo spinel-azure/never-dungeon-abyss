@@ -1154,7 +1154,7 @@ function renderBattle() {
   image.classList.toggle("is-jirene", battle.enemy.id === "jirene_b79f");
   image.classList.toggle("is-amayenak", ["amayenak_b100f", "amayenak_phantom_b100f"].includes(battle.enemy.id));
   const enemyStage = battleUi.root.querySelector(".battle-enemy-stage");
-  enemyStage.classList.toggle('is-map-boss',battle.explorationContext?.source==='special-map-v2-boss');
+  enemyStage.classList.toggle('is-map-boss',['special-map-v2-boss','special-map-v2-special-boss'].includes(battle.explorationContext?.source));
   let lionOpening = enemyStage.querySelector('.battle-lion-opening');
   if (!lionOpening && battle.enemy.id === 'loewenkoenigin_b1f') {
     lionOpening = document.createElement('span');
