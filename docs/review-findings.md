@@ -2038,3 +2038,14 @@
 - LAST UPDATE2026-10-01維持、main.jsキャッシュ20261001-2。README変更なし、コミット/pushなし。
 
 - 最終tests/browser/area-skill-presentation.mjsもPC/スマホ相当で成功。4技の演出1回、途中のHP/結果非表示、終了時の3対象同時数値/HP更新、三女神の背景/ぼかし/消灯、中断後の次戦保護、JSON404時の通常表示を確認。QA画像TEMP/nda-area-effects-BUKw82、ログTEMP/nda-battle-area-timing-final.log。単体/全体のPC/スマホ画像を目視確認。
+
+
+### 2026-10-07 アイテム入手ポップアップの図鑑画像・金箱の鍵表示
+
+- 着手main/19aa144。既存data/item-compendium.jsの赤錆びた鍵項目追加と未追跡images/item-compendium/red_rust_key.avifはユーザー変更として保持し、編集せず参照。
+- js/item-get-presentation.jsへ入手品の表示生成を分離。既存ポップアップ呼出元から正式アイテムIDを渡し、図鑑のimageData/imageSrcを参照。単品は画像の下に名前/個数、複数は小画像と名前の行表示。画像未登録/読込失敗は文字のみ。名称一致による画像検索や所有/保存/報酬処理の追加なし。画像比率を保持しPC/狭幅に対応。既存ジングル・3400ms終了・文章形式を維持。
+- 金箱の鍵はplayer.jsの既存開封アニメーション完了→awardTreasure経路で、新規取得成功時のみポップアップを表示。所持済みでは再表示なし。各階のred_rust_key_b* IDは表示画像だけ図鑑のred_rust_key_b9fへ対応付け、鍵の所持ID/使用条件/宝箱内容は維持。通常ドロップ・一般宝箱のポップアップ対象は拡大していない。
+- Node全1893成功/失敗0。既存報酬表示のソース検査2件へID引渡しを反映。Python29成功/警告0/失敗0/既存2skip。構文/diff確認成功。
+- tests/browser/item-get-images.mjsでPC1280x900、スマホ相当390x844/320x740を検証。仮状態から本編の金箱開封callbackを実行し、開封前非表示/完了後の鍵画像・数量、既所持再取得非表示、複数品の画像有無混在、文字のみ、町の文章形式、画像404時の文字維持を確認。表示枠と行の収まりを検査し、PC/狭幅の鍵と町の画像を目視確認。実端末/実ゲームパッド/通常プレイ全通しは未確認。
+- QA画像TEMP/nda-item-images-Hrynx3、ログTEMP/nda-item-images-browser.log・nda-item-popup-node-final.log・nda-item-popup-python.log。途中の検査で画像枠の背景光がスクロール領域へはみ出す点を修正。画像枠の背景光を枠内へ収め、外側の発光は既存drop-shadowを使用。
+- LAST UPDATE2026-10-07、main.jsおよびtown.cssキャッシュ20261007-1。README変更なし、コミット/pushなし。

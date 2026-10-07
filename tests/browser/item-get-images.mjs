@@ -1,0 +1,50 @@
+import assert from 'node:assert/strict';
+import {readFile,mkdtemp} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {createRequire} from 'node:module';
+const {chromium}=createRequire(import.meta.url)('playwright');
+const main=await readFile('js/main.js','utf8'),player=await readFile('js/player.js','utf8');
+const output=await mkdtemp(join(tmpdir(),'nda-item-images-'));
+const hook=`window.itemQa={setup(){document.querySelector('#titleScreen').hidden=true;document.body.classList.remove('title-active');closeTown();saveEnabled=false;character=createInitialCharacter({name:'QA',job:'warrior'});worldLocation='dungeon';resetDungeon('',null,true);setBgmOptions({enabled:false});setSeOptions({enabled:false});updateCharacterUi();},show:showNamedItemGetEffect,award:awardTreasureLoot,read:()=>character,town(){openTown({facilityId:'inn',mode:'facilityMenu'});}};`;
+const browser=await chromium.launch({channel:'msedge',headless:true});
+try {for(const [label,width,height] of [['pc',1280,900],['mobile',390,844],['narrow',320,740]]) {
+  const page=await browser.newPage({viewport:{width,height}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.addInitScript(()=>navigator.getGamepads=()=>[]);
+  await page.route('**/js/main.js?*',r=>r.fulfill({contentType:'text/javascript',body:main.replace('  document.documentElement.dataset.ndaMainReady = "true";',hook+'\n document.documentElement.dataset.ndaMainReady = "true";')}));
+  await page.route('**/js/player.js',r=>r.fulfill({contentType:'text/javascript',body:player+`\nwindow.itemTreasureQa={open(id){startTreasureEvent('gold',state.gridX,state.gridY);state.overlayEvent.eventTreasureId=id+'_chest';confirmTreasureEvent();},phase:()=>state.overlayEvent?.phase};`}));
+  await page.goto('http://127.0.0.1:4173');await page.waitForFunction(()=>window.itemQa&&window.itemTreasureQa);
+  await page.evaluate(()=>itemQa.setup());
+  await page.evaluate(()=>itemTreasureQa.open('red_rust_key_b19f'));
+  assert.equal(await page.evaluate(()=>document.querySelector('#itemGetEffect').hidden),true);
+  await page.waitForFunction(()=>!document.querySelector('#itemGetEffect').hidden);
+  assert.equal(await page.evaluate(()=>itemTreasureQa.phase()),undefined);
+  await page.waitForFunction(()=>document.querySelector('.item-get-image')?.naturalWidth>0);
+  assert.match(await page.locator('#itemGetItems').innerText(),/赤錆びた鍵 ×1/);
+  async function check(name){
+    await page.waitForTimeout(1100);
+    const bounds=await page.locator('#itemGetItems').evaluate(el=>{
+      const r=el.getBoundingClientRect(),parent=el.parentElement.getBoundingClientRect();
+      return {left:r.left-parent.left,right:parent.right-r.right,top:r.top-parent.top,bottom:parent.bottom-r.bottom,overflow:Math.max(0,...[...el.querySelectorAll(".item-get-row")].map(row=>row.getBoundingClientRect().right-r.right))};
+    });
+    assert.ok(Object.values(bounds).slice(0,4).every(v=>v>=-2),JSON.stringify(bounds));assert.ok(bounds.overflow<=1,JSON.stringify(bounds));
+    await page.screenshot({path:join(output,label+'-'+name+'.png')});
+  }
+  await check('key');
+  await page.waitForFunction(()=>document.querySelector('#itemGetEffect').hidden);
+  await page.evaluate(()=>itemQa.award('gold','red_rust_key_b19f_chest'));
+  assert.equal(await page.evaluate(()=>document.querySelector('#itemGetEffect').hidden),true);
+  await page.evaluate(()=>itemQa.show(['ウィングギフト','回復薬'],{itemIds:['wing_gift','healing_potion'],amounts:[2,3]}));
+  await check('multiple');assert.equal(await page.locator('.item-get-image').count(),1);
+  await page.evaluate(()=>itemQa.show(['回復薬'],{itemIds:['healing_potion']}));
+  assert.equal(await page.locator('.item-get-image').count(),0);
+  await check('text-only');
+  await page.waitForFunction(()=>document.querySelector('#itemGetEffect').hidden);
+  await page.evaluate(()=>{itemQa.town();itemQa.show(['キルケ特製とりもち'],{itemIds:['kirke_special_birdlime'],acquisitionMessage:true});});
+  await check('town');
+  await page.route('**/images/item-compendium/royal_cat_medal.avif',r=>r.fulfill({status:404,body:''}));
+  await page.evaluate(()=>itemQa.show(['勲章'],{itemIds:['royal_cat_medal']}));
+  await page.waitForFunction(()=>document.querySelectorAll('.item-get-image').length===0);
+  assert.match(await page.locator('#itemGetItems').innerText(),/勲章 ×1/);
+  assert.deepEqual(errors,[]);console.log(label+' passed');await page.close();
+}}finally{await browser.close();}console.log(output);

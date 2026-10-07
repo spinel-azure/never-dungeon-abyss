@@ -1,3 +1,4 @@
+import { renderItemGetItems } from "./item-get-presentation.js";
 import {resumeV2Encounter,matchesV2Battle} from './special-map/encounter-v2.js';
 import {grantV2BattleRewards,settleV2ReturnExperience} from './special-map/battle-rewards-v2.js';
 import { createCoalescedNotificationSync } from "./passive-notification-sync.js";
@@ -972,13 +973,13 @@ import {
     getGeminiFourthAccess: () => getGeminiFourthAccess(character),
     getGeminiFourthQuestion: () => getGeminiFourthQuestion(character),
     resolveGeminiFourth: choice => { const result=resolveGeminiFourth(character,choice); if(result){updateCharacterUi();saveGame();} return result; },
-    showGeminiFourthReward: () => showNamedItemGetEffect(['もう一つの紋様の片割れ'],{important:true,acquisitionMessage:true}),
+    showGeminiFourthReward: () => showNamedItemGetEffect(['もう一つの紋様の片割れ'],{ itemIds: ["gemini_emblem_other_half"],important:true,acquisitionMessage:true}),
     getGeminiProgress: () => geminiProgress(character),
     getGeminiThirdAccess: sister => getGeminiThirdAccess(character,sister),
     completeGeminiThirdVisit: sister => { if (completeGeminiThirdVisit(character,sister)) saveGame(); },
     completeGeminiSecond: () => { if (completeGeminiSecond(character)) saveGame(); },
     markGeminiStarted: () => { if (markGeminiStarted(character)) saveGame(); },
-    showGeminiReward: () => showNamedItemGetEffect(['紋様の片割れ'], {important:true, acquisitionMessage:true}),
+    showGeminiReward: () => showNamedItemGetEffect(['紋様の片割れ'], { itemIds: ["gemini_emblem_half"],important:true, acquisitionMessage:true}),
     resolveGeminiChoice: choice => {
       const changed = resolveGeminiChoice(character, choice);
       if (changed) { updateCharacterUi(); saveGame(); }
@@ -1078,7 +1079,7 @@ import {
       character = { ...delivery.character, keyItems: earplugs.keyItems };
       updateCharacterUi();
       saveGame();
-      if (earplugs.gained) setTimeout(() => showNamedItemGetEffect(["蜜蝋の耳栓"], { important: true }), 0);
+      if (earplugs.gained) setTimeout(() => showNamedItemGetEffect(["蜜蝋の耳栓"], { itemIds: ["beeswax_earplugs"], important: true }), 0);
       return {
         accepted: true,
         message: "キルケ「わざわざこんな所まで届けさせて悪かったね。あたしも歳だからね。足を悪くして遠出は厳しいのさ。\nお礼にコイツをあげるよ。今のアンタにちょうどいいんじゃないかねぇ…？ひっひっひ…。」\n「蜜蝋の耳栓」を手に入れた！"
@@ -1092,7 +1093,7 @@ import {
       updateCharacterUi();
       saveGame();
       if (granted.gained) {
-        showNamedItemGetEffect(["キルケ特製とりもち"], { important: true });
+        showNamedItemGetEffect(["キルケ特製とりもち"], { itemIds: ["kirke_special_birdlime"], important: true });
       }
       return granted;
     },
@@ -1110,7 +1111,7 @@ import {
       character = result.character;
       updateCharacterUi();
       saveGame();
-      if (result.brewed) showNamedItemGetEffect(["ヨハンナの薬"], { important: true });
+      if (result.brewed) showNamedItemGetEffect(["ヨハンナの薬"], { itemIds: ["johanna_medicine"], important: true });
       return result;
     },
     beginMaerchentiereBattle,
@@ -1130,7 +1131,7 @@ import {
       character = result.character;
       updateCharacterUi();
       saveGame();
-      if (result.gained) showNamedItemGetEffect(["夜露の花"], { important: true });
+      if (result.gained) showNamedItemGetEffect(["夜露の花"], { itemIds: ["night_dew_flower"], important: true });
       return result;
     },
     beginBossBattle,
@@ -1169,7 +1170,7 @@ import {
       character = completeQueenShadowInvestigation({ ...character, keyItems: granted.keyItems });
       updateCharacterUi();
       saveGame();
-      setTimeout(() => showNamedItemGetEffect(["女王のティアラ"]), 0);
+      setTimeout(() => showNamedItemGetEffect(["女王のティアラ"], { itemIds: ["queen_tiara"] }), 0);
       return true;
     },
     isSecondQueenShadowFinaleCompleted: () => Boolean(character?.eventFlags?.quest_024_earring_found),
@@ -1180,7 +1181,7 @@ import {
       character = completeSecondQueenShadowInvestigation({ ...character, keyItems: granted.keyItems });
       updateCharacterUi();
       saveGame();
-      setTimeout(() => showNamedItemGetEffect(["女王のイヤリング"], { important: true }), 0);
+      setTimeout(() => showNamedItemGetEffect(["女王のイヤリング"], { itemIds: ["queen_earring"], important: true }), 0);
       return true;
     },
     isThirdQueenShadowFinaleCompleted: () => Boolean(character?.eventFlags?.quest_032_necklace_found),
@@ -1191,7 +1192,7 @@ import {
       character = completeThirdQueenShadowInvestigation({ ...character, keyItems: granted.keyItems });
       updateCharacterUi();
       saveGame();
-      setTimeout(() => showNamedItemGetEffect(["女王の首飾り"], { important: true }), 0);
+      setTimeout(() => showNamedItemGetEffect(["女王の首飾り"], { itemIds: ["queen_necklace"], important: true }), 0);
       return true;
     },
     onQuestEvent: event => {
@@ -1226,7 +1227,7 @@ import {
       }
       updateCharacterUi();
       saveGame();
-      if (granted.gained) setTimeout(() => showNamedItemGetEffect([keyItem.name], { important: true }), keyItem.id === "lichtbringer" ? 1100 : 0);
+      if (granted.gained) setTimeout(() => showNamedItemGetEffect([keyItem.name], { important: true, itemIds: [keyItem.id] }), keyItem.id === "lichtbringer" ? 1100 : 0);
       return `貴重品「${keyItem.name}」を手に入れた！`;
     },
     onFixedFloorEvent: event => event?.description || "女王の影が静かに揺らめいている。",
@@ -1372,7 +1373,7 @@ import {
         updateCharacterUi();
         saveGame();
         if (granted.gained > 0) {
-          showNamedItemGetEffect(["ヨハンナの愛猫"], { important: true });
+          showNamedItemGetEffect(["ヨハンナの愛猫"], { itemIds: ["johanna_calico_cat"], important: true });
         }
         return { gained: granted.gained };
       }
@@ -1398,7 +1399,7 @@ import {
       if (flag === HELEN_HIDDEN_EVENT_SEEN_FLAG) {
         const granted = grantKeyItem(character.keyItems, "discount_pass");
         character = { ...character, keyItems: granted.keyItems };
-        if (granted.gained > 0) setTimeout(() => showNamedItemGetEffect(["ディスカウントパス"], { important: true }), 0);
+        if (granted.gained > 0) setTimeout(() => showNamedItemGetEffect(["ディスカウントパス"], { itemIds: ["discount_pass"], important: true }), 0);
       }
       updateCharacterUi();
       saveGame();
@@ -1942,10 +1943,10 @@ import {
 
   function showItemGetEffect(itemIds, { important = false } = {}) {
     const items = itemIds.map(getItem).filter(Boolean);
-    showNamedItemGetEffect(items.map(item => item.name), { important });
+    showNamedItemGetEffect(items.map(item => item.name), { important, itemIds: items.map(item => item.id) });
   }
 
-  function showNamedItemGetEffect(itemNames, { important = false, amounts = [], acquisitionMessage = false, playSound = true } = {}) {
+  function showNamedItemGetEffect(itemNames, { important = false, amounts = [], itemIds = [], acquisitionMessage = false, playSound = true } = {}) {
     if (!itemGetEffect || !itemGetItems || itemNames.length === 0) return;
     window.clearTimeout(itemGetTimer);
     const townPortraitFrame = townScreen?.querySelector(".town-portrait-frame");
@@ -1954,12 +1955,7 @@ import {
       viewport.append(itemGetEffect);
     }
     if(playSound) playSe(important ? "importantItem" : "itemGet");
-    itemGetItems.replaceChildren(...itemNames.map((itemName, index) => {
-      const row = document.createElement("span");
-      const amount = Math.max(1, Math.floor(Number(amounts[index]) || 1));
-      row.textContent = acquisitionMessage ? `「${itemName}」を手に入れた！` : `${itemName} ×${amount}`;
-      return row;
-    }));
+    renderItemGetItems(itemGetItems, itemNames, { itemIds, amounts, acquisitionMessage });
     itemGetEffect.hidden = false;
     itemGetEffect.classList.remove("is-active");
     void itemGetEffect.offsetWidth;
@@ -2225,12 +2221,12 @@ import {
       const supplyItemName = getItem(result.acceptanceSupplyItemId)?.name || result.acceptanceSupplyItemId;
       setTimeout(() => showNamedItemGetEffect(
         [supplyItemName],
-        { important: true, amounts: [result.acceptanceSupplyAmount] }
+        { important: true, itemIds: [result.acceptanceSupplyItemId], amounts: [result.acceptanceSupplyAmount] }
       ), 0);
     }
     if (result.acceptanceKeyItemId) {
       const keyItemName = getKeyItem(result.acceptanceKeyItemId)?.name || result.acceptanceKeyItemId;
-      setTimeout(() => showNamedItemGetEffect([keyItemName], { important: true }), 0);
+      setTimeout(() => showNamedItemGetEffect([keyItemName], { important: true, itemIds: [result.acceptanceKeyItemId] }), 0);
     }
     return {
       ...result,
@@ -2239,7 +2235,7 @@ import {
         paginateClientDialogue:true,clientName:'キルケ',clientPortrait:'images/npc/NPC_23.avif',
         clientDialogue:getKirkeFinalDialogue(character),
         onClientDialogueComplete: result.acceptanceSupplyItemId ? () => {
-          showNamedItemGetEffect(['アルハイルミッテル'],{important:true,amounts:[1]});
+          showNamedItemGetEffect(['アルハイルミッテル'],{important:true,itemIds:['allheilmittel'],amounts:[1]});
           msgEl.textContent='「アルハイルミッテル」を手に入れた！';
         } : null
       } : questId === "guild_029" ? {
@@ -2387,20 +2383,20 @@ import {
     }
     if (rewardEquipmentId) {
       const equipment = getEquipmentItem(rewardEquipmentId);
-      showNamedItemGetEffect([equipment?.name || rewardEquipmentId], { important: true });
+      showNamedItemGetEffect([equipment?.name || rewardEquipmentId], { important: true, itemIds: [rewardEquipmentId] });
       if (eventRewardCardId) await wait(3400);
     }
     if (rewardItemId) {
       const item = getItem(rewardItemId);
       const amount = Math.max(1, Math.floor(Number(rewardItemAmount) || 1));
-      showNamedItemGetEffect([item?.name || rewardItemId], { important: true, amounts: [amount] });
+      showNamedItemGetEffect([item?.name || rewardItemId], { important: true, itemIds: [rewardItemId], amounts: [amount] });
       if (eventRewardCardId) await wait(3400);
     }
     for (let index = 0; index < rewardItems.length; index += 1) {
       const entry = rewardItems[index];
       if (!entry?.itemId || entry.amount <= 0) continue;
       const item = getItem(entry.itemId);
-      showNamedItemGetEffect([item?.name || entry.itemId], { important: true, amounts: [entry.amount] });
+      showNamedItemGetEffect([item?.name || entry.itemId], { important: true, itemIds: [entry.itemId], amounts: [entry.amount] });
       if (eventRewardCardId || index < rewardItems.length - 1) await wait(3400);
     }
     if (eventRewardCardId) {
@@ -2766,7 +2762,7 @@ import {
       updateCharacterUi();
     },
     playReward: async () => {
-      showNamedItemGetEffect(["魔除けのお香"]);
+      showNamedItemGetEffect(["魔除けのお香"], { itemIds: ["warding_incense"] });
       await wait(3400);
     },
     finish: () => {
@@ -3386,7 +3382,10 @@ import {
     if (eventKeyItem) {
       const granted = grantKeyItem(character?.keyItems, eventKeyItem.id);
       if (!granted.gained && granted.reason !== "alreadyOwned") return { message: "鍵は見つからなかった。" };
-      if (granted.gained) character = { ...character, keyItems: granted.keyItems };
+      if (granted.gained) {
+        character = { ...character, keyItems: granted.keyItems };
+        showNamedItemGetEffect([eventKeyItem.name], { itemIds: [eventKeyItem.id] });
+      }
       updateCharacterUi();
       saveGame();
       return { message: "赤錆びた鍵を手に入れた！" };
@@ -3498,7 +3497,7 @@ import {
       const herbicideAmount = Math.max(0, (Number(granted.gained) || 0) + (Number(granted.stored) || 0));
       if (herbicideAmount > 0) setTimeout(() => showNamedItemGetEffect(
         [getItem("strong_herbicide")?.name || "強力除草剤"],
-        { important: true, amounts: [herbicideAmount] }
+        { important: true, itemIds: ["strong_herbicide"], amounts: [herbicideAmount] }
       ), 0);
       return { message: "ヘレン：依頼を受けてくれてありがと。助かったわ。これを受け取って。\n「強力除草剤」×10個を手に入れた！" };
     }
@@ -3829,7 +3828,7 @@ import {
             const equipment = getEquipmentInstanceDefinition(granted.instance);
             bossRewardMessage = `\n${equipment?.name || victory.reward.equipmentId}を手に入れた！`;
             if (battle.enemy.id === "jirene_b79f") {
-              setTimeout(() => showNamedItemGetEffect([equipment?.name || victory.reward.equipmentId], { important: true }), 0);
+              setTimeout(() => showNamedItemGetEffect([equipment?.name || victory.reward.equipmentId], { important: true, itemIds: [victory.reward.equipmentId] }), 0);
             }
           }
         } else if (victory.reward?.type === "item" && victory.reward.itemId) {
@@ -3845,7 +3844,7 @@ import {
           bossRewardMessage = granted.gained > 0
             ? `\n${keyItem?.name || victory.reward.keyItemId}を手に入れた！`
             : "";
-          if (granted.gained > 0) setTimeout(() => showNamedItemGetEffect([keyItem?.name || victory.reward.keyItemId], { important: true }), 0);
+          if (granted.gained > 0) setTimeout(() => showNamedItemGetEffect([keyItem?.name || victory.reward.keyItemId], { important: true, itemIds: [victory.reward.keyItemId] }), 0);
         }
         if (battle.enemy.questProgressId) {
           character = recordCustomQuestProgress(character, battle.enemy.questProgressId, 1);
@@ -3967,7 +3966,7 @@ import {
     setPlayerInputEnabled(false);
     try {
       stopBgm();
-      showNamedItemGetEffect(["真実の杖"], { important: true });
+      showNamedItemGetEffect(["真実の杖"], { itemIds: ["truth_staff"], important: true });
       say("「真実の杖」を手に入れた！");
       if (!await waitForEnding(3500)) return false;
       return await michaelaRestorationController.start();

@@ -11,7 +11,7 @@ test("borrowing Johanna's cat waits for the final confirmation before granting a
   assert.match(talkBranch, /危ない目には遭わせないでおくれよ？\\n＊Aボタン：次へ/);
   assert.match(talkBranch, /completionFlag: "johanna_cat_borrow_transition"/);
   assert.doesNotMatch(talkBranch, /grantKeyItem|showNamedItemGetEffect|autoCompleteAfterMs/);
-  assert.match(mainSource, /flag === "johanna_cat_borrow_transition"[\s\S]*grantKeyItem\(character\.keyItems, "johanna_calico_cat"\)[\s\S]*saveGame\(\)[\s\S]*showNamedItemGetEffect\(\["ヨハンナの愛猫"\], \{ important: true \}\)/);
+  assert.match(mainSource, /flag === "johanna_cat_borrow_transition"[\s\S]*grantKeyItem\(character\.keyItems, "johanna_calico_cat"\)[\s\S]*saveGame\(\)[\s\S]*showNamedItemGetEffect\(\["ヨハンナの愛猫"\], \{ itemIds: \["johanna_calico_cat"\], important: true \}\)/);
   assert.doesNotMatch(townSource, /autoCompleteAfterMs/);
 });
 

@@ -713,7 +713,7 @@ test("quest 018 follows quest 017, tracks B46F Glacies, and unlocks Extreme Cold
 test("multi-item quest rewards pass their quantity separately to the item popup", async () => {
   const { readFile } = await import("node:fs/promises");
   const source = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
-  assert.match(source, /showNamedItemGetEffect\(\[item\?\.name \|\| rewardItemId\],\s*\{ important: true, amounts: \[amount\] \}\)/);
+  assert.match(source, /showNamedItemGetEffect\(\[item\?\.name \|\| rewardItemId\],\s*\{ important: true, itemIds: \[rewardItemId\], amounts: \[amount\] \}\)/);
   assert.doesNotMatch(source, /item\?\.name \|\| rewardItemId\}×\$\{amount\}/);
 });
 

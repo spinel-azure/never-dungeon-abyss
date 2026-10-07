@@ -152,3 +152,13 @@ body.layout-mobile .message.town-compact-talk,body.layout-tablet .message.town-c
 @keyframes settlement-dismiss{to{filter:blur(18px);opacity:0}}
 @media(prefers-reduced-motion:reduce){.experience-settlement-overlay .experience-settlement-notice,.experience-settlement-overlay.is-dismissing{animation:none}}
 @media(max-width:700px){.experience-settlement-overlay{gap:6px;padding:8px}.experience-settlement-overlay strong{font-size:clamp(24px,7.5vw,40px)}#experienceSettlementDetail{font-size:clamp(13px,3.6vw,22px);line-height:1.3}.experience-settlement-overlay .experience-settlement-notice{font-size:clamp(11px,3vw,18px)}}
+
+/* Item-get artwork shares the compendium catalog; text-only rewards retain their presentation. */
+.item-get-items{box-sizing:border-box;max-width:92%;overflow-wrap:anywhere}
+.item-get-items.has-images{top:60%;padding:10px 16px;max-height:70%;overflow:hidden}
+.item-get-row{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
+.item-get-image{display:block;width:clamp(48px,10vw,112px);height:clamp(48px,10vw,112px);object-fit:contain;flex-shrink:0}
+.item-get-items.is-multiple .item-get-row.has-image{flex-direction:row;text-align:left}
+.item-get-items.is-multiple .item-get-image{width:clamp(32px,6vw,56px);height:clamp(32px,6vw,56px)}
+
+.item-get-items.has-images::before{inset:0}

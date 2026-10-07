@@ -4,6 +4,15 @@ export function filterItemCompendiumEntries(entries, tab = "すべて") {
   return entries.filter(entry => tab === "すべて" || entry.category === tab);
 }
 export const ITEM_COMPENDIUM_ENTRIES = Object.freeze({
+  red_rust_key_b9f: Object.freeze({
+    id: "red_rust_key_b9f",
+    name: "赤錆びた鍵",
+    category: "貴重品",
+    acquisition: "金箱（区域ボス出現階層）",
+    purchasePrice: null,
+    imageSrc: "images/item-compendium/red_rust_key.avif",
+    description: "区域ボスがいる部屋の赤い扉を開くことが出来る鍵。何故そんな重要なものがわざわざご丁寧に箱の中に入れられてダンジョン内に放置されているのかは深く考えてはいけない。…いいね？"
+  }),
   kirke_special_birdlime: Object.freeze({
     id: "kirke_special_birdlime",
     name: "キルケ特製とりもち",
