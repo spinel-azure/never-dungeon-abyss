@@ -22,18 +22,32 @@ function enterCell(h,p){
  assert.equal(s.cellPrompt,null,'not locked before arrival');
  h.bound.updateAnimation(170);
 }
-function harness({entry,map=original,playSe=()=>{},saveSurvey=()=>({ok:true})}={}){
- let bound,callback,exits=0,hides=0,openings=0,menus=0,previews=0;const events=new Map();
+function harness({entry,map=original,playSe=()=>{},saveSurvey=()=>({ok:true}),hostOptions={}}={}){
+ let bound,callback,exits=0,hides=0,openings=0,menus=0,previews=0;const events=new Map(),timers=[];
  class Node{constructor(){this.dataset={};}setAttribute(){}append(...nodes){for(const n of nodes)n.parentElement=this;}getContext(){return {};}remove(){}addEventListener(){}}
  const viewport=new Node(),status=new Node();viewport.append(status);
  const host={viewport,status,...(entry?{runEntryTransition:entry}:{}),openMenu(){menus++;},showTreasure(type){assert.equal(type,'gold');previews++;},playTreasureOpening(type,done){assert.equal(type,'gold');callback=done;openings++;},hideTreasure(){hides++;}};
- const scope={discardV2Experience,...session,...v2,mapOriginalId,getSpecialMapContext:()=>null,getSpecialMapHost:()=>host,attachSpecialMap:()=>()=>{},describeTestMap:()=>({name:'地図'}),setWallColor(){},setFloorColor(){},drawMinimap(){},getMinimapBounds(){},toggleMinimapOverlay(){},performance:{now:()=>0},useSpecialMapRenderSource:o=>{bound=o;return ()=>{};},document:{getElementById:()=>null,visibilityState:'hidden',addEventListener:(key,fn)=>events.set(key,fn),removeEventListener:key=>events.delete(key),createElement:()=>new Node()},window:{addEventListener:(key,fn)=>events.set(key,fn),removeEventListener:key=>events.delete(key)}};
+ Object.assign(host,hostOptions);
+ const scope={setTimeout:fn=>timers.push(fn),discardV2Experience,...session,...v2,mapOriginalId,getSpecialMapContext:()=>null,getSpecialMapHost:()=>host,attachSpecialMap:()=>()=>{},describeTestMap:()=>({name:'地図'}),setWallColor(){},setFloorColor(){},drawMinimap(){},getMinimapBounds(){},toggleMinimapOverlay(){},performance:{now:()=>0},useSpecialMapRenderSource:o=>{bound=o;return ()=>{};},document:{getElementById:()=>null,visibilityState:'hidden',addEventListener:(key,fn)=>events.set(key,fn),removeEventListener:key=>events.delete(key),createElement:()=>new Node()},window:{addEventListener:(key,fn)=>events.set(key,fn),removeEventListener:key=>events.delete(key)}};
  const source=readFileSync(new URL('../js/special-map/exploration-ui.js',import.meta.url),'utf8');
  vm.runInNewContext(source.replace(/^import .*;\r?\n/gm,'').replace('export function','function')+';this.start=startSpecialMapExploration;',scope);
  const message={},ui=scope.start({registered:[map],mapKey:mapOriginalId(map),message,saveSurvey,playSe,onExit(){exits++;}});
  ui.input('confirm');
- return {ui,host,message,events,get bound(){return bound;},done:()=>callback(),stats:()=>({exits,hides,openings,menus,previews})};
+ return {ui,host,message,events,get bound(){return bound;},done:()=>callback(),elapsed:async()=>{timers.splice(0).forEach(fn=>fn());await new Promise(r=>setImmediate(r));},stats:()=>({exits,hides,openings,menus,previews})};
 }
+
+test('survey center banner blocks input and waits for both duration and jingle before boss',async()=>{
+ let release,retries=0;const h=harness({hostOptions:{playSurveyCompletion:()=>new Promise(r=>release=r)}}),s=h.ui.session;
+ s.pendingBoss=true;s.surveyNotice={total:300,floor:2};s.surveyCompletionPending=true;s.retryBossEncounter=()=>retries++;
+ h.bound.updateHud();assert.equal(s.renderState.overlayEvent.overlayMessage,'地図調査完了！');assert.equal(s.renderState.overlayEvent.surveyMilestone,true);
+ const pos=[s.playerX,s.playerY,s.direction];for(const a of ['up','left','confirm','cancel','items'])h.ui.input(a);
+ assert.deepEqual([s.playerX,s.playerY,s.direction],pos);assert.equal(h.stats().menus,0);
+ await h.elapsed();assert.equal(retries,0);assert.equal(s.surveyPresentationPlaying,true);
+ release();await new Promise(r=>setImmediate(r));assert.equal(retries,1);assert.equal(s.surveyPresentationPlaying,false);assert.equal(s.renderState.overlayEvent,null);h.ui.close();
+ const partial=harness();partial.ui.session.surveyNotice={total:150,floor:1};partial.bound.updateHud();
+ assert.equal(partial.ui.session.renderState.overlayEvent.overlayMessage,'調査100マス達成！');assert.equal(partial.ui.session.renderState.overlayEvent.overlaySubtitle,'（総合150／300）');
+ await partial.elapsed();assert.equal(partial.ui.session.renderState.overlayEvent,null);partial.ui.close();
+});
 function atChest(h){
  const s=h.ui.session;v2.switchV2Floor(s,s.blueprint.links[1].lower);
  s.playerX=s.generatedMap.keyChest.x;s.playerY=s.generatedMap.keyChest.y;

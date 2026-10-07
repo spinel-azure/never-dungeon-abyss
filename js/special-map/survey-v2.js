@@ -36,7 +36,12 @@ export function attachV2Survey(s,original,{persistSurvey=()=>({ok:true}),schedul
   const next=surveyVisitV2(s.surveyedMasks,s.currentFloor,x,y);
   if(next.every((mask,i)=>mask===s.surveyedMasks[i]))return true;
   s.surveyedMasks=next;views=surveyViewsV2(next);
-  if(getV2SurveyJingle(before,s.totalSurveyed,beforeFloor,s.surveyedCount)==='battleVictory')s.playSe('battleVictory');
+  if(beforeFloor<100&&s.surveyedCount===100)s.surveyNotice={total:s.totalSurveyed,floor:s.currentFloor};
+  if(getV2SurveyJingle(before,s.totalSurveyed,beforeFloor,s.surveyedCount)==='battleVictory'){
+   const boss=s.generatedMap?.bossRoom?.bossCell;
+   if(s.deferBossSurveyJingle?.()&&boss?.x===x&&boss?.y===y)s.bossFloorJinglePending=true;
+   else s.playSe('battleVictory');
+  }
   // Completion is committed immediately before announcing permanent unlock.
   if(s.surveyComplete)return s.flushSurvey();
   if(timer===null){timer=scheduleSurvey(()=>{timer=null;s.flushSurvey();});timer?.unref?.();}

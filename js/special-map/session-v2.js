@@ -1,4 +1,5 @@
 import {attachV2Encounters} from './encounter-v2.js';
+import {attachV2BossEncounter} from './boss-encounter-v2.js';
 import {mapOriginalId} from '../../data/special-maps.js';
 import {generateRegisteredSpecialMap} from './generator.js';
 import {specialMapV2StructureFingerprint} from './generator-v2.js';
@@ -57,7 +58,9 @@ export function createSpecialMapV2Session(registered,mapKey,options={}){
  attachV2Survey(s,original,options);
  s.cellPrompt=null;
  attachV2Encounters(s,options);
- s.onCellEntered=()=>{beginV2CellPrompt(s);s.onEncounterStep();};
+ attachV2BossEncounter(s,options);
+ // A survey milestone is a cell event too: its notice must not race battle audio.
+ s.onCellEntered=()=>{beginV2CellPrompt(s);if(!s.onBossCell()&&!s.surveyNotice)s.onEncounterStep();};
  s.isDoorLocked=(x,y,d)=>s.doorByKey.has(doorKey(x,y,d))&&!s.bossDoorUnlocked;
  s.canOpenDoor=(x,y,d)=>{
   if(!s.isDoorLocked(x,y,d))return true;

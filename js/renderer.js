@@ -525,6 +525,7 @@ function drawFloorLapMessage() {
   if (subtitle) {
     ctx.fillStyle = "#bbb5aa";
     ctx.font = `400 ${Math.max(18, Math.floor(H * .045))}px PixelFont, monospace`;
+    if(state.overlayEvent?.surveyMilestone)ctx.font=`400 ${Math.floor(H*.08)}px PixelFont, monospace`;
     ctx.fillText(subtitle, W / 2, H * .59);
   }
   ctx.restore();

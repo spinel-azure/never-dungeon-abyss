@@ -72,6 +72,12 @@
   display: none;
 }
 
+/* 600px map-boss sprites share the battle UI without pushing long names above it. */
+.battle-enemy-stage.is-map-boss { inset: 8% 4% 12%; }
+.battle-enemy-stage.is-map-boss > .battle-enemy-heading { flex-shrink: 0; max-width: 100%; text-align: center; }
+.battle-enemy-stage.is-map-boss .battle-enemy-name { font-size: clamp(16px, 4.2vw, 34px); white-space: normal; overflow-wrap: anywhere; }
+.battle-enemy-stage.is-map-boss > .battle-enemy-image { min-height: 0; max-height: calc(100% - 48px); object-fit: contain; }
+
 /* Image-space back/front flames; never replace the sprite's filter or animation. */
 .has-enemy-ambient { isolation: isolate; }
 .battle-enemy-ambient {

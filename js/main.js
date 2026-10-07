@@ -1,5 +1,6 @@
 import { renderItemGetItems } from "./item-get-presentation.js";
 import {resumeV2Encounter,matchesV2Battle} from './special-map/encounter-v2.js';
+import {prepareNormalBossImage} from './special-map/normal-boss-presentation.js';
 import {grantV2BattleRewards,settleV2ReturnExperience} from './special-map/battle-rewards-v2.js';
 import { createCoalescedNotificationSync } from "./passive-notification-sync.js";
 import { grantGuildQuestExperience, formatGuildExperienceReceipt } from "../data/guild-experience.js";
@@ -3690,7 +3691,7 @@ import {
   }
 
   function finishBattleVictory(battle) {
-    if(battle?.explorationContext?.source==='special-map-v2')return finishV2Battle(battle,'victory');
+    if(['special-map-v2','special-map-v2-boss'].includes(battle?.explorationContext?.source))return finishV2Battle(battle,'victory');
     const defeatedRoamingEnemyInstanceId = battle?.roamingEnemyInstanceId || activeRoamingEnemyInstanceId;
     if (defeatedRoamingEnemyInstanceId) {
       if (!defeatRoamingEnemy(defeatedRoamingEnemyInstanceId)) return;
@@ -4033,7 +4034,7 @@ import {
   }
 
   async function finishBattleDefeat(battle) {
-    if(battle?.explorationContext?.source==='special-map-v2')return finishV2Battle(battle,'defeat');
+    if(['special-map-v2','special-map-v2-boss'].includes(battle?.explorationContext?.source))return finishV2Battle(battle,'defeat');
     activeRareRoomEncounterId = null;
     const defeatedRoamingEnemyInstanceId = battle?.roamingEnemyInstanceId || activeRoamingEnemyInstanceId;
     if (defeatedRoamingEnemyInstanceId) {
@@ -4286,7 +4287,7 @@ import {
   }
 
   function finishBattleEscape(battle) {
-    if(battle?.explorationContext?.source==='special-map-v2')return finishV2Battle(battle,'escape');
+    if(['special-map-v2','special-map-v2-boss'].includes(battle?.explorationContext?.source))return finishV2Battle(battle,'escape');
     const roamingInstanceId = battle?.roamingEnemyInstanceId || activeRoamingEnemyInstanceId;
     if (roamingInstanceId) {
       activeRoamingEnemyInstanceId = null;
@@ -5490,13 +5491,15 @@ import {
     return result;
   }
   async function beginV2Battle(session,enemyData,context){
-    session.renderState.overlayEvent={type:'randomEncounter',showOverlay:true,encounterType:'normal',encounterLabel:'ENCOUNTER!!',encounterAnimationStartedAt:performance.now(),message:''};
+    const boss=context.source==='special-map-v2-boss';
+    session.renderState.overlayEvent={type:'randomEncounter',showOverlay:true,encounterType:boss?'boss':'normal',encounterLabel:boss?'BOSS ENCOUNTER!!':'ENCOUNTER!!',encounterAnimationStartedAt:performance.now(),message:''};
     playSe('battleStart');say('＊　何者かと遭遇した！　＊');
-    await wait(1400);
+    const prepared=boss?prepareNormalBossImage(enemyData,context):Promise.resolve(enemyData.image);
+    const [image]=await Promise.all([prepared,wait(1400)]);
     if(getSpecialMapContext()?.session!==session||session.battleContext!==context)return;
     session.renderState.overlayEvent=null;
-    startBgm('normalBattle');
-    if(!startBattle(createEnemyCombatant(enemyData),{playStartSe:false,explorationContext:context})){
+    startBgm(boss?'floorBoss':'normalBattle');
+    if(!startBattle(createEnemyCombatant({...enemyData,image}),{playStartSe:false,explorationContext:context})){
       resumeV2Encounter(session,context);startBgm(getSpecialMapBgmKey(session.generatedMap.themeId));
     }
   }
@@ -5522,11 +5525,13 @@ import {
       s.defeatRetry=retry;await retry();return;
     }
     let message='戦闘を離れ、特殊地図の探索へ戻った。';
-    if(outcome==='victory'){const result=grantV2BattleRewards(character,battle,s);character=result.character;message=result.message;}
+    if(outcome==='victory'){const result=grantV2BattleRewards(character,battle,s);character=result.character;message=result.message;if(battle.explorationContext.source==='special-map-v2-boss'){s.bossDefeated=true;message='地図の主を討伐した。\n'+message;}}
     resumeV2Encounter(s,s.battleContext);s.finishingBattle=false;
     startBgm(getSpecialMapBgmKey(s.generatedMap.themeId));say(message);updateCharacterUi();updateHud();saveGame();
   }
   configureSpecialMapHost({
+    playSurveyCompletion:()=>playSeToEnd('importantItem'),
+    playSurveyJingle:key=>playSeToEnd(key),
     onEncounter:(session,enemy,context)=>void beginV2Battle(session,enemy,context),
     isBattleActive,
     handleBattleInput:action=>handleItemOverlayInput(action)||handleSkillOverlayInput(action)||handleBattleInput(action),

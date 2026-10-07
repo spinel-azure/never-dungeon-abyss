@@ -43,18 +43,34 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  const host=getSpecialMapHost();
  const original=registered.find(m=>mapOriginalId(m)===mapKey);
  const createSession=original?.rulesetVersion==='special-map-v2'?createSpecialMapV2Session:createSpecialMapSession;
- const session=createSession(registered,mapKey,{persistSurvey:saveSurvey,playSe,onEncounter:host.onEncounter,say:text=>{message.textContent=text;}});
+ const session=createSession(registered,mapKey,{persistSurvey:saveSurvey,playSe,onEncounter:host.onEncounter,onBossEncounter:host.onEncounter,say:text=>{message.textContent=text;}});
  let name='特殊地図';try{name=describeTestMap(original).name;}catch{}
  const container=document.createElement('section');container.className='special-map-runtime';container.setAttribute('aria-label','特殊迷宮探索');
  const canvas=document.createElement('canvas');canvas.className='special-map-view';canvas.width=960;canvas.height=540;canvas.setAttribute('aria-label','特殊迷宮3D表示');
  container.append(canvas);host.viewport.append(container);
  const statusParent=host.status.parentElement;container.append(host.status);
  let disposed=false,returned=false,chestPreview=false;
+ function presentSurveyNotice(notice){
+  const complete=notice.total===300;
+  const overlay={type:'floorLap',showOverlay:false,specialMapTitle:true,surveyMilestone:true,
+   overlayMessage:complete?'地図調査完了！':'調査100マス達成！',overlaySubtitle:complete?'':`（総合${notice.total}／300）`};
+  session.renderState.overlayEvent=overlay;session.surveyPresentationPlaying=true;session.autoPath=null;syncChestPreview();
+  if(complete){session.surveyCompletionPending=false;const prompt=getV2CellPromptMessage(session);message.textContent='地図の調査が完了した！ 完全地図が解放されました。'+(prompt?'\n'+prompt:'');}
+  const audio=complete?(host.playSurveyCompletion?.()??playSe('importantItem')):
+   session.bossFloorJinglePending?(host.playSurveyJingle?.('battleVictory')??playSe('battleVictory')):null;
+  session.bossFloorJinglePending=false;
+  Promise.allSettled([Promise.resolve(audio),new Promise(resolve=>setTimeout(resolve,2200))]).then(()=>{
+   if(disposed)return;
+   if(session.renderState.overlayEvent===overlay)session.renderState.overlayEvent=null;
+   session.surveyPresentationPlaying=false;
+   if(session.pendingBoss)session.retryBossEncounter();
+  });
+ }
  function syncChestPreview(){
   if(!isV2Session(session)||session.chestOpening)return;
-  const visible=session.cellPrompt==='chest';
+  const visible=session.cellPrompt==='chest'&&!session.surveyPresentationPlaying;
   if(visible===chestPreview)return;chestPreview=visible;
-  if(visible)Promise.resolve(host.showTreasure?.('gold')).then(()=>{if(disposed||(!session.chestOpening&&session.cellPrompt!=='chest'))host.hideTreasure?.();});
+  if(visible)Promise.resolve(host.showTreasure?.('gold')).then(()=>{if(disposed||session.surveyPresentationPlaying||(!session.chestOpening&&session.cellPrompt!=='chest'))host.hideTreasure?.();});
   else host.hideTreasure?.();
  }
  let stairPrompt=getV2StairPrompt(session);
@@ -72,7 +88,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
   wallOnCell:(x,y,d)=>specialWall(session,x,y,d)||specialDoorState(session,x,y,d)==='closed',closedDoorOnCell:(x,y,d)=>specialDoorState(session,x,y,d)==='closed',openDoorOnCell:(x,y,d)=>specialDoorState(session,x,y,d)==='open',getDoorState:(x,y,d)=>specialDoorState(session,x,y,d),getDoorKind:(x,y,d)=>session.cells[y]?.[x]?.doorKinds[d]??null,getDepth:()=>0,
   inBounds:(x,y)=>x>=0&&x<10&&y>=0&&y<10,getRoamingEnemyRenderState:()=>null,
   updateAnimation:now=>{
-   if(host.isPaused?.()||session.transitioning||session.renderState.overlayEvent)return;
+   if(host.isPaused?.()||session.transitioning||session.surveyPresentationPlaying||session.renderState.overlayEvent)return;
    const wasOpening=!!session.renderState.anim,wasStep=session.motion?.isStep,wasAuto=!!session.autoPath;
    updateSpecialMotion(session,now);
    if(wasOpening&&!session.renderState.anim)message.textContent='扉が　ひらいた。';
@@ -101,9 +117,14 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
      chip.hidden=Boolean(host.isBattleActive?.()||session.renderState.overlayEvent?.type==='randomEncounter');
     }
    }
+   if(isV2Session(session)&&session.surveyNotice&&!session.surveyError&&!session.surveyPresentationPlaying){
+    const notice=session.surveyNotice;session.surveyNotice=null;presentSurveyNotice(notice);
+   }
    if(session.surveyCompletionPending){
     session.surveyCompletionPending=false;
-    if(isV2Session(session))playSe('importantItem');
+    if(isV2Session(session)){
+     presentSurveyNotice({total:300});
+    }
     const prompt=isV2Session(session)?getV2CellPromptMessage(session):'';
     message.textContent='地図の調査が完了した！ 完全地図が解放されました。'+(prompt?'\n'+prompt:'');
    }
@@ -145,7 +166,9 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  function input(action){
   if(disposed)return false;
   if(host.isBattleActive?.())return host.handleBattleInput?.(action)??true;
+  if(session.surveyPresentationPlaying)return true;
   if(session.defeatRetry){if(action==='confirm')void session.defeatRetry();return true;}
+  if(session.pendingBoss){if(action==='confirm')session.retryBossEncounter();return true;}
   if(session.transitioning)return true;
   // Cell confirmation precedes menus and all ordinary exploration shortcuts.
   if(session.cellPrompt){
@@ -177,9 +200,9 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  window.addEventListener('pagehide',saveOnHide);
  document.addEventListener('visibilitychange',saveWhenHidden);
  // Native command buttons can bypass the action router (mouse/touch shortcuts).
- const guardCommands=e=>{if(!host.isBattleActive?.()&&isV2Session(session)&&(session.cellPrompt||session.transitioning)&&e.target?.closest?.('.dungeon-commands, .menu-screen')){e.preventDefault();e.stopImmediatePropagation();}};
+ const guardCommands=e=>{if(!host.isBattleActive?.()&&isV2Session(session)&&(session.cellPrompt||session.transitioning||session.surveyPresentationPlaying)&&e.target?.closest?.('.dungeon-commands, .menu-screen')){e.preventDefault();e.stopImmediatePropagation();}};
  for(const event of ['pointerdown','click','touchend'])document.addEventListener(event,guardCommands,true);
- const dismiss=()=>{if(session.renderState.overlayEvent)session.renderState.overlayEvent=null;};canvas.addEventListener('click',dismiss);
+ const dismiss=()=>{if(session.renderState.overlayEvent&&!session.surveyPresentationPlaying)session.renderState.overlayEvent=null;};canvas.addEventListener('click',dismiss);
  function close(){if(disposed)return;disposed=true;if(chestPreview)host.hideTreasure?.();discardV2Experience(session);session.disposeSurvey?.();window.removeEventListener('pagehide',saveOnHide);document.removeEventListener('visibilitychange',saveWhenHidden);for(const event of ['pointerdown','click','touchend'])document.removeEventListener(event,guardCommands,true);if(session.chestOpening){host.hideTreasure?.();cancelV2KeyChest(session);}restore();statusParent.append(host.status);container.remove();window.removeEventListener('keydown',enter,true);detach();}
  return {input,close,session,finish};
 }

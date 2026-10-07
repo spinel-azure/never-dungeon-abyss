@@ -13,6 +13,7 @@ import {mapOriginalId} from '../data/special-maps.js';
 import {grantV2BattleRewards,settleV2ReturnExperience,discardV2Experience} from '../js/special-map/battle-rewards-v2.js';
 import {getV2CombatEnemy} from '../data/special-map-enemies.js';
 import {createEnemyCombatant} from '../data/enemies.js';
+import {createNormalMapBoss} from '../data/karte-normal-bosses.js';
 
 const main=readFileSync(new URL('../js/main.js',import.meta.url),'utf8');
 const ui=readFileSync(new URL('../js/special-map/exploration-ui.js',import.meta.url),'utf8');
@@ -44,6 +45,22 @@ function harness(t,level=60,cards=[]){
   async win(exp){const battle=this.battle(exp);await scope.outcome(battle,'victory');return battle;}};
 }
 const protectedState=c=>structuredClone({carried:c.carriedExperience,pending:c.pendingExperienceSettlement,guild:c.guildExperiencePool,loot:c.lootBag});
+
+test('normal map boss production outcome: victory once, same runtime, defeat save retry and grace',async t=>{
+ const h=harness(t,60,[GODDESS_GRACE_CARD_ID]),normal=protectedState(h.c);
+ const make=()=>{const b=h.battle();h.session.battleContext.source='special-map-v2-boss';h.session.battleContext.bossId='karte_boss_001';b.explorationContext=structuredClone(h.session.battleContext);b.enemy=createEnemyCombatant(createNormalMapBoss({seed:12345,level:60,rarity:'WHITE',themeId:'crystal'}));return b;};
+ h.session.currentFloor=2;h.session.playerX=6;h.session.playerY=0;h.session.direction=1;h.session.torchFuel=63;h.session.bossKeyFound=h.session.bossDoorUnlocked=true;
+ const before=JSON.stringify({x:h.session.playerX,y:h.session.playerY,dir:h.session.direction,torch:h.session.torchFuel,survey:h.session.surveyedMasks});
+ const win=make();win.enemy.hp=0;win.enemy.alive=false;await h.scope.outcome(win,'victory');
+ const reward=h.session.battleExperience;assert.ok(reward>0);assert.equal(h.session.bossDefeated,true);assert.equal(h.session.battleContext,null);assert.ok(h.session.presence<100);
+ assert.equal(JSON.stringify({x:h.session.playerX,y:h.session.playerY,dir:h.session.direction,torch:h.session.torchFuel,survey:h.session.surveyedMasks}),before);
+ await h.scope.outcome(structuredClone(win),'victory');assert.equal(h.session.battleExperience,reward);
+ const loss=make();h.surveyOk(false);await h.scope.outcome(loss,'defeat');assert.equal(h.exits,0);
+ h.surveyOk(true);h.saveOk(false);await h.session.defeatRetry();assert.equal(h.exits,0);assert.equal(h.session.battleExperience,reward);
+ h.saveOk(true);await h.session.defeatRetry();assert.equal(h.exits,1);assert.equal(h.session.battleExperience,0);
+ assert.deepEqual(protectedState(h.c),normal);assert.equal(h.c.experience,1000+reward);
+ await h.scope.outcome(loss,'defeat');assert.equal(h.exits,1);
+});
 
 for(const id of ['silberkaefer','maikaefer_koenig'])test(`${id}: production victory/escape/defeat callback with survey/save retry`,async t=>{
  const h=harness(t),normal=protectedState(h.c),d=getV2CombatEnemy(id);

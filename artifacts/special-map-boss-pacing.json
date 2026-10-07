@@ -1,0 +1,335 @@
+{
+  "fixture": "Lv1/5 initial gear; Lv25/50 B60 pacing gear+3; Lv80/100 B90 pacing gear+3; no NPC; 20 strong healing potions; learned skills only, charge skills enabled. rows exclude ultimate skills; ultimateRows use the already learned Lv80 ultimate once when ready. Mid-level fixture is overgeared and is not an average player claim.",
+  "rows": [
+    {
+      "level": 1,
+      "job": "warrior",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 2.95,
+      "maxTurns": 4,
+      "averageDamageTaken": 4.7,
+      "averageDamageDealt": 48.25,
+      "timeouts": 0
+    },
+    {
+      "level": 1,
+      "job": "thief",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 7.45,
+      "maxTurns": 10,
+      "averageDamageTaken": 19.3,
+      "averageDamageDealt": 48.25,
+      "timeouts": 0
+    },
+    {
+      "level": 1,
+      "job": "priest",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 9.25,
+      "maxTurns": 13,
+      "averageDamageTaken": 28.3,
+      "averageDamageDealt": 48.25,
+      "timeouts": 0
+    },
+    {
+      "level": 1,
+      "job": "mage",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 2.95,
+      "maxTurns": 5,
+      "averageDamageTaken": 10.7,
+      "averageDamageDealt": 48.25,
+      "timeouts": 0
+    },
+    {
+      "level": 5,
+      "job": "warrior",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 4.05,
+      "maxTurns": 5,
+      "averageDamageTaken": 8.2,
+      "averageDamageDealt": 68.9,
+      "timeouts": 0
+    },
+    {
+      "level": 5,
+      "job": "thief",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 11.95,
+      "maxTurns": 15,
+      "averageDamageTaken": 37.2,
+      "averageDamageDealt": 68.9,
+      "timeouts": 0
+    },
+    {
+      "level": 5,
+      "job": "priest",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 13.65,
+      "maxTurns": 21,
+      "averageDamageTaken": 49.45,
+      "averageDamageDealt": 68.9,
+      "timeouts": 0
+    },
+    {
+      "level": 5,
+      "job": "mage",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 4.25,
+      "maxTurns": 8,
+      "averageDamageTaken": 18.05,
+      "averageDamageDealt": 68.9,
+      "timeouts": 0
+    },
+    {
+      "level": 25,
+      "job": "warrior",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 6.95,
+      "maxTurns": 9,
+      "averageDamageTaken": 17.8,
+      "averageDamageDealt": 472.7,
+      "timeouts": 0
+    },
+    {
+      "level": 25,
+      "job": "thief",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 3.55,
+      "maxTurns": 4,
+      "averageDamageTaken": 11.55,
+      "averageDamageDealt": 472.7,
+      "timeouts": 0
+    },
+    {
+      "level": 25,
+      "job": "priest",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 16.95,
+      "maxTurns": 20,
+      "averageDamageTaken": 77.25,
+      "averageDamageDealt": 472.7,
+      "timeouts": 0
+    },
+    {
+      "level": 25,
+      "job": "mage",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 16.4,
+      "maxTurns": 22,
+      "averageDamageTaken": 120,
+      "averageDamageDealt": 472.7,
+      "timeouts": 0
+    },
+    {
+      "level": 50,
+      "job": "warrior",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 12.1,
+      "maxTurns": 15,
+      "averageDamageTaken": 215.9,
+      "averageDamageDealt": 761.2,
+      "timeouts": 0
+    },
+    {
+      "level": 50,
+      "job": "thief",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 5.5,
+      "maxTurns": 8,
+      "averageDamageTaken": 71.65,
+      "averageDamageDealt": 808.5,
+      "timeouts": 0
+    },
+    {
+      "level": 50,
+      "job": "priest",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 31.55,
+      "maxTurns": 40,
+      "averageDamageTaken": 579.55,
+      "averageDamageDealt": 665.55,
+      "timeouts": 0
+    },
+    {
+      "level": 50,
+      "job": "mage",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 35.65,
+      "maxTurns": 50,
+      "averageDamageTaken": 757.25,
+      "averageDamageDealt": 682.7,
+      "timeouts": 0
+    },
+    {
+      "level": 80,
+      "job": "warrior",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 14.65,
+      "maxTurns": 18,
+      "averageDamageTaken": 534.9,
+      "averageDamageDealt": 1388,
+      "timeouts": 0
+    },
+    {
+      "level": 80,
+      "job": "thief",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 9.65,
+      "maxTurns": 15,
+      "averageDamageTaken": 292.55,
+      "averageDamageDealt": 1406.2,
+      "timeouts": 0
+    },
+    {
+      "level": 80,
+      "job": "priest",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 44.15,
+      "maxTurns": 57,
+      "averageDamageTaken": 1526.05,
+      "averageDamageDealt": 1226.95,
+      "timeouts": 0
+    },
+    {
+      "level": 80,
+      "job": "mage",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 33.6,
+      "maxTurns": 41,
+      "averageDamageTaken": 1273.9,
+      "averageDamageDealt": 1325,
+      "timeouts": 0
+    },
+    {
+      "level": 100,
+      "job": "warrior",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 18.5,
+      "maxTurns": 24,
+      "averageDamageTaken": 839.8,
+      "averageDamageDealt": 1808,
+      "timeouts": 0
+    },
+    {
+      "level": 100,
+      "job": "thief",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 12.7,
+      "maxTurns": 17,
+      "averageDamageTaken": 491.2,
+      "averageDamageDealt": 1830.95,
+      "timeouts": 0
+    },
+    {
+      "level": 100,
+      "job": "priest",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 57,
+      "maxTurns": 71,
+      "averageDamageTaken": 2426.3,
+      "averageDamageDealt": 1598.95,
+      "timeouts": 0
+    },
+    {
+      "level": 100,
+      "job": "mage",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 38.55,
+      "maxTurns": 50,
+      "averageDamageTaken": 1727.55,
+      "averageDamageDealt": 1734.5,
+      "timeouts": 0
+    }
+  ],
+  "ultimateRows": [
+    {
+      "level": 80,
+      "job": "warrior",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 10.6,
+      "maxTurns": 18
+    },
+    {
+      "level": 80,
+      "job": "thief",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 9.3,
+      "maxTurns": 12
+    },
+    {
+      "level": 80,
+      "job": "priest",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 10.8,
+      "maxTurns": 12
+    },
+    {
+      "level": 80,
+      "job": "mage",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 13.95,
+      "maxTurns": 19
+    },
+    {
+      "level": 100,
+      "job": "warrior",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 12,
+      "maxTurns": 23
+    },
+    {
+      "level": 100,
+      "job": "thief",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 9.9,
+      "maxTurns": 12
+    },
+    {
+      "level": 100,
+      "job": "priest",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 10.8,
+      "maxTurns": 12
+    },
+    {
+      "level": 100,
+      "job": "mage",
+      "wins": 20,
+      "trials": 20,
+      "averageTurns": 12.95,
+      "maxTurns": 17
+    }
+  ]
+}

@@ -1,0 +1,197 @@
+{
+  "phase": "V2-F3-A Candidate 1",
+  "changedFiles": [
+    "artifacts/special-map-boss-candidate-1.json",
+    "artifacts/special-map-boss-pacing.json",
+    "artifacts/special-map-f3-a-verification.json",
+    "css/battle.css",
+    "data/karte-boss-images.js",
+    "data/karte-normal-bosses.js",
+    "docs/special-maps-v2-experience.md",
+    "js/battle.js",
+    "js/main.js",
+    "js/renderer.js",
+    "js/special-map/boss-encounter-v2.js",
+    "js/special-map/encounter-v2.js",
+    "js/special-map/exploration-ui.js",
+    "js/special-map/normal-boss-presentation.js",
+    "js/special-map/session-v2.js",
+    "js/special-map/survey-v2.js",
+    "scripts/audit-special-map-bosses-v2.mjs",
+    "tests/browser/special-map-f3-boss.mjs",
+    "tests/fixtures/special-map-f3.mjs",
+    "tests/special-map-boss-v2.test.mjs",
+    "tests/special-map-v2-experience.test.mjs",
+    "tests/special-map-v2-feedback.test.mjs",
+    "tools/simulate-map-bosses.mjs"
+  ],
+  "userOwnedUnmodified": [
+    "images/karte_bosses/README.txt"
+  ],
+  "validation": {
+    "node": {
+      "passed": 1903,
+      "failed": 0
+    },
+    "python": {
+      "passed": 29,
+      "failed": 0,
+      "skipped": 2
+    },
+    "diffCheck": true,
+    "selectionCases": 1769472,
+    "selectionFailures": 0,
+    "pacingTrials": 640,
+    "pacingVictories": 640
+  },
+  "structureSha": {
+    "v2Structure": "c1dbc28cf7bfc9f78fffa32281d8d001b4b0a1a8f1aa2f146cb5d0a5559f0e95",
+    "candidate1Structure": "19f8f3aad737c8ab9e91c7e673e892ab810b7938b182cab63e77d3b9601750b1",
+    "candidate2Structure": "243b09bbd93f5ff783b1bf772c156e159132451d90a630a807a19b8d6fdd4db3",
+    "v1Topology": "b985066f1fb5720c8f27c56d925e58d700af9d637d90cd2c6e0fc33ce0920e58",
+    "legacyTopology": "3d92b41f2e2994ca08e40626cd85e498a20c8c0dfc1a135c32472641805df592",
+    "v1Doors": "6a625e0aac5a8c87367c2ab52e46570dcb195e4260ecb7cacc4f1167c81f693f",
+    "v1Ecology": "04c4c6902ef72c567a2166d4b4bd41d83b7ca89eab99a8926b0ceaa5d7c96a8a"
+  },
+  "structureFailures": {
+    "generation": 0,
+    "structure": 0,
+    "keyAccess": 0,
+    "repeat": 0,
+    "levelRarityIndependence": 0,
+    "candidate1Comparison": 0,
+    "candidate2Comparison": 0,
+    "legacy": 0
+  },
+  "ecologySha": "ab38d1e17e4f8d47c8fc89d895e20ed4eba33cc6e781db35cc0aac4a66a17dca",
+  "normalEcologyDifferences": 0,
+  "browser": [
+    {
+      "width": 1280,
+      "level": 5,
+      "boss": "karte_boss_011",
+      "turns": 4,
+      "rewards": {
+        "exp": 120,
+        "gold": 40
+      },
+      "variant": true,
+      "keyRoute": true,
+      "returnSettlement": true,
+      "normalUnchanged": true
+    },
+    {
+      "width": 1280,
+      "level": 100,
+      "boss": "karte_boss_012",
+      "turns": 17,
+      "rewards": {
+        "exp": 7500,
+        "gold": 1000
+      },
+      "variant": true,
+      "keyRoute": true,
+      "returnSettlement": true,
+      "normalUnchanged": true
+    },
+    {
+      "width": 390,
+      "level": 5,
+      "boss": "karte_boss_011",
+      "turns": 3,
+      "rewards": {
+        "exp": 120,
+        "gold": 40
+      },
+      "variant": true,
+      "keyRoute": true,
+      "returnSettlement": true,
+      "normalUnchanged": true
+    },
+    {
+      "width": 390,
+      "level": 100,
+      "boss": "karte_boss_012",
+      "turns": 21,
+      "rewards": {
+        "exp": 7500,
+        "gold": 1000
+      },
+      "variant": true,
+      "keyRoute": true,
+      "returnSettlement": true,
+      "normalUnchanged": true
+    },
+    {
+      "width": 1280,
+      "level": 5,
+      "boss": "karte_boss_011",
+      "turns": 3,
+      "rewards": {
+        "exp": 120,
+        "gold": 40
+      },
+      "variant": true,
+      "keyRoute": true,
+      "returnSettlement": true,
+      "normalUnchanged": true
+    },
+    {
+      "width": 390,
+      "level": 5,
+      "boss": "karte_boss_011",
+      "turns": 4,
+      "rewards": {
+        "exp": 120,
+        "gold": 40
+      },
+      "variant": true,
+      "keyRoute": true,
+      "returnSettlement": true,
+      "normalUnchanged": true
+    },
+    {
+      "width": 390,
+      "level": 100,
+      "boss": "karte_boss_012",
+      "turns": 13,
+      "rewards": {
+        "exp": 7500,
+        "gold": 1000
+      },
+      "variant": true,
+      "keyRoute": true,
+      "returnSettlement": true,
+      "normalUnchanged": true
+    },
+    {
+      "width": 1280,
+      "level": 5,
+      "boss": "karte_boss_011",
+      "turns": 4,
+      "rewards": {
+        "exp": 120,
+        "gold": 40
+      },
+      "variant": true,
+      "keyRoute": true,
+      "returnSettlement": true,
+      "normalUnchanged": true
+    }
+  ],
+  "scope": {
+    "specialBossBattles": false,
+    "persistentClear": false,
+    "nextMapDrop": false,
+    "bossItemDrops": false,
+    "lastUpdateChanged": false,
+    "commit": false,
+    "push": false
+  },
+  "limitations": [
+    "Combat/reward Candidate 1; solo priest without its learned ultimate still averages57 rounds at Lv100 (max71).",
+    "Pacing fixtures use preselected gear/cards/healing; they are not average-player or endurance guarantees.",
+    "Browser tests use local fixtures and suppress general encounters to exercise the key/boss path. They are not iPhone hardware/audio listening tests.",
+    "README 016 name differs from frozen special registry; special boss data was intentionally left unchanged."
+  ]
+}
