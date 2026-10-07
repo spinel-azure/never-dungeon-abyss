@@ -21,7 +21,7 @@ export function attachV2BossEncounter(s,{onBossEncounter}={}){
   if(s.currentFloor!==2||!cell||cell.x!==s.playerX||cell.y!==s.playerY)return false;
   s.autoPath=null;
   if(!NORMAL_MAP_THEMES.includes(s.generatedMap.themeId)){s.say('特殊テーマのボス戦はV2-F3-Bで実装予定です。');return true;}
-  if(s.bossDefeated){s.say('地図の主を討伐した。');return true;}
+  if(s.bossDefeated){s.say('地図の主を討伐した。ワープゲートがある。A／EnterでB1F入口へ移動。');return true;}
   if(!onBossEncounter)return true;
   if(s.battleContext||s.pendingBoss)return true;
   // Normal traversal must have opened the session's key gate first.

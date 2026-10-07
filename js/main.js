@@ -2685,7 +2685,8 @@ import {
       return;
     }
     const experience = Math.max(0, Math.floor(Number(target.experience) || 0));
-    const carried = Math.max(0, Math.floor(Number(target.carriedExperience) || 0));
+    const mapSession=getSpecialMapContext()?.session;
+    const carried = Math.max(0, Math.floor(Number(mapSession?.kind==='specialMapV2'?mapSession.battleExperience:target.carriedExperience) || 0));
     const next = getNextLevelExperience(target.level);
     const suffix = target.level >= MAX_LEVEL ? " MAX LEVEL" : " NEXT LEVEL";
     const settled = document.createTextNode(String(experience).padStart(7, "0"));
@@ -5525,7 +5526,7 @@ import {
       s.defeatRetry=retry;await retry();return;
     }
     let message='戦闘を離れ、特殊地図の探索へ戻った。';
-    if(outcome==='victory'){const result=grantV2BattleRewards(character,battle,s);character=result.character;message=result.message;if(battle.explorationContext.source==='special-map-v2-boss'){s.bossDefeated=true;message='地図の主を討伐した。\n'+message;}}
+    if(outcome==='victory'){const result=grantV2BattleRewards(character,battle,s);character=result.character;message=result.message;if(battle.explorationContext.source==='special-map-v2-boss'){s.bossDefeated=true;message='地図の主を討伐した。ワープゲートが現れた。A／EnterでB1F入口へ移動。\n'+message;}}
     resumeV2Encounter(s,s.battleContext);s.finishingBattle=false;
     startBgm(getSpecialMapBgmKey(s.generatedMap.themeId));say(message);updateCharacterUi();updateHud();saveGame();
   }
@@ -5537,6 +5538,12 @@ import {
     handleBattleInput:action=>handleItemOverlayInput(action)||handleSkillOverlayInput(action)||handleBattleInput(action),
     runEntryTransition:onDark=>runSceneTransition({enteringMapDungeon:true,playAudio:()=>playSeSequence('stairs',3),onDark}),
     showTreasure,playTreasureOpening,hideTreasure,
+    showMapKeyAcquisition:()=>{
+      showNamedItemGetEffect(['赤錆びた鍵'],{itemIds:['red_rust_key_b9f'],acquisitionMessage:true,playSound:false});
+      return new Promise(resolve=>setTimeout(resolve,3400));
+    },
+    hideMapKeyAcquisition:()=>{clearTimeout(itemGetTimer);itemGetEffect.hidden=true;itemGetEffect.classList.remove('is-active');},
+    runMapWarpTransition:onDark=>runSceneTransition({playAudio:()=>playSe('fixedWarp'),onDark}),
     runStairsTransition:onDark=>runSceneTransition({playAudio:()=>playSeSequence('stairs',3),onDark}),
     floorChanged:({session})=>{startBgm(getSpecialMapBgmKey(session.generatedMap.themeId));updateHud();},
     viewport:viewportEl,status:viewportEl.querySelector('.status'),updateHud,

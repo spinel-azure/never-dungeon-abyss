@@ -52,6 +52,21 @@ function atChest(h){
  const s=h.ui.session;v2.switchV2Floor(s,s.blueprint.links[1].lower);
  s.playerX=s.generatedMap.keyChest.x;s.playerY=s.generatedMap.keyChest.y;
 }
+test('key acquisition popup follows opening, plays one jingle and holds field input',async()=>{
+ let release,popups=0;const sounds=[];
+ const h=harness({playSe:key=>sounds.push(key),hostOptions:{showMapKeyAcquisition:()=>{popups++;return new Promise(r=>release=r);}}});
+ atChest(h);h.ui.input('confirm');assert.equal(popups,0);h.done();
+ await Promise.resolve();assert.equal(popups,1);assert.equal(h.ui.session.bossKeyFound,true);
+ assert.equal(h.ui.session.transitioning,true);const xy=[h.ui.session.playerX,h.ui.session.playerY];h.ui.input('up');assert.deepEqual([h.ui.session.playerX,h.ui.session.playerY],xy);
+ assert.equal(sounds.filter(s=>s==='importantItem').length,1);release();await h.elapsed();assert.equal(h.ui.session.transitioning,false);h.ui.close();
+});
+test('defeated boss gate uses transition to B1 entrance without ending session',async()=>{
+ const h=harness(),s=h.ui.session;v2.switchV2Floor(s,s.blueprint.links[1].lower);
+ Object.assign(s,{playerX:s.generatedMap.bossRoom.bossCell.x,playerY:s.generatedMap.bossRoom.bossCell.y,bossDefeated:true,torchFuel:37,battleExperience:987,bossKeyFound:true,bossDoorUnlocked:true});
+ v2.beginV2CellPrompt(s);assert.equal(s.cellPrompt,'gate');h.ui.input('cancel');assert.equal(s.currentFloor,2);
+ h.ui.input('confirm');await h.elapsed();assert.equal(s.currentFloor,0);assert.equal(s.playerX,s.generatedMap.stairsUp.x);assert.equal(s.playerY,s.generatedMap.stairsUp.y);
+ assert.equal(s.torchFuel,37);assert.equal(s.battleExperience,987);assert.equal(s.bossDefeated,true);assert.equal(h.stats().exits,0);h.ui.close();
+});
 test('closing V2 runtime aborts accumulated EXP and prevents a late return',()=>{
  const h=harness(),s=h.ui.session;
  s.battleExperience=123;

@@ -6,6 +6,9 @@ import {specialMapV2StructureFingerprint} from './generator-v2.js';
 import {doorKey} from './doors.js';
 import {resolveSpecialStartDirection,specialDoorState,openSpecialDoorAhead} from './session.js';
 import {attachV2Survey} from './survey-v2.js';
+import {selectNormalMapBoss} from '../../data/karte-normal-bosses.js';
+import {resolveSpecialThemeBoss} from '../../data/karte-special-bosses.js';
+import {NORMAL_MAP_THEMES} from '../../data/special-map-themes.js';
 
 const dirs=['N','E','S','W'];
 const same=(a,b)=>a&&b&&a.x===b.x&&a.y===b.y;
@@ -59,6 +62,15 @@ export function createSpecialMapV2Session(registered,mapKey,options={}){
  s.cellPrompt=null;
  attachV2Encounters(s,options);
  attachV2BossEncounter(s,options);
+ const themeId=blueprint.floors[2].themeId;
+ const visibleBoss=NORMAL_MAP_THEMES.includes(themeId)?selectNormalMapBoss({seed:s.seed,level:s.level,rarity:s.rarity,themeId}):resolveSpecialThemeBoss(themeId,s.level);
+ s.getBossRenderState=()=>{
+  const p=s.generatedMap.bossRoom?.bossCell;
+  if(s.currentFloor!==2||!p||!visibleBoss)return null;
+  const gate=s.bossDefeated;
+  return {x:p.x,y:p.y,renderX:p.x+.5,renderY:p.y+.5,showAtContact:gate,
+   definition:{imageId:gate?'warp_portal_b100f':visibleBoss.id,image:gate?'images/dungeon_effects/warp_portal.avif':visibleBoss.image,renderScale:gate ? .82 : .95,maxHeightRatio:.8}};
+ };
  // A survey milestone is a cell event too: its notice must not race battle audio.
  s.onCellEntered=()=>{beginV2CellPrompt(s);if(!s.onBossCell()&&!s.surveyNotice)s.onEncounterStep();};
  s.isDoorLocked=(x,y,d)=>s.doorByKey.has(doorKey(x,y,d))&&!s.bossDoorUnlocked;
@@ -95,11 +107,12 @@ export function getV2StairPrompt(s){
 
 export function getV2CellPromptMessage(s){
  if(!isV2Session(s)||!s.cellPrompt)return '';
+ if(s.cellPrompt==='gate')return 'ワープゲートが現れた。B1Fの入口へ移動しますか？\n＊A／Enterで移動　Bでその場に留まる';
  return s.cellPrompt==='stairs'?getV2StairPrompt(s):'金色の宝箱がある。開けますか？\n＊A／Enterで開ける　Bでその場に留まる';
 }
 export function beginV2CellPrompt(s){
  const f=s.floors[s.currentFloor],here={x:s.playerX,y:s.playerY};
- s.cellPrompt=getV2StairPrompt(s)?'stairs':same(here,f.generatedFloor.keyChest)&&!f.chestOpened?'chest':null;
+ s.cellPrompt=isV2ReturnGate(s)?'gate':getV2StairPrompt(s)?'stairs':same(here,f.generatedFloor.keyChest)&&!f.chestOpened?'chest':null;
  if(s.cellPrompt){s.autoPath=null;s.say(getV2CellPromptMessage(s));}
  return s.cellPrompt;
 }
@@ -124,6 +137,16 @@ export function cancelV2KeyChest(s){
 
 export function switchV2Floor(s,destination){
  if(!isV2Session(s)||!s.blueprint.links.some(l=>[l.upper,l.lower].some(p=>p.floor===destination?.floor&&same(p,destination))))throw Error('不正な階段移動先です。');
+ return moveV2To(s,destination);
+}
+export function isV2ReturnGate(s){
+ return isV2Session(s)&&s.bossDefeated&&s.currentFloor===2&&same({x:s.playerX,y:s.playerY},s.generatedMap.bossRoom?.bossCell);
+}
+export function warpV2ToEntrance(s){
+ if(!isV2ReturnGate(s)||s.battleContext||s.motion||s.renderState.anim)return false;
+ return moveV2To(s,{floor:1,...s.blueprint.floors[0].stairsUp});
+}
+function moveV2To(s,destination){
  if(!s.flushSurvey())return false;
  s.cellPrompt=null;
  s.autoPath=null;
@@ -141,6 +164,7 @@ export function switchV2Floor(s,destination){
 export function confirmV2Cell(s,now){
  if(s.transitioning||s.motion||s.renderState.anim)return {handled:true};
  s.cellPrompt=null;
+ if(isV2ReturnGate(s))return {handled:true,warpToEntrance:true};
  const destination=getV2StairDestination(s);
  if(destination)return {handled:true,destination};
  const f=s.floors[s.currentFloor],point={x:s.playerX,y:s.playerY};

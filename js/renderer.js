@@ -1182,20 +1182,21 @@ export function drawCellEvents(layer = "all", now = 0) {
   if (layer !== "floor") {
     const roaming = renderer.getRoamingEnemyRenderState(now);
     if (roaming?.definition) {
-      const projected = projectWorldPoint(roaming.renderX, roaming.renderY);
+      const atContact=roaming.showAtContact&&Math.hypot(roaming.renderX-state.x,roaming.renderY-state.y)<.3;
+      const projected = atContact?projectContactForeground():projectWorldPoint(roaming.renderX, roaming.renderY);
       const occupiedCells = roaming.transition
         ? [
             { x: roaming.transition.fromX, y: roaming.transition.fromY },
             { x: roaming.transition.toX, y: roaming.transition.toY }
           ]
         : [{ x: roaming.x, y: roaming.y }];
-      const footprints = projected
+      const footprints = atContact?[]:projected
         ? occupiedCells
             .filter(cell => isSpriteCellVisible(cell.x, cell.y))
             .map(cell => projectCellFootprint(cell.x, cell.y, projected.forward, true))
             .filter(Boolean)
         : [];
-      if (projected && footprints.length) {
+      if (projected && (atContact||footprints.length)) {
         loadCharacterImage(roaming.definition.imageId, roaming.definition.image);
         events.push({
           ...projected,

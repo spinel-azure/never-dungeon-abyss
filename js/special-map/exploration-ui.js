@@ -1,7 +1,7 @@
 import {discardV2Experience} from './battle-rewards-v2.js';
 import {createSpecialMapSession,actSpecialMap,updateSpecialMotion,specialWall,specialDoorState,openSpecialDoorAhead,flushSpecialSurvey,continueSpecialAutoWalker} from './session.js';
 import {useSpecialMapRenderSource,toggleMinimapOverlay,getActiveMinimapBounds,setWallColor,setFloorColor} from '../renderer.js';
-import {createSpecialMapV2Session,isV2Session,confirmV2Cell,switchV2Floor,getV2StairPrompt,getV2CellPromptMessage,cancelV2CellPrompt,completeV2KeyChest,cancelV2KeyChest} from './session-v2.js';
+import {createSpecialMapV2Session,isV2Session,confirmV2Cell,switchV2Floor,warpV2ToEntrance,getV2StairPrompt,getV2CellPromptMessage,cancelV2CellPrompt,completeV2KeyChest,cancelV2KeyChest} from './session-v2.js';
 import {drawMinimap,getMinimapBounds} from '../minimap.js';
 import {attachSpecialMap,getSpecialMapHost,getSpecialMapContext} from './context.js';
 import {describeTestMap,mapOriginalId} from '../../data/special-maps.js';
@@ -86,7 +86,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  session.renderState.overlayEvent={type:'floorLap',showOverlay:false,overlayMessage:name,specialMapTitle:true};
  const restore=useSpecialMapRenderSource({canvas,ctx:canvas.getContext('2d'),W:960,H:540,state:session.renderState,eventOverlayCtx:null,
   wallOnCell:(x,y,d)=>specialWall(session,x,y,d)||specialDoorState(session,x,y,d)==='closed',closedDoorOnCell:(x,y,d)=>specialDoorState(session,x,y,d)==='closed',openDoorOnCell:(x,y,d)=>specialDoorState(session,x,y,d)==='open',getDoorState:(x,y,d)=>specialDoorState(session,x,y,d),getDoorKind:(x,y,d)=>session.cells[y]?.[x]?.doorKinds[d]??null,getDepth:()=>0,
-  inBounds:(x,y)=>x>=0&&x<10&&y>=0&&y<10,getRoamingEnemyRenderState:()=>null,
+  inBounds:(x,y)=>x>=0&&x<10&&y>=0&&y<10,getRoamingEnemyRenderState:()=>session.getBossRenderState?.()??null,
   updateAnimation:now=>{
    if(host.isPaused?.()||session.transitioning||session.surveyPresentationPlaying||session.renderState.overlayEvent)return;
    const wasOpening=!!session.renderState.anim,wasStep=session.motion?.isStep,wasAuto=!!session.autoPath;
@@ -132,19 +132,20 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
   }
  },session.generatedMap.themeId);
  message.textContent=stairPrompt||'特殊地図を探索中。Bボタンでメニュー表示。';
- async function useStairs(destination){
+ async function useStairs(destination,warp=false){
   if(!flushSpecialSurvey(session)){message.textContent=session.surveyError;return;}
   session.transitioning=true;
   try{
    const onDark=()=>{
     if(disposed)return;
-    if(!switchV2Floor(session,destination))return;
+    if(!(warp?warpV2ToEntrance(session):switchV2Floor(session,destination)))return;
     setWallColor(session.generatedMap.themeId);setFloorColor(session.generatedMap.themeId);
     host.floorChanged?.({session});
     session.renderState.overlayEvent={type:'floorLap',showOverlay:false,overlayMessage:`B${session.currentFloor+1}F`,specialMapTitle:true};
     showStairNotice(`B${session.currentFloor+1}Fへ移動した。\n`);
    };
-   if(host.runStairsTransition)await host.runStairsTransition(onDark);else{playSe('stairs');onDark();}
+   const transition=warp?host.runMapWarpTransition:host.runStairsTransition;
+   if(transition)await transition(onDark);else{playSe(warp?'fixedWarp':'stairs');onDark();}
   }catch{if(!disposed)message.textContent='階段の移動を完了できませんでした。';}
   finally{session.transitioning=false;}
  }
@@ -156,6 +157,12 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
    await host.playTreasureOpening('gold',()=>{
     if(disposed||session.chestOpening!==opening)return;
     host.hideTreasure?.();completeV2KeyChest(session);
+    if(host.showMapKeyAcquisition){
+     session.transitioning=true;session.keyAcquisitionPlaying=true;
+     Promise.resolve().then(()=>{if(!disposed)return host.showMapKeyAcquisition();}).catch(()=>{}).finally(()=>{
+      session.keyAcquisitionPlaying=false;if(!disposed)session.transitioning=false;
+     });
+    }
    });
   }catch{
    if(disposed||session.chestOpening!==opening)return;
@@ -182,7 +189,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
   if(['up','down','left','right','confirm','cancel'].includes(action))session.autoPath=null;
   if(action==='cancel'){host.openMenu();return true;}
   if(action==='confirm'&&session.surveyError){flushSpecialSurvey(session);message.textContent=session.surveyError||'調査記録を保存しました。';return true;}
-  if(action==='confirm'&&isV2Session(session)){const result=confirmV2Cell(session,performance.now());if(result.destination)void useStairs(result.destination);else if(result.returnToEntrance)finish();else if(result.openKeyChest)void openKeyChest();}
+  if(action==='confirm'&&isV2Session(session)){const result=confirmV2Cell(session,performance.now());if(result.warpToEntrance)void useStairs(null,true);else if(result.destination)void useStairs(result.destination);else if(result.returnToEntrance)finish();else if(result.openKeyChest)void openKeyChest();}
   else if(action==='confirm'){if(openSpecialDoorAhead(session,performance.now())){playSe('door');message.textContent='ギィ……';}}
   else actSpecialMap(session,action,performance.now());
   container.dataset.moving=String(Boolean(session.motion||session.renderState.anim));return true;
@@ -203,6 +210,6 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  const guardCommands=e=>{if(!host.isBattleActive?.()&&isV2Session(session)&&(session.cellPrompt||session.transitioning||session.surveyPresentationPlaying)&&e.target?.closest?.('.dungeon-commands, .menu-screen')){e.preventDefault();e.stopImmediatePropagation();}};
  for(const event of ['pointerdown','click','touchend'])document.addEventListener(event,guardCommands,true);
  const dismiss=()=>{if(session.renderState.overlayEvent&&!session.surveyPresentationPlaying)session.renderState.overlayEvent=null;};canvas.addEventListener('click',dismiss);
- function close(){if(disposed)return;disposed=true;if(chestPreview)host.hideTreasure?.();discardV2Experience(session);session.disposeSurvey?.();window.removeEventListener('pagehide',saveOnHide);document.removeEventListener('visibilitychange',saveWhenHidden);for(const event of ['pointerdown','click','touchend'])document.removeEventListener(event,guardCommands,true);if(session.chestOpening){host.hideTreasure?.();cancelV2KeyChest(session);}restore();statusParent.append(host.status);container.remove();window.removeEventListener('keydown',enter,true);detach();}
+ function close(){if(disposed)return;disposed=true;if(session.keyAcquisitionPlaying)host.hideMapKeyAcquisition?.();if(chestPreview)host.hideTreasure?.();discardV2Experience(session);session.disposeSurvey?.();window.removeEventListener('pagehide',saveOnHide);document.removeEventListener('visibilitychange',saveWhenHidden);for(const event of ['pointerdown','click','touchend'])document.removeEventListener(event,guardCommands,true);if(session.chestOpening){host.hideTreasure?.();cancelV2KeyChest(session);}restore();statusParent.append(host.status);container.remove();window.removeEventListener('keydown',enter,true);detach();}
  return {input,close,session,finish};
 }
