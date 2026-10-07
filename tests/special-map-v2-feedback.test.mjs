@@ -52,6 +52,15 @@ function atChest(h){
  const s=h.ui.session;v2.switchV2Floor(s,s.blueprint.links[1].lower);
  s.playerX=s.generatedMap.keyChest.x;s.playerY=s.generatedMap.keyChest.y;
 }
+test('V2 Perpetual Torch follows equipped effects; unequipping restores consumption',()=>{
+ let equipped=true;const h=harness({hostOptions:{getTorchCardEffects:()=>({consumptionDisabled:equipped,effectForced:equipped})}}),s=h.ui.session;
+ h.bound.updateHud();assert.equal(s.renderState.torchEffectForced,true);
+ s.motion={isStep:true,started:0,duration:170,x:s.renderState.x,y:s.renderState.y,angle:0,toX:s.renderState.x,toY:s.renderState.y,toAngle:0};
+ session.updateSpecialMotion(s,170);assert.equal(s.torchFuel,100);
+ equipped=false;h.bound.updateHud();assert.equal(s.renderState.torchEffectForced,false);
+ s.motion={isStep:true,started:0,duration:170,x:s.renderState.x,y:s.renderState.y,angle:0,toX:s.renderState.x,toY:s.renderState.y,toAngle:0};
+ session.updateSpecialMotion(s,170);assert.equal(s.torchFuel,99);h.ui.close();
+});
 test('key acquisition popup follows opening, plays one jingle and holds field input',async()=>{
  let release,popups=0;const sounds=[];
  const h=harness({playSe:key=>sounds.push(key),hostOptions:{showMapKeyAcquisition:()=>{popups++;return new Promise(r=>release=r);}}});

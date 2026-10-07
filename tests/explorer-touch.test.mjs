@@ -34,9 +34,16 @@ function setup(t,layout='layout-mobile',initial=fixture(),extra={}){
   const all=e=>[e,...e.children.flatMap(all)];
   const find=label=>all(host).find(e=>e.tag==='button'&&!e.disabled&&e.textContent===label);
   function touch(target){let cancelled=false;for(const type of ['touchstart','touchend'])for(const fn of handlers[type]||[])fn({target,preventDefault(){cancelled=true;},stopPropagation(){}});if(!cancelled&&!target.disabled)target.onclick?.();return cancelled;}
-  return {ui,host,commands,message,find,touch,exits:()=>exits,all,state:()=>state,failSave:()=>{saveFails=true;}};
+  return {ui,host,commands,background,message,find,touch,exits:()=>exits,all,state:()=>state,failSave:()=>{saveFails=true;}};
 }
 
+test('favorite star stays in list/detail and confirmation retains detail background and content',t=>{
+ const initial=normalizeSpecialMaps({discovererName:'QA',registered:[{rulesetVersion:'special-map-v2',seed:12345,level:50,rarity:'WHITE',discovererName:'QA',favorite:true}]});
+ const v=setup(t,'layout-mobile',initial);v.ui.open('maps');assert.match(v.host.textContent,/Lv\.50★/);
+ v.ui.input('confirm');const bg=v.background.src;assert.match(v.host.textContent,/地図詳細/);
+ v.ui.input('confirm');assert.equal(v.background.src,bg);assert.match(v.host.textContent,/地図詳細/);assert.match(v.host.textContent,/Lv\.50★/);assert.match(v.host.textContent,/この地図を探索しますか/);
+ v.ui.input('cancel');assert.doesNotMatch(v.host.textContent,/この地図を探索しますか/);assert.match(v.host.textContent,/探索する/);
+});
 test('V2 uses existing detail UI and passes its original to the exploration dispatcher',t=>{
  const initial=normalizeSpecialMaps({discovererName:'スピネ',registered:[{rulesetVersion:'special-map-v2',seed:12345,level:100,rarity:'GOLD',discovererName:'†ルル'}]});
  let starts=0;const v=setup(t,'layout-mobile',initial,{startExploration({registered,mapKey}){starts++;assert.equal(registered.find(m=>m.id===mapKey).rulesetVersion,'special-map-v2');return {input(){},close(){}};}});

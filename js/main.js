@@ -5531,6 +5531,7 @@ import {
     startBgm(getSpecialMapBgmKey(s.generatedMap.themeId));say(message);updateCharacterUi();updateHud();saveGame();
   }
   configureSpecialMapHost({
+    getTorchCardEffects:()=>({consumptionDisabled:hasCardEffect(character?.cards?.deckSlots,'torch_consumption_disabled'),effectForced:hasCardEffect(character?.cards?.deckSlots,'force_torch_effect_active')}),
     playSurveyCompletion:()=>playSeToEnd('importantItem'),
     playSurveyJingle:key=>playSeToEnd(key),
     onEncounter:(session,enemy,context)=>void beginV2Battle(session,enemy,context),
@@ -5569,6 +5570,7 @@ import {
         const previous=character;
         character={...normalizeCharacter({...character,...changes,wingGiftUses:0}),
           carriedExperience:character.carriedExperience,pendingExperienceSettlement:character.pendingExperienceSettlement,lootBag:character.lootBag};
+        if(session.kind==='specialMapV2'&&reason==='return')character=beginNpcRenewal(character,`map-return-${session.encounterSessionId}`);
         if(settlement||loot){character.returnPresentation={settlement,revival:reason==='defeat'};if(loot)rememberReturnLoot(loot.bag,loot.settled);}
         if(!saveGame()){character=previous;say('帰還前の保存に失敗しました。もう一度お試しください。');return false;}
         updateCharacterUi();return true;

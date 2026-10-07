@@ -129,8 +129,8 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
   function render(){
     if(!active)return;
     actions=[];formControls=[];panel.replaceChildren();panel.hidden=view==='tent';commands.hidden=view!=='tent';
-    background.src=view==='maps'||(view==='detail'&&origin==='maps')?'images/background/circle.avif':tentImage;
-    background.alt=view==='maps'||(view==='detail'&&origin==='maps')?'地図探索':'探検家テント';
+    background.src=view==='maps'||(['detail','enter'].includes(view)&&origin==='maps')?'images/background/circle.avif':tentImage;
+    background.alt=view==='maps'||(['detail','enter'].includes(view)&&origin==='maps')?'地図探索':'探検家テント';
     if(hint)hint.textContent='＊ Bボタンで戻る';
     message.textContent=countText();
     if(view==='tent'){
@@ -138,7 +138,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       commands.setAttribute('aria-label','探検家テント');
       commands.replaceChildren(...['地図鑑定','地図登録','地図整理','戻る',canReceiveTestStarter()&&!maps().starterMapsTestGranted?'【開発用】白地図を受け取る':'',''].map((label,i)=>{const b=button(label,()=>{cursor=i;activateTent();},i===cursor);b.disabled=!label;return b;}));return;
     }
-    panel.append(make('h2',({starter:'【開発用】はじまりの白地図',maps:'MAP EXPLORATION',organize:'地図整理',detail:'地図詳細',signature:'地図署名',appraise:'地図鑑定',appraisal:'地図鑑定',duplicate:'地図鑑定',register:'地図登録',manage:'地図管理',share:'共有コード',delete:'地図削除',sameContent:'地図登録の確認',enter:'特殊地図探索'})[view]));
+    panel.append(make('h2',({starter:'【開発用】はじまりの白地図',maps:'MAP EXPLORATION',organize:'地図整理',detail:'地図詳細',signature:'地図署名',appraise:'地図鑑定',appraisal:'地図鑑定',duplicate:'地図鑑定',register:'地図登録',manage:'地図管理',share:'共有コード',delete:'地図削除',sameContent:'地図登録の確認',enter:'地図詳細'})[view]));
     if(view==='starter'){
       panel.append(make('p','開発用の配布です。はじまりの白地図3枚を受け取り、鑑定と探索を確認できます。本番の初回配布記録は変更しません。'));
       actionButtons([['テスト用3枚を受け取る（A）',receiveStarter],['あとで（B）',back]]);return;
@@ -170,8 +170,8 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       entries.slice(page*5,page*5+5).forEach((map,offset)=>{
         const i=page*5+offset,info=describeTestMap(map)||{name:map.rulesetVersion==='special-map-v1'?'特殊地図':'未対応の生成ルール',level:'?'};
         const b=button('',()=>{if(armed===i)openDetail(map);else{index=i;armed=i;render();}},i===index);
-        b.title=info.name;b.setAttribute('aria-label',isV2Map(map)?info.name:`${info.name} Lv.${info.level}`);
-        b.append(make('span',info.name,isV2Map(map)?'explorer-map-name explorer-map-name-v2':'explorer-map-name'));if(!isV2Map(map))b.append(make('span',`Lv.${info.level}`,'explorer-map-level'));list.append(b);
+        const star=map.favorite?'★':'';b.title=info.name+star;b.setAttribute('aria-label',(isV2Map(map)?info.name:`${info.name} Lv.${info.level}`)+star);
+        b.append(make('span',info.name+(isV2Map(map)?star:''),isV2Map(map)?'explorer-map-name explorer-map-name-v2':'explorer-map-name'));if(!isV2Map(map))b.append(make('span',`Lv.${info.level}${star}`,'explorer-map-level'));list.append(b);
       });
       const pager=make('div',undefined,'transfer-destination-pager');
       const prev=button('◀',()=>turnPage(-1)),next=button('▶',()=>turnPage(1));
@@ -193,16 +193,12 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       ][step]));
       const footer=make('div',undefined,'explorer-footer');footer.append(button('確認（A）',nextAppraisal,true),button('戻る（B）',back));panel.append(footer);return;
     }
-    if(view==='detail'){
+    if(view==='detail'||view==='enter'){
       const map=maps().registered.find(m=>m.id===detailId);if(!map){view=origin;render();return;}
       const info=describeTestMap(map)||{name:map.rulesetVersion==='special-map-v1'?'特殊地図':'未対応の生成ルール',level:'?'};
       const body=make('div',undefined,'explorer-detail');
-      body.append(make('h3',isV2Map(map)?info.name:`${info.name} Lv.${info.level}`),make('p',`発見者：${map.discovererName}`),make('p',isV2Map(map)?`${rarityLabel(map.rarity)}・3層　${surveyTotalV2(map.surveyedMasks)===300?'調査完了':`調査 ${surveyTotalV2(map.surveyedMasks)} / 300`}`:surveyCount(map.surveyedMask)===100?'調査完了':`調査率 ${surveyCount(map.surveyedMask)} / 100`),make('p',isV2Map(map)?'挑戦条件：未実装':'挑戦条件：未実装（Phase 2A仮地図）'));
-      panel.append(body);actionButtons(origin==='maps'?[['探索する（A）',()=>changeView('enter')],['戻る（B）',back]]:[['管理機能を確認（A）',()=>changeView('manage')],['戻る（B）',back]]);return;
-    }
-    if(view==='enter'){
-      panel.append(make('p','この地図を探索しますか？'),make('p',isV2Map(selectedMap())?'3層の調査進捗は保存されます。再入場時はB1F入口から開始し、鍵・たいまつはリセットされます。':'調査した地図は保存されます。再入場時は入口から探索を始めます。'));
-      actionButtons([['はい（A／ENTER）',enterMap],['いいえ（B）',back]]);return;
+      body.append(make('h3',(isV2Map(map)?info.name:`${info.name} Lv.${info.level}`)+(map.favorite?'★':'')),make('p',`発見者：${map.discovererName}`),make('p',isV2Map(map)?`${rarityLabel(map.rarity)}・3層　${surveyTotalV2(map.surveyedMasks)===300?'調査完了':`調査 ${surveyTotalV2(map.surveyedMasks)} / 300`}`:surveyCount(map.surveyedMask)===100?'調査完了':`調査率 ${surveyCount(map.surveyedMask)} / 100`),make('p',isV2Map(map)?'挑戦条件：未実装':'挑戦条件：未実装（Phase 2A仮地図）'));
+      panel.append(body);if(view==='enter'){panel.append(make('p','この地図を探索しますか？'));actionButtons([['はい（A／ENTER）',enterMap],['いいえ（B）',back]]);return;}actionButtons(origin==='maps'?[['探索する（A）',()=>changeView('enter')],['戻る（B）',back]]:[['管理機能を確認（A）',()=>changeView('manage')],['戻る（B）',back]]);return;
     }
     if(view==='sameContent'){
       const existing=maps().registered.find(m=>mapContentId(m)===mapContentId(pendingMap));
@@ -211,8 +207,8 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     }
     const map=selectedMap();if(!map){view='organize';render();return;}
     const info=describeTestMap(map)||{name:map.rulesetVersion==='special-map-v1'?'特殊地図':'未対応の生成ルール',level:'?'};
-    if(isV2Map(map))panel.append(make('p',info.name),make('p',`発見者：${map.discovererName}`));
-    else panel.append(make('p',`${info.name} Lv.${info.level}　発見者：${map.discovererName}`));
+    if(isV2Map(map))panel.append(make('p',info.name+(map.favorite?'★':'')),make('p',`発見者：${map.discovererName}`));
+    else panel.append(make('p',`${info.name} Lv.${info.level}${map.favorite?'★':''}　発見者：${map.discovererName}`));
     if(view==='manage'){
       actionButtons([['共有コードを表示',()=>changeView('share')],['共有コードをコピー',()=>{changeView('share');try{copyCode(encodeMapCode(map));}catch(e){error(e.message);}}],
         [`お気に入り ${map.favorite?'ON':'OFF'}`,favorite],['地図を削除',()=>{if(map.favorite){error('お気に入り登録を解除してから削除してください。');return;}changeView('delete');}],['戻る（B）',back]]);return;

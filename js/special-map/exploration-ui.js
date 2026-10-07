@@ -44,6 +44,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  const original=registered.find(m=>mapOriginalId(m)===mapKey);
  const createSession=original?.rulesetVersion==='special-map-v2'?createSpecialMapV2Session:createSpecialMapSession;
  const session=createSession(registered,mapKey,{persistSurvey:saveSurvey,playSe,onEncounter:host.onEncounter,onBossEncounter:host.onEncounter,say:text=>{message.textContent=text;}});
+ if(isV2Session(session))session.torchConsumptionDisabled=()=>Boolean(host.getTorchCardEffects?.().consumptionDisabled);
  let name='特殊地図';try{name=describeTestMap(original).name;}catch{}
  const container=document.createElement('section');container.className='special-map-runtime';container.setAttribute('aria-label','特殊迷宮探索');
  const canvas=document.createElement('canvas');canvas.className='special-map-view';canvas.width=960;canvas.height=540;canvas.setAttribute('aria-label','特殊迷宮3D表示');
@@ -100,6 +101,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
   },drawMinimap,getMinimapBounds,
   getMinimapOptions:()=>({W:960,MAP_W:10,MAP_H:10,cells:session.cells,explored:session.surveyView,state:session.renderState,mapTitle:isV2Session(session)?name:null}),
   updateHud:()=>{
+   if(isV2Session(session)){const effects=host.getTorchCardEffects?.();session.renderState.torchEffectForced=Boolean(effects?.effectForced);session.renderState.minimapEffectForced=Boolean(effects?.effectForced);}
    container.dataset.moving=String(Boolean(session.motion||session.renderState.anim));
    container.dataset.banner=String(Boolean(session.renderState.overlayEvent));
    host.updateHud?.();

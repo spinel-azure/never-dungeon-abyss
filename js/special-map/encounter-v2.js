@@ -22,7 +22,7 @@ export function attachV2Encounters(s,{onEncounter,random=Math.random,onBlocked=m
  s.ecology=generateV2EcologyCandidate2({ruleset:s.ruleset,seed:s.seed,level:s.level,rarity:s.rarity,themeId:s.generatedMap.themeId});
  s.onEncounterStep=()=>{
   if(!onEncounter||s.transitioning||s.cellPrompt||s.battleContext||!isV2EncounterCell(s))return false;
-  const dark=s.torchFuel<=0;
+  const dark=s.torchFuel<=0&&!s.renderState.torchEffectForced;
   s.presence=Math.min(100,s.presence+(dark?5:4)+Math.floor(random()*(dark?6:5)));
   if(s.presence<100)return false;
   const speciesId=rollV2Species(s.ecology.floors[s.currentFloor].species,random);

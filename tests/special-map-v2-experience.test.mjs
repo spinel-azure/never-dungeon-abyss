@@ -1,3 +1,4 @@
+import {beginNpcRenewal} from '../data/npc-party.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -26,7 +27,7 @@ function harness(t,level=60,cards=[]){
  character.pendingExperienceSettlement=createDepthReturnSettlement(character,10);
  character.cards.deckSlots=cards;character.wingGiftUses=1;
  let saves=0,exits=0,saveOk=true,surveyOk=true;
- const scope={character,session,disposed:false,returned:false,normalizeCharacter,grantV2BattleRewards,settleV2ReturnExperience,resumeV2Encounter,matchesV2Battle,resolveDungeonDefeat,
+ const scope={beginNpcRenewal,character,session,disposed:false,returned:false,normalizeCharacter,grantV2BattleRewards,settleV2ReturnExperience,resumeV2Encounter,matchesV2Battle,resolveDungeonDefeat,
   rememberReturnLoot(){},saveGame:()=>{saves++;return saveOk;},say(){},updateCharacterUi(){},updateHud(){},startBgm(){},stopBgm(){},
   getSpecialMapBgmKey:()=>'',flushSpecialSurvey:()=>surveyOk,close:()=>discardV2Experience(session),onExit:()=>exits++,message:{},
   runDefeatPresentation:async()=>{},openTown(){},finishReturnPresentation:async()=>{},worldLocation:'town',templeRevivalJinglePending:false};
@@ -45,6 +46,14 @@ function harness(t,level=60,cards=[]){
   async win(exp){const battle=this.battle(exp);await scope.outcome(battle,'victory');return battle;}};
 }
 const protectedState=c=>structuredClone({carried:c.carriedExperience,pending:c.pendingExperienceSettlement,guild:c.guildExperiencePool,loot:c.lootBag});
+test('V2 normal return schedules NPC renewal atomically with rewards, retry does not duplicate',t=>{
+ const h=harness(t);h.c.npcSystem={registeredIds:['alec'],activeIds:['alec'],records:{alec:{}},renewal:null,expeditionMaxDepth:0};
+ // Use an actual registered companion ID from the production registry.
+ const before=structuredClone(h.c);h.session.battleExperience=100;h.saveOk(false);
+ assert.equal(h.scope.finish(),false);assert.deepEqual(h.c,before);assert.equal(h.session.battleExperience,100);
+ h.saveOk(true);assert.equal(h.scope.finish(),true);assert.equal(h.c.npcSystem.renewal?.pending,true);
+ const token=h.c.npcSystem.renewal.token;assert.equal(h.scope.finish(),false);assert.equal(h.c.npcSystem.renewal.token,token);
+});
 
 test('normal map boss production outcome: victory once, same runtime, defeat save retry and grace',async t=>{
  const h=harness(t,60,[GODDESS_GRACE_CARD_ID]),normal=protectedState(h.c);

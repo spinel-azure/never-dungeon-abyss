@@ -8,3 +8,13 @@
 - The gate is session-only, like boss defeat. Re-entry starts a fresh boss/chest/key runtime. No clear flag, reward/drop rules or generation inputs change.
 
 Regression tests: `tests/special-map-return-gate.test.mjs`, `tests/special-map-v2-feedback.test.mjs`. Browser route: `tests/browser/special-map-boss-gate-polish.mjs` (test fixtures and battle control only; screenshots/results in OS temp). The browser route covers the key/door path, boss victory, status EXP, gate transfer and return settlement at desktop and 390px widths.
+
+## Follow-up playtest polish
+
+- Favorite maps have a trailing star in the map list/detail/management UI. The canonical name and share code remain unchanged.
+- Entry confirmation retains the map detail and its background instead of switching to the explorer tent.
+- Normal V2 return schedules the existing NPC renewal in the same save transaction as return rewards. The existing presentation queue remains LOT BAG → EXP SETTLEMENT → NPC renewal. Save failure rolls back renewal as well as rewards.
+- V2 successful steps now honor the equipped Perpetual Torch card; forced lighting is reflected in rendering/minimap and the encounter darkness check. Unequipping restores consumption. V1 behavior is unchanged.
+- Exorcism talisman/presence-clearing effects remain intentionally disabled under the earlier F1 restriction; this change does not enable them.
+- Exploration boss and gate sprites are enlarged (boss scale 1.9, gate 1.8) with a 90%-height cap. Battle image size is unchanged.
+- `tests/browser/special-map-qa-polish.mjs` exercises favorite/entry confirmation, an equipped Perpetual Torch, NPC renewal after reward presentation, and desktop/390px sprite rendering.

@@ -45,7 +45,7 @@ export function updateSpecialMotion(session,now){
  session.renderState.x=m.x+(m.toX-m.x)*ease;session.renderState.y=m.y+(m.toY-m.y)*ease;session.renderState.angle=m.angle+(m.toAngle-m.angle)*ease;
  if(t===1){
   if(m.crossedDoor)session.openedDoors.delete(m.crossedDoor);
-  if(m.isStep)session.renderState.torchFuel=Math.max(0,session.renderState.torchFuel-1);
+  if(m.isStep&&!(session.kind==='specialMapV2'&&session.torchConsumptionDisabled?.()))session.renderState.torchFuel=Math.max(0,session.renderState.torchFuel-1);
   session.motion=null;
   // V2 visits/events commit on arrival, before an auto-walker can start its next step.
   // Keep the established V1 visit timing unchanged.
