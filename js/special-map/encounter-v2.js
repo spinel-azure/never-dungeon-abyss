@@ -30,7 +30,7 @@ export function attachV2Encounters(s,{onEncounter,random=Math.random,onBlocked=m
   // Preserve unknown-ID protection; never substitute or reroll the ecology pick.
   if(!enemy||enemy.isBoss){s.presence=0;s.autoPath=null;const message=`${speciesId}：戦闘定義未対応のため遭遇を保留しました。`;onBlocked(message);s.say(message);return false;}
   s.autoPath=null;
-  s.battleContext={source:'special-map-v2',sessionId:s.encounterSessionId,battleId:++s.encounterSequence,mapKey:s.mapKey,contentId:mapContentId({rulesetVersion:s.ruleset,seed:s.seed,level:s.level,rarity:s.rarity}),mapSeed:s.seed,mapLevel:s.level,rarity:s.rarity,themeId:s.generatedMap.themeId,floorIndex:s.currentFloor,speciesId};
+  s.battleContext={source:'special-map-v2',sessionId:s.encounterSessionId,battleId:++s.encounterSequence,mapKey:s.mapKey,contentId:mapContentId({rulesetVersion:s.ruleset,seed:s.seed,level:s.level,rarity:s.rarity,themeOverride:s.themeOverride}),mapSeed:s.seed,mapLevel:s.level,rarity:s.rarity,themeId:s.generatedMap.themeId,floorIndex:s.currentFloor,speciesId};
   s.transitioning=true;
   onEncounter(s,enemy,s.battleContext);
   return true;

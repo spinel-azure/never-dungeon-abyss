@@ -16,7 +16,7 @@ export function attachV2BossEncounter(s,{onBossEncounter}={}){
   const gold=s.generatedMap.themeId==='gold';
   const enemy=(gold?createGoldMapBoss:createNormalMapBoss)({seed:s.seed,level:s.level,rarity:s.rarity,themeId:s.generatedMap.themeId});
   const context={source:gold?V2_SPECIAL_BOSS_SOURCE:V2_BOSS_SOURCE,sessionId:s.encounterSessionId,battleId:++s.encounterSequence,mapKey:s.mapKey,
-   contentId:mapContentId({rulesetVersion:s.ruleset,seed:s.seed,level:s.level,rarity:s.rarity}),
+   contentId:mapContentId({rulesetVersion:s.ruleset,seed:s.seed,level:s.level,rarity:s.rarity,themeOverride:s.themeOverride}),
    mapSeed:s.seed,mapLevel:s.level,rarity:s.rarity,themeId:s.generatedMap.themeId,floorIndex:2,bossId:enemy.id};
   s.pendingBoss=false;s.battleContext=context;
   onBossEncounter(s,enemy,context);return true;

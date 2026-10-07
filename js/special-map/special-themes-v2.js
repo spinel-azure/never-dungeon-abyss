@@ -1,13 +1,10 @@
 import {generateSpecialMapV2,specialMapV2StructureFingerprint} from './generator-v2.js';
 import {validateSpecialTheme} from '../../data/special-map-themes.js';
 import {resolveSpecialThemeBoss} from '../../data/karte-special-bosses.js';
-import {describeV2MapName} from '../../data/special-map-names-v2.js';
+import {describeV2MapName,SPECIAL_THEME_LOCATIONS} from '../../data/special-map-names-v2.js';
+export {SPECIAL_THEME_LOCATIONS};
 import {streamV1,chooseIndexV1} from './random-v1.js';
-export const SPECIAL_THEME_LOCATIONS=Object.freeze(Object.fromEntries(Object.entries({
- gold:['黄金窟','黄金宮','金殿','金色廟'],rice:['稲穂宮','黄金田','豊穣殿','光穂廟'],
- dusk:['宵闇宮','夜露殿','黄昏廟','月影宮'],tender:['若葉宮','新緑殿','翠芽廟','萌芽宮'],
-}).map(([k,v])=>[k,Object.freeze(v)])));
-// Explicit blueprint only: not a registered original or a share-code extension.
+// Explicit theme blueprint: used by development previews and Format 3 originals.
 // Candidate 3 remains the normal generator. Geometry is copied, never mutated.
 export function generateExplicitSpecialMapV2(input){
  validateSpecialTheme(input?.themeId,input?.level);
@@ -18,7 +15,7 @@ export function generateExplicitSpecialMapV2(input){
 }
 export function describeSpecialThemeMapName(input){
  validateSpecialTheme(input?.themeId,input?.level);
- const base=describeV2MapName({...input,rulesetVersion:input.ruleset});
+ const base=describeV2MapName({...input,themeOverride:undefined,rulesetVersion:input.ruleset});
  const choices=SPECIAL_THEME_LOCATIONS[input.themeId];
  const location=choices[chooseIndexV1(streamV1(input.ruleset,input.seed,`map-name-special-location:${input.themeId}`),choices.length)];
  return {...base,themeId:input.themeId,location,name:`${base.prefix}${location}の地図 Lv.${input.level}`};

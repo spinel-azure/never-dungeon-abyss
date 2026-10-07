@@ -25,6 +25,7 @@ export function createSpecialMapV2Session(registered,mapKey,options={}){
  if(options.developmentTheme&&!isExplorerTestEnabled())throw Error('探検家テストをONにしてください。');
  const blueprint=options.developmentTheme?generateExplicitSpecialMapV2({...original,ruleset:original.rulesetVersion,themeId:options.developmentTheme}):generateRegisteredSpecialMap(original);
  const s={kind:'specialMapV2',mapKey,ruleset:original.rulesetVersion,seed:original.seed,level:original.level,rarity:original.rarity,
+  themeOverride:original.themeOverride,
   blueprint,fingerprint:specialMapV2StructureFingerprint(blueprint),currentFloor:0,torchFuel:100,
   battleExperience:0,experienceClosed:false,rewardedBattles:new Set(),lootBag:null,
   bossKeyFound:false,bossDoorUnlocked:false,transitioning:false,playSe,say};

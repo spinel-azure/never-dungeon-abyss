@@ -1,0 +1,3011 @@
+{
+  "bossCandidate": "v2-gold-boss-combat-candidate-1",
+  "playerLevel": 200,
+  "trialsPerCase": 50,
+  "totalBattles": 3600,
+  "assumptions": "Current unchanged boss. B90 pacing equipment +3, 40 healing potions, full HP/SP at each battle. NPC comparison uses Alec/Rebecca/Erika growth stage 9, initial charge 0. Fixed seeds 1..50. Learned charge and ultimate skills enabled. Leo uses ordinary attacks between charges. Not an exhaustive deck/gear/tactics optimization.",
+  "fixtures": [
+    {
+      "job": "warrior",
+      "withNpcs": false,
+      "variant": "standard",
+      "playerLevel": 197,
+      "maxHp": 999,
+      "maxSp": 650,
+      "cost": 16,
+      "costLimit": 48,
+      "deck": [
+        {
+          "id": "sr_ability_boost",
+          "name": "能力向上"
+        },
+        {
+          "id": "sr_ability_boost",
+          "name": "能力向上"
+        },
+        {
+          "id": "sr_ability_boost",
+          "name": "能力向上"
+        },
+        {
+          "id": "common_follow_up",
+          "name": "追撃"
+        },
+        {
+          "id": "common_guard_stone",
+          "name": "護りの魔石"
+        },
+        {
+          "id": "rare_mana_recovery",
+          "name": "魔力回収"
+        }
+      ],
+      "equipment": {
+        "weaponId": "crystal_warhammer",
+        "rightArmId": "crystal_warhammer",
+        "leftArmId": null,
+        "headId": "amethyst_helmet",
+        "bodyId": "amethyst_plate",
+        "footId": "amethyst_greaves",
+        "accessoryId": "masters_necklace",
+        "rightArmEnhancement": 3
+      },
+      "npcSystem": {
+        "registeredIds": [],
+        "activeIds": [],
+        "records": {},
+        "renewal": null,
+        "expeditionMaxDepth": 0
+      }
+    },
+    {
+      "job": "warrior",
+      "withNpcs": false,
+      "variant": "z6",
+      "playerLevel": 197,
+      "maxHp": 1499,
+      "maxSp": 650,
+      "cost": 48,
+      "costLimit": 48,
+      "deck": [
+        {
+          "id": "zodiac_sagittarius",
+          "name": "サジタリウス"
+        },
+        {
+          "id": "zodiac_leo",
+          "name": "リーオー"
+        },
+        {
+          "id": "zodiac_libra",
+          "name": "リーブラ"
+        },
+        {
+          "id": "zodiac_capricorn",
+          "name": "カプリコーン"
+        },
+        {
+          "id": "zodiac_scorpio",
+          "name": "スコルピオ"
+        },
+        {
+          "id": "zodiac_taurus",
+          "name": "トーラス"
+        }
+      ],
+      "equipment": {
+        "weaponId": "crystal_warhammer",
+        "rightArmId": "crystal_warhammer",
+        "leftArmId": null,
+        "headId": "amethyst_helmet",
+        "bodyId": "amethyst_plate",
+        "footId": "amethyst_greaves",
+        "accessoryId": "masters_necklace",
+        "rightArmEnhancement": 3
+      },
+      "npcSystem": {
+        "registeredIds": [],
+        "activeIds": [],
+        "records": {},
+        "renewal": null,
+        "expeditionMaxDepth": 0
+      }
+    },
+    {
+      "job": "warrior",
+      "withNpcs": false,
+      "variant": "z6-no-scorpio",
+      "playerLevel": 197,
+      "maxHp": 1499,
+      "maxSp": 650,
+      "cost": 48,
+      "costLimit": 48,
+      "deck": [
+        {
+          "id": "zodiac_sagittarius",
+          "name": "サジタリウス"
+        },
+        {
+          "id": "zodiac_leo",
+          "name": "リーオー"
+        },
+        {
+          "id": "zodiac_libra",
+          "name": "リーブラ"
+        },
+        {
+          "id": "zodiac_capricorn",
+          "name": "カプリコーン"
+        },
+        {
+          "id": "zodiac_pisces",
+          "name": "パイシーズ"
+        },
+        {
+          "id": "zodiac_taurus",
+          "name": "トーラス"
+        }
+      ],
+      "equipment": {
+        "weaponId": "crystal_warhammer",
+        "rightArmId": "crystal_warhammer",
+        "leftArmId": null,
+        "headId": "amethyst_helmet",
+        "bodyId": "amethyst_plate",
+        "footId": "amethyst_greaves",
+        "accessoryId": "masters_necklace",
+        "rightArmEnhancement": 3
+      },
+      "npcSystem": {
+        "registeredIds": [],
+        "activeIds": [],
+        "records": {},
+        "renewal": null,
+        "expeditionMaxDepth": 0
+      }
+    },
+    {
+      "job": "warrior",
+      "withNpcs": true,
+      "variant": "standard",
+      "playerLevel": 197,
+      "maxHp": 999,
+      "maxSp": 650,
+      "cost": 16,
+      "costLimit": 48,
+      "deck": [
+        {
+          "id": "sr_ability_boost",
+          "name": "能力向上"
+        },
+        {
+          "id": "sr_ability_boost",
+          "name": "能力向上"
+        },
+        {
+          "id": "sr_ability_boost",
+          "name": "能力向上"
+        },
+        {
+          "id": "common_follow_up",
+          "name": "追撃"
+        },
+        {
+          "id": "common_guard_stone",
+          "name": "護りの魔石"
+        },
+        {
+          "id": "rare_mana_recovery",
+          "name": "魔力回収"
+        }
+      ],
+      "equipment": {
+        "weaponId": "crystal_warhammer",
+        "rightArmId": "crystal_warhammer",
+        "leftArmId": null,
+        "headId": "amethyst_helmet",
+        "bodyId": "amethyst_plate",
+        "footId": "amethyst_greaves",
+        "accessoryId": "masters_necklace",
+        "rightArmEnhancement": 3
+      },
+      "npcSystem": {
+        "registeredIds": [
+          "alec",
+          "rebecca",
+          "erika"
+        ],
+        "activeIds": [
+          "alec",
+          "rebecca",
+          "erika"
+        ],
+        "records": {
+          "alec": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          },
+          "rebecca": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          },
+          "erika": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          }
+        },
+        "renewal": null,
+        "expeditionMaxDepth": 0
+      }
+    },
+    {
+      "job": "warrior",
+      "withNpcs": true,
+      "variant": "z6",
+      "playerLevel": 197,
+      "maxHp": 1499,
+      "maxSp": 650,
+      "cost": 48,
+      "costLimit": 48,
+      "deck": [
+        {
+          "id": "zodiac_sagittarius",
+          "name": "サジタリウス"
+        },
+        {
+          "id": "zodiac_leo",
+          "name": "リーオー"
+        },
+        {
+          "id": "zodiac_libra",
+          "name": "リーブラ"
+        },
+        {
+          "id": "zodiac_capricorn",
+          "name": "カプリコーン"
+        },
+        {
+          "id": "zodiac_scorpio",
+          "name": "スコルピオ"
+        },
+        {
+          "id": "zodiac_taurus",
+          "name": "トーラス"
+        }
+      ],
+      "equipment": {
+        "weaponId": "crystal_warhammer",
+        "rightArmId": "crystal_warhammer",
+        "leftArmId": null,
+        "headId": "amethyst_helmet",
+        "bodyId": "amethyst_plate",
+        "footId": "amethyst_greaves",
+        "accessoryId": "masters_necklace",
+        "rightArmEnhancement": 3
+      },
+      "npcSystem": {
+        "registeredIds": [
+          "alec",
+          "rebecca",
+          "erika"
+        ],
+        "activeIds": [
+          "alec",
+          "rebecca",
+          "erika"
+        ],
+        "records": {
+          "alec": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          },
+          "rebecca": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          },
+          "erika": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          }
+        },
+        "renewal": null,
+        "expeditionMaxDepth": 0
+      }
+    },
+    {
+      "job": "warrior",
+      "withNpcs": true,
+      "variant": "z6-no-scorpio",
+      "playerLevel": 197,
+      "maxHp": 1499,
+      "maxSp": 650,
+      "cost": 48,
+      "costLimit": 48,
+      "deck": [
+        {
+          "id": "zodiac_sagittarius",
+          "name": "サジタリウス"
+        },
+        {
+          "id": "zodiac_leo",
+          "name": "リーオー"
+        },
+        {
+          "id": "zodiac_libra",
+          "name": "リーブラ"
+        },
+        {
+          "id": "zodiac_capricorn",
+          "name": "カプリコーン"
+        },
+        {
+          "id": "zodiac_pisces",
+          "name": "パイシーズ"
+        },
+        {
+          "id": "zodiac_taurus",
+          "name": "トーラス"
+        }
+      ],
+      "equipment": {
+        "weaponId": "crystal_warhammer",
+        "rightArmId": "crystal_warhammer",
+        "leftArmId": null,
+        "headId": "amethyst_helmet",
+        "bodyId": "amethyst_plate",
+        "footId": "amethyst_greaves",
+        "accessoryId": "masters_necklace",
+        "rightArmEnhancement": 3
+      },
+      "npcSystem": {
+        "registeredIds": [
+          "alec",
+          "rebecca",
+          "erika"
+        ],
+        "activeIds": [
+          "alec",
+          "rebecca",
+          "erika"
+        ],
+        "records": {
+          "alec": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          },
+          "rebecca": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          },
+          "erika": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          }
+        },
+        "renewal": null,
+        "expeditionMaxDepth": 0
+      }
+    },
+    {
+      "job": "thief",
+      "withNpcs": false,
+      "variant": "standard",
+      "playerLevel": 197,
+      "maxHp": 850,
+      "maxSp": 750,
+      "cost": 16,
+      "costLimit": 48,
+      "deck": [
+        {
+          "id": "sr_ability_boost",
+          "name": "能力向上"
+        },
+        {
+          "id": "sr_ability_boost",
+          "name": "能力向上"
+        },
+        {
+          "id": "sr_ability_boost",
+          "name": "能力向上"
+        },
+        {
+          "id": "common_follow_up",
+          "name": "追撃"
+        },
+        {
+          "id": "common_guard_stone",
+          "name": "護りの魔石"
+        },
+        {
+          "id": "rare_mana_recovery",
+          "name": "魔力回収"
+        }
+      ],
+      "equipment": {
+        "weaponId": "resonant_katar",
+        "rightArmId": "resonant_katar",
+        "leftArmId": "phantom_crystal_buckler",
+        "headId": "phantom_crystal_hood",
+        "bodyId": "phantom_crystal_armor",
+        "footId": "phantom_crystal_boots",
+        "accessoryId": "masters_necklace",
+        "rightArmEnhancement": 3
+      },
+      "npcSystem": {
+        "registeredIds": [],
+        "activeIds": [],
+        "records": {},
+        "renewal": null,
+        "expeditionMaxDepth": 0
+      }
+    },
+    {
+      "job": "thief",
+      "withNpcs": false,
+      "variant": "z6",
+      "playerLevel": 197,
+      "maxHp": 850,
+      "maxSp": 750,
+      "cost": 48,
+      "costLimit": 48,
+      "deck": [
+        {
+          "id": "zodiac_sagittarius",
+          "name": "サジタリウス"
+        },
+        {
+          "id": "zodiac_gemini",
+          "name": "ジェミニ"
+        },
+        {
+          "id": "zodiac_libra",
+          "name": "リーブラ"
+        },
+        {
+          "id": "zodiac_capricorn",
+          "name": "カプリコーン"
+        },
+        {
+          "id": "zodiac_scorpio",
+          "name": "スコルピオ"
+        },
+        {
+          "id": "zodiac_pisces",
+          "name": "パイシーズ"
+        }
+      ],
+      "equipment": {
+        "weaponId": "resonant_katar",
+        "rightArmId": "resonant_katar",
+        "leftArmId": "phantom_crystal_buckler",
+        "headId": "phantom_crystal_hood",
+        "bodyId": "phantom_crystal_armor",
+        "footId": "phantom_crystal_boots",
+        "accessoryId": "masters_necklace",
+        "rightArmEnhancement": 3
+      },
+      "npcSystem": {
+        "registeredIds": [],
+        "activeIds": [],
+        "records": {},
+        "renewal": null,
+        "expeditionMaxDepth": 0
+      }
+    },
+    {
+      "job": "thief",
+      "withNpcs": false,
+      "variant": "z6-no-scorpio",
+      "playerLevel": 197,
+      "maxHp": 1275,
+      "maxSp": 750,
+      "cost": 48,
+      "costLimit": 48,
+      "deck": [
+        {
+          "id": "zodiac_sagittarius",
+          "name": "サジタリウス"
+        },
+        {
+          "id": "zodiac_gemini",
+          "name": "ジェミニ"
+        },
+        {
+          "id": "zodiac_libra",
+          "name": "リーブラ"
+        },
+        {
+          "id": "zodiac_capricorn",
+          "name": "カプリコーン"
+        },
+        {
+          "id": "zodiac_taurus",
+          "name": "トーラス"
+        },
+        {
+          "id": "zodiac_pisces",
+          "name": "パイシーズ"
+        }
+      ],
+      "equipment": {
+        "weaponId": "resonant_katar",
+        "rightArmId": "resonant_katar",
+        "leftArmId": "phantom_crystal_buckler",
+        "headId": "phantom_crystal_hood",
+        "bodyId": "phantom_crystal_armor",
+        "footId": "phantom_crystal_boots",
+        "accessoryId": "masters_necklace",
+        "rightArmEnhancement": 3
+      },
+      "npcSystem": {
+        "registeredIds": [],
+        "activeIds": [],
+        "records": {},
+        "renewal": null,
+        "expeditionMaxDepth": 0
+      }
+    },
+    {
+      "job": "thief",
+      "withNpcs": true,
+      "variant": "standard",
+      "playerLevel": 197,
+      "maxHp": 850,
+      "maxSp": 750,
+      "cost": 16,
+      "costLimit": 48,
+      "deck": [
+        {
+          "id": "sr_ability_boost",
+          "name": "能力向上"
+        },
+        {
+          "id": "sr_ability_boost",
+          "name": "能力向上"
+        },
+        {
+          "id": "sr_ability_boost",
+          "name": "能力向上"
+        },
+        {
+          "id": "common_follow_up",
+          "name": "追撃"
+        },
+        {
+          "id": "common_guard_stone",
+          "name": "護りの魔石"
+        },
+        {
+          "id": "rare_mana_recovery",
+          "name": "魔力回収"
+        }
+      ],
+      "equipment": {
+        "weaponId": "resonant_katar",
+        "rightArmId": "resonant_katar",
+        "leftArmId": "phantom_crystal_buckler",
+        "headId": "phantom_crystal_hood",
+        "bodyId": "phantom_crystal_armor",
+        "footId": "phantom_crystal_boots",
+        "accessoryId": "masters_necklace",
+        "rightArmEnhancement": 3
+      },
+      "npcSystem": {
+        "registeredIds": [
+          "alec",
+          "rebecca",
+          "erika"
+        ],
+        "activeIds": [
+          "alec",
+          "rebecca",
+          "erika"
+        ],
+        "records": {
+          "alec": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          },
+          "rebecca": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          },
+          "erika": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          }
+        },
+        "renewal": null,
+        "expeditionMaxDepth": 0
+      }
+    },
+    {
+      "job": "thief",
+      "withNpcs": true,
+      "variant": "z6",
+      "playerLevel": 197,
+      "maxHp": 850,
+      "maxSp": 750,
+      "cost": 48,
+      "costLimit": 48,
+      "deck": [
+        {
+          "id": "zodiac_sagittarius",
+          "name": "サジタリウス"
+        },
+        {
+          "id": "zodiac_gemini",
+          "name": "ジェミニ"
+        },
+        {
+          "id": "zodiac_libra",
+          "name": "リーブラ"
+        },
+        {
+          "id": "zodiac_capricorn",
+          "name": "カプリコーン"
+        },
+        {
+          "id": "zodiac_scorpio",
+          "name": "スコルピオ"
+        },
+        {
+          "id": "zodiac_pisces",
+          "name": "パイシーズ"
+        }
+      ],
+      "equipment": {
+        "weaponId": "resonant_katar",
+        "rightArmId": "resonant_katar",
+        "leftArmId": "phantom_crystal_buckler",
+        "headId": "phantom_crystal_hood",
+        "bodyId": "phantom_crystal_armor",
+        "footId": "phantom_crystal_boots",
+        "accessoryId": "masters_necklace",
+        "rightArmEnhancement": 3
+      },
+      "npcSystem": {
+        "registeredIds": [
+          "alec",
+          "rebecca",
+          "erika"
+        ],
+        "activeIds": [
+          "alec",
+          "rebecca",
+          "erika"
+        ],
+        "records": {
+          "alec": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          },
+          "rebecca": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          },
+          "erika": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          }
+        },
+        "renewal": null,
+        "expeditionMaxDepth": 0
+      }
+    },
+    {
+      "job": "thief",
+      "withNpcs": true,
+      "variant": "z6-no-scorpio",
+      "playerLevel": 197,
+      "maxHp": 1275,
+      "maxSp": 750,
+      "cost": 48,
+      "costLimit": 48,
+      "deck": [
+        {
+          "id": "zodiac_sagittarius",
+          "name": "サジタリウス"
+        },
+        {
+          "id": "zodiac_gemini",
+          "name": "ジェミニ"
+        },
+        {
+          "id": "zodiac_libra",
+          "name": "リーブラ"
+        },
+        {
+          "id": "zodiac_capricorn",
+          "name": "カプリコーン"
+        },
+        {
+          "id": "zodiac_taurus",
+          "name": "トーラス"
+        },
+        {
+          "id": "zodiac_pisces",
+          "name": "パイシーズ"
+        }
+      ],
+      "equipment": {
+        "weaponId": "resonant_katar",
+        "rightArmId": "resonant_katar",
+        "leftArmId": "phantom_crystal_buckler",
+        "headId": "phantom_crystal_hood",
+        "bodyId": "phantom_crystal_armor",
+        "footId": "phantom_crystal_boots",
+        "accessoryId": "masters_necklace",
+        "rightArmEnhancement": 3
+      },
+      "npcSystem": {
+        "registeredIds": [
+          "alec",
+          "rebecca",
+          "erika"
+        ],
+        "activeIds": [
+          "alec",
+          "rebecca",
+          "erika"
+        ],
+        "records": {
+          "alec": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          },
+          "rebecca": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          },
+          "erika": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          }
+        },
+        "renewal": null,
+        "expeditionMaxDepth": 0
+      }
+    },
+    {
+      "job": "mage",
+      "withNpcs": false,
+      "variant": "standard",
+      "playerLevel": 197,
+      "maxHp": 650,
+      "maxSp": 1054,
+      "cost": 16,
+      "costLimit": 48,
+      "deck": [
+        {
+          "id": "sr_ability_boost",
+          "name": "能力向上"
+        },
+        {
+          "id": "sr_ability_boost",
+          "name": "能力向上"
+        },
+        {
+          "id": "sr_ability_boost",
+          "name": "能力向上"
+        },
+        {
+          "id": "common_follow_up",
+          "name": "追撃"
+        },
+        {
+          "id": "common_guard_stone",
+          "name": "護りの魔石"
+        },
+        {
+          "id": "rare_mana_recovery",
+          "name": "魔力回収"
+        }
+      ],
+      "equipment": {
+        "weaponId": "resonance_staff",
+        "rightArmId": "resonance_staff",
+        "leftArmId": null,
+        "headId": "astral_crystal_hat",
+        "bodyId": "astral_crystal_robe",
+        "footId": "astral_crystal_shoes",
+        "accessoryId": "mana_amplifier",
+        "rightArmEnhancement": 3
+      },
+      "npcSystem": {
+        "registeredIds": [],
+        "activeIds": [],
+        "records": {},
+        "renewal": null,
+        "expeditionMaxDepth": 0
+      }
+    },
+    {
+      "job": "mage",
+      "withNpcs": false,
+      "variant": "z6",
+      "playerLevel": 197,
+      "maxHp": 813,
+      "maxSp": 1318,
+      "cost": 48,
+      "costLimit": 48,
+      "deck": [
+        {
+          "id": "zodiac_aquarius",
+          "name": "アクエリアス"
+        },
+        {
+          "id": "zodiac_gemini",
+          "name": "ジェミニ"
+        },
+        {
+          "id": "zodiac_libra",
+          "name": "リーブラ"
+        },
+        {
+          "id": "zodiac_capricorn",
+          "name": "カプリコーン"
+        },
+        {
+          "id": "zodiac_scorpio",
+          "name": "スコルピオ"
+        },
+        {
+          "id": "zodiac_virgo",
+          "name": "ヴァルゴ"
+        }
+      ],
+      "equipment": {
+        "weaponId": "resonance_staff",
+        "rightArmId": "resonance_staff",
+        "leftArmId": null,
+        "headId": "astral_crystal_hat",
+        "bodyId": "astral_crystal_robe",
+        "footId": "astral_crystal_shoes",
+        "accessoryId": "mana_amplifier",
+        "rightArmEnhancement": 3
+      },
+      "npcSystem": {
+        "registeredIds": [],
+        "activeIds": [],
+        "records": {},
+        "renewal": null,
+        "expeditionMaxDepth": 0
+      }
+    },
+    {
+      "job": "mage",
+      "withNpcs": false,
+      "variant": "z6-no-scorpio",
+      "playerLevel": 197,
+      "maxHp": 813,
+      "maxSp": 1318,
+      "cost": 48,
+      "costLimit": 48,
+      "deck": [
+        {
+          "id": "zodiac_aquarius",
+          "name": "アクエリアス"
+        },
+        {
+          "id": "zodiac_gemini",
+          "name": "ジェミニ"
+        },
+        {
+          "id": "zodiac_libra",
+          "name": "リーブラ"
+        },
+        {
+          "id": "zodiac_capricorn",
+          "name": "カプリコーン"
+        },
+        {
+          "id": "zodiac_pisces",
+          "name": "パイシーズ"
+        },
+        {
+          "id": "zodiac_virgo",
+          "name": "ヴァルゴ"
+        }
+      ],
+      "equipment": {
+        "weaponId": "resonance_staff",
+        "rightArmId": "resonance_staff",
+        "leftArmId": null,
+        "headId": "astral_crystal_hat",
+        "bodyId": "astral_crystal_robe",
+        "footId": "astral_crystal_shoes",
+        "accessoryId": "mana_amplifier",
+        "rightArmEnhancement": 3
+      },
+      "npcSystem": {
+        "registeredIds": [],
+        "activeIds": [],
+        "records": {},
+        "renewal": null,
+        "expeditionMaxDepth": 0
+      }
+    },
+    {
+      "job": "mage",
+      "withNpcs": true,
+      "variant": "standard",
+      "playerLevel": 197,
+      "maxHp": 650,
+      "maxSp": 1054,
+      "cost": 16,
+      "costLimit": 48,
+      "deck": [
+        {
+          "id": "sr_ability_boost",
+          "name": "能力向上"
+        },
+        {
+          "id": "sr_ability_boost",
+          "name": "能力向上"
+        },
+        {
+          "id": "sr_ability_boost",
+          "name": "能力向上"
+        },
+        {
+          "id": "common_follow_up",
+          "name": "追撃"
+        },
+        {
+          "id": "common_guard_stone",
+          "name": "護りの魔石"
+        },
+        {
+          "id": "rare_mana_recovery",
+          "name": "魔力回収"
+        }
+      ],
+      "equipment": {
+        "weaponId": "resonance_staff",
+        "rightArmId": "resonance_staff",
+        "leftArmId": null,
+        "headId": "astral_crystal_hat",
+        "bodyId": "astral_crystal_robe",
+        "footId": "astral_crystal_shoes",
+        "accessoryId": "mana_amplifier",
+        "rightArmEnhancement": 3
+      },
+      "npcSystem": {
+        "registeredIds": [
+          "alec",
+          "rebecca",
+          "erika"
+        ],
+        "activeIds": [
+          "alec",
+          "rebecca",
+          "erika"
+        ],
+        "records": {
+          "alec": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          },
+          "rebecca": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          },
+          "erika": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          }
+        },
+        "renewal": null,
+        "expeditionMaxDepth": 0
+      }
+    },
+    {
+      "job": "mage",
+      "withNpcs": true,
+      "variant": "z6",
+      "playerLevel": 197,
+      "maxHp": 813,
+      "maxSp": 1318,
+      "cost": 48,
+      "costLimit": 48,
+      "deck": [
+        {
+          "id": "zodiac_aquarius",
+          "name": "アクエリアス"
+        },
+        {
+          "id": "zodiac_gemini",
+          "name": "ジェミニ"
+        },
+        {
+          "id": "zodiac_libra",
+          "name": "リーブラ"
+        },
+        {
+          "id": "zodiac_capricorn",
+          "name": "カプリコーン"
+        },
+        {
+          "id": "zodiac_scorpio",
+          "name": "スコルピオ"
+        },
+        {
+          "id": "zodiac_virgo",
+          "name": "ヴァルゴ"
+        }
+      ],
+      "equipment": {
+        "weaponId": "resonance_staff",
+        "rightArmId": "resonance_staff",
+        "leftArmId": null,
+        "headId": "astral_crystal_hat",
+        "bodyId": "astral_crystal_robe",
+        "footId": "astral_crystal_shoes",
+        "accessoryId": "mana_amplifier",
+        "rightArmEnhancement": 3
+      },
+      "npcSystem": {
+        "registeredIds": [
+          "alec",
+          "rebecca",
+          "erika"
+        ],
+        "activeIds": [
+          "alec",
+          "rebecca",
+          "erika"
+        ],
+        "records": {
+          "alec": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          },
+          "rebecca": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          },
+          "erika": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          }
+        },
+        "renewal": null,
+        "expeditionMaxDepth": 0
+      }
+    },
+    {
+      "job": "mage",
+      "withNpcs": true,
+      "variant": "z6-no-scorpio",
+      "playerLevel": 197,
+      "maxHp": 813,
+      "maxSp": 1318,
+      "cost": 48,
+      "costLimit": 48,
+      "deck": [
+        {
+          "id": "zodiac_aquarius",
+          "name": "アクエリアス"
+        },
+        {
+          "id": "zodiac_gemini",
+          "name": "ジェミニ"
+        },
+        {
+          "id": "zodiac_libra",
+          "name": "リーブラ"
+        },
+        {
+          "id": "zodiac_capricorn",
+          "name": "カプリコーン"
+        },
+        {
+          "id": "zodiac_pisces",
+          "name": "パイシーズ"
+        },
+        {
+          "id": "zodiac_virgo",
+          "name": "ヴァルゴ"
+        }
+      ],
+      "equipment": {
+        "weaponId": "resonance_staff",
+        "rightArmId": "resonance_staff",
+        "leftArmId": null,
+        "headId": "astral_crystal_hat",
+        "bodyId": "astral_crystal_robe",
+        "footId": "astral_crystal_shoes",
+        "accessoryId": "mana_amplifier",
+        "rightArmEnhancement": 3
+      },
+      "npcSystem": {
+        "registeredIds": [
+          "alec",
+          "rebecca",
+          "erika"
+        ],
+        "activeIds": [
+          "alec",
+          "rebecca",
+          "erika"
+        ],
+        "records": {
+          "alec": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          },
+          "rebecca": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          },
+          "erika": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          }
+        },
+        "renewal": null,
+        "expeditionMaxDepth": 0
+      }
+    },
+    {
+      "job": "priest",
+      "withNpcs": false,
+      "variant": "standard",
+      "playerLevel": 197,
+      "maxHp": 750,
+      "maxSp": 874,
+      "cost": 16,
+      "costLimit": 48,
+      "deck": [
+        {
+          "id": "sr_ability_boost",
+          "name": "能力向上"
+        },
+        {
+          "id": "sr_ability_boost",
+          "name": "能力向上"
+        },
+        {
+          "id": "sr_ability_boost",
+          "name": "能力向上"
+        },
+        {
+          "id": "common_follow_up",
+          "name": "追撃"
+        },
+        {
+          "id": "common_guard_stone",
+          "name": "護りの魔石"
+        },
+        {
+          "id": "rare_mana_recovery",
+          "name": "魔力回収"
+        }
+      ],
+      "equipment": {
+        "weaponId": "amethyst_flail",
+        "rightArmId": "amethyst_flail",
+        "leftArmId": "white_crystal_shield",
+        "headId": "white_crystal_mitre",
+        "bodyId": "white_crystal_vestment",
+        "footId": "white_crystal_shoes",
+        "accessoryId": "grain_choker",
+        "rightArmEnhancement": 3
+      },
+      "npcSystem": {
+        "registeredIds": [],
+        "activeIds": [],
+        "records": {},
+        "renewal": null,
+        "expeditionMaxDepth": 0
+      }
+    },
+    {
+      "job": "priest",
+      "withNpcs": false,
+      "variant": "z6",
+      "playerLevel": 197,
+      "maxHp": 1125,
+      "maxSp": 874,
+      "cost": 48,
+      "costLimit": 48,
+      "deck": [
+        {
+          "id": "zodiac_aquarius",
+          "name": "アクエリアス"
+        },
+        {
+          "id": "zodiac_gemini",
+          "name": "ジェミニ"
+        },
+        {
+          "id": "zodiac_libra",
+          "name": "リーブラ"
+        },
+        {
+          "id": "zodiac_capricorn",
+          "name": "カプリコーン"
+        },
+        {
+          "id": "zodiac_scorpio",
+          "name": "スコルピオ"
+        },
+        {
+          "id": "zodiac_taurus",
+          "name": "トーラス"
+        }
+      ],
+      "equipment": {
+        "weaponId": "amethyst_flail",
+        "rightArmId": "amethyst_flail",
+        "leftArmId": "white_crystal_shield",
+        "headId": "white_crystal_mitre",
+        "bodyId": "white_crystal_vestment",
+        "footId": "white_crystal_shoes",
+        "accessoryId": "grain_choker",
+        "rightArmEnhancement": 3
+      },
+      "npcSystem": {
+        "registeredIds": [],
+        "activeIds": [],
+        "records": {},
+        "renewal": null,
+        "expeditionMaxDepth": 0
+      }
+    },
+    {
+      "job": "priest",
+      "withNpcs": false,
+      "variant": "z6-no-scorpio",
+      "playerLevel": 197,
+      "maxHp": 1125,
+      "maxSp": 874,
+      "cost": 48,
+      "costLimit": 48,
+      "deck": [
+        {
+          "id": "zodiac_aquarius",
+          "name": "アクエリアス"
+        },
+        {
+          "id": "zodiac_gemini",
+          "name": "ジェミニ"
+        },
+        {
+          "id": "zodiac_libra",
+          "name": "リーブラ"
+        },
+        {
+          "id": "zodiac_capricorn",
+          "name": "カプリコーン"
+        },
+        {
+          "id": "zodiac_pisces",
+          "name": "パイシーズ"
+        },
+        {
+          "id": "zodiac_taurus",
+          "name": "トーラス"
+        }
+      ],
+      "equipment": {
+        "weaponId": "amethyst_flail",
+        "rightArmId": "amethyst_flail",
+        "leftArmId": "white_crystal_shield",
+        "headId": "white_crystal_mitre",
+        "bodyId": "white_crystal_vestment",
+        "footId": "white_crystal_shoes",
+        "accessoryId": "grain_choker",
+        "rightArmEnhancement": 3
+      },
+      "npcSystem": {
+        "registeredIds": [],
+        "activeIds": [],
+        "records": {},
+        "renewal": null,
+        "expeditionMaxDepth": 0
+      }
+    },
+    {
+      "job": "priest",
+      "withNpcs": true,
+      "variant": "standard",
+      "playerLevel": 197,
+      "maxHp": 750,
+      "maxSp": 874,
+      "cost": 16,
+      "costLimit": 48,
+      "deck": [
+        {
+          "id": "sr_ability_boost",
+          "name": "能力向上"
+        },
+        {
+          "id": "sr_ability_boost",
+          "name": "能力向上"
+        },
+        {
+          "id": "sr_ability_boost",
+          "name": "能力向上"
+        },
+        {
+          "id": "common_follow_up",
+          "name": "追撃"
+        },
+        {
+          "id": "common_guard_stone",
+          "name": "護りの魔石"
+        },
+        {
+          "id": "rare_mana_recovery",
+          "name": "魔力回収"
+        }
+      ],
+      "equipment": {
+        "weaponId": "amethyst_flail",
+        "rightArmId": "amethyst_flail",
+        "leftArmId": "white_crystal_shield",
+        "headId": "white_crystal_mitre",
+        "bodyId": "white_crystal_vestment",
+        "footId": "white_crystal_shoes",
+        "accessoryId": "grain_choker",
+        "rightArmEnhancement": 3
+      },
+      "npcSystem": {
+        "registeredIds": [
+          "alec",
+          "rebecca",
+          "erika"
+        ],
+        "activeIds": [
+          "alec",
+          "rebecca",
+          "erika"
+        ],
+        "records": {
+          "alec": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          },
+          "rebecca": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          },
+          "erika": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          }
+        },
+        "renewal": null,
+        "expeditionMaxDepth": 0
+      }
+    },
+    {
+      "job": "priest",
+      "withNpcs": true,
+      "variant": "z6",
+      "playerLevel": 197,
+      "maxHp": 1125,
+      "maxSp": 874,
+      "cost": 48,
+      "costLimit": 48,
+      "deck": [
+        {
+          "id": "zodiac_aquarius",
+          "name": "アクエリアス"
+        },
+        {
+          "id": "zodiac_gemini",
+          "name": "ジェミニ"
+        },
+        {
+          "id": "zodiac_libra",
+          "name": "リーブラ"
+        },
+        {
+          "id": "zodiac_capricorn",
+          "name": "カプリコーン"
+        },
+        {
+          "id": "zodiac_scorpio",
+          "name": "スコルピオ"
+        },
+        {
+          "id": "zodiac_taurus",
+          "name": "トーラス"
+        }
+      ],
+      "equipment": {
+        "weaponId": "amethyst_flail",
+        "rightArmId": "amethyst_flail",
+        "leftArmId": "white_crystal_shield",
+        "headId": "white_crystal_mitre",
+        "bodyId": "white_crystal_vestment",
+        "footId": "white_crystal_shoes",
+        "accessoryId": "grain_choker",
+        "rightArmEnhancement": 3
+      },
+      "npcSystem": {
+        "registeredIds": [
+          "alec",
+          "rebecca",
+          "erika"
+        ],
+        "activeIds": [
+          "alec",
+          "rebecca",
+          "erika"
+        ],
+        "records": {
+          "alec": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          },
+          "rebecca": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          },
+          "erika": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          }
+        },
+        "renewal": null,
+        "expeditionMaxDepth": 0
+      }
+    },
+    {
+      "job": "priest",
+      "withNpcs": true,
+      "variant": "z6-no-scorpio",
+      "playerLevel": 197,
+      "maxHp": 1125,
+      "maxSp": 874,
+      "cost": 48,
+      "costLimit": 48,
+      "deck": [
+        {
+          "id": "zodiac_aquarius",
+          "name": "アクエリアス"
+        },
+        {
+          "id": "zodiac_gemini",
+          "name": "ジェミニ"
+        },
+        {
+          "id": "zodiac_libra",
+          "name": "リーブラ"
+        },
+        {
+          "id": "zodiac_capricorn",
+          "name": "カプリコーン"
+        },
+        {
+          "id": "zodiac_pisces",
+          "name": "パイシーズ"
+        },
+        {
+          "id": "zodiac_taurus",
+          "name": "トーラス"
+        }
+      ],
+      "equipment": {
+        "weaponId": "amethyst_flail",
+        "rightArmId": "amethyst_flail",
+        "leftArmId": "white_crystal_shield",
+        "headId": "white_crystal_mitre",
+        "bodyId": "white_crystal_vestment",
+        "footId": "white_crystal_shoes",
+        "accessoryId": "grain_choker",
+        "rightArmEnhancement": 3
+      },
+      "npcSystem": {
+        "registeredIds": [
+          "alec",
+          "rebecca",
+          "erika"
+        ],
+        "activeIds": [
+          "alec",
+          "rebecca",
+          "erika"
+        ],
+        "records": {
+          "alec": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          },
+          "rebecca": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          },
+          "erika": {
+            "maxDepth": 90,
+            "growthStage": 9,
+            "charge": 0,
+            "chargeCooldown": 0,
+            "passiveStepCount": 0
+          }
+        },
+        "renewal": null,
+        "expeditionMaxDepth": 0
+      }
+    }
+  ],
+  "rows": [
+    {
+      "job": "warrior",
+      "withNpcs": false,
+      "variant": "standard",
+      "mapLevel": 60,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 147.8,
+      "meanVictoryTurns": 147.8,
+      "minVictoryTurns": 125,
+      "maxTurns": 185,
+      "meanHeals": 18.64,
+      "meanPlayerDamage": 6042.22,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "warrior",
+      "withNpcs": false,
+      "variant": "standard",
+      "mapLevel": 80,
+      "trials": 50,
+      "wins": 0,
+      "timeouts": 50,
+      "meanTurnsAll": 200,
+      "meanVictoryTurns": null,
+      "minVictoryTurns": null,
+      "maxTurns": 200,
+      "meanHeals": 33.86,
+      "meanPlayerDamage": 10597.5,
+      "meanBossHpRemaining": 3791.96,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "warrior",
+      "withNpcs": false,
+      "variant": "standard",
+      "mapLevel": 100,
+      "trials": 50,
+      "wins": 0,
+      "timeouts": 49,
+      "meanTurnsAll": 199.9,
+      "meanVictoryTurns": null,
+      "minVictoryTurns": null,
+      "maxTurns": 200,
+      "meanHeals": 38.14,
+      "meanPlayerDamage": 11896.66,
+      "meanBossHpRemaining": 8503.8,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "warrior",
+      "withNpcs": false,
+      "variant": "z6",
+      "mapLevel": 60,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 22.86,
+      "meanVictoryTurns": 22.86,
+      "minVictoryTurns": 16,
+      "maxTurns": 42,
+      "meanHeals": 3.54,
+      "meanPlayerDamage": 514.16,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 12103.04,
+      "deathPoisonBattles": 49,
+      "piscesUsed": 0
+    },
+    {
+      "job": "warrior",
+      "withNpcs": false,
+      "variant": "z6",
+      "mapLevel": 80,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 25.5,
+      "meanVictoryTurns": 25.5,
+      "minVictoryTurns": 17,
+      "maxTurns": 57,
+      "meanHeals": 4.4,
+      "meanPlayerDamage": 740.6,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 17077.86,
+      "deathPoisonBattles": 49,
+      "piscesUsed": 0
+    },
+    {
+      "job": "warrior",
+      "withNpcs": false,
+      "variant": "z6",
+      "mapLevel": 100,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 26.52,
+      "meanVictoryTurns": 26.52,
+      "minVictoryTurns": 17,
+      "maxTurns": 65,
+      "meanHeals": 4.72,
+      "meanPlayerDamage": 872.26,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 19810.82,
+      "deathPoisonBattles": 49,
+      "piscesUsed": 0
+    },
+    {
+      "job": "warrior",
+      "withNpcs": false,
+      "variant": "z6-no-scorpio",
+      "mapLevel": 60,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 42.52,
+      "meanVictoryTurns": 42.52,
+      "minVictoryTurns": 37,
+      "maxTurns": 45,
+      "meanHeals": 7.32,
+      "meanPlayerDamage": 902.68,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "warrior",
+      "withNpcs": false,
+      "variant": "z6-no-scorpio",
+      "mapLevel": 80,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 56.88,
+      "meanVictoryTurns": 56.88,
+      "minVictoryTurns": 51,
+      "maxTurns": 59,
+      "meanHeals": 10.62,
+      "meanPlayerDamage": 1549.26,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "warrior",
+      "withNpcs": false,
+      "variant": "z6-no-scorpio",
+      "mapLevel": 100,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 64.7,
+      "meanVictoryTurns": 64.7,
+      "minVictoryTurns": 57,
+      "maxTurns": 67,
+      "meanHeals": 12.56,
+      "meanPlayerDamage": 1953.58,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "warrior",
+      "withNpcs": true,
+      "variant": "standard",
+      "mapLevel": 60,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 65.54,
+      "meanVictoryTurns": 65.54,
+      "minVictoryTurns": 55,
+      "maxTurns": 79,
+      "meanHeals": 0,
+      "meanPlayerDamage": 2633.78,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "warrior",
+      "withNpcs": true,
+      "variant": "standard",
+      "mapLevel": 80,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 89.66,
+      "meanVictoryTurns": 89.66,
+      "minVictoryTurns": 73,
+      "maxTurns": 107,
+      "meanHeals": 0,
+      "meanPlayerDamage": 4736.98,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "warrior",
+      "withNpcs": true,
+      "variant": "standard",
+      "mapLevel": 100,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 104.38,
+      "meanVictoryTurns": 104.38,
+      "minVictoryTurns": 85,
+      "maxTurns": 125,
+      "meanHeals": 0,
+      "meanPlayerDamage": 6199.74,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "warrior",
+      "withNpcs": true,
+      "variant": "z6",
+      "mapLevel": 60,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 19.12,
+      "meanVictoryTurns": 19.12,
+      "minVictoryTurns": 14,
+      "maxTurns": 28,
+      "meanHeals": 0,
+      "meanPlayerDamage": 443.68,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 9981.3,
+      "deathPoisonBattles": 48,
+      "piscesUsed": 0
+    },
+    {
+      "job": "warrior",
+      "withNpcs": true,
+      "variant": "z6",
+      "mapLevel": 80,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 20.76,
+      "meanVictoryTurns": 20.76,
+      "minVictoryTurns": 15,
+      "maxTurns": 36,
+      "meanHeals": 0,
+      "meanPlayerDamage": 622.82,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 15073.4,
+      "deathPoisonBattles": 49,
+      "piscesUsed": 0
+    },
+    {
+      "job": "warrior",
+      "withNpcs": true,
+      "variant": "z6",
+      "mapLevel": 100,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 21.48,
+      "meanVictoryTurns": 21.48,
+      "minVictoryTurns": 16,
+      "maxTurns": 40,
+      "meanHeals": 0,
+      "meanPlayerDamage": 716.22,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 17492.98,
+      "deathPoisonBattles": 49,
+      "piscesUsed": 0
+    },
+    {
+      "job": "warrior",
+      "withNpcs": true,
+      "variant": "z6-no-scorpio",
+      "mapLevel": 60,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 28.3,
+      "meanVictoryTurns": 28.3,
+      "minVictoryTurns": 25,
+      "maxTurns": 30,
+      "meanHeals": 0,
+      "meanPlayerDamage": 601.74,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "warrior",
+      "withNpcs": true,
+      "variant": "z6-no-scorpio",
+      "mapLevel": 80,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 37.36,
+      "meanVictoryTurns": 37.36,
+      "minVictoryTurns": 34,
+      "maxTurns": 41,
+      "meanHeals": 0,
+      "meanPlayerDamage": 1030.14,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "warrior",
+      "withNpcs": true,
+      "variant": "z6-no-scorpio",
+      "mapLevel": 100,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 41.96,
+      "meanVictoryTurns": 41.96,
+      "minVictoryTurns": 39,
+      "maxTurns": 45,
+      "meanHeals": 0,
+      "meanPlayerDamage": 1286.96,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "thief",
+      "withNpcs": false,
+      "variant": "standard",
+      "mapLevel": 60,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 102.24,
+      "meanVictoryTurns": 102.24,
+      "minVictoryTurns": 96,
+      "maxTurns": 108,
+      "meanHeals": 13.06,
+      "meanPlayerDamage": 3689.16,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "thief",
+      "withNpcs": false,
+      "variant": "standard",
+      "mapLevel": 80,
+      "trials": 50,
+      "wins": 0,
+      "timeouts": 50,
+      "meanTurnsAll": 200,
+      "meanVictoryTurns": null,
+      "minVictoryTurns": null,
+      "maxTurns": 200,
+      "meanHeals": 36.42,
+      "meanPlayerDamage": 9687.72,
+      "meanBossHpRemaining": 1822.72,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "thief",
+      "withNpcs": false,
+      "variant": "standard",
+      "mapLevel": 100,
+      "trials": 50,
+      "wins": 0,
+      "timeouts": 29,
+      "meanTurnsAll": 198.24,
+      "meanVictoryTurns": null,
+      "minVictoryTurns": null,
+      "maxTurns": 200,
+      "meanHeals": 39.84,
+      "meanPlayerDamage": 10827.48,
+      "meanBossHpRemaining": 6990.82,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "thief",
+      "withNpcs": false,
+      "variant": "z6",
+      "mapLevel": 60,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 16.16,
+      "meanVictoryTurns": 16.16,
+      "minVictoryTurns": 12,
+      "maxTurns": 30,
+      "meanHeals": 0.08,
+      "meanPlayerDamage": 355.56,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 10980.36,
+      "deathPoisonBattles": 50,
+      "piscesUsed": 0
+    },
+    {
+      "job": "thief",
+      "withNpcs": false,
+      "variant": "z6",
+      "mapLevel": 80,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 18.48,
+      "meanVictoryTurns": 18.48,
+      "minVictoryTurns": 14,
+      "maxTurns": 41,
+      "meanHeals": 0.66,
+      "meanPlayerDamage": 533.22,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 16499.44,
+      "deathPoisonBattles": 50,
+      "piscesUsed": 0
+    },
+    {
+      "job": "thief",
+      "withNpcs": false,
+      "variant": "z6",
+      "mapLevel": 100,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 18.82,
+      "meanVictoryTurns": 18.82,
+      "minVictoryTurns": 14,
+      "maxTurns": 38,
+      "meanHeals": 0.94,
+      "meanPlayerDamage": 603.06,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 19687.64,
+      "deathPoisonBattles": 50,
+      "piscesUsed": 0
+    },
+    {
+      "job": "thief",
+      "withNpcs": false,
+      "variant": "z6-no-scorpio",
+      "mapLevel": 60,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 37.56,
+      "meanVictoryTurns": 37.56,
+      "minVictoryTurns": 35,
+      "maxTurns": 39,
+      "meanHeals": 0.7,
+      "meanPlayerDamage": 766.38,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "thief",
+      "withNpcs": false,
+      "variant": "z6-no-scorpio",
+      "mapLevel": 80,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 50.92,
+      "meanVictoryTurns": 50.92,
+      "minVictoryTurns": 48,
+      "maxTurns": 53,
+      "meanHeals": 2.06,
+      "meanPlayerDamage": 1343.62,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "thief",
+      "withNpcs": false,
+      "variant": "z6-no-scorpio",
+      "mapLevel": 100,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 58.3,
+      "meanVictoryTurns": 58.3,
+      "minVictoryTurns": 56,
+      "maxTurns": 60,
+      "meanHeals": 3.12,
+      "meanPlayerDamage": 1734.72,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "thief",
+      "withNpcs": true,
+      "variant": "standard",
+      "mapLevel": 60,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 52.7,
+      "meanVictoryTurns": 52.7,
+      "minVictoryTurns": 45,
+      "maxTurns": 58,
+      "meanHeals": 0,
+      "meanPlayerDamage": 1860.04,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "thief",
+      "withNpcs": true,
+      "variant": "standard",
+      "mapLevel": 80,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 73.56,
+      "meanVictoryTurns": 73.56,
+      "minVictoryTurns": 66,
+      "maxTurns": 79,
+      "meanHeals": 0,
+      "meanPlayerDamage": 3525.22,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "thief",
+      "withNpcs": true,
+      "variant": "standard",
+      "mapLevel": 100,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 84.86,
+      "meanVictoryTurns": 84.86,
+      "minVictoryTurns": 77,
+      "maxTurns": 91,
+      "meanHeals": 0,
+      "meanPlayerDamage": 4576.9,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "thief",
+      "withNpcs": true,
+      "variant": "z6",
+      "mapLevel": 60,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 14.02,
+      "meanVictoryTurns": 14.02,
+      "minVictoryTurns": 11,
+      "maxTurns": 26,
+      "meanHeals": 0,
+      "meanPlayerDamage": 325.86,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 10177.18,
+      "deathPoisonBattles": 50,
+      "piscesUsed": 0
+    },
+    {
+      "job": "thief",
+      "withNpcs": true,
+      "variant": "z6",
+      "mapLevel": 80,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 15.62,
+      "meanVictoryTurns": 15.62,
+      "minVictoryTurns": 13,
+      "maxTurns": 29,
+      "meanHeals": 0,
+      "meanPlayerDamage": 473.3,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 15526.26,
+      "deathPoisonBattles": 50,
+      "piscesUsed": 0
+    },
+    {
+      "job": "thief",
+      "withNpcs": true,
+      "variant": "z6",
+      "mapLevel": 100,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 16.36,
+      "meanVictoryTurns": 16.36,
+      "minVictoryTurns": 13,
+      "maxTurns": 30,
+      "meanHeals": 0,
+      "meanPlayerDamage": 555.36,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 18288.2,
+      "deathPoisonBattles": 50,
+      "piscesUsed": 0
+    },
+    {
+      "job": "thief",
+      "withNpcs": true,
+      "variant": "z6-no-scorpio",
+      "mapLevel": 60,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 29.52,
+      "meanVictoryTurns": 29.52,
+      "minVictoryTurns": 27,
+      "maxTurns": 31,
+      "meanHeals": 0,
+      "meanPlayerDamage": 619.04,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "thief",
+      "withNpcs": true,
+      "variant": "z6-no-scorpio",
+      "mapLevel": 80,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 39.1,
+      "meanVictoryTurns": 39.1,
+      "minVictoryTurns": 36,
+      "maxTurns": 42,
+      "meanHeals": 0,
+      "meanPlayerDamage": 1057.44,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "thief",
+      "withNpcs": true,
+      "variant": "z6-no-scorpio",
+      "mapLevel": 100,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 43.76,
+      "meanVictoryTurns": 43.76,
+      "minVictoryTurns": 40,
+      "maxTurns": 47,
+      "meanHeals": 0,
+      "meanPlayerDamage": 1319.78,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "mage",
+      "withNpcs": false,
+      "variant": "standard",
+      "mapLevel": 60,
+      "trials": 50,
+      "wins": 0,
+      "timeouts": 46,
+      "meanTurnsAll": 199.84,
+      "meanVictoryTurns": null,
+      "minVictoryTurns": null,
+      "maxTurns": 200,
+      "meanHeals": 39.7,
+      "meanPlayerDamage": 8314.2,
+      "meanBossHpRemaining": 4799.52,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "mage",
+      "withNpcs": false,
+      "variant": "standard",
+      "mapLevel": 80,
+      "trials": 50,
+      "wins": 0,
+      "timeouts": 0,
+      "meanTurnsAll": 166.56,
+      "meanVictoryTurns": null,
+      "minVictoryTurns": null,
+      "maxTurns": 183,
+      "meanHeals": 40,
+      "meanPlayerDamage": 8775,
+      "meanBossHpRemaining": 12867.24,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "mage",
+      "withNpcs": false,
+      "variant": "standard",
+      "mapLevel": 100,
+      "trials": 50,
+      "wins": 0,
+      "timeouts": 0,
+      "meanTurnsAll": 151.92,
+      "meanVictoryTurns": null,
+      "minVictoryTurns": null,
+      "maxTurns": 171,
+      "meanHeals": 40,
+      "meanPlayerDamage": 8775,
+      "meanBossHpRemaining": 17257.4,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "mage",
+      "withNpcs": false,
+      "variant": "z6",
+      "mapLevel": 60,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 23.92,
+      "meanVictoryTurns": 23.92,
+      "minVictoryTurns": 20,
+      "maxTurns": 35,
+      "meanHeals": 0,
+      "meanPlayerDamage": 0,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 20359.84,
+      "deathPoisonBattles": 50,
+      "piscesUsed": 0
+    },
+    {
+      "job": "mage",
+      "withNpcs": false,
+      "variant": "z6",
+      "mapLevel": 80,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 24.04,
+      "meanVictoryTurns": 24.04,
+      "minVictoryTurns": 20,
+      "maxTurns": 35,
+      "meanHeals": 0,
+      "meanPlayerDamage": 0,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 26747.14,
+      "deathPoisonBattles": 50,
+      "piscesUsed": 0
+    },
+    {
+      "job": "mage",
+      "withNpcs": false,
+      "variant": "z6",
+      "mapLevel": 100,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 24.08,
+      "meanVictoryTurns": 24.08,
+      "minVictoryTurns": 20,
+      "maxTurns": 35,
+      "meanHeals": 0,
+      "meanPlayerDamage": 0,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 29940.96,
+      "deathPoisonBattles": 50,
+      "piscesUsed": 0
+    },
+    {
+      "job": "mage",
+      "withNpcs": false,
+      "variant": "z6-no-scorpio",
+      "mapLevel": 60,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 129.48,
+      "meanVictoryTurns": 129.48,
+      "minVictoryTurns": 121,
+      "maxTurns": 137,
+      "meanHeals": 3.64,
+      "meanPlayerDamage": 1235.06,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "mage",
+      "withNpcs": false,
+      "variant": "z6-no-scorpio",
+      "mapLevel": 80,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 162.18,
+      "meanVictoryTurns": 162.18,
+      "minVictoryTurns": 154,
+      "maxTurns": 173,
+      "meanHeals": 9.82,
+      "meanPlayerDamage": 2766.7,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "mage",
+      "withNpcs": false,
+      "variant": "z6-no-scorpio",
+      "mapLevel": 100,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 180.28,
+      "meanVictoryTurns": 180.28,
+      "minVictoryTurns": 174,
+      "maxTurns": 189,
+      "meanHeals": 13.96,
+      "meanPlayerDamage": 3767.1,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "mage",
+      "withNpcs": true,
+      "variant": "standard",
+      "mapLevel": 60,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 80.32,
+      "meanVictoryTurns": 80.32,
+      "minVictoryTurns": 71,
+      "maxTurns": 89,
+      "meanHeals": 0,
+      "meanPlayerDamage": 3190.12,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "mage",
+      "withNpcs": true,
+      "variant": "standard",
+      "mapLevel": 80,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 105.66,
+      "meanVictoryTurns": 105.66,
+      "minVictoryTurns": 94,
+      "maxTurns": 116,
+      "meanHeals": 0,
+      "meanPlayerDamage": 5502.2,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "mage",
+      "withNpcs": true,
+      "variant": "standard",
+      "mapLevel": 100,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 118.78,
+      "meanVictoryTurns": 118.78,
+      "minVictoryTurns": 107,
+      "maxTurns": 142,
+      "meanHeals": 0,
+      "meanPlayerDamage": 6817.02,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "mage",
+      "withNpcs": true,
+      "variant": "z6",
+      "mapLevel": 60,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 21.5,
+      "meanVictoryTurns": 21.5,
+      "minVictoryTurns": 17,
+      "maxTurns": 36,
+      "meanHeals": 0,
+      "meanPlayerDamage": 0,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 17505.44,
+      "deathPoisonBattles": 50,
+      "piscesUsed": 0
+    },
+    {
+      "job": "mage",
+      "withNpcs": true,
+      "variant": "z6",
+      "mapLevel": 80,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 22.26,
+      "meanVictoryTurns": 22.26,
+      "minVictoryTurns": 18,
+      "maxTurns": 37,
+      "meanHeals": 0,
+      "meanPlayerDamage": 0,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 23678.32,
+      "deathPoisonBattles": 50,
+      "piscesUsed": 0
+    },
+    {
+      "job": "mage",
+      "withNpcs": true,
+      "variant": "z6",
+      "mapLevel": 100,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 22.64,
+      "meanVictoryTurns": 22.64,
+      "minVictoryTurns": 18,
+      "maxTurns": 38,
+      "meanHeals": 0,
+      "meanPlayerDamage": 0,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 26785.46,
+      "deathPoisonBattles": 50,
+      "piscesUsed": 0
+    },
+    {
+      "job": "mage",
+      "withNpcs": true,
+      "variant": "z6-no-scorpio",
+      "mapLevel": 60,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 74.78,
+      "meanVictoryTurns": 74.78,
+      "minVictoryTurns": 67,
+      "maxTurns": 84,
+      "meanHeals": 0,
+      "meanPlayerDamage": 181.08,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "mage",
+      "withNpcs": true,
+      "variant": "z6-no-scorpio",
+      "mapLevel": 80,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 88.08,
+      "meanVictoryTurns": 88.08,
+      "minVictoryTurns": 78,
+      "maxTurns": 98,
+      "meanHeals": 0,
+      "meanPlayerDamage": 941.6,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "mage",
+      "withNpcs": true,
+      "variant": "z6-no-scorpio",
+      "mapLevel": 100,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 95.9,
+      "meanVictoryTurns": 95.9,
+      "minVictoryTurns": 87,
+      "maxTurns": 106,
+      "meanHeals": 0,
+      "meanPlayerDamage": 1419.68,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "priest",
+      "withNpcs": false,
+      "variant": "standard",
+      "mapLevel": 60,
+      "trials": 50,
+      "wins": 0,
+      "timeouts": 50,
+      "meanTurnsAll": 200,
+      "meanVictoryTurns": null,
+      "minVictoryTurns": null,
+      "maxTurns": 200,
+      "meanHeals": 32.12,
+      "meanPlayerDamage": 7571.26,
+      "meanBossHpRemaining": 9989.36,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "priest",
+      "withNpcs": false,
+      "variant": "standard",
+      "mapLevel": 80,
+      "trials": 50,
+      "wins": 0,
+      "timeouts": 35,
+      "meanTurnsAll": 198.9,
+      "meanVictoryTurns": null,
+      "minVictoryTurns": null,
+      "maxTurns": 200,
+      "meanHeals": 39.98,
+      "meanPlayerDamage": 9902.16,
+      "meanBossHpRemaining": 17690.3,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "priest",
+      "withNpcs": false,
+      "variant": "standard",
+      "mapLevel": 100,
+      "trials": 50,
+      "wins": 0,
+      "timeouts": 0,
+      "meanTurnsAll": 181.48,
+      "meanVictoryTurns": null,
+      "minVictoryTurns": null,
+      "maxTurns": 198,
+      "meanHeals": 40,
+      "meanPlayerDamage": 10125,
+      "meanBossHpRemaining": 22140.2,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "priest",
+      "withNpcs": false,
+      "variant": "z6",
+      "mapLevel": 60,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 24.18,
+      "meanVictoryTurns": 24.18,
+      "minVictoryTurns": 21,
+      "maxTurns": 39,
+      "meanHeals": 0,
+      "meanPlayerDamage": 0,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 21111.28,
+      "deathPoisonBattles": 50,
+      "piscesUsed": 0
+    },
+    {
+      "job": "priest",
+      "withNpcs": false,
+      "variant": "z6",
+      "mapLevel": 80,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 24.78,
+      "meanVictoryTurns": 24.78,
+      "minVictoryTurns": 21,
+      "maxTurns": 40,
+      "meanHeals": 0,
+      "meanPlayerDamage": 5.12,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 27476.28,
+      "deathPoisonBattles": 50,
+      "piscesUsed": 0
+    },
+    {
+      "job": "priest",
+      "withNpcs": false,
+      "variant": "z6",
+      "mapLevel": 100,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 24.9,
+      "meanVictoryTurns": 24.9,
+      "minVictoryTurns": 21,
+      "maxTurns": 40,
+      "meanHeals": 0,
+      "meanPlayerDamage": 19.52,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 30651,
+      "deathPoisonBattles": 50,
+      "piscesUsed": 0
+    },
+    {
+      "job": "priest",
+      "withNpcs": false,
+      "variant": "z6-no-scorpio",
+      "mapLevel": 60,
+      "trials": 50,
+      "wins": 0,
+      "timeouts": 50,
+      "meanTurnsAll": 200,
+      "meanVictoryTurns": null,
+      "minVictoryTurns": null,
+      "maxTurns": 200,
+      "meanHeals": 7.14,
+      "meanPlayerDamage": 2881.66,
+      "meanBossHpRemaining": 11891.12,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "priest",
+      "withNpcs": false,
+      "variant": "z6-no-scorpio",
+      "mapLevel": 80,
+      "trials": 50,
+      "wins": 0,
+      "timeouts": 50,
+      "meanTurnsAll": 200,
+      "meanVictoryTurns": null,
+      "minVictoryTurns": null,
+      "maxTurns": 200,
+      "meanHeals": 10.7,
+      "meanPlayerDamage": 4093.92,
+      "meanBossHpRemaining": 19680.4,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "priest",
+      "withNpcs": false,
+      "variant": "z6-no-scorpio",
+      "mapLevel": 100,
+      "trials": 50,
+      "wins": 0,
+      "timeouts": 50,
+      "meanTurnsAll": 200,
+      "meanVictoryTurns": null,
+      "minVictoryTurns": null,
+      "maxTurns": 200,
+      "meanHeals": 12.66,
+      "meanPlayerDamage": 4766.7,
+      "meanBossHpRemaining": 23663.44,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "priest",
+      "withNpcs": true,
+      "variant": "standard",
+      "mapLevel": 60,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 103.98,
+      "meanVictoryTurns": 103.98,
+      "minVictoryTurns": 89,
+      "maxTurns": 117,
+      "meanHeals": 0,
+      "meanPlayerDamage": 3863.8,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "priest",
+      "withNpcs": true,
+      "variant": "standard",
+      "mapLevel": 80,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 135.54,
+      "meanVictoryTurns": 135.54,
+      "minVictoryTurns": 116,
+      "maxTurns": 156,
+      "meanHeals": 0,
+      "meanPlayerDamage": 6758.06,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "priest",
+      "withNpcs": true,
+      "variant": "standard",
+      "mapLevel": 100,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 152.08,
+      "meanVictoryTurns": 152.08,
+      "minVictoryTurns": 131,
+      "maxTurns": 174,
+      "meanHeals": 0,
+      "meanPlayerDamage": 8498.86,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "priest",
+      "withNpcs": true,
+      "variant": "z6",
+      "mapLevel": 60,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 21.86,
+      "meanVictoryTurns": 21.86,
+      "minVictoryTurns": 18,
+      "maxTurns": 42,
+      "meanHeals": 0,
+      "meanPlayerDamage": 1.32,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 18318.1,
+      "deathPoisonBattles": 50,
+      "piscesUsed": 0
+    },
+    {
+      "job": "priest",
+      "withNpcs": true,
+      "variant": "z6",
+      "mapLevel": 80,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 22.54,
+      "meanVictoryTurns": 22.54,
+      "minVictoryTurns": 19,
+      "maxTurns": 43,
+      "meanHeals": 0,
+      "meanPlayerDamage": 6.06,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 24527.74,
+      "deathPoisonBattles": 50,
+      "piscesUsed": 0
+    },
+    {
+      "job": "priest",
+      "withNpcs": true,
+      "variant": "z6",
+      "mapLevel": 100,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 22.86,
+      "meanVictoryTurns": 22.86,
+      "minVictoryTurns": 19,
+      "maxTurns": 49,
+      "meanHeals": 0,
+      "meanPlayerDamage": 22.96,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 27581.64,
+      "deathPoisonBattles": 50,
+      "piscesUsed": 0
+    },
+    {
+      "job": "priest",
+      "withNpcs": true,
+      "variant": "z6-no-scorpio",
+      "mapLevel": 60,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 107.82,
+      "meanVictoryTurns": 107.82,
+      "minVictoryTurns": 89,
+      "maxTurns": 123,
+      "meanHeals": 0,
+      "meanPlayerDamage": 1160.58,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "priest",
+      "withNpcs": true,
+      "variant": "z6-no-scorpio",
+      "mapLevel": 80,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 149.54,
+      "meanVictoryTurns": 149.54,
+      "minVictoryTurns": 122,
+      "maxTurns": 180,
+      "meanHeals": 0,
+      "meanPlayerDamage": 2822.06,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    },
+    {
+      "job": "priest",
+      "withNpcs": true,
+      "variant": "z6-no-scorpio",
+      "mapLevel": 100,
+      "trials": 50,
+      "wins": 50,
+      "timeouts": 0,
+      "meanTurnsAll": 172.28,
+      "meanVictoryTurns": 172.28,
+      "minVictoryTurns": 148,
+      "maxTurns": 199,
+      "meanHeals": 0,
+      "meanPlayerDamage": 3943.36,
+      "meanBossHpRemaining": 0,
+      "meanDeathPoisonDamage": 0,
+      "deathPoisonBattles": 0,
+      "piscesUsed": 0
+    }
+  ]
+}

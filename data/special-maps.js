@@ -1,13 +1,14 @@
 import {normalizeSurveyMask,mergeSurvey,surveyCount} from './special-map-survey.js';
 import {normalizeSurveyMasks,mergeSurveyV2} from './special-map-survey-v2.js';
 import {describeV2MapName} from './special-map-names-v2.js';
+import {validMapThemeOverride} from './special-map-theme-override.js';
 // Phase 2A ownership data. This ruleset is deliberately NOT the future dungeon V1.
 export const SPECIAL_MAP_RULESET = 'phase2a-1';
 export const SPECIAL_MAP_V2 = 'special-map-v2';
 export const MAP_RARITIES = Object.freeze(['WHITE','SILVER','GOLD']);
 export const rarityLabel = rarity => ({WHITE:'白地図',SILVER:'銀地図',GOLD:'金地図'})[rarity];
 export const isV2Map = map => map?.rulesetVersion===SPECIAL_MAP_V2;
-export function validV2Parameters(map){return Number.isInteger(map.level)&&map.level>=1&&map.level<=100&&MAP_RARITIES.includes(map.rarity);}
+export function validV2Parameters(map){return Number.isInteger(map.level)&&map.level>=1&&map.level<=100&&MAP_RARITIES.includes(map.rarity)&&validMapThemeOverride(map);}
 export const UNIDENTIFIED_LIMIT = 3;
 export const REGISTERED_LIMIT = 10;
 
@@ -22,16 +23,18 @@ export function mapOriginalId(map) {
   return JSON.stringify([...JSON.parse(mapContentId(map)),map.discovererName]);
 }
 export function mapLayoutId(map) { return JSON.stringify([map.rulesetVersion,map.seed]); }
-export function mapContentId(map) { return isV2Map(map)?JSON.stringify([map.rulesetVersion,map.seed,map.level,map.rarity]):mapLayoutId(map); }
+export function mapContentId(map) { return isV2Map(map)?JSON.stringify([map.rulesetVersion,map.seed,map.level,map.rarity,...(map.themeOverride!=null?[map.themeOverride]:[])]):mapLayoutId(map); }
 function surveyFields(map){return isV2Map(map)?{surveyedMasks:normalizeSurveyMasks(map.surveyedMasks)}:{surveyedMask:normalizeSurveyMask(map.surveyedMask),surveyComplete:surveyCount(map.surveyedMask)===100};}
 function normalizeOriginal(map) {
   if(!map || !Number.isInteger(map.seed) || map.seed<0 || map.seed>65535 || typeof map.rulesetVersion!=='string' || !map.rulesetVersion) return null;
   if(isV2Map(map)&&!validV2Parameters(map))return null;
+  if(!isV2Map(map)&&map.themeOverride!=null)return null;
   const signature=validateMapSignature(map.discovererName);
   if(!signature.ok)return null;
   if(isV2Map(map)){
     // Explicit ownership schema: never copy generated floors or single-floor survey.
     const clean={rulesetVersion:map.rulesetVersion,seed:map.seed,level:map.level,rarity:map.rarity,discovererName:signature.value};
+    if(map.themeOverride!=null)clean.themeOverride=map.themeOverride;
     for(const key of ['id','discoveryId','acquisitionMethod','memo'])if(typeof map[key]==='string')clean[key]=map[key];
     for(const key of ['favorite','cleared'])if(typeof map[key]==='boolean')clean[key]=map[key];
     if(Array.isArray(map.surveyedMasks))clean.surveyedMasks=normalizeSurveyMasks(map.surveyedMasks);
@@ -87,7 +90,7 @@ export function registerSharedMap(state,original,{confirmSameContent=false}={}) 
   if(state.registered.length>=REGISTERED_LIMIT)return {ok:false,error:'地図帳がいっぱいです。登録済みの地図を整理してから登録してください。'};
   const same=state.registered.find(m=>mapContentId(m)===mapContentId(map));
   if(same&&!confirmSameContent)return {ok:false,needsConfirmation:true,discoverer:same.discovererName};
-  const entry={rulesetVersion:map.rulesetVersion,seed:map.seed,...(isV2Map(map)?{level:map.level,rarity:map.rarity}:{}),discovererName:map.discovererName,id:mapOriginalId(map),...surveyFields({rulesetVersion:map.rulesetVersion}),cleared:false,favorite:false,memo:'',acquisitionMethod:'shared'};
+  const entry={rulesetVersion:map.rulesetVersion,seed:map.seed,...(isV2Map(map)?{level:map.level,rarity:map.rarity}:{}),...(map.themeOverride!=null?{themeOverride:map.themeOverride}:{}),discovererName:map.discovererName,id:mapOriginalId(map),...surveyFields({rulesetVersion:map.rulesetVersion}),cleared:false,favorite:false,memo:'',acquisitionMethod:'shared'};
   return {ok:true,state:{...state,registered:[...state.registered,entry]},map:entry};
 }
 export function deleteRegisteredMap(state,id) {

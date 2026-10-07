@@ -1,4 +1,5 @@
 import {generateSpecialMapV2} from './generator-v2.js';
+import {generateExplicitSpecialMapV2} from './special-themes-v2.js';
 import {generateV1} from './generator-v1.js';
 import {hash32V1} from './random-v1.js';
 export const SPECIAL_DUNGEON_V1='special-map-v1';
@@ -11,7 +12,11 @@ export function generateSpecialMap(ruleset,seed){
   default:throw new RangeError('Unsupported special-map ruleset');
  }
 }
-export function generateRegisteredSpecialMap(map){return map.rulesetVersion==='special-map-v2'?generateSpecialMapV2({ruleset:map.rulesetVersion,seed:map.seed,level:map.level,rarity:map.rarity}):generateSpecialMap(map.rulesetVersion,map.seed);}
+export function generateRegisteredSpecialMap(map){
+ if(map.rulesetVersion!=='special-map-v2')return generateSpecialMap(map.rulesetVersion,map.seed);
+ const input={ruleset:map.rulesetVersion,seed:map.seed,level:map.level,rarity:map.rarity};
+ return map.themeOverride!=null?generateExplicitSpecialMapV2({...input,themeId:map.themeOverride}):generateSpecialMapV2(input);
+}
 export function specialMapFingerprint(map){
  // Fixed field order, independent of object insertion order; diagnostic, not authentication.
  const canonical=JSON.stringify([map.ruleset,map.seed,map.width,map.height,map.walls,map.entrance.x,map.entrance.y,map.entrance.side,map.exit.x,map.exit.y,map.startDirection,map.themeId]);

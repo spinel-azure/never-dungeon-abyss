@@ -1,0 +1,80 @@
+[
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 12345,
+      "level": 60,
+      "rarity": "WHITE",
+      "themeOverride": "gold",
+      "discovererName": "†ルル"
+    },
+    "code": "NDA:AwIwOTwAAAMgIDDrMOtalLzOMczbHw",
+    "name": "荒れ果てた金色廟の地図 Lv.60",
+    "bossId": "karte_boss_maikaefer_koenig"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 12345,
+      "level": 80,
+      "rarity": "WHITE",
+      "themeOverride": "gold",
+      "discovererName": "†ルル"
+    },
+    "code": "NDA:AwIwOVAAAAMgIDDrMOtIX-gHznCGpg",
+    "name": "猛威の金色廟の地図 Lv.80",
+    "bossId": "karte_boss_maikaefer_koenig"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 12345,
+      "level": 100,
+      "rarity": "WHITE",
+      "themeOverride": "gold",
+      "discovererName": "†ルル"
+    },
+    "code": "NDA:AwIwOWQAAAMgIDDrMOsUrQSFA9AW9g",
+    "name": "滅びの金色廟の地図 Lv.100",
+    "bossId": "karte_boss_maikaefer_koenig"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 12345,
+      "level": 100,
+      "rarity": "WHITE",
+      "themeOverride": "rice",
+      "discovererName": "†ルル"
+    },
+    "code": "NDA:AwIwOWQAAQMgIDDrMOvJeb24h94aUg",
+    "name": "滅びの光穂廟の地図 Lv.100",
+    "bossId": "karte_boss_lumina"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 12345,
+      "level": 100,
+      "rarity": "WHITE",
+      "themeOverride": "dusk",
+      "discovererName": "†ルル"
+    },
+    "code": "NDA:AwIwOWQAAgMgIDDrMOsPWBe6V1vKYg",
+    "name": "滅びの夜露殿の地図 Lv.100",
+    "bossId": "karte_boss_noctia"
+  },
+  {
+    "map": {
+      "rulesetVersion": "special-map-v2",
+      "seed": 12345,
+      "level": 100,
+      "rarity": "WHITE",
+      "themeOverride": "tender",
+      "discovererName": "†ルル"
+    },
+    "code": "NDA:AwIwOWQAAwMgIDDrMOsc7kfnblX1MQ",
+    "name": "滅びの翠芽廟の地図 Lv.100",
+    "bossId": "karte_boss_zelena"
+  }
+]
