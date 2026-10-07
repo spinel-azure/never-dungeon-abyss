@@ -82,8 +82,8 @@ test('registered special maps preserve structure, name, ecology, fixed boss and 
    assert.equal(await prepareNormalBossImage(boss,{}, {load:async()=>({}),prepare:()=>{transforms++;return null;}}),boss.image);
    assert.equal(transforms,0);
    const p=s.generatedMap.bossRoom.bossCell;s.playerX=p.x;s.playerY=p.y;s.bossKeyFound=s.bossDoorUnlocked=true;s.recordSurvey(p.x,p.y);s.onBossCell();
-   assert.equal(starts,themeOverride==='gold'?1:0);
-   if(context){assert.equal(context.contentId,mapContentId(original));assert.equal(context.bossId,'karte_boss_maikaefer_koenig');assert.equal(context.themeId,'gold');}
+   assert.equal(starts,1);
+   if(context){assert.equal(context.contentId,mapContentId(original));assert.equal(context.bossId,boss.id);assert.equal(context.themeId,themeOverride);}
   }finally{s.disposeSurvey();}
  }
 });

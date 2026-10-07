@@ -6,7 +6,7 @@ export function createGoldMapBoss({themeId,level}={}){
  const boss=resolveSpecialThemeBoss(themeId,level,{strict:true}),s=boss.scaledStats;
  const scale=s.maxHp/32000;
  const physical=(id,name,powerPerHit,speedModifier=0)=>({id,name,actionType:'physicalAttack',hitCount:1,powerPerHit,speedModifier,effects:[]});
- return {...boss,...s,candidate:'v2-gold-boss-combat-candidate-1',race:'insect',battleSize:'large',isBoss:true,
+ return {...boss,...s,candidate:'v2-gold-boss-combat-candidate-1',ambientEffect:'gold-king',race:'insect',battleSize:'large',isBoss:true,
   // Weapon component is deliberately below STR; spells use the existing neutral elemental multipliers.
   attack:Math.round(50*scale),
   actions:[{weight:35,action:physical('gold_king_attack','攻撃',1)},

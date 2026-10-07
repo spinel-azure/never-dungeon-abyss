@@ -1,3 +1,4 @@
+import {reviveGoddess} from './karte-goddesses.js';
 import { reviveAkashicEnemy } from "./akashic-phantoms.js";
 import { getChargeGain } from "./charge-gain.js";
 import { absorbBossMagicBarrier } from "./boss-magic-barrier.js";
@@ -515,6 +516,7 @@ function setNpcVictory(battle) {
     battle.log.push(`${battle.player.name}は倒れた……`);
     return;
   }
+  if (reviveGoddess(battle,battle.enemy,Array.isArray(battle.enemies)?battle.enemies.indexOf(battle.enemy):undefined)) return;
   if (reviveAkashicEnemy(battle, battle.enemy, Array.isArray(battle.enemies) ? battle.enemies.indexOf(battle.enemy) : undefined)) return;
   battle.enemy.hp = 0;
   battle.enemy.alive = false;

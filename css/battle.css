@@ -1030,3 +1030,10 @@ body.battle-active .viewport > #treasureCanvas {
 .is-akashic-battle .battle-enemy-heading { flex-shrink: 0; }
 .is-akashic-battle .battle-enemy-image { min-height: 0; max-height: calc(100% - 54px); }
 .is-akashic-battle .battle-enemy-name { font-size: clamp(17px, 4.4vw, 26px); }
+
+/* Original magic-circle asset, below sprites/HUD, isolated from the exploration renderer. */
+.battle-screen.is-goddess-battle { background:#08091f; }
+.goddess-battle-circle { position:absolute;left:50%;top:50%;width:92%;height:auto;aspect-ratio:1;object-fit:contain;opacity:.8;pointer-events:none;animation:goddess-circle-rotate 80s linear infinite;transform:translate(-50%,-50%); }
+.goddess-battle-circle[hidden] { display:none; }
+@keyframes goddess-circle-rotate { from { transform:translate(-50%,-50%) rotate(0deg); } to { transform:translate(-50%,-50%) rotate(360deg); } }
+@media(prefers-reduced-motion:reduce) { .goddess-battle-circle { animation:none; } }

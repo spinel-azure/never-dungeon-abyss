@@ -1,5 +1,10 @@
+import {drawSpecialBossSparkles} from './special-map/boss-sparkles.js';
 // Normalized image-space emitters: x, y, width, rise. No boss-ID checks or image edits.
 export const ENEMY_AMBIENT_EFFECTS = Object.freeze({
+  'gold-king':Object.freeze({kind:'specialMapGlow',bossId:'karte_boss_maikaefer_koenig'}),
+  'goddess-rice':Object.freeze({kind:'specialMapGlow',bossId:'karte_boss_lumina'}),
+  'goddess-dusk':Object.freeze({kind:'specialMapGlow',bossId:'karte_boss_noctia'}),
+  'goddess-tender':Object.freeze({kind:'specialMapGlow',bossId:'karte_boss_zelena'}),
   'aquarius-shield': Object.freeze({kind:'aquariusShield'}),
   'water-splash': Object.freeze({ kind: 'waterSplash' }),
   'arrow-glint': Object.freeze({ kind: 'arrowGlint', point: Object.freeze([.972, .287]) }),
@@ -273,6 +278,12 @@ function flame(ctx, emitter, time, seed, strength) {
 
 export function drawEnemyAmbientFrame(entry, seconds, fps, reducedMotion = false) {
   const { profile, concealed } = entry;
+  if(profile.kind==='specialMapGlow'){
+    for(const canvas of [entry.back,entry.front])canvas.getContext('2d')?.clearRect(0,0,canvas.width,canvas.height);
+    if(concealed)return;
+    const c=entry.front,ctx=c.getContext('2d');if(ctx)drawSpecialBossSparkles(ctx,profile.bossId,seconds*1000,{x:c.width*.15/1.3,y:c.height*.22/1.3,width:c.width/1.3,height:c.height/1.3,reducedMotion});
+    return;
+  }
   if (profile.kind === 'aquariusShield') {
     for(const canvas of [entry.back,entry.front]) canvas.getContext('2d')?.clearRect(0,0,canvas.width,canvas.height);
     const canvas=entry.front,ctx=canvas.getContext('2d');if(!ctx)return;

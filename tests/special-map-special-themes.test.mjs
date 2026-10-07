@@ -46,7 +46,7 @@ test('goddess numeric stats use integer 90/95/100 percent; SP stays 9999',()=>{
  for(const [themeId,values] of Object.entries(expected))for(const level of [80,89,90,99,100]){
   const boss=resolveSpecialThemeBoss(themeId,level),s=boss.scaledStats,p=level===100?100:level>=90?95:90;
   assert.deepEqual([s.maxHp,s.stats.str,s.stats.int,s.stats.agi,s.stats.dex,s.stats.luc,s.def,s.magicDefense],values.map(v=>Math.floor((v*p+50)/100)));
-  assert.equal(s.maxSp,9999);assert.equal(boss.battleEnabled,false);assert.equal(boss.resistanceProfile.nonImmuneAilmentsMaySucceed,true);
+  assert.equal(s.maxSp,9999);assert.equal(boss.battleEnabled,true);assert.equal(boss.resistanceProfile.nonImmuneAilmentsMaySucceed,true);
  }
  assert.equal(KARTE_SPECIAL_BOSSES.karte_boss_zelena.design.phaseDesign.reviveRatio,.3);
 });

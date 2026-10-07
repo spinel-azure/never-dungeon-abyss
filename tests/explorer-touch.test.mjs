@@ -39,9 +39,9 @@ function setup(t,layout='layout-mobile',initial=fixture(),extra={}){
 
 test('favorite star stays in list/detail and confirmation retains detail background and content',t=>{
  const initial=normalizeSpecialMaps({discovererName:'QA',registered:[{rulesetVersion:'special-map-v2',seed:12345,level:50,rarity:'WHITE',discovererName:'QA',favorite:true}]});
- const v=setup(t,'layout-mobile',initial);v.ui.open('maps');assert.match(v.host.textContent,/Lv\.50★/);
+ const v=setup(t,'layout-mobile',initial);v.ui.open('maps');assert.match(v.host.textContent,/Lv\.50 ⭐/);
  v.ui.input('confirm');const bg=v.background.src;assert.match(v.host.textContent,/地図詳細/);
- v.ui.input('confirm');assert.equal(v.background.src,bg);assert.match(v.host.textContent,/地図詳細/);assert.match(v.host.textContent,/Lv\.50★/);assert.match(v.host.textContent,/この地図を探索しますか/);
+ v.ui.input('confirm');assert.equal(v.background.src,bg);assert.match(v.host.textContent,/地図詳細/);assert.match(v.host.textContent,/Lv\.50 ⭐/);assert.match(v.host.textContent,/この地図を探索しますか/);
  v.ui.input('cancel');assert.doesNotMatch(v.host.textContent,/この地図を探索しますか/);assert.match(v.host.textContent,/探索する/);
 });
 test('V2 uses existing detail UI and passes its original to the exploration dispatcher',t=>{

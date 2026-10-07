@@ -1,4 +1,5 @@
 import { isCharmed, charmAction, getAkashicPreparation, capAkashicDot, reviveAkashicEnemy } from "./akashic-phantoms.js";
+import {isGoddess,selectGoddessAction,prepareGoddessAction,executeGoddessUtility,finishGoddessAction,reviveGoddess,capGoddessDot,recordGoddessStatus} from './karte-goddesses.js';
 import { applyWingGift } from "../data/wing-gift.js";
 import { isLionQueen, selectLionAction, prepareLionAction, payLionSelfDamage, capLionDamageOverTime, synchronizeLionQueen, exposeLionQueen, prepareLionOpening, finishLionPlayerAction, clearLionOpenings } from './loewenkoenigin.js';
 import { prepareLeoAttack, payLeoAttackCost } from './leo.js';
@@ -889,6 +890,7 @@ export function createEnemyAction(enemy, rng = Math.random, context = {}) {
   if (isWassermannfrau(enemy)) return buildEnemyAction(selectWassermannfrauAction(enemy, context.battle?.player, rng), attack);
   if (enemy?.reservedEnemyAction) {
     const reserved = structuredClone(enemy.reservedEnemyAction);
+    if (isGoddess(enemy) && enemy.goddessTheme === "rice" && enemy.hp <= enemy.maxHp * .5) reserved.speedModifier = (reserved.speedModifier || 0) + 12;
     return {
       ...buildEnemyAction(reserved, attack),
       reservedEnemyActionId: reserved.id
@@ -909,6 +911,7 @@ export function createEnemyAction(enemy, rng = Math.random, context = {}) {
     (status.id || status.statusId) === "action_seal" && status.active !== false
   );
   if (actionSealed) return attack;
+  if (isGoddess(enemy)) return buildEnemyAction(selectGoddessAction(enemy,context.battle,rng),attack);
   if (isLionQueen(enemy)) return buildEnemyAction(selectLionAction(enemy, rng), attack);
   const akashicPreparation = getAkashicPreparation(enemy);
   if (akashicPreparation) return buildEnemyAction(akashicPreparation, attack);
@@ -988,6 +991,10 @@ function buildEnemyAction(action, normalAttack) {
 
 function executeAction({ battle, action, actor, actorSide, actorIndex = null, target, targetSide, deferFollowUp = false, magicFocus = null, rng }) {
   const actionPresentationStart = battle.presentationEvents.length;
+  if(actorSide==='enemy'&&isGoddess(actor)) {
+    action=prepareGoddessAction(battle,actor,action);
+    if(executeGoddessUtility(battle,actor,action))return {followUpEligible:false,actualDamage:0,landedHitCount:0};
+  }
   if (actorSide === "enemy") action = prepareLionAction(battle, actor, action);
   if (actorSide === 'enemy' && isWassermannfrau(actor)) {
     synchronizeWassermannfrau(battle);
@@ -1075,6 +1082,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
   if (action.actionType === "spDrain") {
     const drained = Math.min(Math.max(0, Math.floor(Number(action.spDamage) || 0)), Math.max(0, Number(target.sp) || 0));
     target.sp = Math.max(0, target.sp - drained);
+    if(isGoddess(actor)&&action.goddessSpAbsorb)actor.sp=Math.min(actor.maxSp,actor.sp+drained);
     battle.log.push(`${actor.name}の${action.name}！ ${target.name}のSPが${drained}減少した！`);
     if (drained > 0) battle.presentationEvents.push({ type: "spDamage", actorSide, targetSide, amount: drained, message: `SP－${drained}` });
     return;
@@ -1099,6 +1107,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
       battle.presentationEvents.push({ type: "message", message: action.prepareMessage });
     }
     actor.reservedEnemyAction = structuredClone(action.reservedAction || null);
+    if(isGoddess(actor))battle.presentationEvents.push({type:'message',message:action.prepareMessage});
     battle.log.push(action.prepareMessage || `${actor.name}は次の攻撃に備えた！`);
     if (isLionQueen(actor)) battle.presentationEvents.push({type:"message",message:action.prepareMessage});
     if (actor.twinWhirlpool) battle.presentationEvents.push({ type: "message", message: action.prepareMessage, whirlpoolActorId: actor.id, whirlpoolPreparing: true });
@@ -1489,6 +1498,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
         * (Number(action.geminiDamageMultiplier) || 1)
         * (Number(action.leoDamageMultiplier) || 1)
         * (Number(action.lionDamageMultiplier) || 1)
+        * (Number(action.goddessDamageMultiplier) || 1)
     )) : 0
   }));
   if (actorSide === "enemy" && targetSide === "player" && action.id === "tiefstrom_whirlpool") {
@@ -1730,6 +1740,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     ...resolvedHits.flatMap(hit => hit.effects || []),
     ...(result.actionEffects || [])
   ];
+  recordGoddessStatus(target,applications);
   target.statuses = applyStatusApplications(target.statuses, applications.map(application => (
     application.statusId === "action_seal" && target.isBoss
       ? { ...application, duration: 1 }
@@ -1744,7 +1755,9 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     && !target.capturePuzzle) {
     const scorpio = getCardById("zodiac_scorpio");
     const rate = getScorpioDeathPoisonRate(target);
-    if (Number(rng()) < rate) {
+    const success=Number(rng()) < rate;
+    recordGoddessStatus(target,[{statusId:"death_poison",success}]);
+    if (success) {
       target.statuses = applyStatusApplications(target.statuses, [{
         statusId: "death_poison",
         success: true,
@@ -2020,7 +2033,7 @@ function finishAction(battle, side) {
 function finishCombatantAction(battle, actor, side, targetIndex = null) {
   if (actor.id === ZENTAURIN_ID && actor.zentaurinPrideActions > 0) actor.zentaurinPrideActions -= 1;
   payLionSelfDamage(battle, actor, targetIndex);
-  const end = capAkashicDot(actor, capLionDamageOverTime(actor, resolveEndOfAction({ statuses: actor.statuses, maxHp: actor.maxHp })));
+  const end = capGoddessDot(actor,capAkashicDot(actor, capLionDamageOverTime(actor, resolveEndOfAction({ statuses: actor.statuses, maxHp: actor.maxHp }))));
   actor.statuses = end.statuses;
   if (actor.bossMagicBarrier > 0) {
     const dot = ['poisonDamage','bleedingDamage','deadlyPoisonDamage','deathPoisonDamage'];
@@ -2091,6 +2104,7 @@ function finishCombatantAction(battle, actor, side, targetIndex = null) {
     }
   }
   if (side === 'player' && (battle.enemies || [battle.enemy]).some(isWassermannfrau)) finishWassermannfrauPlayerAction(battle);
+  if(side==='enemy')finishGoddessAction(battle,actor);
 }
 
 function resolveClassRecovery(battle) {
@@ -2126,6 +2140,7 @@ function updateMultiOutcome(battle) {
     return;
   }
   battle.enemies.forEach((enemy, index) => reviveAkashicEnemy(battle, enemy, index));
+  battle.enemies.forEach((enemy,index)=>reviveGoddess(battle,enemy,index));
   if (livingEnemyIndexes(battle.enemies).length > 0) return;
   battle.outcome = "victory";
   battle.phase = "complete";
@@ -2166,6 +2181,7 @@ function updateOutcome(battle) {
     return;
   }
   reviveAkashicEnemy(battle, battle.enemy);
+  reviveGoddess(battle,battle.enemy);
   if (battle.enemy.hp <= 0 && battle.enemy.capturePuzzle) {
     battle.enemy.hp = 0;
     battle.enemy.alive = false;
@@ -2253,6 +2269,7 @@ function combatStats(combatant) {
 }
 
 export function getScorpioDeathPoisonRate(target = {}) {
+  if(isGoddess(target))return .01;
   const card = getCardById("zodiac_scorpio");
   const rate = Math.max(0, Math.min(1, Number(card?.deathPoisonApplicationRate) || 0));
   return target?.isBoss

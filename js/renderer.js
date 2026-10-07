@@ -1,3 +1,4 @@
+import {drawSpecialBossSparkles,SPECIAL_BOSS_GLOW} from './special-map/boss-sparkles.js';
 import { drawQueenProjection } from "./akashic-presentation.js";
 import {SPECIAL_THEME_DEFINITIONS} from '../data/special-map-themes.js';
 import {syncLionBath} from './lion-bath.js';
@@ -1700,7 +1701,9 @@ function drawNpcEvent(ctx, event, now = 0) {
     const drawW = drawH * (image.naturalWidth / image.naturalHeight) * effect.scaleX;
     const drawX = event.x - drawW / 2 + drawW * effect.offsetXRatio;
     bounds = { x: drawX, y: top, width: drawW, height: drawH };
+    if(SPECIAL_BOSS_GLOW[event.npc.imageId]){ctx.shadowColor=SPECIAL_BOSS_GLOW[event.npc.imageId];ctx.shadowBlur=drawH*.045;}
     ctx.drawImage(image, drawX, top, drawW, drawH);
+    drawSpecialBossSparkles(ctx,event.npc.imageId,now,{...bounds,reducedMotion:Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches)});
   } else {
     ctx.fillStyle = "rgba(255,232,186,.72)";
     ctx.fillRect(bounds.x, top, fallbackW, drawH);

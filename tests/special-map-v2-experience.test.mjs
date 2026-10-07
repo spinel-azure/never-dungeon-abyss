@@ -1,3 +1,4 @@
+import {createGoddessMapBoss} from '../data/karte-goddess-bosses.js';
 import {createGoldMapBoss} from '../data/karte-gold-boss.js';
 import {beginNpcRenewal} from '../data/npc-party.js';
 import test from 'node:test';
@@ -182,4 +183,20 @@ test('experience cap consumes the V2 balance exactly once; normal legacy settlem
  assert.equal(ordinary.settlement.returnFloor,10);assert.equal(ordinary.settlement.finalSettlementExp,815);
  Object.assign(h.c,ordinary.changes);assert.equal(h.c.experience,1945);assert.equal(h.c.carriedExperience,0);
  assert.equal(h.c.pendingExperienceSettlement,null);assert.equal(h.c.guildExperiencePool,333);
+});
+
+for(const theme of ['rice','dusk','tender'])test(`${theme} goddess production outcome: victory once, same runtime, defeat save retry and grace`,async t=>{
+ const source='special-map-v2-special-boss';const h=harness(t,100,[GODDESS_GRACE_CARD_ID]),normal=protectedState(h.c);
+ const make=()=>{const b=h.battle();h.session.battleContext.source=source;h.session.battleContext.bossId='karte_boss_001';b.explorationContext=structuredClone(h.session.battleContext);b.enemy=createEnemyCombatant(createGoddessMapBoss({themeId:theme,level:100}));return b;};
+ h.session.currentFloor=2;h.session.playerX=6;h.session.playerY=0;h.session.direction=1;h.session.torchFuel=63;h.session.bossKeyFound=h.session.bossDoorUnlocked=true;
+ const before=JSON.stringify({x:h.session.playerX,y:h.session.playerY,dir:h.session.direction,torch:h.session.torchFuel,survey:h.session.surveyedMasks});
+ const win=make();win.enemy.hp=0;win.enemy.alive=false;await h.scope.outcome(win,'victory');
+ const reward=h.session.battleExperience;assert.ok(reward>0);assert.equal(h.session.bossDefeated,true);assert.equal(h.session.battleContext,null);assert.ok(h.session.presence<100);
+ assert.equal(JSON.stringify({x:h.session.playerX,y:h.session.playerY,dir:h.session.direction,torch:h.session.torchFuel,survey:h.session.surveyedMasks}),before);
+ await h.scope.outcome(structuredClone(win),'victory');assert.equal(h.session.battleExperience,reward);
+ const loss=make();h.surveyOk(false);await h.scope.outcome(loss,'defeat');assert.equal(h.exits,0);
+ h.surveyOk(true);h.saveOk(false);await h.session.defeatRetry();assert.equal(h.exits,0);assert.equal(h.session.battleExperience,reward);
+ h.saveOk(true);await h.session.defeatRetry();assert.equal(h.exits,1);assert.equal(h.session.battleExperience,0);
+ assert.deepEqual(protectedState(h.c),normal);assert.equal(h.c.experience,1000+reward);
+ await h.scope.outcome(loss,'defeat');assert.equal(h.exits,1);
 });

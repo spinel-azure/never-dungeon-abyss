@@ -1,0 +1,5650 @@
+{
+  "candidate": 1,
+  "trials": 10,
+  "npcs": "Alec Rebecca Erika stage9; 40 healing potions; B90 gear+3; standard player level = map level; Z6 player level200",
+  "rows": [
+    {
+      "theme": "rice",
+      "level": 80,
+      "job": "warrior",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {
+        "armor_break": {
+          "attempts": 142,
+          "successes": 142
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 144,
+          "mean": 46.78472222222222
+        },
+        "after": {
+          "hits": 339,
+          "mean": 57.47787610619469
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 43.4,
+      "medianTurns": 41,
+      "maxTurns": 60,
+      "heals": 7.1,
+      "bossHealing": 855,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 2622.2,
+      "playerHp": 216.8,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 80,
+      "job": "warrior",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "armor_break": {
+          "attempts": 155,
+          "successes": 155
+        },
+        "death_poison": {
+          "attempts": 224,
+          "successes": 2
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 152,
+          "mean": 47.78947368421053
+        },
+        "after": {
+          "hits": 317,
+          "mean": 57.41640378548896
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 41.3,
+      "medianTurns": 41.5,
+      "maxTurns": 62,
+      "heals": 7.7,
+      "bossHealing": 765,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 64,
+      "poisonTurns": 1.2,
+      "playerDamage": 2546.5,
+      "playerHp": 243.8,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 80,
+      "job": "warrior",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 153,
+          "successes": 1
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 93,
+          "mean": 41.40860215053763
+        },
+        "after": {
+          "hits": 80,
+          "mean": 40.1875
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 17.1,
+      "medianTurns": 17,
+      "maxTurns": 19,
+      "heals": 0,
+      "bossHealing": 495,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 19.2,
+      "poisonTurns": 0.4,
+      "playerDamage": 706.6,
+      "playerHp": 1359.2,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 80,
+      "job": "warrior",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 94,
+          "mean": 43.255319148936174
+        },
+        "after": {
+          "hits": 76,
+          "mean": 41.06578947368421
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 16.9,
+      "medianTurns": 17,
+      "maxTurns": 18,
+      "heals": 0,
+      "bossHealing": 405,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 718.7,
+      "playerHp": 1327.1,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 80,
+      "job": "thief",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 102,
+          "mean": 43.98039215686274
+        },
+        "after": {
+          "hits": 259,
+          "mean": 56.3938223938224
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 33.7,
+      "medianTurns": 33.5,
+      "maxTurns": 39,
+      "heals": 7.2,
+      "bossHealing": 765,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 1909.2,
+      "playerHp": 190.7,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 80,
+      "job": "thief",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 248,
+          "successes": 3
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 107,
+          "mean": 46.626168224299064
+        },
+        "after": {
+          "hits": 291,
+          "mean": 56.42611683848797
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 36.2,
+      "medianTurns": 36,
+      "maxTurns": 41,
+      "heals": 8.8,
+      "bossHealing": 810,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 83.2,
+      "poisonTurns": 1.6,
+      "playerDamage": 2140.9,
+      "playerHp": 185.9,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 80,
+      "job": "thief",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 166,
+          "successes": 0
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 87,
+          "mean": 40.95402298850575
+        },
+        "after": {
+          "hits": 9,
+          "mean": 47.111111111111114
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 9.5,
+      "medianTurns": 9.5,
+      "maxTurns": 11,
+      "heals": 0,
+      "bossHealing": 225,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 398.7,
+      "playerHp": 822.4,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 80,
+      "job": "thief",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 85,
+          "mean": 41.34117647058824
+        },
+        "after": {
+          "hits": 7,
+          "mean": 41
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 9.1,
+      "medianTurns": 9,
+      "maxTurns": 11,
+      "heals": 0,
+      "bossHealing": 180,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 380.1,
+      "playerHp": 1240.9,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 80,
+      "job": "mage",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 166,
+          "successes": 43
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 110,
+          "mean": 51.03636363636364
+        },
+        "after": {
+          "hits": 170,
+          "mean": 58.82941176470588
+        }
+      },
+      "wins": 3,
+      "timeouts": 0,
+      "meanTurns": 29.6,
+      "medianTurns": 30.5,
+      "maxTurns": 56,
+      "heals": 9.5,
+      "bossHealing": 540,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 1561.5,
+      "playerHp": 50.7,
+      "bossHp": 2620,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 80,
+      "job": "mage",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 152,
+          "successes": 37
+        },
+        "death_poison": {
+          "attempts": 170,
+          "successes": 2
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 110,
+          "mean": 50.45454545454545
+        },
+        "after": {
+          "hits": 172,
+          "mean": 59.88953488372093
+        }
+      },
+      "wins": 4,
+      "timeouts": 0,
+      "meanTurns": 29.6,
+      "medianTurns": 22,
+      "maxTurns": 53,
+      "heals": 10,
+      "bossHealing": 450,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 64,
+      "poisonTurns": 1.2,
+      "playerDamage": 1585.1,
+      "playerHp": 54,
+      "bossHp": 1951.2,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 80,
+      "job": "mage",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 361,
+          "successes": 83
+        },
+        "death_poison": {
+          "attempts": 379,
+          "successes": 1
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 56,
+          "mean": 43.714285714285715
+        },
+        "after": {
+          "hits": 81,
+          "mean": 40.17283950617284
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 21,
+      "medianTurns": 21.5,
+      "maxTurns": 24,
+      "heals": 0,
+      "bossHealing": 495,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 57.6,
+      "poisonTurns": 1,
+      "playerDamage": 570.2,
+      "playerHp": 786,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 80,
+      "job": "mage",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 312,
+          "successes": 78
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 52,
+          "mean": 43.88461538461539
+        },
+        "after": {
+          "hits": 64,
+          "mean": 41.34375
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 19,
+      "medianTurns": 19.5,
+      "maxTurns": 22,
+      "heals": 0,
+      "bossHealing": 180,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 492.8,
+      "playerHp": 801.8,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 80,
+      "job": "priest",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 307,
+          "mean": 48.185667752442995
+        },
+        "after": {
+          "hits": 487,
+          "mean": 54.38603696098563
+        }
+      },
+      "wins": 8,
+      "timeouts": 0,
+      "meanTurns": 66.9,
+      "medianTurns": 70.5,
+      "maxTurns": 76,
+      "heals": 23.8,
+      "bossHealing": 900,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 4127.9,
+      "playerHp": 114.6,
+      "bossHp": 461.6,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 80,
+      "job": "priest",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 383,
+          "successes": 6
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 289,
+          "mean": 48.02768166089965
+        },
+        "after": {
+          "hits": 519,
+          "mean": 55.47976878612717
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 70.2,
+      "medianTurns": 68,
+      "maxTurns": 86,
+      "heals": 24.6,
+      "bossHealing": 900,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 584.4,
+      "poisonTurns": 9.8,
+      "playerDamage": 4267.4,
+      "playerHp": 168.3,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 80,
+      "job": "priest",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 867,
+          "successes": 7
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 224,
+          "mean": 37.044642857142854
+        },
+        "after": {
+          "hits": 320,
+          "mean": 34.903125
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 49.6,
+      "medianTurns": 50,
+      "maxTurns": 60,
+      "heals": 0,
+      "bossHealing": 810,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 595.2,
+      "poisonTurns": 10.1,
+      "playerDamage": 1946.7,
+      "playerHp": 1085.5,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 80,
+      "job": "priest",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 286,
+          "mean": 33.54195804195804
+        },
+        "after": {
+          "hits": 339,
+          "mean": 35.0117994100295
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 54.1,
+      "medianTurns": 54,
+      "maxTurns": 59,
+      "heals": 0,
+      "bossHealing": 855,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 2146.2,
+      "playerHp": 1113,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 90,
+      "job": "warrior",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {
+        "armor_break": {
+          "attempts": 178,
+          "successes": 178
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 146,
+          "mean": 48.36986301369863
+        },
+        "after": {
+          "hits": 335,
+          "mean": 60.62985074626866
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 43.8,
+      "medianTurns": 41,
+      "maxTurns": 56,
+      "heals": 5.9,
+      "bossHealing": 950,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 2737.3,
+      "playerHp": 261,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 90,
+      "job": "warrior",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "armor_break": {
+          "attempts": 180,
+          "successes": 180
+        },
+        "death_poison": {
+          "attempts": 275,
+          "successes": 2
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 187,
+          "mean": 51.45989304812834
+        },
+        "after": {
+          "hits": 376,
+          "mean": 60.31117021276596
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 50.2,
+      "medianTurns": 49,
+      "maxTurns": 59,
+      "heals": 7.3,
+      "bossHealing": 950,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 129.6,
+      "poisonTurns": 2.1,
+      "playerDamage": 3230,
+      "playerHp": 292.1,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 90,
+      "job": "warrior",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 161,
+          "successes": 1
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 102,
+          "mean": 42.64705882352941
+        },
+        "after": {
+          "hits": 85,
+          "mean": 40.976470588235294
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 18,
+      "medianTurns": 18,
+      "maxTurns": 20,
+      "heals": 0,
+      "bossHealing": 522.5,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 21.6,
+      "poisonTurns": 0.4,
+      "playerDamage": 783.3,
+      "playerHp": 1307.6,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 90,
+      "job": "warrior",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 95,
+          "mean": 44.61052631578947
+        },
+        "after": {
+          "hits": 84,
+          "mean": 41.67857142857143
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 17.7,
+      "medianTurns": 18,
+      "maxTurns": 19,
+      "heals": 0,
+      "bossHealing": 427.5,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 773.9,
+      "playerHp": 1306.6,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 90,
+      "job": "thief",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 95,
+          "mean": 46.09473684210526
+        },
+        "after": {
+          "hits": 252,
+          "mean": 58.551587301587304
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 33,
+      "medianTurns": 34.5,
+      "maxTurns": 38,
+      "heals": 5.7,
+      "bossHealing": 807.5,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 1913.4,
+      "playerHp": 236.8,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 90,
+      "job": "thief",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 265,
+          "successes": 4
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 104,
+          "mean": 48
+        },
+        "after": {
+          "hits": 288,
+          "mean": 58.80902777777778
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 36.3,
+      "medianTurns": 35.5,
+      "maxTurns": 45,
+      "heals": 7.1,
+      "bossHealing": 855,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 288,
+      "poisonTurns": 4.5,
+      "playerDamage": 2192.9,
+      "playerHp": 233.3,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 90,
+      "job": "thief",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 179,
+          "successes": 1
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 89,
+          "mean": 42.10112359550562
+        },
+        "after": {
+          "hits": 19,
+          "mean": 47.21052631578947
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 10.5,
+      "medianTurns": 10.5,
+      "maxTurns": 12,
+      "heals": 0,
+      "bossHealing": 332.5,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 7.2,
+      "poisonTurns": 0.2,
+      "playerDamage": 464.4,
+      "playerHp": 813,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 90,
+      "job": "thief",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 88,
+          "mean": 42.45454545454545
+        },
+        "after": {
+          "hits": 15,
+          "mean": 40.8
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 9.8,
+      "medianTurns": 10,
+      "maxTurns": 11,
+      "heals": 0,
+      "bossHealing": 190,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 434.8,
+      "playerHp": 1225,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 90,
+      "job": "mage",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 229,
+          "successes": 54
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 110,
+          "mean": 50.163636363636364
+        },
+        "after": {
+          "hits": 322,
+          "mean": 63.816770186335404
+        }
+      },
+      "wins": 8,
+      "timeouts": 0,
+      "meanTurns": 43.2,
+      "medianTurns": 47,
+      "maxTurns": 55,
+      "heals": 15,
+      "bossHealing": 855,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 2606.7,
+      "playerHp": 118.2,
+      "bossHp": 628.2,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 90,
+      "job": "mage",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 253,
+          "successes": 56
+        },
+        "death_poison": {
+          "attempts": 281,
+          "successes": 3
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 95,
+          "mean": 51.26315789473684
+        },
+        "after": {
+          "hits": 406,
+          "mean": 63.1871921182266
+        }
+      },
+      "wins": 8,
+      "timeouts": 0,
+      "meanTurns": 49.8,
+      "medianTurns": 49.5,
+      "maxTurns": 60,
+      "heals": 18.3,
+      "bossHealing": 902.5,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 172.8,
+      "poisonTurns": 2.7,
+      "playerDamage": 3052.4,
+      "playerHp": 123.4,
+      "bossHp": 90.1,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 90,
+      "job": "mage",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 416,
+          "successes": 95
+        },
+        "death_poison": {
+          "attempts": 435,
+          "successes": 1
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 56,
+          "mean": 44.92857142857143
+        },
+        "after": {
+          "hits": 100,
+          "mean": 40.9
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 23.8,
+      "medianTurns": 25,
+      "maxTurns": 26,
+      "heals": 0,
+      "bossHealing": 617.5,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 64.8,
+      "poisonTurns": 1,
+      "playerDamage": 660.6,
+      "playerHp": 793,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 90,
+      "job": "mage",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 371,
+          "successes": 94
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 52,
+          "mean": 45.26923076923077
+        },
+        "after": {
+          "hits": 86,
+          "mean": 40.86046511627907
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 22.4,
+      "medianTurns": 22.5,
+      "maxTurns": 26,
+      "heals": 0,
+      "bossHealing": 332.5,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 586.8,
+      "playerHp": 790,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 90,
+      "job": "priest",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 287,
+          "mean": 49.3205574912892
+        },
+        "after": {
+          "hits": 566,
+          "mean": 57.39399293286219
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 73.3,
+      "medianTurns": 75.5,
+      "maxTurns": 80,
+      "heals": 22.7,
+      "bossHealing": 950,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 4664,
+      "playerHp": 185,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 90,
+      "job": "priest",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 440,
+          "successes": 1
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 299,
+          "mean": 48.94648829431438
+        },
+        "after": {
+          "hits": 550,
+          "mean": 58.16
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 75.1,
+      "medianTurns": 74,
+      "maxTurns": 85,
+      "heals": 21.8,
+      "bossHealing": 950,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 136.8,
+      "poisonTurns": 2.1,
+      "playerDamage": 4662.3,
+      "playerHp": 199.2,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 90,
+      "job": "priest",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 924,
+          "successes": 8
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 230,
+          "mean": 38.130434782608695
+        },
+        "after": {
+          "hits": 343,
+          "mean": 36.39067055393586
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 52.6,
+      "medianTurns": 52,
+      "maxTurns": 57,
+      "heals": 0,
+      "bossHealing": 950,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 626.4,
+      "poisonTurns": 9.5,
+      "playerDamage": 2125.2,
+      "playerHp": 1086,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 90,
+      "job": "priest",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 303,
+          "mean": 34.445544554455445
+        },
+        "after": {
+          "hits": 355,
+          "mean": 36.80281690140845
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 56.5,
+      "medianTurns": 56,
+      "maxTurns": 64,
+      "heals": 0,
+      "bossHealing": 902.5,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 2350.2,
+      "playerHp": 1096.9,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 100,
+      "job": "warrior",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {
+        "armor_break": {
+          "attempts": 200,
+          "successes": 200
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 129,
+          "mean": 51.86821705426357
+        },
+        "after": {
+          "hits": 325,
+          "mean": 61.652307692307694
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 42.4,
+      "medianTurns": 42,
+      "maxTurns": 54,
+      "heals": 4.3,
+      "bossHealing": 1000,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 2672.8,
+      "playerHp": 301.5,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 100,
+      "job": "warrior",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "armor_break": {
+          "attempts": 210,
+          "successes": 210
+        },
+        "death_poison": {
+          "attempts": 276,
+          "successes": 3
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 169,
+          "mean": 53.798816568047336
+        },
+        "after": {
+          "hits": 371,
+          "mean": 63.8733153638814
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 47.3,
+      "medianTurns": 47,
+      "maxTurns": 53,
+      "heals": 6.7,
+      "bossHealing": 1000,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 56,
+      "poisonTurns": 1.1,
+      "playerDamage": 3278.9,
+      "playerHp": 286.6,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 100,
+      "job": "warrior",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 167,
+          "successes": 2
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 103,
+          "mean": 43.80582524271845
+        },
+        "after": {
+          "hits": 92,
+          "mean": 42.57608695652174
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 18.7,
+      "medianTurns": 19,
+      "maxTurns": 21,
+      "heals": 0,
+      "bossHealing": 500,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 48,
+      "poisonTurns": 0.8,
+      "playerDamage": 842.9,
+      "playerHp": 1318.8,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 100,
+      "job": "warrior",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 99,
+          "mean": 45.707070707070706
+        },
+        "after": {
+          "hits": 90,
+          "mean": 42.5
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 18.6,
+      "medianTurns": 19,
+      "maxTurns": 20,
+      "heals": 0,
+      "bossHealing": 450,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 835,
+      "playerHp": 1318.9,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 100,
+      "job": "thief",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 99,
+          "mean": 47.474747474747474
+        },
+        "after": {
+          "hits": 285,
+          "mean": 63.24912280701754
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 34.8,
+      "medianTurns": 35,
+      "maxTurns": 40,
+      "heals": 6.3,
+      "bossHealing": 900,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 2272.6,
+      "playerHp": 228,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 100,
+      "job": "thief",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 285,
+          "successes": 4
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 108,
+          "mean": 51.02777777777778
+        },
+        "after": {
+          "hits": 312,
+          "mean": 63.00320512820513
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 38.9,
+      "medianTurns": 39.5,
+      "maxTurns": 43,
+      "heals": 7.2,
+      "bossHealing": 950,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 256,
+      "poisonTurns": 3.8,
+      "playerDamage": 2516.8,
+      "playerHp": 226.2,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 100,
+      "job": "thief",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 197,
+          "successes": 1
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 89,
+          "mean": 43.70786516853933
+        },
+        "after": {
+          "hits": 29,
+          "mean": 47.55172413793103
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 11.7,
+      "medianTurns": 11.5,
+      "maxTurns": 14,
+      "heals": 0,
+      "bossHealing": 400,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 8,
+      "poisonTurns": 0.2,
+      "playerDamage": 526.9,
+      "playerHp": 813.3,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 100,
+      "job": "thief",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 88,
+          "mean": 44.02272727272727
+        },
+        "after": {
+          "hits": 23,
+          "mean": 42.34782608695652
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 10.4,
+      "medianTurns": 10,
+      "maxTurns": 12,
+      "heals": 0,
+      "bossHealing": 200,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 484.8,
+      "playerHp": 1231.3,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 100,
+      "job": "mage",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 280,
+          "successes": 74
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 108,
+          "mean": 52.46296296296296
+        },
+        "after": {
+          "hits": 382,
+          "mean": 65.55759162303664
+        }
+      },
+      "wins": 9,
+      "timeouts": 0,
+      "meanTurns": 50.5,
+      "medianTurns": 52,
+      "maxTurns": 63,
+      "heals": 15.9,
+      "bossHealing": 1000,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 3070.9,
+      "playerHp": 146.6,
+      "bossHp": 271.9,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 100,
+      "job": "mage",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 266,
+          "successes": 61
+        },
+        "death_poison": {
+          "attempts": 296,
+          "successes": 4
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 89,
+          "mean": 52.337078651685395
+        },
+        "after": {
+          "hits": 428,
+          "mean": 68.19859813084112
+        }
+      },
+      "wins": 8,
+      "timeouts": 0,
+      "meanTurns": 51.4,
+      "medianTurns": 49.5,
+      "maxTurns": 62,
+      "heals": 18.3,
+      "bossHealing": 950,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 224,
+      "poisonTurns": 3.3,
+      "playerDamage": 3384.7,
+      "playerHp": 148.3,
+      "bossHp": 170.7,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 100,
+      "job": "mage",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 434,
+          "successes": 103
+        },
+        "death_poison": {
+          "attempts": 456,
+          "successes": 3
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 56,
+          "mean": 46.375
+        },
+        "after": {
+          "hits": 108,
+          "mean": 41.925925925925924
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 25.2,
+      "medianTurns": 26,
+      "maxTurns": 28,
+      "heals": 0,
+      "bossHealing": 700,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 88,
+      "poisonTurns": 1.5,
+      "playerDamage": 712.5,
+      "playerHp": 792.7,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 100,
+      "job": "mage",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 414,
+          "successes": 105
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 52,
+          "mean": 46.69230769230769
+        },
+        "after": {
+          "hits": 99,
+          "mean": 42.04040404040404
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 25,
+      "medianTurns": 25.5,
+      "maxTurns": 28,
+      "heals": 0,
+      "bossHealing": 400,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 659,
+      "playerHp": 797.5,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 100,
+      "job": "priest",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 318,
+          "mean": 51.70125786163522
+        },
+        "after": {
+          "hits": 557,
+          "mean": 61.30879712746858
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 74,
+      "medianTurns": 73.5,
+      "maxTurns": 80,
+      "heals": 20.8,
+      "bossHealing": 1000,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 5059,
+      "playerHp": 175.8,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 100,
+      "job": "priest",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 471,
+          "successes": 1
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 331,
+          "mean": 53.91238670694864
+        },
+        "after": {
+          "hits": 580,
+          "mean": 62.936206896551724
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 77.6,
+      "medianTurns": 76.5,
+      "maxTurns": 89,
+      "heals": 23.2,
+      "bossHealing": 1000,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 48.1,
+      "poisonTurns": 0.8,
+      "playerDamage": 5434.8,
+      "playerHp": 180.1,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 100,
+      "job": "priest",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 958,
+          "successes": 8
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 239,
+          "mean": 39.15481171548117
+        },
+        "after": {
+          "hits": 356,
+          "mean": 37.76123595505618
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 54.9,
+      "medianTurns": 54,
+      "maxTurns": 60,
+      "heals": 0,
+      "bossHealing": 1000,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 720,
+      "poisonTurns": 9.9,
+      "playerDamage": 2280.1,
+      "playerHp": 1107.4,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "rice",
+      "level": 100,
+      "job": "priest",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 312,
+          "mean": 35.77884615384615
+        },
+        "after": {
+          "hits": 377,
+          "mean": 38.249336870026525
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 59.2,
+      "medianTurns": 59,
+      "maxTurns": 64,
+      "heals": 0,
+      "bossHealing": 950,
+      "bossBarrier": 0,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 2558.3,
+      "playerHp": 1103.4,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 80,
+      "job": "warrior",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {
+        "armor_break": {
+          "attempts": 84,
+          "successes": 84
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 271,
+          "mean": 29.04059040590406
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 43.2,
+      "medianTurns": 46,
+      "maxTurns": 51,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 450,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 787,
+      "playerHp": 314.7,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 80,
+      "job": "warrior",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "armor_break": {
+          "attempts": 60,
+          "successes": 60
+        },
+        "death_poison": {
+          "attempts": 237,
+          "successes": 0
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 268,
+          "mean": 30.779850746268657
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 41.1,
+      "medianTurns": 42.5,
+      "maxTurns": 52,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 522,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 824.9,
+      "playerHp": 305.4,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 80,
+      "job": "warrior",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 128,
+          "successes": 2
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 109,
+          "mean": 39.43119266055046
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 16.4,
+      "medianTurns": 16.5,
+      "maxTurns": 18,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 198,
+      "deathPoisonDamage": 115.2,
+      "poisonTurns": 2.1,
+      "playerDamage": 429.8,
+      "playerHp": 1340.8,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.19,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 80,
+      "job": "warrior",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 112,
+          "mean": 38.964285714285715
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 16.7,
+      "medianTurns": 16.5,
+      "maxTurns": 19,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 180,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 436.4,
+      "playerHp": 1329.2,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.2,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 80,
+      "job": "thief",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 238,
+          "mean": 33.7563025210084
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 37.2,
+      "medianTurns": 37,
+      "maxTurns": 50,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 468,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 803.4,
+      "playerHp": 251.8,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 80,
+      "job": "thief",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 307,
+          "successes": 1
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 264,
+          "mean": 32.77651515151515
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 41.1,
+      "medianTurns": 37.5,
+      "maxTurns": 62,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 504,
+      "deathPoisonDamage": 108.7,
+      "poisonTurns": 2.1,
+      "playerDamage": 865.3,
+      "playerHp": 251.2,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 80,
+      "job": "thief",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 137,
+          "successes": 3
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 66,
+          "mean": 40.84848484848485
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 8.8,
+      "medianTurns": 9,
+      "maxTurns": 10,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 72,
+      "deathPoisonDamage": 70.4,
+      "poisonTurns": 1.4,
+      "playerDamage": 269.6,
+      "playerHp": 833.8,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 80,
+      "job": "thief",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 71,
+          "mean": 42.40845070422535
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 10.3,
+      "medianTurns": 9,
+      "maxTurns": 17,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 126,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 301.1,
+      "playerHp": 1259.6,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.04,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 80,
+      "job": "mage",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 168,
+          "successes": 45
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 219,
+          "mean": 30.141552511415526
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 37.3,
+      "medianTurns": 36.5,
+      "maxTurns": 56,
+      "heals": 0.1,
+      "bossHealing": 0,
+      "bossBarrier": 396,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 660.1,
+      "playerHp": 169.3,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 80,
+      "job": "mage",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 152,
+          "successes": 31
+        },
+        "death_poison": {
+          "attempts": 250,
+          "successes": 2
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 227,
+          "mean": 33.11453744493392
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 40.1,
+      "medianTurns": 41,
+      "maxTurns": 48,
+      "heals": 0.2,
+      "bossHealing": 0,
+      "bossBarrier": 468,
+      "deathPoisonDamage": 249.6,
+      "poisonTurns": 4.4,
+      "playerDamage": 751.7,
+      "playerHp": 178.3,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 80,
+      "job": "mage",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 308,
+          "successes": 70
+        },
+        "death_poison": {
+          "attempts": 322,
+          "successes": 4
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 96,
+          "mean": 40.21875
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 21.7,
+      "medianTurns": 18.5,
+      "maxTurns": 36,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 288,
+      "deathPoisonDamage": 179.8,
+      "poisonTurns": 3.7,
+      "playerDamage": 386.1,
+      "playerHp": 802.6,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.3,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 80,
+      "job": "mage",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 276,
+          "successes": 55
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 90,
+          "mean": 39.82222222222222
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 21.1,
+      "medianTurns": 18.5,
+      "maxTurns": 40,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 270,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 358.4,
+      "playerHp": 801.7,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.29,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 80,
+      "job": "priest",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 371,
+          "mean": 31.161725067385444
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 57.3,
+      "medianTurns": 56.5,
+      "maxTurns": 65,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 522,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 1156.1,
+      "playerHp": 220.1,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 80,
+      "job": "priest",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 353,
+          "successes": 2
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 360,
+          "mean": 31.377777777777776
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 56,
+      "medianTurns": 56.5,
+      "maxTurns": 63,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 486,
+      "deathPoisonDamage": 281.6,
+      "poisonTurns": 5,
+      "playerDamage": 1129.6,
+      "playerHp": 223.6,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 80,
+      "job": "priest",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 630,
+          "successes": 10
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 273,
+          "mean": 36.71062271062271
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 44,
+      "medianTurns": 42.5,
+      "maxTurns": 56,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 486,
+      "deathPoisonDamage": 1131.8,
+      "poisonTurns": 20.6,
+      "playerDamage": 1002.2,
+      "playerHp": 1117.5,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 80,
+      "job": "priest",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 331,
+          "mean": 36.45015105740181
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 50.6,
+      "medianTurns": 51,
+      "maxTurns": 55,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 522,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 1206.5,
+      "playerHp": 1107.4,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 90,
+      "job": "warrior",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {
+        "armor_break": {
+          "attempts": 65,
+          "successes": 65
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 272,
+          "mean": 29.709558823529413
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 42.3,
+      "medianTurns": 40,
+      "maxTurns": 60,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 432,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 808.1,
+      "playerHp": 351.6,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 90,
+      "job": "warrior",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "armor_break": {
+          "attempts": 70,
+          "successes": 70
+        },
+        "death_poison": {
+          "attempts": 236,
+          "successes": 4
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 268,
+          "mean": 31.809701492537314
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 41.5,
+      "medianTurns": 42,
+      "maxTurns": 53,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 504,
+      "deathPoisonDamage": 337.2,
+      "poisonTurns": 5.7,
+      "playerDamage": 852.5,
+      "playerHp": 350.1,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 90,
+      "job": "warrior",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 133,
+          "successes": 2
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 111,
+          "mean": 38.93693693693694
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 17.2,
+      "medianTurns": 17,
+      "maxTurns": 19,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 234,
+      "deathPoisonDamage": 129.6,
+      "poisonTurns": 2.2,
+      "playerDamage": 432.2,
+      "playerHp": 1369,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.2,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 90,
+      "job": "warrior",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 115,
+          "mean": 38.2
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 17.2,
+      "medianTurns": 17.5,
+      "maxTurns": 19,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 180,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 439.3,
+      "playerHp": 1363.2,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.18,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 90,
+      "job": "thief",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 221,
+          "mean": 33.81447963800905
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 35.8,
+      "medianTurns": 36,
+      "maxTurns": 44,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 450,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 747.3,
+      "playerHp": 301.4,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 90,
+      "job": "thief",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 282,
+          "successes": 3
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 236,
+          "mean": 33.17372881355932
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 38.1,
+      "medianTurns": 38.5,
+      "maxTurns": 55,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 432,
+      "deathPoisonDamage": 172.8,
+      "poisonTurns": 2.8,
+      "playerDamage": 782.9,
+      "playerHp": 309.7,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 90,
+      "job": "thief",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 139,
+          "successes": 3
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 68,
+          "mean": 41.05882352941177
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 9.1,
+      "medianTurns": 9,
+      "maxTurns": 10,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 72,
+      "deathPoisonDamage": 79.2,
+      "poisonTurns": 1.4,
+      "playerDamage": 279.2,
+      "playerHp": 831.7,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.01,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 90,
+      "job": "thief",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 73,
+          "mean": 42.986301369863014
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 10.8,
+      "medianTurns": 9,
+      "maxTurns": 17,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 144,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 313.8,
+      "playerHp": 1259.9,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.05,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 90,
+      "job": "mage",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 194,
+          "successes": 52
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 229,
+          "mean": 30.240174672489083
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 41,
+      "medianTurns": 39.5,
+      "maxTurns": 62,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 450,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 692.5,
+      "playerHp": 220.6,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 90,
+      "job": "mage",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 184,
+          "successes": 41
+        },
+        "death_poison": {
+          "attempts": 283,
+          "successes": 3
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 246,
+          "mean": 31.6260162601626
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 42.4,
+      "medianTurns": 43,
+      "maxTurns": 57,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 468,
+      "deathPoisonDamage": 385.6,
+      "poisonTurns": 6.5,
+      "playerDamage": 778,
+      "playerHp": 216.4,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 90,
+      "job": "mage",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 341,
+          "successes": 76
+        },
+        "death_poison": {
+          "attempts": 358,
+          "successes": 5
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 104,
+          "mean": 39.06730769230769
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 23.7,
+      "medianTurns": 20.5,
+      "maxTurns": 39,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 288,
+      "deathPoisonDamage": 230.4,
+      "poisonTurns": 4.2,
+      "playerDamage": 406.3,
+      "playerHp": 799.6,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.33,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 90,
+      "job": "mage",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 308,
+          "successes": 64
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 95,
+          "mean": 39.757894736842104
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 23,
+      "medianTurns": 20.5,
+      "maxTurns": 41,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 270,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 377.7,
+      "playerHp": 808.8,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.32,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 90,
+      "job": "priest",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 397,
+          "mean": 30.445843828715365
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 59.6,
+      "medianTurns": 60,
+      "maxTurns": 67,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 540,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 1208.7,
+      "playerHp": 260.6,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 90,
+      "job": "priest",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 379,
+          "successes": 2
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 399,
+          "mean": 32.1077694235589
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 62,
+      "medianTurns": 63.5,
+      "maxTurns": 69,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 540,
+      "deathPoisonDamage": 266.4,
+      "poisonTurns": 4.2,
+      "playerDamage": 1281.1,
+      "playerHp": 251.7,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 90,
+      "job": "priest",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 650,
+          "successes": 10
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 283,
+          "mean": 36.73851590106007
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 45.6,
+      "medianTurns": 43.5,
+      "maxTurns": 60,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 522,
+      "deathPoisonDamage": 1312.1,
+      "poisonTurns": 21.5,
+      "playerDamage": 1039.7,
+      "playerHp": 1109.5,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 90,
+      "job": "priest",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 349,
+          "mean": 36.51862464183381
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 53.2,
+      "medianTurns": 53,
+      "maxTurns": 58,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 522,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 1274.5,
+      "playerHp": 1107.7,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 100,
+      "job": "warrior",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {
+        "armor_break": {
+          "attempts": 82,
+          "successes": 82
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 271,
+          "mean": 31.162361623616235
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 43.2,
+      "medianTurns": 46,
+      "maxTurns": 53,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 504,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 844.5,
+      "playerHp": 398.4,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 100,
+      "job": "warrior",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "armor_break": {
+          "attempts": 85,
+          "successes": 85
+        },
+        "death_poison": {
+          "attempts": 257,
+          "successes": 1
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 291,
+          "mean": 30.185567010309278
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 45.5,
+      "medianTurns": 46.5,
+      "maxTurns": 58,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 522,
+      "deathPoisonDamage": 224,
+      "poisonTurns": 3.2,
+      "playerDamage": 878.4,
+      "playerHp": 406.4,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 100,
+      "job": "warrior",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 140,
+          "successes": 2
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 115,
+          "mean": 38.7304347826087
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 17.9,
+      "medianTurns": 18,
+      "maxTurns": 20,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 234,
+      "deathPoisonDamage": 160,
+      "poisonTurns": 2.3,
+      "playerDamage": 445.4,
+      "playerHp": 1369.6,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.2,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 100,
+      "job": "warrior",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 121,
+          "mean": 37.81818181818182
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 18.3,
+      "medianTurns": 18,
+      "maxTurns": 20,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 216,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 457.6,
+      "playerHp": 1351.1,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.2,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 100,
+      "job": "thief",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 211,
+          "mean": 31.175355450236967
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 32.9,
+      "medianTurns": 34.5,
+      "maxTurns": 41,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 378,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 657.8,
+      "playerHp": 341.9,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 100,
+      "job": "thief",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 293,
+          "successes": 2
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 239,
+          "mean": 32.46025104602511
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 38.2,
+      "medianTurns": 37.5,
+      "maxTurns": 56,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 396,
+      "deathPoisonDamage": 177.5,
+      "poisonTurns": 2.9,
+      "playerDamage": 775.8,
+      "playerHp": 336.9,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 100,
+      "job": "thief",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 149,
+          "successes": 3
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 72,
+          "mean": 41.06944444444444
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 9.8,
+      "medianTurns": 10,
+      "maxTurns": 11,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 108,
+      "deathPoisonDamage": 95.6,
+      "poisonTurns": 1.5,
+      "playerDamage": 295.7,
+      "playerHp": 833.5,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.04,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 100,
+      "job": "thief",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 77,
+          "mean": 42.675324675324674
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 11.3,
+      "medianTurns": 10,
+      "maxTurns": 19,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 144,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 328.6,
+      "playerHp": 1258.3,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.06,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 100,
+      "job": "mage",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 223,
+          "successes": 61
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 243,
+          "mean": 30.909465020576132
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 43.1,
+      "medianTurns": 41,
+      "maxTurns": 67,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 468,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 751.1,
+      "playerHp": 239.7,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 100,
+      "job": "mage",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 225,
+          "successes": 52
+        },
+        "death_poison": {
+          "attempts": 326,
+          "successes": 4
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 259,
+          "mean": 30.305019305019304
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 46.5,
+      "medianTurns": 44,
+      "maxTurns": 69,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 468,
+      "deathPoisonDamage": 304,
+      "poisonTurns": 4.3,
+      "playerDamage": 784.9,
+      "playerHp": 252.4,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.39,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 100,
+      "job": "mage",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 380,
+          "successes": 86
+        },
+        "death_poison": {
+          "attempts": 397,
+          "successes": 5
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 111,
+          "mean": 38.73873873873874
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 26.1,
+      "medianTurns": 23.5,
+      "maxTurns": 42,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 342,
+      "deathPoisonDamage": 299.5,
+      "poisonTurns": 4.7,
+      "playerDamage": 430,
+      "playerHp": 806.5,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.37,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 100,
+      "job": "mage",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 342,
+          "successes": 72
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 104,
+          "mean": 39.46153846153846
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 25.1,
+      "medianTurns": 23,
+      "maxTurns": 45,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 270,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 410.4,
+      "playerHp": 803.7,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.34,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 100,
+      "job": "priest",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 404,
+          "mean": 30.413366336633665
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 60.9,
+      "medianTurns": 60.5,
+      "maxTurns": 69,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 504,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 1228.7,
+      "playerHp": 292.4,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 100,
+      "job": "priest",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 381,
+          "successes": 3
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 383,
+          "mean": 31.971279373368148
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 59.6,
+      "medianTurns": 61,
+      "maxTurns": 70,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 540,
+      "deathPoisonDamage": 664,
+      "poisonTurns": 9.1,
+      "playerDamage": 1224.5,
+      "playerHp": 287.7,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 100,
+      "job": "priest",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 668,
+          "successes": 10
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 291,
+          "mean": 36.934707903780065
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 46.7,
+      "medianTurns": 43.5,
+      "maxTurns": 62,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 522,
+      "deathPoisonDamage": 1498.4,
+      "poisonTurns": 21.9,
+      "playerDamage": 1074.8,
+      "playerHp": 1102.3,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "dusk",
+      "level": 100,
+      "job": "priest",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 369,
+          "mean": 36.50135501355014
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 55.7,
+      "medianTurns": 56,
+      "maxTurns": 61,
+      "heals": 0,
+      "bossHealing": 0,
+      "bossBarrier": 522,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 1346.9,
+      "playerHp": 1108.9,
+      "bossHp": 0,
+      "reviveTurn": 0,
+      "postReviveTurns": 0,
+      "growth": 0.4,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 80,
+      "job": "warrior",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {
+        "armor_break": {
+          "attempts": 78,
+          "successes": 78
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 663,
+          "mean": 27.41025641025641
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 87.2,
+      "medianTurns": 84.5,
+      "maxTurns": 102,
+      "heals": 0,
+      "bossHealing": 1492,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 1817.3,
+      "playerHp": 316.2,
+      "bossHp": 0,
+      "reviveTurn": 66,
+      "postReviveTurns": 21.2,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 80,
+      "job": "warrior",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "armor_break": {
+          "attempts": 63,
+          "successes": 63
+        },
+        "death_poison": {
+          "attempts": 468,
+          "successes": 3
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 646,
+          "mean": 27.512383900928793
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 83.9,
+      "medianTurns": 81.5,
+      "maxTurns": 107,
+      "heals": 0,
+      "bossHealing": 1484.8,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 141.5,
+      "poisonTurns": 2.5,
+      "playerDamage": 1777.3,
+      "playerHp": 322.9,
+      "bossHp": 0,
+      "reviveTurn": 62.5,
+      "postReviveTurns": 21.4,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 80,
+      "job": "warrior",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 214,
+          "successes": 2
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 191,
+          "mean": 34.84293193717277
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 29.3,
+      "medianTurns": 30,
+      "maxTurns": 33,
+      "heals": 0,
+      "bossHealing": 1382.4,
+      "bossBarrier": 550,
+      "deathPoisonDamage": 38.4,
+      "poisonTurns": 0.8,
+      "playerDamage": 665.5,
+      "playerHp": 1362.7,
+      "bossHp": 0,
+      "reviveTurn": 23.7,
+      "postReviveTurns": 5.6,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 80,
+      "job": "warrior",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 188,
+          "mean": 34.579787234042556
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 28.8,
+      "medianTurns": 30,
+      "maxTurns": 32,
+      "heals": 0,
+      "bossHealing": 1328.4,
+      "bossBarrier": 625,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 650.1,
+      "playerHp": 1359.7,
+      "bossHp": 0,
+      "reviveTurn": 23.5,
+      "postReviveTurns": 5.3,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 80,
+      "job": "thief",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 673,
+          "mean": 25.686478454680536
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 89.2,
+      "medianTurns": 87,
+      "maxTurns": 113,
+      "heals": 0,
+      "bossHealing": 1512,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 1728.7,
+      "playerHp": 275.3,
+      "bossHp": 0,
+      "reviveTurn": 61.3,
+      "postReviveTurns": 27.9,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 80,
+      "job": "thief",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 712,
+          "successes": 7
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 704,
+          "mean": 28.120738636363637
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 92.8,
+      "medianTurns": 90.5,
+      "maxTurns": 116,
+      "heals": 0,
+      "bossHealing": 1512,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 467.9,
+      "poisonTurns": 8.3,
+      "playerDamage": 1979.7,
+      "playerHp": 278,
+      "bossHp": 0,
+      "reviveTurn": 64.2,
+      "postReviveTurns": 28.6,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 80,
+      "job": "thief",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 355,
+          "successes": 7
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 161,
+          "mean": 36.24844720496895
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 24.1,
+      "medianTurns": 22,
+      "maxTurns": 32,
+      "heals": 0,
+      "bossHealing": 1047.6,
+      "bossBarrier": 475,
+      "deathPoisonDamage": 140.8,
+      "poisonTurns": 2.9,
+      "playerDamage": 583.6,
+      "playerHp": 838.1,
+      "bossHp": 0,
+      "reviveTurn": 16.9,
+      "postReviveTurns": 7.2,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 80,
+      "job": "thief",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 148,
+          "mean": 36.054054054054056
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 22.6,
+      "medianTurns": 22.5,
+      "maxTurns": 30,
+      "heals": 0,
+      "bossHealing": 972,
+      "bossBarrier": 425,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 533.6,
+      "playerHp": 1261.5,
+      "bossHp": 0,
+      "reviveTurn": 15.7,
+      "postReviveTurns": 6.9,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 80,
+      "job": "mage",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 229,
+          "successes": 51
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 711,
+          "mean": 24.28551336146273
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 96.1,
+      "medianTurns": 91,
+      "maxTurns": 117,
+      "heals": 0,
+      "bossHealing": 1510.4,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 1726.7,
+      "playerHp": 202.9,
+      "bossHp": 0,
+      "reviveTurn": 70.1,
+      "postReviveTurns": 26,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 80,
+      "job": "mage",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 234,
+          "successes": 66
+        },
+        "death_poison": {
+          "attempts": 639,
+          "successes": 5
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 715,
+          "mean": 26.76923076923077
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 101,
+      "medianTurns": 98,
+      "maxTurns": 119,
+      "heals": 0,
+      "bossHealing": 1511.1,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 198.4,
+      "poisonTurns": 3.7,
+      "playerDamage": 1914,
+      "playerHp": 194.3,
+      "bossHp": 0,
+      "reviveTurn": 73.7,
+      "postReviveTurns": 27.3,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 80,
+      "job": "mage",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 751,
+          "successes": 171
+        },
+        "death_poison": {
+          "attempts": 794,
+          "successes": 7
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 278,
+          "mean": 29.866906474820144
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 53.8,
+      "medianTurns": 52.5,
+      "maxTurns": 69,
+      "heals": 0,
+      "bossHealing": 1407.4,
+      "bossBarrier": 700,
+      "deathPoisonDamage": 262.4,
+      "poisonTurns": 4.7,
+      "playerDamage": 830.3,
+      "playerHp": 799,
+      "bossHp": 0,
+      "reviveTurn": 38.8,
+      "postReviveTurns": 15,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 80,
+      "job": "mage",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 810,
+          "successes": 177
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 310,
+          "mean": 30.893548387096775
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 59.3,
+      "medianTurns": 56.5,
+      "maxTurns": 77,
+      "heals": 0,
+      "bossHealing": 1391.5,
+      "bossBarrier": 675,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 957.7,
+      "playerHp": 803.5,
+      "bossHp": 0,
+      "reviveTurn": 42.3,
+      "postReviveTurns": 17,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 80,
+      "job": "priest",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 865,
+          "mean": 26.046242774566473
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 109.9,
+      "medianTurns": 111,
+      "maxTurns": 126,
+      "heals": 0,
+      "bossHealing": 1510.8,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 2253,
+      "playerHp": 240.9,
+      "bossHp": 0,
+      "reviveTurn": 84,
+      "postReviveTurns": 25.9,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 80,
+      "job": "priest",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 686,
+          "successes": 6
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 894,
+          "mean": 27.589485458612977
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 112.3,
+      "medianTurns": 115,
+      "maxTurns": 125,
+      "heals": 0,
+      "bossHealing": 1475.6,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 873.7,
+      "poisonTurns": 14.3,
+      "playerDamage": 2466.5,
+      "playerHp": 240.7,
+      "bossHp": 0,
+      "reviveTurn": 85.2,
+      "postReviveTurns": 27.1,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 80,
+      "job": "priest",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 1301,
+          "successes": 12
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 717,
+          "mean": 31.655509065550905
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 94.1,
+      "medianTurns": 93,
+      "maxTurns": 105,
+      "heals": 0,
+      "bossHealing": 1504.4,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 665.6,
+      "poisonTurns": 11.6,
+      "playerDamage": 2269.7,
+      "playerHp": 1114,
+      "bossHp": 0,
+      "reviveTurn": 73.6,
+      "postReviveTurns": 20.5,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 80,
+      "job": "priest",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 741,
+          "mean": 32.00674763832659
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 97.7,
+      "medianTurns": 98.5,
+      "maxTurns": 102,
+      "heals": 0,
+      "bossHealing": 1485.8,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 2371.7,
+      "playerHp": 1116,
+      "bossHp": 0,
+      "reviveTurn": 77.9,
+      "postReviveTurns": 19.8,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 90,
+      "job": "warrior",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {
+        "armor_break": {
+          "attempts": 101,
+          "successes": 101
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 690,
+          "mean": 27.344927536231886
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 90.8,
+      "medianTurns": 88.5,
+      "maxTurns": 107,
+      "heals": 0,
+      "bossHealing": 1573,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 1886.8,
+      "playerHp": 366.5,
+      "bossHp": 0,
+      "reviveTurn": 68.6,
+      "postReviveTurns": 22.2,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 90,
+      "job": "warrior",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "armor_break": {
+          "attempts": 87,
+          "successes": 87
+        },
+        "death_poison": {
+          "attempts": 477,
+          "successes": 3
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 624,
+          "mean": 27.44871794871795
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 82.1,
+      "medianTurns": 84,
+      "maxTurns": 102,
+      "heals": 0,
+      "bossHealing": 1563.8,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 115.3,
+      "poisonTurns": 1.9,
+      "playerDamage": 1712.8,
+      "playerHp": 358.4,
+      "bossHp": 0,
+      "reviveTurn": 61.6,
+      "postReviveTurns": 20.5,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 90,
+      "job": "warrior",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 226,
+          "successes": 2
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 202,
+          "mean": 34.504950495049506
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 31,
+      "medianTurns": 31,
+      "maxTurns": 33,
+      "heals": 0,
+      "bossHealing": 1527.6,
+      "bossBarrier": 600,
+      "deathPoisonDamage": 43.2,
+      "poisonTurns": 0.8,
+      "playerDamage": 697,
+      "playerHp": 1346.3,
+      "bossHp": 0,
+      "reviveTurn": 24,
+      "postReviveTurns": 7,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 90,
+      "job": "warrior",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 195,
+          "mean": 34.36923076923077
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 30.2,
+      "medianTurns": 30.5,
+      "maxTurns": 33,
+      "heals": 0,
+      "bossHealing": 1447.8,
+      "bossBarrier": 675,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 670.2,
+      "playerHp": 1350.6,
+      "bossHp": 0,
+      "reviveTurn": 23.9,
+      "postReviveTurns": 6.3,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 90,
+      "job": "thief",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 656,
+          "mean": 25.765243902439025
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 86.3,
+      "medianTurns": 84.5,
+      "maxTurns": 103,
+      "heals": 0,
+      "bossHealing": 1596,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 1690.2,
+      "playerHp": 306.5,
+      "bossHp": 0,
+      "reviveTurn": 56.9,
+      "postReviveTurns": 29.4,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 90,
+      "job": "thief",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 703,
+          "successes": 8
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 695,
+          "mean": 27.753956834532374
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 91.9,
+      "medianTurns": 91,
+      "maxTurns": 111,
+      "heals": 0,
+      "bossHealing": 1596,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 606.3,
+      "poisonTurns": 9.5,
+      "playerDamage": 1928.9,
+      "playerHp": 305.8,
+      "bossHp": 0,
+      "reviveTurn": 62.5,
+      "postReviveTurns": 29.4,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 90,
+      "job": "thief",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 374,
+          "successes": 7
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 164,
+          "mean": 35.93292682926829
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 25,
+      "medianTurns": 23.5,
+      "maxTurns": 31,
+      "heals": 0,
+      "bossHealing": 1185.6,
+      "bossBarrier": 575,
+      "deathPoisonDamage": 187.2,
+      "poisonTurns": 3.2,
+      "playerDamage": 589.3,
+      "playerHp": 835.1,
+      "bossHp": 0,
+      "reviveTurn": 17.7,
+      "postReviveTurns": 7.3,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 90,
+      "job": "thief",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 158,
+          "mean": 36.39873417721519
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 24.7,
+      "medianTurns": 24,
+      "maxTurns": 34,
+      "heals": 0,
+      "bossHealing": 1174.2,
+      "bossBarrier": 500,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 575.1,
+      "playerHp": 1258.9,
+      "bossHp": 0,
+      "reviveTurn": 16.8,
+      "postReviveTurns": 7.9,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 90,
+      "job": "mage",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 283,
+          "successes": 64
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 713,
+          "mean": 24.455820476858346
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 100.1,
+      "medianTurns": 98,
+      "maxTurns": 119,
+      "heals": 0,
+      "bossHealing": 1572.2,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 1743.7,
+      "playerHp": 229.8,
+      "bossHp": 0,
+      "reviveTurn": 71.9,
+      "postReviveTurns": 28.2,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 90,
+      "job": "mage",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 284,
+          "successes": 64
+        },
+        "death_poison": {
+          "attempts": 687,
+          "successes": 7
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 776,
+          "mean": 26.396907216494846
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 105.8,
+      "medianTurns": 101.5,
+      "maxTurns": 131,
+      "heals": 0,
+      "bossHealing": 1562.5,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 246.4,
+      "poisonTurns": 4.4,
+      "playerDamage": 2048.4,
+      "playerHp": 229.4,
+      "bossHp": 0,
+      "reviveTurn": 74.8,
+      "postReviveTurns": 31,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 90,
+      "job": "mage",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 792,
+          "successes": 190
+        },
+        "death_poison": {
+          "attempts": 837,
+          "successes": 6
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 293,
+          "mean": 30.331058020477816
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 57.8,
+      "medianTurns": 54,
+      "maxTurns": 76,
+      "heals": 0,
+      "bossHealing": 1503.5,
+      "bossBarrier": 700,
+      "deathPoisonDamage": 338,
+      "poisonTurns": 5,
+      "playerDamage": 888.7,
+      "playerHp": 804.6,
+      "bossHp": 0,
+      "reviveTurn": 40.5,
+      "postReviveTurns": 17.3,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 90,
+      "job": "mage",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 857,
+          "successes": 194
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 314,
+          "mean": 31.203821656050955
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 63.1,
+      "medianTurns": 58,
+      "maxTurns": 80,
+      "heals": 0,
+      "bossHealing": 1547.3,
+      "bossBarrier": 725,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 979.8,
+      "playerHp": 803,
+      "bossHp": 0,
+      "reviveTurn": 46.4,
+      "postReviveTurns": 16.7,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 90,
+      "job": "priest",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 898,
+          "mean": 26.38641425389755
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 114,
+      "medianTurns": 114.5,
+      "maxTurns": 126,
+      "heals": 0,
+      "bossHealing": 1592.9,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 2369.5,
+      "playerHp": 275.2,
+      "bossHp": 0,
+      "reviveTurn": 87.7,
+      "postReviveTurns": 26.3,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 90,
+      "job": "priest",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 751,
+          "successes": 4
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 1006,
+          "mean": 28.389662027833
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 127.3,
+      "medianTurns": 128,
+      "maxTurns": 137,
+      "heals": 0,
+      "bossHealing": 1550.2,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 158.4,
+      "poisonTurns": 2.7,
+      "playerDamage": 2856,
+      "playerHp": 268.2,
+      "bossHp": 0,
+      "reviveTurn": 99.7,
+      "postReviveTurns": 27.6,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 90,
+      "job": "priest",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 1304,
+          "successes": 12
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 731,
+          "mean": 31.67578659370725
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 96.6,
+      "medianTurns": 97,
+      "maxTurns": 108,
+      "heals": 0,
+      "bossHealing": 1586.3,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 979.5,
+      "poisonTurns": 14.9,
+      "playerDamage": 2315.5,
+      "playerHp": 1113.4,
+      "bossHp": 0,
+      "reviveTurn": 76.1,
+      "postReviveTurns": 20.5,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 90,
+      "job": "priest",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 773,
+          "mean": 31.813712807244503
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 100.5,
+      "medianTurns": 100.5,
+      "maxTurns": 106,
+      "heals": 0,
+      "bossHealing": 1566,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 2459.2,
+      "playerHp": 1100.8,
+      "bossHp": 0,
+      "reviveTurn": 80.9,
+      "postReviveTurns": 19.6,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 100,
+      "job": "warrior",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {
+        "armor_break": {
+          "attempts": 137,
+          "successes": 137
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 698,
+          "mean": 27.535816618911173
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 92.2,
+      "medianTurns": 90,
+      "maxTurns": 104,
+      "heals": 0,
+      "bossHealing": 1654,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 1922,
+      "playerHp": 401.7,
+      "bossHp": 0,
+      "reviveTurn": 69.6,
+      "postReviveTurns": 22.6,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 100,
+      "job": "warrior",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "armor_break": {
+          "attempts": 117,
+          "successes": 117
+        },
+        "death_poison": {
+          "attempts": 477,
+          "successes": 7
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 628,
+          "mean": 27.63216560509554
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 83.8,
+      "medianTurns": 83,
+      "maxTurns": 95,
+      "heals": 0,
+      "bossHealing": 1642.8,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 613.7,
+      "poisonTurns": 8.3,
+      "playerDamage": 1735.3,
+      "playerHp": 404.2,
+      "bossHp": 0,
+      "reviveTurn": 60.8,
+      "postReviveTurns": 23,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 100,
+      "job": "warrior",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 231,
+          "successes": 2
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 205,
+          "mean": 34.47317073170732
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 31.5,
+      "medianTurns": 31.5,
+      "maxTurns": 34,
+      "heals": 0,
+      "bossHealing": 1608,
+      "bossBarrier": 600,
+      "deathPoisonDamage": 48,
+      "poisonTurns": 0.8,
+      "playerDamage": 706.7,
+      "playerHp": 1363.7,
+      "bossHp": 0,
+      "reviveTurn": 24,
+      "postReviveTurns": 7.5,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 100,
+      "job": "warrior",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 205,
+          "mean": 34.02439024390244
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 31.4,
+      "medianTurns": 31,
+      "maxTurns": 33,
+      "heals": 0,
+      "bossHealing": 1560,
+      "bossBarrier": 725,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 697.5,
+      "playerHp": 1334.7,
+      "bossHp": 0,
+      "reviveTurn": 24,
+      "postReviveTurns": 7.4,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 100,
+      "job": "thief",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 618,
+          "mean": 25.977346278317153
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 83.8,
+      "medianTurns": 80.5,
+      "maxTurns": 108,
+      "heals": 0,
+      "bossHealing": 1680,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 1605.4,
+      "playerHp": 337.3,
+      "bossHp": 0,
+      "reviveTurn": 52.6,
+      "postReviveTurns": 31.2,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 100,
+      "job": "thief",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 699,
+          "successes": 7
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 689,
+          "mean": 28.41509433962264
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 91.1,
+      "medianTurns": 90,
+      "maxTurns": 108,
+      "heals": 0,
+      "bossHealing": 1680,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 483,
+      "poisonTurns": 6.7,
+      "playerDamage": 1957.8,
+      "playerHp": 346.1,
+      "bossHp": 0,
+      "reviveTurn": 58.8,
+      "postReviveTurns": 32.3,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 100,
+      "job": "thief",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 409,
+          "successes": 8
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 176,
+          "mean": 36.47159090909091
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 27.3,
+      "medianTurns": 26,
+      "maxTurns": 33,
+      "heals": 0,
+      "bossHealing": 1344,
+      "bossBarrier": 600,
+      "deathPoisonDamage": 242.6,
+      "poisonTurns": 3.9,
+      "playerDamage": 641.9,
+      "playerHp": 840.1,
+      "bossHp": 0,
+      "reviveTurn": 18.9,
+      "postReviveTurns": 8.4,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 100,
+      "job": "thief",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 165,
+          "mean": 35.5030303030303
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 26.1,
+      "medianTurns": 25,
+      "maxTurns": 33,
+      "heals": 0,
+      "bossHealing": 1332,
+      "bossBarrier": 625,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 585.8,
+      "playerHp": 1263.9,
+      "bossHp": 0,
+      "reviveTurn": 17.9,
+      "postReviveTurns": 8.2,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 100,
+      "job": "mage",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 342,
+          "successes": 77
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 747,
+          "mean": 24.550200803212853
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 106,
+      "medianTurns": 102.5,
+      "maxTurns": 125,
+      "heals": 0,
+      "bossHealing": 1648.6,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 1833.9,
+      "playerHp": 256.2,
+      "bossHp": 0,
+      "reviveTurn": 75.5,
+      "postReviveTurns": 30.5,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 100,
+      "job": "mage",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 341,
+          "successes": 83
+        },
+        "death_poison": {
+          "attempts": 712,
+          "successes": 11
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 745,
+          "mean": 26.49798657718121
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 105.1,
+      "medianTurns": 105,
+      "maxTurns": 132,
+      "heals": 0,
+      "bossHealing": 1639.6,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 568,
+      "poisonTurns": 8.4,
+      "playerDamage": 1974.1,
+      "playerHp": 261.5,
+      "bossHp": 0,
+      "reviveTurn": 75.5,
+      "postReviveTurns": 29.6,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 100,
+      "job": "mage",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 840,
+          "successes": 200
+        },
+        "death_poison": {
+          "attempts": 889,
+          "successes": 9
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 324,
+          "mean": 29.703703703703702
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 61.4,
+      "medianTurns": 60.5,
+      "maxTurns": 76,
+      "heals": 0,
+      "bossHealing": 1626.3,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 484.6,
+      "poisonTurns": 6.9,
+      "playerDamage": 962.4,
+      "playerHp": 801.5,
+      "bossHp": 0,
+      "reviveTurn": 44.3,
+      "postReviveTurns": 17.1,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 100,
+      "job": "mage",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "action_skip": {
+          "attempts": 881,
+          "successes": 192
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 347,
+          "mean": 30.939481268011527
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 67.7,
+      "medianTurns": 65,
+      "maxTurns": 85,
+      "heals": 0,
+      "bossHealing": 1627.7,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 1073.6,
+      "playerHp": 807,
+      "bossHp": 0,
+      "reviveTurn": 51,
+      "postReviveTurns": 16.7,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 100,
+      "job": "priest",
+      "variant": "standard",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 923,
+          "mean": 26.092091007583964
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 118.9,
+      "medianTurns": 117.5,
+      "maxTurns": 137,
+      "heals": 0,
+      "bossHealing": 1673.3,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 2408.3,
+      "playerHp": 303.2,
+      "bossHp": 0,
+      "reviveTurn": 90.4,
+      "postReviveTurns": 28.5,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 100,
+      "job": "priest",
+      "variant": "standard-scorpio",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 784,
+          "successes": 3
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 1025,
+          "mean": 28.465365853658536
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 132,
+      "medianTurns": 132.5,
+      "maxTurns": 139,
+      "heals": 0,
+      "bossHealing": 1624.9,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 114.7,
+      "poisonTurns": 2,
+      "playerDamage": 2917.7,
+      "playerHp": 301.5,
+      "bossHp": 0,
+      "reviveTurn": 102.2,
+      "postReviveTurns": 29.8,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 100,
+      "job": "priest",
+      "variant": "z6",
+      "trials": 10,
+      "statusMetrics": {
+        "death_poison": {
+          "attempts": 1355,
+          "successes": 13
+        }
+      },
+      "phaseDamage": {
+        "before": {
+          "hits": 781,
+          "mean": 31.53137003841229
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 101.7,
+      "medianTurns": 99,
+      "maxTurns": 113,
+      "heals": 0,
+      "bossHealing": 1666.8,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 805,
+      "poisonTurns": 11,
+      "playerDamage": 2462.6,
+      "playerHp": 1111.3,
+      "bossHp": 0,
+      "reviveTurn": 81.2,
+      "postReviveTurns": 20.5,
+      "growth": 0,
+      "oneShotHits": 0
+    },
+    {
+      "theme": "tender",
+      "level": 100,
+      "job": "priest",
+      "variant": "z6-no-scorpio",
+      "trials": 10,
+      "statusMetrics": {},
+      "phaseDamage": {
+        "before": {
+          "hits": 805,
+          "mean": 31.891925465838508
+        },
+        "after": {
+          "hits": 0,
+          "mean": 0
+        }
+      },
+      "wins": 10,
+      "timeouts": 0,
+      "meanTurns": 104.2,
+      "medianTurns": 104.5,
+      "maxTurns": 112,
+      "heals": 0,
+      "bossHealing": 1643,
+      "bossBarrier": 750,
+      "deathPoisonDamage": 0,
+      "poisonTurns": 0,
+      "playerDamage": 2567.3,
+      "playerHp": 1103.1,
+      "bossHp": 0,
+      "reviveTurn": 83.2,
+      "postReviveTurns": 21,
+      "growth": 0,
+      "oneShotHits": 0
+    }
+  ]
+}

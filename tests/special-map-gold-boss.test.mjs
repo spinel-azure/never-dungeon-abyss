@@ -33,7 +33,7 @@ test('gold fixed identity/stats/actions; 60..100 integer scaling; no other theme
  }
  for(const level of [0,1,59,101,NaN]){assert.throws(()=>createGoldMapBoss({themeId:'gold',level}));assert.equal(resolveSpecialThemeBoss('gold',level),null);}
  for(const themeId of ['slate','rice','dusk','tender'])assert.throws(()=>createGoldMapBoss({themeId,level:100}));
- for(const themeId of ['rice','dusk','tender'])assert.equal(resolveSpecialThemeBoss(themeId,100).battleEnabled,false);
+ for(const themeId of ['rice','dusk','tender'])assert.equal(resolveSpecialThemeBoss(themeId,100).battleEnabled,true);
  assert.deepEqual(getV2CombatEnemy('maikaefer_koenig'),baseline);
  assert.equal(KARTE_SPECIAL_BOSSES.karte_boss_maikaefer_koenig.allowColorVariant,false);
 });

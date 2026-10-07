@@ -1,3 +1,5 @@
+import {syncGoddessBackdrop,playGoddessDefeat} from './special-map/goddess-presentation.js';
+import {SPECIAL_BOSS_GLOW} from './special-map/boss-sparkles.js';
 import { isCharmed } from "../combat/akashic-phantoms.js";
 import { renderCharmStatus, mountAkashicBackground } from "./akashic-presentation.js";
 import { getAreaPresentationGroup } from "./area-skill-presentation.js";
@@ -656,7 +658,7 @@ async function playPresentationEvents(startingSp) {
       : battleUi.battle.enemies && Array.isArray(battleUi.presentationHp?.enemies)
         ? battleUi.presentationHp.enemies[vanishTargetIndex]
         : battleUi.presentationHp?.enemy;
-    const revivalPending = events.slice(events.indexOf(event) + 1).some(next => next.causalityRevival && next.targetIndex === event.targetIndex);
+    const revivalPending = events.slice(events.indexOf(event) + 1).some(next => (next.causalityRevival || next.goddessRevival) && next.targetIndex === event.targetIndex);
     const shouldPlayVanish = Number(enemyHpBefore) > 0 && Number(enemyHpAfter) <= 0 && !revivalPending;
     const vanishImage = shouldPlayVanish
       ? battleUi.battle.enemies
@@ -691,7 +693,7 @@ async function playPresentationEvents(startingSp) {
       if (!event.whirlpoolPreparing) await playWhirlpoolWave(battleUi.root, () => battleUi.active);
     }
     if (event.broken) await playBarrierShatter(battleUi.root, image, () => battleUi.active);
-    if (event.causalityRevival) await playDefeatRecoveryFlash();
+    if (event.causalityRevival || event.goddessRevival) await playDefeatRecoveryFlash();
     if (event.type === "healing") {
       showBattleNumber(event.targetSide, event.amount, "healing");
       battleUi.playSe("heal");
@@ -735,7 +737,7 @@ async function playPresentationEvents(startingSp) {
     targetImage?.classList.remove("is-hit");
     if (event.slashExecution) await playSlashEffect(targetImage, { restoreImage: !vanishImage });
     if (vanishImage && vanishEnemy) {
-      await playEnemyVanish({ image: vanishImage, enemy: vanishEnemy });
+      await (vanishEnemy.goddessTheme?playGoddessDefeat(battleUi.root,vanishImage):playEnemyVanish({ image: vanishImage, enemy: vanishEnemy }));
       renderBattleVitals();
     }
   }
@@ -782,7 +784,7 @@ async function playAreaSkillPresentation(events) {
   if (!current()) return;
   await Promise.all(vanishing.map(async ({image,enemy,event}) => {
     if (event.slashExecution) await playSlashEffect(image,{restoreImage:false});
-    if (current()) await playEnemyVanish({image,enemy});
+    if (current()) await (enemy.goddessTheme?playGoddessDefeat(battleUi.root,image):playEnemyVanish({image,enemy}));
   }));
   if (current()) renderBattleVitals();
 }
@@ -1132,6 +1134,7 @@ function renderBattle() {
   setText("battleEnemyCondition", statusText(battle.enemy));
   const image = battleUi.root.querySelector("#battleEnemyImage");
   image.src = (battleUi.presenting ? battleUi.presentationEnemyImage : battle.enemy.image) || "";
+  syncGoddessBackdrop(battleUi.root,battle.enemy);
   image.alt = battleUi.concealed ? "正体不明の敵" : battle.enemy.name;
   const defeated = ["victory", "enemyEscaped", "maerchentiereEscaped"].includes(battle.outcome) && !battleUi.presenting;
   image.classList.toggle("is-defeated", defeated);
@@ -1141,6 +1144,9 @@ function renderBattle() {
   image.style.filter = battleUi.phantom
     ? "brightness(0) drop-shadow(0 0 2px rgba(225,252,255,.98)) drop-shadow(0 0 8px rgba(128,235,255,.9)) drop-shadow(0 0 18px rgba(55,173,255,.68))"
     : "";
+  if(!battleUi.phantom&&!battleUi.concealed&&SPECIAL_BOSS_GLOW[battle.enemy.id]){
+    const color=SPECIAL_BOSS_GLOW[battle.enemy.id];image.style.filter=`drop-shadow(0 0 5px ${color}) drop-shadow(0 0 15px ${color})`;
+  }
   ENEMY_DISPLAY_SIZES.forEach(size => image.classList.toggle(`is-size-${size}`, size === getEnemyDisplaySize(battle.enemy)));
   image.classList.toggle("is-jabberwock", battle.enemy.id === "jabberwock_event_boss");
   image.classList.toggle("is-iron-maiden", battle.enemy.id === "iron_maiden_b29f");

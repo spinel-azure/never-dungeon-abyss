@@ -5501,7 +5501,7 @@ import {
     const [image]=await Promise.all([prepared,wait(1400)]);
     if(getSpecialMapContext()?.session!==session||session.battleContext!==context)return;
     session.renderState.overlayEvent=null;
-    startBgm(boss?'floorBoss':'normalBattle');
+    startBgm(enemyData.goddessTheme?'finalBoss':boss?'floorBoss':'normalBattle');
     if(!startBattle(createEnemyCombatant({...enemyData,image}),{playStartSe:false,explorationContext:context})){
       resumeV2Encounter(session,context);startBgm(getSpecialMapBgmKey(session.generatedMap.themeId));
     }
