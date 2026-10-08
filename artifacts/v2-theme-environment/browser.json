@@ -1,0 +1,126 @@
+[
+  {
+    "width": 1280,
+    "theme": "crystal",
+    "before": {
+      "hp": 130,
+      "sp": 179
+    },
+    "after": {
+      "hp": 130,
+      "sp": 178,
+      "torch": 97
+    },
+    "ordinaryStateUnchanged": true
+  },
+  {
+    "width": 1280,
+    "theme": "black",
+    "before": {
+      "hp": 130,
+      "sp": 179
+    },
+    "after": {
+      "hp": 130,
+      "sp": 179,
+      "torch": 0
+    },
+    "ordinaryStateUnchanged": true
+  },
+  {
+    "width": 1280,
+    "theme": "blue",
+    "before": {
+      "hp": 130,
+      "sp": 179
+    },
+    "after": {
+      "hp": 127,
+      "sp": 179,
+      "torch": 97
+    },
+    "ordinaryStateUnchanged": true
+  },
+  {
+    "width": 1280,
+    "theme": "red",
+    "before": {
+      "hp": 130,
+      "sp": 179
+    },
+    "after": {
+      "hp": 127,
+      "sp": 179,
+      "torch": 97
+    },
+    "ordinaryStateUnchanged": true
+  },
+  {
+    "width": 1280,
+    "receipt": true,
+    "saveFailureNoAnimation": true,
+    "jingleBeforePopup": true
+  },
+  {
+    "width": 390,
+    "theme": "crystal",
+    "before": {
+      "hp": 130,
+      "sp": 179
+    },
+    "after": {
+      "hp": 130,
+      "sp": 178,
+      "torch": 97
+    },
+    "ordinaryStateUnchanged": true
+  },
+  {
+    "width": 390,
+    "theme": "black",
+    "before": {
+      "hp": 130,
+      "sp": 179
+    },
+    "after": {
+      "hp": 130,
+      "sp": 179,
+      "torch": 0
+    },
+    "ordinaryStateUnchanged": true
+  },
+  {
+    "width": 390,
+    "theme": "blue",
+    "before": {
+      "hp": 130,
+      "sp": 179
+    },
+    "after": {
+      "hp": 127,
+      "sp": 179,
+      "torch": 97
+    },
+    "ordinaryStateUnchanged": true
+  },
+  {
+    "width": 390,
+    "theme": "red",
+    "before": {
+      "hp": 130,
+      "sp": 179
+    },
+    "after": {
+      "hp": 127,
+      "sp": 179,
+      "torch": 97
+    },
+    "ordinaryStateUnchanged": true
+  },
+  {
+    "width": 390,
+    "receipt": true,
+    "saveFailureNoAnimation": true,
+    "jingleBeforePopup": true
+  }
+]

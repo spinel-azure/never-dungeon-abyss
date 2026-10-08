@@ -1313,6 +1313,7 @@ function activateEntranceCommand(command) {
       getMaps: () => town.getCharacter()?.specialMaps,
       canReceiveTestStarter: isExplorerTestEnabled,
       updateMaps: operation => town.updateSpecialMaps(operation),
+      showMapRewardAcquisition:options=>town.showMapRewardAcquisition?.(options),
       message: town.messageEl, playSe: key => town.playSe(key),
       startExploration: startSpecialMapExploration,
       onExit: () => {town.mode = "dungeonEntrance";renderDungeonEntrance();}

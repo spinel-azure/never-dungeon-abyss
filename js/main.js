@@ -1,4 +1,5 @@
 import { renderItemGetItems } from "./item-get-presentation.js";
+import {applyV2ThemeStep,syncV2ThemeEnvironment,getV2ThemeBattleOptions} from './special-map/theme-environment-v2.js';
 import {developmentMapOptions} from './special-map/development-map.js';
 import {startSpecialMapExploration} from './special-map/exploration-ui.js';
 import {resumeV2Encounter,matchesV2Battle} from './special-map/encounter-v2.js';
@@ -1244,6 +1245,14 @@ import {
     onStateChanged: handlePersistentStateChanged
   });
   configureTown({
+    showMapRewardAcquisition:async({signal}={})=>{
+      await playSeToEnd('importantItem');
+      if(signal?.aborted)return;
+      showNamedItemGetEffect(['未鑑定地図'],{imageSources:['images/item-compendium/unidentified_map.avif'],acquisitionMessage:true,playSound:false});
+      const hide=()=>{clearTimeout(itemGetTimer);itemGetEffect.hidden=true;itemGetEffect.classList.remove('is-active');};
+      signal?.addEventListener('abort',hide,{once:true});
+      await wait(3400);signal?.removeEventListener('abort',hide);
+    },
     updateSpecialMaps: operation => transactSpecialMaps({getCharacter:()=>character,setCharacter:next=>{character=next;},save:()=>saveGame()},operation),
     root: townScreen,
     messageEl: msgEl,
@@ -1950,7 +1959,7 @@ import {
     showNamedItemGetEffect(items.map(item => item.name), { important, itemIds: items.map(item => item.id) });
   }
 
-  function showNamedItemGetEffect(itemNames, { important = false, amounts = [], itemIds = [], acquisitionMessage = false, playSound = true } = {}) {
+  function showNamedItemGetEffect(itemNames, { important = false, amounts = [], itemIds = [], imageSources = [], acquisitionMessage = false, playSound = true } = {}) {
     if (!itemGetEffect || !itemGetItems || itemNames.length === 0) return;
     window.clearTimeout(itemGetTimer);
     const townPortraitFrame = townScreen?.querySelector(".town-portrait-frame");
@@ -1959,7 +1968,7 @@ import {
       viewport.append(itemGetEffect);
     }
     if(playSound) playSe(important ? "importantItem" : "itemGet");
-    renderItemGetItems(itemGetItems, itemNames, { itemIds, amounts, acquisitionMessage });
+    renderItemGetItems(itemGetItems, itemNames, { itemIds, imageSources, amounts, acquisitionMessage });
     itemGetEffect.hidden = false;
     itemGetEffect.classList.remove("is-active");
     void itemGetEffect.offsetWidth;
@@ -5496,14 +5505,15 @@ import {
   }
   async function beginV2Battle(session,enemyData,context){
     const boss=['special-map-v2-boss','special-map-v2-special-boss'].includes(context.source);
-    session.renderState.overlayEvent={type:'randomEncounter',showOverlay:true,encounterType:boss?'boss':'normal',encounterLabel:boss?'BOSS ENCOUNTER!!':'ENCOUNTER!!',encounterAnimationStartedAt:performance.now(),message:''};
+    const environment=getV2ThemeBattleOptions(session,character,{boss});
+    session.renderState.overlayEvent={type:'randomEncounter',showOverlay:true,encounterType:boss?'boss':environment.ambush?'ambush':'normal',encounterLabel:boss?'BOSS ENCOUNTER!!':environment.ambush?'AMBUSH!!':'ENCOUNTER!!',encounterAnimationStartedAt:performance.now(),message:''};
     playSe('battleStart');say('＊　何者かと遭遇した！　＊');
     const prepared=boss?prepareNormalBossImage(enemyData,context):Promise.resolve(enemyData.image);
     const [image]=await Promise.all([prepared,wait(1400)]);
     if(getSpecialMapContext()?.session!==session||!matchesV2Battle(session,context))return;
     session.renderState.overlayEvent=null;
     startBgm(enemyData.goddessTheme?'finalBoss':boss?'floorBoss':'normalBattle');
-    if(!startBattle(createEnemyCombatant({...enemyData,image}),{playStartSe:false,explorationContext:context})){
+    if(!startBattle(createEnemyCombatant({...enemyData,image}),{playStartSe:false,explorationContext:context,...environment})){
       resumeV2Encounter(session,context);startBgm(getSpecialMapBgmKey(session.generatedMap.themeId));
     }
   }
@@ -5548,6 +5558,13 @@ import {
     startBgm(getSpecialMapBgmKey(s.generatedMap.themeId));say(message);updateCharacterUi();updateHud();saveGame();
   }
   configureSpecialMapHost({
+    onMapEnvironmentStep:session=>{
+      const result=applyV2ThemeStep(character,session);character=result.character;
+      if(result.hpDamage)showPoisonStepDamage(result.hpDamage);
+      if(result.spDamage)showStepSpDamage(result.spDamage);
+      updateCharacterUi();
+    },
+    syncMapEnvironment:session=>syncV2ThemeEnvironment(session,character,{effectForced:hasCardEffect(character?.cards?.deckSlots,'force_torch_effect_active')}),
     checkMapEntry:(map,options)=>{
       if(map?.rulesetVersion!=='special-map-v2'||map.themeOverride!=null||options.developmentTheme)return {ok:true};
       if(hasPendingMapReward(character?.specialMaps))return {ok:false,error:MAP_REWARD_PENDING_MESSAGE};

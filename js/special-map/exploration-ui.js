@@ -1,6 +1,7 @@
 import {discardV2Experience} from './battle-rewards-v2.js';
+import {getV2StairImage} from './stair-presentation-v2.js';
 import {createSpecialMapSession,actSpecialMap,updateSpecialMotion,specialWall,specialDoorState,openSpecialDoorAhead,flushSpecialSurvey,continueSpecialAutoWalker} from './session.js';
-import {preloadExplorationImage,useSpecialMapRenderSource,toggleMinimapOverlay,getActiveMinimapBounds,setWallColor,setFloorColor} from '../renderer.js';
+import {preloadExplorationImage,useSpecialMapRenderSource,toggleMinimapOverlay,isMinimapOverlayVisible,setWallColor,setFloorColor} from '../renderer.js';
 import {createSpecialMapV2Session,isV2Session,confirmV2Cell,switchV2Floor,warpV2ToEntrance,getV2StairPrompt,getV2CellPromptMessage,cancelV2CellPrompt,completeV2KeyChest,cancelV2KeyChest} from './session-v2.js';
 import {drawMinimap,getMinimapBounds} from '../minimap.js';
 import {attachSpecialMap,getSpecialMapHost,getSpecialMapContext} from './context.js';
@@ -45,12 +46,23 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  const host=getSpecialMapHost();
  const original=registered.find(m=>mapOriginalId(m)===mapKey);
  const createSession=original?.rulesetVersion==='special-map-v2'?createSpecialMapV2Session:createSpecialMapSession;
- const session=createSession(registered,mapKey,{developmentTheme,persistSurvey:saveSurvey,playSe,onEncounter:host.onEncounter,onBossEncounter:host.onEncounter,prepareBossEncounter:host.prepareBossEncounter,say:text=>{message.textContent=text;}});
+ const session=createSession(registered,mapKey,{developmentTheme,persistSurvey:saveSurvey,playSe,onEnvironmentStep:host.onMapEnvironmentStep,onEncounter:host.onEncounter,onBossEncounter:host.onEncounter,prepareBossEncounter:host.prepareBossEncounter,say:text=>{message.textContent=text;}});
  if(isV2Session(session))session.torchConsumptionDisabled=()=>Boolean(host.getTorchCardEffects?.().consumptionDisabled);
  let name=developmentName||'特殊地図';try{if(!developmentName)name=describeTestMap(original).name;}catch{}
  const container=document.createElement('section');container.className='special-map-runtime';container.setAttribute('aria-label','特殊迷宮探索');
  const canvas=document.createElement('canvas');canvas.className='special-map-view';canvas.width=960;canvas.height=540;canvas.setAttribute('aria-label','特殊迷宮3D表示');
  container.append(canvas);host.viewport.append(container);
+ const stairImage=isV2Session(session)?document.createElement('img'):null;
+ if(stairImage){stairImage.className='special-map-stair-image';stairImage.hidden=true;container.append(stairImage);
+  for(const file of ['up_stairs','down_stairs','exit']){const image=document.createElement('img');image.src=`images/dungeon_effects/${file}.avif`;}
+ }
+ let renderTheme=host.syncMapEnvironment?.(session)||session.generatedMap.themeId;
+ function syncStairImage(){
+  if(!stairImage)return;
+  const image=getV2StairImage(session);
+  stairImage.hidden=!image||Boolean(session.motion||session.renderState.anim||session.transitioning||session.surveyPresentationPlaying||session.renderState.overlayEvent||host.isPaused?.()||isMinimapOverlayVisible());
+  if(image){if(stairImage.getAttribute('src')!==image.src)stairImage.src=image.src;stairImage.alt=image.alt;}
+ }
  const statusParent=host.status.parentElement;container.append(host.status);
  let disposed=false,returned=false,chestPreview=false;
  session.startUnavailableBossPresentation=()=>{
@@ -117,11 +129,16 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
   },drawMinimap,getMinimapBounds,
   getMinimapOptions:()=>({W:960,MAP_W:10,MAP_H:10,cells:session.cells,explored:session.surveyView,state:session.renderState,mapTitle:isV2Session(session)?name:null}),
   updateHud:()=>{
-   if(isV2Session(session)){const effects=host.getTorchCardEffects?.();session.renderState.torchEffectForced=Boolean(effects?.effectForced);session.renderState.minimapEffectForced=Boolean(effects?.effectForced);}
+   if(isV2Session(session)){
+    const effects=host.getTorchCardEffects?.();session.renderState.torchEffectForced=Boolean(effects?.effectForced);session.renderState.minimapEffectForced=Boolean(effects?.effectForced);
+    const theme=host.syncMapEnvironment?.(session)||session.generatedMap.themeId;
+    if(theme!==renderTheme){renderTheme=theme;setWallColor(theme);setFloorColor(theme);}
+   }
    container.dataset.moving=String(Boolean(session.motion||session.renderState.anim));
    container.dataset.banner=String(Boolean(session.renderState.overlayEvent));
    host.updateHud?.();
    syncChestPreview();
+   syncStairImage();
    if(isV2Session(session)){
     const chip=document.getElementById('specialSurveyChip');
     if(chip){
@@ -148,7 +165,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
    }
    if(session.surveyError)message.textContent=session.surveyError;
   }
- },session.generatedMap.themeId);
+ },renderTheme);
  message.textContent=stairPrompt||'特殊地図を探索中。Bボタンでメニュー表示。';
  async function useStairs(destination,warp=false){
   if(!flushSpecialSurvey(session)){message.textContent=session.surveyError;return;}
@@ -157,7 +174,8 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
    const onDark=()=>{
     if(disposed)return;
     if(!(warp?warpV2ToEntrance(session):switchV2Floor(session,destination)))return;
-    setWallColor(session.generatedMap.themeId);setFloorColor(session.generatedMap.themeId);
+    renderTheme=host.syncMapEnvironment?.(session)||session.generatedMap.themeId;
+    setWallColor(renderTheme);setFloorColor(renderTheme);
     host.floorChanged?.({session});
     session.renderState.overlayEvent={type:'floorLap',showOverlay:false,overlayMessage:`B${session.currentFloor+1}F`,specialMapTitle:true};
     showStairNotice(`B${session.currentFloor+1}Fへ移動した。\n`);

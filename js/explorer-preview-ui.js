@@ -6,7 +6,7 @@ import {getTentBackground} from './explorer-preview.js';
 import {isV2Map, rarityLabel, mapContentId, normalizeSpecialMaps, describeTestMap, setMapSignature, inspectAppraisal, appraiseMap, registerSharedMap, deleteRegisteredMap, toggleMapFavorite, updateMapSurvey} from '../data/special-maps.js';
 import {encodeMapCode,decodeMapCode} from '../data/special-map-code.js';
 
-export function createExplorerPreviewUI({host, commands, background, message, playSe, onExit, startExploration, canReceiveTestStarter=()=>false, getMaps=()=>null, updateMaps=()=>({ok:false,error:'保存処理に接続されていません。'})}) {
+export function createExplorerPreviewUI({host, commands, background, message, playSe, onExit, startExploration, showMapRewardAcquisition, canReceiveTestStarter=()=>false, getMaps=()=>null, updateMaps=()=>({ok:false,error:'保存処理に接続されていません。'})}) {
   const panel=document.createElement('section');
   panel.className='transfer-destination-overlay explorer-preview';panel.hidden=true;
   panel.setAttribute('aria-label','特殊地図');host.append(panel);
@@ -16,12 +16,13 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
   const maps=()=>normalizeSpecialMaps(getMaps());
   let formControls=[],formCursor=0,actions=[],actionCursor=0,pendingMap=null,codeDraft='';
   let exploration=null;
+  let acquisitionController=null;
   const selectedMap=()=>maps().registered.find(m=>m.id===detailId);
   const make=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
-  const button=(label,action,selected=false)=>{const b=make('button');b.type='button';if(label)b.append(make('span',label,'explorer-button-label'));b.classList.toggle('is-selected',selected);b.onclick=()=>{playSe('confirm');action();};return b;};
+  const button=(label,action,selected=false)=>{const b=make('button');b.type='button';if(label)b.append(make('span',label,'explorer-button-label'));b.classList.toggle('is-selected',selected);b.onclick=()=>{if(acquisitionController)return;playSe('confirm');action();};return b;};
   const error=text=>{message.textContent=text;};
   const countText=()=>`未鑑定の地図 ${maps().unidentified.length} / 3　登録済み地図 ${maps().registered.length} / 10${hasPendingMapReward(maps())?'　討伐地図報酬：未受領':''}`;
-  function close(){exploration?.close();exploration=null;if(active&&hint)hint.textContent=previousHint;active=false;panel.hidden=true;commands.hidden=false;}
+  function close(){acquisitionController?.abort();acquisitionController=null;exploration?.close();exploration=null;if(active&&hint)hint.textContent=previousHint;active=false;panel.hidden=true;commands.hidden=false;}
   function exit(){close();onExit();}
   function back(){
     if(view==='enter'){view='detail';actionCursor=0;}
@@ -66,7 +67,12 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     if(cursor===5){
       const result=updateMaps(receiveMapBossReward);
       if(!result.ok){error(result.error);return;}
-      cursor=0;render();playSe('importantItem');message.textContent='討伐報酬の未鑑定地図を1枚受け取りました。地図鑑定で確認できます。';return;
+      cursor=0;render();message.textContent='討伐報酬の未鑑定地図を1枚受け取りました。地図鑑定で確認できます。';
+      if(showMapRewardAcquisition){
+        const controller=new AbortController();acquisitionController=controller;
+        Promise.resolve().then(()=>{if(!controller.signal.aborted)return showMapRewardAcquisition({signal:controller.signal});}).catch(()=>{}).finally(()=>{if(acquisitionController===controller)acquisitionController=null;});
+      }else playSe('importantItem');
+      return;
     }
     if(cursor===4){view='starter';render();return;}
     if(cursor===3){exit();return;}
@@ -231,6 +237,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
   }
   function inputAction(action){
     if(!active)return false;
+    if(acquisitionController)return true;
     if(exploration)return exploration.input(action);
     if(action==='cancel'){back();return true;}
     if(view==='signature'||view==='register'){

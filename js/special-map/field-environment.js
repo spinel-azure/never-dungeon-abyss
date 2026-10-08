@@ -1,4 +1,5 @@
 import {getItem} from '../../data/items.js';
+import {isV2TorchRestricted} from './theme-environment-v2.js';
 import {getSkill} from '../../data/skills.js';
 import {resolveFieldItemUse} from '../../combat/resolve-item-use.js';
 import {resolveFieldSkill} from '../../combat/resolve-field-skill.js';
@@ -13,12 +14,14 @@ export const SPECIAL_FIELD_EFFECT_TARGETS=Object.freeze({
 });
 export function resolveSpecialFieldItem({character,itemId,session}){
  const item=getItem(itemId);
+ if(item?.effects.some(e=>e.id==='restore_torch')&&isV2TorchRestricted(session,character))return {accepted:false,reason:'noEffect',message:'この区域では、たいまつの光を補充できない。'};
  if(item?.usableIn.includes('dungeon')&&item.effects.some(e=>!SPECIAL_FIELD_EFFECT_TARGETS[e.id]||SPECIAL_FIELD_EFFECT_TARGETS[e.id]==='unavailable'))return {accepted:false,reason:'noEffect',message:'今は使用する必要がない。'};
  if(itemId==='auto_walker'){const a=getSpecialAutoAvailability(session);if(!a.accepted)return {accepted:false,reason:a.reason};}
  return resolveFieldItemUse({character,itemId,context:'dungeon',torchFuel:session.renderState.torchFuel,treasureCompassActive:false});
 }
 export function resolveSpecialFieldSkill({character,skillId,session}){
  const effect=getSkill(skillId)?.environmentEffect;
+ if(effect==='restoreTorch'&&isV2TorchRestricted(session,character))return {accepted:false,reason:'noEffect',message:'この区域では、たいまつの光を補充できない。'};
  if(effect&&!['restoreTorch','autoReturn'].includes(effect))return {accepted:false,reason:'noEffect',message:'今は使用する必要がない。'};
  return resolveFieldSkill({character,skillId,context:'dungeon',torchFuel:session.renderState.torchFuel,presenceIncreaseReduction:0,autoReturnAvailability:getSpecialAutoAvailability(session)});
 }

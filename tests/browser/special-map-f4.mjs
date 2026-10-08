@@ -113,7 +113,11 @@ try{for(const width of [1280,390]){
   assert.equal(await p.evaluate(()=>f4Qa.c().specialMaps.unidentified.length),3);
   assert.deepEqual(await p.evaluate(id=>f4Qa.c().specialMaps.unidentified.find(m=>m.discoveryId===id),reward.rewardId),reward.map);
   assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
-  await p.screenshot({path:`${output}/${width}-received-${lap}.png`});await activateCommand('戻る');
+  await p.locator('#itemGetEffect:not([hidden]) .item-get-image').waitFor({state:'visible'});
+  await p.waitForTimeout(1100);
+  await p.screenshot({path:`${output}/${width}-received-${lap}.png`});
+  await p.waitForFunction(()=>document.querySelector('#itemGetEffect').hidden);await p.waitForTimeout(100);
+  await activateCommand('戻る');
  }
  assert.deepEqual(errors,[]);results.push({width,laps:2,level:100,clonedDuplicate:true,victorySaveRetry:true,receiptSaveRollback:true,pendingReload:true,fullThenAppraised:true,entryBlocked:true,expGoldAndRenewal:true,ordinaryDungeonUnchanged:true,fixture:'HP1 normal boss, direct B3F placement, precompleted survey; production combat/outcome/portal/return/receipt'});
  console.log(results.at(-1));await p.close();

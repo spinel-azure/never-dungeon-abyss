@@ -233,3 +233,16 @@ test('F4 tent full inventory and save failure retain exact pending reward, count
  const failed=setup(t,'layout-mobile',pendingRewardBook());failed.ui.open('tent');failed.failSave();
  failed.touch(failed.commands.children[5]);assert.equal(failed.state().unidentified.length,0);assert.equal(failed.state().bossReward.status,'pending');assert.match(failed.message.textContent,/保存に失敗/);
 });
+
+test('F4 successful receipt presents only after commit, locks input, and never replays a stale reward',async t=>{
+ let release,calls=0,signal;const v=setup(t,'layout-mobile',pendingRewardBook(),{showMapRewardAcquisition:options=>{
+  calls++;signal=options.signal;assert.equal(v.state().bossReward.status,'received');return new Promise(r=>release=r);
+ }});v.ui.open('tent');const stale=v.commands.children[5];v.touch(stale);
+ await Promise.resolve();assert.equal(calls,1);assert.equal(signal.aborted,false);
+ v.touch(stale);v.ui.input('cancel');v.touch(v.commands.children[3]);assert.equal(v.exits(),0);assert.equal(v.state().unidentified.length,1);
+ release();await new Promise(r=>setImmediate(r));v.ui.input('cancel');assert.equal(v.exits(),1);assert.equal(calls,1);
+});
+test('F4 no receipt animation on full/save failure; closing aborts pending presentation',async t=>{
+ for(const full of [true,false]){let calls=0;const v=setup(t,'layout-mobile',pendingRewardBook(full),{showMapRewardAcquisition:()=>calls++});v.ui.open('tent');if(!full)v.failSave();v.touch(v.commands.children[5]);await Promise.resolve();assert.equal(calls,0);}
+ let signal;const v=setup(t,'layout-mobile',pendingRewardBook(),{showMapRewardAcquisition:o=>{signal=o.signal;return Promise.resolve();}});v.ui.open('tent');v.touch(v.commands.children[5]);await Promise.resolve();v.ui.close();assert.equal(signal.aborted,true);
+});

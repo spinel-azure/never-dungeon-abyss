@@ -1,4 +1,5 @@
 import {discardV2Experience} from '../js/special-map/battle-rewards-v2.js';
+import {getV2StairImage} from '../js/special-map/stair-presentation-v2.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -24,11 +25,11 @@ function enterCell(h,p){
 }
 function harness({entry,map=original,playSe=()=>{},saveSurvey=()=>({ok:true}),hostOptions={}}={}){
  let bound,callback,exits=0,hides=0,openings=0,menus=0,previews=0;const events=new Map(),timers=[];
- class Node{constructor(){this.dataset={};}setAttribute(){}append(...nodes){for(const n of nodes)n.parentElement=this;}getContext(){return {};}remove(){}addEventListener(){}}
+ class Node{constructor(){this.dataset={};this.attrs={};}setAttribute(k,v){this.attrs[k]=v;}getAttribute(k){return this.attrs[k];}append(...nodes){for(const n of nodes)n.parentElement=this;}getContext(){return {};}remove(){}addEventListener(){}}
  const viewport=new Node(),status=new Node();viewport.append(status);
  const host={viewport,status,...(entry?{runEntryTransition:entry}:{}),openMenu(){menus++;},showTreasure(type){assert.equal(type,'gold');previews++;},playTreasureOpening(type,done){assert.equal(type,'gold');callback=done;openings++;},hideTreasure(){hides++;}};
  Object.assign(host,hostOptions);
- const scope={setTimeout:fn=>timers.push(fn),discardV2Experience,...session,...v2,mapOriginalId,getSpecialMapContext:()=>null,getSpecialMapHost:()=>host,attachSpecialMap:()=>()=>{},describeTestMap:()=>({name:'地図'}),setWallColor(){},setFloorColor(){},drawMinimap(){},getMinimapBounds(){},toggleMinimapOverlay(){},performance:{now:()=>0},preloadExplorationImage:()=>{},useSpecialMapRenderSource:o=>{bound=o;return ()=>{};},document:{getElementById:()=>null,visibilityState:'hidden',addEventListener:(key,fn)=>events.set(key,fn),removeEventListener:key=>events.delete(key),createElement:()=>new Node()},window:{addEventListener:(key,fn)=>events.set(key,fn),removeEventListener:key=>events.delete(key)}};
+ const scope={setTimeout:fn=>timers.push(fn),discardV2Experience,getV2StairImage,...session,...v2,mapOriginalId,getSpecialMapContext:()=>null,getSpecialMapHost:()=>host,attachSpecialMap:()=>()=>{},describeTestMap:()=>({name:'地図'}),setWallColor(){},setFloorColor(){},drawMinimap(){},getMinimapBounds(){},toggleMinimapOverlay(){},isMinimapOverlayVisible:()=>false,performance:{now:()=>0},preloadExplorationImage:()=>{},useSpecialMapRenderSource:o=>{bound=o;return ()=>{};},document:{getElementById:()=>null,visibilityState:'hidden',addEventListener:(key,fn)=>events.set(key,fn),removeEventListener:key=>events.delete(key),createElement:()=>new Node()},window:{addEventListener:(key,fn)=>events.set(key,fn),removeEventListener:key=>events.delete(key)}};
  const source=readFileSync(new URL('../js/special-map/exploration-ui.js',import.meta.url),'utf8');
  vm.runInNewContext(source.replace(/^import .*;\r?\n/gm,'').replace('export function','function')+';this.start=startSpecialMapExploration;',scope);
  const message={},ui=scope.start({registered:[map],mapKey:mapOriginalId(map),message,saveSurvey,playSe,onExit(){exits++;}});

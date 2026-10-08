@@ -77,7 +77,7 @@ export function createSpecialMapV2Session(registered,mapKey,options={}){
    definition:{imageId:gate?'warp_portal_b100f':visibleBoss.id,image:gate?'images/dungeon_effects/warp_portal.avif':visibleBoss.image,renderScale:gate ? 1.8 : 1.9,maxHeightRatio:.9,silhouette:!gate&&Boolean(visibleBoss.battleMinMapLevel>s.level),opacity:s.bossPreviewFadeStarted?Math.max(0,1-(Date.now()-s.bossPreviewFadeStarted)/1000):1}};
  };
  // A survey milestone is a cell event too: its notice must not race battle audio.
- s.onCellEntered=()=>{beginV2CellPrompt(s);if(!s.onBossCell()&&!s.surveyNotice)s.onEncounterStep();};
+ s.onCellEntered=()=>{options.onEnvironmentStep?.(s);beginV2CellPrompt(s);if(!s.onBossCell()&&!s.surveyNotice)s.onEncounterStep();};
  s.isDoorLocked=(x,y,d)=>s.doorByKey.has(doorKey(x,y,d))&&!s.bossDoorUnlocked;
  s.canOpenDoor=(x,y,d)=>{
   if(!s.isDoorLocked(x,y,d))return true;

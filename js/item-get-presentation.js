@@ -1,7 +1,7 @@
 import { getItemCompendiumEntry } from "../data/item-compendium.js";
 
 // Presentation only: ownership and reward processing remain with the caller.
-export function renderItemGetItems(root, names, { itemIds = [], amounts = [], acquisitionMessage = false } = {}) {
+export function renderItemGetItems(root, names, { itemIds = [], imageSources = [], amounts = [], acquisitionMessage = false } = {}) {
   const document = root.ownerDocument;
   root.classList.toggle("is-multiple", names.length > 1);
   root.classList.remove("has-images");
@@ -14,7 +14,7 @@ export function renderItemGetItems(root, names, { itemIds = [], amounts = [], ac
     const id = itemIds[index];
     const catalogId = /^red_rust_key_b\d+f$/.test(id || "") ? "red_rust_key_b9f" : id;
     const entry = getItemCompendiumEntry(catalogId);
-    const source = entry?.imageData || entry?.imageSrc;
+    const source = imageSources[index] || entry?.imageData || entry?.imageSrc;
     if (source) {
       const image = document.createElement("img");
       image.className = "item-get-image";
