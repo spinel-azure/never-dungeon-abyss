@@ -11,7 +11,7 @@ export const rarityLabel = rarity => ({WHITE:'白地図',SILVER:'銀地図',GOLD
 export const isV2Map = map => map?.rulesetVersion===SPECIAL_MAP_V2;
 export function validV2Parameters(map){return Number.isInteger(map.level)&&map.level>=1&&map.level<=100&&MAP_RARITIES.includes(map.rarity)&&validMapThemeOverride(map);}
 export const UNIDENTIFIED_LIMIT = 3;
-export const REGISTERED_LIMIT = 10;
+export const REGISTERED_LIMIT = 100;
 
 export function validateMapSignature(input) {
   const value = String(input ?? '').trim().normalize('NFC');

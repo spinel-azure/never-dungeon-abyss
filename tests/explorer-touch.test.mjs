@@ -299,3 +299,15 @@ test('form action routed through its button does not double-play and disabled te
  v.ui.input('cancel');assert.deepEqual(cues.splice(0),['cancel']);
  v.touch(v.commands.children[5]);assert.deepEqual(cues.splice(0),['cancel']);
 });
+
+test('100 registered maps survive reload and sort cycles preserve identity and saved order',t=>{
+ const initial=normalizeSpecialMaps({discovererName:'QA',registered:Array.from({length:100},(_,i)=>({rulesetVersion:'special-map-v2',seed:i,level:100-i,rarity:'WHITE',discovererName:'QA',favorite:i===99}))});
+ assert.equal(normalizeSpecialMaps(JSON.parse(JSON.stringify(initial))).registered.length,100);
+ const before=JSON.stringify(initial);const v=setup(t,'layout-mobile',initial);v.ui.open('maps');assert.match(v.message.textContent,/100 \/ 100/);assert.match(v.host.textContent,/1 \/ 20/);
+ v.touch(v.find('ソート：登録順'));assert.ok(v.find('ソート：お気に入り'));v.ui.input('confirm');assert.match(v.host.textContent,/Lv\.1 ⭐/);v.ui.input('cancel');
+ v.touch(v.find('ソート：お気に入り'));assert.ok(v.find('ソート：Lv低い順'));v.ui.input('confirm');assert.match(v.host.textContent,/Lv\.1 ⭐/);v.ui.input('cancel');
+ v.touch(v.find('ソート：Lv低い順'));assert.ok(v.find('ソート：Lv高い順'));v.ui.input('confirm');assert.match(v.host.textContent,/Lv\.100/);v.ui.input('cancel');
+ v.touch(v.find('ソート：Lv高い順'));assert.ok(v.find('ソート：テーマ'));v.touch(v.find('ソート：テーマ'));assert.ok(v.find('ソート：お気に入り'));
+ assert.equal(JSON.stringify(v.state()),before);
+ for(let i=0;i<19;i++)v.ui.input('right');assert.match(v.host.textContent,/20 \/ 20/);v.ui.input('confirm');assert.match(v.host.textContent,/地図詳細/);
+});

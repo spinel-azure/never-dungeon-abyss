@@ -399,10 +399,12 @@ export const TAVERN_RUMORS = Object.freeze([
   Object.freeze({
     id:'rumor_019',title:'続・迷宮探検家の噂',verbatimCustomers:true,
     unlock:c=>c.mapBetaRumorEligible,
-    currentWhile:c=>!c.formalStarterGranted,
+    currentWhile:c=>!c.formalStarterGranted||!c.formalStarterRumorRead,
     customerLead:'おい、知ってるか？例のリュックを背負った女の子がキャンプしている話。',
     customerReply:'ああ。奈落入口の近くにテントを張って寝泊まりしているらしい。',
-    phases:Object.freeze([Object.freeze({id:'base',readFlag:MAP_BETA_RUMOR_FLAG,unlock:()=>true,
+    phases:Object.freeze([Object.freeze({id:'base',readFlag:MAP_BETA_RUMOR_FLAG,unlock:c=>!c.formalStarterGranted,
+      rosa:'まぁ…。女の子がそんな所で一人っきりなんて危ないわ…。'}),
+      Object.freeze({id:'received',readFlag:'tavern_rumor_019_received_read',unlock:c=>c.formalStarterGranted,
       rosa:'まぁ…。女の子がそんな所で一人っきりなんて危ないわ…。',
       rosaContinuation:'えっ？地図作りを手伝ってくれと頼まれたですって！？変わった子ね…。'})])
   })
@@ -434,6 +436,7 @@ function normalizeRumorContext(character, context = {}) {
     trelirenMet: Boolean(eventFlags.treliren_met),
     mapBetaRumorEligible:Boolean(eventFlags.tavern_rumor_017_base_read&&normalizeTrelirenProgress(character).encounters>=3&&normalizeTrelirenProgress(character).requestCompleted),
     formalStarterGranted:character?.specialMaps?.starterMapsGranted===true,
+    formalStarterRumorRead:Boolean(eventFlags.tavern_rumor_019_received_read),
     leoQualified: hasLeoQualification(character),
     leoObtainedAfterVictory: Boolean(eventFlags.boss_loewenkoenigin_b1f_defeated && Number(character?.cards?.ownedCardCounts?.zodiac_leo) > 0),
     mikanEncountered: Boolean(context.mikanEncountered ?? eventFlags.mikan_nyanko_encountered),

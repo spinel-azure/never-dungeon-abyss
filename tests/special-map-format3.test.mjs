@@ -57,8 +57,8 @@ test('Format 2 identity stays exact; theme splits originals; save, limits, favor
  state=updateMapSurvey(state,gold.id,masks).state;state=toggleMapFavorite(state,gold.id).state;
  state=normalizeSpecialMaps(JSON.parse(JSON.stringify(state)));assert.deepEqual(state.registered[1].surveyedMasks,masks);assert.ok(state.registered[1].favorite);
  assert.equal(registerSharedMap(state,map({themeOverride:'gold',discovererName:'ALC'})).needsConfirmation,true);
- while(state.registered.length<10)state=registerSharedMap(state,map({seed:state.registered.length})).state;
- const duplicate=registerSharedMap(state,map({themeOverride:'gold'}));assert.ok(duplicate.duplicate);assert.ok(duplicate.map.favorite);assert.equal(registerSharedMap(state,map({seed:42})).ok,false);
+ while(state.registered.length<100)state=registerSharedMap(state,map({seed:state.registered.length})).state;
+ const duplicate=registerSharedMap(state,map({themeOverride:'gold'}));assert.ok(duplicate.duplicate);assert.ok(duplicate.map.favorite);assert.equal(registerSharedMap(state,map({seed:1042})).ok,false);
  assert.equal(deleteRegisteredMap(state,gold.id).ok,false);state=toggleMapFavorite(state,gold.id).state;state=deleteRegisteredMap(state,gold.id).state;
  const restored=registerSharedMap(state,decodeMapCode(encodeMapCode(gold)).map);assert.ok(restored.ok);assert.equal(restored.map.themeOverride,'gold');assert.equal(restored.map.favorite,false);assert.deepEqual(restored.map.surveyedMasks,Array(3).fill('0'.repeat(25)));
  assert.equal(normalizeSpecialMaps({unidentified:themes.map(themeOverride=>map({themeOverride}))}).unidentified.length,3);

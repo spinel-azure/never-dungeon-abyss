@@ -1,3 +1,4 @@
+import {sortRegisteredMaps} from '../data/special-map-sort.js';
 import {MAP_BETA_WELCOME,MAP_BETA_EXPLANATION,MAP_BETA_NOTICE} from '../data/map-beta.js';
 import {paginateMessageToFit} from './message-pagination.js';
 import {grantTestStarterMaps,prepareFormalStarter,receiveFormalStarter,unidentifiedMapLabel} from '../data/special-map-starter.js';
@@ -5,7 +6,7 @@ import {hasPendingMapReward,receiveMapBossReward} from '../data/special-map-rewa
 import {surveyCount} from '../data/special-map-survey.js';
 import {surveyTotalV2} from '../data/special-map-survey-v2.js';
 import {getTentBackground} from './explorer-preview.js';
-import {isV2Map, rarityLabel, mapContentId, normalizeSpecialMaps, describeTestMap, setMapSignature, inspectAppraisal, appraiseMap, registerSharedMap, deleteRegisteredMap, toggleMapFavorite, updateMapSurvey} from '../data/special-maps.js';
+import {REGISTERED_LIMIT,isV2Map, rarityLabel, mapContentId, normalizeSpecialMaps, describeTestMap, setMapSignature, inspectAppraisal, appraiseMap, registerSharedMap, deleteRegisteredMap, toggleMapFavorite, updateMapSurvey} from '../data/special-maps.js';
 import {encodeMapCode,decodeMapCode} from '../data/special-map-code.js';
 
 export function createExplorerPreviewUI({host, commands, background, message, playSe, onExit, startExploration, showMapRewardAcquisition, useBetaIntroduction=()=>false, finishTyping=()=>false, canReceiveTestStarter=()=>false, getMaps=()=>null, updateMaps=()=>({ok:false,error:'保存処理に接続されていません。'})}) {
@@ -56,19 +57,23 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     if(!result.ok){error(result.error);return;}
     preparedStarter=null;
     const controller=new AbortController();acquisitionController=controller;
-    message.textContent='「未鑑定の白地図」を3枚受け取った！';
+    message.textContent='「はじまりの白地図」（3枚）を受け取った！';
     try{if(showMapRewardAcquisition)await showMapRewardAcquisition({signal:controller.signal,starter:true});else playSe('importantItem');}
     finally{if(acquisitionController===controller)acquisitionController=null;}
     if(controller.signal.aborted||!active)return;
     betaView='';view='betaExplanation';render();
   }
 
+  let sortMode=-1;
+  const sortLabels=['お気に入り','Lv低い順','Lv高い順','テーマ'];
+  const entries=()=>sortRegisteredMaps(maps().registered,sortMode);
+  function cycleSort(){sortMode=(sortMode+1)%sortLabels.length;index=page=0;armed=-1;render();}
   const selectedMap=()=>maps().registered.find(m=>m.id===detailId);
   const make=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
   const invoke=(action,sound=action===back||action===exit?'cancel':'confirm')=>{playSe(sound);action();};
   const button=(label,action,selected=false,sound)=>{const b=make('button');b.type='button';if(label)b.append(make('span',label,'explorer-button-label'));b.classList.toggle('is-selected',selected);b.onclick=()=>{if(acquisitionController||b.disabled)return;if(finishTyping())return;invoke(action,typeof sound==='function'?sound():sound??(label==='戻る'?'cancel':undefined));};return b;};
   const error=text=>{message.textContent=text;};
-  const countText=()=>`未鑑定の地図 ${maps().unidentified.length} / 3　登録済み地図 ${maps().registered.length} / 10${hasPendingMapReward(maps())?'　討伐地図報酬：未受領':''}`;
+  const countText=()=>`未鑑定の地図 ${maps().unidentified.length} / 3　登録済み地図 ${maps().registered.length} / ${REGISTERED_LIMIT}${hasPendingMapReward(maps())?'　討伐地図報酬：未受領':''}`;
   function close(){acquisitionController?.abort();acquisitionController=null;exploration?.close();exploration=null;if(active&&hint)hint.textContent=previousHint;active=false;panel.hidden=true;commands.hidden=false;}
   function exit(){close();onExit();}
   function back(){
@@ -93,7 +98,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
   function complete(){
     const result=updateMaps(state=>appraiseMap(state,discoveryId));
     if(!result.ok){view='appraise';render();error(result.error);return;}
-    index=maps().registered.findIndex(m=>m.id===result.map.id);page=Math.floor(index/5);
+    index=entries().findIndex(m=>m.id===result.map.id);page=Math.floor(index/5);
     origin='organize';detailId=result.map.id;view='detail';render();
     message.textContent=result.duplicate?'登録済みの地図を確認しました。既存の記録はそのままです。':'地図帳へ登録しました！';
   }
@@ -139,7 +144,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
   }
   function registered(result){
     if(!result.ok){error(result.error);return;}
-    detailId=result.map.id;index=maps().registered.findIndex(m=>m.id===detailId);page=Math.floor(index/5);
+    detailId=result.map.id;index=entries().findIndex(m=>m.id===detailId);page=Math.floor(index/5);
     origin='organize';changeView('detail');error(result.duplicate?'この地図はすでに登録されています。':'地図帳へ登録しました！');
   }
   function importCode(confirmed=false){
@@ -225,7 +230,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       if(isSignature)message.textContent='トレリーレン「発見した人の名前も地図に残すんだけど……なんて書いておけばいい？」';return;
     }
     if(view==='maps'||view==='organize'){
-      const entries=maps().registered;index=Math.max(0,Math.min(index,entries.length-1));page=Math.floor(index/5);
+      const entries=sortRegisteredMaps(maps().registered,sortMode);index=Math.max(0,Math.min(index,entries.length-1));page=Math.floor(index/5);
       const list=make('div',undefined,'transfer-destination-list');
       if(!entries.length)list.append(make('p','登録されている地図はありません。'));
       entries.slice(page*5,page*5+5).forEach((map,offset)=>{
@@ -238,7 +243,9 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       const prev=button('◀',()=>turnPage(-1),false,'cursorMove'),next=button('▶',()=>turnPage(1),false,'cursorMove');
       prev.setAttribute('aria-label','前のページ');next.setAttribute('aria-label','次のページ');prev.disabled=next.disabled=entries.length<=5;
       pager.append(prev,make('strong',`${page+1} / ${Math.max(1,Math.ceil(entries.length/5))}`),next);
-      const footer=make('div',undefined,'explorer-footer');footer.append(button('戻る（B）',back));panel.append(list,pager,footer);
+      const footer=make('div',undefined,'explorer-footer');const sort=button('ソート：'+(sortMode<0?'登録順':sortLabels[sortMode]),cycleSort);
+      sort.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();sort.onclick();}};
+      footer.append(button('戻る（B）',back),sort);panel.append(list,pager,footer);
       message.textContent=`${countText()}　↑↓：選択　←→：ページ　A：詳細　B：戻る`;return;
     }
     if(view==='appraise'){
@@ -290,6 +297,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     if(action==='confirm'&&finishTyping())return true;
     if(exploration)return exploration.input(action);
     if(action==='cancel'){invoke(back);return true;}
+    if(action==='sort'&&(view==='maps'||view==='organize')){invoke(cycleSort);return true;}
     if(['up','down','left','right','pageLeft','pageRight'].includes(action))playSe('cursorMove');
     if(view==='signature'||view==='register'){
       if(['up','down','left','right'].includes(action)){formCursor=(formCursor+(['down','right'].includes(action)?1:formControls.length-1))%formControls.length;focusForm();}
@@ -308,7 +316,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       render();return true;
     }
     if(view==='maps'||view==='organize'){
-      const entries=maps().registered;
+      const entries=sortRegisteredMaps(maps().registered,sortMode);
       if(action==='confirm'&&entries[index])invoke(()=>openDetail(entries[index]));
       else if(action==='left'||action==='pageLeft')turnPage(-1);
       else if(action==='right'||action==='pageRight')turnPage(1);

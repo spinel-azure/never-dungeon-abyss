@@ -40,9 +40,9 @@ test('cross-save import, full duplicate preservation, same-content confirmation 
  let r=registerSharedMap(state,decoded);state=r.state;assert.equal(r.map.discovererName,'†ルル');assert.equal(r.map.acquisitionMethod,'shared');
  const info=describeTestMap(r.map),id=r.map.id;
  state.registered[0]={...r.map,cleared:true,memo:'keep',favorite:true};
- while(state.registered.length<10)state=registerSharedMap(state,original(state.registered.length)).state;
+ while(state.registered.length<100)state=registerSharedMap(state,original(state.registered.length)).state;
  r=registerSharedMap(state,decoded);assert.equal(r.duplicate,true);assert.equal(r.map.memo,'keep');assert.equal(r.map.favorite,true);assert.equal(r.map.cleared,true);
- assert.equal(registerSharedMap(state,original(42)).ok,false);
+ assert.equal(registerSharedMap(state,original(1042)).ok,false);
  assert.equal(deleteRegisteredMap(state,id).ok,false);
  state=toggleMapFavorite(state,id).state;state=deleteRegisteredMap(state,id).state;
  r=registerSharedMap(state,decoded);assert.equal(r.map.cleared,false);assert.equal(r.map.memo,'');assert.deepEqual(describeTestMap(r.map),info);

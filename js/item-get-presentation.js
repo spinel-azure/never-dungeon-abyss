@@ -11,6 +11,7 @@ export function renderItemGetItems(root, names, { itemIds = [], imageSources = [
     const label = document.createElement("span");
     const amount = Math.max(1, Math.floor(Number(amounts[index]) || 1));
     label.textContent = typeof acquisitionMessage==='string'?acquisitionMessage:acquisitionMessage ? `「${name}」を手に入れた！` : `${name} ×${amount}`;
+    if(typeof acquisitionMessage==='string'&&acquisitionMessage.includes('\n'))label.className='item-get-multiline';
     const id = itemIds[index];
     const catalogId = /^red_rust_key_b\d+f$/.test(id || "") ? "red_rust_key_b9f" : id;
     const entry = getItemCompendiumEntry(catalogId);

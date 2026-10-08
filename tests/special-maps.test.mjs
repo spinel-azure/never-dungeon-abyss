@@ -29,11 +29,11 @@ test('appraisal derives fixed info without random draws and moves original atomi
   assert.deepEqual(normalizeSpecialMaps(JSON.parse(JSON.stringify(result.state))),result.state);
  }
 });
-test('registration counts 0–10, full rejection retains map, full duplicate preserves all records',()=>{
- let state=empty();for(let i=0;i<10;i++){state=appraiseMap(discover(state,i,`d${i}`),`d${i}`).state;assert.equal(state.registered.length,i+1);}
+test('registration counts 0–100, full rejection retains map, full duplicate preserves all records',()=>{
+ let state=empty();for(let i=0;i<100;i++){state=appraiseMap(discover(state,i,`d${i}`),`d${i}`).state;assert.equal(state.registered.length,i+1);}
  const full=discover(state,100);assert.equal(appraiseMap(full,'discovery').ok,false);assert.equal(full.unidentified.length,1);
  state.registered[0]={...state.registered[0],cleared:true,favorite:true,memo:'永久保存'};
- const duplicate=appraiseMap(discover(state,0),'discovery');assert.equal(duplicate.duplicate,true);assert.equal(duplicate.state.registered.length,10);assert.equal(duplicate.state.unidentified.length,0);assert.deepEqual(duplicate.state.registered,state.registered);
+ const duplicate=appraiseMap(discover(state,0),'discovery');assert.equal(duplicate.duplicate,true);assert.equal(duplicate.state.registered.length,100);assert.equal(duplicate.state.unidentified.length,0);assert.deepEqual(duplicate.state.registered,state.registered);
 });
 test('same seed, different signatures are distinct originals with identical content',()=>{
  let state=appraiseMap(discover(empty()),'discovery').state;

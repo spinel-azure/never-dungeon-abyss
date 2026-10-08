@@ -1258,7 +1258,7 @@ import {
   configureTown({
     showMapRewardAcquisition:async({signal,starter=false}={})=>{
       if(signal?.aborted)return;
-      showNamedItemGetEffect([starter?'未鑑定の白地図':'未鑑定地図'],{amounts:starter?[3]:[],imageSources:['images/item-compendium/unidentified_map.avif'],acquisitionMessage:starter?'「未鑑定の白地図」を受け取った！ （3枚）':true,important:true});
+      showNamedItemGetEffect([starter?'はじまりの白地図':'未鑑定地図'],{amounts:starter?[3]:[],imageSources:['images/item-compendium/unidentified_map.avif'],acquisitionMessage:starter?'「はじまりの白地図」（3枚）を\n受け取った！':true,important:true});
       const hide=()=>{clearTimeout(itemGetTimer);itemGetEffect.hidden=true;itemGetEffect.classList.remove('is-active');};
       signal?.addEventListener('abort',hide,{once:true});
       await wait(3400);signal?.removeEventListener('abort',hide);
@@ -2790,6 +2790,7 @@ import {
       await wait(3400);
     },
     needsRequest:()=>needsTrelirenRequest(character),
+    requestCompleted:()=>character.trelirenProgress?.requestCompleted===true,
     startTyping:startNpcTypewriter,completeTyping:completeNpcTypewriter,stopTyping:stopNpcTypewriter,
     finish: () => {
       const previous=character;

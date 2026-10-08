@@ -1,0 +1,26 @@
+[
+  {
+    "width": 1280,
+    "meetings": 4,
+    "requestAtStart": true,
+    "fourthFollowup": true,
+    "requestReload": true,
+    "rumorGate": true,
+    "starterCount": 3,
+    "explanationReload": true,
+    "firstAppraisalUnlock": true,
+    "debug": false
+  },
+  {
+    "width": 390,
+    "meetings": 4,
+    "requestAtStart": true,
+    "fourthFollowup": true,
+    "requestReload": true,
+    "rumorGate": true,
+    "starterCount": 3,
+    "explanationReload": true,
+    "firstAppraisalUnlock": true,
+    "debug": false
+  }
+]

@@ -30,7 +30,8 @@ test('rumor 017, third meeting and completed request are independently mandatory
  c=markTavernRumorRead(c,rumor(c));assert.equal(isMapTentUnlocked(c),true);assert.ok(rumor(c));
  assert.ok(!getPastTavernRumors(c).some(r=>r.id==='rumor_019'));
  assert.ok(!syncTavernRumorNotifications(c).pendingRumors.some(r=>r.rumorId==='rumor_019'));
- c.specialMaps={starterMapsGranted:true};assert.equal(rumor(c),undefined);assert.equal(getPastTavernRumors(c).find(r=>r.id==='rumor_019').title,'続・迷宮探検家の噂');assert.equal(isMapTentUnlocked(c),true);
+ assert.equal(rumor(c).dialogue.length,3);assert.ok(!rumor(c).dialogue.join('').includes('変わった子ね'));
+ c.specialMaps={starterMapsGranted:true};assert.equal(rumor(c).stageId,'received');assert.match(rumor(c).dialogue.at(-1),/変わった子ね/);assert.ok(syncTavernRumorNotifications(c).addedIds.includes('rumor_019:received'));c=markTavernRumorRead(c,rumor(c));assert.equal(rumor(c),undefined);assert.equal(getPastTavernRumors(c).find(r=>r.id==='rumor_019').title,'続・迷宮探検家の噂');assert.equal(isMapTentUnlocked(c),true);
 });
 test('formal batch retains test entitlement independence, fixed contents, capacity and one-time delivery',()=>{
  let state=grantTestStarterMaps(normalizeSpecialMaps({discovererName:'QA'}),{random:()=>.1}).state;

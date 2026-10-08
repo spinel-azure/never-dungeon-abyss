@@ -24,7 +24,7 @@ function grantInitialBatch(state,grantFlag,{random=Math.random,id=()=>crypto.ran
  const batch=[];
  try{for(let i=0;i<3;i++){
   let seed=draw(65536);
-  // Finite fallback even with a broken/repeating RNG. At most 10 registered seeds
+  // Finite fallback even with a broken/repeating RNG. At most 100 registered seeds
   // exist, so a free value is guaranteed; no seed-dependent generator exceptions.
   for(let tries=0;occupied.has(seed)&&tries<65536;tries++)seed=(seed+1)&65535;
   if(occupied.has(seed))throw Error('No free seed');occupied.add(seed);

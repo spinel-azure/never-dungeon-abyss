@@ -1,5 +1,6 @@
 export const MAP_BETA_RUMOR_FLAG='tavern_rumor_019_base_read';
 export const TRELIREN_REQUEST='ふぅ、ふぅ…。こんにちは！よく会うね。あなたにならお願いしても…いいかな？地図作りをあなたにも手伝ってもらいたいの。詳しくは今度あたしのテントで話しましょ！';
+export const TRELIREN_FOLLOWUP='ふぅ、ふぅ…。こんにちは！いつでもいいから地図迷宮の調査を手伝ってくれると嬉しいな！';
 export const MAP_BETA_WELCOME='あたしのテントへようこそ！あなたにはあたしが見つけた地図の探索を手伝ってほしいの。まずはこれを渡しておくね。';
 export const MAP_BETA_EXPLANATION=[
  'あたしが見つけたこの白地図は奈落とは違う所に繋がっているの。あたしは『地図迷宮』って呼んでるけれど。',

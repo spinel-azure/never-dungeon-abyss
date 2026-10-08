@@ -69,11 +69,11 @@ test('mixed book, V2 duplicate before capacity, shared signature and deletion re
  assert.equal(result.map.discovererName,'†ルル');assert.equal(result.map.acquisitionMethod,'shared');
  assert.equal(registerSharedMap(state,original({discovererName:'ALC'})).needsConfirmation,true);
  state=registerSharedMap(state,original({discovererName:'ALC'}),{confirmSameContent:true}).state;
- for(let level=1;state.registered.length<10;level++)state=registerSharedMap(state,original({level})).state;
+ for(let level=1;state.registered.length<100;level++)state=registerSharedMap(state,original({level})).state;
  state.registered[1]={...state.registered[1],memo:'keep',favorite:true,cleared:true};
  result=registerSharedMap(state,decodeMapCode(encodeMapCode(original()).replace('NDA:','nda:')).map);
  assert.equal(result.duplicate,true);assert.equal(result.map.memo,'keep');assert.equal(result.map.favorite,true);
- assert.equal(registerSharedMap(state,original({level:99})).ok,false);
+ assert.equal(registerSharedMap(state,original({seed:1042})).ok,false);
  assert.equal(deleteRegisteredMap(state,result.map.id).ok,false);
  state.registered[1].favorite=false;state=deleteRegisteredMap(state,result.map.id).state;
  result=registerSharedMap(state,decodeMapCode(encodeMapCode(original())).map,{confirmSameContent:true});
@@ -91,7 +91,7 @@ test('V2 acquisition/appraisal fixes parameters, shares limits and initializes e
  assert.equal(result.map.discovererName,'スピネ');assert.equal(result.map.acquisitionMethod,'discovered');assert.equal('surveyedMask' in result.map,false);
  assert.equal(updateMapSurvey(result.state,result.map.id,'f'.repeat(25)).ok,false);
  assert.equal(describeTestMap(result.map).level,100);
- const full={...state,registered:Array.from({length:10},(_,seed)=>({...original({seed:100+seed}),id:mapOriginalId(original({seed:100+seed}))}))};
+ const full={...state,registered:Array.from({length:100},(_,seed)=>({...original({seed:100+seed}),id:mapOriginalId(original({seed:100+seed}))}))};
  assert.equal(appraiseMap(full,'0').ok,false);assert.equal(full.unidentified.length,3);
  full.registered[0]=result.map;assert.equal(appraiseMap(full,'0').duplicate,true);
 });
