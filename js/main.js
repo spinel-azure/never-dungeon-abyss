@@ -1,4 +1,5 @@
 import { renderItemGetItems } from "./item-get-presentation.js";
+import { getDungeonStairImage } from './dungeon-stair-presentation.js';
 import {applyV2ThemeStep,syncV2ThemeEnvironment,getV2ThemeBattleOptions} from './special-map/theme-environment-v2.js';
 import {developmentMapOptions} from './special-map/development-map.js';
 import {startSpecialMapExploration} from './special-map/exploration-ui.js';
@@ -80,7 +81,7 @@ import {
   cancelRapidCurrentTransition,
   applyFixedFloorWarp
 } from "./player.js";
-import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setFrameRateMode, getEffectiveFrameRate, setMistOptions, setWallColor, setFloorColor, toggleMinimapOverlay } from "./renderer.js";
+import { configureRenderer, startRenderLoop, setScreenShakeEnabled, setTorchFlickerEnabled, setFrameRateMode, getEffectiveFrameRate, setMistOptions, setWallColor, setFloorColor, toggleMinimapOverlay, isMinimapOverlayVisible } from "./renderer.js";
 import { drawMinimap, getMinimapBounds, setMinimapRevealOptions } from "./minimap.js";
 import {
   advanceRoamingEnemyForPlayerStep,
@@ -349,6 +350,14 @@ import {
   const firstDungeonTutorial = document.getElementById("firstDungeonTutorial");
   const deckTutorial = document.getElementById("deckTutorial");
   const viewportEl = document.querySelector(".viewport");
+  const dungeonStairImage = document.createElement('img');
+  dungeonStairImage.className = 'dungeon-stair-image';
+  dungeonStairImage.hidden = true;
+  viewportEl.insertBefore(dungeonStairImage, viewportEl.querySelector('.status'));
+  for (const file of ['exit', 'down_stairs', 'transport_portal']) {
+    const image = document.createElement('img');
+    image.src = `images/dungeon_effects/${file}.avif`;
+  }
   const townPortraitFrame = document.querySelector(".town-portrait-frame");
   const torchMeterEl = document.getElementById("torchMeter");
   const presenceMeterEl = document.getElementById("presenceMeter");
@@ -5321,6 +5330,16 @@ import {
 
   function updateHud() {
     const special=getSpecialMapContext();
+    const stair = getDungeonStairImage(cells[state.gridY]?.[state.gridX]);
+    dungeonStairImage.hidden = !stair || Boolean(special || worldLocation !== 'dungeon'
+      || document.body.classList.contains('title-active') || state.anim || sceneTransitionRunning
+      || (state.overlayEvent && state.overlayEvent.type !== 'stairsPrompt')
+      || isBattleActive() || isMenuOpen() || !itemOverlay.hidden || !skillOverlay.hidden
+      || isMinimapOverlayVisible());
+    if (stair) {
+      if (dungeonStairImage.getAttribute('src') !== stair.src) dungeonStairImage.src = stair.src;
+      dungeonStairImage.alt = stair.alt;
+    }
     if(special){
       const s=special.session;
       depthEl.textContent=s.kind==='specialMapV2'?`B${s.currentFloor+1}F`:'特殊地図';posEl.textContent=`X:${s.playerX} Y:${s.playerY}`;
