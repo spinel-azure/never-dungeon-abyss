@@ -66,7 +66,7 @@ export function applyBossVariantPixels(data, adjustments) {
 
 export function renderBossVariant(image, adjustments, createCanvas = () => document.createElement('canvas')) {
   const width = image.naturalWidth ?? image.width, height = image.naturalHeight ?? image.height;
-  if (width !== BOSS_VARIANT_SIZE || height !== BOSS_VARIANT_SIZE) throw new RangeError('Expected 600×600 image');
+  if (![BOSS_VARIANT_SIZE,900].includes(width) || height !== BOSS_VARIANT_SIZE) throw new RangeError('Expected 600×600 or 900×600 image');
   const canvas = createCanvas();
   canvas.width = width; canvas.height = height;
   const ctx = canvas.getContext('2d', {willReadFrequently:true});
@@ -92,7 +92,7 @@ export function createBossVariantCache({maxEntries = 8, createCanvas} = {}) {
       let adjustments;
       try { adjustments = computeBossVariantAdjustments(options); } catch { return image; }
       // Do not cache a not-yet-loaded image; a later preload completion may retry.
-      if ((image.naturalWidth ?? image.width) !== 600 || (image.naturalHeight ?? image.height) !== 600) return image;
+      if (![600,900].includes(image.naturalWidth ?? image.width) || (image.naturalHeight ?? image.height) !== 600) return image;
       const key = JSON.stringify([BOSS_VARIANT_VERSION,bossId,imagePath,level,seed,rarity]);
       if (cache.has(key)) {
         const result = cache.get(key); cache.delete(key); cache.set(key,result); return result;

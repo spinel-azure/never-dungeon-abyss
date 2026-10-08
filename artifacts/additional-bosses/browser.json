@@ -1,0 +1,282 @@
+[
+  {
+    "id": "karte_boss_020",
+    "width": 1280,
+    "seed": 2,
+    "size": {
+      "width": 600,
+      "height": 600,
+      "hsl": true,
+      "rect": {
+        "x": 380,
+        "width": 520,
+        "height": 333.125
+      }
+    },
+    "victory": true,
+    "pendingReward": true,
+    "portal": true,
+    "escape": false,
+    "fixture": "Lv100 mage with Aries; real stats for display, HP1 for shortened victory; direct B3F, surveyed map"
+  },
+  {
+    "id": "karte_boss_019",
+    "width": 1280,
+    "seed": 3,
+    "size": {
+      "width": 600,
+      "height": 600,
+      "hsl": true,
+      "rect": {
+        "x": 380,
+        "width": 520,
+        "height": 333.125
+      }
+    },
+    "victory": true,
+    "pendingReward": true,
+    "portal": true,
+    "escape": false,
+    "fixture": "Lv100 mage with Aries; real stats for display, HP1 for shortened victory; direct B3F, surveyed map"
+  },
+  {
+    "id": "karte_boss_024",
+    "width": 1280,
+    "seed": 7,
+    "size": {
+      "width": 600,
+      "height": 600,
+      "hsl": true,
+      "rect": {
+        "x": 380,
+        "width": 520,
+        "height": 333.125
+      }
+    },
+    "victory": true,
+    "pendingReward": true,
+    "portal": true,
+    "escape": false,
+    "fixture": "Lv100 mage with Aries; real stats for display, HP1 for shortened victory; direct B3F, surveyed map"
+  },
+  {
+    "id": "karte_boss_022",
+    "width": 1280,
+    "seed": 20,
+    "size": {
+      "width": 600,
+      "height": 600,
+      "hsl": true,
+      "rect": {
+        "x": 380,
+        "width": 520,
+        "height": 333.125
+      }
+    },
+    "victory": true,
+    "pendingReward": true,
+    "portal": true,
+    "escape": false,
+    "fixture": "Lv100 mage with Aries; real stats for display, HP1 for shortened victory; direct B3F, surveyed map"
+  },
+  {
+    "id": "karte_boss_023",
+    "width": 1280,
+    "seed": 38,
+    "size": {
+      "width": 900,
+      "height": 600,
+      "hsl": true,
+      "rect": {
+        "x": 380,
+        "width": 520,
+        "height": 333.125
+      }
+    },
+    "victory": true,
+    "pendingReward": true,
+    "portal": true,
+    "escape": true,
+    "fixture": "Lv100 mage with Aries; real stats for display, HP1 for shortened victory; direct B3F, surveyed map"
+  },
+  {
+    "id": "karte_boss_018",
+    "width": 1280,
+    "seed": 74,
+    "size": {
+      "width": 600,
+      "height": 600,
+      "hsl": true,
+      "rect": {
+        "x": 380,
+        "width": 520,
+        "height": 333.125
+      }
+    },
+    "victory": true,
+    "pendingReward": true,
+    "portal": true,
+    "escape": false,
+    "fixture": "Lv100 mage with Aries; real stats for display, HP1 for shortened victory; direct B3F, surveyed map"
+  },
+  {
+    "id": "karte_boss_021",
+    "width": 1280,
+    "seed": 242,
+    "size": {
+      "width": 600,
+      "height": 600,
+      "hsl": true,
+      "rect": {
+        "x": 380,
+        "width": 520,
+        "height": 333.125
+      }
+    },
+    "victory": true,
+    "pendingReward": true,
+    "portal": true,
+    "escape": false,
+    "fixture": "Lv100 mage with Aries; real stats for display, HP1 for shortened victory; direct B3F, surveyed map"
+  },
+  {
+    "id": "karte_boss_020",
+    "width": 390,
+    "seed": 2,
+    "size": {
+      "width": 600,
+      "height": 600,
+      "hsl": true,
+      "rect": {
+        "x": 56.625,
+        "width": 276.75,
+        "height": 121.21875
+      }
+    },
+    "victory": true,
+    "pendingReward": true,
+    "portal": true,
+    "escape": false,
+    "fixture": "Lv100 mage with Aries; real stats for display, HP1 for shortened victory; direct B3F, surveyed map"
+  },
+  {
+    "id": "karte_boss_019",
+    "width": 390,
+    "seed": 3,
+    "size": {
+      "width": 600,
+      "height": 600,
+      "hsl": true,
+      "rect": {
+        "x": 56.625,
+        "width": 276.75,
+        "height": 121.21875
+      }
+    },
+    "victory": true,
+    "pendingReward": true,
+    "portal": true,
+    "escape": false,
+    "fixture": "Lv100 mage with Aries; real stats for display, HP1 for shortened victory; direct B3F, surveyed map"
+  },
+  {
+    "id": "karte_boss_024",
+    "width": 390,
+    "seed": 7,
+    "size": {
+      "width": 600,
+      "height": 600,
+      "hsl": true,
+      "rect": {
+        "x": 56.625,
+        "width": 276.75,
+        "height": 121.21875
+      }
+    },
+    "victory": true,
+    "pendingReward": true,
+    "portal": true,
+    "escape": false,
+    "fixture": "Lv100 mage with Aries; real stats for display, HP1 for shortened victory; direct B3F, surveyed map"
+  },
+  {
+    "id": "karte_boss_022",
+    "width": 390,
+    "seed": 20,
+    "size": {
+      "width": 600,
+      "height": 600,
+      "hsl": true,
+      "rect": {
+        "x": 56.625,
+        "width": 276.75,
+        "height": 121.21875
+      }
+    },
+    "victory": true,
+    "pendingReward": true,
+    "portal": true,
+    "escape": false,
+    "fixture": "Lv100 mage with Aries; real stats for display, HP1 for shortened victory; direct B3F, surveyed map"
+  },
+  {
+    "id": "karte_boss_023",
+    "width": 390,
+    "seed": 38,
+    "size": {
+      "width": 900,
+      "height": 600,
+      "hsl": true,
+      "rect": {
+        "x": 56.625,
+        "width": 276.75,
+        "height": 121.21875
+      }
+    },
+    "victory": true,
+    "pendingReward": true,
+    "portal": true,
+    "escape": true,
+    "fixture": "Lv100 mage with Aries; real stats for display, HP1 for shortened victory; direct B3F, surveyed map"
+  },
+  {
+    "id": "karte_boss_018",
+    "width": 390,
+    "seed": 74,
+    "size": {
+      "width": 600,
+      "height": 600,
+      "hsl": true,
+      "rect": {
+        "x": 56.625,
+        "width": 276.75,
+        "height": 121.21875
+      }
+    },
+    "victory": true,
+    "pendingReward": true,
+    "portal": true,
+    "escape": false,
+    "fixture": "Lv100 mage with Aries; real stats for display, HP1 for shortened victory; direct B3F, surveyed map"
+  },
+  {
+    "id": "karte_boss_021",
+    "width": 390,
+    "seed": 242,
+    "size": {
+      "width": 600,
+      "height": 600,
+      "hsl": true,
+      "rect": {
+        "x": 56.625,
+        "width": 276.75,
+        "height": 121.21875
+      }
+    },
+    "victory": true,
+    "pendingReward": true,
+    "portal": true,
+    "escape": false,
+    "fixture": "Lv100 mage with Aries; real stats for display, HP1 for shortened victory; direct B3F, surveyed map"
+  }
+]

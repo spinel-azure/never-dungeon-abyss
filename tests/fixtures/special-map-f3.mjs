@@ -7,13 +7,13 @@ export const F3_MAP_FIXTURES = Object.freeze([
     "discovererName": "†ルル",
     "name": "朽ちかけた晶宮の地図 Lv.5",
     "themeId": "crystal",
-    "bossId": "karte_boss_011",
-    "bossName": "フレムデ・ヴァイスハイト",
+    "bossId": "karte_boss_012",
+    "bossName": "ディグローセ・レーヴェンケーニギン",
     "code": "NDA:AgIwOQUAAyAgMOsw6yUMAoV_W1oO",
     "adjustments": {
-      "hueShift": 3.0491854730288552,
-      "saturationScale": 1.0237587209508867,
-      "lightnessOffset": -0.004016301404562782
+      "hueShift": 3.2668144036488336,
+      "saturationScale": 0.9756143335545732,
+      "lightnessOffset": 0.0047108137767037
     }
   },
   {
@@ -24,13 +24,13 @@ export const F3_MAP_FIXTURES = Object.freeze([
     "discovererName": "†ルル",
     "name": "滅びの晶宮の地図 Lv.100",
     "themeId": "crystal",
-    "bossId": "karte_boss_012",
-    "bossName": "ディグローセ・レーヴェンケーニギン",
+    "bossId": "karte_boss_017",
+    "bossName": "アッシェンプッテル",
     "code": "NDA:AgIwOWQAAyAgMOsw6w7C8owb3gre",
     "adjustments": {
-      "hueShift": 8.682271837885493,
-      "saturationScale": 0.9351897724000737,
-      "lightnessOffset": -0.012479984861914999
+      "hueShift": -2.891966470004991,
+      "saturationScale": 1.0633033557552845,
+      "lightnessOffset": -0.02646872080070898
     }
   },
   {

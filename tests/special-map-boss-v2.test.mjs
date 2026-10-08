@@ -23,22 +23,22 @@ test('device originals roundtrip to identical boss/name/color without survey',()
   assert.deepEqual(computeBossVariantAdjustments({...decoded.map,bossId:boss.id}),f.adjustments);
  }
 });
-test('metadata pools: 13 normals, six exclusive, no special boss, deterministic full content',()=>{
- assert.equal(Object.keys(NORMAL_KARTE_BOSSES).length,13);
- for(const themeId of NORMAL_MAP_THEMES){const pool=normalBossPool(themeId);assert.equal(pool.length,['blue','torture','green','yellow','water','red'].includes(themeId)?8:7);
+test('metadata pools: 20 normals, twelve exclusive, no special boss, deterministic full content',()=>{
+ assert.equal(Object.keys(NORMAL_KARTE_BOSSES).length,20);
+ for(const themeId of NORMAL_MAP_THEMES){const pool=normalBossPool(themeId);assert.equal(pool.length,({blue:9,red:9,torture:10,yellow:10,green:11,water:11}[themeId]||8));
   for(let seed=0;seed<100;seed++){const b=selectNormalMapBoss({...input,seed,themeId});assert.ok(pool.includes(b));assert.equal(selectNormalMapBoss({...input,seed,themeId,discovererName:'別人'}),b);}
  }
  for(const themeId of ['gold','rice','dusk','tender'])assert.throws(()=>selectNormalMapBoss({...input,themeId}));
  for(const level of [0,101,NaN])assert.throws(()=>createNormalMapBoss({...input,level}));
 });
-test('Lv1..100 valid, deterministic stats, boss escape disabled, no item drop',()=>{
+test('Lv1..100 valid, deterministic stats, only whale escape enabled, no item drop',()=>{
  for(const level of [1,5,25,50,75,100])for(const themeId of NORMAL_MAP_THEMES){
   const d=createNormalMapBoss({...input,themeId,level}),e=createEnemyCombatant(d);
   assert.deepEqual(createNormalMapBoss({...input,themeId,level}),d);
   assert.ok(e.isBoss&&e.noDrop&&e.fixedGoldPerDefeat);assert.ok(e.hp>0&&e.hp<20000);
   assert.ok(Object.values(e.stats).every(n=>Number.isInteger(n)&&n>0));
-  assert.equal(getEquipmentAdjustedEscapeRate({escapeRate:e.escapeRate,isBoss:e.isBoss,weaponId:'vorpal_sword'}),0);
-  assert.equal(resolveEscapeAttempt({escapeRate:e.escapeRate,rng:()=>0}).success,false);
+  assert.equal(getEquipmentAdjustedEscapeRate({escapeRate:e.escapeRate,isBoss:e.isBoss,weaponId:'vorpal_sword'}),e.id==='karte_boss_023'?1:0);
+  assert.equal(resolveEscapeAttempt({escapeRate:e.escapeRate,rng:()=>0}).success,e.id==='karte_boss_023');
  }
 });
 function session(options={}){const s=createSpecialMapV2Session([map],mapOriginalId(map),options);s.currentFloor=2;Object.assign(s,s.generatedMap.bossRoom.bossCell?{playerX:s.generatedMap.bossRoom.bossCell.x,playerY:s.generatedMap.bossRoom.bossCell.y}:{});return s;}

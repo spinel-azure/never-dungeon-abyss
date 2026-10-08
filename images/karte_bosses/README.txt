@@ -199,7 +199,104 @@ specialBehavior:
 - 低HP時に攻撃頻度が上昇する
 ※封印の矢ギミックの解除方法は「ツェンタウリン」と同様とする。
 
+[karte_boss_020.avif]
+name: ヴェシュテン・カイゼリン
+theme: yellow
+themeName: 砂漠
+exclusive: true
+colorVariant: true
+archetype: スピンクス強化型
 
+specialBehavior:
+- 砂塵を巻き上げ、プレイヤーの行動速度を低下させる
+- 尻尾の大蛇による攻撃で猛毒を付与する
+- HP50%以下で2回行動する
+
+note:
+砂漠エリア専用boss。
+yellow以外では使用禁止。
+カラーバリエーション可能。
+
+
+[karte_boss_021.avif]
+name: ルビィン・アラクネ
+theme: green
+themeName: 密林
+exclusive: true
+colorVariant: true
+archetype: 蜘蛛女型
+
+specialBehavior:
+- 出血を多用する
+- 「束縛」で行動不能を付与する
+- HP50%以下で2回行動する
+
+note:
+密林エリア専用boss。
+green以外では使用禁止。
+カラーバリエーション可能。
+
+
+[karte_boss_022.avif]
+name: ブルーメンクローネ
+theme: green
+themeName: 密林
+exclusive: true
+colorVariant: true
+archetype: アルラウネ型
+
+specialBehavior:
+- フライシュフレッサー同様のリゲインを使用する
+- 猛毒を多用する
+- 強化除草剤の効果対象とする
+
+note:
+密林エリア専用boss。
+green以外では使用禁止。
+カラーバリエーション可能。
+「強化除草剤」の具体的な倍率・解除効果等は実装時に既存仕様を確認すること。
+
+
+[karte_boss_023.avif]
+name: グローサー・ヴァール
+theme: water
+themeName: 激流
+exclusive: true
+colorVariant: true
+archetype: 巨大クジラ型
+imageSize: 900x600
+battleSize: large
+
+specialBehavior:
+- HP50%以下で「大洪水」を使用する
+- 大洪水は最大HPの60%ダメージ
+- 大洪水の直前に事前予告行動を行う
+
+specialRules:
+- 近接攻撃無効
+- プレイヤー逃走可能
+
+note:
+激流エリア専用boss。
+water以外では使用禁止。
+カラーバリエーション可能。
+大型boss扱い。
+画像規格は通常の400×400 / 600×600ではなく900×600px。
+大洪水は予告なしで発動させないこと。
+
+[karte_boss_024.avif]
+name: ティーフゼー・ブラウト
+theme: water
+themeName: 激流
+exclusive: true
+colorVariant: true
+archetype: 人魚型
+
+note:
+激流エリア専用boss。
+water以外では使用禁止。
+カラーバリエーション可能。
+特殊行動は現時点で未指定。
 
 
 

@@ -186,7 +186,8 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
   }
   const order = applyAriesOpeningPriority(next, resolveTurnOrder([
     { side: "player", actor: combatStats(next.player), action: playerAction.action },
-    { side: "enemy", actor: combatStats(next.enemy), action: enemyAction }
+    { side: "enemy", actor: combatStats(next.enemy), action: enemyAction },
+    ...additionalMapBossTurns(next.enemy, rng, next)
   ], rng));
   next.log = [];
   next.presentationEvents = [];
@@ -366,6 +367,7 @@ export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.rand
   next.enemies.forEach((member, partyIndex) => {
     if (!member.alive || member.hp <= 0) return;
     orderEntries.push({ side: "enemy", partyIndex, actor: combatStats(member), action: createEnemyAction(member, rng, { battle: next }) });
+    orderEntries.push(...additionalMapBossTurns(member, rng, next).map(entry => ({...entry,partyIndex})));
   });
   const order = applyAriesOpeningPriority(next, resolveTurnOrder(orderEntries, rng));
   next.log = [];
@@ -965,10 +967,18 @@ function getEnemyActionWeight(entry, enemy) {
   return Number(statusActive ? conditional.weight : entry?.weight) || 0;
 }
 
+// Extra turns are fixed at round start. Each has its own action/status opportunity.
+function additionalMapBossTurns(enemy, rng, battle) {
+  return enemy.mapBossTraits?.doubleActionBelowHalf && enemy.hp <= enemy.maxHp * .5
+    ? [{side:'enemy',actor:combatStats(enemy),action:createEnemyAction(enemy,rng,{battle})}] : [];
+}
+
 function actionConditionMatches(condition, enemy, context = {}) {
   if (!condition) return true;
   const rate = Number(enemy?.maxHp) > 0 ? Number(enemy.hp) / Number(enemy.maxHp) : 1;
   if (Number.isFinite(Number(condition.hpRateBelow)) && !(rate < Number(condition.hpRateBelow))) return false;
+  if (Number.isFinite(Number(condition.hpRateAtMost)) && rate > Number(condition.hpRateAtMost)) return false;
+  if (Number.isFinite(Number(condition.hpRateAbove)) && rate <= Number(condition.hpRateAbove)) return false;
   const battle = context?.battle;
   const enemies = Array.isArray(battle?.enemies) ? battle.enemies : [battle?.enemy || enemy];
   const livingEnemyCount = enemies.filter(member => member?.alive !== false && Number(member?.hp) > 0).length;
@@ -1014,8 +1024,9 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     return {followUpEligible:false,actualDamage:0,landedHitCount:0};
   }
   if (actorSide === "player" && cannotReachTarget(target, action)) {
-    battle.log.push(DISTANT_MESSAGE);
-    battle.presentationEvents.push({ type: "message", outOfRange: true, message: DISTANT_MESSAGE });
+    const message = target.mapBossTraits?.distantTarget ? `${target.name}は遠すぎて、攻撃が届かない！` : DISTANT_MESSAGE;
+    battle.log.push(message);
+    battle.presentationEvents.push({ type: "message", outOfRange: true, message });
     return;
   }
   if (actorSide === "enemy" && actor.twinWhirlpool) {
@@ -1107,7 +1118,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
       battle.presentationEvents.push({ type: "message", message: action.prepareMessage });
     }
     actor.reservedEnemyAction = structuredClone(action.reservedAction || null);
-    if(isGoddess(actor))battle.presentationEvents.push({type:'message',message:action.prepareMessage});
+    if(isGoddess(actor) || actor.mapBossTraits?.distantTarget)battle.presentationEvents.push({type:'message',message:action.prepareMessage});
     battle.log.push(action.prepareMessage || `${actor.name}は次の攻撃に備えた！`);
     if (isLionQueen(actor)) battle.presentationEvents.push({type:"message",message:action.prepareMessage});
     if (actor.twinWhirlpool) battle.presentationEvents.push({ type: "message", message: action.prepareMessage, whirlpoolActorId: actor.id, whirlpoolPreparing: true });
@@ -1501,6 +1512,10 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
         * (Number(action.goddessDamageMultiplier) || 1)
     )) : 0
   }));
+  if (actorSide === 'enemy' && actor.id === 'karte_boss_023' && action.id === 'whale_flood'
+    && action.reservedEnemyActionId === 'whale_flood') {
+    presentedHits = presentedHits.map(hit => ({...hit,damage:hit.hit ? Math.floor(target.maxHp * .6) : 0,critical:false}));
+  }
   if (actorSide === "enemy" && targetSide === "player" && action.id === "tiefstrom_whirlpool") {
     const guarding = target.statuses?.some(status => (status.id || status.statusId) === "guard" && status.active !== false);
     const damage = Math.max(1, Math.floor(target.maxHp * (guarding ? 0.05 : 0.15)));

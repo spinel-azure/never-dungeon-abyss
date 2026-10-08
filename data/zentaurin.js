@@ -38,9 +38,10 @@ export const ZENTAURIN = Object.freeze({
 });
 
 export function getZentaurinOpening(enemy, deckSlots = []) {
-  if (enemy?.id !== ZENTAURIN_ID) return null;
+  if (enemy?.id !== ZENTAURIN_ID && !enemy?.mapBossTraits?.sealingArrow) return null;
   const broken = deckSlots.includes("zodiac_aries");
+  const name = enemy.id === ZENTAURIN_ID ? 'ツェンタウリン' : enemy.name;
   return { broken, sealed: !broken, message: broken
-    ? "ツェンタウリンが構えた封印の矢を破壊した！"
-    : `ツェンタウリンの封印の矢！\n${ZENTAURIN_SEAL_MESSAGE}` };
+    ? `${name}が構えた封印の矢を破壊した！`
+    : `${name}の封印の矢！\n${ZENTAURIN_SEAL_MESSAGE}` };
 }

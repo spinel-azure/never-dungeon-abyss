@@ -451,8 +451,9 @@ function getNpcChargeRecord(player, npcId) {
 function applyNpcDamage(battle, { npcId, damage, range = "melee", actionName = "", message, hitIndex = 0, hitCount = 1, rng = Math.random }) {
   if (battle.outcome || battle.enemy.hp <= 0) return 0;
   if (cannotReachTarget(battle.enemy, { actionType: "physicalAttack", range })) {
-    battle.log.push(DISTANT_MESSAGE);
-    battle.presentationEvents.push({ type: "npcSupport", outOfRange: true, npcId, message: DISTANT_MESSAGE });
+    const message = battle.enemy.mapBossTraits?.distantTarget ? `${battle.enemy.name}は遠すぎて、攻撃が届かない！` : DISTANT_MESSAGE;
+    battle.log.push(message);
+    battle.presentationEvents.push({ type: "npcSupport", outOfRange: true, npcId, message });
     return 0;
   }
   if (hitIndex === 0) battle.enemy.npcBarrierHeld = battle.enemy.bossMagicBarrier > 0;

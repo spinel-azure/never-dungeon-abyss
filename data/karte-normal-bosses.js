@@ -1,5 +1,6 @@
 import {NORMAL_MAP_THEMES} from './special-map-themes.js';
 import {streamV1,chooseIndexV1} from '../js/special-map/random-v1.js';
+import {applyAdditionalMapBossTraits} from './karte-additional-bosses.js';
 
 // Names, eligibility and color permissions transcribed from images/karte_bosses/README.txt.
 // Combat roles/curves are F3-A Candidate 1, not established character lore.
@@ -11,7 +12,11 @@ const rows=[
  ['007','グリミヒ・フライシュフレッサー','green'],['008','アマイゼンレーヴェ','yellow'],
  ['009','ディーヴァ・ジレーネ','water'],['010','メヒティガー・ウィッカーマン','red'],
  ['011','フレムデ・ヴァイスハイト',null],['012','ディグローセ・レーヴェンケーニギン',null],
- ['017','アッシェンプッテル',null]
+ ['017','アッシェンプッテル',null],
+ ['018','ドクトル・ムンター','torture'],['019','エリーテ・ツェンタウリン',null],
+ ['020','ヴェシュテン・カイゼリン','yellow'],['021','ルビィン・アラクネ','green'],
+ ['022','ブルーメンクローネ','green'],['023','グローサー・ヴァール','water'],
+ ['024','ティーフゼー・ブラウト','water']
 ];
 const freeze=o=>{if(o&&typeof o==='object'){Object.values(o).forEach(freeze);Object.freeze(o);}return o;};
 export const NORMAL_KARTE_BOSSES=freeze(Object.fromEntries(rows.map(([number,name,theme],i)=>{
@@ -46,13 +51,13 @@ export function createNormalMapBoss(input){
  const hpScale=boss.profile==='durable'?1.15:boss.profile==='offensive'?.9:1;
  const power=boss.profile==='offensive'?1.1:1;
  const strike={id:'map_boss_strike',name:'強撃',actionType:'physicalAttack',hitCount:1,powerPerHit:1.25,effects:[]};
- return {...boss,level,race:'unknown',battleSize:'large',isBoss:true,
+ return applyAdditionalMapBossTraits({...boss,name:`${boss.name} Lv.${level}`,level,race:'unknown',battleSize:'large',isBoss:true,
   maxHp:Math.round(v[1]*hpScale),attack:Math.round(v[2]*power),stats:{str:v[3],int:v[4],agi:v[5],dex:v[6],luc:v[7]},def:v[8],
   actions:[{weight:65,action:{id:'map_boss_attack',name:'攻撃',actionType:'physicalAttack',hitCount:1,powerPerHit:1,effects:[]}},
    {weight:25,action:strike},{weight:10,action:{id:'map_boss_wait',name:'様子を見る',actionType:'wait'}}],
   elementMultipliers:{fire:1,ice:1,lightning:1,light:1,dark:1},
   statusResistances:{instantDeath:{immune:true,resistancePoints:100},petrify:{immune:true,resistancePoints:100},
    poison:{resistancePoints:60},deadly_poison:{resistancePoints:80},action_skip:{resistancePoints:70},speed_down:{resistancePoints:30}},
-  escapeRate:0,surpriseRate:0,surpriseRateMaximum:0,noDrop:true,fixedGoldPerDefeat:true,dropGold:v[10],experienceReward:v[9]};
+  escapeRate:0,surpriseRate:0,surpriseRateMaximum:0,noDrop:true,fixedGoldPerDefeat:true,dropGold:v[10],experienceReward:v[9]});
 }
 
