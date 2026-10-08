@@ -771,7 +771,7 @@ export function createEnemyCombatant(enemy) {
     maxHp: enemy.maxHp,
     sp: 0,
     maxSp: 0,
-    ...(enemy.goddessTheme ? {goddessTheme:enemy.goddessTheme,sp:enemy.maxSp,maxSp:enemy.maxSp,
+    ...(enemy.goddessTheme ? {goddessTheme:enemy.goddessTheme,goddessOffenseMultiplier:enemy.goddessOffenseMultiplier,sp:enemy.maxSp,maxSp:enemy.maxSp,
       magicDefense:enemy.magicDefense,magicDamageReduction:enemy.magicDamageReduction} : {}),
     stats: { ...enemy.stats },
     def: enemy.def,

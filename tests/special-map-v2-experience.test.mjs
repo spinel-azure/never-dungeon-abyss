@@ -12,7 +12,8 @@ import {createDepthReturnSettlement,formatDepthReturnSettlement} from '../data/e
 import {settleReturnExperience,resolveDungeonDefeat} from '../js/character-services.js';
 import {createSpecialMapV2Session,switchV2Floor} from '../js/special-map/session-v2.js';
 import {resumeV2Encounter,matchesV2Battle} from '../js/special-map/encounter-v2.js';
-import {mapOriginalId} from '../data/special-maps.js';
+import {mapOriginalId,mapContentId,normalizeSpecialMaps,transactSpecialMaps} from '../data/special-maps.js';
+import {isNormalMapRewardBattle,prepareMapBossReward,confirmMapBossVictory,receiveMapBossReward,hasPendingMapReward,MAP_REWARD_PENDING_MESSAGE} from '../data/special-map-rewards.js';
 import {grantV2BattleRewards,settleV2ReturnExperience,discardV2Experience} from '../js/special-map/battle-rewards-v2.js';
 import {getV2CombatEnemy} from '../data/special-map-enemies.js';
 import {createEnemyCombatant} from '../data/enemies.js';
@@ -29,7 +30,7 @@ function harness(t,level=60,cards=[]){
  character.pendingExperienceSettlement=createDepthReturnSettlement(character,10);
  character.cards.deckSlots=cards;character.wingGiftUses=1;
  let saves=0,exits=0,saveOk=true,surveyOk=true;
- const scope={beginNpcRenewal,character,session,disposed:false,returned:false,normalizeCharacter,grantV2BattleRewards,settleV2ReturnExperience,resumeV2Encounter,matchesV2Battle,resolveDungeonDefeat,
+ const scope={isNormalMapRewardBattle,confirmMapBossVictory,transactSpecialMaps,beginNpcRenewal,character,session,disposed:false,returned:false,normalizeCharacter,grantV2BattleRewards,settleV2ReturnExperience,resumeV2Encounter,matchesV2Battle,resolveDungeonDefeat,
   rememberReturnLoot(){},saveGame:()=>{saves++;return saveOk;},say(){},updateCharacterUi(){},updateHud(){},startBgm(){},stopBgm(){},
   getSpecialMapBgmKey:()=>'',flushSpecialSurvey:()=>surveyOk,close:()=>discardV2Experience(session),onExit:()=>exits++,message:{},
   runDefeatPresentation:async()=>{},openTown(){},finishReturnPresentation:async()=>{},worldLocation:'town',templeRevivalJinglePending:false};
@@ -199,4 +200,46 @@ for(const theme of ['rice','dusk','tender'])test(`${theme} goddess production ou
  h.saveOk(true);await h.session.defeatRetry();assert.equal(h.exits,1);assert.equal(h.session.battleExperience,0);
  assert.deepEqual(protectedState(h.c),normal);assert.equal(h.c.experience,1000+reward);
  await h.scope.outcome(loss,'defeat');assert.equal(h.exits,1);
+});
+
+test('F4 actual victory callback: cloned IDs, failed commit retry, receipt and another expedition preserve EXP/G/renewal',async t=>{
+ const map={rulesetVersion:'special-map-v2',seed:12345,level:100,rarity:'WHITE',discovererName:'原作者'};
+ let maps=normalizeSpecialMaps({discovererName:'QA',registered:[map]});
+ let previousId;
+ for(let lap=0;lap<2;lap++){
+  const h=harness(t,100);h.c.specialMaps=maps;
+  h.c.npcSystem={registeredIds:['alec'],activeIds:['alec'],records:{alec:{}},renewal:null,expeditionMaxDepth:0};
+  const original=h.c.specialMaps.registered[0];h.session.mapKey=mapOriginalId(original);
+  const b=h.battle(250);
+  Object.assign(h.session.battleContext,{source:'special-map-v2-boss',themeId:'crystal',bossId:'karte_boss_001',mapSeed:12345,rarity:'WHITE',contentId:mapContentId(map),expeditionId:h.session.expeditionId,battleUuid:crypto.randomUUID()});
+  b.explorationContext=structuredClone(h.session.battleContext);
+  h.c.specialMaps=prepareMapBossReward(h.c.specialMaps,b.explorationContext,{random:()=>.5}).state;
+  const baseline=protectedState(h.c);
+  h.saveOk(false);await h.scope.outcome(b,'victory');
+  assert.equal(h.session.bossDefeated,false);assert.equal(h.session.battleExperience,0);assert.equal(h.c.specialMaps.bossReward.status,'prepared');assert.equal(h.scope.finish(),false);
+  await h.scope.outcome(structuredClone(b),'victory');assert.equal(h.session.battleExperience,0);
+  h.saveOk(true);h.session.victoryRetry();
+  assert.equal(h.session.bossDefeated,true);assert.equal(h.session.battleExperience,250);assert.equal(h.session.lootBag.gold,20);
+  assert.equal(h.c.specialMaps.bossReward.status,'pending');assert.equal(h.c.specialMaps.bossReward.map.level,100);
+  await h.scope.outcome(structuredClone(b),'victory');assert.equal(h.session.battleExperience,250);
+  assert.equal(h.scope.finish(),true);assert.equal(h.c.npcSystem.renewal.pending,true);assert.deepEqual(protectedState(h.c),baseline);
+  maps=receiveMapBossReward(h.c.specialMaps).state;assert.equal(maps.unidentified.length,lap+1);
+  assert.notEqual(maps.bossReward.rewardId,previousId);previousId=maps.bossReward.rewardId;
+ }
+});
+
+test('F4 production entry gate blocks only normal V2 with pending reward, and prebattle save retries keep lottery inputs',t=>{
+ const h=harness(t),map={rulesetVersion:'special-map-v2',seed:12345,level:60,rarity:'WHITE',discovererName:'QA'};
+ h.c.specialMaps=normalizeSpecialMaps({discovererName:'QA',registered:[map]});
+ Object.assign(h.scope,{hasPendingMapReward,MAP_REWARD_PENDING_MESSAGE,prepareMapBossReward});
+ const hooks=main.slice(main.indexOf('    checkMapEntry:'),main.indexOf('    getTorchCardEffects:'));
+ vm.runInContext('this.rewardHost={'+hooks+'};',vm.createContext(h.scope));
+ const c={source:'special-map-v2-boss',themeId:'crystal',mapKey:mapOriginalId(map),contentId:mapContentId(map),mapSeed:12345,mapLevel:60,rarity:'WHITE',expeditionId:crypto.randomUUID(),battleUuid:crypto.randomUUID()};
+ assert.equal(h.scope.rewardHost.checkMapEntry(map,{}).ok,true);
+ h.saveOk(false);assert.equal(h.scope.rewardHost.prepareBossEncounter(c).ok,false);const randoms=[...c.rewardRandomValues];
+ h.saveOk(true);assert.equal(h.scope.rewardHost.prepareBossEncounter(c).ok,true);assert.deepEqual([...c.rewardRandomValues],randoms);
+ h.c.specialMaps=confirmMapBossVictory(h.c.specialMaps,c).state;
+ assert.equal(h.scope.rewardHost.checkMapEntry(map,{}).ok,false);
+ for(const themeOverride of ['gold','rice','dusk','tender'])assert.equal(h.scope.rewardHost.checkMapEntry({...map,themeOverride},{}).ok,true);
+ h.c.specialMaps=receiveMapBossReward(h.c.specialMaps).state;assert.equal(h.scope.rewardHost.checkMapEntry(map,{}).ok,true);
 });

@@ -1375,8 +1375,9 @@ function renderBossHpMeter(enemy) {
   shield.hidden = !(enemy?.bossMagicBarrierMax > 0);
   if (!shield.hidden) {
     const value = battleUi.presenting ? battleUi.presentationBossBarrier ?? enemy.bossMagicBarrier : enemy.bossMagicBarrier;
-    shield.textContent = `♒ ${value} / ${enemy.bossMagicBarrierMax}`;
-    shield.style.background = `linear-gradient(to right,#375e9d ${value/enemy.bossMagicBarrierMax*100}%,#10202b 0)`;
+    if(!shield.firstElementChild)shield.innerHTML='<span class="boss-barrier-fill"></span><span class="boss-barrier-label"></span>';
+    shield.querySelector('.boss-barrier-label').textContent = `♒ ${value} / ${enemy.bossMagicBarrierMax}`;
+    shield.querySelector('.boss-barrier-fill').style.width = `${Math.max(0,Math.min(100,value/enemy.bossMagicBarrierMax*100))}%`;
     shield.setAttribute('aria-valuemin','0');shield.setAttribute('aria-valuemax',String(enemy.bossMagicBarrierMax));shield.setAttribute('aria-valuenow',String(value));
   }
   const isBoss = Boolean(enemy?.isBoss);

@@ -6,6 +6,8 @@ import {normalizeSpecialMaps, SPECIAL_MAP_RULESET, describeTestMap,discoverTestM
 const fixture=()=>normalizeSpecialMaps({discovererName:'†ルル',registered:Array.from({length:10},(_,i)=>({seed:i*36,rulesetVersion:SPECIAL_MAP_RULESET,discovererName:'†ルル'}))});
 const label=i=>{const m=describeTestMap(fixture().registered[i]);return m.name+'Lv.'+m.level;};
 import {createExplorerPreviewUI} from '../js/explorer-preview-ui.js';
+import {prepareMapBossReward,confirmMapBossVictory} from '../data/special-map-rewards.js';
+import {mapOriginalId,mapContentId} from '../data/special-maps.js';
 
 // Minimal DOM for exercising the real controller's handlers and the document
 // touch guard together. A cancelled touch sequence must not synthesize click.
@@ -206,4 +208,28 @@ test('late clipboard response cannot replace input on another screen',async t=>{
  Object.defineProperty(globalThis,'navigator',{configurable:true,value:{clipboard:{readText:()=>new Promise(r=>resolve=r)}}});
  const v=setup(t);v.ui.open('tent');v.touch(v.commands.children[1]);v.touch(v.find('貼り付け'));v.ui.input('cancel');v.touch(v.commands.children[1]);
  const field=v.all(v.host).find(e=>e.tag==='textarea');field.value='new input';resolve('old clipboard');await Promise.resolve();assert.equal(field.value,'new input');
+});
+
+function pendingRewardBook(full=false){
+ const map={rulesetVersion:'special-map-v2',seed:12345,level:100,rarity:'WHITE',discovererName:'QA'};
+ let state=normalizeSpecialMaps({discovererName:'QA',registered:[map]});
+ if(full)state.unidentified=Array.from({length:3},(_,i)=>({...map,seed:i,discoveryId:'owned-'+i}));
+ const c={source:'special-map-v2-boss',themeId:'crystal',mapKey:mapOriginalId(map),contentId:mapContentId(map),mapSeed:map.seed,mapLevel:map.level,rarity:map.rarity,expeditionId:crypto.randomUUID(),battleUuid:crypto.randomUUID()};
+ state=prepareMapBossReward(state,c,{random:()=>.5}).state;
+ return confirmMapBossVictory(state,c).state;
+}
+
+test('F4 pending receipt is reachable by keyboard and touch, with no double receipt from a stale button',t=>{
+ const v=setup(t,'layout-mobile',pendingRewardBook());v.ui.open('tent');
+ assert.match(v.commands.children[5].textContent,/討伐地図報酬/);const stale=v.commands.children[5];
+ v.ui.input('left');v.ui.input('down');v.ui.input('confirm');
+ assert.equal(v.state().unidentified.length,1);assert.equal(v.state().bossReward.status,'received');
+ assert.equal(v.commands.children[5].disabled,true);v.touch(stale);assert.equal(v.state().unidentified.length,1);
+});
+
+test('F4 tent full inventory and save failure retain exact pending reward, count and visible action',t=>{
+ const full=setup(t,'layout-mobile',pendingRewardBook(true));full.ui.open('tent');const before=structuredClone(full.state());
+ full.touch(full.commands.children[5]);assert.deepEqual(full.state(),before);assert.match(full.message.textContent,/先に鑑定/);assert.equal(full.commands.children[5].disabled,false);
+ const failed=setup(t,'layout-mobile',pendingRewardBook());failed.ui.open('tent');failed.failSave();
+ failed.touch(failed.commands.children[5]);assert.equal(failed.state().unidentified.length,0);assert.equal(failed.state().bossReward.status,'pending');assert.match(failed.message.textContent,/保存に失敗/);
 });

@@ -28,7 +28,7 @@ function harness({entry,map=original,playSe=()=>{},saveSurvey=()=>({ok:true}),ho
  const viewport=new Node(),status=new Node();viewport.append(status);
  const host={viewport,status,...(entry?{runEntryTransition:entry}:{}),openMenu(){menus++;},showTreasure(type){assert.equal(type,'gold');previews++;},playTreasureOpening(type,done){assert.equal(type,'gold');callback=done;openings++;},hideTreasure(){hides++;}};
  Object.assign(host,hostOptions);
- const scope={setTimeout:fn=>timers.push(fn),discardV2Experience,...session,...v2,mapOriginalId,getSpecialMapContext:()=>null,getSpecialMapHost:()=>host,attachSpecialMap:()=>()=>{},describeTestMap:()=>({name:'地図'}),setWallColor(){},setFloorColor(){},drawMinimap(){},getMinimapBounds(){},toggleMinimapOverlay(){},performance:{now:()=>0},useSpecialMapRenderSource:o=>{bound=o;return ()=>{};},document:{getElementById:()=>null,visibilityState:'hidden',addEventListener:(key,fn)=>events.set(key,fn),removeEventListener:key=>events.delete(key),createElement:()=>new Node()},window:{addEventListener:(key,fn)=>events.set(key,fn),removeEventListener:key=>events.delete(key)}};
+ const scope={setTimeout:fn=>timers.push(fn),discardV2Experience,...session,...v2,mapOriginalId,getSpecialMapContext:()=>null,getSpecialMapHost:()=>host,attachSpecialMap:()=>()=>{},describeTestMap:()=>({name:'地図'}),setWallColor(){},setFloorColor(){},drawMinimap(){},getMinimapBounds(){},toggleMinimapOverlay(){},performance:{now:()=>0},preloadExplorationImage:()=>{},useSpecialMapRenderSource:o=>{bound=o;return ()=>{};},document:{getElementById:()=>null,visibilityState:'hidden',addEventListener:(key,fn)=>events.set(key,fn),removeEventListener:key=>events.delete(key),createElement:()=>new Node()},window:{addEventListener:(key,fn)=>events.set(key,fn),removeEventListener:key=>events.delete(key)}};
  const source=readFileSync(new URL('../js/special-map/exploration-ui.js',import.meta.url),'utf8');
  vm.runInNewContext(source.replace(/^import .*;\r?\n/gm,'').replace('export function','function')+';this.start=startSpecialMapExploration;',scope);
  const message={},ui=scope.start({registered:[map],mapKey:mapOriginalId(map),message,saveSurvey,playSe,onExit(){exits++;}});
@@ -235,4 +235,16 @@ test('failed completion save retains event lock and plays completion cue once af
  assert.deepEqual(sounds.filter(k=>['battleVictory','importantItem'].includes(k)),[]);
  ok=true;h.ui.input('confirm');h.bound.updateHud();h.bound.updateHud();
  assert.equal(h.ui.session.cellPrompt,'stairs');assert.deepEqual(sounds.filter(k=>['battleVictory','importantItem'].includes(k)),['importantItem']);h.ui.close();
+});
+
+for(const themeOverride of ['gold','rice','dusk','tender'])test(`${themeOverride} Lv99: silhouette, notice, fade, unpaid portal; never boss defeat`,async()=>{
+ let battles=0;const h=harness({map:{...original,themeOverride,level:99},hostOptions:{onEncounter(){battles++;}}}),s=h.ui.session;
+ s.currentFloor=2;const p=s.generatedMap.bossRoom.bossCell;s.playerX=p.x;s.playerY=p.y;s.renderState.x=p.x+.5;s.renderState.y=p.y+.5;s.bossKeyFound=s.bossDoorUnlocked=true;
+ assert.equal(s.getBossRenderState().definition.silhouette,true);
+ s.surveyNotice={total:300};s.onBossCell();assert.equal(s.bossPreviewPlaying,undefined);
+ s.surveyNotice=null;s.retryBossEncounter();assert.equal(s.bossPreviewPlaying,true);assert.match(h.message.textContent,/Lv100/);assert.equal(battles,0);
+ await h.elapsed();assert.ok(s.bossPreviewFadeStarted);assert.equal(s.bossPreviewDismissed,undefined);
+ await h.elapsed();assert.equal(s.bossPreviewDismissed,true);assert.equal(s.bossDefeated,false);assert.equal(s.battleExperience,0);assert.equal(s.lootBag,null);
+ assert.equal(s.getBossRenderState().definition.imageId,'warp_portal_b100f');assert.equal(v2.warpV2ToEntrance(s),true);assert.equal(s.currentFloor,0);
+ h.ui.close();
 });

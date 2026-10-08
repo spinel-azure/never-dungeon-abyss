@@ -24,7 +24,7 @@ export function createSpecialMapV2Session(registered,mapKey,options={}){
  if(original?.rulesetVersion!=='special-map-v2')throw Error('登録済みV2地図が見つかりません。');
  if(options.developmentTheme&&!isExplorerTestEnabled())throw Error('探検家テストをONにしてください。');
  const blueprint=options.developmentTheme?generateExplicitSpecialMapV2({...original,ruleset:original.rulesetVersion,themeId:options.developmentTheme}):generateRegisteredSpecialMap(original);
- const s={kind:'specialMapV2',mapKey,ruleset:original.rulesetVersion,seed:original.seed,level:original.level,rarity:original.rarity,
+ const s={kind:'specialMapV2',expeditionId:crypto.randomUUID(),mapKey,ruleset:original.rulesetVersion,seed:original.seed,level:original.level,rarity:original.rarity,
   themeOverride:original.themeOverride,
   blueprint,fingerprint:specialMapV2StructureFingerprint(blueprint),currentFloor:0,torchFuel:100,
   battleExperience:0,experienceClosed:false,rewardedBattles:new Set(),lootBag:null,
@@ -68,12 +68,13 @@ export function createSpecialMapV2Session(registered,mapKey,options={}){
  attachV2BossEncounter(s,options);
  const themeId=blueprint.floors[2].themeId;
  const visibleBoss=NORMAL_MAP_THEMES.includes(themeId)?selectNormalMapBoss({seed:s.seed,level:s.level,rarity:s.rarity,themeId}):resolveSpecialThemeBoss(themeId,s.level);
+ s.bossRenderDefinition=visibleBoss;
  s.getBossRenderState=()=>{
   const p=s.generatedMap.bossRoom?.bossCell;
   if(s.currentFloor!==2||!p||!visibleBoss)return null;
-  const gate=s.bossDefeated;
-  return {x:p.x,y:p.y,renderX:p.x+.5,renderY:p.y+.5,showAtContact:gate,
-   definition:{imageId:gate?'warp_portal_b100f':visibleBoss.id,image:gate?'images/dungeon_effects/warp_portal.avif':visibleBoss.image,renderScale:gate ? 1.8 : 1.9,maxHeightRatio:.9}};
+  const gate=s.bossDefeated||s.bossPreviewDismissed;
+  return {x:p.x,y:p.y,renderX:p.x+.5,renderY:p.y+.5,showAtContact:gate||s.bossPreviewPlaying,
+   definition:{imageId:gate?'warp_portal_b100f':visibleBoss.id,image:gate?'images/dungeon_effects/warp_portal.avif':visibleBoss.image,renderScale:gate ? 1.8 : 1.9,maxHeightRatio:.9,silhouette:!gate&&Boolean(visibleBoss.battleMinMapLevel>s.level),opacity:s.bossPreviewFadeStarted?Math.max(0,1-(Date.now()-s.bossPreviewFadeStarted)/1000):1}};
  };
  // A survey milestone is a cell event too: its notice must not race battle audio.
  s.onCellEntered=()=>{beginV2CellPrompt(s);if(!s.onBossCell()&&!s.surveyNotice)s.onEncounterStep();};
@@ -144,7 +145,7 @@ export function switchV2Floor(s,destination){
  return moveV2To(s,destination);
 }
 export function isV2ReturnGate(s){
- return isV2Session(s)&&s.bossDefeated&&s.currentFloor===2&&same({x:s.playerX,y:s.playerY},s.generatedMap.bossRoom?.bossCell);
+ return isV2Session(s)&&(s.bossDefeated||s.bossPreviewDismissed)&&s.currentFloor===2&&same({x:s.playerX,y:s.playerY},s.generatedMap.bossRoom?.bossCell);
 }
 export function warpV2ToEntrance(s){
  if(!isV2ReturnGate(s)||s.battleContext||s.motion||s.renderState.anim)return false;

@@ -7,7 +7,7 @@ const charge = (action) => ({id:action.id+'_prepare', name:action.name, actionTy
   prepareMessage:`${action.name}の光が集まる……！ 次の一撃に備えよ！`, reservedAction:action});
 const entry = (weight, action) => ({weight, action});
 
-// Combat Candidate 1. Design metadata remains unchanged; these fields are consumed by the engine.
+// Combat Candidate 2. Design metadata remains unchanged; these fields are consumed by the engine.
 export function createGoddessMapBoss({themeId, level, bossId} = {}) {
   if (!GODDESS_THEMES.includes(themeId)) throw RangeError('Not a goddess theme');
   const boss = resolveSpecialThemeBoss(themeId, level, {bossId, strict:true});
@@ -39,9 +39,9 @@ export function createGoddessMapBoss({themeId, level, bossId} = {}) {
       entry(10,charge(spell('zelena_judgment','大樹の審判','holy',105)))
     ]
   };
-  const combatBase={rice:{maxHp:10000,def:65},dusk:{maxHp:9000,def:50},tender:{maxHp:12000,def:70}}[themeId];
-  return {...boss, ...boss.scaledStats,maxHp:round(combatBase.maxHp),def:round(combatBase.def),candidate:'v2-goddess-combat-candidate-1',
-    goddessTheme:themeId, race:'divine', isBoss:true, battleSize:'large', attack:round(themeId==='rice'?80:55),
+  const combatBase={rice:{maxHp:20000,def:65},dusk:{maxHp:18000,def:50},tender:{maxHp:24000,def:70}}[themeId];
+  return {...boss, ...boss.scaledStats,maxHp:round(combatBase.maxHp),def:round(combatBase.def),candidate:'v2-goddess-combat-candidate-2',
+    goddessTheme:themeId,goddessOffenseMultiplier:1.6, race:'divine', isBoss:true, battleSize:'large', attack:round(themeId==='rice'?80:55),
     // magicDefense is design metadata; the existing engine consumes reduction instead.
     magicDamageReduction:Math.min(.3, boss.scaledStats.magicDefense/500),
     actions:tables[themeId], ambientEffect:`goddess-${themeId}`,

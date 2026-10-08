@@ -9,7 +9,7 @@ const stats=(maxHp,str,int,agi,dex,luc,def,magicDefense)=>({maxHp,maxSp:9999,sta
 const goddess=(id,name,themeId,imageNumber,baseStats,battleRole,actions,phaseDesign)=>({
  id,name,themeId,image:`images/karte_bosses/karte_boss_${imageNumber}.avif`,allowColorVariant:false,
  minMapLevel:80,imageSize:600,tier:'endgame-superboss',baseLevel:100,baseStats,battleRole,resistanceProfile,
- design:{actions,phaseDesign},battleEnabled:true,
+ design:{actions,phaseDesign},battleEnabled:true,battleMinMapLevel:100,
 });
 export const KARTE_SPECIAL_BOSSES=freeze({
  karte_boss_lumina:goddess('karte_boss_lumina','黄金の稲穂の女神・ルミナ','rice','013',stats(55000,115,105,100,110,120,115,105),'攻守万能型',
@@ -21,7 +21,7 @@ export const KARTE_SPECIAL_BOSSES=freeze({
  karte_boss_maikaefer_koenig:{id:'karte_boss_maikaefer_koenig',name:'デアグローセ・ケーファーケーニヒ',themeId:'gold',
   image:'images/karte_bosses/karte_boss_016.avif',allowColorVariant:false,minMapLevel:60,imageSize:600,
   baseLevel:100,baseStats:{...stats(32000,110,35,120,115,130,140,35),maxSp:0},
-  battleRole:'高防御・高速の物理型特殊強敵',resistanceProfile:{instantDeath:'immune',petrify:'immune',otherAilments:'high'},battleEnabled:true},
+  battleRole:'高防御・高速の物理型特殊強敵',resistanceProfile:{instantDeath:'immune',petrify:'immune',otherAilments:'high'},battleEnabled:true,battleMinMapLevel:100},
 });
 export const SPECIAL_THEME_BOSS_IDS=freeze({gold:'karte_boss_maikaefer_koenig',rice:'karte_boss_lumina',dusk:'karte_boss_noctia',tender:'karte_boss_zelena'});
 export function assertSpecialThemeBoss(themeId,bossId,level){

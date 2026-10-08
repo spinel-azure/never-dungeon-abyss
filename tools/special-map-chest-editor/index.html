@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NDA 特殊地図V2 宝箱ドロップ工房</title><link rel="stylesheet" href="style.css">
+<header><small>NEVER DUNGEON : ABYSS · LOCAL TOOL</small><h1>特殊地図V2 宝箱ドロップ工房</h1><p>調整用・未承認の編集データです。ゲームへ自動適用されません。</p></header>
+<main>
+<section class="toolbar"><label class="button">JSONを読み込む<input id="import" type="file" accept=".json,application/json" hidden></label><button id="draft">下書きJSON保存</button><button id="export" class="primary">本番用JSON出力</button><button id="undo">直前の編集を戻す</button><button id="fresh">新しい下書き</button><span id="saveState" role="status"></span></section>
+<p id="catalogInfo"></p><p id="message" role="status"></p>
+<nav id="tabs" aria-label="箱の種類"></nav>
+<div class="layout"><aside><h2>Lv範囲別テーブル</h2><div id="tableList"></div><button id="addTable">＋ テーブル追加</button><button id="cloneTable">複製</button><button id="deleteTable">削除</button><p class="muted">最初は候補なし。Lv帯・候補・配分は自由に設計してください。全3色のLv1〜100が揃うまで本番出力はできません。</p></aside>
+<section><div id="editor"></div><div id="searchPanel"><h2>本体定義から候補を探す</h2><div class="toolbar"><input id="search" placeholder="名前または正式IDで検索" aria-label="候補検索"><select id="kind" aria-label="候補種類"><option value="">すべての種類</option value="item">アイテム</option><option value="equipment">装備</option><option value="card">カード</option></select></div><p class="muted">特殊入手候補も表示します。注意表示を確認して採用してください。性能・売値・カード効果は出力しません。</p><div id="results"></div></div></section></div>
+<section><h2>検証結果 <span id="validity"></span></h2><div id="issues"></div></section>
+<section><h2>試行結果（参考値）</h2><p>主表示は重みから求めた計算上の確率です。有効な設定で選択中の箱テーブルを試行します。</p><button id="sim100">100回試行</button><button id="sim1000">1,000回試行</button><pre id="simulation">未実行</pre></section>
+<details><summary>下書きJSONを直接確認・修正（未知の項目も保持）</summary><p>テキストを変更したら「JSON編集を反映」を押してください。</p><textarea id="raw" spellcheck="false" aria-label="下書きJSON"></textarea><button id="applyRaw">JSON編集を反映</button></details>
+<footer>起動：index.html をブラウザで開く。候補一覧の更新：update-catalog.cmd を実行後、ブラウザを再読み込み。詳しくは「使い方.txt」。自動保存はこのツール専用領域です。</footer>
+</main><script src="catalog.js"></script><script src="chest-core.js"></script><script src="app.js"></script></html>

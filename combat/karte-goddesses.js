@@ -20,7 +20,7 @@ export function prepareGoddessAction(b,e,a) {
     r.growthTurn=b.turn;r.growth=Math.min(.4,Number((r.growth+.04).toFixed(2)));
     message(b,`宵闇が深まる……ノクティアの魔法威力＋${Math.round(r.growth*100)}％！`);
   }
-  const multiplier=(r.power>0?1.1:1)*(e.goddessTheme==='dusk'&&a.actionType==='spell'?1+r.growth:1)
+  const multiplier=(e.goddessOffenseMultiplier||1)*(r.power>0?1.1:1)*(e.goddessTheme==='dusk'&&a.actionType==='spell'?1+r.growth:1)
     *(r.phase&&a.element==='lightning'?1.2:1);
   return {...a,speedModifier:a.speedModifier||0,
     criticalBonus:(a.criticalBonus||0)+(r.phase ? .08 : 0),goddessDamageMultiplier:multiplier};

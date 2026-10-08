@@ -4,6 +4,7 @@ import {startSpecialMapExploration} from './special-map/exploration-ui.js';
 import {resumeV2Encounter,matchesV2Battle} from './special-map/encounter-v2.js';
 import {prepareNormalBossImage} from './special-map/normal-boss-presentation.js';
 import {grantV2BattleRewards,settleV2ReturnExperience} from './special-map/battle-rewards-v2.js';
+import {prepareMapBossReward,confirmMapBossVictory,hasPendingMapReward,isNormalMapRewardBattle,MAP_REWARD_PENDING_MESSAGE} from '../data/special-map-rewards.js';
 import { createCoalescedNotificationSync } from "./passive-notification-sync.js";
 import { grantGuildQuestExperience, formatGuildExperienceReceipt } from "../data/guild-experience.js";
 import { isAkashicRematchUnlocked, AKASHIC_PHANTOM_IDS, QUEEN_PROJECTION_MESSAGES } from "../data/akashic-phantoms.js";
@@ -5499,7 +5500,7 @@ import {
     playSe('battleStart');say('＊　何者かと遭遇した！　＊');
     const prepared=boss?prepareNormalBossImage(enemyData,context):Promise.resolve(enemyData.image);
     const [image]=await Promise.all([prepared,wait(1400)]);
-    if(getSpecialMapContext()?.session!==session||session.battleContext!==context)return;
+    if(getSpecialMapContext()?.session!==session||!matchesV2Battle(session,context))return;
     session.renderState.overlayEvent=null;
     startBgm(enemyData.goddessTheme?'finalBoss':boss?'floorBoss':'normalBattle');
     if(!startBattle(createEnemyCombatant({...enemyData,image}),{playStartSe:false,explorationContext:context})){
@@ -5528,11 +5529,36 @@ import {
       s.defeatRetry=retry;await retry();return;
     }
     let message='戦闘を離れ、特殊地図の探索へ戻った。';
+    if(outcome==='victory'&&isNormalMapRewardBattle(battle.explorationContext)){
+      const completeVictory=()=>{
+        if(!matchesV2Battle(s,battle.explorationContext)||s.experienceClosed)return;
+        const committed=transactSpecialMaps({getCharacter:()=>character,setCharacter:next=>{character=next;},save:()=>saveGame()},maps=>confirmMapBossVictory(maps,battle.explorationContext));
+        if(!committed.ok){s.victoryRetry=completeVictory;s.transitioning=true;say(committed.error+' A／Enterで討伐報酬の保存を再試行します。');return;}
+        const reward=grantV2BattleRewards(character,battle,s);character=reward.character;
+        s.bossDefeated=true;s.victoryRetry=null;
+        resumeV2Encounter(s,battle.explorationContext);s.finishingBattle=false;
+        startBgm(getSpecialMapBgmKey(s.generatedMap.themeId));
+        say('地図の主を討伐した。ワープゲートが現れた。A／EnterでB1F入口へ移動。\n未鑑定地図を発見。探検家テントで受領できます。\n'+reward.message);
+        updateCharacterUi();updateHud();saveGame();
+      };
+      completeVictory();return;
+    }
     if(outcome==='victory'){const result=grantV2BattleRewards(character,battle,s);character=result.character;message=result.message;if(['special-map-v2-boss','special-map-v2-special-boss'].includes(battle.explorationContext.source)){s.bossDefeated=true;message='地図の主を討伐した。ワープゲートが現れた。A／EnterでB1F入口へ移動。\n'+message;}}
     resumeV2Encounter(s,s.battleContext);s.finishingBattle=false;
     startBgm(getSpecialMapBgmKey(s.generatedMap.themeId));say(message);updateCharacterUi();updateHud();saveGame();
   }
   configureSpecialMapHost({
+    checkMapEntry:(map,options)=>{
+      if(map?.rulesetVersion!=='special-map-v2'||map.themeOverride!=null||options.developmentTheme)return {ok:true};
+      if(hasPendingMapReward(character?.specialMaps))return {ok:false,error:MAP_REWARD_PENDING_MESSAGE};
+      return character?.specialMaps?.discovererName?{ok:true}:{ok:false,error:'先に探検家テントで地図署名を登録してください。'};
+    },
+    prepareBossEncounter:context=>{
+      if(!isNormalMapRewardBattle(context))return {ok:true};
+      context.rewardRandomValues??=[Math.random(),Math.random(),Math.random()];
+      let drawIndex=0;
+      return transactSpecialMaps({getCharacter:()=>character,setCharacter:next=>{character=next;},save:()=>saveGame()},maps=>prepareMapBossReward(maps,context,{random:()=>context.rewardRandomValues[drawIndex++]}));
+    },
     getTorchCardEffects:()=>({consumptionDisabled:hasCardEffect(character?.cards?.deckSlots,'torch_consumption_disabled'),effectForced:hasCardEffect(character?.cards?.deckSlots,'force_torch_effect_active')}),
     playSurveyCompletion:()=>playSeToEnd('importantItem'),
     playSurveyJingle:key=>playSeToEnd(key),

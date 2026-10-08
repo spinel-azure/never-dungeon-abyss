@@ -46,7 +46,7 @@ export function runGoddess({theme,level,job,variant,seed=1,withNpcs=true}){
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  const rows=[],trials=Number(process.env.NDA_TRIALS||10);
- for(const theme of ['rice','dusk','tender'])for(const level of [80,90,100])for(const job of Object.keys(decks))for(const variant of ['standard','standard-scorpio','z6','z6-no-scorpio']){
+ for(const theme of ['rice','dusk','tender'])for(const level of [100])for(const job of Object.keys(decks))for(const variant of ['standard','standard-scorpio','z6','z6-no-scorpio']){
   const runs=Array.from({length:trials},(_,i)=>runGoddess({theme,level,job,variant,seed:i+1}));
   const statusMetrics={};for(const run of runs)for(const [key,m] of Object.entries(run.statusMetrics)){const t=statusMetrics[key] ||= {attempts:0,successes:0};t.attempts+=m.attempts;t.successes+=m.successes;}
   const phaseDamage=Object.fromEntries(['before','after'].map(key=>{const values=runs.flatMap(r=>r.phaseDamage[key]);return [key,{hits:values.length,mean:values.length?values.reduce((s,n)=>s+n,0)/values.length:0}];}));
@@ -56,5 +56,5 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
    ...Object.fromEntries(['heals','bossHealing','bossBarrier','deathPoisonDamage','poisonTurns','playerDamage','playerHp','bossHp','reviveTurn','postReviveTurns','growth','oneShotHits'].map(k=>[k,avg(k)]))});
   console.log(theme,level,job,variant,rows.at(-1).wins,rows.at(-1).meanTurns);
  }
- writeFileSync(process.env.NDA_REPORT||'artifacts/special-map-goddess-pacing.json',JSON.stringify({candidate:1,trials,npcs:'Alec Rebecca Erika stage9; 40 healing potions; B90 gear+3; standard player level = map level; Z6 player level200',rows},null,2)+'\n');
+ writeFileSync(process.env.NDA_REPORT||'artifacts/special-map-goddess-pacing-candidate-2.json',JSON.stringify({candidate:2,trials,npcs:'Alec Rebecca Erika stage9; 40 healing potions; B90 gear+3; standard player level = map level; Z6 player level200',rows},null,2)+'\n');
 }

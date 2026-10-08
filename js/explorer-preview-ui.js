@@ -1,4 +1,5 @@
 import {grantTestStarterMaps,unidentifiedMapLabel} from '../data/special-map-starter.js';
+import {hasPendingMapReward,receiveMapBossReward} from '../data/special-map-rewards.js';
 import {surveyCount} from '../data/special-map-survey.js';
 import {surveyTotalV2} from '../data/special-map-survey-v2.js';
 import {getTentBackground} from './explorer-preview.js';
@@ -19,7 +20,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
   const make=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
   const button=(label,action,selected=false)=>{const b=make('button');b.type='button';if(label)b.append(make('span',label,'explorer-button-label'));b.classList.toggle('is-selected',selected);b.onclick=()=>{playSe('confirm');action();};return b;};
   const error=text=>{message.textContent=text;};
-  const countText=()=>`未鑑定の地図 ${maps().unidentified.length} / 3　登録済み地図 ${maps().registered.length} / 10`;
+  const countText=()=>`未鑑定の地図 ${maps().unidentified.length} / 3　登録済み地図 ${maps().registered.length} / 10${hasPendingMapReward(maps())?'　討伐地図報酬：未受領':''}`;
   function close(){exploration?.close();exploration=null;if(active&&hint)hint.textContent=previousHint;active=false;panel.hidden=true;commands.hidden=false;}
   function exit(){close();onExit();}
   function back(){
@@ -62,6 +63,11 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     message.textContent='【開発用】はじまりの白地図を3枚受け取りました。地図鑑定で確認できます。\n未鑑定の地図 3 / 3';
   }
   function activateTent(){
+    if(cursor===5){
+      const result=updateMaps(receiveMapBossReward);
+      if(!result.ok){error(result.error);return;}
+      cursor=0;render();playSe('importantItem');message.textContent='討伐報酬の未鑑定地図を1枚受け取りました。地図鑑定で確認できます。';return;
+    }
     if(cursor===4){view='starter';render();return;}
     if(cursor===3){exit();return;}
     view=['appraise','register','organize'][cursor];
@@ -136,7 +142,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     if(view==='tent'){
       commands.dataset.townActive='true';delete commands.dataset.entranceActive;
       commands.setAttribute('aria-label','探検家テント');
-      commands.replaceChildren(...['地図鑑定','地図登録','地図整理','戻る',canReceiveTestStarter()&&!maps().starterMapsTestGranted?'【開発用】白地図を受け取る':'',''].map((label,i)=>{const b=button(label,()=>{cursor=i;activateTent();},i===cursor);b.disabled=!label;return b;}));return;
+      commands.replaceChildren(...['地図鑑定','地図登録','地図整理','戻る',canReceiveTestStarter()&&!maps().starterMapsTestGranted?'【開発用】白地図を受け取る':'',hasPendingMapReward(maps())?'討伐地図報酬を受け取る':''].map((label,i)=>{const b=button(label,()=>{cursor=i;activateTent();},i===cursor);b.disabled=!label;return b;}));return;
     }
     panel.append(make('h2',({starter:'【開発用】はじまりの白地図',maps:'MAP EXPLORATION',organize:'地図整理',detail:'地図詳細',signature:'地図署名',appraise:'地図鑑定',appraisal:'地図鑑定',duplicate:'地図鑑定',register:'地図登録',manage:'地図管理',share:'共有コード',delete:'地図削除',sameContent:'地図登録の確認',enter:'地図詳細'})[view]));
     if(view==='starter'){
@@ -219,7 +225,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       panel.append(field);actionButtons([['コードをコピー（A）',()=>copyCode(code)],['戻る（B）',back]]);return;
     }
     if(view==='delete'){
-      panel.append(make('p','この地図を削除しますか？'),make('p','調査記録・踏破記録・お気に入り・メモ・探索途中の状態も失われます。再登録には共有コードが必要です。'));
+      panel.append(make('p','この地図を削除しますか？'),make('p',isV2Map(map)?'調査記録・お気に入り・メモ・探索途中の状態は失われます。討伐済みの記録と報酬の受領履歴は保持されます。再登録には共有コードが必要です。':'調査記録・踏破記録・お気に入り・メモ・探索途中の状態も失われます。再登録には共有コードが必要です。'));
       actionButtons([['削除する（A）',removeMap],['やめる（B）',back]]);
     }
   }
@@ -237,6 +243,12 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       else if(action==='confirm')actions[actionCursor]();return true;
     }
     if(view==='tent'){
+      if(hasPendingMapReward(maps())&&['up','down','left','right'].includes(action)){
+        const available=[0,1,2,3,...(canReceiveTestStarter()&&!maps().starterMapsTestGranted?[4]:[]),5];
+        if(action==='up'||action==='down'){const next=(cursor+3)%6;cursor=available.includes(next)?next:3;}
+        else{const row=available.filter(i=>Math.floor(i/3)===Math.floor(cursor/3));cursor=row[(row.indexOf(cursor)+(action==='right'?1:row.length-1))%row.length];}
+        render();return true;
+      }
       if(action==='up'||action==='down')cursor=cursor===4?1:cursor<3?(cursor===1&&canReceiveTestStarter()&&!maps().starterMapsTestGranted?4:3):0;
       else if(action==='left'||action==='right'){if(cursor<3)cursor=(cursor+(action==='right'?1:2))%3;else if(canReceiveTestStarter()&&!maps().starterMapsTestGranted)cursor=cursor===3?4:3;}
       else if(action==='confirm'){activateTent();return true;}

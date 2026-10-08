@@ -1037,3 +1037,7 @@ body.battle-active .viewport > #treasureCanvas {
 .goddess-battle-circle[hidden] { display:none; }
 @keyframes goddess-circle-rotate { from { transform:translate(-50%,-50%) rotate(0deg); } to { transform:translate(-50%,-50%) rotate(360deg); } }
 @media(prefers-reduced-motion:reduce) { .goddess-battle-circle { animation:none; } }
+
+.boss-barrier-fill {position:absolute;inset:0 auto 0 0;background:#375e9d;border-radius:3px;transition:width .45s ease-out;pointer-events:none;}
+.boss-barrier-label {position:relative;z-index:1;}
+@media(prefers-reduced-motion:reduce){.boss-barrier-fill {transition:none;}}

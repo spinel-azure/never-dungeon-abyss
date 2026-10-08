@@ -59,7 +59,7 @@ test('development maps require opt-in and never change a registered original; fr
  }finally{s.disposeSurvey();setExplorerTestEnabled(false);}
 });
 test('gold key/survey/save/notice precedes boss; reward once; gate retains runtime; independent return retry',()=>{
- let save=true,starts=0;const s=session(80,{persistSurvey:()=>({ok:save}),onBossEncounter:()=>starts++});
+ let save=true,starts=0;const s=session(100,{persistSurvey:()=>({ok:save}),onBossEncounter:()=>starts++});
  try{
   s.currentFloor=2;const p=s.generatedMap.bossRoom.bossCell;s.playerX=p.x;s.playerY=p.y;
   assert.equal(isV2EncounterCell(s),false);s.onBossCell();assert.equal(starts,0);
@@ -68,17 +68,17 @@ test('gold key/survey/save/notice precedes boss; reward once; gate retains runti
   s.surveyNotice=null;s.surveyPresentationPlaying=true;s.retryBossEncounter();assert.equal(starts,0);
   s.surveyPresentationPlaying=false;s.retryBossEncounter();assert.equal(starts,1);
   const ctx=s.battleContext;assert.equal(ctx.source,'special-map-v2-special-boss');assert.equal(ctx.floorIndex,2);assert.ok(matchesV2Battle(s,ctx));
-  const enemy=createEnemyCombatant(createGoldMapBoss({themeId:'gold',level:80}));enemy.hp=0;enemy.alive=false;
+  const enemy=createEnemyCombatant(createGoldMapBoss({themeId:'gold',level:100}));enemy.hp=0;enemy.alive=false;
   let c=createInitialCharacter({name:'QA',job:'warrior'});c.carriedExperience=777;const initial=c.experience;
   const b={enemy,explorationContext:ctx};grantV2BattleRewards(c,b,s);grantV2BattleRewards(c,b,s);
-  assert.equal(s.battleExperience,10800);assert.equal(s.lootBag.gold,2250);
+  assert.equal(s.battleExperience,12000);assert.equal(s.lootBag.gold,2500);
   s.bossDefeated=true;resumeV2Encounter(s,ctx);s.onBossCell();assert.equal(starts,1);
   const masks=[...s.surveyedMasks],torch=s.torchFuel;s.transitioning=false;
-  assert.equal(warpV2ToEntrance(s),true);assert.equal(s.currentFloor,0);assert.equal(s.torchFuel,torch);assert.equal(s.battleExperience,10800);assert.equal(s.lootBag.gold,2250);
+  assert.equal(warpV2ToEntrance(s),true);assert.equal(s.currentFloor,0);assert.equal(s.torchFuel,torch);assert.equal(s.battleExperience,12000);assert.equal(s.lootBag.gold,2500);
   assert.deepEqual(s.surveyedMasks,masks);assert.equal(s.bossDoorUnlocked,true);
-  assert.equal(settleV2ReturnExperience(c,s,()=>false),false);assert.equal(s.battleExperience,10800);
-  assert.equal(settleV2ReturnExperience(c,s,r=>{c={...c,...r.changes};return true;}),true);assert.equal(c.experience,initial+15120);assert.equal(c.carriedExperience,777);
+  assert.equal(settleV2ReturnExperience(c,s,()=>false),false);assert.equal(s.battleExperience,12000);
+  assert.equal(settleV2ReturnExperience(c,s,r=>{c={...c,...r.changes};return true;}),true);assert.equal(c.experience,initial+18000);assert.equal(c.carriedExperience,777);
   const exp=c.experience;settleV2ReturnExperience(c,s,r=>{c={...c,...r.changes};return true;});assert.equal(c.experience,exp);
  }finally{s.disposeSurvey();setExplorerTestEnabled(false);}
- const again=session(80);assert.equal(again.bossDefeated,false);again.disposeSurvey();setExplorerTestEnabled(false);
+ const again=session(100);assert.equal(again.bossDefeated,false);again.disposeSurvey();setExplorerTestEnabled(false);
 });

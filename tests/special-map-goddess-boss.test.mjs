@@ -19,7 +19,7 @@ test('fixed goddess factory: identity, images, exact metadata, scaling, cap30, S
  for(const [theme,id,n,hp,exp] of [['rice','lumina','013',55000,25000],['dusk','noctia','014',48000,25000],['tender','zelena','015',60000,30000]]){
   for(const [level,s] of [[80,.9],[89,.9],[90,.95],[99,.95],[100,1]]){
    const d=createGoddessMapBoss({themeId:theme,level}),e=createEnemyCombatant(d);
-   assert.equal(d.id,`karte_boss_${id}`);assert.equal(d.maxHp,Math.round(({rice:10000,dusk:9000,tender:12000}[theme])*s));assert.equal(e.sp,9999);
+   assert.equal(d.id,`karte_boss_${id}`);assert.equal(d.maxHp,Math.round(({rice:20000,dusk:18000,tender:24000}[theme])*s));assert.equal(e.sp,9999);
    assert.equal(e.experienceReward,Math.round(exp*s));assert.equal(e.noDrop,true);assert.equal(e.isBoss,true);
    assert.equal(d.actions.reduce((n,a)=>n+a.weight,0),100);
    assert.ok(Object.values(collectStats(e)).every(v=>typeof v!=='number'||Number.isFinite(v)));
@@ -36,7 +36,7 @@ test('fixed goddess factory: identity, images, exact metadata, scaling, cap30, S
 test('Lumina phase affects effective lightning damage and crit; Noctia growth is bounded and once per turn',()=>{
  const b=battle('rice');b.enemy.hp=b.enemy.maxHp*.5;
  const a=prepareGoddessAction(b,b.enemy,{element:'lightning',actionType:'spell'});
- assert.equal(a.goddessDamageMultiplier,1.2);assert.equal(a.criticalBonus,.08);
+ assert.equal(a.goddessDamageMultiplier,1.92);assert.equal(a.criticalBonus,.08);
  const n=battle('dusk');n.enemy.hp=n.enemy.maxHp*.3;
  for(let turn=1;turn<=30;turn++){n.turn=turn;prepareGoddessAction(n,n.enemy,{actionType:'spell'});prepareGoddessAction(n,n.enemy,{actionType:'spell'});assert.ok(n.enemy.goddessRuntime.growth<=.4);}
  assert.equal(n.enemy.goddessRuntime.growth,.4);
@@ -44,7 +44,7 @@ test('Lumina phase affects effective lightning damage and crit; Noctia growth is
 test('Zelena revives before single/multi victory, exactly once, no reward at first death; fresh runtime per battle',()=>{
  for(const multi of [false,true]){
   const b=battle();if(multi)b.enemies=[b.enemy];b.enemy.hp=0;b.enemy.alive=false;
-  resolveBattleOutcome(b);assert.equal(b.outcome,null);assert.equal(b.enemy.hp,3600);assert.equal(b.enemy.alive,true);
+  resolveBattleOutcome(b);assert.equal(b.outcome,null);assert.equal(b.enemy.hp,7200);assert.equal(b.enemy.alive,true);
   assert.equal(b.presentationEvents.at(-1).goddessRevival,true);
   b.enemy.hp=0;resolveBattleOutcome(b);assert.equal(b.outcome,'victory');
  }
@@ -53,7 +53,7 @@ test('Zelena revives before single/multi victory, exactly once, no reward at fir
 test('goddess utilities heal/cleanse, finite barrier, finite regen and poison cannot scale with max HP',()=>{
  const b=battle();b.enemy.hp=6000;b.enemy.statuses=[{id:'death_poison'}];
  const d=createGoddessMapBoss({themeId:'tender',level:100});
- executeGoddessUtility(b,b.enemy,d.actions[1].action);assert.equal(b.enemy.hp,6480);assert.equal(b.enemy.statuses.length,0);
+ executeGoddessUtility(b,b.enemy,d.actions[1].action);assert.equal(b.enemy.hp,6960);assert.equal(b.enemy.statuses.length,0);
  executeGoddessUtility(b,b.enemy,d.actions[2].action);assert.equal(b.enemy.bossMagicBarrier,250);
  executeGoddessUtility(b,b.enemy,d.actions[4].action);assert.equal(b.enemy.goddessRuntime.regen,3);
  assert.equal(getScorpioDeathPoisonRate(b.enemy),.01);
@@ -94,12 +94,12 @@ test('Lumina priority includes reserved ultimate; power persists for three follo
  const b=battle('rice');b.enemy.hp=b.enemy.maxHp/2;b.enemy.reservedEnemyAction={id:'qa',actionType:'spell',speedModifier:2};
  assert.equal(createEnemyAction(b.enemy,()=>0,{battle:b}).speedModifier,14);
  executeGoddessUtility(b,b.enemy,{id:'power',goddessUtility:'power'});finishGoddessAction(b,b.enemy);
- for(let i=0;i<3;i++){assert.equal(prepareGoddessAction(b,b.enemy,{actionType:'physicalAttack'}).goddessDamageMultiplier,1.1);finishGoddessAction(b,b.enemy);}
- assert.equal(prepareGoddessAction(b,b.enemy,{actionType:'physicalAttack'}).goddessDamageMultiplier,1);
+ for(let i=0;i<3;i++){assert.equal(prepareGoddessAction(b,b.enemy,{actionType:'physicalAttack'}).goddessDamageMultiplier,1.7600000000000002);finishGoddessAction(b,b.enemy);}
+ assert.equal(prepareGoddessAction(b,b.enemy,{actionType:'physicalAttack'}).goddessDamageMultiplier,1.6);
 });
 test('actual NPC lethal hit revives Zelena before victory and second lethal hit wins',()=>{
  const b=createBattleState({character:goddessCharacter('warrior',100,'standard'),enemy:boss()});
- b.enemy.hp=1;applyNpcAfterPlayerAttack(b,()=>0);assert.equal(b.outcome,null);assert.equal(b.enemy.hp,3600);
+ b.enemy.hp=1;applyNpcAfterPlayerAttack(b,()=>0);assert.equal(b.outcome,null);assert.equal(b.enemy.hp,7200);
  b.enemy.hp=1;applyNpcAfterPlayerAttack(b,()=>0);assert.equal(b.outcome,'victory');
 });
 

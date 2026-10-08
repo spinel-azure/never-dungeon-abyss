@@ -4,7 +4,7 @@ import {mapContentId} from '../../data/special-maps.js';
 
 let nextSessionId=0;
 export function matchesV2Battle(s,c){
- return Boolean(s?.battleContext&&c&&['special-map-v2','special-map-v2-boss','special-map-v2-special-boss'].includes(c.source)&&c.source===s.battleContext.source&&c.mapKey===s.mapKey&&c.sessionId===s.encounterSessionId&&c.battleId===s.battleContext.battleId&&Number.isInteger(c.battleId));
+ return Boolean(s?.battleContext&&c&&['special-map-v2','special-map-v2-boss','special-map-v2-special-boss'].includes(c.source)&&c.source===s.battleContext.source&&c.mapKey===s.mapKey&&c.sessionId===s.encounterSessionId&&c.battleId===s.battleContext.battleId&&Number.isInteger(c.battleId)&&c.battleUuid===s.battleContext.battleUuid&&c.expeditionId===s.battleContext.expeditionId);
 }
 export function rollV2Species(species,random=Math.random){
  if(!Array.isArray(species)||!species.length||species.some(s=>!s.id||s.id.startsWith('karte_boss_')||!Number.isInteger(s.weight)||s.weight<1)||species.reduce((n,s)=>n+s.weight,0)!==10000)throw Error('Invalid V2 encounter weights');
@@ -37,7 +37,7 @@ export function attachV2Encounters(s,{onEncounter,random=Math.random,onBlocked=m
  };
 }
 export function resumeV2Encounter(s,context){
- if(!s||s.battleContext!==context)return false;
+ if(!matchesV2Battle(s,context))return false;
  s.battleContext=null;s.transitioning=false;s.autoPath=null;s.presence=0;
  return true;
 }

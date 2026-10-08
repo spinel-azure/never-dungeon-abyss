@@ -2,6 +2,7 @@ import {normalizeSurveyMask,mergeSurvey,surveyCount} from './special-map-survey.
 import {normalizeSurveyMasks,mergeSurveyV2} from './special-map-survey-v2.js';
 import {describeV2MapName} from './special-map-names-v2.js';
 import {validMapThemeOverride} from './special-map-theme-override.js';
+import {normalizeBossReward,normalizeMapContentHistory} from './special-map-rewards.js';
 // Phase 2A ownership data. This ruleset is deliberately NOT the future dungeon V1.
 export const SPECIAL_MAP_RULESET = 'phase2a-1';
 export const SPECIAL_MAP_V2 = 'special-map-v2';
@@ -47,7 +48,12 @@ export function normalizeSpecialMaps(input) {
   const clean=list=>(Array.isArray(list)?list:[]).map(normalizeOriginal).filter(Boolean);
   const registered=[...new Map(clean(input?.registered).map(map=>[mapOriginalId(map),{...map,id:mapOriginalId(map),...surveyFields(map),acquisitionMethod:map.acquisitionMethod==='shared'?'shared':'discovered'}])).values()].slice(0,REGISTERED_LIMIT);
   const unidentified=clean(input?.unidentified).slice(0,UNIDENTIFIED_LIMIT).map((map,index)=>({...map,discoveryId:typeof map.discoveryId==='string'&&map.discoveryId?map.discoveryId:`legacy-${index}-${mapOriginalId(map)}`}));
-  return {dataVersion:1,discovererName:signature.ok?signature.value:'',unidentified,registered,...(input?.starterMapsGranted===true?{starterMapsGranted:true}:{}),...(input?.starterMapsTestGranted===true?{starterMapsTestGranted:true}:{})};
+  const bossReward=normalizeBossReward(input?.bossReward);
+  const bossClears=normalizeMapContentHistory(input?.bossClears);
+  const surveyRewardClaims=normalizeMapContentHistory(input?.surveyRewardClaims);
+  for(const map of registered)if(bossClears[mapContentId(map)])map.cleared=true;
+  return {dataVersion:1,discovererName:signature.ok?signature.value:'',unidentified,registered,...(input?.starterMapsGranted===true?{starterMapsGranted:true}:{}),...(input?.starterMapsTestGranted===true?{starterMapsTestGranted:true}:{}),
+    ...(bossReward?{bossReward}:{}),...(Object.keys(bossClears).length?{bossClears}:{}),...(Object.keys(surveyRewardClaims).length?{surveyRewardClaims}:{})};
 }
 export function describeTestMap(map) {
   if(isV2Map(map)){try{return {...describeV2MapName(map),level:map.level,rarityLabel:rarityLabel(map.rarity)};}catch{return null;}}

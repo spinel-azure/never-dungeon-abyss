@@ -1,6 +1,6 @@
 import {discardV2Experience} from './battle-rewards-v2.js';
 import {createSpecialMapSession,actSpecialMap,updateSpecialMotion,specialWall,specialDoorState,openSpecialDoorAhead,flushSpecialSurvey,continueSpecialAutoWalker} from './session.js';
-import {useSpecialMapRenderSource,toggleMinimapOverlay,getActiveMinimapBounds,setWallColor,setFloorColor} from '../renderer.js';
+import {preloadExplorationImage,useSpecialMapRenderSource,toggleMinimapOverlay,getActiveMinimapBounds,setWallColor,setFloorColor} from '../renderer.js';
 import {createSpecialMapV2Session,isV2Session,confirmV2Cell,switchV2Floor,warpV2ToEntrance,getV2StairPrompt,getV2CellPromptMessage,cancelV2CellPrompt,completeV2KeyChest,cancelV2KeyChest} from './session-v2.js';
 import {drawMinimap,getMinimapBounds} from '../minimap.js';
 import {attachSpecialMap,getSpecialMapHost,getSpecialMapContext} from './context.js';
@@ -8,6 +8,8 @@ import {describeTestMap,mapOriginalId} from '../../data/special-maps.js';
 export function startSpecialMapExploration(options){
  const host=getSpecialMapHost();
  const original=options.registered.find(m=>mapOriginalId(m)===options.mapKey);
+ const entryCheck=host.checkMapEntry?.(original,options);
+ if(entryCheck&&!entryCheck.ok)throw Error(entryCheck.error);
  if(original?.rulesetVersion!=='special-map-v2'||!host.runEntryTransition)return createExploration(options);
  if(getSpecialMapContext())throw Error('特殊地図はすでに探索中です。');
  let controller=null,cancelled=false,locked=true;
@@ -43,7 +45,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  const host=getSpecialMapHost();
  const original=registered.find(m=>mapOriginalId(m)===mapKey);
  const createSession=original?.rulesetVersion==='special-map-v2'?createSpecialMapV2Session:createSpecialMapSession;
- const session=createSession(registered,mapKey,{developmentTheme,persistSurvey:saveSurvey,playSe,onEncounter:host.onEncounter,onBossEncounter:host.onEncounter,say:text=>{message.textContent=text;}});
+ const session=createSession(registered,mapKey,{developmentTheme,persistSurvey:saveSurvey,playSe,onEncounter:host.onEncounter,onBossEncounter:host.onEncounter,prepareBossEncounter:host.prepareBossEncounter,say:text=>{message.textContent=text;}});
  if(isV2Session(session))session.torchConsumptionDisabled=()=>Boolean(host.getTorchCardEffects?.().consumptionDisabled);
  let name=developmentName||'特殊地図';try{if(!developmentName)name=describeTestMap(original).name;}catch{}
  const container=document.createElement('section');container.className='special-map-runtime';container.setAttribute('aria-label','特殊迷宮探索');
@@ -51,6 +53,19 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  container.append(canvas);host.viewport.append(container);
  const statusParent=host.status.parentElement;container.append(host.status);
  let disposed=false,returned=false,chestPreview=false;
+ session.startUnavailableBossPresentation=()=>{
+  if(disposed||session.bossPreviewPlaying||session.bossPreviewDismissed)return;
+  session.bossPreviewPlaying=true;session.transitioning=true;session.autoPath=null;
+  message.textContent='この地図の主との戦いは地図Lv100限定です。影は静かに姿を消していく……。';
+  setTimeout(()=>{
+   if(disposed)return;session.bossPreviewFadeStarted=Date.now();
+   setTimeout(()=>{
+    if(disposed)return;
+    session.bossPreviewFadeStarted=null;session.bossPreviewPlaying=false;session.bossPreviewDismissed=true;session.transitioning=false;
+    message.textContent='ワープゲートが現れた。A／EnterでB1F入口へ移動。';
+   },1000);
+  },2200);
+ };
  function presentSurveyNotice(notice){
   const complete=notice.total===300;
   const overlay={type:'floorLap',showOverlay:false,specialMapTitle:true,surveyMilestone:true,
@@ -85,6 +100,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  onEnter();
  const detach=attachSpecialMap({session,finish,input});
  session.renderState.overlayEvent={type:'floorLap',showOverlay:false,overlayMessage:name,specialMapTitle:true};
+ if(session.bossRenderDefinition)preloadExplorationImage(session.bossRenderDefinition.id,session.bossRenderDefinition.image);
  const restore=useSpecialMapRenderSource({canvas,ctx:canvas.getContext('2d'),W:960,H:540,state:session.renderState,eventOverlayCtx:null,
   wallOnCell:(x,y,d)=>specialWall(session,x,y,d)||specialDoorState(session,x,y,d)==='closed',closedDoorOnCell:(x,y,d)=>specialDoorState(session,x,y,d)==='closed',openDoorOnCell:(x,y,d)=>specialDoorState(session,x,y,d)==='open',getDoorState:(x,y,d)=>specialDoorState(session,x,y,d),getDoorKind:(x,y,d)=>session.cells[y]?.[x]?.doorKinds[d]??null,getDepth:()=>0,
   inBounds:(x,y)=>x>=0&&x<10&&y>=0&&y<10,getRoamingEnemyRenderState:()=>session.getBossRenderState?.()??null,
@@ -176,6 +192,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
   if(disposed)return false;
   if(host.isBattleActive?.())return host.handleBattleInput?.(action)??true;
   if(session.surveyPresentationPlaying)return true;
+  if(session.victoryRetry){if(action==='confirm')session.victoryRetry();return true;}
   if(session.defeatRetry){if(action==='confirm')void session.defeatRetry();return true;}
   if(session.pendingBoss){if(action==='confirm')session.retryBossEncounter();return true;}
   if(session.transitioning)return true;

@@ -1205,7 +1205,7 @@ export function drawCellEvents(layer = "all", now = 0) {
           eventKind: "roamingEnemy",
           npc: {
             imageId: roaming.definition.imageId,
-            friendly: roaming.definition.friendly, renderScale: roaming.definition.renderScale, maxHeightRatio: roaming.definition.maxHeightRatio, breathing: roaming.definition.friendly && !roaming.transition
+            friendly: roaming.definition.friendly,silhouette:roaming.definition.silhouette,opacity:roaming.definition.opacity, renderScale: roaming.definition.renderScale, maxHeightRatio: roaming.definition.maxHeightRatio, breathing: roaming.definition.friendly && !roaming.transition
           }
         });
       }
@@ -1358,6 +1358,8 @@ function loadTreasureImage(type, src, tint = "") {
   image.src = src;
   renderer.treasureImages.set(type, image);
 }
+
+export function preloadExplorationImage(id, src) { loadCharacterImage(id, src); }
 
 function loadCharacterImage(id, src) {
   if (renderer.characterImages.has(id)) return;
@@ -1639,6 +1641,8 @@ function drawExplorationObstacleSparkles(ctx, event, bounds, sparkles) {
 
 function drawNpcEvent(ctx, event, now = 0) {
   const image = renderer.characterImages.get(event.npc.imageId);
+  const mapBoss = event.npc.imageId?.startsWith("karte_boss_");
+  if (mapBoss && !(image?.complete && image.naturalWidth > 0)) return;
   const supportsProximityEnlargement = ["npc", "boss", "bossRemains", "fixedEvent"].includes(event.eventKind);
   const isOneStepAway = supportsProximityEnlargement && event.forward <= 1.55;
   const nearbyScale = event.npc.imageId === "NPC_01" ? 1.5 : 1.9;
@@ -1650,7 +1654,7 @@ function drawNpcEvent(ctx, event, now = 0) {
   let spriteH = isOneStepAway
     ? Math.min(scaledSpriteH, renderer.H * .82)
     : Math.min(scaledSpriteH, obstacleHeightLimit);
-  if (event.npc.friendly && event.footprints?.length) {
+  if ((event.npc.friendly || (mapBoss && event.forward > 1.55)) && event.footprints?.length) {
     const ceiling = Math.min(...event.footprints.flatMap(footprint => footprint.ceiling.map(point => point.y)));
     spriteH = Math.min(spriteH, Math.max(1, event.floorY - ceiling - 5));
   }
@@ -1678,7 +1682,7 @@ function drawNpcEvent(ctx, event, now = 0) {
     }
     ctx.clip();
   }
-  ctx.globalAlpha = event.alpha;
+  ctx.globalAlpha = event.alpha * (event.npc.opacity ?? 1);
   if (event.npc.id === "crystal_cluster" || event.npc.renderEffect === "dark-waver") {
     const halo = Math.max(3, event.size * .035);
     ctx.filter = `drop-shadow(0 0 ${halo}px rgba(230,210,255,.95)) drop-shadow(0 0 ${halo * 3}px rgba(175,95,255,.9))`;
@@ -1703,7 +1707,7 @@ function drawNpcEvent(ctx, event, now = 0) {
     bounds = { x: drawX, y: top, width: drawW, height: drawH };
     if(SPECIAL_BOSS_GLOW[event.npc.imageId]){ctx.shadowColor=SPECIAL_BOSS_GLOW[event.npc.imageId];ctx.shadowBlur=drawH*.045;}
     ctx.drawImage(image, drawX, top, drawW, drawH);
-    drawSpecialBossSparkles(ctx,event.npc.imageId,now,{...bounds,reducedMotion:Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches)});
+    if(!event.npc.silhouette)drawSpecialBossSparkles(ctx,event.npc.imageId,now,{...bounds,reducedMotion:Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches)});
   } else {
     ctx.fillStyle = "rgba(255,232,186,.72)";
     ctx.fillRect(bounds.x, top, fallbackW, drawH);
