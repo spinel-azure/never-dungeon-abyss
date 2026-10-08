@@ -1,4 +1,6 @@
-import {grantTestStarterMaps,unidentifiedMapLabel} from '../data/special-map-starter.js';
+import {MAP_BETA_WELCOME,MAP_BETA_EXPLANATION,MAP_BETA_NOTICE} from '../data/map-beta.js';
+import {paginateMessageToFit} from './message-pagination.js';
+import {grantTestStarterMaps,prepareFormalStarter,receiveFormalStarter,unidentifiedMapLabel} from '../data/special-map-starter.js';
 import {hasPendingMapReward,receiveMapBossReward} from '../data/special-map-rewards.js';
 import {surveyCount} from '../data/special-map-survey.js';
 import {surveyTotalV2} from '../data/special-map-survey-v2.js';
@@ -6,7 +8,7 @@ import {getTentBackground} from './explorer-preview.js';
 import {isV2Map, rarityLabel, mapContentId, normalizeSpecialMaps, describeTestMap, setMapSignature, inspectAppraisal, appraiseMap, registerSharedMap, deleteRegisteredMap, toggleMapFavorite, updateMapSurvey} from '../data/special-maps.js';
 import {encodeMapCode,decodeMapCode} from '../data/special-map-code.js';
 
-export function createExplorerPreviewUI({host, commands, background, message, playSe, onExit, startExploration, showMapRewardAcquisition, canReceiveTestStarter=()=>false, getMaps=()=>null, updateMaps=()=>({ok:false,error:'保存処理に接続されていません。'})}) {
+export function createExplorerPreviewUI({host, commands, background, message, playSe, onExit, startExploration, showMapRewardAcquisition, useBetaIntroduction=()=>false, finishTyping=()=>false, canReceiveTestStarter=()=>false, getMaps=()=>null, updateMaps=()=>({ok:false,error:'保存処理に接続されていません。'})}) {
   const panel=document.createElement('section');
   panel.className='transfer-destination-overlay explorer-preview';panel.hidden=true;
   panel.setAttribute('aria-label','特殊地図');host.append(panel);
@@ -16,10 +18,54 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
   const maps=()=>normalizeSpecialMaps(getMaps());
   let formControls=[],formCursor=0,actions=[],actionCursor=0,pendingMap=null,codeDraft='';
   let exploration=null;
-  let acquisitionController=null;
+  let acquisitionController=null,preparedStarter=null,betaView='',betaPages=[],betaPage=0;
+  const tentView=()=>useBetaIntroduction()?(!maps().starterMapsGranted?'betaWelcome':!maps().betaExplanationComplete?'betaExplanation':'tent'):'tent';
+  const initialView=kind=>kind==='tent'&&canReceiveTestStarter()&&!maps().starterMapsTestGranted?'starter':kind==='tent'&&useBetaIntroduction()?tentView():kind;
+  function showBetaPage(){message.textContent=betaPages[betaPage]+'\n＊Aボタンで次へ';}
+  function betaCommands(entries){
+    actions=entries.filter(e=>e[1]).map(e=>e[1]);
+    commands.replaceChildren(...entries.map(([label,action])=>{const b=button(label,action,Boolean(action)&&actions.indexOf(action)===actionCursor);b.disabled=!action;return b;}));
+  }
+  function renderBeta(){
+    panel.hidden=true;commands.hidden=false;commands.dataset.townActive='true';delete commands.dataset.entranceActive;
+    if(betaView!==view){
+      betaView=view;betaPage=0;
+      const texts=view==='betaWelcome'?[MAP_BETA_WELCOME]:[MAP_BETA_NOTICE,...MAP_BETA_EXPLANATION];
+      betaPages=texts.flatMap(text=>paginateMessageToFit({element:message,text:text===MAP_BETA_NOTICE?text:'トレリーレン「'+text+'」',formatPage:value=>value+'\n＊Aボタンで次へ'}));
+    }
+    betaCommands([['次へ（A）',advanceBeta],[''],[''],[''],[''],['戻る（B）',exit]]);showBetaPage();
+    if(view==='betaWelcome'&&maps().unidentified.length){
+      betaCommands([['既存の地図を鑑定する',()=>{view='appraise';render();}],['地図整理',()=>{view='organize';render();}],[''],[''],[''],['戻る（B）',exit]]);
+      message.textContent='トレリーレン「3枚まとめて渡すので、未鑑定の地図をすべて鑑定してから受け取りに来てね。」';
+    }
+  }
+  async function advanceBeta(){
+    if(finishTyping())return;
+    if(betaPage<betaPages.length-1){betaPage++;showBetaPage();return;}
+    if(view==='betaExplanation'){
+      const result=updateMaps(state=>({ok:true,state:{...state,betaExplanationComplete:true}}));
+      if(!result.ok){error(result.error);return;}
+      betaView='';view='appraise';appraisalIndex=0;render();return;
+    }
+    if(!maps().starterOffer){
+      if(!preparedStarter){const prepared=prepareFormalStarter(maps());if(!prepared.ok){error(prepared.error);return;}preparedStarter=prepared.maps;}
+      const prepared=updateMaps(state=>({ok:true,state:{...state,starterOffer:preparedStarter}}));
+      if(!prepared.ok){error(prepared.error);return;}
+    }
+    const result=updateMaps(receiveFormalStarter);
+    if(!result.ok){error(result.error);return;}
+    preparedStarter=null;
+    const controller=new AbortController();acquisitionController=controller;
+    message.textContent='「未鑑定の白地図」を3枚受け取った！';
+    try{if(showMapRewardAcquisition)await showMapRewardAcquisition({signal:controller.signal,starter:true});else playSe('importantItem');}
+    finally{if(acquisitionController===controller)acquisitionController=null;}
+    if(controller.signal.aborted||!active)return;
+    betaView='';view='betaExplanation';render();
+  }
+
   const selectedMap=()=>maps().registered.find(m=>m.id===detailId);
   const make=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
-  const button=(label,action,selected=false)=>{const b=make('button');b.type='button';if(label)b.append(make('span',label,'explorer-button-label'));b.classList.toggle('is-selected',selected);b.onclick=()=>{if(acquisitionController)return;playSe('confirm');action();};return b;};
+  const button=(label,action,selected=false)=>{const b=make('button');b.type='button';if(label)b.append(make('span',label,'explorer-button-label'));b.classList.toggle('is-selected',selected);b.onclick=()=>{if(acquisitionController)return;if(finishTyping())return;playSe('confirm');action();};return b;};
   const error=text=>{message.textContent=text;};
   const countText=()=>`未鑑定の地図 ${maps().unidentified.length} / 3　登録済み地図 ${maps().registered.length} / 10${hasPendingMapReward(maps())?'　討伐地図報酬：未受領':''}`;
   function close(){acquisitionController?.abort();acquisitionController=null;exploration?.close();exploration=null;if(active&&hint)hint.textContent=previousHint;active=false;panel.hidden=true;commands.hidden=false;}
@@ -28,10 +74,10 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     if(view==='enter'){view='detail';actionCursor=0;}
     else if(['manage','share','delete'].includes(view)){view=view==='manage'?'detail':'manage';actionCursor=0;}
     else if(view==='sameContent')view='register';
-    else if(view==='signature'||view==='starter')view='tent';
+    else if(view==='signature'||view==='starter')view=tentView();
     else if(view==='detail'){view=origin;armed=-1;}
     else if(view==='appraisal'||view==='duplicate'){view='appraise';appraisalArmed=-1;}
-    else if(['appraise','register','organize'].includes(view))view='tent';
+    else if(['appraise','register','organize'].includes(view))view=tentView();
     else {exit();return;}
     render();
   }
@@ -54,7 +100,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
   function signature(){
     const result=updateMaps(state=>setMapSignature(state,input.value));
     if(!result.ok){error(result.error);return;}
-    view=opening==='tent'&&canReceiveTestStarter()&&!maps().starterMapsTestGranted?'starter':opening;render();
+    view=initialView(opening);render();
   }
   function receiveStarter(){
     if(!canReceiveTestStarter())return;
@@ -151,6 +197,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       commands.setAttribute('aria-label','探検家テント');
       commands.replaceChildren(...['地図鑑定','地図登録','地図整理','調査報告','討伐報酬受領','戻る'].map((label,i)=>{const b=button(label,()=>{cursor=i;activateTent();},i===cursor);b.disabled=i===3||(i===4&&!hasPendingMapReward(maps()));return b;}));return;
     }
+    if(view==='betaWelcome'||view==='betaExplanation'){renderBeta();return;}
     panel.append(make('h2',({starter:'【開発用】はじまりの白地図',maps:'MAP EXPLORATION',organize:'地図整理',detail:'地図詳細',signature:'地図署名',appraise:'地図鑑定',appraisal:'地図鑑定',duplicate:'地図鑑定',register:'地図登録',manage:'地図管理',share:'共有コード',delete:'地図削除',sameContent:'地図登録の確認',enter:'地図詳細'})[view]));
     if(view==='starter'){
       panel.append(make('p','開発用の配布です。はじまりの白地図3枚を受け取り、鑑定と探索を確認できます。本番の初回配布記録は変更しません。'));
@@ -239,6 +286,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
   function inputAction(action){
     if(!active)return false;
     if(acquisitionController)return true;
+    if(action==='confirm'&&finishTyping())return true;
     if(exploration)return exploration.input(action);
     if(action==='cancel'){back();return true;}
     if(view==='signature'||view==='register'){
@@ -272,5 +320,5 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     }
     return true;
   }
-  return {open(kind){previousHint=hint?.textContent||'';active=true;opening=kind;view=maps().discovererName?(kind==='tent'&&canReceiveTestStarter()&&!maps().starterMapsTestGranted?'starter':kind):'signature';cursor=formCursor=actionCursor=0;armed=appraisalArmed=-1;tentImage=getTentBackground();render();},input:inputAction,close};
+  return {open(kind){previousHint=hint?.textContent||'';active=true;opening=kind;betaView='';view=maps().discovererName?initialView(kind):'signature';cursor=formCursor=actionCursor=0;armed=appraisalArmed=-1;tentImage=getTentBackground();render();},input:inputAction,isTalking:()=>view==='betaWelcome'||view==='betaExplanation',close};
 }

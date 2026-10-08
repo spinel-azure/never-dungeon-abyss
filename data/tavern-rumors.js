@@ -1,3 +1,4 @@
+import {normalizeTrelirenProgress,MAP_BETA_RUMOR_FLAG} from './map-beta.js';
 import {hasLeoQualification, LION_RUMOR_READ_FLAG} from './loewenkoenigin.js';
 import { hasKeyItem } from './key-items.js';
 import { characterOwnsEquipment } from "./equipment-inventory.js";
@@ -394,6 +395,16 @@ export const TAVERN_RUMORS = Object.freeze([
         rosa: '奈落の最深部ですって…。女王様も戻られたのに…。',
         rosaContinuation: 'えっ！？原因を突き止めて、もう解決した！？うふふ。もう驚かないわよ…！' })
     ])
+  }),
+  Object.freeze({
+    id:'rumor_019',title:'続・迷宮探検家の噂',verbatimCustomers:true,
+    unlock:c=>c.mapBetaRumorEligible,
+    currentWhile:c=>!c.formalStarterGranted,
+    customerLead:'おい、知ってるか？例のリュックを背負った女の子がキャンプしている話。',
+    customerReply:'ああ。奈落入口の近くにテントを張って寝泊まりしているらしい。',
+    phases:Object.freeze([Object.freeze({id:'base',readFlag:MAP_BETA_RUMOR_FLAG,unlock:()=>true,
+      rosa:'まぁ…。女の子がそんな所で一人っきりなんて危ないわ…。',
+      rosaContinuation:'えっ？地図作りを手伝ってくれと頼まれたですって！？変わった子ね…。'})])
   })
 ]);
 
@@ -421,6 +432,8 @@ function normalizeRumorContext(character, context = {}) {
     level: Number(character?.level) || 1,
     amayenakPhantomDefeated: Boolean(eventFlags.achievement_amayenak_phantom_defeated),
     trelirenMet: Boolean(eventFlags.treliren_met),
+    mapBetaRumorEligible:Boolean(eventFlags.tavern_rumor_017_base_read&&normalizeTrelirenProgress(character).encounters>=3&&normalizeTrelirenProgress(character).requestCompleted),
+    formalStarterGranted:character?.specialMaps?.starterMapsGranted===true,
     leoQualified: hasLeoQualification(character),
     leoObtainedAfterVictory: Boolean(eventFlags.boss_loewenkoenigin_b1f_defeated && Number(character?.cards?.ownedCardCounts?.zodiac_leo) > 0),
     mikanEncountered: Boolean(context.mikanEncountered ?? eventFlags.mikan_nyanko_encountered),
@@ -467,7 +480,7 @@ export function getUnreadTavernRumors(character, context = {}) {
     if (!rumor.unlock(normalizedContext)) return [];
     const unlockedPhases = rumor.phases.filter(phase => phase.unlock(normalizedContext));
     const phase = unlockedPhases.at(-1);
-    if (!phase || flags[phase.readFlag]) return [];
+    if (!phase || (rumor.currentWhile?!rumor.currentWhile(normalizedContext):flags[phase.readFlag])) return [];
     const phaseIndex = rumor.phases.indexOf(phase);
     return [{
       id: `${rumor.id}_${phase.id}`,
@@ -491,7 +504,7 @@ export function getPastTavernRumors(character, context = {}) {
   return TAVERN_RUMORS.flatMap((rumor, index) => {
     if (!rumor.unlock(normalizedContext)) return [];
     const phase = rumor.phases.filter(candidate => candidate.unlock(normalizedContext)).at(-1);
-    if (!phase || !flags[phase.readFlag]) return [];
+    if (!phase || !flags[phase.readFlag] || rumor.currentWhile?.(normalizedContext)) return [];
     return [{
       id: rumor.id,
       number: String(index + 1).padStart(3, "0"),

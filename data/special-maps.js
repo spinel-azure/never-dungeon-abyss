@@ -48,11 +48,15 @@ export function normalizeSpecialMaps(input) {
   const clean=list=>(Array.isArray(list)?list:[]).map(normalizeOriginal).filter(Boolean);
   const registered=[...new Map(clean(input?.registered).map(map=>[mapOriginalId(map),{...map,id:mapOriginalId(map),...surveyFields(map),acquisitionMethod:map.acquisitionMethod==='shared'?'shared':'discovered'}])).values()].slice(0,REGISTERED_LIMIT);
   const unidentified=clean(input?.unidentified).slice(0,UNIDENTIFIED_LIMIT).map((map,index)=>({...map,discoveryId:typeof map.discoveryId==='string'&&map.discoveryId?map.discoveryId:`legacy-${index}-${mapOriginalId(map)}`}));
+  const starterOffer=clean(input?.starterOffer).filter(m=>isV2Map(m)&&m.rarity==='WHITE'&&m.level<=5&&m.acquisitionMethod==='starter');
+  const formalStarterIds=Array.isArray(input?.formalStarterIds)?[...new Set(input.formalStarterIds.filter(id=>typeof id==='string'&&id))].slice(0,3):[];
   const bossReward=normalizeBossReward(input?.bossReward);
   const bossClears=normalizeMapContentHistory(input?.bossClears);
   const surveyRewardClaims=normalizeMapContentHistory(input?.surveyRewardClaims);
   for(const map of registered)if(bossClears[mapContentId(map)])map.cleared=true;
   return {dataVersion:1,discovererName:signature.ok?signature.value:'',unidentified,registered,...(input?.starterMapsGranted===true?{starterMapsGranted:true}:{}),...(input?.starterMapsTestGranted===true?{starterMapsTestGranted:true}:{}),
+    ...(starterOffer.length===3?{starterOffer}:{}),...(formalStarterIds.length?{formalStarterIds}:{}),
+    ...(input?.betaExplanationComplete===true?{betaExplanationComplete:true}:{}),...(input?.betaExplorationUnlocked===true?{betaExplorationUnlocked:true}:{}),
     ...(bossReward?{bossReward}:{}),...(Object.keys(bossClears).length?{bossClears}:{}),...(Object.keys(surveyRewardClaims).length?{surveyRewardClaims}:{})};
 }
 export function describeTestMap(map) {
@@ -86,7 +90,8 @@ export function inspectAppraisal(state,discoveryId) {
 export function appraiseMap(state,discoveryId) {
   const result=inspectAppraisal(state,discoveryId);
   if(!result.ok)return result;
-  return {...result,state:{...state,unidentified:state.unidentified.filter(m=>m.discoveryId!==discoveryId),registered:result.duplicate?state.registered:[...state.registered,result.map]}};
+  const unlock=state.starterMapsGranted&&state.formalStarterIds?.includes(discoveryId);
+  return {...result,state:{...state,...(unlock?{betaExplorationUnlocked:true}:{}),unidentified:state.unidentified.filter(m=>m.discoveryId!==discoveryId),registered:result.duplicate?state.registered:[...state.registered,result.map]}};
 }
 export function registerSharedMap(state,original,{confirmSameContent=false}={}) {
   const map=normalizeOriginal(original);

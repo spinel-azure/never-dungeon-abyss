@@ -14,8 +14,8 @@ export function normalizeTrelirenRun(value={}){
   if(zone&&String(zone.minimumDepth)===key&&depth>=10&&depth<90&&depth%10!==9)floors[key]=depth;
  }
  return {floors,encountered:Boolean(value?.encountered),rewardGiven:Boolean(value?.rewardGiven),
- phase:Number.isInteger(value?.phase)&&value.phase>=0&&value.phase<=4?value.phase:-1,
- firstEncounter:Boolean(value?.firstEncounter)};
+ phase:Number.isInteger(value?.phase)&&value.phase>=0&&value.phase<=5?value.phase:-1,
+ firstEncounter:Boolean(value?.firstEncounter),encounterId:typeof value?.encounterId==='string'?value.encounterId:''};
 }
 export function prepareTrelirenFloor(character,depth,rng=Math.random){
  if(!character)return [];

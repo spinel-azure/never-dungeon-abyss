@@ -1,0 +1,32 @@
+[
+  {
+    "width": 1280,
+    "debugOff": true,
+    "laps": 2,
+    "level": 100,
+    "clonedDuplicate": true,
+    "victorySaveRetry": true,
+    "receiptSaveRollback": true,
+    "pendingReload": true,
+    "fullThenAppraised": true,
+    "entryBlocked": true,
+    "expGoldAndRenewal": true,
+    "ordinaryDungeonUnchanged": true,
+    "fixture": "HP1 normal boss, direct B3F placement, precompleted survey; production combat/outcome/portal/return/receipt"
+  },
+  {
+    "width": 390,
+    "debugOff": true,
+    "laps": 2,
+    "level": 100,
+    "clonedDuplicate": true,
+    "victorySaveRetry": true,
+    "receiptSaveRollback": true,
+    "pendingReload": true,
+    "fullThenAppraised": true,
+    "entryBlocked": true,
+    "expGoldAndRenewal": true,
+    "ordinaryDungeonUnchanged": true,
+    "fixture": "HP1 normal boss, direct B3F placement, precompleted survey; production combat/outcome/portal/return/receipt"
+  }
+]

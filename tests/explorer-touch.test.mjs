@@ -36,7 +36,7 @@ function setup(t,layout='layout-mobile',initial=fixture(),extra={}){
   const all=e=>[e,...e.children.flatMap(all)];
   const find=label=>all(host).find(e=>e.tag==='button'&&!e.disabled&&e.textContent===label);
   function touch(target){let cancelled=false;for(const type of ['touchstart','touchend'])for(const fn of handlers[type]||[])fn({target,preventDefault(){cancelled=true;},stopPropagation(){}});if(!cancelled&&!target.disabled)target.onclick?.();return cancelled;}
-  return {ui,host,commands,background,message,find,touch,exits:()=>exits,all,state:()=>state,failSave:()=>{saveFails=true;}};
+  return {ui,host,commands,background,message,find,touch,exits:()=>exits,all,state:()=>state,failSave:(value=true)=>{saveFails=value;}};
 }
 
 test('favorite star stays in list/detail and confirmation retains detail background and content',t=>{
@@ -252,4 +252,25 @@ test('tent has fixed six commands and skips disabled report and reward actions',
  assert.deepEqual(v.commands.children.map(b=>b.textContent),['地図鑑定','地図登録','地図整理','調査報告','討伐報酬受領','戻る']);
  assert.equal(v.commands.children[3].disabled,true);assert.equal(v.commands.children[4].disabled,true);
  v.ui.input('down');v.ui.input('confirm');assert.equal(v.exits(),1);
+});
+
+test('formal introduction resumes explanation after receipt without regranting and directs first appraisal',async t=>{
+ let cues=0;const v=setup(t,'layout-mobile',normalizeSpecialMaps({discovererName:'QA'}),{useBetaIntroduction:()=>true,showMapRewardAcquisition:async o=>{assert.equal(o.starter,true);cues++;}});
+ v.message.clientHeight=0;v.ui.open('tent');assert.match(v.message.textContent,/テントへようこそ/);v.ui.input('confirm');await new Promise(r=>setImmediate(r));
+ assert.equal(v.state().unidentified.length,3);assert.equal(cues,1);assert.match(v.message.textContent,/地図探索β/);
+ v.ui.input('confirm');v.ui.close();v.ui.open('tent');assert.match(v.message.textContent,/地図探索β/);assert.equal(cues,1);
+ for(let i=0;i<6;i++)v.ui.input('confirm');assert.equal(v.state().betaExplanationComplete,true);assert.ok(v.find('はじまりの白地図 1'));
+ v.ui.input('confirm');for(let i=0;i<3;i++)v.ui.input('confirm');assert.equal(v.state().betaExplorationUnlocked,true);
+});
+test('formal introduction keeps full inventory and entitlement intact while offering appraisal',t=>{
+ const v=setup(t,'layout-mobile',pendingRewardBook(true),{useBetaIntroduction:()=>true});v.ui.open('tent');
+ assert.equal(v.commands.children[0].textContent,'既存の地図を鑑定する');assert.equal(v.state().starterMapsGranted,undefined);v.touch(v.commands.children[0]);assert.match(v.host.textContent,/地図鑑定/);
+});
+
+test('failed formal preparation retries the same draw and only celebrates after successful delivery',async t=>{
+ let draws=0,cues=0;t.mock.method(Math,'random',()=>{draws++;return .25;});
+ const v=setup(t,'layout-mobile',normalizeSpecialMaps({discovererName:'QA'}),{useBetaIntroduction:()=>true,showMapRewardAcquisition:async()=>cues++});v.message.clientHeight=0;v.failSave();v.ui.open('tent');
+ v.ui.input('confirm');assert.equal(draws,6);assert.equal(v.state().unidentified.length,0);assert.equal(cues,0);
+ v.ui.input('confirm');assert.equal(draws,6);v.failSave(false);v.ui.input('confirm');await new Promise(r=>setImmediate(r));
+ assert.equal(draws,6);assert.equal(v.state().unidentified.length,3);assert.equal(cues,1);
 });

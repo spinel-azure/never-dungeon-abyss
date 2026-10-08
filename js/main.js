@@ -1,3 +1,4 @@
+import {needsTrelirenRequest,completeTrelirenEncounter} from '../data/map-beta.js';
 import { renderItemGetItems } from "./item-get-presentation.js";
 import { getDungeonStairImage } from './dungeon-stair-presentation.js';
 import {applyV2ThemeStep,syncV2ThemeEnvironment,getV2ThemeBattleOptions} from './special-map/theme-environment-v2.js';
@@ -54,6 +55,7 @@ import {
 } from "./dungeon.js";
 import {
   state,
+  startNpcTypewriter,completeNpcTypewriter,stopNpcTypewriter,
   configurePlayer,
   startLionVictoryEvent,
   resetPlayer,
@@ -1254,9 +1256,9 @@ import {
     onStateChanged: handlePersistentStateChanged
   });
   configureTown({
-    showMapRewardAcquisition:async({signal}={})=>{
+    showMapRewardAcquisition:async({signal,starter=false}={})=>{
       if(signal?.aborted)return;
-      showNamedItemGetEffect(['未鑑定地図'],{imageSources:['images/item-compendium/unidentified_map.avif'],acquisitionMessage:true,important:true});
+      showNamedItemGetEffect([starter?'未鑑定の白地図':'未鑑定地図'],{amounts:starter?[3]:[],imageSources:['images/item-compendium/unidentified_map.avif'],acquisitionMessage:starter?'「未鑑定の白地図」を受け取った！ （3枚）':true,important:true});
       const hide=()=>{clearTimeout(itemGetTimer);itemGetEffect.hidden=true;itemGetEffect.classList.remove('is-active');};
       signal?.addEventListener('abort',hide,{once:true});
       await wait(3400);signal?.removeEventListener('abort',hide);
@@ -1331,9 +1333,9 @@ import {
     onOpenCardGallery: openLibraryCardGallery,
     getUnreadRumor: () => getUnreadTavernRumor(character, getCurrentTavernRumorContext()),
     onCompleteRumor: rumor => {
-      character = markTavernRumorRead(character, rumor);
-      updateCharacterUi();
-      saveGame();
+      const previous=character;character = markTavernRumorRead(character, rumor);
+      if(!saveGame()){character=previous;return false;}
+      updateCharacterUi();return true;
     },
     onCompleteFacilityTalk: (flag, context = {}) => {
       if (!flag || !character) return;
@@ -2774,7 +2776,7 @@ import {
   }
 
   const trelirenDialogue = createTrelirenDialogue({
-    messageEl: msgEl, getRun: () => character.trelirenRun,
+    messageEl: msgEl, getRun: () => {character.trelirenRun.encounterId ||= crypto.randomUUID();return character.trelirenRun;},
     startOverlay: startOverlayEvent, getEvent: () => state.overlayEvent,
     clearOverlay: () => {state.overlayEvent = null;},
     save: () => saveGame(),
@@ -2787,9 +2789,13 @@ import {
       showNamedItemGetEffect(["魔除けのお香"], { itemIds: ["warding_incense"] });
       await wait(3400);
     },
+    needsRequest:()=>needsTrelirenRequest(character),
+    startTyping:startNpcTypewriter,completeTyping:completeNpcTypewriter,stopTyping:stopNpcTypewriter,
     finish: () => {
-      character.trelirenRun.encountered = true; character.trelirenRun.phase = -1;
-      character.eventFlags = {...character.eventFlags, [TRELIREN_MET_FLAG]:true};
+      const previous=character;
+      character=completeTrelirenEncounter(character,{requestCompleted:character.trelirenRun.phase===5});
+      if(!saveGame()){character=previous;return false;}
+      return true;
     },
     onCancel: () => {
       clearTimeout(itemGetTimer);itemGetEffect.hidden=true;
@@ -2804,6 +2810,7 @@ import {
     if (state.overlayEvent || !character) return false;
     character.trelirenRun = normalizeTrelirenRun(character.trelirenRun);
     if (character.trelirenRun.encountered) return false;
+    character.trelirenRun.encounterId ||= crypto.randomUUID();
     if (character.trelirenRun.phase < 0) {
       character.trelirenRun.phase = 0;
       character.trelirenRun.firstEncounter = !character.eventFlags?.[TRELIREN_MET_FLAG];

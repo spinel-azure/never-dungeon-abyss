@@ -5,16 +5,18 @@ import assert from 'node:assert/strict';
 import {encodeMapCode} from '../../data/special-map-code.js';
 import {bossTestCharacter} from '../../tools/simulate-map-bosses.mjs';
 const {chromium}=createRequire(import.meta.url)('playwright');
-const output='artifacts/special-map-f4';await mkdir(output,{recursive:true});
+const beta=process.env.NDA_MAP_BETA_QA==='1';
+const output=beta?'artifacts/map-beta/cycle':'artifacts/special-map-f4';await mkdir(output,{recursive:true});
 const previous=await readFile('tests/browser/special-map-v2-f1-outcomes.mjs','utf8'),scope={};
 vm.runInNewContext(previous.slice(previous.indexOf('const baseHook='),previous.indexOf('\nconst main='))+';this.hook=baseHook;',scope);
 const code=encodeMapCode({rulesetVersion:'special-map-v2',seed:12345,level:100,rarity:'WHITE',discovererName:'原作者'});
-const hook=scope.hook.replace('NDA:AgIwOTIBAyAgMOsw65QoofYQw8Ta',code).replace("worldLocation='town';","character.eventFlags.treliren_met=true;worldLocation='town';");
+const hook=scope.hook.replace('setExplorerTestEnabled(true)','setExplorerTestEnabled('+(!beta)+')').replace('NDA:AgIwOTIBAyAgMOsw65QoofYQw8Ta',code).replace("worldLocation='town';","character.eventFlags.treliren_met=true;worldLocation='town';");
 const extra=`window.f4Qa={
  c:()=>character,active:isBattleActive,input:handleBattleInput,
  prepare(c){const maps=character.specialMaps;maps.starterMapsTestGranted=true;maps.registered[0].surveyedMasks=Array(3).fill('f'.repeat(25));
  maps.unidentified=Array.from({length:3},(_,i)=>({rulesetVersion:'special-map-v2',seed:10+i,level:1,rarity:'WHITE',discovererName:'QA',discoveryId:'owned-'+i}));
- character={...c,specialMaps:maps,carriedExperience:777,lootBagTutorialSeen:true,eventFlags:{...c.eventFlags,treliren_met:true}};
+ if(${beta})Object.assign(maps,{starterMapsGranted:true,betaExplanationComplete:true,betaExplorationUnlocked:true});
+ character={...c,specialMaps:maps,carriedExperience:777,lootBagTutorialSeen:true,eventFlags:{...c.eventFlags,treliren_met:true,...(${beta}?{tavern_rumor_019_base_read:true}:{})}};
  character.lootBag={gold:888,items:{},cards:{},equipmentInstances:[]};
  character.npcSystem={registeredIds:['alec'],activeIds:['alec'],records:{alec:{}},renewal:null,expeditionMaxDepth:0};
  updateCharacterUi();setBattleSpeedMode('fast');saveGame();},
@@ -25,7 +27,7 @@ const extra=`window.f4Qa={
  return:()=>getSpecialMapContext().finish(),
  renewalNo:()=>handleRawTownInput('cancel'),
  resume(){document.querySelector('#titleScreen').hidden=true;document.body.classList.remove('title-active');window.dispatchEvent(new Event('nda:continue'));},
- explorerTest:async()=>{(await import('/js/explorer-preview.js')).setExplorerTestEnabled(true);},
+ explorerTest:async()=>{(await import('/js/explorer-preview.js')).setExplorerTestEnabled(${!beta});},
  failSave(on){if(!this.realSet)this.realSet=Storage.prototype.setItem;const original=this.realSet;Storage.prototype.setItem=on?function(k,v){if(k==='nda.save.slot1.current')throw Error('QA quota');return original.call(this,k,v);}:original;}
 };`;
 const main=(await readFile('js/main.js','utf8'))
@@ -119,7 +121,7 @@ try{for(const width of [1280,390]){
   await p.waitForFunction(()=>document.querySelector('#itemGetEffect').hidden);await p.waitForTimeout(100);
   await activateCommand('戻る');
  }
- assert.deepEqual(errors,[]);results.push({width,laps:2,level:100,clonedDuplicate:true,victorySaveRetry:true,receiptSaveRollback:true,pendingReload:true,fullThenAppraised:true,entryBlocked:true,expGoldAndRenewal:true,ordinaryDungeonUnchanged:true,fixture:'HP1 normal boss, direct B3F placement, precompleted survey; production combat/outcome/portal/return/receipt'});
+ assert.deepEqual(errors,[]);results.push({width,debugOff:beta,laps:2,level:100,clonedDuplicate:true,victorySaveRetry:true,receiptSaveRollback:true,pendingReload:true,fullThenAppraised:true,entryBlocked:true,expGoldAndRenewal:true,ordinaryDungeonUnchanged:true,fixture:'HP1 normal boss, direct B3F placement, precompleted survey; production combat/outcome/portal/return/receipt'});
  console.log(results.at(-1));await p.close();
 }}catch(error){
  for(const c of browser.contexts())for(const p of c.pages()){await p.screenshot({path:`${output}/failure.png`});await writeFile(`${output}/failure.txt`,await p.locator('body').innerText());}

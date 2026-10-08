@@ -10,7 +10,7 @@ export function createUnidentifiedV2Map({seed,level,rarity,discovererName,discov
  if(!Number.isInteger(seed)||seed<0||seed>65535||!validV2Parameters({level,rarity})||!signature.ok||typeof discoveryId!=='string'||!discoveryId)throw RangeError('Invalid unidentified V2 map');
  return {rulesetVersion:SPECIAL_MAP_V2,seed,level,rarity,discovererName:signature.value,discoveryId};
 }
-// Production trigger intentionally unconnected until enemies/boss/rewards are ready.
+// Production and development entitlements stay independent.
 export const grantStarterMaps=(state,options)=>grantInitialBatch(state,'starterMapsGranted',options);
 // The development route cannot consume the future production entitlement.
 export const grantTestStarterMaps=(state,options)=>grantInitialBatch(state,'starterMapsTestGranted',options);
@@ -32,4 +32,19 @@ function grantInitialBatch(state,grantFlag,{random=Math.random,id=()=>crypto.ran
   batch.push({...map,acquisitionMethod:'starter'});
  }}catch{return {ok:false,error:'白地図を用意できませんでした。もう一度お試しください。'};}
  return {ok:true,maps:batch,state:{...state,[grantFlag]:true,unidentified:[...state.unidentified,...batch]}};
+}
+
+// Save the exact offer before delivery. Caller retains a failed preparation for retry.
+export function prepareFormalStarter(state,options){
+ if(state.starterMapsGranted)return {ok:false,error:'白地図は受け取り済みです。'};
+ if(state.starterOffer?.length===3)return {ok:true,state,maps:state.starterOffer};
+ const batch=grantStarterMaps(state,options);
+ return batch.ok?{ok:true,maps:batch.maps,state:{...state,starterOffer:batch.maps}}:batch;
+}
+export function receiveFormalStarter(state){
+ if(state.starterMapsGranted)return {ok:false,error:'白地図は受け取り済みです。'};
+ if(state.unidentified.length)return {ok:false,error:'3枚まとめて渡すので、未鑑定の地図をすべて鑑定してから受け取りに来てね。'};
+ if(state.starterOffer?.length!==3)return {ok:false,error:'白地図の準備が完了していません。'};
+ const {starterOffer,...rest}=state;
+ return {ok:true,maps:starterOffer,state:{...rest,starterMapsGranted:true,formalStarterIds:starterOffer.map(m=>m.discoveryId),unidentified:[...starterOffer]}};
 }

@@ -1,0 +1,22 @@
+[
+  {
+    "width": 1280,
+    "meetings": 3,
+    "requestReload": true,
+    "rumorGate": true,
+    "starterCount": 3,
+    "explanationReload": true,
+    "firstAppraisalUnlock": true,
+    "debug": false
+  },
+  {
+    "width": 390,
+    "meetings": 3,
+    "requestReload": true,
+    "rumorGate": true,
+    "starterCount": 3,
+    "explanationReload": true,
+    "firstAppraisalUnlock": true,
+    "debug": false
+  }
+]

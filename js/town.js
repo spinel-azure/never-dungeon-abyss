@@ -1,3 +1,4 @@
+import {isMapTentUnlocked,isMapBetaUnlocked} from '../data/map-beta.js';
 import {getSpecialMapContext} from './special-map/context.js';
 import { renderCharmStatus } from "./akashic-presentation.js";
 import { selectTrelirenEntranceImage } from "../data/treliren.js";
@@ -735,7 +736,7 @@ function handleTavernRumorInput(action) {
     return true;
   }
   document.body.classList.remove("facility-talk-message-expanded");
-  town.onCompleteRumor(town.activeRumor);
+  if(town.onCompleteRumor(town.activeRumor)===false){town.rumorDialogueIndex=town.rumorDialogue.length-1;town.messageEl.textContent="保存に失敗しました。Aボタンで再試行してください。";return true;}
   town.activeRumor = null;
   town.rumorDialogue = [];
   town.rumorDialogueIndex = 0;
@@ -985,7 +986,7 @@ function configureTownMessageObserver() {
     if (text === townTypewriter.lastRenderedText) return;
     clearTownTypewriter();
     const rumorParts = town.mode === "tavernRumor" ? getTavernRumorTypewriterParts(text) : null;
-    if (!town.active || !townTypewriter.enabled || (!town.compactTalk && !isNpcTownMessage(text) && !rumorParts)) {
+    if (!town.active || !townTypewriter.enabled || (!town.compactTalk && !(town.mode==='explorerPreview'&&explorerPreview?.isTalking()) && !isNpcTownMessage(text) && !rumorParts)) {
       townTypewriter.lastRenderedText = text;
       updateCompactTalkHint();
       playPendingFacilityVoice();
@@ -1307,11 +1308,13 @@ function handleEntranceInput(action) {
 
 function activateEntranceCommand(command) {
   if (command === "explorerTent" || command === "mapExploration") {
-    if (!isExplorerTestEnabled()) return;
+    if (!isExplorerTestEnabled()&&!(command==='explorerTent'?isMapTentUnlocked(town.getCharacter()):isMapBetaUnlocked(town.getCharacter()))) return;
     if (!explorerPreview) explorerPreview = createExplorerPreviewUI({
       host: town.background.parentElement, commands: town.commandRoot, background: town.background,
       getMaps: () => town.getCharacter()?.specialMaps,
       canReceiveTestStarter: isExplorerTestEnabled,
+      useBetaIntroduction:()=>isMapTentUnlocked(town.getCharacter()),
+      finishTyping:()=>{if(!townTypewriter.active)return false;completeTownTypewriter();return true;},
       updateMaps: operation => town.updateSpecialMaps(operation),
       showMapRewardAcquisition:options=>town.showMapRewardAcquisition?.(options),
       message: town.messageEl, playSe: key => town.playSe(key),
@@ -3375,11 +3378,11 @@ function renderFacilityCommandSelection() {
 function updateEntranceLabels() {
   const transferButton = town.entranceButtons.find(button => button.dataset.entranceCommand === "circle");
   if (transferButton) transferButton.textContent = town.transferUnlocked ? "転送門" : "？？？";
-  for (const [id,label] of [["explorerTent","探検家テント"],["mapExploration","地図探索"]]) {
+  for (const [id,label] of [["explorerTent","探検家テント"],["mapExploration","地図探索β"]]) {
     const button = town.entranceButtons.find(button => button.dataset.entranceCommand === id);
     if (!button) continue;
-    button.textContent = isExplorerTestEnabled() ? label : "？？？";
-    button.disabled = !isExplorerTestEnabled();
+    button.textContent = isExplorerTestEnabled()||isMapTentUnlocked(town.getCharacter()) ? label : "？？？";
+    button.disabled = !isExplorerTestEnabled()&&!(id==='explorerTent'?isMapTentUnlocked(town.getCharacter()):isMapBetaUnlocked(town.getCharacter()));
     button.classList.toggle("is-locked", button.disabled);
     button.setAttribute("aria-disabled", String(button.disabled));
   }
@@ -3388,7 +3391,7 @@ function updateEntranceLabels() {
 
 onExplorerTestChanged(() => {
   updateEntranceLabels();
-  if (!isExplorerTestEnabled() && town.mode === "explorerPreview") {
+  if (!isExplorerTestEnabled() && !isMapTentUnlocked(town.getCharacter()) && town.mode === "explorerPreview") {
     explorerPreview?.close();town.mode = "dungeonEntrance";
     if (town.active) renderDungeonEntrance();
   } else if (town.active && town.mode === "dungeonEntrance" && !town.isMenuOpen()) renderEntranceSelection();

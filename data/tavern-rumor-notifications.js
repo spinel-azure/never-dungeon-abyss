@@ -43,7 +43,7 @@ export function syncTavernRumorNotifications(character, context = {}) {
     return { character, pendingRumors: [], addedIds: [], removedIds: [] };
   }
   const state = normalizeTavernRumorNotificationState(character.tavernRumorNotifications);
-  const unreadRumors = getUnreadTavernRumors(character, context);
+  const unreadRumors = getUnreadTavernRumors(character, context).filter(rumor=>!rumor.readFlags.every(flag=>character.eventFlags?.[flag]));
   const unreadIds = new Set(unreadRumors.map(rumor => rumor.notificationId));
   const notified = new Set(state.notifiedIds);
   const pending = state.pendingIds.filter(id => unreadIds.has(id) && !notified.has(id));
@@ -74,7 +74,7 @@ export function getPendingTavernRumorNotifications(character, context = {}) {
     character.tavernRumorNotifications
   ).pendingIds);
   return getUnreadTavernRumors(character, context)
-    .filter(rumor => pending.has(rumor.notificationId));
+    .filter(rumor => pending.has(rumor.notificationId)&&!rumor.readFlags.every(flag=>character.eventFlags?.[flag]));
 }
 
 /** Marks a completed display batch. Reading a rumor remains a separate action. */

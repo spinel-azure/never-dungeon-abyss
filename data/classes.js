@@ -1,3 +1,4 @@
+import {normalizeTrelirenProgress} from './map-beta.js';
 import { wingGiftUses, wingGiftMaxHp } from "./wing-gift.js";
 import { normalizeSpecialMaps } from "./special-maps.js";
 import { normalizeShopNotifications } from "./shop-notifications.js";
@@ -156,6 +157,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
 
 export function normalizeCharacter(character) {
   if (!character || typeof character !== "object") return null;
+  character = {...character,trelirenProgress:normalizeTrelirenProgress(character)};
   const characterClass = getCharacterClass(character.job) || CHARACTER_CLASSES.WARRIOR;
   const legacyCharacter = !character.baseStats || !Array.isArray(character.skillIds);
   const level = Math.max(1, Math.min(197, Math.floor(Number(character.level) || 1)));

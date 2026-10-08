@@ -160,7 +160,7 @@ export function setNpcTypewriterOptions({ enabled, speed } = {}) {
   if (typeof enabled === "boolean") npcTypewriter.enabled = enabled;
   if (speed in NPC_TYPEWRITER_DELAYS) npcTypewriter.speed = speed;
   const event = state.overlayEvent;
-  if (!npcTypewriter.enabled && event?.type === "npcTalk" && event.typing?.active) completeNpcTypewriter(event);
+  if (!npcTypewriter.enabled && ["npcTalk","trelirenTalk"].includes(event?.type) && event.typing?.active) completeNpcTypewriter(event);
 }
 
 export function createPlayerState(startDir) {
@@ -2506,7 +2506,8 @@ function resumeAutoReturnAfterTransientTreasure(event) {
   if (state.autoWalkerActive) window.setTimeout(hooks.continueAutoReturn, 0);
 }
 
-function startNpcTypewriter(event, dialogue) {
+export function startNpcTypewriter(event, dialogue, renderTyping) {
+  event.renderTyping=renderTyping;
   stopNpcTypewriter();
   const characters = Array.from(dialogue);
   event.typing = { active: npcTypewriter.enabled && characters.length > 0, characters, visibleLength: npcTypewriter.enabled ? 0 : characters.length };
@@ -2527,6 +2528,7 @@ function scheduleNpcTypewriter(event) {
 
 function renderNpcTypewriter(event) {
   const typing = event.typing;
+  if(event.renderTyping){event.renderTyping(typing.characters.slice(0,typing.visibleLength).join(""),typing.active);return;}
   const dialogue = typing.characters.slice(0, typing.visibleLength).join("");
   const closingQuote = typing.active ? "" : "」";
   hooks.say(`${event.npc.name}「${dialogue}${closingQuote}\n＊Aボタンで次へ`);
@@ -2536,7 +2538,7 @@ function renderNpcTypewriter(event) {
   }
 }
 
-function completeNpcTypewriter(event) {
+export function completeNpcTypewriter(event) {
   if (!event.typing) return;
   stopNpcTypewriter();
   event.typing.visibleLength = event.typing.characters.length;
@@ -2544,7 +2546,7 @@ function completeNpcTypewriter(event) {
   renderNpcTypewriter(event);
 }
 
-function stopNpcTypewriter() {
+export function stopNpcTypewriter() {
   if (npcTypewriter.timer) window.clearTimeout(npcTypewriter.timer);
   npcTypewriter.timer = 0;
 }
