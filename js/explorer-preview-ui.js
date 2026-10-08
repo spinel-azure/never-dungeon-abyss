@@ -65,7 +65,8 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
 
   const selectedMap=()=>maps().registered.find(m=>m.id===detailId);
   const make=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
-  const button=(label,action,selected=false)=>{const b=make('button');b.type='button';if(label)b.append(make('span',label,'explorer-button-label'));b.classList.toggle('is-selected',selected);b.onclick=()=>{if(acquisitionController)return;if(finishTyping())return;playSe('confirm');action();};return b;};
+  const invoke=(action,sound=action===back||action===exit?'cancel':'confirm')=>{playSe(sound);action();};
+  const button=(label,action,selected=false,sound)=>{const b=make('button');b.type='button';if(label)b.append(make('span',label,'explorer-button-label'));b.classList.toggle('is-selected',selected);b.onclick=()=>{if(acquisitionController||b.disabled)return;if(finishTyping())return;invoke(action,typeof sound==='function'?sound():sound??(label==='戻る'?'cancel':undefined));};return b;};
   const error=text=>{message.textContent=text;};
   const countText=()=>`未鑑定の地図 ${maps().unidentified.length} / 3　登録済み地図 ${maps().registered.length} / 10${hasPendingMapReward(maps())?'　討伐地図報酬：未受領':''}`;
   function close(){acquisitionController?.abort();acquisitionController=null;exploration?.close();exploration=null;if(active&&hint)hint.textContent=previousHint;active=false;panel.hidden=true;commands.hidden=false;}
@@ -179,7 +180,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
   }
   function focusForm(){
     formControls.forEach((e,i)=>e.classList.toggle('is-selected',i===formCursor));
-    if(formCursor===0)input.focus?.();else{input.blur?.();formControls[formCursor]?.focus?.();}
+    if(formCursor===0)invoke(()=>input.focus?.());else{input.blur?.();formControls[formCursor]?.focus?.();}
   }
   function turnPage(delta){
     const count=maps().registered.length,pages=Math.ceil(count/5);if(pages<2)return;
@@ -218,8 +219,8 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       formControls=isSignature?[input,submit,cancel]:[input,paste,submit,cancel];formControls.forEach((e,i)=>{e.classList.toggle('is-selected',i===formCursor);e.onfocus=()=>{formCursor=i;formControls.forEach((c,j)=>c.classList.toggle('is-selected',i===j));};});
       const formActions=make('div',undefined,'explorer-form-actions');
       if(paste)formActions.append(paste);formActions.append(submit,cancel);form.append(formActions);
-      form.onsubmit=e=>{e.preventDefault();submitAction();};
-      input.onkeydown=e=>{if(e.isComposing)return;if(e.key==='Escape'){e.preventDefault();back();}else if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();submitAction();}};
+      form.onsubmit=e=>{e.preventDefault();if(!finishTyping())invoke(submitAction);};
+      input.onkeydown=e=>{if(e.isComposing)return;if(e.key==='Escape'){e.preventDefault();invoke(back);}else if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!finishTyping())invoke(submitAction);}};
       panel.append(form);
       if(isSignature)message.textContent='トレリーレン「発見した人の名前も地図に残すんだけど……なんて書いておけばいい？」';return;
     }
@@ -229,12 +230,12 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       if(!entries.length)list.append(make('p','登録されている地図はありません。'));
       entries.slice(page*5,page*5+5).forEach((map,offset)=>{
         const i=page*5+offset,info=describeTestMap(map)||{name:map.rulesetVersion==='special-map-v1'?'特殊地図':'未対応の生成ルール',level:'?'};
-        const b=button('',()=>{if(armed===i)openDetail(map);else{index=i;armed=i;render();}},i===index);
+        const b=button('',()=>{if(armed===i)openDetail(map);else{index=i;armed=i;render();}},i===index,()=>armed===i?'confirm':'cursorMove');
         const star=map.favorite?' ⭐':'';b.title=info.name+star;b.setAttribute('aria-label',(isV2Map(map)?info.name:`${info.name} Lv.${info.level}`)+star);
         b.append(make('span',info.name+(isV2Map(map)?star:''),isV2Map(map)?'explorer-map-name explorer-map-name-v2':'explorer-map-name'));if(!isV2Map(map))b.append(make('span',`Lv.${info.level}${star}`,'explorer-map-level'));list.append(b);
       });
       const pager=make('div',undefined,'transfer-destination-pager');
-      const prev=button('◀',()=>turnPage(-1)),next=button('▶',()=>turnPage(1));
+      const prev=button('◀',()=>turnPage(-1),false,'cursorMove'),next=button('▶',()=>turnPage(1),false,'cursorMove');
       prev.setAttribute('aria-label','前のページ');next.setAttribute('aria-label','次のページ');prev.disabled=next.disabled=entries.length<=5;
       pager.append(prev,make('strong',`${page+1} / ${Math.max(1,Math.ceil(entries.length/5))}`),next);
       const footer=make('div',undefined,'explorer-footer');footer.append(button('戻る（B）',back));panel.append(list,pager,footer);
@@ -244,7 +245,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       const entries=maps().unidentified;appraisalIndex=Math.max(0,Math.min(appraisalIndex,entries.length-1));
       const list=make('div',undefined,'transfer-destination-list');
       if(!entries.length)list.append(make('p','鑑定できる地図を持っていません。'));
-      entries.forEach((map,i)=>list.append(button(`${unidentifiedMapLabel(map)} ${i+1}`,()=>{if(appraisalArmed===i)inspect();else{appraisalIndex=i;appraisalArmed=i;render();}},i===appraisalIndex)));
+      entries.forEach((map,i)=>list.append(button(`${unidentifiedMapLabel(map)} ${i+1}`,()=>{if(appraisalArmed===i)inspect();else{appraisalIndex=i;appraisalArmed=i;render();}},i===appraisalIndex,()=>appraisalArmed===i?'confirm':'cursorMove')));
       panel.append(list,button('戻る（B）',back));return;
     }
     if(view==='duplicate'||view==='appraisal'){
@@ -288,7 +289,8 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     if(acquisitionController)return true;
     if(action==='confirm'&&finishTyping())return true;
     if(exploration)return exploration.input(action);
-    if(action==='cancel'){back();return true;}
+    if(action==='cancel'){invoke(back);return true;}
+    if(['up','down','left','right','pageLeft','pageRight'].includes(action))playSe('cursorMove');
     if(view==='signature'||view==='register'){
       if(['up','down','left','right'].includes(action)){formCursor=(formCursor+(['down','right'].includes(action)?1:formControls.length-1))%formControls.length;focusForm();}
       else if(action==='confirm'){if(formCursor===0)input.focus?.();else formControls[formCursor]?.onclick?.();}
@@ -296,27 +298,27 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     }
     if(actions.length){
       if(['up','down','left','right'].includes(action)){actionCursor=(actionCursor+(['down','right'].includes(action)?1:actions.length-1))%actions.length;render();}
-      else if(action==='confirm')actions[actionCursor]();return true;
+      else if(action==='confirm')invoke(actions[actionCursor]);return true;
     }
     if(view==='tent'){
       const available=[0,1,2,...(hasPendingMapReward(maps())?[4]:[]),5];
       if(action==='up'||action==='down'){const next=(cursor+3)%6;cursor=available.includes(next)?next:5;}
       else if(action==='left'||action==='right'){const row=available.filter(i=>Math.floor(i/3)===Math.floor(cursor/3));cursor=row[(row.indexOf(cursor)+(action==='right'?1:row.length-1))%row.length];}
-      else if(action==='confirm'){activateTent();return true;}
+      else if(action==='confirm'){invoke(activateTent,cursor===5?'cancel':'confirm');return true;}
       render();return true;
     }
     if(view==='maps'||view==='organize'){
       const entries=maps().registered;
-      if(action==='confirm'&&entries[index])openDetail(entries[index]);
+      if(action==='confirm'&&entries[index])invoke(()=>openDetail(entries[index]));
       else if(action==='left'||action==='pageLeft')turnPage(-1);
       else if(action==='right'||action==='pageRight')turnPage(1);
       else if(entries.length&&(action==='up'||action==='down')){index=(index+(action==='down'?1:entries.length-1))%entries.length;armed=-1;render();}
     }else if(view==='appraise'){
       const count=maps().unidentified.length;
-      if(action==='confirm')inspect();
+      if(action==='confirm'&&count)invoke(inspect);
       else if(count&&(action==='up'||action==='down')){appraisalIndex=(appraisalIndex+(action==='down'?1:count-1))%count;appraisalArmed=-1;render();}
     }else if(action==='confirm'){
-      if(view==='appraisal'||view==='duplicate')nextAppraisal();else back();
+      if(view==='appraisal'||view==='duplicate')invoke(nextAppraisal);else invoke(back);
     }
     return true;
   }

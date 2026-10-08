@@ -274,3 +274,28 @@ test('failed formal preparation retries the same draw and only celebrates after 
  v.ui.input('confirm');assert.equal(draws,6);v.failSave(false);v.ui.input('confirm');await new Promise(r=>setImmediate(r));
  assert.equal(draws,6);assert.equal(v.state().unidentified.length,3);assert.equal(cues,1);
 });
+
+test('tent keyboard and gamepad actions play one cursor, confirm or cancel cue',t=>{
+ const cues=[],v=setup(t,'layout-mobile',fixture(),{playSe:key=>cues.push(key)});v.ui.open('tent');
+ v.ui.input('right');assert.deepEqual(cues.splice(0),['cursorMove']);
+ v.ui.input('left');v.ui.input('confirm');assert.deepEqual(cues.splice(0),['cursorMove','confirm']);
+ v.ui.input('cancel');assert.deepEqual(cues.splice(0),['cancel']);
+ v.ui.input('down');v.ui.input('confirm');assert.deepEqual(cues.splice(0),['cursorMove','cancel']);assert.equal(v.exits(),1);
+});
+test('map touch selection, activation, paging and back have distinct single cues',t=>{
+ const cues=[],v=setup(t,'layout-mobile',fixture(),{playSe:key=>cues.push(key)});v.ui.open('maps');
+ v.touch(v.find(label(2)));assert.deepEqual(cues.splice(0),['cursorMove']);
+ v.touch(v.find(label(2)));assert.deepEqual(cues.splice(0),['confirm']);
+ v.touch(v.find('戻る（B）'));assert.deepEqual(cues.splice(0),['cancel']);
+ v.touch(v.find('▶'));assert.deepEqual(cues.splice(0),['cursorMove']);
+ v.ui.input('confirm');assert.deepEqual(cues.splice(0),['confirm']);
+ v.ui.input('cancel');assert.deepEqual(cues.splice(0),['cancel']);
+});
+test('form action routed through its button does not double-play and disabled tent actions stay silent',t=>{
+ const cues=[],v=setup(t,'layout-mobile',fixture(),{playSe:key=>cues.push(key)});v.ui.open('tent');
+ v.commands.children[3].onclick();v.commands.children[4].onclick();assert.deepEqual(cues,[]);
+ v.ui.input('right');v.ui.input('confirm');cues.length=0;
+ v.ui.input('right');v.ui.input('confirm');assert.deepEqual(cues.splice(0),['cursorMove','confirm']);
+ v.ui.input('cancel');assert.deepEqual(cues.splice(0),['cancel']);
+ v.touch(v.commands.children[5]);assert.deepEqual(cues.splice(0),['cancel']);
+});
