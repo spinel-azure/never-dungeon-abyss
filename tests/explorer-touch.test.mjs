@@ -221,28 +221,35 @@ function pendingRewardBook(full=false){
 
 test('F4 pending receipt is reachable by keyboard and touch, with no double receipt from a stale button',t=>{
  const v=setup(t,'layout-mobile',pendingRewardBook());v.ui.open('tent');
- assert.match(v.commands.children[5].textContent,/討伐地図報酬/);const stale=v.commands.children[5];
- v.ui.input('left');v.ui.input('down');v.ui.input('confirm');
+ assert.match(v.commands.children[4].textContent,/討伐報酬受領/);const stale=v.commands.children[4];
+ v.ui.input('right');v.ui.input('down');v.ui.input('confirm');
  assert.equal(v.state().unidentified.length,1);assert.equal(v.state().bossReward.status,'received');
- assert.equal(v.commands.children[5].disabled,true);v.touch(stale);assert.equal(v.state().unidentified.length,1);
+ assert.equal(v.commands.children[4].disabled,true);v.touch(stale);assert.equal(v.state().unidentified.length,1);
 });
 
 test('F4 tent full inventory and save failure retain exact pending reward, count and visible action',t=>{
  const full=setup(t,'layout-mobile',pendingRewardBook(true));full.ui.open('tent');const before=structuredClone(full.state());
- full.touch(full.commands.children[5]);assert.deepEqual(full.state(),before);assert.match(full.message.textContent,/先に鑑定/);assert.equal(full.commands.children[5].disabled,false);
+ full.touch(full.commands.children[4]);assert.deepEqual(full.state(),before);assert.match(full.message.textContent,/先に鑑定/);assert.equal(full.commands.children[4].disabled,false);
  const failed=setup(t,'layout-mobile',pendingRewardBook());failed.ui.open('tent');failed.failSave();
- failed.touch(failed.commands.children[5]);assert.equal(failed.state().unidentified.length,0);assert.equal(failed.state().bossReward.status,'pending');assert.match(failed.message.textContent,/保存に失敗/);
+ failed.touch(failed.commands.children[4]);assert.equal(failed.state().unidentified.length,0);assert.equal(failed.state().bossReward.status,'pending');assert.match(failed.message.textContent,/保存に失敗/);
 });
 
 test('F4 successful receipt presents only after commit, locks input, and never replays a stale reward',async t=>{
  let release,calls=0,signal;const v=setup(t,'layout-mobile',pendingRewardBook(),{showMapRewardAcquisition:options=>{
   calls++;signal=options.signal;assert.equal(v.state().bossReward.status,'received');return new Promise(r=>release=r);
- }});v.ui.open('tent');const stale=v.commands.children[5];v.touch(stale);
+ }});v.ui.open('tent');const stale=v.commands.children[4];v.touch(stale);
  await Promise.resolve();assert.equal(calls,1);assert.equal(signal.aborted,false);
- v.touch(stale);v.ui.input('cancel');v.touch(v.commands.children[3]);assert.equal(v.exits(),0);assert.equal(v.state().unidentified.length,1);
+ v.touch(stale);v.ui.input('cancel');v.touch(v.commands.children[5]);assert.equal(v.exits(),0);assert.equal(v.state().unidentified.length,1);
  release();await new Promise(r=>setImmediate(r));v.ui.input('cancel');assert.equal(v.exits(),1);assert.equal(calls,1);
 });
 test('F4 no receipt animation on full/save failure; closing aborts pending presentation',async t=>{
- for(const full of [true,false]){let calls=0;const v=setup(t,'layout-mobile',pendingRewardBook(full),{showMapRewardAcquisition:()=>calls++});v.ui.open('tent');if(!full)v.failSave();v.touch(v.commands.children[5]);await Promise.resolve();assert.equal(calls,0);}
- let signal;const v=setup(t,'layout-mobile',pendingRewardBook(),{showMapRewardAcquisition:o=>{signal=o.signal;return Promise.resolve();}});v.ui.open('tent');v.touch(v.commands.children[5]);await Promise.resolve();v.ui.close();assert.equal(signal.aborted,true);
+ for(const full of [true,false]){let calls=0;const v=setup(t,'layout-mobile',pendingRewardBook(full),{showMapRewardAcquisition:()=>calls++});v.ui.open('tent');if(!full)v.failSave();v.touch(v.commands.children[4]);await Promise.resolve();assert.equal(calls,0);}
+ let signal;const v=setup(t,'layout-mobile',pendingRewardBook(),{showMapRewardAcquisition:o=>{signal=o.signal;return Promise.resolve();}});v.ui.open('tent');v.touch(v.commands.children[4]);await Promise.resolve();v.ui.close();assert.equal(signal.aborted,true);
+});
+
+test('tent has fixed six commands and skips disabled report and reward actions',t=>{
+ const v=setup(t,'layout-mobile',fixture());v.ui.open('tent');
+ assert.deepEqual(v.commands.children.map(b=>b.textContent),['地図鑑定','地図登録','地図整理','調査報告','討伐報酬受領','戻る']);
+ assert.equal(v.commands.children[3].disabled,true);assert.equal(v.commands.children[4].disabled,true);
+ v.ui.input('down');v.ui.input('confirm');assert.equal(v.exits(),1);
 });

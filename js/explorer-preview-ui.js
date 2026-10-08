@@ -64,7 +64,8 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     message.textContent='【開発用】はじまりの白地図を3枚受け取りました。地図鑑定で確認できます。\n未鑑定の地図 3 / 3';
   }
   function activateTent(){
-    if(cursor===5){
+    if(cursor===4){
+      if(!hasPendingMapReward(maps()))return;
       const result=updateMaps(receiveMapBossReward);
       if(!result.ok){error(result.error);return;}
       cursor=0;render();message.textContent='討伐報酬の未鑑定地図を1枚受け取りました。地図鑑定で確認できます。';
@@ -74,8 +75,8 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       }else playSe('importantItem');
       return;
     }
-    if(cursor===4){view='starter';render();return;}
-    if(cursor===3){exit();return;}
+    if(cursor===3)return;
+    if(cursor===5){exit();return;}
     view=['appraise','register','organize'][cursor];
     if(view==='appraise'&&!maps().discovererName){opening='appraise';view='signature';}
     formCursor=0;codeDraft='';appraisalArmed=armed=-1;render();
@@ -148,7 +149,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     if(view==='tent'){
       commands.dataset.townActive='true';delete commands.dataset.entranceActive;
       commands.setAttribute('aria-label','探検家テント');
-      commands.replaceChildren(...['地図鑑定','地図登録','地図整理','戻る',canReceiveTestStarter()&&!maps().starterMapsTestGranted?'【開発用】白地図を受け取る':'',hasPendingMapReward(maps())?'討伐地図報酬を受け取る':''].map((label,i)=>{const b=button(label,()=>{cursor=i;activateTent();},i===cursor);b.disabled=!label;return b;}));return;
+      commands.replaceChildren(...['地図鑑定','地図登録','地図整理','調査報告','討伐報酬受領','戻る'].map((label,i)=>{const b=button(label,()=>{cursor=i;activateTent();},i===cursor);b.disabled=i===3||(i===4&&!hasPendingMapReward(maps()));return b;}));return;
     }
     panel.append(make('h2',({starter:'【開発用】はじまりの白地図',maps:'MAP EXPLORATION',organize:'地図整理',detail:'地図詳細',signature:'地図署名',appraise:'地図鑑定',appraisal:'地図鑑定',duplicate:'地図鑑定',register:'地図登録',manage:'地図管理',share:'共有コード',delete:'地図削除',sameContent:'地図登録の確認',enter:'地図詳細'})[view]));
     if(view==='starter'){
@@ -250,14 +251,9 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       else if(action==='confirm')actions[actionCursor]();return true;
     }
     if(view==='tent'){
-      if(hasPendingMapReward(maps())&&['up','down','left','right'].includes(action)){
-        const available=[0,1,2,3,...(canReceiveTestStarter()&&!maps().starterMapsTestGranted?[4]:[]),5];
-        if(action==='up'||action==='down'){const next=(cursor+3)%6;cursor=available.includes(next)?next:3;}
-        else{const row=available.filter(i=>Math.floor(i/3)===Math.floor(cursor/3));cursor=row[(row.indexOf(cursor)+(action==='right'?1:row.length-1))%row.length];}
-        render();return true;
-      }
-      if(action==='up'||action==='down')cursor=cursor===4?1:cursor<3?(cursor===1&&canReceiveTestStarter()&&!maps().starterMapsTestGranted?4:3):0;
-      else if(action==='left'||action==='right'){if(cursor<3)cursor=(cursor+(action==='right'?1:2))%3;else if(canReceiveTestStarter()&&!maps().starterMapsTestGranted)cursor=cursor===3?4:3;}
+      const available=[0,1,2,...(hasPendingMapReward(maps())?[4]:[]),5];
+      if(action==='up'||action==='down'){const next=(cursor+3)%6;cursor=available.includes(next)?next:5;}
+      else if(action==='left'||action==='right'){const row=available.filter(i=>Math.floor(i/3)===Math.floor(cursor/3));cursor=row[(row.indexOf(cursor)+(action==='right'?1:row.length-1))%row.length];}
       else if(action==='confirm'){activateTent();return true;}
       render();return true;
     }

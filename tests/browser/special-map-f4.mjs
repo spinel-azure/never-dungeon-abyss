@@ -85,7 +85,7 @@ try{for(const width of [1280,390]){
   await enter();assert.equal(await p.evaluate(()=>!!v2Qa.s()),false);assert.match(await p.locator('#message').innerText().catch(()=>p.locator('body').innerText()),/未受領/);
   await p.evaluate(()=>{v2Qa.input('cancel');v2Qa.input('cancel');v2Qa.input('cancel');});
   await p.locator('[data-entrance-command="explorerTent"]').dispatchEvent('click');
-  await activateCommand('討伐地図報酬を受け取る');
+  await activateCommand('討伐報酬受領');
   assert.equal(await p.evaluate(()=>f4Qa.c().specialMaps.bossReward.status),'pending');
   assert.equal(await p.evaluate(()=>f4Qa.c().specialMaps.unidentified.length),3);
   await p.screenshot({path:`${output}/${width}-full-${lap}.png`});
@@ -95,7 +95,7 @@ try{for(const width of [1280,390]){
   for(let i=0;i<3;i++)await p.getByRole('button',{name:'確認（A）',exact:true}).click();
   await p.evaluate(()=>{v2Qa.input('cancel');v2Qa.input('cancel');});
   if(lap===0){
-   await p.evaluate(()=>f4Qa.failSave(true));await activateCommand('討伐地図報酬を受け取る');
+   await p.evaluate(()=>f4Qa.failSave(true));await activateCommand('討伐報酬受領');
    assert.equal(await p.evaluate(()=>f4Qa.c().specialMaps.unidentified.length),2);assert.equal(await p.evaluate(()=>f4Qa.c().specialMaps.bossReward.status),'pending');
    await p.evaluate(()=>f4Qa.failSave(false));
    await p.reload();await p.waitForFunction(()=>window.f4Qa);await p.evaluate(()=>f4Qa.resume());await p.waitForFunction(()=>f4Qa.c()?.specialMaps?.bossReward?.status==='pending');
@@ -108,7 +108,7 @@ try{for(const width of [1280,390]){
    assert.deepEqual(await p.evaluate(()=>f4Qa.c().specialMaps.bossReward),reward);
    await p.locator('[data-entrance-command="explorerTent"]').dispatchEvent('click');
   }
-  await activateCommand('討伐地図報酬を受け取る');
+  await activateCommand('討伐報酬受領');
   assert.equal(await p.evaluate(()=>f4Qa.c().specialMaps.bossReward.status),'received');
   assert.equal(await p.evaluate(()=>f4Qa.c().specialMaps.unidentified.length),3);
   assert.deepEqual(await p.evaluate(id=>f4Qa.c().specialMaps.unidentified.find(m=>m.discoveryId===id),reward.rewardId),reward.map);

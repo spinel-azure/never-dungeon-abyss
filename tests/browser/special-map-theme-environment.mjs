@@ -3,7 +3,7 @@ import {createRequire} from 'node:module';import vm from 'node:vm';import assert
 import {encodeMapCode} from '../../data/special-map-code.js';
 import {generateSpecialMapV2} from '../../js/special-map/generator-v2.js';
 import {bossTestCharacter} from '../../tools/simulate-map-bosses.mjs';
-const {chromium}=createRequire(import.meta.url)('playwright'),output='artifacts/v2-theme-environment';await mkdir(output,{recursive:true});
+const {chromium}=createRequire(import.meta.url)('playwright'),output='artifacts/tent-reward-ui';await mkdir(output,{recursive:true});
 const previous=await readFile('tests/browser/special-map-v2-f1-outcomes.mjs','utf8'),scope={};vm.runInNewContext(previous.slice(previous.indexOf('const baseHook='),previous.indexOf('\nconst main='))+';this.hook=baseHook;',scope);
 const maps=new Map();for(let seed=0;maps.size<4;seed++){const m={rulesetVersion:'special-map-v2',seed,level:50,rarity:'WHITE',discovererName:'QA'},theme=generateSpecialMapV2({...m,ruleset:m.rulesetVersion}).themeId;if(['red','blue','crystal','black'].includes(theme)&&!maps.has(theme))maps.set(theme,m);}
 const extra=`window.envQa={c:()=>character,cues:[],
@@ -27,7 +27,7 @@ const extra=`window.envQa={c:()=>character,cues:[],
  character.specialMaps=confirmMapBossVictory(prepareMapBossReward(character.specialMaps,c,{random:()=>.5}).state,c).state;saveGame();},
  failSave(on){if(!this.realSet)this.realSet=Storage.prototype.setItem;const original=this.realSet;Storage.prototype.setItem=on?function(k,v){if(k==='nda.save.slot1.current')throw Error('QA quota');return original.call(this,k,v);}:original;}
 };`;
-const main=(await readFile('js/main.js','utf8')).replaceAll("await playSeToEnd('importantItem');","window.envQa.cues.push('jingle-start');await playSeToEnd('importantItem');window.envQa.cues.push('jingle-end');").replace("showNamedItemGetEffect(['未鑑定地図'],","window.envQa.cues.push('popup');showNamedItemGetEffect(['未鑑定地図'],");
+const main=(await readFile('js/main.js','utf8')).replace('if(playSound) playSe(important ? "importantItem" : "itemGet");','if(playSound){window.envQa.cues.push("jingle-start");playSe(important ? "importantItem" : "itemGet");}').replace("showNamedItemGetEffect(['未鑑定地図'],","window.envQa.cues.push('popup');showNamedItemGetEffect(['未鑑定地図'],");
 const title=await readFile('js/title-screen.js','utf8'),browser=await chromium.launch({channel:'msedge',headless:true}),results=[];
 async function page(width,map){const p=await browser.newPage({viewport:{width,height:900},hasTouch:width===390});p.setDefaultTimeout(30000);const errors=[];p.on('pageerror',e=>errors.push(e.message));
  const hook=scope.hook.replace('NDA:AgIwOTIBAyAgMOsw65QoofYQw8Ta',encodeMapCode(map));
@@ -59,15 +59,18 @@ try{for(const width of [1280,390]){
  }
  console.log('Receipt',width);const {p,errors}=await page(width,maps.get('red'));await p.evaluate(()=>envQa.pending());
  await p.locator('[data-entrance-command="explorerTent"]').dispatchEvent('click');
- const receive=p.getByRole('button',{name:'討伐地図報酬を受け取る',exact:true});
+ const receive=p.getByRole('button',{name:'討伐報酬受領',exact:true});
+ assert.equal(await p.getByRole('button',{name:'調査報告',exact:true}).isDisabled(),true);
+ assert.equal(await receive.isEnabled(),true);
+ await p.screenshot({path:output+'/'+width+'-tent-pending.png'});
  await p.evaluate(()=>envQa.failSave(true));await receive.dispatchEvent('click');assert.deepEqual(await p.evaluate(()=>envQa.cues),[]);assert.equal(await p.evaluate(()=>envQa.c().specialMaps.bossReward.status),'pending');
  await p.evaluate(()=>envQa.failSave(false));if(width===390)await receive.tap();else await receive.dispatchEvent('click');
  await p.locator('#itemGetEffect:not([hidden]) .item-get-image').waitFor({state:'visible'});
  assert.match(await p.locator('#itemGetEffect .item-get-image').getAttribute('src'),/unidentified_map.avif$/);
- assert.deepEqual(await p.evaluate(()=>envQa.cues),['jingle-start','jingle-end','popup']);assert.equal(await p.evaluate(()=>envQa.c().specialMaps.unidentified.length),1);
+ assert.deepEqual(await p.evaluate(()=>envQa.cues),['popup','jingle-start']);assert.equal(await p.evaluate(()=>envQa.c().specialMaps.unidentified.length),1);assert.equal(await receive.isDisabled(),true);
  await p.waitForTimeout(1100);await p.screenshot({path:`${output}/${width}-receipt.png`});
  await p.getByRole('button',{name:'戻る',exact:true}).dispatchEvent('click');assert.equal(await p.evaluate(()=>envQa.c().specialMaps.unidentified.length),1);
  await p.waitForFunction(()=>document.querySelector('#itemGetEffect').hidden);await p.waitForTimeout(100);
- assert.deepEqual(errors,[]);results.push({width,receipt:true,saveFailureNoAnimation:true,jingleBeforePopup:true});await p.close();
+ assert.deepEqual(errors,[]);results.push({width,receipt:true,saveFailureNoAnimation:true,jingleWithPopup:true});await p.close();
 }}catch(error){for(const c of browser.contexts())for(const p of c.pages()){await p.screenshot({path:`${output}/failure.png`});await writeFile(`${output}/failure.txt`,await p.locator('body').innerText());}throw error;}
 finally{await browser.close();await writeFile(`${output}/browser.json`,JSON.stringify(results,null,2)+'\n');}

@@ -1255,9 +1255,8 @@ import {
   });
   configureTown({
     showMapRewardAcquisition:async({signal}={})=>{
-      await playSeToEnd('importantItem');
       if(signal?.aborted)return;
-      showNamedItemGetEffect(['未鑑定地図'],{imageSources:['images/item-compendium/unidentified_map.avif'],acquisitionMessage:true,playSound:false});
+      showNamedItemGetEffect(['未鑑定地図'],{imageSources:['images/item-compendium/unidentified_map.avif'],acquisitionMessage:true,important:true});
       const hide=()=>{clearTimeout(itemGetTimer);itemGetEffect.hidden=true;itemGetEffect.classList.remove('is-active');};
       signal?.addEventListener('abort',hide,{once:true});
       await wait(3400);signal?.removeEventListener('abort',hide);
