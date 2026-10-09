@@ -1928,23 +1928,69 @@ import {
     return result;
   }
 
-  function reincarnateAtTemple() {
+  async function reincarnateAtTemple() {
     const previous = structuredClone(character);
     const result = applyReincarnation(character);
     if (!result.accepted) return result;
-    character = {
-      ...result.character,
-      adventureStats: recordTempleDonation(result.character.adventureStats, result.fee)
-    };
-    updateCharacterUi();
-    renderCharacterStatus();
-    if (!saveGame()) {
-      character = previous;
+    return runReincarnationCeremony(() => {
+      character = {
+        ...result.character,
+        adventureStats: recordTempleDonation(result.character.adventureStats, result.fee)
+      };
       updateCharacterUi();
       renderCharacterStatus();
-      return { ...result, accepted: false, reason: "saveFailed", character };
+      if (!saveGame()) {
+        character = previous;
+        updateCharacterUi();
+        renderCharacterStatus();
+        return { ...result, accepted: false, reason: "saveFailed", character };
+      }
+      return { ...result, character };
+    });
+  }
+
+  async function runReincarnationCeremony(commit) {
+    if (!sceneTransition || !revivalPrayer || !revivalPrayerText || !revivalGoddess) return commit();
+    stopBgm();
+    sceneTransitionRunning = true;
+    sceneTransition.hidden = false;
+    sceneTransition.className = "scene-transition is-running is-black is-revival is-reincarnation";
+    sceneTransitionTitle.hidden = true;
+    defeatMessage.hidden = true;
+    revivalPrayer.hidden = false;
+    revivalPrayerText.textContent = "";
+    revivalGoddess.src = "images/npc/NPC_19c.avif";
+    revivalGoddess.alt = "女神ルミナ";
+    revivalGoddess.hidden = true;
+    revivalGoddess.classList.remove("is-active");
+    document.body.classList.add("scene-transition-active");
+    const audioPromise = playSeSequence("revival", 1);
+    for (const phrase of ["たましい――", "きおく――", "めぐり――", "あらたなせいを――！"]) {
+      revivalPrayerText.textContent = phrase;
+      await wait(1500);
     }
-    return { ...result, character };
+    revivalPrayerText.textContent = "";
+    revivalGoddess.hidden = false;
+    void revivalGoddess.offsetWidth;
+    revivalGoddess.classList.add("is-active");
+    await Promise.all([audioPromise, wait(4000)]);
+    sceneTransition.classList.add("is-reincarnation-whiteout");
+    await wait(700);
+    const result = commit();
+    await wait(350);
+    revivalPrayer.hidden = true;
+    revivalGoddess.hidden = true;
+    revivalGoddess.classList.remove("is-active");
+    sceneTransition.classList.remove("is-reincarnation-whiteout", "is-black");
+    sceneTransition.classList.add("is-revealing");
+    await wait(1200);
+    sceneTransition.className = "scene-transition";
+    sceneTransition.hidden = true;
+    revivalGoddess.alt = "";
+    document.body.classList.remove("scene-transition-active");
+    sceneTransitionRunning = false;
+    if (worldLocation === "town" && getTownState().facilityId === "temple") startBgm("temple");
+    return result;
   }
 
   function renderPlayerChargeGauge() {

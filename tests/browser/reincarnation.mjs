@@ -6,6 +6,11 @@ import { readFile } from "node:fs/promises";
 const { chromium } = createRequire(import.meta.url)("playwright");
 const origin = process.env.REINCARNATION_TEST_URL || "http://127.0.0.1:4173";
 const mainSource = await readFile(new URL("../../js/main.js", import.meta.url), "utf8");
+const acceleratedSource = mainSource.replace(
+  "return new Promise(resolve => window.setTimeout(resolve, milliseconds));",
+  "return new Promise(resolve => window.setTimeout(resolve, Math.min(milliseconds, 5)));"
+);
+assert.notEqual(acceleratedSource, mainSource, "reincarnation ceremony wait hook was installed");
 const hook = String.raw`
 window.reincarnationQa = {
   start() {
@@ -54,7 +59,11 @@ window.reincarnationQa = {
       medalHidden: medal.hidden,
       medalSource: medalImage.getAttribute("src"),
       reincarnationText: document.querySelector("#statusReincarnation").textContent.trim(),
-      whiteout: document.querySelector("#townScreen").classList.contains("is-reincarnation-whiteout")
+      ceremonyVisible: !document.querySelector("#sceneTransition").hidden,
+      ceremonyImage: document.querySelector("#revivalGoddess").getAttribute("src"),
+      ceremonyImageLoaded: document.querySelector("#revivalGoddess").complete
+        && document.querySelector("#revivalGoddess").naturalWidth > 0,
+      whiteout: document.querySelector("#sceneTransition").classList.contains("is-reincarnation-whiteout")
     };
   }
 };`;
@@ -78,7 +87,7 @@ try {
     page.on("console", message => { if (message.type() === "error") errors.push(message.text()); });
     await page.route("**/js/main.js?*", route => route.fulfill({
       contentType: "text/javascript",
-      body: instrumentMain(mainSource)
+      body: instrumentMain(acceleratedSource)
     }));
     await page.goto(origin);
     await page.waitForFunction(() => window.reincarnationQa);
@@ -103,6 +112,11 @@ try {
     assert.equal(snapshot.buttons[0].selected, true, "final confirmation defaults to cancel");
     await page.evaluate(() => reincarnationQa.input("right"));
     await page.evaluate(() => reincarnationQa.input("confirm"));
+    await page.waitForFunction(() => reincarnationQa.snapshot().ceremonyVisible);
+    snapshot = await page.evaluate(() => reincarnationQa.snapshot());
+    assert.equal(snapshot.level, 197, "reincarnation commits only at the final whiteout");
+    assert.equal(snapshot.gold, 2500000, "donation commits only at the final whiteout");
+    assert.equal(snapshot.ceremonyImage, "images/npc/NPC_19c.avif");
     await page.waitForFunction(() => reincarnationQa.snapshot().reincarnationCount === 1);
     snapshot = await page.evaluate(() => reincarnationQa.snapshot());
     assert.equal(snapshot.level, 1);
@@ -110,6 +124,7 @@ try {
     assert.equal(snapshot.medalHidden, false);
     assert.equal(snapshot.medalSource, "images/screenshots/medal_02.avif");
     assert.match(snapshot.reincarnationText, /転生：1回/);
+    assert.equal(snapshot.ceremonyImageLoaded, true);
     await page.evaluate(() => reincarnationQa.showStatus());
     assert.equal(await page.locator("#reincarnationMedal").evaluate(element => element.getBoundingClientRect().width > 0), true);
     const layout = await page.evaluate(() => {

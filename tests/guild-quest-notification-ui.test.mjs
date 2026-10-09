@@ -29,6 +29,6 @@ test("persistent state changes, reload resume, and guild rendering recheck quest
 
 test("notification assets use the current cache revision", () => {
   const html = read("index.html");
-  assert.match(html, /css\/town\.css\?v=20261009-1/);
-  assert.match(html, /js\/main\.js\?v=20261009-4/);
+  assert.match(html, /css\/town\.css\?v=20261009-2/);
+  assert.match(html, /js\/main\.js\?v=20261009-5/);
 });

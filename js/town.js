@@ -2341,7 +2341,7 @@ async function completeTempleReincarnation() {
   if (town.transitioning) return;
   town.transitioning = true;
   disableFacilityCommands();
-  const result = town.onReincarnate();
+  const result = await town.onReincarnate();
   if (!result?.accepted) {
     town.transitioning = false;
     cancelTempleReincarnation(result?.reason === "saveFailed"
@@ -2349,9 +2349,6 @@ async function completeTempleReincarnation() {
       : reincarnationUnavailableMessage(result?.reason, result));
     return;
   }
-  town.root.classList.add("is-reincarnation-whiteout");
-  await new Promise(resolve => window.setTimeout(resolve, 900));
-  town.root.classList.remove("is-reincarnation-whiteout");
   town.transitioning = false;
   document.body.classList.remove("facility-talk-message-expanded");
   town.mode = "facilityMenu";

@@ -114,6 +114,6 @@ test("restoration returns silently without an unrelated floor transition message
 
 test("main.js keeps the current top-level cache buster without versioned module imports", () => {
   const html = read("index.html");
-  assert.match(html, /js\/main\.js\?v=20261009-4/);
+  assert.match(html, /js\/main\.js\?v=20261009-5/);
   assert.doesNotMatch(read("js/main.js"), /from\s+["'][^"']+\?v=/);
 });

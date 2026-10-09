@@ -179,6 +179,10 @@ test("temple flow, rollback hook, medals and Japanese reset warnings are wired",
   assert.match(town, /レベルは1、デッキコストは3/);
   assert.match(town, /習得したスキルも職業の初期スキルだけ/);
   assert.match(main, /if \(!saveGame\(\)\)[\s\S]*?character = previous/);
+  assert.match(main, /runReincarnationCeremony/);
+  assert.match(main, /images\/npc\/NPC_19c\.avif/);
+  assert.match(main, /たましい――[\s\S]*?きおく――[\s\S]*?めぐり――[\s\S]*?あらたなせいを――！/);
+  assert.match(main, /is-reincarnation-whiteout[\s\S]*?const result = commit\(\)/);
   assert.match(html, /id="reincarnationMedal"/);
   assert.match(html, /id="statusReincarnation"/);
 });
