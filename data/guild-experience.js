@@ -1,4 +1,4 @@
-import { MAX_EXPERIENCE, MAX_LEVEL, getNextLevelExperience } from './growth.js';
+import { MAX_LEVEL, getExperienceForLevel, getNextLevelExperience } from './growth.js';
 
 const amounts = [20,30,50,60,100,200,400,600,800,1200,2000,3000,2500,3500,5000,10000,4000,5000,8000,6000,10000,0,15000,12000,0,12000,22000,30000,10000,45000,18000,40000,30000,60000,100000];
 const initialIds = ['guild_001_abyss_rat','guild_002_cave_slime','guild_003_b1f_survey','guild_004_abyss_rabbit'];
@@ -15,7 +15,9 @@ export function grantGuildQuestExperience(character, questIds = character?.quest
   const ids = [...new Set(questIds)].filter(id=>reported.has(id) && getGuildExperienceReward(id)>0 && !paid.includes(id));
   const nominal = ids.reduce((sum,id)=>sum+getGuildExperienceReward(id),0);
   const pool = integer(character?.guildExperiencePool);
-  const gained = Math.min(nominal,Math.max(0,MAX_EXPERIENCE-integer(character?.experience)-pool));
+  const reincarnationCount=character?.reincarnationCount||0;
+  const cap=getExperienceForLevel(MAX_LEVEL,reincarnationCount);
+  const gained = Math.min(nominal,Math.max(0,cap-integer(character?.experience)-pool));
   return {
     ids, nominal, gained,
     character: ids.length ? {...character,guildExperiencePool:pool+gained,
@@ -28,6 +30,6 @@ export function formatGuildExperienceReceipt(receipt, {compensation=false}={}) {
   const prefix = compensation ? `ギルド依頼に経験値報酬が追加されました。報告済みの依頼${receipt.ids.length}件分として、` : '依頼報酬として、';
   const cap = receipt.gained !== receipt.nominal ? `（規定報酬${amount(receipt.nominal)}EXP。経験値上限により制限）` : '';
   const c=receipt.character;
-  const ready=c.level<MAX_LEVEL && integer(c.experience)+integer(c.guildExperiencePool)>=getNextLevelExperience(c.level);
+  const ready=c.level<MAX_LEVEL && integer(c.experience)+integer(c.guildExperiencePool)>=getNextLevelExperience(c.level,c.reincarnationCount);
   return `${prefix}${amount(receipt.gained)}EXPを宿泊時の精算分として確保しました。${cap}\n${ready ? '＊ 宿屋に泊まる事でレベルアップ可能です ＊' : '経験値精算とレベルアップは宿泊時に行われます。'}`;
 }

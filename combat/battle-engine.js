@@ -31,6 +31,7 @@ import {
 } from "./status-lifecycle.js";
 import { getSkill } from "../data/skills.js";
 import { getItem } from "../data/items.js";
+import { getSpellReincarnationMultiplier } from "../data/reincarnation.js";
 import { consumeItem } from "../data/inventory.js";
 import {
   calculateHealingItemSpReturn,
@@ -1459,7 +1460,9 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
   const result = action.actionType === "spell"
     ? resolveSpell({ attacker: actorStats, defender: targetStats, spell: action, rng })
     : resolvePhysicalAttack({ attacker: actorStats, defender: targetStats,
-      attack: actorSide === "player" ? preparePlayerPhysicalAttack(action, actorStats, actor.level) : action, rng });
+      attack: actorSide === "player"
+        ? preparePlayerPhysicalAttack(action, actorStats, actor.level, actor.reincarnationCount)
+        : action, rng });
   const reduction = action.actionType === "physicalAttack"
     ? Math.max(
       getPhysicalDamageReduction(target.statuses),
@@ -2260,6 +2263,10 @@ function combatStats(combatant) {
   );
   return {
     ...collected,
+    spellReincarnationMultiplier: getSpellReincarnationMultiplier(
+      combatant.level,
+      combatant.reincarnationCount
+    ),
     def: Math.floor((collected.def + getStatusDefenseBonus(combatant.statuses))
       * getDefenseMultiplier(combatant.statuses)),
     statusResistanceBonus: collected.statusResistanceBonus + getStatusResistanceBonus(combatant.statuses),

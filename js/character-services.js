@@ -57,10 +57,11 @@ export function settleIndependentReturnExperience(character, amount, returnFloor
 }
 
 function applyExperienceSettlement(character, settlement) {
+  const reincarnationCount = character?.reincarnationCount || 0;
   return {
     settlement,
     changes: {
-      experience: normalizeExperience((Number(character.experience) || 0) + settlement.finalSettlementExp)
+      experience: normalizeExperience((Number(character.experience) || 0) + settlement.finalSettlementExp, reincarnationCount)
     }
   };
 }
@@ -102,11 +103,12 @@ export function resolveInnStay(character) {
   });
   const guildExperience = Math.max(0, Math.floor(Number(character.guildExperiencePool) || 0));
   const gainedExperience = settlement.finalSettlementExp + guildExperience;
-  const experience = normalizeExperience((Number(character.experience) || 0) + gainedExperience);
+  const reincarnationCount = character?.reincarnationCount || 0;
+  const experience = normalizeExperience((Number(character.experience) || 0) + gainedExperience, reincarnationCount);
   const previousLevel = Math.max(1, Math.floor(Number(character.level) || 1));
-  const level = getLevelForExperience(experience);
-  const previousGrowth = getLevelGrowth(character.job, previousLevel);
-  const growth = getLevelGrowth(character.job, level);
+  const level = getLevelForExperience(experience, reincarnationCount);
+  const previousGrowth = getLevelGrowth(character.job, previousLevel, reincarnationCount);
+  const growth = getLevelGrowth(character.job, level, reincarnationCount);
   const maxHpBonus = getVitalBonus(character, "maxHp");
   const maxSpBonus = getVitalBonus(character, "maxSp");
   const maxHp = applyInnVitalCardMultipliers(character, "maxHp", growth.hp + maxHpBonus);
@@ -134,7 +136,7 @@ export function resolveInnStay(character) {
     },
     settlement,
     guildExperience,
-    guildExperienceApplied: Math.max(0, experience - normalizeExperience((Number(character.experience) || 0) + settlement.finalSettlementExp)),
+    guildExperienceApplied: Math.max(0, experience - normalizeExperience((Number(character.experience) || 0) + settlement.finalSettlementExp, reincarnationCount)),
     hadPendingSettlement: Boolean(pendingSettlement),
     gainedExperience,
     levelsGained: Math.max(0, level - previousLevel),

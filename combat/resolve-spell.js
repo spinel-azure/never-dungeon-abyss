@@ -37,7 +37,8 @@ export function resolveSpell({
     : spell.element === "ice" ? numeric(attacker.iceSpellDamageBonus) : 0;
   const baseDamage = spellAttack * numericOr(spell.powerMultiplier, 1)
     * (1 + offensiveBonus + numeric(attacker.attackSpellDamageBonus))
-    * (spell.element === "dark" ? Math.max(0, numericOr(attacker.darkSpellDamageMultiplier, 1)) : 1);
+    * (spell.element === "dark" ? Math.max(0, numericOr(attacker.darkSpellDamageMultiplier, 1)) : 1)
+    * Math.max(0, numericOr(attacker.spellReincarnationMultiplier, 1));
   let damage = 0;
   if (multiplier !== 0) {
     const variance = randomBetween(

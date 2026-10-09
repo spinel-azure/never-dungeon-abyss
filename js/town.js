@@ -173,6 +173,8 @@ const town = {
   onStay: () => {},
   onHeal: () => {},
   onRename: () => null,
+  getReincarnationPreview: () => ({ accepted: false, reason: "noCharacter" }),
+  onReincarnate: () => ({ accepted: false, reason: "notConnected" }),
   onPurchaseItem: () => null,
   onPurchaseEquipment: () => null,
   onBuybackEquipment: () => null,
@@ -396,6 +398,14 @@ export function configureTown(options) {
     const button = document.createElement("button");
     button.type = "button";
     button.addEventListener("click", () => {
+      if (town.mode === "templeReincarnationFinal") {
+        if (index > 1) return;
+        town.facilityCommandIndex = index;
+        renderFacilityCommandSelection();
+        handleTempleReincarnationInput("confirm");
+        return;
+      }
+      if (town.mode === "templeReincarnationExplain" || town.mode === "templeReincarnationPreview") return;
       if (town.compactTalk || button.classList.contains("is-empty")) return;
       const command = button.dataset.facilityCommand;
       const alreadyPrepared = town.facilityCommandIndex === index
@@ -626,6 +636,7 @@ export function handleTownInput(action) {
   if (town.mode === "templeHealConfirm") return handleTempleHealConfirmationInput(action);
   if (town.mode === "templeRenameConfirm") return handleTempleRenameConfirmationInput(action);
   if (town.mode === "templeRenameInput") return handleTempleRenameInput(action);
+  if (town.mode.startsWith("templeReincarnation")) return handleTempleReincarnationInput(action);
   if (town.mode === "commerceQuantity") return handleCommerceQuantityInput(action);
   if (town.mode === "commerceConfirm") return handleCommerceConfirmationInput(action);
   if (town.mode === "commerce") return handleCommerceInput(action);
@@ -1952,14 +1963,13 @@ function showFacilityCommands(facilityId) {
   town.facilityCommandButtons.forEach((button, index) => {
     const [id, label] = commands[index];
     const empty = !label;
-    // Reincarnation stays disabled until its future eligibility rules are implemented.
-    const unimplemented = (facilityId === "tavern" && UNIMPLEMENTED_TAVERN_COMMANDS.has(id))
-      || (facilityId === "temple" && id === "reincarnate");
+    const unimplemented = facilityId === "tavern" && UNIMPLEMENTED_TAVERN_COMMANDS.has(id);
     const available = id === "return"
       || id === "stay"
       || id === "heal"
       || (facilityId === "temple" && id === "donate")
       || (facilityId === "temple" && id === "rename")
+      || (facilityId === "temple" && id === "reincarnate")
       || (facilityId === "shop" && id === "buy")
       || (facilityId === "shop" && ["sell", "buyback", "storage"].includes(id))
       || id === "deck"
@@ -2005,6 +2015,10 @@ function activateFacilityService(command) {
   }
   if (command === "rename") {
     requestTempleRename();
+    return true;
+  }
+  if (command === "reincarnate") {
+    requestTempleReincarnation();
     return true;
   }
   if (command === "deck") {
@@ -2250,6 +2264,125 @@ function handleTempleRenameConfirmationInput(action) {
   town.messageEl.textContent = `${templeKeeper()}：では、女神様の前で新たな魂の名前を口にしてください…！`;
   openTempleRenameInput();
   return true;
+}
+
+function requestTempleReincarnation() {
+  const preview = town.getReincarnationPreview();
+  if (!preview?.accepted) {
+    town.messageEl.textContent = reincarnationUnavailableMessage(preview?.reason, preview);
+    return;
+  }
+  town.mode = "templeReincarnationExplain";
+  document.body.classList.add("facility-talk-message-expanded");
+  disableFacilityCommands();
+  town.messageEl.textContent = `${templeKeeper()}：転生の儀では、これまでの力を魂へ刻み、新たな生を歩み始めます。\n\nレベルは1、デッキコストは3へ戻り、装備中のカードはすべて解除されます。習得したスキルも職業の初期スキルだけになります。\n\n＊Aボタン：転生後の数値を確認　Bボタン：やめる`;
+}
+
+function handleTempleReincarnationInput(action) {
+  if (town.transitioning) return true;
+  if (action === "cancel") {
+    cancelTempleReincarnation();
+    return true;
+  }
+  if (town.mode === "templeReincarnationFinal" && ["left", "right", "up", "down"].includes(action)) {
+    town.playSe("cursorMove");
+    town.facilityCommandIndex = town.facilityCommandIndex === 0 ? 1 : 0;
+    renderFacilityCommandSelection();
+    return true;
+  }
+  if (action !== "confirm") return true;
+  town.playSe("confirm");
+  if (town.mode === "templeReincarnationExplain") {
+    const preview = town.getReincarnationPreview();
+    if (!preview?.accepted) {
+      cancelTempleReincarnation(reincarnationUnavailableMessage(preview?.reason, preview));
+      return true;
+    }
+    town.mode = "templeReincarnationPreview";
+    town.messageEl.textContent = formatReincarnationPreview(preview);
+    return true;
+  }
+  if (town.mode === "templeReincarnationPreview") {
+    showReincarnationFinalConfirmation();
+    return true;
+  }
+  if (town.mode === "templeReincarnationFinal") {
+    if (town.facilityCommandIndex === 0) {
+      cancelTempleReincarnation();
+      return true;
+    }
+    void completeTempleReincarnation();
+    return true;
+  }
+  return true;
+}
+
+function formatReincarnationPreview(preview) {
+  const amount = value => Math.max(0, Math.floor(Number(value) || 0)).toLocaleString("ja-JP");
+  return `転生回数：${preview.currentCount}回 → ${preview.nextCount}回\nレベル：197 → 1　デッキコスト：48 → 3\n最大HP：${amount(preview.currentMaxHp)} → ${amount(preview.nextMaxHp)}\n最大SP：${amount(preview.currentMaxSp)} → ${amount(preview.nextMaxSp)}\n次周の必要経験値：×${Number(preview.experienceMultiplier).toFixed(2)}\n寄進：${amount(preview.fee)}G（残金 ${amount(preview.goldAfter)}G）\n\nデッキは全解除され、習得スキルは初期スキルだけになります。\n＊Aボタン：最終確認　Bボタン：やめる`;
+}
+
+function showReincarnationFinalConfirmation() {
+  town.mode = "templeReincarnationFinal";
+  town.facilityCommandButtons.forEach((button, index) => {
+    const label = index === 0 ? "やめる" : index === 1 ? "転生する" : "";
+    button.textContent = label;
+    button.disabled = index > 1;
+    button.dataset.facilityCommand = index === 0 ? "reincarnation-cancel" : index === 1 ? "reincarnation-confirm" : `empty-${index}`;
+    button.classList.toggle("is-empty", !label);
+    button.setAttribute("aria-disabled", String(index > 1));
+  });
+  town.facilityCommandIndex = 0;
+  renderFacilityCommandSelection();
+  town.messageEl.textContent = "本当に転生しますか？\nこの操作は取り消せません。\n\nレベルは1、デッキコストは3となり、デッキと習得スキルは初期化されます。";
+}
+
+async function completeTempleReincarnation() {
+  if (town.transitioning) return;
+  town.transitioning = true;
+  disableFacilityCommands();
+  const result = town.onReincarnate();
+  if (!result?.accepted) {
+    town.transitioning = false;
+    cancelTempleReincarnation(result?.reason === "saveFailed"
+      ? `${templeKeeper()}：魂を記録できませんでした。所持金と状態は転生前へ戻されています。`
+      : reincarnationUnavailableMessage(result?.reason, result));
+    return;
+  }
+  town.root.classList.add("is-reincarnation-whiteout");
+  await new Promise(resolve => window.setTimeout(resolve, 900));
+  town.root.classList.remove("is-reincarnation-whiteout");
+  town.transitioning = false;
+  document.body.classList.remove("facility-talk-message-expanded");
+  town.mode = "facilityMenu";
+  showFacilityCommands("temple");
+  town.messageEl.textContent = `${templeKeeper()}：女神の光が、あなたの力を魂へ刻みました。\n${result.nextCount}回目の転生が完了しました。新たな生を歩み始めてください。`;
+}
+
+function cancelTempleReincarnation(message = `${templeKeeper()}：承知しました。心が決まった時に、またお申し付けください。`) {
+  town.playSe("cancel");
+  document.body.classList.remove("facility-talk-message-expanded");
+  town.mode = "facilityMenu";
+  showFacilityCommands("temple");
+  town.messageEl.textContent = message;
+}
+
+function disableFacilityCommands() {
+  town.facilityCommandButtons.forEach(button => {
+    button.disabled = true;
+    button.setAttribute("aria-disabled", "true");
+    button.classList.remove("is-selected");
+  });
+}
+
+function reincarnationUnavailableMessage(reason, preview = {}) {
+  const keeper = templeKeeper();
+  if (reason === "maximumReached") return `${keeper}：魂には、これ以上ないほどの力が刻まれています。転生は3回が上限です。`;
+  if (reason === "levelRequired") return `${keeper}：転生の儀を受けるには、レベル197へ到達する必要があります。`;
+  if (reason === "amayenakRequired") return `${keeper}：転生の儀には、アマイェナクを打ち倒した証が必要です。`;
+  if (reason === "medalRequired") return `${keeper}：転生の儀には、王家より授けられた猫勲章が必要です。`;
+  if (reason === "insufficientGold") return `${keeper}：次の転生には${Math.max(0, Number(preview.fee) || 0).toLocaleString("ja-JP")}Gの寄進が必要です。`;
+  return `${keeper}：今は転生の儀を行うことができません。`;
 }
 
 function openTempleRenameInput() {

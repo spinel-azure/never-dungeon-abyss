@@ -13,7 +13,8 @@ export function deriveDetailStats(character = {}) {
     : getEquipmentItem(weaponId, "rightArmId");
   const weaponType = getWeaponType(weapon?.type);
   const normalAttack = preparePlayerPhysicalAttack(
-    createNormalAttack({ weapon, skillIds: character.skillIds || [] }), stats, character.level);
+    createNormalAttack({ weapon, skillIds: character.skillIds || [] }), stats,
+    character.level, character.reincarnationCount);
   const normalAttackStatId = normalAttack.attackStat;
   const normalAttackStat = normalAttackStatId === "int" ? stats.int : stats.str;
   const normalAttackStatMultiplier = Number.isFinite(Number(normalAttack.attackStatMultiplier))

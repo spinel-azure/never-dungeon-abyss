@@ -178,6 +178,12 @@ import { getRestoredTreasureType } from "./dungeon-save-restore.js";
 import { getDeadlyPoisonStepDamage, getNonlethalPoisonDamage } from "../combat/status-lifecycle.js";
 import { getConditionLabel } from "../combat/condition-label.js";
 import { getNextLevelExperience, MAX_LEVEL } from "../data/growth.js";
+import { REINCARNATION_MEDALS } from "../data/reincarnation.js";
+import {
+  applyReincarnation,
+  getReincarnationPreview,
+  hasReincarnationQualification
+} from "./reincarnation-service.js";
 import { resolveFieldSkill } from "../combat/resolve-field-skill.js";
 import { configureSkillOverlay, openSkillOverlay, handleSkillOverlayInput } from "./skill-overlay.js";
 import { configureItemOverlay, openItemOverlay, handleItemOverlayInput } from "./item-overlay.js";
@@ -1274,6 +1280,8 @@ import {
     onStay: stayAtInn,
     onHeal: healAtTemple,
     onRename: renameCharacterAtTemple,
+    getReincarnationPreview: () => getReincarnationPreview(character),
+    onReincarnate: reincarnateAtTemple,
     onPurchaseItem: purchaseTownItem,
     onPurchaseEquipment: purchaseTownEquipment,
     onBuybackEquipment: buybackTownEquipment,
@@ -1908,6 +1916,25 @@ import {
     return result;
   }
 
+  function reincarnateAtTemple() {
+    const previous = structuredClone(character);
+    const result = applyReincarnation(character);
+    if (!result.accepted) return result;
+    character = {
+      ...result.character,
+      adventureStats: recordTempleDonation(result.character.adventureStats, result.fee)
+    };
+    updateCharacterUi();
+    renderCharacterStatus();
+    if (!saveGame()) {
+      character = previous;
+      updateCharacterUi();
+      renderCharacterStatus();
+      return { ...result, accepted: false, reason: "saveFailed", character };
+    }
+    return { ...result, character };
+  }
+
   function renderPlayerChargeGauge() {
     const gauge = document.getElementById("playerChargeGauge");
     const fill = document.getElementById("playerChargeFill");
@@ -2456,6 +2483,19 @@ import {
   function updateCharacterUi() {
     const medal = document.getElementById("royalMedal");
     if (medal) medal.hidden = !character?.eventFlags?.royal_cat_medal_awarded;
+    const reincarnationCount = Math.max(0, Math.min(3, Math.floor(Number(character?.reincarnationCount) || 0)));
+    const reincarnationMedal = document.getElementById("reincarnationMedal");
+    const reincarnationMedalImage = document.getElementById("reincarnationMedalImage");
+    const reincarnationText = document.getElementById("statusReincarnation");
+    if (reincarnationMedal) reincarnationMedal.hidden = reincarnationCount <= 0;
+    if (reincarnationMedalImage && reincarnationCount > 0) {
+      reincarnationMedalImage.src = REINCARNATION_MEDALS[reincarnationCount];
+    }
+    if (reincarnationText) {
+      reincarnationText.hidden = reincarnationCount <= 0;
+      const output = reincarnationText.querySelector("output");
+      if (output) output.textContent = String(reincarnationCount);
+    }
     const statusCharacter = getContextualCharacter();
     setPassivePresenceIncreaseReduction(sumCardEffectValues(
       character?.cards?.deckSlots,
@@ -2497,6 +2537,7 @@ import {
     renderDetailStats(statusCharacter);
     renderExperience(statusCharacter);
     detectAchievementUnlocks();
+    requestReincarnationUnlockNotification();
     notificationSync.request();
   }
 
@@ -2561,6 +2602,39 @@ import {
         const index = achievementNotificationQueue.findIndex(entry => entry.id === achievement.id);
         if (index >= 0) achievementNotificationQueue.splice(index, 1);
         queueMicrotask(playNextAchievementNotification);
+        return true;
+      }
+    });
+  }
+
+  function requestReincarnationUnlockNotification() {
+    if (!achievementUnlockedEffect || !hasReincarnationQualification(character)
+      || character?.eventFlags?.reincarnation_unlocked_notified) return false;
+    return passiveNotificationCoordinator.enqueue({
+      id: "reincarnation:unlocked",
+      channel: "reincarnation",
+      play: async ({ signal }) => {
+        if (!hasReincarnationQualification(character)
+          || character?.eventFlags?.reincarnation_unlocked_notified) return true;
+        achievementUnlockedEffect.textContent = "寺院で転生の儀を受けられるようになりました";
+        achievementUnlockedEffect.hidden = false;
+        achievementUnlockedEffect.classList.remove("is-active");
+        void achievementUnlockedEffect.offsetWidth;
+        playSe("achievementUnlocked");
+        achievementUnlockedEffect.classList.add("is-active");
+        const completed = await waitForPassiveNotification(4200, signal);
+        achievementUnlockedEffect.classList.remove("is-active");
+        achievementUnlockedEffect.hidden = true;
+        if (!completed) {
+          stopSe("achievementUnlocked");
+          return false;
+        }
+        const previous = Boolean(character.eventFlags?.reincarnation_unlocked_notified);
+        character.eventFlags = { ...(character.eventFlags || {}), reincarnation_unlocked_notified: true };
+        if (!saveGame()) {
+          character.eventFlags.reincarnation_unlocked_notified = previous;
+          return false;
+        }
         return true;
       }
     });
@@ -2709,7 +2783,7 @@ import {
     const experience = Math.max(0, Math.floor(Number(target.experience) || 0));
     const mapSession=getSpecialMapContext()?.session;
     const carried = Math.max(0, Math.floor(Number(mapSession?.kind==='specialMapV2'?mapSession.battleExperience:target.carriedExperience) || 0));
-    const next = getNextLevelExperience(target.level);
+    const next = getNextLevelExperience(target.level, target.reincarnationCount);
     const suffix = target.level >= MAX_LEVEL ? " MAX LEVEL" : " NEXT LEVEL";
     const settled = document.createTextNode(String(experience).padStart(7, "0"));
     const carriedElement = document.createElement("span");
@@ -4541,7 +4615,7 @@ import {
       experienceSettlementOverlay.append(notice, prompt);
     }
     notice.hidden = !(character && character.level < MAX_LEVEL
-      && character.experience >= getNextLevelExperience(character.level));
+      && character.experience >= getNextLevelExperience(character.level, character.reincarnationCount));
     experienceSettlementOverlay.classList.remove("is-dismissing");
     experienceSettlementCloseCallback = onClose;
     experienceSettlementOverlay.hidden = false;

@@ -31,6 +31,7 @@ import { createInitialPlayerCharge, normalizePlayerCharge } from "../combat/play
 import { getConditionLabel } from "../combat/condition-label.js";
 import { backfillCompendiumFromCharacter, createInitialCompendium } from "./compendium.js";
 import { backfillB80TransferUnlock, isB80TransferUnlocked } from "./b80-transfer-unlock.js";
+import { normalizeReincarnationCount } from "./reincarnation.js";
 import {
   createInitialTavernRumorNotificationState,
   normalizeTavernRumorNotificationState
@@ -116,6 +117,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     npcSystem: createInitialNpcSystem(),
     playerCharge: createInitialPlayerCharge(),
     adventureDefeatRecoveryUsed: false,
+    reincarnationCount: 0,
     firstDungeonTutorialSeen: false,
     deckTutorialSeen: false,
     lootBagTutorialSeen: false,
@@ -161,7 +163,8 @@ export function normalizeCharacter(character) {
   const characterClass = getCharacterClass(character.job) || CHARACTER_CLASSES.WARRIOR;
   const legacyCharacter = !character.baseStats || !Array.isArray(character.skillIds);
   const level = Math.max(1, Math.min(197, Math.floor(Number(character.level) || 1)));
-  const growth = getLevelGrowth(characterClass.id, level);
+  const reincarnationCount = normalizeReincarnationCount(character.reincarnationCount);
+  const growth = getLevelGrowth(characterClass.id, level, reincarnationCount);
   const equipment = normalizeEquipment(character.equipment, characterClass.id);
   const equipmentCollection = normalizeEquipmentInventory(
     character.equipmentInventory,
@@ -207,6 +210,7 @@ export function normalizeCharacter(character) {
     character.eventFlags,
     quests.completedQuestIds
   ));
+  if (level >= 197 || reincarnationCount > 0) eventFlags.achievement_level_197_reached = true;
   if (quests.completedQuestIds.includes("guild_011")) {
     eventFlags.support_npc_malicious_join_unlocked = true;
   }
@@ -253,6 +257,7 @@ export function normalizeCharacter(character) {
     npcSystem: normalizeNpcSystem(character.npcSystem),
     playerCharge: normalizePlayerCharge(character.playerCharge),
     adventureDefeatRecoveryUsed: Boolean(character.adventureDefeatRecoveryUsed),
+    reincarnationCount,
     firstDungeonTutorialSeen: typeof character.firstDungeonTutorialSeen === "boolean"
       ? character.firstDungeonTutorialSeen
       : true,
@@ -272,7 +277,7 @@ export function normalizeCharacter(character) {
       Math.floor(Number(character.highestDungeonDepthReached) || 1)
     ),
     gold: Math.max(0, Math.floor(Number(character.gold) || 0)),
-    experience: normalizeExperience(character.experience),
+    experience: normalizeExperience(character.experience, reincarnationCount),
     guildExperiencePool: Math.max(0, Math.floor(Number(character.guildExperiencePool) || 0)),
     carriedExperience: Math.max(0, Math.floor(Number(character.carriedExperience) || 0)),
     pendingExperienceSettlement: normalizeDepthReturnSettlement(

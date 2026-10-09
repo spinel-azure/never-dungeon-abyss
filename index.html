@@ -8,12 +8,12 @@
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
   <link rel="stylesheet" href="css/style.css?v=20260917-4">
-  <link rel="stylesheet" href="css/game-menu.css?v=20260926-2">
+  <link rel="stylesheet" href="css/game-menu.css?v=20261009-1">
   <link rel="stylesheet" href="css/card-gallery.css?v=20260810-1">
   <link rel="stylesheet" href="css/monster-compendium.css">
   <link rel="stylesheet" href="css/item-compendium.css?v=20260923-2">
   <link rel="stylesheet" href="css/title-screen.css?v=20260917-3">
-  <link rel="stylesheet" href="css/town.css?v=20261007-1">
+  <link rel="stylesheet" href="css/town.css?v=20261009-1">
   <link rel="stylesheet" href="css/effects.css?v=20260805-2">
   <link rel="stylesheet" href="css/scene-transition.css?v=20260809-2">
   <link rel="stylesheet" href="css/battle.css?v=20260928-1">
@@ -355,11 +355,14 @@
     <section class="menu-screen" id="menuScreen" aria-label="メニュー画面" hidden>
       <div class="menu-panel status-panel" data-menu-view="status" hidden>
         <article class="nde-status-page" data-status-page="0">
-          <h1 class="menu-title">＊ STATUS ＊<details id="royalMedal" class="royal-medal" hidden><summary aria-label="王家の猫勲章"><img src="images/screenshots/medal_01.avif" alt="王家の猫勲章"></summary><span>《Königlicher Katzenorden》
+          <h1 class="menu-title">＊ STATUS ＊<span class="status-medals"><details id="royalMedal" class="royal-medal" hidden><summary aria-label="王家の猫勲章"><img src="images/screenshots/medal_01.avif" alt="王家の猫勲章"></summary><span>《Königlicher Katzenorden》
 ケーニクリヒャー・カッツェンオルデン
 
-女王の加護：表層の奈落で、女王の装飾品が持っていた力を再現する。</span></details></h1>
+女王の加護：表層の奈落で、女王の装飾品が持っていた力を再現する。</span></details><details id="reincarnationMedal" class="royal-medal reincarnation-medal" hidden><summary aria-label="魂刻の聖印"><img id="reincarnationMedalImage" src="images/screenshots/medal_02.avif" alt="魂刻の聖印"></summary><span>魂刻の聖印
+
+転生の儀によって魂へ刻まれた力の証。</span></details></span></h1>
           <div class="nde-status-identity"><strong><span>NAME：</span><output id="statusName">NO_NAME</output></strong><strong><span>JOB：</span><output id="statusJob">UNKNOWN</output></strong><strong><span>LV：</span><output id="statusLevel">---</output></strong></div>
+          <p id="statusReincarnation" class="nde-status-reincarnation" hidden>転生：<output>0</output>回</p>
           <div class="nde-status-vitals"><span>HP ---- / ----</span><span>SP ---- / ----</span><span>DECK COST : --</span></div>
           <section id="ndeStatRows" class="nde-stat-rows" aria-label="能力値未接続"></section>
           <p class="nde-stat-note">能力値上限 30 / 装備・カード超過不可</p>
@@ -604,7 +607,7 @@
     </section>
   </section>
 </main>
-  <script type="module" src="js/main.js?v=20261009-1"></script>
+  <script type="module" src="js/main.js?v=20261009-2"></script>
   <script type="module" src="js/title-screen.js?v=20260917-3"></script>
 </body>
 </html>

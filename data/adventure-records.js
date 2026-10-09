@@ -133,7 +133,7 @@ export function getAdventureChronicle(character) {
     ["discountPass", "ディスカウントパスを入手した", hasKeyItem(character?.keyItems, "discount_pass"), "商店のお得意様としてディスカウントパスを入手した。", "？？？？？？――お得意様"],
     ["zentaurin", "ツェンタウリンを撃破した", flags.achievement_zentaurin_defeated, "ツェンタウリンを撃破した。", "？？？？？？――射手座の守護者"],
     ["allZodiacCards", "ゾディアックカードを12枚全て集めた", countOwnedZodiacCardKinds(character?.cards) >= 12, "12種類すべてのゾディアックカードを所持した。", "？？？？？？――黄道十二宮"],
-    ["level197", "最大レベル197に到達した", Number(character?.level) >= 197, "最大レベル197に到達した。", "？？？？？？――完璧で究極の冒険者"],
+    ["level197", "最大レベル197に到達した", Number(character?.level) >= 197 || Boolean(flags.achievement_level_197_reached), "最大レベル197に到達した。", "？？？？？？――完璧で究極の冒険者"],
     ["lionQueen", "レーヴェンケーニギンを撃破した", flags.boss_loewenkoenigin_b1f_defeated, "獅子座の守護者を撃破した。", "？？？？？？――獅子座の守護者"],
     ["amayenakPhantom", "アマイェナクの幻影を倒した", flags.achievement_amayenak_phantom_defeated, "暴走する因果記録庫の幻影を倒した。", "？？？？？？――因果記録庫暴走"],
     ["lionBath", "レーヴェンケーニギンの沐浴を目撃した", flags.achievement_lion_bath_seen, "激闘のあと、女王の沐浴を目撃した。", "？？？？？？――激闘のあとに"],

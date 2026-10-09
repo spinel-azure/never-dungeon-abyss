@@ -13,6 +13,7 @@ body.layout-pc .shell{padding-block:8px}
 @media(max-width:420px){.quick-status{gap:.12em;padding-inline:3px;font-size:clamp(9px,2.75vw,11px)}.quick-status .quick-name{flex-shrink:1}.quick-status #quickName{display:none}.quick-status .quick-name-compact{display:inline}}
 
 .nde-status-identity{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) auto}
+.status-medals{display:inline-flex;align-items:center;gap:4px;margin-left:5px;vertical-align:middle}.status-medals .royal-medal{margin-left:0}.status-medals summary img{width:auto;height:1.2em;object-fit:contain}.nde-status-reincarnation{margin:-3px 0 3px;color:#ffe9a0;font:12px "GameFont",sans-serif;text-align:right}
 .nde-status-identity strong{display:flex;min-width:0;color:#5bd1ff;text-align:left}
 .nde-status-identity strong:nth-child(2){justify-content:center}
 .nde-status-identity strong:last-child{justify-content:flex-end;color:#5bd1ff;text-align:left}

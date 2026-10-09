@@ -1,3 +1,8 @@
+import {
+  getReincarnationExperienceMultiplier,
+  normalizeReincarnationCount
+} from "./reincarnation.js";
+
 export const MAX_LEVEL = 197;
 export const MAX_EXPERIENCE = 9_999_999;
 
@@ -41,7 +46,7 @@ const EXPERIENCE_ANCHORS = Object.freeze([
   Object.freeze([197, MAX_EXPERIENCE])
 ]);
 
-export function getLevelGrowth(jobId, level) {
+export function getLevelGrowth(jobId, level, reincarnationCount = 0) {
   const job = JOB_GROWTH[jobId] || JOB_GROWTH.warrior;
   const normalized = normalizeLevel(level);
   const baseVitalProgress = getVitalGrowthProgress(normalized);
@@ -49,10 +54,13 @@ export function getLevelGrowth(jobId, level) {
     1,
     baseVitalProgress + getMidgameHpProgressBonus(normalized)
   );
+  const reincarnations = normalizeReincarnationCount(reincarnationCount);
+  const hpCycleGain = job.hpMax - job.hp;
+  const spCycleGain = job.spMax - job.sp;
   return Object.freeze({
     level: normalized,
-    hp: Math.round(job.hp + (job.hpMax - job.hp) * hpProgress),
-    sp: Math.round(job.sp + (job.spMax - job.sp) * baseVitalProgress),
+    hp: Math.round(job.hp + (job.hpMax - job.hp) * hpProgress) + reincarnations * hpCycleGain,
+    sp: Math.round(job.sp + (job.spMax - job.sp) * baseVitalProgress) + reincarnations * spCycleGain,
     deckCost: getDeckCostAtLevel(normalized)
   });
 }
@@ -73,30 +81,38 @@ export function getDeckCostAtLevel(level) {
   return 3 + PRIME_LEVELS.filter(prime => prime <= normalized).length;
 }
 
-export function getExperienceForLevel(level) {
+export function getExperienceForLevel(level, reincarnationCount = 0) {
   const normalized = normalizeLevel(level);
   const upperIndex = EXPERIENCE_ANCHORS.findIndex(([anchorLevel]) => anchorLevel >= normalized);
   const upper = EXPERIENCE_ANCHORS[upperIndex];
-  if (upper[0] === normalized || upperIndex === 0) return upper[1];
+  if (upper[0] === normalized || upperIndex === 0) {
+    return Math.ceil(upper[1] * getReincarnationExperienceMultiplier(reincarnationCount));
+  }
   const lower = EXPERIENCE_ANCHORS[upperIndex - 1];
   const progress = (normalized - lower[0]) / (upper[0] - lower[0]);
-  return Math.round(lower[1] + (upper[1] - lower[1]) * progress);
+  const base = Math.round(lower[1] + (upper[1] - lower[1]) * progress);
+  return Math.ceil(base * getReincarnationExperienceMultiplier(reincarnationCount));
 }
 
-export function getLevelForExperience(experience) {
-  const normalized = normalizeExperience(experience);
+export function getLevelForExperience(experience, reincarnationCount = 0) {
+  const normalized = normalizeExperience(experience, reincarnationCount);
   let level = 1;
-  while (level < MAX_LEVEL && normalized >= getExperienceForLevel(level + 1)) level += 1;
+  while (level < MAX_LEVEL && normalized >= getExperienceForLevel(level + 1, reincarnationCount)) level += 1;
   return level;
 }
 
-export function getNextLevelExperience(level) {
+export function getNextLevelExperience(level, reincarnationCount = 0) {
   const normalized = normalizeLevel(level);
-  return normalized >= MAX_LEVEL ? MAX_EXPERIENCE : getExperienceForLevel(normalized + 1);
+  return normalized >= MAX_LEVEL
+    ? getExperienceForLevel(MAX_LEVEL, reincarnationCount)
+    : getExperienceForLevel(normalized + 1, reincarnationCount);
 }
 
-export function normalizeExperience(experience) {
-  return Math.min(MAX_EXPERIENCE, Math.max(0, Math.floor(Number(experience) || 0)));
+export function normalizeExperience(experience, reincarnationCount = 0) {
+  return Math.min(
+    getExperienceForLevel(MAX_LEVEL, reincarnationCount),
+    Math.max(0, Math.floor(Number(experience) || 0))
+  );
 }
 
 function normalizeLevel(level) {
