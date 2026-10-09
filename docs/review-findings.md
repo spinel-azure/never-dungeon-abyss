@@ -2067,3 +2067,15 @@
 - reincarnateは未実装コマンドとしてdisabled/aria-disabled/is-unavailableを既存UI経路で適用。クリック不可、方向入力の候補から除外。現在は常時無効。将来の転生実装時も条件成立時のみ有効化する方針であり、今回条件・成長・保存処理は追加していない。
 - 関連Node23成功/失敗0、構文/diff確認成功。TEMP/nda-temple-menu-qa.cjsでPC1280/スマホ相当390幅の2段3列・順序・グレーアウト・無効クリック・方向選択除外・既存returnのDOM click callbackによる町復帰を確認。通常のポインタークリックによる復帰はこのQAで確認できず、DOM callback検証と区別する。実端末/実ゲームパッドは未確認。画像TEMP/nda-temple-menu-1280.png、nda-temple-menu-390.pngを目視確認。
 - LAST UPDATEは既存2026-10-09維持。main.jsキャッシュ20261009-1。README変更なし、コミット/pushなし。
+
+
+### 2026-10-09 通常迷宮の保存負荷と移動中の割込み改善
+
+- 着手main/b8d2e50、作業ツリークリーン。先行調査の結果を受け実装。save-integrity.jsのBase64復号をUint8Array.fromの文字別callbackから確保済み配列への直接代入へ変更。保存形式・UTF-8・署名・一時保存検証・現行保存検証・バックアップは維持。
+- 非表示のタイトル画面がsave-changedごとにCONTINUE/EXPORT用の保存検証を実行していたため、titleOpen=falseではメニュー再構築を省略。タイトル再表示時は従来どおり再評価。自動保存のみの検証環境で、1保存あたり復号4→2回、HMAC5→3回。
+- 通常の保存予約をjs/autosave-scheduler.jsへ分離。250msの待機中に別の移動・旋回が開始した場合、state.animがなくなるまで延期。連続入力でも無期限に延期しないよう、最初の予約から約5秒経過後は次の移動完了通知で保存。アニメーションが継続する限り強制保存しない。報酬確定・手動・pagehide等の直接保存は従来経路を維持し、予約を取り消す。STEP_MS170/TURN_MS150、能力値、報酬、画面更新内容は変更なし。
+- tests/browser/autosave-performance.mjsで旧b8d2e50と現在を分離Edge/headless・PC1280x900・同じ仮状態で比較。33依頼報告済み＋通常階を基礎に、負荷比較用文字列0/64KiB/256KiBを追加。実地図枚数・実ユーザーセーブを表す条件ではない。ウォームアップ5回/計測20回、実localStorage保存経路。保存全体平均はJSON約72KBで47.5→13.5ms、137KBで88.4→24.9ms、334KBで218.4→59.3ms。他テストと並行した初回計測を採用せず、負荷を分離して再計測した値。
+- 137KB条件の2歩入力では旧版が移動中82.3msの保存を実行、新版は完了後24.0msの1保存で移動中保存なし。6.8秒の40ms間隔模擬連続旋回では約5秒時点と終了後の2保存（23.7/33.6ms）、ともにstate.animなし。終了後に33.2msのRAF間隔を1回観測し、停止後の同期保存負荷まで消えたとはしない。タイトル再表示後のCONTINUE復帰・pageerrorなしを確認。実セーブ・物理キーボードのリピート/ゲームパッド・スマホ実端末・長時間通常プレイは未確認。
+- 毎歩UI/通知は先行調査で約0.9msであり、今回は保存を優先。非表示装備・詳細UIの更新抑制は未変更。大容量時は署名計算等の同期負荷が残る。
+- Node全2036成功/失敗0。新規6件でデバウンス、移動中延期、連続入力期限、長時間busy、取消後callback破棄、旧UTF-8/Base64互換と改ざん拒否を確認。キャッシュ更新後の関連14成功。Python29成功/警告0/失敗0/既存2skip。構文検査成功。ログTEMP/nda-save-fix-node.log・nda-save-fix-cache-tests.log・nda-save-fix-python.log・nda-save-fix-browser-final.log。
+- LAST UPDATEは2026-10-09維持。main.jsキャッシュ20261009-3、別エントリのtitle-screen.jsは20261009-1へ更新。内部importへのクエリ付加なし。README変更なし、コミット/pushなし。

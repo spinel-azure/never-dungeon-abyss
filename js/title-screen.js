@@ -47,6 +47,7 @@ function getActions() {
 }
 
 function renderMenu() {
+  if (!titleOpen) return;
   const labels = {
     continue: "CONTINUE",
     "load-game": "LOAD GAME",

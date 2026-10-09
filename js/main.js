@@ -1,3 +1,4 @@
+import { createAutosaveScheduler } from "./autosave-scheduler.js";
 import {needsTrelirenRequest,completeTrelirenEncounter} from '../data/map-beta.js';
 import { renderItemGetItems } from "./item-get-presentation.js";
 import { getDungeonStairImage } from './dungeon-stair-presentation.js';
@@ -328,7 +329,10 @@ import {
   let runStartedAt = performance.now();
   let floorStartedAt = runStartedAt;
   let saveEnabled = false;
-  let autosaveTimer = 0;
+  const autosaveScheduler = createAutosaveScheduler({
+    save: () => saveGame(),
+    isBusy: () => Boolean(state.anim)
+  });
   let worldLocation = "dungeon";
   let character = null;
   let currentDepth = 1;
@@ -1554,10 +1558,7 @@ import {
     accruePlayTime();
     const isManualSave = /^manual[1-3]$/.test(slot);
     if (isManualSave && worldLocation !== "town") return false;
-    if (autosaveTimer) {
-      clearTimeout(autosaveTimer);
-      autosaveTimer = 0;
-    }
+    autosaveScheduler.cancel();
     if (character) {
       character = {
         ...character,
@@ -1575,8 +1576,7 @@ import {
 
   function scheduleAutosave() {
     if (!saveEnabled) return;
-    if (autosaveTimer) clearTimeout(autosaveTimer);
-    autosaveTimer = window.setTimeout(() => saveGame(), 250);
+    autosaveScheduler.request();
   }
 
   function accruePlayTime(now = performance.now()) {

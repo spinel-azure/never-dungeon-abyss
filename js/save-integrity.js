@@ -47,7 +47,8 @@ function encodeBase64Utf8(text) {
 
 function decodeBase64Utf8(value) {
   const binary = atob(value);
-  const bytes = Uint8Array.from(binary, character => character.charCodeAt(0));
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
   return new TextDecoder().decode(bytes);
 }
 
