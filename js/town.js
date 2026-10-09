@@ -58,7 +58,7 @@ const FACILITY_COMMANDS = Object.freeze({
   ],
   temple: [
     ["heal", "治療"], ["donate", "寄進"], ["rename", "改名"],
-    ["talk", "話す"], ["return", "町へ戻る"], ["empty-1", ""]
+    ["talk", "話す"], ["reincarnate", "転生"], ["return", "戻る"]
   ],
   shop: [
     ["buy", "購入"], ["sell", "売却"], ["buyback", "買い戻す"],
@@ -1952,7 +1952,9 @@ function showFacilityCommands(facilityId) {
   town.facilityCommandButtons.forEach((button, index) => {
     const [id, label] = commands[index];
     const empty = !label;
-    const unimplemented = facilityId === "tavern" && UNIMPLEMENTED_TAVERN_COMMANDS.has(id);
+    // Reincarnation stays disabled until its future eligibility rules are implemented.
+    const unimplemented = (facilityId === "tavern" && UNIMPLEMENTED_TAVERN_COMMANDS.has(id))
+      || (facilityId === "temple" && id === "reincarnate");
     const available = id === "return"
       || id === "stay"
       || id === "heal"

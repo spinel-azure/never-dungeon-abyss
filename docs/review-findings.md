@@ -2049,3 +2049,11 @@
 - tests/browser/item-get-images.mjsでPC1280x900、スマホ相当390x844/320x740を検証。仮状態から本編の金箱開封callbackを実行し、開封前非表示/完了後の鍵画像・数量、既所持再取得非表示、複数品の画像有無混在、文字のみ、町の文章形式、画像404時の文字維持を確認。表示枠と行の収まりを検査し、PC/狭幅の鍵と町の画像を目視確認。実端末/実ゲームパッド/通常プレイ全通しは未確認。
 - QA画像TEMP/nda-item-images-Hrynx3、ログTEMP/nda-item-images-browser.log・nda-item-popup-node-final.log・nda-item-popup-python.log。途中の検査で画像枠の背景光がスクロール領域へはみ出す点を修正。画像枠の背景光を枠内へ収め、外側の発光は既存drop-shadowを使用。
 - LAST UPDATE2026-10-07、main.jsおよびtown.cssキャッシュ20261007-1。README変更なし、コミット/pushなし。
+
+
+### 2026-10-09 寺院メニューに転生の準備枠
+
+- 着手main/db4089d、作業ツリークリーン。寺院を上段「治療/寄進/改名」、下段「話す/転生/戻る」へ変更。既存returnコマンドを右下へ移動し、寺院のみ表示名を「戻る」に変更。
+- reincarnateは未実装コマンドとしてdisabled/aria-disabled/is-unavailableを既存UI経路で適用。クリック不可、方向入力の候補から除外。現在は常時無効。将来の転生実装時も条件成立時のみ有効化する方針であり、今回条件・成長・保存処理は追加していない。
+- 関連Node23成功/失敗0、構文/diff確認成功。TEMP/nda-temple-menu-qa.cjsでPC1280/スマホ相当390幅の2段3列・順序・グレーアウト・無効クリック・方向選択除外・既存returnのDOM click callbackによる町復帰を確認。通常のポインタークリックによる復帰はこのQAで確認できず、DOM callback検証と区別する。実端末/実ゲームパッドは未確認。画像TEMP/nda-temple-menu-1280.png、nda-temple-menu-390.pngを目視確認。
+- LAST UPDATEは既存2026-10-09維持。main.jsキャッシュ20261009-1。README変更なし、コミット/pushなし。
