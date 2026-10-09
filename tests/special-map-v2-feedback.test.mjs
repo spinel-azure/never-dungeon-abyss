@@ -1,3 +1,4 @@
+import {mapNameColor} from '../js/special-map/name-color.js';
 import {discardV2Experience} from '../js/special-map/battle-rewards-v2.js';
 import {getV2StairImage} from '../js/special-map/stair-presentation-v2.js';
 import test from 'node:test';
@@ -29,7 +30,7 @@ function harness({entry,map=original,playSe=()=>{},saveSurvey=()=>({ok:true}),ho
  const viewport=new Node(),status=new Node();viewport.append(status);
  const host={viewport,status,...(entry?{runEntryTransition:entry}:{}),openMenu(){menus++;},showTreasure(type){assert.equal(type,'gold');previews++;},playTreasureOpening(type,done){assert.equal(type,'gold');callback=done;openings++;},hideTreasure(){hides++;}};
  Object.assign(host,hostOptions);
- const scope={setTimeout:fn=>timers.push(fn),discardV2Experience,getV2StairImage,...session,...v2,mapOriginalId,getSpecialMapContext:()=>null,getSpecialMapHost:()=>host,attachSpecialMap:()=>()=>{},describeTestMap:()=>({name:'地図'}),setWallColor(){},setFloorColor(){},drawMinimap(){},getMinimapBounds(){},toggleMinimapOverlay(){},isMinimapOverlayVisible:()=>false,performance:{now:()=>0},preloadExplorationImage:()=>{},useSpecialMapRenderSource:o=>{bound=o;return ()=>{};},document:{getElementById:()=>null,visibilityState:'hidden',addEventListener:(key,fn)=>events.set(key,fn),removeEventListener:key=>events.delete(key),createElement:()=>new Node()},window:{addEventListener:(key,fn)=>events.set(key,fn),removeEventListener:key=>events.delete(key)}};
+ const scope={setTimeout:fn=>timers.push(fn),discardV2Experience,getV2StairImage,...session,...v2,mapOriginalId,getSpecialMapContext:()=>null,getSpecialMapHost:()=>host,attachSpecialMap:()=>()=>{},mapNameColor,describeTestMap:()=>({name:'地図'}),setWallColor(){},setFloorColor(){},drawMinimap(){},getMinimapBounds(){},toggleMinimapOverlay(){},isMinimapOverlayVisible:()=>false,performance:{now:()=>0},preloadExplorationImage:()=>{},useSpecialMapRenderSource:o=>{bound=o;return ()=>{};},document:{getElementById:()=>null,visibilityState:'hidden',addEventListener:(key,fn)=>events.set(key,fn),removeEventListener:key=>events.delete(key),createElement:()=>new Node()},window:{addEventListener:(key,fn)=>events.set(key,fn),removeEventListener:key=>events.delete(key)}};
  const source=readFileSync(new URL('../js/special-map/exploration-ui.js',import.meta.url),'utf8');
  vm.runInNewContext(source.replace(/^import .*;\r?\n/gm,'').replace('export function','function')+';this.start=startSpecialMapExploration;',scope);
  const message={},ui=scope.start({registered:[map],mapKey:mapOriginalId(map),message,saveSurvey,playSe,onExit(){exits++;}});

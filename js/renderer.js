@@ -456,7 +456,7 @@ function drawMinimapOverlay() {
   ctx.fillRect(0, 0, W, H);
   const mapOptions=renderer.getMinimapOptions();
   if(mapOptions.mapTitle){
-    ctx.font='32px PixelFont, monospace';ctx.textAlign='center';ctx.fillStyle='#fff';
+    ctx.font='32px PixelFont, monospace';ctx.textAlign='center';ctx.fillStyle=mapOptions.mapTitleColor||'#fff';
     ctx.fillText(mapOptions.mapTitle,W/2,oy-20,W*.74);
   }
   renderer.drawMinimap(ctx, {
@@ -518,6 +518,7 @@ function drawFloorLapMessage() {
   ctx.font = `400 ${Math.max(54, Math.floor(H * .15))}px PixelFont, monospace`;
   const titleY = subtitle ? H * .46 : H / 2;
   if(state.overlayEvent?.specialMapTitle){
+    if(state.overlayEvent.mapTitleColor)ctx.fillStyle=state.overlayEvent.mapTitleColor;
     const size=Math.max(24,Math.min(Math.max(54,Math.floor(H*.15)),(W*.88/Math.max(1,ctx.measureText(title).width))*Math.max(54,Math.floor(H*.15))));
     ctx.font=`400 ${size}px PixelFont, monospace`;
   }

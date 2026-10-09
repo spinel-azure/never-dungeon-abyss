@@ -1,3 +1,4 @@
+import {mapNameColor} from './name-color.js';
 import {restoreSpecialMapSession,resumeMapOriginal} from './save-session.js';
 import {discardV2Experience} from './battle-rewards-v2.js';
 import {getV2StairImage} from './stair-presentation-v2.js';
@@ -32,7 +33,7 @@ export function startSpecialMapExploration(options){
    if(cancelled)return;
    if(completed===false||!controller)throw Error('入場演出を開始できませんでした。');
    let name=options.developmentName||'特殊地図';try{if(!options.developmentName)name=describeTestMap(original).name;}catch{}
-   controller.session.renderState.overlayEvent={type:'floorLap',showOverlay:false,overlayMessage:name,specialMapTitle:true};
+   controller.session.renderState.overlayEvent={type:'floorLap',showOverlay:false,overlayMessage:name,mapTitleColor:mapNameColor(original.rarity),specialMapTitle:true};
    controller.session.transitioning=false;locked=false;
   }catch{
    if(cancelled)return;
@@ -115,7 +116,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  function finish({reason='return'}={}){if(disposed||returned||session.transitioning)return false;if(!flushSpecialSurvey(session)){message.textContent=session.surveyError;return false;}if(host.beforeReturn?.({session,reason})===false)return false;returned=true;close();onExit();host.afterReturn?.({session,reason});return true;}
  onEnter();
  const detach=attachSpecialMap({session,finish,input,close});
- session.renderState.overlayEvent={type:'floorLap',showOverlay:false,overlayMessage:name,specialMapTitle:true};
+ session.renderState.overlayEvent={type:'floorLap',showOverlay:false,overlayMessage:name,mapTitleColor:mapNameColor(original.rarity),specialMapTitle:true};
  if(session.bossRenderDefinition)preloadExplorationImage(session.bossRenderDefinition.id,session.bossRenderDefinition.image);
  const restore=useSpecialMapRenderSource({canvas,ctx:canvas.getContext('2d'),W:960,H:540,state:session.renderState,eventOverlayCtx:null,
   wallOnCell:(x,y,d)=>specialWall(session,x,y,d)||specialDoorState(session,x,y,d)==='closed',closedDoorOnCell:(x,y,d)=>specialDoorState(session,x,y,d)==='closed',openDoorOnCell:(x,y,d)=>specialDoorState(session,x,y,d)==='open',getDoorState:(x,y,d)=>specialDoorState(session,x,y,d),getDoorKind:(x,y,d)=>session.cells[y]?.[x]?.doorKinds[d]??null,getDepth:()=>0,
@@ -132,7 +133,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
     showStairNotice();
    }
   },drawMinimap,getMinimapBounds,
-  getMinimapOptions:()=>({W:960,MAP_W:10,MAP_H:10,cells:session.cells,explored:session.surveyView,state:session.renderState,mapTitle:isV2Session(session)?name:null}),
+  getMinimapOptions:()=>({W:960,MAP_W:10,MAP_H:10,cells:session.cells,explored:session.surveyView,state:session.renderState,mapTitle:isV2Session(session)?name:null,mapTitleColor:mapNameColor(original.rarity)}),
   updateHud:()=>{
    if(isV2Session(session)){
     const effects=host.getTorchCardEffects?.();session.renderState.torchEffectForced=Boolean(effects?.effectForced);session.renderState.minimapEffectForced=Boolean(effects?.effectForced);

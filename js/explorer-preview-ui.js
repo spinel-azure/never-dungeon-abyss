@@ -1,3 +1,4 @@
+import {mapNameColor} from './special-map/name-color.js';
 import {sortRegisteredMaps} from '../data/special-map-sort.js';
 import {MAP_BETA_WELCOME,MAP_BETA_EXPLANATION,MAP_BETA_NOTICE} from '../data/map-beta.js';
 import {paginateMessageToFit} from './message-pagination.js';
@@ -70,6 +71,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
   function cycleSort(){sortMode=(sortMode+1)%sortLabels.length;index=page=0;armed=-1;render();}
   const selectedMap=()=>maps().registered.find(m=>m.id===detailId);
   const make=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
+  const mapText=(tag,text,map,cls)=>{const e=make(tag,text,cls);e.style.color=mapNameColor(map.rarity);return e;};
   const invoke=(action,sound=action===back||action===exit?'cancel':'confirm')=>{playSe(sound);action();};
   const button=(label,action,selected=false,sound)=>{const b=make('button');b.type='button';if(label)b.append(make('span',label,'explorer-button-label'));b.classList.toggle('is-selected',selected);b.onclick=()=>{if(acquisitionController||b.disabled)return;if(finishTyping())return;invoke(action,typeof sound==='function'?sound():sound??(label==='戻る'?'cancel':undefined));};return b;};
   const error=text=>{message.textContent=text;};
@@ -238,7 +240,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
         const i=page*5+offset,info=describeTestMap(map)||{name:map.rulesetVersion==='special-map-v1'?'特殊地図':'未対応の生成ルール',level:'?'};
         const b=button('',()=>{sortFocused=false;if(armed===i)openDetail(map);else{index=i;armed=i;render();}},i===index&&!sortFocused,()=>armed===i?'confirm':'cursorMove');
         const star=map.favorite?' ⭐':'';b.title=info.name+star;b.setAttribute('aria-label',(isV2Map(map)?info.name:`${info.name} Lv.${info.level}`)+star);
-        b.append(make('span',info.name+(isV2Map(map)?star:''),isV2Map(map)?'explorer-map-name explorer-map-name-v2':'explorer-map-name'));if(!isV2Map(map))b.append(make('span',`Lv.${info.level}${star}`,'explorer-map-level'));list.append(b);
+        b.append(mapText('span',info.name+(isV2Map(map)?star:''),map,isV2Map(map)?'explorer-map-name explorer-map-name-v2':'explorer-map-name'));if(!isV2Map(map))b.append(mapText('span',`Lv.${info.level}${star}`,map,'explorer-map-level'));list.append(b);
       });
       const pager=make('div',undefined,'transfer-destination-pager');
       const prev=button('◀',()=>turnPage(-1),false,'cursorMove'),next=button('▶',()=>turnPage(1),false,'cursorMove');
@@ -266,7 +268,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       const map=maps().registered.find(m=>m.id===detailId);if(!map){view=origin;render();return;}
       const info=describeTestMap(map)||{name:map.rulesetVersion==='special-map-v1'?'特殊地図':'未対応の生成ルール',level:'?'};
       const body=make('div',undefined,'explorer-detail');
-      body.append(make('h3',(isV2Map(map)?info.name:`${info.name} Lv.${info.level}`)+(map.favorite?' ⭐':'')),make('p',`発見者：${map.discovererName}`),make('p',isV2Map(map)?`${rarityLabel(map.rarity)}・3層　${surveyTotalV2(map.surveyedMasks)===300?'調査完了':`調査 ${surveyTotalV2(map.surveyedMasks)} / 300`}`:surveyCount(map.surveyedMask)===100?'調査完了':`調査率 ${surveyCount(map.surveyedMask)} / 100`),make('p',isV2Map(map)?'挑戦条件：未実装':'挑戦条件：未実装（Phase 2A仮地図）'));
+      body.append(mapText('h3',(isV2Map(map)?info.name:`${info.name} Lv.${info.level}`)+(map.favorite?' ⭐':''),map),make('p',`発見者：${map.discovererName}`),make('p',isV2Map(map)?`${rarityLabel(map.rarity)}・3層　${surveyTotalV2(map.surveyedMasks)===300?'調査完了':`調査 ${surveyTotalV2(map.surveyedMasks)} / 300`}`:surveyCount(map.surveyedMask)===100?'調査完了':`調査率 ${surveyCount(map.surveyedMask)} / 100`),make('p',isV2Map(map)?'挑戦条件：未実装':'挑戦条件：未実装（Phase 2A仮地図）'));
       panel.append(body);if(view==='enter'){panel.append(make('p','この地図を探索しますか？'));actionButtons([['はい（A／ENTER）',enterMap],['いいえ（B）',back]]);return;}actionButtons(origin==='maps'?[['探索する（A）',()=>changeView('enter')],['戻る（B）',back]]:[['管理機能を確認（A）',()=>changeView('manage')],['戻る（B）',back]]);return;
     }
     if(view==='sameContent'){
@@ -276,8 +278,8 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     }
     const map=selectedMap();if(!map){view='organize';render();return;}
     const info=describeTestMap(map)||{name:map.rulesetVersion==='special-map-v1'?'特殊地図':'未対応の生成ルール',level:'?'};
-    if(isV2Map(map))panel.append(make('p',info.name+(map.favorite?' ⭐':'')),make('p',`発見者：${map.discovererName}`));
-    else panel.append(make('p',`${info.name} Lv.${info.level}${map.favorite?' ⭐':''}　発見者：${map.discovererName}`));
+    if(isV2Map(map))panel.append(mapText('p',info.name+(map.favorite?' ⭐':''),map),make('p',`発見者：${map.discovererName}`));
+    else panel.append(mapText('p',`${info.name} Lv.${info.level}${map.favorite?' ⭐':''}　発見者：${map.discovererName}`,map));
     if(view==='manage'){
       actionButtons([['共有コードを表示',()=>changeView('share')],['共有コードをコピー',()=>{changeView('share');try{copyCode(encodeMapCode(map));}catch(e){error(e.message);}}],
         [`お気に入り ${map.favorite?'ON':'OFF'}`,favorite],['地図を削除',()=>{if(map.favorite){error('お気に入り登録を解除してから削除してください。');return;}changeView('delete');}],['戻る（B）',back]]);return;

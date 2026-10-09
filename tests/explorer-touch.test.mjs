@@ -12,7 +12,7 @@ import {mapOriginalId,mapContentId} from '../data/special-maps.js';
 // Minimal DOM for exercising the real controller's handlers and the document
 // touch guard together. A cancelled touch sequence must not synthesize click.
 class Element {
-  constructor(tag='div'){this.tag=tag;this.children=[];this.dataset={};this.attrs={};this.hidden=false;this.text='';this.classes=new Set();this.classList={toggle:(v,on)=>on?this.classes.add(v):this.classes.delete(v)};}
+  constructor(tag='div'){this.tag=tag;this.style={};this.children=[];this.dataset={};this.attrs={};this.hidden=false;this.text='';this.classes=new Set();this.classList={toggle:(v,on)=>on?this.classes.add(v):this.classes.delete(v)};}
   set textContent(v){this.text=v;this.children=[];}
   get textContent(){return this.text+this.children.map(c=>c.textContent).join('');}
   setAttribute(k,v){this.attrs[k]=v;}
@@ -341,4 +341,12 @@ test('sort navigation handles a partial final page and empty book',t=>{
  const empty=setup(t,'layout-mobile',initial);empty.ui.open('maps');empty.ui.input('up');empty.ui.input('confirm');
  assert.ok(empty.find('ソート：お気に入り').classes.has('is-selected'));
  empty.ui.input('cancel');assert.equal(empty.exits(),1);
+});
+
+for(const [rarity,color] of [['WHITE','#ffffff'],['SILVER','#dce6f2'],['GOLD','#ffd966']])test(`${rarity} map name color persists in selected list and details`,t=>{
+ const initial=normalizeSpecialMaps({discovererName:'QA',registered:[{rulesetVersion:'special-map-v2',seed:1,level:20,rarity,discovererName:'QA'}]});
+ const v=setup(t,'layout-mobile',initial);v.ui.open('maps');
+ const name=v.all(v.host).find(e=>e.className?.includes('explorer-map-name'));assert.equal(name.style.color,color);
+ v.ui.input('confirm');assert.equal(v.all(v.host).find(e=>e.tag==='h3').style.color,color);
+ assert.equal(v.state().registered[0].rarity,rarity);
 });
