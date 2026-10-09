@@ -38,7 +38,7 @@ function grantInitialBatch(state,grantFlag,{random=Math.random,id=()=>crypto.ran
 export function prepareFormalStarter(state,options){
  if(state.starterMapsGranted)return {ok:false,error:'白地図は受け取り済みです。'};
  if(state.starterOffer?.length===3)return {ok:true,state,maps:state.starterOffer};
- const batch=grantStarterMaps(state,options);
+ const batch=grantStarterMaps({...state,discovererName:state.discovererName||'トレリー'},options);
  return batch.ok?{ok:true,maps:batch.maps,state:{...state,starterOffer:batch.maps}}:batch;
 }
 export function receiveFormalStarter(state){

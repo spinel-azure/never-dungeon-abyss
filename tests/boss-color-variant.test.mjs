@@ -7,12 +7,12 @@ test('RGB/HSL roundtrips primary, gray and arbitrary colors',()=>{
 });
 test('deterministic dedicated adjustments vary with seed, level and rarity within safe bounds',()=>{
   assert.deepEqual(compute(input),compute(input));
-  assert.deepEqual(compute(input),{hueShift:17.06847894954015,saturationScale:1.1701228556307033,lightnessOffset:.015045391288915216});
+  assert.ok(Math.abs(compute({...input,level:100}).hueShift)>Math.abs(compute({...input,level:1}).hueShift)+100);
   for(const change of [{seed:1},{level:1},{rarity:'WHITE'},{rarity:'SILVER'}]) assert.notDeepEqual(compute({...input,...change}),compute(input));
   let silver=0,gold=0;
   for(let seed=0;seed<1000;seed++) for(const rarity of ['WHITE','SILVER','GOLD']) {
     const a=compute({...input,seed,rarity,level:seed%100+1});
-    assert.ok(Math.abs(a.hueShift)<=20 && a.saturationScale>=.85 && a.saturationScale<=1.25 && Math.abs(a.lightnessOffset)<=.06);
+    assert.ok(Math.abs(a.hueShift)<=180 && a.saturationScale>=.75 && a.saturationScale<=1.4 && Math.abs(a.lightnessOffset)<=.06);
     if(rarity==='SILVER') silver+=a.saturationScale;
     if(rarity==='GOLD') gold+=a.saturationScale;
   }
@@ -32,7 +32,7 @@ test('pixels are deterministic, alpha and transparent RGB/black/grays preserved;
   for(let i=3;i<a.length;i+=4) assert.equal(a[i],source[i]);
   assert.ok(Math.abs(a[20]-source[20])<3);
   assert.notDeepEqual(a.slice(24,27),source.slice(24,27));
-  assert.deepEqual(pixels(source.slice(),{hueShift:999,saturationScale:999,lightnessOffset:999}),pixels(source.slice(),{hueShift:20,saturationScale:1.25,lightnessOffset:.06}));
+  assert.deepEqual(pixels(source.slice(),{hueShift:999,saturationScale:999,lightnessOffset:999}),pixels(source.slice(),{hueShift:180,saturationScale:1.4,lightnessOffset:.06}));
 });
 function harness(fail=false,maxEntries=8) {
   const calls={get:0,put:0,draw:0};

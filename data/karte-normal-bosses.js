@@ -42,7 +42,8 @@ export const NORMAL_BOSS_ANCHORS=freeze([
  [1,45,4,4,4,5,5,4,4,50,20], [5,65,4,5,5,6,6,5,5,120,40],
  [10,160,10,10,10,12,12,8,10,300,80], [25,600,17,17,18,18,18,12,17,900,180],
  [50,2000,27,27,28,24,24,17,25,2300,400], [75,7000,40,40,42,30,30,22,33,4500,650],
- [100,22000,50,50,50,36,36,27,40,7500,1000]
+ [89,15800,46,46,46,33,33,25,37,6180,846],
+ [90,50000,46,46,46,34,34,25,38,6300,860], [100,100000,50,50,50,36,36,27,40,7500,1000]
 ]);
 export function createNormalMapBoss(input){
  const boss=selectNormalMapBoss(input),level=input.level;
@@ -52,7 +53,7 @@ export function createNormalMapBoss(input){
  const power=boss.profile==='offensive'?1.1:1;
  const strike={id:'map_boss_strike',name:'強撃',actionType:'physicalAttack',hitCount:1,powerPerHit:1.25,effects:[]};
  return applyAdditionalMapBossTraits({...boss,name:`${boss.name} Lv.${level}`,level,race:'unknown',battleSize:'large',isBoss:true,
-  maxHp:Math.round(v[1]*hpScale),attack:Math.round(v[2]*power),stats:{str:v[3],int:v[4],agi:v[5],dex:v[6],luc:v[7]},def:v[8],
+  maxHp:level>=90?Math.max(50000,Math.min(100000,Math.round(v[1]*hpScale))):Math.round(v[1]*hpScale),attack:Math.round(v[2]*power),stats:{str:v[3],int:v[4],agi:v[5],dex:v[6],luc:v[7]},def:v[8],
   actions:[{weight:65,action:{id:'map_boss_attack',name:'攻撃',actionType:'physicalAttack',hitCount:1,powerPerHit:1,effects:[]}},
    {weight:25,action:strike},{weight:10,action:{id:'map_boss_wait',name:'様子を見る',actionType:'wait'}}],
   elementMultipliers:{fire:1,ice:1,lightning:1,light:1,dark:1},

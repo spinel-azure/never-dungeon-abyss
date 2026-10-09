@@ -350,3 +350,13 @@ for(const [rarity,color] of [['WHITE','#ffffff'],['SILVER','#dce6f2'],['GOLD','#
  v.ui.input('confirm');assert.equal(v.all(v.host).find(e=>e.tag==='h3').style.color,color);
  assert.equal(v.state().registered[0].rarity,rarity);
 });
+
+test('formal welcome precedes receipt and signature, and reload retains the exact three maps',async t=>{
+ const v=setup(t,'layout-mobile',normalizeSpecialMaps({}),{useBetaIntroduction:()=>true,showMapRewardAcquisition:async()=>{}});
+ v.message.clientHeight=0;v.ui.open('tent');assert.match(v.message.textContent,/テントへようこそ/);
+ v.ui.input('confirm');await new Promise(r=>setImmediate(r));assert.equal(v.state().unidentified.length,3);assert.match(v.host.textContent,/地図署名/);
+ const ids=v.state().unidentified.map(m=>[m.discoveryId,m.seed,m.level]);v.ui.close();v.ui.open('tent');assert.match(v.host.textContent,/地図署名/);
+ const field=v.all(v.host).find(e=>e.tag==='input');field.value='銀虫';v.touch(v.find('署名を登録（A）'));
+ assert.equal(v.state().discovererName,'銀虫');assert.ok(v.state().unidentified.every(m=>m.discovererName==='銀虫'));
+ assert.deepEqual(v.state().unidentified.map(m=>[m.discoveryId,m.seed,m.level]),ids);assert.match(v.message.textContent,/地図探索β/);
+});

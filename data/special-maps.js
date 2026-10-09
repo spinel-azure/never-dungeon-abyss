@@ -69,7 +69,7 @@ export function describeTestMap(map) {
 export function setMapSignature(state,input) {
   if(state.discovererName)return {ok:false,error:'地図署名は登録済みです。'};
   const result=validateMapSignature(input);
-  return result.ok?{ok:true,state:{...state,discovererName:result.value}}:result;
+  return result.ok?{ok:true,state:{...state,discovererName:result.value,unidentified:state.unidentified.map(m=>state.formalStarterIds?.includes(m.discoveryId)?{...m,discovererName:result.value}:m)}}:result;
 }
 export function discoverTestMap(state,{seed=()=>crypto.getRandomValues(new Uint16Array(1))[0],id=()=>crypto.randomUUID(),rulesetVersion=SPECIAL_MAP_RULESET,level,rarity}={}) {
   if(!state.discovererName)return {ok:false,error:'先に探検家テントで地図署名を登録してください。'};

@@ -14,7 +14,7 @@ export function createTrelirenDialogue({messageEl,getRun,startOverlay,getEvent,c
   body=document.createElement('span');body.className='town-talk-body';
   hint=document.createElement('span');hint.className='town-talk-hint';
   messageEl.replaceChildren(body,hint);
-  pages=paginateMessageToFit({element:body,text:run.phase>=5?'迷宮探検家トレリーレン「'+(run.phase===5?TRELIREN_REQUEST:TRELIREN_FOLLOWUP)+'」':TRELIREN_DIALOGUES[run.firstEncounter?'first':'repeat'][run.phase]});
+  pages=paginateMessageToFit({element:body,text:run.phase>=5&&run.rewardGiven?'「魔除けのお香」を手に入れた！':run.phase>=5?'迷宮探検家トレリーレン「'+(run.phase===5?TRELIREN_REQUEST:TRELIREN_FOLLOWUP)+'」':TRELIREN_DIALOGUES[run.firstEncounter?'first':'repeat'][run.phase]});
   page=0;show();
  }
  function show(){const text=pages[page]||'';if(startTyping)startTyping(getEvent(),text,(value,typing)=>{body.textContent=value;hint.textContent=locked||typing?'':'＊Aボタンで次へ';});else {body.textContent=text;hint.textContent=locked?'':'＊Aボタンで次へ';}}
@@ -39,6 +39,7 @@ export function createTrelirenDialogue({messageEl,getRun,startOverlay,getEvent,c
    if(getEvent()?.typing?.active){completeTyping?.(getEvent());return true;}
    if(++page<pages.length){show();return true;}
    const run=getRun();
+   if(run.phase>=5&&!run.rewardGiven){void reward();return true;}
    if(run.phase<4){run.phase++;save();render();if(run.phase===3)void reward();return true;}
    locked=true;hint.textContent='';getEvent().fadeStartedAt=performance.now();
    const token=epoch;

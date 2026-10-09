@@ -62,7 +62,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     try{if(showMapRewardAcquisition)await showMapRewardAcquisition({signal:controller.signal,starter:true});else playSe('importantItem');}
     finally{if(acquisitionController===controller)acquisitionController=null;}
     if(controller.signal.aborted||!active)return;
-    betaView='';view='betaExplanation';render();
+    betaView='';view=maps().discovererName?'betaExplanation':'signature';render();
   }
 
   let sortMode=-1,sortFocused=false;
@@ -83,6 +83,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     if(view==='enter'){view='detail';actionCursor=0;}
     else if(['manage','share','delete'].includes(view)){view=view==='manage'?'detail':'manage';actionCursor=0;}
     else if(view==='sameContent')view='register';
+    else if(view==='signature'&&useBetaIntroduction()&&!maps().discovererName){exit();return;}
     else if(view==='signature'||view==='starter')view=tentView();
     else if(view==='detail'){view=origin;armed=-1;}
     else if(view==='appraisal'||view==='duplicate'){view='appraise';appraisalArmed=-1;}
@@ -340,5 +341,5 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     }
     return true;
   }
-  return {open(kind){previousHint=hint?.textContent||'';active=true;sortFocused=false;opening=kind;betaView='';view=maps().discovererName?initialView(kind):'signature';cursor=formCursor=actionCursor=0;armed=appraisalArmed=-1;tentImage=getTentBackground();render();},input:inputAction,isTalking:()=>view==='betaWelcome'||view==='betaExplanation',close};
+  return {open(kind){previousHint=hint?.textContent||'';active=true;sortFocused=false;opening=kind;betaView='';view=maps().discovererName?initialView(kind):kind==='tent'&&useBetaIntroduction()&&!maps().starterMapsGranted?'betaWelcome':'signature';cursor=formCursor=actionCursor=0;armed=appraisalArmed=-1;tentImage=getTentBackground();render();},input:inputAction,isTalking:()=>view==='betaWelcome'||view==='betaExplanation',close};
 }

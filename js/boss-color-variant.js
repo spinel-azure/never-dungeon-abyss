@@ -3,7 +3,7 @@ import {KARTE_BOSS_IMAGES} from '../data/karte-boss-images.js';
 import {KARTE_SPECIAL_BOSSES} from '../data/karte-special-bosses.js';
 import {SPECIAL_MAP_THEMES} from '../data/special-map-themes.js';
 
-export const BOSS_VARIANT_VERSION = 1;
+export const BOSS_VARIANT_VERSION = 2;
 export const BOSS_VARIANT_SIZE = 600;
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
@@ -34,12 +34,12 @@ export function computeBossVariantAdjustments({bossId, level, seed, rarity} = {}
   }
   const roll = purpose => streamV1('special-map-v2', seed,
     JSON.stringify(['boss-variant', BOSS_VARIANT_VERSION, bossId, purpose]))() / 4294967296 * 2 - 1;
-  const strength = .35 + .65 * (level - 1) / 99;
+  const strength = (level - 1) / 99;
   const rare = rarity === 'WHITE' ? [0,0,0,.65] : rarity === 'SILVER' ? [-3,-.07,.025,1] : [3,.12,.02,1];
-  // Hue rotation is deliberately modest; it cannot make every source color warm/cold.
+  // Higher map levels rotate farther from the original; seed chooses direction.
   return Object.freeze({
-    hueShift: clamp(roll('hue') * 17 * strength * rare[3] + rare[0], -20, 20),
-    saturationScale: clamp(1 + roll('saturation') * .12 * strength * rare[3] + rare[1], .85, 1.25),
+    hueShift: (roll('hue') < 0 ? -1 : 1) * (8 + 142 * strength) + rare[0],
+    saturationScale: clamp(1 + roll('saturation') * .25 * strength + rare[1], .75, 1.4),
     lightnessOffset: clamp(roll('lightness') * .035 * strength * rare[3] + rare[2]
       - Math.max(0, level - 60) / 40 * .025, -.06, .06),
   });
@@ -56,8 +56,8 @@ export function applyBossVariantPixels(data, adjustments) {
     // Preserve outlines exactly; fade corrections into colored midtones.
     const protection = clamp((l - .08) / .18, 0, 1) * clamp(s / .2, 0, 1);
     if (!protection) continue;
-    const rgb = hslToRgb(h + clamp(hueShift,-20,20) * protection,
-      s * (1 + (clamp(saturationScale,.85,1.25) - 1) * protection),
+    const rgb = hslToRgb(h + clamp(hueShift,-180,180) * protection,
+      s * (1 + (clamp(saturationScale,.75,1.4) - 1) * protection),
       l + clamp(lightnessOffset,-.06,.06) * protection);
     data[i] = rgb[0]; data[i+1] = rgb[1]; data[i+2] = rgb[2];
   }
