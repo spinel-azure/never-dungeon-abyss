@@ -311,3 +311,34 @@ test('100 registered maps survive reload and sort cycles preserve identity and s
  assert.equal(JSON.stringify(v.state()),before);
  for(let i=0;i<19;i++)v.ui.input('right');assert.match(v.host.textContent,/20 \/ 20/);v.ui.input('confirm');assert.match(v.host.textContent,/地図詳細/);
 });
+
+for(const kind of ['maps','organize'])test(`${kind}: page edges reach sort and confirm cycles without leaving sort`,t=>{
+ const cues=[],v=setup(t,'layout-mobile',fixture(),{playSe:key=>cues.push(key)});v.ui.open(kind);
+ const selected=()=>v.all(v.host).filter(e=>e.tag==='button'&&e.classes.has('is-selected'));
+ for(let i=0;i<5;i++)v.ui.input('down');
+ assert.deepEqual(selected().map(e=>e.textContent),['ソート：登録順']);
+ assert.match(v.host.textContent,/1 \/ 2/);
+ cues.length=0;
+ for(const name of ['お気に入り','Lv低い順','Lv高い順','テーマ','お気に入り']){
+  v.ui.input('confirm');assert.deepEqual(selected().map(e=>e.textContent),['ソート：'+name]);
+ }
+ assert.deepEqual(cues,Array(5).fill('confirm'));
+ v.ui.input('down');assert.equal(selected().length,1);assert.ok(!selected()[0].textContent.startsWith('ソート'));
+ v.ui.input('up');assert.ok(selected()[0].textContent.startsWith('ソート'));
+ v.ui.input('up');assert.equal(selected()[0],v.find(label(4)));
+ v.ui.input('down');v.ui.input('right');assert.equal(selected()[0],v.find(label(5)));
+ v.ui.input('up');v.touch(v.find(label(6)));assert.equal(selected()[0],v.find(label(6)));
+ v.ui.input('confirm');assert.match(v.host.textContent,/地図詳細/);
+ v.ui.input('cancel');assert.equal(selected()[0],v.find(label(6)));
+});
+
+test('sort navigation handles a partial final page and empty book',t=>{
+ const initial=fixture();initial.registered=initial.registered.slice(0,6);
+ const v=setup(t,'layout-mobile',initial);v.ui.open('maps');v.ui.input('right');v.ui.input('down');
+ assert.ok(v.find('ソート：登録順').classes.has('is-selected'));
+ v.ui.input('up');assert.ok(v.find(label(5)).classes.has('is-selected'));
+ v.ui.close();initial.registered=[];
+ const empty=setup(t,'layout-mobile',initial);empty.ui.open('maps');empty.ui.input('up');empty.ui.input('confirm');
+ assert.ok(empty.find('ソート：お気に入り').classes.has('is-selected'));
+ empty.ui.input('cancel');assert.equal(empty.exits(),1);
+});

@@ -26,7 +26,7 @@ for(const f of F2_MAP_FIXTURES){
   const s=createSpecialMapV2Session([map],mapOriginalId(map));
   try{for(let floor=0;floor<3;floor++){
    let calls=0,roll=0;s.currentFloor=floor;
-   attachV2Encounters(s,{random:()=>roll,onBlocked:()=>assert.fail('blocked'),onEncounter:(_,enemy,context)=>{calls++;assert.equal(enemy,getV2CombatEnemy(f.id));assert.equal(context.speciesId,f.id);assert.equal(context.floorIndex,floor);}});
+   attachV2Encounters(s,{random:()=>roll,onBlocked:()=>assert.fail('blocked'),onEncounter:(_,enemy,context)=>{calls++;assert.deepEqual(enemy,getV2CombatEnemy(f.id,f.level));assert.equal(context.speciesId,f.id);assert.equal(context.floorIndex,floor);}});
    const pool=s.ecology.floors[floor].species,index=pool.findIndex(row=>row.id===f.id);
    roll=(pool.slice(0,index).reduce((n,row)=>n+row.weight,0)+0.5)/10000;
    for(let i=0;i<100;i++){s.playerX=i%10;s.playerY=Math.floor(i/10);if(isV2EncounterCell(s))break;}
@@ -45,7 +45,7 @@ for(const f of F2_MAP_FIXTURES){
   for(const key of ['name','image','attack','def','experienceReward','dropGold','fixedGoldPerDefeat','noDrop','escapeRate'])assert.deepEqual(a[key],d[key]);
   for(const key of ['stats','actions','statusResistances','elementMultipliers'])assert.deepEqual(a[key],d[key]);
   assert.equal(a.hp,d.maxHp);assert.equal(a.actions.reduce((n,row)=>n+row.weight,0),100);
-  assert.ok(a.actions.every(row=>['physicalAttack','wait'].includes(row.actionType)));
+  assert.ok(a.actions.every(row=>['physicalAttack','wait','enemyEscape'].includes(row.actionType)));
   let weight=0;for(const row of a.actions){const action=createEnemyAction(a,()=>(weight+.5)/100);assert.equal(action.actionType,row.actionType);assert.equal(action.id,row.id);if(row.actionType==='physicalAttack')assert.equal(action.powerPerHit,row.powerPerHit);weight+=row.weight;}
   a.hp=0;a.statuses.push({id:'poison'});a.actions[0].weight=0;a.stats.str=0;
   assert.equal(b.hp,d.maxHp);assert.deepEqual(b.statuses,[]);assert.equal(b.actions[0].weight,d.actions[0].weight);assert.equal(b.stats.str,d.stats.str);
@@ -56,7 +56,7 @@ for(const f of F2_MAP_FIXTURES){
   const s=createSpecialMapV2Session([map],mapOriginalId(map));
   try{
    let c=createInitialCharacter({name:'試験',job:'warrior'});c.carriedExperience=777;c.pendingExperienceSettlement={test:true};c.lootBag={gold:888,items:{},cards:{},equipmentInstances:[]};
-   const before=structuredClone(c),d=getV2CombatEnemy(f.id);
+   const before=structuredClone(c),d=getV2CombatEnemy(f.id,f.level);
    s.battleContext={source:'special-map-v2',sessionId:s.encounterSessionId,battleId:1,mapKey:s.mapKey};
    const enemy=createEnemyCombatant(d);enemy.hp=0;enemy.alive=false;
    const battle={enemy,explorationContext:structuredClone(s.battleContext)};
@@ -70,10 +70,14 @@ for(const f of F2_MAP_FIXTURES){
   }finally{s.disposeSurvey();}
  });
 }
-test('Candidate combat pacing: minimum-level fixtures can win, actions execute through engine',()=>{
+test('Candidate combat pacing: minimum-level fixtures resolve victory or beetle escape through engine',()=>{
  for(const id of ['silberkaefer','maikaefer_koenig'])for(const job of ['warrior','thief','priest','mage']){
   const runs=Array.from({length:20},(_,i)=>simulateF2(id,job,i+1));
-  assert.ok(runs.some(r=>r.outcome==='victory'),`${id} ${job} unwinnable`);
+  if(id==='silberkaefer'){
+   assert.ok(runs.some(r=>['victory','enemyEscaped'].includes(r.outcome)),`${job}: silver fight must allow victory or escape`);
+   if(job==='thief')assert.ok(runs.some(r=>r.outcome==='enemyEscaped'));
+   assert.ok(runs.every(r=>['victory','defeat','enemyEscaped'].includes(r.outcome)));
+  }else assert.ok(runs.some(r=>r.outcome==='victory'),`${id} ${job} unwinnable`);
   assert.ok(runs.every(r=>r.outcome!=='timeout'));
  }
 });
@@ -93,4 +97,22 @@ test('special themes resolve general ecology species, never fixed bosses',()=>{
   const e=generateV2EcologyCandidate2({ruleset:'special-map-v2',seed:22172,level:100,rarity:'GOLD',themeId});
   for(const floor of e.floors)for(const row of floor.species){assert.ok(getV2CombatEnemy(row.id));assert.equal(getV2CombatEnemy(row.id).isBoss,false);}
  }
+});
+
+test('V2 beetle EXP interpolates before return bonuses without mutating abyss definitions',()=>{
+ for(const [id,base,max] of [['maikaefer',1000,20000],['silberkaefer',300,5000]]){
+  const original=structuredClone(getV2CombatEnemy(id));
+  for(let level=1;level<=100;level++){
+   const enemy=getV2CombatEnemy(id,level);
+   assert.equal(enemy.experienceReward,base+Math.floor((max-base)*(level-1)/99));
+   assert.equal(enemy.maxHp,original.maxHp);assert.deepEqual(enemy.stats,original.stats);
+  }
+  assert.deepEqual(getV2CombatEnemy(id),original);
+ }
+ assert.equal(getRandomEncounterEnemy({depth:100,rng:()=>0}).experienceReward,100000);
+ const silver=createEnemyCombatant(getV2CombatEnemy('silberkaefer',100));
+ const actions=Array.from({length:100},(_,i)=>createEnemyAction(silver,()=>(i+.5)/100).actionType);
+ assert.equal(actions.filter(a=>a==='enemyEscape').length,30);
+ assert.equal(actions.filter(a=>a==='physicalAttack').length,45);
+ assert.equal(actions.filter(a=>a==='wait').length,25);
 });

@@ -26,7 +26,7 @@ export function attachV2Encounters(s,{onEncounter,random=Math.random,onBlocked=m
   s.presence=Math.min(100,s.presence+(dark?5:4)+Math.floor(random()*(dark?6:5)));
   if(s.presence<100)return false;
   const speciesId=rollV2Species(s.ecology.floors[s.currentFloor].species,random);
-  const enemy=getV2CombatEnemy(speciesId);
+  const enemy=getV2CombatEnemy(speciesId,s.level);
   // Preserve unknown-ID protection; never substitute or reroll the ecology pick.
   if(!enemy||enemy.isBoss){s.presence=0;s.autoPath=null;const message=`${speciesId}：戦闘定義未対応のため遭遇を保留しました。`;onBlocked(message);s.say(message);return false;}
   s.autoPath=null;

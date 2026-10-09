@@ -81,6 +81,7 @@ for(const id of ['silberkaefer','maikaefer_koenig'])test(`${id}: production vict
  await h.scope.outcome(win,'victory');assert.equal(h.session.battleExperience,d.experienceReward);assert.equal(h.session.lootBag.gold,d.dropGold);
  await h.scope.outcome(structuredClone(win),'victory');assert.equal(h.session.battleExperience,d.experienceReward);
  await h.scope.outcome(battle(),'escape');assert.equal(h.session.battleExperience,d.experienceReward);assert.equal(h.session.lootBag.gold,d.dropGold);
+ await h.scope.outcome(battle(),'enemyEscaped');assert.equal(h.session.battleExperience,d.experienceReward);assert.equal(h.session.lootBag.gold,d.dropGold);assert.equal(h.session.battleContext,null);
  const masks=[...h.session.surveyedMasks],loss=battle();h.surveyOk(false);
  await h.scope.outcome(loss,'defeat');assert.equal(h.exits,0);assert.equal(h.session.battleExperience,d.experienceReward);
  h.surveyOk(true);h.saveOk(false);await h.session.defeatRetry();assert.equal(h.exits,0);

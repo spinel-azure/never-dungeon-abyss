@@ -1,0 +1,3 @@
+# Browser verification screenshots are disposable local output.
+# Keep game assets, JSON reports, fixtures and test scripts tracked.
+/artifacts/**/*.png

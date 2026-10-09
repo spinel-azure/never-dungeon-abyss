@@ -64,7 +64,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     betaView='';view='betaExplanation';render();
   }
 
-  let sortMode=-1;
+  let sortMode=-1,sortFocused=false;
   const sortLabels=['お気に入り','Lv低い順','Lv高い順','テーマ'];
   const entries=()=>sortRegisteredMaps(maps().registered,sortMode);
   function cycleSort(){sortMode=(sortMode+1)%sortLabels.length;index=page=0;armed=-1;render();}
@@ -77,6 +77,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
   function close(){acquisitionController?.abort();acquisitionController=null;exploration?.close();exploration=null;if(active&&hint)hint.textContent=previousHint;active=false;panel.hidden=true;commands.hidden=false;}
   function exit(){close();onExit();}
   function back(){
+    sortFocused=false;
     if(view==='enter'){view='detail';actionCursor=0;}
     else if(['manage','share','delete'].includes(view)){view=view==='manage'?'detail':'manage';actionCursor=0;}
     else if(view==='sameContent')view='register';
@@ -87,7 +88,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     else {exit();return;}
     render();
   }
-  function openDetail(map){detailId=map.id;origin=view;view='detail';actionCursor=0;render();}
+  function openDetail(map){sortFocused=false;detailId=map.id;origin=view;view='detail';actionCursor=0;render();}
   function inspect(){
     const map=maps().unidentified[appraisalIndex];if(!map)return;
     discoveryId=map.discoveryId;
@@ -189,7 +190,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
   }
   function turnPage(delta){
     const count=maps().registered.length,pages=Math.ceil(count/5);if(pages<2)return;
-    page=(page+delta+pages)%pages;index=page*5;armed=-1;render();
+    page=(page+delta+pages)%pages;index=page*5;armed=-1;sortFocused=false;render();
   }
   function render(){
     if(!active)return;
@@ -232,10 +233,10 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     if(view==='maps'||view==='organize'){
       const entries=sortRegisteredMaps(maps().registered,sortMode);index=Math.max(0,Math.min(index,entries.length-1));page=Math.floor(index/5);
       const list=make('div',undefined,'transfer-destination-list');
-      if(!entries.length)list.append(make('p','登録されている地図はありません。'));
+      if(!entries.length){sortFocused=true;list.append(make('p','登録されている地図はありません。'));}
       entries.slice(page*5,page*5+5).forEach((map,offset)=>{
         const i=page*5+offset,info=describeTestMap(map)||{name:map.rulesetVersion==='special-map-v1'?'特殊地図':'未対応の生成ルール',level:'?'};
-        const b=button('',()=>{if(armed===i)openDetail(map);else{index=i;armed=i;render();}},i===index,()=>armed===i?'confirm':'cursorMove');
+        const b=button('',()=>{sortFocused=false;if(armed===i)openDetail(map);else{index=i;armed=i;render();}},i===index&&!sortFocused,()=>armed===i?'confirm':'cursorMove');
         const star=map.favorite?' ⭐':'';b.title=info.name+star;b.setAttribute('aria-label',(isV2Map(map)?info.name:`${info.name} Lv.${info.level}`)+star);
         b.append(make('span',info.name+(isV2Map(map)?star:''),isV2Map(map)?'explorer-map-name explorer-map-name-v2':'explorer-map-name'));if(!isV2Map(map))b.append(make('span',`Lv.${info.level}${star}`,'explorer-map-level'));list.append(b);
       });
@@ -243,10 +244,10 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       const prev=button('◀',()=>turnPage(-1),false,'cursorMove'),next=button('▶',()=>turnPage(1),false,'cursorMove');
       prev.setAttribute('aria-label','前のページ');next.setAttribute('aria-label','次のページ');prev.disabled=next.disabled=entries.length<=5;
       pager.append(prev,make('strong',`${page+1} / ${Math.max(1,Math.ceil(entries.length/5))}`),next);
-      const footer=make('div',undefined,'explorer-footer');const sort=button('ソート：'+(sortMode<0?'登録順':sortLabels[sortMode]),cycleSort);
+      const footer=make('div',undefined,'explorer-footer');const sort=button('ソート：'+(sortMode<0?'登録順':sortLabels[sortMode]),cycleSort,sortFocused);
       sort.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();sort.onclick();}};
       footer.append(button('戻る（B）',back),sort);panel.append(list,pager,footer);
-      message.textContent=`${countText()}　↑↓：選択　←→：ページ　A：詳細　B：戻る`;return;
+      message.textContent=`${countText()}　↑↓：選択・ソート　←→：ページ　A：${sortFocused?'ソート':'詳細'}　B：戻る`;return;
     }
     if(view==='appraise'){
       const entries=maps().unidentified;appraisalIndex=Math.max(0,Math.min(appraisalIndex,entries.length-1));
@@ -317,10 +318,17 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     }
     if(view==='maps'||view==='organize'){
       const entries=sortRegisteredMaps(maps().registered,sortMode);
-      if(action==='confirm'&&entries[index])invoke(()=>openDetail(entries[index]));
+      if(action==='confirm'&&sortFocused)invoke(cycleSort);
+      else if(action==='confirm'&&entries[index])invoke(()=>openDetail(entries[index]));
       else if(action==='left'||action==='pageLeft')turnPage(-1);
       else if(action==='right'||action==='pageRight')turnPage(1);
-      else if(entries.length&&(action==='up'||action==='down')){index=(index+(action==='down'?1:entries.length-1))%entries.length;armed=-1;render();}
+      else if(entries.length&&(action==='up'||action==='down')){
+        const first=page*5,last=Math.min(first+4,entries.length-1);
+        if(sortFocused){sortFocused=false;index=action==='down'?first:last;}
+        else if((action==='down'&&index===last)||(action==='up'&&index===first))sortFocused=true;
+        else index+=action==='down'?1:-1;
+        armed=-1;render();
+      }
     }else if(view==='appraise'){
       const count=maps().unidentified.length;
       if(action==='confirm'&&count)invoke(inspect);
@@ -330,5 +338,5 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     }
     return true;
   }
-  return {open(kind){previousHint=hint?.textContent||'';active=true;opening=kind;betaView='';view=maps().discovererName?initialView(kind):'signature';cursor=formCursor=actionCursor=0;armed=appraisalArmed=-1;tentImage=getTentBackground();render();},input:inputAction,isTalking:()=>view==='betaWelcome'||view==='betaExplanation',close};
+  return {open(kind){previousHint=hint?.textContent||'';active=true;sortFocused=false;opening=kind;betaView='';view=maps().discovererName?initialView(kind):'signature';cursor=formCursor=actionCursor=0;armed=appraisalArmed=-1;tentImage=getTentBackground();render();},input:inputAction,isTalking:()=>view==='betaWelcome'||view==='betaExplanation',close};
 }
