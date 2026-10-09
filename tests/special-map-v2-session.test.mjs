@@ -105,6 +105,45 @@ test('V2 transition locks input, torch items target shared fuel, one active cont
  s.transitioning=false;s.renderState.torchFuel=12;
  const character={hp:10,maxHp:10,sp:10,maxSp:10,inventory:{counts:{guiding_torch:1,warding_incense:1}},keyItems:{red_rust_key_b9f:true}};
  const r=resolveSpecialFieldItem({character,itemId:'guiding_torch',session:s});assert.ok(r.accepted);applySpecialFieldEnvironment(s,r.environment);assert.equal(s.torchFuel,100);
- assert.equal(s.bossKeyFound,false);assert.equal(resolveSpecialFieldItem({character,itemId:'warding_incense',session:s}).accepted,false);
+ assert.equal(s.bossKeyFound,false);assert.equal(resolveSpecialFieldItem({character,itemId:'warding_incense',session:s}).accepted,true);
  const detach=attachSpecialMap({session:s});assert.throws(()=>attachSpecialMap({session:create()}));detach();assert.equal(getSpecialMapContext(),null);
+});
+
+// Presence effects belong to the expedition, never the ordinary abyss singleton.
+test('V2 concealment, talisman and incense affect encounters and expire on a fresh expedition',async()=>{
+ const {resolveSpecialFieldSkill}=await import('../js/special-map/field-environment.js');
+ const {isV2EncounterCell}=await import('../js/special-map/encounter-v2.js');
+ const s=create({random:()=>0,onEncounter:()=>assert.fail('suppressed encounter')});
+ const character={hp:20,maxHp:20,sp:100,maxSp:100,skillIds:['conceal_presence'],statuses:[],inventory:{counts:{exorcism_talisman:2,warding_incense:2}}};
+ try{
+  for(let i=0;i<100;i++){s.playerX=i%10;s.playerY=Math.floor(i/10);if(isV2EncounterCell(s))break;}
+  s.onEncounterStep();assert.equal(s.presence,4);
+  const skill=resolveSpecialFieldSkill({character,skillId:'conceal_presence',session:s});assert.equal(skill.accepted,true);assert.equal(skill.character.sp,90);
+  applySpecialFieldEnvironment(s,skill.environment);s.onEncounterStep();assert.equal(s.presence,6);
+  assert.equal(resolveSpecialFieldSkill({character:skill.character,skillId:'conceal_presence',session:s}).accepted,false);
+  const talisman=resolveSpecialFieldItem({character,itemId:'exorcism_talisman',session:s});assert.equal(talisman.accepted,true);assert.equal(talisman.character.inventory.counts.exorcism_talisman,1);
+  applySpecialFieldEnvironment(s,talisman.environment);assert.equal(s.presence,0);
+  for(let i=0;i<30;i++)s.onEncounterStep();assert.equal(s.presence,0);assert.equal(s.presenceSuppressedSteps,0);
+  s.onEncounterStep();assert.equal(s.presence,2);
+  const incense=resolveSpecialFieldItem({character,itemId:'warding_incense',session:s});assert.equal(incense.accepted,true);applySpecialFieldEnvironment(s,incense.environment);
+  for(let i=0;i<100;i++)s.onEncounterStep();assert.equal(s.presence,2);
+  assert.equal(resolveSpecialFieldItem({character,itemId:'warding_incense',session:s}).accepted,false);
+  switchV2Floor(s,s.blueprint.links[0].lower);assert.equal(s.incenseActive,true);assert.equal(s.presenceIncreaseReduction,.5);
+  const fresh=create();try{assert.equal(fresh.incenseActive,false);assert.equal(fresh.presenceIncreaseReduction,0);assert.equal(fresh.presenceSuppressedSteps,0);}finally{fresh.disposeSurvey();}
+ }finally{s.disposeSurvey();}
+});
+
+test('boss return portal marker appears only after gate activation on its own floor',()=>{
+ const s=create();try{
+  const p=s.floors[2].generatedMap.bossRoom.bossCell,cell=s.floors[2].cells[p.y][p.x];
+  assert.equal(cell.mapReturnPortal,false);s.bossDefeated=true;assert.equal(cell.mapReturnPortal,true);
+  assert.ok(s.floors[0].cells.flat().every(c=>!c.mapReturnPortal));
+  s.bossDefeated=false;s.bossPreviewDismissed=true;assert.equal(cell.mapReturnPortal,true);
+ }finally{s.disposeSurvey();}
+});
+test('portal marker draws emoji or font-independent six-point star',async()=>{
+ const {drawMapReturnPortalMark}=await import('../js/minimap.js');
+ const calls=[],ctx={save(){},restore(){},fillText(text){calls.push(text);},beginPath(){},moveTo(){},lineTo(){},closePath(){},stroke(){calls.push('triangle');}};
+ drawMapReturnPortalMark(ctx,0,0,12,true);assert.deepEqual(calls,['🔯']);calls.length=0;
+ drawMapReturnPortalMark(ctx,0,0,12,false);assert.deepEqual(calls,['triangle','triangle']);
 });

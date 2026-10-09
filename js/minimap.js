@@ -83,6 +83,7 @@ export function drawMinimap(ctx, {
       }
       if (c.fountain && effectiveTorchActive) drawFountainMark(ctx, x1, y1, cell);
       if ((c.fixedWarp || c.fixedReturnPortal) && isExplored) drawTextMark(ctx, "※", x1, y1, cell, "#63e9ff");
+      if (c.mapReturnPortal && isExplored) drawMapReturnPortalMark(ctx, x1, y1, cell);
       if (c.fixedEvent && isExplored) drawTextMark(ctx, "!", x1, y1, cell, "#b9f4ff");
       if (c.quicksand && isExplored) drawQuicksandMark(ctx, x1, y1, cell);
       if (c.rapidCurrent && c.rapidCurrentDiscovered) {
@@ -446,4 +447,35 @@ export function line(ctx, x1, y1, x2, y2) {
   ctx.moveTo(x1, y1);
   ctx.lineTo(x2, y2);
   ctx.stroke();
+}
+
+let portalEmojiSupported;
+function supportsPortalEmoji() {
+  if (portalEmojiSupported !== undefined) return portalEmojiSupported;
+  portalEmojiSupported = false;
+  try {
+    const canvas = document.createElement('canvas');canvas.width = canvas.height = 32;
+    const ctx = canvas.getContext('2d', {willReadFrequently:true});
+    ctx.font = '24px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+    ctx.fillText('🔯', 2, 25);
+    const pixels = ctx.getImageData(0, 0, 32, 32).data;
+    // A monochrome/missing glyph uses the reliable vector fallback instead.
+    for(let i=0;i<pixels.length;i+=4)if(pixels[i+3]>128&&Math.max(pixels[i],pixels[i+1],pixels[i+2])-Math.min(pixels[i],pixels[i+1],pixels[i+2])>30){portalEmojiSupported=true;break;}
+  } catch { /* Canvas readback or emoji fonts unavailable. */ }
+  return portalEmojiSupported;
+}
+export function drawMapReturnPortalMark(ctx,x,y,size,emojiSupported=supportsPortalEmoji()) {
+  ctx.save();
+  if(emojiSupported){
+    ctx.font = Math.max(8,size*.85)+'px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🔯',x+size/2,y+size/2);
+  }else{
+    ctx.strokeStyle='#dbacff';ctx.lineWidth=Math.max(1,size*.07);
+    for(const rotation of [-Math.PI/2,Math.PI/2]){
+      ctx.beginPath();
+      for(let i=0;i<3;i++){const angle=rotation+i*Math.PI*2/3,px=x+size/2+Math.cos(angle)*size*.4,py=y+size/2+Math.sin(angle)*size*.4;if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);}
+      ctx.closePath();ctx.stroke();
+    }
+  }
+  ctx.restore();
 }

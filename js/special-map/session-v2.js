@@ -43,6 +43,7 @@ export function createSpecialMapV2Session(registered,mapKey,options={}){
    const x=i%10,y=Math.floor(i/10),p={x,y};
    const cell={x,y,type:same(p,f.stairsUp)?'stairsUp':same(p,f.stairsDown)?'stairsDown':'floor',
     walls:Object.fromEntries(dirs.map((d,j)=>[d,w[j]])),doors:{},doorKinds:{}};
+   if(same(p,f.bossRoom?.bossCell))Object.defineProperty(cell,'mapReturnPortal',{enumerable:true,get:()=>Boolean(s.bossDefeated||s.bossPreviewDismissed)});
    if(same(p,f.keyChest)){
     Object.defineProperty(cell,'treasure',{enumerable:true,get:()=>r.chestOpened?null:'gold'});
     Object.defineProperty(cell,'treasureDiscovered',{enumerable:true,get:()=>r.explored[y][x]});

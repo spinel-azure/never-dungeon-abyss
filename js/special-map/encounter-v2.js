@@ -18,12 +18,14 @@ export function isV2EncounterCell(s){
  return ![f.stairsUp,f.stairsDown,f.keyChest,f.bossRoom?.bossCell].some(same);
 }
 export function attachV2Encounters(s,{onEncounter,random=Math.random,onBlocked=message=>console.warn(message)}={}){
- s.presence=0;s.battleContext=null;s.encounterSessionId=++nextSessionId;s.encounterSequence=0;
+ s.presence=0;s.presenceSuppressedSteps=0;s.presenceIncreaseReduction=0;s.incenseActive=false;s.battleContext=null;s.encounterSessionId=++nextSessionId;s.encounterSequence=0;
  s.ecology=generateV2EcologyCandidate2({ruleset:s.ruleset,seed:s.seed,level:s.level,rarity:s.rarity,themeId:s.generatedMap.themeId});
  s.onEncounterStep=()=>{
   if(!onEncounter||s.transitioning||s.cellPrompt||s.battleContext||!isV2EncounterCell(s))return false;
+  if(s.presenceSuppressedSteps>0){s.presenceSuppressedSteps--;return false;}
+  if(s.incenseActive)return false;
   const dark=s.torchFuel<=0&&!s.renderState.torchEffectForced;
-  s.presence=Math.min(100,s.presence+(dark?5:4)+Math.floor(random()*(dark?6:5)));
+  s.presence=Math.min(100,s.presence+Math.floor(((dark?5:4)+Math.floor(random()*(dark?6:5)))*(1-(s.presenceIncreaseReduction||0))));
   if(s.presence<100)return false;
   const speciesId=rollV2Species(s.ecology.floors[s.currentFloor].species,random);
   const enemy=getV2CombatEnemy(speciesId,s.level);
