@@ -16,6 +16,7 @@ export function bossTestCharacter(level,job='warrior'){
  c.hp=c.maxHp;c.sp=c.maxSp;return c;
 }
 export function bossTestCommand(b,{ultimates=false}={}){
+ if(b.player.battleSkillSealed)return {type:'attack'};
  if(b.player.hp<b.player.maxHp*.45&&getItemCount(b.player.inventory,'strong_healing_potion_small')>0)return {type:'item',itemId:'strong_healing_potion_small'};
  const charge={warrior:'falcon_schnitt',thief:'twin_rapid_strike',priest:'twilight_flash',mage:'tunguska'}[b.player.job];
  const ultimate={warrior:'drachen_fang',thief:'acht_streich',priest:'call_goddess_name',mage:'apocalypse'}[b.player.job];

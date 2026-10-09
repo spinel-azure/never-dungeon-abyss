@@ -1,0 +1,866 @@
+{
+  "limit": 100,
+  "fixture": "bossTestCharacter, no NPC, five seeds per job/level, ultimates enabled; not user Lv142 equipment",
+  "rows": [
+    {
+      "level": 1,
+      "job": "warrior",
+      "wins": 5,
+      "timeouts": 0,
+      "runs": [
+        {
+          "outcome": "victory",
+          "turns": 3,
+          "damageTaken": 5,
+          "damageDealt": 52,
+          "bossId": "karte_boss_005"
+        },
+        {
+          "outcome": "victory",
+          "turns": 3,
+          "damageTaken": 4,
+          "damageDealt": 41,
+          "bossId": "karte_boss_019"
+        },
+        {
+          "outcome": "victory",
+          "turns": 3,
+          "damageTaken": 6,
+          "damageDealt": 52,
+          "bossId": "karte_boss_002"
+        },
+        {
+          "outcome": "victory",
+          "turns": 3,
+          "damageTaken": 3,
+          "damageDealt": 52,
+          "bossId": "karte_boss_005"
+        },
+        {
+          "outcome": "victory",
+          "turns": 3,
+          "damageTaken": 5,
+          "damageDealt": 52,
+          "bossId": "karte_boss_011"
+        }
+      ]
+    },
+    {
+      "level": 1,
+      "job": "thief",
+      "wins": 5,
+      "timeouts": 0,
+      "runs": [
+        {
+          "outcome": "victory",
+          "turns": 8,
+          "damageTaken": 13,
+          "damageDealt": 52,
+          "bossId": "karte_boss_005"
+        },
+        {
+          "outcome": "victory",
+          "turns": 6,
+          "damageTaken": 18,
+          "damageDealt": 41,
+          "bossId": "karte_boss_019"
+        },
+        {
+          "outcome": "victory",
+          "turns": 9,
+          "damageTaken": 26,
+          "damageDealt": 52,
+          "bossId": "karte_boss_002"
+        },
+        {
+          "outcome": "victory",
+          "turns": 6,
+          "damageTaken": 12,
+          "damageDealt": 52,
+          "bossId": "karte_boss_005"
+        },
+        {
+          "outcome": "victory",
+          "turns": 8,
+          "damageTaken": 19,
+          "damageDealt": 52,
+          "bossId": "karte_boss_011"
+        }
+      ]
+    },
+    {
+      "level": 1,
+      "job": "priest",
+      "wins": 5,
+      "timeouts": 0,
+      "runs": [
+        {
+          "outcome": "victory",
+          "turns": 9,
+          "damageTaken": 21,
+          "damageDealt": 52,
+          "bossId": "karte_boss_005"
+        },
+        {
+          "outcome": "victory",
+          "turns": 5,
+          "damageTaken": 15,
+          "damageDealt": 41,
+          "bossId": "karte_boss_019"
+        },
+        {
+          "outcome": "victory",
+          "turns": 13,
+          "damageTaken": 46,
+          "damageDealt": 52,
+          "bossId": "karte_boss_002"
+        },
+        {
+          "outcome": "victory",
+          "turns": 9,
+          "damageTaken": 25,
+          "damageDealt": 52,
+          "bossId": "karte_boss_005"
+        },
+        {
+          "outcome": "victory",
+          "turns": 10,
+          "damageTaken": 31,
+          "damageDealt": 52,
+          "bossId": "karte_boss_011"
+        }
+      ]
+    },
+    {
+      "level": 1,
+      "job": "mage",
+      "wins": 4,
+      "timeouts": 0,
+      "runs": [
+        {
+          "outcome": "victory",
+          "turns": 3,
+          "damageTaken": 14,
+          "damageDealt": 52,
+          "bossId": "karte_boss_005"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 4,
+          "damageTaken": 15,
+          "damageDealt": 30,
+          "bossId": "karte_boss_019"
+        },
+        {
+          "outcome": "victory",
+          "turns": 4,
+          "damageTaken": 18,
+          "damageDealt": 52,
+          "bossId": "karte_boss_002"
+        },
+        {
+          "outcome": "victory",
+          "turns": 4,
+          "damageTaken": 17,
+          "damageDealt": 52,
+          "bossId": "karte_boss_005"
+        },
+        {
+          "outcome": "victory",
+          "turns": 5,
+          "damageTaken": 19,
+          "damageDealt": 52,
+          "bossId": "karte_boss_011"
+        }
+      ]
+    },
+    {
+      "level": 10,
+      "job": "warrior",
+      "wins": 0,
+      "timeouts": 0,
+      "runs": [
+        {
+          "outcome": "defeat",
+          "turns": 31,
+          "damageTaken": 350,
+          "damageDealt": 124,
+          "bossId": "karte_boss_002"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 32,
+          "damageTaken": 350,
+          "damageDealt": 144,
+          "bossId": "karte_boss_005"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 5,
+          "damageTaken": 50,
+          "damageDealt": 42,
+          "bossId": "karte_boss_019"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 4,
+          "damageTaken": 50,
+          "damageDealt": 38,
+          "bossId": "karte_boss_019"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 34,
+          "damageTaken": 350,
+          "damageDealt": 169,
+          "bossId": "karte_boss_011"
+        }
+      ]
+    },
+    {
+      "level": 10,
+      "job": "thief",
+      "wins": 0,
+      "timeouts": 0,
+      "runs": [
+        {
+          "outcome": "defeat",
+          "turns": 21,
+          "damageTaken": 263,
+          "damageDealt": 8,
+          "bossId": "karte_boss_002"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 12,
+          "damageTaken": 159,
+          "damageDealt": 5,
+          "bossId": "karte_boss_005"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 5,
+          "damageTaken": 42,
+          "damageDealt": 8,
+          "bossId": "karte_boss_019"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 4,
+          "damageTaken": 42,
+          "damageDealt": 6,
+          "bossId": "karte_boss_019"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 20,
+          "damageTaken": 224,
+          "damageDealt": 13,
+          "bossId": "karte_boss_011"
+        }
+      ]
+    },
+    {
+      "level": 10,
+      "job": "priest",
+      "wins": 0,
+      "timeouts": 0,
+      "runs": [
+        {
+          "outcome": "defeat",
+          "turns": 14,
+          "damageTaken": 145,
+          "damageDealt": 32,
+          "bossId": "karte_boss_002"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 3,
+          "damageTaken": 46,
+          "damageDealt": 18,
+          "bossId": "karte_boss_005"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 3,
+          "damageTaken": 35,
+          "damageDealt": 14,
+          "bossId": "karte_boss_019"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 3,
+          "damageTaken": 35,
+          "damageDealt": 15,
+          "bossId": "karte_boss_019"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 21,
+          "damageTaken": 233,
+          "damageDealt": 24,
+          "bossId": "karte_boss_011"
+        }
+      ]
+    },
+    {
+      "level": 10,
+      "job": "mage",
+      "wins": 0,
+      "timeouts": 0,
+      "runs": [
+        {
+          "outcome": "defeat",
+          "turns": 3,
+          "damageTaken": 37,
+          "damageDealt": 46,
+          "bossId": "karte_boss_002"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 2,
+          "damageTaken": 28,
+          "damageDealt": 25,
+          "bossId": "karte_boss_005"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 2,
+          "damageTaken": 28,
+          "damageDealt": 9,
+          "bossId": "karte_boss_019"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 2,
+          "damageTaken": 28,
+          "damageDealt": 10,
+          "bossId": "karte_boss_019"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 2,
+          "damageTaken": 28,
+          "damageDealt": 22,
+          "bossId": "karte_boss_011"
+        }
+      ]
+    },
+    {
+      "level": 50,
+      "job": "warrior",
+      "wins": 5,
+      "timeouts": 0,
+      "runs": [
+        {
+          "outcome": "victory",
+          "turns": 48,
+          "damageTaken": 1001,
+          "damageDealt": 1995,
+          "bossId": "karte_boss_005"
+        },
+        {
+          "outcome": "victory",
+          "turns": 33,
+          "damageTaken": 731,
+          "damageDealt": 1590,
+          "bossId": "karte_boss_012"
+        },
+        {
+          "outcome": "victory",
+          "turns": 44,
+          "damageTaken": 805,
+          "damageDealt": 1990,
+          "bossId": "karte_boss_011"
+        },
+        {
+          "outcome": "victory",
+          "turns": 38,
+          "damageTaken": 718,
+          "damageDealt": 1750,
+          "bossId": "karte_boss_017"
+        },
+        {
+          "outcome": "victory",
+          "turns": 31,
+          "damageTaken": 615,
+          "damageDealt": 1580,
+          "bossId": "karte_boss_012"
+        }
+      ]
+    },
+    {
+      "level": 50,
+      "job": "thief",
+      "wins": 5,
+      "timeouts": 0,
+      "runs": [
+        {
+          "outcome": "victory",
+          "turns": 21,
+          "damageTaken": 419,
+          "damageDealt": 2170,
+          "bossId": "karte_boss_005"
+        },
+        {
+          "outcome": "victory",
+          "turns": 15,
+          "damageTaken": 306,
+          "damageDealt": 1700,
+          "bossId": "karte_boss_012"
+        },
+        {
+          "outcome": "victory",
+          "turns": 19,
+          "damageTaken": 359,
+          "damageDealt": 2170,
+          "bossId": "karte_boss_011"
+        },
+        {
+          "outcome": "victory",
+          "turns": 14,
+          "damageTaken": 170,
+          "damageDealt": 1890,
+          "bossId": "karte_boss_017"
+        },
+        {
+          "outcome": "victory",
+          "turns": 15,
+          "damageTaken": 257,
+          "damageDealt": 1700,
+          "bossId": "karte_boss_012"
+        }
+      ]
+    },
+    {
+      "level": 50,
+      "job": "priest",
+      "wins": 5,
+      "timeouts": 0,
+      "runs": [
+        {
+          "outcome": "victory",
+          "turns": 86,
+          "damageTaken": 1733,
+          "damageDealt": 1820,
+          "bossId": "karte_boss_005"
+        },
+        {
+          "outcome": "victory",
+          "turns": 77,
+          "damageTaken": 1683,
+          "damageDealt": 1420,
+          "bossId": "karte_boss_012"
+        },
+        {
+          "outcome": "victory",
+          "turns": 92,
+          "damageTaken": 1917,
+          "damageDealt": 1825,
+          "bossId": "karte_boss_011"
+        },
+        {
+          "outcome": "victory",
+          "turns": 72,
+          "damageTaken": 1304,
+          "damageDealt": 1590,
+          "bossId": "karte_boss_017"
+        },
+        {
+          "outcome": "victory",
+          "turns": 67,
+          "damageTaken": 1340,
+          "damageDealt": 1420,
+          "bossId": "karte_boss_012"
+        }
+      ]
+    },
+    {
+      "level": 50,
+      "job": "mage",
+      "wins": 0,
+      "timeouts": 0,
+      "runs": [
+        {
+          "outcome": "defeat",
+          "turns": 80,
+          "damageTaken": 1690,
+          "damageDealt": 1386,
+          "bossId": "karte_boss_005"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 63,
+          "damageTaken": 1690,
+          "damageDealt": 929,
+          "bossId": "karte_boss_012"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 76,
+          "damageTaken": 1690,
+          "damageDealt": 1260,
+          "bossId": "karte_boss_011"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 83,
+          "damageTaken": 1690,
+          "damageDealt": 1533,
+          "bossId": "karte_boss_017"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 67,
+          "damageTaken": 1690,
+          "damageDealt": 1052,
+          "bossId": "karte_boss_012"
+        }
+      ]
+    },
+    {
+      "level": 75,
+      "job": "warrior",
+      "wins": 0,
+      "timeouts": 4,
+      "runs": [
+        {
+          "outcome": "timeout",
+          "turns": 100,
+          "damageTaken": 3531,
+          "damageDealt": 4228,
+          "bossId": "karte_boss_002"
+        },
+        {
+          "outcome": "timeout",
+          "turns": 100,
+          "damageTaken": 3216,
+          "damageDealt": 4918,
+          "bossId": "karte_boss_001"
+        },
+        {
+          "outcome": "timeout",
+          "turns": 100,
+          "damageTaken": 3684,
+          "damageDealt": 4545,
+          "bossId": "karte_boss_012"
+        },
+        {
+          "outcome": "timeout",
+          "turns": 100,
+          "damageTaken": 3636,
+          "damageDealt": 3808,
+          "bossId": "karte_boss_011"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 9,
+          "damageTaken": 314,
+          "damageDealt": 388,
+          "bossId": "karte_boss_019"
+        }
+      ]
+    },
+    {
+      "level": 75,
+      "job": "thief",
+      "wins": 2,
+      "timeouts": 2,
+      "runs": [
+        {
+          "outcome": "timeout",
+          "turns": 100,
+          "damageTaken": 3340,
+          "damageDealt": 7231,
+          "bossId": "karte_boss_002"
+        },
+        {
+          "outcome": "victory",
+          "turns": 62,
+          "damageTaken": 1991,
+          "damageDealt": 6620,
+          "bossId": "karte_boss_001"
+        },
+        {
+          "outcome": "victory",
+          "turns": 67,
+          "damageTaken": 2656,
+          "damageDealt": 5950,
+          "bossId": "karte_boss_012"
+        },
+        {
+          "outcome": "timeout",
+          "turns": 100,
+          "damageTaken": 3455,
+          "damageDealt": 7418,
+          "bossId": "karte_boss_011"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 8,
+          "damageTaken": 267,
+          "damageDealt": 262,
+          "bossId": "karte_boss_019"
+        }
+      ]
+    },
+    {
+      "level": 75,
+      "job": "priest",
+      "wins": 0,
+      "timeouts": 0,
+      "runs": [
+        {
+          "outcome": "defeat",
+          "turns": 93,
+          "damageTaken": 3074,
+          "damageDealt": 2507,
+          "bossId": "karte_boss_002"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 83,
+          "damageTaken": 3074,
+          "damageDealt": 1953,
+          "bossId": "karte_boss_001"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 78,
+          "damageTaken": 3074,
+          "damageDealt": 1804,
+          "bossId": "karte_boss_012"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 82,
+          "damageTaken": 3074,
+          "damageDealt": 1592,
+          "bossId": "karte_boss_011"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 7,
+          "damageTaken": 234,
+          "damageDealt": 217,
+          "bossId": "karte_boss_019"
+        }
+      ]
+    },
+    {
+      "level": 75,
+      "job": "mage",
+      "wins": 0,
+      "timeouts": 0,
+      "runs": [
+        {
+          "outcome": "defeat",
+          "turns": 82,
+          "damageTaken": 2641,
+          "damageDealt": 3632,
+          "bossId": "karte_boss_002"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 71,
+          "damageTaken": 2641,
+          "damageDealt": 3255,
+          "bossId": "karte_boss_001"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 60,
+          "damageTaken": 2641,
+          "damageDealt": 1682,
+          "bossId": "karte_boss_012"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 72,
+          "damageTaken": 2641,
+          "damageDealt": 3236,
+          "bossId": "karte_boss_011"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 5,
+          "damageTaken": 201,
+          "damageDealt": 83,
+          "bossId": "karte_boss_019"
+        }
+      ]
+    },
+    {
+      "level": 100,
+      "job": "warrior",
+      "wins": 0,
+      "timeouts": 5,
+      "runs": [
+        {
+          "outcome": "timeout",
+          "turns": 100,
+          "damageTaken": 4536,
+          "damageDealt": 10572,
+          "bossId": "karte_boss_005"
+        },
+        {
+          "outcome": "timeout",
+          "turns": 100,
+          "damageTaken": 4363,
+          "damageDealt": 9726,
+          "bossId": "karte_boss_011"
+        },
+        {
+          "outcome": "timeout",
+          "turns": 100,
+          "damageTaken": 4778,
+          "damageDealt": 10028,
+          "bossId": "karte_boss_011"
+        },
+        {
+          "outcome": "timeout",
+          "turns": 100,
+          "damageTaken": 4386,
+          "damageDealt": 10505,
+          "bossId": "karte_boss_017"
+        },
+        {
+          "outcome": "timeout",
+          "turns": 100,
+          "damageTaken": 4466,
+          "damageDealt": 10170,
+          "bossId": "karte_boss_011"
+        }
+      ]
+    },
+    {
+      "level": 100,
+      "job": "thief",
+      "wins": 0,
+      "timeouts": 5,
+      "runs": [
+        {
+          "outcome": "timeout",
+          "turns": 100,
+          "damageTaken": 4263,
+          "damageDealt": 11553,
+          "bossId": "karte_boss_005"
+        },
+        {
+          "outcome": "timeout",
+          "turns": 100,
+          "damageTaken": 3987,
+          "damageDealt": 12516,
+          "bossId": "karte_boss_011"
+        },
+        {
+          "outcome": "timeout",
+          "turns": 100,
+          "damageTaken": 3868,
+          "damageDealt": 12222,
+          "bossId": "karte_boss_011"
+        },
+        {
+          "outcome": "timeout",
+          "turns": 100,
+          "damageTaken": 3863,
+          "damageDealt": 11830,
+          "bossId": "karte_boss_017"
+        },
+        {
+          "outcome": "timeout",
+          "turns": 100,
+          "damageTaken": 4233,
+          "damageDealt": 12235,
+          "bossId": "karte_boss_011"
+        }
+      ]
+    },
+    {
+      "level": 100,
+      "job": "priest",
+      "wins": 0,
+      "timeouts": 4,
+      "runs": [
+        {
+          "outcome": "timeout",
+          "turns": 100,
+          "damageTaken": 4130,
+          "damageDealt": 5272,
+          "bossId": "karte_boss_005"
+        },
+        {
+          "outcome": "timeout",
+          "turns": 100,
+          "damageTaken": 3806,
+          "damageDealt": 4805,
+          "bossId": "karte_boss_011"
+        },
+        {
+          "outcome": "timeout",
+          "turns": 100,
+          "damageTaken": 4082,
+          "damageDealt": 5299,
+          "bossId": "karte_boss_011"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 95,
+          "damageTaken": 4185,
+          "damageDealt": 4721,
+          "bossId": "karte_boss_017"
+        },
+        {
+          "outcome": "timeout",
+          "turns": 100,
+          "damageTaken": 4136,
+          "damageDealt": 4764,
+          "bossId": "karte_boss_011"
+        }
+      ]
+    },
+    {
+      "level": 100,
+      "job": "mage",
+      "wins": 0,
+      "timeouts": 0,
+      "runs": [
+        {
+          "outcome": "defeat",
+          "turns": 84,
+          "damageTaken": 3642,
+          "damageDealt": 7381,
+          "bossId": "karte_boss_005"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 79,
+          "damageTaken": 3642,
+          "damageDealt": 6596,
+          "bossId": "karte_boss_011"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 76,
+          "damageTaken": 3642,
+          "damageDealt": 6142,
+          "bossId": "karte_boss_011"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 86,
+          "damageTaken": 3642,
+          "damageDealt": 7128,
+          "bossId": "karte_boss_017"
+        },
+        {
+          "outcome": "defeat",
+          "turns": 78,
+          "damageTaken": 3642,
+          "damageDealt": 6603,
+          "bossId": "karte_boss_011"
+        }
+      ]
+    }
+  ]
+}

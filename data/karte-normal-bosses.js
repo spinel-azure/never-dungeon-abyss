@@ -23,7 +23,7 @@ export const NORMAL_KARTE_BOSSES=freeze(Object.fromEntries(rows.map(([number,nam
  const id=`karte_boss_${number}`;
  return [id,{id,name,image:`images/karte_bosses/karte_boss_${number}.avif`,themes:theme?[theme]:[...NORMAL_MAP_THEMES],
   allowColorVariant:true,battleEnabled:true,candidate:NORMAL_BOSS_CANDIDATE,
-  // Three modest provisional pacing profiles, independent of selection randomness.
+  // Three pacing profiles, independent of selection randomness.
   profile:['balanced','durable','offensive'][i%3]}];
 })));
 export function normalBossPool(themeId){
@@ -40,9 +40,9 @@ export function selectNormalMapBoss({seed,level,rarity,themeId}={}){
 // Lv, HP, weapon attack, STR, INT, AGI, DEX, LUC, DEF, EXP, G.
 export const NORMAL_BOSS_ANCHORS=freeze([
  [1,45,4,4,4,5,5,4,4,50,20], [5,65,4,5,5,6,6,5,5,120,40],
- [10,160,10,10,10,12,12,8,10,300,80], [25,450,17,17,18,18,18,12,17,900,180],
- [50,800,27,27,28,24,24,17,25,2300,400], [75,1300,40,40,42,30,30,22,33,4500,650],
- [100,1800,50,50,50,36,36,27,40,7500,1000]
+ [10,160,10,10,10,12,12,8,10,300,80], [25,600,17,17,18,18,18,12,17,900,180],
+ [50,2000,27,27,28,24,24,17,25,2300,400], [75,7000,40,40,42,30,30,22,33,4500,650],
+ [100,22000,50,50,50,36,36,27,40,7500,1000]
 ]);
 export function createNormalMapBoss(input){
  const boss=selectNormalMapBoss(input),level=input.level;
