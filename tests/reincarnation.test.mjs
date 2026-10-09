@@ -14,6 +14,7 @@ import {
 import { grantKeyItem, hasKeyItem } from "../data/key-items.js";
 import { grantCard, setDeckSlot } from "../data/deck.js";
 import {
+  REINCARNATION_GODDESSES,
   getPhysicalReincarnationMultiplier,
   getSpellReincarnationMultiplier,
   normalizeReincarnationCount
@@ -180,7 +181,12 @@ test("temple flow, rollback hook, medals and Japanese reset warnings are wired",
   assert.match(town, /習得したスキルも職業の初期スキルだけ/);
   assert.match(main, /if \(!saveGame\(\)\)[\s\S]*?character = previous/);
   assert.match(main, /runReincarnationCeremony/);
-  assert.match(main, /images\/npc\/NPC_19c\.avif/);
+  assert.deepEqual(REINCARNATION_GODDESSES.slice(1).map(entry => [entry.name, entry.image]), [
+    ["女神ゼレーナ", "images/npc/NPC_19e.avif"],
+    ["女神ノクティア", "images/npc/NPC_19d.avif"],
+    ["女神ルミナ", "images/npc/NPC_19c.avif"]
+  ]);
+  assert.match(main, /REINCARNATION_GODDESSES\[reincarnationCount\]/);
   assert.match(main, /たましい――[\s\S]*?きおく――[\s\S]*?めぐり――[\s\S]*?あらたなせいを――！/);
   assert.match(main, /is-reincarnation-whiteout[\s\S]*?const result = commit\(\)/);
   assert.match(html, /id="reincarnationMedal"/);

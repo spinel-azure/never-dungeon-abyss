@@ -116,7 +116,7 @@ try {
     snapshot = await page.evaluate(() => reincarnationQa.snapshot());
     assert.equal(snapshot.level, 197, "reincarnation commits only at the final whiteout");
     assert.equal(snapshot.gold, 2500000, "donation commits only at the final whiteout");
-    assert.equal(snapshot.ceremonyImage, "images/npc/NPC_19c.avif");
+    assert.equal(snapshot.ceremonyImage, "images/npc/NPC_19e.avif");
     await page.waitForFunction(() => reincarnationQa.snapshot().reincarnationCount === 1);
     snapshot = await page.evaluate(() => reincarnationQa.snapshot());
     assert.equal(snapshot.level, 1);

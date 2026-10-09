@@ -181,7 +181,7 @@ import { getRestoredTreasureType } from "./dungeon-save-restore.js";
 import { getDeadlyPoisonStepDamage, getNonlethalPoisonDamage } from "../combat/status-lifecycle.js";
 import { getConditionLabel } from "../combat/condition-label.js";
 import { getNextLevelExperience, MAX_LEVEL } from "../data/growth.js";
-import { REINCARNATION_MEDALS } from "../data/reincarnation.js";
+import { REINCARNATION_GODDESSES, REINCARNATION_MEDALS } from "../data/reincarnation.js";
 import {
   applyReincarnation,
   getReincarnationPreview,
@@ -1932,7 +1932,7 @@ import {
     const previous = structuredClone(character);
     const result = applyReincarnation(character);
     if (!result.accepted) return result;
-    return runReincarnationCeremony(() => {
+    return runReincarnationCeremony(result.nextCount, () => {
       character = {
         ...result.character,
         adventureStats: recordTempleDonation(result.character.adventureStats, result.fee)
@@ -1949,7 +1949,7 @@ import {
     });
   }
 
-  async function runReincarnationCeremony(commit) {
+  async function runReincarnationCeremony(reincarnationCount, commit) {
     if (!sceneTransition || !revivalPrayer || !revivalPrayerText || !revivalGoddess) return commit();
     stopBgm();
     sceneTransitionRunning = true;
@@ -1959,8 +1959,9 @@ import {
     defeatMessage.hidden = true;
     revivalPrayer.hidden = false;
     revivalPrayerText.textContent = "";
-    revivalGoddess.src = "images/npc/NPC_19c.avif";
-    revivalGoddess.alt = "女神ルミナ";
+    const goddess = REINCARNATION_GODDESSES[reincarnationCount] || REINCARNATION_GODDESSES[1];
+    revivalGoddess.src = goddess.image;
+    revivalGoddess.alt = goddess.name;
     revivalGoddess.hidden = true;
     revivalGoddess.classList.remove("is-active");
     document.body.classList.add("scene-transition-active");

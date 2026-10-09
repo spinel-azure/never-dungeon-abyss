@@ -9,6 +9,12 @@ export const REINCARNATION_MEDALS = Object.freeze([
   "images/screenshots/medal_03.avif",
   "images/screenshots/medal_04.avif"
 ]);
+export const REINCARNATION_GODDESSES = Object.freeze([
+  null,
+  Object.freeze({ name: "女神ゼレーナ", image: "images/npc/NPC_19e.avif" }),
+  Object.freeze({ name: "女神ノクティア", image: "images/npc/NPC_19d.avif" }),
+  Object.freeze({ name: "女神ルミナ", image: "images/npc/NPC_19c.avif" })
+]);
 
 export function normalizeReincarnationCount(value) {
   return Math.max(0, Math.min(MAX_REINCARNATIONS, Math.floor(Number(value) || 0)));
