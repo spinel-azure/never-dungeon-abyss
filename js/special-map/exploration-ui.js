@@ -1,3 +1,4 @@
+import {restoreSpecialMapSession,resumeMapOriginal} from './save-session.js';
 import {discardV2Experience} from './battle-rewards-v2.js';
 import {getV2StairImage} from './stair-presentation-v2.js';
 import {createSpecialMapSession,actSpecialMap,updateSpecialMotion,specialWall,specialDoorState,openSpecialDoorAhead,flushSpecialSurvey,continueSpecialAutoWalker} from './session.js';
@@ -9,9 +10,9 @@ import {describeTestMap,mapOriginalId} from '../../data/special-maps.js';
 export function startSpecialMapExploration(options){
  const host=getSpecialMapHost();
  const original=options.registered.find(m=>mapOriginalId(m)===options.mapKey);
- const entryCheck=host.checkMapEntry?.(original,options);
+ const entryCheck=options.resumeSave?null:host.checkMapEntry?.(original,options);
  if(entryCheck&&!entryCheck.ok)throw Error(entryCheck.error);
- if(original?.rulesetVersion!=='special-map-v2'||!host.runEntryTransition)return createExploration(options);
+ if(options.resumeSave||original?.rulesetVersion!=='special-map-v2'||!host.runEntryTransition)return createExploration(options);
  if(getSpecialMapContext())throw Error('特殊地図はすでに探索中です。');
  let controller=null,cancelled=false,locked=true;
  const pending={
@@ -41,12 +42,15 @@ export function startSpecialMapExploration(options){
  })();
  return pending;
 }
-function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},playSe=()=>{},saveSurvey=()=>({ok:false}),developmentTheme,developmentName}){
+function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},playSe=()=>{},saveSurvey=()=>({ok:false}),developmentTheme,developmentName,resumeSave}){
  if(getSpecialMapContext())throw Error('特殊地図はすでに探索中です。');
  const host=getSpecialMapHost();
  const original=registered.find(m=>mapOriginalId(m)===mapKey);
  const createSession=original?.rulesetVersion==='special-map-v2'?createSpecialMapV2Session:createSpecialMapSession;
- const session=createSession(registered,mapKey,{developmentTheme,persistSurvey:saveSurvey,playSe,onEnvironmentStep:host.onMapEnvironmentStep,onEncounter:host.onEncounter,onBossEncounter:host.onEncounter,prepareBossEncounter:host.prepareBossEncounter,say:text=>{message.textContent=text;}});
+ const restoredRegistered=resumeSave?registered.map(m=>mapOriginalId(m)===mapKey?resumeMapOriginal(m,resumeSave):m):registered;
+ const session=createSession(restoredRegistered,mapKey,{developmentTheme,persistSurvey:saveSurvey,playSe,onEnvironmentStep:host.onMapEnvironmentStep,onEncounter:host.onEncounter,onBossEncounter:host.onEncounter,prepareBossEncounter:host.prepareBossEncounter,say:text=>{message.textContent=text;}});
+ session.developmentSession=Boolean(developmentTheme||developmentName);
+ if(resumeSave)restoreSpecialMapSession(session,resumeSave);
  if(isV2Session(session))session.torchConsumptionDisabled=()=>Boolean(host.getTorchCardEffects?.().consumptionDisabled);
  let name=developmentName||'特殊地図';try{if(!developmentName)name=describeTestMap(original).name;}catch{}
  const container=document.createElement('section');container.className='special-map-runtime';container.setAttribute('aria-label','特殊迷宮探索');
@@ -110,7 +114,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  }
  function finish({reason='return'}={}){if(disposed||returned||session.transitioning)return false;if(!flushSpecialSurvey(session)){message.textContent=session.surveyError;return false;}if(host.beforeReturn?.({session,reason})===false)return false;returned=true;close();onExit();host.afterReturn?.({session,reason});return true;}
  onEnter();
- const detach=attachSpecialMap({session,finish,input});
+ const detach=attachSpecialMap({session,finish,input,close});
  session.renderState.overlayEvent={type:'floorLap',showOverlay:false,overlayMessage:name,specialMapTitle:true};
  if(session.bossRenderDefinition)preloadExplorationImage(session.bossRenderDefinition.id,session.bossRenderDefinition.image);
  const restore=useSpecialMapRenderSource({canvas,ctx:canvas.getContext('2d'),W:960,H:540,state:session.renderState,eventOverlayCtx:null,
@@ -118,9 +122,10 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
   inBounds:(x,y)=>x>=0&&x<10&&y>=0&&y<10,getRoamingEnemyRenderState:()=>session.getBossRenderState?.()??null,
   updateAnimation:now=>{
    if(host.isPaused?.()||session.transitioning||session.surveyPresentationPlaying||session.renderState.overlayEvent)return;
-   const wasOpening=!!session.renderState.anim,wasStep=session.motion?.isStep,wasAuto=!!session.autoPath;
+   const wasOpening=!!session.renderState.anim,wasMoving=!!session.motion,wasStep=session.motion?.isStep,wasAuto=!!session.autoPath;
    updateSpecialMotion(session,now);
    if(wasOpening&&!session.renderState.anim)message.textContent='扉が　ひらいた。';
+   if((wasOpening&&!session.renderState.anim)||(wasMoving&&!session.motion))host.onStateChanged?.();
    continueSpecialAutoWalker(session,now);
    // Also replace the auto-walker's arrival notice with the actionable stair prompt.
    if(!session.motion&&(wasStep||(wasAuto&&!session.autoPath))){
@@ -177,6 +182,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
     renderTheme=host.syncMapEnvironment?.(session)||session.generatedMap.themeId;
     setWallColor(renderTheme);setFloorColor(renderTheme);
     host.floorChanged?.({session});
+    host.onStateChanged?.();
     session.renderState.overlayEvent={type:'floorLap',showOverlay:false,overlayMessage:`B${session.currentFloor+1}F`,specialMapTitle:true};
     showStairNotice(`B${session.currentFloor+1}Fへ移動した。\n`);
    };
@@ -192,7 +198,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
    message.textContent='金箱を開けている……';playSe('door');
    await host.playTreasureOpening('gold',()=>{
     if(disposed||session.chestOpening!==opening)return;
-    host.hideTreasure?.();completeV2KeyChest(session);
+    host.hideTreasure?.();completeV2KeyChest(session);host.onStateChanged?.();
     if(host.showMapKeyAcquisition){
      session.transitioning=true;session.keyAcquisitionPlaying=true;
      Promise.resolve().then(()=>{if(!disposed)return host.showMapKeyAcquisition();}).catch(()=>{}).finally(()=>{
@@ -248,5 +254,11 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  for(const event of ['pointerdown','click','touchend'])document.addEventListener(event,guardCommands,true);
  const dismiss=()=>{if(session.renderState.overlayEvent&&!session.surveyPresentationPlaying)session.renderState.overlayEvent=null;};canvas.addEventListener('click',dismiss);
  function close(){if(disposed)return;disposed=true;if(session.keyAcquisitionPlaying)host.hideMapKeyAcquisition?.();if(chestPreview)host.hideTreasure?.();discardV2Experience(session);session.disposeSurvey?.();window.removeEventListener('pagehide',saveOnHide);document.removeEventListener('visibilitychange',saveWhenHidden);for(const event of ['pointerdown','click','touchend'])document.removeEventListener(event,guardCommands,true);if(session.chestOpening){host.hideTreasure?.();cancelV2KeyChest(session);}restore();statusParent.append(host.status);container.remove();window.removeEventListener('keydown',enter,true);detach();}
+ host.onStateChanged?.();
+ if(resumeSave){
+  session.renderState.overlayEvent=null;
+  if(session.battleContext)queueMicrotask(()=>{if(!disposed)host.resumeEncounter?.(session);});
+  else if(isV2Session(session)&&!session.bossDefeated)queueMicrotask(()=>{if(!disposed)session.onBossCell();});
+ }
  return {input,close,session,finish};
 }

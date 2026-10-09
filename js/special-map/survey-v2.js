@@ -44,7 +44,14 @@ export function attachV2Survey(s,original,{persistSurvey=()=>({ok:true}),schedul
   }
   // Completion is committed immediately before announcing permanent unlock.
   if(s.surveyComplete)return s.flushSurvey();
-  if(timer===null){timer=scheduleSurvey(()=>{timer=null;s.flushSurvey();});timer?.unref?.();}
+  if(timer===null){
+   const flushWhenSettled=()=>{
+    timer=null;
+    if(s.motion||s.renderState.anim){timer=scheduleSurvey(flushWhenSettled);timer?.unref?.();return;}
+    s.flushSurvey();
+   };
+   timer=scheduleSurvey(flushWhenSettled);timer?.unref?.();
+  }
   return true;
  };
  s.disposeSurvey=cancel;

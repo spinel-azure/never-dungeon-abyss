@@ -1,3 +1,5 @@
+import {serializeSpecialMapSession,resumeMapOriginal} from './special-map/save-session.js';
+import {getV2CombatEnemy} from '../data/special-map-enemies.js';
 import { createAutosaveScheduler } from "./autosave-scheduler.js";
 import {needsTrelirenRequest,completeTrelirenEncounter} from '../data/map-beta.js';
 import { renderItemGetItems } from "./item-get-presentation.js";
@@ -155,7 +157,7 @@ import { getEquipmentHighlightClass, getLotEquipmentHighlightClass, hasUncertain
 import { showGameCommands, handleSpecialMapInput, configureTown, resumeDungeonEntrance, INN_MEDICINE_DELIVERY_TRANSITION_FLAG, setTownEndingSuspended, openPendingNpcRenewal, openTown, closeTown, getTownState, handleTownInput as handleRawTownInput, isTownOpen, renderCharacterStatus, showTownArrival, showTownNameBanner, setTownTypewriterOptions, setTransferUnlocked } from "./town.js";
 import { flashNpcPartyStatus, renderNpcPartyStatus, renderNpcStatusPage, setNpcPartyCharge } from "./npc-party-ui.js";
 import { createInitialCharacter, normalizeCharacter } from "../data/classes.js";
-import { transactSpecialMaps, discoverTestMap } from "../data/special-maps.js";
+import { transactSpecialMaps, discoverTestMap, updateMapSurvey, mapOriginalId } from "../data/special-maps.js";
 import { applyNpcExplorationPassives, beginNpcRenewal, hireNpc, recordNpcExpeditionDepth, registerNpc, resolveNpcRenewal } from "../data/npc-party.js";
 import { getActivePlayTimeDelta, normalizeAdventureStats, recordInnStay, recordShopPurchase, recordTempleDonation } from "../data/adventure-stats.js";
 import { getAdventureChronicle, PLAY_TIME_100_HOURS_SECONDS } from "../data/adventure-records.js";
@@ -331,7 +333,7 @@ import {
   let saveEnabled = false;
   const autosaveScheduler = createAutosaveScheduler({
     save: () => saveGame(),
-    isBusy: () => Boolean(state.anim)
+    isBusy: () => Boolean(state.anim || getSpecialMapContext()?.session.motion || getSpecialMapContext()?.session.renderState.anim)
   });
   let worldLocation = "dungeon";
   let character = null;
@@ -1512,9 +1514,12 @@ import {
     playSe
   });
 
-  function makeSaveSnapshot() {
+  function makeSaveSnapshot({endSpecialMap=false} = {}) {
     const now = performance.now();
+    const mapSession=getSpecialMapContext()?.session;
+    const savedCharacter=!endSpecialMap&&mapSession?.battleContext&&mapSession.battleStartCharacter||character;
     return {
+      specialMap: endSpecialMap ? null : serializeSpecialMapSession(mapSession),
       player: {
         gridX: state.gridX,
         gridY: state.gridY,
@@ -1524,7 +1529,7 @@ import {
         npcEncounterCounts: { ...state.npcEncounterCounts },
         stairsPromptDismissed: state.stairsPromptDismissed
       },
-      character: character ? { ...character } : null,
+      character: savedCharacter ? { ...savedCharacter } : null,
       world: {
         location: worldLocation,
         town: getTownState()
@@ -1549,7 +1554,7 @@ import {
     };
   }
 
-  function saveGame({ announce = false, slot = "auto" } = {}) {
+  function saveGame({ announce = false, slot = "auto", endSpecialMap = false } = {}) {
     if (!saveEnabled) return false;
     const roamingEnemy = getActiveRoamingEnemy();
     if (activeRoamingEnemyInstanceId || roamingEnemy?.inBattle || roamingEnemy?.transition?.pendingContact) return false;
@@ -1557,7 +1562,7 @@ import {
     if (isJireneScriptedBattleActive()) return false;
     accruePlayTime();
     const isManualSave = /^manual[1-3]$/.test(slot);
-    if (isManualSave && worldLocation !== "town") return false;
+    if (isManualSave && (worldLocation !== "town" || getSpecialMapContext())) return false;
     autosaveScheduler.cancel();
     if (character) {
       character = {
@@ -1565,7 +1570,7 @@ import {
         compendium: backfillCompendiumFromCharacter(character.compendium, character)
       };
     }
-    const snapshot = makeSaveSnapshot();
+    const snapshot = makeSaveSnapshot({endSpecialMap});
     const autoSaved = writeGame(snapshot, "auto");
     const saved = isManualSave
       ? autoSaved && writeGame(snapshot, slot)
@@ -1611,6 +1616,8 @@ import {
   }
 
   function restoreGame(save) {
+    getSpecialMapContext()?.close?.();
+    autosaveScheduler.cancel();
     trelirenDialogue.cleanup();clearTimeout(itemGetTimer);itemGetEffect.hidden=true;
     resetPassiveNotifications();
     activeRoamingEnemyInstanceId = null;
@@ -1817,7 +1824,10 @@ import {
         firstTownArrivalPending: save.world?.town?.firstTownArrivalPending,
         innKeeperId: save.world?.town?.innKeeperId
       });
-      void finishReturnPresentation();
+      if(save.specialMap){
+        try { resumeSavedSpecialMap(save.specialMap); }
+        catch(error){saveEnabled=false;autosaveScheduler.cancel();say(error.message+" 保存を停止しました。タイトルからセーブを読み直してください。");return true;}
+      }else void finishReturnPresentation();
     } else {
       closeTown();
       startBgm(selectDungeonBgm());
@@ -1867,6 +1877,8 @@ import {
   function startNewGame() {
     resetPassiveNotifications();
     resetDebugSettingsForNewGame();
+    getSpecialMapContext()?.close?.();
+    autosaveScheduler.cancel();
     saveEnabled = true;
     currentDepth = 1;
     setDungeonColors({ wall: "default", floor: "default" });
@@ -5604,6 +5616,8 @@ import {
     return result;
   }
   async function beginV2Battle(session,enemyData,context){
+    session.battleStartCharacter=structuredClone(character);
+    saveGame();
     const boss=['special-map-v2-boss','special-map-v2-special-boss'].includes(context.source);
     const environment=getV2ThemeBattleOptions(session,character,{boss});
     session.renderState.overlayEvent={type:'randomEncounter',showOverlay:true,encounterType:boss?'boss':environment.ambush?'ambush':'normal',encounterLabel:boss?'BOSS ENCOUNTER!!':environment.ambush?'AMBUSH!!':'ENCOUNTER!!',encounterAnimationStartedAt:performance.now(),message:''};
@@ -5642,11 +5656,18 @@ import {
     if(outcome==='victory'&&isNormalMapRewardBattle(battle.explorationContext)){
       const completeVictory=()=>{
         if(!matchesV2Battle(s,battle.explorationContext)||s.experienceClosed)return;
-        const committed=transactSpecialMaps({getCharacter:()=>character,setCharacter:next=>{character=next;},save:()=>saveGame()},maps=>confirmMapBossVictory(maps,battle.explorationContext));
-        if(!committed.ok){s.victoryRetry=completeVictory;s.transitioning=true;say(committed.error+' A／Enterで討伐報酬の保存を再試行します。');return;}
+        // Commit the permanent boss reward, expedition loot and cleared state
+        // together. A failed write restores the live state for the same retry.
+        const previous={character,lootBag:s.lootBag,battleExperience:s.battleExperience,rewardedBattles:new Set(s.rewardedBattles),battleContext:s.battleContext,presence:s.presence};
         const reward=grantV2BattleRewards(character,battle,s);character=reward.character;
-        s.bossDefeated=true;s.victoryRetry=null;
-        resumeV2Encounter(s,battle.explorationContext);s.finishingBattle=false;
+        s.bossDefeated=true;
+        resumeV2Encounter(s,battle.explorationContext);
+        const committed=transactSpecialMaps({getCharacter:()=>character,setCharacter:next=>{character=next;},save:()=>saveGame()},maps=>confirmMapBossVictory(maps,battle.explorationContext));
+        if(!committed.ok){
+          character=previous.character;Object.assign(s,{lootBag:previous.lootBag,battleExperience:previous.battleExperience,rewardedBattles:previous.rewardedBattles,battleContext:previous.battleContext,presence:previous.presence,bossDefeated:false});
+          s.victoryRetry=completeVictory;s.transitioning=true;say(committed.error+' A／Enterで討伐報酬の保存を再試行します。');return;
+        }
+        s.victoryRetry=null;s.finishingBattle=false;
         startBgm(getSpecialMapBgmKey(s.generatedMap.themeId));
         say('地図の主を討伐した。ワープゲートが現れた。A／EnterでB1F入口へ移動。\n未鑑定地図を発見。探検家テントで受領できます。\n'+reward.message);
         updateCharacterUi();updateHud();saveGame();
@@ -5657,7 +5678,28 @@ import {
     resumeV2Encounter(s,s.battleContext);s.finishingBattle=false;
     startBgm(getSpecialMapBgmKey(s.generatedMap.themeId));say(message);updateCharacterUi();updateHud();saveGame();
   }
+  function resumeSavedSpecialMap(saved){
+    const registered=character.specialMaps.registered.map(m=>mapOriginalId(m)===saved.mapKey?resumeMapOriginal(m,saved):m);
+    // Keep merged survey knowledge in the same future snapshot as the expedition.
+    character={...character,specialMaps:{...character.specialMaps,registered}};
+    startSpecialMapExploration({registered,mapKey:saved.mapKey,resumeSave:saved,message:msgEl,playSe,
+      saveSurvey:mask=>transactSpecialMaps({getCharacter:()=>character,setCharacter:next=>{character=next;},save:()=>saveGame()},maps=>updateMapSurvey(maps,saved.mapKey,mask)),
+      onExit:()=>openTown({registrationRequired:false,mode:'dungeonEntrance'})});
+    say('地図迷宮の冒険を再開しました。');
+  }
   configureSpecialMapHost({
+    onStateChanged:scheduleAutosave,
+    resumeEncounter:session=>{
+      const c=session.battleContext;
+      if(c.source==='special-map-v2'){
+        void beginV2Battle(session,getV2CombatEnemy(c.speciesId,session.level),c);
+      }else{
+        // Reuse the original UUID/lottery and retry preparation if its last
+        // transaction failed. Never enter a boss fight without its reward ticket.
+        session.preparedBossContext=c;session.battleContext=null;session.pendingBoss=true;
+        session.retryBossEncounter();
+      }
+    },
     onMapEnvironmentStep:session=>{
       const result=applyV2ThemeStep(character,session);character=result.character;
       if(result.hpDamage)showPoisonStepDamage(result.hpDamage);
@@ -5715,13 +5757,13 @@ import {
         const previous=character;
         character={...normalizeCharacter({...character,...changes,wingGiftUses:0}),
           carriedExperience:character.carriedExperience,pendingExperienceSettlement:character.pendingExperienceSettlement,lootBag:character.lootBag};
-        if(session.kind==='specialMapV2'&&reason==='return')character=beginNpcRenewal(character,`map-return-${session.encounterSessionId}`);
+        if(session.kind==='specialMapV2'&&reason==='return')character=beginNpcRenewal(character,`map-return-${session.expeditionId || session.encounterSessionId}`);
         if(settlement||loot){character.returnPresentation={settlement,revival:reason==='defeat'};if(loot)rememberReturnLoot(loot.bag,loot.settled);}
-        if(!saveGame()){character=previous;say('帰還前の保存に失敗しました。もう一度お試しください。');return false;}
+        if(!saveGame({endSpecialMap:true})){character=previous;say('帰還前の保存に失敗しました。もう一度お試しください。');return false;}
         updateCharacterUi();return true;
       };
       if(session.kind==='specialMapV2')return settleV2ReturnExperience(character,session,commit,{reason});
-      if(!character?.wingGiftUses)return true;
+      if(!character?.wingGiftUses)return saveGame({endSpecialMap:true});
       return commit({changes:{}});
     },
     afterReturn:({reason})=>{if(reason==='return')void finishReturnPresentation();},
@@ -5804,7 +5846,7 @@ import {
       return true;
     },
     saveGame: slot => saveGame({ announce: true, slot }),
-    canManualSave: () => worldLocation === "town",
+    canManualSave: () => worldLocation === "town" && !getSpecialMapContext(),
     getSaveSlotSummaries,
     openSkills: () => {
       if (isTownOpen()&&!getSpecialMapContext()) townPortraitFrame.append(skillOverlay);
