@@ -5669,7 +5669,7 @@ import {
     const environment=getV2ThemeBattleOptions(session,character,{boss});
     session.renderState.overlayEvent={type:'randomEncounter',showOverlay:true,encounterType:boss?'boss':environment.ambush?'ambush':'normal',encounterLabel:boss?'BOSS ENCOUNTER!!':environment.ambush?'AMBUSH!!':'ENCOUNTER!!',encounterAnimationStartedAt:performance.now(),message:''};
     playSe('battleStart');say('＊　何者かと遭遇した！　＊');
-    const prepared=boss?prepareNormalBossImage(enemyData,context):Promise.resolve(enemyData.image);
+    const prepared=boss?(session.bossImageReady||prepareNormalBossImage(enemyData,context)):Promise.resolve(enemyData.image);
     const [image]=await Promise.all([prepared,wait(1400)]);
     if(getSpecialMapContext()?.session!==session||!matchesV2Battle(session,context))return;
     session.renderState.overlayEvent=null;
@@ -5773,6 +5773,7 @@ import {
     handleBattleInput:action=>handleItemOverlayInput(action)||handleSkillOverlayInput(action)||handleBattleInput(action),
     runEntryTransition:onDark=>runSceneTransition({enteringMapDungeon:true,playAudio:()=>playSeSequence('stairs',3),onDark}),
     showTreasure,playTreasureOpening,hideTreasure,
+    prepareMapBossImage:prepareNormalBossImage,
     showMapKeyAcquisition:()=>{
       showNamedItemGetEffect(['赤錆びた鍵'],{itemIds:['red_rust_key_b9f'],acquisitionMessage:true,playSound:false});
       return new Promise(resolve=>setTimeout(resolve,3400));

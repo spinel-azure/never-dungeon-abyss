@@ -31,6 +31,8 @@ export function startSpecialMapExploration(options){
     controller.session.renderState.overlayEvent=null;
    });
    if(cancelled)return;
+   await controller?.session.bossImageReady;
+   if(cancelled)return;
    if(completed===false||!controller)throw Error('入場演出を開始できませんでした。');
    let name=options.developmentName||'特殊地図';try{if(!options.developmentName)name=describeTestMap(original).name;}catch{}
    controller.session.renderState.overlayEvent={type:'floorLap',showOverlay:false,overlayMessage:name,mapTitleColor:mapNameColor(original.rarity),specialMapTitle:true};
@@ -103,7 +105,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
   if(!isV2Session(session)||session.chestOpening)return;
   const visible=session.cellPrompt==='chest'&&!session.surveyPresentationPlaying;
   if(visible===chestPreview)return;chestPreview=visible;
-  if(visible)Promise.resolve(host.showTreasure?.('gold')).then(()=>{if(disposed||session.surveyPresentationPlaying||(!session.chestOpening&&session.cellPrompt!=='chest'))host.hideTreasure?.();});
+  if(visible)Promise.resolve(host.showTreasure?.('gold',{backdrop:true})).then(()=>{if(disposed||session.surveyPresentationPlaying||(!session.chestOpening&&session.cellPrompt!=='chest'))host.hideTreasure?.();});
   else host.hideTreasure?.();
  }
  let stairPrompt=getV2StairPrompt(session);
@@ -117,7 +119,13 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  onEnter();
  const detach=attachSpecialMap({session,finish,input,close});
  session.renderState.overlayEvent={type:'floorLap',showOverlay:false,overlayMessage:name,mapTitleColor:mapNameColor(original.rarity),specialMapTitle:true};
- if(session.bossRenderDefinition)preloadExplorationImage(session.bossRenderDefinition.id,session.bossRenderDefinition.image);
+ if(session.bossRenderDefinition){
+  const boss=session.bossRenderDefinition;session.bossImageLoading=Boolean(boss.allowColorVariant&&host.prepareMapBossImage);
+  session.bossImageReady=Promise.resolve(host.prepareMapBossImage?.(boss,{mapLevel:session.level,mapSeed:session.seed,rarity:session.rarity,themeId:session.blueprint?.floors[2].themeId})||boss.image).catch(()=>boss.image).then(async image=>{
+   if(!disposed){session.bossExplorationImage=image;session.bossExplorationImageId=JSON.stringify(['map-boss',boss.id,session.seed,session.level,session.rarity,session.blueprint?.floors[2].themeId,image===boss.image?'original':'variant']);await preloadExplorationImage(session.bossExplorationImageId,image);session.bossImageLoading=false;}
+   return image;
+  });
+ }
  const restore=useSpecialMapRenderSource({canvas,ctx:canvas.getContext('2d'),W:960,H:540,state:session.renderState,eventOverlayCtx:null,
   wallOnCell:(x,y,d)=>specialWall(session,x,y,d)||specialDoorState(session,x,y,d)==='closed',closedDoorOnCell:(x,y,d)=>specialDoorState(session,x,y,d)==='closed',openDoorOnCell:(x,y,d)=>specialDoorState(session,x,y,d)==='open',getDoorState:(x,y,d)=>specialDoorState(session,x,y,d),getDoorKind:(x,y,d)=>session.cells[y]?.[x]?.doorKinds[d]??null,getDepth:()=>0,
   inBounds:(x,y)=>x>=0&&x<10&&y>=0&&y<10,getRoamingEnemyRenderState:()=>session.getBossRenderState?.()??null,
@@ -206,7 +214,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
       session.keyAcquisitionPlaying=false;if(!disposed)session.transitioning=false;
      });
     }
-   });
+   },{backdrop:true});
   }catch{
    if(disposed||session.chestOpening!==opening)return;
    host.hideTreasure?.();cancelV2KeyChest(session);

@@ -1318,3 +1318,5 @@ body.wassermannfrau-event .message{height:auto!important;min-height:0!important;
 body.gemini-event .message{height:auto!important;min-height:0!important;overflow:visible}
 
 body.lion-aftermath-event .message{height:auto!important;min-height:calc(1.35em * 6 + 20px)!important;overflow:visible;box-sizing:border-box}
+
+.treasure-backdrop{position:absolute;inset:0;z-index:3;background:rgba(0,0,0,.8);pointer-events:none}

@@ -250,3 +250,16 @@ for(const themeOverride of ['gold','rice','dusk','tender'])test(`${themeOverride
  assert.equal(s.getBossRenderState().definition.imageId,'warp_portal_b100f');assert.equal(v2.warpV2ToEntrance(s),true);assert.equal(s.currentFloor,0);
  h.ui.close();
 });
+
+test('entry prepares one boss image for exploration and battle, with per-map image identity',async()=>{
+ let prepared=0;const h=harness({hostOptions:{prepareMapBossImage:async(boss,context)=>{prepared++;assert.equal(context.mapLevel,50);return 'data:image/png;base64,variant';}}});
+ const s=h.ui.session;s.currentFloor=2;assert.equal(s.getBossRenderState(),null);
+ assert.equal(await s.bossImageReady,'data:image/png;base64,variant');assert.equal(prepared,1);
+ const rendered=s.getBossRenderState();assert.equal(rendered.definition.image,await s.bossImageReady);assert.match(rendered.definition.imageId,/map-boss/);
+ s.bossDefeated=true;assert.equal(s.getBossRenderState().definition.imageId,'warp_portal_b100f');h.ui.close();
+});
+test('failed boss preparation retains the same original image for exploration and battle',async()=>{
+ const h=harness({hostOptions:{prepareMapBossImage:async()=>{throw Error('decode failed');}}});
+ const s=h.ui.session;await s.bossImageReady;s.currentFloor=2;
+ assert.equal(s.getBossRenderState().definition.image,await s.bossImageReady);assert.equal(s.bossExplorationImage,s.bossRenderDefinition.image);h.ui.close();
+});

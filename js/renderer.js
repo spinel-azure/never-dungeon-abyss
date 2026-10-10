@@ -1360,7 +1360,7 @@ function loadTreasureImage(type, src, tint = "") {
   renderer.treasureImages.set(type, image);
 }
 
-export function preloadExplorationImage(id, src) { loadCharacterImage(id, src); }
+export function preloadExplorationImage(id, src) { loadCharacterImage(id, src); return renderer.characterImages.get(id)?.decode?.().catch(()=>{}); }
 
 function loadCharacterImage(id, src) {
   if (renderer.characterImages.has(id)) return;

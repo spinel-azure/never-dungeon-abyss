@@ -15,6 +15,7 @@ const TYPES = {
 
 const treasure = {
   canvas: null,
+  backdrop: null,
   THREE: null,
   renderer: null,
   scene: null,
@@ -38,6 +39,11 @@ const treasure = {
 
 export function configureTreasure({ canvas }) {
   treasure.canvas = canvas;
+  treasure.backdrop?.remove();
+  treasure.backdrop = document.createElement('div');
+  treasure.backdrop.className = 'treasure-backdrop';
+  treasure.backdrop.hidden = true;
+  canvas.before(treasure.backdrop);
   window.addEventListener("resize", resize);
 }
 
@@ -46,6 +52,9 @@ export async function showTreasure(type = "red", options = {}) {
   treasure.type = TYPES[type] ? type : "red";
   if (!treasure.canvas) return;
   treasure.canvas.style.visibility = "visible";
+  treasure.backdrop.hidden = !options.backdrop;
+  const glow = '#'+TYPES[treasure.type].glow.toString(16).padStart(6,'0');
+  treasure.canvas.style.filter = 'drop-shadow(0 0 8px '+glow+') drop-shadow(0 0 16px '+glow+'80)';
   treasure.visible = true;
   try {
     await ensureThree();
@@ -70,6 +79,7 @@ export async function playTreasureOpening(type = "red", onComplete = () => {}, o
 
 export function hideTreasure() {
   treasure.visible = false;
+  if(treasure.backdrop)treasure.backdrop.hidden=true;
   treasure.animation = null;
   treasure.completion = null;
   if (treasure.frame) cancelAnimationFrame(treasure.frame);
