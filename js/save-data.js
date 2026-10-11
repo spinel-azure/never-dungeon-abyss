@@ -1,3 +1,4 @@
+import { normalizeReincarnationCount } from "../data/reincarnation.js";
 import {
   isProtectedSavePayload,
   protectSavePayload,
@@ -137,6 +138,7 @@ export function getSaveSlotSummaries() {
       slot,
       label: slot === AUTO_SAVE_SLOT ? "オートセーブ" : `セーブ${index}`,
       exists: Boolean(save),
+      reincarnationCount: normalizeReincarnationCount(save?.character?.reincarnationCount),
       hasRoyalCatMedal: Boolean(save?.character?.eventFlags?.royal_cat_medal_awarded),
       name: save?.character?.name || "",
       level: Math.max(1, Math.floor(Number(save?.character?.level) || 1)),

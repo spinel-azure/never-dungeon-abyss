@@ -1,3 +1,4 @@
+import {createReincarnationVision, isReincarnationVisionEligible} from './reincarnation-vision.js';
 import {serializeSpecialMapSession,resumeMapOriginal} from './special-map/save-session.js';
 import {getV2CombatEnemy} from '../data/special-map-enemies.js';
 import { createAutosaveScheduler } from "./autosave-scheduler.js";
@@ -437,6 +438,7 @@ import {
   const revivalPrayer = document.getElementById("revivalPrayer");
   const revivalPrayerText = document.getElementById("revivalPrayerText");
   const revivalGoddess = document.getElementById("revivalGoddess");
+  const reincarnationVision=createReincarnationVision({host:sceneTransition,message:msgEl});
   const lichtbringerWhiteout = document.getElementById("lichtbringerWhiteout");
   const michaelaRestorationRoot = document.getElementById("michaelaRestoration");
   const michaelaRestorationController = createMichaelaRestorationController({
@@ -554,6 +556,7 @@ import {
   }
 
   function handleTownInput(action) {
+    if(reincarnationVision.handleInput(action))return true;
     if(getSpecialMapContext())return handleSpecialMapInput(action);
     const handled = handleRawTownInput(action);
     passiveNotificationCoordinator.updateAvailability();
@@ -1296,6 +1299,8 @@ import {
     onSellItem: sellTownItem,
     onOpenSellInventory: openShopSellInventory,
     onOpenPurchaseInventory: openShopPurchaseInventory,
+    shouldShowTempleVision: () => !sceneTransitionRunning && isReincarnationVisionEligible(character),
+    onEnterTemple: () => { void resumeReincarnationVision(); },
     onEnterShop: enterShop,
     onEnterInn: enterInn,
     onEnterGuild: () => {
@@ -1617,6 +1622,7 @@ import {
   }
 
   function restoreGame(save) {
+    reincarnationVision.dispose();
     getSpecialMapContext()?.close?.();
     autosaveScheduler.cancel();
     trelirenDialogue.cleanup();clearTimeout(itemGetTimer);itemGetEffect.hidden=true;
@@ -1828,7 +1834,8 @@ import {
       if(save.specialMap){
         try { resumeSavedSpecialMap(save.specialMap); }
         catch(error){saveEnabled=false;autosaveScheduler.cancel();say(error.message+" 保存を停止しました。タイトルからセーブを読み直してください。");return true;}
-      }else void finishReturnPresentation();
+
+      }else if(!reincarnationVision.isActive()) void finishReturnPresentation();
     } else {
       closeTown();
       startBgm(selectDungeonBgm());
@@ -1878,6 +1885,7 @@ import {
   function startNewGame() {
     resetPassiveNotifications();
     resetDebugSettingsForNewGame();
+    reincarnationVision.dispose();
     getSpecialMapContext()?.close?.();
     autosaveScheduler.cancel();
     saveEnabled = true;
@@ -1993,6 +2001,29 @@ import {
     sceneTransitionRunning = false;
     if (worldLocation === "town" && getTownState().facilityId === "temple") startBgm("temple");
     return result;
+  }
+
+  async function playPendingReincarnationVision(){
+    sceneTransition.classList.remove("is-reincarnation-whiteout");
+    const completed=await reincarnationVision.play(character.name);
+    if(completed){
+      character.eventFlags={...character.eventFlags,reincarnation_lumina_completed:true};
+      if(!saveGame())character.eventFlags.reincarnation_lumina_completed=false;
+    }
+  }
+
+  async function resumeReincarnationVision(){
+    if(sceneTransitionRunning || !isReincarnationVisionEligible(character))return;
+    stopBgm();sceneTransitionRunning=true;
+    msgEl.textContent='';
+    sceneTransition.hidden=false;
+    sceneTransition.className='scene-transition is-running is-black';
+    sceneTransitionTitle.hidden=true;revivalPrayer.hidden=true;defeatMessage.hidden=true;
+    document.body.classList.add('scene-transition-active');
+    await playPendingReincarnationVision();
+    sceneTransition.className='scene-transition';sceneTransition.hidden=true;
+    sceneTransitionRunning=false;document.body.classList.remove('scene-transition-active');
+    startBgm('temple');msgEl.textContent='';
   }
 
   function renderPlayerChargeGauge() {
@@ -5552,6 +5583,7 @@ import {
   }
 
   function dispatchGamepadAction(action) {
+    if(reincarnationVision.handleInput(action))return true;
     if (document.body.classList.contains("title-active")) {
       window.dispatchEvent(new CustomEvent("nda:title-input", { detail: { action } }));
       return true;
@@ -5655,7 +5687,7 @@ import {
     handleOverlayInput: action => endingController.handleAction(action) || michaelaRestorationController.handleAction(action) || endingSequenceActive || handleBlockingTutorialInput(action) || handleOverlayEventInput(action),
     handleBattleInput: action => endingController.handleAction(action) || michaelaRestorationController.handleAction(action) || endingSequenceActive || handleBlockingTutorialInput(action) || handleBattleInput(action),
     handleTownInput: action => (
-      endingController.handleAction(action) || michaelaRestorationController.handleAction(action) || endingSequenceActive || handleBlockingTutorialInput(action) || handleExperienceSettlementInput(action) || sceneTransitionRunning || handleLootIdentifyInput(action) || handleTownInput(action)
+      reincarnationVision.handleInput(action) || endingController.handleAction(action) || michaelaRestorationController.handleAction(action) || endingSequenceActive || handleBlockingTutorialInput(action) || handleExperienceSettlementInput(action) || sceneTransitionRunning || handleLootIdentifyInput(action) || handleTownInput(action)
     ),
     handleDoorInput: openDoorAhead,
     onUserOperation: recordUserInput,

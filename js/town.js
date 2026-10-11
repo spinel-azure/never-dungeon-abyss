@@ -182,6 +182,8 @@ const town = {
   onBuybackItem: () => null,
   onOpenSellInventory: () => {},
   onOpenPurchaseInventory: () => {},
+  shouldShowTempleVision: () => false,
+  onEnterTemple: () => {},
   onEnterShop: () => null,
   onEnterInn: () => null,
   onEnterGuild: () => null,
@@ -1720,6 +1722,7 @@ function renderTownView() {
 function renderFacility() {
   stopTownNameBanner();
   const facility = currentFacility();
+  const templeVision = facility.id === "temple" && town.shouldShowTempleVision();
   const innNotice = facility.id === "inn" ? resolveInnProfile(facility) : null;
   town.onAmbienceChanged(false);
   town.onBgmChanged(
@@ -1746,7 +1749,9 @@ function renderFacility() {
   town.background.alt = `${facility.label}の背景`;
   town.background.hidden = false;
   town.pendingVoiceFacility = "";
-  if (innNotice?.message) {
+  if (templeVision) {
+    town.messageEl.textContent = "";
+  } else if (innNotice?.message) {
     setInnMessage(innNotice.message, innNotice);
   } else if (facility.id === "inn" && !town.getCharacter()?.eventFlags?.inn_visited) {
     const visitor = town.getCharacter();
@@ -1803,7 +1808,7 @@ function renderFacility() {
     town.mode = "facilityMenu";
     showFacilityCommands(facility.id);
   }
-  if (facility.id === "temple" && isAnastasiaOutfitEventPending(town.getCharacter())) {
+  if (!templeVision && facility.id === "temple" && isAnastasiaOutfitEventPending(town.getCharacter())) {
     town.facilityTalkDialogue = [
       "助祭アナスタシア：こっ、これは……黄金の稲穂の女神、ルミナ様に特別な祈りを捧げる祝祭の儀礼で着用する衣装なんです……。\nその……あなたに、見ていただきたくて……。\n＊Aボタンで次へ"
     ];
@@ -1828,6 +1833,7 @@ function renderFacility() {
     const notice = town.onEnterGuild();
     if (notice?.message) startCompactTalk(notice);
   }
+  if (templeVision) town.onEnterTemple();
   town.onStateChanged();
 }
 

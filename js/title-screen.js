@@ -1,3 +1,4 @@
+import { REINCARNATION_MEDALS } from "../data/reincarnation.js";
 import {
   MANUAL_SAVE_SLOTS,
   createSaveArchive,
@@ -89,6 +90,13 @@ function renderLoadSlots() {
       medal.src = ENDING_ASSETS.medal;
       medal.alt = "猫勲章授与済み";
       medal.title = "猫勲章授与済み";
+      button.append(medal);
+    }
+    if (summary.exists && summary.reincarnationCount > 0) {
+      const medal = document.createElement("img");
+      medal.className = "title-load-medal";
+      medal.src = REINCARNATION_MEDALS[summary.reincarnationCount];
+      medal.alt = medal.title = `転生${summary.reincarnationCount}回の勲章`;
       button.append(medal);
     }
     button.classList.toggle("is-selected", index === loadSelectedIndex);

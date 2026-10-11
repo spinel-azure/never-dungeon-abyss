@@ -2117,3 +2117,21 @@
 - tests/browser/strafe.mjsで分離Edge PC1280x900・スマホ相当390x844・タブレット相当820x1180を検証。通常奈落の実キーWASD/QE、壁衝突、ゲームパッドaction入口L/R、touch tap左右各1歩、メニュー中Q抑止、地図迷宮の横移動と向き/燃料を確認。pageerrorなし。画像TEMP/nda-strafe-fjXaF7/mobile.png・tablet.pngの配置/ベベル/文字収容を目視確認。通常迷宮は仮の開放マスと遭遇抑止で検証、ゲームパッドはaction入口の模擬入力であり実USB/Bluetooth機器ではない。実スマホ/実タブレット/通常プレイ全通しは未確認。
 - 初回ブラウザ検査は固定250ms待機で描画準備に間に合わず、アニメーション完了条件の待機へ直して全画面サイズ成功。初回Node検査の既存VM抽出は新helperのexportが原因で失敗し、非公開helperへ修正して全件成功。ログTEMP/nda-strafe-node-final.log・nda-strafe-browser.log・nda-strafe-python.log。
 - LAST UPDATE2026-10-11、main.js/game-menu.cssキャッシュ20261011-1。README変更なし、コミット/pushなし。
+
+### 2026-10-11 3回目転生後のルミナイベント
+
+- 着手main/807030e、作業ツリークリーン。既存転生の保存成功後、3回目だけ専用イベントを実行。images/background/dungeon_event_25.avifは既存素材をそのまま使用し、大小文字も実ファイルに合わせた。
+- js/reincarnation-vision.jsに表示と入力管理を分離。白転からメイン枠へ画像を表示し、指定のルミナ台詞へプレイヤー名を挿入。実測のメッセージ枠に合わせてページ分割、Aで送り、最後は白転＋共通EffectEngineのテレビ消灯で寺院へ復帰。軽減モーション時は短いフェード。新規効果音は追加していない。
+- 3回目転生確定と同じ保存でreincarnation_lumina_pendingを保存し、会話終了時に解除。会話中のロードはイベントだけ再開し、費用や転生処理を重複させない。更新前から3回転生済みのセーブには遡及イベントを発生させない。画像ロード待ちに上限を設け、イベント中は他操作を抑止。
+- Node全2061成功/失敗0。Python29成功/警告0/失敗0/既存2skip。構文・diff検査成功。tests/browser/reincarnation-vision.mjsで分離Edge PC1280x900・スマホ相当390x844を確認。転生条件を設定し、本編転生callback（既存儀式待機を短縮）から1回目の非表示/3回目の表示、名前、画像読込、PC2ページ/スマホ3ページの枠内収容、キーボードX/タッチAで終了、途中reload→CONTINUEで費用不変と再開、終了済み保存とoverlay解放、pageerrorなしを確認。初回の実キー検証で既存遷移ロックにより進まない問題を検出し、専用入力を先に処理するよう修正して再検証成功。
+- 実端末/実ゲームパッド、通常プレイでの3回転生全通しは未確認。QA画像TEMP/nda-reincarnation-vision-7CvT3Y、ログTEMP/nda-vision-browser.log・nda-vision-node-final.log・nda-vision-python.log。
+- LAST UPDATE2026-10-11維持、main.jsキャッシュ20261011-2。README変更なし、コミット/pushなし。
+### 2026-10-11 ルミナイベント条件・画像進行変更／ロード転生勲章
+
+- ユーザー訂正により直前の「3回目転生完了時」仕様を置換。転生3回済みかつLv197以上で寺院へ入場し、reincarnation_lumina_completed未記録の場合のみ発生。転生直後Lv1では発生しない。前実装のpendingフラグを発生根拠にしない。完了済み保存で再入場時は発生せず、条件達成済み旧セーブも対象。
+- 寺院renderFacility内で挨拶とアナスタシア衣装会話を抑止し、メイン枠を白転。確認済み画像順は25b→25c→25（⑤のドット表記は既存アンダースコアのファイル）。既存25およびユーザー未追跡25b/25cは改変していない。25bをぼかしから表示、名前付き指定台詞を実測分割してA送り。25cへぼかし切替後5秒保持、25へぼかし切替、Aで最後の台詞、3秒後白転＋テレビ消灯し寺院へ戻る。演出専用入力で他のメニュー操作を抑止。軽減モーションでは切替短縮、5秒/3秒保持は維持。新規効果音なし。
+- 中断保存の寺院へCONTINUEした場合は未完了イベントを最初から再開。完了フラグの保存失敗時は未完了へ戻す。転生費用・能力値処理には変更なし。
+- ロード画面の猫勲章に続けてREINCARNATION_MEDALSの回数別勲章1枚を追加。保存スロットごとに回数を取得し、旧セーブ/転生0回は非表示。既存勲章画像・CSSを再利用。
+- Node全2063成功/失敗0、Python29成功/警告0/失敗0/既存2skip。構文/diff検査成功。新規単体テストで発生条件/完了済み/旧pending排除と各スロットの転生勲章回数・旧セーブ互換を検証。
+- tests/browser/reincarnation-vision.mjsを今回仕様へ更新。分離Edge PC1280x900/スマホ相当390x844で転生2回Lv197・3回Lv196/1の非発生、3回Lv197の発生、開始時メッセージ空欄、25b/c/25順序、A入力、最終台詞からの自動終了、スマホ途中reload→CONTINUE、完了フラグ保存、再入場非発生、ロード勲章2枚を確認。PC2ページ/スマホ4ページ。手動保存QA呼出しを本編APIのオブジェクト引数へ修正し再検証成功。初期状態を設定した検証であり、通常プレイでの転生全通し/実端末/物理ゲームパッドは未確認。
+- QA画像TEMP/nda-reincarnation-vision-xEFNFY（pc-medals.png/mobile-medals.pngをユーザー提示）、ログTEMP/nda-vision-revised-browser.log・nda-vision-revised-node-final.log・nda-vision-revised-python.log。LAST UPDATE2026-10-11維持、main.jsキャッシュ20261011-3、title-screen.jsは20261011-1。README変更なし、コミット/pushなし。

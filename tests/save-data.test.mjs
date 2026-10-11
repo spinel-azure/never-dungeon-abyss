@@ -195,3 +195,14 @@ test("a legacy backup is upgraded when it is promoted", () => {
   assert.equal(restored.schemaVersion, 2);
   assert.equal(loadGame("auto").character.name, "LEGACY");
 });
+
+
+test("load summaries preserve each slot reincarnation medal and support legacy saves", () => {
+  for(let count=1;count<=3;count++){
+    const snapshot=makeSnapshot();snapshot.character.reincarnationCount=count;
+    writeGame(snapshot,`manual${count}`);
+  }
+  assert.deepEqual(getSaveSlotSummaries().map(s=>s.reincarnationCount),[0,1,2,3]);
+  writeGame(makeSnapshot(),"manual2");
+  assert.equal(getSaveSlotSummaries().find(s=>s.slot==="manual2").reincarnationCount,0);
+});
