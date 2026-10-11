@@ -7,6 +7,8 @@ export function configureInput({
   randomGenerateBtn,
   manualMove,
   manualTurn,
+  handleStrafeInput = () => {},
+  strafeLeftBtn, strafeRightBtn,
   startAutoReturn,
   generateRandomDungeon,
   buttonA,
@@ -26,39 +28,46 @@ export function configureInput({
 }) {
   window.addEventListener("keydown", (e) => {
     if (e.target instanceof Element && e.target.closest("input, select, textarea")) return;
+    if (e.ctrlKey || e.metaKey || e.altKey || e.isComposing) return;
+    const key = keyboardDirectionKey(e);
+    if (e.code === "KeyQ" || e.code === "KeyE") {
+      e.preventDefault();onUserOperation();handleStrafeInput(e.code === "KeyQ" ? -1 : 1);return;
+    }
     const skillAction = keyAction(e);
     if((skillAction||e.key==='Enter')&&handleExplorationInput(skillAction||'confirm')){e.preventDefault();return;}
     if (skillAction) onUserOperation();
     if (skillAction && handleItemInput(skillAction)) { e.preventDefault(); return; }
     if (skillAction && handleSkillInput(skillAction)) { e.preventDefault(); return; }
-    if (e.key === "ArrowUp" && handleBattleInput("up")) { e.preventDefault(); return; }
-    if (e.key === "ArrowDown" && handleBattleInput("down")) { e.preventDefault(); return; }
-    if (e.key === "ArrowLeft" && handleBattleInput("left")) { e.preventDefault(); return; }
-    if (e.key === "ArrowRight" && handleBattleInput("right")) { e.preventDefault(); return; }
+    if (key === "ArrowUp" && handleBattleInput("up")) { e.preventDefault(); return; }
+    if (key === "ArrowDown" && handleBattleInput("down")) { e.preventDefault(); return; }
+    if (key === "ArrowLeft" && handleBattleInput("left")) { e.preventDefault(); return; }
+    if (key === "ArrowRight" && handleBattleInput("right")) { e.preventDefault(); return; }
     if (e.code === "KeyX" && handleBattleInput("confirm")) { e.preventDefault(); return; }
     if (e.code === "KeyZ" && handleBattleInput("cancel")) { e.preventDefault(); return; }
-    if (e.key === "ArrowUp" && handleTownInput("up")) { e.preventDefault(); return; }
-    if (e.key === "ArrowDown" && handleTownInput("down")) { e.preventDefault(); return; }
-    if (e.key === "ArrowLeft" && handleTownInput("left")) { e.preventDefault(); return; }
-    if (e.key === "ArrowRight" && handleTownInput("right")) { e.preventDefault(); return; }
+    if (key === "ArrowUp" && handleTownInput("up")) { e.preventDefault(); return; }
+    if (key === "ArrowDown" && handleTownInput("down")) { e.preventDefault(); return; }
+    if (key === "ArrowLeft" && handleTownInput("left")) { e.preventDefault(); return; }
+    if (key === "ArrowRight" && handleTownInput("right")) { e.preventDefault(); return; }
     if (e.code === "KeyX" && handleTownInput("confirm")) { e.preventDefault(); return; }
     if (e.code === "KeyZ" && handleTownInput("cancel")) { e.preventDefault(); return; }
     if (skillAction && handleEventChoiceInput(skillAction)) { e.preventDefault(); return; }
     if (handleOverlayInput("dismiss")) { e.preventDefault(); return; }
-    if (e.key === "ArrowUp" && handleMenuInput("up")) { e.preventDefault(); return; }
-    if (e.key === "ArrowDown" && handleMenuInput("down")) { e.preventDefault(); return; }
-    if (e.key === "ArrowLeft" && handleMenuInput("left")) { e.preventDefault(); return; }
-    if (e.key === "ArrowRight" && handleMenuInput("right")) { e.preventDefault(); return; }
+    if (key === "ArrowUp" && handleMenuInput("up")) { e.preventDefault(); return; }
+    if (key === "ArrowDown" && handleMenuInput("down")) { e.preventDefault(); return; }
+    if (key === "ArrowLeft" && handleMenuInput("left")) { e.preventDefault(); return; }
+    if (key === "ArrowRight" && handleMenuInput("right")) { e.preventDefault(); return; }
     if (e.code === "KeyL" && handleMenuInput("lock")) { e.preventDefault(); return; }
     if (e.code === "KeyX" && (handleOverlayInput("confirm") || handleMenuInput("confirm") || handleDoorInput())) { e.preventDefault(); return; }
     if (e.code === "KeyZ" && (handleOverlayInput("cancel") || handleMenuInput("cancel"))) { e.preventDefault(); return; }
-    if (e.key === "ArrowUp") { e.preventDefault(); manualMove(1); }
-    if (e.key === "ArrowDown") { e.preventDefault(); manualMove(-1); }
-    if (e.key === "ArrowLeft") { e.preventDefault(); manualTurn(-1); }
-    if (e.key === "ArrowRight") { e.preventDefault(); manualTurn(1); }
+    if (key === "ArrowUp") { e.preventDefault(); manualMove(1); }
+    if (key === "ArrowDown") { e.preventDefault(); manualMove(-1); }
+    if (key === "ArrowLeft") { e.preventDefault(); manualTurn(-1); }
+    if (key === "ArrowRight") { e.preventDefault(); manualTurn(1); }
   }, { passive: false });
 
   const operate = handler => () => { onUserOperation(); return handler(); };
+  if(strafeLeftBtn)bindControl(strafeLeftBtn,operate(()=>handleStrafeInput(-1)));
+  if(strafeRightBtn)bindControl(strafeRightBtn,operate(()=>handleStrafeInput(1)));
   bindControl(forwardBtn, operate(() => handleExplorationInput("up") || handleItemInput("up") || handleSkillInput("up") || handleOverlayInput("dismiss") || manualMove(1)));
   bindControl(backBtn, operate(() => handleExplorationInput("down") || handleItemInput("down") || handleSkillInput("down") || handleOverlayInput("dismiss") || manualMove(-1)));
   bindControl(leftBtn, operate(() => handleExplorationInput("left") || handleItemInput("left") || handleSkillInput("left") || handleEventChoiceInput("left") || handleOverlayInput("dismiss") || manualTurn(-1)));
@@ -88,11 +97,15 @@ export function configureInput({
   configureTouchGuards();
 }
 
+function keyboardDirectionKey(event) {
+  return ({KeyW:"ArrowUp",KeyA:"ArrowLeft",KeyS:"ArrowDown",KeyD:"ArrowRight"})[event.code] || event.key;
+}
 function keyAction(event) {
-  if (event.key === "ArrowUp") return "up";
-  if (event.key === "ArrowDown") return "down";
-  if (event.key === "ArrowLeft") return "left";
-  if (event.key === "ArrowRight") return "right";
+  const key=keyboardDirectionKey(event);
+  if (key === "ArrowUp") return "up";
+  if (key === "ArrowDown") return "down";
+  if (key === "ArrowLeft") return "left";
+  if (key === "ArrowRight") return "right";
   if (event.code === "KeyX") return "confirm";
   if (event.code === "KeyZ") return "cancel";
   return "";

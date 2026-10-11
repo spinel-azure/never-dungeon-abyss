@@ -223,6 +223,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  }
  function input(action){
   if(disposed)return false;
+  if(['strafeLeft','strafeRight'].includes(action)&&(host.isPaused?.()||session.renderState.overlayEvent))return true;
   if(host.isBattleActive?.())return host.handleBattleInput?.(action)??true;
   if(session.surveyPresentationPlaying)return true;
   if(session.victoryRetry){if(action==='confirm')session.victoryRetry();return true;}
@@ -238,7 +239,9 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
   if(!session.cellPrompt&&host.handleInput?.(action))return true;
   if(session.renderState.overlayEvent){session.renderState.overlayEvent=null;return true;}
   if(action==='map'){toggleMinimapOverlay();return true;}
-  if(['up','down','left','right','confirm','cancel'].includes(action))session.autoPath=null;
+  if(action==='pageLeft')action='strafeLeft';
+  if(action==='pageRight')action='strafeRight';
+  if(['up','down','left','right','strafeLeft','strafeRight','confirm','cancel'].includes(action))session.autoPath=null;
   if(action==='cancel'){host.openMenu();return true;}
   if(action==='confirm'&&session.surveyError){flushSpecialSurvey(session);message.textContent=session.surveyError||'調査記録を保存しました。';return true;}
   if(action==='confirm'&&isV2Session(session)){const result=confirmV2Cell(session,performance.now());if(result.warpToEntrance)void useStairs(null,true);else if(result.destination)void useStairs(result.destination);else if(result.returnToEntrance)finish();else if(result.openKeyChest)void openKeyChest();}

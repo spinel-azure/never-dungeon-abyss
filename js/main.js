@@ -70,6 +70,7 @@ import {
   updateAnimation,
   retreatFromTreliren,
   manualMove,
+  manualStrafe,
   manualTurn,
   openDoorAhead,
   handleOverlayEventInput,
@@ -5540,6 +5541,16 @@ import {
     say("オート移動を中断した。");
   }
 
+  function dispatchStrafe(amount) {
+    if(document.body.classList.contains('title-active')||endingSequenceActive||sceneTransitionRunning
+      ||firstDungeonTutorialActive||deckTutorialActive||lootBagTutorialActive||pendingLootIdentification||experienceSettlementCloseCallback
+      ||michaelaRestorationStarting||michaelaRestorationController.isActive()
+      ||isBattleActive()||isMenuOpen()||!itemOverlay.hidden||!skillOverlay.hidden)return true;
+    if(getSpecialMapContext())return handleSpecialMapInput(amount<0?'strafeLeft':'strafeRight');
+    if(worldLocation!=='dungeon'||state.overlayEvent)return true;
+    recordUserInput();manualStrafe(amount);return true;
+  }
+
   function dispatchGamepadAction(action) {
     if (document.body.classList.contains("title-active")) {
       window.dispatchEvent(new CustomEvent("nda:title-input", { detail: { action } }));
@@ -5560,6 +5571,8 @@ import {
     }
     if ((action === "pageLeft" || action === "pageRight") && worldLocation === "town" && handleTownInput(action)) return true;
     if ((action === "pageLeft" || action === "pageRight") && handleMenuInput(action)) return true;
+    if ((action === "pageLeft" || action === "pageRight") && worldLocation === "dungeon"
+      && !isBattleActive() && !isMenuOpen() && itemOverlay.hidden && skillOverlay.hidden) return dispatchStrafe(action === "pageLeft" ? -1 : 1);
     if (action === "pageLeft") action = "left";
     if (action === "pageRight") action = "right";
     if (handleItemOverlayInput(action) || handleSkillOverlayInput(action) || handleBattleInput(action)) return true;
@@ -5614,6 +5627,9 @@ import {
 
   configureInput({
     handleExplorationInput:handleSpecialMapInput,
+    handleStrafeInput:dispatchStrafe,
+    strafeLeftBtn:document.getElementById('strafeLeft'),
+    strafeRightBtn:document.getElementById('strafeRight'),
     forwardBtn,
     backBtn,
     leftBtn,

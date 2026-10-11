@@ -61,8 +61,8 @@ export function actSpecialMap(session,action,now){
  const state=session.renderState;let x=session.playerX,y=session.playerY,angle=state.angle,crossedDoor=null,duration=STEP_MS;
  if(action==='left'||action==='right'){
   const turn=action==='left'?-1:1;session.direction=(session.direction+turn+4)%4;angle+=turn*Math.PI/2;duration=TURN_MS;state.shake=turn>0?2:-2;
- }else if(action==='up'||action==='down'){
-  const d=(session.direction+(action==='down'?2:0))%4;
+ }else if(['up','down','strafeLeft','strafeRight'].includes(action)){
+  const d=(session.direction+(action==='down'?2:action==='strafeLeft'?3:action==='strafeRight'?1:0))%4;
   const forward=action==='up';
   const blocked=(text,outer=false)=>{session.playSe('blocked');state.shake=outer?(forward?-7:5):(forward?-12:9);session.say(text);return false;};
   if(specialDoorState(session,x,y,dirs[d])==='closed')return blocked('扉がある。\n＊Aボタンで開く');
@@ -76,7 +76,7 @@ export function actSpecialMap(session,action,now){
   session.playerX=x;session.playerY=y;
   if(session.kind!=='specialMapV2'){session.explored[y][x]=true;recordSpecialSurvey(session,x,y);}
  }else return false;
- session.motion={x:state.x,y:state.y,angle:state.angle,toX:x+.5,toY:y+.5,toAngle:angle,started:now,duration,crossedDoor,isStep:action==='up'||action==='down'};return true;
+ session.motion={x:state.x,y:state.y,angle:state.angle,toX:x+.5,toY:y+.5,toAngle:angle,started:now,duration,crossedDoor,isStep:['up','down','strafeLeft','strafeRight'].includes(action)};return true;
 }
 
 export function recordSpecialSurvey(session,x,y){

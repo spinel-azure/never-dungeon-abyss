@@ -91,6 +91,6 @@ test('keyboard and touch controls cannot fall through to normal movement or gene
  const forbidden=()=>assert.fail('normal dungeon handler called');
  scope.configure({forwardBtn:'up',backBtn:'down',leftBtn:'left',rightBtn:'right',autoReturnBtn:'return',randomGenerateBtn:'generate',buttonA:'A',buttonB:'B',manualMove:forbidden,manualTurn:forbidden,startAutoReturn:forbidden,generateRandomDungeon:forbidden,handleExplorationInput:a=>{received.push(a);return true;}});
  for(const fn of bindings.values())fn();
- for(const [key,code] of [['ArrowUp',''],['ArrowDown',''],['ArrowLeft',''],['ArrowRight',''],['Enter',''],['x','KeyX'],['z','KeyZ']])keydown({key,code,preventDefault(){}});
- assert.deepEqual(received,['up','down','left','right','cancel','blocked','confirm','cancel','up','down','left','right','confirm','confirm','cancel']);
+ for(const [key,code] of [['ArrowUp',''],['ArrowDown',''],['ArrowLeft',''],['ArrowRight',''],['Enter',''],['x','KeyX'],['z','KeyZ'],['w','KeyW'],['a','KeyA'],['s','KeyS'],['d','KeyD']])keydown({key,code,preventDefault(){}});
+ assert.deepEqual(received,['up','down','left','right','cancel','blocked','confirm','cancel','up','down','left','right','confirm','confirm','cancel','up','left','down','right']);
 });

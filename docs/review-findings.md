@@ -2104,3 +2104,16 @@
 - tests/browser/special-map-resume.mjsで分離EdgeのPC1280x900・スマホ相当390x844を確認。状態設定後、本編保存→ページreload→実CONTINUEクリック→位置/鍵/消耗/積立復元→キーボード旋回、帰還保存と再ロード時の精算重複なし、通常戦闘/ボス戦中断再開、撃破後のpending地図報酬とゲート復帰、localStorage書込み失敗時の帰還/ボス報酬rollbackと再試行を検証。ブラウザpageerrorなし。ボス勝利は状態を用意して本編結果callbackを実行し、通常プレイ全通しとは区別。初期QAでタイトルをCSSだけで隠したためキー入力がタイトルへ渡る問題があり、実CONTINUEクリックに直して再確認。
 - 実端末、実ゲームパッド、ブラウザ強制終了/電源断、通常プレイ全行程は未確認。保存前の直近操作は強制終了で失われ得る点は通常奈落と同じ。旧版で既に消えた経験値/戦利品の復元はできない。QAログTEMP/nda-map-resume-node-final.log・nda-map-resume-browser-final.log・nda-map-resume-python.log。
 - LAST UPDATE2026-10-09維持、main.jsキャッシュ20261009-4。README変更なし。コミット/pushなし。
+
+
+### 2026-10-11 WASD・水平移動・タッチ用L/Rボタン
+
+- 着手main/2655e7b。未追跡images/background/dungeon_event_25.avifはユーザー素材として保持、編集なし。通常奈落/地図迷宮の移動処理と現行入力経路を確認して実装。
+- W/Sを前進/後退、A/Dを左右旋回として方向キーと共通経路に追加。Q/Eは向きを維持した左/右水平移動。文字入力・IME変換・Ctrl/Alt/Meta操作には反応しない。X/Z、方向キー、既存タイトル操作は維持。
+- 通常奈落はtryMoveへ相対移動方向を渡して共通の壁/扉/障害物/激流/ボス部屋制限、到着時処理を利用。向きとカメラ角度は変更せずSTEP_MSを維持。特殊部屋の入室確認後も横方向を保持、横の施錠扉で正面向きの自動入室を誤実行しない。地図迷宮も既存actSpecialMap/updateSpecialMotionに横方向を追加し、一歩の環境効果・たいまつ・調査・遭遇・保存を共用。
+- ゲームパッド既存L/R(pageLeft/pageRight、標準ボタン4/5)は探索中のみ水平移動へ振分け。町・メニュー・戦闘は既存ページ/選択操作を維持。タッチ/キーボード横移動はメニュー、戦闘、チュートリアル、精算/演出中に進まない。
+- スマホ/タブレットのタッチ操作ON時、コマンド欄下にL-Strafe/R-Strafeを左右配置。固定十字キー同系のオリーブ色・ベベル、44px以上の高さ、日本語aria-label。町/メニュー/戦闘/タイトル等では非表示。既存touchend/click重複防止を共用。PC専用ボタンは追加しない。
+- Node全2061成功/失敗0。新規9件でV2全4方向×左右の向き保持・到着1回・たいまつ1消費・調査、壁/ボス扉通過不可を確認。既存入力テストにWASDを追加。Python29成功/警告0/失敗0/既存2skip、構文/diff確認成功。
+- tests/browser/strafe.mjsで分離Edge PC1280x900・スマホ相当390x844・タブレット相当820x1180を検証。通常奈落の実キーWASD/QE、壁衝突、ゲームパッドaction入口L/R、touch tap左右各1歩、メニュー中Q抑止、地図迷宮の横移動と向き/燃料を確認。pageerrorなし。画像TEMP/nda-strafe-fjXaF7/mobile.png・tablet.pngの配置/ベベル/文字収容を目視確認。通常迷宮は仮の開放マスと遭遇抑止で検証、ゲームパッドはaction入口の模擬入力であり実USB/Bluetooth機器ではない。実スマホ/実タブレット/通常プレイ全通しは未確認。
+- 初回ブラウザ検査は固定250ms待機で描画準備に間に合わず、アニメーション完了条件の待機へ直して全画面サイズ成功。初回Node検査の既存VM抽出は新helperのexportが原因で失敗し、非公開helperへ修正して全件成功。ログTEMP/nda-strafe-node-final.log・nda-strafe-browser.log・nda-strafe-python.log。
+- LAST UPDATE2026-10-11、main.js/game-menu.cssキャッシュ20261011-1。README変更なし、コミット/pushなし。

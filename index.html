@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
   <link rel="stylesheet" href="css/style.css?v=20260917-4">
-  <link rel="stylesheet" href="css/game-menu.css?v=20261009-1">
+  <link rel="stylesheet" href="css/game-menu.css?v=20261011-1">
   <link rel="stylesheet" href="css/card-gallery.css?v=20260810-1">
   <link rel="stylesheet" href="css/monster-compendium.css">
   <link rel="stylesheet" href="css/item-compendium.css?v=20260923-2">
@@ -45,7 +45,7 @@
   </nav>
   <p id="titleSaveFeedback" class="title-save-feedback" aria-live="polite"></p>
     <p class="title-version">MVP1.0</p>
-  <p class="title-updated">LAST UPDATE : 2026-10-09</p>
+  <p class="title-updated">LAST UPDATE : 2026-10-11</p>
   <section id="prologueScreen" class="prologue-screen" aria-label="物語のプロローグ" hidden>
     <img id="prologueSilhouette" class="prologue-silhouette" alt="" aria-hidden="true">
     <div class="prologue-scroll-window" aria-live="off">
@@ -335,6 +335,10 @@
       <p id="registrationFeedback" class="registration-feedback" aria-live="polite"></p>
     </form>
 
+    <div class="strafe-controls" aria-label="水平移動">
+      <button id="strafeLeft" type="button" aria-label="左へ水平移動">L-Strafe</button>
+      <button id="strafeRight" type="button" aria-label="右へ水平移動">R-Strafe</button>
+    </div>
     <div class="controls">
       <div class="pad" aria-label="移動操作">
         <button id="forward" type="button" title="前進">↑</button><button id="left" type="button" title="左旋回">←</button><button id="back" type="button" title="後退">↓</button><button id="right" type="button" title="右旋回">→</button>
@@ -607,7 +611,7 @@
     </section>
   </section>
 </main>
-  <script type="module" src="js/main.js?v=20261009-6"></script>
+  <script type="module" src="js/main.js?v=20261011-1"></script>
   <script type="module" src="js/title-screen.js?v=20261009-1"></script>
 </body>
 </html>

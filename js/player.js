@@ -419,17 +419,17 @@ export function applyFixedFloorWarp(warp) {
   return true;
 }
 
-export function tryMove(amount, automated = false, specialEntryConfirmed = false) {
+export function tryMove(amount, automated = false, specialEntryConfirmed = false, directionOffset = 0) {
   if (!playerInputEnabled) return;
   if (state.anim) return;
   if (!automated) hooks.cancelAutoReturn(false);
-  const currentDir = amount > 0 ? DIRS[state.dir] : DIRS[(state.dir + 2) % 4];
+  const currentDir = DIRS[(state.dir + (directionOffset || (amount > 0 ? 0 : 2)) + 4) % 4];
   const currentDoorKind = getDoorKind(state.gridX, state.gridY, currentDir.key);
   if (blockSealedSpecialDoor(currentDoorKind)) return;
   if (currentDoorKind === "specialLocked" && !openDoorOnCell(state.gridX, state.gridY, currentDir.key)) {
     hooks.playSe("blocked");
     state.shake = amount > 0 ? -12 : 9;
-    startSpecialDoorLockEvent(state.gridX, state.gridY, currentDir.key, !automated && amount > 0);
+    startSpecialDoorLockEvent(state.gridX, state.gridY, currentDir.key, !automated && amount > 0 && directionOffset === 0);
     return;
   }
   if (closedDoorOnCell(state.gridX, state.gridY, currentDir.key)) {
@@ -500,6 +500,7 @@ export function tryMove(amount, automated = false, specialEntryConfirmed = false
       type: "specialRoomWarning",
       showOverlay: false,
       moveAmount: amount,
+      directionOffset,
       canCancel: true,
       message: specialRoomWarningMessage
     });
@@ -552,6 +553,12 @@ export function manualMove(amount) {
     hooks.say("帰還を中断した。");
   }
   if (!state.anim) tryMove(amount);
+}
+
+export function manualStrafe(amount) {
+  if (!playerInputEnabled || state.overlayEvent) return;
+  if (state.autoReturning) { hooks.cancelAutoReturn(false); hooks.say("帰還を中断した。"); }
+  if (!state.anim) tryMove(1, false, false, amount < 0 ? -1 : 1);
 }
 
 export function manualTurn(amount) {
@@ -715,7 +722,7 @@ function confirmSpecialRoomWarningEvent() {
   if (!event || event.type !== "specialRoomWarning") return;
   state.overlayEvent = null;
   hooks.say("");
-  tryMove(event.moveAmount, false, true);
+  tryMove(event.moveAmount, false, true, event.directionOffset || 0);
 }
 
 function startSpecialRoomContentEvent(content, fromGX, fromGY) {
