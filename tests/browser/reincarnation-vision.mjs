@@ -44,6 +44,15 @@ try{for(const [label,width,height] of [['pc',1280,900],['mobile',390,844]]){
  assert.match(await p.locator('.reincarnation-vision img').getAttribute('src'),/dungeon_event_25.avif/);
  if(label==='mobile')await p.locator('#buttonA').tap();else await p.keyboard.press('x');
  await p.waitForFunction(()=>visionQa.read().text.includes('私たちはいつでも'));
+ let closingText='';
+ while((await p.evaluate(()=>visionQa.read().text)).includes('＊Aボタンで次へ')){
+  const text=await p.evaluate(()=>visionQa.read().text);
+  await p.waitForTimeout(3300);assert.equal(await p.evaluate(()=>visionQa.read().text),text);
+  closingText+=text.replace('\n＊Aボタンで次へ','');
+  if(label==='mobile')await p.locator('#buttonA').tap();else await p.keyboard.press('x');
+ }
+ closingText+=await p.evaluate(()=>visionQa.read().text);
+ assert.equal(closingText,'黄金の稲穂の女神ルミナ「私たちはいつでもあなたを見守っておりますよ…。」');
  await p.waitForTimeout(1500);assert.equal((await p.evaluate(()=>visionQa.read())).active,true);
  await p.waitForFunction(()=>!visionQa.read().active);
  assert.equal((await p.evaluate(()=>visionQa.read())).done,true);

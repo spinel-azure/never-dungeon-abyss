@@ -18,6 +18,8 @@ export function createReincarnationVision({host,message}){
  function dispose(){active?.finish(false);}
  async function play(name){
   dispose();
+  const previousInstantText=message.dataset.instantText;
+  message.dataset.instantText='true';
   const root=document.createElement('div');root.className='reincarnation-vision';
   root.style.cssText='position:absolute;inset:0;z-index:4;background:#fff;overflow:hidden';
   const picture=document.createElement('img');picture.src=REINCARNATION_VISION_IMAGE;picture.alt='黄金の稲穂の女神ルミナ';
@@ -34,7 +36,7 @@ export function createReincarnationVision({host,message}){
   for(const type of guardedEvents)document.addEventListener(type,guard,{capture:true,passive:false});
   let resolve,ended=false;
   const result=new Promise(done=>{resolve=done;});
-  const state={ready:false,next:null,finish(ok){if(ended)return;ended=true;engine.stop(false);state.next?.();for(const type of guardedEvents)document.removeEventListener(type,guard,true);root.remove();if(active===state)active=null;resolve(ok);}};
+  const state={ready:false,next:null,finish(ok){if(ended)return;ended=true;if(previousInstantText===undefined)delete message.dataset.instantText;else message.dataset.instantText=previousInstantText;engine.stop(false);state.next?.();for(const type of guardedEvents)document.removeEventListener(type,guard,true);root.remove();if(active===state)active=null;resolve(ok);}};
   active=state;
   const pause=ms=>Promise.race([new Promise(done=>setTimeout(done,ms)),result]);
   const animate=async frames=>{
@@ -76,8 +78,13 @@ export function createReincarnationVision({host,message}){
   message.textContent='＊Aボタンで次へ';
   await next();
   if(ended)return result;
-  const closing=paginateMessageToFit({element:message,text:'黄金の稲穂の女神ルミナ「私たちはいつでもあなたを見守っておりますよ…。」'});
-  for(const page of closing){message.textContent=page;await pause(3000);if(ended)return result;}
+  const closing=paginateMessageToFit({element:message,text:'黄金の稲穂の女神ルミナ「私たちはいつでもあなたを見守っておりますよ…。」',formatPage:text=>text+hint});
+  for(let index=0;index<closing.length;index++){
+   const last=index===closing.length-1;
+   message.textContent=closing[index]+(last?'':hint);
+   if(last)await pause(3000);else await next();
+   if(ended)return result;
+  }
   message.textContent='';
   engine.load(effect(reduced
    ? [{type:'blackout',enabled:true,start:0,duration:160,color:'#000000',intensity:1,fadeIn:160,hold:0,fadeOut:0}]

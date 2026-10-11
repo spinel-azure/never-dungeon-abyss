@@ -999,7 +999,7 @@ function configureTownMessageObserver() {
     if (text === townTypewriter.lastRenderedText) return;
     clearTownTypewriter();
     const rumorParts = town.mode === "tavernRumor" ? getTavernRumorTypewriterParts(text) : null;
-    if (!town.active || !townTypewriter.enabled || (!town.compactTalk && !(town.mode==='explorerPreview'&&explorerPreview?.isTalking()) && !isNpcTownMessage(text) && !rumorParts)) {
+    if (townMessageTarget()?.dataset.instantText === "true" || !town.active || !townTypewriter.enabled || (!town.compactTalk && !(town.mode==='explorerPreview'&&explorerPreview?.isTalking()) && !isNpcTownMessage(text) && !rumorParts)) {
       townTypewriter.lastRenderedText = text;
       updateCompactTalkHint();
       playPendingFacilityVoice();

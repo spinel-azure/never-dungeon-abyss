@@ -2135,3 +2135,9 @@
 - Node全2063成功/失敗0、Python29成功/警告0/失敗0/既存2skip。構文/diff検査成功。新規単体テストで発生条件/完了済み/旧pending排除と各スロットの転生勲章回数・旧セーブ互換を検証。
 - tests/browser/reincarnation-vision.mjsを今回仕様へ更新。分離Edge PC1280x900/スマホ相当390x844で転生2回Lv197・3回Lv196/1の非発生、3回Lv197の発生、開始時メッセージ空欄、25b/c/25順序、A入力、最終台詞からの自動終了、スマホ途中reload→CONTINUE、完了フラグ保存、再入場非発生、ロード勲章2枚を確認。PC2ページ/スマホ4ページ。手動保存QA呼出しを本編APIのオブジェクト引数へ修正し再検証成功。初期状態を設定した検証であり、通常プレイでの転生全通し/実端末/物理ゲームパッドは未確認。
 - QA画像TEMP/nda-reincarnation-vision-xEFNFY（pc-medals.png/mobile-medals.pngをユーザー提示）、ログTEMP/nda-vision-revised-browser.log・nda-vision-revised-node-final.log・nda-vision-revised-python.log。LAST UPDATE2026-10-11維持、main.jsキャッシュ20261011-3、title-screen.jsは20261011-1。README変更なし、コミット/pushなし。
+### 2026-10-11 ルミナ最終台詞のA送りと最終ページ待機
+
+- 着手main/b6b8035、作業ツリークリーン。最後の台詞も途中ページはA待ち＋案内表示へ変更し、最終ページだけ全文表示後3秒待機して白転/テレビ消灯へ進む。分割計測はA案内の行数を含める。
+- スマホ途中ロード時に町のMutationObserverによるタイプライターが台詞を段階表示することをブラウザ検査で検出。イベント中だけmessage.dataset.instantTextを設定してページ全文を即時表示し、終了/破棄時は以前の設定へ復帰。通常の町会話設定は維持。
+- 関連Node15成功/失敗0。PC1280x900/スマホ相当390x844で途中ページを3.3秒放置しても変わらないこと、A送り後の全ページを連結すると指定全文と一致すること、最終ページ1.5秒時点では継続しその後自動終了することを確認。途中ロード/完了保存/再入場非発生/勲章表示も成功。構文/diff検査成功。Node全件/Pythonは今回は再実行なし。実端末/物理ゲームパッド未確認。
+- QAログTEMP/nda-vision-closing-browser.log・nda-vision-closing-node.log、画像TEMP/nda-reincarnation-vision-OWeBRG。LAST UPDATE2026-10-11維持、main.jsキャッシュ20261011-4。README変更なし、コミット/pushなし。
