@@ -107,8 +107,8 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
   session.deferredSurveyNotice=null;
   return presentSurveyNotice(notice).then(()=>true);
  };
- session.presentEngravingChest=async itemId=>{
-  if(!itemId||disposed)return false;
+ session.presentV2RareRewardChest=async reward=>{
+  if(!reward||disposed)return false;
   session.transitioning=true;
   try{
    message.textContent='金箱が出現した！';
@@ -119,8 +119,8 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
    });
    if(disposed)return false;
    session.playSe('importantItem');
-   session.keyAcquisitionPlaying=true;
-   try{await host.showEngravingAcquisition?.(itemId);}finally{session.keyAcquisitionPlaying=false;}
+   session.rareRewardPlaying=true;
+   try{await host.showV2RareRewardAcquisition?.(reward);}finally{session.rareRewardPlaying=false;}
    return true;
   }finally{
    host.hideTreasure?.();
@@ -291,7 +291,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  const guardCommands=e=>{if(!host.isBattleActive?.()&&isV2Session(session)&&(session.cellPrompt||session.transitioning||session.surveyPresentationPlaying)&&e.target?.closest?.('.dungeon-commands, .menu-screen')){e.preventDefault();e.stopImmediatePropagation();}};
  for(const event of ['pointerdown','click','touchend'])document.addEventListener(event,guardCommands,true);
  const dismiss=()=>{if(session.renderState.overlayEvent&&!session.surveyPresentationPlaying)session.renderState.overlayEvent=null;};canvas.addEventListener('click',dismiss);
- function close(){if(disposed)return;disposed=true;if(session.keyAcquisitionPlaying)host.hideMapKeyAcquisition?.();if(chestPreview)host.hideTreasure?.();discardV2Experience(session);session.disposeSurvey?.();window.removeEventListener('pagehide',saveOnHide);document.removeEventListener('visibilitychange',saveWhenHidden);for(const event of ['pointerdown','click','touchend'])document.removeEventListener(event,guardCommands,true);if(session.chestOpening){host.hideTreasure?.();cancelV2KeyChest(session);}restore();statusParent.append(host.status);container.remove();window.removeEventListener('keydown',enter,true);detach();}
+ function close(){if(disposed)return;disposed=true;if(session.keyAcquisitionPlaying)host.hideMapKeyAcquisition?.();if(session.rareRewardPlaying)host.hideV2RareRewardAcquisition?.();if(chestPreview)host.hideTreasure?.();discardV2Experience(session);session.disposeSurvey?.();window.removeEventListener('pagehide',saveOnHide);document.removeEventListener('visibilitychange',saveWhenHidden);for(const event of ['pointerdown','click','touchend'])document.removeEventListener(event,guardCommands,true);if(session.chestOpening){host.hideTreasure?.();cancelV2KeyChest(session);}restore();statusParent.append(host.status);container.remove();window.removeEventListener('keydown',enter,true);detach();}
  host.onStateChanged?.();
  if(resumeSave){
   session.renderState.overlayEvent=null;

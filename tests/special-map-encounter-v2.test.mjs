@@ -80,6 +80,7 @@ test('V2 beetles add their card drops beside fixed gold at 3% and 0.5%',()=>{
    const enemy={...getV2CombatEnemy(enemyId,50),hp:0};
    const reward=grantV2BattleRewards(c,{enemy,explorationContext:s.battleContext},s,()=>roll);
    assert.equal(reward.cardDrop?.cardId===cardId?1:0,expected,`${enemyId} @ ${roll}`);
+   assert.equal(reward.rareChestReward?.cardId===cardId?1:0,expected,`gold chest ${enemyId} @ ${roll}`);
    assert.equal(s.lootBag.gold,enemy.dropGold);s.disposeSurvey();
   }
  }
@@ -92,6 +93,7 @@ test('any Lv100 V2 boss has a stable 1% engraving chest with an even five-way ta
   s.battleContext=context;
   const reward=grantV2BattleRewards(createInitialCharacter({name:'刻印',job:'warrior'}),{enemy:{experienceReward:0,noDrop:true},explorationContext:context},s,()=>.5);
   assert.equal(reward.engravingItemId,['strength_engraving','intelligence_engraving','agility_engraving','dexterity_engraving','luck_engraving'][index]);
+  assert.deepEqual(reward.rareChestReward,{kind:'item',itemId:reward.engravingItemId});
   assert.equal(s.lootBag.items[reward.engravingItemId],1);s.disposeSurvey();
  }
  const s=create(),context={source:'special-map-v2-boss',sessionId:s.encounterSessionId,battleId:1,mapKey:s.mapKey,mapLevel:100,engravingRandomValues:[.01,0]};s.battleContext=context;

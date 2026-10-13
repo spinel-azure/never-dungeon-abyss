@@ -14,9 +14,10 @@ export function rollV2Level100Engraving(context,random=Math.random){
  if(normalized(values[0])>=.01)return null;
  return V2_LEVEL_100_ENGRAVINGS[Math.floor(normalized(values[1])*V2_LEVEL_100_ENGRAVINGS.length)];
 }
-function rollV2CardDrop(enemy,random){
+function rollV2CardDrop(enemy,context,random){
  const profile=enemy?.v2CardDrop;
- return profile&&normalized(random())<profile.rate
+ const roll=context?.rareCardRandomValue??random();
+ return profile&&normalized(roll)<profile.rate
   ?{kind:'card',cardId:profile.cardId,amount:1,unidentifiedName:'？カード',rarity:profile.rarity}
   :null;
 }
@@ -38,15 +39,16 @@ export function grantV2BattleRewards(character,battle,session,random=Math.random
  const exp=calculateBattleExperienceReward(character,enemies.reduce((n,e)=>n+Math.max(0,Number(e?.experienceReward)||0),0));
  const fixed=calculateFixedGoldPerDefeat(enemies);
  const drop=fixed>0?{kind:'gold',amount:fixed}:rollEnemyDrop(battle.enemy,random);
- const cardDrop=rollV2CardDrop(battle.enemy,random);
+ const cardDrop=rollV2CardDrop(battle.enemy,context,random);
  const engravingItemId=rollV2Level100Engraving(context,random);
+ const rareChestReward=engravingItemId?{kind:'item',itemId:engravingItemId}:cardDrop?{...cardDrop}:null;
  let bag=addDrop(session.lootBag,drop);
  bag=addDrop(bag,cardDrop);
  if(engravingItemId)bag=addLootItem(bag,engravingItemId,1).lootBag;
  session.lootBag=bag;
  session.battleExperience+=exp;
  session.rewardedBattles.add(context.battleId);
- return {character,exp,drop,cardDrop,engravingItemId,
+ return {character,exp,drop,cardDrop,engravingItemId,rareChestReward,
   message:`戦闘に勝利した。${exp}EXPを帰還時の精算に積み立てた。${drop.kind==='gold'?` ${drop.amount}Gをロット袋に入れた。`:bag?' 戦利品をロット袋に入れた。':drop.kind==='redChest'?' 赤宝箱イベントはV2-F1では未対応です。':''}${cardDrop?' カードをロット袋に入れた。':''}`};
 }
 

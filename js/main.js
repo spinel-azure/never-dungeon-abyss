@@ -5790,7 +5790,7 @@ import {
         }
         s.victoryRetry=null;
         startBgm(getSpecialMapBgmKey(s.generatedMap.themeId));
-        if(reward.engravingItemId)await s.presentEngravingChest?.(reward.engravingItemId);
+        if(reward.rareChestReward)await s.presentV2RareRewardChest?.(reward.rareChestReward);
         await s.presentDeferredSurveyNotice?.();
         s.finishingBattle=false;
         say('地図の主を討伐した。ワープゲートが現れた。A／EnterでB1F入口へ移動。\n未鑑定地図を発見。探検家テントで受領できます。\n'+reward.message);
@@ -5802,7 +5802,7 @@ import {
     if(outcome==='victory'){victoryReward=grantV2BattleRewards(character,battle,s);character=victoryReward.character;message=victoryReward.message;if(['special-map-v2-boss','special-map-v2-special-boss'].includes(battle.explorationContext.source)){s.bossDefeated=true;message='地図の主を討伐した。ワープゲートが現れた。A／EnterでB1F入口へ移動。\n'+message;}}
     resumeV2Encounter(s,s.battleContext);
     if(outcome==='victory')saveGame();
-    if(victoryReward?.engravingItemId)await s.presentEngravingChest?.(victoryReward.engravingItemId);
+    if(victoryReward?.rareChestReward)await s.presentV2RareRewardChest?.(victoryReward.rareChestReward);
     if(outcome==='victory')await s.presentDeferredSurveyNotice?.();
     s.finishingBattle=false;
     startBgm(getSpecialMapBgmKey(s.generatedMap.themeId));say(message);updateCharacterUi();updateHud();saveGame();
@@ -5861,10 +5861,16 @@ import {
       showNamedItemGetEffect(['赤錆びた鍵'],{itemIds:['red_rust_key_b9f'],acquisitionMessage:true,playSound:false});
       return new Promise(resolve=>setTimeout(resolve,3400));
     },
-    showEngravingAcquisition:itemId=>{
-      const item=getItem(itemId);if(!item)return Promise.resolve();
-      showNamedItemGetEffect([item.name],{itemIds:[itemId],imageSources:[`images/item-compendium/${itemId}.avif`],acquisitionMessage:true,playSound:false});
+    showV2RareRewardAcquisition:reward=>{
+      if(reward?.kind==='card')return new Promise(resolve=>showCardGetEffect(reward.cardId,{seId:null,onComplete:resolve}));
+      const item=getItem(reward?.itemId);if(!item)return Promise.resolve();
+      showNamedItemGetEffect([item.name],{itemIds:[item.id],imageSources:[`images/item-compendium/${item.id}.avif`],acquisitionMessage:true,playSound:false});
       return new Promise(resolve=>setTimeout(resolve,3400));
+    },
+    hideV2RareRewardAcquisition:()=>{
+      clearTimeout(itemGetTimer);itemGetEffect.hidden=true;itemGetEffect.classList.remove('is-active');
+      clearTimeout(cardGetTimer);cardGetEffect.hidden=true;cardGetEffect.classList.remove('is-active');
+      const frame=townScreen?.querySelector('.town-portrait-frame');if(frame&&cardGetEffect.parentElement!==frame)frame.append(cardGetEffect);
     },
     hideMapKeyAcquisition:()=>{clearTimeout(itemGetTimer);itemGetEffect.hidden=true;itemGetEffect.classList.remove('is-active');},
     runMapWarpTransition:onDark=>runSceneTransition({playAudio:()=>playSe('fixedWarp'),onDark}),
