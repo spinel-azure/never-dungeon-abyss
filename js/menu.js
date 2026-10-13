@@ -1326,7 +1326,7 @@ function equipmentEffectLabels(definition) {
   return labels;
 }
 function getStatusStatPageMaximum(character = menu.getCharacter()) {
-  return Math.min(2, Math.max(0, Math.floor(Number(character?.reincarnationCount) || 0)));
+  return Math.min(2, Math.max(1, Math.floor(Number(character?.reincarnationCount) || 0)));
 }
 function setStatusStatPage(page) {
   const maximum = getStatusStatPageMaximum();

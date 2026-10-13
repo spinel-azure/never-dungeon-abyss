@@ -2141,3 +2141,10 @@
 - スマホ途中ロード時に町のMutationObserverによるタイプライターが台詞を段階表示することをブラウザ検査で検出。イベント中だけmessage.dataset.instantTextを設定してページ全文を即時表示し、終了/破棄時は以前の設定へ復帰。通常の町会話設定は維持。
 - 関連Node15成功/失敗0。PC1280x900/スマホ相当390x844で途中ページを3.3秒放置しても変わらないこと、A送り後の全ページを連結すると指定全文と一致すること、最終ページ1.5秒時点では継続しその後自動終了することを確認。途中ロード/完了保存/再入場非発生/勲章表示も成功。構文/diff検査成功。Node全件/Pythonは今回は再実行なし。実端末/物理ゲームパッド未確認。
 - QAログTEMP/nda-vision-closing-browser.log・nda-vision-closing-node.log、画像TEMP/nda-reincarnation-vision-OWeBRG。LAST UPDATE2026-10-11維持、main.jsキャッシュ20261011-4。README変更なし、コミット/pushなし。
+### 2026-10-13 ステータス枠選択の強調と転生0回DEFページ
+
+- 着手main/8652ad6、作業ツリークリーン。能力値枠選択時の光彩を増強し、明るい2pxの外縁と内側光彩・背景色を追加。↑で枠選択/左右で範囲切替/↓で戻る、タッチ用左右矢印の案内を常時表示。
+- main/menu双方の能力値ページ上限に最低2ページを確保。転生0回も31～60へ移動でき、STR等の上限超過セルはロック表示、DEFは60まで表示。能力値上限そのものや転生1回以上の既存ページ規則は変更なし。
+- Node全2068成功/失敗0、構文/diff検査成功。分離Edge PC1280x900/スマホ相当390x844で既存転生ページ、上/左右/下の入力経路、転生0回2ページ目とDEF60/60・他能力値ロック30セル、光彩/案内の収容を確認。画像TEMP/nda-stat-focus-qfDYy9のpc-zero-focused.png/mobile-zero-focused.pngを目視確認。ブラウザ検証は状態設定＋入力action経路であり実端末/実ゲームパッド未確認。Pythonは未実行。ブラウザ検証成果物は今後TEMPへ出力するよう変更。
+- 初回通常書込みが拒否されたため昇格書込みで変更を実施。変更前に開始された検証結果を採用せず、編集後にブラウザとNode全件を再実行。ログTEMP/nda-status-browser-final.log・nda-status-node-final.log。
+- LAST UPDATE2026-10-13、main.js/game-menu.cssキャッシュ20261013-1。README変更なし、コミット/pushなし。

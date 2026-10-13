@@ -2748,7 +2748,7 @@ import {
     const engravingBonuses = normalizeEngravingBonuses(target?.engravingStatBonuses);
     const statMaximum = getPlayerStatMaximum(target?.reincarnationCount);
     const defenseMaximum = getPlayerDefenseMaximum(target?.reincarnationCount);
-    const maximumPage = Math.min(2, Math.max(0, Math.floor(Number(target?.reincarnationCount) || 0)));
+    const maximumPage = Math.min(2, Math.max(1, Math.floor(Number(target?.reincarnationCount) || 0)));
     statusStatPage = Math.max(0, Math.min(maximumPage, Math.floor(Number(requestedPage) || 0)));
     const pageStart = statusStatPage * 30;
     const pageEnd = pageStart + 30;
