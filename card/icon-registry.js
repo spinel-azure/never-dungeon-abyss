@@ -18,6 +18,7 @@ import { drawStairsDetectionIcon } from "./icons/stairs-detection.js";
 import { drawPersonDetectionIcon } from "./icons/person-detection.js";
 import { drawTreasureDetectionIcon } from "./icons/treasure-detection.js";
 import { drawFlameSwordIcon, drawIceSwordIcon, drawLightningSwordIcon } from "./icons/elemental-sword.js";
+import { drawSilverBeetleIcon, drawBeetleKingIcon } from "./icons/beetle.js";
 
 const iconDrawers = new Map([
   ['astronomy', drawAstronomyIcon],
@@ -41,6 +42,8 @@ const iconDrawers = new Map([
   ["flame-sword", drawFlameSwordIcon],
   ["ice-sword", drawIceSwordIcon],
   ["lightning-sword", drawLightningSwordIcon],
+  ["silver-beetle", drawSilverBeetleIcon],
+  ["beetle-king", drawBeetleKingIcon],
   ["unknown", drawUnknownIcon],
 ]);
 

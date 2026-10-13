@@ -10,6 +10,11 @@ test("beetle cards have approved costs and no enabled drop route",()=>{
  assert.equal(getCardById(silver).acquisition.enabled,false);assert.equal(getCardById(king).acquisition.enabled,false);
  assert.equal(getCardById(king).acquisition.enemyId,"maikaefer_koenig");
 });
+
+test("new beetle cards use their dedicated card icons",()=>{
+ assert.equal(getCardById(silver).iconId,"silver-beetle");
+ assert.equal(getCardById(king).iconId,"beetle-king");
+});
 test("battle EXP bonuses add before one final floor",()=>{
  const c=createInitialCharacter({name:"甲虫",job:"thief"});
  const cases=[ [[],101], [[silver],111], [[gold],126], [[king],151], [[silver,gold],136], [[silver,king],161], [[gold,king],176], [[silver,gold,king],186] ];
