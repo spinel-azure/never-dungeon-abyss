@@ -1116,7 +1116,7 @@ function renderBattle() {
   if (battle.outcome) hideBattleCommands();
   battleUi.messageEl.classList.remove("is-skill-description");
   setText("battlePlayerName", `${battle.player.name} [${battle.player.jobLabel || battle.player.job}]${isCharmed(battle.player) ? "♥" : ""}`);
-  renderCharmStatus(battle.player);
+  renderCharmStatus(battle.player, document, battleUi.active && !battle.outcome);
   battleUi.root.querySelector("#battlePlayerName")?.classList.toggle(
     "condition-poison",
     ["POISON", "TOXIC", "DEATH POISON"].includes(getConditionLabel(battle.player.statuses))

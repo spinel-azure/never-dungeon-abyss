@@ -184,7 +184,7 @@ body.title-active .strafe-controls,body.menu-open .strafe-controls,body.battle-a
 .nde-stat-page-arrow:disabled{visibility:hidden;pointer-events:none}
 .nde-stat-paged.is-focused .nde-stat-rows{border-color:#e4fcff;background:rgba(32,190,255,.12);outline:2px solid #75ecff;outline-offset:2px;box-shadow:0 0 12px #45e2ff,0 0 24px #45e2ff99,inset 0 0 12px #45e2ff55}
 .nde-stat-range{margin:2px 0 0;color:#61eaff;font:11px "GameFont",sans-serif;text-align:right}
-.nde-empty-gauge i.is-engraving{background:#ffe34f;border-color:#d2b51d;box-shadow:inset 0 0 2px rgba(255,250,170,.8)}
+.nde-empty-gauge i.is-engraving{background:#b8ed4f;border-color:#81b52c;box-shadow:inset 0 0 2px rgba(225,255,170,.8)}
 .nde-empty-gauge i.is-locked{border-color:#1c2526;background:#020303;box-shadow:inset 0 0 0 1px rgba(0,0,0,.8);opacity:.42}
 .nde-empty-gauge i.is-penalty{filter:brightness(.42);background-image:repeating-linear-gradient(135deg,transparent 0 2px,#ff5b68 2px 3px)}
 @media(max-width:420px){.nde-stat-paged{grid-template-columns:16px minmax(0,1fr) 16px;gap:2px}.nde-stat-page-arrow{width:16px;min-height:72px;font-size:14px}.nde-stat-range,.nde-stat-note{font-size:9px}.nde-stat-row output{font-size:12px}}

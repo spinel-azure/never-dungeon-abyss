@@ -1,8 +1,8 @@
 import { AKASHIC_BACKGROUND } from '../data/akashic-phantoms.js';
 import { isCharmed } from '../combat/akashic-phantoms.js';
 
-export function renderCharmStatus(character, root = document) {
-  const active = isCharmed(character);
+export function renderCharmStatus(character, root = document, battleActive = false) {
+  const active = battleActive && isCharmed(character);
   for (const id of ['quickName', 'quickNameCompact', 'battlePlayerName']) {
     root.getElementById(id)?.classList.toggle('condition-charm', active);
   }
@@ -15,6 +15,8 @@ export function renderCharmStatus(character, root = document) {
     heart.setAttribute('aria-label', '魅了'); job.after(heart);
   }
   heart.hidden = !active;
+  heart.textContent = active ? '♥' : '';
+  heart.style.display = active ? '' : 'none';
 }
 
 export function drawQueenProjection(ctx, image, width, height, event, now, reducedMotion = false) {

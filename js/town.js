@@ -3629,7 +3629,7 @@ function showRegistrationRequired() {
 export function renderCharacterStatus() {
   const character = town.getCharacter();
   renderWeaponElementStatus(character);
-  renderCharmStatus(character);
+  if (!document.body.classList.contains('battle-active')) renderCharmStatus(null);
   const quickName = character?.name || "NO_NAME";
   const values = {
     quickName,

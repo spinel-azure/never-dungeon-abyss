@@ -2148,3 +2148,17 @@
 - Node全2068成功/失敗0、構文/diff検査成功。分離Edge PC1280x900/スマホ相当390x844で既存転生ページ、上/左右/下の入力経路、転生0回2ページ目とDEF60/60・他能力値ロック30セル、光彩/案内の収容を確認。画像TEMP/nda-stat-focus-qfDYy9のpc-zero-focused.png/mobile-zero-focused.pngを目視確認。ブラウザ検証は状態設定＋入力action経路であり実端末/実ゲームパッド未確認。Pythonは未実行。ブラウザ検証成果物は今後TEMPへ出力するよう変更。
 - 初回通常書込みが拒否されたため昇格書込みで変更を実施。変更前に開始された検証結果を採用せず、編集後にブラウザとNode全件を再実行。ログTEMP/nda-status-browser-final.log・nda-status-node-final.log。
 - LAST UPDATE2026-10-13、main.js/game-menu.cssキャッシュ20261013-1。README変更なし、コミット/pushなし。
+### 2026-10-13 双子座Lv31の白い♥調査と回帰テスト
+
+- 調査・テスト追加依頼。ゲーム本体は変更なし。tests/browser/gemini-charm-regression.mjsを追加。魅了未経験のLv31新規状態で双子座第1幕の正解箱→添付と同じ成功台詞→退場→次の奈落ネズミ戦をPC1280x900/スマホ相当390x844で確認。メモリstatuses=[]、保存データ非魅了、isCharmed=false、quickCharm.hidden=true、現行CSSでdisplay:none、次戦の戦闘用player実在と非魅了を検証成功。ユーザーの実セーブは未提供であり未検査。
+- 魅了専用CSS3規則を除いた旧CSS相当をブラウザ内だけに適用すると、非魅了・hidden=trueのままdisplay:flex/color rgb(247,251,255)で白い♥を再現。共通quick-status spanのdisplayがUAのhidden表示を上書きするため。現行CSSへ戻すと非表示。実端末のキャッシュ原因確定とは区別する。
+- 呼出順：startGeminiEvent→startOverlayEventで台詞/overlay設定、箱演出callback→resolveGeminiChoice→updateCharacterUi→renderCharacterStatus→renderCharmStatus→saveGame、openedでA→result台詞/報酬表示。双子座からcharmを付与する経路なし。表示要素は非魅了でも生成される。renderCharmStatusは探索用characterのstatusesも参照するため異常セーブのcharmは表示に影響し得る。
+- 防御策案：戦闘activeと戦闘用player魅了だけを表示根拠にし、非魅了時は文字を空にする/DOMを除去して旧CSSでも白♥を描けなくする。探索UIからの更新が戦闘表示を消さないよう表示所有者も統一する必要あり。今回は検討のみ、保存状態の消去や本体変更はしない。
+- ログTEMP/nda-gemini-charm-final.log、画像TEMP/nda-gemini-charm-*。本編callbackを使う設定データ検証であり実セーブ/実端末/通常プレイ全通しではない。日付/キャッシュ/README変更なし、コミット/pushなし。
+### 2026-10-13 白い♥の防御修正・刻印黄緑化
+
+- 前回の調査台帳/未追跡回帰テストを維持して実装。renderCharmStatusは明示された進行中戦闘フラグと戦闘用playerの魅了が両方成立する時だけ有効。戦闘UIからactiveかつ未決着を渡す。探索/町の更新は探索characterのstatusesを表示根拠にせず、戦闘中は戦闘UIの表示を上書きしない。
+- 非魅了時はhidden=trueに加え、文字を空にしてinline display:noneを設定。古いCSS相当でも白い♥が描かれない。戦闘終了時は既存closeBattleからクリア。状態異常の保存データそのものを削除/改変する対応は行わない。
+- 刻印ゲージの黄色を黄緑(#b8ed4f)に変更、凡例も黄緑:刻印へ統一。上限/能力値/色分け対象は変更なし。
+- Node全2068成功/失敗0。PC1280x900/スマホ相当390x844でLv31双子座成功会話の非魅了/保存非魅了/hidden=true、旧CSS相当でもdisplay:noneかつ空文字、次戦非魅了、戦闘用playerへ魅了状態を設定した時だけ♥表示、解除と戦闘終了で非表示を確認。刻印ゲージの各転生ページと黄緑表示を既存ブラウザQAで確認。画像TEMP/nda-stat-focus-fqQtz0/mobile-status-page1.pngを目視。実端末/ユーザー実セーブは未確認。初回テスト追加時の引用符エラーを修正して再実行成功。
+- ログTEMP/nda-charm-fix-browser.log・nda-charm-fix-node.log・nda-green-browser.log。LAST UPDATE2026-10-13維持、main.js/game-menu.cssキャッシュ20261013-2。README変更なし、コミット/pushなし。
