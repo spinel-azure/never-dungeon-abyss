@@ -12,7 +12,7 @@ export function attachV2BossEncounter(s,{onBossEncounter,prepareBossEncounter}={
  s.retryBossEncounter=()=>{
   if(!s.pendingBoss||s.battleContext||s.experienceClosed)return false;
   if(!s.flushSurvey()){s.say(s.surveyError);return false;}
-  if(s.surveyCompletionPending||s.bossFloorJinglePending||s.surveyNotice||s.surveyPresentationPlaying)return false;
+  if(s.surveyCompletionPending||s.surveyNotice||s.surveyPresentationPlaying)return false;
   if(!enabled(s)){s.pendingBoss=false;s.startUnavailableBossPresentation?.();return false;}
   const gold=s.generatedMap.themeId==='gold';
   const goddess=GODDESS_THEMES.includes(s.generatedMap.themeId);

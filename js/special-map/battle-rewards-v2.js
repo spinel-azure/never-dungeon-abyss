@@ -4,6 +4,31 @@ import {calculateBattleExperienceReward,settleIndependentReturnExperience} from 
 import {calculateFixedGoldPerDefeat,rollEnemyDrop} from '../../data/loot.js';
 import {addLootGold,addLootItem,addLootEquipment,addLootCard,settleLootBag} from '../../data/inventory.js';
 
+export const V2_LEVEL_100_ENGRAVINGS=Object.freeze([
+ 'strength_engraving','intelligence_engraving','agility_engraving','dexterity_engraving','luck_engraving'
+]);
+const normalized=value=>Math.max(0,Math.min(.999999999,Number(value)||0));
+export function rollV2Level100Engraving(context,random=Math.random){
+ if(!['special-map-v2-boss','special-map-v2-special-boss'].includes(context?.source)||Number(context.mapLevel)!==100)return null;
+ const values=Array.isArray(context.engravingRandomValues)?context.engravingRandomValues:[random(),random()];
+ if(normalized(values[0])>=.01)return null;
+ return V2_LEVEL_100_ENGRAVINGS[Math.floor(normalized(values[1])*V2_LEVEL_100_ENGRAVINGS.length)];
+}
+function rollV2CardDrop(enemy,random){
+ const profile=enemy?.v2CardDrop;
+ return profile&&normalized(random())<profile.rate
+  ?{kind:'card',cardId:profile.cardId,amount:1,unidentifiedName:'？カード',rarity:profile.rarity}
+  :null;
+}
+function addDrop(bag,drop){
+ if(!drop)return bag;
+ if(drop.kind==='gold')return addLootGold(bag,drop.amount).lootBag;
+ if(drop.kind==='item')return addLootItem(bag,drop.itemId,drop.amount||1).lootBag;
+ if(drop.kind==='equipment')return addLootEquipment(bag,drop).lootBag;
+ if(drop.kind==='card')return addLootCard(bag,drop.cardId,drop.amount||1).lootBag;
+ return bag;
+}
+
 // EXP belongs to this three-floor expedition until a successful return.
 // Loot belongs to the expedition, independent of the abyss loot bag.
 export function grantV2BattleRewards(character,battle,session,random=Math.random){
@@ -13,16 +38,16 @@ export function grantV2BattleRewards(character,battle,session,random=Math.random
  const exp=calculateBattleExperienceReward(character,enemies.reduce((n,e)=>n+Math.max(0,Number(e?.experienceReward)||0),0));
  const fixed=calculateFixedGoldPerDefeat(enemies);
  const drop=fixed>0?{kind:'gold',amount:fixed}:rollEnemyDrop(battle.enemy,random);
- let bag=session.lootBag;
- if(drop.kind==='gold')bag=addLootGold(bag,drop.amount).lootBag;
- if(drop.kind==='item')bag=addLootItem(bag,drop.itemId,drop.amount||1).lootBag;
- if(drop.kind==='equipment')bag=addLootEquipment(bag,drop).lootBag;
- if(drop.kind==='card')bag=addLootCard(bag,drop.cardId,drop.amount||1).lootBag;
+ const cardDrop=rollV2CardDrop(battle.enemy,random);
+ const engravingItemId=rollV2Level100Engraving(context,random);
+ let bag=addDrop(session.lootBag,drop);
+ bag=addDrop(bag,cardDrop);
+ if(engravingItemId)bag=addLootItem(bag,engravingItemId,1).lootBag;
  session.lootBag=bag;
  session.battleExperience+=exp;
  session.rewardedBattles.add(context.battleId);
- return {character,exp,drop,
-  message:`戦闘に勝利した。${exp}EXPを帰還時の精算に積み立てた。${drop.kind==='gold'?` ${drop.amount}Gをロット袋に入れた。`:bag?' 戦利品をロット袋に入れた。':drop.kind==='redChest'?' 赤宝箱イベントはV2-F1では未対応です。':''}`};
+ return {character,exp,drop,cardDrop,engravingItemId,
+  message:`戦闘に勝利した。${exp}EXPを帰還時の精算に積み立てた。${drop.kind==='gold'?` ${drop.amount}Gをロット袋に入れた。`:bag?' 戦利品をロット袋に入れた。':drop.kind==='redChest'?' 赤宝箱イベントはV2-F1では未対応です。':''}${cardDrop?' カードをロット袋に入れた。':''}`};
 }
 
 // Commit includes saving the character. Keep the session intact on failure so

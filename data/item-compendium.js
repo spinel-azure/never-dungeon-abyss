@@ -4,6 +4,11 @@ export function filterItemCompendiumEntries(entries, tab = "すべて") {
   return entries.filter(entry => tab === "すべて" || entry.category === tab);
 }
 export const ITEM_COMPENDIUM_ENTRIES = Object.freeze({
+  strength_engraving: engravingEntry("strength_engraving", "剛力の刻印", "STR"),
+  intelligence_engraving: engravingEntry("intelligence_engraving", "叡智の刻印", "INT"),
+  agility_engraving: engravingEntry("agility_engraving", "疾風の刻印", "AGI"),
+  dexterity_engraving: engravingEntry("dexterity_engraving", "技巧の刻印", "DEX"),
+  luck_engraving: engravingEntry("luck_engraving", "幸運の刻印", "LUC"),
   red_rust_key_b9f: Object.freeze({
     id: "red_rust_key_b9f",
     name: "赤錆びた鍵",
@@ -89,6 +94,11 @@ export const ITEM_COMPENDIUM_ENTRIES = Object.freeze({
     description: "カッツェンラントの女王が身に着けていたと言われるティアラ。柑橘系の匂いがする。所持しているだけで「人捜し」と同じ効果がある。"
   })
 });
+
+function engravingEntry(id,name,stat){
+ return Object.freeze({id,name,category:"消耗品",acquisition:"地図迷宮Lv100ボスの金箱（V2）",purchasePrice:null,
+  imageSrc:`images/item-compendium/${id}.avif`,description:`魂へ刻み込むと、${stat}が恒久的に1上昇する。`});
+}
 
 export function getItemCompendiumEntry(id) {
   return ITEM_COMPENDIUM_ENTRIES[id] || null;

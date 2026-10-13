@@ -94,13 +94,39 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
   const audio=complete?(host.playSurveyCompletion?.()??playSe('importantItem')):
    session.bossFloorJinglePending?(host.playSurveyJingle?.('battleVictory')??playSe('battleVictory')):null;
   session.bossFloorJinglePending=false;
-  Promise.allSettled([Promise.resolve(audio),new Promise(resolve=>setTimeout(resolve,2200))]).then(()=>{
+  return Promise.allSettled([Promise.resolve(audio),new Promise(resolve=>setTimeout(resolve,2200))]).then(()=>{
    if(disposed)return;
    if(session.renderState.overlayEvent===overlay)session.renderState.overlayEvent=null;
    session.surveyPresentationPlaying=false;
    if(session.pendingBoss)session.retryBossEncounter();
   });
  }
+ session.presentDeferredSurveyNotice=()=>{
+  const notice=session.deferredSurveyNotice;
+  if(!notice)return Promise.resolve(false);
+  session.deferredSurveyNotice=null;
+  return presentSurveyNotice(notice).then(()=>true);
+ };
+ session.presentEngravingChest=async itemId=>{
+  if(!itemId||disposed)return false;
+  session.transitioning=true;
+  try{
+   message.textContent='金箱が出現した！';
+   playSe('door');
+   await new Promise((resolve,reject)=>{
+    if(!host.playTreasureOpening){reject(Error('Treasure presentation unavailable'));return;}
+    Promise.resolve(host.playTreasureOpening('gold',()=>{host.hideTreasure?.();resolve();},{backdrop:true})).catch(reject);
+   });
+   if(disposed)return false;
+   session.playSe('importantItem');
+   session.keyAcquisitionPlaying=true;
+   try{await host.showEngravingAcquisition?.(itemId);}finally{session.keyAcquisitionPlaying=false;}
+   return true;
+  }finally{
+   host.hideTreasure?.();
+   if(!disposed)session.transitioning=false;
+  }
+ };
  function syncChestPreview(){
   if(!isV2Session(session)||session.chestOpening)return;
   const visible=session.cellPrompt==='chest'&&!session.surveyPresentationPlaying;

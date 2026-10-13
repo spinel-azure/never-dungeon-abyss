@@ -56,17 +56,16 @@ test('boss cell: requires session key, survey flush precedes battle; special fou
  }finally{s.disposeSurvey();}
  const again=session();assert.equal(again.bossDefeated,false);again.disposeSurvey();
 });
-test('299→300 waits for committed survey notification/audio before boss; no auto-survey',()=>{
+test('299→300 starts the boss first and defers committed survey presentation',()=>{
  const original={...map,surveyedMasks:Array(3).fill('f'.repeat(25))};
  const probe=session(),p=probe.generatedMap.bossRoom.bossCell;probe.disposeSurvey();
  const index=p.y*10+p.x,nibble=Math.floor(index/4),bit=index%4;
  original.surveyedMasks[2]='f'.repeat(nibble)+(15&~(1<<bit)).toString(16)+'f'.repeat(24-nibble);
  let count=0;const s=createSpecialMapV2Session([original],mapOriginalId(original),{onBossEncounter:()=>count++});
  try{s.currentFloor=2;s.playerX=p.x;s.playerY=p.y;s.bossKeyFound=s.bossDoorUnlocked=true;
-  assert.equal(s.totalSurveyed,299);s.recordSurvey(p.x,p.y);assert.equal(s.totalSurveyed,300);s.onBossCell();assert.equal(count,0);
-  assert.deepEqual(s.surveyNotice,{total:300,floor:2});s.surveyNotice=null;
-  s.surveyCompletionPending=false;s.surveyPresentationPlaying=true;s.retryBossEncounter();assert.equal(count,0);
-  s.surveyPresentationPlaying=false;s.retryBossEncounter();assert.equal(count,1);s.onBossCell();assert.equal(count,1);
+  assert.equal(s.totalSurveyed,299);s.recordSurvey(p.x,p.y);assert.equal(s.totalSurveyed,300);s.onCellEntered();assert.equal(count,1);
+  assert.equal(s.surveyNotice,null);assert.deepEqual(s.deferredSurveyNotice,{total:300,floor:2});
+  s.onBossCell();assert.equal(count,1);
  }finally{s.disposeSurvey();}
 });
 test('boss EXP/G enter existing return transaction once; normal carried state untouched',()=>{

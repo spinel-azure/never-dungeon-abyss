@@ -5775,7 +5775,7 @@ import {
     }
     let message='戦闘を離れ、特殊地図の探索へ戻った。';
     if(outcome==='victory'&&isNormalMapRewardBattle(battle.explorationContext)){
-      const completeVictory=()=>{
+      const completeVictory=async()=>{
         if(!matchesV2Battle(s,battle.explorationContext)||s.experienceClosed)return;
         // Commit the permanent boss reward, expedition loot and cleared state
         // together. A failed write restores the live state for the same retry.
@@ -5788,15 +5788,23 @@ import {
           character=previous.character;Object.assign(s,{lootBag:previous.lootBag,battleExperience:previous.battleExperience,rewardedBattles:previous.rewardedBattles,battleContext:previous.battleContext,presence:previous.presence,bossDefeated:false});
           s.victoryRetry=completeVictory;s.transitioning=true;say(committed.error+' A／Enterで討伐報酬の保存を再試行します。');return;
         }
-        s.victoryRetry=null;s.finishingBattle=false;
+        s.victoryRetry=null;
         startBgm(getSpecialMapBgmKey(s.generatedMap.themeId));
+        if(reward.engravingItemId)await s.presentEngravingChest?.(reward.engravingItemId);
+        await s.presentDeferredSurveyNotice?.();
+        s.finishingBattle=false;
         say('地図の主を討伐した。ワープゲートが現れた。A／EnterでB1F入口へ移動。\n未鑑定地図を発見。探検家テントで受領できます。\n'+reward.message);
         updateCharacterUi();updateHud();saveGame();
       };
-      completeVictory();return;
+      void completeVictory();return;
     }
-    if(outcome==='victory'){const result=grantV2BattleRewards(character,battle,s);character=result.character;message=result.message;if(['special-map-v2-boss','special-map-v2-special-boss'].includes(battle.explorationContext.source)){s.bossDefeated=true;message='地図の主を討伐した。ワープゲートが現れた。A／EnterでB1F入口へ移動。\n'+message;}}
-    resumeV2Encounter(s,s.battleContext);s.finishingBattle=false;
+    let victoryReward=null;
+    if(outcome==='victory'){victoryReward=grantV2BattleRewards(character,battle,s);character=victoryReward.character;message=victoryReward.message;if(['special-map-v2-boss','special-map-v2-special-boss'].includes(battle.explorationContext.source)){s.bossDefeated=true;message='地図の主を討伐した。ワープゲートが現れた。A／EnterでB1F入口へ移動。\n'+message;}}
+    resumeV2Encounter(s,s.battleContext);
+    if(outcome==='victory')saveGame();
+    if(victoryReward?.engravingItemId)await s.presentEngravingChest?.(victoryReward.engravingItemId);
+    if(outcome==='victory')await s.presentDeferredSurveyNotice?.();
+    s.finishingBattle=false;
     startBgm(getSpecialMapBgmKey(s.generatedMap.themeId));say(message);updateCharacterUi();updateHud();saveGame();
   }
   function resumeSavedSpecialMap(saved){
@@ -5834,6 +5842,7 @@ import {
       return character?.specialMaps?.discovererName?{ok:true}:{ok:false,error:'先に探検家テントで地図署名を登録してください。'};
     },
     prepareBossEncounter:context=>{
+      context.engravingRandomValues??=[Math.random(),Math.random()];
       if(!isNormalMapRewardBattle(context))return {ok:true};
       context.rewardRandomValues??=[Math.random(),Math.random(),Math.random()];
       let drawIndex=0;
@@ -5850,6 +5859,11 @@ import {
     prepareMapBossImage:prepareNormalBossImage,
     showMapKeyAcquisition:()=>{
       showNamedItemGetEffect(['赤錆びた鍵'],{itemIds:['red_rust_key_b9f'],acquisitionMessage:true,playSound:false});
+      return new Promise(resolve=>setTimeout(resolve,3400));
+    },
+    showEngravingAcquisition:itemId=>{
+      const item=getItem(itemId);if(!item)return Promise.resolve();
+      showNamedItemGetEffect([item.name],{itemIds:[itemId],imageSources:[`images/item-compendium/${itemId}.avif`],acquisitionMessage:true,playSound:false});
       return new Promise(resolve=>setTimeout(resolve,3400));
     },
     hideMapKeyAcquisition:()=>{clearTimeout(itemGetTimer);itemGetEffect.hidden=true;itemGetEffect.classList.remove('is-active');},

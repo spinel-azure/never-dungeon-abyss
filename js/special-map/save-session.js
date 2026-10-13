@@ -3,7 +3,8 @@
 const copy = value => value == null ? null : structuredClone(value);
 const fields = ['expeditionId','torchFuel','battleExperience','bossKeyFound','bossDoorUnlocked',
   'bossDefeated','bossPreviewDismissed','presence','presenceSuppressedSteps',
-  'presenceIncreaseReduction','incenseActive','crystalFloorStepCount','encounterSequence','cellPrompt'];
+  'presenceIncreaseReduction','incenseActive','crystalFloorStepCount','encounterSequence','cellPrompt',
+  'deferredSurveyNotice','bossFloorJinglePending'];
 const facing = angle => ((Math.round((angle + Math.PI / 2) / (Math.PI / 2)) % 4) + 4) % 4;
 export function serializeSpecialMapSession(s) {
   if (!s || s.experienceClosed || s.developmentSession) return null;
@@ -48,7 +49,8 @@ export function restoreSpecialMapSession(s, data) {
   s.lootBag=copy(data.lootBag);s.rewardedBattles=new Set(data.rewardedBattles || []);
   s.battleContext=data.encounter ? {...copy(data.encounter),sessionId:s.encounterSessionId} : null;
   s.transitioning=!!s.battleContext;
-  s.surveyNotice=null;s.surveyCompletionPending=false;s.bossFloorJinglePending=false;
+  s.surveyNotice=null;s.surveyCompletionPending=false;
+  if(!s.deferredSurveyNotice)s.bossFloorJinglePending=false;
   return s;
 }
 

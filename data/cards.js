@@ -22,7 +22,7 @@ const STANDARD_CARDS = [
     descriptionJa: "戦闘で獲得する経験値が10％増加する。ほかの経験値増加カードと加算して重複する。",
     category: "exploration", effectId: "experience_gain_bonus", effectValue: 0.1,
     iconId: "silver-beetle", maxOwned: 1, maxCopies: 1,
-    acquisition: Object.freeze({ type: "plannedEnemyDrop", enemyId: "silberkaefer", dropRate: 0.05, enabled: false })
+    acquisition: Object.freeze({ type: "enemyDrop", enemyId: "silberkaefer", dropRate: 0.03, enabled: true })
   },
   {
     id: "sr_astronomy", rarity: "SR", cost: 4,
@@ -360,7 +360,7 @@ const STANDARD_CARDS = [
     descriptionJa: "戦闘で獲得する経験値が50％増加する。ほかの経験値増加カードと加算して重複する。",
     category: "exploration", effectId: "experience_gain_bonus", effectValue: 0.5,
     iconId: "beetle-king", maxOwned: 1, maxCopies: 1,
-    acquisition: Object.freeze({ type: "plannedEnemyDrop", enemyId: "maikaefer_koenig", dropRate: 0.005, enabled: false })
+    acquisition: Object.freeze({ type: "enemyDrop", enemyId: "maikaefer_koenig", dropRate: 0.005, enabled: true })
   },
   {
     id: "sr_holy_armament", rarity: "SR", cost: 4,

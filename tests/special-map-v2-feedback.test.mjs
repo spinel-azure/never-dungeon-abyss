@@ -71,6 +71,18 @@ test('key acquisition popup follows opening, plays one jingle and holds field in
  assert.equal(h.ui.session.transitioning,true);const xy=[h.ui.session.playerX,h.ui.session.playerY];h.ui.input('up');assert.deepEqual([h.ui.session.playerX,h.ui.session.playerY],xy);
  assert.equal(sounds.filter(s=>s==='importantItem').length,1);release();await h.elapsed();assert.equal(h.ui.session.transitioning,false);h.ui.close();
 });
+test('Lv100 engraving chest waits for opening, then popup, before deferred survey',async()=>{
+ let release,popups=0;const sounds=[];
+ const h=harness({playSe:key=>sounds.push(key),hostOptions:{showEngravingAcquisition:id=>{popups++;assert.equal(id,'strength_engraving');return new Promise(r=>release=r);}}}),s=h.ui.session;
+ s.deferredSurveyNotice={total:300,floor:2};
+ const presentation=s.presentEngravingChest('strength_engraving');
+ assert.equal(popups,0);assert.equal(s.transitioning,true);assert.equal(s.renderState.overlayEvent?.surveyMilestone,undefined);
+ h.done();await Promise.resolve();assert.equal(popups,1);assert.deepEqual(sounds,['door','importantItem']);
+ assert.equal(s.deferredSurveyNotice.total,300,'survey remains deferred through the chest popup');
+ release();await presentation;assert.equal(s.transitioning,false);
+ const survey=s.presentDeferredSurveyNotice();assert.equal(s.renderState.overlayEvent.overlayMessage,'地図調査完了！');
+ await h.elapsed();await survey;assert.equal(s.deferredSurveyNotice,null);h.ui.close();
+});
 test('defeated boss gate uses transition to B1 entrance without ending session',async()=>{
  const h=harness(),s=h.ui.session;v2.switchV2Floor(s,s.blueprint.links[1].lower);
  Object.assign(s,{playerX:s.generatedMap.bossRoom.bossCell.x,playerY:s.generatedMap.bossRoom.bossCell.y,bossDefeated:true,torchFuel:37,battleExperience:987,bossKeyFound:true,bossDoorUnlocked:true});
