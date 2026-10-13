@@ -1,5 +1,7 @@
 import { COMBAT_CONFIG, clamp } from "./combat-config.js";
 import { STAT_KEYS, getCharacterClass } from "../data/classes.js";
+import { normalizeEngravingBonuses } from "../data/engravings.js";
+import { getPlayerDefenseMaximum, getPlayerStatMaximum } from "../data/stat-caps.js";
 
 export function collectStats(source = {}) {
   const characterClass = getCharacterClass(source.job);
@@ -9,12 +11,16 @@ export function collectStats(source = {}) {
   const cards = source.cardStatBonuses || source.cardBonuses || {};
   const temporary = source.temporaryStatBonuses || {};
   const npc = source.npcStatBonuses || source.npcBonuses || {};
+  const engravings = normalizeEngravingBonuses(source.engravingStatBonuses);
+  const playerStatMaximum = source.job
+    ? getPlayerStatMaximum(source.reincarnationCount)
+    : COMBAT_CONFIG.statMaximum;
   const stats = {};
   for (const key of STAT_KEYS) {
     stats[key] = clamp(
-      numeric(base[key]) + numeric(equipment[key]) + numeric(cards[key]) + numeric(temporary[key]),
+      numeric(base[key]) + numeric(engravings[key]) + numeric(equipment[key]) + numeric(cards[key]) + numeric(temporary[key]),
       1,
-      COMBAT_CONFIG.statMaximum
+      playerStatMaximum
     );
   }
   return {
@@ -25,7 +31,7 @@ export function collectStats(source = {}) {
         + numeric(cards.def)
         + numeric(temporary.def)) * positiveMultiplier(equipment.defenseMultiplier),
       0,
-      source.job ? COMBAT_CONFIG.defenseMaximum : Number.POSITIVE_INFINITY
+      source.job ? getPlayerDefenseMaximum(source.reincarnationCount) : Number.POSITIVE_INFINITY
     ),
     hitBonus: numeric(source.hitBonus),
     healingMiracleMultiplier: positiveMultiplier(equipment.healingMiracleMultiplier)

@@ -8,7 +8,7 @@ import {getSpecialAutoAvailability,startSpecialAutoWalker} from './session.js';
 // consuming anything. Ordinary dungeon environment handlers are never called.
 export const SPECIAL_FIELD_EFFECT_TARGETS=Object.freeze({
  heal_hp:'character',heal_hp_rate:'character',cure_poison:'character',cure_deadly_poison:'character',cure_bleeding:'character',
- restore_hp_full:'character',restore_sp_full:'character',restore_sp_rate:'character',cure_all_ailments:'character',wing_gift:'character',
+ restore_hp_full:'character',restore_sp_full:'character',restore_sp_rate:'character',cure_all_ailments:'character',wing_gift:'character',permanent_stat_engraving:'character',
  restore_torch:'specialMap',auto_walk_to_stairs_up:'specialMap',emergency_escape:'specialMap',
  warding_incense:'specialMap',reset_presence:'specialMap',suppress_presence_steps:'specialMap',reveal_treasures_until_return:'unavailable'
 });

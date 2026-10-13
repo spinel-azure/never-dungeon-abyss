@@ -10,7 +10,7 @@ import {
   normalizeDepthReturnSettlement
 } from "../data/experience-settlement.js";
 import { getLevelUnlockedSkillIds } from "../data/skills.js";
-import { applyCardVitalMultipliers, hasCardEffect } from "../data/cards.js";
+import { applyCardVitalMultipliers, sumCardEffectValues } from "../data/cards.js";
 import { getConditionLabel } from "../combat/condition-label.js";
 
 export const TOWN_INTRODUCTION_FLAGS = Object.freeze([
@@ -42,10 +42,10 @@ export function awardBattleExperience(character, amount) {
 
 export function calculateBattleExperienceReward(character, amount) {
   const baseReward = Math.max(0, Math.floor(Number(amount) || 0));
-  const multiplier = hasCardEffect(
+  const multiplier = 1 + sumCardEffectValues(
     character?.cards?.deckSlots,
     "experience_gain_bonus"
-  ) ? 1.25 : 1;
+  );
   return Math.floor(baseReward * multiplier);
 }
 

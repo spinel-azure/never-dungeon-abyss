@@ -32,6 +32,7 @@ import { getConditionLabel } from "../combat/condition-label.js";
 import { backfillCompendiumFromCharacter, createInitialCompendium } from "./compendium.js";
 import { backfillB80TransferUnlock, isB80TransferUnlocked } from "./b80-transfer-unlock.js";
 import { normalizeReincarnationCount } from "./reincarnation.js";
+import { normalizeEngravingBonuses } from "./engravings.js";
 import {
   createInitialTavernRumorNotificationState,
   normalizeTavernRumorNotificationState
@@ -118,6 +119,7 @@ export function createInitialCharacter({ name, job, jobLabel } = {}) {
     playerCharge: createInitialPlayerCharge(),
     adventureDefeatRecoveryUsed: false,
     reincarnationCount: 0,
+    engravingStatBonuses: normalizeEngravingBonuses(),
     firstDungeonTutorialSeen: false,
     deckTutorialSeen: false,
     lootBagTutorialSeen: false,
@@ -258,6 +260,7 @@ export function normalizeCharacter(character) {
     playerCharge: normalizePlayerCharge(character.playerCharge),
     adventureDefeatRecoveryUsed: Boolean(character.adventureDefeatRecoveryUsed),
     reincarnationCount,
+    engravingStatBonuses: normalizeEngravingBonuses(character.engravingStatBonuses),
     firstDungeonTutorialSeen: typeof character.firstDungeonTutorialSeen === "boolean"
       ? character.firstDungeonTutorialSeen
       : true,

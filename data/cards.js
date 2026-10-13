@@ -17,6 +17,14 @@ export const VIRGO_CARD_ID = "zodiac_virgo";
 
 const STANDARD_CARDS = [
   {
+    id: "common_silver_beetle", rarity: "C", cost: 1,
+    name: "Silver Beetle", nameJa: "銀甲虫", concept: "獲得経験値 +10%",
+    descriptionJa: "戦闘で獲得する経験値が10％増加する。ほかの経験値増加カードと加算して重複する。",
+    category: "exploration", effectId: "experience_gain_bonus", effectValue: 0.1,
+    iconId: "luck", maxOwned: 1, maxCopies: 1,
+    acquisition: Object.freeze({ type: "plannedEnemyDrop", enemyId: "silberkaefer", dropRate: 0.05, enabled: false })
+  },
+  {
     id: "sr_astronomy", rarity: "SR", cost: 4,
     name: "Astronomy", nameJa: "天体観測", concept: "転送門で星座イベントを探知",
     descriptionJa: "転送門に、未完了のゾディアックイベントがある区域の星座マークを表示する。",
@@ -345,6 +353,14 @@ const STANDARD_CARDS = [
     iconId: "luck", maxOwned: 1, maxCopies: 1,
     sellPrice: 5000, buybackPrice: 50000, overflowGold: 5000,
     acquisition: Object.freeze({ type: "rareEnemy", enemyId: "maikaefer", dropRate: 0.01 })
+  },
+  {
+    id: "legendary_beetle_king", rarity: "L", cost: 6,
+    name: "Beetle King", nameJa: "甲虫王", concept: "獲得経験値 +50%",
+    descriptionJa: "戦闘で獲得する経験値が50％増加する。ほかの経験値増加カードと加算して重複する。",
+    category: "exploration", effectId: "experience_gain_bonus", effectValue: 0.5,
+    iconId: "luck", maxOwned: 1, maxCopies: 1,
+    acquisition: Object.freeze({ type: "plannedEnemyDrop", enemyId: "maikaefer_koenig", dropRate: 0.005, enabled: false })
   },
   {
     id: "sr_holy_armament", rarity: "SR", cost: 4,

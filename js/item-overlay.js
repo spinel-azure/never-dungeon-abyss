@@ -11,6 +11,7 @@ const overlay = {
   root: null, list: null, pageEl: null, prevButton: null, nextButton: null, backButton: null, messageEl: null,
   battleRows: BATTLE_ITEMS_PER_COLUMN, active: false, selectedIndex: 0, page: 0, items: [], character: null, context: "dungeon",
   lastSelectionByContext: {},
+  pendingUseId: "", useBusy: false,
   enemy: null, enemies: null, torchFuel: 0, treasureCompassActive: false, onUse: async () => ({ accepted: false }),
   onClose: () => {}, playSe: () => {}, previousMessage: ""
 };
@@ -47,6 +48,7 @@ export function openItemOverlay({ context = "dungeon", character, enemy = null, 
   overlay.onUse = onUse || overlay.onUse;
   overlay.onClose = onClose || (() => {});
   overlay.previousMessage = overlay.messageEl.textContent;
+  overlay.pendingUseId = "";
   overlay.root.classList.toggle("is-battle-items", context === "battle");
   overlay.root.hidden = false;
   document.body.classList.add("item-overlay-open");
@@ -69,6 +71,7 @@ export function closeItemOverlay({ restoreMessage = true } = {}) {
 export function handleItemOverlayInput(action) {
   if (!overlay.active) return false;
   if (action === "cancel") {
+    if (overlay.pendingUseId) { overlay.pendingUseId = ""; renderSelection(); return true; }
     overlay.playSe("cancel");
     closeItemOverlay();
   } else if (action === "up") {
@@ -164,10 +167,20 @@ async function activate() {
     showReason(reason);
     return;
   }
+  if (item.category === "engraving" && overlay.pendingUseId !== item.id) {
+    overlay.pendingUseId = item.id;
+    overlay.playSe("confirm");
+    renderSelection();
+    return;
+  }
+  if (overlay.useBusy) return;
+  overlay.useBusy = true;
   overlay.playSe("confirm");
   overlay.lastSelectionByContext[overlay.context] = { id: item.id, index: overlay.selectedIndex };
   if (overlay.context === "battle") closeItemOverlay();
   const result = await overlay.onUse(item.id);
+  overlay.useBusy = false;
+  overlay.pendingUseId = "";
   if (!result?.accepted) {
     showReason(result?.reason);
     if (overlay.active) render();
@@ -220,7 +233,9 @@ function renderSelection() {
   overlay.messageEl.classList.toggle("is-skill-description", !backSelected && Boolean(item));
   overlay.messageEl.textContent = backSelected
     ? (overlay.items.length ? "アイテム選択を終了する。" : "アイテムを所持していない。")
-    : item.description;
+    : overlay.pendingUseId === item?.id
+      ? `${item.name}を使用します。（使用後にオートセーブされます）\n＊Aボタン：はい　Bボタン：いいえ`
+      : item.description;
 }
 
 function unavailableReason(item) {
@@ -249,6 +264,8 @@ function showReason(reason) {
     undeadOnly: "アンデッドにしか効果がない。",
     bossImmune: "ボスには効果がない。",
     notOwned: "そのアイテムは所持していない。",
+    statMaximum: "能力値は上限に達している。刻印は使用しなかった。",
+    saveFailed: "保存に失敗したため、刻印は使用しなかった。",
     allheilmittelOncePerBattle: "アルハイルミッテルは1戦闘に1回だけ使用できる。"
   })[reason] || "現在使用できない。";
 }

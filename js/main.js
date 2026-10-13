@@ -174,6 +174,8 @@ import { settleReturnExperience, awardBattleExperience, calculateBattleExperienc
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { resolveTreasureTrap } from "../combat/resolve-trap.js";
 import { collectStats } from "../combat/collect-stats.js";
+import { normalizeEngravingBonuses } from "../data/engravings.js";
+import { getPlayerDefenseMaximum, getPlayerStatMaximum } from "../data/stat-caps.js";
 import { resolveSurprise } from "../combat/resolve-environment-save.js";
 import {
   createDepthReturnSettlement,
@@ -2739,49 +2741,54 @@ import {
   }
 
   function renderStatusGauges(target) {
+    // Legacy DEF-overcap palette was #43d86f / #e6bd35 and used key === "def" && total > 30.
     const statRows = document.getElementById("ndeStatRows");
     if (!statRows) return;
-    const definitions = [
-      ["STR", "str"], ["INT", "int"], ["AGI", "agi"],
-      ["DEX", "dex"], ["LUC", "luc"], ["DEF", "def"]
-    ];
+    const definitions = [["STR", "str"], ["INT", "int"], ["AGI", "agi"], ["DEX", "dex"], ["LUC", "luc"], ["DEF", "def"]];
+    const engravingBonuses = normalizeEngravingBonuses(target?.engravingStatBonuses);
+    const statMaximum = getPlayerStatMaximum(target?.reincarnationCount);
+    const defenseMaximum = getPlayerDefenseMaximum(target?.reincarnationCount);
     statRows.replaceChildren(...definitions.map(([label, key]) => {
-      const base = Math.max(0, Math.floor(Number(
-        key === "def" ? target?.def : target?.baseStats?.[key]
-      ) || 0));
+      const maximum = key === "def" ? defenseMaximum : statMaximum;
+      const base = Math.max(0, Math.floor(Number(key === "def" ? target?.def : target?.baseStats?.[key]) || 0));
+      const engraving = key === "def" ? 0 : engravingBonuses[key];
       const equipment = Math.max(0, Math.floor(Number(target?.equipmentStatBonuses?.[key]) || 0));
       const cards = Math.floor(Number(target?.cardStatBonuses?.[key]) || 0);
-      const maximum = key === "def" ? 60 : 30;
-      const totalBeforePenalty = Math.min(maximum, base + equipment + Math.max(0, cards));
-      const total = key === "def"
-        ? Math.max(0, totalBeforePenalty + Math.min(0, cards))
-        : Math.max(1, totalBeforePenalty + Math.min(0, cards));
+      const temporary = Math.floor(Number(target?.temporaryStatBonuses?.[key]) || 0);
+      const positiveCard = Math.max(0, cards);
+      const rawPositive = base + engraving + equipment + positiveCard + Math.max(0, temporary);
+      const minimum = key === "def" ? 0 : 1;
+      const total = Math.max(minimum, Math.min(maximum, rawPositive + Math.min(0, cards) + Math.min(0, temporary)));
       const row = document.createElement("div");
       row.className = "nde-stat-row";
-      if (key === "def" && total > 30) row.classList.add(total >= 60 ? "is-def-maximum" : "is-def-overcap");
+      row.dataset.tier = String(Math.max(1, Math.ceil(total / 30)));
       const name = document.createElement("strong");
       name.textContent = label;
       const gauge = document.createElement("span");
       gauge.className = "nde-empty-gauge";
-      gauge.setAttribute("aria-label", `${label} ${total}/${maximum}`);
+      const details = key === "def"
+        ? `基礎 ${base}／装備 ${equipment}／カード ${cards}／一時 ${temporary}`
+        : `基礎 ${base}／刻印 ${engraving}／装備 ${equipment}／カード ${cards}／一時 ${temporary}`;
+      gauge.setAttribute("aria-label", `${label} ${total}/${maximum}（${details}）`);
+      gauge.title = `${details}${rawPositive > maximum ? `／上限超過 ${rawPositive - maximum}` : ""}`;
+      const sourceForPoint = point => point <= base ? "base"
+        : point <= base + engraving ? "engraving"
+          : point <= base + engraving + equipment ? "equipment"
+            : "card";
       for (let index = 0; index < 30; index += 1) {
         const cell = document.createElement("i");
-        if (total > 30 && index < total - 30) {
-          cell.className = `is-overcap${total >= 60 ? " is-maximum" : ""}`;
-          cell.style.borderColor = total >= 60 ? "#fff0a0" : "#3f9f63";
-          cell.style.background = total >= 60 ? "#e6bd35" : "#43d86f";
-          cell.style.boxShadow = total >= 60
-            ? "0 0 7px rgba(255,218,75,.9)"
-            : "0 0 4px rgba(81,255,137,.55)";
+        const highestLayer = Math.min(3, Math.max(0, Math.floor((total - 1 - index) / 30) + 1));
+        if (highestLayer > 0) {
+          const point = index + 1 + (highestLayer - 1) * 30;
+          cell.classList.add(`is-${sourceForPoint(point)}`, `is-tier-${highestLayer}`);
+          cell.title = `${point}：${sourceForPoint(point)}`;
         }
-        else if (index >= total && index < totalBeforePenalty) cell.className = "is-penalty";
-        else if (index < Math.min(base, total)) cell.className = "is-base";
-        else if (index < Math.min(base + equipment, total)) cell.className = "is-equipment";
-        else if (index < total) cell.className = "is-card";
+        if (index >= total && index < Math.min(30, rawPositive)) cell.classList.add("is-penalty");
         gauge.append(cell);
       }
       const value = document.createElement("output");
-      value.textContent = `${total} / ${maximum}`;
+      value.textContent = `${total}/${maximum}`;
+      value.title = details;
       row.append(name, gauge, value);
       return row;
     }));
@@ -3853,6 +3860,7 @@ import {
       treasureCompassActive: state.treasureCompassActive
     });
     if (!result.accepted) return result;
+    const previousCharacter = character;
     character = result.character;
     if (Number.isFinite(result.environment.torchFuel)) {
       state.torchFuel = result.environment.torchFuel;
@@ -3878,9 +3886,17 @@ import {
     }
     updateHud();
     updateCharacterUi();
+    if (!saveGame()) {
+      character = previousCharacter;
+      updateHud();
+      updateCharacterUi();
+      const failed = { accepted: false, reason: "saveFailed", message: "保存に失敗したため、アイテムは使用しませんでした。" };
+      say(failed.message);
+      playSe("cancel");
+      return failed;
+    }
     say(result.message);
     playSe(result.healing > 0 ? "heal" : "confirm");
-    saveGame();
     return result;
   }
 
@@ -5705,7 +5721,9 @@ import {
       if(!context.finish()){character=previous;updateCharacterUi();return {accepted:false,reason:'saveFailed'};}
       return result;
     }
-    character=result.character;updateCharacterUi();saveGame();updateHud();
+    const previous=character;character=result.character;updateCharacterUi();
+    if(!saveGame()){character=previous;updateCharacterUi();updateHud();const failed={accepted:false,reason:'saveFailed',message:'保存に失敗したため、アイテムは使用しませんでした。'};say(failed.message);playSe('cancel');return failed;}
+    updateHud();
     say(result.message||'スキルを使用した。');playSe(result.healing>0?'heal':'confirm');
     if(result.environment?.startAutoWalker)closeCampMenu('special');
     return result;

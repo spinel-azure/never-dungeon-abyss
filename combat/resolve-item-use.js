@@ -6,6 +6,7 @@ import { getStatusEffect } from "../data/status-effects.js";
 import { getConditionLabel } from "./condition-label.js";
 import { hasKeyItem } from "../data/key-items.js";
 import { sumCardEffectValues } from "../data/cards.js";
+import { ENGRAVING_EFFECT_ID, getEngravingUseReason, normalizeEngravingBonuses } from "../data/engravings.js";
 
 const HP_RECOVERY_ITEM_EFFECT_IDS = new Set([
   "heal_hp",
@@ -45,6 +46,8 @@ export function getItemUnavailableReason({ character, itemId, context, enemy, to
     if (item.usableIn?.includes("dungeon")) return "dungeonOnly";
     return "battleOnly";
   }
+  const engraving = item.effects?.find(effect => effect.id === ENGRAVING_EFFECT_ID);
+  if (engraving) return getEngravingUseReason(character, engraving.stat);
   const healsHp = item.effects?.some(effect => effect.id === "heal_hp" || effect.id === "heal_hp_rate");
   const hasAnotherEffect = item.effects?.some(effect => effect.id !== "heal_hp" && effect.id !== "heal_hp_rate");
   if (healsHp && !hasAnotherEffect && character.hp >= character.maxHp) return "fullHp";
@@ -116,7 +119,17 @@ export function calculateHealingItemSpReturn({
 
 export function resolveFieldItemUse({ character, itemId, context = "dungeon", torchFuel = 0, treasureCompassActive = false } = {}) {
   const reason = getItemUnavailableReason({ character, itemId, context, torchFuel, treasureCompassActive });
-  if (reason) return { accepted: false, reason };
+  if (reason) {
+    const unavailableItem = getItem(itemId);
+    const engraving = unavailableItem?.effects?.find(effect => effect.id === ENGRAVING_EFFECT_ID);
+    return reason === "statMaximum" && engraving
+      ? {
+        accepted: false,
+        reason,
+        message: `${String(engraving.stat).toUpperCase()}は上限に達している。${unavailableItem.name}は使用しなかった。`
+      }
+      : { accepted: false, reason };
+  }
   const item = getItem(itemId);
   const next = structuredClone(character);
   const environment = {};
@@ -125,7 +138,11 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
   const deathPoisonUnaffected = ["antidote", "strong_antidote"].includes(itemId)
     && hasStatus(next, "death_poison");
   for (const effect of item.effects) {
-    if (effect.id === "heal_hp") {
+    if (effect.id === ENGRAVING_EFFECT_ID) {
+      const bonuses = normalizeEngravingBonuses(next.engravingStatBonuses);
+      bonuses[effect.stat] += Math.max(1, Math.floor(Number(effect.value) || 1));
+      next.engravingStatBonuses = bonuses;
+    } else if (effect.id === "heal_hp") {
       const amount = Math.min(effect.value, next.maxHp - next.hp);
       next.hp += amount;
       healing += amount;
@@ -193,7 +210,9 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
     environment,
     healing,
     spHealing,
-    message: itemId === "allheilmittel"
+    message: item.category === "engraving"
+      ? `${item.name}を魂に刻み込む…。${String(item.effects[0].stat).toUpperCase()}が1上がった！`
+      : itemId === "allheilmittel"
       ? `${item.name}を使った。HPとSPが全回復し、すべての状態異常が治った。`
       : spHealing > 0 && healing === 0
         ? `${item.name}を使った。SPが${spHealing}回復した。`

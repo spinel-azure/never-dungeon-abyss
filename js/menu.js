@@ -11,6 +11,7 @@ import { ITEMS, canUseItemIn, getShopItemIdsForCharacter } from "../data/items.j
 import { normalizeCharacter } from "../data/classes.js";
 import { EQUIPMENT_SLOT_LABELS, canEquipInstance, equipInstance, findEquipmentDefinition, getEquipmentInstanceDefinition, getEquipmentInstanceName, listEquipmentInstances, setEquipmentInstanceLocked } from "../data/equipment-inventory.js";
 import { collectStats } from "../combat/collect-stats.js";
+import { getEngravingUseReason } from "../data/engravings.js";
 import { deriveDetailStats } from "../combat/derive-detail-stats.js";
 import { getWeapon, getWeaponType } from "../data/weapons.js";
 import { listOwnedKeyItems } from "../data/key-items.js";
@@ -62,6 +63,7 @@ const menu = {
   saveCursor: 0,
   inventoryTab: "items", inventoryCursor: 0, inventoryPage: 0, inventoryMode: "list", inventorySlot: null, inventoryFocus: "list",
   inventoryPurpose: "manage", inventorySaleStage: "list", inventorySaleQuantity: 1,
+  inventoryPendingUseId: "", inventoryUseBusy: false,
   inventoryNewStockIds: new Set(),
   inventorySort: "category",
   questHistoryCursor: 0, questHistoryPage: 0, questHistoryFocus: "list",
@@ -484,6 +486,8 @@ function availableInventoryTabs() {
 
 export function getInventoryItemUnavailableReason(item, character, context = menu.getInventoryContext()) {
   if (!canUseItemIn(item, context)) return context === "town" ? "ダンジョンまたは戦闘中のみ使用可能です。" : "現在は使用できません。";
+  const engraving = item.effects?.find(effect => effect.id === "permanent_stat_engraving");
+  if (engraving && getEngravingUseReason(character, engraving.stat)) return `${String(engraving.stat).toUpperCase()}は上限に達している。${item.name}は使用しなかった。`;
   const heals = item.effects?.some(effect => effect.id === "heal_hp" || effect.id === "heal_hp_rate");
   const cures = item.effects?.some(effect => ["cure_poison", "cure_deadly_poison", "cure_bleeding"].includes(effect.id));
   if (heals && !cures && character.hp >= character.maxHp) return "HPが最大です。";
@@ -505,6 +509,11 @@ function handleInventory(action) {
     return;
   }
   if (action === "cancel") {
+    if (menu.inventoryPendingUseId) {
+      menu.inventoryPendingUseId = "";
+      renderInventory();
+      return;
+    }
     if (menu.inventoryMode === "equip") Object.assign(menu, { inventoryMode: "list", inventoryCursor: 0, inventoryPage: 0, inventoryFocus: "list" });
     else if (menu.inventoryPurpose === "sell" || menu.inventoryPurpose === "buy") { closeInventoryTrade(); return; }
     else { menu.view = "commands"; updateView(); return; }
@@ -612,10 +621,21 @@ function handleInventory(action) {
     return;
   }
   if (menu.inventoryMode === "equip") { applyEquipmentCandidate(entry); return; }
-  if (entry.item) { Promise.resolve(menu.onUseInventoryItem(entry.item.id)).then(result=>{
-    renderInventory();
-    if(!result?.accepted&&result?.message)menu.inventoryPanel.querySelector('[data-inventory-description]').textContent=result.message;
-  }); return; }
+  if (entry.item) {
+    if (entry.item.category === "engraving" && menu.inventoryPendingUseId !== entry.item.id) {
+      const unavailable = getInventoryItemUnavailableReason(entry.item, menu.getCharacter());
+      if (unavailable) { menu.inventoryPanel.querySelector("[data-inventory-description]").textContent = unavailable; return; }
+      menu.inventoryPendingUseId = entry.item.id;
+      renderInventory();
+      return;
+    }
+    if (menu.inventoryUseBusy) return;
+    menu.inventoryUseBusy = true;
+    Promise.resolve(menu.onUseInventoryItem(entry.item.id)).then(result=>{
+      menu.inventoryPendingUseId = "";
+      renderInventory();
+      if(!result?.accepted&&result?.message)menu.inventoryPanel.querySelector('[data-inventory-description]').textContent=result.message;
+    }).finally(() => { menu.inventoryUseBusy = false; }); return; }
   if (menu.getInventoryContext() === "dungeon") {
     menu.inventoryPanel.querySelector("[data-inventory-description]").textContent = "ダンジョン探索中は装備を変更できません。"; return;
   }
@@ -1170,7 +1190,9 @@ function renderInventory() {
   if (!selected) description.textContent = menu.inventoryPurpose === "sell" ? "売却できる所持品がありません。" : menu.inventoryTab === "keyItems" ? "貴重品を所持していません。" : "所持品がありません。";
   else if (menu.inventoryPurpose === "sell") description.textContent = inventorySaleDescription(selected, character);
   else if (menu.inventoryPurpose === "buy") description.textContent = selected.item ? `${selected.item.description} / 購入価格 ${inventoryBuyPrice(selected)}G / 所持数 ${inventoryOwnedItemCount(selected.item.id)}／${selected.item.maxOwned || 99} / 倉庫 ${inventoryWarehouseItemCount(selected.item.id)} / Aボタン：購入` : `${equipmentEffectLabels(selected.shopEquipment).join(" / ")}${incompatibleEquipmentJobLabel(selected.shopEquipment, character)} / 購入価格 ${inventoryBuyPrice(selected)}G / Aボタン：購入`;
-  else if (selected.item) description.textContent = getInventoryItemDescription(selected.item, character);
+  else if (selected.item) description.textContent = menu.inventoryPendingUseId === selected.item.id
+    ? `${selected.item.name}を使用します。（使用後にオートセーブされます）\n＊Aボタン：はい　Bボタン：いいえ`
+    : getInventoryItemDescription(selected.item, character);
   else if (selected.keyItem) description.textContent = selected.keyItem.description || "大切な貴重品です。";
   else if (!selected.instance) description.textContent = "この装備部位を空にします。";
   else { const definition = getEquipmentInstanceDefinition(selected.instance); const requirements = Object.entries(definition?.requirements || {}).map(([key, value]) => `${key.toUpperCase()} ${value}以上`).join(" / "); const effects = equipmentEffectLabels(definition); description.textContent = `${EQUIPMENT_SLOT_LABELS[selected.instance.slot]} / ${effects.join(" / ")}${effects.length ? " / " : ""}${requirements ? `装備条件：${requirements}` : "装備条件なし"}${incompatibleEquipmentJobLabel(definition, character)}${selected.instance.locked ? " / ロック中" : ""}${selected.instance.curseKnown ? " / 呪われているため外せません。" : ""}`; }
