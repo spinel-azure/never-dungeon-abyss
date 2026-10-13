@@ -2740,14 +2740,20 @@ import {
       || (key === "maxSp" && target?.cards?.deckSlots?.some(cardId => ["legendary_mana_booster", "zodiac_virgo"].includes(cardId)));
   }
 
-  function renderStatusGauges(target) {
-    // Legacy DEF-overcap palette was #43d86f / #e6bd35 and used key === "def" && total > 30.
+  let statusStatPage = 0;
+  function renderStatusGauges(target, requestedPage = statusStatPage) {
     const statRows = document.getElementById("ndeStatRows");
     if (!statRows) return;
     const definitions = [["STR", "str"], ["INT", "int"], ["AGI", "agi"], ["DEX", "dex"], ["LUC", "luc"], ["DEF", "def"]];
     const engravingBonuses = normalizeEngravingBonuses(target?.engravingStatBonuses);
     const statMaximum = getPlayerStatMaximum(target?.reincarnationCount);
     const defenseMaximum = getPlayerDefenseMaximum(target?.reincarnationCount);
+    const maximumPage = Math.min(2, Math.max(0, Math.floor(Number(target?.reincarnationCount) || 0)));
+    statusStatPage = Math.max(0, Math.min(maximumPage, Math.floor(Number(requestedPage) || 0)));
+    const pageStart = statusStatPage * 30;
+    const pageEnd = pageStart + 30;
+    const range = document.querySelector("[data-stat-range]");
+    if (range) range.textContent = `${pageStart + 1}–${pageEnd}　${statusStatPage + 1}/3`;
     statRows.replaceChildren(...definitions.map(([label, key]) => {
       const maximum = key === "def" ? defenseMaximum : statMaximum;
       const base = Math.max(0, Math.floor(Number(key === "def" ? target?.def : target?.baseStats?.[key]) || 0));
@@ -2761,7 +2767,7 @@ import {
       const total = Math.max(minimum, Math.min(maximum, rawPositive + Math.min(0, cards) + Math.min(0, temporary)));
       const row = document.createElement("div");
       row.className = "nde-stat-row";
-      row.dataset.tier = String(Math.max(1, Math.ceil(total / 30)));
+      row.dataset.statPage = String(statusStatPage + 1);
       const name = document.createElement("strong");
       name.textContent = label;
       const gauge = document.createElement("span");
@@ -2777,13 +2783,15 @@ import {
             : "card";
       for (let index = 0; index < 30; index += 1) {
         const cell = document.createElement("i");
-        const highestLayer = Math.min(3, Math.max(0, Math.floor((total - 1 - index) / 30) + 1));
-        if (highestLayer > 0) {
-          const point = index + 1 + (highestLayer - 1) * 30;
-          cell.classList.add(`is-${sourceForPoint(point)}`, `is-tier-${highestLayer}`);
+        const point = pageStart + index + 1;
+        if (point > maximum) {
+          cell.classList.add("is-locked");
+          cell.title = `${point}：現在の転生段階では到達不能`;
+        } else if (point <= total) {
+          cell.classList.add(`is-${sourceForPoint(point)}`);
           cell.title = `${point}：${sourceForPoint(point)}`;
         }
-        if (index >= total && index < Math.min(30, rawPositive)) cell.classList.add("is-penalty");
+        if (point > total && point <= Math.min(maximum, rawPositive)) cell.classList.add("is-penalty");
         gauge.append(cell);
       }
       const value = document.createElement("output");
@@ -5902,6 +5910,7 @@ import {
     commandRoot: dungeonCommands,
     getCharacter: () => character,
     onStatusOpened: updateCharacterUi,
+    onStatusStatPageChanged: page => renderStatusGauges(getContextualCharacter(), page),
     canReplayEnding: () => worldLocation === "town" && Boolean(character?.eventFlags?.ending_credits_watched),
     replayEnding: () => void runMainEnding({ replay: true }),
     getRumorHistory: () => getPastTavernRumors(character, getCurrentTavernRumorContext()),

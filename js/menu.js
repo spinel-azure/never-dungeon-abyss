@@ -54,7 +54,7 @@ const EQUIPMENT_JOB_LABELS = Object.freeze({ warrior: "戦士", thief: "盗賊",
 
 const menu = {
   root: null, commandRoot: null, statusPanel: null, deckPanel: null, inventoryPanel: null, questHistoryPanel: null, rumorHistoryPanel: null, adventureRecordsPanel: null, monsterCompendiumPanel: null, cardGalleryPanel: null, savePanel: null, optionsPanel: null, debugPanel: null,
-  commands: [], enabledCommands: [], commandIndex: 0, statusPage: 0,
+  commands: [], enabledCommands: [], commandIndex: 0, statusPage: 0, statusStatPage: 0, statusFocus: "footer",
   deckInspectFocused: false, deckCursor: 0, deckSlots: [], deckEditable: false, deckReturnView: "commands",
   deckPickerOpen: false, deckPickerCursor: 0, deckPickerItems: [], deckPickerPage: 0,
   deckCostOverEl: null, deckCostOverTimer: 0,
@@ -104,6 +104,7 @@ const menu = {
   onPurchaseInventoryItem: () => ({ accepted: false }), onPurchaseInventoryEquipment: () => ({ accepted: false }), onInventoryPurchaseClosed: () => {},
   onDeckChanged: () => {},
   onStatusOpened: () => {},
+  onStatusStatPageChanged: () => {},
   openItems: () => false,
   openSkills: () => false,
   onReturnToDungeon: () => {}
@@ -274,7 +275,7 @@ export function setSpecialMapMenuMode(enabled){
  if(button){button.dataset.command=enabled?'return':'save';button.textContent=enabled?'帰還':'セーブ';}
 }
 export function openCampMenu() { menu.view = "commands"; menu.commandIndex = 0; updateView(); }
-export function openStatusMenu() { menu.playSe("confirm"); menu.view = "status"; menu.statusPage = 0; menu.onStatusOpened(); updateView(); }
+export function openStatusMenu() { menu.playSe("confirm"); menu.view = "status"; menu.statusPage = 0; menu.statusStatPage = 0; menu.statusFocus = "footer"; menu.onStatusOpened(); updateView(); }
 export function openDeckEditor() {
   menu.playSe("confirm");
   menu.view = "deck";
@@ -1324,9 +1325,38 @@ function equipmentEffectLabels(definition) {
   if (definition.flavorText) labels.push(definition.flavorText);
   return labels;
 }
+function getStatusStatPageMaximum(character = menu.getCharacter()) {
+  return Math.min(2, Math.max(0, Math.floor(Number(character?.reincarnationCount) || 0)));
+}
+function setStatusStatPage(page) {
+  const maximum = getStatusStatPageMaximum();
+  const next = Math.max(0, Math.min(maximum, Math.floor(Number(page) || 0)));
+  if (next === menu.statusStatPage) return false;
+  menu.statusStatPage = next;
+  menu.onStatusStatPageChanged(next);
+  updateStatusStatPager();
+  return true;
+}
+function updateStatusStatPager() {
+  const root = menu.statusPanel?.querySelector("[data-stat-paged]");
+  if (!root) return;
+  const maximum = getStatusStatPageMaximum();
+  menu.statusStatPage = Math.min(menu.statusStatPage, maximum);
+  root.classList.toggle("is-focused", menu.statusFocus === "stats" && menu.statusPage === 0);
+  const previous = root.querySelector('[data-stat-page-nav="previous"]');
+  const next = root.querySelector('[data-stat-page-nav="next"]');
+  previous.disabled = menu.statusStatPage <= 0;
+  next.disabled = menu.statusStatPage >= maximum;
+  previous.hidden = maximum <= 0;
+  next.hidden = maximum <= 0;
+}
 function handleStatus(action) {
   const lastPage = getStatusPageCount(menu.getCharacter()) - 1;
   if (action === "cancel") { menu.view = "commands"; updateView(); }
+  else if (menu.statusPage === 0 && action === "up") { menu.statusFocus = "stats"; updateStatusStatPager(); }
+  else if (menu.statusPage === 0 && action === "down" && menu.statusFocus === "stats") { menu.statusFocus = "footer"; updateStatusStatPager(); }
+  else if (menu.statusPage === 0 && menu.statusFocus === "stats" && action === "left") { setStatusStatPage(menu.statusStatPage - 1); }
+  else if (menu.statusPage === 0 && menu.statusFocus === "stats" && action === "right") { setStatusStatPage(menu.statusStatPage + 1); }
   else if (action === "left") { menu.statusPage = Math.max(0, menu.statusPage - 1); updateStatus(); }
   else if (action === "right") { menu.statusPage = Math.min(lastPage, menu.statusPage + 1); updateStatus(); }
   else if (action === "confirm") { menu.view = "commands"; updateView(); }
@@ -1607,7 +1637,14 @@ function executeDebug(key, amount = 1) {
 function triggerAction(key, action) { menu.actionActive[key] = true; updateDebugStates(); setTimeout(() => { menu.actionActive[key] = false; action(); updateDebugStates(); }, ACTION_FEEDBACK_MS); }
 
 function bindCommands() { menu.commands.forEach(button => button.addEventListener("click", () => { menu.commandIndex = menu.commands.indexOf(button); updateSelection(); if (isCommandUnavailable(button)) return; menu.playSe("confirm"); openCommand(button.dataset.command); })); }
-function bindStatus() { menu.statusPanel.querySelectorAll("[data-status-nav]").forEach(button => button.addEventListener("click", () => { menu.playSe(button.dataset.statusNav === "back" ? "cancel" : "confirm"); statusNavigate(button.dataset.statusNav); })); }
+function bindStatus() {
+  menu.statusPanel.querySelectorAll("[data-status-nav]").forEach(button => button.addEventListener("click", () => { menu.playSe(button.dataset.statusNav === "back" ? "cancel" : "confirm"); statusNavigate(button.dataset.statusNav); }));
+  menu.statusPanel.querySelectorAll("[data-stat-page-nav]").forEach(button => button.addEventListener("click", () => {
+    if (button.disabled) return;
+    menu.statusFocus = "stats";
+    if (setStatusStatPage(menu.statusStatPage + (button.dataset.statPageNav === "next" ? 1 : -1))) menu.playSe("cursorMove");
+  }));
+}
 function bindDeck() {
   menu.deckPanel.querySelector("[data-deck-inspect]").addEventListener("click", () => {
     menu.playSe("confirm");
@@ -1968,6 +2005,7 @@ function updateStatus() {
   next.textContent = menu.statusPage < lastPage ? "NEXT" : "MAIN";
   menu.statusPanel.querySelector('[data-status-nav="back"]').classList.toggle("is-selected", menu.statusPage === 0);
   next.classList.toggle("is-selected", menu.statusPage === lastPage);
+  updateStatusStatPager();
 }
 function updatePager() { menu.optionsPanel.querySelector("[data-page-indicator]").textContent = `${menu.optionPage + 1}/${menu.optionPages.length}`; menu.optionNavButtons.find(button => button.dataset.optionNav === "next").textContent = menu.optionPage < menu.optionPages.length - 1 ? "NEXT" : "MAIN"; }
 function updateDebugPager() { menu.debugPanel.querySelector("[data-debug-indicator]").textContent = `${menu.debugPage + 1}/${menu.debugPages.length}`; menu.debugNavButtons.find(button => button.dataset.debugNav === "next").textContent = menu.debugPage < menu.debugPages.length - 1 ? "NEXT" : "MAIN"; }
