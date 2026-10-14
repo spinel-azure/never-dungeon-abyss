@@ -11,7 +11,7 @@ const normalized=value=>Math.max(0,Math.min(.999999999,Number(value)||0));
 export function rollV2Level100Engraving(context,random=Math.random){
  if(!['special-map-v2-boss','special-map-v2-special-boss'].includes(context?.source)||Number(context.mapLevel)!==100)return null;
  const values=Array.isArray(context.engravingRandomValues)?context.engravingRandomValues:[random(),random()];
- if(normalized(values[0])>=.10)return null;
+ if(normalized(values[0])>=.20)return null;
  return V2_LEVEL_100_ENGRAVINGS[Math.floor(normalized(values[1])*V2_LEVEL_100_ENGRAVINGS.length)];
 }
 function rollV2CardDrop(enemy,context,random){

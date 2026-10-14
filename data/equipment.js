@@ -17,6 +17,11 @@ export const ANTI_MAGIC_SET_EQUIPMENT_IDS = Object.freeze([
 export const ANTI_MAGIC_SET_MAGIC_DAMAGE_REDUCTION = 0.1;
 
 export const EQUIPMENT = Object.freeze({
+  alveter_schuhe: item('alveter_schuhe','アルヴェターシューエ','footId',{def:5},{
+    description:'各種床ダメージ無効',unique:true,lotBagHighlight:'orange',sellPrice:0,
+    fireFloorDamageImmunity:true,coldFloorDamageImmunity:true,crystalFloorDamageImmunity:true,
+    acquisitionSource:'surveyExchange',surveyExchangeCost:500,surveyExchangeOnce:true
+  }),
   kirke_amulet: item('kirke_amulet','キルケの護符','accessoryId',{ordinaryStatusRateMultiplier:.5},{
     description:'魔女キルケが守りの祈りを込めた護符。通常の状態異常を受ける確率を半減する。',
     hiddenStatBonusKeys:Object.freeze(['ordinaryStatusRateMultiplier']),unique:true,sellPrice:0

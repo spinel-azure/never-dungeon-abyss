@@ -1,3 +1,4 @@
+import {hasEquippedFloorProtection} from './floor-protection.js';
 export const COLD_FLOOR_MIN_DEPTH = 40;
 export const COLD_FLOOR_MAX_DEPTH = 49;
 export const COLD_FLOOR_DAMAGE = 1;
@@ -9,12 +10,7 @@ export function isColdFloorDepth(depth) {
 }
 
 export function hasColdFloorImmunity(character) {
-  if (!character) return false;
-  if (character.equipment?.footId === COLDPROOF_BOOTS_ID) return true;
-  const equippedInstanceId = character.equippedInstanceIds?.footId;
-  return Boolean((character.equipmentInventory?.instances || []).some(instance => (
-    instance.instanceId === equippedInstanceId && instance.equipmentId === COLDPROOF_BOOTS_ID
-  )));
+  return hasEquippedFloorProtection(character,'coldFloorDamageImmunity');
 }
 
 export function getColdFloorStepDamage(character, depth) {

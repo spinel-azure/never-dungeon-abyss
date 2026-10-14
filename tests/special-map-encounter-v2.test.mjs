@@ -104,17 +104,17 @@ test('V2 beetle material drops survive combat conversion and use their independe
   }
  }
 });
-test('any Lv100 V2 boss has a stable 10% engraving chest with an even five-way table',()=>{
+test('any Lv100 V2 boss has a stable 20% engraving chest with an even five-way table',()=>{
  for(let index=0;index<5;index++){
   const level100={...map,level:100,seed:12345+index};
   const s=createSpecialMapV2Session([level100],mapOriginalId(level100));
-  const context={source:index%2?'special-map-v2-special-boss':'special-map-v2-boss',sessionId:s.encounterSessionId,battleId:1,mapKey:s.mapKey,mapLevel:100,engravingRandomValues:[.099,(index+.1)/5]};
+  const context={source:index%2?'special-map-v2-special-boss':'special-map-v2-boss',sessionId:s.encounterSessionId,battleId:1,mapKey:s.mapKey,mapLevel:100,engravingRandomValues:[.199999,(index+.1)/5]};
   s.battleContext=context;
   const reward=grantV2BattleRewards(createInitialCharacter({name:'刻印',job:'warrior'}),{enemy:{experienceReward:0,noDrop:true},explorationContext:context},s,()=>.5);
   assert.equal(reward.engravingItemId,['strength_engraving','intelligence_engraving','agility_engraving','dexterity_engraving','luck_engraving'][index]);
   assert.deepEqual(reward.rareChestReward,{kind:'item',itemId:reward.engravingItemId});
   assert.equal(s.lootBag.items[reward.engravingItemId],1);s.disposeSurvey();
  }
- const s=create(),context={source:'special-map-v2-boss',sessionId:s.encounterSessionId,battleId:1,mapKey:s.mapKey,mapLevel:100,engravingRandomValues:[.10,0]};s.battleContext=context;
+ const s=create(),context={source:'special-map-v2-boss',sessionId:s.encounterSessionId,battleId:1,mapKey:s.mapKey,mapLevel:100,engravingRandomValues:[.20,0]};s.battleContext=context;
  assert.equal(grantV2BattleRewards(createInitialCharacter({name:'外れ',job:'warrior'}),{enemy:{experienceReward:0,noDrop:true},explorationContext:context},s,()=>0).engravingItemId,null);s.disposeSurvey();
 });

@@ -1,3 +1,4 @@
+import {hasEquippedFloorProtection} from './floor-protection.js';
 export const FIRE_FLOOR_MIN_DEPTH = 30;
 export const FIRE_FLOOR_MAX_DEPTH = 39;
 export const FIRE_FLOOR_DAMAGE = 1;
@@ -9,12 +10,7 @@ export function isFireFloorDepth(depth) {
 }
 
 export function hasFireFloorImmunity(character) {
-  if (!character) return false;
-  if (character.equipment?.footId === FIREPROOF_BOOTS_ID) return true;
-  const equippedInstanceId = character.equippedInstanceIds?.footId;
-  return Boolean((character.equipmentInventory?.instances || []).some(instance => (
-    instance.instanceId === equippedInstanceId && instance.equipmentId === FIREPROOF_BOOTS_ID
-  )));
+  return hasEquippedFloorProtection(character,'fireFloorDamageImmunity');
 }
 
 export function getFireFloorStepDamage(character, depth) {

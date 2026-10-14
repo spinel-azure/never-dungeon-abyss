@@ -1,3 +1,4 @@
+import {hasEquippedFloorProtection} from './floor-protection.js';
 export const CRYSTAL_FLOOR_MIN_DEPTH = 80;
 export const CRYSTAL_FLOOR_MAX_DEPTH = 89;
 export const CRYSTAL_FLOOR_SP_DRAIN_INTERVAL = 3;
@@ -8,7 +9,7 @@ export function isCrystalFloorDepth(depth) {
 }
 
 export function applyCrystalFloorSpStep(character, depth) {
-  if (!character || !isCrystalFloorDepth(depth)) {
+  if (!character || !isCrystalFloorDepth(depth) || hasEquippedFloorProtection(character,'crystalFloorDamageImmunity')) {
     return { character: character ? { ...character, crystalFloorStepCount: 0 } : character, drained: 0 };
   }
   const stepCount = (Math.max(0, Math.floor(Number(character.crystalFloorStepCount) || 0)) + 1) % CRYSTAL_FLOOR_SP_DRAIN_INTERVAL;
