@@ -91,7 +91,7 @@ test('900x600 whale HSL retains dimensions and cache identity',()=>{
 });
 test('each new boss enters a real normal-theme session and grants EXP/G and one repeat-safe map reward',()=>{
  const found=new Map();
- for(let seed=0;seed<2000&&found.size<7;seed++){
+ for(let seed=0;seed<7000&&found.size<7;seed++){
   const map={rulesetVersion:'special-map-v2',seed,level:100,rarity:'WHITE',discovererName:'QA'};
   const themeId=generateSpecialMapV2({...map,ruleset:map.rulesetVersion}).themeId;
   const id=selectNormalMapBoss({...map,themeId}).id;if(ids.includes(id)&&!found.has(id))found.set(id,map);

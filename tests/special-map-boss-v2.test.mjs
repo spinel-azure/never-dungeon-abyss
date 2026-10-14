@@ -15,7 +15,7 @@ import {encodeMapCode,decodeMapCode} from '../data/special-map-code.js';
 import {describeV2MapName} from '../data/special-map-names-v2.js';
 import {computeBossVariantAdjustments} from '../js/boss-color-variant.js';
 const map={rulesetVersion:'special-map-v2',seed:12345,level:50,rarity:'WHITE',discovererName:'QA'};
-const input={seed:12345,level:50,rarity:'WHITE',themeId:'crystal'};
+const input={seed:12345,level:50,rarity:'WHITE',themeId:'yellow'};
 test('device originals roundtrip to identical boss/name/color without survey',()=>{
  for(const f of F3_MAP_FIXTURES){const decoded=decodeMapCode(f.code);assert.equal(decoded.ok,true);assert.equal(encodeMapCode(decoded.map),f.code);
   assert.equal(decoded.map.surveyedMasks,undefined);assert.equal(describeV2MapName(decoded.map).name,f.name);

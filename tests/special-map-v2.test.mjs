@@ -14,8 +14,9 @@ import {KEY_ITEMS} from '../data/key-items.js';
 const input = (seed, level = 1, rarity = 'WHITE') => ({ruleset: SPECIAL_DUNGEON_V2, seed, level, rarity});
 const seeds = [0, 1, 12345, 32768, 65535];
 // Candidate comparison snapshots, not a declaration that V2 has been released.
-const fingerprints = ['d5a7a4aa', '43daa69d', '3519b715', '90f038f0', '54ac48a2'];
+const fingerprints = ['7b507989', '2ed411b3', '36351d4a', '87bf3f3c', '54ac48a2'];
 const withoutTheme = ({themeId,...rest}) => rest;
+const geometry=({themeId,level,rarity,...map})=>({...map,floors:map.floors.map(withoutTheme)});
 
 test('V2 Candidate 3: three floors, reciprocal stairs, 1x2 room and reachable key chest repeat 100 times', () => {
   for (const seed of seeds) {
@@ -30,11 +31,11 @@ test('V2 Candidate 3: three floors, reciprocal stairs, 1x2 room and reachable ke
 
 test('V2: all 100 levels and all rarities preserve structural coverage; identity inputs remain explicit', () => {
   for (const seed of [0, 12345, 65535]) {
-    const expected = canonicalV2Structure(generateSpecialMapV2(input(seed)));
+    const expected = geometry(generateSpecialMapV2(input(seed)));
     for (let level = 1; level <= 100; level++) for (const rarity of V2_RARITIES) {
       const map = generateSpecialMapV2(input(seed, level, rarity));
       assert.equal(map.level, level); assert.equal(map.rarity, rarity);
-      assert.equal(canonicalV2Structure(map), expected);
+      assert.deepEqual(geometry(map), expected);
     }
   }
 });
@@ -101,7 +102,6 @@ test('V2 Candidate 1 comparison fixture retains fingerprints and unchanged first
     assert.equal(old.floors[2].keyChest, undefined);
     assert.deepEqual(current.floors.slice(0, 2).map(withoutTheme), old.floors.slice(0, 2).map(withoutTheme));
     assert.ok(current.floors.every(f => f.themeId === current.themeId));
-    assert.equal(current.themeId, old.floors[0].themeId);
   }
 });
 
@@ -174,7 +174,6 @@ test('Candidate 3 changes only themes, preserving Candidate 2 geometry, stairs, 
   assert.equal(candidate2Fingerprint(old),oldFingerprints[i]);
   assert.deepEqual(current.floors.map(withoutTheme),old.floors.map(withoutTheme));
   assert.deepEqual(current.links,old.links);
-  assert.equal(current.themeId,old.floors[0].themeId);
   assert.ok(current.floors.every(f=>f.themeId===current.themeId));
   const changed=structuredClone(current);changed.floors[2].themeId='invalid';
   assert.notEqual(specialMapV2StructureFingerprint(changed),specialMapV2StructureFingerprint(current));

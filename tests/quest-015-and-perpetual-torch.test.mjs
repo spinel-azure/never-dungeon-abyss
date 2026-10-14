@@ -84,6 +84,7 @@ test("Goddess's Mercy combines Grace and Floor Detection without separating the 
   assert.equal(mercy.cost, 6);
   assert.equal(hasCardEffect([mercy.id], "preserve_experience_on_defeat"), true);
   assert.equal(hasCardEffect([mercy.id], "floor_detection"), true);
+  assert.match(mercy.descriptionJa, /※表示は奈落迷宮のみ有効$/);
 
   let cards = createInitialCardState();
   for (const id of [GODDESS_GRACE_CARD_ID, "sr_floor_detection", GODDESS_MERCY_CARD_ID]) {

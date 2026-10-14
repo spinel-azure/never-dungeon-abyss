@@ -36,7 +36,7 @@ function stairs(s,down){
 
 test('V2 starts registered-only on floor 1, preserves blueprint and separates runtime from persistent knowledge',()=>{
  const s=create();
- assert.equal(s.kind,'specialMapV2');assert.equal(s.currentFloor,0);assert.equal(s.torchFuel,100);assert.equal(s.fingerprint,'3519b715');
+ assert.equal(s.kind,'specialMapV2');assert.equal(s.currentFloor,0);assert.equal(s.torchFuel,100);assert.equal(s.fingerprint,'d133bf1f');
  assert.equal(s.cells[s.playerY][s.playerX].type,'stairsUp');assert.equal(s.cells[s.playerY][s.playerX].walls[dirs[s.direction]],false);
  assert.deepEqual(s.floors.map(f=>f.explored.flat().filter(Boolean).length),[1,0,0]);
  assert.equal(getV2StairDestination(s),null);assert.equal(confirmV2Cell(s,0).destination,undefined);

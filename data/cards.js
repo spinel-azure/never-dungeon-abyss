@@ -115,21 +115,21 @@ const STANDARD_CARDS = [
   {
     id: "common_stairs_detection", rarity: "C", cost: 1,
     name: "Stairs Detection", nameJa: "階段探知", concept: "下り階段探知",
-    descriptionJa: "たいまつが灯っている間、下り階段をミニマップに表示する。",
+    descriptionJa: "たいまつが灯っている間、下り階段をミニマップに表示する。※表示は奈落迷宮のみ有効",
     category: "exploration", effectId: "stairs_detection", iconId: "stairs-detection",
     maxOwned: 1, maxCopies: 1, sellPrice: 100, buybackPrice: 1000, overflowGold: 100
   },
   {
     id: "common_person_detection", rarity: "C", cost: 1,
     name: "People Finder", nameJa: "人捜し", concept: "NPC探知",
-    descriptionJa: "たいまつが灯っている間、NPCをミニマップに表示する。",
+    descriptionJa: "たいまつが灯っている間、NPCをミニマップに表示する。※表示は奈落迷宮のみ有効",
     category: "exploration", effectId: "npc_detection", iconId: "person-detection",
     maxOwned: 1, maxCopies: 1, sellPrice: 100, buybackPrice: 1000, overflowGold: 100
   },
   {
     id: "common_treasure_detection", rarity: "C", cost: 1,
     name: "Treasure Detection", nameJa: "宝箱探知", concept: "宝箱探知",
-    descriptionJa: "たいまつが灯っている間、宝箱をミニマップに表示する。",
+    descriptionJa: "たいまつが灯っている間、宝箱をミニマップに表示する。※表示は奈落迷宮のみ有効",
     category: "exploration", effectId: "treasure_detection", iconId: "treasure-detection",
     maxOwned: 1, maxCopies: 1, sellPrice: 100, buybackPrice: 1000, overflowGold: 100
   },
@@ -317,7 +317,7 @@ const STANDARD_CARDS = [
   {
     id: "sr_floor_detection", rarity: "SR", cost: 4,
     name: "Floor Detection", nameJa: "階層探知", concept: "下り階段 / 宝箱 / NPC探知",
-    descriptionJa: "たいまつが灯っている間、下り階段と宝箱、NPCをミニマップに表示する。",
+    descriptionJa: "たいまつが灯っている間、下り階段と宝箱、NPCをミニマップに表示する。※表示は奈落迷宮のみ有効",
     category: "exploration", effectId: "floor_detection",
     iconId: "alertness", maxOwned: 1, maxCopies: 1
   },
@@ -397,7 +397,7 @@ const STANDARD_CARDS = [
   {
     id: GODDESS_MERCY_CARD_ID, rarity: "L", cost: 6,
     name: "Goddess's Mercy", nameJa: "女神の慈愛", concept: "女神の恩寵 / 階層探知",
-    descriptionJa: "戦闘不能時の探索経験値を守り、たいまつ点灯中は下り階段、宝箱、NPCを表示する。深層帰還ボーナスは無効。",
+    descriptionJa: "戦闘不能時の探索経験値を守り、たいまつ点灯中は下り階段、宝箱、NPCを表示する。深層帰還ボーナスは無効。※表示は奈落迷宮のみ有効",
     category: "exploration", effectId: "goddess_mercy",
     effectIds: Object.freeze(["preserve_experience_on_defeat", "floor_detection"]),
     conflictsWith: Object.freeze([GODDESS_GRACE_CARD_ID, "sr_floor_detection"]),

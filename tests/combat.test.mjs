@@ -1782,6 +1782,7 @@ test("Floor Detection is a unique SR exploration card and Defense Up uses the sh
   assert.equal(detection.maxCopies, 1);
   assert.equal(hasCardEffect([detection.id], "floor_detection"), true);
   assert.match(detection.descriptionJa, /NPC/);
+  assert.match(detection.descriptionJa, /※表示は奈落迷宮のみ有効$/);
   assert.equal(getCardById("rare_defense_up").iconId, "quartered-shield");
 });
 
@@ -1796,6 +1797,7 @@ test("early detection cards are unique C cards with individual minimap effects",
     assert.equal(card?.cost, 1);
     assert.equal(card?.maxOwned, 1);
     assert.equal(card?.maxCopies, 1);
+    assert.match(card?.descriptionJa, /※表示は奈落迷宮のみ有効$/);
     assert.equal(card?.sellPrice, 100);
     assert.equal(card?.buybackPrice, 1000);
     assert.equal(card?.overflowGold, 100);

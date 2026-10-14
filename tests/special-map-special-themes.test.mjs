@@ -19,7 +19,7 @@ test('normal lottery remains ten; explicit themes replace presentation only acro
    for(let i=0;i<3;i++){const {themeId:t,...geometry}=special.floors[i],{themeId:_,...original}=normal.floors[i];assert.equal(t,themeId);assert.deepEqual(geometry,original);}
   }
  }
- assert.equal(specialMapV2StructureFingerprint(generateSpecialMapV2(base)),'3519b715');
+ assert.equal(specialMapV2StructureFingerprint(generateSpecialMapV2(base)),'b91064fe');
 });
 test('goddess themes require 80..100; gold runtime requires 60..100; invalid identity rejected',()=>{
  for(const themeId of SPECIAL_MAP_THEMES){for(const level of [0,101,NaN])assert.throws(()=>generateExplicitSpecialMapV2({...base,themeId,level}));

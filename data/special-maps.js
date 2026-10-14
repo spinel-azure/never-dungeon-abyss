@@ -3,6 +3,7 @@ import {normalizeSurveyMasks,mergeSurveyV2} from './special-map-survey-v2.js';
 import {describeV2MapName} from './special-map-names-v2.js';
 import {validMapThemeOverride} from './special-map-theme-override.js';
 import {normalizeBossReward,normalizeMapContentHistory} from './special-map-rewards.js';
+import {resolveV2AppraisalTheme} from './special-map-theme-lottery-v2.js';
 // Phase 2A ownership data. This ruleset is deliberately NOT the future dungeon V1.
 export const SPECIAL_MAP_RULESET = 'phase2a-1';
 export const SPECIAL_MAP_V2 = 'special-map-v2';
@@ -79,8 +80,9 @@ export function discoverTestMap(state,{seed=()=>crypto.getRandomValues(new Uint1
   return {ok:true,state:{...state,unidentified:[...state.unidentified,map]},map};
 }
 export function inspectAppraisal(state,discoveryId) {
-  const map=state.unidentified.find(m=>m.discoveryId===discoveryId);
-  if(!map)return {ok:false,error:'鑑定する地図が見つかりません。'};
+  const unidentified=state.unidentified.find(m=>m.discoveryId===discoveryId);
+  if(!unidentified)return {ok:false,error:'鑑定する地図が見つかりません。'};
+  const map=resolveV2AppraisalTheme(unidentified);
   const existing=state.registered.find(m=>mapOriginalId(m)===mapOriginalId(map));
   if(existing)return {ok:true,map:existing,duplicate:true};
   if(state.registered.length>=REGISTERED_LIMIT)return {ok:false,error:'地図帳がいっぱいです。登録済みの地図を整理してから鑑定してください。'};

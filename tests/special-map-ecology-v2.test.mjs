@@ -10,7 +10,7 @@ const base={ruleset:'special-map-v2',seed:12345,level:100,rarity:'GOLD',themeId:
 test('Candidate 1 comparison fixtures and Candidate 3 geometry remain unchanged',()=>{
   const fixtures=JSON.parse(readFileSync(new URL('./fixtures/special-map-ecology-v2-candidate-1.json',import.meta.url)));
   for(const {input,ecology} of fixtures)assert.deepEqual(generateV2Ecology(input),ecology);
-  assert.equal(specialMapV2StructureFingerprint(generateSpecialMapV2(base)),'3519b715');
+  assert.equal(specialMapV2StructureFingerprint(generateSpecialMapV2(base)),'b91064fe');
 });
 test('V2 ecology deterministic and independent of signature, browser RNG and map name streams',()=>{
   const expected=generateV2Ecology(base),nameInput={...base,rulesetVersion:base.ruleset};

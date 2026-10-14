@@ -1,4 +1,5 @@
 import {streamV1, chooseIndexV1, hash32V1} from './random-v1.js';
+import {selectV2NormalTheme} from '../../data/special-map-theme-lottery-v2.js';
 
 // V2 structural candidate 3: one map-wide theme; Candidate 2 geometry is unchanged.
 // Reuse the frozen integer PRNG, never the single-floor V1 generator/dispatcher.
@@ -170,7 +171,7 @@ export function generateSpecialMapV2({ruleset, seed, level, rarity} = {}) {
   if (!Number.isInteger(level) || level < 1 || level > 100) throw new RangeError('level must be an integer from 1 to 100');
   if (!V2_RARITIES.includes(rarity)) throw new RangeError('Unsupported V2 rarity');
   // Retain the original floor-1 theme stream as the map theme. No geometry stream changes.
-  const themeId = V2_THEMES[chooseIndexV1(streamV1(SPECIAL_DUNGEON_V2, seed, 'floor-1-theme'), V2_THEMES.length)];
+  const themeId = selectV2NormalTheme({ruleset:SPECIAL_DUNGEON_V2,seed,level});
   const floors = [1, 2, 3].map(floor => generateFloor(seed, floor, themeId));
   const links = [0, 1].map(i => ({
     upper: {floor: i + 1, ...floors[i].stairsDown},

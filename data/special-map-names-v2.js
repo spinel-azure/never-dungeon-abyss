@@ -1,6 +1,7 @@
 import {streamV1,chooseIndexV1} from '../js/special-map/random-v1.js';
-import {SPECIAL_DUNGEON_V2,V2_THEMES,V2_RARITIES} from '../js/special-map/generator-v2.js';
+import {SPECIAL_DUNGEON_V2,V2_RARITIES} from '../js/special-map/generator-v2.js';
 import {validMapThemeOverride} from './special-map-theme-override.js';
+import {selectV2NormalTheme} from './special-map-theme-lottery-v2.js';
 
 export const SPECIAL_THEME_LOCATIONS=Object.freeze(Object.fromEntries(Object.entries({
  gold:['黄金窟','黄金宮','金殿','金色廟'],rice:['稲穂宮','黄金田','豊穣殿','光穂廟'],
@@ -34,7 +35,7 @@ export function describeV2MapName(map){
   ||!Number.isInteger(map.level)||map.level<1||map.level>100||!V2_RARITIES.includes(map.rarity)||!validMapThemeOverride(map))throw RangeError('Invalid V2 map name input');
  const next=purpose=>streamV1(SPECIAL_DUNGEON_V2,map.seed,purpose);
  // Read Candidate 3's map-wide theme without constructing 300 cells on every UI render.
- const themeId=map.themeOverride??V2_THEMES[chooseIndexV1(next('floor-1-theme'),V2_THEMES.length)];
+ const themeId=map.themeOverride??selectV2NormalTheme({ruleset:SPECIAL_DUNGEON_V2,seed:map.seed,level:map.level});
  const band=Math.floor((map.level-1)/20),prefixes=V2_NAME_PREFIXES[band],locations=map.themeOverride!=null?SPECIAL_THEME_LOCATIONS[themeId]:V2_NAME_LOCATIONS[themeId];
  const prefix=prefixes[chooseIndexV1(next('map-name-prefix'),prefixes.length)];
  const location=locations[chooseIndexV1(next(map.themeOverride!=null?`map-name-special-location:${themeId}`:'map-name-location'),locations.length)];

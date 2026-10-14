@@ -65,9 +65,10 @@ test('development grant never consumes the production entitlement, including aft
 test('naming fixtures cover every level band boundary and exclude rarity/signature',()=>{
  for(const {map,name} of JSON.parse(readFileSync(new URL('./fixtures/special-map-v2-names.json',import.meta.url))))assert.equal(describeV2MapName(map).name,name);
  const levels=[1,20,21,40,41,60,61,80,81,100],prefixes=['朽ちかけた','朽ちかけた','彷徨う','彷徨う','荒れ果てた','荒れ果てた','猛威の','猛威の','滅びの','滅びの'];
+ const themes=['torture','red','blue','green','yellow','water','crystal','crystal','black','black'];
  for(let i=0;i<levels.length;i++)for(const rarity of ['WHITE','SILVER','GOLD']){
   const map={...original,level:levels[i],rarity,discovererName:'別人'},info=describeV2MapName(map);
-  assert.equal(info.name,`${prefixes[i]}晶宮の地図 Lv.${levels[i]}`);assert.equal(info.themeId,'crystal');
+  assert.equal(info.name,`${prefixes[i]}${V2_NAME_LOCATIONS[themes[i]][4]}の地図 Lv.${levels[i]}`);assert.equal(info.themeId,themes[i]);
   const decoded=decodeMapCode(encodeMapCode({...map,surveyedMasks:['f'.repeat(25),'f'.repeat(25),'f'.repeat(25)]})).map;
   assert.equal(describeV2MapName(decoded).name,info.name);assert.equal(decoded.surveyedMasks,undefined);
   assert.deepEqual(registerSharedMap(empty(),decoded).map.surveyedMasks,['0'.repeat(25),'0'.repeat(25),'0'.repeat(25)]);
@@ -85,5 +86,5 @@ test('naming consumes independent streams and leaves Candidate 3 untouched',()=>
  const before=generateSpecialMapV2({ruleset:'special-map-v2',seed:12345,level:1,rarity:'WHITE'});
  for(let level=1;level<=100;level++)describeV2MapName({...original,level});
  assert.deepEqual(generateSpecialMapV2({ruleset:'special-map-v2',seed:12345,level:1,rarity:'WHITE'}),before);
- assert.equal(specialMapV2StructureFingerprint(before),'3519b715');
+ assert.equal(specialMapV2StructureFingerprint(before),'36351d4a');
 });

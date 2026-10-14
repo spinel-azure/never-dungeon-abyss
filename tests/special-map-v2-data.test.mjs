@@ -88,6 +88,7 @@ test('V2 acquisition/appraisal fixes parameters, shares limits and initializes e
  assert.equal(discoverTestMap(state,{seed:()=>{throw Error('must not draw');}}).ok,false);
  state=normalizeSpecialMaps(JSON.parse(JSON.stringify(state)));
  const result=appraiseMap(state,'0');assert.equal(result.ok,true);assert.equal(result.map.seed,0);assert.equal(result.map.level,100);assert.equal(result.map.rarity,'GOLD');
+ assert.equal(result.map.themeOverride,'tender');assert.equal(decodeMapCode(encodeMapCode(result.map)).map.themeOverride,'tender');
  assert.equal(result.map.discovererName,'スピネ');assert.equal(result.map.acquisitionMethod,'discovered');assert.equal('surveyedMask' in result.map,false);
  assert.equal(updateMapSurvey(result.state,result.map.id,'f'.repeat(25)).ok,false);
  assert.equal(describeTestMap(result.map).level,100);
@@ -113,7 +114,7 @@ test('decoded V2 routes only to Candidate 3, reproduces layout independent of le
   assert.equal(generated.ruleset,'special-map-v2');assert.equal(generated.floors.length,3);
   checkV2KeyAccess(generated);
   if(map.seed===12345){
-   assert.equal(specialMapV2StructureFingerprint(generated),'3519b715');
+   assert.equal(specialMapV2StructureFingerprint(generated),({1:'36351d4a',50:'d133bf1f',100:'b91064fe'})[map.level]);
    assert.equal(generated.floors[2].keyChest.x,9);assert.equal(generated.floors[2].keyChest.y,8);
   }
  }

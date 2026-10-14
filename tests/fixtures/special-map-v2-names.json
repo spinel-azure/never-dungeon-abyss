@@ -6,7 +6,7 @@
       "level": 1,
       "rarity": "WHITE"
     },
-    "name": "朽ちかけた晶宮の地図 Lv.1"
+    "name": "朽ちかけた責苦殿の地図 Lv.1"
   },
   {
     "map": {
@@ -15,7 +15,7 @@
       "level": 20,
       "rarity": "WHITE"
     },
-    "name": "朽ちかけた晶宮の地図 Lv.20"
+    "name": "朽ちかけた火焔宮の地図 Lv.20"
   },
   {
     "map": {
@@ -24,7 +24,7 @@
       "level": 21,
       "rarity": "WHITE"
     },
-    "name": "彷徨う晶宮の地図 Lv.21"
+    "name": "彷徨う霜洞の地図 Lv.21"
   },
   {
     "map": {
@@ -33,7 +33,7 @@
       "level": 40,
       "rarity": "WHITE"
     },
-    "name": "彷徨う晶宮の地図 Lv.40"
+    "name": "彷徨う緑窟の地図 Lv.40"
   },
   {
     "map": {
@@ -42,7 +42,7 @@
       "level": 41,
       "rarity": "WHITE"
     },
-    "name": "荒れ果てた晶宮の地図 Lv.41"
+    "name": "荒れ果てた流砂洞の地図 Lv.41"
   },
   {
     "map": {
@@ -51,7 +51,7 @@
       "level": 60,
       "rarity": "WHITE"
     },
-    "name": "荒れ果てた晶宮の地図 Lv.60"
+    "name": "荒れ果てた深水洞の地図 Lv.60"
   },
   {
     "map": {
@@ -78,7 +78,7 @@
       "level": 81,
       "rarity": "WHITE"
     },
-    "name": "滅びの晶宮の地図 Lv.81"
+    "name": "滅びの黒宮の地図 Lv.81"
   },
   {
     "map": {
@@ -87,6 +87,6 @@
       "level": 100,
       "rarity": "WHITE"
     },
-    "name": "滅びの晶宮の地図 Lv.100"
+    "name": "滅びの黒宮の地図 Lv.100"
   }
 ]

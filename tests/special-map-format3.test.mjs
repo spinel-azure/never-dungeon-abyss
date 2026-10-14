@@ -65,7 +65,7 @@ test('Format 2 identity stays exact; theme splits originals; save, limits, favor
 });
 
 test('registered special maps preserve structure, name, ecology, fixed boss and original images',async()=>{
- const normal=generateRegisteredSpecialMap(map());assert.equal(specialMapV2StructureFingerprint(normal),'3519b715');
+ const normal=generateRegisteredSpecialMap(map());assert.equal(specialMapV2StructureFingerprint(normal),'b91064fe');
  for(const themeOverride of themes){
   const original=decodeMapCode(encodeMapCode(map({themeOverride}))).map,generated=generateRegisteredSpecialMap(original);
   assert.deepEqual(generated.links,normal.links);
