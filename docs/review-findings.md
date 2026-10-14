@@ -2168,3 +2168,8 @@
 - タブレット縦のL/R-Strafeは固定操作ボタン群より上へ配置（bottom184px＋safe-area）。メイン画面は16:9を維持。町・タイトル・メニューの上寄せ/幅変更には適用しない。横向きレイアウト、移動速度/入力ロジックは変更なし。
 - tests/browser/strafe.mjsでPC1280x900、スマホ相当390x844、タブレット相当820x1180/768x900の移動・タッチ操作・地図迷宮を確認。水平移動列と十字キー/A/Bの矩形非重複、地図迷宮コマンド欄との4px超の間隔を検証。初期案の短画面でコマンド欄との余裕が少なかったため高さ予約を40px増やして再検証成功。画像TEMP/nda-strafe-JQwGKi/tablet-short-map.pngを目視。実iPad/Safari・ブラウザバー開閉の実機挙動は未確認。CSS中心の変更につきNode全件/Pythonは未実行。diff検査成功。
 - LAST UPDATE2026-10-14、game-menu.cssキャッシュ20261014-1。main.js既存20261014-2は維持。ログTEMP/nda-tablet-layout-final.log。README変更なし、コミット/pushなし。
+### 2026-10-15 ステータスHP/SPの4桁折返し対策
+
+- 着手main/7b806ae。既存se/README.txt差分と未追跡erledigt画像/音声は保護し未変更。HP/SP/DECK COST行のみ16px、420px以下は13pxへ縮小し、各項目内の折返しを禁止。数値処理/能力値は変更なし。
+- 分離EdgeでPC1280x900・スマホ相当390x844/360x800を検証。表示DOMへHP9999/9999・SP9999/9999・DECK COST99を設定し、フォント読込後の横はみ出しなしと1行収容を確認。既存能力値ページ検証も成功。画像TEMP/nda-stat-focus-6e1kWH/narrow-four-digits.pngを目視。実端末未確認、CSS変更のためNode全件/Pythonは未実行。diff検査成功。
+- LAST UPDATE2026-10-15、game-menu.cssキャッシュ20261015-1。main.js番号は維持。README変更なし（既存se/README.txt差分には触れていない）、コミット/pushなし。

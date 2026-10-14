@@ -194,3 +194,5 @@ body.title-active .strafe-controls,body.menu-open .strafe-controls,body.battle-a
 body.touch-controls-enabled.layout-tablet.orientation-portrait:not(.menu-open):not(.title-active):is(:not(.town-active),.special-map-active) .shell{align-items:start;padding-top:max(8px,env(safe-area-inset-top));padding-bottom:0}
 body.touch-controls-enabled.layout-tablet.orientation-portrait:not(.menu-open):not(.title-active):is(:not(.town-active),.special-map-active) .game{gap:8px;width:min(97vw,1024px,calc((100dvh - 540px) * 16 / 9))}
 body.touch-controls-enabled.layout-tablet.orientation-portrait .strafe-controls{position:fixed;left:max(18px,env(safe-area-inset-left));right:max(18px,env(safe-area-inset-right));bottom:calc(184px + env(safe-area-inset-bottom));width:auto;margin:0}
+.nde-status-vitals{font-size:16px;gap:6px}.nde-status-vitals>span{white-space:nowrap}
+@media(max-width:420px){.nde-status-vitals{font-size:13px;gap:4px}}
