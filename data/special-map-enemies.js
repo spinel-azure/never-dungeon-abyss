@@ -25,7 +25,9 @@ export const V2_EXCLUSIVE_ENEMIES = freeze([
     statusResistances: { poison: { resistancePoints: 20 }, deadly_poison: { resistancePoints: 20 }, action_skip: { resistancePoints: 20 }, speed_down: { resistancePoints: 20 } },
     escapeRate: 0.8, surpriseRate: 0, surpriseRateMaximum: 0,
     experienceReward: 300, dropGold: 60, fixedGoldPerDefeat: true,
-    noDrop: true, v2CardDrop: { cardId: 'common_silver_beetle', rate: 0.03, rarity: 'C' }, dropItemId: null
+    noDrop: true,
+    v2ItemDrop: { itemId: 'silver_beetle_wing', rate: 0.55 },
+    v2CardDrop: { cardId: 'common_silver_beetle', rate: 0.03, rarity: 'C' }, dropItemId: null
   },
   {
     id: 'maikaefer_koenig', name: 'マイケーファーケーニヒ',
@@ -38,7 +40,9 @@ export const V2_EXCLUSIVE_ENEMIES = freeze([
     statusResistances: { poison: { resistancePoints: 40 }, deadly_poison: { resistancePoints: 40 }, action_skip: { resistancePoints: 40 }, speed_down: { resistancePoints: 40 } },
     escapeRate: 0.65, surpriseRate: 0, surpriseRateMaximum: 0,
     experienceReward: 2000, dropGold: 300, fixedGoldPerDefeat: true,
-    noDrop: true, v2CardDrop: { cardId: 'legendary_beetle_king', rate: 0.005, rarity: 'L' }, dropItemId: null
+    noDrop: true,
+    v2ItemDrop: { itemId: 'beetle_king_horn', rate: 0.55 },
+    v2CardDrop: { cardId: 'legendary_beetle_king', rate: 0.02, rarity: 'L' }, dropItemId: null
   }
 ]);
 

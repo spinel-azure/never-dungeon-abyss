@@ -7,6 +7,8 @@ import {mapOriginalId} from '../data/special-maps.js';
 import {createInitialCharacter} from '../data/classes.js';
 import {grantV2BattleRewards} from '../js/special-map/battle-rewards-v2.js';
 import {getV2CombatEnemy} from '../data/special-map-enemies.js';
+import {createEnemyCombatant} from '../data/enemies.js';
+import {getItem} from '../data/items.js';
 import {getPresence,restorePresence} from '../js/presence.js';
 const map={rulesetVersion:'special-map-v2',seed:12345,level:50,rarity:'WHITE',discovererName:'試験'};
 const create=options=>createSpecialMapV2Session([map],mapOriginalId(map),options);
@@ -72,12 +74,14 @@ test('V2 rewards accumulate session EXP and settle loot without ordinary carried
  assert.equal(session.battleExperience,100);session.disposeSurvey();
  assert.equal(exp,100);assert.equal(n.experience,c.experience);assert.equal(n.gold,c.gold);assert.equal(session.lootBag.gold,20);assert.equal(n.carriedExperience,123);assert.deepEqual(n.pendingExperienceSettlement,c.pendingExperienceSettlement);assert.deepEqual(n.lootBag,c.lootBag);assert.deepEqual(c,before);
 });
-test('V2 beetles add their card drops beside fixed gold at 3% and 0.5%',()=>{
- for(const [enemyId,cardId,hit,miss] of [['silberkaefer','common_silver_beetle',.029999,.03],['maikaefer_koenig','legendary_beetle_king',.004999,.005]]){
+test('V2 beetles add their card drops beside fixed gold at 3% and 2%',()=>{
+ for(const [enemyId,cardId,hit,miss] of [['silberkaefer','common_silver_beetle',.029999,.03],['maikaefer_koenig','legendary_beetle_king',.019999,.02]]){
   for(const [roll,expected] of [[hit,1],[miss,0]]){
    const s=create(),c=createInitialCharacter({name:'甲虫',job:'warrior'});
    s.battleContext={source:'special-map-v2',sessionId:s.encounterSessionId,battleId:1,mapKey:s.mapKey,mapLevel:50};
-   const enemy={...getV2CombatEnemy(enemyId,50),hp:0};
+   const enemy=createEnemyCombatant(getV2CombatEnemy(enemyId,50));enemy.hp=0;enemy.alive=false;
+   assert.deepEqual(enemy.v2CardDrop,getV2CombatEnemy(enemyId,50).v2CardDrop,'real combat conversion preserves rare-card profile');
+   s.battleContext.normalItemRandomValue=1;
    const reward=grantV2BattleRewards(c,{enemy,explorationContext:s.battleContext},s,()=>roll);
    assert.equal(reward.cardDrop?.cardId===cardId?1:0,expected,`${enemyId} @ ${roll}`);
    assert.equal(reward.rareChestReward?.cardId===cardId?1:0,expected,`gold chest ${enemyId} @ ${roll}`);
@@ -85,17 +89,32 @@ test('V2 beetles add their card drops beside fixed gold at 3% and 0.5%',()=>{
   }
  }
 });
-test('any Lv100 V2 boss has a stable 1% engraving chest with an even five-way table',()=>{
+test('V2 beetle material drops survive combat conversion and use their independent 55% roll',()=>{
+ for(const [enemyId,itemId,sellPrice] of [['silberkaefer','silver_beetle_wing',1000],['maikaefer_koenig','beetle_king_horn',10000]]){
+  assert.equal(getItem(itemId)?.sellPrice,sellPrice);
+  assert.equal(getItem(itemId)?.category,'material');
+  for(const [roll,expected] of [[.549999,1],[.55,0]]){
+   const s=create(),c=createInitialCharacter({name:'素材',job:'warrior'});
+   s.battleContext={source:'special-map-v2',sessionId:s.encounterSessionId,battleId:1,mapKey:s.mapKey,mapLevel:50,normalItemRandomValue:roll,rareCardRandomValue:1};
+   const enemy=createEnemyCombatant(getV2CombatEnemy(enemyId,50));enemy.hp=0;enemy.alive=false;
+   assert.deepEqual(enemy.v2ItemDrop,getV2CombatEnemy(enemyId,50).v2ItemDrop,'real combat conversion preserves material profile');
+   const reward=grantV2BattleRewards(c,{enemy,explorationContext:s.battleContext},s,()=>1);
+   assert.equal(reward.itemDrop?.itemId===itemId?1:0,expected,`${enemyId} @ ${roll}`);
+   assert.equal(s.lootBag.items[itemId]||0,expected);s.disposeSurvey();
+  }
+ }
+});
+test('any Lv100 V2 boss has a stable 10% engraving chest with an even five-way table',()=>{
  for(let index=0;index<5;index++){
   const level100={...map,level:100,seed:12345+index};
   const s=createSpecialMapV2Session([level100],mapOriginalId(level100));
-  const context={source:index%2?'special-map-v2-special-boss':'special-map-v2-boss',sessionId:s.encounterSessionId,battleId:1,mapKey:s.mapKey,mapLevel:100,engravingRandomValues:[.009,(index+.1)/5]};
+  const context={source:index%2?'special-map-v2-special-boss':'special-map-v2-boss',sessionId:s.encounterSessionId,battleId:1,mapKey:s.mapKey,mapLevel:100,engravingRandomValues:[.099,(index+.1)/5]};
   s.battleContext=context;
   const reward=grantV2BattleRewards(createInitialCharacter({name:'刻印',job:'warrior'}),{enemy:{experienceReward:0,noDrop:true},explorationContext:context},s,()=>.5);
   assert.equal(reward.engravingItemId,['strength_engraving','intelligence_engraving','agility_engraving','dexterity_engraving','luck_engraving'][index]);
   assert.deepEqual(reward.rareChestReward,{kind:'item',itemId:reward.engravingItemId});
   assert.equal(s.lootBag.items[reward.engravingItemId],1);s.disposeSurvey();
  }
- const s=create(),context={source:'special-map-v2-boss',sessionId:s.encounterSessionId,battleId:1,mapKey:s.mapKey,mapLevel:100,engravingRandomValues:[.01,0]};s.battleContext=context;
+ const s=create(),context={source:'special-map-v2-boss',sessionId:s.encounterSessionId,battleId:1,mapKey:s.mapKey,mapLevel:100,engravingRandomValues:[.10,0]};s.battleContext=context;
  assert.equal(grantV2BattleRewards(createInitialCharacter({name:'外れ',job:'warrior'}),{enemy:{experienceReward:0,noDrop:true},explorationContext:context},s,()=>0).engravingItemId,null);s.disposeSurvey();
 });

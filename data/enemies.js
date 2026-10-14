@@ -788,6 +788,8 @@ export function createEnemyCombatant(enemy) {
     dropGold: Math.max(0, Math.floor(Number(enemy.dropGold) || 0)),
     fixedGoldPerDefeat: Boolean(enemy.fixedGoldPerDefeat),
     dropProfile: enemy.dropProfile || "",
+    v2ItemDrop: enemy.v2ItemDrop ? structuredClone(enemy.v2ItemDrop) : null,
+    v2CardDrop: enemy.v2CardDrop ? structuredClone(enemy.v2CardDrop) : null,
     escapeRate: enemy.escapeRate,
     surpriseRate: enemy.surpriseRate,
     surpriseRateMaximum: enemy.surpriseRateMaximum,

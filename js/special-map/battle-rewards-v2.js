@@ -11,7 +11,7 @@ const normalized=value=>Math.max(0,Math.min(.999999999,Number(value)||0));
 export function rollV2Level100Engraving(context,random=Math.random){
  if(!['special-map-v2-boss','special-map-v2-special-boss'].includes(context?.source)||Number(context.mapLevel)!==100)return null;
  const values=Array.isArray(context.engravingRandomValues)?context.engravingRandomValues:[random(),random()];
- if(normalized(values[0])>=.01)return null;
+ if(normalized(values[0])>=.10)return null;
  return V2_LEVEL_100_ENGRAVINGS[Math.floor(normalized(values[1])*V2_LEVEL_100_ENGRAVINGS.length)];
 }
 function rollV2CardDrop(enemy,context,random){
@@ -19,6 +19,13 @@ function rollV2CardDrop(enemy,context,random){
  const roll=context?.rareCardRandomValue??random();
  return profile&&normalized(roll)<profile.rate
   ?{kind:'card',cardId:profile.cardId,amount:1,unidentifiedName:'？カード',rarity:profile.rarity}
+  :null;
+}
+function rollV2ItemDrop(enemy,context,random){
+ const profile=enemy?.v2ItemDrop;
+ const roll=context?.normalItemRandomValue??random();
+ return profile&&normalized(roll)<profile.rate
+  ?{kind:'item',itemId:profile.itemId,amount:1}
   :null;
 }
 function addDrop(bag,drop){
@@ -39,17 +46,19 @@ export function grantV2BattleRewards(character,battle,session,random=Math.random
  const exp=calculateBattleExperienceReward(character,enemies.reduce((n,e)=>n+Math.max(0,Number(e?.experienceReward)||0),0));
  const fixed=calculateFixedGoldPerDefeat(enemies);
  const drop=fixed>0?{kind:'gold',amount:fixed}:rollEnemyDrop(battle.enemy,random);
+ const itemDrop=rollV2ItemDrop(battle.enemy,context,random);
  const cardDrop=rollV2CardDrop(battle.enemy,context,random);
  const engravingItemId=rollV2Level100Engraving(context,random);
  const rareChestReward=engravingItemId?{kind:'item',itemId:engravingItemId}:cardDrop?{...cardDrop}:null;
  let bag=addDrop(session.lootBag,drop);
+ bag=addDrop(bag,itemDrop);
  bag=addDrop(bag,cardDrop);
  if(engravingItemId)bag=addLootItem(bag,engravingItemId,1).lootBag;
  session.lootBag=bag;
  session.battleExperience+=exp;
  session.rewardedBattles.add(context.battleId);
- return {character,exp,drop,cardDrop,engravingItemId,rareChestReward,
-  message:`戦闘に勝利した。${exp}EXPを帰還時の精算に積み立てた。${drop.kind==='gold'?` ${drop.amount}Gをロット袋に入れた。`:bag?' 戦利品をロット袋に入れた。':drop.kind==='redChest'?' 赤宝箱イベントはV2-F1では未対応です。':''}${cardDrop?' カードをロット袋に入れた。':''}`};
+ return {character,exp,drop,itemDrop,cardDrop,engravingItemId,rareChestReward,
+  message:`戦闘に勝利した。${exp}EXPを帰還時の精算に積み立てた。${drop.kind==='gold'?` ${drop.amount}Gをロット袋に入れた。`:bag?' 戦利品をロット袋に入れた。':drop.kind==='redChest'?' 赤宝箱イベントはV2-F1では未対応です。':''}${itemDrop?` ${itemDrop.itemId==='silver_beetle_wing'?'銀甲虫の翅':'甲虫王の角'}をロット袋に入れた。`:''}${cardDrop?' ？カードをロット袋に入れた！':''}${engravingItemId?' ？刻印をロット袋にいれた！':''}`};
 }
 
 // Commit includes saving the character. Keep the session intact on failure so

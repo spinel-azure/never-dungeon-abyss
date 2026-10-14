@@ -4,6 +4,16 @@ export function filterItemCompendiumEntries(entries, tab = "すべて") {
   return entries.filter(entry => tab === "すべて" || entry.category === tab);
 }
 export const ITEM_COMPENDIUM_ENTRIES = Object.freeze({
+  silver_beetle_wing: Object.freeze({
+    id: "silver_beetle_wing", name: "銀甲虫の翅", category: "換金・素材",
+    acquisition: "ズィルバーケーファー", purchasePrice: null,
+    description: "ズィルバーケーファーの銀色に輝く翅。売却専用。"
+  }),
+  beetle_king_horn: Object.freeze({
+    id: "beetle_king_horn", name: "甲虫王の角", category: "換金・素材",
+    acquisition: "マイケーファーケーニヒ", purchasePrice: null,
+    description: "マイケーファーケーニヒの威厳ある角。売却専用。"
+  }),
   strength_engraving: engravingEntry("strength_engraving", "剛力の刻印", "STR"),
   intelligence_engraving: engravingEntry("intelligence_engraving", "叡智の刻印", "INT"),
   agility_engraving: engravingEntry("agility_engraving", "疾風の刻印", "AGI"),

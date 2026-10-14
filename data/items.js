@@ -1,4 +1,16 @@
 export const ITEMS = Object.freeze([
+  Object.freeze({
+    number: 65, id: "beetle_king_horn", name: "甲虫王の角", category: "material",
+    buyPrice: 0, sellPrice: 10000, source: "drop", usableIn: Object.freeze([]),
+    effects: Object.freeze([]), description: "マイケーファーケーニヒの威厳ある角。売却専用。", maxOwned: 99,
+    repurchasable: false, iconId: "beetle-king", version: 1
+  }),
+  Object.freeze({
+    number: 64, id: "silver_beetle_wing", name: "銀甲虫の翅", category: "material",
+    buyPrice: 0, sellPrice: 1000, source: "drop", usableIn: Object.freeze([]),
+    effects: Object.freeze([]), description: "ズィルバーケーファーの銀色に輝く翅。売却専用。", maxOwned: 99,
+    repurchasable: false, iconId: "silver-beetle", version: 1
+  }),
   Object.freeze({ number: 63, id: "luck_engraving", name: "幸運の刻印", category: "engraving", buyPrice: 0, sellPrice: 0, source: "special-map-v2-boss", usableIn: Object.freeze(["town", "dungeon"]), effects: Object.freeze([{ id: "permanent_stat_engraving", stat: "luc", value: 1 }]), description: "魂へ刻み込むと、LUCが恒久的に1上昇する。", maxOwned: 99, repurchasable: false, iconId: "luck", version: 1 }),
   Object.freeze({ number: 62, id: "dexterity_engraving", name: "技巧の刻印", category: "engraving", buyPrice: 0, sellPrice: 0, source: "special-map-v2-boss", usableIn: Object.freeze(["town", "dungeon"]), effects: Object.freeze([{ id: "permanent_stat_engraving", stat: "dex", value: 1 }]), description: "魂へ刻み込むと、DEXが恒久的に1上昇する。", maxOwned: 99, repurchasable: false, iconId: "dexterity", version: 1 }),
   Object.freeze({ number: 61, id: "agility_engraving", name: "疾風の刻印", category: "engraving", buyPrice: 0, sellPrice: 0, source: "special-map-v2-boss", usableIn: Object.freeze(["town", "dungeon"]), effects: Object.freeze([{ id: "permanent_stat_engraving", stat: "agi", value: 1 }]), description: "魂へ刻み込むと、AGIが恒久的に1上昇する。", maxOwned: 99, repurchasable: false, iconId: "agility", version: 1 }),

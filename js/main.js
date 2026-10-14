@@ -2048,7 +2048,7 @@ import {
     return result.gained > 0;
   }
 
-  function showCardGetEffect(cardId, { seId = "battleVictory", afterSeId = null, onComplete = null } = {}) {
+  function showCardGetEffect(cardId, { seId = "battleVictory", afterSeId = null, onComplete = null, unidentified = false } = {}) {
     const card = getCardById(cardId);
     if (!cardGetEffect || !cardGetCanvas || !card) {onComplete?.();return;}
     window.clearTimeout(cardGetTimer);
@@ -2058,7 +2058,13 @@ import {
       viewport.append(cardGetEffect);
     }
     if(seId) playSe(seId);
-    drawCardCanvas(cardGetCanvas, card);
+    drawCardCanvas(cardGetCanvas, unidentified ? {
+      ...card,
+      name: "???",
+      nameJa: "？？？",
+      footerText: "？？？",
+      iconId: "unknown"
+    } : card);
     cardGetEffect.hidden = false;
     cardGetEffect.classList.remove("is-active");
     void cardGetEffect.offsetWidth;
@@ -5862,9 +5868,9 @@ import {
       return new Promise(resolve=>setTimeout(resolve,3400));
     },
     showV2RareRewardAcquisition:reward=>{
-      if(reward?.kind==='card')return new Promise(resolve=>showCardGetEffect(reward.cardId,{seId:null,onComplete:resolve}));
+      if(reward?.kind==='card')return new Promise(resolve=>showCardGetEffect(reward.cardId,{seId:null,onComplete:resolve,unidentified:true}));
       const item=getItem(reward?.itemId);if(!item)return Promise.resolve();
-      showNamedItemGetEffect([item.name],{itemIds:[item.id],imageSources:[`images/item-compendium/${item.id}.avif`],acquisitionMessage:true,playSound:false});
+      showNamedItemGetEffect(['？刻印'],{imageSources:['images/item-compendium/unknown_engraving.avif'],acquisitionMessage:'？刻印をロット袋にいれた！',playSound:false});
       return new Promise(resolve=>setTimeout(resolve,3400));
     },
     hideV2RareRewardAcquisition:()=>{

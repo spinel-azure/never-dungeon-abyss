@@ -8,7 +8,7 @@ const silver="common_silver_beetle",gold="sr_golden_beetle",king="legendary_beet
 test("beetle cards have approved costs and enabled V2 enemy drop routes",()=>{
  assert.deepEqual([getCardById(silver).cost,getCardById(gold).cost,getCardById(king).cost],[1,4,6]);
  assert.equal(getCardById(silver).acquisition.enabled,true);assert.equal(getCardById(silver).acquisition.dropRate,.03);
- assert.equal(getCardById(king).acquisition.enabled,true);assert.equal(getCardById(king).acquisition.dropRate,.005);
+ assert.equal(getCardById(king).acquisition.enabled,true);assert.equal(getCardById(king).acquisition.dropRate,.02);
  assert.equal(getCardById(king).acquisition.enemyId,"maikaefer_koenig");
 });
 
