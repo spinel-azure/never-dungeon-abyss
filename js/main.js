@@ -5854,7 +5854,11 @@ import {
       let drawIndex=0;
       return transactSpecialMaps({getCharacter:()=>character,setCharacter:next=>{character=next;},save:()=>saveGame()},maps=>prepareMapBossReward(maps,context,{random:()=>context.rewardRandomValues[drawIndex++]}));
     },
-    getTorchCardEffects:()=>({consumptionDisabled:hasCardEffect(character?.cards?.deckSlots,'torch_consumption_disabled'),effectForced:hasCardEffect(character?.cards?.deckSlots,'force_torch_effect_active')}),
+    getTorchCardEffects:()=>({
+      consumptionDisabled:hasCardEffect(character?.cards?.deckSlots,'torch_consumption_disabled'),
+      effectForced:hasCardEffect(character?.cards?.deckSlots,'force_torch_effect_active'),
+      presenceIncreaseReduction:sumCardEffectValues(character?.cards?.deckSlots,'presence_gain_reduction')
+    }),
     playSurveyCompletion:()=>playSeToEnd('importantItem'),
     playSurveyJingle:key=>playSeToEnd(key),
     onEncounter:(session,enemy,context)=>void beginV2Battle(session,enemy,context),

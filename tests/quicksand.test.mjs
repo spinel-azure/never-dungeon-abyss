@@ -103,5 +103,5 @@ test("quicksand contact shows its image then uses a short fade transition", asyn
   assert.match(mainSource, /style\.transitionDuration = `\$\{darkenMs\}ms`/);
   assert.match(mainSource, /cells\[y\]\[x\]\.quicksand = savedCell\.quicksand \|\| null/);
   assert.match(rendererSource, /NPC_event_15\.avif|DESERT_QUICKSAND\.image/);
-  assert.match(minimapSource, /c\.quicksand && isExplored/);
+  assert.match(minimapSource, /c\.quicksand && \(isExplored \|\| completedMapReveal\)/);
 });

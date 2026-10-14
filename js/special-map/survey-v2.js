@@ -11,15 +11,18 @@ export function getV2SurveyJingle(before,after,beforeFloor,afterFloor){
 // flushes bypass the timer. Failed writes retain all dirty knowledge for retry.
 export function attachV2Survey(s,original,{persistSurvey=()=>({ok:true}),scheduleSurvey=fn=>setTimeout(fn,750),cancelSurvey=clearTimeout}={}){
  s.surveyedMasks=normalizeSurveyMasks(original.surveyedMasks);
+ const expectedTotal=s.surveyedMasks.length*100;
+ // Capture this at entry so completing the survey unlocks markers next expedition.
+ s.fullSurveyMinimapUnlocked=surveyTotalV2(s.surveyedMasks)===expectedTotal;
  let saved=[...s.surveyedMasks],timer=null;
  s.surveyCompletionPending=false;s.surveyError='';
- let completionSaved=surveyTotalV2(saved)===300;
+ let completionSaved=surveyTotalV2(saved)===expectedTotal;
  let views=surveyViewsV2(s.surveyedMasks);
  Object.defineProperties(s,{
   surveyView:{get:()=>views[s.currentFloor]},
   surveyedCount:{get:()=>surveyCountsV2(s.surveyedMasks)[s.currentFloor]},
   totalSurveyed:{get:()=>surveyTotalV2(s.surveyedMasks)},
-  surveyComplete:{get:()=>s.totalSurveyed===300}
+  surveyComplete:{get:()=>s.totalSurveyed===expectedTotal}
  });
  const cancel=()=>{if(timer!==null){cancelSurvey(timer);timer=null;}};
  s.flushSurvey=()=>{

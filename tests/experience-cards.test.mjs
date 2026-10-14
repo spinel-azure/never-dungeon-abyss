@@ -10,6 +10,8 @@ test("beetle cards have approved costs and enabled V2 enemy drop routes",()=>{
  assert.equal(getCardById(silver).acquisition.enabled,true);assert.equal(getCardById(silver).acquisition.dropRate,.03);
  assert.equal(getCardById(king).acquisition.enabled,true);assert.equal(getCardById(king).acquisition.dropRate,.02);
  assert.equal(getCardById(king).acquisition.enemyId,"maikaefer_koenig");
+ assert.deepEqual([getCardById(silver).maxOwned,getCardById(silver).maxCopies,getCardById(silver).overflowGold],[1,1,1000]);
+ assert.deepEqual([getCardById(king).maxOwned,getCardById(king).maxCopies,getCardById(king).overflowGold],[1,1,50000]);
 });
 
 test("new beetle cards use their dedicated card icons",()=>{

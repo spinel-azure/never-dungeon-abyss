@@ -63,6 +63,14 @@ test('V2 Perpetual Torch follows equipped effects; unequipping restores consumpt
  s.motion={isStep:true,started:0,duration:170,x:s.renderState.x,y:s.renderState.y,angle:0,toX:s.renderState.x,toY:s.renderState.y,toAngle:0};
  session.updateSpecialMotion(s,170);assert.equal(s.torchFuel,99);h.ui.close();
 });
+test('V2 exploration UI passes completed-map reveal and Swift Foot reduction into the session',()=>{
+ const map={...original,surveyedMasks:Array(3).fill('f'.repeat(25))};
+ const h=harness({map,hostOptions:{getTorchCardEffects:()=>({presenceIncreaseReduction:1})}}),s=h.ui.session;
+ h.bound.updateHud();
+ assert.equal(s.cardPresenceIncreaseReduction,1);
+ assert.equal(h.bound.getMinimapOptions().completedMapReveal,true);
+ h.ui.close();
+});
 test('key acquisition popup follows opening, plays one jingle and holds field input',async()=>{
  let release,popups=0;const sounds=[];
  const h=harness({playSe:key=>sounds.push(key),hostOptions:{showMapKeyAcquisition:()=>{popups++;return new Promise(r=>release=r);}}});

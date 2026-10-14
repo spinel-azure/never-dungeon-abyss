@@ -54,7 +54,10 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  const session=createSession(restoredRegistered,mapKey,{developmentTheme,persistSurvey:saveSurvey,playSe,onEnvironmentStep:host.onMapEnvironmentStep,onEncounter:host.onEncounter,onBossEncounter:host.onEncounter,prepareBossEncounter:host.prepareBossEncounter,say:text=>{message.textContent=text;}});
  session.developmentSession=Boolean(developmentTheme||developmentName);
  if(resumeSave)restoreSpecialMapSession(session,resumeSave);
- if(isV2Session(session))session.torchConsumptionDisabled=()=>Boolean(host.getTorchCardEffects?.().consumptionDisabled);
+ if(isV2Session(session)){
+  session.torchConsumptionDisabled=()=>Boolean(host.getTorchCardEffects?.().consumptionDisabled);
+  session.cardPresenceIncreaseReduction=Math.max(0,Math.min(1,Number(host.getTorchCardEffects?.().presenceIncreaseReduction)||0));
+ }
  let name=developmentName||'特殊地図';try{if(!developmentName)name=describeTestMap(original).name;}catch{}
  const container=document.createElement('section');container.className='special-map-runtime';container.setAttribute('aria-label','特殊迷宮探索');
  const canvas=document.createElement('canvas');canvas.className='special-map-view';canvas.width=960;canvas.height=540;canvas.setAttribute('aria-label','特殊迷宮3D表示');
@@ -167,10 +170,11 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
     showStairNotice();
    }
   },drawMinimap,getMinimapBounds,
-  getMinimapOptions:()=>({W:960,MAP_W:10,MAP_H:10,cells:session.cells,explored:session.surveyView,state:session.renderState,mapTitle:isV2Session(session)?name:null,mapTitleColor:mapNameColor(original.rarity)}),
+  getMinimapOptions:()=>({W:960,MAP_W:10,MAP_H:10,cells:session.cells,explored:session.surveyView,state:session.renderState,completedMapReveal:Boolean(session.fullSurveyMinimapUnlocked),mapTitle:isV2Session(session)?name:null,mapTitleColor:mapNameColor(original.rarity)}),
   updateHud:()=>{
    if(isV2Session(session)){
     const effects=host.getTorchCardEffects?.();session.renderState.torchEffectForced=Boolean(effects?.effectForced);session.renderState.minimapEffectForced=Boolean(effects?.effectForced);
+    session.cardPresenceIncreaseReduction=Math.max(0,Math.min(1,Number(effects?.presenceIncreaseReduction)||0));
     const theme=host.syncMapEnvironment?.(session)||session.generatedMap.themeId;
     if(theme!==renderTheme){renderTheme=theme;setWallColor(theme);setFloorColor(theme);}
    }

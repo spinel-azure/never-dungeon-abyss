@@ -21,7 +21,7 @@ const STANDARD_CARDS = [
     name: "Silver Beetle", nameJa: "銀甲虫", concept: "獲得経験値 +10%",
     descriptionJa: "戦闘で獲得する経験値が10％増加する。ほかの経験値増加カードと加算して重複する。",
     category: "exploration", effectId: "experience_gain_bonus", effectValue: 0.1,
-    iconId: "silver-beetle", maxOwned: 1, maxCopies: 1,
+    iconId: "silver-beetle", maxOwned: 1, maxCopies: 1, overflowGold: 1000,
     acquisition: Object.freeze({ type: "enemyDrop", enemyId: "silberkaefer", dropRate: 0.03, enabled: true })
   },
   {
@@ -359,7 +359,7 @@ const STANDARD_CARDS = [
     name: "Beetle King", nameJa: "甲虫王", concept: "獲得経験値 +50%",
     descriptionJa: "戦闘で獲得する経験値が50％増加する。ほかの経験値増加カードと加算して重複する。",
     category: "exploration", effectId: "experience_gain_bonus", effectValue: 0.5,
-    iconId: "beetle-king", maxOwned: 1, maxCopies: 1,
+    iconId: "beetle-king", maxOwned: 1, maxCopies: 1, overflowGold: 50000,
     acquisition: Object.freeze({ type: "enemyDrop", enemyId: "maikaefer_koenig", dropRate: 0.02, enabled: true })
   },
   {

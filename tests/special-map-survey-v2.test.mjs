@@ -95,10 +95,18 @@ test('ordinary final cell also completes; failed final commit defers notice unti
 });
 test('all-known maps still use torch darkness and only persistent knowledge guides auto walking',()=>{
  const h=setup([full,full,full]),s=h.create();step(s);
+ assert.equal(s.fullSurveyMinimapUnlocked,true);
  assert.equal(s.explored.flat().filter(Boolean).length,2);assert.ok(getSpecialAutoAvailability(s).accepted);
  const masks=[...s.surveyedMasks];s.renderState.torchFuel=0;
  assert.equal(s.renderState.torchFuel,0);assert.deepEqual(s.surveyedMasks,masks);
  s.renderState.torchFuel=100;assert.ok(s.surveyView.flat().every(Boolean));s.disposeSurvey();
+});
+test('full-map feature reveal unlocks only on the expedition after survey completion',()=>{
+ const probe=setup().create(),p={x:probe.playerX,y:probe.playerY};probe.disposeSurvey();
+ const h=setup([maskExcept(p),full,full]),s=h.create();
+ assert.equal(s.fullSurveyMinimapUnlocked,false);assert.equal(s.totalSurveyed,300);
+ assert.ok(s.flushSurvey());assert.equal(s.fullSurveyMinimapUnlocked,false);s.disposeSurvey();
+ h.reload();const next=h.create();assert.equal(next.fullSurveyMinimapUnlocked,true);next.disposeSurvey();
 });
 test('auto walker may cross historically surveyed cells absent from runtime explored, never unknown cells',()=>{
  const h=setup([full,EMPTY_SURVEY,EMPTY_SURVEY]),s=h.create();

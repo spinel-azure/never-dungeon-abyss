@@ -12,11 +12,12 @@ export function drawMinimap(ctx, {
   size = 126,
   ox = W - size - 16,
   oy = 16,
-  alpha = .82
+  alpha = .82,
+  completedMapReveal = false
 }) {
   const cell = size / MAP_W;
   const effectiveTorchActive = state.torchFuel > 0 || state.torchEffectForced;
-  const fullMapRevealActive = isFullMapRevealActive(state);
+  const fullMapRevealActive = isFullMapRevealActive(state) || completedMapReveal;
   const floorDetectionActive = effectiveTorchActive && state.floorDetectionActive;
   const stairsDetectionActive = floorDetectionActive || (effectiveTorchActive && state.stairsDetectionActive);
   const npcDetectionActive = floorDetectionActive || (effectiveTorchActive && state.npcDetectionActive);
@@ -70,30 +71,31 @@ export function drawMinimap(ctx, {
         if (c.walls.E) line(ctx, x2, y1, x2, y2);
         if (c.walls.S) line(ctx, x1, y2, x2, y2);
       }
-      if ((isExplored && c.type === "stairsUp") || (c.type === "stairsDown" && (isExplored || revealOptions.stairsDown || stairsDetectionActive))) {
+      if (((isExplored || completedMapReveal) && c.type === "stairsUp") || (c.type === "stairsDown" && (isExplored || completedMapReveal || revealOptions.stairsDown || stairsDetectionActive))) {
         drawStairsMark(ctx, x1, y1, cell, c.type, c.portal);
       }
-      if (c.npc && (isExplored || revealOptions.npcs || npcDetectionActive)) drawNpcMark(ctx, x1, y1, cell);
-      if (c.bossId && isExplored) c.bossId === "giant_vine_obstacle"
+      if (c.npc && (isExplored || completedMapReveal || revealOptions.npcs || npcDetectionActive)) drawNpcMark(ctx, x1, y1, cell);
+      if (c.bossId && (isExplored || completedMapReveal)) c.bossId === "giant_vine_obstacle"
         ? drawTextMark(ctx, "🌿", x1, y1, cell)
         : drawBossMark(ctx, x1, y1, cell);
+      if (c.mapBoss && (isExplored || completedMapReveal)) drawBossMark(ctx, x1, y1, cell);
       if (shouldDrawExplorationObstacleMarker(c)) {
         const obstacle = getExplorationObstacleById(c.explorationObstacleId);
         if (obstacle) drawTextMark(ctx, obstacle.minimapMarker, x1, y1, cell, obstacle.minimapColor);
       }
-      if (c.fountain && effectiveTorchActive) drawFountainMark(ctx, x1, y1, cell);
-      if ((c.fixedWarp || c.fixedReturnPortal) && isExplored) drawTextMark(ctx, "※", x1, y1, cell, "#63e9ff");
-      if (c.mapReturnPortal && isExplored) drawMapReturnPortalMark(ctx, x1, y1, cell);
-      if (c.fixedEvent && isExplored) drawTextMark(ctx, "!", x1, y1, cell, "#b9f4ff");
-      if (c.quicksand && isExplored) drawQuicksandMark(ctx, x1, y1, cell);
-      if (c.rapidCurrent && c.rapidCurrentDiscovered) {
+      if (c.fountain && (effectiveTorchActive || completedMapReveal)) drawFountainMark(ctx, x1, y1, cell);
+      if ((c.fixedWarp || c.fixedReturnPortal) && (isExplored || completedMapReveal)) drawTextMark(ctx, "※", x1, y1, cell, "#63e9ff");
+      if (c.mapReturnPortal && (isExplored || completedMapReveal)) drawMapReturnPortalMark(ctx, x1, y1, cell);
+      if (c.fixedEvent && (isExplored || completedMapReveal)) drawTextMark(ctx, "!", x1, y1, cell, "#b9f4ff");
+      if (c.quicksand && (isExplored || completedMapReveal)) drawQuicksandMark(ctx, x1, y1, cell);
+      if (c.rapidCurrent && (c.rapidCurrentDiscovered || completedMapReveal)) {
         drawRapidCurrentMark(ctx, x1, y1, cell, c.rapidCurrent.direction);
       }
-      if (shouldDrawSpecialRoomMarker(c.specialRoom, isExplored, effectiveTorchActive ? 1 : 0)) {
+      if (shouldDrawSpecialRoomMarker(c.specialRoom, isExplored || completedMapReveal, (effectiveTorchActive || completedMapReveal) ? 1 : 0)) {
         drawSpecialRoomMark(ctx, x1, y1, cell, c.specialRoom.content.minimapMarker);
       }
-      if (c.questEvent && effectiveTorchActive) drawQuestEventMark(ctx, x1, y1, cell);
-      if (c.treasure && (revealOptions.treasures || treasureDetectionActive)) {
+      if (c.questEvent && (effectiveTorchActive || completedMapReveal)) drawQuestEventMark(ctx, x1, y1, cell);
+      if (c.treasure && (completedMapReveal || revealOptions.treasures || treasureDetectionActive)) {
         drawTreasureMark(ctx, x1, y1, cell, c.treasure);
       } else if (c.treasure && state.treasureCompassActive) {
         drawTreasureCompassMark(ctx, x1, y1, cell);

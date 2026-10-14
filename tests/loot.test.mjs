@@ -317,6 +317,26 @@ test("a duplicate Search and Destroy card converts into 1000 gold", () => {
   }]);
 });
 
+test("duplicate beetle cards convert into their approved gold values", () => {
+  for (const [cardId, convertedGold] of [
+    ["common_silver_beetle", 1000],
+    ["legendary_beetle_king", 50000]
+  ]) {
+    let character = createInitialCharacter({ name: "TEST", job: "thief" });
+    character.lootBag = addLootCard(character.lootBag, cardId, 1).lootBag;
+    character = settleLootBag(character).character;
+    const goldBefore = character.gold;
+    character.lootBag = addLootCard(character.lootBag, cardId, 1).lootBag;
+    const settled = settleLootBag(character);
+    assert.equal(settled.character.cards.ownedCardCounts[cardId], 1);
+    assert.equal(settled.character.gold, goldBefore + convertedGold);
+    assert.equal(settled.gold, convertedGold);
+    assert.deepEqual(settled.cardResults, [{
+      cardId, count: 1, gained: 0, discarded: 1, convertedGold
+    }]);
+  }
+});
+
 test("B1F to B4F keep one to three red chests alongside eligible purple special-room chests", () => {
   for (const [depth, roll, expected] of [[1, 0, 1], [2, 0.4, 2], [4, 0.99, 3]]) {
     buildBoundaryWallMap(depth, () => roll);

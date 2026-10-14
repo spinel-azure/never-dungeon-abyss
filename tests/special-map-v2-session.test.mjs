@@ -133,6 +133,17 @@ test('V2 concealment, talisman and incense affect encounters and expire on a fre
  }finally{s.disposeSurvey();}
 });
 
+test('V2 Swift Foot card reduction stacks with field concealment and can fully stop presence gain',()=>{
+ const s=create({random:()=>0,onEncounter:()=>assert.fail('suppressed encounter')});
+ try{
+  const blocked=[s.generatedMap.stairsUp,s.generatedMap.stairsDown,s.generatedMap.keyChest,s.generatedMap.bossRoom?.bossCell];
+  const target=s.cells.flat().find(c=>!blocked.some(p=>p?.x===c.x&&p?.y===c.y));s.playerX=target.x;s.playerY=target.y;
+  s.cardPresenceIncreaseReduction=1;s.onEncounterStep();assert.equal(s.presence,0);
+  s.cardPresenceIncreaseReduction=.5;s.presenceIncreaseReduction=.5;s.onEncounterStep();assert.equal(s.presence,0);
+  s.cardPresenceIncreaseReduction=.25;s.presenceIncreaseReduction=.5;s.onEncounterStep();assert.equal(s.presence,1);
+ }finally{s.disposeSurvey();}
+});
+
 test('boss return portal marker appears only after gate activation on its own floor',()=>{
  const s=create();try{
   const p=s.floors[2].generatedMap.bossRoom.bossCell,cell=s.floors[2].cells[p.y][p.x];

@@ -25,7 +25,8 @@ export function attachV2Encounters(s,{onEncounter,random=Math.random,onBlocked=m
   if(s.presenceSuppressedSteps>0){s.presenceSuppressedSteps--;return false;}
   if(s.incenseActive)return false;
   const dark=s.torchFuel<=0&&!s.renderState.torchEffectForced;
-  s.presence=Math.min(100,s.presence+Math.floor(((dark?5:4)+Math.floor(random()*(dark?6:5)))*(1-(s.presenceIncreaseReduction||0))));
+  const reduction=Math.min(1,(s.presenceIncreaseReduction||0)+(s.cardPresenceIncreaseReduction||0));
+  s.presence=Math.min(100,s.presence+Math.floor(((dark?5:4)+Math.floor(random()*(dark?6:5)))*(1-reduction)));
   if(s.presence<100)return false;
   const speciesId=rollV2Species(s.ecology.floors[s.currentFloor].species,random);
   const enemy=getV2CombatEnemy(speciesId,s.level);
