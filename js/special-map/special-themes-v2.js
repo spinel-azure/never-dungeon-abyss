@@ -3,7 +3,6 @@ import {validateSpecialTheme} from '../../data/special-map-themes.js';
 import {resolveSpecialThemeBoss} from '../../data/karte-special-bosses.js';
 import {describeV2MapName,SPECIAL_THEME_LOCATIONS} from '../../data/special-map-names-v2.js';
 export {SPECIAL_THEME_LOCATIONS};
-import {streamV1,chooseIndexV1} from './random-v1.js';
 // Explicit theme blueprint: used by development previews and Format 3 originals.
 // Candidate 3 remains the normal generator. Geometry is copied, never mutated.
 export function generateExplicitSpecialMapV2(input){
@@ -15,8 +14,5 @@ export function generateExplicitSpecialMapV2(input){
 }
 export function describeSpecialThemeMapName(input){
  validateSpecialTheme(input?.themeId,input?.level);
- const base=describeV2MapName({...input,themeOverride:undefined,rulesetVersion:input.ruleset});
- const choices=SPECIAL_THEME_LOCATIONS[input.themeId];
- const location=choices[chooseIndexV1(streamV1(input.ruleset,input.seed,`map-name-special-location:${input.themeId}`),choices.length)];
- return {...base,themeId:input.themeId,location,name:`${base.prefix}${location}の地図 Lv.${input.level}`};
+ return describeV2MapName({...input,themeOverride:input.themeId,rulesetVersion:input.ruleset});
 }

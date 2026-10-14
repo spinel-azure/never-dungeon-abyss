@@ -10,7 +10,7 @@ import {getV2CombatEnemy} from '../data/special-map-enemies.js';
 import {createInitialCharacter} from '../data/classes.js';
 import {grantV2BattleRewards,settleV2ReturnExperience} from '../js/special-map/battle-rewards-v2.js';
 import {prepareNormalBossImage} from '../js/special-map/normal-boss-presentation.js';
-import {generateV2EcologyCandidate2} from '../js/special-map/ecology-v2-candidate-2.js';
+import {generateV2EcologyCandidate2,V2_GOLD_FIXED_ECOLOGY,V2_GOLD_FIXED_SPECIES} from '../js/special-map/ecology-v2-candidate-2.js';
 import {collectStats} from '../combat/collect-stats.js';
 
 function session(level=60,options={}){
@@ -53,7 +53,8 @@ test('gold actual 299 to 300 commits before queued encounter and waits for the c
 test('development maps require opt-in and never change a registered original; frozen Lv1 gold ecology remains valid',()=>{
  setExplorerTestEnabled(false);assert.throws(()=>developmentMapOptions());setExplorerTestEnabled(true);
  assert.throws(()=>developmentMapOptions({level:59}));
- const e=generateV2EcologyCandidate2({ruleset:'special-map-v2',seed:12345,level:1,rarity:'WHITE',themeId:'gold'});assert.equal(e.floors.length,3);
+ const e=generateV2EcologyCandidate2({ruleset:'special-map-v2',seed:12345,level:1,rarity:'WHITE',themeId:'gold'});assert.equal(e.floors.length,3);assert.equal(e.revision,V2_GOLD_FIXED_ECOLOGY);
+ assert.deepEqual(e.floors.map(f=>f.species),Array(3).fill(V2_GOLD_FIXED_SPECIES));
  const s=session();try{assert.ok(s.blueprint.floors.every(f=>f.themeId==='gold'));assert.equal(s.bossDefeated,false);
   for(const f of s.ecology.floors)assert.ok(f.species.every(x=>!x.id.startsWith('karte_boss_')));
  }finally{s.disposeSurvey();setExplorerTestEnabled(false);}

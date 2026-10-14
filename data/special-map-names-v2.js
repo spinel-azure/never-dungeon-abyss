@@ -7,6 +7,9 @@ export const SPECIAL_THEME_LOCATIONS=Object.freeze(Object.fromEntries(Object.ent
  gold:['黄金窟','黄金宮','金殿','金色廟'],rice:['稲穂宮','黄金田','豊穣殿','光穂廟'],
  dusk:['宵闇宮','夜露殿','黄昏廟','月影宮'],tender:['若葉宮','新緑殿','翠芽廟','萌芽宮'],
 }).map(([k,v])=>[k,Object.freeze(v)])));
+export const SPECIAL_THEME_FIXED_NAMES=Object.freeze({
+ gold:'甲虫たちの黄金郷',rice:'黄金の稲穂の森',dusk:'宵闇の夜露の森',tender:'新緑の若葉の森',
+});
 
 // Naming revision 1. Future ecology/boss naming belongs in an explicitly versioned
 // policy; adding those systems must not silently rename existing originals.
@@ -36,6 +39,7 @@ export function describeV2MapName(map){
  const next=purpose=>streamV1(SPECIAL_DUNGEON_V2,map.seed,purpose);
  // Read Candidate 3's map-wide theme without constructing 300 cells on every UI render.
  const themeId=map.themeOverride??selectV2NormalTheme({ruleset:SPECIAL_DUNGEON_V2,seed:map.seed,level:map.level});
+ if(map.themeOverride!=null){const location=SPECIAL_THEME_FIXED_NAMES[themeId];return {name:`${location}Lv.${map.level}`,prefix:'',location,themeId,band:Math.floor((map.level-1)/20)};}
  const band=Math.floor((map.level-1)/20),prefixes=V2_NAME_PREFIXES[band],locations=map.themeOverride!=null?SPECIAL_THEME_LOCATIONS[themeId]:V2_NAME_LOCATIONS[themeId];
  const prefix=prefixes[chooseIndexV1(next('map-name-prefix'),prefixes.length)];
  const location=locations[chooseIndexV1(next(map.themeOverride!=null?`map-name-special-location:${themeId}`:'map-name-location'),locations.length)];

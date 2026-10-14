@@ -9,7 +9,7 @@
       "discovererName": "†ルル"
     },
     "code": "NDA:AwIwOTwAAAMgIDDrMOtalLzOMczbHw",
-    "name": "荒れ果てた金色廟の地図 Lv.60",
+    "name": "甲虫たちの黄金郷Lv.60",
     "bossId": "karte_boss_maikaefer_koenig"
   },
   {
@@ -22,7 +22,7 @@
       "discovererName": "†ルル"
     },
     "code": "NDA:AwIwOVAAAAMgIDDrMOtIX-gHznCGpg",
-    "name": "猛威の金色廟の地図 Lv.80",
+    "name": "甲虫たちの黄金郷Lv.80",
     "bossId": "karte_boss_maikaefer_koenig"
   },
   {
@@ -35,7 +35,7 @@
       "discovererName": "†ルル"
     },
     "code": "NDA:AwIwOWQAAAMgIDDrMOsUrQSFA9AW9g",
-    "name": "滅びの金色廟の地図 Lv.100",
+    "name": "甲虫たちの黄金郷Lv.100",
     "bossId": "karte_boss_maikaefer_koenig"
   },
   {
@@ -48,7 +48,7 @@
       "discovererName": "†ルル"
     },
     "code": "NDA:AwIwOWQAAQMgIDDrMOvJeb24h94aUg",
-    "name": "滅びの光穂廟の地図 Lv.100",
+    "name": "黄金の稲穂の森Lv.100",
     "bossId": "karte_boss_lumina"
   },
   {
@@ -61,7 +61,7 @@
       "discovererName": "†ルル"
     },
     "code": "NDA:AwIwOWQAAgMgIDDrMOsPWBe6V1vKYg",
-    "name": "滅びの夜露殿の地図 Lv.100",
+    "name": "宵闇の夜露の森Lv.100",
     "bossId": "karte_boss_noctia"
   },
   {
@@ -74,7 +74,7 @@
       "discovererName": "†ルル"
     },
     "code": "NDA:AwIwOWQAAwMgIDDrMOsc7kfnblX1MQ",
-    "name": "滅びの翠芽廟の地図 Lv.100",
+    "name": "新緑の若葉の森Lv.100",
     "bossId": "karte_boss_zelena"
   }
 ]

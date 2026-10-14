@@ -83,7 +83,14 @@ for(const total of [0,100,300])test(`V2 detail displays persistent ${total}/300 
  const initial=normalizeSpecialMaps({discovererName:'スピネ',registered:[{rulesetVersion:'special-map-v2',seed:1,level:50,rarity:'SILVER',discovererName:'A',surveyedMasks:masks}]});
  const v=setup(t,'layout-mobile',initial);v.ui.open('maps');v.ui.input('confirm');
  assert.ok(v.host.textContent.includes(total===300?'調査完了':`調査 ${total} / 300`));
+ assert.equal(v.host.textContent.includes('☑'),total===300);
  assert.doesNotMatch(v.host.textContent,/今回の入場中のみ/);
+});
+test('completed map uses a dedicated purple check badge beside an independent favorite star',t=>{
+ const initial=normalizeSpecialMaps({discovererName:'QA',registered:[{rulesetVersion:'special-map-v2',seed:1,level:50,rarity:'SILVER',discovererName:'A',surveyedMasks:Array(3).fill('f'.repeat(25)),favorite:true}]});
+ const v=setup(t,'layout-mobile',initial);v.ui.open('maps');assert.match(v.host.textContent,/☑ ⭐/);
+ const badge=v.all(v.host).find(e=>e.className==='explorer-map-complete');assert.ok(badge);assert.equal(badge.textContent,' ☑');
+ const css=readFileSync(new URL('../css/explorer-preview.css',import.meta.url),'utf8');assert.match(css,/\.explorer-map-complete\{color:#ce70ff/);
 });
 for(const layout of ['layout-mobile','layout-tablet'])test(`${layout}: native taps select twice, explicit actions execute once`,t=>{
   const v=setup(t,layout);v.ui.open('maps');

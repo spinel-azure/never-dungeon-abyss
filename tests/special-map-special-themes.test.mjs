@@ -73,10 +73,11 @@ test('Candidate 2 preserves all normal theme outputs exactly and keeps bosses ou
  assert.throws(()=>generateV2EcologyCandidate2({...base,themeId:'rice',level:79}));
  assert.ok(getV2Candidate2Candidates({...base,themeId:'gold'}).some(s=>s.id==='maikaefer_koenig'));
 });
-test('special names are deterministic with explicit theme and existing prefix; BGM falls back to dungeon',()=>{
+test('special names are fixed by theme; BGM falls back to dungeon',()=>{
+ const expected={gold:'甲虫たちの黄金郷Lv.100',rice:'黄金の稲穂の森Lv.100',dusk:'宵闇の夜露の森Lv.100',tender:'新緑の若葉の森Lv.100'};
  for(const themeId of SPECIAL_MAP_THEMES){const input={...base,themeId},name=describeSpecialThemeMapName(input);
   assert.deepEqual(name,describeSpecialThemeMapName({...input,rarity:'GOLD',discovererName:'別名'}));
-  assert.equal(name.themeId,themeId);assert.equal(getSpecialMapBgmKey(themeId),'dungeon');
+  assert.equal(name.themeId,themeId);assert.equal(name.name,expected[themeId]);assert.equal(getSpecialMapBgmKey(themeId),'dungeon');
   assert.equal(SPECIAL_THEME_DEFINITIONS[themeId].walls.length,2);
  }
 });

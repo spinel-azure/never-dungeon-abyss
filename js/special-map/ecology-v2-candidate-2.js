@@ -3,6 +3,10 @@ import {NORMAL_MAP_THEMES,validateSpecialTheme} from '../../data/special-map-the
 import {streamV1,chooseIndexV1,hash32V1} from './random-v1.js';
 
 export const V2_ECOLOGY_CANDIDATE_2='v2-ecology-candidate-2';
+export const V2_GOLD_FIXED_ECOLOGY='v2-gold-fixed-ecology-1';
+export const V2_GOLD_FIXED_SPECIES=Object.freeze([
+ Object.freeze({id:'silberkaefer',weight:4500}),Object.freeze({id:'maikaefer',weight:4000}),Object.freeze({id:'maikaefer_koenig',weight:1500}),
+]);
 const rows=(ids,affinity=3)=>ids.map(id=>({id,affinity}));
 export const SPECIAL_ECOLOGY_POOLS=Object.freeze(Object.fromEntries(Object.entries({
  gold:[...rows(['abyss_rat','cave_slime','abyss_rabbit','wandering_dead','poison_slime','vampire_bat','viper'],1),
@@ -43,6 +47,11 @@ function distribute(total,raw){
 export function generateV2EcologyCandidate2(input){
  if(NORMAL_MAP_THEMES.includes(input?.themeId))return generateV2Ecology(input);
  validate(input);
+ if(input.themeId==='gold'){
+  const floors=Array.from({length:3},(_,floorIndex)=>({floorIndex,species:V2_GOLD_FIXED_SPECIES.map(row=>({...row})),rareSpeciesRate:10000,ecologyTags:['rare-rich','beetle-rich','low-diversity']}));
+  const e={revision:V2_GOLD_FIXED_ECOLOGY,ruleset:input.ruleset,seed:input.seed,level:input.level,rarity:input.rarity,themeId:input.themeId,dominantSpeciesId:'silberkaefer',floors};
+  return {...e,fingerprint:hash32V1(canonicalV2Ecology(e)).toString(16).padStart(8,'0')};
+ }
  const rng=purpose=>streamV1(input.ruleset,input.seed,JSON.stringify([V2_ECOLOGY_CANDIDATE_2,input.level,input.rarity,input.themeId,purpose]));
  const dominantSpeciesId=pick(rng('dominant'),getV2Candidate2Candidates(input)).id;
  const extreme=chooseIndexV1(rng('dominance'),10000)<200,floors=[];
