@@ -2179,3 +2179,9 @@
 - 耐火ブーツ/防寒ブーツ/キルケの護符/ムーサの冠へ既存lotBagHighlight:orangeを設定。共通の名前色判定を利用し、売却・入手制限・能力値には変更なし。
 - 関連Node27件成功。4品の共通オレンジ判定と詳細説明維持を確認。分離Edge PC1280x900/スマホ相当390x844で本編ステータス描画に護符と耐火ブーツを設定し、短文/オレンジクラス/横はみ出しなしを検証。TEMP/nda-stat-focus-YjLjiw/mobile-status-page1.pngを目視確認。実端末未確認、Node全件/Python検証は未実行。構文/diff検査成功。
 - LAST UPDATE2026-10-15維持、main.jsキャッシュ20261015-1へ更新、CSS番号維持。README変更なし、コミット/pushなし。
+
+### 2026-10-15 Node CIのキャッシュ番号期待値修正
+
+- 着手main/1c5e906、作業ツリークリーン。直前のmain.jsキャッシュ更新に対してdeck-tutorial/guild-quest-notification-ui/michaela-restorationの3テストが旧20261014-2を期待していたため、現行20261015-1へ同期。ゲーム本体や検証条件の削除・失敗無視はなし。
+- node --test tests/*.test.mjs全2086成功/失敗0/skip0。ログTEMP/nda-node-cache-fix.log。diff検査成功。GitHub Actions上の再実行は未確認（ローカルのみ）。前回の関連27件のみの検証ではこの不一致を検出できていなかった。
+- テスト/台帳のみ変更。日付/キャッシュ番号は追加変更なし。コミット/pushなし。
