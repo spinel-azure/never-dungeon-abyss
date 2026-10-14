@@ -24,20 +24,24 @@ export const EQUIPMENT = Object.freeze({
   }),
   kirke_amulet: item('kirke_amulet','キルケの護符','accessoryId',{ordinaryStatusRateMultiplier:.5},{
     description:'魔女キルケが守りの祈りを込めた護符。通常の状態異常を受ける確率を半減する。',
+    statusDescription:'状態異常付与率半減',lotBagHighlight:'orange',
     hiddenStatBonusKeys:Object.freeze(['ordinaryStatusRateMultiplier']),unique:true,sellPrice:0
   }),
   musa_crown: item("musa_crown", "ムーサの冠", "accessoryId", { def: 6, temptationResistance: 1 }, {
     sellPrice: 0,
     description: "魅了完全耐性",
     flavorText: "異界の女神の加護を宿す冠。",
+    lotBagHighlight: "orange",
     hiddenStatBonusKeys: Object.freeze(["temptationResistance"]),
     unique: true
   }),
   fireproof_boots: item("fireproof_boots", "耐火ブーツ", "footId", { def: 3, fireDamageReduction: 0.15 }, {
+    lotBagHighlight: "orange",
     fireFloorDamageImmunity: true,
     hiddenStatBonusKeys: Object.freeze(["fireDamageReduction"])
   }),
   coldproof_boots: item("coldproof_boots", "防寒ブーツ", "footId", { def: 3, iceDamageReduction: 0.15 }, {
+    lotBagHighlight: "orange",
     coldFloorDamageImmunity: true,
     hiddenStatBonusKeys: Object.freeze(["iceDamageReduction"])
   }),

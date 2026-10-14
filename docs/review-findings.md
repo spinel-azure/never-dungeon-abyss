@@ -2173,3 +2173,9 @@
 - 着手main/7b806ae。既存se/README.txt差分と未追跡erledigt画像/音声は保護し未変更。HP/SP/DECK COST行のみ16px、420px以下は13pxへ縮小し、各項目内の折返しを禁止。数値処理/能力値は変更なし。
 - 分離EdgeでPC1280x900・スマホ相当390x844/360x800を検証。表示DOMへHP9999/9999・SP9999/9999・DECK COST99を設定し、フォント読込後の横はみ出しなしと1行収容を確認。既存能力値ページ検証も成功。画像TEMP/nda-stat-focus-6e1kWH/narrow-four-digits.pngを目視。実端末未確認、CSS変更のためNode全件/Pythonは未実行。diff検査成功。
 - LAST UPDATE2026-10-15、game-menu.cssキャッシュ20261015-1。main.js番号は維持。README変更なし（既存se/README.txt差分には触れていない）、コミット/pushなし。
+### 2026-10-15 キルケ護符のステータス説明短縮・一品物の名前色
+
+- 着手main/ab9755a、作業ツリークリーン。キルケの護符にstatusDescription「状態異常付与率半減」を追加し、ステータス装備欄だけ短文を優先。インベントリ用descriptionと状態異常付与率半減の性能は維持。
+- 耐火ブーツ/防寒ブーツ/キルケの護符/ムーサの冠へ既存lotBagHighlight:orangeを設定。共通の名前色判定を利用し、売却・入手制限・能力値には変更なし。
+- 関連Node27件成功。4品の共通オレンジ判定と詳細説明維持を確認。分離Edge PC1280x900/スマホ相当390x844で本編ステータス描画に護符と耐火ブーツを設定し、短文/オレンジクラス/横はみ出しなしを検証。TEMP/nda-stat-focus-YjLjiw/mobile-status-page1.pngを目視確認。実端末未確認、Node全件/Python検証は未実行。構文/diff検査成功。
+- LAST UPDATE2026-10-15維持、main.jsキャッシュ20261015-1へ更新、CSS番号維持。README変更なし、コミット/pushなし。

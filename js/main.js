@@ -2838,7 +2838,8 @@ import {
     const bonuses = [];
     const spacer = item.compactStatusBonuses ? "" : " ";
     if (Number.isFinite(item.attack)) bonuses.push(`ATK${spacer}+${item.attack}`);
-    if (item.description && item.showDescriptionInStatus !== false) bonuses.push(item.description);
+    const description = item.statusDescription ?? item.description;
+    if (description && item.showDescriptionInStatus !== false) bonuses.push(description);
     if (item.fireFloorDamageImmunity) bonuses.push("火炎床無効");
     if (item.coldFloorDamageImmunity) bonuses.push("氷結床無効");
     bonuses.push(...Object.entries(item.statBonuses || {})
