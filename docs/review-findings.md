@@ -2162,3 +2162,9 @@
 - 刻印ゲージの黄色を黄緑(#b8ed4f)に変更、凡例も黄緑:刻印へ統一。上限/能力値/色分け対象は変更なし。
 - Node全2068成功/失敗0。PC1280x900/スマホ相当390x844でLv31双子座成功会話の非魅了/保存非魅了/hidden=true、旧CSS相当でもdisplay:noneかつ空文字、次戦非魅了、戦闘用playerへ魅了状態を設定した時だけ♥表示、解除と戦闘終了で非表示を確認。刻印ゲージの各転生ページと黄緑表示を既存ブラウザQAで確認。画像TEMP/nda-stat-focus-fqQtz0/mobile-status-page1.pngを目視。実端末/ユーザー実セーブは未確認。初回テスト追加時の引用符エラーを修正して再実行成功。
 - ログTEMP/nda-charm-fix-browser.log・nda-charm-fix-node.log・nda-green-browser.log。LAST UPDATE2026-10-13維持、main.js/game-menu.cssキャッシュ20261013-2。README変更なし、コミット/pushなし。
+### 2026-10-14 タブレット縦画面の水平移動ボタン重なり対策
+
+- 着手main/bdec6d5、作業ツリークリーン。タッチONのタブレット縦探索画面（通常奈落/地図迷宮）を上寄せし、上余白8px＋safe-area、要素間隔8pxへ調整。ゲーム幅を動的viewport高さにも制限し、下部の操作域を確保。
+- タブレット縦のL/R-Strafeは固定操作ボタン群より上へ配置（bottom184px＋safe-area）。メイン画面は16:9を維持。町・タイトル・メニューの上寄せ/幅変更には適用しない。横向きレイアウト、移動速度/入力ロジックは変更なし。
+- tests/browser/strafe.mjsでPC1280x900、スマホ相当390x844、タブレット相当820x1180/768x900の移動・タッチ操作・地図迷宮を確認。水平移動列と十字キー/A/Bの矩形非重複、地図迷宮コマンド欄との4px超の間隔を検証。初期案の短画面でコマンド欄との余裕が少なかったため高さ予約を40px増やして再検証成功。画像TEMP/nda-strafe-JQwGKi/tablet-short-map.pngを目視。実iPad/Safari・ブラウザバー開閉の実機挙動は未確認。CSS中心の変更につきNode全件/Pythonは未実行。diff検査成功。
+- LAST UPDATE2026-10-14、game-menu.cssキャッシュ20261014-1。main.js既存20261014-2は維持。ログTEMP/nda-tablet-layout-final.log。README変更なし、コミット/pushなし。

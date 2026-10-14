@@ -190,3 +190,7 @@ body.title-active .strafe-controls,body.menu-open .strafe-controls,body.battle-a
 @media(max-width:420px){.nde-stat-paged{grid-template-columns:16px minmax(0,1fr) 16px;gap:2px}.nde-stat-page-arrow{width:16px;min-height:72px;font-size:14px}.nde-stat-range,.nde-stat-note{font-size:9px}.nde-stat-row output{font-size:12px}}
 
 .nde-stat-help{margin:6px 0 2px;text-align:center;color:#9be6ff;font:10px/1.4 'GameFont',sans-serif}
+/* Reserve separate rows for tablet exploration content and fixed touch controls. */
+body.touch-controls-enabled.layout-tablet.orientation-portrait:not(.menu-open):not(.title-active):is(:not(.town-active),.special-map-active) .shell{align-items:start;padding-top:max(8px,env(safe-area-inset-top));padding-bottom:0}
+body.touch-controls-enabled.layout-tablet.orientation-portrait:not(.menu-open):not(.title-active):is(:not(.town-active),.special-map-active) .game{gap:8px;width:min(97vw,1024px,calc((100dvh - 540px) * 16 / 9))}
+body.touch-controls-enabled.layout-tablet.orientation-portrait .strafe-controls{position:fixed;left:max(18px,env(safe-area-inset-left));right:max(18px,env(safe-area-inset-right));bottom:calc(184px + env(safe-area-inset-bottom));width:auto;margin:0}

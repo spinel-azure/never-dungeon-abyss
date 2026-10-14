@@ -18,7 +18,7 @@ const hook=base+`window.strafeQa={
  mapRead:()=>{const s=getSpecialMapContext().session;return {x:s.playerX,y:s.playerY,dir:s.direction,motion:!!s.motion,torch:s.torchFuel};}
 };`;
 const browser=await chromium.launch({channel:'msedge',headless:true});
-try{for(const [label,width,height] of [['pc',1280,900],['mobile',390,844],['tablet',820,1180]]){
+try{for(const [label,width,height] of [['pc',1280,900],['mobile',390,844],['tablet',820,1180],['tablet-short',768,900]]){
  const p=await browser.newPage({viewport:{width,height},hasTouch:label!=='pc'}),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.addInitScript(()=>navigator.getGamepads=()=>[]);
  const main=await readFile('js/main.js','utf8');await p.route('**/js/main.js?*',r=>r.fulfill({contentType:'text/javascript',body:main.replace('  document.documentElement.dataset.ndaMainReady = "true";',hook+'\n document.documentElement.dataset.ndaMainReady="true";')}));
  const player=(await readFile('js/player.js','utf8')).replace('const encounterTriggered = onExplorationStep({','const encounterTriggered = false && onExplorationStep({');await p.route('**/js/player.js',r=>r.fulfill({contentType:'text/javascript',body:player}));
@@ -36,10 +36,12 @@ try{for(const [label,width,height] of [['pc',1280,900],['mobile',390,844],['tabl
   await p.locator('#strafeLeft').tap();await p.waitForFunction(()=>!strafeQa.read().anim&&document.querySelector('.special-map-runtime')?.dataset.moving!=='true');assert.equal((await p.evaluate(()=>strafeQa.read())).x,3);
   await p.locator('#strafeRight').tap();await p.waitForFunction(()=>!strafeQa.read().anim&&document.querySelector('.special-map-runtime')?.dataset.moving!=='true');assert.equal((await p.evaluate(()=>strafeQa.read())).x,4);
   const box=await p.locator('.strafe-controls').boundingBox();assert.ok(box.x>=0&&box.x+box.width<=width+1);
+  for(const selector of ['.touch-dpad','#buttonA','#buttonB']){const control=await p.locator(selector).boundingBox();assert.ok(box.y+box.height<=control.y-4,`${label}: strafe overlaps ${selector}`);}
   await p.screenshot({path:join(output,label+'.png')});
  }
  await key('z');const saved=await p.evaluate(()=>strafeQa.read());await key('q');assert.deepEqual(await p.evaluate(()=>strafeQa.read()),saved);await key('z');
  await p.evaluate(()=>strafeQa.map());await key('q');assert.equal((await p.evaluate(()=>strafeQa.mapRead())).x,3);
  await p.evaluate(()=>strafeQa.pad('pageRight'));await p.waitForFunction(()=>!strafeQa.read().anim&&document.querySelector('.special-map-runtime')?.dataset.moving!=='true');const m=await p.evaluate(()=>strafeQa.mapRead());assert.equal(m.x,4);assert.equal(m.dir,0);assert.equal(m.torch,98);
+ if(label.startsWith('tablet')){const strafe=await p.locator('.strafe-controls').boundingBox();const message=await p.locator('#message').boundingBox();assert.ok(message.y+message.height<strafe.y);const commands=await p.locator("#dungeonCommands").boundingBox();assert.ok(commands.y+commands.height+4<strafe.y);await p.screenshot({path:join(output,label+'-map.png')});}
  assert.deepEqual(errors,[]);console.log(label+' passed');await p.close();
 }}finally{await browser.close();}console.log(output);
