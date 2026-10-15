@@ -622,6 +622,8 @@ function handleInventory(action) {
     return;
   }
   if (menu.inventoryMode === "equip") { applyEquipmentCandidate(entry); return; }
+  // Key items are read-only here; they have no equipment instance to equip.
+  if (entry.keyItem) return;
   if (entry.item) {
     if (entry.item.category === "engraving" && menu.inventoryPendingUseId !== entry.item.id) {
       const unavailable = getInventoryItemUnavailableReason(entry.item, menu.getCharacter());
