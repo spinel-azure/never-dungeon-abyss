@@ -54,3 +54,10 @@ export function selectTrelirenEntranceImage(character, rng = Math.random) {
   return character?.eventFlags?.[TRELIREN_MET_FLAG] && rng() < 0.2
     ? "images/background/dungeon_01b.avif" : "images/background/dungeon_01.avif";
 }
+
+export function syncAttractingIncenseZone(character,depth,inTown=false){
+ if(!character)return false;
+ const zone=getFloorZone(depth)?.name;
+ if(inTown||!zone||character.attractingIncenseZone!==zone)delete character.attractingIncenseZone;
+ return Boolean(character.attractingIncenseZone);
+}

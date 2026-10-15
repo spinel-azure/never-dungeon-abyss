@@ -29,6 +29,10 @@ export function cureAllNegativeStatuses(statuses = []) {
 }
 
 export function getItemUnavailableReason({ character, itemId, context, enemy, torchFuel = 0, treasureCompassActive = false } = {}) {
+  if (itemId === "attracting_incense") {
+    if (sumCardEffectValues(character?.cards?.deckSlots,"presence_gain_reduction") >= 1) return "presenceDisabledCard";
+    if (character?.attractingIncenseZone) return "alreadyActive";
+  }
   if (itemId === "warding_incense" && character?.incenseZone) return "alreadyActive";
   if (itemId === "wing_gift") {
     if (wingGiftUses(character) >= 4) return "wingGiftLimit";
@@ -120,6 +124,7 @@ export function calculateHealingItemSpReturn({
 export function resolveFieldItemUse({ character, itemId, context = "dungeon", torchFuel = 0, treasureCompassActive = false } = {}) {
   const reason = getItemUnavailableReason({ character, itemId, context, torchFuel, treasureCompassActive });
   if (reason) {
+    if(reason === "presenceDisabledCard") return {accepted:false,reason,message:"気配上昇なしカードセット中のため、引き寄せのお香は使用できません。"};
     const unavailableItem = getItem(itemId);
     const engraving = unavailableItem?.effects?.find(effect => effect.id === ENGRAVING_EFFECT_ID);
     return reason === "statMaximum" && engraving
@@ -176,6 +181,8 @@ export function resolveFieldItemUse({ character, itemId, context = "dungeon", to
       environment.torchFuel = effect.value;
     } else if (effect.id === "wing_gift") {
       applyWingGift(next);
+    } else if (effect.id === "attracting_incense") {
+      environment.attractingIncense = true;
     } else if (effect.id === "warding_incense") {
       environment.wardingIncense = true;
     } else if (effect.id === "reset_presence") {

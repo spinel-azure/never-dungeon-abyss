@@ -30,6 +30,7 @@ export const SE = Object.freeze({
   revival: "fukkatsu-inori1.mp3",
   levelUpJingle: "sentou-syouri2.mp3",
   itemGet: "item-get.mp3",
+  surveyStamp: "erledigt_stamp_pon.wav",
   importantItem: "juuyou-item.mp3",
   costOver: "boo.wav",
   achievementUnlocked: "item-get.mp3",

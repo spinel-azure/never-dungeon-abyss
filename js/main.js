@@ -1,3 +1,4 @@
+import {transactSurvey} from '../data/survey-report.js';
 import {createReincarnationVision, isReincarnationVisionEligible} from './reincarnation-vision.js';
 import {serializeSpecialMapSession,resumeMapOriginal} from './special-map/save-session.js';
 import {getV2CombatEnemy} from '../data/special-map-enemies.js';
@@ -19,7 +20,7 @@ import { getKirkeFinalDialogue } from "../data/endgame-quests.js";
 import {configureSpecialMapHost,getSpecialMapContext,getSpecialMapBgmKey} from './special-map/context.js';
 import {resolveSpecialFieldItem,resolveSpecialFieldSkill,applySpecialFieldEnvironment} from './special-map/field-environment.js';
 import {flushSpecialSurvey,startSpecialAutoWalker} from './special-map/session.js';
-import {prepareTrelirenFloor,normalizeTrelirenRun,syncIncenseZone,TRELIREN_DEFINITION,TRELIREN_MET_FLAG,INCENSE_ID} from '../data/treliren.js';
+import {prepareTrelirenFloor,normalizeTrelirenRun,syncIncenseZone,syncAttractingIncenseZone,TRELIREN_DEFINITION,TRELIREN_MET_FLAG,INCENSE_ID} from '../data/treliren.js';
 import {getFloorZone} from '../data/floor-zone-names.js';
 import {createTrelirenDialogue} from './treliren-dialogue.js';
 import {resetLionBathVisits} from './lion-bath.js';
@@ -127,6 +128,7 @@ import { configureDevice } from "./device.js";
 import {
   configurePresence,
   setIncenseActive,
+  setAttractingIncenseActive,
   getPresence,
   getPresenceIncreaseReduction,
   getPresenceSuppressedSteps,
@@ -1274,6 +1276,8 @@ import {
     onStateChanged: handlePersistentStateChanged
   });
   configureTown({
+    transactSurvey:(action,id)=>transactSurvey({getCharacter:()=>character,setCharacter:c=>{character=c;updateCharacterUi();},save:()=>saveGame()},action,id),
+    playSurveyJingle:key=>playSeSequence(key),
     showMapRewardAcquisition:async({signal,starter=false}={})=>{
       if(signal?.aborted)return;
       showNamedItemGetEffect([starter?'はじまりの白地図':'未鑑定地図'],{amounts:starter?[3]:[],imageSources:['images/item-compendium/unidentified_map.avif'],acquisitionMessage:starter?'「はじまりの白地図」（3枚）を\n受け取った！':true,important:true});
@@ -1804,6 +1808,7 @@ import {
     character.trelirenRun = normalizeTrelirenRun(character.trelirenRun);
     if (savedLocation === "town") {character.trelirenRun = normalizeTrelirenRun();character.wingGiftUses=0;character=normalizeCharacter(character);}
     setIncenseActive(syncIncenseZone(character,currentDepth,savedLocation === "town"));
+    setAttractingIncenseActive(syncAttractingIncenseZone(character,currentDepth,savedLocation === "town"));
     if (savedLocation === "town") clearPresenceIncreaseReduction();
     worldLocation = savedLocation;
     if (restoredLongMarchReward || restoredFinalLongMarchReward.claimed) {
@@ -3880,7 +3885,8 @@ import {
     if (Number.isFinite(result.environment.torchFuel)) {
       state.torchFuel = result.environment.torchFuel;
     }
-    if (result.environment.wardingIncense) {character.incenseZone=getFloorZone(currentDepth)?.name;setIncenseActive(true);}
+    if (result.environment.wardingIncense) {character.incenseZone=getFloorZone(currentDepth)?.name;delete character.attractingIncenseZone;}
+    if (result.environment.attractingIncense) {character.attractingIncenseZone=getFloorZone(currentDepth)?.name;delete character.incenseZone;}
     if (result.environment.resetPresence) resetPresence();
     if (result.environment.suppressPresenceSteps) {
       suppressPresence(result.environment.suppressPresenceSteps);
@@ -3910,6 +3916,8 @@ import {
       playSe("cancel");
       return failed;
     }
+    setIncenseActive(syncIncenseZone(character,currentDepth,isTownOpen()));
+    setAttractingIncenseActive(syncAttractingIncenseZone(character,currentDepth,isTownOpen()));
     say(result.message);
     playSe(result.healing > 0 ? "heal" : "confirm");
     return result;
@@ -4954,8 +4962,8 @@ import {
 
   function resetTrelirenAdventure() {
     trelirenDialogue.cleanup();
-    if(character){character.trelirenRun=normalizeTrelirenRun();delete character.incenseZone;character.wingGiftUses=0;character=normalizeCharacter(character);}
-    setIncenseActive(false);
+    if(character){character.trelirenRun=normalizeTrelirenRun();delete character.incenseZone;delete character.attractingIncenseZone;character.wingGiftUses=0;character=normalizeCharacter(character);}
+    setIncenseActive(false);setAttractingIncenseActive(false);
     clearTimeout(itemGetTimer);itemGetEffect.hidden=true;
   }
   function returnToTown({ ending = false } = {}) {
@@ -5390,6 +5398,7 @@ import {
 
   function getDungeonProgress() {
     setIncenseActive(syncIncenseZone(character,currentDepth));
+    setAttractingIncenseActive(syncAttractingIncenseZone(character,currentDepth));
     const trelirenDefinitions = prepareTrelirenFloor(character,currentDepth);
     const floorBoss = getFloorBossByDepth(currentDepth);
     const room = floorBoss?.room || {};
@@ -5728,8 +5737,10 @@ import {
     const context=getSpecialMapContext();if(!context)return {accepted:false};
     const session=context.session;
     const result=kind==='item'?resolveSpecialFieldItem({character,itemId:id,session}):resolveSpecialFieldSkill({character,skillId:id,session});
-    if(!result.accepted){say(result.message||'今は使用する必要がない。');return result;}
+    if(!result.accepted){say(result.message||'今は使用する必要がない。');if(result.reason==='presenceDisabledCard')playSe('costOver');return result;}
     if(result.environment?.emergencyEscape&&!flushSpecialSurvey(session)){say(session.surveyError);return {accepted:false,reason:'saveFailed'};}
+    const previousEffects=Object.fromEntries(['presence','presenceSuppressedSteps','presenceIncreaseReduction','incenseActive','attractingIncenseActive','autoPath'].map(key=>[key,session[key]]));
+    const previousTorch=session.renderState.torchFuel;
     if(!applySpecialFieldEnvironment(session,result.environment))return {accepted:false,reason:'noPath'};
     if(result.environment?.emergencyEscape){
       const previous=character;character=result.character;
@@ -5737,7 +5748,7 @@ import {
       return result;
     }
     const previous=character;character=result.character;updateCharacterUi();
-    if(!saveGame()){character=previous;updateCharacterUi();updateHud();const failed={accepted:false,reason:'saveFailed',message:'保存に失敗したため、アイテムは使用しませんでした。'};say(failed.message);playSe('cancel');return failed;}
+    if(!saveGame()){character=previous;Object.assign(session,previousEffects);session.renderState.torchFuel=previousTorch;updateCharacterUi();updateHud();const failed={accepted:false,reason:'saveFailed',message:'保存に失敗したため、アイテムは使用しませんでした。'};say(failed.message);playSe('cancel');return failed;}
     updateHud();
     say(result.message||'スキルを使用した。');playSe(result.healing>0?'heal':'confirm');
     if(result.environment?.startAutoWalker)closeCampMenu('special');

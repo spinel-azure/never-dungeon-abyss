@@ -3,7 +3,7 @@
 const copy = value => value == null ? null : structuredClone(value);
 const fields = ['expeditionId','torchFuel','battleExperience','bossKeyFound','bossDoorUnlocked',
   'bossDefeated','bossPreviewDismissed','presence','presenceSuppressedSteps',
-  'presenceIncreaseReduction','incenseActive','crystalFloorStepCount','encounterSequence','cellPrompt',
+  'presenceIncreaseReduction','incenseActive','attractingIncenseActive','crystalFloorStepCount','encounterSequence','cellPrompt',
   'deferredSurveyNotice','bossFloorJinglePending'];
 const facing = angle => ((Math.round((angle + Math.PI / 2) / (Math.PI / 2)) % 4) + 4) % 4;
 export function serializeSpecialMapSession(s) {

@@ -1,8 +1,7 @@
 import {isV2Map,mapContentId,normalizeSpecialMaps} from './special-maps.js';
 import {surveyTotalV2} from './special-map-survey-v2.js';
 
-// Read-only preparation for the future town report UI. No claim or reward writes.
-// Claims must eventually be saved atomically with the reward, by content ID.
+// Read-only eligibility; survey-report.js saves claims and points atomically.
 export function getMapSurveyReports(input){
  const state=normalizeSpecialMaps(input),reports=new Map();
  for(const map of state.registered){

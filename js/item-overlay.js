@@ -163,7 +163,7 @@ async function activate() {
   const item = overlay.items[overlay.selectedIndex];
   const reason = unavailableReason(item);
   if (reason) {
-    overlay.playSe(reason === "deadlyPoisonNotCurable" ? "costOver" : "cancel");
+    overlay.playSe(["deadlyPoisonNotCurable","presenceDisabledCard"].includes(reason) ? "costOver" : "cancel");
     showReason(reason);
     return;
   }
@@ -204,7 +204,7 @@ function render() {
     button.type = "button";
     button.className = "skill-overlay-item";
     const reason = unavailableReason(item);
-    button.disabled = Boolean(reason && reason !== "deadlyPoisonNotCurable");
+    button.disabled = Boolean(reason && !["deadlyPoisonNotCurable","presenceDisabledCard"].includes(reason));
     button.classList.toggle("is-unavailable", Boolean(reason));
     button.setAttribute("aria-disabled", reason ? "true" : "false");
     const count = item.keyItemId ? 1 : getItemCount(overlay.character.inventory, item.id);
@@ -252,6 +252,8 @@ function unavailableReason(item) {
 function showReason(reason) {
   overlay.messageEl.classList.remove("is-skill-description");
   overlay.messageEl.textContent = ({
+    presenceDisabledCard: "気配上昇なしカードセット中のため、引き寄せのお香は使用できません。",
+    alreadyActive: "お香の効果はまだ続いている。",
     fullHp: "HPは満タンだ。",
     wingGiftLimit: "ウィングギフトは1回の冒険で4回までだ。",
     fullSp: "SPは満タンだ。",

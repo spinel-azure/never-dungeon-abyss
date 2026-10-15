@@ -12,7 +12,7 @@ import {mapOriginalId,mapContentId} from '../data/special-maps.js';
 // Minimal DOM for exercising the real controller's handlers and the document
 // touch guard together. A cancelled touch sequence must not synthesize click.
 class Element {
-  constructor(tag='div'){this.tag=tag;this.style={};this.children=[];this.dataset={};this.attrs={};this.hidden=false;this.text='';this.classes=new Set();this.classList={toggle:(v,on)=>on?this.classes.add(v):this.classes.delete(v)};}
+  constructor(tag='div'){this.tag=tag;this.style={};this.children=[];this.dataset={};this.attrs={};this.hidden=false;this.text='';this.classes=new Set();this.classList={add:v=>this.classes.add(v),remove:v=>this.classes.delete(v),toggle:(v,on)=>on?this.classes.add(v):this.classes.delete(v)};}
   set textContent(v){this.text=v;this.children=[];}
   get textContent(){return this.text+this.children.map(c=>c.textContent).join('');}
   setAttribute(k,v){this.attrs[k]=v;}
@@ -254,11 +254,11 @@ test('F4 no receipt animation on full/save failure; closing aborts pending prese
  let signal;const v=setup(t,'layout-mobile',pendingRewardBook(),{showMapRewardAcquisition:o=>{signal=o.signal;return Promise.resolve();}});v.ui.open('tent');v.touch(v.commands.children[4]);await Promise.resolve();v.ui.close();assert.equal(signal.aborted,true);
 });
 
-test('tent has fixed six commands and skips disabled report and reward actions',t=>{
+test('tent has fixed six commands and enables report and skips unavailable reward',t=>{
  const v=setup(t,'layout-mobile',fixture());v.ui.open('tent');
  assert.deepEqual(v.commands.children.map(b=>b.textContent),['地図鑑定','地図登録','地図整理','調査報告','討伐報酬受領','戻る']);
- assert.equal(v.commands.children[3].disabled,true);assert.equal(v.commands.children[4].disabled,true);
- v.ui.input('down');v.ui.input('confirm');assert.equal(v.exits(),1);
+ assert.equal(v.commands.children[3].disabled,false);assert.equal(v.commands.children[4].disabled,true);
+ v.ui.input('cancel');assert.equal(v.exits(),1);
 });
 
 test('formal introduction resumes explanation after receipt without regranting and directs first appraisal',async t=>{
@@ -287,7 +287,7 @@ test('tent keyboard and gamepad actions play one cursor, confirm or cancel cue',
  v.ui.input('right');assert.deepEqual(cues.splice(0),['cursorMove']);
  v.ui.input('left');v.ui.input('confirm');assert.deepEqual(cues.splice(0),['cursorMove','confirm']);
  v.ui.input('cancel');assert.deepEqual(cues.splice(0),['cancel']);
- v.ui.input('down');v.ui.input('confirm');assert.deepEqual(cues.splice(0),['cursorMove','cancel']);assert.equal(v.exits(),1);
+ v.ui.input('cancel');assert.deepEqual(cues.splice(0),['cancel']);assert.equal(v.exits(),1);
 });
 test('map touch selection, activation, paging and back have distinct single cues',t=>{
  const cues=[],v=setup(t,'layout-mobile',fixture(),{playSe:key=>cues.push(key)});v.ui.open('maps');
@@ -300,7 +300,7 @@ test('map touch selection, activation, paging and back have distinct single cues
 });
 test('form action routed through its button does not double-play and disabled tent actions stay silent',t=>{
  const cues=[],v=setup(t,'layout-mobile',fixture(),{playSe:key=>cues.push(key)});v.ui.open('tent');
- v.commands.children[3].onclick();v.commands.children[4].onclick();assert.deepEqual(cues,[]);
+ v.commands.children[4].onclick();assert.deepEqual(cues,[]);
  v.ui.input('right');v.ui.input('confirm');cues.length=0;
  v.ui.input('right');v.ui.input('confirm');assert.deepEqual(cues.splice(0),['cursorMove','confirm']);
  v.ui.input('cancel');assert.deepEqual(cues.splice(0),['cancel']);
@@ -366,4 +366,24 @@ test('formal welcome precedes receipt and signature, and reload retains the exac
  const field=v.all(v.host).find(e=>e.tag==='input');field.value='銀虫';v.touch(v.find('署名を登録（A）'));
  assert.equal(v.state().discovererName,'銀虫');assert.ok(v.state().unidentified.every(m=>m.discovererName==='銀虫'));
  assert.deepEqual(v.state().unidentified.map(m=>[m.discoveryId,m.seed,m.level]),ids);assert.match(v.message.textContent,/地図探索β/);
+});
+
+import {surveyOperation,transactSurvey} from '../data/survey-report.js';
+import {createInitialCharacter} from '../data/classes.js';
+test('report intro resumes after interruption, old jingle cannot advance the reopened screen',async t=>{
+ let c=createInitialCharacter({name:'QA',job:'thief'});c.specialMaps=fixture();let finishJingle,grants=0;
+ const v=setup(t,'layout-mobile',fixture(),{getCharacter:()=>c,transactSurvey:(action,id)=>{if(action==='book')grants++;return transactSurvey({getCharacter:()=>c,setCharacter:n=>c=n,save:()=>true},action,id);},playJingle:()=>new Promise(r=>finishJingle=r)});
+ v.message.clientHeight=0;v.ui.open('tent');v.commands.children[3].onclick();v.ui.input('confirm');
+ assert.equal(grants,1);assert.ok(c.keyItems.owned.stamp_book);assert.equal(c.specialMaps.surveyIntroductionComplete,false);
+ v.ui.close();v.ui.open('tent');v.commands.children[3].onclick();assert.match(v.message.textContent,/スタンプ1つ/);
+ finishJingle();await new Promise(r=>setImmediate(r));assert.match(v.message.textContent,/スタンプ1つ/);assert.equal(grants,1);
+ v.ui.input('confirm');v.ui.input('confirm');assert.equal(c.specialMaps.surveyIntroductionComplete,true);
+ assert.deepEqual(v.commands.children.slice(0,3).map(b=>b.textContent),['報告','交換','戻る']);
+});
+test('report intro failed grant is retriable without playing the acquisition jingle',t=>{
+ let c=createInitialCharacter({name:'QA',job:'thief'}),fail=true,cues=0;c.specialMaps=fixture();
+ const v=setup(t,'layout-mobile',fixture(),{getCharacter:()=>c,transactSurvey:(action,id)=>transactSurvey({getCharacter:()=>c,setCharacter:n=>c=n,save:()=>!fail},action,id),playJingle:async()=>{cues++;}});
+ v.message.clientHeight=0;v.ui.open('tent');v.commands.children[3].onclick();v.ui.input('confirm');
+ assert.equal(c.keyItems.owned.stamp_book,undefined);assert.equal(cues,0);assert.match(v.message.textContent,/保存に失敗/);
+ v.ui.close();
 });

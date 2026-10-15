@@ -1325,6 +1325,7 @@ function activateEntranceCommand(command) {
     if (!explorerPreview) explorerPreview = createExplorerPreviewUI({
       host: town.background.parentElement, commands: town.commandRoot, background: town.background,
       getMaps: () => town.getCharacter()?.specialMaps,
+      getCharacter:()=>town.getCharacter(),transactSurvey:(action,id)=>town.transactSurvey(action,id),playJingle:key=>town.playSurveyJingle(key),
       canReceiveTestStarter: isExplorerTestEnabled,
       useBetaIntroduction:()=>isMapTentUnlocked(town.getCharacter()),
       finishTyping:()=>{if(!townTypewriter.active)return false;completeTownTypewriter();return true;},

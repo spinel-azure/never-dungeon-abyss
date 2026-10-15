@@ -1,6 +1,6 @@
 export const INVENTORY_SORT_MODES = Object.freeze(['category', 'obtained', 'id']);
 export const INVENTORY_SORT_LABELS = Object.freeze({category:'カテゴリ順', obtained:'入手順', id:'ID順（番号）'});
-const exploration = ['warding_incense','exorcism_talisman','guiding_torch','auto_walker','emergency_escape'];
+const exploration = ['attracting_incense','warding_incense','exorcism_talisman','guiding_torch','auto_walker','emergency_escape'];
 function categoryRank(item) {
   const effects = new Set((item.effects || []).map(effect => effect.id));
   if (effects.has('restore_hp_full')) return 0;

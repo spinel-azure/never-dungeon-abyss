@@ -55,7 +55,7 @@ export function normalizeSpecialMaps(input) {
   const bossClears=normalizeMapContentHistory(input?.bossClears);
   const surveyRewardClaims=normalizeMapContentHistory(input?.surveyRewardClaims);
   for(const map of registered)if(bossClears[mapContentId(map)])map.cleared=true;
-  return {dataVersion:1,discovererName:signature.ok?signature.value:'',unidentified,registered,...(input?.starterMapsGranted===true?{starterMapsGranted:true}:{}),...(input?.starterMapsTestGranted===true?{starterMapsTestGranted:true}:{}),
+  return {stampPoints:Math.max(0,Math.min(Number.MAX_SAFE_INTEGER,Math.floor(Number(input?.stampPoints)||0))),surveyIntroductionComplete:input?.surveyIntroductionComplete===true,surveyShoesExchanged:input?.surveyShoesExchanged===true,dataVersion:1,discovererName:signature.ok?signature.value:'',unidentified,registered,...(input?.starterMapsGranted===true?{starterMapsGranted:true}:{}),...(input?.starterMapsTestGranted===true?{starterMapsTestGranted:true}:{}),
     ...(starterOffer.length===3?{starterOffer}:{}),...(formalStarterIds.length?{formalStarterIds}:{}),
     ...(input?.betaExplanationComplete===true?{betaExplanationComplete:true}:{}),...(input?.betaExplorationUnlocked===true?{betaExplorationUnlocked:true}:{}),
     ...(bossReward?{bossReward}:{}),...(Object.keys(bossClears).length?{bossClears}:{}),...(Object.keys(surveyRewardClaims).length?{surveyRewardClaims}:{})};

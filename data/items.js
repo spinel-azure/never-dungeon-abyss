@@ -1,4 +1,5 @@
 export const ITEMS = Object.freeze([
+ Object.freeze({number:66,id:'attracting_incense',name:'引き寄せのお香',category:'exploration',source:'surveyExchange',buyPrice:0,sellPrice:0,repurchasable:false,usableIn:Object.freeze(['dungeon']),effects:Object.freeze([{id:'attracting_incense',value:2}]),description:'気配上昇量が2倍になる。奈落は区域移動まで、地図迷宮は帰還まで持続。',maxOwned:99,iconId:'exorcism-talisman',version:1}),
   Object.freeze({
     number: 65, id: "beetle_king_horn", name: "甲虫王の角", category: "material",
     buyPrice: 0, sellPrice: 10000, source: "drop", usableIn: Object.freeze([]),
