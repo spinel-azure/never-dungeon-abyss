@@ -75,7 +75,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
   const make=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
   const mapText=(tag,text,map,cls)=>{const e=make(tag,text,cls);e.style.color=mapNameColor(map.rarity);return e;};
   const mapSurveyComplete=map=>isV2Map(map)?surveyTotalV2(map.surveyedMasks)===300:surveyCount(map.surveyedMask)===100;
-  const appendMapBadges=(element,map)=>{if(mapSurveyComplete(map))element.append(make('span',' ☑','explorer-map-complete'));if(map.favorite)element.append(make('span',' ⭐','explorer-map-favorite'));return element;};
+  const appendMapBadges=(element,map)=>{if(mapSurveyComplete(map))element.append(make('span',' ☑','explorer-map-complete'));if(maps().surveyRewardClaims?.[mapContentId(map)]){const badge=make('span',' 🐾','explorer-map-reported');badge.title='調査報告済み';badge.setAttribute('aria-label','調査報告済み');element.append(badge);}if(map.favorite)element.append(make('span',' ⭐','explorer-map-favorite'));return element;};
   const invoke=(action,sound=action===back||action===exit?'cancel':'confirm')=>{playSe(sound);action();};
   const button=(label,action,selected=false,sound)=>{const b=make('button');b.type='button';if(label)b.append(make('span',label,'explorer-button-label'));b.classList.toggle('is-selected',selected);b.onclick=()=>{if(acquisitionController||b.disabled)return;if(finishTyping())return;invoke(action,typeof sound==='function'?sound():sound??(label==='戻る'?'cancel':undefined));};return b;};
   const error=text=>{message.textContent=text;};

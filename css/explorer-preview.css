@@ -91,3 +91,5 @@ body .explorer-preview textarea.is-selected{outline:2px solid #aef6ff}
 
 .survey-heading{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:8px}.survey-heading>h2{grid-column:2}.survey-heading>span{grid-column:3;justify-self:end;font-size:16px;white-space:nowrap}
 @media(max-width:680px){.survey-heading>span{font-size:12px}}
+
+.explorer-map-reported{white-space:nowrap;color:#aef6ff;font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif}
