@@ -1,0 +1,5339 @@
+{
+  "label": "candidate",
+  "defense90LaboratoryOverride": false,
+  "coefficient": "7",
+  "trials": 10,
+  "characters": [
+    {
+      "job": "warrior",
+      "variant": "base",
+      "hp": 6009,
+      "sp": 2555,
+      "stats": {
+        "str": 90,
+        "int": 90,
+        "agi": 90,
+        "dex": 90,
+        "luc": 90,
+        "def": 56,
+        "hitBonus": 0,
+        "healingMiracleMultiplier": 1,
+        "evasionBonus": 0,
+        "criticalBonus": 0,
+        "speedBonus": 0,
+        "defensePenetration": 0,
+        "statusPowerBonus": 0,
+        "statusResistanceBonus": 0,
+        "ordinaryStatusRateMultiplier": 1,
+        "darkSpellDamageMultiplier": 1,
+        "attackSpellDamageBonus": 0,
+        "passiveInstantDeathRateBonus": 0.04,
+        "poisonResistance": 0,
+        "bleedingResistance": 0,
+        "actionSkipResistance": 0.1,
+        "deadlyPoisonResistance": 0,
+        "temptationResistance": 0,
+        "magicDamageReduction": 0.15000000000000002,
+        "fireDamageReduction": 0,
+        "iceDamageReduction": 0,
+        "nonElementalMagicDamageReduction": 0,
+        "elementalMagicDamageReduction": 0,
+        "fireSpellDamageBonus": 0,
+        "iceSpellDamageBonus": 0,
+        "fireDamageTakenBonus": 0,
+        "iceDamageTakenBonus": 0,
+        "instantDeathResistance": 0,
+        "surpriseResistance": 0
+      },
+      "engravings": {
+        "str": 58,
+        "int": 88,
+        "agi": 85,
+        "dex": 78,
+        "luc": 83
+      },
+      "equipment": {
+        "weaponId": "katzbalger",
+        "rightArmId": "katzbalger",
+        "leftArmId": "amethyst_aegis",
+        "headId": "amethyst_helmet",
+        "bodyId": "amethyst_plate",
+        "footId": "amethyst_greaves",
+        "accessoryId": "masters_necklace",
+        "rightArmEnhancement": 0
+      },
+      "deck": [
+        "zodiac_sagittarius",
+        "zodiac_libra",
+        "zodiac_leo",
+        "zodiac_capricorn",
+        "zodiac_taurus",
+        "zodiac_pisces"
+      ],
+      "inventory": {
+        "strong_healing_potion_large": 30
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "scorpio",
+      "hp": 4006,
+      "sp": 2555,
+      "stats": {
+        "str": 90,
+        "int": 90,
+        "agi": 90,
+        "dex": 90,
+        "luc": 90,
+        "def": 56,
+        "hitBonus": 0,
+        "healingMiracleMultiplier": 1,
+        "evasionBonus": 0,
+        "criticalBonus": 0,
+        "speedBonus": 0,
+        "defensePenetration": 0,
+        "statusPowerBonus": 0,
+        "statusResistanceBonus": 0,
+        "ordinaryStatusRateMultiplier": 1,
+        "darkSpellDamageMultiplier": 1,
+        "attackSpellDamageBonus": 0,
+        "passiveInstantDeathRateBonus": 0.04,
+        "poisonResistance": 0,
+        "bleedingResistance": 0,
+        "actionSkipResistance": 0.1,
+        "deadlyPoisonResistance": 0,
+        "temptationResistance": 0,
+        "magicDamageReduction": 0.15000000000000002,
+        "fireDamageReduction": 0,
+        "iceDamageReduction": 0,
+        "nonElementalMagicDamageReduction": 0,
+        "elementalMagicDamageReduction": 0,
+        "fireSpellDamageBonus": 0,
+        "iceSpellDamageBonus": 0,
+        "fireDamageTakenBonus": 0,
+        "iceDamageTakenBonus": 0,
+        "instantDeathResistance": 0,
+        "surpriseResistance": 0
+      },
+      "engravings": {
+        "str": 58,
+        "int": 88,
+        "agi": 85,
+        "dex": 78,
+        "luc": 83
+      },
+      "equipment": {
+        "weaponId": "katzbalger",
+        "rightArmId": "katzbalger",
+        "leftArmId": "amethyst_aegis",
+        "headId": "amethyst_helmet",
+        "bodyId": "amethyst_plate",
+        "footId": "amethyst_greaves",
+        "accessoryId": "masters_necklace",
+        "rightArmEnhancement": 0
+      },
+      "deck": [
+        "zodiac_sagittarius",
+        "zodiac_libra",
+        "zodiac_leo",
+        "zodiac_capricorn",
+        "zodiac_scorpio",
+        "zodiac_pisces"
+      ],
+      "inventory": {
+        "strong_healing_potion_large": 30
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "cancer",
+      "hp": 5008,
+      "sp": 2555,
+      "stats": {
+        "str": 90,
+        "int": 90,
+        "agi": 90,
+        "dex": 90,
+        "luc": 90,
+        "def": 56,
+        "hitBonus": 0,
+        "healingMiracleMultiplier": 1,
+        "evasionBonus": 0,
+        "criticalBonus": 0,
+        "speedBonus": 0,
+        "defensePenetration": 0,
+        "statusPowerBonus": 0,
+        "statusResistanceBonus": 0,
+        "ordinaryStatusRateMultiplier": 1,
+        "darkSpellDamageMultiplier": 1,
+        "attackSpellDamageBonus": 0,
+        "passiveInstantDeathRateBonus": 0.04,
+        "poisonResistance": 0,
+        "bleedingResistance": 0,
+        "actionSkipResistance": 0.1,
+        "deadlyPoisonResistance": 0,
+        "temptationResistance": 0,
+        "magicDamageReduction": 0.15000000000000002,
+        "fireDamageReduction": 0,
+        "iceDamageReduction": 0,
+        "nonElementalMagicDamageReduction": 0,
+        "elementalMagicDamageReduction": 0,
+        "fireSpellDamageBonus": 0,
+        "iceSpellDamageBonus": 0,
+        "fireDamageTakenBonus": 0,
+        "iceDamageTakenBonus": 0,
+        "instantDeathResistance": 0,
+        "surpriseResistance": 0
+      },
+      "engravings": {
+        "str": 58,
+        "int": 88,
+        "agi": 85,
+        "dex": 78,
+        "luc": 83
+      },
+      "equipment": {
+        "weaponId": "katzbalger",
+        "rightArmId": "katzbalger",
+        "leftArmId": "amethyst_aegis",
+        "headId": "amethyst_helmet",
+        "bodyId": "amethyst_plate",
+        "footId": "amethyst_greaves",
+        "accessoryId": "masters_necklace",
+        "rightArmEnhancement": 0
+      },
+      "deck": [
+        "zodiac_sagittarius",
+        "zodiac_libra",
+        "zodiac_leo",
+        "zodiac_capricorn",
+        "zodiac_cancer",
+        "zodiac_pisces"
+      ],
+      "inventory": {
+        "strong_healing_potion_large": 30
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "no-libra",
+      "hp": 7512,
+      "sp": 3194,
+      "stats": {
+        "str": 90,
+        "int": 90,
+        "agi": 90,
+        "dex": 90,
+        "luc": 90,
+        "def": 56,
+        "hitBonus": 0,
+        "healingMiracleMultiplier": 1,
+        "evasionBonus": 0,
+        "criticalBonus": 0,
+        "speedBonus": 0,
+        "defensePenetration": 0,
+        "statusPowerBonus": 0,
+        "statusResistanceBonus": 0,
+        "ordinaryStatusRateMultiplier": 1,
+        "darkSpellDamageMultiplier": 1,
+        "attackSpellDamageBonus": 0,
+        "passiveInstantDeathRateBonus": 0.04,
+        "poisonResistance": 0,
+        "bleedingResistance": 0,
+        "actionSkipResistance": 0.1,
+        "deadlyPoisonResistance": 0,
+        "temptationResistance": 0,
+        "magicDamageReduction": 0.15000000000000002,
+        "fireDamageReduction": 0,
+        "iceDamageReduction": 0,
+        "nonElementalMagicDamageReduction": 0,
+        "elementalMagicDamageReduction": 0,
+        "fireSpellDamageBonus": 0,
+        "iceSpellDamageBonus": 0,
+        "fireDamageTakenBonus": 0,
+        "iceDamageTakenBonus": 0,
+        "instantDeathResistance": 0,
+        "surpriseResistance": 0
+      },
+      "engravings": {
+        "str": 58,
+        "int": 88,
+        "agi": 85,
+        "dex": 78,
+        "luc": 83
+      },
+      "equipment": {
+        "weaponId": "katzbalger",
+        "rightArmId": "katzbalger",
+        "leftArmId": "amethyst_aegis",
+        "headId": "amethyst_helmet",
+        "bodyId": "amethyst_plate",
+        "footId": "amethyst_greaves",
+        "accessoryId": "masters_necklace",
+        "rightArmEnhancement": 0
+      },
+      "deck": [
+        "zodiac_sagittarius",
+        "zodiac_virgo",
+        "zodiac_leo",
+        "zodiac_capricorn",
+        "zodiac_taurus",
+        "zodiac_pisces"
+      ],
+      "inventory": {
+        "strong_healing_potion_large": 30
+      }
+    },
+    {
+      "job": "thief",
+      "variant": "base",
+      "hp": 4988,
+      "sp": 2940,
+      "stats": {
+        "str": 90,
+        "int": 90,
+        "agi": 90,
+        "dex": 90,
+        "luc": 90,
+        "def": 48,
+        "hitBonus": 0,
+        "healingMiracleMultiplier": 1,
+        "evasionBonus": 0,
+        "criticalBonus": 0,
+        "speedBonus": 0,
+        "defensePenetration": 0,
+        "statusPowerBonus": 0,
+        "statusResistanceBonus": 0,
+        "ordinaryStatusRateMultiplier": 1,
+        "darkSpellDamageMultiplier": 1,
+        "attackSpellDamageBonus": 0,
+        "passiveInstantDeathRateBonus": 0.04,
+        "poisonResistance": 0,
+        "bleedingResistance": 0,
+        "actionSkipResistance": 0.08,
+        "deadlyPoisonResistance": 0,
+        "temptationResistance": 0,
+        "magicDamageReduction": 0.08,
+        "fireDamageReduction": 0,
+        "iceDamageReduction": 0,
+        "nonElementalMagicDamageReduction": 0,
+        "elementalMagicDamageReduction": 0,
+        "fireSpellDamageBonus": 0,
+        "iceSpellDamageBonus": 0,
+        "fireDamageTakenBonus": 0,
+        "iceDamageTakenBonus": 0,
+        "instantDeathResistance": 0,
+        "surpriseResistance": 0.05
+      },
+      "engravings": {
+        "str": 86,
+        "int": 87,
+        "agi": 74,
+        "dex": 54,
+        "luc": 84
+      },
+      "equipment": {
+        "weaponId": "resonant_katar",
+        "rightArmId": "resonant_katar",
+        "leftArmId": "phantom_crystal_buckler",
+        "headId": "phantom_crystal_hood",
+        "bodyId": "phantom_crystal_armor",
+        "footId": "phantom_crystal_boots",
+        "accessoryId": "masters_necklace",
+        "rightArmEnhancement": 3
+      },
+      "deck": [
+        "zodiac_sagittarius",
+        "zodiac_libra",
+        "zodiac_leo",
+        "zodiac_capricorn",
+        "zodiac_taurus",
+        "zodiac_pisces"
+      ],
+      "inventory": {
+        "strong_healing_potion_large": 30
+      }
+    },
+    {
+      "job": "mage",
+      "variant": "base",
+      "hp": 3833,
+      "sp": 3961,
+      "stats": {
+        "str": 90,
+        "int": 90,
+        "agi": 90,
+        "dex": 90,
+        "luc": 90,
+        "def": 36,
+        "hitBonus": 0,
+        "healingMiracleMultiplier": 1,
+        "evasionBonus": 0,
+        "criticalBonus": 0,
+        "speedBonus": 0,
+        "defensePenetration": 0,
+        "statusPowerBonus": 0,
+        "statusResistanceBonus": 0,
+        "ordinaryStatusRateMultiplier": 1,
+        "darkSpellDamageMultiplier": 1,
+        "attackSpellDamageBonus": 0.2,
+        "passiveInstantDeathRateBonus": 0,
+        "poisonResistance": 0,
+        "bleedingResistance": 0,
+        "actionSkipResistance": 0,
+        "deadlyPoisonResistance": 0,
+        "temptationResistance": 0,
+        "magicDamageReduction": 0.1,
+        "fireDamageReduction": 0,
+        "iceDamageReduction": 0,
+        "nonElementalMagicDamageReduction": 0,
+        "elementalMagicDamageReduction": 0,
+        "fireSpellDamageBonus": 0,
+        "iceSpellDamageBonus": 0,
+        "fireDamageTakenBonus": 0,
+        "iceDamageTakenBonus": 0,
+        "instantDeathResistance": 0,
+        "surpriseResistance": 0
+      },
+      "engravings": {
+        "str": 88,
+        "int": 56,
+        "agi": 76,
+        "dex": 85,
+        "luc": 86
+      },
+      "equipment": {
+        "weaponId": "resonance_staff",
+        "rightArmId": "resonance_staff",
+        "leftArmId": null,
+        "headId": "astral_crystal_hat",
+        "bodyId": "astral_crystal_robe",
+        "footId": "astral_crystal_shoes",
+        "accessoryId": "mana_amplifier",
+        "rightArmEnhancement": 3
+      },
+      "deck": [
+        "zodiac_sagittarius",
+        "zodiac_libra",
+        "zodiac_leo",
+        "zodiac_capricorn",
+        "zodiac_taurus",
+        "zodiac_pisces"
+      ],
+      "inventory": {
+        "strong_healing_potion_large": 30
+      }
+    },
+    {
+      "job": "priest",
+      "variant": "base",
+      "hp": 4410,
+      "sp": 3349,
+      "stats": {
+        "str": 90,
+        "int": 90,
+        "agi": 90,
+        "dex": 90,
+        "luc": 90,
+        "def": 48,
+        "hitBonus": 0,
+        "healingMiracleMultiplier": 1.4,
+        "evasionBonus": 0,
+        "criticalBonus": 0,
+        "speedBonus": 0,
+        "defensePenetration": 0,
+        "statusPowerBonus": 0,
+        "statusResistanceBonus": 0,
+        "ordinaryStatusRateMultiplier": 1,
+        "darkSpellDamageMultiplier": 1,
+        "attackSpellDamageBonus": 0,
+        "passiveInstantDeathRateBonus": 0,
+        "poisonResistance": 0,
+        "bleedingResistance": 0,
+        "actionSkipResistance": 0,
+        "deadlyPoisonResistance": 0,
+        "temptationResistance": 0,
+        "magicDamageReduction": 0.08,
+        "fireDamageReduction": 0,
+        "iceDamageReduction": 0,
+        "nonElementalMagicDamageReduction": 0,
+        "elementalMagicDamageReduction": 0,
+        "fireSpellDamageBonus": 0,
+        "iceSpellDamageBonus": 0,
+        "fireDamageTakenBonus": 0,
+        "iceDamageTakenBonus": 0,
+        "instantDeathResistance": 0,
+        "surpriseResistance": 0
+      },
+      "engravings": {
+        "str": 85,
+        "int": 84,
+        "agi": 77,
+        "dex": 86,
+        "luc": 59
+      },
+      "equipment": {
+        "weaponId": "amethyst_flail",
+        "rightArmId": "amethyst_flail",
+        "leftArmId": "white_crystal_shield",
+        "headId": "white_crystal_mitre",
+        "bodyId": "white_crystal_vestment",
+        "footId": "white_crystal_shoes",
+        "accessoryId": "grain_choker",
+        "rightArmEnhancement": 3
+      },
+      "deck": [
+        "zodiac_sagittarius",
+        "zodiac_libra",
+        "zodiac_leo",
+        "zodiac_capricorn",
+        "zodiac_taurus",
+        "zodiac_pisces"
+      ],
+      "inventory": {
+        "strong_healing_potion_large": 30
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "base",
+      "withNpcs": true,
+      "hp": 6009,
+      "sp": 2555,
+      "stats": {
+        "str": 90,
+        "int": 90,
+        "agi": 90,
+        "dex": 90,
+        "luc": 90,
+        "def": 56,
+        "hitBonus": 0,
+        "healingMiracleMultiplier": 1,
+        "evasionBonus": 0,
+        "criticalBonus": 0,
+        "speedBonus": 0,
+        "defensePenetration": 0,
+        "statusPowerBonus": 0,
+        "statusResistanceBonus": 0,
+        "ordinaryStatusRateMultiplier": 1,
+        "darkSpellDamageMultiplier": 1,
+        "attackSpellDamageBonus": 0,
+        "passiveInstantDeathRateBonus": 0.04,
+        "poisonResistance": 0,
+        "bleedingResistance": 0,
+        "actionSkipResistance": 0.1,
+        "deadlyPoisonResistance": 0,
+        "temptationResistance": 0,
+        "magicDamageReduction": 0.15000000000000002,
+        "fireDamageReduction": 0,
+        "iceDamageReduction": 0,
+        "nonElementalMagicDamageReduction": 0,
+        "elementalMagicDamageReduction": 0,
+        "fireSpellDamageBonus": 0,
+        "iceSpellDamageBonus": 0,
+        "fireDamageTakenBonus": 0,
+        "iceDamageTakenBonus": 0,
+        "instantDeathResistance": 0,
+        "surpriseResistance": 0
+      },
+      "engravings": {
+        "str": 58,
+        "int": 88,
+        "agi": 85,
+        "dex": 78,
+        "luc": 83
+      },
+      "equipment": {
+        "weaponId": "katzbalger",
+        "rightArmId": "katzbalger",
+        "leftArmId": "amethyst_aegis",
+        "headId": "amethyst_helmet",
+        "bodyId": "amethyst_plate",
+        "footId": "amethyst_greaves",
+        "accessoryId": "masters_necklace",
+        "rightArmEnhancement": 0
+      },
+      "deck": [
+        "zodiac_sagittarius",
+        "zodiac_libra",
+        "zodiac_leo",
+        "zodiac_capricorn",
+        "zodiac_taurus",
+        "zodiac_pisces"
+      ],
+      "inventory": {
+        "strong_healing_potion_large": 30
+      }
+    }
+  ],
+  "rows": [
+    {
+      "job": "warrior",
+      "variant": "base",
+      "theme": "rice",
+      "aware": true,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 131.5,
+      "summary": {
+        "mean": {
+          "turns": 131.5,
+          "attacks": 92.9,
+          "heals": 29.9,
+          "guards": 8.7,
+          "items": 29.9,
+          "bossHealing": 8000,
+          "barrierAbsorbed": 0,
+          "revival": 0,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 42513.2,
+          "playerHp": 2792.3,
+          "bossHp": 0
+        },
+        "maxSingleHit": 911,
+        "maxTurns": 139,
+        "deathCauses": {},
+        "suppliesExhausted": 9,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 129
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 139
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 127
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 129
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 134
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 130
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 139
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 126
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 131
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 131
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "base",
+      "theme": "dusk",
+      "aware": true,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 123.5,
+      "summary": {
+        "mean": {
+          "turns": 123.5,
+          "attacks": 67.1,
+          "heals": 26,
+          "guards": 30.4,
+          "items": 26,
+          "bossHealing": 0,
+          "barrierAbsorbed": 540,
+          "revival": 0,
+          "eclipses": 30.4,
+          "eclipseGuards": 30.4,
+          "interrupts": 0,
+          "leoSelfDamage": 31112.2,
+          "playerHp": 4513,
+          "bossHp": 0
+        },
+        "maxSingleHit": 753,
+        "maxTurns": 135,
+        "deathCauses": {},
+        "suppliesExhausted": 0,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 113
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 135
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 135
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 110
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 126
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 125
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 121
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 126
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 122
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 122
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "base",
+      "theme": "tender",
+      "aware": true,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 160.7,
+      "summary": {
+        "mean": {
+          "turns": 160.7,
+          "attacks": 110.8,
+          "heals": 28.2,
+          "guards": 21.7,
+          "items": 28.2,
+          "bossHealing": 27704,
+          "barrierAbsorbed": 750,
+          "revival": 63000,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0.2,
+          "leoSelfDamage": 51031.4,
+          "playerHp": 4316,
+          "bossHp": 0
+        },
+        "maxSingleHit": 475,
+        "maxTurns": 170,
+        "deathCauses": {},
+        "suppliesExhausted": 0,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 20,
+          "successes": 2,
+          "damages": [
+            4140,
+            4416,
+            4485,
+            4545,
+            4555,
+            4555,
+            4701,
+            4704,
+            5201,
+            5258,
+            5332,
+            5458,
+            5671,
+            5718,
+            5792,
+            5806,
+            5837,
+            5849,
+            6157,
+            7272
+          ]
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 163
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 170
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 164
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 164
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 158
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 148
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 157
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 167
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 157
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 159
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "base",
+      "theme": "rice",
+      "aware": false,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 121,
+      "summary": {
+        "mean": {
+          "turns": 121,
+          "attacks": 91.5,
+          "heals": 29.5,
+          "guards": 0,
+          "items": 29.5,
+          "bossHealing": 8000,
+          "barrierAbsorbed": 0,
+          "revival": 0,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 42144.4,
+          "playerHp": 3721.7,
+          "bossHp": 0
+        },
+        "maxSingleHit": 911,
+        "maxTurns": 125,
+        "deathCauses": {},
+        "suppliesExhausted": 5,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 121
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 125
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 119
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 120
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 121
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 120
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 120
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 121
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 121
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 122
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "base",
+      "theme": "dusk",
+      "aware": false,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 91.7,
+      "summary": {
+        "mean": {
+          "turns": 91.7,
+          "attacks": 68.4,
+          "heals": 23.3,
+          "guards": 0,
+          "items": 23.3,
+          "bossHealing": 0,
+          "barrierAbsorbed": 540,
+          "revival": 0,
+          "eclipses": 22.1,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 31621.3,
+          "playerHp": 4104.4,
+          "bossHp": 0
+        },
+        "maxSingleHit": 1221,
+        "maxTurns": 100,
+        "deathCauses": {},
+        "suppliesExhausted": 0,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 91
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 95
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 92
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 88
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 87
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 91
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 88
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 95
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 100
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 90
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "base",
+      "theme": "tender",
+      "aware": false,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 141.8,
+      "summary": {
+        "mean": {
+          "turns": 141.8,
+          "attacks": 112.6,
+          "heals": 29.2,
+          "guards": 0,
+          "items": 29.2,
+          "bossHealing": 26040,
+          "barrierAbsorbed": 750,
+          "revival": 63000,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0.4,
+          "leoSelfDamage": 52087,
+          "playerHp": 4081,
+          "bossHp": 0
+        },
+        "maxSingleHit": 895,
+        "maxTurns": 148,
+        "deathCauses": {},
+        "suppliesExhausted": 6,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 20,
+          "successes": 4,
+          "damages": [
+            2122,
+            2274,
+            2345,
+            3501,
+            4156,
+            4380,
+            4488,
+            4575,
+            4988,
+            5255,
+            5346,
+            5360,
+            5400,
+            5468,
+            5515,
+            5516,
+            6421,
+            6513,
+            6573,
+            6864
+          ]
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 145
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 136
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 148
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 140
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 147
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 140
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 137
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 148
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 145
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 132
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "scorpio",
+      "theme": "rice",
+      "aware": true,
+      "trials": 10,
+      "wins": 6,
+      "defeats": 4,
+      "timeouts": 0,
+      "meanTurns": 118.4,
+      "summary": {
+        "mean": {
+          "turns": 118.4,
+          "attacks": 81.2,
+          "heals": 30,
+          "guards": 7.2,
+          "items": 30,
+          "bossHealing": 8000,
+          "barrierAbsorbed": 0,
+          "revival": 0,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 23240.1,
+          "playerHp": 558.5,
+          "bossHp": 1059.2
+        },
+        "maxSingleHit": 872,
+        "maxTurns": 123,
+        "deathCauses": {
+          "黄金雷閃": 2,
+          "稲妻の双刃": 2
+        },
+        "suppliesExhausted": 10,
+        "piscesUsed": 10,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 121
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 120
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 123
+          },
+          {
+            "seed": 4,
+            "outcome": "defeat",
+            "turns": 118
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 122
+          },
+          {
+            "seed": 6,
+            "outcome": "defeat",
+            "turns": 107
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 120
+          },
+          {
+            "seed": 8,
+            "outcome": "defeat",
+            "turns": 118
+          },
+          {
+            "seed": 9,
+            "outcome": "defeat",
+            "turns": 115
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 120
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "scorpio",
+      "theme": "dusk",
+      "aware": true,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 122.1,
+      "summary": {
+        "mean": {
+          "turns": 122.1,
+          "attacks": 62.3,
+          "heals": 29.8,
+          "guards": 30,
+          "items": 29.8,
+          "bossHealing": 0,
+          "barrierAbsorbed": 540,
+          "revival": 0,
+          "eclipses": 30,
+          "eclipseGuards": 30,
+          "interrupts": 0,
+          "leoSelfDamage": 19369.2,
+          "playerHp": 1674,
+          "bossHp": 0
+        },
+        "maxSingleHit": 753,
+        "maxTurns": 127,
+        "deathCauses": {},
+        "suppliesExhausted": 8,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 126
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 119
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 122
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 127
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 115
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 122
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 126
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 121
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 122
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 121
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "scorpio",
+      "theme": "tender",
+      "aware": true,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 158.5,
+      "summary": {
+        "mean": {
+          "turns": 158.5,
+          "attacks": 106.7,
+          "heals": 30,
+          "guards": 21.8,
+          "items": 30,
+          "bossHealing": 25816.7,
+          "barrierAbsorbed": 750,
+          "revival": 63000,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0.4,
+          "leoSelfDamage": 31963.7,
+          "playerHp": 873.4,
+          "bossHp": 0
+        },
+        "maxSingleHit": 494,
+        "maxTurns": 167,
+        "deathCauses": {},
+        "suppliesExhausted": 10,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 20,
+          "successes": 4,
+          "damages": [
+            4123,
+            4214,
+            4285,
+            4288,
+            4366,
+            4417,
+            4515,
+            5036,
+            5204,
+            5320,
+            5387,
+            5526,
+            5558,
+            5572,
+            5614,
+            5795,
+            6745,
+            7070,
+            7137,
+            7249
+          ]
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 159
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 167
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 158
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 158
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 157
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 162
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 161
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 155
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 153
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 155
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "scorpio",
+      "theme": "rice",
+      "aware": false,
+      "trials": 10,
+      "wins": 8,
+      "defeats": 2,
+      "timeouts": 0,
+      "meanTurns": 110.6,
+      "summary": {
+        "mean": {
+          "turns": 110.6,
+          "attacks": 80.6,
+          "heals": 30,
+          "guards": 0,
+          "items": 30,
+          "bossHealing": 8000,
+          "barrierAbsorbed": 0,
+          "revival": 0,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 23279.8,
+          "playerHp": 535.5,
+          "bossHp": 3099.3
+        },
+        "maxSingleHit": 1043,
+        "maxTurns": 114,
+        "deathCauses": {
+          "稲妻の双刃": 1,
+          "通常攻撃": 1
+        },
+        "suppliesExhausted": 10,
+        "piscesUsed": 10,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 114
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 113
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 109
+          },
+          {
+            "seed": 4,
+            "outcome": "defeat",
+            "turns": 105
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 111
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 109
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 114
+          },
+          {
+            "seed": 8,
+            "outcome": "defeat",
+            "turns": 110
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 112
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 109
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "scorpio",
+      "theme": "dusk",
+      "aware": false,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 95.5,
+      "summary": {
+        "mean": {
+          "turns": 95.5,
+          "attacks": 65.8,
+          "heals": 29.7,
+          "guards": 0,
+          "items": 29.7,
+          "bossHealing": 0,
+          "barrierAbsorbed": 540,
+          "revival": 0,
+          "eclipses": 23.2,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 19638.1,
+          "playerHp": 1641.8,
+          "bossHp": 0
+        },
+        "maxSingleHit": 1234,
+        "maxTurns": 98,
+        "deathCauses": {},
+        "suppliesExhausted": 8,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 94
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 95
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 97
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 96
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 95
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 91
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 96
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 98
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 98
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 95
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "scorpio",
+      "theme": "tender",
+      "aware": false,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 135.3,
+      "summary": {
+        "mean": {
+          "turns": 135.3,
+          "attacks": 105.3,
+          "heals": 30,
+          "guards": 0,
+          "items": 30,
+          "bossHealing": 25816.7,
+          "barrierAbsorbed": 750,
+          "revival": 63000,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0.4,
+          "leoSelfDamage": 31409.1,
+          "playerHp": 664.6,
+          "bossHp": 0
+        },
+        "maxSingleHit": 975,
+        "maxTurns": 139,
+        "deathCauses": {},
+        "suppliesExhausted": 10,
+        "piscesUsed": 2,
+        "healInterruptions": {
+          "attempts": 20,
+          "successes": 4,
+          "damages": [
+            2224,
+            2517,
+            3004,
+            3278,
+            4173,
+            4201,
+            4342,
+            4464,
+            4721,
+            5447,
+            5458,
+            5576,
+            5590,
+            5610,
+            5620,
+            5644,
+            6164,
+            6281,
+            6282,
+            6596
+          ]
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 135
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 135
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 134
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 135
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 137
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 135
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 137
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 132
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 139
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 134
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "cancer",
+      "theme": "rice",
+      "aware": true,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 121,
+      "summary": {
+        "mean": {
+          "turns": 121,
+          "attacks": 83.3,
+          "heals": 29.9,
+          "guards": 7.8,
+          "items": 29.9,
+          "bossHealing": 8000,
+          "barrierAbsorbed": 0,
+          "revival": 0,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 31739.2,
+          "playerHp": 2641.1,
+          "bossHp": 0
+        },
+        "maxSingleHit": 824,
+        "maxTurns": 127,
+        "deathCauses": {},
+        "suppliesExhausted": 9,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 124
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 120
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 119
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 122
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 123
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 116
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 122
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 123
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 114
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 127
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "cancer",
+      "theme": "dusk",
+      "aware": true,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 112.7,
+      "summary": {
+        "mean": {
+          "turns": 112.7,
+          "attacks": 59,
+          "heals": 25.9,
+          "guards": 27.8,
+          "items": 25.9,
+          "bossHealing": 0,
+          "barrierAbsorbed": 540,
+          "revival": 0,
+          "eclipses": 27.8,
+          "eclipseGuards": 27.8,
+          "interrupts": 0,
+          "leoSelfDamage": 22443.1,
+          "playerHp": 3447.9,
+          "bossHp": 0
+        },
+        "maxSingleHit": 753,
+        "maxTurns": 118,
+        "deathCauses": {},
+        "suppliesExhausted": 0,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 114
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 118
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 116
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 110
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 107
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 109
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 113
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 109
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 118
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 113
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "cancer",
+      "theme": "tender",
+      "aware": true,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 152.6,
+      "summary": {
+        "mean": {
+          "turns": 152.6,
+          "attacks": 104.3,
+          "heals": 28.4,
+          "guards": 19.9,
+          "items": 28.4,
+          "bossHealing": 24203.3,
+          "barrierAbsorbed": 750,
+          "revival": 63000,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0.6,
+          "leoSelfDamage": 40209.4,
+          "playerHp": 3530.8,
+          "bossHp": 0
+        },
+        "maxSingleHit": 475,
+        "maxTurns": 157,
+        "deathCauses": {},
+        "suppliesExhausted": 1,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 20,
+          "successes": 6,
+          "damages": [
+            4109,
+            4312,
+            4373,
+            4393,
+            4396,
+            4531,
+            4559,
+            5029,
+            5434,
+            5458,
+            5491,
+            5644,
+            5707,
+            5849,
+            6195,
+            6255,
+            6513,
+            6614,
+            6854,
+            7816
+          ]
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 152
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 148
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 153
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 152
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 146
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 157
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 157
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 155
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 152
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 154
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "cancer",
+      "theme": "rice",
+      "aware": false,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 111.9,
+      "summary": {
+        "mean": {
+          "turns": 111.9,
+          "attacks": 82.2,
+          "heals": 29.7,
+          "guards": 0,
+          "items": 29.7,
+          "bossHealing": 8000,
+          "barrierAbsorbed": 0,
+          "revival": 0,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 31273.5,
+          "playerHp": 2246.3,
+          "bossHp": 0
+        },
+        "maxSingleHit": 1038,
+        "maxTurns": 115,
+        "deathCauses": {},
+        "suppliesExhausted": 8,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 114
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 113
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 113
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 112
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 113
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 111
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 109
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 115
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 110
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 109
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "cancer",
+      "theme": "dusk",
+      "aware": false,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 82.3,
+      "summary": {
+        "mean": {
+          "turns": 82.3,
+          "attacks": 58.5,
+          "heals": 23.8,
+          "guards": 0,
+          "items": 23.8,
+          "bossHealing": 0,
+          "barrierAbsorbed": 540,
+          "revival": 0,
+          "eclipses": 19.9,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 22809.3,
+          "playerHp": 3651.3,
+          "bossHp": 0
+        },
+        "maxSingleHit": 1241,
+        "maxTurns": 92,
+        "deathCauses": {},
+        "suppliesExhausted": 0,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 83
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 92
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 85
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 87
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 80
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 80
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 79
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 79
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 78
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 80
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "cancer",
+      "theme": "tender",
+      "aware": false,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 135.7,
+      "summary": {
+        "mean": {
+          "turns": 135.7,
+          "attacks": 106.1,
+          "heals": 29.6,
+          "guards": 0,
+          "items": 29.6,
+          "bossHealing": 28403.3,
+          "barrierAbsorbed": 750,
+          "revival": 63000,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0.1,
+          "leoSelfDamage": 41008.4,
+          "playerHp": 3266.2,
+          "bossHp": 0
+        },
+        "maxSingleHit": 901,
+        "maxTurns": 140,
+        "deathCauses": {},
+        "suppliesExhausted": 6,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 20,
+          "successes": 1,
+          "damages": [
+            2126,
+            2129,
+            2153,
+            2244,
+            2264,
+            2288,
+            2382,
+            3521,
+            4096,
+            4393,
+            4575,
+            4704,
+            5170,
+            5258,
+            5346,
+            5454,
+            5461,
+            5562,
+            5776,
+            6644
+          ]
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 138
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 140
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 137
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 136
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 133
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 130
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 135
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 136
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 139
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 133
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "no-libra",
+      "theme": "rice",
+      "aware": true,
+      "trials": 10,
+      "wins": 0,
+      "defeats": 10,
+      "timeouts": 0,
+      "meanTurns": 136.1,
+      "summary": {
+        "mean": {
+          "turns": 136.1,
+          "attacks": 97.6,
+          "heals": 30,
+          "guards": 8.5,
+          "items": 30,
+          "bossHealing": 8000,
+          "barrierAbsorbed": 0,
+          "revival": 0,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 51959.7,
+          "playerHp": 0,
+          "bossHp": 16770.4
+        },
+        "maxSingleHit": 1302,
+        "maxTurns": 145,
+        "deathCauses": {
+          "天穹雷霆": 1,
+          "通常攻撃": 2,
+          "黄金雷閃": 3,
+          "稲妻の双刃": 4
+        },
+        "suppliesExhausted": 10,
+        "piscesUsed": 10,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "defeat",
+            "turns": 140
+          },
+          {
+            "seed": 2,
+            "outcome": "defeat",
+            "turns": 143
+          },
+          {
+            "seed": 3,
+            "outcome": "defeat",
+            "turns": 140
+          },
+          {
+            "seed": 4,
+            "outcome": "defeat",
+            "turns": 125
+          },
+          {
+            "seed": 5,
+            "outcome": "defeat",
+            "turns": 137
+          },
+          {
+            "seed": 6,
+            "outcome": "defeat",
+            "turns": 135
+          },
+          {
+            "seed": 7,
+            "outcome": "defeat",
+            "turns": 145
+          },
+          {
+            "seed": 8,
+            "outcome": "defeat",
+            "turns": 131
+          },
+          {
+            "seed": 9,
+            "outcome": "defeat",
+            "turns": 133
+          },
+          {
+            "seed": 10,
+            "outcome": "defeat",
+            "turns": 132
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "no-libra",
+      "theme": "dusk",
+      "aware": true,
+      "trials": 10,
+      "wins": 7,
+      "defeats": 3,
+      "timeouts": 0,
+      "meanTurns": 143,
+      "summary": {
+        "mean": {
+          "turns": 143,
+          "attacks": 77.7,
+          "heals": 30,
+          "guards": 35.3,
+          "items": 30,
+          "bossHealing": 0,
+          "barrierAbsorbed": 540,
+          "revival": 0,
+          "eclipses": 35.3,
+          "eclipseGuards": 35.3,
+          "interrupts": 0,
+          "leoSelfDamage": 41436,
+          "playerHp": 667,
+          "bossHp": 1113.2
+        },
+        "maxSingleHit": 1023,
+        "maxTurns": 147,
+        "deathCauses": {
+          "月蝕": 1,
+          "宵闇": 1,
+          "ノクティス": 1
+        },
+        "suppliesExhausted": 10,
+        "piscesUsed": 10,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "defeat",
+            "turns": 140
+          },
+          {
+            "seed": 2,
+            "outcome": "defeat",
+            "turns": 147
+          },
+          {
+            "seed": 3,
+            "outcome": "defeat",
+            "turns": 146
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 141
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 142
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 142
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 142
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 143
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 145
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 142
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "no-libra",
+      "theme": "tender",
+      "aware": true,
+      "trials": 10,
+      "wins": 8,
+      "defeats": 2,
+      "timeouts": 0,
+      "meanTurns": 184.7,
+      "summary": {
+        "mean": {
+          "turns": 184.7,
+          "attacks": 128.8,
+          "heals": 30,
+          "guards": 25.9,
+          "items": 30,
+          "bossHealing": 29200.4,
+          "barrierAbsorbed": 750,
+          "revival": 63000,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 68491.4,
+          "playerHp": 801.1,
+          "bossHp": 68.6
+        },
+        "maxSingleHit": 679,
+        "maxTurns": 195,
+        "deathCauses": {
+          "大樹の審判": 1,
+          "シルワンエメラ": 1
+        },
+        "suppliesExhausted": 10,
+        "piscesUsed": 10,
+        "healInterruptions": {
+          "attempts": 20,
+          "successes": 0,
+          "damages": [
+            3184,
+            3184,
+            3223,
+            3319,
+            3354,
+            3520,
+            3845,
+            3985,
+            4050,
+            4089,
+            4180,
+            4197,
+            4201,
+            4370,
+            4393,
+            4455,
+            4773,
+            4985,
+            5097,
+            5468
+          ]
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 182
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 186
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 182
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 195
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 189
+          },
+          {
+            "seed": 6,
+            "outcome": "defeat",
+            "turns": 189
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 174
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 188
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 182
+          },
+          {
+            "seed": 10,
+            "outcome": "defeat",
+            "turns": 180
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "no-libra",
+      "theme": "rice",
+      "aware": false,
+      "trials": 10,
+      "wins": 3,
+      "defeats": 7,
+      "timeouts": 0,
+      "meanTurns": 129.3,
+      "summary": {
+        "mean": {
+          "turns": 129.3,
+          "attacks": 99.3,
+          "heals": 30,
+          "guards": 0,
+          "items": 30,
+          "bossHealing": 8000,
+          "barrierAbsorbed": 0,
+          "revival": 0,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 53114.8,
+          "playerHp": 67.7,
+          "bossHp": 11172.1
+        },
+        "maxSingleHit": 1302,
+        "maxTurns": 135,
+        "deathCauses": {
+          "天穹雷霆": 2,
+          "通常攻撃": 4,
+          "黄金雷閃": 1
+        },
+        "suppliesExhausted": 10,
+        "piscesUsed": 10,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "defeat",
+            "turns": 131
+          },
+          {
+            "seed": 2,
+            "outcome": "defeat",
+            "turns": 127
+          },
+          {
+            "seed": 3,
+            "outcome": "defeat",
+            "turns": 128
+          },
+          {
+            "seed": 4,
+            "outcome": "defeat",
+            "turns": 122
+          },
+          {
+            "seed": 5,
+            "outcome": "defeat",
+            "turns": 126
+          },
+          {
+            "seed": 6,
+            "outcome": "defeat",
+            "turns": 130
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 135
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 133
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 132
+          },
+          {
+            "seed": 10,
+            "outcome": "defeat",
+            "turns": 129
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "no-libra",
+      "theme": "dusk",
+      "aware": false,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 111.5,
+      "summary": {
+        "mean": {
+          "turns": 111.5,
+          "attacks": 81.5,
+          "heals": 30,
+          "guards": 0,
+          "items": 30,
+          "bossHealing": 0,
+          "barrierAbsorbed": 540,
+          "revival": 0,
+          "eclipses": 27.1,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 44966.1,
+          "playerHp": 1622.7,
+          "bossHp": 0
+        },
+        "maxSingleHit": 1744,
+        "maxTurns": 116,
+        "deathCauses": {},
+        "suppliesExhausted": 10,
+        "piscesUsed": 6,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 112
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 116
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 111
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 113
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 110
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 107
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 114
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 108
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 116
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 108
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "no-libra",
+      "theme": "tender",
+      "aware": false,
+      "trials": 10,
+      "wins": 8,
+      "defeats": 2,
+      "timeouts": 0,
+      "meanTurns": 156.7,
+      "summary": {
+        "mean": {
+          "turns": 156.7,
+          "attacks": 126.7,
+          "heals": 30,
+          "guards": 0,
+          "items": 30,
+          "bossHealing": 29340.9,
+          "barrierAbsorbed": 750,
+          "revival": 63000,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 67236.6,
+          "playerHp": 616.5,
+          "bossHp": 798.2
+        },
+        "maxSingleHit": 1278,
+        "maxTurns": 161,
+        "deathCauses": {
+          "大樹の審判": 1,
+          "シルワンエメラ": 1
+        },
+        "suppliesExhausted": 10,
+        "piscesUsed": 10,
+        "healInterruptions": {
+          "attempts": 20,
+          "successes": 0,
+          "damages": [
+            1565,
+            1713,
+            1799,
+            1812,
+            2483,
+            2496,
+            2662,
+            2714,
+            3202,
+            3452,
+            3467,
+            3506,
+            3931,
+            3952,
+            4148,
+            4240,
+            4393,
+            5488,
+            5874,
+            5899
+          ]
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 155
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 157
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 155
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 155
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 158
+          },
+          {
+            "seed": 6,
+            "outcome": "defeat",
+            "turns": 156
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 155
+          },
+          {
+            "seed": 8,
+            "outcome": "defeat",
+            "turns": 160
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 161
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 155
+          }
+        ]
+      }
+    },
+    {
+      "job": "thief",
+      "variant": "base",
+      "theme": "rice",
+      "aware": true,
+      "trials": 10,
+      "wins": 9,
+      "defeats": 1,
+      "timeouts": 0,
+      "meanTurns": 125.1,
+      "summary": {
+        "mean": {
+          "turns": 125.1,
+          "attacks": 87.4,
+          "heals": 30,
+          "guards": 7.7,
+          "items": 30,
+          "bossHealing": 8000,
+          "barrierAbsorbed": 0,
+          "revival": 0,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 31751.4,
+          "playerHp": 994.7,
+          "bossHp": 1608.6
+        },
+        "maxSingleHit": 1051,
+        "maxTurns": 137,
+        "deathCauses": {
+          "黄金雷閃": 1
+        },
+        "suppliesExhausted": 10,
+        "piscesUsed": 7,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 129
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 137
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 122
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 123
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 131
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 127
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 123
+          },
+          {
+            "seed": 8,
+            "outcome": "defeat",
+            "turns": 117
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 123
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 119
+          }
+        ]
+      }
+    },
+    {
+      "job": "thief",
+      "variant": "base",
+      "theme": "dusk",
+      "aware": true,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 121.6,
+      "summary": {
+        "mean": {
+          "turns": 121.6,
+          "attacks": 63.5,
+          "heals": 28.3,
+          "guards": 29.8,
+          "items": 28.3,
+          "bossHealing": 0,
+          "barrierAbsorbed": 540,
+          "revival": 0,
+          "eclipses": 29.8,
+          "eclipseGuards": 29.8,
+          "interrupts": 0,
+          "leoSelfDamage": 24093,
+          "playerHp": 3674.9,
+          "bossHp": 0
+        },
+        "maxSingleHit": 820,
+        "maxTurns": 127,
+        "deathCauses": {},
+        "suppliesExhausted": 1,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 122
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 125
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 123
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 119
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 119
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 123
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 117
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 122
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 127
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 119
+          }
+        ]
+      }
+    },
+    {
+      "job": "thief",
+      "variant": "base",
+      "theme": "tender",
+      "aware": true,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 156.2,
+      "summary": {
+        "mean": {
+          "turns": 156.2,
+          "attacks": 105.6,
+          "heals": 29.4,
+          "guards": 21.2,
+          "items": 29.4,
+          "bossHealing": 22680,
+          "barrierAbsorbed": 750,
+          "revival": 63000,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0.8,
+          "leoSelfDamage": 40396.6,
+          "playerHp": 3115.8,
+          "bossHp": 0
+        },
+        "maxSingleHit": 534,
+        "maxTurns": 164,
+        "deathCauses": {},
+        "suppliesExhausted": 5,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 20,
+          "successes": 8,
+          "damages": [
+            4821,
+            4893,
+            5035,
+            5109,
+            5285,
+            5294,
+            5322,
+            5457,
+            5602,
+            5608,
+            5785,
+            5805,
+            6037,
+            6115,
+            6147,
+            6186,
+            6214,
+            6261,
+            6281,
+            6512
+          ]
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 154
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 149
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 150
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 158
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 161
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 158
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 161
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 157
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 164
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 150
+          }
+        ]
+      }
+    },
+    {
+      "job": "thief",
+      "variant": "base",
+      "theme": "rice",
+      "aware": false,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 117.4,
+      "summary": {
+        "mean": {
+          "turns": 117.4,
+          "attacks": 87.4,
+          "heals": 30,
+          "guards": 0,
+          "items": 30,
+          "bossHealing": 8000,
+          "barrierAbsorbed": 0,
+          "revival": 0,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 31638.9,
+          "playerHp": 1317.9,
+          "bossHp": 0
+        },
+        "maxSingleHit": 1161,
+        "maxTurns": 119,
+        "deathCauses": {},
+        "suppliesExhausted": 10,
+        "piscesUsed": 10,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 118
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 118
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 116
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 118
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 117
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 116
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 117
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 119
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 118
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 117
+          }
+        ]
+      }
+    },
+    {
+      "job": "thief",
+      "variant": "base",
+      "theme": "dusk",
+      "aware": false,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 90.1,
+      "summary": {
+        "mean": {
+          "turns": 90.1,
+          "attacks": 63.3,
+          "heals": 26.8,
+          "guards": 0,
+          "items": 26.8,
+          "bossHealing": 0,
+          "barrierAbsorbed": 540,
+          "revival": 0,
+          "eclipses": 21.9,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 24053.7,
+          "playerHp": 3635,
+          "bossHp": 0
+        },
+        "maxSingleHit": 1344,
+        "maxTurns": 94,
+        "deathCauses": {},
+        "suppliesExhausted": 0,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 94
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 91
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 88
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 88
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 91
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 89
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 90
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 90
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 90
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 90
+          }
+        ]
+      }
+    },
+    {
+      "job": "thief",
+      "variant": "base",
+      "theme": "tender",
+      "aware": false,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 136.9,
+      "summary": {
+        "mean": {
+          "turns": 136.9,
+          "attacks": 107.1,
+          "heals": 29.8,
+          "guards": 0,
+          "items": 29.8,
+          "bossHealing": 26040,
+          "barrierAbsorbed": 750,
+          "revival": 63000,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0.4,
+          "leoSelfDamage": 40837.3,
+          "playerHp": 2447.4,
+          "bossHp": 0
+        },
+        "maxSingleHit": 1082,
+        "maxTurns": 141,
+        "deathCauses": {},
+        "suppliesExhausted": 8,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 20,
+          "successes": 4,
+          "damages": [
+            2209,
+            2379,
+            2689,
+            2815,
+            2910,
+            2910,
+            4845,
+            5024,
+            5028,
+            5156,
+            5170,
+            5298,
+            5336,
+            5612,
+            5872,
+            5960,
+            6115,
+            6301,
+            6512,
+            6657
+          ]
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 136
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 137
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 141
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 133
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 138
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 139
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 134
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 139
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 134
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 138
+          }
+        ]
+      }
+    },
+    {
+      "job": "mage",
+      "variant": "base",
+      "theme": "rice",
+      "aware": true,
+      "trials": 10,
+      "wins": 7,
+      "defeats": 3,
+      "timeouts": 0,
+      "meanTurns": 115.6,
+      "summary": {
+        "mean": {
+          "turns": 115.6,
+          "attacks": 78.3,
+          "heals": 30,
+          "guards": 7.3,
+          "items": 30,
+          "bossHealing": 8000,
+          "barrierAbsorbed": 0,
+          "revival": 0,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 20732.1,
+          "playerHp": 380.8,
+          "bossHp": 3805.5
+        },
+        "maxSingleHit": 989,
+        "maxTurns": 121,
+        "deathCauses": {
+          "黄金雷閃": 1,
+          "稲妻の双刃": 1,
+          "天穹雷霆": 1
+        },
+        "suppliesExhausted": 10,
+        "piscesUsed": 10,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 116
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 117
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 113
+          },
+          {
+            "seed": 4,
+            "outcome": "defeat",
+            "turns": 115
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 120
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 121
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 113
+          },
+          {
+            "seed": 8,
+            "outcome": "defeat",
+            "turns": 113
+          },
+          {
+            "seed": 9,
+            "outcome": "defeat",
+            "turns": 112
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 116
+          }
+        ]
+      }
+    },
+    {
+      "job": "mage",
+      "variant": "base",
+      "theme": "dusk",
+      "aware": true,
+      "trials": 10,
+      "wins": 7,
+      "defeats": 3,
+      "timeouts": 0,
+      "meanTurns": 114,
+      "summary": {
+        "mean": {
+          "turns": 114,
+          "attacks": 58.8,
+          "heals": 27.2,
+          "guards": 28,
+          "items": 27.2,
+          "bossHealing": 0,
+          "barrierAbsorbed": 540,
+          "revival": 0,
+          "eclipses": 28,
+          "eclipseGuards": 28,
+          "interrupts": 0,
+          "leoSelfDamage": 17045.6,
+          "playerHp": 2061.9,
+          "bossHp": 4666.4
+        },
+        "maxSingleHit": 759,
+        "maxTurns": 137,
+        "deathCauses": {
+          "夜天星葬": 3
+        },
+        "suppliesExhausted": 3,
+        "piscesUsed": 3,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 107
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 102
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 103
+          },
+          {
+            "seed": 4,
+            "outcome": "defeat",
+            "turns": 137
+          },
+          {
+            "seed": 5,
+            "outcome": "defeat",
+            "turns": 137
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 106
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 102
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 102
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 107
+          },
+          {
+            "seed": 10,
+            "outcome": "defeat",
+            "turns": 137
+          }
+        ]
+      }
+    },
+    {
+      "job": "mage",
+      "variant": "base",
+      "theme": "tender",
+      "aware": true,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 152.1,
+      "summary": {
+        "mean": {
+          "turns": 152.1,
+          "attacks": 101,
+          "heals": 30,
+          "guards": 21.1,
+          "items": 30,
+          "bossHealing": 28315,
+          "barrierAbsorbed": 750,
+          "revival": 63000,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0.1,
+          "leoSelfDamage": 29084.3,
+          "playerHp": 1232,
+          "bossHp": 0
+        },
+        "maxSingleHit": 504,
+        "maxTurns": 157,
+        "deathCauses": {},
+        "suppliesExhausted": 10,
+        "piscesUsed": 1,
+        "healInterruptions": {
+          "attempts": 20,
+          "successes": 1,
+          "damages": [
+            3443,
+            3535,
+            3599,
+            3768,
+            3819,
+            3828,
+            3836,
+            4424,
+            4494,
+            4501,
+            4602,
+            4694,
+            4758,
+            4856,
+            4894,
+            5083,
+            5272,
+            5620,
+            5678,
+            10124
+          ]
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 154
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 157
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 150
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 151
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 148
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 154
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 142
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 157
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 156
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 152
+          }
+        ]
+      }
+    },
+    {
+      "job": "mage",
+      "variant": "base",
+      "theme": "rice",
+      "aware": false,
+      "trials": 10,
+      "wins": 6,
+      "defeats": 4,
+      "timeouts": 0,
+      "meanTurns": 109.4,
+      "summary": {
+        "mean": {
+          "turns": 109.4,
+          "attacks": 79.4,
+          "heals": 30,
+          "guards": 0,
+          "items": 30,
+          "bossHealing": 8000,
+          "barrierAbsorbed": 0,
+          "revival": 0,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 21155,
+          "playerHp": 432.7,
+          "bossHp": 1642.3
+        },
+        "maxSingleHit": 989,
+        "maxTurns": 113,
+        "deathCauses": {
+          "黄金雷閃": 3,
+          "稲妻の双刃": 1
+        },
+        "suppliesExhausted": 10,
+        "piscesUsed": 10,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 107
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 107
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 113
+          },
+          {
+            "seed": 4,
+            "outcome": "defeat",
+            "turns": 108
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 111
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 109
+          },
+          {
+            "seed": 7,
+            "outcome": "defeat",
+            "turns": 107
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 113
+          },
+          {
+            "seed": 9,
+            "outcome": "defeat",
+            "turns": 112
+          },
+          {
+            "seed": 10,
+            "outcome": "defeat",
+            "turns": 107
+          }
+        ]
+      }
+    },
+    {
+      "job": "mage",
+      "variant": "base",
+      "theme": "dusk",
+      "aware": false,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 81.7,
+      "summary": {
+        "mean": {
+          "turns": 81.7,
+          "attacks": 53.9,
+          "heals": 27.8,
+          "guards": 0,
+          "items": 27.8,
+          "bossHealing": 0,
+          "barrierAbsorbed": 540,
+          "revival": 0,
+          "eclipses": 19.7,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 15762.4,
+          "playerHp": 2577.5,
+          "bossHp": 0
+        },
+        "maxSingleHit": 1303,
+        "maxTurns": 88,
+        "deathCauses": {},
+        "suppliesExhausted": 2,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 80
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 82
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 80
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 79
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 84
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 82
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 82
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 78
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 82
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 88
+          }
+        ]
+      }
+    },
+    {
+      "job": "mage",
+      "variant": "base",
+      "theme": "tender",
+      "aware": false,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 131.6,
+      "summary": {
+        "mean": {
+          "turns": 131.6,
+          "attacks": 101.6,
+          "heals": 30,
+          "guards": 0,
+          "items": 30,
+          "bossHealing": 28437.4,
+          "barrierAbsorbed": 750,
+          "revival": 63000,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0.1,
+          "leoSelfDamage": 28845,
+          "playerHp": 1327.1,
+          "bossHp": 0
+        },
+        "maxSingleHit": 948,
+        "maxTurns": 134,
+        "deathCauses": {},
+        "suppliesExhausted": 10,
+        "piscesUsed": 8,
+        "healInterruptions": {
+          "attempts": 20,
+          "successes": 1,
+          "damages": [
+            1635,
+            1737,
+            1757,
+            1889,
+            2528,
+            3443,
+            3700,
+            3714,
+            3865,
+            4427,
+            4437,
+            4441,
+            4704,
+            4758,
+            5184,
+            5272,
+            5275,
+            5438,
+            5522,
+            10415
+          ]
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 129
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 130
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 134
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 130
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 134
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 131
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 130
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 132
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 132
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 134
+          }
+        ]
+      }
+    },
+    {
+      "job": "priest",
+      "variant": "base",
+      "theme": "rice",
+      "aware": true,
+      "trials": 10,
+      "wins": 0,
+      "defeats": 10,
+      "timeouts": 0,
+      "meanTurns": 127.6,
+      "summary": {
+        "mean": {
+          "turns": 127.6,
+          "attacks": 90.1,
+          "heals": 30,
+          "guards": 7.5,
+          "items": 30,
+          "bossHealing": 8000,
+          "barrierAbsorbed": 0,
+          "revival": 0,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 27433,
+          "playerHp": 0,
+          "bossHp": 31558.9
+        },
+        "maxSingleHit": 945,
+        "maxTurns": 140,
+        "deathCauses": {
+          "稲妻の双刃": 4,
+          "通常攻撃": 2,
+          "黄金雷閃": 4
+        },
+        "suppliesExhausted": 10,
+        "piscesUsed": 10,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "defeat",
+            "turns": 127
+          },
+          {
+            "seed": 2,
+            "outcome": "defeat",
+            "turns": 128
+          },
+          {
+            "seed": 3,
+            "outcome": "defeat",
+            "turns": 140
+          },
+          {
+            "seed": 4,
+            "outcome": "defeat",
+            "turns": 123
+          },
+          {
+            "seed": 5,
+            "outcome": "defeat",
+            "turns": 124
+          },
+          {
+            "seed": 6,
+            "outcome": "defeat",
+            "turns": 128
+          },
+          {
+            "seed": 7,
+            "outcome": "defeat",
+            "turns": 123
+          },
+          {
+            "seed": 8,
+            "outcome": "defeat",
+            "turns": 125
+          },
+          {
+            "seed": 9,
+            "outcome": "defeat",
+            "turns": 128
+          },
+          {
+            "seed": 10,
+            "outcome": "defeat",
+            "turns": 130
+          }
+        ]
+      }
+    },
+    {
+      "job": "priest",
+      "variant": "base",
+      "theme": "dusk",
+      "aware": true,
+      "trials": 10,
+      "wins": 2,
+      "defeats": 8,
+      "timeouts": 0,
+      "meanTurns": 136.6,
+      "summary": {
+        "mean": {
+          "turns": 136.6,
+          "attacks": 72.8,
+          "heals": 30,
+          "guards": 33.8,
+          "items": 30,
+          "bossHealing": 0,
+          "barrierAbsorbed": 540,
+          "revival": 0,
+          "eclipses": 33.8,
+          "eclipseGuards": 33.8,
+          "interrupts": 0,
+          "leoSelfDamage": 22839.5,
+          "playerHp": 170.8,
+          "bossHp": 7843.8
+        },
+        "maxSingleHit": 771,
+        "maxTurns": 140,
+        "deathCauses": {
+          "ノクティス": 5,
+          "夜天星葬": 2,
+          "月蝕": 1
+        },
+        "suppliesExhausted": 10,
+        "piscesUsed": 10,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "defeat",
+            "turns": 133
+          },
+          {
+            "seed": 2,
+            "outcome": "defeat",
+            "turns": 138
+          },
+          {
+            "seed": 3,
+            "outcome": "defeat",
+            "turns": 138
+          },
+          {
+            "seed": 4,
+            "outcome": "defeat",
+            "turns": 140
+          },
+          {
+            "seed": 5,
+            "outcome": "defeat",
+            "turns": 138
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 137
+          },
+          {
+            "seed": 7,
+            "outcome": "defeat",
+            "turns": 133
+          },
+          {
+            "seed": 8,
+            "outcome": "defeat",
+            "turns": 138
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 133
+          },
+          {
+            "seed": 10,
+            "outcome": "defeat",
+            "turns": 138
+          }
+        ]
+      }
+    },
+    {
+      "job": "priest",
+      "variant": "base",
+      "theme": "tender",
+      "aware": true,
+      "trials": 10,
+      "wins": 8,
+      "defeats": 2,
+      "timeouts": 0,
+      "meanTurns": 177.2,
+      "summary": {
+        "mean": {
+          "turns": 177.2,
+          "attacks": 123.1,
+          "heals": 30,
+          "guards": 24.1,
+          "items": 30,
+          "bossHealing": 29314.3,
+          "barrierAbsorbed": 750,
+          "revival": 63000,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 36904.6,
+          "playerHp": 645.4,
+          "bossHp": 2085.4
+        },
+        "maxSingleHit": 514,
+        "maxTurns": 187,
+        "deathCauses": {
+          "シルワンエメラ": 1,
+          "大樹の審判": 1
+        },
+        "suppliesExhausted": 10,
+        "piscesUsed": 10,
+        "healInterruptions": {
+          "attempts": 20,
+          "successes": 0,
+          "damages": [
+            3703,
+            3707,
+            3791,
+            3865,
+            3984,
+            4113,
+            4160,
+            4276,
+            4606,
+            4660,
+            4720,
+            4839,
+            5032,
+            5042,
+            5065,
+            5356,
+            5481,
+            5647,
+            5796,
+            5982
+          ]
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 177
+          },
+          {
+            "seed": 2,
+            "outcome": "defeat",
+            "turns": 178
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 180
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 173
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 175
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 176
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 170
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 187
+          },
+          {
+            "seed": 9,
+            "outcome": "defeat",
+            "turns": 179
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 177
+          }
+        ]
+      }
+    },
+    {
+      "job": "priest",
+      "variant": "base",
+      "theme": "rice",
+      "aware": false,
+      "trials": 10,
+      "wins": 0,
+      "defeats": 10,
+      "timeouts": 0,
+      "meanTurns": 120.8,
+      "summary": {
+        "mean": {
+          "turns": 120.8,
+          "attacks": 90.8,
+          "heals": 30,
+          "guards": 0,
+          "items": 30,
+          "bossHealing": 8000,
+          "barrierAbsorbed": 0,
+          "revival": 0,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 27638.7,
+          "playerHp": 0,
+          "bossHp": 26568.2
+        },
+        "maxSingleHit": 975,
+        "maxTurns": 124,
+        "deathCauses": {
+          "黄金雷閃": 4,
+          "稲妻の双刃": 5,
+          "通常攻撃": 1
+        },
+        "suppliesExhausted": 10,
+        "piscesUsed": 10,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "defeat",
+            "turns": 120
+          },
+          {
+            "seed": 2,
+            "outcome": "defeat",
+            "turns": 119
+          },
+          {
+            "seed": 3,
+            "outcome": "defeat",
+            "turns": 121
+          },
+          {
+            "seed": 4,
+            "outcome": "defeat",
+            "turns": 118
+          },
+          {
+            "seed": 5,
+            "outcome": "defeat",
+            "turns": 123
+          },
+          {
+            "seed": 6,
+            "outcome": "defeat",
+            "turns": 119
+          },
+          {
+            "seed": 7,
+            "outcome": "defeat",
+            "turns": 124
+          },
+          {
+            "seed": 8,
+            "outcome": "defeat",
+            "turns": 120
+          },
+          {
+            "seed": 9,
+            "outcome": "defeat",
+            "turns": 123
+          },
+          {
+            "seed": 10,
+            "outcome": "defeat",
+            "turns": 121
+          }
+        ]
+      }
+    },
+    {
+      "job": "priest",
+      "variant": "base",
+      "theme": "dusk",
+      "aware": false,
+      "trials": 10,
+      "wins": 7,
+      "defeats": 3,
+      "timeouts": 0,
+      "meanTurns": 104.1,
+      "summary": {
+        "mean": {
+          "turns": 104.1,
+          "attacks": 74.1,
+          "heals": 30,
+          "guards": 0,
+          "items": 30,
+          "bossHealing": 0,
+          "barrierAbsorbed": 540,
+          "revival": 0,
+          "eclipses": 25.6,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 22632.6,
+          "playerHp": 749.2,
+          "bossHp": 1909.6
+        },
+        "maxSingleHit": 1330,
+        "maxTurns": 106,
+        "deathCauses": {
+          "夜天星葬": 1,
+          "月蝕": 1,
+          "ノクティス": 1
+        },
+        "suppliesExhausted": 10,
+        "piscesUsed": 10,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 106
+          },
+          {
+            "seed": 2,
+            "outcome": "defeat",
+            "turns": 105
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 106
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 101
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 102
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 102
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 104
+          },
+          {
+            "seed": 8,
+            "outcome": "defeat",
+            "turns": 104
+          },
+          {
+            "seed": 9,
+            "outcome": "defeat",
+            "turns": 105
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 106
+          }
+        ]
+      }
+    },
+    {
+      "job": "priest",
+      "variant": "base",
+      "theme": "tender",
+      "aware": false,
+      "trials": 10,
+      "wins": 4,
+      "defeats": 6,
+      "timeouts": 0,
+      "meanTurns": 151.3,
+      "summary": {
+        "mean": {
+          "turns": 151.3,
+          "attacks": 121.3,
+          "heals": 30,
+          "guards": 0,
+          "items": 30,
+          "bossHealing": 27720,
+          "barrierAbsorbed": 750,
+          "revival": 63000,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0.2,
+          "leoSelfDamage": 36408.6,
+          "playerHp": 143.3,
+          "bossHp": 4499.5
+        },
+        "maxSingleHit": 970,
+        "maxTurns": 155,
+        "deathCauses": {
+          "シルワンエメラ": 3,
+          "大樹の審判": 3
+        },
+        "suppliesExhausted": 10,
+        "piscesUsed": 10,
+        "healInterruptions": {
+          "attempts": 20,
+          "successes": 2,
+          "damages": [
+            2068,
+            2798,
+            2818,
+            2964,
+            3683,
+            3689,
+            3703,
+            3721,
+            3724,
+            3801,
+            3865,
+            4153,
+            4670,
+            4822,
+            5059,
+            5168,
+            5647,
+            5995,
+            6036,
+            6319
+          ]
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 155
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 149
+          },
+          {
+            "seed": 3,
+            "outcome": "defeat",
+            "turns": 152
+          },
+          {
+            "seed": 4,
+            "outcome": "defeat",
+            "turns": 150
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 155
+          },
+          {
+            "seed": 6,
+            "outcome": "defeat",
+            "turns": 155
+          },
+          {
+            "seed": 7,
+            "outcome": "defeat",
+            "turns": 152
+          },
+          {
+            "seed": 8,
+            "outcome": "defeat",
+            "turns": 149
+          },
+          {
+            "seed": 9,
+            "outcome": "defeat",
+            "turns": 147
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 149
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "base",
+      "withNpcs": true,
+      "theme": "rice",
+      "aware": true,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 95.1,
+      "summary": {
+        "mean": {
+          "turns": 95.1,
+          "attacks": 88.6,
+          "heals": 0.7,
+          "guards": 5.8,
+          "items": 0.7,
+          "bossHealing": 8000,
+          "barrierAbsorbed": 0,
+          "revival": 0,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 43425.3,
+          "playerHp": 4566.3,
+          "bossHp": 0
+        },
+        "maxSingleHit": 716,
+        "maxTurns": 100,
+        "deathCauses": {},
+        "suppliesExhausted": 0,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 95
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 100
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 100
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 92
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 89
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 93
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 90
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 98
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 96
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 98
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "base",
+      "withNpcs": true,
+      "theme": "dusk",
+      "aware": true,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 82.1,
+      "summary": {
+        "mean": {
+          "turns": 82.1,
+          "attacks": 62.1,
+          "heals": 0,
+          "guards": 20,
+          "items": 0,
+          "bossHealing": 0,
+          "barrierAbsorbed": 540,
+          "revival": 0,
+          "eclipses": 20,
+          "eclipseGuards": 20,
+          "interrupts": 0,
+          "leoSelfDamage": 34196.5,
+          "playerHp": 5301.9,
+          "bossHp": 0
+        },
+        "maxSingleHit": 747,
+        "maxTurns": 86,
+        "deathCauses": {},
+        "suppliesExhausted": 0,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 75
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 82
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 79
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 81
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 82
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 85
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 83
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 85
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 86
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 83
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "base",
+      "withNpcs": true,
+      "theme": "tender",
+      "aware": true,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 121.5,
+      "summary": {
+        "mean": {
+          "turns": 121.5,
+          "attacks": 106.6,
+          "heals": 0,
+          "guards": 14.9,
+          "items": 0,
+          "bossHealing": 26040,
+          "barrierAbsorbed": 750,
+          "revival": 63000,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0.4,
+          "leoSelfDamage": 60554.2,
+          "playerHp": 5556.1,
+          "bossHp": 0
+        },
+        "maxSingleHit": 490,
+        "maxTurns": 130,
+        "deathCauses": {},
+        "suppliesExhausted": 0,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 20,
+          "successes": 4,
+          "damages": [
+            4238,
+            4325,
+            4417,
+            4450,
+            4532,
+            4589,
+            4718,
+            4798,
+            5137,
+            5390,
+            5410,
+            5464,
+            5519,
+            5592,
+            5701,
+            5745,
+            6094,
+            6353,
+            6695,
+            6773
+          ]
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 130
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 126
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 115
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 121
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 122
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 118
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 123
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 116
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 120
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 124
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "base",
+      "withNpcs": true,
+      "theme": "rice",
+      "aware": false,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 88.2,
+      "summary": {
+        "mean": {
+          "turns": 88.2,
+          "attacks": 87.4,
+          "heals": 0.8,
+          "guards": 0,
+          "items": 0.8,
+          "bossHealing": 8000,
+          "barrierAbsorbed": 0,
+          "revival": 0,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 41078.5,
+          "playerHp": 4264.5,
+          "bossHp": 0
+        },
+        "maxSingleHit": 1062,
+        "maxTurns": 92,
+        "deathCauses": {},
+        "suppliesExhausted": 0,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 83
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 92
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 86
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 89
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 87
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 91
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 87
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 88
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 90
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 89
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "base",
+      "withNpcs": true,
+      "theme": "dusk",
+      "aware": false,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 68,
+      "summary": {
+        "mean": {
+          "turns": 68,
+          "attacks": 65.8,
+          "heals": 2.2,
+          "guards": 0,
+          "items": 2.2,
+          "bossHealing": 0,
+          "barrierAbsorbed": 522,
+          "revival": 0,
+          "eclipses": 16.4,
+          "eclipseGuards": 0,
+          "interrupts": 0,
+          "leoSelfDamage": 29438.9,
+          "playerHp": 4327,
+          "bossHp": 0
+        },
+        "maxSingleHit": 1221,
+        "maxTurns": 73,
+        "deathCauses": {},
+        "suppliesExhausted": 0,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 0,
+          "successes": 0,
+          "damages": []
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 68
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 69
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 69
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 67
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 65
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 73
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 68
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 67
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 67
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 67
+          }
+        ]
+      }
+    },
+    {
+      "job": "warrior",
+      "variant": "base",
+      "withNpcs": true,
+      "theme": "tender",
+      "aware": false,
+      "trials": 10,
+      "wins": 10,
+      "defeats": 0,
+      "timeouts": 0,
+      "meanTurns": 106.9,
+      "summary": {
+        "mean": {
+          "turns": 106.9,
+          "attacks": 106.9,
+          "heals": 0,
+          "guards": 0,
+          "items": 0,
+          "bossHealing": 27720,
+          "barrierAbsorbed": 750,
+          "revival": 63000,
+          "eclipses": 0,
+          "eclipseGuards": 0,
+          "interrupts": 0.2,
+          "leoSelfDamage": 59738.9,
+          "playerHp": 5226.7,
+          "bossHp": 0
+        },
+        "maxSingleHit": 1004,
+        "maxTurns": 113,
+        "deathCauses": {},
+        "suppliesExhausted": 0,
+        "piscesUsed": 0,
+        "healInterruptions": {
+          "attempts": 20,
+          "successes": 2,
+          "damages": [
+            4068,
+            4403,
+            4410,
+            4427,
+            4444,
+            4528,
+            4542,
+            4579,
+            4606,
+            5123,
+            5137,
+            5211,
+            5272,
+            5370,
+            5390,
+            5417,
+            5474,
+            5982,
+            6550,
+            6776
+          ]
+        },
+        "trials": [
+          {
+            "seed": 1,
+            "outcome": "victory",
+            "turns": 108
+          },
+          {
+            "seed": 2,
+            "outcome": "victory",
+            "turns": 105
+          },
+          {
+            "seed": 3,
+            "outcome": "victory",
+            "turns": 105
+          },
+          {
+            "seed": 4,
+            "outcome": "victory",
+            "turns": 104
+          },
+          {
+            "seed": 5,
+            "outcome": "victory",
+            "turns": 106
+          },
+          {
+            "seed": 6,
+            "outcome": "victory",
+            "turns": 108
+          },
+          {
+            "seed": 7,
+            "outcome": "victory",
+            "turns": 105
+          },
+          {
+            "seed": 8,
+            "outcome": "victory",
+            "turns": 107
+          },
+          {
+            "seed": 9,
+            "outcome": "victory",
+            "turns": 108
+          },
+          {
+            "seed": 10,
+            "outcome": "victory",
+            "turns": 113
+          }
+        ]
+      }
+    }
+  ]
+}

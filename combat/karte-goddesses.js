@@ -1,9 +1,11 @@
+import {isSuperGoddess,selectSuperGoddessAction,prepareSuperGoddessAction,executeSuperGoddessUtility,finishSuperGoddessAction} from './goddess-superboss.js';
 // Every hook is gated by both the fixed ID and the battle-only theme marker.
 const ids={rice:'karte_boss_lumina',dusk:'karte_boss_noctia',tender:'karte_boss_zelena'};
 export const isGoddess = e => Boolean(e?.goddessTheme && ids[e.goddessTheme]===e.id);
 function runtime(e) { return e.goddessRuntime ||= {cooldowns:{},uses:{},reviveUsed:false,growth:0,regen:0,power:0}; }
 function message(b,text,extra={}) { b.log.push(text);b.presentationEvents.push({type:'message',message:text,...extra}); }
 export function selectGoddessAction(e,b,rng) {
+  if(isSuperGoddess(e))return selectSuperGoddessAction(e,b,rng);
   const r=runtime(e);
   const table=e.actions.filter(({action:a})=>!(a.goddessUtility&&((r.uses[a.id]||0)>=(a.goddessUtility==='barrier'?3:2)))&&!(r.cooldowns[a.id]>(b?.turn||1))
     && !(a.goddessUtility==='heal'&&e.hp>e.maxHp*.8)
@@ -14,6 +16,7 @@ export function selectGoddessAction(e,b,rng) {
 }
 export function prepareGoddessAction(b,e,a) {
   if(!isGoddess(e))return a;
+  if(isSuperGoddess(e))return prepareSuperGoddessAction(b,e,a);
   const r=runtime(e);
   if(e.goddessTheme==='rice'&&e.hp<=e.maxHp*.5&&!r.phase){r.phase=true;message(b,'解放の光！ ルミナの雷光と行動速度が増した！');}
   if(e.goddessTheme==='dusk'&&e.hp<=e.maxHp*.3&&r.growthTurn!==b.turn){
@@ -27,6 +30,7 @@ export function prepareGoddessAction(b,e,a) {
 }
 export function executeGoddessUtility(b,e,a) {
   if(!isGoddess(e)||!a.goddessUtility)return false;
+  if(isSuperGoddess(e)&&executeSuperGoddessUtility(b,e,a))return true;
   const r=runtime(e);r.uses[a.id]=(r.uses[a.id]||0)+1;r.cooldowns[a.id]=b.turn+(a.cooldown||1);
   if(a.goddessUtility==='heal'){
     const amount=Math.min(e.maxHp-e.hp,Math.round(e.maxHp*a.healRatio));e.hp+=amount;
@@ -41,6 +45,7 @@ export function executeGoddessUtility(b,e,a) {
 }
 export function finishGoddessAction(b,e) {
   if(!isGoddess(e)||e.hp<=0)return;
+  if(isSuperGoddess(e)&&!finishSuperGoddessAction(b,e))return;
   const r=runtime(e);
   if(r.power>0)r.power--;
   if(r.regen>0){r.regen--;const amount=Math.min(e.maxHp-e.hp,Math.round(e.maxHp*.01));e.hp+=amount;
@@ -49,6 +54,7 @@ export function finishGoddessAction(b,e) {
 export function reviveGoddess(b,e,targetIndex) {
   if(!isGoddess(e)||e.goddessTheme!=='tender'||e.hp>0||runtime(e).reviveUsed)return false;
   const r=runtime(e);r.reviveUsed=true;r.reviveTurn=b.turn;r.regen=0;
+  delete r.healPreparation;delete r.lastAction;r.executed=false;r.rest=false;
   e.hp=Math.round(e.maxHp*.3);e.alive=true;e.statuses=[];e.bossMagicBarrier=0;delete e.reservedEnemyAction;
   message(b,'若葉が舞い、失われた生命が再び芽吹く――。',{type:'healing',actorSide:'enemy',targetSide:'enemy',
     ...(targetIndex==null?{}:{targetIndex}),amount:e.hp,goddessRevival:true});

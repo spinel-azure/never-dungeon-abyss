@@ -775,7 +775,7 @@ export function createEnemyCombatant(enemy) {
       regainRate:enemy.mapBossTraits.regainRate,
       strongHerbicideTrait:structuredClone(enemy.mapBossTraits.strongHerbicideTrait || null),
       distantTarget:Boolean(enemy.mapBossTraits.distantTarget)} : {}),
-    ...(enemy.goddessTheme ? {goddessTheme:enemy.goddessTheme,goddessOffenseMultiplier:enemy.goddessOffenseMultiplier,sp:enemy.maxSp,maxSp:enemy.maxSp,
+    ...(enemy.goddessTheme ? {goddessTheme:enemy.goddessTheme,goddessCandidate:enemy.goddessCandidate,goddessOffenseMultiplier:enemy.goddessOffenseMultiplier,sp:enemy.maxSp,maxSp:enemy.maxSp,
       magicDefense:enemy.magicDefense,magicDamageReduction:enemy.magicDamageReduction} : {}),
     stats: { ...enemy.stats },
     def: enemy.def,

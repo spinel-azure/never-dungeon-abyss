@@ -49,7 +49,7 @@ try{for(const width of (process.env.NDA_QA_WIDTHS||'1280,390').split(',').map(Nu
  await p.waitForSelector('[data-entrance-command="mapExploration"]');await p.evaluate(async()=>{(await import('/js/explorer-preview.js')).setExplorerTestEnabled(true);});
  const saved=await p.evaluate(()=>format3Qa.maps());assert.equal(saved.registered[0].themeOverride,theme);assert.equal(saved.registered[0].favorite,true);
  await p.evaluate(c=>format3Qa.prepare(c),goddessCharacter('warrior',100,'z6'));
- await p.locator('[data-entrance-command="mapExploration"]').dispatchEvent('click');await press(fixture.name+' ⭐');await press(fixture.name+' ⭐');
+ await p.locator('[data-entrance-command="mapExploration"]').dispatchEvent('click');await press(fixture.name+' お気に入り');await press(fixture.name+' お気に入り');
  await press('探索する（A）');await press('はい（A／ENTER）');
  await p.waitForFunction(()=>!document.querySelector('#sceneTransitionTitle').hidden);
  assert.match(await p.locator('#sceneTransitionTitle').textContent(),/ENTERING\s+MAP DUNGEON/);
@@ -66,7 +66,7 @@ try{for(const width of (process.env.NDA_QA_WIDTHS||'1280,390').split(',').map(Nu
  await p.evaluate(()=>v2Qa.input('confirm'));await p.waitForFunction(()=>v2Qa.s().bossKeyFound&&!v2Qa.s().transitioning);
  await p.evaluate(async()=>{const d=v2Qa.s().generatedMap.bossRoom.doorEdge,dir=['N','E','S','W'].indexOf(d.direction);await v2Qa.go({x:d.x+[0,1,0,-1][dir],y:d.y+[-1,0,1,0][dir]});await v2Qa.face((dir+2)%4);v2Qa.input('confirm');await v2Qa.settled();await v2Qa.go(d);});
  assert.equal(await p.evaluate(()=>v2Qa.s().bossDoorUnlocked),true);
- const boss=await p.evaluate(()=>v2Qa.s().getBossRenderState());assert.equal(boss.definition.imageId,fixture.bossId);
+ const boss=await p.evaluate(()=>v2Qa.s().getBossRenderState());assert.equal(JSON.parse(boss.definition.imageId)[1],fixture.bossId);
  await p.waitForTimeout(400);await p.screenshot({path:join(output,`${width}-${theme}-boss-room.png`)});
  await p.evaluate(()=>v2Qa.go(v2Qa.s().generatedMap.bossRoom.bossCell));
  if(theme==='gold'){await p.waitForFunction(()=>format3Qa.active());await p.waitForFunction(()=>document.querySelector('#battleEnemyImage')?.naturalWidth===600);assert.match(await p.locator('#battleEnemyName').textContent(),/デアグローセ/);}

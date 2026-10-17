@@ -1,3 +1,4 @@
+import {isSuperGoddess} from './goddess-superboss.js';
 import { getStatusEffect } from "../data/status-effects.js";
 import { COMBAT_CONFIG, clamp } from "./combat-config.js";
 import { isPiscesInvincible, isOrdinaryNegativeStatus } from "./pisces.js";
@@ -14,6 +15,7 @@ export function resolveStatusEffect({
   if (resistance.immune) {
     return statusResult(effect, false, 0, true);
   }
+  if(isSuperGoddess(defender)&&['deadly_poison','death_poison'].includes(effect.statusId))return statusResult(effect,roll(rng)<.01,.01,false);
   if (effect.guaranteed) {
     return statusResult(effect, true, 1, false);
   }

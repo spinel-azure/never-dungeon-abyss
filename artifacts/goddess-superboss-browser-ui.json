@@ -1,0 +1,30 @@
+[
+  {
+    "width": 1280,
+    "goddessLayouts": 3,
+    "moonReload": true,
+    "saveFailureRollback": true,
+    "errors": [],
+    "fullBattle": false,
+    "commands": 0,
+    "elapsedSeconds": 0.008,
+    "outcome": null,
+    "turn": 5,
+    "hp": 4641,
+    "bossHp": 180000
+  },
+  {
+    "width": 390,
+    "goddessLayouts": 3,
+    "moonReload": true,
+    "saveFailureRollback": true,
+    "errors": [],
+    "fullBattle": false,
+    "commands": 0,
+    "elapsedSeconds": 0.009,
+    "outcome": null,
+    "turn": 5,
+    "hp": 4228,
+    "bossHp": 180000
+  }
+]

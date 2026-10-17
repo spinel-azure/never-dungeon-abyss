@@ -7,7 +7,8 @@ const charge = (action) => ({id:action.id+'_prepare', name:action.name, actionTy
   prepareMessage:`${action.name}の光が集まる……！ 次の一撃に備えよ！`, reservedAction:action});
 const entry = (weight, action) => ({weight, action});
 
-// Combat Candidate 2. Design metadata remains unchanged; these fields are consumed by the engine.
+// Legacy Candidate 2 below Lv100; Superboss Candidate 1 at Lv100 only.
+// Design metadata remains unchanged; these fields are consumed by the engine.
 export function createGoddessMapBoss({themeId, level, bossId} = {}) {
   if (!GODDESS_THEMES.includes(themeId)) throw RangeError('Not a goddess theme');
   const boss = resolveSpecialThemeBoss(themeId, level, {bossId, strict:true});
@@ -39,9 +40,23 @@ export function createGoddessMapBoss({themeId, level, bossId} = {}) {
       entry(10,charge(spell('zelena_judgment','大樹の審判','holy',105)))
     ]
   };
-  const combatBase={rice:{maxHp:20000,def:65},dusk:{maxHp:18000,def:50},tender:{maxHp:24000,def:70}}[themeId];
+  const superboss=level===100;
+  if(superboss){
+    const powers={lumina_thunder:100,lumina_sky:220,noctia_noctis:120,zelena_sylvan:90,zelena_judgment:205};
+    for(const rows of Object.values(tables))for(const {action} of rows){
+      const a=action.reservedAction||action;
+      if(powers[a.id])a.spellPower=powers[a.id];
+      if(action.reservedAction)a.goddessUltimate=true;
+      if(a.id==='noctia_dew')a.spDamage=150;
+    }
+    // Eclipse is exclusively the forced full-moon action. Stars becomes a normal spell.
+    tables.dusk=tables.dusk.filter(row=>row.action.id!=='noctia_eclipse'&&row.action.id!=='noctia_stars_prepare');
+    tables.dusk.push(entry(25,spell('noctia_stars','夜天星葬','dark',120,{speedModifier:12})));
+  }
+  const combatBase={rice:{maxHp:superboss?250000:20000,def:65},dusk:{maxHp:superboss?180000:18000,def:50},tender:{maxHp:superboss?210000:24000,def:70}}[themeId];
   return {...boss, ...boss.scaledStats,maxHp:round(combatBase.maxHp),def:round(combatBase.def),candidate:'v2-goddess-combat-candidate-2',
-    goddessTheme:themeId,goddessOffenseMultiplier:1.6, race:'divine', isBoss:true, battleSize:'large', attack:round(themeId==='rice'?80:55),
+    ...(superboss?{goddessCandidate:'superboss-1',candidate:'v2-goddess-superboss-candidate-1'}:{}),
+    goddessTheme:themeId,goddessOffenseMultiplier:superboss?10:1.6, race:'divine', isBoss:true, battleSize:'large', attack:round(themeId==='rice'?(superboss?130:80):55),
     // magicDefense is design metadata; the existing engine consumes reduction instead.
     magicDamageReduction:Math.min(.3, boss.scaledStats.magicDefense/500),
     actions:tables[themeId], ambientEffect:`goddess-${themeId}`,

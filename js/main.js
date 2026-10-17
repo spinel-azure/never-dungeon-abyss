@@ -1,3 +1,4 @@
+import {goddessCheckpoint,restoreGoddessCheckpoint} from './special-map/goddess-checkpoint.js';
 import {transactSurvey} from '../data/survey-report.js';
 import {createReincarnationVision, isReincarnationVisionEligible} from './reincarnation-vision.js';
 import {serializeSpecialMapSession,resumeMapOriginal} from './special-map/save-session.js';
@@ -1489,6 +1490,14 @@ import {
     setBattleSpeedMode,
     getCharacter: () => getContextualCharacter(),
     onCharacterChanged: updateCharacterFromBattle,
+    onBattleCheckpoint:battle=>{
+      const s=getSpecialMapContext()?.session;
+      if(!s||!matchesV2Battle(s,battle.explorationContext))return true;
+      const snapshot=goddessCheckpoint(battle,s.battleContext);if(!snapshot)return true;
+      const before=s.goddessBattle;s.goddessBattle=snapshot;
+      if(saveGame())return true;
+      s.goddessBattle=before;return false;
+    },
     onVictory: finishBattleVictory,
     onDefeat: finishBattleDefeat,
     onEscape: finishBattleEscape,
@@ -5755,6 +5764,7 @@ import {
     return result;
   }
   async function beginV2Battle(session,enemyData,context){
+    const resumed=restoreGoddessCheckpoint(session.goddessBattle,context);
     session.battleStartCharacter=structuredClone(character);
     saveGame();
     const boss=['special-map-v2-boss','special-map-v2-special-boss'].includes(context.source);
@@ -5766,7 +5776,7 @@ import {
     if(getSpecialMapContext()?.session!==session||!matchesV2Battle(session,context))return;
     session.renderState.overlayEvent=null;
     startBgm(enemyData.goddessTheme?'finalBoss':boss?'floorBoss':'normalBattle');
-    if(!startBattle(createEnemyCombatant({...enemyData,image}),{playStartSe:false,explorationContext:context,...environment})){
+    if(!startBattle(createEnemyCombatant({...enemyData,image}),{playStartSe:false,explorationContext:context,resumeBattleState:resumed,...environment})){
       resumeV2Encounter(session,context);startBgm(getSpecialMapBgmKey(session.generatedMap.themeId));
     }
   }

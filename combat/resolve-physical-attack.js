@@ -143,6 +143,7 @@ export function calculatePhysicalHitRate({ attacker = {}, defender = {}, attack 
 }
 
 export function calculateCriticalRate({ attacker = {}, attack = {} } = {}) {
+  if(attack.disableCritical)return 0;
   return clamp(
     COMBAT_CONFIG.criticalRateBase
       + numeric(attacker.dex) * COMBAT_CONFIG.criticalDexMultiplier

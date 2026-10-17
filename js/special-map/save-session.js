@@ -1,5 +1,7 @@
+import {restoreGoddessCheckpoint} from './goddess-checkpoint.js';
 // Only durable exploration state is stored. Render objects, callbacks and timers
-// are rebuilt from the registered map; interrupted combat restarts its encounter.
+// are rebuilt from the registered map. Lv100 goddess battles preserve complete rounds;
+// other interrupted encounters retain their existing restart behavior.
 const copy = value => value == null ? null : structuredClone(value);
 const fields = ['expeditionId','torchFuel','battleExperience','bossKeyFound','bossDoorUnlocked',
   'bossDefeated','bossPreviewDismissed','presence','presenceSuppressedSteps',
@@ -21,6 +23,7 @@ export function serializeSpecialMapSession(s) {
     values:Object.fromEntries(fields.filter(k => s[k] !== undefined).map(k => [k,s[k]])),
     torchFuel:s.renderState.torchFuel,
     lootBag:copy(s.lootBag),rewardedBattles:[...(s.rewardedBattles || [])],
+    goddessBattle:s.battleContext&&!s.bossDefeated ? copy(s.goddessBattle) : null,
     encounter:copy(s.bossDefeated ? null : s.battleContext || s.preparedBossContext),
     surveyedMasks:copy(s.surveyedMasks),surveyedMask:s.pendingSurveyMask ?? null};
 }
@@ -48,6 +51,7 @@ export function restoreSpecialMapSession(s, data) {
   s.renderState.torchFuel=data.torchFuel;
   s.lootBag=copy(data.lootBag);s.rewardedBattles=new Set(data.rewardedBattles || []);
   s.battleContext=data.encounter ? {...copy(data.encounter),sessionId:s.encounterSessionId} : null;
+  s.goddessBattle=restoreGoddessCheckpoint(data.goddessBattle,s.battleContext);
   s.transitioning=!!s.battleContext;
   s.surveyNotice=null;s.surveyCompletionPending=false;
   if(!s.deferredSurveyNotice)s.bossFloorJinglePending=false;

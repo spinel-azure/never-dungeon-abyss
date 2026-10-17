@@ -1,0 +1,28 @@
+[
+  {
+    "width": 1280,
+    "moonReload": true,
+    "saveFailureRollback": true,
+    "errors": [],
+    "fullBattle": true,
+    "commands": 129,
+    "elapsedSeconds": 147.701,
+    "outcome": "victory",
+    "turn": 129,
+    "hp": 1180,
+    "bossHp": 0
+  },
+  {
+    "width": 390,
+    "moonReload": true,
+    "saveFailureRollback": true,
+    "errors": [],
+    "fullBattle": false,
+    "commands": 0,
+    "elapsedSeconds": 0.008,
+    "outcome": null,
+    "turn": 5,
+    "hp": 4270,
+    "bossHp": 180000
+  }
+]

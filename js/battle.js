@@ -1,3 +1,4 @@
+import {goddessForecast,isSuperGoddess} from '../combat/goddess-superboss.js';
 import {syncGoddessBackdrop,playGoddessDefeat} from './special-map/goddess-presentation.js';
 import {SPECIAL_BOSS_GLOW} from './special-map/boss-sparkles.js';
 import { isCharmed } from "../combat/akashic-phantoms.js";
@@ -83,6 +84,7 @@ const battleUi = {
   setBattleSpeedMode: mode => normalizeBattleSpeedMode(mode),
   getCharacter: () => null,
   onCharacterChanged: () => {},
+  onBattleCheckpoint: () => true,
   onVictory: () => {},
   onDefeat: () => {},
   onEscape: () => {},
@@ -158,6 +160,7 @@ export function startBattle(enemy, {
   targetIndex = 0,
   scriptedBattleType = "",
   roamingEnemyInstanceId = "",
+  resumeBattleState = null,
   explorationContext = null
 } = {}) {
   const character = battleUi.getCharacter();
@@ -187,7 +190,7 @@ export function startBattle(enemy, {
   clearAutoTimer();
   battleUi.akashicCleanup?.();
   battleUi.akashicCleanup = enemy.akashicPhantom ? mountAkashicBackground(battleUi.root) : null;
-  battleUi.battle = createBattleState({ character, enemy, enemies, targetIndex });
+  battleUi.battle = resumeBattleState ? structuredClone(resumeBattleState) : createBattleState({ character, enemy, enemies, targetIndex });
   if(explorationContext)battleUi.battle.explorationContext=structuredClone(explorationContext);
   battleUi.presenting = false;
   battleUi.presentationEnemyImage = battleUi.battle.enemy.image || "";
@@ -201,12 +204,14 @@ export function startBattle(enemy, {
     battleUi.battle.log = ["甘い歌声に意識を絡め取られた！", "仲間たちは魅了され、身体を動かすことができない！"];
   }
   battleUi.battle.encounterBossId = enemy.id;
+  if(isSuperGoddess(battleUi.battle.enemy))battleUi.onBattleCheckpoint(battleUi.battle);
   battleUi.root.hidden = false;
   document.body.classList.add("battle-active");
   showCommandButtons();
   if (playStartSe) battleUi.playSe("battleStart");
   renderBattle();
-  if (battleUi.battle.lifeBoosterRecovery > 0) {
+  if(resumeBattleState)battleUi.onCharacterChanged(createPersistentBattlePlayerChanges(battleUi.battle.player));
+  if (!resumeBattleState && battleUi.battle.lifeBoosterRecovery > 0) {
     battleUi.onCharacterChanged({ hp: battleUi.battle.player.hp });
     const openingBattle = battleUi.battle;
     window.setTimeout(() => {
@@ -215,7 +220,7 @@ export function startBattle(enemy, {
       }
     }, 300);
   }
-  if (battleUi.battle.manaBoosterRecovery > 0) {
+  if (!resumeBattleState && battleUi.battle.manaBoosterRecovery > 0) {
     battleUi.onCharacterChanged({ sp: battleUi.battle.player.sp });
     const openingBattle = battleUi.battle;
     window.setTimeout(() => {
@@ -469,6 +474,10 @@ async function executeCommand(command) {
     if (resolved.reason === "deadlyPoisonNotCurable") battleUi.playSe("costOver");
     battleUi.messageEl.textContent = messages[resolved.reason] || "現在使用できません。";
     return;
+  }
+  if(isSuperGoddess(resolved.battle.enemy)&&battleUi.onBattleCheckpoint(resolved.battle)===false){
+    battleUi.messageEl.textContent='戦闘の保存に失敗しました。もう一度コマンドを選んでください。';
+    battleUi.playSe('cancel');return;
   }
   battleUi.presentationPisces = isPiscesInvincible(battleUi.battle.player);
   battleUi.battle = resolved.battle;
@@ -1129,6 +1138,11 @@ function renderBattle() {
   else if (party) party.hidden = true;
   const enemyName = battleUi.root.querySelector("#battleEnemyName");
   setText("battleEnemyName", battleUi.concealed ? "？？？？？" : battle.enemy.name);
+  let forecast=battleUi.root.querySelector('.battle-goddess-forecast');
+  if(!forecast){forecast=document.createElement('span');forecast.className='battle-goddess-forecast';enemyName?.after(forecast);}
+  forecast.textContent=battleUi.concealed?'':goddessForecast(battle.enemy);
+  forecast.hidden=!forecast.textContent;
+  enemyName?.parentElement.classList.toggle('has-goddess-forecast',!forecast.hidden);
   renderEnemyWeakness(battle.enemy);
   enemyName?.classList.toggle("is-defense-down", hasEnemyDefenseDown(battle.enemy));
   setText("battleEnemyCondition", statusText(battle.enemy));
@@ -1380,6 +1394,12 @@ function renderBossHpMeter(enemy) {
     shield.querySelector('.boss-barrier-fill').style.width = `${Math.max(0,Math.min(100,value/enemy.bossMagicBarrierMax*100))}%`;
     shield.setAttribute('aria-valuemin','0');shield.setAttribute('aria-valuemax',String(enemy.bossMagicBarrierMax));shield.setAttribute('aria-valuenow',String(value));
   }
+  const superboss=isSuperGoddess(enemy);
+  meter.classList.toggle('has-goddess-hp',superboss);
+  let hpLabel=meter.querySelector('.goddess-hp-label');
+  if(!hpLabel){hpLabel=document.createElement('span');hpLabel.className='goddess-hp-label';meter.append(hpLabel);}
+  hpLabel.hidden=!superboss;
+  if(superboss)hpLabel.textContent=String(Math.max(0,battleUi.presenting?battleUi.presentationHp?.enemy??enemy.hp:enemy.hp))+' / '+enemy.maxHp;
   const isBoss = Boolean(enemy?.isBoss);
   meter.hidden = !isBoss;
   if (!isBoss) return;

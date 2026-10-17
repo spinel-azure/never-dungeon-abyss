@@ -1,3 +1,4 @@
+import {recordGoddessInterruptionDamage,finishGoddessPlayerOpportunity} from './goddess-superboss.js';
 import { isCharmed, charmAction, getAkashicPreparation, capAkashicDot, reviveAkashicEnemy } from "./akashic-phantoms.js";
 import {isGoddess,selectGoddessAction,prepareGoddessAction,executeGoddessUtility,finishGoddessAction,reviveGoddess,capGoddessDot,recordGoddessStatus} from './karte-goddesses.js';
 import { applyWingGift } from "../data/wing-gift.js";
@@ -1317,8 +1318,10 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
         const shieldAtStart = target.bossMagicBarrier > 0;
         for (let hitIndex = 0; hitIndex < hitCount && target.hp > 0; hitIndex += 1) {
           if (battle.throwingItemGuaranteedHitAtStart || Number(rng()) < hitRate) {
+            const hpBeforeThrow=target.hp, barrierBeforeThrow=target.bossMagicBarrier||0;
             const damage = absorbBossMagicBarrier(battle, target, protectedCombatDamage(target, Math.min(Math.max(0, Number(target.hp) || 0), Math.max(0, Math.floor((Number(effect.value) || 0) * elementMultiplier)))), shieldAtStart);
             applyCombatHpDamage(target, damage);
+            if(actorSide==='player')recordGoddessInterruptionDamage(battle,target,Math.max(0,hpBeforeThrow-target.hp)+Math.max(0,barrierBeforeThrow-(target.bossMagicBarrier||0)));
             if (target.hp <= 0) target.alive = false;
             battle.log.push(`${action.item.name}が${target.name}に命中した！ ${damage}のダメージ！`);
             battle.presentationEvents.push({ type: "damage", hit: true, bossBarrierBlocked:shieldAtStart, actorSide, targetSide, amount: damage, element, hitIndex, hitCount, message: `${action.item.name}：${damage}ダメージ！` });
@@ -1653,6 +1656,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     battle.log.push(message);
     battle.presentationEvents.push({type:'magicBarrierDamage',targetSide:'player',amount:absorbed,remaining:barrier.amount,message});
   }
+  const bossBarrierBefore = Math.max(0,target.bossMagicBarrier||0);
   const bossBarrierBlocked = targetSide === "enemy" && target.bossMagicBarrier > 0 && actualDamage > 0;
   if (bossBarrierBlocked) {
     actualDamage = absorbBossMagicBarrier(battle, target, actualDamage);
@@ -1661,6 +1665,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
   const targetHpBeforeDamage = Math.max(0, Number(target.hp) || 0);
   applyCombatHpDamage(target, actualDamage);
   const actualHpLoss = Math.max(0, targetHpBeforeDamage - target.hp);
+  if(actorSide==='player'&&targetSide==='enemy')recordGoddessInterruptionDamage(battle,target,actualHpLoss+Math.max(0,bossBarrierBefore-(target.bossMagicBarrier||0)));
   if (actorSide === 'enemy' && action.spDamageOnHpHit > 0 && actualHpLoss > 0) {
     const amount = Math.min(Math.max(0, target.sp), action.spDamageOnHpHit);
     target.sp -= amount;
@@ -1930,7 +1935,9 @@ export function applyCancerDoubleReturn({
 export function applyFixedFollowUpDamage(battle, target, targetIndex = null) {
   const damage = Math.max(0, Math.floor(Number(battle?.followUpDamageAtStart) || 0));
   if (!battle || !target?.alive || target.hp <= 0 || damage <= 0) return 0;
+  const hpBeforeFollowUp=target.hp;
   applyCombatHpDamage(target, damage);
+  recordGoddessInterruptionDamage(battle,target,Math.max(0,hpBeforeFollowUp-target.hp));
   target.alive = target.hp > 0;
   battle.log.push(`追撃！ ${damage}ダメージ！`);
   battle.presentationEvents.push({
@@ -2049,6 +2056,7 @@ function finishAction(battle, side) {
 }
 
 function finishCombatantAction(battle, actor, side, targetIndex = null) {
+  if(side==='player')finishGoddessPlayerOpportunity(battle);
   if (actor.id === ZENTAURIN_ID && actor.zentaurinPrideActions > 0) actor.zentaurinPrideActions -= 1;
   payLionSelfDamage(battle, actor, targetIndex);
   const end = capGoddessDot(actor,capAkashicDot(actor, capLionDamageOverTime(actor, resolveEndOfAction({ statuses: actor.statuses, maxHp: actor.maxHp }))));
@@ -2263,6 +2271,7 @@ function combatStats(combatant) {
   );
   return {
     ...collected,
+    id:combatant.id,level:combatant.level,goddessTheme:combatant.goddessTheme,goddessCandidate:combatant.goddessCandidate,
     spellReincarnationMultiplier: getSpellReincarnationMultiplier(
       combatant.level,
       combatant.reincarnationCount
