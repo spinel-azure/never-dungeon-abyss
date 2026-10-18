@@ -8,10 +8,15 @@ export const V2_LEVEL_100_ENGRAVINGS=Object.freeze([
  'strength_engraving','intelligence_engraving','agility_engraving','dexterity_engraving','luck_engraving'
 ]);
 const normalized=value=>Math.max(0,Math.min(.999999999,Number(value)||0));
+const fixedLevel100Engravings=Object.freeze({
+ slate:'strength_engraving',magic:'intelligence_engraving',torture:'agility_engraving',
+ red:'dexterity_engraving',blue:'luck_engraving'
+});
 export function rollV2Level100Engraving(context,random=Math.random){
  if(!['special-map-v2-boss','special-map-v2-special-boss'].includes(context?.source)||Number(context.mapLevel)!==100)return null;
  const values=Array.isArray(context.engravingRandomValues)?context.engravingRandomValues:[random(),random()];
  if(normalized(values[0])>=.20)return null;
+ if(Object.hasOwn(fixedLevel100Engravings,context.themeId))return fixedLevel100Engravings[context.themeId];
  return V2_LEVEL_100_ENGRAVINGS[Math.floor(normalized(values[1])*V2_LEVEL_100_ENGRAVINGS.length)];
 }
 function rollV2CardDrop(enemy,context,random){
