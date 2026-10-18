@@ -1,0 +1,299 @@
+{
+  "sourceCommit": "70b657f245fd1f46a0b8c2edeed0a620d83a3f94",
+  "schemaVersion": 1,
+  "seeds": 65536,
+  "ecologyProfiles": 22,
+  "profiles": [
+    {
+      "level": 1,
+      "rarity": "WHITE"
+    },
+    {
+      "level": 5,
+      "rarity": "WHITE"
+    },
+    {
+      "level": 25,
+      "rarity": "SILVER"
+    },
+    {
+      "level": 60,
+      "rarity": "WHITE"
+    },
+    {
+      "level": 100,
+      "rarity": "WHITE"
+    },
+    {
+      "level": 100,
+      "rarity": "GOLD"
+    },
+    {
+      "themeId": "gold",
+      "level": 1,
+      "rarity": "WHITE"
+    },
+    {
+      "themeId": "gold",
+      "level": 60,
+      "rarity": "WHITE"
+    },
+    {
+      "themeId": "gold",
+      "level": 100,
+      "rarity": "WHITE"
+    },
+    {
+      "themeId": "gold",
+      "level": 100,
+      "rarity": "GOLD"
+    },
+    {
+      "themeId": "rice",
+      "level": 80,
+      "rarity": "WHITE"
+    },
+    {
+      "themeId": "rice",
+      "level": 90,
+      "rarity": "WHITE"
+    },
+    {
+      "themeId": "rice",
+      "level": 100,
+      "rarity": "WHITE"
+    },
+    {
+      "themeId": "rice",
+      "level": 100,
+      "rarity": "GOLD"
+    },
+    {
+      "themeId": "dusk",
+      "level": 80,
+      "rarity": "WHITE"
+    },
+    {
+      "themeId": "dusk",
+      "level": 90,
+      "rarity": "WHITE"
+    },
+    {
+      "themeId": "dusk",
+      "level": 100,
+      "rarity": "WHITE"
+    },
+    {
+      "themeId": "dusk",
+      "level": 100,
+      "rarity": "GOLD"
+    },
+    {
+      "themeId": "tender",
+      "level": 80,
+      "rarity": "WHITE"
+    },
+    {
+      "themeId": "tender",
+      "level": 90,
+      "rarity": "WHITE"
+    },
+    {
+      "themeId": "tender",
+      "level": 100,
+      "rarity": "WHITE"
+    },
+    {
+      "themeId": "tender",
+      "level": 100,
+      "rarity": "GOLD"
+    }
+  ],
+  "fingerprint": "36351d4a",
+  "actual": {
+    "v2Structure": "3ef9d97820479cf1e53a50f3ca1a77a1c5b95ce3968714c4e8185bf23f9fb84a",
+    "v1Topology": "b985066f1fb5720c8f27c56d925e58d700af9d637d90cd2c6e0fc33ce0920e58",
+    "legacyTopology": "3d92b41f2e2994ca08e40626cd85e498a20c8c0dfc1a135c32472641805df592",
+    "v1Doors": "6a625e0aac5a8c87367c2ab52e46570dcb195e4260ecb7cacc4f1167c81f693f",
+    "v1Ecology": "04c4c6902ef72c567a2166d4b4bd41d83b7ca89eab99a8926b0ceaa5d7c96a8a",
+    "v2Ecology": "9e3f074c82895f627bc9c9fa08b1f5e4ce0c8cb9478bb508bc5b71d7a6f9216a"
+  },
+  "geometryWithoutTheme": "9b5ddabc33fdea9ff3a7576a02984eee25ecb929de9d538c384795c7380307dd",
+  "profileHashes": [
+    {
+      "profile": {
+        "level": 1,
+        "rarity": "WHITE"
+      },
+      "sha256": "b01fecc802513c9a2e7870653033ff43b9b4e6cf569609da5ca868f1a5d4a877"
+    },
+    {
+      "profile": {
+        "level": 5,
+        "rarity": "WHITE"
+      },
+      "sha256": "19ab3c5a97eed141a82f5c38bfc580f657c47bbecb401207fadebce74706c9fc"
+    },
+    {
+      "profile": {
+        "level": 25,
+        "rarity": "SILVER"
+      },
+      "sha256": "3335c8d850abb83eb4800670bf122ff8f0d5bbccfde5ff779bef96f570ae860a"
+    },
+    {
+      "profile": {
+        "level": 60,
+        "rarity": "WHITE"
+      },
+      "sha256": "7f3b2650d68812928a8a8db62eb817bee2d3c36d0b8e58e9806d711509714fac"
+    },
+    {
+      "profile": {
+        "level": 100,
+        "rarity": "WHITE"
+      },
+      "sha256": "f49b7525858eefc6bf9d1b2e21079c9745533ec93281af25cd32fe0641dd805a"
+    },
+    {
+      "profile": {
+        "level": 100,
+        "rarity": "GOLD"
+      },
+      "sha256": "edb646d16fc582fbd9e1a5542689237b62592450d089314e74c8d44077bfb343"
+    },
+    {
+      "profile": {
+        "themeId": "gold",
+        "level": 1,
+        "rarity": "WHITE"
+      },
+      "sha256": "3a2102a913be5e19951972d18728360eb7f470f1f985dca90741c1a7b0cbb73e"
+    },
+    {
+      "profile": {
+        "themeId": "gold",
+        "level": 60,
+        "rarity": "WHITE"
+      },
+      "sha256": "af37a99dcdecb63ba5d32e5f32103e17dedbe28d6b86f9d0852cef8a7f0b5ec3"
+    },
+    {
+      "profile": {
+        "themeId": "gold",
+        "level": 100,
+        "rarity": "WHITE"
+      },
+      "sha256": "7a4c578a209646b742f8516d78f6e46e5ff81282d1c5aba14da06d0e27c93a88"
+    },
+    {
+      "profile": {
+        "themeId": "gold",
+        "level": 100,
+        "rarity": "GOLD"
+      },
+      "sha256": "e31f967e133ebebe67242d1dcc67b27b6e1ec62a20f23f0e5c3514a182511093"
+    },
+    {
+      "profile": {
+        "themeId": "rice",
+        "level": 80,
+        "rarity": "WHITE"
+      },
+      "sha256": "b17fd6d9b1820d975790ab9fb0878724b79c3cae97393472fa66bf041b06fe64"
+    },
+    {
+      "profile": {
+        "themeId": "rice",
+        "level": 90,
+        "rarity": "WHITE"
+      },
+      "sha256": "be0cdaaff5405579d32c6deae64c40c06776e988ec1f9c8895ba1df438acaf41"
+    },
+    {
+      "profile": {
+        "themeId": "rice",
+        "level": 100,
+        "rarity": "WHITE"
+      },
+      "sha256": "ab5a19e443bbd2518d193ff6de2c470c0d111611817c81c24973c75b259abc32"
+    },
+    {
+      "profile": {
+        "themeId": "rice",
+        "level": 100,
+        "rarity": "GOLD"
+      },
+      "sha256": "1f70c32b82ac4d89af2218a3d0b5b568c5afef2d0789d06fd900feb96b16605b"
+    },
+    {
+      "profile": {
+        "themeId": "dusk",
+        "level": 80,
+        "rarity": "WHITE"
+      },
+      "sha256": "955789f3211dc9ed01da47bd9accedfd17a5fb8b6f3fd3bfdac605c405d28ffe"
+    },
+    {
+      "profile": {
+        "themeId": "dusk",
+        "level": 90,
+        "rarity": "WHITE"
+      },
+      "sha256": "4cfef765b4f7c90fbd30d52af87207a4fda9890a20242d6c06845b852c2f71bb"
+    },
+    {
+      "profile": {
+        "themeId": "dusk",
+        "level": 100,
+        "rarity": "WHITE"
+      },
+      "sha256": "78af89ef3b78c5179b758b3264476b9a17100da95eca18a3103d7ef9ed505092"
+    },
+    {
+      "profile": {
+        "themeId": "dusk",
+        "level": 100,
+        "rarity": "GOLD"
+      },
+      "sha256": "036371698612fb863ed0e51a687583ca79617a1da29328599a962601b001e26f"
+    },
+    {
+      "profile": {
+        "themeId": "tender",
+        "level": 80,
+        "rarity": "WHITE"
+      },
+      "sha256": "f6cefcd26f64e0d21d28f27cce2a6855bfa515d89c6cf087db34c223bfa4eef0"
+    },
+    {
+      "profile": {
+        "themeId": "tender",
+        "level": 90,
+        "rarity": "WHITE"
+      },
+      "sha256": "11a2e3eb809e2e6b3810434a7867e9f80bdd6b2d5a56282a97e2c29f1092442a"
+    },
+    {
+      "profile": {
+        "themeId": "tender",
+        "level": 100,
+        "rarity": "WHITE"
+      },
+      "sha256": "c22f9d9db2b122c58c305f7c82c9d8edfab3148abb8e600e3529ed3bb8bd74fd"
+    },
+    {
+      "profile": {
+        "themeId": "tender",
+        "level": 100,
+        "rarity": "GOLD"
+      },
+      "sha256": "6905c47b84896701ffc10df8cba5c5c1f0099d4509ef555a909dce3cc3232e8b"
+    }
+  ],
+  "example": {
+    "themeId": "torture",
+    "canonical": "[\"special-map-v2\",12345,3,[[1,10,10,[[true,false,true,true],[true,true,false,false],[true,false,true,true],[true,false,true,false],[true,false,false,false],[true,false,false,false],[true,false,false,false],[true,true,false,false],[true,false,false,true],[true,true,false,false],[true,true,false,true],[false,false,false,true],[true,false,true,false],[true,false,true,false],[false,false,false,false],[false,true,false,false],[false,true,false,true],[false,false,true,true],[false,true,false,false],[false,true,false,true],[false,false,false,true],[false,true,false,false],[true,false,false,true],[true,false,true,false],[false,true,false,false],[false,false,true,true],[false,true,true,false],[true,false,false,true],[false,true,false,false],[false,true,false,true],[false,true,false,true],[false,false,true,true],[false,true,false,false],[true,false,false,true],[false,true,false,false],[true,false,true,true],[true,true,false,false],[false,true,false,true],[false,false,false,true],[false,true,false,false],[false,false,false,true],[true,false,false,false],[false,true,false,false],[false,true,false,true],[false,false,true,true],[true,false,true,false],[false,true,true,false],[false,true,false,true],[false,false,true,true],[false,true,false,false],[false,false,true,true],[false,true,true,false],[false,true,false,true],[false,false,true,true],[true,false,true,false],[true,false,true,false],[true,false,true,false],[false,true,true,false],[true,false,false,true],[false,true,true,false],[true,false,false,true],[true,true,false,false],[false,false,false,true],[true,false,true,false],[true,false,false,false],[true,true,false,false],[true,false,true,true],[true,false,false,false],[false,false,false,false],[true,true,false,false],[false,false,false,true],[false,false,true,false],[false,true,false,false],[true,false,false,true],[false,true,false,false],[false,false,true,true],[true,true,false,false],[false,false,true,true],[false,true,true,false],[false,true,false,true],[false,false,true,true],[true,true,false,false],[false,false,false,true],[false,true,false,false],[false,false,true,true],[true,true,false,false],[false,true,false,true],[true,false,false,true],[true,false,true,false],[false,true,false,false],[true,false,true,true],[false,true,true,false],[false,false,true,true],[false,false,true,false],[true,true,true,false],[false,false,true,true],[false,false,true,false],[false,true,true,false],[true,false,true,true],[false,true,true,false]],[0,3],[7,7],\"W\",\"S\",\"torture\",null,null],[2,10,10,[[true,false,true,true],[true,false,true,false],[true,false,true,false],[true,false,true,false],[true,true,false,false],[true,false,false,true],[true,false,false,false],[true,false,false,false],[true,false,true,false],[true,true,false,false],[true,false,true,true],[true,false,false,false],[true,true,false,false],[true,false,false,true],[false,true,true,false],[false,false,false,true],[false,true,false,false],[false,false,true,true],[true,false,true,false],[false,true,false,false],[true,false,false,true],[false,true,true,false],[false,false,true,true],[false,false,true,false],[true,true,false,false],[false,true,false,true],[false,false,false,true],[true,false,false,false],[true,false,false,false],[false,true,false,false],[false,true,false,true],[true,false,false,true],[true,false,false,false],[true,true,true,false],[false,true,false,true],[false,true,false,true],[false,false,false,true],[false,true,false,false],[false,true,true,true],[false,true,false,true],[false,false,false,true],[false,true,true,false],[false,false,true,true],[true,true,false,false],[false,true,false,true],[false,true,false,true],[false,true,true,true],[false,true,false,true],[true,false,false,true],[false,true,false,false],[false,true,false,true],[true,false,false,true],[true,true,false,false],[false,true,false,true],[false,true,false,true],[false,false,true,true],[true,false,false,false],[false,true,false,false],[false,true,false,true],[false,true,false,true],[false,true,false,true],[false,false,true,true],[false,true,false,false],[false,true,false,true],[false,false,true,true],[true,true,false,false],[false,false,false,true],[false,false,false,false],[false,true,true,false],[false,true,false,true],[false,false,true,true],[true,true,false,false],[false,true,false,true],[false,false,true,true],[true,true,false,false],[false,false,false,true],[false,true,false,false],[false,false,true,true],[true,false,true,false],[false,true,false,false],[true,false,false,true],[false,true,false,false],[false,false,true,true],[true,true,false,false],[false,false,false,true],[false,true,false,false],[false,true,true,true],[true,false,false,true],[true,true,false,false],[false,true,false,true],[false,false,true,true],[false,false,true,false],[true,false,true,false],[false,true,true,false],[false,false,true,true],[false,false,true,false],[true,false,true,false],[false,false,true,false],[false,false,true,false],[false,true,true,false]],[8,9],[1,5],\"S\",\"N\",\"torture\",null,null],[3,10,10,[[true,false,true,true],[true,false,true,false],[true,true,false,false],[true,false,true,true],[true,false,true,false],[true,true,false,false],[true,true,false,true],[true,false,false,true],[true,false,true,false],[true,true,false,false],[true,false,false,true],[true,true,false,false],[false,false,false,true],[true,true,false,false],[true,false,false,true],[false,true,true,false],[false,true,false,true],[false,true,false,true],[true,false,true,true],[false,true,true,false],[false,true,false,true],[false,false,false,true],[false,true,false,false],[false,true,false,true],[false,false,true,true],[true,false,true,false],[false,false,true,false],[false,false,true,false],[true,false,true,false],[true,true,false,false],[false,false,false,true],[false,true,false,false],[false,true,false,true],[false,false,true,true],[true,false,false,false],[true,false,true,false],[true,false,true,false],[true,false,false,false],[true,true,false,false],[false,true,false,true],[false,false,false,true],[false,true,false,false],[false,false,true,true],[true,false,false,false],[false,false,true,false],[true,false,true,false],[true,false,false,false],[false,true,true,false],[false,false,true,true],[false,true,false,false],[false,true,false,true],[false,false,false,true],[true,true,false,false],[false,true,false,true],[true,false,false,true],[true,false,true,false],[false,true,true,false],[true,false,false,true],[true,false,true,false],[false,true,false,false],[false,true,false,true],[false,false,false,true],[false,false,false,false],[false,false,false,false],[false,true,true,false],[true,false,false,true],[true,false,false,false],[false,true,false,false],[true,false,true,true],[false,true,false,false],[false,false,false,true],[false,true,true,false],[false,true,false,true],[false,false,false,true],[true,true,false,false],[false,true,false,true],[false,true,false,true],[false,false,true,true],[true,false,false,false],[false,true,false,false],[false,false,true,true],[true,true,false,false],[false,false,true,true],[false,true,true,false],[false,false,true,true],[false,false,true,false],[false,false,true,false],[true,false,false,false],[false,true,true,false],[false,true,false,true],[true,false,true,true],[false,false,true,false],[true,false,true,false],[true,false,true,false],[true,false,true,false],[true,false,true,false],[true,true,true,false],[false,false,true,true],[true,false,true,false],[false,true,true,false]],[6,9],null,null,\"W\",\"torture\",[\"N\",[[6,1],[6,0]],[6,2],[6,0],[6,1],\"S\",\"floor-3:6,1,S\",\"boss\",\"locked\",\"special-map-v2:rusted-boss-key\",\"specialMapSession\"],[\"floor-3:rusted-key-chest\",[9,8],\"gold\",\"sessionKey\",\"special-map-v2:rusted-boss-key\",\"赤錆びた鍵\",\"specialMapSession\"]]],[[[1,7,7],[2,8,9]],[[2,1,5],[3,6,9]]]]"
+  },
+  "seconds": 108.824
+}
