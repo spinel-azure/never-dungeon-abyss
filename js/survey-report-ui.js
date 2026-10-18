@@ -1,4 +1,4 @@
-import {SURVEY_PRIZES,reportableMaps,surveyExchangeReason} from '../data/survey-report.js';
+import {SURVEY_PRIZES,reportableMaps,surveyExchangeReason,surveyPrizeDetails} from '../data/survey-report.js';
 import {describeTestMap,normalizeSpecialMaps} from '../data/special-maps.js';
 import {hasKeyItem} from '../data/key-items.js';
 import {mapNameColor} from './special-map/name-color.js';
@@ -42,6 +42,9 @@ export function createSurveyReportUI({host,commands,message,getCharacter,transac
    if(!commit('report',selected.id))return;
    talk('…わぁ！隅々までじっくり調査してくれたのね。どうもありがとう！',async()=>{if(await present('report')){list('reports');say('他にも報告してくれる地図はあるのかな？');}});
   }else if(mode==='exchangeConfirm'){
+   if(surveyExchangeReason(getCharacter(),selected)==='ポイント不足'){
+    playSe('blocked');talk('ごめんね。ポイントが足りないみたい。他の物を選んでくれる？',()=>list('exchange',true));return;
+   }
    if(!commit('exchange',selected.id))return;
    locked=true;const token=epoch;say('はい、どうぞ！');await playJingle('battleVictory');if(token!==epoch)return;locked=false;list('exchange',true);say('はい、どうぞ！');
   }
@@ -58,13 +61,23 @@ export function createSurveyReportUI({host,commands,message,getCharacter,transac
   if(mode==='talk'){commands.append(button('次へ（A）',advance,true),button('報告',()=>{},false,true),button('交換',()=>{},false,true),make('span'),make('span'),button('戻る（B）',back));message.textContent=pages[pageIndex]+'\n＊Aボタンで次へ';return;}
   if(mode==='home'){commands.append(button('報告',()=>list('reports'),index===0),button('交換',()=>list('exchange'),index===1),button('戻る',back,index===2),make('span'),make('span'),make('span'));return;}
   const heading=make('header');heading.className='survey-heading';heading.append(make('h2',mode.startsWith('report')?'調査報告':'スタンプ交換'),make('span',`所持 ${state().stampPoints}p`));panel.append(heading);
-  if(mode.endsWith('Confirm')){panel.append(make('h3',selected.name||describeTestMap(selected)?.name));panel.append(button('はい（A）',confirm,index===0),button('いいえ（B）',back,index===1));say(mode==='reportConfirm'?'この地図を報告してくれるの？':'交換するのはこれでいい？');return;}
+  if(mode.endsWith('Confirm')){
+   if(mode==='exchangeConfirm'){
+    const detail=make('div');detail.className='explorer-detail survey-exchange-detail';
+    const info=surveyPrizeDetails(selected),top=make('div');top.className='survey-prize-top';
+    const name=make('h3',selected.name);if(selected.once)name.style.color='#ff9d2e';top.append(name);
+    if(info.image){const image=make('img');image.src=info.image;image.alt=selected.name;image.onerror=()=>image.remove();top.append(image);}
+    detail.append(top,make('p',`【${info.category}】${info.description}`),make('p',`必要 ${selected.cost}p ／ 所持 ${state().stampPoints}p`));
+    const reason=surveyExchangeReason(getCharacter(),selected);if(reason)detail.append(make('p',reason));panel.append(detail);
+   }else panel.append(make('h3',selected.name||describeTestMap(selected)?.name));
+   panel.append(button('はい（A）',confirm,index===0),button('いいえ（B）',back,index===1));say(mode==='reportConfirm'?'この地図を報告してくれるの？':'交換するのはこれでいい？');return;
+  }
   const items=rows();index=Math.max(0,Math.min(index,items.length-1));page=Math.floor(index/5);
   const listEl=make('div');listEl.className='transfer-destination-list';
   if(!items.length)listEl.append(make('p','報告できる地図はありません。'));
   items.slice(page*5,page*5+5).forEach((row,n)=>{const i=page*5+n,reason=mode==='exchange'?surveyExchangeReason(getCharacter(),row):'';
    const label=mode==='reports'?describeTestMap(row)?.name:`${row.name}　${row.cost}p${reason?'（'+reason+'）':''}`;
-   const b=button(label,()=>select(row),!sortFocus&&index===i,Boolean(reason));b.children[0].className='explorer-map-name';if(mode==='reports'){b.style.color=mapNameColor(row.rarity);const check=make('span','☑');check.className='explorer-map-complete';b.append(check);}if(row.once&&!reason)b.style.color='#ff9d2e';listEl.append(b);
+   const b=button(label,()=>{index=i;select(row);},!sortFocus&&index===i);b.classList.toggle('is-unavailable',Boolean(reason));b.children[0].className='explorer-map-name';if(mode==='reports'){b.style.color=mapNameColor(row.rarity);const check=make('span','☑');check.className='explorer-map-complete';b.append(check);}if(row.once&&!reason)b.style.color='#ff9d2e';listEl.append(b);
   });panel.append(listEl);
   const pager=make('div');pager.className='transfer-destination-pager';pager.append(button('◀',()=>turn(-1)),make('strong',`${page+1} / ${Math.max(1,Math.ceil(items.length/5))}`),button('▶',()=>turn(1)));panel.append(pager);
   const footer=make('div');footer.className='explorer-footer';footer.append(button('戻る（B）',back),button('ソート：'+(sort<0?'登録順':mode==='reports'?['お気に入り','Lv低い順','Lv高い順','テーマ'][sort]:['カテゴリ順','ポイント低い順','ポイント高い順'][sort]),cycleSort,sortFocus));panel.append(footer);
@@ -72,7 +85,7 @@ export function createSurveyReportUI({host,commands,message,getCharacter,transac
  }
  function turn(delta){const count=Math.max(1,Math.ceil(rows().length/5));page=(page+delta+count)%count;index=page*5;sortFocus=false;render();}
  function input(action){if(!active)return false;if(locked)return true;if(action==='confirm'&&finishTyping())return true;if(action==='cancel'){playSe('cancel');back();return true;}
-  if(action==='confirm'){playSe('confirm');if(mode==='talk')advance();else if(mode==='home'){if(index===2)back();else list(index===0?'reports':'exchange');}else if(mode.endsWith('Confirm')){if(index===0)void confirm();else back();}else if(sortFocus)cycleSort();else {const row=rows()[index];if(row){const reason=mode==='exchange'?surveyExchangeReason(getCharacter(),row):'';if(reason){playSe('blocked');message.textContent=reason;}else select(row);}}return true;}
+  if(action==='confirm'){playSe('confirm');if(mode==='talk')advance();else if(mode==='home'){if(index===2)back();else list(index===0?'reports':'exchange');}else if(mode.endsWith('Confirm')){if(index===0)void confirm();else back();}else if(sortFocus)cycleSort();else {const row=rows()[index];if(row)select(row);}return true;}
   if(['up','down','left','right','pageLeft','pageRight'].includes(action)){playSe('cursorMove');if(mode==='talk')return true;if(mode==='home'||mode.endsWith('Confirm')){const count=mode==='home'?3:2;index=(index+(['down','right'].includes(action)?1:count-1))%count;render();}else if(['left','pageLeft','right','pageRight'].includes(action))turn(['left','pageLeft'].includes(action)?-1:1);else{const first=page*5,last=Math.min(first+4,rows().length-1);if(sortFocus){sortFocus=false;index=action==='up'?last:first;}else if((action==='up'&&index===first)||(action==='down'&&index===last))sortFocus=true;else index+=action==='down'?1:-1;render();}}return true;
  }
  function close(){active=false;epoch++;locked=false;overlay.hidden=true;overlay.classList.remove('is-fading');panel.hidden=true;}

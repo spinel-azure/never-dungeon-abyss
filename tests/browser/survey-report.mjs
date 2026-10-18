@@ -28,11 +28,23 @@ try{for(const width of [1280,390]){
  for(let n=0;n<10&&!(await page.locator('.survey-reward-overlay').isVisible());n++){await finish();await press('confirm');}await page.waitForTimeout(80);if(process.env.SURVEY_SCREENSHOTS==='1')await page.screenshot({path:path.join(tmpdir(),`nda-stamp-${width}.png`)});await page.waitForTimeout(2400);
  assert.equal(await panel.locator('.transfer-destination-list button').count(),5);assert.ok((await page.evaluate(()=>surveyCues)).includes('surveyStamp'));
  await press('cancel');await finish();await press('right');await press('confirm');await finish();
+ // Unaffordable prizes remain selectable through the shared keyboard/gamepad route.
+ if(width===390)await panel.getByRole('button',{name:/ツァウバートランク/}).tap();else {await press('down');await press('confirm');}await finish();
+ assert.match(await panel.locator('.survey-exchange-detail').innerText(),/25％/);
+ await panel.locator('.survey-prize-top img').evaluate(img=>img.decode());
+ await press('confirm');await finish();assert.match(await page.locator('body').innerText(),/ポイントが足りない/);
+ assert.equal(await page.evaluate(()=>surveyQA.state().specialMaps.stampPoints),1);
+ for(let n=0;n<10 && !(await panel.isVisible());n++){await finish();await press('confirm');}
+ await press('up');
  await page.evaluate(()=>surveyQA.points(500));await press('left');await press('right');assert.equal(await panel.locator('.transfer-destination-list button').count(),5);
- await press('confirm');await finish();await press('confirm');await page.waitForTimeout(100);assert.equal(await page.evaluate(()=>surveyQA.state().inventory.counts.attracting_incense),1);
+ await finish();await press('confirm');await finish();await press('confirm');await page.waitForTimeout(100);assert.equal(await page.evaluate(()=>surveyQA.state().inventory.counts.attracting_incense),1);
  // Keep the cursor after exchange, then select unique shoes on the next page.
  await finish();
- await press('right');await press('down');await finish();await press('confirm');await finish();await press('confirm');await page.waitForTimeout(100);
+ await press('right');await press('down');await press('down');await press('down');await finish();await press('confirm');await finish();
+ assert.match(await panel.locator('.survey-exchange-detail').innerText(),/DEF＋5/);
+ await panel.locator('.survey-prize-top img').evaluate(img=>img.decode());
+ if(process.env.SURVEY_SCREENSHOTS==='1')await page.screenshot({path:path.join(tmpdir(),`nda-exchange-detail-${width}.png`)});
+ await press('confirm');await page.waitForTimeout(100);
  assert.equal(await page.evaluate(()=>surveyQA.state().specialMaps.surveyShoesExchanged),true);assert.equal(await page.evaluate(()=>surveyQA.state().equipmentInventory.instances.find(i=>i.equipmentId==='alveter_schuhe').locked),true);
  if(process.env.SURVEY_SCREENSHOTS==='1')await page.screenshot({path:path.join(tmpdir(),`nda-exchange-${width}.png`)});
  assert.deepEqual(errors,[]);console.log(width+'px report/introduction/exchange passed');await page.close();

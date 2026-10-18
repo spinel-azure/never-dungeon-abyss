@@ -1,14 +1,25 @@
 import {normalizeSpecialMaps,mapContentId} from './special-maps.js';
 import {getMapSurveyReports} from './special-map-survey-report.js';
 import {getItem} from './items.js';
+import {getItemCompendiumEntry} from './item-compendium.js';
+import {getEquipmentItem} from './equipment.js';
 import {grantItem,getItemCount} from './inventory.js';
 import {grantKeyItem,hasKeyItem} from './key-items.js';
 import {grantEquipmentInstance,characterOwnsEquipment} from './equipment-inventory.js';
 export const SURVEY_PRIZES=Object.freeze([
  ...['strength','intelligence','agility','dexterity','luck'].map(stat=>({id:stat+'_engraving',name:getItem(stat+'_engraving').name,cost:100,category:1})),
  {id:'attracting_incense',name:'引き寄せのお香',cost:1,category:0},
+ {id:'zaubertrank',name:getItem('zaubertrank').name,cost:300,category:0},
+ {id:'allheilmittel',name:getItem('allheilmittel').name,cost:600,category:0},
  {id:'alveter_schuhe',name:'アルヴェターシューエ',cost:250,category:2,once:true}
 ]);
+export function surveyPrizeDetails(prize){
+ const item=prize.once?getEquipmentItem(prize.id,'footId'):getItem(prize.id);
+ const catalog=getItemCompendiumEntry(prize.id);
+ return {category:prize.once?'装備品・足':'消耗品',
+  description:prize.once?`DEF＋${item.statBonuses.def}／${item.description}。一品物・交換は1回のみ。ロック状態で受け取ります。`:item.description,
+  image:catalog?.imageSrc||({alveter_schuhe:'images/item-compendium/allwetterschuhe.avif',zaubertrank:'images/item-compendium/zaubertrank.avif',allheilmittel:'images/item-compendium/allheilmittel.avif'}[prize.id]||'')};
+}
 export function reportableMaps(character){const s=normalizeSpecialMaps(character?.specialMaps);const ids=new Set(getMapSurveyReports(s).filter(r=>r.canReport).map(r=>r.mapId));return s.registered.filter(m=>ids.has(m.id));}
 const fail=error=>({ok:false,error});
 export function surveyExchangeReason(character,prize){
