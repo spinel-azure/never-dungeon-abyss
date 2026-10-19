@@ -9,6 +9,28 @@ const enabled=s=>NORMAL_MAP_THEMES.includes(s.generatedMap.themeId)||(s.generate
 export function attachV2BossEncounter(s,{onBossEncounter,prepareBossEncounter}={}){
  s.bossDefeated=false;s.pendingBoss=false;
  s.deferBossSurveyJingle=()=>Boolean(onBossEncounter&&!s.bossDefeated&&enabled(s));
+ s.completeBossSurvey=()=>{
+  const cell=s.generatedMap.bossRoom?.bossCell;
+  if(!s.bossDefeated||s.currentFloor!==2||!cell)return false;
+  s.recordSurvey(cell.x,cell.y);
+  const saved=s.flushSurvey();
+  if(s.surveyNotice||s.surveyCompletionPending){
+   s.deferredSurveyNotice=s.surveyNotice||{total:300,floor:2};
+   s.surveyNotice=null;s.surveyCompletionPending=false;
+  }
+  return saved;
+ };
+ s.retreatFromBoss=()=>{
+  if(s.bossDefeated||s.currentFloor!==2)return false;
+  const room=s.generatedMap.bossRoom,cell=room?.cells[0];
+  if(!cell)return false;
+  s.playerX=cell.x;s.playerY=cell.y;
+  s.motion=null;s.autoPath=null;s.cellPrompt=null;
+  Object.assign(s.renderState,{x:cell.x+.5,y:cell.y+.5,anim:null});
+  s.deferredSurveyNotice=null;s.bossFloorJinglePending=false;
+  s.surveyNotice=null;s.surveyCompletionPending=false;
+  return true;
+ };
  s.retryBossEncounter=()=>{
   if(!s.pendingBoss||s.battleContext||s.experienceClosed)return false;
   if(!s.flushSurvey()){s.say(s.surveyError);return false;}

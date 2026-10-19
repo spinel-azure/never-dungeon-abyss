@@ -1,3 +1,4 @@
+import {surveyVisitV2} from '../data/special-map-survey-v2.js';
 import {createGoddessMapBoss} from '../data/karte-goddess-bosses.js';
 import {createGoldMapBoss} from '../data/karte-gold-boss.js';
 import {beginNpcRenewal} from '../data/npc-party.js';
@@ -49,6 +50,20 @@ function harness(t,level=60,cards=[]){
   async win(exp){const battle=this.battle(exp);await scope.outcome(battle,'victory');return battle;}};
 }
 const protectedState=c=>structuredClone({carried:c.carriedExperience,pending:c.pendingExperienceSettlement,guild:c.guildExperiencePool,loot:c.lootBag});
+test('production boss escape retreats without rewards or a later mob victory showing boss survey',async t=>{
+ const h=harness(t,100),s=h.session;s.currentFloor=2;
+ const room=s.generatedMap.bossRoom;s.playerX=room.bossCell.x;s.playerY=room.bossCell.y;
+ const masks=[...s.surveyedMasks],before=protectedState(h.c);let notices=0;
+ s.presentDeferredSurveyNotice=()=>{notices++;};
+ // Also discard a completion notice retained by an older interrupted fight.
+ s.deferredSurveyNotice={total:300,floor:2};
+ const battle=h.battle();s.battleContext.source='special-map-v2-boss';battle.explorationContext=structuredClone(s.battleContext);
+ await h.scope.outcome(battle,'escape');
+ assert.deepEqual([s.playerX,s.playerY],[room.cells[0].x,room.cells[0].y]);
+ assert.equal(s.bossDefeated,false);assert.equal(s.battleExperience,0);assert.equal(s.deferredSurveyNotice,null);
+ assert.deepEqual(s.surveyedMasks,masks);assert.deepEqual(protectedState(h.c),before);
+ await h.win(100);assert.equal(notices,0);assert.deepEqual(s.surveyedMasks,masks);
+});
 test('V2 normal return schedules NPC renewal atomically with rewards, retry does not duplicate',t=>{
  const h=harness(t);h.c.npcSystem={registeredIds:['alec'],activeIds:['alec'],records:{alec:{}},renewal:null,expeditionMaxDepth:0};
  // Use an actual registered companion ID from the production registry.
@@ -62,7 +77,7 @@ for(const source of ['special-map-v2-boss','special-map-v2-special-boss'])test(`
  const h=harness(t,60,[GODDESS_GRACE_CARD_ID]),normal=protectedState(h.c);
  const make=()=>{const b=h.battle();h.session.battleContext.source=source;h.session.battleContext.bossId='karte_boss_001';b.explorationContext=structuredClone(h.session.battleContext);b.enemy=createEnemyCombatant(source==='special-map-v2-special-boss'?createGoldMapBoss({themeId:'gold',level:60}):createNormalMapBoss({seed:12345,level:60,rarity:'WHITE',themeId:'crystal'}));return b;};
  h.session.currentFloor=2;h.session.playerX=6;h.session.playerY=0;h.session.direction=1;h.session.torchFuel=63;h.session.bossKeyFound=h.session.bossDoorUnlocked=true;
- const before=JSON.stringify({x:h.session.playerX,y:h.session.playerY,dir:h.session.direction,torch:h.session.torchFuel,survey:h.session.surveyedMasks});
+ const before=JSON.stringify({x:h.session.playerX,y:h.session.playerY,dir:h.session.direction,torch:h.session.torchFuel,survey:surveyVisitV2(h.session.surveyedMasks,2,h.session.generatedMap.bossRoom.bossCell.x,h.session.generatedMap.bossRoom.bossCell.y)});
  const win=make();win.enemy.hp=0;win.enemy.alive=false;await h.scope.outcome(win,'victory');
  const reward=h.session.battleExperience;assert.ok(reward>0);assert.equal(h.session.bossDefeated,true);assert.equal(h.session.battleContext,null);assert.ok(h.session.presence<100);
  assert.equal(JSON.stringify({x:h.session.playerX,y:h.session.playerY,dir:h.session.direction,torch:h.session.torchFuel,survey:h.session.surveyedMasks}),before);
@@ -191,7 +206,7 @@ for(const theme of ['rice','dusk','tender'])test(`${theme} goddess production ou
  const source='special-map-v2-special-boss';const h=harness(t,100,[GODDESS_GRACE_CARD_ID]),normal=protectedState(h.c);
  const make=()=>{const b=h.battle();h.session.battleContext.source=source;h.session.battleContext.bossId='karte_boss_001';b.explorationContext=structuredClone(h.session.battleContext);b.enemy=createEnemyCombatant(createGoddessMapBoss({themeId:theme,level:100}));return b;};
  h.session.currentFloor=2;h.session.playerX=6;h.session.playerY=0;h.session.direction=1;h.session.torchFuel=63;h.session.bossKeyFound=h.session.bossDoorUnlocked=true;
- const before=JSON.stringify({x:h.session.playerX,y:h.session.playerY,dir:h.session.direction,torch:h.session.torchFuel,survey:h.session.surveyedMasks});
+ const before=JSON.stringify({x:h.session.playerX,y:h.session.playerY,dir:h.session.direction,torch:h.session.torchFuel,survey:surveyVisitV2(h.session.surveyedMasks,2,h.session.generatedMap.bossRoom.bossCell.x,h.session.generatedMap.bossRoom.bossCell.y)});
  const win=make();win.enemy.hp=0;win.enemy.alive=false;await h.scope.outcome(win,'victory');
  const reward=h.session.battleExperience;assert.ok(reward>0);assert.equal(h.session.bossDefeated,true);assert.equal(h.session.battleContext,null);assert.ok(h.session.presence<100);
  assert.equal(JSON.stringify({x:h.session.playerX,y:h.session.playerY,dir:h.session.direction,torch:h.session.torchFuel,survey:h.session.surveyedMasks}),before);

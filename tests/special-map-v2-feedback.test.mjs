@@ -83,7 +83,7 @@ test('V2 rare reward chest waits for opening, then item popup, before deferred s
  let release,popups=0;const sounds=[];
  const reward={kind:'item',itemId:'strength_engraving'};
  const h=harness({playSe:key=>sounds.push(key),hostOptions:{showV2RareRewardAcquisition:value=>{popups++;assert.deepEqual(value,reward);return new Promise(r=>release=r);}}}),s=h.ui.session;
- s.deferredSurveyNotice={total:300,floor:2};
+ s.bossDefeated=true;s.deferredSurveyNotice={total:300,floor:2};
  const presentation=s.presentV2RareRewardChest(reward);
  assert.equal(popups,0);assert.equal(s.transitioning,true);assert.equal(s.renderState.overlayEvent?.surveyMilestone,undefined);
  h.done();await Promise.resolve();assert.equal(popups,1);assert.deepEqual(sounds,['door','importantItem']);

@@ -37,7 +37,7 @@ test('gold fixed identity/stats/actions; 60..100 integer scaling; no other theme
  assert.deepEqual(getV2CombatEnemy('maikaefer_koenig'),baseline);
  assert.equal(KARTE_SPECIAL_BOSSES.karte_boss_maikaefer_koenig.allowColorVariant,false);
 });
-test('gold actual 299 to 300 commits before queued encounter and waits for the completion presentation',()=>{
+test('gold boss contact stays at 299 and victory commits 300 before presentation',()=>{
  setExplorerTestEnabled(true);const o=developmentMapOptions({level:100,seed:12346});
  const probe=createSpecialMapV2Session(o.registered,o.mapKey,{developmentTheme:'gold'}),p=probe.blueprint.floors[2].bossRoom.bossCell;probe.disposeSurvey();
  const masks=Array(3).fill('f'.repeat(25)),i=p.y*10+p.x,n=Math.floor(i/4);masks[2]='f'.repeat(n)+(15&~(1<<(i%4))).toString(16)+'f'.repeat(24-n);
@@ -45,9 +45,9 @@ test('gold actual 299 to 300 commits before queued encounter and waits for the c
  const s=createSpecialMapV2Session([original],o.mapKey,{developmentTheme:'gold',persistSurvey:()=>{events.push('save');return {ok:true};},onBossEncounter:()=>events.push('boss')});
  try{
   s.currentFloor=2;s.playerX=p.x;s.playerY=p.y;s.bossKeyFound=s.bossDoorUnlocked=true;
-  assert.equal(s.totalSurveyed,299);s.recordSurvey(p.x,p.y);s.onBossCell();assert.equal(s.totalSurveyed,300);assert.deepEqual(events,['save']);
-  s.surveyNotice=null;s.surveyCompletionPending=false;s.surveyPresentationPlaying=true;s.retryBossEncounter();assert.deepEqual(events,['save']);
-  s.surveyPresentationPlaying=false;s.retryBossEncounter();assert.deepEqual(events,['save','boss']);
+  assert.equal(s.totalSurveyed,299);s.recordSurvey(p.x,p.y);s.onBossCell();assert.equal(s.totalSurveyed,299);assert.deepEqual(events,['boss']);
+  s.bossDefeated=true;s.completeBossSurvey();assert.equal(s.totalSurveyed,300);assert.deepEqual(events,['boss','save']);
+  assert.deepEqual(s.deferredSurveyNotice,{total:300,floor:2});
  }finally{s.disposeSurvey();setExplorerTestEnabled(false);}
 });
 test('development maps require opt-in and never change a registered original; frozen Lv1 gold ecology remains valid',()=>{

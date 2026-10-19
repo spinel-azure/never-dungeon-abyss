@@ -10,6 +10,7 @@ import {grantV2BattleRewards,settleV2ReturnExperience} from '../js/special-map/b
 import {prepareNormalBossImage} from '../js/special-map/normal-boss-presentation.js';
 import {getEquipmentAdjustedEscapeRate,resolveEscapeAttempt} from '../combat/resolve-escape.js';
 import {surveyVisitV2} from '../data/special-map-survey-v2.js';
+import {serializeSpecialMapSession,restoreSpecialMapSession,resumeMapOriginal} from '../js/special-map/save-session.js';
 import {F3_MAP_FIXTURES} from './fixtures/special-map-f3.mjs';
 import {encodeMapCode,decodeMapCode} from '../data/special-map-code.js';
 import {describeV2MapName} from '../data/special-map-names-v2.js';
@@ -56,16 +57,34 @@ test('boss cell: requires session key, survey flush precedes battle; special fou
  }finally{s.disposeSurvey();}
  const again=session();assert.equal(again.bossDefeated,false);again.disposeSurvey();
 });
-test('299→300 starts the boss first and defers committed survey presentation',()=>{
+test('boss contact and escape stay at 299; victory alone completes the survey',()=>{
  const original={...map,surveyedMasks:Array(3).fill('f'.repeat(25))};
  const probe=session(),p=probe.generatedMap.bossRoom.bossCell;probe.disposeSurvey();
  const index=p.y*10+p.x,nibble=Math.floor(index/4),bit=index%4;
  original.surveyedMasks[2]='f'.repeat(nibble)+(15&~(1<<bit)).toString(16)+'f'.repeat(24-nibble);
  let count=0;const s=createSpecialMapV2Session([original],mapOriginalId(original),{onBossEncounter:()=>count++});
  try{s.currentFloor=2;s.playerX=p.x;s.playerY=p.y;s.bossKeyFound=s.bossDoorUnlocked=true;
-  assert.equal(s.totalSurveyed,299);s.recordSurvey(p.x,p.y);assert.equal(s.totalSurveyed,300);s.onCellEntered();assert.equal(count,1);
-  assert.equal(s.surveyNotice,null);assert.deepEqual(s.deferredSurveyNotice,{total:300,floor:2});
+  assert.equal(s.totalSurveyed,299);s.recordSurvey(p.x,p.y);assert.equal(s.totalSurveyed,299);s.onCellEntered();assert.equal(count,1);
+  assert.equal(s.surveyNotice,undefined);assert.equal(s.deferredSurveyNotice,undefined);
   s.onBossCell();assert.equal(count,1);
+  const snapshot=JSON.parse(JSON.stringify(serializeSpecialMapSession(s)));
+  const resumedMap=resumeMapOriginal(original,snapshot);
+  const resumed=createSpecialMapV2Session([resumedMap],mapOriginalId(resumedMap),{onBossEncounter:()=>{}});
+  try{
+   restoreSpecialMapSession(resumed,snapshot);assert.equal(resumed.totalSurveyed,299);
+   resumeV2Encounter(resumed,resumed.battleContext);resumed.retreatFromBoss();
+   assert.equal(resumed.surveyView[p.y][p.x],false);assert.equal(resumed.totalSurveyed,299);
+  }finally{resumed.disposeSurvey();}
+  resumeV2Encounter(s,s.battleContext);assert.ok(s.retreatFromBoss());
+  const retreat=s.generatedMap.bossRoom.cells[0];
+  assert.deepEqual([s.playerX,s.playerY,s.renderState.x,s.renderState.y],[retreat.x,retreat.y,retreat.x+.5,retreat.y+.5]);
+  assert.equal(s.totalSurveyed,299);assert.equal(s.surveyedCount,99);assert.equal(s.surveyCompletionPending,false);
+  s.recordSurvey(retreat.x,retreat.y);assert.equal(s.totalSurveyed,299);
+  s.playerX=p.x;s.playerY=p.y;s.onBossCell();assert.equal(count,2);
+  s.bossDefeated=true;resumeV2Encounter(s,s.battleContext);assert.ok(s.completeBossSurvey());
+  assert.equal(s.totalSurveyed,300);assert.deepEqual(s.deferredSurveyNotice,{total:300,floor:2});
+  const revisited=createSpecialMapV2Session([{...original,surveyedMasks:s.surveyedMasks}],mapOriginalId(original),{onBossEncounter:()=>{}});
+  try{revisited.currentFloor=2;revisited.retreatFromBoss();assert.equal(revisited.totalSurveyed,300);}finally{revisited.disposeSurvey();}
  }finally{s.disposeSurvey();}
 });
 test('boss EXP/G enter existing return transaction once; normal carried state untouched',()=>{

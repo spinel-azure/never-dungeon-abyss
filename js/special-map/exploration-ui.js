@@ -105,6 +105,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
   });
  }
  session.presentDeferredSurveyNotice=()=>{
+  if(!session.bossDefeated||!session.flushSurvey())return Promise.resolve(false);
   const notice=session.deferredSurveyNotice;
   if(!notice)return Promise.resolve(false);
   session.deferredSurveyNotice=null;

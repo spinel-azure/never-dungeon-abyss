@@ -35,6 +35,9 @@ export function attachV2Survey(s,original,{persistSurvey=()=>({ok:true}),schedul
   return true;
  };
  s.recordSurvey=(x,y)=>{
+  const boss=s.generatedMap?.bossRoom?.bossCell;
+  // Contact starts combat; only victory earns new survey knowledge here.
+  if(s.currentFloor===2&&boss?.x===x&&boss?.y===y&&s.deferBossSurveyJingle?.())return true;
   const before=s.totalSurveyed,beforeFloor=s.surveyedCount;
   const next=surveyVisitV2(s.surveyedMasks,s.currentFloor,x,y);
   if(next.every((mask,i)=>mask===s.surveyedMasks[i]))return true;
@@ -42,7 +45,7 @@ export function attachV2Survey(s,original,{persistSurvey=()=>({ok:true}),schedul
   if(beforeFloor<100&&s.surveyedCount===100)s.surveyNotice={total:s.totalSurveyed,floor:s.currentFloor};
   if(getV2SurveyJingle(before,s.totalSurveyed,beforeFloor,s.surveyedCount)==='battleVictory'){
    const boss=s.generatedMap?.bossRoom?.bossCell;
-   if(s.deferBossSurveyJingle?.()&&boss?.x===x&&boss?.y===y)s.bossFloorJinglePending=true;
+   if((s.deferBossSurveyJingle?.()||s.finishingBattle)&&boss?.x===x&&boss?.y===y)s.bossFloorJinglePending=true;
    else s.playSe('battleVictory');
   }
   // Completion is committed immediately before announcing permanent unlock.

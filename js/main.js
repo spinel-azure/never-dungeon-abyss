@@ -5817,6 +5817,7 @@ import {
           s.victoryRetry=completeVictory;s.transitioning=true;say(committed.error+' A／Enterで討伐報酬の保存を再試行します。');return;
         }
         s.victoryRetry=null;
+        s.completeBossSurvey();
         startBgm(getSpecialMapBgmKey(s.generatedMap.themeId));
         if(reward.rareChestReward)await s.presentV2RareRewardChest?.(reward.rareChestReward);
         await s.presentDeferredSurveyNotice?.();
@@ -5829,9 +5830,14 @@ import {
     let victoryReward=null;
     if(outcome==='victory'){victoryReward=grantV2BattleRewards(character,battle,s);character=victoryReward.character;message=victoryReward.message;if(['special-map-v2-boss','special-map-v2-special-boss'].includes(battle.explorationContext.source)){s.bossDefeated=true;message='地図の主を討伐した。ワープゲートが現れた。A／EnterでB1F入口へ移動。\n'+message;}}
     resumeV2Encounter(s,s.battleContext);
+    const mapBossBattle=['special-map-v2-boss','special-map-v2-special-boss'].includes(battle.explorationContext.source);
+    if(mapBossBattle){
+      if(outcome==='victory')s.completeBossSurvey();
+      else if(outcome==='escape')s.retreatFromBoss();
+    }
     if(outcome==='victory')saveGame();
     if(victoryReward?.rareChestReward)await s.presentV2RareRewardChest?.(victoryReward.rareChestReward);
-    if(outcome==='victory')await s.presentDeferredSurveyNotice?.();
+    if(outcome==='victory'&&mapBossBattle)await s.presentDeferredSurveyNotice?.();
     s.finishingBattle=false;
     startBgm(getSpecialMapBgmKey(s.generatedMap.themeId));say(message);updateCharacterUi();updateHud();saveGame();
   }
