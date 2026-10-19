@@ -1,7 +1,7 @@
-import { COMBAT_CONFIG, clamp } from "./combat-config.js";
+import { clamp } from "./combat-config.js";
 import { STAT_KEYS, getCharacterClass } from "../data/classes.js";
 import { normalizeEngravingBonuses } from "../data/engravings.js";
-import { getPlayerDefenseMaximum, getPlayerStatMaximum } from "../data/stat-caps.js";
+import { getEnemyStatMaximum, getPlayerDefenseMaximum, getPlayerStatMaximum } from "../data/stat-caps.js";
 
 export function collectStats(source = {}) {
   const characterClass = getCharacterClass(source.job);
@@ -12,15 +12,15 @@ export function collectStats(source = {}) {
   const temporary = source.temporaryStatBonuses || {};
   const npc = source.npcStatBonuses || source.npcBonuses || {};
   const engravings = normalizeEngravingBonuses(source.engravingStatBonuses);
-  const playerStatMaximum = source.job
+  const statMaximum = source.job
     ? getPlayerStatMaximum(source.reincarnationCount)
-    : COMBAT_CONFIG.statMaximum;
+    : getEnemyStatMaximum(source.enemyPlayerReincarnationCount);
   const stats = {};
   for (const key of STAT_KEYS) {
     stats[key] = clamp(
       numeric(base[key]) + numeric(engravings[key]) + numeric(equipment[key]) + numeric(cards[key]) + numeric(temporary[key]),
       1,
-      playerStatMaximum
+      statMaximum
     );
   }
   return {

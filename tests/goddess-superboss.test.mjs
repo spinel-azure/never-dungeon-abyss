@@ -103,7 +103,7 @@ test('guard reduces telegraphed ultimate after x10, fast/slow enemy cannot bypas
   b=round(b);assert.ok(b.enemy.reservedEnemyAction);assert.ok(!b.presentationEvents.some(e=>e.actionName==='大技'));
   const guarded=round(b,{type:'guard'}),exposed=round(b,{type:'wait'});
   const damage=r=>r.presentationEvents.filter(e=>e.type==='attackHit'&&e.targetSide==='player').reduce((s,e)=>s+e.damage,0);
-  assert.ok(damage(guarded)<damage(exposed));assert.ok(guarded.presentationEvents.filter(e=>e.actionName==='大技').every(e=>!e.critical));
+  assert.ok(damage(guarded)<damage(exposed),JSON.stringify({speed,g:guarded.presentationEvents,e:exposed.presentationEvents}));assert.ok(guarded.presentationEvents.filter(e=>e.actionName==='大技').every(e=>!e.critical));
   const rested=round(guarded);assert.ok(!rested.presentationEvents.some(e=>e.type==='attackHit'&&e.targetSide==='player'));
  }
 });

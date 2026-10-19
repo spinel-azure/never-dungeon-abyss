@@ -12,6 +12,7 @@ import { renderWeaponElementStatus } from "./weapon-element-status.js";
 import { AQUARIUS_STATUS, magicBarrierAmount } from '../combat/aquarius.js';
 import {
   createBattleState,
+  synchronizeEnemyStatCaps,
   isCaptureAvailable,
   resolveJireneScriptedRound,
   resolveBattleRound,
@@ -190,7 +191,7 @@ export function startBattle(enemy, {
   clearAutoTimer();
   battleUi.akashicCleanup?.();
   battleUi.akashicCleanup = enemy.akashicPhantom ? mountAkashicBackground(battleUi.root) : null;
-  battleUi.battle = resumeBattleState ? structuredClone(resumeBattleState) : createBattleState({ character, enemy, enemies, targetIndex });
+  battleUi.battle = resumeBattleState ? synchronizeEnemyStatCaps(structuredClone(resumeBattleState)) : createBattleState({ character, enemy, enemies, targetIndex });
   if(explorationContext)battleUi.battle.explorationContext=structuredClone(explorationContext);
   battleUi.presenting = false;
   battleUi.presentationEnemyImage = battleUi.battle.enemy.image || "";

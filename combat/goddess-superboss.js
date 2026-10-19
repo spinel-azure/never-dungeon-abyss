@@ -4,7 +4,7 @@ export const isSuperGoddess=e=>e?.level===100&&e.goddessCandidate==='superboss-1
 export const goddessState=e=>e.goddessRuntime ||= {cooldowns:{},uses:{},reviveUsed:false,growth:0,regen:0,power:0};
 const say=(b,message,extra={})=>{b.log.push(message);b.presentationEvents.push({type:'message',message,...extra});};
 const idle=(name='力を整えている……',kind='wait')=>({id:'goddess_'+kind,name,actionType:'buff',goddessUtility:kind});
-const eclipse=()=>({id:'noctia_eclipse',name:'月蝕',actionType:'spell',element:'dark',spellPower:180,guardable:true,goddessUltimate:true});
+const eclipse=()=>({id:'noctia_eclipse',name:'月蝕',actionType:'spell',element:'dark',spellPower:180,guardable:true,goddessUltimate:true,turnPriority:-1});
 export const MOONS=['🌑 新月','🌒 三日月','🌓 半月','🌕 満月'];
 export function goddessForecast(e){
  if(!isSuperGoddess(e))return '';
@@ -38,14 +38,14 @@ export function prepareSuperGoddessAction(b,e,a){
  if(a.goddessUltimate&&b.turn<=(r.ultimateAnnouncedTurn||0))a=idle();
  r.executed=true;r.lastAction=a;
  if(a.actionType==='prepareAction'){
-  r.ultimateAnnouncedTurn=b.turn;a={...a,reservedAction:{...a.reservedAction,goddessUltimate:true}};
+  r.ultimateAnnouncedTurn=b.turn;a={...a,reservedAction:{...a.reservedAction,goddessUltimate:true,turnPriority:-1}};
  }
  if(a.actionType==='spDrain'){r.uses[a.id]=(r.uses[a.id]||0)+1;r.lastDrainOpportunity=r.opportunities;}
  if(e.goddessTheme==='rice'&&e.hp<=e.maxHp*.5&&!r.phase){r.phase=true;say(b,'解放の光！ ルミナの雷光と行動速度が増した！');}
  const multiplier=e.goddessOffenseMultiplier*(r.power>0?1.1:1)
   *(e.goddessTheme==='dusk'&&a.actionType==='spell'?[1,1.15,1.25,1.4][r.moon||0]:1)
   *(r.phase&&a.element==='lightning'?1.2:1);
- return {...a,criticalBonus:a.goddessUltimate?0:(a.criticalBonus||0)+(r.phase?.08:0),disableCritical:!!a.goddessUltimate,goddessDamageMultiplier:multiplier};
+ return {...a,...(a.goddessUltimate?{turnPriority:-1}:{}),criticalBonus:a.goddessUltimate?0:(a.criticalBonus||0)+(r.phase?.08:0),disableCritical:!!a.goddessUltimate,goddessDamageMultiplier:multiplier};
 }
 export function executeSuperGoddessUtility(b,e,a){
  const r=goddessState(e),kind=a.goddessUtility;

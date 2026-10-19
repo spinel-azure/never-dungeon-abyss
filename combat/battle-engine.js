@@ -1,4 +1,4 @@
-import {recordGoddessInterruptionDamage,finishGoddessPlayerOpportunity} from './goddess-superboss.js';
+import {isSuperGoddess,recordGoddessInterruptionDamage,finishGoddessPlayerOpportunity} from './goddess-superboss.js';
 import { isCharmed, charmAction, getAkashicPreparation, capAkashicDot, reviveAkashicEnemy } from "./akashic-phantoms.js";
 import {isGoddess,selectGoddessAction,prepareGoddessAction,executeGoddessUtility,finishGoddessAction,reviveGoddess,capGoddessDot,recordGoddessStatus} from './karte-goddesses.js';
 import { applyWingGift } from "../data/wing-gift.js";
@@ -62,6 +62,14 @@ import { getZentaurinOpening, ZENTAURIN_ID } from "../data/zentaurin.js";
 import { cannotReachTarget, DISTANT_MESSAGE, synchronizeTwinState, canPrepareWhirlpool, reserveWhirlpool, executeTwinAction } from "./tiefstrom.js";
 import { resolveClassDefeatRecovery } from "./resolve-defeat-recovery.js";
 
+// Keep enemy cap context serializable and refresh legacy battle snapshots on resume.
+export function synchronizeEnemyStatCaps(battle) {
+  for (const enemy of new Set([battle.enemy, ...(battle.enemies || [])])) {
+    if (enemy) enemy.enemyPlayerReincarnationCount = battle.player?.reincarnationCount || 0;
+  }
+  return battle;
+}
+
 const FLEISCHFRESSER_REGAIN_SUPPRESSION_TURNS = 5;
 
 export function isCaptureAvailable(enemy, maximumHpRate = 0.1) {
@@ -81,6 +89,7 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     ? normalizeLivingTargetIndex(enemyParty, targetIndex)
     : 0;
   const selectedEnemy = enemyParty ? enemyParty[selectedTargetIndex] : cloneCombatant(enemy);
+  synchronizeEnemyStatCaps({ player: character, enemy: selectedEnemy, enemies: enemyParty });
   if (selectedEnemy.akashicPhantom) { selectedEnemy.causalityUsed = false; selectedEnemy.apocalypseUsed = false; delete selectedEnemy.reservedEnemyAction; }
   clearLionOpenings({enemy:selectedEnemy, ...(enemyParty ? {enemies:enemyParty} : {})});
   const sphinxBarrierRate = Math.max(0, sumCardEffectValues(character?.cards?.deckSlots, "sphinx_battle_barrier"));
@@ -163,7 +172,7 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
 
 export function resolveBattleRound({ battle, playerCommand, rng = Math.random } = {}) {
   if (Array.isArray(battle?.enemies)) return resolveMultiBattleRound({ battle, playerCommand, rng });
-  const next = structuredClone(battle);
+  const next = synchronizeEnemyStatCaps(structuredClone(battle));
   if (isCharmed(next.player)) playerCommand = { type: "wait" };
   const playerAction = createPlayerAction(next.player, playerCommand, next.enemy);
   if (!playerAction.ok) return { battle: next, accepted: false, reason: playerAction.reason };
@@ -359,7 +368,7 @@ export function resolveJireneScriptedRound({ battle, rng = Math.random } = {}) {
 }
 
 export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.random } = {}) {
-  const next = structuredClone(battle);
+  const next = synchronizeEnemyStatCaps(structuredClone(battle));
   next.targetIndex = normalizeLivingTargetIndex(next.enemies, playerCommand?.targetIndex ?? next.targetIndex);
   next.enemy = next.enemies[next.targetIndex];
   if (isCharmed(next.player)) playerCommand = { type: "wait" };
@@ -765,7 +774,7 @@ function applyPlayerTurnEndChargeEffects(battle) {
 }
 
 export function resolveEnemyAmbush({ battle, rng = Math.random } = {}) {
-  const next = structuredClone(battle);
+  const next = synchronizeEnemyStatCaps(structuredClone(battle));
   next.resolvingAmbush = true;
   if (next.ariesActiveAtStart) {
     next.log = ["エアリーズの力が敵の不意打ちを打ち消した！"];
@@ -894,6 +903,7 @@ export function createEnemyAction(enemy, rng = Math.random, context = {}) {
   if (isWassermannfrau(enemy)) return buildEnemyAction(selectWassermannfrauAction(enemy, context.battle?.player, rng), attack);
   if (enemy?.reservedEnemyAction) {
     const reserved = structuredClone(enemy.reservedEnemyAction);
+    if (isSuperGoddess(enemy) && reserved.goddessUltimate) reserved.turnPriority = -1;
     if (isGoddess(enemy) && enemy.goddessTheme === "rice" && enemy.hp <= enemy.maxHp * .5) reserved.speedModifier = (reserved.speedModifier || 0) + 12;
     return {
       ...buildEnemyAction(reserved, attack),
