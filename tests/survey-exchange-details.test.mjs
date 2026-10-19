@@ -4,7 +4,7 @@ import {surveyOperation,SURVEY_PRIZES,surveyPrizeDetails} from '../data/survey-r
 import {createInitialCharacter} from '../data/classes.js';
 import {getItemCount} from '../data/inventory.js';
 function ready(){let c=createInitialCharacter({name:'QA',job:'thief'});c=surveyOperation(c,'book').character;return surveyOperation(c,'intro').character;}
-for(const [id,cost,cap] of [['zaubertrank',300,5],['allheilmittel',600,1]])test(id+' exchange price, insufficient points and real holding limit',()=>{
+for(const [id,cost,cap] of [['zaubertrank',10,5],['allheilmittel',30,1]])test(id+' exchange price, insufficient points and real holding limit',()=>{
  let c=ready();c.specialMaps.stampPoints=cost-1;assert.equal(surveyOperation(c,'exchange',id).error,'ポイント不足');assert.equal(getItemCount(c.inventory,id),0);
  c.specialMaps.stampPoints=cost*(cap+1);
  for(let i=0;i<cap;i++)c=surveyOperation(c,'exchange',id).character;
