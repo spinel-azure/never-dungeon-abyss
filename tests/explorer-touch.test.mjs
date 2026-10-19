@@ -13,6 +13,8 @@ import {mapOriginalId,mapContentId} from '../data/special-maps.js';
 // touch guard together. A cancelled touch sequence must not synthesize click.
 class Element {
   constructor(tag='div'){this.tag=tag;this.style={};this.children=[];this.dataset={};this.attrs={};this.hidden=false;this.text='';this.classes=new Set();this.classList={add:v=>this.classes.add(v),remove:v=>this.classes.delete(v),toggle:(v,on)=>on?this.classes.add(v):this.classes.delete(v)};}
+  get ownerDocument(){return globalThis.document;}
+  addEventListener(){}
   set textContent(v){this.text=v;this.children=[];}
   get textContent(){return this.text+this.children.map(c=>c.textContent).join('');}
   setAttribute(k,v){this.attrs[k]=v;}

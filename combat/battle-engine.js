@@ -1,3 +1,5 @@
+import {hasKeyItem} from '../data/key-items.js';
+import {normalizeReincarnationCount} from '../data/reincarnation.js';
 import {isSuperGoddess,recordGoddessInterruptionDamage,finishGoddessPlayerOpportunity} from './goddess-superboss.js';
 import { isCharmed, charmAction, getAkashicPreparation, capAkashicDot, reviveAkashicEnemy } from "./akashic-phantoms.js";
 import {isGoddess,selectGoddessAction,prepareGoddessAction,executeGoddessUtility,finishGoddessAction,reviveGoddess,capGoddessDot,recordGoddessStatus} from './karte-goddesses.js';
@@ -90,6 +92,13 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     : 0;
   const selectedEnemy = enemyParty ? enemyParty[selectedTargetIndex] : cloneCombatant(enemy);
   synchronizeEnemyStatCaps({ player: character, enemy: selectedEnemy, enemies: enemyParty });
+  const hackedEnemies = (enemyParty || [selectedEnemy]).filter(member =>
+    isSuperGoddess(member) && normalizeReincarnationCount(character?.reincarnationCount) === 3
+    && hasKeyItem(character?.keyItems, 'hacking_device') && !member.hackingDeviceApplied);
+  for (const member of hackedEnemies) {
+    member.hp = Math.min(member.hp, Math.floor(member.maxHp * 0.95));
+    member.hackingDeviceApplied = true;
+  }
   if (selectedEnemy.akashicPhantom) { selectedEnemy.causalityUsed = false; selectedEnemy.apocalypseUsed = false; delete selectedEnemy.reservedEnemyAction; }
   clearLionOpenings({enemy:selectedEnemy, ...(enemyParty ? {enemies:enemyParty} : {})});
   const sphinxBarrierRate = Math.max(0, sumCardEffectValues(character?.cards?.deckSlots, "sphinx_battle_barrier"));
@@ -158,6 +167,7 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     slashExecution: null,
     log: [
       enemyParty ? `${enemyParty.map(member => member.name).join("、")}が現れた！` : `${enemy.name}が現れた！`,
+      ...hackedEnemies.map(member => `ハッキングデバイスが作動！ ${member.name}の開始HPが5％減少した。`),
       ...(selectedEnemy?.battleIntro ? [selectedEnemy.battleIntro] : []),
       ...(zentaurinOpening ? [zentaurinOpening.message] : []),
       ...(sphinxBarrierAmount > 0 ? ["スピンクスの威容が障壁を展開した！"] : []),

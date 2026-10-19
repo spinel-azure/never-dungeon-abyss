@@ -63,6 +63,7 @@ export const ITEM_COMPENDIUM_ENTRIES = Object.freeze({
     description: "カッツェンラントの女王が身に着けていたと言われる首飾り。柑橘系の匂いがする。所持しているだけでそのフロアのミニマップを全て表示する。ただしB100Fでは無効。"
   }),
   attracting_incense: Object.freeze({id:'attracting_incense',name:'引き寄せのお香',category:'消耗品',acquisition:'スタンプ交換',purchasePrice:null,imageSrc:'images/item-compendium/monster_attracting_incense.avif',description:'気配上昇量が2倍になる。奈落は区域移動まで、地図迷宮は帰還まで持続。'}),
+  hacking_device:Object.freeze({id:'hacking_device',name:'ハッキングデバイス',category:'貴重品',acquisition:'スタンプ交換（転生3回・1000p）',purchasePrice:null,imageSrc:'images/item-compendium/hacking_device.avif',description:'明らかにこの世界の物ではない。用途は不明。'}),
   stamp_book: Object.freeze({id:'stamp_book',name:'スタンプ帳',category:'貴重品',acquisition:'探検家テント',purchasePrice:null,imageSrc:'images/item-compendium/stamp_book.avif',description:'迷宮探検家トレリーレンから貰ったスタンプ帳。調査が完了する度にスタンプを押してくれる。'}),
   warding_incense: Object.freeze({
     "id": "warding_incense",

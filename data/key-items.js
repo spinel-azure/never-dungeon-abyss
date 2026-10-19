@@ -1,5 +1,6 @@
 import { mergeItemDiscovery } from "./item-discovery.js";
 export const KEY_ITEMS = Object.freeze({
+ hacking_device:Object.freeze({id:'hacking_device',name:'ハッキングデバイス',description:'明らかにこの世界の物ではない。用途は不明。',sellable:false,consumable:false,version:1}),
  stamp_book:Object.freeze({id:'stamp_book',name:'スタンプ帳',description:'迷宮探検家トレリーレンから貰ったスタンプ帳。調査が完了する度にスタンプを押してくれる。',sellable:false,consumable:false,version:1}),
   gemini_emblem_other_half: Object.freeze({id:'gemini_emblem_other_half',name:'もう一つの紋様の片割れ',description:'壁のくぼみで見つけた、最初の紋様と対になる紫色の石版。',sellable:false,consumable:false,version:1}),
   gemini_emblem_half: Object.freeze({id:'gemini_emblem_half',name:'紋様の片割れ',description:'シュヴェスターの試しを解いて得た紋様の片割れ。',sellable:false,consumable:false,version:1}),

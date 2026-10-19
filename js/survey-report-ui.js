@@ -1,3 +1,4 @@
+import {renderItemGetItems} from './item-get-presentation.js';
 import {SURVEY_PRIZES,reportableMaps,surveyExchangeReason,surveyPrizeDetails} from '../data/survey-report.js';
 import {describeTestMap,normalizeSpecialMaps} from '../data/special-maps.js';
 import {hasKeyItem} from '../data/key-items.js';
@@ -21,7 +22,14 @@ export function createSurveyReportUI({host,commands,message,getCharacter,transac
   locked=true;const token=epoch;overlay.replaceChildren();overlay.hidden=false;
   const title=make('div',kind==='book'?'「スタンプ帳」を手に入れた！':'報告完了');title.className='survey-reward-title';
   const image=make('img');image.src=kind==='book'?'images/item-compendium/stamp_book.avif':'images/screenshots/erledigt_stamp.avif';image.alt=kind==='book'?'スタンプ帳':'Erledigt';image.className=kind==='book'?'survey-book':'survey-stamp';
-  if(kind==='book'){overlay.append(image,title);await playJingle('importantItem');if(token!==epoch)return;await playJingle('battleVictory');}
+  if(kind==='book'){
+   const effect=make('div');effect.className='card-get-effect item-get-effect is-active';
+   const heading=make('strong','ITEM GET!!');heading.className='card-get-title';
+   const items=make('span');items.className='item-get-items';
+   renderItemGetItems(items,['スタンプ帳'],{itemIds:['stamp_book'],acquisitionMessage:true});
+   effect.append(heading,items);overlay.append(effect);
+   await Promise.all([playJingle('importantItem'),delay(3200)]);if(token!==epoch)return;await playJingle('battleVictory');
+  }
   else{overlay.append(title);await playJingle('battleVictory');if(token!==epoch)return;overlay.append(image,make('p',`＋1p　所持 ${state().stampPoints}p`));playSe('surveyStamp');await delay(2000);}
   if(token!==epoch)return;overlay.classList.add('is-fading');await delay(350);if(token!==epoch)return;
   overlay.hidden=true;overlay.classList.remove('is-fading');locked=false;return true;
@@ -68,6 +76,7 @@ export function createSurveyReportUI({host,commands,message,getCharacter,transac
     const name=make('h3',selected.name);if(selected.once)name.style.color='#ff9d2e';top.append(name);
     if(info.image){const image=make('img');image.src=info.image;image.alt=selected.name;image.onerror=()=>image.remove();top.append(image);}
     detail.append(top,make('p',`【${info.category}】${info.description}`),make('p',`必要 ${selected.cost}p ／ 所持 ${state().stampPoints}p`));
+    if(info.effect)detail.append(make('p',info.effect));
     const reason=surveyExchangeReason(getCharacter(),selected);if(reason)detail.append(make('p',reason));panel.append(detail);
    }else panel.append(make('h3',selected.name||describeTestMap(selected)?.name));
    panel.append(button('はい（A）',confirm,index===0),button('いいえ（B）',back,index===1));say(mode==='reportConfirm'?'この地図を報告してくれるの？':'交換するのはこれでいい？');return;

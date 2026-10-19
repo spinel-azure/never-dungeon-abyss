@@ -2,7 +2,7 @@ import {readFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';import path from 'node:path';import {createRequire} from 'node:module';import assert from 'node:assert/strict';
 const {chromium}=createRequire(import.meta.url)('playwright');
 const main=await readFile('js/main.js','utf8'),town=await readFile('js/town.js','utf8');
-const hook=`window.surveyQA={async setup(){const {normalizeSpecialMaps}=await import("/data/special-maps.js");document.querySelector('#titleScreen').hidden=true;document.body.classList.remove('title-active');character=createInitialCharacter({name:'報告確認',job:'thief'});character.eventFlags.tavern_rumor_019_base_read=true;character.specialMaps=normalizeSpecialMaps({discovererName:'QA',starterMapsGranted:true,betaExplanationComplete:true,betaExplorationUnlocked:true,registered:Array.from({length:7},(_,i)=>({rulesetVersion:'special-map-v2',seed:i+1,level:i+1,rarity:'WHITE',discovererName:'QA',surveyedMasks:Array(3).fill('f'.repeat(25))}))});saveEnabled=true;worldLocation='town';setBgmOptions({enabled:false});setSeOptions({enabled:false});openTown({mode:'dungeonEntrance'});updateCharacterUi();},state:()=>structuredClone(character),points:n=>character.specialMaps.stampPoints=n};`;
+const hook=`window.surveyQA={async setup(){const {normalizeSpecialMaps}=await import("/data/special-maps.js");document.querySelector('#titleScreen').hidden=true;document.body.classList.remove('title-active');character=createInitialCharacter({name:'報告確認',job:'thief'});character.eventFlags.tavern_rumor_019_base_read=true;character.specialMaps=normalizeSpecialMaps({discovererName:'QA',starterMapsGranted:true,betaExplanationComplete:true,betaExplorationUnlocked:true,registered:Array.from({length:7},(_,i)=>({rulesetVersion:'special-map-v2',seed:i+1,level:i+1,rarity:'WHITE',discovererName:'QA',surveyedMasks:Array(3).fill('f'.repeat(25))}))});saveEnabled=true;worldLocation='town';setBgmOptions({enabled:false});setSeOptions({enabled:false});openTown({mode:'dungeonEntrance'});updateCharacterUi();},state:()=>structuredClone(character),points:n=>character.specialMaps.stampPoints=n,reincarnate:n=>character.reincarnationCount=n};`;
 const townHook=`window.surveyTown={open:()=>activateEntranceCommand('explorerTent'),input:handleTownInput,typing:()=>townTypewriter.active,finish:completeTownTypewriter,record(){setTownTypewriterOptions({enabled:true,speed:"slow"});delete town.messageEl.dataset.instantText;window.surveyCues=[];town.playSurveyJingle=async key=>{surveyCues.push(key);};town.playSe=key=>surveyCues.push(key);}};`;
 const browser=await chromium.launch({channel:'msedge',headless:true});
 try{for(const width of [1280,390]){
@@ -16,6 +16,11 @@ try{for(const width of [1280,390]){
  if(width===390)await page.getByRole('button',{name:'調査報告',exact:true}).tap();else {await press('down');await press('confirm');}await page.waitForTimeout(50);assert.equal(await page.evaluate(()=>surveyTown.typing()),true);
  await press('confirm');assert.equal((await page.evaluate(()=>surveyQA.state())).keyItems.owned.stamp_book,undefined);
  for(let n=0;n<10&&!(await page.evaluate(()=>surveyQA.state())).keyItems.owned.stamp_book;n++){await finish();await press('confirm');}await page.waitForTimeout(450);assert.ok((await page.evaluate(()=>surveyQA.state())).keyItems.owned.stamp_book);
+ assert.equal(await page.locator('.survey-reward-overlay .card-get-title').innerText(),'ITEM GET!!');
+ await page.locator('.survey-reward-overlay .item-get-image').evaluate(img=>img.decode());
+ await page.waitForTimeout(600);
+ if(process.env.SURVEY_SCREENSHOTS==='1')await page.screenshot({path:path.join(tmpdir(),`nda-stamp-book-${width}.png`)});
+ await page.waitForTimeout(2700);
  // Finish each wrapped dialogue page using the same input routed for gamepad.
  for(let n=0;n<20 && !(await page.evaluate(()=>surveyQA.state().specialMaps.surveyIntroductionComplete));n++){await finish();await press('confirm');}
  assert.equal(await page.evaluate(()=>surveyQA.state().specialMaps.surveyIntroductionComplete),true);
@@ -47,5 +52,11 @@ try{for(const width of [1280,390]){
  await press('confirm');await page.waitForTimeout(100);
  assert.equal(await page.evaluate(()=>surveyQA.state().specialMaps.surveyShoesExchanged),true);assert.equal(await page.evaluate(()=>surveyQA.state().equipmentInventory.instances.find(i=>i.equipmentId==='alveter_schuhe').locked),true);
  if(process.env.SURVEY_SCREENSHOTS==='1')await page.screenshot({path:path.join(tmpdir(),`nda-exchange-${width}.png`)});
+ await finish();await panel.getByRole('button',{name:/ハッキングデバイス/}).click();await finish();
+ assert.match(await panel.locator('.survey-exchange-detail').innerText(),/転生3回で交換可能/);
+ await panel.locator('.survey-prize-top img').evaluate(img=>img.decode());
+ await press('confirm');assert.equal((await page.evaluate(()=>surveyQA.state())).keyItems.owned.hacking_device,undefined);
+ await page.evaluate(()=>{surveyQA.reincarnate(3);surveyQA.points(1000);});await finish();await press('confirm');await page.waitForTimeout(100);
+ assert.ok((await page.evaluate(()=>surveyQA.state())).keyItems.owned.hacking_device);assert.equal(await page.evaluate(()=>surveyQA.state().specialMaps.stampPoints),0);
  assert.deepEqual(errors,[]);console.log(width+'px report/introduction/exchange passed');await page.close();
 }}finally{await browser.close();}
