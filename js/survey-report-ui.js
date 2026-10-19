@@ -79,7 +79,10 @@ export function createSurveyReportUI({host,commands,message,getCharacter,transac
     if(info.effect)detail.append(make('p',info.effect));
     const reason=surveyExchangeReason(getCharacter(),selected);if(reason)detail.append(make('p',reason));panel.append(detail);
    }else panel.append(make('h3',selected.name||describeTestMap(selected)?.name));
-   panel.append(button('はい（A）',confirm,index===0),button('いいえ（B）',back,index===1));say(mode==='reportConfirm'?'この地図を報告してくれるの？':'交換するのはこれでいい？');return;
+   panel.append(button('はい（A）',confirm,index===0),button('いいえ（B）',back,index===1));
+   say(mode==='reportConfirm'?'この地図を報告してくれるの？':selected.id==='hacking_device'
+    ?'交換するのはこれでいい？奈落の迷宮で拾ったんだけど、何に使うのかさっぱり分からないのよね…。'
+    :'交換するのはこれでいい？');return;
   }
   const items=rows();index=Math.max(0,Math.min(index,items.length-1));page=Math.floor(index/5);
   const listEl=make('div');listEl.className='transfer-destination-list';

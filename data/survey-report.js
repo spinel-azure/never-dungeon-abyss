@@ -8,12 +8,12 @@ import {grantKeyItem,hasKeyItem} from './key-items.js';
 import {grantEquipmentInstance,characterOwnsEquipment} from './equipment-inventory.js';
 import {normalizeReincarnationCount} from './reincarnation.js';
 export const SURVEY_PRIZES=Object.freeze([
- ...['strength','intelligence','agility','dexterity','luck'].map(stat=>({id:stat+'_engraving',name:getItem(stat+'_engraving').name,cost:100,category:1})),
+ ...['strength','intelligence','agility','dexterity','luck'].map(stat=>({id:stat+'_engraving',name:getItem(stat+'_engraving').name,cost:15,category:1})),
  {id:'attracting_incense',name:'引き寄せのお香',cost:1,category:0},
- {id:'zaubertrank',name:getItem('zaubertrank').name,cost:300,category:0},
- {id:'allheilmittel',name:getItem('allheilmittel').name,cost:600,category:0},
+ {id:'zaubertrank',name:getItem('zaubertrank').name,cost:10,category:0},
+ {id:'allheilmittel',name:getItem('allheilmittel').name,cost:30,category:0},
  {id:'hacking_device',name:'ハッキングデバイス',cost:1000,category:3,keyItem:true,once:true},
- {id:'alveter_schuhe',name:'アルヴェターシューエ',cost:250,category:2,once:true}
+ {id:'alveter_schuhe',name:'アルヴェターシューエ',cost:40,category:2,once:true}
 ]);
 export function surveyPrizeDetails(prize){
  if(prize.keyItem)return {category:'貴重品',description:'明らかにこの世界の物ではない。用途は不明。',effect:'転生3回時のみ、Lv.100三女神の開始HPを5％減らす。所持で有効・消費なし・交換は1回のみ。',image:getItemCompendiumEntry(prize.id)?.imageSrc};

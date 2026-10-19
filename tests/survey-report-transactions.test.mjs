@@ -29,15 +29,15 @@ for(const action of ['book','intro','report','exchange'])for(const throws of [fa
  const api={getCharacter:()=>c,setCharacter:value=>c=value,save:()=>{if(failure){if(throws)throw Error('disk');return false;}return true;}};
  const id=action==='report'?c.specialMaps.registered[0].id:'strength_engraving';
  assert.equal(transactSurvey(api,action,id).ok,false);assert.deepEqual(c,before);failure=false;
- assert.equal(transactSurvey(api,action,id).ok,true);if(action==='exchange'){assert.equal(c.specialMaps.stampPoints,0);assert.equal(getItemCount(c.inventory,id),1);}
+ assert.equal(transactSurvey(api,action,id).ok,true);if(action==='exchange'){assert.equal(c.specialMaps.stampPoints,85);assert.equal(getItemCount(c.inventory,id),1);}
 });
 test('exchange supports repeatable marks, inventory limits and locked once-only shoes',()=>{
  let c=ready();c.specialMaps.stampPoints=1000;
  c=surveyOperation(c,'exchange','strength_engraving').character;c=surveyOperation(c,'exchange','strength_engraving').character;
- assert.equal(getItemCount(c.inventory,'strength_engraving'),2);assert.equal(c.specialMaps.stampPoints,800);
+ assert.equal(getItemCount(c.inventory,'strength_engraving'),2);assert.equal(c.specialMaps.stampPoints,970);
  c.inventory=grantItem(c.inventory,'attracting_incense',99).inventory;
- assert.equal(surveyOperation(c,'exchange','attracting_incense').ok,false);assert.equal(c.specialMaps.stampPoints,800);
- c=surveyOperation(c,'exchange','alveter_schuhe').character;assert.equal(c.specialMaps.stampPoints,550);
+ assert.equal(surveyOperation(c,'exchange','attracting_incense').ok,false);assert.equal(c.specialMaps.stampPoints,970);
+ c=surveyOperation(c,'exchange','alveter_schuhe').character;assert.equal(c.specialMaps.stampPoints,930);
  assert.equal(c.equipmentInventory.instances.find(i=>i.equipmentId==='alveter_schuhe').locked,true);
  c.equipmentInventory.instances=c.equipmentInventory.instances.filter(i=>i.equipmentId!=='alveter_schuhe');c=normalizeCharacter(JSON.parse(JSON.stringify(c)));
  assert.equal(surveyOperation(c,'exchange','alveter_schuhe').ok,false);
