@@ -2,7 +2,7 @@ import {readFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';import path from 'node:path';import {createRequire} from 'node:module';import assert from 'node:assert/strict';
 const {chromium}=createRequire(import.meta.url)('playwright');
 const main=await readFile('js/main.js','utf8'),town=await readFile('js/town.js','utf8');
-const hook=`window.surveyQA={async setup(){const {normalizeSpecialMaps}=await import("/data/special-maps.js");document.querySelector('#titleScreen').hidden=true;document.body.classList.remove('title-active');character=createInitialCharacter({name:'報告確認',job:'thief'});character.eventFlags.tavern_rumor_019_base_read=true;character.specialMaps=normalizeSpecialMaps({discovererName:'QA',starterMapsGranted:true,betaExplanationComplete:true,betaExplorationUnlocked:true,registered:Array.from({length:7},(_,i)=>({rulesetVersion:'special-map-v2',seed:i+1,level:i+1,rarity:'WHITE',discovererName:'QA',surveyedMasks:Array(3).fill('f'.repeat(25))}))});saveEnabled=true;worldLocation='town';setBgmOptions({enabled:false});setSeOptions({enabled:false});openTown({mode:'dungeonEntrance'});updateCharacterUi();},state:()=>structuredClone(character),points:n=>character.specialMaps.stampPoints=n,reincarnate:n=>character.reincarnationCount=n};`;
+const hook=`window.surveyQA={async setup(){const {normalizeSpecialMaps}=await import("/data/special-maps.js");document.querySelector('#titleScreen').hidden=true;document.body.classList.remove('title-active');character=createInitialCharacter({name:'報告確認',job:'thief'});character.eventFlags.tavern_rumor_019_base_read=true;character.specialMaps=normalizeSpecialMaps({discovererName:'QA',starterMapsGranted:true,betaExplanationComplete:true,betaExplorationUnlocked:true,registered:Array.from({length:7},(_,i)=>({rulesetVersion:'special-map-v2',seed:i+1,level:i+1,rarity:'WHITE',discovererName:'QA',surveyedMasks:Array(3).fill('f'.repeat(25))}))});saveEnabled=true;worldLocation='town';setBgmOptions({enabled:false});setSeOptions({enabled:false});openTown({mode:'dungeonEntrance'});updateCharacterUi();},state:()=>structuredClone(character),points:n=>character.specialMaps.stampPoints=n,reports:()=>{character.specialMaps.surveyRewardClaims=Object.fromEntries(Array.from({length:1000},(_,seed)=>[JSON.stringify(['special-map-v2',seed,1,'WHITE']),true]));},reincarnate:n=>character.reincarnationCount=n};`;
 const townHook=`window.surveyTown={open:()=>activateEntranceCommand('explorerTent'),input:handleTownInput,typing:()=>townTypewriter.active,finish:completeTownTypewriter,record(){setTownTypewriterOptions({enabled:true,speed:"slow"});delete town.messageEl.dataset.instantText;window.surveyCues=[];town.playSurveyJingle=async key=>{surveyCues.push(key);};town.playSe=key=>surveyCues.push(key);}};`;
 const browser=await chromium.launch({channel:'msedge',headless:true});
 try{for(const width of [1280,390]){
@@ -53,10 +53,10 @@ try{for(const width of [1280,390]){
  assert.equal(await page.evaluate(()=>surveyQA.state().specialMaps.surveyShoesExchanged),true);assert.equal(await page.evaluate(()=>surveyQA.state().equipmentInventory.instances.find(i=>i.equipmentId==='alveter_schuhe').locked),true);
  if(process.env.SURVEY_SCREENSHOTS==='1')await page.screenshot({path:path.join(tmpdir(),`nda-exchange-${width}.png`)});
  await finish();await panel.getByRole('button',{name:/ハッキングデバイス/}).click();await finish();
- assert.match(await panel.locator('.survey-exchange-detail').innerText(),/転生3回で交換可能/);
+ assert.match(await panel.locator('.survey-exchange-detail').innerText(),/転生3回で受領可能/);
  await panel.locator('.survey-prize-top img').evaluate(img=>img.decode());
  await press('confirm');assert.equal((await page.evaluate(()=>surveyQA.state())).keyItems.owned.hacking_device,undefined);
- await page.evaluate(()=>{surveyQA.reincarnate(3);surveyQA.points(1000);});await finish();await press('confirm');await page.waitForTimeout(100);
- assert.ok((await page.evaluate(()=>surveyQA.state())).keyItems.owned.hacking_device);assert.equal(await page.evaluate(()=>surveyQA.state().specialMaps.stampPoints),0);
+ await page.evaluate(()=>{surveyQA.reincarnate(3);surveyQA.points(1000);surveyQA.reports();});await finish();await press('confirm');await page.waitForTimeout(100);
+ assert.ok((await page.evaluate(()=>surveyQA.state())).keyItems.owned.hacking_device);assert.equal(await page.evaluate(()=>surveyQA.state().specialMaps.stampPoints),1000);
  assert.deepEqual(errors,[]);console.log(width+'px report/introduction/exchange passed');await page.close();
 }}finally{await browser.close();}

@@ -12,26 +12,28 @@ export const SURVEY_PRIZES=Object.freeze([
  {id:'attracting_incense',name:'引き寄せのお香',cost:1,category:0},
  {id:'zaubertrank',name:getItem('zaubertrank').name,cost:10,category:0},
  {id:'allheilmittel',name:getItem('allheilmittel').name,cost:30,category:0},
- {id:'hacking_device',name:'ハッキングデバイス',cost:1000,category:3,keyItem:true,once:true},
+ {id:'hacking_device',name:'ハッキングデバイス',cost:0,requiredReports:1000,category:3,keyItem:true,once:true},
  {id:'alveter_schuhe',name:'アルヴェターシューエ',cost:40,category:2,once:true}
 ]);
 export function surveyPrizeDetails(prize){
- if(prize.keyItem)return {category:'貴重品',description:'明らかにこの世界の物ではない。用途は不明。',effect:'転生3回時のみ、Lv.100三女神の開始HPを5％減らす。所持で有効・消費なし・交換は1回のみ。',image:getItemCompendiumEntry(prize.id)?.imageSrc};
+ if(prize.keyItem)return {category:'貴重品',description:'明らかにこの世界の物ではない。用途は不明。',effect:'効果は不明。『HACKING AURORA OS』と書かれているが…？',image:getItemCompendiumEntry(prize.id)?.imageSrc};
  const item=prize.once?getEquipmentItem(prize.id,'footId'):getItem(prize.id);
  const catalog=getItemCompendiumEntry(prize.id);
  return {category:prize.once?'装備品・足':'消耗品',
   description:prize.once?`DEF＋${item.statBonuses.def}／${item.description}。一品物・交換は1回のみ。ロック状態で受け取ります。`:item.description,
   image:catalog?.imageSrc||({alveter_schuhe:'images/item-compendium/allwetterschuhe.avif',zaubertrank:'images/item-compendium/zaubertrank.avif',allheilmittel:'images/item-compendium/allheilmittel.avif'}[prize.id]||'')};
 }
+export function totalSurveyReports(character){return Object.keys(normalizeSpecialMaps(character?.specialMaps).surveyRewardClaims||{}).length;}
 export function reportableMaps(character){const s=normalizeSpecialMaps(character?.specialMaps);const ids=new Set(getMapSurveyReports(s).filter(r=>r.canReport).map(r=>r.mapId));return s.registered.filter(m=>ids.has(m.id));}
 const fail=error=>({ok:false,error});
 export function surveyExchangeReason(character,prize){
  const s=normalizeSpecialMaps(character?.specialMaps);
  if(!hasKeyItem(character?.keyItems,'stamp_book')||!s.surveyIntroductionComplete)return '説明を聞いてから交換してください。';
  if(prize.keyItem){
-  if(normalizeReincarnationCount(character.reincarnationCount)<3)return '転生3回で交換可能';
+  if(normalizeReincarnationCount(character.reincarnationCount)<3)return '転生3回で受領可能';
   if(hasKeyItem(character.keyItems,prize.id))return '交換済み・所持済み';
  }
+ if(prize.requiredReports&&totalSurveyReports(character)<prize.requiredReports)return '累計調査報告1000件で受領可能';
  if(prize.once&&!prize.keyItem&&(s.surveyShoesExchanged||characterOwnsEquipment(character,prize.id)))return '交換済み・所持済み';
  if(s.stampPoints<prize.cost)return 'ポイント不足';
  if(!prize.once&&getItemCount(character.inventory,prize.id)>=getItem(prize.id).maxOwned)return '所持上限';

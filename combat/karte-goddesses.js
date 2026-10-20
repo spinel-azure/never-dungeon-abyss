@@ -48,7 +48,7 @@ export function finishGoddessAction(b,e) {
   if(isSuperGoddess(e)&&!finishSuperGoddessAction(b,e))return;
   const r=runtime(e);
   if(r.power>0)r.power--;
-  if(r.regen>0){r.regen--;const amount=Math.min(e.maxHp-e.hp,Math.round(e.maxHp*.01));e.hp+=amount;
+  if(r.regen>0){r.regen--;const amount=Math.min(e.maxHp-e.hp,Math.round(e.maxHp*.01*(isSuperGoddess(e)&&e.goddessTheme==='tender'&&e.hackingDeviceApplied?.75:1)));e.hp+=amount;
     if(amount)message(b,`萌芽がHPを${amount}再生した。`,{type:'healing',targetSide:'enemy',actorSide:'enemy',amount});}
 }
 export function reviveGoddess(b,e,targetIndex) {

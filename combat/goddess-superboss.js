@@ -42,9 +42,12 @@ export function prepareSuperGoddessAction(b,e,a){
  }
  if(a.actionType==='spDrain'){r.uses[a.id]=(r.uses[a.id]||0)+1;r.lastDrainOpportunity=r.opportunities;}
  if(e.goddessTheme==='rice'&&e.hp<=e.maxHp*.5&&!r.phase){r.phase=true;say(b,'解放の光！ ルミナの雷光と行動速度が増した！');}
+ const hacked=e.hackingDeviceApplied===true;
+ const moonBonus=[0,.15,.25,.4][r.moon||0];
  const multiplier=e.goddessOffenseMultiplier*(r.power>0?1.1:1)
-  *(e.goddessTheme==='dusk'&&a.actionType==='spell'?[1,1.15,1.25,1.4][r.moon||0]:1)
-  *(r.phase&&a.element==='lightning'?1.2:1);
+  *(e.goddessTheme==='dusk'&&a.actionType==='spell'?1+moonBonus*(hacked?.5:1):1)
+  *(r.phase&&a.element==='lightning'?1.2:1)
+  *(hacked&&e.goddessTheme==='rice'&&a.element==='lightning'?.9:1);
  return {...a,...(a.goddessUltimate?{turnPriority:-1}:{}),criticalBonus:a.goddessUltimate?0:(a.criticalBonus||0)+(r.phase?.08:0),disableCritical:!!a.goddessUltimate,goddessDamageMultiplier:multiplier};
 }
 export function executeSuperGoddessUtility(b,e,a){
@@ -60,7 +63,7 @@ export function executeSuperGoddessUtility(b,e,a){
  if(kind==='preparedHeal'){
   const p=r.healPreparation;
   if(!p||p.remaining>0){say(b,'若葉の息吹を準備している……');return true;}
-  delete r.healPreparation;heal(b,e,8400,p.name,{goddessHealResolved:true,interruptionDamage:p.damage});return true;
+  delete r.healPreparation;heal(b,e,e.hackingDeviceApplied?6300:8400,p.name,{goddessHealResolved:true,interruptionDamage:p.damage});return true;
  }
  if(kind==='heal'){
   r.uses[a.id]=(r.uses[a.id]||0)+1;r.cooldowns[a.id]=b.turn+(a.cooldown||1);heal(b,e,4000,a.name);return true;

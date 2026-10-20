@@ -167,7 +167,7 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
     slashExecution: null,
     log: [
       enemyParty ? `${enemyParty.map(member => member.name).join("、")}が現れた！` : `${enemy.name}が現れた！`,
-      ...hackedEnemies.map(member => `ハッキングデバイスが作動！ ${member.name}の開始HPが5％減少した。`),
+      ...hackedEnemies.map(member => `ハッキングデバイスが作動！ ${member.name}の力に、わずかな乱れが生じた……。`),
       ...(selectedEnemy?.battleIntro ? [selectedEnemy.battleIntro] : []),
       ...(zentaurinOpening ? [zentaurinOpening.message] : []),
       ...(sphinxBarrierAmount > 0 ? ["スピンクスの威容が障壁を展開した！"] : []),

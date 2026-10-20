@@ -1,4 +1,5 @@
 // Reproducible laboratory comparison; does not modify game balance or saves.
+import {grantKeyItem} from '../data/key-items.js';
 import {writeFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
 import {superbossCharacter,superbossCommand,summarizeSuperbossRuns} from './simulate-goddess-superboss.mjs';
@@ -9,6 +10,7 @@ import {createGoddessMapBoss} from '../data/karte-goddess-bosses.js';
 import {createEnemyCombatant} from '../data/enemies.js';
 import {createBattleState,resolveBattleRound} from '../combat/battle-engine.js';
 import {f2Random} from './simulate-special-map-f2.mjs';
+const hackingDevice=process.env.NDA_HACKING_DEVICE==='1';
 const reincarnationCount=Number(process.env.NDA_REINCARNATION ?? 3);
 assert.ok(Number.isInteger(reincarnationCount)&&reincarnationCount>=0&&reincarnationCount<=3);
 const statCap=[30,50,70,90][reincarnationCount],defenseCap=[60,70,80,90][reincarnationCount];
@@ -20,6 +22,7 @@ function deckCharacter(id){
  const s=collectStats(c);
  // Laboratory stats at each reincarnation cap, including DEF; no HP/SP override.
  c.temporaryStatBonuses=Object.fromEntries(['str','int','agi','dex','luc','def'].map(k=>[k,(k==='def'?defenseCap:statCap)-s[k]]));
+ if(hackingDevice)c.keyItems=grantKeyItem(c.keyItems,'hacking_device').keyItems;
  c.hp=c.maxHp;c.sp=c.maxSp;
  for(const k of ['str','int','agi','dex','luc','def'])assert.equal(collectStats(c)[k],k==='def'?defenseCap:statCap);
  assert.equal(getItemCount(c.inventory,'strong_healing_potion_large'),30);
@@ -60,5 +63,5 @@ for(const variant of Object.keys(decks))for(const theme of ['rice','dusk','tende
  console.log(JSON.stringify({variant,theme,wins:row.wins,defeats:row.defeats,timeouts:row.timeouts,turns:row.meanTurns,items:row.meanItems,maxHit:row.summary.maxSingleHit}));
 }
 const characters=Object.keys(decks).map(id=>{const c=deckCharacter(id);return {id,deck:c.cards.deckSlots,hp:c.maxHp,sp:c.maxSp,stats:collectStats(c),equipment:c.equipment,skillIds:c.skillIds,inventory:c.inventory};});
-writeFileSync(reincarnationCount===3?'artifacts/goddess-z-deck-comparison.json':`artifacts/goddess-z-deck-reincarnation-${reincarnationCount}.json`,JSON.stringify({trials,reincarnationCount,statCap,defenseCap,characters,conditions:`Warrior Lv197 reincarnation${reincarnationCount}; laboratory STR/INT/AGI/DEX/LUC${statCap}/DEF${defenseCap}; Katzbalger, amethyst+3, masters necklace; no NPC; factory enemy stats/cap${statCap}/coefficient10; charge0; 30 strong_healing_potion_large, no refills; 500-round cutoff; guard forecast, heal below60% (35% during interruption), learned charge/ultimate skills, Leo normal attacks; seeds1..30; HP/SP generated normally; no browser timing measurement`,rows},null,2)+'\n');
+writeFileSync(process.env.NDA_REPORT || (hackingDevice?`artifacts/goddess-z-deck-hacking-device-${reincarnationCount}.json`:reincarnationCount===3?'artifacts/goddess-z-deck-comparison.json':`artifacts/goddess-z-deck-reincarnation-${reincarnationCount}.json`),JSON.stringify({hackingDevice,trials,reincarnationCount,statCap,defenseCap,characters,conditions:`Warrior Lv197 reincarnation${reincarnationCount}; laboratory STR/INT/AGI/DEX/LUC${statCap}/DEF${defenseCap}; Katzbalger, amethyst+3, masters necklace; no NPC; factory enemy stats/cap${statCap}/coefficient10; charge0; 30 strong_healing_potion_large, no refills; 500-round cutoff; guard forecast, heal below60% (35% during interruption), learned charge/ultimate skills, Leo normal attacks; seeds1..30; HP/SP generated normally; no browser timing measurement`,rows},null,2)+'\n');
 console.log(JSON.stringify(characters.map(c=>({id:c.id,hp:c.hp,sp:c.sp,skills:c.skillIds}))));
