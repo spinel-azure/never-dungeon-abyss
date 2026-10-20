@@ -40,8 +40,8 @@ export function superbossCommand(b,aware=true){
  if(b.player.cards.deckSlots.includes('zodiac_leo')&&!isPlayerChargeReady(b.player)&&c.type!=='item')c={type:'attack'};
  return c;
 }
-export function superbossTrial({theme,job='warrior',variant='base',withNpcs=false,aware=true,seed=1,coefficient,defense90=false}={}){
- const c=superbossCharacter(job,variant,withNpcs),enemy=createGoddessMapBoss({themeId:theme,level:100});
+export function superbossTrial({theme,job='warrior',variant='base',withNpcs=false,aware=true,seed=1,coefficient,defense90=false,character=null}={}){
+ const c=character?structuredClone(character):superbossCharacter(job,variant,withNpcs),enemy=createGoddessMapBoss({themeId:theme,level:100});
  if(coefficient!=null)enemy.goddessOffenseMultiplier=coefficient;
  // Explicit laboratory-only sensitivity scenario, never a claimed legal equipment build.
  if(defense90)c.temporaryStatBonuses={def:90-collectStats(c).def};

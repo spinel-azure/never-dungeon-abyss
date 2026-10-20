@@ -1,9 +1,10 @@
+import { armorSpellCost } from "./reincarnation-armor.js";
 import { magicBarrierAmount } from './aquarius.js';
 export function getEffectiveSpCost(skill = {}, character = {}) {
   const baseCost = Math.max(0, Math.floor(Number(skill?.spCost) || 0));
   if (baseCost === 0) return 0;
   if (magicBarrierAmount(character) > 0) return 0;
-  if (skill.ignoreSpCostReduction) return baseCost;
+  if (skill.ignoreSpCostReduction) return armorSpellCost(baseCost, skill, character);
   const manaSpring = character?.statuses?.some(status =>
     (status.id || status.statusId) === "charge_mana_spring" && status.active !== false
   );
@@ -18,5 +19,5 @@ export function getEffectiveSpCost(skill = {}, character = {}) {
       || Number(character?.cardStatBonuses?.spCostReduction)
       || 0
   ));
-  return Math.max(1, multipliedCost - reduction);
+  return armorSpellCost(Math.max(1, multipliedCost - reduction), skill, character);
 }

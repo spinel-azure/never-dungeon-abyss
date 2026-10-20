@@ -2837,6 +2837,7 @@ import {
         : getEquipmentItem(equippedId, slot);
       const name = document.createElement("span");
       name.className = "nde-equipment-name";
+      element.classList.toggle("is-reincarnation-armor", Boolean(item?.minimumReincarnations));
       const highlightClass = getEquipmentHighlightClass(equippedInstance, item);
       if (highlightClass) name.classList.add(highlightClass);
       name.textContent = equippedInstance ? getEquipmentInstanceName(equippedInstance) : item?.name || "―";
@@ -2874,6 +2875,7 @@ import {
           fireDamageTakenBonus: "被炎ダメージ",
           iceDamageTakenBonus: "被氷ダメージ",
           attackSpellDamageBonus: "攻撃呪文威力",
+      lightningDamageReduction:"雷軽減", darkDamageReduction:"闇軽減", holyDamageReduction:"聖軽減", earthDamageReduction:"地軽減",
           healingMiracleBonus: "回復奇蹟威力",
           passiveInstantDeathRateBonus: "一閃・暗殺術",
           poisonResistance: "毒・猛毒・死毒耐性",

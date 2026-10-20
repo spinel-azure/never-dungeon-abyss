@@ -45,7 +45,8 @@ export function resolvePhysicalAttack({
       ? Math.max(0, Math.min(0.75, Number(defender.fireDamageReduction) || 0))
       : element === "ice"
         ? Math.max(0, Math.min(0.75, Number(defender.iceDamageReduction) || 0))
-        : 0;
+        : ["lightning","dark","holy","earth"].includes(element)
+          ? Math.max(0, Math.min(0.75, Number(defender[`${element}DamageReduction`]) || 0)) : 0;
     const hit = attack.unavoidable ? true : roll(rng) < hitRate;
     if (!hit) {
       hits.push({

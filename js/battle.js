@@ -710,7 +710,7 @@ async function playPresentationEvents(startingSp) {
     } else if (event.type === "spHealing") {
       showBattleNumber(event.targetSide, event.amount, "sp-healing");
       battleUi.playSe("heal");
-    } else if (event.type === "barrierDamage") {
+    } else if (event.type === "barrierDamage" || event.type === "armorBarrierDamage") {
       showBattleNumber("player", event.amount, "barrier");
     } else if (!event.bossBarrierBlocked && (event.hit || event.type === "damage" || event.type === "followUpDamage" || event.type === "poisonDamage" || event.type === "bleedingDamage" || event.type === "leoHpCost")) {
       showBattleNumber(

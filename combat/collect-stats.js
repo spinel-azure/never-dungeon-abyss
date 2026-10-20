@@ -94,6 +94,10 @@ export function collectStats(source = {}) {
       0,
       0.75
     ),
+    lightningDamageReduction: clamp(numeric(source.lightningDamageReduction) + numeric(equipment.lightningDamageReduction) + numeric(cards.lightningDamageReduction) + numeric(temporary.lightningDamageReduction), 0, 0.75),
+    darkDamageReduction: clamp(numeric(source.darkDamageReduction) + numeric(equipment.darkDamageReduction) + numeric(cards.darkDamageReduction) + numeric(temporary.darkDamageReduction), 0, 0.75),
+    holyDamageReduction: clamp(numeric(source.holyDamageReduction) + numeric(equipment.holyDamageReduction) + numeric(cards.holyDamageReduction) + numeric(temporary.holyDamageReduction), 0, 0.75),
+    earthDamageReduction: clamp(numeric(source.earthDamageReduction) + numeric(equipment.earthDamageReduction) + numeric(cards.earthDamageReduction) + numeric(temporary.earthDamageReduction), 0, 0.75),
     fireDamageReduction: clamp(
       numeric(source.fireDamageReduction)
         + numeric(equipment.fireDamageReduction)

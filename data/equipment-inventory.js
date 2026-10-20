@@ -9,7 +9,7 @@ export const EQUIPMENT_SLOT_LABELS = Object.freeze({
   accessoryId: "ACCESSORY"
 });
 
-export function normalizeEquipmentInventory(source, equipment, equippedInstanceIds, job) {
+export function normalizeEquipmentInventory(source, equipment, equippedInstanceIds, job, reincarnationCount = 0) {
   const initial = getInitialEquipment(job);
   const rawInstances = Array.isArray(source?.instances) ? source.instances : [];
   const instances = [];
@@ -51,6 +51,10 @@ export function normalizeEquipmentInventory(source, equipment, equippedInstanceI
       usedIds.add(instanceId);
       instance = { instanceId, equipmentId, slot, acquiredOrder: nextOrder++, enhancement: 0, identified: true, curseKnown: false, locked: false };
       instances.push(instance);
+    }
+    const candidate = findEquipmentDefinition(instance.equipmentId, slot);
+    if (candidate?.minimumReincarnations && (reincarnationCount < candidate.minimumReincarnations || !candidate.allowedJobs.includes(job))) {
+      slotInstances[slot] = null; equipment = {...equipment, [slot]:null}; continue;
     }
     slotInstances[slot] = instance.instanceId;
   }
@@ -146,7 +150,8 @@ export function grantEquipmentInstance(character, equipmentId, slot, options = {
     character.equipmentInventory,
     character.equipment,
     character.equippedInstanceIds,
-    character.job
+    character.job,
+    character.reincarnationCount
   );
   const equipmentInventory = structuredClone(normalized.equipmentInventory);
   const used = new Set(equipmentInventory.instances.map(instance => instance.instanceId));
@@ -204,6 +209,9 @@ export function canEquipInstance(character, instance) {
   }
   if (definition.allowedJobs?.length && !definition.allowedJobs.includes(character?.job)) {
     return { accepted: false, reason: "この職業では装備できません。" };
+  }
+  if ((Number(character?.reincarnationCount) || 0) < (definition.minimumReincarnations || 0)) {
+    return { accepted:false, reason:`装備条件：転生${definition.minimumReincarnations}回以上` };
   }
   for (const [stat, required] of Object.entries(definition.requirements || {})) {
     const current = Math.floor(Number(character?.baseStats?.[stat]) || 0);

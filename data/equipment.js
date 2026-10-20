@@ -1,3 +1,4 @@
+import { REINCARNATION_ARMOR } from "./reincarnation-armor.js";
 import { getWeapon } from "./weapons.js";
 
 export const EQUIPMENT_SLOTS = Object.freeze([
@@ -17,6 +18,7 @@ export const ANTI_MAGIC_SET_EQUIPMENT_IDS = Object.freeze([
 export const ANTI_MAGIC_SET_MAGIC_DAMAGE_REDUCTION = 0.1;
 
 export const EQUIPMENT = Object.freeze({
+  ...REINCARNATION_ARMOR,
   alveter_schuhe: item('alveter_schuhe','アルヴェターシューエ','footId',{def:5},{
     description:'各種床ダメージ無効',unique:true,lotBagHighlight:'orange',sellPrice:0,
     fireFloorDamageImmunity:true,coldFloorDamageImmunity:true,crystalFloorDamageImmunity:true,

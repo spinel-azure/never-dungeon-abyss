@@ -60,11 +60,13 @@ export function resolveSpell({
       : Math.max(0, Math.min(0.75,
         numeric(defender.magicDamageReduction) + elementalReduction
           + elementalMagicReduction + nonElementalReduction));
+    const separateElementReduction = !spell.ignoresElementResistance && ["lightning","dark","holy","earth"].includes(spell.element)
+      ? Math.max(0,Math.min(0.75,numeric(defender[`${spell.element}DamageReduction`]))) : 0;
     const damageTakenBonus = spell.element === "fire"
       ? numeric(defender.fireDamageTakenBonus)
       : spell.element === "ice" ? numeric(defender.iceDamageTakenBonus) : 0;
     damage = Math.max(1, Math.floor(baseDamage * multiplier * variance * (1 - damageReduction)
-      * (1 + damageTakenBonus + numeric(defender.magicDamageTakenBonus))));
+      * (1 - separateElementReduction) * (1 + damageTakenBonus + numeric(defender.magicDamageTakenBonus))));
   }
   const actionEffects = resolveEffects({
     effects: spell.effects,

@@ -172,7 +172,8 @@ export function normalizeCharacter(character) {
     character.equipmentInventory,
     equipment,
     character.equippedInstanceIds,
-    characterClass.id
+    characterClass.id,
+    reincarnationCount
   );
   const equipmentStatBonuses = collectEquippedInstanceBonuses(
     equipmentCollection.equipmentInventory,

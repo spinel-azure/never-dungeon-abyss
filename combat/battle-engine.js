@@ -1,3 +1,4 @@
+import { syncArmorState, beginArmorCommand, armorDamageMultiplier, recordArmorGuard, grantArmorBarrier, absorbArmorBarrier, finishArmorRound } from "./reincarnation-armor.js";
 import {hasKeyItem} from '../data/key-items.js';
 import {normalizeReincarnationCount} from '../data/reincarnation.js';
 import {isSuperGoddess,recordGoddessInterruptionDamage,finishGoddessPlayerOpportunity} from './goddess-superboss.js';
@@ -110,6 +111,8 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
   ));
   const sphinxBarrier = sphinxBarrierAmount + guardStoneBarrier;
   const player = cloneCombatant(character);
+  delete player.armorBattle;
+  syncArmorState(player);
   const aquariusActiveAtStart = (character?.cards?.deckSlots || []).includes('zodiac_aquarius');
   initializeMagicBarrier(player, aquariusActiveAtStart);
   player.statuses = player.statuses.filter(status => (status.id || status.statusId) !== PISCES_STATUS);
@@ -184,6 +187,7 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
   if (Array.isArray(battle?.enemies)) return resolveMultiBattleRound({ battle, playerCommand, rng });
   const next = synchronizeEnemyStatCaps(structuredClone(battle));
   if (isCharmed(next.player)) playerCommand = { type: "wait" };
+  syncArmorState(next.player);
   const playerAction = createPlayerAction(next.player, playerCommand, next.enemy);
   if (!playerAction.ok) return { battle: next, accepted: false, reason: playerAction.reason };
   const enemyAction = createEnemyAction(next.enemy, rng, { battle: next });
@@ -250,6 +254,7 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
     const targetSide = entry.side === "player" ? "enemy" : "player";
     const target = next[targetSide];
     if (!actor.alive || actor.hp <= 0) continue;
+    if (entry.side === "enemy") actor.armorOpportunityTurn = next.turn;
     const opportunity = resolveActionOpportunity(actor.statuses);
     actor.statuses = opportunity.statuses;
     if (opportunity.skipped) {
@@ -311,13 +316,14 @@ export function resolveBattleRound({ battle, playerCommand, rng = Math.random } 
 // Pay once when the chosen action actually starts, including all-target/Gemini casts.
 function consumePlayerActionSp(battle, playerAction) {
   const cost = playerAction.spCost;
-  if (!(cost > 0)) return true;
+  if (!(cost > 0)) { beginArmorCommand(battle, playerAction.action); return true; }
   if (battle.player.sp < cost) {
     const message = `${battle.player.name}はSPが足りず、${playerAction.action.name}を使えない！`;
     battle.log.push(message);
     battle.presentationEvents.push({type:"skillUnavailable", message});
     return false;
   }
+  beginArmorCommand(battle, playerAction.action);
   battle.player.sp -= cost;
   battle.presentationEvents.push({type:"skillActivation", playerSp:battle.player.sp,
     message:`${battle.player.name}の${playerAction.action.name}！`});
@@ -382,6 +388,7 @@ export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.rand
   next.targetIndex = normalizeLivingTargetIndex(next.enemies, playerCommand?.targetIndex ?? next.targetIndex);
   next.enemy = next.enemies[next.targetIndex];
   if (isCharmed(next.player)) playerCommand = { type: "wait" };
+  syncArmorState(next.player);
   const playerAction = createPlayerAction(next.player, playerCommand, next.enemy);
   if (!playerAction.ok) return { battle: next, accepted: false, reason: playerAction.reason };
   const orderEntries = [{ side: "player", actor: combatStats(next.player), action: playerAction.action }];
@@ -441,6 +448,7 @@ export function resolveMultiBattleRound({ battle, playerCommand, rng = Math.rand
     if (priorityPlayerAction && entry.side === "player") continue;
     const actor = entry.side === "player" ? next.player : next.enemies[entry.partyIndex];
     if (!actor?.alive || actor.hp <= 0) continue;
+    if (entry.side === "enemy") actor.armorOpportunityTurn = next.turn;
     const opportunity = resolveActionOpportunity(actor.statuses);
     actor.statuses = opportunity.statuses;
     if (opportunity.skipped) {
@@ -1121,6 +1129,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     return;
   }
   if (action.actionType === "guard") {
+    if (actorSide === "player") recordArmorGuard(battle);
     actor.statuses = applyStatusApplications(actor.statuses, [{
       statusId: "guard",
       success: true,
@@ -1427,6 +1436,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
   if (action.actionType === "healing") {
     const result = resolveHealing({ caster: actorStats, target: actor, healing: action });
     actor.hp = Math.min(actor.maxHp, actor.hp + result.actualHealing);
+    if (actorSide === "player" && action.category === "miracle") grantArmorBarrier(battle, result.actualHealing);
     const priorityHealing = Number(action.turnPriority) >= 100;
     const healingMessage = priorityHealing
       ? `${action.name}で最速治療！HPが${result.actualHealing}回復した！`
@@ -1521,6 +1531,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     critical: hit.critical,
     damage: hit.hit ? Math.max(0, Math.floor(
       hit.damage
+        * (actorSide === "player" ? armorDamageMultiplier(battle, action, target) : 1)
         * (1 - reduction)
         * getCapricornDamageMultiplier(battle, actorSide)
         * getCapricornReceivedDamageMultiplier(battle, targetSide)
@@ -1682,6 +1693,11 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     actualDamage = absorbBossMagicBarrier(battle, target, actualDamage);
     presentedHits = presentedHits.map(hit => ({...hit, damage:0, bossBarrierBlocked:true}));
   }
+  if (targetSide === "player" && actualDamage > 0 && target.armorBattle?.barrier > 0) {
+    const before = presentedHits.reduce((sum, hit) => sum + hit.damage, 0);
+    presentedHits = absorbArmorBarrier(battle, presentedHits);
+    actualDamage = Math.max(0,actualDamage - before + presentedHits.reduce((sum, hit) => sum + hit.damage, 0));
+  }
   const targetHpBeforeDamage = Math.max(0, Number(target.hp) || 0);
   applyCombatHpDamage(target, actualDamage);
   const actualHpLoss = Math.max(0, targetHpBeforeDamage - target.hp);
@@ -1699,6 +1715,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     if (applications.some(application => application.success)) battle.log.push(`${target.name}は出血した！`);
   }
   target.alive = target.hp > 0;
+  if (targetSide === "player" && !target.alive && target.armorBattle) target.armorBattle.barrier = 0;
   const hitCount = presentedHits.filter(hit => hit.hit).length;
   const isMultiHit = presentedHits.length > 1;
   battle.log.push(`${actor.name}の${action.name || "攻撃"}！`);
@@ -2173,6 +2190,7 @@ function resolveClassRecovery(battle) {
 }
 
 function updateMultiOutcome(battle) {
+  if (battle.player.hp <= 0 && battle.player.armorBattle) battle.player.armorBattle.barrier = 0;
   synchronizeLionQueen(battle);
   synchronizeWassermannfrau(battle);
   synchronizeTwinState(battle);
@@ -2207,6 +2225,7 @@ function markUltimateUsed(actor, action) {
 }
 
 function updateOutcome(battle) {
+  if (battle.player.hp <= 0 && battle.player.armorBattle) battle.player.armorBattle.barrier = 0;
   synchronizeLionQueen(battle);
   synchronizeWassermannfrau(battle);
   if (battle.scriptedNonlethal) {
@@ -2373,6 +2392,7 @@ function statusName(id) {
 }
 
 function finishBattleDefenses(battle) {
+  finishArmorRound(battle);
   finishPiscesTurn(battle);
   if (battle.outcome) { initializeMagicBarrier(battle.player, false); clearLionOpenings(battle); }
 }

@@ -1226,8 +1226,9 @@ function renderInventory() {
 
 function incompatibleEquipmentJobLabel(definition, character) {
   const allowedJobs = Array.isArray(definition?.allowedJobs) ? definition.allowedJobs : [];
-  if (!allowedJobs.length || allowedJobs.includes(character?.job)) return "";
-  return ` / 装備可能職：${allowedJobs.map(job => EQUIPMENT_JOB_LABELS[job] || job).join("・")}`;
+  const reincarnationLabel = definition?.minimumReincarnations ? ` / 装備条件：転生${definition.minimumReincarnations}回以上` : "";
+  if (!allowedJobs.length || allowedJobs.includes(character?.job)) return reincarnationLabel;
+  return `${reincarnationLabel} / 装備可能職：${allowedJobs.map(job => EQUIPMENT_JOB_LABELS[job] || job).join("・")}`;
 }
 
 function renderInventoryComparison(root, candidate) {
@@ -1315,9 +1316,11 @@ function equipmentEffectLabels(definition) {
       fireDamageTakenBonus: "被炎ダメージ",
       iceDamageTakenBonus: "被氷ダメージ",
       attackSpellDamageBonus: "攻撃呪文威力",
+      lightningDamageReduction:"雷軽減", darkDamageReduction:"闇軽減", holyDamageReduction:"聖軽減", earthDamageReduction:"地軽減",
       healingMiracleBonus: "回復奇蹟威力",
       passiveInstantDeathRateBonus: "一閃・暗殺術",
       poisonResistance: "毒・猛毒・死毒耐性",
+      surpriseResistance: "奇襲耐性",
       bleedingResistance: "出血耐性"
     };
     labels.push(percentLabels[key]

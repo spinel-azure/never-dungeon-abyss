@@ -196,3 +196,9 @@ body.touch-controls-enabled.layout-tablet.orientation-portrait:not(.menu-open):n
 body.touch-controls-enabled.layout-tablet.orientation-portrait .strafe-controls{position:fixed;left:max(18px,env(safe-area-inset-left));right:max(18px,env(safe-area-inset-right));bottom:calc(184px + env(safe-area-inset-bottom));width:auto;margin:0}
 .nde-status-vitals{font-size:16px;gap:6px}.nde-status-vitals>span{white-space:nowrap}
 @media(max-width:420px){.nde-status-vitals{font-size:13px;gap:4px}}
+
+/* Longer reincarnation armor effects retain their complete text within the panel. */
+.nde-equipment:has(.is-reincarnation-armor){grid-template-columns:112px minmax(0,1fr)}
+.nde-equipment strong.is-reincarnation-armor{min-width:0;flex-wrap:wrap;row-gap:2px}
+.nde-equipment .is-reincarnation-armor .nde-equipment-bonus{flex:1 1 100%;white-space:normal;overflow-wrap:anywhere}
+@media(max-width:420px){.nde-equipment:has(.is-reincarnation-armor){grid-template-columns:88px minmax(0,1fr)}}
