@@ -5853,6 +5853,8 @@ import {
     say('地図迷宮の冒険を再開しました。');
   }
   configureSpecialMapHost({
+    getReincarnationCount:()=>character?.reincarnationCount||0,
+    saveTreasureState:()=>saveGame(),
     onStateChanged:scheduleAutosave,
     resumeEncounter:session=>{
       const c=session.battleContext;

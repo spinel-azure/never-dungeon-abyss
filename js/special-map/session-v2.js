@@ -11,6 +11,7 @@ import {resolveSpecialThemeBoss} from '../../data/karte-special-bosses.js';
 import {NORMAL_MAP_THEMES} from '../../data/special-map-themes.js';
 import {generateExplicitSpecialMapV2} from './special-themes-v2.js';
 import {isExplorerTestEnabled} from '../explorer-preview.js';
+import {createV2TreasureLayout,v2TreasureAt} from './treasures-v2.js';
 
 const dirs=['N','E','S','W'];
 const same=(a,b)=>a&&b&&a.x===b.x&&a.y===b.y;
@@ -27,7 +28,7 @@ export function createSpecialMapV2Session(registered,mapKey,options={}){
  const s={kind:'specialMapV2',expeditionId:crypto.randomUUID(),mapKey,ruleset:original.rulesetVersion,seed:original.seed,level:original.level,rarity:original.rarity,
   themeOverride:original.themeOverride,
   blueprint,fingerprint:specialMapV2StructureFingerprint(blueprint),currentFloor:0,torchFuel:100,
-  battleExperience:0,experienceClosed:false,rewardedBattles:new Set(),lootBag:null,
+  battleExperience:0,experienceClosed:false,rewardedBattles:new Set(),lootBag:null,treasureStates:{},
   bossKeyFound:false,bossDoorUnlocked:false,transitioning:false,playSe,say};
  s.floors=blueprint.floors.map(f=>{
   const generatedMap={...f,entrance:f.stairsUp};
@@ -37,6 +38,7 @@ export function createSpecialMapV2Session(registered,mapKey,options={}){
   const doors=edge?[{...edge,dir:edge.direction,key:doorKey(edge.x,edge.y,edge.direction)}]:[];
   const r={generatedFloor:f,generatedMap,playerX:f.stairsUp.x,playerY:f.stairsUp.y,direction,
    explored:Array.from({length:10},()=>Array(10).fill(false)),openedDoors:new Set(),
+   treasures:createV2TreasureLayout(s.seed,s.level,f),
    doorLayout:{doors},doorByKey:new Map(doors.map(d=>[d.key,d])),motion:null,autoPath:null,chestOpened:false,
    renderState:{kind:'specialMapV2',x:f.stairsUp.x+.5,y:f.stairsUp.y+.5,angle:direction*Math.PI/2-Math.PI/2,shake:0,torch:0,minimapEffectForced:false}};
   r.cells=f.walls.reduce((rows,w,i)=>{
@@ -49,6 +51,11 @@ export function createSpecialMapV2Session(registered,mapKey,options={}){
    }
    if(same(p,f.keyChest)){
     Object.defineProperty(cell,'treasure',{enumerable:true,get:()=>r.chestOpened?null:'gold'});
+    Object.defineProperty(cell,'treasureDiscovered',{enumerable:true,get:()=>r.explored[y][x]});
+   }
+   const treasure=r.treasures.find(t=>same(p,t));
+   if(treasure){
+    Object.defineProperty(cell,'treasure',{enumerable:true,get:()=>s.treasureStates[treasure.id]?.opened?null:treasure.color});
     Object.defineProperty(cell,'treasureDiscovered',{enumerable:true,get:()=>r.explored[y][x]});
    }
    for(const d of dirs){
@@ -128,11 +135,14 @@ export function getV2StairPrompt(s){
 export function getV2CellPromptMessage(s){
  if(!isV2Session(s)||!s.cellPrompt)return '';
  if(s.cellPrompt==='gate')return 'ワープゲートが現れた。B1Fの入口へ移動しますか？\n＊A／Enterで移動　Bでその場に留まる';
+ if(s.cellPrompt==='redChest')return '赤色の宝箱がある。開けますか？\n＊A／Enterで開ける　Bでその場に留まる';
  return s.cellPrompt==='stairs'?getV2StairPrompt(s):'金色の宝箱がある。開けますか？\n＊A／Enterで開ける　Bでその場に留まる';
 }
 export function beginV2CellPrompt(s){
  const f=s.floors[s.currentFloor],here={x:s.playerX,y:s.playerY};
  s.cellPrompt=isV2ReturnGate(s)?'gate':getV2StairPrompt(s)?'stairs':same(here,f.generatedFloor.keyChest)&&!f.chestOpened?'chest':null;
+ const treasure=v2TreasureAt(s);
+ if(!s.cellPrompt&&treasure?.color==='red'&&!s.treasureStates[treasure.id]?.opened)s.cellPrompt='redChest';
  if(s.cellPrompt){s.autoPath=null;s.say(getV2CellPromptMessage(s));}
  return s.cellPrompt;
 }
@@ -189,6 +199,12 @@ export function confirmV2Cell(s,now){
  if(destination)return {handled:true,destination};
  const f=s.floors[s.currentFloor],point={x:s.playerX,y:s.playerY};
  if(s.currentFloor===0&&same(point,f.generatedFloor.stairsUp))return {handled:true,returnToEntrance:true};
+ const treasure=v2TreasureAt(s);
+ if(treasure){
+  if(treasure.color==='black'){s.say('黒色の宝箱がある。今は開けられない。');return {handled:true};}
+  if(s.treasureStates[treasure.id]?.opened){s.say('赤箱は空だ。');return {handled:true};}
+  return {handled:true,openRedChest:true};
+ }
  if(same(point,f.generatedFloor.keyChest)){
   if(!f.chestOpened){s.chestOpening=f;s.transitioning=true;return {handled:true,openKeyChest:true};}
   else s.say('金箱は空だ。');

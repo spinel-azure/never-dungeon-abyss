@@ -22,7 +22,7 @@ export function serializeSpecialMapSession(s) {
     currentFloor:s.currentFloor || 0,floors,
     values:Object.fromEntries(fields.filter(k => s[k] !== undefined).map(k => [k,s[k]])),
     torchFuel:s.renderState.torchFuel,
-    lootBag:copy(s.lootBag),rewardedBattles:[...(s.rewardedBattles || [])],
+    lootBag:copy(s.lootBag),treasureStates:copy(s.treasureStates),rewardedBattles:[...(s.rewardedBattles || [])],
     goddessBattle:s.battleContext&&!s.bossDefeated ? copy(s.goddessBattle) : null,
     encounter:copy(s.bossDefeated ? null : s.battleContext || s.preparedBossContext),
     surveyedMasks:copy(s.surveyedMasks),surveyedMask:s.pendingSurveyMask ?? null};
@@ -50,6 +50,7 @@ export function restoreSpecialMapSession(s, data) {
   });
   s.renderState.torchFuel=data.torchFuel;
   s.lootBag=copy(data.lootBag);s.rewardedBattles=new Set(data.rewardedBattles || []);
+  if(s.kind==='specialMapV2')s.treasureStates=copy(data.treasureStates)||{};
   s.battleContext=data.encounter ? {...copy(data.encounter),sessionId:s.encounterSessionId} : null;
   s.goddessBattle=restoreGoddessCheckpoint(data.goddessBattle,s.battleContext);
   s.transitioning=!!s.battleContext;

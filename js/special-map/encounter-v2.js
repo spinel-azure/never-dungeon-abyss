@@ -15,7 +15,7 @@ export function rollV2Species(species,random=Math.random){
 export function isV2EncounterCell(s){
  const f=s.generatedMap,p={x:s.playerX,y:s.playerY};
  const same=q=>q&&q.x===p.x&&q.y===p.y;
- return ![f.stairsUp,f.stairsDown,f.keyChest,f.bossRoom?.bossCell].some(same);
+ return ![f.stairsUp,f.stairsDown,f.keyChest,f.bossRoom?.bossCell,...(s.floors?.[s.currentFloor]?.treasures||[])].some(same);
 }
 export function attachV2Encounters(s,{onEncounter,random=Math.random,onBlocked=message=>console.warn(message)}={}){
  s.presence=0;s.presenceSuppressedSteps=0;s.presenceIncreaseReduction=0;s.incenseActive=false;s.attractingIncenseActive=false;s.battleContext=null;s.encounterSessionId=++nextSessionId;s.encounterSequence=0;

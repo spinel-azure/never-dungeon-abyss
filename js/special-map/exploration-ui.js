@@ -1,4 +1,5 @@
 import {mapNameColor} from './name-color.js';
+import {prepareV2Treasure,completeV2Treasure,v2TreasureAt} from './treasures-v2.js';
 import {restoreSpecialMapSession,resumeMapOriginal} from './save-session.js';
 import {discardV2Experience} from './battle-rewards-v2.js';
 import {getV2StairImage} from './stair-presentation-v2.js';
@@ -132,10 +133,10 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
   }
  };
  function syncChestPreview(){
-  if(!isV2Session(session)||session.chestOpening)return;
-  const visible=session.cellPrompt==='chest'&&!session.surveyPresentationPlaying;
+  if(!isV2Session(session)||session.chestOpening||session.redChestOpening)return;
+  const visible=['chest','redChest'].includes(session.cellPrompt)&&!session.surveyPresentationPlaying;
   if(visible===chestPreview)return;chestPreview=visible;
-  if(visible)Promise.resolve(host.showTreasure?.('gold',{backdrop:true})).then(()=>{if(disposed||session.surveyPresentationPlaying||(!session.chestOpening&&session.cellPrompt!=='chest'))host.hideTreasure?.();});
+  if(visible)Promise.resolve(host.showTreasure?.(session.cellPrompt==='redChest'?'red':'gold',{backdrop:true})).then(()=>{if(disposed||session.surveyPresentationPlaying||(!session.chestOpening&&!session.redChestOpening&&!['chest','redChest'].includes(session.cellPrompt)))host.hideTreasure?.();});
   else host.hideTreasure?.();
  }
  let stairPrompt=getV2StairPrompt(session);
@@ -252,6 +253,35 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
    message.textContent='金箱を開けられませんでした。A／Enterでもう一度お試しください。';
   }
  }
+ async function openRedChest(){
+  const chest=v2TreasureAt(session);
+  const save=()=>session.developmentSession?true:host.saveTreasureState?.()===true;
+  if(!prepareV2Treasure(session,host.getReincarnationCount?.()||0,save)){
+   message.textContent='宝箱の保存に失敗しました。A／Enterでもう一度お試しください。';return;
+  }
+  session.redChestOpening=chest.id;session.transitioning=true;
+  let completed=false;
+  try{
+   if(!host.playTreasureOpening)throw Error('Treasure presentation unavailable');
+   message.textContent='赤箱を開けている……';playSe('door');
+   await new Promise((resolve,reject)=>Promise.resolve(host.playTreasureOpening('red',()=>{
+    if(disposed||session.redChestOpening!==chest.id)return;
+    completed=completeV2Treasure(session,chest.id,save);
+    if(completed){
+     const reward=session.treasureStates[chest.id].reward;
+     message.textContent=reward.kind==='equipment'?'？防具をロット袋に入れた！':'？薬をロット袋に入れた！';
+     playSe('importantItem');
+    }
+    resolve();
+   },{backdrop:true})).catch(reject));
+  }catch{}
+  finally{
+   if(!disposed){
+    host.hideTreasure?.();chestPreview=false;session.redChestOpening=null;session.transitioning=false;
+    if(!completed)message.textContent='宝箱を開けられませんでした。A／Enterでもう一度お試しください。';
+   }
+  }
+ }
  function input(action){
   if(disposed)return false;
   if(['strafeLeft','strafeRight'].includes(action)&&(host.isPaused?.()||session.renderState.overlayEvent))return true;
@@ -275,7 +305,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
   if(['up','down','left','right','strafeLeft','strafeRight','confirm','cancel'].includes(action))session.autoPath=null;
   if(action==='cancel'){host.openMenu();return true;}
   if(action==='confirm'&&session.surveyError){flushSpecialSurvey(session);message.textContent=session.surveyError||'調査記録を保存しました。';return true;}
-  if(action==='confirm'&&isV2Session(session)){const result=confirmV2Cell(session,performance.now());if(result.warpToEntrance)void useStairs(null,true);else if(result.destination)void useStairs(result.destination);else if(result.returnToEntrance)finish();else if(result.openKeyChest)void openKeyChest();}
+  if(action==='confirm'&&isV2Session(session)){const result=confirmV2Cell(session,performance.now());if(result.warpToEntrance)void useStairs(null,true);else if(result.destination)void useStairs(result.destination);else if(result.returnToEntrance)finish();else if(result.openKeyChest)void openKeyChest();else if(result.openRedChest)void openRedChest();}
   else if(action==='confirm'){if(openSpecialDoorAhead(session,performance.now())){playSe('door');message.textContent='ギィ……';}}
   else actSpecialMap(session,action,performance.now());
   container.dataset.moving=String(Boolean(session.motion||session.renderState.anim));return true;
@@ -296,7 +326,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  const guardCommands=e=>{if(!host.isBattleActive?.()&&isV2Session(session)&&(session.cellPrompt||session.transitioning||session.surveyPresentationPlaying)&&e.target?.closest?.('.dungeon-commands, .menu-screen')){e.preventDefault();e.stopImmediatePropagation();}};
  for(const event of ['pointerdown','click','touchend'])document.addEventListener(event,guardCommands,true);
  const dismiss=()=>{if(session.renderState.overlayEvent&&!session.surveyPresentationPlaying)session.renderState.overlayEvent=null;};canvas.addEventListener('click',dismiss);
- function close(){if(disposed)return;disposed=true;if(session.keyAcquisitionPlaying)host.hideMapKeyAcquisition?.();if(session.rareRewardPlaying)host.hideV2RareRewardAcquisition?.();if(chestPreview)host.hideTreasure?.();discardV2Experience(session);session.disposeSurvey?.();window.removeEventListener('pagehide',saveOnHide);document.removeEventListener('visibilitychange',saveWhenHidden);for(const event of ['pointerdown','click','touchend'])document.removeEventListener(event,guardCommands,true);if(session.chestOpening){host.hideTreasure?.();cancelV2KeyChest(session);}restore();statusParent.append(host.status);container.remove();window.removeEventListener('keydown',enter,true);detach();}
+ function close(){if(disposed)return;disposed=true;if(session.redChestOpening){host.hideTreasure?.();session.redChestOpening=null;}if(session.keyAcquisitionPlaying)host.hideMapKeyAcquisition?.();if(session.rareRewardPlaying)host.hideV2RareRewardAcquisition?.();if(chestPreview)host.hideTreasure?.();discardV2Experience(session);session.disposeSurvey?.();window.removeEventListener('pagehide',saveOnHide);document.removeEventListener('visibilitychange',saveWhenHidden);for(const event of ['pointerdown','click','touchend'])document.removeEventListener(event,guardCommands,true);if(session.chestOpening){host.hideTreasure?.();cancelV2KeyChest(session);}restore();statusParent.append(host.status);container.remove();window.removeEventListener('keydown',enter,true);detach();}
  host.onStateChanged?.();
  if(resumeSave){
   session.renderState.overlayEvent=null;
