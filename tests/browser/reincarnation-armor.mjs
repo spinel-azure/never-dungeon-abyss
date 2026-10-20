@@ -17,6 +17,7 @@ window.armorQa={async setup(series){
  const e=equipInstance(g.character,item.slot,g.instance.instanceId);
  if(!e.accepted)throw new Error(e.reason);character=e.character;
  }
+ if(set.job==='thief'){const g=grantEquipmentInstance(character,'katzendolch','rightArmId');const e=equipInstance(g.character,'rightArmId',g.instance.instanceId);if(!e.accepted)throw Error(e.reason);character=e.character;}
  character=normalizeCharacter(character);
  document.querySelector('#titleScreen').hidden=true;document.body.classList.remove('title-active');
  document.body.classList.add('town-active');closeCampMenu('qa');closeTown();updateCharacterUi();openStatusMenu();
@@ -27,8 +28,8 @@ const hooked=source.replace(/\n\}\)\(\);\s*$/,`\n${hook}\n})();\n`);
 assert.notEqual(hooked,source);
 const browser=await chromium.launch({channel:'msedge',headless:true}),errors=[];
 try{
- for(const [label,width,height] of [['pc',1280,900],['mobile',390,844]]){
-  const context=await browser.newContext({viewport:{width,height},hasTouch:label==='mobile',isMobile:label==='mobile'});
+ for(const [label,width,height] of [['pc',1280,900],['mobile',390,844],['narrow',360,800]]){
+  const context=await browser.newContext({viewport:{width,height},hasTouch:label!=='pc',isMobile:label!=='pc'});
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
   await page.route('**/js/main.js?*',r=>r.fulfill({contentType:'text/javascript',body:hooked}));
   await page.goto(process.env.ARMOR_QA_URL||'http://127.0.0.1:4174');
@@ -37,7 +38,7 @@ try{
    const panel=page.locator('#menuScreen');
    assert.ok((await panel.boundingBox()).width<=width,`${label} ${id} panel exceeds viewport`);
    assert.ok(await panel.evaluate(e=>e.scrollWidth<=e.clientWidth+1),`${label} ${id} content overflow`);
-   assert.ok(await panel.evaluate(e=>[...e.querySelectorAll('.nde-equipment-bonus')].every(x=>{
+   assert.ok(await panel.evaluate(e=>[...e.querySelectorAll('.nde-equipment-name,.nde-equipment-bonus')].every(x=>{
     const box=x.getBoundingClientRect(),outer=e.getBoundingClientRect();
     return box.right<=outer.right+1 && x.scrollWidth<=x.clientWidth+1;
    })),`${label} ${id} clipped bonus text`);
