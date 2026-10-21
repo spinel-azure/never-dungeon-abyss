@@ -136,7 +136,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
   if(!isV2Session(session)||session.chestOpening||session.redChestOpening)return;
   const visible=['chest','redChest'].includes(session.cellPrompt)&&!session.surveyPresentationPlaying;
   if(visible===chestPreview)return;chestPreview=visible;
-  if(visible)Promise.resolve(host.showTreasure?.(session.cellPrompt==='redChest'?'red':'gold',{backdrop:true})).then(()=>{if(disposed||session.surveyPresentationPlaying||(!session.chestOpening&&!session.redChestOpening&&!['chest','redChest'].includes(session.cellPrompt)))host.hideTreasure?.();});
+  if(visible)Promise.resolve(host.showTreasure?.(session.cellPrompt==='redChest'?(session.treasureStates[v2TreasureAt(session)?.id]?.color||v2TreasureAt(session)?.color||'red'):'gold',{backdrop:true})).then(()=>{if(disposed||session.surveyPresentationPlaying||(!session.chestOpening&&!session.redChestOpening&&!['chest','redChest'].includes(session.cellPrompt)))host.hideTreasure?.();});
   else host.hideTreasure?.();
  }
  let stairPrompt=getV2StairPrompt(session);
@@ -256,20 +256,21 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  async function openRedChest(){
   const chest=v2TreasureAt(session);
   const save=()=>session.developmentSession?true:host.saveTreasureState?.()===true;
-  if(!prepareV2Treasure(session,host.getReincarnationCount?.()||0,save)){
+  if(!prepareV2Treasure(session,host.getReincarnationCount?.()||0,save,host.getTreasureCharacter?.())){
    message.textContent='宝箱の保存に失敗しました。A／Enterでもう一度お試しください。';return;
   }
   session.redChestOpening=chest.id;session.transitioning=true;
   let completed=false;
   try{
    if(!host.playTreasureOpening)throw Error('Treasure presentation unavailable');
-   message.textContent='赤箱を開けている……';playSe('door');
-   await new Promise((resolve,reject)=>Promise.resolve(host.playTreasureOpening('red',()=>{
+   const color=session.treasureStates[chest.id].color||chest.color;
+   message.textContent=({red:'赤箱',black:'黒箱',gold:'金箱'}[color])+'を開けている……';playSe('door');
+   await new Promise((resolve,reject)=>Promise.resolve(host.playTreasureOpening(color,()=>{
     if(disposed||session.redChestOpening!==chest.id)return;
-    completed=completeV2Treasure(session,chest.id,save);
+    completed=completeV2Treasure(session,chest.id,save,host.getTreasureCharacter?.());
     if(completed){
      const reward=session.treasureStates[chest.id].reward;
-     message.textContent=reward.kind==='equipment'?'？防具をロット袋に入れた！':'？薬をロット袋に入れた！';
+     message.textContent=reward.kind==='equipment'?(reward.slot==='rightArmId'?'？武器をロット袋に入れた！':'？防具をロット袋に入れた！'):'？薬をロット袋に入れた！';
      playSe('importantItem');
     }
     resolve();

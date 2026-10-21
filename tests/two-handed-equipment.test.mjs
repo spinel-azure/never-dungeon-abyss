@@ -9,6 +9,10 @@ import {
 import { WEAPONS } from "../data/weapons.js";
 
 const EXPECTED_TWO_HANDED_WEAPON_IDS = Object.freeze([
+  "reinc_eveningstar_weapon",
+  "reinc_firmament_weapon",
+  "reinc_polarstar_weapon",
+  "katzennova",
   "salamander_staff",
   "ice_lizard_staff",
   "training_greatsword",
@@ -41,6 +45,7 @@ test("all two-handed weapons clear the left hand and prevent it from being re-eq
   for (const weapon of twoHandedWeapons) {
     const job = weapon.allowedJobs?.[0] || "warrior";
     const initial = createInitialCharacter({ name: "TEST", job });
+    initial.reincarnationCount = weapon.minimumReincarnations || 0;
     const leftArmInstanceId = initial.equippedInstanceIds.leftArmId;
     const leftArmInstance = findInstance(initial, leftArmInstanceId);
     assert.ok(leftArmInstance, `${weapon.id}: initial left-arm equipment exists`);

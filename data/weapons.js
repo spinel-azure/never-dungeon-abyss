@@ -1,4 +1,6 @@
+import {REINCARNATION_WEAPONS,FINAL_CAT_WEAPONS} from './reincarnation-weapons.js';
 export const WEAPON_TYPES = Object.freeze({
+  ROYAL_CAT_DAGGER: Object.freeze({id:'royal_cat_dagger',hitCount:5,powerPerHit:.5,speedModifier:5,defensePenetration:0,damageDexMultiplier:.25}),
   LONGSWORD: Object.freeze({
     id: "longsword",
     hitCount: 1,
@@ -63,6 +65,7 @@ export const WEAPON_TYPES = Object.freeze({
 });
 
 export const WEAPONS = Object.freeze({
+  ...REINCARNATION_WEAPONS,...FINAL_CAT_WEAPONS,
   iron_longsword: Object.freeze({
     id: "iron_longsword",
     name: "鉄の長剣",

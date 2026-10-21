@@ -72,12 +72,13 @@ export function resolvePhysicalAttack({
     const normalDamage = elementMultiplier <= 0
       ? 0
       : Math.max(1, Math.floor(baseDamage * variance * elementMultiplier * (1 - elementalReduction)));
-    const damage = normalDamage <= 0 ? 0 : critical
+    let damage = normalDamage <= 0 ? 0 : critical
       ? Math.max(
         COMBAT_CONFIG.criticalDamageMinimum,
         Math.floor(normalDamage * COMBAT_CONFIG.criticalMultiplier)
       )
       : normalDamage;
+    if(critical && damage > 0 && attack.weapon?.physicalCriticalMultiplier) damage=Math.floor(damage * attack.weapon.physicalCriticalMultiplier);
     const effects = [
       ...resolveEffects({ effects: attack.effects, trigger: "perHit", attacker, defender, rng })
     ];

@@ -40,7 +40,7 @@ export function superbossCommand(b,aware=true){
  if(b.player.cards.deckSlots.includes('zodiac_leo')&&!isPlayerChargeReady(b.player)&&c.type!=='item')c={type:'attack'};
  return c;
 }
-export function superbossTrial({theme,job='warrior',variant='base',withNpcs=false,aware=true,seed=1,coefficient,defense90=false,character=null}={}){
+export function superbossTrial({theme,job='warrior',variant='base',withNpcs=false,aware=true,seed=1,coefficient,defense90=false,character=null,commandPolicy=null}={}){
  const c=character?structuredClone(character):superbossCharacter(job,variant,withNpcs),enemy=createGoddessMapBoss({themeId:theme,level:100});
  if(coefficient!=null)enemy.goddessOffenseMultiplier=coefficient;
  // Explicit laboratory-only sensitivity scenario, never a claimed legal equipment build.
@@ -48,7 +48,7 @@ export function superbossTrial({theme,job='warrior',variant='base',withNpcs=fals
  let b=createBattleState({character:c,enemy:createEnemyCombatant(enemy)});const rng=f2Random(seed);
  const row={outcome:'timeout',turns:0,attacks:0,heals:0,guards:0,items:0,maxHit:0,bossHealing:0,barrierAbsorbed:0,revival:0,eclipses:0,eclipseGuards:0,interrupts:0,leoSelfDamage:0,deathCause:'',interruptionDamage:[]};
  while(!b.outcome&&row.turns<500){
-  const command=superbossCommand(b,aware);row.turns++;row[command.type==='guard'?'guards':command.type==='item'?'heals':'attacks']++;
+  const command=commandPolicy?commandPolicy(b):superbossCommand(b,aware);row.turns++;row[command.type==='guard'?'guards':command.type==='item'?'heals':'attacks']++;
   const result=resolveBattleRound({battle:b,playerCommand:command,rng});assert.ok(result.accepted,result.reason);b=result.battle;
   for(const e of b.presentationEvents||[]){
    if(e.type==='attackHit'&&e.targetSide==='player'){row.maxHit=Math.max(row.maxHit,e.damage||0);if(e.actualHpLoss>0)row.deathCause=e.actionName;}
@@ -61,7 +61,7 @@ export function superbossTrial({theme,job='warrior',variant='base',withNpcs=fals
   }
  }
  row.outcome=b.outcome||'timeout';row.items=30-getItemCount(b.player.inventory,'strong_healing_potion_large');
- row.playerHp=b.player.hp;row.bossHp=b.enemy.hp;row.runtime=b.enemy.goddessRuntime;row.piscesUsed=b.piscesUsed;row.suppliesExhausted=getItemCount(b.player.inventory,'strong_healing_potion_large')===0;
+ row.playerHp=b.player.hp;row.playerSp=b.player.sp;row.bossHp=b.enemy.hp;row.runtime=b.enemy.goddessRuntime;row.piscesUsed=b.piscesUsed;row.suppliesExhausted=getItemCount(b.player.inventory,'strong_healing_potion_large')===0;
  if(row.outcome!=='defeat')row.deathCause='';return row;
 }
 export function summarizeSuperbossRuns(runs){

@@ -1316,6 +1316,7 @@ function equipmentEffectLabels(definition) {
       fireDamageTakenBonus: "被炎ダメージ",
       iceDamageTakenBonus: "被氷ダメージ",
       attackSpellDamageBonus: "攻撃呪文威力",
+      baseMaxHpRate:"基礎最大HP",baseMaxSpRate:"基礎最大SP",criticalBonus:"会心率",attackMiracleDamageBonus:"攻撃奇蹟威力",spellResistanceRelief:"属性耐性緩和",
       lightningDamageReduction:"雷軽減", darkDamageReduction:"闇軽減", holyDamageReduction:"聖軽減", earthDamageReduction:"地軽減",
       healingMiracleBonus: "回復奇蹟威力",
       passiveInstantDeathRateBonus: "一閃・暗殺術",

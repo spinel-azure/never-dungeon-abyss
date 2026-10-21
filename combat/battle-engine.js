@@ -1,3 +1,4 @@
+import {finalWeaponDamageMultiplier,applyFinalWeaponEndurance} from './final-cat-weapons.js';
 import { syncArmorState, beginArmorCommand, armorDamageMultiplier, recordArmorGuard, grantArmorBarrier, absorbArmorBarrier, finishArmorRound } from "./reincarnation-armor.js";
 import {hasKeyItem} from '../data/key-items.js';
 import {normalizeReincarnationCount} from '../data/reincarnation.js';
@@ -111,6 +112,7 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
   ));
   const sphinxBarrier = sphinxBarrierAmount + guardStoneBarrier;
   const player = cloneCombatant(character);
+  player.weaponEndureUsed = false;
   delete player.armorBattle;
   syncArmorState(player);
   const aquariusActiveAtStart = (character?.cards?.deckSlots || []).includes('zodiac_aquarius');
@@ -725,7 +727,7 @@ function applyNormalAttackRecovery(battle, actor, command, results) {
   const requestedHp = Math.max(1, Math.ceil(actor.maxHp * (Number(recovery.maxHpRate) || 0)));
   const hpRecovery = Math.min(requestedHp, Math.max(0, actor.maxHp - actor.hp));
   const spRecovery = Math.min(
-    Math.max(0, Math.floor(Number(recovery.sp) || 0)),
+    recovery.maxSpRate ? Math.ceil(actor.maxSp * recovery.maxSpRate) : Math.max(0, Math.floor(Number(recovery.sp) || 0)),
     Math.max(0, actor.maxSp - actor.sp)
   );
   actor.hp += hpRecovery;
@@ -1531,7 +1533,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     critical: hit.critical,
     damage: hit.hit ? Math.max(0, Math.floor(
       hit.damage
-        * (actorSide === "player" ? armorDamageMultiplier(battle, action, target) : 1)
+        * (actorSide === "player" ? armorDamageMultiplier(battle, action, target) * finalWeaponDamageMultiplier(actor,action) : 1)
         * (1 - reduction)
         * getCapricornDamageMultiplier(battle, actorSide)
         * getCapricornReceivedDamageMultiplier(battle, targetSide)
@@ -1697,6 +1699,11 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     const before = presentedHits.reduce((sum, hit) => sum + hit.damage, 0);
     presentedHits = absorbArmorBarrier(battle, presentedHits);
     actualDamage = Math.max(0,actualDamage - before + presentedHits.reduce((sum, hit) => sum + hit.damage, 0));
+  }
+  if(actorSide==='enemy'&&targetSide==='player'&&getEquippedWeapon(target).endureDirectHit&&['physicalAttack','spell'].includes(action.actionType)&&actualDamage>0){
+    const before=presentedHits.reduce((sum,hit)=>sum+hit.damage,0);
+    presentedHits=applyFinalWeaponEndurance(battle,presentedHits);
+    actualDamage=Math.max(0,actualDamage-before+presentedHits.reduce((sum,hit)=>sum+hit.damage,0));
   }
   const targetHpBeforeDamage = Math.max(0, Number(target.hp) || 0);
   applyCombatHpDamage(target, actualDamage);

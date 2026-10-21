@@ -27,7 +27,7 @@ export function normalizeEquipmentInventory(source, equipment, equippedInstanceI
       equipmentId: definition.id,
       slot: definition.slot,
       acquiredOrder,
-      enhancement: Math.max(0, Math.floor(Number(raw?.enhancement) || 0)),
+      enhancement: definition.unique && definition.minimumReincarnations ? 0 : Math.max(0, Math.floor(Number(raw?.enhancement) || 0)),
       identified: raw?.identified !== false,
       curseKnown: raw?.curseKnown === true,
       locked: raw?.locked === true

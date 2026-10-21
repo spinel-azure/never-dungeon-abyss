@@ -10,7 +10,9 @@ export function resolveSpell({
   elementMultiplier,
   rng = Math.random
 } = {}) {
-  const baseMultiplier = resolveElementMultiplier(defender, spell.element, elementMultiplier);
+  const rawMultiplier = resolveElementMultiplier(defender, spell.element, elementMultiplier);
+  const baseMultiplier = spell.category === "attackSpell" && rawMultiplier > 0 && rawMultiplier < 1
+    ? Math.min(1,rawMultiplier + Math.max(0,numeric(attacker.spellResistanceRelief))) : rawMultiplier;
   const multiplier = spell.ignoresElementResistance && baseMultiplier > 0 && baseMultiplier < 1 ? 1 : baseMultiplier;
   const unavoidable = spell.unavoidable !== false;
   const hitRate = unavoidable
@@ -36,7 +38,8 @@ export function resolveSpell({
     ? numeric(attacker.fireSpellDamageBonus)
     : spell.element === "ice" ? numeric(attacker.iceSpellDamageBonus) : 0;
   const baseDamage = spellAttack * numericOr(spell.powerMultiplier, 1)
-    * (1 + offensiveBonus + numeric(attacker.attackSpellDamageBonus))
+    * (1 + offensiveBonus + numeric(attacker.attackSpellDamageBonus)
+      + (spell.category === 'miracle' ? numeric(attacker.attackMiracleDamageBonus) : 0))
     * (spell.element === "dark" ? Math.max(0, numericOr(attacker.darkSpellDamageMultiplier, 1)) : 1)
     * Math.max(0, numericOr(attacker.spellReincarnationMultiplier, 1));
   let damage = 0;

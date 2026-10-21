@@ -55,7 +55,7 @@ export function createSpecialMapV2Session(registered,mapKey,options={}){
    }
    const treasure=r.treasures.find(t=>same(p,t));
    if(treasure){
-    Object.defineProperty(cell,'treasure',{enumerable:true,get:()=>s.treasureStates[treasure.id]?.opened?null:treasure.color});
+    Object.defineProperty(cell,'treasure',{enumerable:true,get:()=>s.treasureStates[treasure.id]?.opened?null:(s.treasureStates[treasure.id]?.color||treasure.color)});
     Object.defineProperty(cell,'treasureDiscovered',{enumerable:true,get:()=>r.explored[y][x]});
    }
    for(const d of dirs){
@@ -135,14 +135,14 @@ export function getV2StairPrompt(s){
 export function getV2CellPromptMessage(s){
  if(!isV2Session(s)||!s.cellPrompt)return '';
  if(s.cellPrompt==='gate')return 'ワープゲートが現れた。B1Fの入口へ移動しますか？\n＊A／Enterで移動　Bでその場に留まる';
- if(s.cellPrompt==='redChest')return '赤色の宝箱がある。開けますか？\n＊A／Enterで開ける　Bでその場に留まる';
+ if(s.cellPrompt==='redChest')return '宝箱がある。開けますか？\n＊A／Enterで開ける　Bでその場に留まる';
  return s.cellPrompt==='stairs'?getV2StairPrompt(s):'金色の宝箱がある。開けますか？\n＊A／Enterで開ける　Bでその場に留まる';
 }
 export function beginV2CellPrompt(s){
  const f=s.floors[s.currentFloor],here={x:s.playerX,y:s.playerY};
  s.cellPrompt=isV2ReturnGate(s)?'gate':getV2StairPrompt(s)?'stairs':same(here,f.generatedFloor.keyChest)&&!f.chestOpened?'chest':null;
  const treasure=v2TreasureAt(s);
- if(!s.cellPrompt&&treasure?.color==='red'&&!s.treasureStates[treasure.id]?.opened)s.cellPrompt='redChest';
+ if(!s.cellPrompt&&['red','black'].includes(treasure?.color)&&!s.treasureStates[treasure.id]?.opened)s.cellPrompt='redChest';
  if(s.cellPrompt){s.autoPath=null;s.say(getV2CellPromptMessage(s));}
  return s.cellPrompt;
 }
@@ -201,8 +201,7 @@ export function confirmV2Cell(s,now){
  if(s.currentFloor===0&&same(point,f.generatedFloor.stairsUp))return {handled:true,returnToEntrance:true};
  const treasure=v2TreasureAt(s);
  if(treasure){
-  if(treasure.color==='black'){s.say('黒色の宝箱がある。今は開けられない。');return {handled:true};}
-  if(s.treasureStates[treasure.id]?.opened){s.say('赤箱は空だ。');return {handled:true};}
+  if(s.treasureStates[treasure.id]?.opened){s.say('宝箱は空だ。');return {handled:true};}
   return {handled:true,openRedChest:true};
  }
  if(same(point,f.generatedFloor.keyChest)){

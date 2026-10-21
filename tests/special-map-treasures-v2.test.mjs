@@ -43,7 +43,7 @@ test('exact category/enhancement distribution and eight equal pieces for every s
   assert.equal(ids.size,8);assert.deepEqual(enh,(high?[40,30,20,10]:[60,25,10,5]).map(n=>n*8));
  }
 });
-test('actual prompt/open/save/load, save failure retry, no duplicate reward, unopened and old saves, black disabled',()=>{
+test('actual prompt/open/save/load, save failure retry, no duplicate reward, unopened and old saves, black connected',()=>{
  const s=create(),p=locate(s);assert.equal(isV2EncounterCell(s),false);
  assert.equal(beginV2CellPrompt(s),'redChest');assert.equal(confirmV2Cell(s,0).openRedChest,true);
  const before=serializeSpecialMapSession(s);
@@ -54,7 +54,7 @@ test('actual prompt/open/save/load, save failure retry, no duplicate reward, uno
  let saved;assert.ok(completeV2Treasure(s,p.id,()=>{saved=JSON.parse(JSON.stringify(serializeSpecialMapSession(s)));return true;}));
  const bag=structuredClone(s.lootBag);assert.equal(completeV2Treasure(s,p.id,()=>true),false);assert.deepEqual(s.lootBag,bag);
  const r=restoreSpecialMapSession(create(),saved);locate(r);assert.deepEqual(r.lootBag,bag);assert.equal(r.cells[p.y][p.x].treasure,null);assert.equal(confirmV2Cell(r,0).openRedChest,undefined);
- locate(r,'black');assert.equal(confirmV2Cell(r,0).openRedChest,undefined);assert.equal(prepareV2Treasure(r,3,()=>true),false);
+ locate(r,'black');assert.equal(confirmV2Cell(r,0).openRedChest,true);assert.equal(prepareV2Treasure(r,3,()=>true),true);
  const old=serializeSpecialMapSession(create());delete old.treasureStates;assert.deepEqual(restoreSpecialMapSession(create(),old).treasureStates,{});
  const fresh=create();assert.deepEqual(fresh.floors[0].treasures,s.floors[0].treasures);assert.notEqual(fresh.expeditionId,s.expeditionId);assert.deepEqual(fresh.treasureStates,{});
 });

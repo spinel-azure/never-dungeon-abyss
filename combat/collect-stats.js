@@ -40,7 +40,9 @@ export function collectStats(source = {}) {
     physicalHitMinimum: Number.isFinite(Number(source.physicalHitMinimum))
       ? Number(source.physicalHitMinimum)
       : undefined,
-    criticalBonus: numeric(source.criticalBonus),
+    criticalBonus: numeric(source.criticalBonus) + numeric(equipment.criticalBonus),
+    attackMiracleDamageBonus: numeric(equipment.attackMiracleDamageBonus),
+    spellResistanceRelief: numeric(equipment.spellResistanceRelief),
     speedBonus: numeric(source.speedBonus),
     defensePenetration: numeric(source.defensePenetration),
     statusPowerBonus: numeric(source.statusPowerBonus),
