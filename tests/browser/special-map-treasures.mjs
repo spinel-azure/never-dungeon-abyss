@@ -23,6 +23,7 @@ const hook=`window.chestQa={
  },
  async at(color){const s=getSpecialMapContext().session;const p=s.floors[s.currentFloor].treasures.find(x=>x.color===color);s.playerX=p.x;s.playerY=p.y;s.renderState.x=p.x+.5;s.renderState.y=p.y+.5;s.renderState.overlayEvent=null;s.cellPrompt=null;const {beginV2CellPrompt}=await import('/js/special-map/session-v2.js');beginV2CellPrompt(s);return p.id;},
  async gold(color='black'){const s=getSpecialMapContext().session;await this.at(color);const {prepareV2Treasure}=await import('/js/special-map/treasures-v2.js');for(let i=0;i<10000;i++){s.expeditionId='browser-gold-'+i;s.treasureStates={};prepareV2Treasure(s,character.reincarnationCount,()=>false,character);if(Object.values(s.treasureStates).some(x=>x.color==='gold'))return;}throw Error('No gold seed');},
+ lot(){showLootIdentification(getSpecialMapContext().session.lootBag,{}, {playBgm:false});},
  input:handleSpecialMapInput,
  state(){const s=getSpecialMapContext().session;return {busy:s.transitioning,states:s.treasureStates,bag:s.lootBag,counts:s.floors.map(f=>f.treasures.length),message:msgEl.textContent};},
  async resume(){const data=makeSaveSnapshot().specialMap;getSpecialMapContext().close();resumeSavedSpecialMap(data);return this.state();}
@@ -36,6 +37,7 @@ async function freshPage(width,errors){
 }
 try{for(const width of [1280,390]){
  const errors=[];let page=await freshPage(width,errors);
+ if(!process.env.ENGRAVING_ONLY){
  await page.evaluate(()=>chestQa.start());await page.waitForTimeout(3500);const id=await page.evaluate(()=>chestQa.at('red'));await page.waitForTimeout(1500);
  await page.screenshot({path:path.join(output,`${width}-red.png`)});
  await page.evaluate(()=>chestQa.input('confirm'));
@@ -56,11 +58,17 @@ try{for(const width of [1280,390]){
  await page.screenshot({path:path.join(output,width+'-gold-tier'+tier+'.png')});
  const restored=await page.evaluate(()=>chestQa.resume());assert.deepEqual(restored.bag,golden.bag);
  }
+ }
  await page.close();page=await freshPage(width,errors);await page.evaluate(()=>chestQa.start(0));await page.waitForTimeout(3500);await page.evaluate(()=>chestQa.gold('red'));
  const engravingId=await page.evaluate(()=>chestQa.at('red'));await page.evaluate(()=>chestQa.input('confirm'));
+ await page.waitForSelector('#itemGetEffect:not([hidden])');
+ assert.match(await page.locator('#itemGetEffect').innerText(),/刻印/);
+ await page.waitForTimeout(1000);
+ await page.screenshot({path:path.join(output,width+'-engraving-popup.png')});
  await page.waitForFunction(id=>chestQa.state().states[id]?.opened&&!chestQa.state().busy,engravingId,{timeout:30000});
  assert.equal(await page.evaluate(()=>window.qaOpeningColor),'gold');const engraved=await page.evaluate(()=>chestQa.state());assert.match(engraved.message,/刻印/);assert.match(engraved.states[engravingId].reward.itemId,/_engraving$/);
  await page.screenshot({path:path.join(output,width+'-engraving-gold.png')});
  assert.deepEqual((await page.evaluate(()=>chestQa.resume())).bag,engraved.bag);
- assert.deepEqual(errors,[]);console.log(width,'passed',opened.counts);await page.close();
+ await page.evaluate(()=>chestQa.lot());assert.match(await page.locator('#lootIdentifyOverlay').innerText(),/？刻印/);
+ assert.deepEqual(errors,[]);console.log(width,'passed');await page.close();
 }}finally{await browser.close();}

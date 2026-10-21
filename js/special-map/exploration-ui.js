@@ -275,6 +275,12 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
     }
     resolve();
    },{backdrop:true})).catch(reject));
+   const reward=session.treasureStates[chest.id].reward;
+   if(completed&&!disposed&&reward.kind==='item'&&reward.itemId.endsWith('_engraving')){
+    host.hideTreasure?.();
+    session.rareRewardPlaying=true;
+    try{await host.showV2RareRewardAcquisition?.(reward);}finally{session.rareRewardPlaying=false;}
+   }
   }catch{}
   finally{
    if(!disposed){

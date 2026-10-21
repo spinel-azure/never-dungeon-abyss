@@ -5043,7 +5043,7 @@ import {
       if (item?.category === "material") unknown.push({ label: item.name, count: `×${count}` });
     }
     for (const [itemId, count] of Object.entries(bag.items || {})) {
-      if (getItem(itemId)?.category !== "material") unknown.push({ label: "？道具", count: `×${count}` });
+      if (getItem(itemId)?.category !== "material") unknown.push({ label: getItem(itemId)?.category === "engraving" ? "？刻印" : "？道具", count: `×${count}` });
     }
     for (const [cardId, count] of Object.entries(bag.cards || {})) {
       unknown.push({ label: "？カード", count: `×${count}`,
