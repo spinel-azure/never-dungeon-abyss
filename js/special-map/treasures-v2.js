@@ -1,3 +1,4 @@
+import {V2_LEVEL_100_ENGRAVINGS} from "./battle-rewards-v2.js";
 import {streamV1,chooseIndexV1} from './random-v1.js';
 import {REINCARNATION_ARMOR,REINCARNATION_ARMOR_SETS} from '../../data/reincarnation-armor.js';
 import {REINCARNATION_WEAPONS} from '../../data/reincarnation-weapons.js';
@@ -37,6 +38,11 @@ export function rollV2ArmorChest({level,theme,tier},random){
  const enhancement=high?(r<.4?0:r<.7?1:r<.9?2:3):(r<.6?0:r<.85?1:r<.95?2:3);
  return {kind:'equipment',equipmentId:item.id,slot:item.slot,enhancement};
 }
+export function rollV2RedChest(context,random,goldRandom){
+ const reward=rollV2ArmorChest(context,random);
+ if(goldRandom()<.01)return {opened:false,color:'gold',reward:{kind:'item',itemId:V2_LEVEL_100_ENGRAVINGS[Math.floor(goldRandom()*V2_LEVEL_100_ENGRAVINGS.length)],amount:1}};
+ return {opened:false,reward};
+}
 export const OLD_MAP_WEAPONS=Object.freeze({warrior:'katzbalger',thief:'katzendolch',priest:'katzenkolben',mage:'katzenstab'});
 export const FINAL_MAP_WEAPONS=Object.freeze({warrior:'katzregalia',thief:'katzreaper',priest:'katzenbenedia',mage:'katzennova'});
 export function rollV2WeaponChest({level,theme,tier},random){
@@ -67,8 +73,9 @@ export function prepareV2Treasure(s,tier,save,character=null){
  if(state?.opened)return false;
  if(!state){
   const next=streamV1('special-map-v2',s.seed,`loot-v1:${s.expeditionId}:${chest.id}`);
+  const engraving=streamV1('special-map-v2',s.seed,`red-engraving-v1:${s.expeditionId}:${chest.id}`);
   const gold=streamV1('special-map-v2',s.seed,`final-cat-v1:${s.expeditionId}:${chest.id}`);
-  s.treasureStates[chest.id]=chest.color==='red'?{opened:false,reward:rollV2ArmorChest({level:s.level,theme:s.generatedMap.themeId,tier},()=>next()/4294967296)}:rollV2BlackChest(s,chest,tier,character,()=>next()/4294967296,()=>gold()/4294967296);
+  s.treasureStates[chest.id]=chest.color==='red'?rollV2RedChest({level:s.level,theme:s.generatedMap.themeId,tier},()=>next()/4294967296,()=>engraving()/4294967296):rollV2BlackChest(s,chest,tier,character,()=>next()/4294967296,()=>gold()/4294967296);
  }
  try{if(save()!==true)return false;}catch{return false;}
  return true;
@@ -76,7 +83,7 @@ export function prepareV2Treasure(s,tier,save,character=null){
 export function completeV2Treasure(s,id,save,character=null){
  const state=s.treasureStates[id];
  if(!state||state.opened)return false;
- if(state.color==='gold'&&owns(s,character,state.reward.equipmentId)){state.reward=state.fallback;state.color='black';}
+ if(state.color==='gold'&&state.reward.kind==='equipment'&&owns(s,character,state.reward.equipmentId)){state.reward=state.fallback;state.color='black';}
  const before=s.lootBag;
  const result=state.reward.kind==='equipment'?addLootEquipment(before,state.reward):addLootItem(before,state.reward.itemId,1);
  if(result.gained!==1)return false;

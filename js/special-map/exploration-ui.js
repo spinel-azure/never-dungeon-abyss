@@ -270,7 +270,7 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
     completed=completeV2Treasure(session,chest.id,save,host.getTreasureCharacter?.());
     if(completed){
      const reward=session.treasureStates[chest.id].reward;
-     message.textContent=reward.kind==='equipment'?(reward.slot==='rightArmId'?'？武器をロット袋に入れた！':'？防具をロット袋に入れた！'):'？薬をロット袋に入れた！';
+     message.textContent=reward.kind==='equipment'?(reward.slot==='rightArmId'?'？武器をロット袋に入れた！':'？防具をロット袋に入れた！'):reward.itemId.endsWith('_engraving')?'？刻印をロット袋に入れた！':'？薬をロット袋に入れた！';
      playSe('importantItem');
     }
     resolve();
