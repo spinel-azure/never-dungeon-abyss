@@ -3664,6 +3664,7 @@ export function renderCharacterStatus() {
 
 function hasMaxVitalBonus(character, key) {
   return Number(character?.equipmentStatBonuses?.[key]) > 0
+    || Number(character?.equipmentStatBonuses?.[key === "maxHp" ? "baseMaxHpRate" : "baseMaxSpRate"]) > 0
     || Number(character?.cardStatBonuses?.[key]) > 0
     || (key === "maxHp" && character?.cards?.deckSlots?.some(cardId => (
       ["zodiac_taurus", "zodiac_cancer", "legendary_life_booster", "zodiac_virgo"].includes(cardId)

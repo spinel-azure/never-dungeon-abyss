@@ -1,3 +1,4 @@
+import { calculateMaxVital } from "../data/vital-stats.js";
 import {
   getLevelForExperience,
   getLevelGrowth,
@@ -10,7 +11,7 @@ import {
   normalizeDepthReturnSettlement
 } from "../data/experience-settlement.js";
 import { getLevelUnlockedSkillIds } from "../data/skills.js";
-import { applyCardVitalMultipliers, sumCardEffectValues } from "../data/cards.js";
+import { sumCardEffectValues } from "../data/cards.js";
 import { getConditionLabel } from "../combat/condition-label.js";
 
 export const TOWN_INTRODUCTION_FLAGS = Object.freeze([
@@ -109,10 +110,8 @@ export function resolveInnStay(character) {
   const level = getLevelForExperience(experience, reincarnationCount);
   const previousGrowth = getLevelGrowth(character.job, previousLevel, reincarnationCount);
   const growth = getLevelGrowth(character.job, level, reincarnationCount);
-  const maxHpBonus = getVitalBonus(character, "maxHp");
-  const maxSpBonus = getVitalBonus(character, "maxSp");
-  const maxHp = applyInnVitalCardMultipliers(character, "maxHp", growth.hp + maxHpBonus);
-  const maxSp = applyInnVitalCardMultipliers(character, "maxSp", growth.sp + maxSpBonus);
+  const maxHp = calculateMaxVital(growth, "maxHp", character.equipmentStatBonuses, character.cardStatBonuses, character.cards?.deckSlots);
+  const maxSp = calculateMaxVital(growth, "maxSp", character.equipmentStatBonuses, character.cardStatBonuses, character.cards?.deckSlots);
   const previousSkillIds = Array.isArray(character.skillIds) ? character.skillIds : [];
   const unlockedSkillIds = getLevelUnlockedSkillIds(character.job, level);
   const skillIds = [...new Set([...previousSkillIds, ...unlockedSkillIds])];
@@ -185,22 +184,6 @@ export function resolveInnStableStay(character) {
       }
     }
   };
-}
-
-function getVitalBonus(character, key) {
-  const equipment = Math.max(
-    0,
-    Math.floor(Number(character?.equipmentStatBonuses?.[key]) || 0)
-  );
-  const cards = Math.max(
-    0,
-    Math.floor(Number(character?.cardStatBonuses?.[key]) || 0)
-  );
-  return equipment + cards;
-}
-
-function applyInnVitalCardMultipliers(character, key, baseValue) {
-  return applyCardVitalMultipliers(character?.cards?.deckSlots, key, baseValue);
 }
 
 function retainPoisonStatuses(character) {

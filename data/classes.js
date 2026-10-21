@@ -1,3 +1,4 @@
+import { calculateMaxVital } from "./vital-stats.js";
 import {normalizeTrelirenProgress} from './map-beta.js';
 import { wingGiftUses, wingGiftMaxHp } from "./wing-gift.js";
 import { normalizeSpecialMaps } from "./special-maps.js";
@@ -6,7 +7,7 @@ import { getInitialEquipment } from "./equipment.js";
 import { normalizeEndingFlags } from "./ending.js";
 import { getDeckCostAtLevel, getLevelGrowth, normalizeExperience } from "./growth.js";
 import { createInitialCardState, normalizeCardState } from "./deck.js";
-import { applyCardVitalMultipliers, collectCardStatBonuses } from "./cards.js";
+import { collectCardStatBonuses } from "./cards.js";
 import {
   createInitialInventory, createInitialLootBag, createInitialWarehouse,
   normalizeInventory, normalizeLootBag, normalizeWarehouse
@@ -181,17 +182,9 @@ export function normalizeCharacter(character) {
   );
   const cards = normalizeCardState(character.cards, growth.deckCost);
   const cardStatBonuses = collectCardStatBonuses(cards.deckSlots);
-  const maxHpBeforeMultipliers = growth.hp
-    + Math.max(0, Math.floor(Number(equipmentStatBonuses.maxHp) || 0))
-    + Math.max(0, Math.floor(Number(cardStatBonuses.maxHp) || 0));
-  const wingGiftBaseMaxHp = applyCardVitalMultipliers(cards.deckSlots, "maxHp", maxHpBeforeMultipliers)
-    + Math.floor(growth.hp * Math.max(0,Number(equipmentStatBonuses.baseMaxHpRate)||0));
+  const wingGiftBaseMaxHp = calculateMaxVital(growth, "maxHp", equipmentStatBonuses, cardStatBonuses, cards.deckSlots);
   const maxHp = wingGiftMaxHp(wingGiftBaseMaxHp, wingGiftUses(character));
-  const maxSpBeforeMultipliers = growth.sp
-    + Math.max(0, Math.floor(Number(equipmentStatBonuses.maxSp) || 0))
-    + Math.max(0, Math.floor(Number(cardStatBonuses.maxSp) || 0));
-  const maxSp = applyCardVitalMultipliers(cards.deckSlots, "maxSp", maxSpBeforeMultipliers)
-    + Math.floor(growth.sp * Math.max(0,Number(equipmentStatBonuses.baseMaxSpRate)||0));
+  const maxSp = calculateMaxVital(growth, "maxSp", equipmentStatBonuses, cardStatBonuses, cards.deckSlots);
   const inferredDepth = character.eventFlags?.transfer_portal_b10f_unlocked ? 10 : 1;
   const normalizedEquipmentBuyback = Array.isArray(character.equipmentBuyback)
     ? structuredClone(character.equipmentBuyback)

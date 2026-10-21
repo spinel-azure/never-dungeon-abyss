@@ -154,3 +154,21 @@ test('final weapon exact values and armor set exclusion remain correct with actu
   c=equipInstance(c,c.job==='mage'?'headId':'leftArmId',null).character;assert.equal(getReincarnationArmorSet(c),null);
  }
 });
+import {resolveInnStay,resolveInnStableStay} from '../js/character-services.js';
+import {getExperienceForLevel} from '../data/growth.js';
+test('all weapon vital bonuses survive lodging and stable recovery, with and without level up',()=>{
+ for(const w of [...Object.values(common),...Object.values(cats)])for(const enhancement of (w.unique?[0]:[0,1,2,3]))for(const levelUp of [false,true]){
+  let c=equip(character(w.allowedJobs[0]),w.id,enhancement);
+  c.experience=getExperienceForLevel(levelUp?101:100,3);c.hp=1;c.sp=1;
+  const expected=normalizeCharacter({...c,level:levelUp?101:100});
+  const inn=resolveInnStay(c),stable=resolveInnStableStay(c);
+  for(const r of [inn,stable]){assert.equal(r.changes.maxHp,expected.maxHp,w.id);assert.equal(r.changes.maxSp,expected.maxSp,w.id);}
+  assert.equal(inn.changes.hp,expected.maxHp);assert.equal(inn.changes.sp,expected.maxSp);
+  assert.equal(stable.changes.hp,Math.min(expected.maxHp,1+Math.ceil(expected.maxHp*.3)));
+ }
+});
+test('reported tier one level 140 nightcrow +2 lodging retains 1423 HP',()=>{
+ let c=normalizeCharacter({...createInitialCharacter({name:'QA',job:'thief'}),reincarnationCount:1,level:140,experience:getExperienceForLevel(140,1)});
+ c=equip(c,'reinc_nightcrow_weapon',2);assert.equal(c.maxHp,1423);
+ assert.equal(resolveInnStay(c).changes.hp,1423);
+});

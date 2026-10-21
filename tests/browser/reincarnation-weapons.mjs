@@ -32,6 +32,10 @@ try{
    const panel=page.locator('#menuScreen');
    assert.ok((await panel.boundingBox()).width<=width,`${label}/${w.id} panel width`);
    assert.ok(await panel.evaluate(e=>e.scrollWidth<=e.clientWidth+1),`${label}/${w.id} status overflow`);
+   const vitalIndex=['warrior','thief'].includes(w.allowedJobs[0])?0:1;
+   const maximum=page.locator('.nde-status-vitals > span').nth(vitalIndex).locator('strong').last();
+   assert.ok(await maximum.evaluate(e=>e.classList.contains('vital-max-bonus')),`${w.id} maximum bonus color`);
+   await panel.screenshot({path:path.join(output,`${label}-${w.id}-status.png`)});
    await page.evaluate(()=>weaponQa.inventory());await page.locator('[data-inventory-tab=equipment]').click();
    await page.locator('.inventory-entry').filter({hasText:w.name}).first().click();
    const detail=page.locator('[data-inventory-description]');
