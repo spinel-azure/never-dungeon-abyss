@@ -32,8 +32,9 @@ export function getMapManagementInfo(map){
 export function renderMapManagementInfo(info){
  const make=(tag,text)=>{const e=document.createElement(tag);if(text)e.textContent=text;return e;};
  const root=make('div');root.className='explorer-map-info';root.tabIndex=0;root.setAttribute('aria-label','地図の調査情報');
- root.append(make('p',`エリア：${info.area}`),make('p',`環境：${info.environment}`),make('p',`ボス：${info.bossName||'未公開（討伐後に表示）'}`),make('p','敵分布：通常遭遇時の敵の出現割合（遭遇発生率ではありません）'));
+ root.append(make('p',`エリア：${info.area}`),make('p',`環境：${info.environment}`),make('p',`ボス：${info.bossName||'未公開（討伐後に表示）'}`));
  if(info.bossDrops)root.append(make('p',`ボスのドロップ・報酬：${info.bossDrops.length?info.bossDrops.join('／'):'アイテムなし'}`));
+ root.append(make('p','敵分布：通常遭遇時の敵の出現割合（遭遇発生率ではありません）'));
  const tabs=make('div');tabs.className='explorer-floor-tabs';tabs.setAttribute('aria-label','表示する階層');
  const floors=make('div');floors.className='explorer-map-floors';
  for(const f of info.floors){
