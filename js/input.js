@@ -190,6 +190,7 @@ function configureTouchGuards() {
       // These native buttons use click for both pointer and touch activation.
       // Cancelling touchstart here prevents Safari from generating that click.
       && !target.closest(".explorer-preview button")
+      && !target.closest(".explorer-preview .explorer-map-info")
       && !target.closest(".special-map-runtime button")
       && !!target.closest(guardedSelector);
   }
