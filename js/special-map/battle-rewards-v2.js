@@ -12,6 +12,11 @@ const fixedLevel100Engravings=Object.freeze({
  slate:'strength_engraving',magic:'intelligence_engraving',torture:'agility_engraving',
  red:'dexterity_engraving',blue:'luck_engraving'
 });
+export function getV2BossItemRewards(themeId,level){
+ if(Number(level)!==100)return [];
+ const fixed=fixedLevel100Engravings[themeId];
+ return (fixed?[fixed]:V2_LEVEL_100_ENGRAVINGS).map(itemId=>({itemId,rate:fixed?0.20:0.04}));
+}
 export function rollV2Level100Engraving(context,random=Math.random){
  if(!['special-map-v2-boss','special-map-v2-special-boss'].includes(context?.source)||Number(context.mapLevel)!==100)return null;
  const values=Array.isArray(context.engravingRandomValues)?context.engravingRandomValues:[random(),random()];

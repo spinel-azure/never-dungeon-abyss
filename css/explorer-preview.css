@@ -7,7 +7,17 @@
 .explorer-map-floors h3{font-size:15px;margin:0 0 6px}
 .explorer-map-floors dl{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 8px;margin:0}
 .explorer-map-floors dt{overflow-wrap:anywhere}.explorer-map-floors dd{margin:0;text-align:right;white-space:nowrap;color:#c1f4ff}
-@media(max-width:680px){.explorer-map-floors{grid-template-columns:1fr;gap:6px}.explorer-map-info{font-size:13px}.explorer-map-floors section{padding:6px}}
+.explorer-floor-tabs,.explorer-management-toggle{display:none!important}
+body.layout-mobile .explorer-preview:has(>.explorer-map-info){position:fixed;inset:max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom));z-index:100;max-height:none;background:rgba(5,12,16,.98);padding:12px;gap:8px}
+body.layout-mobile .explorer-map-info{font-size:14px;scrollbar-width:thin}
+body.layout-mobile .explorer-map-floors{grid-template-columns:1fr}
+body.layout-mobile .explorer-map-floors section:not(.is-active){display:none}
+body.layout-mobile .explorer-floor-tabs{display:flex!important;gap:8px;margin:12px 0 8px;position:sticky;top:0;background:#081116;padding:4px 0}
+body.layout-mobile .explorer-floor-tabs button{flex:1;min-height:44px}
+body.layout-mobile .explorer-floor-tabs button[aria-pressed=true]{background:#14313a;border-color:#aef6ff}
+body.layout-mobile .explorer-preview:has(>.explorer-map-info)>.explorer-footer:not(.is-expanded)>button:not(:nth-last-child(2)):not(.explorer-management-toggle){display:none}
+body.layout-mobile .explorer-management-toggle{display:block!important;order:-1}
+body.layout-mobile .explorer-preview:has(>.explorer-map-info)>.explorer-footer{flex-wrap:wrap;flex-shrink:0}
 .explorer-preview{padding:20px 40px;gap:8px;background:rgba(0,0,0,.78)}
 .explorer-preview h2{font-size:32px}
 .explorer-preview .transfer-destination-list{gap:6px;min-height:0}

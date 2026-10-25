@@ -4,6 +4,7 @@ import {getMapManagementInfo} from '../js/special-map/management-info.js';
 import {createSpecialMapV2Session} from '../js/special-map/session-v2.js';
 import {mapOriginalId,mapContentId,normalizeSpecialMaps} from '../data/special-maps.js';
 import {surveyVisitV2} from '../data/special-map-survey-v2.js';
+import {getV2BossItemRewards,rollV2Level100Engraving} from '../js/special-map/battle-rewards-v2.js';
 const map={rulesetVersion:'special-map-v2',seed:12345,level:100,rarity:'WHITE',discovererName:'QA'};
 test('management ecology matches live exploration and independently unlocks historical floors',()=>{
  let masks=['f'.repeat(25),'0'.repeat(25),'f'.repeat(25)];
@@ -31,3 +32,12 @@ test('special themes use their real pools and keep undefeated goddess names priv
  assert.equal(getMapManagementInfo({...map,themeOverride:'rice',level:99,cleared:true}).bossName,null);
 });
 test('legacy maps retain their existing management view',()=>{assert.equal(getMapManagementInfo({...map,rulesetVersion:'special-map-v1'}),null);});
+test('boss rewards stay private until cleared and match engraving lottery',()=>{
+ assert.equal(getMapManagementInfo(map).bossDrops,null);
+ assert.ok(getMapManagementInfo({...map,cleared:true}).bossDrops.some(x=>x.includes('未鑑定地図')));
+ for(const themeId of ['slate','magic','torture','red','blue','black','gold','rice','dusk','tender']){
+  const rewards=getV2BossItemRewards(themeId,100);assert.ok(Math.abs(rewards.reduce((n,r)=>n+r.rate,0)-.2)<1e-9);
+  for(let i=0;i<5;i++)assert.ok(rewards.some(r=>r.itemId===rollV2Level100Engraving({source:'special-map-v2-boss',mapLevel:100,themeId,engravingRandomValues:[.1,(i+.5)/5]})));
+  assert.deepEqual(getV2BossItemRewards(themeId,99),[]);
+ }
+});

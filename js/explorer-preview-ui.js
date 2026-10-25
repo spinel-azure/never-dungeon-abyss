@@ -21,7 +21,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
   let index=0,page=0,armed=-1,appraisalIndex=0,appraisalArmed=-1,discoveryId='',step=0,detailId='',input=null;
   const maps=()=>normalizeSpecialMaps(getMaps());
   let formControls=[],formCursor=0,actions=[],actionCursor=0,pendingMap=null,codeDraft='';
-  let exploration=null;
+  let exploration=null,manageActionsExpanded=false;
   const reportUI=createSurveyReportUI({host,commands,message,getCharacter,transact:transactSurvey,playSe,playJingle,finishTyping,onBack:()=>{view='tent';render();}});
   let acquisitionController=null,preparedStarter=null,betaView='',betaPages=[],betaPage=0;
   const tentView=()=>useBetaIntroduction()?(!maps().starterMapsGranted?'betaWelcome':!maps().betaExplanationComplete?'betaExplanation':'tent'):'tent';
@@ -142,7 +142,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     if(view==='appraise'&&!maps().discovererName){opening='appraise';view='signature';}
     formCursor=0;codeDraft='';appraisalArmed=armed=-1;render();
   }
-  function changeView(next){view=next;actionCursor=0;render();}
+  function changeView(next){manageActionsExpanded=false;view=next;actionCursor=0;render();}
   function enterMap(){
     if(exploration)return;
     try{
@@ -188,7 +188,7 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     }
   }
   function actionButtons(items){
-    actions=items.map(item=>item[1]);actionCursor=Math.min(actionCursor,items.length-1);
+    actions=items.map(item=>item[1]);actionCursor=Math.min(actionCursor,items.length-1+(view==='manage'&&manageActionsExpanded&&document.body.classList.contains('layout-mobile')?1:0));
     const footer=make('div',undefined,'explorer-footer');
     items.forEach(([label,action],i)=>footer.append(button(label,action,i===actionCursor)));panel.append(footer);
   }
@@ -290,7 +290,19 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
       const managementInfo=getMapManagementInfo(map);
       if(managementInfo)panel.append(renderMapManagementInfo(managementInfo));
       actionButtons([['共有コードを表示',()=>changeView('share')],['共有コードをコピー',()=>{changeView('share');try{copyCode(encodeMapCode(map));}catch(e){error(e.message);}}],
-        [`お気に入り ${map.favorite?'ON':'OFF'}`,favorite],['地図を削除',()=>{if(map.favorite){error('お気に入り登録を解除してから削除してください。');return;}changeView('delete');}],['戻る（B）',back]]);return;
+        [`お気に入り ${map.favorite?'ON':'OFF'}`,favorite],['地図を削除',()=>{if(map.favorite){error('お気に入り登録を解除してから削除してください。');return;}changeView('delete');}],['戻る（B）',back]]);
+      if(managementInfo){
+        const footer=panel.children[panel.children.length-1];
+        const toggleAction=()=>{manageActionsExpanded=!manageActionsExpanded;actionCursor=0;render();};
+        const toggle=button('地図操作',toggleAction);toggle.className='explorer-management-toggle';toggle.setAttribute('aria-expanded',String(manageActionsExpanded));footer.append(toggle);footer.classList.toggle('is-expanded',manageActionsExpanded);
+        if(document.body.classList.contains('layout-mobile')){
+          const original=actions;actions=manageActionsExpanded?[toggleAction,...original]:[toggleAction,back];
+          actionCursor=Math.min(actionCursor,actions.length-1);
+          const controls=manageActionsExpanded?[toggle,...Array.from(footer.children).filter(b=>b!==toggle)]:[toggle,footer.children[footer.children.length-2]];
+          for(const b of footer.children)b.classList.toggle('is-selected',b===controls[actionCursor]);
+        }
+      }
+      return;
     }
     if(view==='share'){
       let code;try{code=encodeMapCode(map);}catch(e){panel.append(make('p',e.message));actionButtons([['戻る（B）',back]]);return;}
