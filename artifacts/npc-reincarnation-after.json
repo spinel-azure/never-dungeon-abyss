@@ -1,0 +1,2840 @@
+{
+  "conditions": "Warrior Lv197 reincarnation3; C deck; laboratory primary stats/DEF90; stage10 NPCs, charge0; no hacking device; 30 large potions; seeds1..30; normal enemies use current native stats; goddess Lv100; 500 turn cutoff",
+  "rows": [
+    {
+      "party": "solo",
+      "target": "wraith",
+      "wins": 30,
+      "turns": 1.4666666666666666,
+      "items": 0,
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 2,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 3,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 4,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 5,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 6,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 7,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 8,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 9,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 10,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 11,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 12,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 13,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 14,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 15,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 16,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 17,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 18,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 19,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 20,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 21,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 22,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 23,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 24,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 25,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 26,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 27,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 28,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 29,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 30,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        }
+      ]
+    },
+    {
+      "party": "solo",
+      "target": "amethyst_golem",
+      "wins": 30,
+      "turns": 1.4666666666666666,
+      "items": 0,
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 2,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 3,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 4,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 5,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 6,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 7,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 8,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 9,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 10,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 11,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 12,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 13,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 14,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 15,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 16,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 17,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 18,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 19,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 20,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 21,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 22,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 23,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 24,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 25,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 26,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 27,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 28,
+          "outcome": "victory",
+          "turns": 2,
+          "items": 0
+        },
+        {
+          "seed": 29,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 30,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        }
+      ]
+    },
+    {
+      "party": "solo",
+      "target": "rice",
+      "wins": 30,
+      "turns": 131.66666666666666,
+      "items": 27.566666666666666,
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "victory",
+          "turns": 144,
+          "items": 28
+        },
+        {
+          "seed": 2,
+          "outcome": "victory",
+          "turns": 126,
+          "items": 28
+        },
+        {
+          "seed": 3,
+          "outcome": "victory",
+          "turns": 135,
+          "items": 30
+        },
+        {
+          "seed": 4,
+          "outcome": "victory",
+          "turns": 140,
+          "items": 30
+        },
+        {
+          "seed": 5,
+          "outcome": "victory",
+          "turns": 138,
+          "items": 28
+        },
+        {
+          "seed": 6,
+          "outcome": "victory",
+          "turns": 137,
+          "items": 30
+        },
+        {
+          "seed": 7,
+          "outcome": "victory",
+          "turns": 121,
+          "items": 25
+        },
+        {
+          "seed": 8,
+          "outcome": "victory",
+          "turns": 130,
+          "items": 26
+        },
+        {
+          "seed": 9,
+          "outcome": "victory",
+          "turns": 149,
+          "items": 30
+        },
+        {
+          "seed": 10,
+          "outcome": "victory",
+          "turns": 136,
+          "items": 25
+        },
+        {
+          "seed": 11,
+          "outcome": "victory",
+          "turns": 137,
+          "items": 29
+        },
+        {
+          "seed": 12,
+          "outcome": "victory",
+          "turns": 117,
+          "items": 26
+        },
+        {
+          "seed": 13,
+          "outcome": "victory",
+          "turns": 128,
+          "items": 27
+        },
+        {
+          "seed": 14,
+          "outcome": "victory",
+          "turns": 137,
+          "items": 29
+        },
+        {
+          "seed": 15,
+          "outcome": "victory",
+          "turns": 122,
+          "items": 27
+        },
+        {
+          "seed": 16,
+          "outcome": "victory",
+          "turns": 130,
+          "items": 27
+        },
+        {
+          "seed": 17,
+          "outcome": "victory",
+          "turns": 121,
+          "items": 24
+        },
+        {
+          "seed": 18,
+          "outcome": "victory",
+          "turns": 140,
+          "items": 30
+        },
+        {
+          "seed": 19,
+          "outcome": "victory",
+          "turns": 125,
+          "items": 28
+        },
+        {
+          "seed": 20,
+          "outcome": "victory",
+          "turns": 127,
+          "items": 28
+        },
+        {
+          "seed": 21,
+          "outcome": "victory",
+          "turns": 128,
+          "items": 26
+        },
+        {
+          "seed": 22,
+          "outcome": "victory",
+          "turns": 131,
+          "items": 25
+        },
+        {
+          "seed": 23,
+          "outcome": "victory",
+          "turns": 136,
+          "items": 30
+        },
+        {
+          "seed": 24,
+          "outcome": "victory",
+          "turns": 130,
+          "items": 26
+        },
+        {
+          "seed": 25,
+          "outcome": "victory",
+          "turns": 134,
+          "items": 27
+        },
+        {
+          "seed": 26,
+          "outcome": "victory",
+          "turns": 132,
+          "items": 29
+        },
+        {
+          "seed": 27,
+          "outcome": "victory",
+          "turns": 131,
+          "items": 29
+        },
+        {
+          "seed": 28,
+          "outcome": "victory",
+          "turns": 126,
+          "items": 25
+        },
+        {
+          "seed": 29,
+          "outcome": "victory",
+          "turns": 126,
+          "items": 26
+        },
+        {
+          "seed": 30,
+          "outcome": "victory",
+          "turns": 136,
+          "items": 29
+        }
+      ]
+    },
+    {
+      "party": "solo",
+      "target": "dusk",
+      "wins": 30,
+      "turns": 115.56666666666666,
+      "items": 19.066666666666666,
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "victory",
+          "turns": 120,
+          "items": 21
+        },
+        {
+          "seed": 2,
+          "outcome": "victory",
+          "turns": 129,
+          "items": 22
+        },
+        {
+          "seed": 3,
+          "outcome": "victory",
+          "turns": 125,
+          "items": 21
+        },
+        {
+          "seed": 4,
+          "outcome": "victory",
+          "turns": 117,
+          "items": 19
+        },
+        {
+          "seed": 5,
+          "outcome": "victory",
+          "turns": 110,
+          "items": 18
+        },
+        {
+          "seed": 6,
+          "outcome": "victory",
+          "turns": 119,
+          "items": 20
+        },
+        {
+          "seed": 7,
+          "outcome": "victory",
+          "turns": 115,
+          "items": 20
+        },
+        {
+          "seed": 8,
+          "outcome": "victory",
+          "turns": 111,
+          "items": 18
+        },
+        {
+          "seed": 9,
+          "outcome": "victory",
+          "turns": 111,
+          "items": 18
+        },
+        {
+          "seed": 10,
+          "outcome": "victory",
+          "turns": 112,
+          "items": 18
+        },
+        {
+          "seed": 11,
+          "outcome": "victory",
+          "turns": 118,
+          "items": 20
+        },
+        {
+          "seed": 12,
+          "outcome": "victory",
+          "turns": 117,
+          "items": 18
+        },
+        {
+          "seed": 13,
+          "outcome": "victory",
+          "turns": 118,
+          "items": 20
+        },
+        {
+          "seed": 14,
+          "outcome": "victory",
+          "turns": 119,
+          "items": 20
+        },
+        {
+          "seed": 15,
+          "outcome": "victory",
+          "turns": 117,
+          "items": 19
+        },
+        {
+          "seed": 16,
+          "outcome": "victory",
+          "turns": 99,
+          "items": 17
+        },
+        {
+          "seed": 17,
+          "outcome": "victory",
+          "turns": 115,
+          "items": 18
+        },
+        {
+          "seed": 18,
+          "outcome": "victory",
+          "turns": 126,
+          "items": 22
+        },
+        {
+          "seed": 19,
+          "outcome": "victory",
+          "turns": 122,
+          "items": 19
+        },
+        {
+          "seed": 20,
+          "outcome": "victory",
+          "turns": 115,
+          "items": 18
+        },
+        {
+          "seed": 21,
+          "outcome": "victory",
+          "turns": 108,
+          "items": 17
+        },
+        {
+          "seed": 22,
+          "outcome": "victory",
+          "turns": 121,
+          "items": 21
+        },
+        {
+          "seed": 23,
+          "outcome": "victory",
+          "turns": 113,
+          "items": 18
+        },
+        {
+          "seed": 24,
+          "outcome": "victory",
+          "turns": 119,
+          "items": 21
+        },
+        {
+          "seed": 25,
+          "outcome": "victory",
+          "turns": 118,
+          "items": 20
+        },
+        {
+          "seed": 26,
+          "outcome": "victory",
+          "turns": 118,
+          "items": 20
+        },
+        {
+          "seed": 27,
+          "outcome": "victory",
+          "turns": 103,
+          "items": 17
+        },
+        {
+          "seed": 28,
+          "outcome": "victory",
+          "turns": 118,
+          "items": 18
+        },
+        {
+          "seed": 29,
+          "outcome": "victory",
+          "turns": 107,
+          "items": 17
+        },
+        {
+          "seed": 30,
+          "outcome": "victory",
+          "turns": 107,
+          "items": 17
+        }
+      ]
+    },
+    {
+      "party": "solo",
+      "target": "tender",
+      "wins": 30,
+      "turns": 173.5,
+      "items": 16.766666666666666,
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "victory",
+          "turns": 178,
+          "items": 17
+        },
+        {
+          "seed": 2,
+          "outcome": "victory",
+          "turns": 182,
+          "items": 17
+        },
+        {
+          "seed": 3,
+          "outcome": "victory",
+          "turns": 178,
+          "items": 18
+        },
+        {
+          "seed": 4,
+          "outcome": "victory",
+          "turns": 169,
+          "items": 17
+        },
+        {
+          "seed": 5,
+          "outcome": "victory",
+          "turns": 177,
+          "items": 16
+        },
+        {
+          "seed": 6,
+          "outcome": "victory",
+          "turns": 179,
+          "items": 17
+        },
+        {
+          "seed": 7,
+          "outcome": "victory",
+          "turns": 166,
+          "items": 16
+        },
+        {
+          "seed": 8,
+          "outcome": "victory",
+          "turns": 170,
+          "items": 18
+        },
+        {
+          "seed": 9,
+          "outcome": "victory",
+          "turns": 174,
+          "items": 18
+        },
+        {
+          "seed": 10,
+          "outcome": "victory",
+          "turns": 169,
+          "items": 17
+        },
+        {
+          "seed": 11,
+          "outcome": "victory",
+          "turns": 174,
+          "items": 17
+        },
+        {
+          "seed": 12,
+          "outcome": "victory",
+          "turns": 172,
+          "items": 16
+        },
+        {
+          "seed": 13,
+          "outcome": "victory",
+          "turns": 177,
+          "items": 18
+        },
+        {
+          "seed": 14,
+          "outcome": "victory",
+          "turns": 178,
+          "items": 17
+        },
+        {
+          "seed": 15,
+          "outcome": "victory",
+          "turns": 165,
+          "items": 15
+        },
+        {
+          "seed": 16,
+          "outcome": "victory",
+          "turns": 164,
+          "items": 17
+        },
+        {
+          "seed": 17,
+          "outcome": "victory",
+          "turns": 184,
+          "items": 17
+        },
+        {
+          "seed": 18,
+          "outcome": "victory",
+          "turns": 175,
+          "items": 15
+        },
+        {
+          "seed": 19,
+          "outcome": "victory",
+          "turns": 172,
+          "items": 17
+        },
+        {
+          "seed": 20,
+          "outcome": "victory",
+          "turns": 174,
+          "items": 17
+        },
+        {
+          "seed": 21,
+          "outcome": "victory",
+          "turns": 169,
+          "items": 17
+        },
+        {
+          "seed": 22,
+          "outcome": "victory",
+          "turns": 175,
+          "items": 17
+        },
+        {
+          "seed": 23,
+          "outcome": "victory",
+          "turns": 174,
+          "items": 18
+        },
+        {
+          "seed": 24,
+          "outcome": "victory",
+          "turns": 173,
+          "items": 16
+        },
+        {
+          "seed": 25,
+          "outcome": "victory",
+          "turns": 166,
+          "items": 16
+        },
+        {
+          "seed": 26,
+          "outcome": "victory",
+          "turns": 181,
+          "items": 17
+        },
+        {
+          "seed": 27,
+          "outcome": "victory",
+          "turns": 175,
+          "items": 16
+        },
+        {
+          "seed": 28,
+          "outcome": "victory",
+          "turns": 181,
+          "items": 16
+        },
+        {
+          "seed": 29,
+          "outcome": "victory",
+          "turns": 164,
+          "items": 16
+        },
+        {
+          "seed": 30,
+          "outcome": "victory",
+          "turns": 170,
+          "items": 17
+        }
+      ]
+    },
+    {
+      "party": "attack",
+      "target": "wraith",
+      "wins": 30,
+      "turns": 1,
+      "items": 0,
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 2,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 3,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 4,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 5,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 6,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 7,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 8,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 9,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 10,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 11,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 12,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 13,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 14,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 15,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 16,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 17,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 18,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 19,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 20,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 21,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 22,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 23,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 24,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 25,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 26,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 27,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 28,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 29,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 30,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        }
+      ]
+    },
+    {
+      "party": "attack",
+      "target": "amethyst_golem",
+      "wins": 30,
+      "turns": 1,
+      "items": 0,
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 2,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 3,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 4,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 5,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 6,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 7,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 8,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 9,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 10,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 11,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 12,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 13,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 14,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 15,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 16,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 17,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 18,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 19,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 20,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 21,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 22,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 23,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 24,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 25,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 26,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 27,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 28,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 29,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 30,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        }
+      ]
+    },
+    {
+      "party": "attack",
+      "target": "rice",
+      "wins": 30,
+      "turns": 78.86666666666666,
+      "items": 15.366666666666667,
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "victory",
+          "turns": 87,
+          "items": 18
+        },
+        {
+          "seed": 2,
+          "outcome": "victory",
+          "turns": 80,
+          "items": 15
+        },
+        {
+          "seed": 3,
+          "outcome": "victory",
+          "turns": 80,
+          "items": 13
+        },
+        {
+          "seed": 4,
+          "outcome": "victory",
+          "turns": 83,
+          "items": 15
+        },
+        {
+          "seed": 5,
+          "outcome": "victory",
+          "turns": 80,
+          "items": 16
+        },
+        {
+          "seed": 6,
+          "outcome": "victory",
+          "turns": 76,
+          "items": 15
+        },
+        {
+          "seed": 7,
+          "outcome": "victory",
+          "turns": 78,
+          "items": 16
+        },
+        {
+          "seed": 8,
+          "outcome": "victory",
+          "turns": 78,
+          "items": 16
+        },
+        {
+          "seed": 9,
+          "outcome": "victory",
+          "turns": 76,
+          "items": 16
+        },
+        {
+          "seed": 10,
+          "outcome": "victory",
+          "turns": 80,
+          "items": 14
+        },
+        {
+          "seed": 11,
+          "outcome": "victory",
+          "turns": 84,
+          "items": 17
+        },
+        {
+          "seed": 12,
+          "outcome": "victory",
+          "turns": 78,
+          "items": 14
+        },
+        {
+          "seed": 13,
+          "outcome": "victory",
+          "turns": 80,
+          "items": 13
+        },
+        {
+          "seed": 14,
+          "outcome": "victory",
+          "turns": 80,
+          "items": 16
+        },
+        {
+          "seed": 15,
+          "outcome": "victory",
+          "turns": 72,
+          "items": 16
+        },
+        {
+          "seed": 16,
+          "outcome": "victory",
+          "turns": 80,
+          "items": 16
+        },
+        {
+          "seed": 17,
+          "outcome": "victory",
+          "turns": 75,
+          "items": 16
+        },
+        {
+          "seed": 18,
+          "outcome": "victory",
+          "turns": 80,
+          "items": 15
+        },
+        {
+          "seed": 19,
+          "outcome": "victory",
+          "turns": 78,
+          "items": 16
+        },
+        {
+          "seed": 20,
+          "outcome": "victory",
+          "turns": 75,
+          "items": 16
+        },
+        {
+          "seed": 21,
+          "outcome": "victory",
+          "turns": 75,
+          "items": 16
+        },
+        {
+          "seed": 22,
+          "outcome": "victory",
+          "turns": 80,
+          "items": 15
+        },
+        {
+          "seed": 23,
+          "outcome": "victory",
+          "turns": 81,
+          "items": 16
+        },
+        {
+          "seed": 24,
+          "outcome": "victory",
+          "turns": 77,
+          "items": 14
+        },
+        {
+          "seed": 25,
+          "outcome": "victory",
+          "turns": 79,
+          "items": 16
+        },
+        {
+          "seed": 26,
+          "outcome": "victory",
+          "turns": 81,
+          "items": 15
+        },
+        {
+          "seed": 27,
+          "outcome": "victory",
+          "turns": 77,
+          "items": 16
+        },
+        {
+          "seed": 28,
+          "outcome": "victory",
+          "turns": 80,
+          "items": 15
+        },
+        {
+          "seed": 29,
+          "outcome": "victory",
+          "turns": 74,
+          "items": 13
+        },
+        {
+          "seed": 30,
+          "outcome": "victory",
+          "turns": 82,
+          "items": 16
+        }
+      ]
+    },
+    {
+      "party": "attack",
+      "target": "dusk",
+      "wins": 30,
+      "turns": 65.03333333333333,
+      "items": 9.666666666666666,
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "victory",
+          "turns": 68,
+          "items": 11
+        },
+        {
+          "seed": 2,
+          "outcome": "victory",
+          "turns": 71,
+          "items": 10
+        },
+        {
+          "seed": 3,
+          "outcome": "victory",
+          "turns": 59,
+          "items": 9
+        },
+        {
+          "seed": 4,
+          "outcome": "victory",
+          "turns": 65,
+          "items": 10
+        },
+        {
+          "seed": 5,
+          "outcome": "victory",
+          "turns": 65,
+          "items": 10
+        },
+        {
+          "seed": 6,
+          "outcome": "victory",
+          "turns": 63,
+          "items": 9
+        },
+        {
+          "seed": 7,
+          "outcome": "victory",
+          "turns": 62,
+          "items": 9
+        },
+        {
+          "seed": 8,
+          "outcome": "victory",
+          "turns": 70,
+          "items": 10
+        },
+        {
+          "seed": 9,
+          "outcome": "victory",
+          "turns": 69,
+          "items": 10
+        },
+        {
+          "seed": 10,
+          "outcome": "victory",
+          "turns": 65,
+          "items": 10
+        },
+        {
+          "seed": 11,
+          "outcome": "victory",
+          "turns": 69,
+          "items": 10
+        },
+        {
+          "seed": 12,
+          "outcome": "victory",
+          "turns": 65,
+          "items": 10
+        },
+        {
+          "seed": 13,
+          "outcome": "victory",
+          "turns": 65,
+          "items": 10
+        },
+        {
+          "seed": 14,
+          "outcome": "victory",
+          "turns": 64,
+          "items": 10
+        },
+        {
+          "seed": 15,
+          "outcome": "victory",
+          "turns": 66,
+          "items": 10
+        },
+        {
+          "seed": 16,
+          "outcome": "victory",
+          "turns": 65,
+          "items": 9
+        },
+        {
+          "seed": 17,
+          "outcome": "victory",
+          "turns": 65,
+          "items": 10
+        },
+        {
+          "seed": 18,
+          "outcome": "victory",
+          "turns": 61,
+          "items": 8
+        },
+        {
+          "seed": 19,
+          "outcome": "victory",
+          "turns": 59,
+          "items": 9
+        },
+        {
+          "seed": 20,
+          "outcome": "victory",
+          "turns": 66,
+          "items": 9
+        },
+        {
+          "seed": 21,
+          "outcome": "victory",
+          "turns": 67,
+          "items": 11
+        },
+        {
+          "seed": 22,
+          "outcome": "victory",
+          "turns": 65,
+          "items": 10
+        },
+        {
+          "seed": 23,
+          "outcome": "victory",
+          "turns": 66,
+          "items": 11
+        },
+        {
+          "seed": 24,
+          "outcome": "victory",
+          "turns": 62,
+          "items": 9
+        },
+        {
+          "seed": 25,
+          "outcome": "victory",
+          "turns": 63,
+          "items": 8
+        },
+        {
+          "seed": 26,
+          "outcome": "victory",
+          "turns": 61,
+          "items": 8
+        },
+        {
+          "seed": 27,
+          "outcome": "victory",
+          "turns": 69,
+          "items": 10
+        },
+        {
+          "seed": 28,
+          "outcome": "victory",
+          "turns": 62,
+          "items": 9
+        },
+        {
+          "seed": 29,
+          "outcome": "victory",
+          "turns": 67,
+          "items": 10
+        },
+        {
+          "seed": 30,
+          "outcome": "victory",
+          "turns": 67,
+          "items": 11
+        }
+      ]
+    },
+    {
+      "party": "attack",
+      "target": "tender",
+      "wins": 30,
+      "turns": 99.1,
+      "items": 8.5,
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "victory",
+          "turns": 97,
+          "items": 8
+        },
+        {
+          "seed": 2,
+          "outcome": "victory",
+          "turns": 100,
+          "items": 8
+        },
+        {
+          "seed": 3,
+          "outcome": "victory",
+          "turns": 96,
+          "items": 8
+        },
+        {
+          "seed": 4,
+          "outcome": "victory",
+          "turns": 100,
+          "items": 8
+        },
+        {
+          "seed": 5,
+          "outcome": "victory",
+          "turns": 102,
+          "items": 8
+        },
+        {
+          "seed": 6,
+          "outcome": "victory",
+          "turns": 100,
+          "items": 9
+        },
+        {
+          "seed": 7,
+          "outcome": "victory",
+          "turns": 100,
+          "items": 9
+        },
+        {
+          "seed": 8,
+          "outcome": "victory",
+          "turns": 100,
+          "items": 7
+        },
+        {
+          "seed": 9,
+          "outcome": "victory",
+          "turns": 97,
+          "items": 10
+        },
+        {
+          "seed": 10,
+          "outcome": "victory",
+          "turns": 98,
+          "items": 8
+        },
+        {
+          "seed": 11,
+          "outcome": "victory",
+          "turns": 100,
+          "items": 8
+        },
+        {
+          "seed": 12,
+          "outcome": "victory",
+          "turns": 99,
+          "items": 8
+        },
+        {
+          "seed": 13,
+          "outcome": "victory",
+          "turns": 101,
+          "items": 8
+        },
+        {
+          "seed": 14,
+          "outcome": "victory",
+          "turns": 100,
+          "items": 9
+        },
+        {
+          "seed": 15,
+          "outcome": "victory",
+          "turns": 95,
+          "items": 9
+        },
+        {
+          "seed": 16,
+          "outcome": "victory",
+          "turns": 100,
+          "items": 9
+        },
+        {
+          "seed": 17,
+          "outcome": "victory",
+          "turns": 101,
+          "items": 8
+        },
+        {
+          "seed": 18,
+          "outcome": "victory",
+          "turns": 96,
+          "items": 9
+        },
+        {
+          "seed": 19,
+          "outcome": "victory",
+          "turns": 101,
+          "items": 8
+        },
+        {
+          "seed": 20,
+          "outcome": "victory",
+          "turns": 104,
+          "items": 10
+        },
+        {
+          "seed": 21,
+          "outcome": "victory",
+          "turns": 107,
+          "items": 10
+        },
+        {
+          "seed": 22,
+          "outcome": "victory",
+          "turns": 92,
+          "items": 8
+        },
+        {
+          "seed": 23,
+          "outcome": "victory",
+          "turns": 97,
+          "items": 9
+        },
+        {
+          "seed": 24,
+          "outcome": "victory",
+          "turns": 102,
+          "items": 8
+        },
+        {
+          "seed": 25,
+          "outcome": "victory",
+          "turns": 102,
+          "items": 9
+        },
+        {
+          "seed": 26,
+          "outcome": "victory",
+          "turns": 92,
+          "items": 9
+        },
+        {
+          "seed": 27,
+          "outcome": "victory",
+          "turns": 96,
+          "items": 9
+        },
+        {
+          "seed": 28,
+          "outcome": "victory",
+          "turns": 102,
+          "items": 8
+        },
+        {
+          "seed": 29,
+          "outcome": "victory",
+          "turns": 98,
+          "items": 8
+        },
+        {
+          "seed": 30,
+          "outcome": "victory",
+          "turns": 98,
+          "items": 8
+        }
+      ]
+    },
+    {
+      "party": "support",
+      "target": "wraith",
+      "wins": 30,
+      "turns": 1,
+      "items": 0,
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 2,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 3,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 4,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 5,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 6,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 7,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 8,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 9,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 10,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 11,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 12,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 13,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 14,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 15,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 16,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 17,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 18,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 19,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 20,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 21,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 22,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 23,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 24,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 25,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 26,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 27,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 28,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 29,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 30,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        }
+      ]
+    },
+    {
+      "party": "support",
+      "target": "amethyst_golem",
+      "wins": 30,
+      "turns": 1,
+      "items": 0,
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 2,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 3,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 4,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 5,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 6,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 7,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 8,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 9,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 10,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 11,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 12,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 13,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 14,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 15,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 16,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 17,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 18,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 19,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 20,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 21,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 22,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 23,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 24,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 25,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 26,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 27,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 28,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 29,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        },
+        {
+          "seed": 30,
+          "outcome": "victory",
+          "turns": 1,
+          "items": 0
+        }
+      ]
+    },
+    {
+      "party": "support",
+      "target": "rice",
+      "wins": 30,
+      "turns": 81.86666666666666,
+      "items": 0,
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "victory",
+          "turns": 77,
+          "items": 0
+        },
+        {
+          "seed": 2,
+          "outcome": "victory",
+          "turns": 86,
+          "items": 0
+        },
+        {
+          "seed": 3,
+          "outcome": "victory",
+          "turns": 83,
+          "items": 0
+        },
+        {
+          "seed": 4,
+          "outcome": "victory",
+          "turns": 82,
+          "items": 0
+        },
+        {
+          "seed": 5,
+          "outcome": "victory",
+          "turns": 78,
+          "items": 0
+        },
+        {
+          "seed": 6,
+          "outcome": "victory",
+          "turns": 82,
+          "items": 0
+        },
+        {
+          "seed": 7,
+          "outcome": "victory",
+          "turns": 87,
+          "items": 0
+        },
+        {
+          "seed": 8,
+          "outcome": "victory",
+          "turns": 84,
+          "items": 0
+        },
+        {
+          "seed": 9,
+          "outcome": "victory",
+          "turns": 93,
+          "items": 0
+        },
+        {
+          "seed": 10,
+          "outcome": "victory",
+          "turns": 78,
+          "items": 0
+        },
+        {
+          "seed": 11,
+          "outcome": "victory",
+          "turns": 81,
+          "items": 0
+        },
+        {
+          "seed": 12,
+          "outcome": "victory",
+          "turns": 82,
+          "items": 0
+        },
+        {
+          "seed": 13,
+          "outcome": "victory",
+          "turns": 83,
+          "items": 0
+        },
+        {
+          "seed": 14,
+          "outcome": "victory",
+          "turns": 81,
+          "items": 0
+        },
+        {
+          "seed": 15,
+          "outcome": "victory",
+          "turns": 82,
+          "items": 0
+        },
+        {
+          "seed": 16,
+          "outcome": "victory",
+          "turns": 80,
+          "items": 0
+        },
+        {
+          "seed": 17,
+          "outcome": "victory",
+          "turns": 81,
+          "items": 0
+        },
+        {
+          "seed": 18,
+          "outcome": "victory",
+          "turns": 83,
+          "items": 0
+        },
+        {
+          "seed": 19,
+          "outcome": "victory",
+          "turns": 85,
+          "items": 0
+        },
+        {
+          "seed": 20,
+          "outcome": "victory",
+          "turns": 85,
+          "items": 0
+        },
+        {
+          "seed": 21,
+          "outcome": "victory",
+          "turns": 83,
+          "items": 0
+        },
+        {
+          "seed": 22,
+          "outcome": "victory",
+          "turns": 76,
+          "items": 0
+        },
+        {
+          "seed": 23,
+          "outcome": "victory",
+          "turns": 80,
+          "items": 0
+        },
+        {
+          "seed": 24,
+          "outcome": "victory",
+          "turns": 88,
+          "items": 0
+        },
+        {
+          "seed": 25,
+          "outcome": "victory",
+          "turns": 83,
+          "items": 0
+        },
+        {
+          "seed": 26,
+          "outcome": "victory",
+          "turns": 80,
+          "items": 0
+        },
+        {
+          "seed": 27,
+          "outcome": "victory",
+          "turns": 76,
+          "items": 0
+        },
+        {
+          "seed": 28,
+          "outcome": "victory",
+          "turns": 80,
+          "items": 0
+        },
+        {
+          "seed": 29,
+          "outcome": "victory",
+          "turns": 79,
+          "items": 0
+        },
+        {
+          "seed": 30,
+          "outcome": "victory",
+          "turns": 78,
+          "items": 0
+        }
+      ]
+    },
+    {
+      "party": "support",
+      "target": "dusk",
+      "wins": 30,
+      "turns": 69.26666666666667,
+      "items": 0,
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "victory",
+          "turns": 70,
+          "items": 0
+        },
+        {
+          "seed": 2,
+          "outcome": "victory",
+          "turns": 73,
+          "items": 0
+        },
+        {
+          "seed": 3,
+          "outcome": "victory",
+          "turns": 71,
+          "items": 0
+        },
+        {
+          "seed": 4,
+          "outcome": "victory",
+          "turns": 69,
+          "items": 0
+        },
+        {
+          "seed": 5,
+          "outcome": "victory",
+          "turns": 69,
+          "items": 0
+        },
+        {
+          "seed": 6,
+          "outcome": "victory",
+          "turns": 66,
+          "items": 0
+        },
+        {
+          "seed": 7,
+          "outcome": "victory",
+          "turns": 72,
+          "items": 0
+        },
+        {
+          "seed": 8,
+          "outcome": "victory",
+          "turns": 71,
+          "items": 0
+        },
+        {
+          "seed": 9,
+          "outcome": "victory",
+          "turns": 71,
+          "items": 0
+        },
+        {
+          "seed": 10,
+          "outcome": "victory",
+          "turns": 70,
+          "items": 0
+        },
+        {
+          "seed": 11,
+          "outcome": "victory",
+          "turns": 75,
+          "items": 0
+        },
+        {
+          "seed": 12,
+          "outcome": "victory",
+          "turns": 71,
+          "items": 0
+        },
+        {
+          "seed": 13,
+          "outcome": "victory",
+          "turns": 66,
+          "items": 0
+        },
+        {
+          "seed": 14,
+          "outcome": "victory",
+          "turns": 70,
+          "items": 0
+        },
+        {
+          "seed": 15,
+          "outcome": "victory",
+          "turns": 70,
+          "items": 0
+        },
+        {
+          "seed": 16,
+          "outcome": "victory",
+          "turns": 69,
+          "items": 0
+        },
+        {
+          "seed": 17,
+          "outcome": "victory",
+          "turns": 71,
+          "items": 0
+        },
+        {
+          "seed": 18,
+          "outcome": "victory",
+          "turns": 66,
+          "items": 0
+        },
+        {
+          "seed": 19,
+          "outcome": "victory",
+          "turns": 62,
+          "items": 0
+        },
+        {
+          "seed": 20,
+          "outcome": "victory",
+          "turns": 67,
+          "items": 0
+        },
+        {
+          "seed": 21,
+          "outcome": "victory",
+          "turns": 70,
+          "items": 0
+        },
+        {
+          "seed": 22,
+          "outcome": "victory",
+          "turns": 69,
+          "items": 0
+        },
+        {
+          "seed": 23,
+          "outcome": "victory",
+          "turns": 69,
+          "items": 0
+        },
+        {
+          "seed": 24,
+          "outcome": "victory",
+          "turns": 70,
+          "items": 0
+        },
+        {
+          "seed": 25,
+          "outcome": "victory",
+          "turns": 69,
+          "items": 0
+        },
+        {
+          "seed": 26,
+          "outcome": "victory",
+          "turns": 64,
+          "items": 0
+        },
+        {
+          "seed": 27,
+          "outcome": "victory",
+          "turns": 70,
+          "items": 0
+        },
+        {
+          "seed": 28,
+          "outcome": "victory",
+          "turns": 67,
+          "items": 0
+        },
+        {
+          "seed": 29,
+          "outcome": "victory",
+          "turns": 70,
+          "items": 0
+        },
+        {
+          "seed": 30,
+          "outcome": "victory",
+          "turns": 71,
+          "items": 0
+        }
+      ]
+    },
+    {
+      "party": "support",
+      "target": "tender",
+      "wins": 30,
+      "turns": 112.3,
+      "items": 0,
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "victory",
+          "turns": 112,
+          "items": 0
+        },
+        {
+          "seed": 2,
+          "outcome": "victory",
+          "turns": 120,
+          "items": 0
+        },
+        {
+          "seed": 3,
+          "outcome": "victory",
+          "turns": 111,
+          "items": 0
+        },
+        {
+          "seed": 4,
+          "outcome": "victory",
+          "turns": 114,
+          "items": 0
+        },
+        {
+          "seed": 5,
+          "outcome": "victory",
+          "turns": 112,
+          "items": 0
+        },
+        {
+          "seed": 6,
+          "outcome": "victory",
+          "turns": 109,
+          "items": 0
+        },
+        {
+          "seed": 7,
+          "outcome": "victory",
+          "turns": 106,
+          "items": 0
+        },
+        {
+          "seed": 8,
+          "outcome": "victory",
+          "turns": 115,
+          "items": 0
+        },
+        {
+          "seed": 9,
+          "outcome": "victory",
+          "turns": 123,
+          "items": 0
+        },
+        {
+          "seed": 10,
+          "outcome": "victory",
+          "turns": 107,
+          "items": 0
+        },
+        {
+          "seed": 11,
+          "outcome": "victory",
+          "turns": 114,
+          "items": 0
+        },
+        {
+          "seed": 12,
+          "outcome": "victory",
+          "turns": 110,
+          "items": 0
+        },
+        {
+          "seed": 13,
+          "outcome": "victory",
+          "turns": 109,
+          "items": 0
+        },
+        {
+          "seed": 14,
+          "outcome": "victory",
+          "turns": 109,
+          "items": 0
+        },
+        {
+          "seed": 15,
+          "outcome": "victory",
+          "turns": 113,
+          "items": 0
+        },
+        {
+          "seed": 16,
+          "outcome": "victory",
+          "turns": 112,
+          "items": 0
+        },
+        {
+          "seed": 17,
+          "outcome": "victory",
+          "turns": 111,
+          "items": 0
+        },
+        {
+          "seed": 18,
+          "outcome": "victory",
+          "turns": 106,
+          "items": 0
+        },
+        {
+          "seed": 19,
+          "outcome": "victory",
+          "turns": 118,
+          "items": 0
+        },
+        {
+          "seed": 20,
+          "outcome": "victory",
+          "turns": 113,
+          "items": 0
+        },
+        {
+          "seed": 21,
+          "outcome": "victory",
+          "turns": 111,
+          "items": 0
+        },
+        {
+          "seed": 22,
+          "outcome": "victory",
+          "turns": 116,
+          "items": 0
+        },
+        {
+          "seed": 23,
+          "outcome": "victory",
+          "turns": 115,
+          "items": 0
+        },
+        {
+          "seed": 24,
+          "outcome": "victory",
+          "turns": 107,
+          "items": 0
+        },
+        {
+          "seed": 25,
+          "outcome": "victory",
+          "turns": 110,
+          "items": 0
+        },
+        {
+          "seed": 26,
+          "outcome": "victory",
+          "turns": 116,
+          "items": 0
+        },
+        {
+          "seed": 27,
+          "outcome": "victory",
+          "turns": 113,
+          "items": 0
+        },
+        {
+          "seed": 28,
+          "outcome": "victory",
+          "turns": 123,
+          "items": 0
+        },
+        {
+          "seed": 29,
+          "outcome": "victory",
+          "turns": 104,
+          "items": 0
+        },
+        {
+          "seed": 30,
+          "outcome": "victory",
+          "turns": 110,
+          "items": 0
+        }
+      ]
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import { normalizeReincarnationCount } from "../data/reincarnation.js";
 import {reviveGoddess} from './karte-goddesses.js';
 import { reviveAkashicEnemy } from "./akashic-phantoms.js";
 import { getChargeGain } from "./charge-gain.js";
@@ -9,6 +10,12 @@ import { getNpcStagePassive, NPC_ADVANCED_GROWTH } from "../data/npc-passives.js
 import { getConditionLabel } from "./condition-label.js";
 import { resolvePlayerSurvival } from "./pisces.js";
 import { cannotReachTarget, DISTANT_MESSAGE } from "./tiefstrom.js";
+
+// Scale offensive support only; percentage healing, protection and executions retain their rules.
+export const NPC_REINCARNATION_POWER = Object.freeze([1, 3, 6, 10]);
+export function getNpcReincarnationPower(character) {
+  return NPC_REINCARNATION_POWER[normalizeReincarnationCount(character?.reincarnationCount)];
+}
 
 export const NPC_SUPPORT_BALANCE = Object.freeze({
   alec: Object.freeze({ attackRate: 0.8, growthAttack: 3, guardBase: 0.15, guardPerStage: 0.02, guardMaximum: 0.35 }),
@@ -95,7 +102,7 @@ export function applyNpcBattleStart(battle, rng = Math.random) {
     || getGrowthStage(battle.player, "rebecca") < 10) return battle;
   const upgrade = NPC_ADVANCED_GROWTH.rebecca.stage10;
   const support = NPC_SUPPORT_BALANCE.rebecca;
-  const attack = Number(getNpcDefinition("rebecca")?.baseStats?.atk) + 10 * support.growthAttack;
+  const attack = (Number(getNpcDefinition("rebecca")?.baseStats?.atk) + 10 * support.growthAttack) * getNpcReincarnationPower(battle.player);
   const damage = Math.max(1, Math.floor(attack * support.hitRate));
   battle.log.push(`レベッカの「${upgrade.name}」！`);
   battle.presentationEvents.push({ type: "npcSupport", npcId: "rebecca", actionName: upgrade.name,
@@ -166,7 +173,7 @@ export function getNpcSupportStatus(character, npcId) {
   const common = { id: npcId, name: definition.name, jobLabel: definition.jobLabel, stage, maxDepth, growth };
   if (npcId === "alec") {
     const config = NPC_SUPPORT_BALANCE.alec;
-    const attack = Number(definition.baseStats.atk) + stage * config.growthAttack;
+    const attack = (Number(definition.baseStats.atk) + stage * config.growthAttack) * getNpcReincarnationPower(character);
     const stage7 = stage >= 7 ? NPC_ADVANCED_GROWTH.alec.stage7 : null;
     const advancedRows = [
       ...(stage >= 8 ? [["チャージ", NPC_ADVANCED_GROWTH.alec.stage8.name]] : []),
@@ -182,7 +189,7 @@ export function getNpcSupportStatus(character, npcId) {
   }
   if (npcId === "rebecca") {
     const config = NPC_SUPPORT_BALANCE.rebecca;
-    const attack = Number(definition.baseStats.atk) + stage * config.growthAttack;
+    const attack = (Number(definition.baseStats.atk) + stage * config.growthAttack) * getNpcReincarnationPower(character);
     const stage7 = stage >= 7 ? NPC_ADVANCED_GROWTH.rebecca.stage7 : null;
     return { ...common, rows: [
       ["連撃威力", `${Math.max(1, Math.floor(attack * config.hitRate))}×2`],
@@ -206,7 +213,7 @@ export function getNpcSupportStatus(character, npcId) {
   const config = NPC_SUPPORT_BALANCE.johan;
   const intelligence = Number(definition.baseStats.int) + stage * config.growthInt;
   const stage7 = stage >= 7 ? NPC_ADVANCED_GROWTH.johan.stage7 : null;
-  const baseDamage = (config.basePower + intelligence * 0.5) * config.spellRate * (stage7?.spellDamageMultiplier || 1);
+  const baseDamage = getNpcReincarnationPower(character) * (config.basePower + intelligence * 0.5) * config.spellRate * (stage7?.spellDamageMultiplier || 1);
   return { ...common, rows: [
     ["呪文威力", `約${Math.max(1, Math.floor(baseDamage * 0.9))}～${Math.max(1, Math.floor(baseDamage * 1.1))}`],
     ["属性", "無属性"],
@@ -232,7 +239,7 @@ export function applyNpcAfterPlayerAttack(battle, rng = Math.random) {
   if (!canNpcSupport({ battle, npcId: "alec", supportType: "followUp" })) return battle;
   const stage = getGrowthStage(battle.player, "alec");
   const config = NPC_SUPPORT_BALANCE.alec;
-  const attack = Number(getNpcDefinition("alec")?.baseStats?.atk) + stage * config.growthAttack;
+  const attack = (Number(getNpcDefinition("alec")?.baseStats?.atk) + stage * config.growthAttack) * getNpcReincarnationPower(battle.player);
   const stage7 = stage >= 7 ? NPC_ADVANCED_GROWTH.alec.stage7 : null;
   const damage = Math.max(1, Math.floor(attack * config.attackRate * (stage7?.attackMultiplier || 1)));
   applyNpcDamage(battle, { npcId: "alec", damage, message: `アレクの追撃！ ${damage}ダメージ！`, rng });
@@ -297,7 +304,7 @@ function applyRebeccaSupport(battle, rng) {
   const definition = getNpcDefinition("rebecca");
   const config = NPC_SUPPORT_BALANCE.rebecca;
   const stage7 = stage >= 7 ? NPC_ADVANCED_GROWTH.rebecca.stage7 : null;
-  const attack = Number(definition?.baseStats?.atk) + stage * config.growthAttack;
+  const attack = (Number(definition?.baseStats?.atk) + stage * config.growthAttack) * getNpcReincarnationPower(battle.player);
   const damage = Math.max(1, Math.floor(attack * config.hitRate));
   battle.log.push("レベッカの連続攻撃！");
   for (let hitIndex = 0; hitIndex < 2 && !battle.outcome; hitIndex += 1) {
@@ -325,7 +332,7 @@ function applyJohanSupport(battle, rng) {
     attacker: { int: intelligence },
     defender: battle.enemy,
     spell: { id: "npc_johan_arcane", element: config.element, spellPower: config.basePower,
-      powerMultiplier: config.spellRate * (stage7?.spellDamageMultiplier || 1) },
+      powerMultiplier: getNpcReincarnationPower(battle.player) * config.spellRate * (stage7?.spellDamageMultiplier || 1) },
     rng
   });
   const damage = Math.max(0, Math.floor(result.totalDamage || result.hits?.[0]?.damage || 0));
@@ -345,7 +352,7 @@ function applyJohanSupport(battle, rng) {
 function applyAlecChargeSkill(battle, config, rng) {
   const stage = getGrowthStage(battle.player, "alec");
   const support = NPC_SUPPORT_BALANCE.alec;
-  const attack = Number(getNpcDefinition("alec")?.baseStats?.atk) + stage * support.growthAttack;
+  const attack = (Number(getNpcDefinition("alec")?.baseStats?.atk) + stage * support.growthAttack) * getNpcReincarnationPower(battle.player);
   const stage7 = stage >= 7 ? NPC_ADVANCED_GROWTH.alec.stage7 : null;
   const upgrade = stage >= 8 ? NPC_ADVANCED_GROWTH.alec.stage8 : null;
   const normalDamage = Math.max(1, Math.floor(attack * support.attackRate * (stage7?.attackMultiplier || 1)));
@@ -367,7 +374,7 @@ function applyRebeccaChargeSkill(battle, config, rng) {
   const stage = getGrowthStage(battle.player, "rebecca");
   const support = NPC_SUPPORT_BALANCE.rebecca;
   const upgrade = stage >= 8 ? NPC_ADVANCED_GROWTH.rebecca.stage8 : null;
-  const attack = Number(getNpcDefinition("rebecca")?.baseStats?.atk) + stage * support.growthAttack;
+  const attack = (Number(getNpcDefinition("rebecca")?.baseStats?.atk) + stage * support.growthAttack) * getNpcReincarnationPower(battle.player);
   const normalHitDamage = Math.max(1, Math.floor(attack * support.hitRate));
   const damage = Math.max(1, Math.floor(normalHitDamage * config.damageMultiplier * (upgrade?.defensePierceDamageMultiplier || 1)));
   const actionName = upgrade?.name || config.name;
@@ -399,7 +406,7 @@ function applyErikaChargeSkill(battle, config) {
       amount, actionName: upgrade.name, message });
     return;
   }
-  const baseDamage = Math.max(1, Math.floor(config.basePower + stage * config.growthPower));
+  const baseDamage = Math.max(1, Math.floor((config.basePower + stage * config.growthPower) * getNpcReincarnationPower(battle.player)));
   const isUndead = battle.enemy.race === "undead";
   const damage = isUndead && !battle.enemy.isBoss
     ? battle.enemy.hp
