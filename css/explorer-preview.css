@@ -1,4 +1,13 @@
 /* Phase 1 only. Keep transfer styles and state untouched. */
+.explorer-preview:has(>.explorer-map-info){grid-template-rows:auto auto auto minmax(0,1fr) auto}
+.explorer-map-info{min-height:0;overflow:auto;overscroll-behavior:contain;touch-action:pan-y;flex:1;font-size:14px;line-height:1.5}
+.explorer-map-info p{margin:3px 0;overflow-wrap:anywhere}
+.explorer-map-floors{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.explorer-map-floors section{padding:8px;border:1px solid #687477;border-radius:6px;background:#101b20cc;min-width:0}
+.explorer-map-floors h3{font-size:15px;margin:0 0 6px}
+.explorer-map-floors dl{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 8px;margin:0}
+.explorer-map-floors dt{overflow-wrap:anywhere}.explorer-map-floors dd{margin:0;text-align:right;white-space:nowrap;color:#c1f4ff}
+@media(max-width:680px){.explorer-map-floors{grid-template-columns:1fr;gap:6px}.explorer-map-info{font-size:13px}.explorer-map-floors section{padding:6px}}
 .explorer-preview{padding:20px 40px;gap:8px;background:rgba(0,0,0,.78)}
 .explorer-preview h2{font-size:32px}
 .explorer-preview .transfer-destination-list{gap:6px;min-height:0}

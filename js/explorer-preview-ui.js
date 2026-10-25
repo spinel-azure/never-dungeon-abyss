@@ -1,4 +1,5 @@
 import {createSurveyReportUI} from './survey-report-ui.js';
+import {getMapManagementInfo,renderMapManagementInfo} from './special-map/management-info.js';
 import {mapNameColor} from './special-map/name-color.js';
 import {sortRegisteredMaps} from '../data/special-map-sort.js';
 import {MAP_BETA_WELCOME,MAP_BETA_EXPLANATION,MAP_BETA_NOTICE} from '../data/map-beta.js';
@@ -286,6 +287,8 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     if(isV2Map(map))panel.append(appendMapBadges(mapText('p',info.name,map),map),make('p',`発見者：${map.discovererName}`));
     else panel.append(appendMapBadges(mapText('p',`${info.name} Lv.${info.level}`,map),map),make('p',`発見者：${map.discovererName}`));
     if(view==='manage'){
+      const managementInfo=getMapManagementInfo(map);
+      if(managementInfo)panel.append(renderMapManagementInfo(managementInfo));
       actionButtons([['共有コードを表示',()=>changeView('share')],['共有コードをコピー',()=>{changeView('share');try{copyCode(encodeMapCode(map));}catch(e){error(e.message);}}],
         [`お気に入り ${map.favorite?'ON':'OFF'}`,favorite],['地図を削除',()=>{if(map.favorite){error('お気に入り登録を解除してから削除してください。');return;}changeView('delete');}],['戻る（B）',back]]);return;
     }
