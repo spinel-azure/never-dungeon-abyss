@@ -1,5 +1,5 @@
 import {normalizeSurveyMask,mergeSurvey,surveyCount} from './special-map-survey.js';
-import {normalizeSurveyMasks,mergeSurveyV2} from './special-map-survey-v2.js';
+import {normalizeSurveyMasks,mergeSurveyV2,surveyTotalV2} from './special-map-survey-v2.js';
 import {describeV2MapName} from './special-map-names-v2.js';
 import {validMapThemeOverride} from './special-map-theme-override.js';
 import {normalizeBossReward,normalizeMapContentHistory} from './special-map-rewards.js';
@@ -54,8 +54,16 @@ export function normalizeSpecialMaps(input) {
   const bossReward=normalizeBossReward(input?.bossReward);
   const bossClears=normalizeMapContentHistory(input?.bossClears);
   const surveyRewardClaims=normalizeMapContentHistory(input?.surveyRewardClaims);
+  const legacyAccess=normalizeMapContentHistory(input?.legacyAccess);
+  const starterAccess=normalizeMapContentHistory(input?.starterAccess);
+  if(input?.accessMigrationVersion!==1){
+    Object.assign(legacyAccess,bossClears,surveyRewardClaims);
+    for(const map of registered)if(isV2Map(map)&&(map.cleared||surveyTotalV2(map.surveyedMasks)>0))legacyAccess[mapContentId(map)]=true;
+  }
+  for(const map of [...registered,...unidentified,...starterOffer])if(isV2Map(map)&&formalStarterIds.includes(map.discoveryId))starterAccess[mapContentId(map)]=true;
   for(const map of registered)if(bossClears[mapContentId(map)])map.cleared=true;
   return {stampPoints:Math.max(0,Math.min(Number.MAX_SAFE_INTEGER,Math.floor(Number(input?.stampPoints)||0))),surveyIntroductionComplete:input?.surveyIntroductionComplete===true,surveyShoesExchanged:input?.surveyShoesExchanged===true,dataVersion:1,discovererName:signature.ok?signature.value:'',unidentified,registered,...(input?.starterMapsGranted===true?{starterMapsGranted:true}:{}),...(input?.starterMapsTestGranted===true?{starterMapsTestGranted:true}:{}),
+    accessMigrationVersion:1,legacyAccess,starterAccess,
     ...(starterOffer.length===3?{starterOffer}:{}),...(formalStarterIds.length?{formalStarterIds}:{}),
     ...(input?.betaExplanationComplete===true?{betaExplanationComplete:true}:{}),...(input?.betaExplorationUnlocked===true?{betaExplorationUnlocked:true}:{}),
     ...(bossReward?{bossReward}:{}),...(Object.keys(bossClears).length?{bossClears}:{}),...(Object.keys(surveyRewardClaims).length?{surveyRewardClaims}:{})};
@@ -93,7 +101,7 @@ export function appraiseMap(state,discoveryId) {
   const result=inspectAppraisal(state,discoveryId);
   if(!result.ok)return result;
   const unlock=state.starterMapsGranted&&state.formalStarterIds?.includes(discoveryId);
-  return {...result,state:{...state,...(unlock?{betaExplorationUnlocked:true}:{}),unidentified:state.unidentified.filter(m=>m.discoveryId!==discoveryId),registered:result.duplicate?state.registered:[...state.registered,result.map]}};
+  return {...result,state:{...state,...(unlock?{betaExplorationUnlocked:true,starterAccess:{...state.starterAccess,[mapContentId(result.map)]:true}}:{}),unidentified:state.unidentified.filter(m=>m.discoveryId!==discoveryId),registered:result.duplicate?state.registered:[...state.registered,result.map]}};
 }
 export function registerSharedMap(state,original,{confirmSameContent=false}={}) {
   const map=normalizeOriginal(original);

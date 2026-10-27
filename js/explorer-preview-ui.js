@@ -1,3 +1,4 @@
+import {getSpecialMapAccess} from '../data/special-map-access.js';
 import {createSurveyReportUI} from './survey-report-ui.js';
 import {getMapManagementInfo,renderMapManagementInfo} from './special-map/management-info.js';
 import {mapNameColor} from './special-map/name-color.js';
@@ -145,6 +146,8 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
   function changeView(next){manageActionsExpanded=false;view=next;actionCursor=0;render();}
   function enterMap(){
     if(exploration)return;
+    const access=getSpecialMapAccess({...getCharacter(),specialMaps:maps()},selectedMap());
+    if(!access.ok){error(access.error);return;}
     try{
       if(!startExploration)throw Error('探索機能に接続されていません。');
       exploration=startExploration({host,registered:maps().registered,mapKey:detailId,message,onEnter:()=>{panel.hidden=true;},onExit:exit,playSe,saveSurvey:mask=>updateMaps(state=>updateMapSurvey(state,detailId,mask))});
@@ -273,9 +276,20 @@ export function createExplorerPreviewUI({host, commands, background, message, pl
     if(view==='detail'||view==='enter'){
       const map=maps().registered.find(m=>m.id===detailId);if(!map){view=origin;render();return;}
       const info=describeTestMap(map)||{name:map.rulesetVersion==='special-map-v1'?'特殊地図':'未対応の生成ルール',level:'?'};
-      const body=make('div',undefined,'explorer-detail');
-      body.append(appendMapBadges(mapText('h3',isV2Map(map)?info.name:`${info.name} Lv.${info.level}`,map),map),make('p',`発見者：${map.discovererName}`),make('p',isV2Map(map)?`${rarityLabel(map.rarity)}・3層　${surveyTotalV2(map.surveyedMasks)===300?'調査完了':`調査 ${surveyTotalV2(map.surveyedMasks)} / 300`}`:surveyCount(map.surveyedMask)===100?'調査完了':`調査率 ${surveyCount(map.surveyedMask)} / 100`),make('p',isV2Map(map)?'挑戦条件：未実装':'挑戦条件：未実装（Phase 2A仮地図）'));
-      panel.append(body);if(view==='enter'){panel.append(make('p','この地図を探索しますか？'));actionButtons([['はい（A／ENTER）',enterMap],['いいえ（B）',back]]);return;}actionButtons(origin==='maps'?[['探索する（A）',()=>changeView('enter')],['戻る（B）',back]]:[['管理機能を確認（A）',()=>changeView('manage')],['戻る（B）',back]]);return;
+      const access=getSpecialMapAccess({...getCharacter(),specialMaps:maps()},map);
+      const managementInfo=getMapManagementInfo(map);
+      panel.append(appendMapBadges(mapText('p',isV2Map(map)?info.name:info.name+' Lv.'+info.level,map,'explorer-detail-name'),map),make('p','発見者：'+map.discovererName));
+      if(managementInfo){
+        const details=renderMapManagementInfo(managementInfo);
+        details.prepend(make('p',rarityLabel(map.rarity)+'・3層　'+(surveyTotalV2(map.surveyedMasks)===300?'調査完了':'調査 '+surveyTotalV2(map.surveyedMasks)+' / 300')),make('p','挑戦条件：'+access.label+(access.ok?' ✓':'（未達成）')));
+        if(view==='enter')details.append(make('p','この地図を探索しますか？'));
+        panel.append(details);
+      }else panel.append(make('p',view==='enter'?'この地図を探索しますか？':'挑戦条件：追加条件なし'));
+      const proceed=()=>{const a=getSpecialMapAccess({...getCharacter(),specialMaps:maps()},map);if(!a.ok){error(a.error);return;}changeView('enter');};
+      actionButtons(view==='enter'?[['はい（A／ENTER）',enterMap],['戻る（B）',back]]:origin==='maps'?[['探索する（A）',proceed],['戻る（B）',back]]:[['管理機能を確認（A）',()=>changeView('manage')],['戻る（B）',back]]);
+      panel.lastElementChild.classList.add('explorer-entry-footer');
+      if((origin==='maps'||view==='enter')&&!access.ok)panel.lastElementChild.firstElementChild.disabled=true;
+      return;
     }
     if(view==='sameContent'){
       const existing=maps().registered.find(m=>mapContentId(m)===mapContentId(pendingMap));

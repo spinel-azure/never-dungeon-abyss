@@ -36,7 +36,7 @@ test('boss rewards stay private until cleared and match engraving lottery',()=>{
  assert.equal(getMapManagementInfo(map).bossDrops,null);
  assert.ok(getMapManagementInfo({...map,cleared:true}).bossDrops.some(x=>x.includes('未鑑定地図')));
  for(const themeId of ['slate','magic','torture','red','blue','black','gold','rice','dusk','tender']){
-  const rewards=getV2BossItemRewards(themeId,100);assert.ok(Math.abs(rewards.reduce((n,r)=>n+r.rate,0)-.2)<1e-9);
+  const rewards=getV2BossItemRewards(themeId,100);assert.ok(Math.abs(rewards.reduce((n,r)=>n+r.rate,0)-(['gold','rice','dusk','tender'].includes(themeId)?.2:.25))<1e-9);
   for(let i=0;i<5;i++)assert.ok(rewards.some(r=>r.itemId===rollV2Level100Engraving({source:'special-map-v2-boss',mapLevel:100,themeId,engravingRandomValues:[.1,(i+.5)/5]})));
   assert.deepEqual(getV2BossItemRewards(themeId,99),[]);
  }

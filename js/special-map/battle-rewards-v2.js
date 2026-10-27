@@ -1,3 +1,4 @@
+import {NORMAL_MAP_THEMES} from '../../data/special-map-themes.js';
 import {hasCardEffect} from '../../data/cards.js';
 import {matchesV2Battle} from './encounter-v2.js';
 import {calculateBattleExperienceReward,settleIndependentReturnExperience} from '../character-services.js';
@@ -12,15 +13,16 @@ const fixedLevel100Engravings=Object.freeze({
  slate:'strength_engraving',magic:'intelligence_engraving',torture:'agility_engraving',
  red:'dexterity_engraving',blue:'luck_engraving'
 });
+export const v2EngravingRate=themeId=>NORMAL_MAP_THEMES.includes(themeId)?0.25:0.20;
 export function getV2BossItemRewards(themeId,level){
  if(Number(level)!==100)return [];
  const fixed=fixedLevel100Engravings[themeId];
- return (fixed?[fixed]:V2_LEVEL_100_ENGRAVINGS).map(itemId=>({itemId,rate:fixed?0.20:0.04}));
+ return (fixed?[fixed]:V2_LEVEL_100_ENGRAVINGS).map(itemId=>({itemId,rate:v2EngravingRate(themeId)/(fixed?1:5)}));
 }
 export function rollV2Level100Engraving(context,random=Math.random){
  if(!['special-map-v2-boss','special-map-v2-special-boss'].includes(context?.source)||Number(context.mapLevel)!==100)return null;
  const values=Array.isArray(context.engravingRandomValues)?context.engravingRandomValues:[random(),random()];
- if(normalized(values[0])>=.20)return null;
+ if(normalized(values[0])>=v2EngravingRate(context.themeId))return null;
  if(Object.hasOwn(fixedLevel100Engravings,context.themeId))return fixedLevel100Engravings[context.themeId];
  return V2_LEVEL_100_ENGRAVINGS[Math.floor(normalized(values[1])*V2_LEVEL_100_ENGRAVINGS.length)];
 }

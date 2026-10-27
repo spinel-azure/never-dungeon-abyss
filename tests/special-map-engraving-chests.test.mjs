@@ -8,11 +8,11 @@ import {mapOriginalId} from '../data/special-maps.js';
 import {createInitialCharacter} from '../data/classes.js';
 const map={rulesetVersion:'special-map-v2',seed:12345,level:100,rarity:'WHITE',discovererName:'QA'};
 const create=()=>createSpecialMapV2Session([map],mapOriginalId(map),{scheduleSurvey:()=>null});
-test('red gold conversion is one percent, all five engravings equal, all tiers and eligible maps',()=>{
+test('red gold conversion is three percent, all five engravings equal, all tiers and eligible maps',()=>{
  for(const level of [91,99,100])for(const theme of ['green','yellow','crystal','black'])for(const tier of [0,1,2,3]){
   const context={level,theme,tier};
-  for(let i=0;i<5;i++){const values=[.009999,(i+.5)/5];const r=rollV2RedChest(context,()=>.99,()=>values.shift());assert.equal(r.color,'gold');assert.equal(r.reward.itemId,engravings[i]);}
-  const ordinary=rollV2RedChest(context,()=>.99,()=>.01);assert.deepEqual(ordinary.reward,rollV2ArmorChest(context,()=>.99));assert.notEqual(ordinary.color,'gold');
+  for(let i=0;i<5;i++){const values=[.029999,(i+.5)/5];const r=rollV2RedChest(context,()=>.99,()=>values.shift());assert.equal(r.color,'gold');assert.equal(r.reward.itemId,engravings[i]);}
+  const ordinary=rollV2RedChest(context,()=>.99,()=>.03);assert.deepEqual(ordinary.reward,rollV2ArmorChest(context,()=>.99));assert.notEqual(ordinary.color,'gold');
  }
  assert.throws(()=>rollV2RedChest({level:90,theme:'green'},()=>0,()=>0));
  assert.throws(()=>rollV2RedChest({level:100,theme:'water'},()=>0,()=>0));

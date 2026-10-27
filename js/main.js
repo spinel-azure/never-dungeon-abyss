@@ -1,3 +1,4 @@
+import {getSpecialMapAccess} from '../data/special-map-access.js';
 import {goddessCheckpoint,restoreGoddessCheckpoint} from './special-map/goddess-checkpoint.js';
 import {transactSurvey} from '../data/survey-report.js';
 import {createReincarnationVision, isReincarnationVisionEligible} from './reincarnation-vision.js';
@@ -5878,6 +5879,7 @@ import {
     },
     syncMapEnvironment:session=>syncV2ThemeEnvironment(session,character,{effectForced:hasCardEffect(character?.cards?.deckSlots,'force_torch_effect_active')}),
     checkMapEntry:(map,options)=>{
+      if(!options.developmentTheme){const access=getSpecialMapAccess(character,map);if(!access.ok)return access;}
       if(map?.rulesetVersion!=='special-map-v2'||map.themeOverride!=null||options.developmentTheme)return {ok:true};
       if(hasPendingMapReward(character?.specialMaps))return {ok:false,error:MAP_REWARD_PENDING_MESSAGE};
       return character?.specialMaps?.discovererName?{ok:true}:{ok:false,error:'先に探検家テントで地図署名を登録してください。'};

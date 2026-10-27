@@ -1,3 +1,4 @@
+import {getSpecialMapAccess} from '../data/special-map-access.js';
 import {surveyVisitV2} from '../data/special-map-survey-v2.js';
 import {createGoddessMapBoss} from '../data/karte-goddess-bosses.js';
 import {createGoldMapBoss} from '../data/karte-gold-boss.js';
@@ -247,7 +248,8 @@ test('F4 actual victory callback: cloned IDs, failed commit retry, receipt and a
 test('F4 production entry gate blocks only normal V2 with pending reward, and prebattle save retries keep lottery inputs',t=>{
  const h=harness(t),map={rulesetVersion:'special-map-v2',seed:12345,level:60,rarity:'WHITE',discovererName:'QA'};
  h.c.specialMaps=normalizeSpecialMaps({discovererName:'QA',registered:[map]});
- Object.assign(h.scope,{hasPendingMapReward,MAP_REWARD_PENDING_MESSAGE,prepareMapBossReward});
+ h.c.reincarnationCount=1;
+ Object.assign(h.scope,{getSpecialMapAccess,hasPendingMapReward,MAP_REWARD_PENDING_MESSAGE,prepareMapBossReward});
  const hooks=main.slice(main.indexOf('    checkMapEntry:'),main.indexOf('    getTorchCardEffects:'));
  vm.runInContext('this.rewardHost={'+hooks+'};',vm.createContext(h.scope));
  const c={source:'special-map-v2-boss',themeId:'crystal',mapKey:mapOriginalId(map),contentId:mapContentId(map),mapSeed:12345,mapLevel:60,rarity:'WHITE',expeditionId:crypto.randomUUID(),battleUuid:crypto.randomUUID()};

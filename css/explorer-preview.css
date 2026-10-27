@@ -15,7 +15,7 @@ body.layout-mobile .explorer-map-floors section:not(.is-active){display:none}
 body.layout-mobile .explorer-floor-tabs{display:flex!important;gap:8px;margin:12px 0 8px;position:sticky;top:0;background:#081116;padding:4px 0}
 body.layout-mobile .explorer-floor-tabs button{flex:1;min-height:44px}
 body.layout-mobile .explorer-floor-tabs button[aria-pressed=true]{background:#14313a;border-color:#aef6ff}
-body.layout-mobile .explorer-preview:has(>.explorer-map-info)>.explorer-footer:not(.is-expanded)>button:not(:nth-last-child(2)):not(.explorer-management-toggle){display:none}
+body.layout-mobile .explorer-preview:has(>.explorer-map-info)>.explorer-footer:not(.explorer-entry-footer):not(.is-expanded)>button:not(:nth-last-child(2)):not(.explorer-management-toggle){display:none}
 body.layout-mobile .explorer-management-toggle{display:block!important;order:-1}
 body.layout-mobile .explorer-preview:has(>.explorer-map-info)>.explorer-footer{flex-wrap:wrap;flex-shrink:0}
 .explorer-preview{padding:20px 40px;gap:8px;background:rgba(0,0,0,.78)}

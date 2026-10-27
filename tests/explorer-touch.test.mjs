@@ -13,6 +13,9 @@ import {mapOriginalId,mapContentId} from '../data/special-maps.js';
 // touch guard together. A cancelled touch sequence must not synthesize click.
 class Element {
   constructor(tag='div'){this.tag=tag;this.style={};this.children=[];this.dataset={};this.attrs={};this.hidden=false;this.text='';this.classes=new Set();this.classList={add:v=>this.classes.add(v),remove:v=>this.classes.delete(v),toggle:(v,on)=>on?this.classes.add(v):this.classes.delete(v)};}
+  get firstElementChild(){return this.children[0];}
+  get lastElementChild(){return this.children.at(-1);}
+  prepend(...children){for(const c of children)c.parent=this;this.children.unshift(...children);}
   get ownerDocument(){return globalThis.document;}
   addEventListener(){}
   set textContent(v){this.text=v;this.children=[];}
@@ -34,7 +37,7 @@ function setup(t,layout='layout-mobile',initial=fixture(),extra={}){
   const host=new Element(),commands=new Element(),background=new Element(),message=new Element();let exits=0;
   commands.className='dungeon-commands';
   let state=initial,saveFails=false;
-  const ui=createExplorerPreviewUI({host,commands,background,message,getMaps:()=>state,updateMaps:operation=>{const result=operation(state);if(saveFails)return {ok:false,error:'保存に失敗しました。'};if(result.ok)state=result.state;return result;},playSe(){},onExit(){exits++;},...extra});
+  const ui=createExplorerPreviewUI({host,commands,background,message,getCharacter:()=>({highestDungeonDepthReached:100,reincarnationCount:1}),getMaps:()=>state,updateMaps:operation=>{const result=operation(state);if(saveFails)return {ok:false,error:'保存に失敗しました。'};if(result.ok)state=result.state;return result;},playSe(){},onExit(){exits++;},...extra});
   const all=e=>[e,...e.children.flatMap(all)];
   const find=label=>all(host).find(e=>e.tag==='button'&&!e.disabled&&e.textContent===label);
   function touch(target){let cancelled=false;for(const type of ['touchstart','touchend'])for(const fn of handlers[type]||[])fn({target,preventDefault(){cancelled=true;},stopPropagation(){}});if(!cancelled&&!target.disabled)target.onclick?.();return cancelled;}
@@ -99,7 +102,7 @@ for(const layout of ['layout-mobile','layout-tablet'])test(`${layout}: native ta
   assert.equal(v.touch(v.find(label(2))),false);
   assert.ok(v.find(label(0)),'first tap remains in list');
   assert.equal(v.touch(v.find(label(2))),false);
-  assert.ok(v.host.textContent.includes('挑戦条件：未実装'),'second tap opens detail');
+  assert.ok(v.host.textContent.includes('挑戦条件：追加条件なし'),'second tap opens detail');
 
   v.touch(v.find('戻る（B）'));assert.ok(v.find(label(0)));
   assert.ok(v.find(label(2)).classes.has('is-selected'));
@@ -130,7 +133,7 @@ test('touch guard still protects the game surface and preserves existing command
 });
 test('keyboard/gamepad action routing retains paging and detail return position',t=>{
   const v=setup(t);v.ui.open('maps');for(const action of ['right','down','down','confirm'])v.ui.input(action);
-  assert.ok(v.host.textContent.includes('挑戦条件：未実装'));v.ui.input('cancel');
+  assert.ok(v.host.textContent.includes('挑戦条件：追加条件なし'));v.ui.input('cancel');
   assert.ok(v.find(label(7)).classes.has('is-selected'));
   assert.match(v.host.textContent,/2 \/ 2/);
 });
@@ -356,7 +359,7 @@ for(const [rarity,color] of [['WHITE','#ffffff'],['SILVER','#dce6f2'],['GOLD','#
  const initial=normalizeSpecialMaps({discovererName:'QA',registered:[{rulesetVersion:'special-map-v2',seed:1,level:20,rarity,discovererName:'QA'}]});
  const v=setup(t,'layout-mobile',initial);v.ui.open('maps');
  const name=v.all(v.host).find(e=>e.className?.includes('explorer-map-name'));assert.equal(name.style.color,color);
- v.ui.input('confirm');assert.equal(v.all(v.host).find(e=>e.tag==='h3').style.color,color);
+ v.ui.input('confirm');assert.equal(v.all(v.host).find(e=>e.className==='explorer-detail-name').style.color,color);
  assert.equal(v.state().registered[0].rarity,rarity);
 });
 
@@ -389,3 +392,11 @@ test('report intro failed grant is retriable without playing the acquisition jin
  assert.equal(c.keyItems.owned.stamp_book,undefined);assert.equal(cues,0);assert.match(v.message.textContent,/保存に失敗/);
  v.ui.close();
 });
+
+ test('locked V2 detail rejects touch and keyboard/gamepad confirmation without starting exploration',t=>{
+ const m={rulesetVersion:'special-map-v2',seed:12345,level:100,rarity:'WHITE',discovererName:'QA',themeOverride:'rice'};
+ let starts=0;const v=setup(t,'layout-mobile',normalizeSpecialMaps({discovererName:'QA',registered:[m]}),{getCharacter:()=>({reincarnationCount:0}),startExploration:()=>{starts++;}});
+ v.ui.open('maps');v.ui.input('confirm');const locked=v.all(v.host).find(e=>e.tag==='button'&&e.textContent==='探索する（A）');assert.equal(locked.disabled,true);
+ v.touch(locked);v.ui.input('confirm');v.ui.input('confirm');
+ assert.equal(starts,0);assert.match(v.host.textContent,/1回以上転生済み/);
+ });

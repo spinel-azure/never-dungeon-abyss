@@ -40,7 +40,7 @@ export function rollV2ArmorChest({level,theme,tier},random){
 }
 export function rollV2RedChest(context,random,goldRandom){
  const reward=rollV2ArmorChest(context,random);
- if(goldRandom()<.01)return {opened:false,color:'gold',reward:{kind:'item',itemId:V2_LEVEL_100_ENGRAVINGS[Math.floor(goldRandom()*V2_LEVEL_100_ENGRAVINGS.length)],amount:1}};
+ if(goldRandom()<.03)return {opened:false,color:'gold',reward:{kind:'item',itemId:V2_LEVEL_100_ENGRAVINGS[Math.floor(goldRandom()*V2_LEVEL_100_ENGRAVINGS.length)],amount:1}};
  return {opened:false,reward};
 }
 export const OLD_MAP_WEAPONS=Object.freeze({warrior:'katzbalger',thief:'katzendolch',priest:'katzenkolben',mage:'katzenstab'});

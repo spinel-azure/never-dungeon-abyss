@@ -1,4 +1,5 @@
 import { calculateMaxVital } from "./vital-stats.js";
+import {getLifetimeDungeonDepth} from './dungeon-arrival-history.js';
 import {normalizeTrelirenProgress} from './map-beta.js';
 import { wingGiftUses, wingGiftMaxHp } from "./wing-gift.js";
 import { normalizeSpecialMaps } from "./special-maps.js";
@@ -185,7 +186,6 @@ export function normalizeCharacter(character) {
   const wingGiftBaseMaxHp = calculateMaxVital(growth, "maxHp", equipmentStatBonuses, cardStatBonuses, cards.deckSlots);
   const maxHp = wingGiftMaxHp(wingGiftBaseMaxHp, wingGiftUses(character));
   const maxSp = calculateMaxVital(growth, "maxSp", equipmentStatBonuses, cardStatBonuses, cards.deckSlots);
-  const inferredDepth = character.eventFlags?.transfer_portal_b10f_unlocked ? 10 : 1;
   const normalizedEquipmentBuyback = Array.isArray(character.equipmentBuyback)
     ? structuredClone(character.equipmentBuyback)
       .filter(entry => entry?.instance?.instanceId && isEquipmentBuybackEligible(entry.instance))
@@ -271,10 +271,7 @@ export function normalizeCharacter(character) {
     cardPassiveStepCount: Math.max(0, Math.floor(Number(character.cardPassiveStepCount) || 0)) % 5,
     herbicideTrialUses: Math.max(0, Math.min(5, Math.floor(Number(character.herbicideTrialUses) || 0))),
     cardPassiveStepCount: Math.max(0, Math.floor(Number(character.cardPassiveStepCount) || 0)) % 5,
-    highestDungeonDepthReached: Math.max(
-      inferredDepth,
-      Math.floor(Number(character.highestDungeonDepthReached) || 1)
-    ),
+    highestDungeonDepthReached: getLifetimeDungeonDepth({...character,eventFlags}),
     gold: Math.max(0, Math.floor(Number(character.gold) || 0)),
     experience: normalizeExperience(character.experience, reincarnationCount),
     guildExperiencePool: Math.max(0, Math.floor(Number(character.guildExperiencePool) || 0)),
