@@ -162,7 +162,7 @@ export const SKILLS = Object.freeze({
   }),
   holy_light: Object.freeze({
     id: "holy_light", name: "聖光",
-    description: "必中する聖属性攻撃。\nアンデッドには与えるダメージが1.5倍。",
+    description: "必中する聖属性攻撃。\n転生に応じてINTによる威力が上昇。\nアンデッドには与えるダメージが1.5倍。",
     actionType: "spell", category: "miracle", spCost: 12, target: "enemy", element: "holy",
     spellPower: 22, powerMultiplier: 1, unavoidable: true, speedModifier: -3,
     raceDamageMultipliers: Object.freeze({ undead: 1.5 }), effects: Object.freeze([])
@@ -212,7 +212,7 @@ export const SKILLS = Object.freeze({
   holy_strike: Object.freeze({
     id: "holy_strike",
     name: "聖なる打撃",
-    description: "敵のDEFを無視する聖属性攻撃。\n威力は（STR＋INT）×0.8。",
+    description: "敵のDEFを無視する聖属性攻撃。\n基本威力は（STR＋INT）×0.8。\nレベル・転生に応じて威力が上昇。",
     actionType: "physicalAttack",
     category: "miracle",
     spCost: 4,

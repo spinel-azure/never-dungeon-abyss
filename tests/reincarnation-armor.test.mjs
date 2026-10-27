@@ -234,9 +234,9 @@ test('Gemini repeats share the first-strike command bonus; immune spells still a
   b=run(b,'skill','fireball');assert.equal(b.enemy.hp,100000);assert.equal(b.player.armorBattle.casts,1);
   b.player.armorBattle.casts=3;
   assert.equal(getEffectiveSpCost({actionType:'spell',spCost:0},b.player),0);
-  assert.equal(getEffectiveSpCost({actionType:'spell',spCost:1},b.player),1);
+  assert.equal(getEffectiveSpCost({actionType:'spell',spCost:1},b.player),3); // ceil(1 * 4 * 0.6)
   b.player.equipmentStatBonuses.spCostMultiplier=.5;
-  assert.equal(getEffectiveSpCost({actionType:'spell',spCost:9},b.player),3);
+  assert.equal(getEffectiveSpCost({actionType:'spell',spCost:9},b.player),11); // ceil(9 * 4 * 0.5 * 0.6)
 });
 test('existing barriers absorb before priest armor barrier and non-set battles gain no armor state',()=>{
   let b=battleFor('heavenprayer');delete b.enemy.scriptedActionCycle;b.enemy.attack=50;

@@ -19,6 +19,7 @@ import { ELEMENT_LABELS } from "./item-elements.js";
 import { collectStats } from "./collect-stats.js";
 import { createNormalAttack, createSkillAttack } from "./create-attack.js";
 import { preparePlayerPhysicalAttack } from "./player-physical-attack.js";
+import { preparePlayerSkillDamage } from './player-skill-scaling.js';
 import { calculatePhysicalHitRate, resolvePhysicalAttack } from "./resolve-physical-attack.js";
 import { resolveSpell } from "./resolve-spell.js";
 import { resolveHealing } from "./resolve-healing.js";
@@ -1492,6 +1493,7 @@ function executeAction({ battle, action, actor, actorSide, actorIndex = null, ta
     const maximum = Math.max(minimum, Math.floor(Number(action.hitCountRange[1]) || minimum));
     action = { ...action, hitCount: minimum + Math.floor(Math.max(0, Math.min(0.999999, Number(rng()) || 0)) * (maximum - minimum + 1)) };
   }
+  if (actorSide === 'player') action = preparePlayerSkillDamage(action, actor);
   const result = action.actionType === "spell"
     ? resolveSpell({ attacker: actorStats, defender: targetStats, spell: action, rng })
     : resolvePhysicalAttack({ attacker: actorStats, defender: targetStats,

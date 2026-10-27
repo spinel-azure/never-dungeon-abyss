@@ -1,0 +1,5558 @@
+{
+  "candidate": true,
+  "gentle": true,
+  "earlyOnly": false,
+  "goddessOnly": true,
+  "samples": 30,
+  "conditions": "Driver hooks; candidate cost1/2/3/4, extra power1/1.25/1.5/1.75 plus priest rework; gentle variant uses holy_light INT1.5/2/2.5/3 instead of fixed3. Fresh: no engravings/cards, initial armor; iron/oak weapon at33+. Trained-early: same equipment with base abilities30. Restart: prior-tier gear+3, prior-life base stat cap engravings and C deck retained, learned skills reset to current level. Complete: current-tier gear and base ability caps, C deck. No NPC/device. Full resources each battle; 500 turn limit. Potions30 only restart/complete. Early normal/paid actions, high charge/ultimate only when learned; no low charge buffs or healing miracles. Probes:30 fresh neutral DEF0 battles, no element/race weakness.",
+  "characters": [
+    {
+      "id": "complete-1-197-priest",
+      "kind": "complete",
+      "n": 1,
+      "level": 197,
+      "job": "priest",
+      "hp": 2775,
+      "sp": 1758,
+      "stats": {
+        "str": 50,
+        "int": 50,
+        "agi": 50,
+        "dex": 50,
+        "luc": 50,
+        "def": 60,
+        "hitBonus": 0,
+        "healingMiracleMultiplier": 1.4,
+        "evasionBonus": 0,
+        "criticalBonus": 0,
+        "attackMiracleDamageBonus": 0,
+        "spellResistanceRelief": 0,
+        "speedBonus": 0,
+        "defensePenetration": 0,
+        "statusPowerBonus": 0,
+        "statusResistanceBonus": 0,
+        "ordinaryStatusRateMultiplier": 1,
+        "darkSpellDamageMultiplier": 1,
+        "attackSpellDamageBonus": 0,
+        "passiveInstantDeathRateBonus": 0,
+        "poisonResistance": 0.1,
+        "bleedingResistance": 0,
+        "actionSkipResistance": 0.1,
+        "deadlyPoisonResistance": 0,
+        "temptationResistance": 0,
+        "magicDamageReduction": 0.08,
+        "lightningDamageReduction": 0,
+        "darkDamageReduction": 0,
+        "holyDamageReduction": 0,
+        "earthDamageReduction": 0,
+        "fireDamageReduction": 0,
+        "iceDamageReduction": 0,
+        "nonElementalMagicDamageReduction": 0,
+        "elementalMagicDamageReduction": 0,
+        "fireSpellDamageBonus": 0,
+        "iceSpellDamageBonus": 0,
+        "fireDamageTakenBonus": 0,
+        "iceDamageTakenBonus": 0,
+        "instantDeathResistance": 0,
+        "surpriseResistance": 0
+      },
+      "engravings": {
+        "str": 45,
+        "int": 44,
+        "agi": 46,
+        "dex": 46,
+        "luc": 45
+      },
+      "equipment": {
+        "weaponId": "reinc_dawn_weapon",
+        "rightArmId": "reinc_dawn_weapon",
+        "leftArmId": "reinc_dawn_leftArm",
+        "headId": "reinc_dawn_head",
+        "bodyId": "reinc_dawn_body",
+        "footId": "reinc_dawn_foot",
+        "accessoryId": "grain_choker",
+        "rightArmEnhancement": 3
+      },
+      "deck": [
+        "zodiac_sagittarius",
+        "zodiac_libra",
+        "zodiac_capricorn",
+        "zodiac_taurus",
+        "zodiac_pisces",
+        "zodiac_cancer"
+      ],
+      "skills": [
+        "holy_strike",
+        "healing_prayer",
+        "guardian_prayer",
+        "green_budding",
+        "triage",
+        "green_healing",
+        "greater_healing",
+        "holy_light",
+        "grain_glow",
+        "antidote",
+        "exorcism",
+        "hemostasis",
+        "die_antidote",
+        "die_triage",
+        "maximal_triage",
+        "twilight_flash",
+        "call_goddess_name",
+        "reincarnation"
+      ]
+    },
+    {
+      "id": "complete-2-197-priest",
+      "kind": "complete",
+      "n": 2,
+      "level": 197,
+      "job": "priest",
+      "hp": 4144,
+      "sp": 2650,
+      "stats": {
+        "str": 70,
+        "int": 70,
+        "agi": 70,
+        "dex": 70,
+        "luc": 70,
+        "def": 70,
+        "hitBonus": 0,
+        "healingMiracleMultiplier": 1.5,
+        "evasionBonus": 0,
+        "criticalBonus": 0,
+        "attackMiracleDamageBonus": 0,
+        "spellResistanceRelief": 0,
+        "speedBonus": 0,
+        "defensePenetration": 0,
+        "statusPowerBonus": 0,
+        "statusResistanceBonus": 0,
+        "ordinaryStatusRateMultiplier": 1,
+        "darkSpellDamageMultiplier": 1,
+        "attackSpellDamageBonus": 0,
+        "passiveInstantDeathRateBonus": 0,
+        "poisonResistance": 0.15,
+        "bleedingResistance": 0,
+        "actionSkipResistance": 0.15,
+        "deadlyPoisonResistance": 0,
+        "temptationResistance": 0,
+        "magicDamageReduction": 0.12,
+        "lightningDamageReduction": 0,
+        "darkDamageReduction": 0,
+        "holyDamageReduction": 0,
+        "earthDamageReduction": 0,
+        "fireDamageReduction": 0,
+        "iceDamageReduction": 0,
+        "nonElementalMagicDamageReduction": 0,
+        "elementalMagicDamageReduction": 0,
+        "fireSpellDamageBonus": 0,
+        "iceSpellDamageBonus": 0,
+        "fireDamageTakenBonus": 0,
+        "iceDamageTakenBonus": 0,
+        "instantDeathResistance": 0,
+        "surpriseResistance": 0
+      },
+      "engravings": {
+        "str": 65,
+        "int": 64,
+        "agi": 66,
+        "dex": 66,
+        "luc": 65
+      },
+      "equipment": {
+        "weaponId": "reinc_sacredradiance_weapon",
+        "rightArmId": "reinc_sacredradiance_weapon",
+        "leftArmId": "reinc_sacredradiance_leftArm",
+        "headId": "reinc_sacredradiance_head",
+        "bodyId": "reinc_sacredradiance_body",
+        "footId": "reinc_sacredradiance_foot",
+        "accessoryId": "grain_choker",
+        "rightArmEnhancement": 3
+      },
+      "deck": [
+        "zodiac_sagittarius",
+        "zodiac_libra",
+        "zodiac_capricorn",
+        "zodiac_taurus",
+        "zodiac_pisces",
+        "zodiac_cancer"
+      ],
+      "skills": [
+        "holy_strike",
+        "healing_prayer",
+        "guardian_prayer",
+        "green_budding",
+        "triage",
+        "green_healing",
+        "greater_healing",
+        "holy_light",
+        "grain_glow",
+        "antidote",
+        "exorcism",
+        "hemostasis",
+        "die_antidote",
+        "die_triage",
+        "maximal_triage",
+        "twilight_flash",
+        "call_goddess_name",
+        "reincarnation"
+      ]
+    }
+  ],
+  "probes": [
+    {
+      "id": "complete-1-197-priest",
+      "policy": "normal",
+      "damage": 341.1,
+      "cost": 0,
+      "samples": 30
+    },
+    {
+      "id": "complete-1-197-priest",
+      "policy": "holy_strike",
+      "damage": 341.1,
+      "cost": 8,
+      "samples": 30
+    },
+    {
+      "id": "complete-1-197-priest",
+      "policy": "holy_light",
+      "damage": 294.06666666666666,
+      "cost": 24,
+      "samples": 30
+    },
+    {
+      "id": "complete-2-197-priest",
+      "policy": "normal",
+      "damage": 624.2666666666667,
+      "cost": 0,
+      "samples": 30
+    },
+    {
+      "id": "complete-2-197-priest",
+      "policy": "holy_strike",
+      "damage": 806.9666666666667,
+      "cost": 12,
+      "samples": 30
+    },
+    {
+      "id": "complete-2-197-priest",
+      "policy": "holy_light",
+      "damage": 853.3666666666667,
+      "cost": 36,
+      "samples": 30
+    }
+  ],
+  "rows": [
+    {
+      "id": "complete-1-197-priest",
+      "kind": "complete",
+      "n": 1,
+      "level": 197,
+      "job": "priest",
+      "policy": "normal",
+      "enemy": "rice",
+      "wins": 0,
+      "samples": 30,
+      "all": {
+        "turns": 81.8,
+        "spPaid": 100,
+        "spEnd": 1658,
+        "items": 30
+      },
+      "victories": {
+        "turns": null,
+        "spPaid": null,
+        "spEnd": null,
+        "items": null
+      },
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "defeat",
+          "turns": 87,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 2,
+          "outcome": "defeat",
+          "turns": 75,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 3,
+          "outcome": "defeat",
+          "turns": 77,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 4,
+          "outcome": "defeat",
+          "turns": 91,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 5,
+          "outcome": "defeat",
+          "turns": 79,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 6,
+          "outcome": "defeat",
+          "turns": 83,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 7,
+          "outcome": "defeat",
+          "turns": 76,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 8,
+          "outcome": "defeat",
+          "turns": 82,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 9,
+          "outcome": "defeat",
+          "turns": 79,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 10,
+          "outcome": "defeat",
+          "turns": 85,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 11,
+          "outcome": "defeat",
+          "turns": 85,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 12,
+          "outcome": "defeat",
+          "turns": 83,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 13,
+          "outcome": "defeat",
+          "turns": 92,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 14,
+          "outcome": "defeat",
+          "turns": 75,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 15,
+          "outcome": "defeat",
+          "turns": 73,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 16,
+          "outcome": "defeat",
+          "turns": 72,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 17,
+          "outcome": "defeat",
+          "turns": 84,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 18,
+          "outcome": "defeat",
+          "turns": 96,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 19,
+          "outcome": "defeat",
+          "turns": 77,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 20,
+          "outcome": "defeat",
+          "turns": 79,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 21,
+          "outcome": "defeat",
+          "turns": 74,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 22,
+          "outcome": "defeat",
+          "turns": 88,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 23,
+          "outcome": "defeat",
+          "turns": 81,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 24,
+          "outcome": "defeat",
+          "turns": 83,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 25,
+          "outcome": "defeat",
+          "turns": 81,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 26,
+          "outcome": "defeat",
+          "turns": 93,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 27,
+          "outcome": "defeat",
+          "turns": 78,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 28,
+          "outcome": "defeat",
+          "turns": 82,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 29,
+          "outcome": "defeat",
+          "turns": 77,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 30,
+          "outcome": "defeat",
+          "turns": 87,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 2
+        }
+      ]
+    },
+    {
+      "id": "complete-1-197-priest",
+      "kind": "complete",
+      "n": 1,
+      "level": 197,
+      "job": "priest",
+      "policy": "normal",
+      "enemy": "dusk",
+      "wins": 0,
+      "samples": 30,
+      "all": {
+        "turns": 92.63,
+        "spPaid": 100,
+        "spEnd": 1208,
+        "items": 30
+      },
+      "victories": {
+        "turns": null,
+        "spPaid": null,
+        "spEnd": null,
+        "items": null
+      },
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "defeat",
+          "turns": 90,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 2,
+          "outcome": "defeat",
+          "turns": 94,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 3,
+          "outcome": "defeat",
+          "turns": 98,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 4,
+          "outcome": "defeat",
+          "turns": 95,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 5,
+          "outcome": "defeat",
+          "turns": 91,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 6,
+          "outcome": "defeat",
+          "turns": 96,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 7,
+          "outcome": "defeat",
+          "turns": 95,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 8,
+          "outcome": "defeat",
+          "turns": 90,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 9,
+          "outcome": "defeat",
+          "turns": 90,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 10,
+          "outcome": "defeat",
+          "turns": 92,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 11,
+          "outcome": "defeat",
+          "turns": 91,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 12,
+          "outcome": "defeat",
+          "turns": 96,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 13,
+          "outcome": "defeat",
+          "turns": 83,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 14,
+          "outcome": "defeat",
+          "turns": 86,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 15,
+          "outcome": "defeat",
+          "turns": 91,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 16,
+          "outcome": "defeat",
+          "turns": 90,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 17,
+          "outcome": "defeat",
+          "turns": 96,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 18,
+          "outcome": "defeat",
+          "turns": 95,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 19,
+          "outcome": "defeat",
+          "turns": 94,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 20,
+          "outcome": "defeat",
+          "turns": 88,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 21,
+          "outcome": "defeat",
+          "turns": 94,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 22,
+          "outcome": "defeat",
+          "turns": 96,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 23,
+          "outcome": "defeat",
+          "turns": 96,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 24,
+          "outcome": "defeat",
+          "turns": 90,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 25,
+          "outcome": "defeat",
+          "turns": 94,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 26,
+          "outcome": "defeat",
+          "turns": 96,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 27,
+          "outcome": "defeat",
+          "turns": 95,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 28,
+          "outcome": "defeat",
+          "turns": 90,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 29,
+          "outcome": "defeat",
+          "turns": 95,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        },
+        {
+          "seed": 30,
+          "outcome": "defeat",
+          "turns": 92,
+          "spPaid": 100,
+          "spEnd": 1208,
+          "items": 30,
+          "skillCommands": 2
+        }
+      ]
+    },
+    {
+      "id": "complete-1-197-priest",
+      "kind": "complete",
+      "n": 1,
+      "level": 197,
+      "job": "priest",
+      "policy": "normal",
+      "enemy": "tender",
+      "wins": 0,
+      "samples": 30,
+      "all": {
+        "turns": 159.4,
+        "spPaid": 100,
+        "spEnd": 1658,
+        "items": 30
+      },
+      "victories": {
+        "turns": null,
+        "spPaid": null,
+        "spEnd": null,
+        "items": null
+      },
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "defeat",
+          "turns": 171,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 2,
+          "outcome": "defeat",
+          "turns": 172,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 3,
+          "outcome": "defeat",
+          "turns": 155,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 4,
+          "outcome": "defeat",
+          "turns": 149,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 5,
+          "outcome": "defeat",
+          "turns": 152,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 6,
+          "outcome": "defeat",
+          "turns": 169,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 7,
+          "outcome": "defeat",
+          "turns": 154,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 8,
+          "outcome": "defeat",
+          "turns": 152,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 9,
+          "outcome": "defeat",
+          "turns": 150,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 10,
+          "outcome": "defeat",
+          "turns": 165,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 11,
+          "outcome": "defeat",
+          "turns": 162,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 12,
+          "outcome": "defeat",
+          "turns": 170,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 13,
+          "outcome": "defeat",
+          "turns": 145,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 4
+        },
+        {
+          "seed": 14,
+          "outcome": "defeat",
+          "turns": 161,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 15,
+          "outcome": "defeat",
+          "turns": 161,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 16,
+          "outcome": "defeat",
+          "turns": 167,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 17,
+          "outcome": "defeat",
+          "turns": 162,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 18,
+          "outcome": "defeat",
+          "turns": 156,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 19,
+          "outcome": "defeat",
+          "turns": 147,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 20,
+          "outcome": "defeat",
+          "turns": 164,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 21,
+          "outcome": "defeat",
+          "turns": 156,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 22,
+          "outcome": "defeat",
+          "turns": 171,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 23,
+          "outcome": "defeat",
+          "turns": 158,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 24,
+          "outcome": "defeat",
+          "turns": 164,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 25,
+          "outcome": "defeat",
+          "turns": 152,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 26,
+          "outcome": "defeat",
+          "turns": 153,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 27,
+          "outcome": "defeat",
+          "turns": 156,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 28,
+          "outcome": "defeat",
+          "turns": 167,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 29,
+          "outcome": "defeat",
+          "turns": 158,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        },
+        {
+          "seed": 30,
+          "outcome": "defeat",
+          "turns": 163,
+          "spPaid": 100,
+          "spEnd": 1658,
+          "items": 30,
+          "skillCommands": 5
+        }
+      ]
+    },
+    {
+      "id": "complete-1-197-priest",
+      "kind": "complete",
+      "n": 1,
+      "level": 197,
+      "job": "priest",
+      "policy": "holy_strike",
+      "enemy": "rice",
+      "wins": 0,
+      "samples": 30,
+      "all": {
+        "turns": 83.17,
+        "spPaid": 438.93,
+        "spEnd": 1319.07,
+        "items": 30
+      },
+      "victories": {
+        "turns": null,
+        "spPaid": null,
+        "spEnd": null,
+        "items": null
+      },
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "defeat",
+          "turns": 90,
+          "spPaid": 460,
+          "spEnd": 1298,
+          "items": 30,
+          "skillCommands": 51
+        },
+        {
+          "seed": 2,
+          "outcome": "defeat",
+          "turns": 87,
+          "spPaid": 460,
+          "spEnd": 1298,
+          "items": 30,
+          "skillCommands": 50
+        },
+        {
+          "seed": 3,
+          "outcome": "defeat",
+          "turns": 78,
+          "spPaid": 396,
+          "spEnd": 1362,
+          "items": 30,
+          "skillCommands": 43
+        },
+        {
+          "seed": 4,
+          "outcome": "defeat",
+          "turns": 95,
+          "spPaid": 484,
+          "spEnd": 1274,
+          "items": 30,
+          "skillCommands": 55
+        },
+        {
+          "seed": 5,
+          "outcome": "defeat",
+          "turns": 83,
+          "spPaid": 436,
+          "spEnd": 1322,
+          "items": 30,
+          "skillCommands": 48
+        },
+        {
+          "seed": 6,
+          "outcome": "defeat",
+          "turns": 89,
+          "spPaid": 468,
+          "spEnd": 1290,
+          "items": 30,
+          "skillCommands": 53
+        },
+        {
+          "seed": 7,
+          "outcome": "defeat",
+          "turns": 80,
+          "spPaid": 420,
+          "spEnd": 1338,
+          "items": 30,
+          "skillCommands": 46
+        },
+        {
+          "seed": 8,
+          "outcome": "defeat",
+          "turns": 81,
+          "spPaid": 428,
+          "spEnd": 1330,
+          "items": 30,
+          "skillCommands": 47
+        },
+        {
+          "seed": 9,
+          "outcome": "defeat",
+          "turns": 70,
+          "spPaid": 372,
+          "spEnd": 1386,
+          "items": 30,
+          "skillCommands": 38
+        },
+        {
+          "seed": 10,
+          "outcome": "defeat",
+          "turns": 85,
+          "spPaid": 452,
+          "spEnd": 1306,
+          "items": 30,
+          "skillCommands": 50
+        },
+        {
+          "seed": 11,
+          "outcome": "defeat",
+          "turns": 84,
+          "spPaid": 452,
+          "spEnd": 1306,
+          "items": 30,
+          "skillCommands": 50
+        },
+        {
+          "seed": 12,
+          "outcome": "defeat",
+          "turns": 85,
+          "spPaid": 444,
+          "spEnd": 1314,
+          "items": 30,
+          "skillCommands": 49
+        },
+        {
+          "seed": 13,
+          "outcome": "defeat",
+          "turns": 90,
+          "spPaid": 476,
+          "spEnd": 1282,
+          "items": 30,
+          "skillCommands": 53
+        },
+        {
+          "seed": 14,
+          "outcome": "defeat",
+          "turns": 79,
+          "spPaid": 420,
+          "spEnd": 1338,
+          "items": 30,
+          "skillCommands": 46
+        },
+        {
+          "seed": 15,
+          "outcome": "defeat",
+          "turns": 79,
+          "spPaid": 420,
+          "spEnd": 1338,
+          "items": 30,
+          "skillCommands": 45
+        },
+        {
+          "seed": 16,
+          "outcome": "defeat",
+          "turns": 78,
+          "spPaid": 412,
+          "spEnd": 1346,
+          "items": 30,
+          "skillCommands": 44
+        },
+        {
+          "seed": 17,
+          "outcome": "defeat",
+          "turns": 89,
+          "spPaid": 460,
+          "spEnd": 1298,
+          "items": 30,
+          "skillCommands": 51
+        },
+        {
+          "seed": 18,
+          "outcome": "defeat",
+          "turns": 86,
+          "spPaid": 452,
+          "spEnd": 1306,
+          "items": 30,
+          "skillCommands": 51
+        },
+        {
+          "seed": 19,
+          "outcome": "defeat",
+          "turns": 83,
+          "spPaid": 444,
+          "spEnd": 1314,
+          "items": 30,
+          "skillCommands": 49
+        },
+        {
+          "seed": 20,
+          "outcome": "defeat",
+          "turns": 75,
+          "spPaid": 396,
+          "spEnd": 1362,
+          "items": 30,
+          "skillCommands": 42
+        },
+        {
+          "seed": 21,
+          "outcome": "defeat",
+          "turns": 86,
+          "spPaid": 444,
+          "spEnd": 1314,
+          "items": 30,
+          "skillCommands": 49
+        },
+        {
+          "seed": 22,
+          "outcome": "defeat",
+          "turns": 81,
+          "spPaid": 436,
+          "spEnd": 1322,
+          "items": 30,
+          "skillCommands": 47
+        },
+        {
+          "seed": 23,
+          "outcome": "defeat",
+          "turns": 79,
+          "spPaid": 444,
+          "spEnd": 1314,
+          "items": 30,
+          "skillCommands": 48
+        },
+        {
+          "seed": 24,
+          "outcome": "defeat",
+          "turns": 82,
+          "spPaid": 444,
+          "spEnd": 1314,
+          "items": 30,
+          "skillCommands": 48
+        },
+        {
+          "seed": 25,
+          "outcome": "defeat",
+          "turns": 78,
+          "spPaid": 412,
+          "spEnd": 1346,
+          "items": 30,
+          "skillCommands": 44
+        },
+        {
+          "seed": 26,
+          "outcome": "defeat",
+          "turns": 90,
+          "spPaid": 476,
+          "spEnd": 1282,
+          "items": 30,
+          "skillCommands": 53
+        },
+        {
+          "seed": 27,
+          "outcome": "defeat",
+          "turns": 76,
+          "spPaid": 404,
+          "spEnd": 1354,
+          "items": 30,
+          "skillCommands": 43
+        },
+        {
+          "seed": 28,
+          "outcome": "defeat",
+          "turns": 86,
+          "spPaid": 460,
+          "spEnd": 1298,
+          "items": 30,
+          "skillCommands": 51
+        },
+        {
+          "seed": 29,
+          "outcome": "defeat",
+          "turns": 87,
+          "spPaid": 452,
+          "spEnd": 1306,
+          "items": 30,
+          "skillCommands": 51
+        },
+        {
+          "seed": 30,
+          "outcome": "defeat",
+          "turns": 84,
+          "spPaid": 444,
+          "spEnd": 1314,
+          "items": 30,
+          "skillCommands": 49
+        }
+      ]
+    },
+    {
+      "id": "complete-1-197-priest",
+      "kind": "complete",
+      "n": 1,
+      "level": 197,
+      "job": "priest",
+      "policy": "holy_strike",
+      "enemy": "dusk",
+      "wins": 0,
+      "samples": 30,
+      "all": {
+        "turns": 92.77,
+        "spPaid": 377.87,
+        "spEnd": 930.13,
+        "items": 30
+      },
+      "victories": {
+        "turns": null,
+        "spPaid": null,
+        "spEnd": null,
+        "items": null
+      },
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "defeat",
+          "turns": 100,
+          "spPaid": 420,
+          "spEnd": 888,
+          "items": 30,
+          "skillCommands": 45
+        },
+        {
+          "seed": 2,
+          "outcome": "defeat",
+          "turns": 91,
+          "spPaid": 372,
+          "spEnd": 936,
+          "items": 30,
+          "skillCommands": 39
+        },
+        {
+          "seed": 3,
+          "outcome": "defeat",
+          "turns": 96,
+          "spPaid": 396,
+          "spEnd": 912,
+          "items": 30,
+          "skillCommands": 42
+        },
+        {
+          "seed": 4,
+          "outcome": "defeat",
+          "turns": 95,
+          "spPaid": 388,
+          "spEnd": 920,
+          "items": 30,
+          "skillCommands": 42
+        },
+        {
+          "seed": 5,
+          "outcome": "defeat",
+          "turns": 95,
+          "spPaid": 388,
+          "spEnd": 920,
+          "items": 30,
+          "skillCommands": 42
+        },
+        {
+          "seed": 6,
+          "outcome": "defeat",
+          "turns": 87,
+          "spPaid": 348,
+          "spEnd": 960,
+          "items": 30,
+          "skillCommands": 36
+        },
+        {
+          "seed": 7,
+          "outcome": "defeat",
+          "turns": 87,
+          "spPaid": 348,
+          "spEnd": 960,
+          "items": 30,
+          "skillCommands": 36
+        },
+        {
+          "seed": 8,
+          "outcome": "defeat",
+          "turns": 103,
+          "spPaid": 436,
+          "spEnd": 872,
+          "items": 30,
+          "skillCommands": 48
+        },
+        {
+          "seed": 9,
+          "outcome": "defeat",
+          "turns": 92,
+          "spPaid": 372,
+          "spEnd": 936,
+          "items": 30,
+          "skillCommands": 39
+        },
+        {
+          "seed": 10,
+          "outcome": "defeat",
+          "turns": 90,
+          "spPaid": 364,
+          "spEnd": 944,
+          "items": 30,
+          "skillCommands": 38
+        },
+        {
+          "seed": 11,
+          "outcome": "defeat",
+          "turns": 96,
+          "spPaid": 396,
+          "spEnd": 912,
+          "items": 30,
+          "skillCommands": 42
+        },
+        {
+          "seed": 12,
+          "outcome": "defeat",
+          "turns": 89,
+          "spPaid": 356,
+          "spEnd": 952,
+          "items": 30,
+          "skillCommands": 37
+        },
+        {
+          "seed": 13,
+          "outcome": "defeat",
+          "turns": 91,
+          "spPaid": 364,
+          "spEnd": 944,
+          "items": 30,
+          "skillCommands": 39
+        },
+        {
+          "seed": 14,
+          "outcome": "defeat",
+          "turns": 92,
+          "spPaid": 372,
+          "spEnd": 936,
+          "items": 30,
+          "skillCommands": 39
+        },
+        {
+          "seed": 15,
+          "outcome": "defeat",
+          "turns": 90,
+          "spPaid": 364,
+          "spEnd": 944,
+          "items": 30,
+          "skillCommands": 38
+        },
+        {
+          "seed": 16,
+          "outcome": "defeat",
+          "turns": 90,
+          "spPaid": 364,
+          "spEnd": 944,
+          "items": 30,
+          "skillCommands": 38
+        },
+        {
+          "seed": 17,
+          "outcome": "defeat",
+          "turns": 90,
+          "spPaid": 364,
+          "spEnd": 944,
+          "items": 30,
+          "skillCommands": 38
+        },
+        {
+          "seed": 18,
+          "outcome": "defeat",
+          "turns": 90,
+          "spPaid": 364,
+          "spEnd": 944,
+          "items": 30,
+          "skillCommands": 38
+        },
+        {
+          "seed": 19,
+          "outcome": "defeat",
+          "turns": 91,
+          "spPaid": 372,
+          "spEnd": 936,
+          "items": 30,
+          "skillCommands": 39
+        },
+        {
+          "seed": 20,
+          "outcome": "defeat",
+          "turns": 88,
+          "spPaid": 356,
+          "spEnd": 952,
+          "items": 30,
+          "skillCommands": 36
+        },
+        {
+          "seed": 21,
+          "outcome": "defeat",
+          "turns": 95,
+          "spPaid": 388,
+          "spEnd": 920,
+          "items": 30,
+          "skillCommands": 42
+        },
+        {
+          "seed": 22,
+          "outcome": "defeat",
+          "turns": 95,
+          "spPaid": 388,
+          "spEnd": 920,
+          "items": 30,
+          "skillCommands": 42
+        },
+        {
+          "seed": 23,
+          "outcome": "defeat",
+          "turns": 91,
+          "spPaid": 364,
+          "spEnd": 944,
+          "items": 30,
+          "skillCommands": 39
+        },
+        {
+          "seed": 24,
+          "outcome": "defeat",
+          "turns": 90,
+          "spPaid": 364,
+          "spEnd": 944,
+          "items": 30,
+          "skillCommands": 38
+        },
+        {
+          "seed": 25,
+          "outcome": "defeat",
+          "turns": 100,
+          "spPaid": 420,
+          "spEnd": 888,
+          "items": 30,
+          "skillCommands": 45
+        },
+        {
+          "seed": 26,
+          "outcome": "defeat",
+          "turns": 94,
+          "spPaid": 380,
+          "spEnd": 928,
+          "items": 30,
+          "skillCommands": 41
+        },
+        {
+          "seed": 27,
+          "outcome": "defeat",
+          "turns": 98,
+          "spPaid": 404,
+          "spEnd": 904,
+          "items": 30,
+          "skillCommands": 44
+        },
+        {
+          "seed": 28,
+          "outcome": "defeat",
+          "turns": 95,
+          "spPaid": 388,
+          "spEnd": 920,
+          "items": 30,
+          "skillCommands": 42
+        },
+        {
+          "seed": 29,
+          "outcome": "defeat",
+          "turns": 94,
+          "spPaid": 380,
+          "spEnd": 928,
+          "items": 30,
+          "skillCommands": 41
+        },
+        {
+          "seed": 30,
+          "outcome": "defeat",
+          "turns": 88,
+          "spPaid": 356,
+          "spEnd": 952,
+          "items": 30,
+          "skillCommands": 36
+        }
+      ]
+    },
+    {
+      "id": "complete-1-197-priest",
+      "kind": "complete",
+      "n": 1,
+      "level": 197,
+      "job": "priest",
+      "policy": "holy_strike",
+      "enemy": "tender",
+      "wins": 0,
+      "samples": 30,
+      "all": {
+        "turns": 161.57,
+        "spPaid": 879.47,
+        "spEnd": 878.53,
+        "items": 30
+      },
+      "victories": {
+        "turns": null,
+        "spPaid": null,
+        "spEnd": null,
+        "items": null
+      },
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "defeat",
+          "turns": 167,
+          "spPaid": 892,
+          "spEnd": 866,
+          "items": 30,
+          "skillCommands": 112
+        },
+        {
+          "seed": 2,
+          "outcome": "defeat",
+          "turns": 158,
+          "spPaid": 860,
+          "spEnd": 898,
+          "items": 30,
+          "skillCommands": 107
+        },
+        {
+          "seed": 3,
+          "outcome": "defeat",
+          "turns": 147,
+          "spPaid": 812,
+          "spEnd": 946,
+          "items": 30,
+          "skillCommands": 101
+        },
+        {
+          "seed": 4,
+          "outcome": "defeat",
+          "turns": 160,
+          "spPaid": 884,
+          "spEnd": 874,
+          "items": 30,
+          "skillCommands": 110
+        },
+        {
+          "seed": 5,
+          "outcome": "defeat",
+          "turns": 162,
+          "spPaid": 892,
+          "spEnd": 866,
+          "items": 30,
+          "skillCommands": 113
+        },
+        {
+          "seed": 6,
+          "outcome": "defeat",
+          "turns": 173,
+          "spPaid": 908,
+          "spEnd": 850,
+          "items": 30,
+          "skillCommands": 115
+        },
+        {
+          "seed": 7,
+          "outcome": "defeat",
+          "turns": 167,
+          "spPaid": 884,
+          "spEnd": 874,
+          "items": 30,
+          "skillCommands": 112
+        },
+        {
+          "seed": 8,
+          "outcome": "defeat",
+          "turns": 167,
+          "spPaid": 892,
+          "spEnd": 866,
+          "items": 30,
+          "skillCommands": 112
+        },
+        {
+          "seed": 9,
+          "outcome": "defeat",
+          "turns": 159,
+          "spPaid": 868,
+          "spEnd": 890,
+          "items": 30,
+          "skillCommands": 109
+        },
+        {
+          "seed": 10,
+          "outcome": "defeat",
+          "turns": 162,
+          "spPaid": 884,
+          "spEnd": 874,
+          "items": 30,
+          "skillCommands": 110
+        },
+        {
+          "seed": 11,
+          "outcome": "defeat",
+          "turns": 154,
+          "spPaid": 860,
+          "spEnd": 898,
+          "items": 30,
+          "skillCommands": 108
+        },
+        {
+          "seed": 12,
+          "outcome": "defeat",
+          "turns": 165,
+          "spPaid": 884,
+          "spEnd": 874,
+          "items": 30,
+          "skillCommands": 111
+        },
+        {
+          "seed": 13,
+          "outcome": "defeat",
+          "turns": 150,
+          "spPaid": 852,
+          "spEnd": 906,
+          "items": 30,
+          "skillCommands": 106
+        },
+        {
+          "seed": 14,
+          "outcome": "defeat",
+          "turns": 164,
+          "spPaid": 900,
+          "spEnd": 858,
+          "items": 30,
+          "skillCommands": 113
+        },
+        {
+          "seed": 15,
+          "outcome": "defeat",
+          "turns": 172,
+          "spPaid": 940,
+          "spEnd": 818,
+          "items": 30,
+          "skillCommands": 118
+        },
+        {
+          "seed": 16,
+          "outcome": "defeat",
+          "turns": 163,
+          "spPaid": 892,
+          "spEnd": 866,
+          "items": 30,
+          "skillCommands": 113
+        },
+        {
+          "seed": 17,
+          "outcome": "defeat",
+          "turns": 163,
+          "spPaid": 884,
+          "spEnd": 874,
+          "items": 30,
+          "skillCommands": 111
+        },
+        {
+          "seed": 18,
+          "outcome": "defeat",
+          "turns": 159,
+          "spPaid": 860,
+          "spEnd": 898,
+          "items": 30,
+          "skillCommands": 108
+        },
+        {
+          "seed": 19,
+          "outcome": "defeat",
+          "turns": 163,
+          "spPaid": 900,
+          "spEnd": 858,
+          "items": 30,
+          "skillCommands": 112
+        },
+        {
+          "seed": 20,
+          "outcome": "defeat",
+          "turns": 169,
+          "spPaid": 916,
+          "spEnd": 842,
+          "items": 30,
+          "skillCommands": 116
+        },
+        {
+          "seed": 21,
+          "outcome": "defeat",
+          "turns": 162,
+          "spPaid": 892,
+          "spEnd": 866,
+          "items": 30,
+          "skillCommands": 112
+        },
+        {
+          "seed": 22,
+          "outcome": "defeat",
+          "turns": 173,
+          "spPaid": 932,
+          "spEnd": 826,
+          "items": 30,
+          "skillCommands": 117
+        },
+        {
+          "seed": 23,
+          "outcome": "defeat",
+          "turns": 165,
+          "spPaid": 900,
+          "spEnd": 858,
+          "items": 30,
+          "skillCommands": 114
+        },
+        {
+          "seed": 24,
+          "outcome": "defeat",
+          "turns": 167,
+          "spPaid": 892,
+          "spEnd": 866,
+          "items": 30,
+          "skillCommands": 112
+        },
+        {
+          "seed": 25,
+          "outcome": "defeat",
+          "turns": 156,
+          "spPaid": 836,
+          "spEnd": 922,
+          "items": 30,
+          "skillCommands": 105
+        },
+        {
+          "seed": 26,
+          "outcome": "defeat",
+          "turns": 151,
+          "spPaid": 820,
+          "spEnd": 938,
+          "items": 30,
+          "skillCommands": 102
+        },
+        {
+          "seed": 27,
+          "outcome": "defeat",
+          "turns": 159,
+          "spPaid": 876,
+          "spEnd": 882,
+          "items": 30,
+          "skillCommands": 110
+        },
+        {
+          "seed": 28,
+          "outcome": "defeat",
+          "turns": 153,
+          "spPaid": 860,
+          "spEnd": 898,
+          "items": 30,
+          "skillCommands": 108
+        },
+        {
+          "seed": 29,
+          "outcome": "defeat",
+          "turns": 153,
+          "spPaid": 836,
+          "spEnd": 922,
+          "items": 30,
+          "skillCommands": 105
+        },
+        {
+          "seed": 30,
+          "outcome": "defeat",
+          "turns": 164,
+          "spPaid": 876,
+          "spEnd": 882,
+          "items": 30,
+          "skillCommands": 110
+        }
+      ]
+    },
+    {
+      "id": "complete-1-197-priest",
+      "kind": "complete",
+      "n": 1,
+      "level": 197,
+      "job": "priest",
+      "policy": "holy_light",
+      "enemy": "rice",
+      "wins": 0,
+      "samples": 30,
+      "all": {
+        "turns": 79.37,
+        "spPaid": 1048.8,
+        "spEnd": 709.2,
+        "items": 30
+      },
+      "victories": {
+        "turns": null,
+        "spPaid": null,
+        "spEnd": null,
+        "items": null
+      },
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "defeat",
+          "turns": 72,
+          "spPaid": 964,
+          "spEnd": 794,
+          "items": 30,
+          "skillCommands": 40
+        },
+        {
+          "seed": 2,
+          "outcome": "defeat",
+          "turns": 75,
+          "spPaid": 964,
+          "spEnd": 794,
+          "items": 30,
+          "skillCommands": 41
+        },
+        {
+          "seed": 3,
+          "outcome": "defeat",
+          "turns": 69,
+          "spPaid": 916,
+          "spEnd": 842,
+          "items": 30,
+          "skillCommands": 38
+        },
+        {
+          "seed": 4,
+          "outcome": "defeat",
+          "turns": 74,
+          "spPaid": 916,
+          "spEnd": 842,
+          "items": 30,
+          "skillCommands": 40
+        },
+        {
+          "seed": 5,
+          "outcome": "defeat",
+          "turns": 86,
+          "spPaid": 1132,
+          "spEnd": 626,
+          "items": 30,
+          "skillCommands": 49
+        },
+        {
+          "seed": 6,
+          "outcome": "defeat",
+          "turns": 82,
+          "spPaid": 1132,
+          "spEnd": 626,
+          "items": 30,
+          "skillCommands": 48
+        },
+        {
+          "seed": 7,
+          "outcome": "defeat",
+          "turns": 80,
+          "spPaid": 1036,
+          "spEnd": 722,
+          "items": 30,
+          "skillCommands": 44
+        },
+        {
+          "seed": 8,
+          "outcome": "defeat",
+          "turns": 76,
+          "spPaid": 1012,
+          "spEnd": 746,
+          "items": 30,
+          "skillCommands": 44
+        },
+        {
+          "seed": 9,
+          "outcome": "defeat",
+          "turns": 73,
+          "spPaid": 964,
+          "spEnd": 794,
+          "items": 30,
+          "skillCommands": 41
+        },
+        {
+          "seed": 10,
+          "outcome": "defeat",
+          "turns": 83,
+          "spPaid": 1132,
+          "spEnd": 626,
+          "items": 30,
+          "skillCommands": 49
+        },
+        {
+          "seed": 11,
+          "outcome": "defeat",
+          "turns": 81,
+          "spPaid": 1060,
+          "spEnd": 698,
+          "items": 30,
+          "skillCommands": 46
+        },
+        {
+          "seed": 12,
+          "outcome": "defeat",
+          "turns": 75,
+          "spPaid": 1012,
+          "spEnd": 746,
+          "items": 30,
+          "skillCommands": 43
+        },
+        {
+          "seed": 13,
+          "outcome": "defeat",
+          "turns": 77,
+          "spPaid": 1012,
+          "spEnd": 746,
+          "items": 30,
+          "skillCommands": 43
+        },
+        {
+          "seed": 14,
+          "outcome": "defeat",
+          "turns": 74,
+          "spPaid": 988,
+          "spEnd": 770,
+          "items": 30,
+          "skillCommands": 42
+        },
+        {
+          "seed": 15,
+          "outcome": "defeat",
+          "turns": 91,
+          "spPaid": 1204,
+          "spEnd": 554,
+          "items": 30,
+          "skillCommands": 53
+        },
+        {
+          "seed": 16,
+          "outcome": "defeat",
+          "turns": 73,
+          "spPaid": 964,
+          "spEnd": 794,
+          "items": 30,
+          "skillCommands": 41
+        },
+        {
+          "seed": 17,
+          "outcome": "defeat",
+          "turns": 75,
+          "spPaid": 964,
+          "spEnd": 794,
+          "items": 30,
+          "skillCommands": 41
+        },
+        {
+          "seed": 18,
+          "outcome": "defeat",
+          "turns": 83,
+          "spPaid": 1036,
+          "spEnd": 722,
+          "items": 30,
+          "skillCommands": 45
+        },
+        {
+          "seed": 19,
+          "outcome": "defeat",
+          "turns": 80,
+          "spPaid": 1108,
+          "spEnd": 650,
+          "items": 30,
+          "skillCommands": 48
+        },
+        {
+          "seed": 20,
+          "outcome": "defeat",
+          "turns": 85,
+          "spPaid": 1156,
+          "spEnd": 602,
+          "items": 30,
+          "skillCommands": 50
+        },
+        {
+          "seed": 21,
+          "outcome": "defeat",
+          "turns": 85,
+          "spPaid": 1108,
+          "spEnd": 650,
+          "items": 30,
+          "skillCommands": 48
+        },
+        {
+          "seed": 22,
+          "outcome": "defeat",
+          "turns": 74,
+          "spPaid": 916,
+          "spEnd": 842,
+          "items": 30,
+          "skillCommands": 39
+        },
+        {
+          "seed": 23,
+          "outcome": "defeat",
+          "turns": 79,
+          "spPaid": 1036,
+          "spEnd": 722,
+          "items": 30,
+          "skillCommands": 44
+        },
+        {
+          "seed": 24,
+          "outcome": "defeat",
+          "turns": 78,
+          "spPaid": 1036,
+          "spEnd": 722,
+          "items": 30,
+          "skillCommands": 45
+        },
+        {
+          "seed": 25,
+          "outcome": "defeat",
+          "turns": 89,
+          "spPaid": 1204,
+          "spEnd": 554,
+          "items": 30,
+          "skillCommands": 52
+        },
+        {
+          "seed": 26,
+          "outcome": "defeat",
+          "turns": 92,
+          "spPaid": 1228,
+          "spEnd": 530,
+          "items": 30,
+          "skillCommands": 54
+        },
+        {
+          "seed": 27,
+          "outcome": "defeat",
+          "turns": 70,
+          "spPaid": 916,
+          "spEnd": 842,
+          "items": 30,
+          "skillCommands": 38
+        },
+        {
+          "seed": 28,
+          "outcome": "defeat",
+          "turns": 82,
+          "spPaid": 1060,
+          "spEnd": 698,
+          "items": 30,
+          "skillCommands": 46
+        },
+        {
+          "seed": 29,
+          "outcome": "defeat",
+          "turns": 87,
+          "spPaid": 1204,
+          "spEnd": 554,
+          "items": 30,
+          "skillCommands": 52
+        },
+        {
+          "seed": 30,
+          "outcome": "defeat",
+          "turns": 81,
+          "spPaid": 1084,
+          "spEnd": 674,
+          "items": 30,
+          "skillCommands": 46
+        }
+      ]
+    },
+    {
+      "id": "complete-1-197-priest",
+      "kind": "complete",
+      "n": 1,
+      "level": 197,
+      "job": "priest",
+      "policy": "holy_light",
+      "enemy": "dusk",
+      "wins": 0,
+      "samples": 30,
+      "all": {
+        "turns": 92.77,
+        "spPaid": 934.4,
+        "spEnd": 373.6,
+        "items": 30
+      },
+      "victories": {
+        "turns": null,
+        "spPaid": null,
+        "spEnd": null,
+        "items": null
+      },
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "defeat",
+          "turns": 88,
+          "spPaid": 868,
+          "spEnd": 440,
+          "items": 30,
+          "skillCommands": 36
+        },
+        {
+          "seed": 2,
+          "outcome": "defeat",
+          "turns": 94,
+          "spPaid": 940,
+          "spEnd": 368,
+          "items": 30,
+          "skillCommands": 41
+        },
+        {
+          "seed": 3,
+          "outcome": "defeat",
+          "turns": 91,
+          "spPaid": 892,
+          "spEnd": 416,
+          "items": 30,
+          "skillCommands": 39
+        },
+        {
+          "seed": 4,
+          "outcome": "defeat",
+          "turns": 96,
+          "spPaid": 988,
+          "spEnd": 320,
+          "items": 30,
+          "skillCommands": 42
+        },
+        {
+          "seed": 5,
+          "outcome": "defeat",
+          "turns": 99,
+          "spPaid": 1036,
+          "spEnd": 272,
+          "items": 30,
+          "skillCommands": 45
+        },
+        {
+          "seed": 6,
+          "outcome": "defeat",
+          "turns": 97,
+          "spPaid": 988,
+          "spEnd": 320,
+          "items": 30,
+          "skillCommands": 43
+        },
+        {
+          "seed": 7,
+          "outcome": "defeat",
+          "turns": 87,
+          "spPaid": 844,
+          "spEnd": 464,
+          "items": 30,
+          "skillCommands": 36
+        },
+        {
+          "seed": 8,
+          "outcome": "defeat",
+          "turns": 93,
+          "spPaid": 916,
+          "spEnd": 392,
+          "items": 30,
+          "skillCommands": 40
+        },
+        {
+          "seed": 9,
+          "outcome": "defeat",
+          "turns": 99,
+          "spPaid": 1036,
+          "spEnd": 272,
+          "items": 30,
+          "skillCommands": 45
+        },
+        {
+          "seed": 10,
+          "outcome": "defeat",
+          "turns": 88,
+          "spPaid": 868,
+          "spEnd": 440,
+          "items": 30,
+          "skillCommands": 36
+        },
+        {
+          "seed": 11,
+          "outcome": "defeat",
+          "turns": 96,
+          "spPaid": 988,
+          "spEnd": 320,
+          "items": 30,
+          "skillCommands": 42
+        },
+        {
+          "seed": 12,
+          "outcome": "defeat",
+          "turns": 90,
+          "spPaid": 892,
+          "spEnd": 416,
+          "items": 30,
+          "skillCommands": 38
+        },
+        {
+          "seed": 13,
+          "outcome": "defeat",
+          "turns": 96,
+          "spPaid": 988,
+          "spEnd": 320,
+          "items": 30,
+          "skillCommands": 42
+        },
+        {
+          "seed": 14,
+          "outcome": "defeat",
+          "turns": 96,
+          "spPaid": 988,
+          "spEnd": 320,
+          "items": 30,
+          "skillCommands": 42
+        },
+        {
+          "seed": 15,
+          "outcome": "defeat",
+          "turns": 90,
+          "spPaid": 892,
+          "spEnd": 416,
+          "items": 30,
+          "skillCommands": 38
+        },
+        {
+          "seed": 16,
+          "outcome": "defeat",
+          "turns": 100,
+          "spPaid": 1060,
+          "spEnd": 248,
+          "items": 30,
+          "skillCommands": 45
+        },
+        {
+          "seed": 17,
+          "outcome": "defeat",
+          "turns": 92,
+          "spPaid": 940,
+          "spEnd": 368,
+          "items": 30,
+          "skillCommands": 39
+        },
+        {
+          "seed": 18,
+          "outcome": "defeat",
+          "turns": 91,
+          "spPaid": 892,
+          "spEnd": 416,
+          "items": 30,
+          "skillCommands": 39
+        },
+        {
+          "seed": 19,
+          "outcome": "defeat",
+          "turns": 95,
+          "spPaid": 964,
+          "spEnd": 344,
+          "items": 30,
+          "skillCommands": 42
+        },
+        {
+          "seed": 20,
+          "outcome": "defeat",
+          "turns": 95,
+          "spPaid": 964,
+          "spEnd": 344,
+          "items": 30,
+          "skillCommands": 42
+        },
+        {
+          "seed": 21,
+          "outcome": "defeat",
+          "turns": 96,
+          "spPaid": 988,
+          "spEnd": 320,
+          "items": 30,
+          "skillCommands": 42
+        },
+        {
+          "seed": 22,
+          "outcome": "defeat",
+          "turns": 91,
+          "spPaid": 916,
+          "spEnd": 392,
+          "items": 30,
+          "skillCommands": 39
+        },
+        {
+          "seed": 23,
+          "outcome": "defeat",
+          "turns": 90,
+          "spPaid": 892,
+          "spEnd": 416,
+          "items": 30,
+          "skillCommands": 38
+        },
+        {
+          "seed": 24,
+          "outcome": "defeat",
+          "turns": 88,
+          "spPaid": 868,
+          "spEnd": 440,
+          "items": 30,
+          "skillCommands": 36
+        },
+        {
+          "seed": 25,
+          "outcome": "defeat",
+          "turns": 93,
+          "spPaid": 940,
+          "spEnd": 368,
+          "items": 30,
+          "skillCommands": 40
+        },
+        {
+          "seed": 26,
+          "outcome": "defeat",
+          "turns": 90,
+          "spPaid": 892,
+          "spEnd": 416,
+          "items": 30,
+          "skillCommands": 38
+        },
+        {
+          "seed": 27,
+          "outcome": "defeat",
+          "turns": 90,
+          "spPaid": 892,
+          "spEnd": 416,
+          "items": 30,
+          "skillCommands": 38
+        },
+        {
+          "seed": 28,
+          "outcome": "defeat",
+          "turns": 86,
+          "spPaid": 820,
+          "spEnd": 488,
+          "items": 30,
+          "skillCommands": 35
+        },
+        {
+          "seed": 29,
+          "outcome": "defeat",
+          "turns": 96,
+          "spPaid": 988,
+          "spEnd": 320,
+          "items": 30,
+          "skillCommands": 42
+        },
+        {
+          "seed": 30,
+          "outcome": "defeat",
+          "turns": 90,
+          "spPaid": 892,
+          "spEnd": 416,
+          "items": 30,
+          "skillCommands": 38
+        }
+      ]
+    },
+    {
+      "id": "complete-1-197-priest",
+      "kind": "complete",
+      "n": 1,
+      "level": 197,
+      "job": "priest",
+      "policy": "holy_light",
+      "enemy": "tender",
+      "wins": 0,
+      "samples": 30,
+      "all": {
+        "turns": 163.1,
+        "spPaid": 1756,
+        "spEnd": 2,
+        "items": 30
+      },
+      "victories": {
+        "turns": null,
+        "spPaid": null,
+        "spEnd": null,
+        "items": null
+      },
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "defeat",
+          "turns": 166,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 2,
+          "outcome": "defeat",
+          "turns": 177,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 80
+        },
+        {
+          "seed": 3,
+          "outcome": "defeat",
+          "turns": 163,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 4,
+          "outcome": "defeat",
+          "turns": 146,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 5,
+          "outcome": "defeat",
+          "turns": 156,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 6,
+          "outcome": "defeat",
+          "turns": 159,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 7,
+          "outcome": "defeat",
+          "turns": 160,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 8,
+          "outcome": "defeat",
+          "turns": 170,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 80
+        },
+        {
+          "seed": 9,
+          "outcome": "defeat",
+          "turns": 163,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 10,
+          "outcome": "defeat",
+          "turns": 166,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 80
+        },
+        {
+          "seed": 11,
+          "outcome": "defeat",
+          "turns": 169,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 12,
+          "outcome": "defeat",
+          "turns": 165,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 13,
+          "outcome": "defeat",
+          "turns": 174,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 80
+        },
+        {
+          "seed": 14,
+          "outcome": "defeat",
+          "turns": 167,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 15,
+          "outcome": "defeat",
+          "turns": 154,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 16,
+          "outcome": "defeat",
+          "turns": 159,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 17,
+          "outcome": "defeat",
+          "turns": 171,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 18,
+          "outcome": "defeat",
+          "turns": 164,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 80
+        },
+        {
+          "seed": 19,
+          "outcome": "defeat",
+          "turns": 166,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 20,
+          "outcome": "defeat",
+          "turns": 169,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 21,
+          "outcome": "defeat",
+          "turns": 163,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 80
+        },
+        {
+          "seed": 22,
+          "outcome": "defeat",
+          "turns": 164,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 23,
+          "outcome": "defeat",
+          "turns": 157,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 24,
+          "outcome": "defeat",
+          "turns": 167,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 25,
+          "outcome": "defeat",
+          "turns": 160,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 26,
+          "outcome": "defeat",
+          "turns": 161,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 27,
+          "outcome": "defeat",
+          "turns": 158,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 28,
+          "outcome": "defeat",
+          "turns": 156,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 29,
+          "outcome": "defeat",
+          "turns": 164,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 30,
+          "outcome": "defeat",
+          "turns": 159,
+          "spPaid": 1756,
+          "spEnd": 2,
+          "items": 30,
+          "skillCommands": 79
+        }
+      ]
+    },
+    {
+      "id": "complete-2-197-priest",
+      "kind": "complete",
+      "n": 2,
+      "level": 197,
+      "job": "priest",
+      "policy": "normal",
+      "enemy": "rice",
+      "wins": 0,
+      "samples": 30,
+      "all": {
+        "turns": 108.77,
+        "spPaid": 100,
+        "spEnd": 2550,
+        "items": 30
+      },
+      "victories": {
+        "turns": null,
+        "spPaid": null,
+        "spEnd": null,
+        "items": null
+      },
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "defeat",
+          "turns": 110,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 2,
+          "outcome": "defeat",
+          "turns": 103,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 3,
+          "outcome": "defeat",
+          "turns": 105,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 4,
+          "outcome": "defeat",
+          "turns": 127,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 4
+        },
+        {
+          "seed": 5,
+          "outcome": "defeat",
+          "turns": 109,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 6,
+          "outcome": "defeat",
+          "turns": 113,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 7,
+          "outcome": "defeat",
+          "turns": 115,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 8,
+          "outcome": "defeat",
+          "turns": 101,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 9,
+          "outcome": "defeat",
+          "turns": 100,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 10,
+          "outcome": "defeat",
+          "turns": 115,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 11,
+          "outcome": "defeat",
+          "turns": 109,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 12,
+          "outcome": "defeat",
+          "turns": 99,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 13,
+          "outcome": "defeat",
+          "turns": 110,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 14,
+          "outcome": "defeat",
+          "turns": 101,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 15,
+          "outcome": "defeat",
+          "turns": 108,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 16,
+          "outcome": "defeat",
+          "turns": 113,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 17,
+          "outcome": "defeat",
+          "turns": 115,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 18,
+          "outcome": "defeat",
+          "turns": 112,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 19,
+          "outcome": "defeat",
+          "turns": 108,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 20,
+          "outcome": "defeat",
+          "turns": 110,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 21,
+          "outcome": "defeat",
+          "turns": 105,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 22,
+          "outcome": "defeat",
+          "turns": 108,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 23,
+          "outcome": "defeat",
+          "turns": 104,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 24,
+          "outcome": "defeat",
+          "turns": 108,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 25,
+          "outcome": "defeat",
+          "turns": 116,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 26,
+          "outcome": "defeat",
+          "turns": 108,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 27,
+          "outcome": "defeat",
+          "turns": 113,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 28,
+          "outcome": "defeat",
+          "turns": 111,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 29,
+          "outcome": "defeat",
+          "turns": 101,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 30,
+          "outcome": "defeat",
+          "turns": 106,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 3
+        }
+      ]
+    },
+    {
+      "id": "complete-2-197-priest",
+      "kind": "complete",
+      "n": 2,
+      "level": 197,
+      "job": "priest",
+      "policy": "normal",
+      "enemy": "dusk",
+      "wins": 0,
+      "samples": 30,
+      "all": {
+        "turns": 133.7,
+        "spPaid": 100,
+        "spEnd": 2100,
+        "items": 30
+      },
+      "victories": {
+        "turns": null,
+        "spPaid": null,
+        "spEnd": null,
+        "items": null
+      },
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "defeat",
+          "turns": 132,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 2,
+          "outcome": "defeat",
+          "turns": 138,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 4
+        },
+        {
+          "seed": 3,
+          "outcome": "defeat",
+          "turns": 138,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 4
+        },
+        {
+          "seed": 4,
+          "outcome": "defeat",
+          "turns": 128,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 5,
+          "outcome": "defeat",
+          "turns": 131,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 6,
+          "outcome": "defeat",
+          "turns": 132,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 7,
+          "outcome": "defeat",
+          "turns": 132,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 8,
+          "outcome": "defeat",
+          "turns": 132,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 9,
+          "outcome": "defeat",
+          "turns": 132,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 10,
+          "outcome": "defeat",
+          "turns": 134,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 11,
+          "outcome": "defeat",
+          "turns": 132,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 12,
+          "outcome": "defeat",
+          "turns": 136,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 13,
+          "outcome": "defeat",
+          "turns": 139,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 4
+        },
+        {
+          "seed": 14,
+          "outcome": "defeat",
+          "turns": 135,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 15,
+          "outcome": "defeat",
+          "turns": 136,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 16,
+          "outcome": "defeat",
+          "turns": 132,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 17,
+          "outcome": "defeat",
+          "turns": 138,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 4
+        },
+        {
+          "seed": 18,
+          "outcome": "defeat",
+          "turns": 128,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 19,
+          "outcome": "defeat",
+          "turns": 138,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 4
+        },
+        {
+          "seed": 20,
+          "outcome": "defeat",
+          "turns": 133,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 21,
+          "outcome": "defeat",
+          "turns": 133,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 22,
+          "outcome": "defeat",
+          "turns": 131,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 23,
+          "outcome": "defeat",
+          "turns": 134,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 24,
+          "outcome": "defeat",
+          "turns": 132,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 25,
+          "outcome": "defeat",
+          "turns": 137,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 26,
+          "outcome": "defeat",
+          "turns": 128,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 27,
+          "outcome": "defeat",
+          "turns": 132,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 28,
+          "outcome": "defeat",
+          "turns": 136,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 29,
+          "outcome": "defeat",
+          "turns": 132,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 3
+        },
+        {
+          "seed": 30,
+          "outcome": "defeat",
+          "turns": 140,
+          "spPaid": 100,
+          "spEnd": 2100,
+          "items": 30,
+          "skillCommands": 4
+        }
+      ]
+    },
+    {
+      "id": "complete-2-197-priest",
+      "kind": "complete",
+      "n": 2,
+      "level": 197,
+      "job": "priest",
+      "policy": "normal",
+      "enemy": "tender",
+      "wins": 0,
+      "samples": 30,
+      "all": {
+        "turns": 219.53,
+        "spPaid": 100,
+        "spEnd": 2550,
+        "items": 30
+      },
+      "victories": {
+        "turns": null,
+        "spPaid": null,
+        "spEnd": null,
+        "items": null
+      },
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "defeat",
+          "turns": 230,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 8
+        },
+        {
+          "seed": 2,
+          "outcome": "defeat",
+          "turns": 212,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 7
+        },
+        {
+          "seed": 3,
+          "outcome": "defeat",
+          "turns": 223,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 7
+        },
+        {
+          "seed": 4,
+          "outcome": "defeat",
+          "turns": 204,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 7
+        },
+        {
+          "seed": 5,
+          "outcome": "defeat",
+          "turns": 216,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 7
+        },
+        {
+          "seed": 6,
+          "outcome": "defeat",
+          "turns": 221,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 7
+        },
+        {
+          "seed": 7,
+          "outcome": "defeat",
+          "turns": 224,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 7
+        },
+        {
+          "seed": 8,
+          "outcome": "defeat",
+          "turns": 212,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 7
+        },
+        {
+          "seed": 9,
+          "outcome": "defeat",
+          "turns": 211,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 7
+        },
+        {
+          "seed": 10,
+          "outcome": "defeat",
+          "turns": 213,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 7
+        },
+        {
+          "seed": 11,
+          "outcome": "defeat",
+          "turns": 225,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 7
+        },
+        {
+          "seed": 12,
+          "outcome": "defeat",
+          "turns": 223,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 7
+        },
+        {
+          "seed": 13,
+          "outcome": "defeat",
+          "turns": 217,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 7
+        },
+        {
+          "seed": 14,
+          "outcome": "defeat",
+          "turns": 205,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 7
+        },
+        {
+          "seed": 15,
+          "outcome": "defeat",
+          "turns": 212,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 7
+        },
+        {
+          "seed": 16,
+          "outcome": "defeat",
+          "turns": 226,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 7
+        },
+        {
+          "seed": 17,
+          "outcome": "defeat",
+          "turns": 223,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 7
+        },
+        {
+          "seed": 18,
+          "outcome": "defeat",
+          "turns": 227,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 8
+        },
+        {
+          "seed": 19,
+          "outcome": "defeat",
+          "turns": 223,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 8
+        },
+        {
+          "seed": 20,
+          "outcome": "defeat",
+          "turns": 209,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 7
+        },
+        {
+          "seed": 21,
+          "outcome": "defeat",
+          "turns": 218,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 7
+        },
+        {
+          "seed": 22,
+          "outcome": "defeat",
+          "turns": 230,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 8
+        },
+        {
+          "seed": 23,
+          "outcome": "defeat",
+          "turns": 239,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 8
+        },
+        {
+          "seed": 24,
+          "outcome": "defeat",
+          "turns": 229,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 7
+        },
+        {
+          "seed": 25,
+          "outcome": "defeat",
+          "turns": 228,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 8
+        },
+        {
+          "seed": 26,
+          "outcome": "defeat",
+          "turns": 212,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 7
+        },
+        {
+          "seed": 27,
+          "outcome": "defeat",
+          "turns": 227,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 7
+        },
+        {
+          "seed": 28,
+          "outcome": "defeat",
+          "turns": 221,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 7
+        },
+        {
+          "seed": 29,
+          "outcome": "defeat",
+          "turns": 201,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 7
+        },
+        {
+          "seed": 30,
+          "outcome": "defeat",
+          "turns": 225,
+          "spPaid": 100,
+          "spEnd": 2550,
+          "items": 30,
+          "skillCommands": 7
+        }
+      ]
+    },
+    {
+      "id": "complete-2-197-priest",
+      "kind": "complete",
+      "n": 2,
+      "level": 197,
+      "job": "priest",
+      "policy": "holy_strike",
+      "enemy": "rice",
+      "wins": 0,
+      "samples": 30,
+      "all": {
+        "turns": 108.4,
+        "spPaid": 856.4,
+        "spEnd": 1793.6,
+        "items": 30
+      },
+      "victories": {
+        "turns": null,
+        "spPaid": null,
+        "spEnd": null,
+        "items": null
+      },
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "defeat",
+          "turns": 115,
+          "spPaid": 916,
+          "spEnd": 1734,
+          "items": 30,
+          "skillCommands": 78
+        },
+        {
+          "seed": 2,
+          "outcome": "defeat",
+          "turns": 103,
+          "spPaid": 820,
+          "spEnd": 1830,
+          "items": 30,
+          "skillCommands": 68
+        },
+        {
+          "seed": 3,
+          "outcome": "defeat",
+          "turns": 109,
+          "spPaid": 868,
+          "spEnd": 1782,
+          "items": 30,
+          "skillCommands": 73
+        },
+        {
+          "seed": 4,
+          "outcome": "defeat",
+          "turns": 124,
+          "spPaid": 976,
+          "spEnd": 1674,
+          "items": 30,
+          "skillCommands": 83
+        },
+        {
+          "seed": 5,
+          "outcome": "defeat",
+          "turns": 96,
+          "spPaid": 784,
+          "spEnd": 1866,
+          "items": 30,
+          "skillCommands": 65
+        },
+        {
+          "seed": 6,
+          "outcome": "defeat",
+          "turns": 122,
+          "spPaid": 940,
+          "spEnd": 1710,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 7,
+          "outcome": "defeat",
+          "turns": 103,
+          "spPaid": 820,
+          "spEnd": 1830,
+          "items": 30,
+          "skillCommands": 68
+        },
+        {
+          "seed": 8,
+          "outcome": "defeat",
+          "turns": 110,
+          "spPaid": 868,
+          "spEnd": 1782,
+          "items": 30,
+          "skillCommands": 73
+        },
+        {
+          "seed": 9,
+          "outcome": "defeat",
+          "turns": 99,
+          "spPaid": 784,
+          "spEnd": 1866,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 10,
+          "outcome": "defeat",
+          "turns": 108,
+          "spPaid": 856,
+          "spEnd": 1794,
+          "items": 30,
+          "skillCommands": 72
+        },
+        {
+          "seed": 11,
+          "outcome": "defeat",
+          "turns": 117,
+          "spPaid": 904,
+          "spEnd": 1746,
+          "items": 30,
+          "skillCommands": 77
+        },
+        {
+          "seed": 12,
+          "outcome": "defeat",
+          "turns": 110,
+          "spPaid": 844,
+          "spEnd": 1806,
+          "items": 30,
+          "skillCommands": 71
+        },
+        {
+          "seed": 13,
+          "outcome": "defeat",
+          "turns": 121,
+          "spPaid": 964,
+          "spEnd": 1686,
+          "items": 30,
+          "skillCommands": 82
+        },
+        {
+          "seed": 14,
+          "outcome": "defeat",
+          "turns": 113,
+          "spPaid": 892,
+          "spEnd": 1758,
+          "items": 30,
+          "skillCommands": 75
+        },
+        {
+          "seed": 15,
+          "outcome": "defeat",
+          "turns": 99,
+          "spPaid": 784,
+          "spEnd": 1866,
+          "items": 30,
+          "skillCommands": 65
+        },
+        {
+          "seed": 16,
+          "outcome": "defeat",
+          "turns": 115,
+          "spPaid": 904,
+          "spEnd": 1746,
+          "items": 30,
+          "skillCommands": 76
+        },
+        {
+          "seed": 17,
+          "outcome": "defeat",
+          "turns": 110,
+          "spPaid": 880,
+          "spEnd": 1770,
+          "items": 30,
+          "skillCommands": 74
+        },
+        {
+          "seed": 18,
+          "outcome": "defeat",
+          "turns": 109,
+          "spPaid": 832,
+          "spEnd": 1818,
+          "items": 30,
+          "skillCommands": 70
+        },
+        {
+          "seed": 19,
+          "outcome": "defeat",
+          "turns": 97,
+          "spPaid": 760,
+          "spEnd": 1890,
+          "items": 30,
+          "skillCommands": 63
+        },
+        {
+          "seed": 20,
+          "outcome": "defeat",
+          "turns": 113,
+          "spPaid": 904,
+          "spEnd": 1746,
+          "items": 30,
+          "skillCommands": 77
+        },
+        {
+          "seed": 21,
+          "outcome": "defeat",
+          "turns": 105,
+          "spPaid": 808,
+          "spEnd": 1842,
+          "items": 30,
+          "skillCommands": 67
+        },
+        {
+          "seed": 22,
+          "outcome": "defeat",
+          "turns": 108,
+          "spPaid": 856,
+          "spEnd": 1794,
+          "items": 30,
+          "skillCommands": 72
+        },
+        {
+          "seed": 23,
+          "outcome": "defeat",
+          "turns": 101,
+          "spPaid": 808,
+          "spEnd": 1842,
+          "items": 30,
+          "skillCommands": 67
+        },
+        {
+          "seed": 24,
+          "outcome": "defeat",
+          "turns": 97,
+          "spPaid": 784,
+          "spEnd": 1866,
+          "items": 30,
+          "skillCommands": 64
+        },
+        {
+          "seed": 25,
+          "outcome": "defeat",
+          "turns": 115,
+          "spPaid": 904,
+          "spEnd": 1746,
+          "items": 30,
+          "skillCommands": 76
+        },
+        {
+          "seed": 26,
+          "outcome": "defeat",
+          "turns": 109,
+          "spPaid": 868,
+          "spEnd": 1782,
+          "items": 30,
+          "skillCommands": 73
+        },
+        {
+          "seed": 27,
+          "outcome": "defeat",
+          "turns": 110,
+          "spPaid": 856,
+          "spEnd": 1794,
+          "items": 30,
+          "skillCommands": 72
+        },
+        {
+          "seed": 28,
+          "outcome": "defeat",
+          "turns": 113,
+          "spPaid": 880,
+          "spEnd": 1770,
+          "items": 30,
+          "skillCommands": 74
+        },
+        {
+          "seed": 29,
+          "outcome": "defeat",
+          "turns": 99,
+          "spPaid": 808,
+          "spEnd": 1842,
+          "items": 30,
+          "skillCommands": 67
+        },
+        {
+          "seed": 30,
+          "outcome": "defeat",
+          "turns": 102,
+          "spPaid": 820,
+          "spEnd": 1830,
+          "items": 30,
+          "skillCommands": 69
+        }
+      ]
+    },
+    {
+      "id": "complete-2-197-priest",
+      "kind": "complete",
+      "n": 2,
+      "level": 197,
+      "job": "priest",
+      "policy": "holy_strike",
+      "enemy": "dusk",
+      "wins": 0,
+      "samples": 30,
+      "all": {
+        "turns": 134.4,
+        "spPaid": 850.4,
+        "spEnd": 1349.6,
+        "items": 30
+      },
+      "victories": {
+        "turns": null,
+        "spPaid": null,
+        "spEnd": null,
+        "items": null
+      },
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "defeat",
+          "turns": 132,
+          "spPaid": 832,
+          "spEnd": 1368,
+          "items": 30,
+          "skillCommands": 69
+        },
+        {
+          "seed": 2,
+          "outcome": "defeat",
+          "turns": 138,
+          "spPaid": 880,
+          "spEnd": 1320,
+          "items": 30,
+          "skillCommands": 74
+        },
+        {
+          "seed": 3,
+          "outcome": "defeat",
+          "turns": 136,
+          "spPaid": 868,
+          "spEnd": 1332,
+          "items": 30,
+          "skillCommands": 72
+        },
+        {
+          "seed": 4,
+          "outcome": "defeat",
+          "turns": 136,
+          "spPaid": 868,
+          "spEnd": 1332,
+          "items": 30,
+          "skillCommands": 72
+        },
+        {
+          "seed": 5,
+          "outcome": "defeat",
+          "turns": 128,
+          "spPaid": 796,
+          "spEnd": 1404,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 6,
+          "outcome": "defeat",
+          "turns": 134,
+          "spPaid": 844,
+          "spEnd": 1356,
+          "items": 30,
+          "skillCommands": 71
+        },
+        {
+          "seed": 7,
+          "outcome": "defeat",
+          "turns": 133,
+          "spPaid": 832,
+          "spEnd": 1368,
+          "items": 30,
+          "skillCommands": 70
+        },
+        {
+          "seed": 8,
+          "outcome": "defeat",
+          "turns": 133,
+          "spPaid": 832,
+          "spEnd": 1368,
+          "items": 30,
+          "skillCommands": 70
+        },
+        {
+          "seed": 9,
+          "outcome": "defeat",
+          "turns": 132,
+          "spPaid": 832,
+          "spEnd": 1368,
+          "items": 30,
+          "skillCommands": 69
+        },
+        {
+          "seed": 10,
+          "outcome": "defeat",
+          "turns": 132,
+          "spPaid": 832,
+          "spEnd": 1368,
+          "items": 30,
+          "skillCommands": 69
+        },
+        {
+          "seed": 11,
+          "outcome": "defeat",
+          "turns": 132,
+          "spPaid": 832,
+          "spEnd": 1368,
+          "items": 30,
+          "skillCommands": 69
+        },
+        {
+          "seed": 12,
+          "outcome": "defeat",
+          "turns": 137,
+          "spPaid": 868,
+          "spEnd": 1332,
+          "items": 30,
+          "skillCommands": 73
+        },
+        {
+          "seed": 13,
+          "outcome": "defeat",
+          "turns": 138,
+          "spPaid": 880,
+          "spEnd": 1320,
+          "items": 30,
+          "skillCommands": 74
+        },
+        {
+          "seed": 14,
+          "outcome": "defeat",
+          "turns": 136,
+          "spPaid": 868,
+          "spEnd": 1332,
+          "items": 30,
+          "skillCommands": 72
+        },
+        {
+          "seed": 15,
+          "outcome": "defeat",
+          "turns": 138,
+          "spPaid": 880,
+          "spEnd": 1320,
+          "items": 30,
+          "skillCommands": 74
+        },
+        {
+          "seed": 16,
+          "outcome": "defeat",
+          "turns": 135,
+          "spPaid": 856,
+          "spEnd": 1344,
+          "items": 30,
+          "skillCommands": 72
+        },
+        {
+          "seed": 17,
+          "outcome": "defeat",
+          "turns": 136,
+          "spPaid": 868,
+          "spEnd": 1332,
+          "items": 30,
+          "skillCommands": 72
+        },
+        {
+          "seed": 18,
+          "outcome": "defeat",
+          "turns": 128,
+          "spPaid": 796,
+          "spEnd": 1404,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 19,
+          "outcome": "defeat",
+          "turns": 136,
+          "spPaid": 868,
+          "spEnd": 1332,
+          "items": 30,
+          "skillCommands": 72
+        },
+        {
+          "seed": 20,
+          "outcome": "defeat",
+          "turns": 134,
+          "spPaid": 844,
+          "spEnd": 1356,
+          "items": 30,
+          "skillCommands": 71
+        },
+        {
+          "seed": 21,
+          "outcome": "defeat",
+          "turns": 133,
+          "spPaid": 832,
+          "spEnd": 1368,
+          "items": 30,
+          "skillCommands": 70
+        },
+        {
+          "seed": 22,
+          "outcome": "defeat",
+          "turns": 129,
+          "spPaid": 796,
+          "spEnd": 1404,
+          "items": 30,
+          "skillCommands": 67
+        },
+        {
+          "seed": 23,
+          "outcome": "defeat",
+          "turns": 137,
+          "spPaid": 868,
+          "spEnd": 1332,
+          "items": 30,
+          "skillCommands": 73
+        },
+        {
+          "seed": 24,
+          "outcome": "defeat",
+          "turns": 132,
+          "spPaid": 832,
+          "spEnd": 1368,
+          "items": 30,
+          "skillCommands": 69
+        },
+        {
+          "seed": 25,
+          "outcome": "defeat",
+          "turns": 136,
+          "spPaid": 868,
+          "spEnd": 1332,
+          "items": 30,
+          "skillCommands": 72
+        },
+        {
+          "seed": 26,
+          "outcome": "defeat",
+          "turns": 128,
+          "spPaid": 796,
+          "spEnd": 1404,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 27,
+          "outcome": "defeat",
+          "turns": 132,
+          "spPaid": 832,
+          "spEnd": 1368,
+          "items": 30,
+          "skillCommands": 69
+        },
+        {
+          "seed": 28,
+          "outcome": "defeat",
+          "turns": 135,
+          "spPaid": 868,
+          "spEnd": 1332,
+          "items": 30,
+          "skillCommands": 72
+        },
+        {
+          "seed": 29,
+          "outcome": "defeat",
+          "turns": 138,
+          "spPaid": 880,
+          "spEnd": 1320,
+          "items": 30,
+          "skillCommands": 74
+        },
+        {
+          "seed": 30,
+          "outcome": "defeat",
+          "turns": 148,
+          "spPaid": 964,
+          "spEnd": 1236,
+          "items": 30,
+          "skillCommands": 81
+        }
+      ]
+    },
+    {
+      "id": "complete-2-197-priest",
+      "kind": "complete",
+      "n": 2,
+      "level": 197,
+      "job": "priest",
+      "policy": "holy_strike",
+      "enemy": "tender",
+      "wins": 0,
+      "samples": 30,
+      "all": {
+        "turns": 219.47,
+        "spPaid": 1796.4,
+        "spEnd": 853.6,
+        "items": 30
+      },
+      "victories": {
+        "turns": null,
+        "spPaid": null,
+        "spEnd": null,
+        "items": null
+      },
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "defeat",
+          "turns": 226,
+          "spPaid": 1876,
+          "spEnd": 774,
+          "items": 30,
+          "skillCommands": 166
+        },
+        {
+          "seed": 2,
+          "outcome": "defeat",
+          "turns": 212,
+          "spPaid": 1756,
+          "spEnd": 894,
+          "items": 30,
+          "skillCommands": 156
+        },
+        {
+          "seed": 3,
+          "outcome": "defeat",
+          "turns": 219,
+          "spPaid": 1792,
+          "spEnd": 858,
+          "items": 30,
+          "skillCommands": 159
+        },
+        {
+          "seed": 4,
+          "outcome": "defeat",
+          "turns": 224,
+          "spPaid": 1792,
+          "spEnd": 858,
+          "items": 30,
+          "skillCommands": 160
+        },
+        {
+          "seed": 5,
+          "outcome": "defeat",
+          "turns": 232,
+          "spPaid": 1828,
+          "spEnd": 822,
+          "items": 30,
+          "skillCommands": 163
+        },
+        {
+          "seed": 6,
+          "outcome": "defeat",
+          "turns": 225,
+          "spPaid": 1768,
+          "spEnd": 882,
+          "items": 30,
+          "skillCommands": 157
+        },
+        {
+          "seed": 7,
+          "outcome": "defeat",
+          "turns": 223,
+          "spPaid": 1816,
+          "spEnd": 834,
+          "items": 30,
+          "skillCommands": 161
+        },
+        {
+          "seed": 8,
+          "outcome": "defeat",
+          "turns": 222,
+          "spPaid": 1804,
+          "spEnd": 846,
+          "items": 30,
+          "skillCommands": 161
+        },
+        {
+          "seed": 9,
+          "outcome": "defeat",
+          "turns": 213,
+          "spPaid": 1756,
+          "spEnd": 894,
+          "items": 30,
+          "skillCommands": 157
+        },
+        {
+          "seed": 10,
+          "outcome": "defeat",
+          "turns": 230,
+          "spPaid": 1864,
+          "spEnd": 786,
+          "items": 30,
+          "skillCommands": 166
+        },
+        {
+          "seed": 11,
+          "outcome": "defeat",
+          "turns": 209,
+          "spPaid": 1720,
+          "spEnd": 930,
+          "items": 30,
+          "skillCommands": 154
+        },
+        {
+          "seed": 12,
+          "outcome": "defeat",
+          "turns": 210,
+          "spPaid": 1744,
+          "spEnd": 906,
+          "items": 30,
+          "skillCommands": 155
+        },
+        {
+          "seed": 13,
+          "outcome": "defeat",
+          "turns": 212,
+          "spPaid": 1744,
+          "spEnd": 906,
+          "items": 30,
+          "skillCommands": 156
+        },
+        {
+          "seed": 14,
+          "outcome": "defeat",
+          "turns": 230,
+          "spPaid": 1864,
+          "spEnd": 786,
+          "items": 30,
+          "skillCommands": 165
+        },
+        {
+          "seed": 15,
+          "outcome": "defeat",
+          "turns": 208,
+          "spPaid": 1732,
+          "spEnd": 918,
+          "items": 30,
+          "skillCommands": 153
+        },
+        {
+          "seed": 16,
+          "outcome": "defeat",
+          "turns": 217,
+          "spPaid": 1792,
+          "spEnd": 858,
+          "items": 30,
+          "skillCommands": 160
+        },
+        {
+          "seed": 17,
+          "outcome": "defeat",
+          "turns": 215,
+          "spPaid": 1792,
+          "spEnd": 858,
+          "items": 30,
+          "skillCommands": 159
+        },
+        {
+          "seed": 18,
+          "outcome": "defeat",
+          "turns": 215,
+          "spPaid": 1780,
+          "spEnd": 870,
+          "items": 30,
+          "skillCommands": 158
+        },
+        {
+          "seed": 19,
+          "outcome": "defeat",
+          "turns": 223,
+          "spPaid": 1840,
+          "spEnd": 810,
+          "items": 30,
+          "skillCommands": 164
+        },
+        {
+          "seed": 20,
+          "outcome": "defeat",
+          "turns": 231,
+          "spPaid": 1852,
+          "spEnd": 798,
+          "items": 30,
+          "skillCommands": 164
+        },
+        {
+          "seed": 21,
+          "outcome": "defeat",
+          "turns": 225,
+          "spPaid": 1792,
+          "spEnd": 858,
+          "items": 30,
+          "skillCommands": 160
+        },
+        {
+          "seed": 22,
+          "outcome": "defeat",
+          "turns": 212,
+          "spPaid": 1756,
+          "spEnd": 894,
+          "items": 30,
+          "skillCommands": 156
+        },
+        {
+          "seed": 23,
+          "outcome": "defeat",
+          "turns": 223,
+          "spPaid": 1840,
+          "spEnd": 810,
+          "items": 30,
+          "skillCommands": 163
+        },
+        {
+          "seed": 24,
+          "outcome": "defeat",
+          "turns": 216,
+          "spPaid": 1804,
+          "spEnd": 846,
+          "items": 30,
+          "skillCommands": 160
+        },
+        {
+          "seed": 25,
+          "outcome": "defeat",
+          "turns": 208,
+          "spPaid": 1768,
+          "spEnd": 882,
+          "items": 30,
+          "skillCommands": 157
+        },
+        {
+          "seed": 26,
+          "outcome": "defeat",
+          "turns": 214,
+          "spPaid": 1756,
+          "spEnd": 894,
+          "items": 30,
+          "skillCommands": 157
+        },
+        {
+          "seed": 27,
+          "outcome": "defeat",
+          "turns": 240,
+          "spPaid": 1924,
+          "spEnd": 726,
+          "items": 30,
+          "skillCommands": 173
+        },
+        {
+          "seed": 28,
+          "outcome": "defeat",
+          "turns": 214,
+          "spPaid": 1780,
+          "spEnd": 870,
+          "items": 30,
+          "skillCommands": 158
+        },
+        {
+          "seed": 29,
+          "outcome": "defeat",
+          "turns": 215,
+          "spPaid": 1768,
+          "spEnd": 882,
+          "items": 30,
+          "skillCommands": 157
+        },
+        {
+          "seed": 30,
+          "outcome": "defeat",
+          "turns": 221,
+          "spPaid": 1792,
+          "spEnd": 858,
+          "items": 30,
+          "skillCommands": 160
+        }
+      ]
+    },
+    {
+      "id": "complete-2-197-priest",
+      "kind": "complete",
+      "n": 2,
+      "level": 197,
+      "job": "priest",
+      "policy": "holy_light",
+      "enemy": "rice",
+      "wins": 0,
+      "samples": 30,
+      "all": {
+        "turns": 105.73,
+        "spPaid": 2298.4,
+        "spEnd": 351.6,
+        "items": 30
+      },
+      "victories": {
+        "turns": null,
+        "spPaid": null,
+        "spEnd": null,
+        "items": null
+      },
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "defeat",
+          "turns": 105,
+          "spPaid": 2296,
+          "spEnd": 354,
+          "items": 30,
+          "skillCommands": 70
+        },
+        {
+          "seed": 2,
+          "outcome": "defeat",
+          "turns": 110,
+          "spPaid": 2440,
+          "spEnd": 210,
+          "items": 30,
+          "skillCommands": 74
+        },
+        {
+          "seed": 3,
+          "outcome": "defeat",
+          "turns": 99,
+          "spPaid": 2152,
+          "spEnd": 498,
+          "items": 30,
+          "skillCommands": 65
+        },
+        {
+          "seed": 4,
+          "outcome": "defeat",
+          "turns": 107,
+          "spPaid": 2224,
+          "spEnd": 426,
+          "items": 30,
+          "skillCommands": 68
+        },
+        {
+          "seed": 5,
+          "outcome": "defeat",
+          "turns": 101,
+          "spPaid": 2188,
+          "spEnd": 462,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 6,
+          "outcome": "defeat",
+          "turns": 110,
+          "spPaid": 2440,
+          "spEnd": 210,
+          "items": 30,
+          "skillCommands": 74
+        },
+        {
+          "seed": 7,
+          "outcome": "defeat",
+          "turns": 104,
+          "spPaid": 2260,
+          "spEnd": 390,
+          "items": 30,
+          "skillCommands": 69
+        },
+        {
+          "seed": 8,
+          "outcome": "defeat",
+          "turns": 108,
+          "spPaid": 2404,
+          "spEnd": 246,
+          "items": 30,
+          "skillCommands": 73
+        },
+        {
+          "seed": 9,
+          "outcome": "defeat",
+          "turns": 97,
+          "spPaid": 2080,
+          "spEnd": 570,
+          "items": 30,
+          "skillCommands": 63
+        },
+        {
+          "seed": 10,
+          "outcome": "defeat",
+          "turns": 117,
+          "spPaid": 2548,
+          "spEnd": 102,
+          "items": 30,
+          "skillCommands": 77
+        },
+        {
+          "seed": 11,
+          "outcome": "defeat",
+          "turns": 105,
+          "spPaid": 2296,
+          "spEnd": 354,
+          "items": 30,
+          "skillCommands": 70
+        },
+        {
+          "seed": 12,
+          "outcome": "defeat",
+          "turns": 106,
+          "spPaid": 2296,
+          "spEnd": 354,
+          "items": 30,
+          "skillCommands": 70
+        },
+        {
+          "seed": 13,
+          "outcome": "defeat",
+          "turns": 100,
+          "spPaid": 2188,
+          "spEnd": 462,
+          "items": 30,
+          "skillCommands": 67
+        },
+        {
+          "seed": 14,
+          "outcome": "defeat",
+          "turns": 96,
+          "spPaid": 2008,
+          "spEnd": 642,
+          "items": 30,
+          "skillCommands": 61
+        },
+        {
+          "seed": 15,
+          "outcome": "defeat",
+          "turns": 96,
+          "spPaid": 2116,
+          "spEnd": 534,
+          "items": 30,
+          "skillCommands": 64
+        },
+        {
+          "seed": 16,
+          "outcome": "defeat",
+          "turns": 104,
+          "spPaid": 2260,
+          "spEnd": 390,
+          "items": 30,
+          "skillCommands": 68
+        },
+        {
+          "seed": 17,
+          "outcome": "defeat",
+          "turns": 114,
+          "spPaid": 2476,
+          "spEnd": 174,
+          "items": 30,
+          "skillCommands": 74
+        },
+        {
+          "seed": 18,
+          "outcome": "defeat",
+          "turns": 113,
+          "spPaid": 2440,
+          "spEnd": 210,
+          "items": 30,
+          "skillCommands": 74
+        },
+        {
+          "seed": 19,
+          "outcome": "defeat",
+          "turns": 108,
+          "spPaid": 2440,
+          "spEnd": 210,
+          "items": 30,
+          "skillCommands": 74
+        },
+        {
+          "seed": 20,
+          "outcome": "defeat",
+          "turns": 109,
+          "spPaid": 2332,
+          "spEnd": 318,
+          "items": 30,
+          "skillCommands": 70
+        },
+        {
+          "seed": 21,
+          "outcome": "defeat",
+          "turns": 110,
+          "spPaid": 2404,
+          "spEnd": 246,
+          "items": 30,
+          "skillCommands": 73
+        },
+        {
+          "seed": 22,
+          "outcome": "defeat",
+          "turns": 103,
+          "spPaid": 2296,
+          "spEnd": 354,
+          "items": 30,
+          "skillCommands": 70
+        },
+        {
+          "seed": 23,
+          "outcome": "defeat",
+          "turns": 102,
+          "spPaid": 2224,
+          "spEnd": 426,
+          "items": 30,
+          "skillCommands": 67
+        },
+        {
+          "seed": 24,
+          "outcome": "defeat",
+          "turns": 103,
+          "spPaid": 2224,
+          "spEnd": 426,
+          "items": 30,
+          "skillCommands": 67
+        },
+        {
+          "seed": 25,
+          "outcome": "defeat",
+          "turns": 114,
+          "spPaid": 2512,
+          "spEnd": 138,
+          "items": 30,
+          "skillCommands": 75
+        },
+        {
+          "seed": 26,
+          "outcome": "defeat",
+          "turns": 119,
+          "spPaid": 2584,
+          "spEnd": 66,
+          "items": 30,
+          "skillCommands": 79
+        },
+        {
+          "seed": 27,
+          "outcome": "defeat",
+          "turns": 99,
+          "spPaid": 2080,
+          "spEnd": 570,
+          "items": 30,
+          "skillCommands": 63
+        },
+        {
+          "seed": 28,
+          "outcome": "defeat",
+          "turns": 101,
+          "spPaid": 2188,
+          "spEnd": 462,
+          "items": 30,
+          "skillCommands": 65
+        },
+        {
+          "seed": 29,
+          "outcome": "defeat",
+          "turns": 112,
+          "spPaid": 2404,
+          "spEnd": 246,
+          "items": 30,
+          "skillCommands": 73
+        },
+        {
+          "seed": 30,
+          "outcome": "defeat",
+          "turns": 100,
+          "spPaid": 2152,
+          "spEnd": 498,
+          "items": 30,
+          "skillCommands": 65
+        }
+      ]
+    },
+    {
+      "id": "complete-2-197-priest",
+      "kind": "complete",
+      "n": 2,
+      "level": 197,
+      "job": "priest",
+      "policy": "holy_light",
+      "enemy": "dusk",
+      "wins": 0,
+      "samples": 30,
+      "all": {
+        "turns": 134.57,
+        "spPaid": 2188,
+        "spEnd": 12,
+        "items": 30
+      },
+      "victories": {
+        "turns": null,
+        "spPaid": null,
+        "spEnd": null,
+        "items": null
+      },
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "defeat",
+          "turns": 134,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 2,
+          "outcome": "defeat",
+          "turns": 136,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 3,
+          "outcome": "defeat",
+          "turns": 129,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 4,
+          "outcome": "defeat",
+          "turns": 136,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 5,
+          "outcome": "defeat",
+          "turns": 132,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 6,
+          "outcome": "defeat",
+          "turns": 139,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 7,
+          "outcome": "defeat",
+          "turns": 136,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 8,
+          "outcome": "defeat",
+          "turns": 136,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 9,
+          "outcome": "defeat",
+          "turns": 133,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 10,
+          "outcome": "defeat",
+          "turns": 132,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 11,
+          "outcome": "defeat",
+          "turns": 132,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 12,
+          "outcome": "defeat",
+          "turns": 136,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 13,
+          "outcome": "defeat",
+          "turns": 132,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 14,
+          "outcome": "defeat",
+          "turns": 136,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 15,
+          "outcome": "defeat",
+          "turns": 133,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 16,
+          "outcome": "defeat",
+          "turns": 142,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 17,
+          "outcome": "defeat",
+          "turns": 132,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 18,
+          "outcome": "defeat",
+          "turns": 134,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 19,
+          "outcome": "defeat",
+          "turns": 136,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 20,
+          "outcome": "defeat",
+          "turns": 136,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 21,
+          "outcome": "defeat",
+          "turns": 135,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 22,
+          "outcome": "defeat",
+          "turns": 133,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 23,
+          "outcome": "defeat",
+          "turns": 128,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 24,
+          "outcome": "defeat",
+          "turns": 135,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 25,
+          "outcome": "defeat",
+          "turns": 132,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 26,
+          "outcome": "defeat",
+          "turns": 139,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 27,
+          "outcome": "defeat",
+          "turns": 132,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 28,
+          "outcome": "defeat",
+          "turns": 136,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 29,
+          "outcome": "defeat",
+          "turns": 136,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        },
+        {
+          "seed": 30,
+          "outcome": "defeat",
+          "turns": 139,
+          "spPaid": 2188,
+          "spEnd": 12,
+          "items": 30,
+          "skillCommands": 66
+        }
+      ]
+    },
+    {
+      "id": "complete-2-197-priest",
+      "kind": "complete",
+      "n": 2,
+      "level": 197,
+      "job": "priest",
+      "policy": "holy_light",
+      "enemy": "tender",
+      "wins": 0,
+      "samples": 30,
+      "all": {
+        "turns": 220.43,
+        "spPaid": 2620,
+        "spEnd": 30,
+        "items": 30
+      },
+      "victories": {
+        "turns": null,
+        "spPaid": null,
+        "spEnd": null,
+        "items": null
+      },
+      "runs": [
+        {
+          "seed": 1,
+          "outcome": "defeat",
+          "turns": 213,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 82
+        },
+        {
+          "seed": 2,
+          "outcome": "defeat",
+          "turns": 227,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 83
+        },
+        {
+          "seed": 3,
+          "outcome": "defeat",
+          "turns": 211,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 83
+        },
+        {
+          "seed": 4,
+          "outcome": "defeat",
+          "turns": 221,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 83
+        },
+        {
+          "seed": 5,
+          "outcome": "defeat",
+          "turns": 231,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 83
+        },
+        {
+          "seed": 6,
+          "outcome": "defeat",
+          "turns": 226,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 83
+        },
+        {
+          "seed": 7,
+          "outcome": "defeat",
+          "turns": 206,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 82
+        },
+        {
+          "seed": 8,
+          "outcome": "defeat",
+          "turns": 228,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 83
+        },
+        {
+          "seed": 9,
+          "outcome": "defeat",
+          "turns": 218,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 83
+        },
+        {
+          "seed": 10,
+          "outcome": "defeat",
+          "turns": 218,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 83
+        },
+        {
+          "seed": 11,
+          "outcome": "defeat",
+          "turns": 218,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 83
+        },
+        {
+          "seed": 12,
+          "outcome": "defeat",
+          "turns": 233,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 83
+        },
+        {
+          "seed": 13,
+          "outcome": "defeat",
+          "turns": 212,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 82
+        },
+        {
+          "seed": 14,
+          "outcome": "defeat",
+          "turns": 221,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 83
+        },
+        {
+          "seed": 15,
+          "outcome": "defeat",
+          "turns": 215,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 83
+        },
+        {
+          "seed": 16,
+          "outcome": "defeat",
+          "turns": 232,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 83
+        },
+        {
+          "seed": 17,
+          "outcome": "defeat",
+          "turns": 214,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 82
+        },
+        {
+          "seed": 18,
+          "outcome": "defeat",
+          "turns": 222,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 83
+        },
+        {
+          "seed": 19,
+          "outcome": "defeat",
+          "turns": 214,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 82
+        },
+        {
+          "seed": 20,
+          "outcome": "defeat",
+          "turns": 217,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 82
+        },
+        {
+          "seed": 21,
+          "outcome": "defeat",
+          "turns": 206,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 82
+        },
+        {
+          "seed": 22,
+          "outcome": "defeat",
+          "turns": 220,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 83
+        },
+        {
+          "seed": 23,
+          "outcome": "defeat",
+          "turns": 210,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 83
+        },
+        {
+          "seed": 24,
+          "outcome": "defeat",
+          "turns": 232,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 83
+        },
+        {
+          "seed": 25,
+          "outcome": "defeat",
+          "turns": 216,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 82
+        },
+        {
+          "seed": 26,
+          "outcome": "defeat",
+          "turns": 222,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 83
+        },
+        {
+          "seed": 27,
+          "outcome": "defeat",
+          "turns": 237,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 83
+        },
+        {
+          "seed": 28,
+          "outcome": "defeat",
+          "turns": 228,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 83
+        },
+        {
+          "seed": 29,
+          "outcome": "defeat",
+          "turns": 207,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 82
+        },
+        {
+          "seed": 30,
+          "outcome": "defeat",
+          "turns": 238,
+          "spPaid": 2620,
+          "spEnd": 30,
+          "items": 30,
+          "skillCommands": 83
+        }
+      ]
+    }
+  ]
+}

@@ -1,7 +1,8 @@
 import { armorSpellCost } from "./reincarnation-armor.js";
 import { magicBarrierAmount } from './aquarius.js';
+import { getSkillSpMultiplier } from './player-skill-scaling.js';
 export function getEffectiveSpCost(skill = {}, character = {}) {
-  const baseCost = Math.max(0, Math.floor(Number(skill?.spCost) || 0));
+  const baseCost = Math.max(0, Math.floor(Number(skill?.spCost) || 0)) * getSkillSpMultiplier(skill, character);
   if (baseCost === 0) return 0;
   if (magicBarrierAmount(character) > 0) return 0;
   if (skill.ignoreSpCostReduction) return armorSpellCost(baseCost, skill, character);

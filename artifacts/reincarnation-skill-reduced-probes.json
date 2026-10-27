@@ -1,0 +1,281 @@
+{
+  "baseline": [
+    {
+      "job": "warrior",
+      "id": "attack",
+      "cost": 0,
+      "damage": 1475,
+      "enemyDamage": 0
+    },
+    {
+      "job": "warrior",
+      "id": "power_strike",
+      "cost": 5,
+      "damage": 2064,
+      "enemyDamage": 0
+    },
+    {
+      "job": "warrior",
+      "id": "falcon_schnitt",
+      "cost": 0,
+      "damage": 3717,
+      "enemyDamage": 0
+    },
+    {
+      "job": "thief",
+      "id": "attack",
+      "cost": 0,
+      "damage": 1652,
+      "enemyDamage": 0
+    },
+    {
+      "job": "thief",
+      "id": "gale_blades",
+      "cost": 6,
+      "damage": 4966,
+      "enemyDamage": 0
+    },
+    {
+      "job": "thief",
+      "id": "twin_rapid_strike",
+      "cost": 0,
+      "damage": 4766,
+      "enemyDamage": 0
+    },
+    {
+      "job": "priest",
+      "id": "attack",
+      "cost": 0,
+      "damage": 1388,
+      "enemyDamage": 0
+    },
+    {
+      "job": "priest",
+      "id": "holy_light",
+      "cost": 12,
+      "damage": 334,
+      "enemyDamage": 0
+    },
+    {
+      "job": "priest",
+      "id": "holy_strike",
+      "cost": 4,
+      "damage": 253,
+      "enemyDamage": 0
+    },
+    {
+      "job": "priest",
+      "id": "twilight_flash",
+      "cost": 0,
+      "damage": 1332,
+      "enemyDamage": 0
+    },
+    {
+      "job": "mage",
+      "id": "attack",
+      "cost": 0,
+      "damage": 1050,
+      "enemyDamage": 0
+    },
+    {
+      "job": "mage",
+      "id": "fireball",
+      "cost": 3,
+      "damage": 1049,
+      "enemyDamage": 0
+    },
+    {
+      "job": "mage",
+      "id": "tunguska",
+      "cost": 0,
+      "damage": 9776,
+      "enemyDamage": 0
+    }
+  ],
+  "reduced": [
+    {
+      "job": "warrior",
+      "id": "attack",
+      "cost": 0,
+      "damage": 1475,
+      "enemyDamage": 0
+    },
+    {
+      "job": "warrior",
+      "id": "power_strike",
+      "cost": 20,
+      "damage": 3615,
+      "enemyDamage": 0
+    },
+    {
+      "job": "warrior",
+      "id": "falcon_schnitt",
+      "cost": 0,
+      "damage": 3717,
+      "enemyDamage": 0
+    },
+    {
+      "job": "thief",
+      "id": "attack",
+      "cost": 0,
+      "damage": 1652,
+      "enemyDamage": 0
+    },
+    {
+      "job": "thief",
+      "id": "gale_blades",
+      "cost": 24,
+      "damage": 8696,
+      "enemyDamage": 0
+    },
+    {
+      "job": "thief",
+      "id": "twin_rapid_strike",
+      "cost": 0,
+      "damage": 4766,
+      "enemyDamage": 0
+    },
+    {
+      "job": "priest",
+      "id": "attack",
+      "cost": 0,
+      "damage": 1388,
+      "enemyDamage": 0
+    },
+    {
+      "job": "priest",
+      "id": "holy_light",
+      "cost": 48,
+      "damage": 585,
+      "enemyDamage": 0
+    },
+    {
+      "job": "priest",
+      "id": "holy_strike",
+      "cost": 16,
+      "damage": 444,
+      "enemyDamage": 0
+    },
+    {
+      "job": "priest",
+      "id": "twilight_flash",
+      "cost": 0,
+      "damage": 1332,
+      "enemyDamage": 0
+    },
+    {
+      "job": "mage",
+      "id": "attack",
+      "cost": 0,
+      "damage": 1050,
+      "enemyDamage": 0
+    },
+    {
+      "job": "mage",
+      "id": "fireball",
+      "cost": 12,
+      "damage": 1836,
+      "enemyDamage": 0
+    },
+    {
+      "job": "mage",
+      "id": "tunguska",
+      "cost": 0,
+      "damage": 9776,
+      "enemyDamage": 0
+    }
+  ],
+  "priestRework": [
+    {
+      "job": "warrior",
+      "id": "attack",
+      "cost": 0,
+      "damage": 1475,
+      "enemyDamage": 0
+    },
+    {
+      "job": "warrior",
+      "id": "power_strike",
+      "cost": 20,
+      "damage": 3615,
+      "enemyDamage": 0
+    },
+    {
+      "job": "warrior",
+      "id": "falcon_schnitt",
+      "cost": 0,
+      "damage": 3717,
+      "enemyDamage": 0
+    },
+    {
+      "job": "thief",
+      "id": "attack",
+      "cost": 0,
+      "damage": 1652,
+      "enemyDamage": 0
+    },
+    {
+      "job": "thief",
+      "id": "gale_blades",
+      "cost": 24,
+      "damage": 8696,
+      "enemyDamage": 0
+    },
+    {
+      "job": "thief",
+      "id": "twin_rapid_strike",
+      "cost": 0,
+      "damage": 4766,
+      "enemyDamage": 0
+    },
+    {
+      "job": "priest",
+      "id": "attack",
+      "cost": 0,
+      "damage": 1388,
+      "enemyDamage": 0
+    },
+    {
+      "job": "priest",
+      "id": "holy_light",
+      "cost": 48,
+      "damage": 2551,
+      "enemyDamage": 0
+    },
+    {
+      "job": "priest",
+      "id": "holy_strike",
+      "cost": 16,
+      "damage": 2187,
+      "enemyDamage": 0
+    },
+    {
+      "job": "priest",
+      "id": "twilight_flash",
+      "cost": 0,
+      "damage": 1332,
+      "enemyDamage": 0
+    },
+    {
+      "job": "mage",
+      "id": "attack",
+      "cost": 0,
+      "damage": 1050,
+      "enemyDamage": 0
+    },
+    {
+      "job": "mage",
+      "id": "fireball",
+      "cost": 12,
+      "damage": 1836,
+      "enemyDamage": 0
+    },
+    {
+      "job": "mage",
+      "id": "tunguska",
+      "cost": 0,
+      "damage": 9776,
+      "enemyDamage": 0
+    }
+  ]
+}
