@@ -12,11 +12,13 @@ export const SURVEY_PRIZES=Object.freeze([
  {id:'attracting_incense',name:'引き寄せのお香',cost:1,category:0},
  {id:'zaubertrank',name:getItem('zaubertrank').name,cost:10,category:0},
  {id:'allheilmittel',name:getItem('allheilmittel').name,cost:30,category:0},
- {id:'magic_lantern',name:'魔法のランタン',cost:10,category:3,keyItem:true,once:true},
+ {id:'ewige_laterne',name:'エーヴィゲ・ラテルネ',cost:45,category:3,keyItem:true,once:true},
+ {id:'magic_lantern',name:'魔法のランタン',cost:15,category:3,keyItem:true,once:true},
  {id:'hacking_device',name:'ハッキングデバイス',cost:0,requiredReports:1000,category:3,keyItem:true,once:true},
  {id:'alveter_schuhe',name:'アルヴェターシューエ',cost:40,category:2,once:true}
 ]);
 export function surveyPrizeDetails(prize){
+ if(prize.id==='ewige_laterne')return {category:'貴重品',description:'所持中、地図迷宮でたいまつゲージが減らなくなる。奈落迷宮では無効。',effect:'所持で有効・消費なし・交換は1回のみ。',image:getItemCompendiumEntry(prize.id)?.imageSrc};
  if(prize.id==='magic_lantern')return {category:'貴重品',description:'地図迷宮でたいまつの消費量が半分になる。満タンで200歩分、階層移動で全回復。導きのたいまつは使用不可。奈落迷宮では無効。',effect:'所持で有効・消費なし・交換は1回のみ。',image:getItemCompendiumEntry(prize.id)?.imageSrc};
  if(prize.keyItem)return {category:'貴重品',description:'明らかにこの世界の物ではない。用途は不明。',effect:'効果は不明。『HACKING AURORA OS』と書かれているが…？',image:getItemCompendiumEntry(prize.id)?.imageSrc};
  const item=prize.once?getEquipmentItem(prize.id,'footId'):getItem(prize.id);

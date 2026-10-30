@@ -8,9 +8,9 @@ import {getV2ThemeBattleOptions,syncV2ThemeEnvironment} from '../js/special-map/
 import {createSpecialMapV2Session} from '../js/special-map/session-v2.js';
 import {updateSpecialMotion} from '../js/special-map/session.js';
 import {mapOriginalId} from '../data/special-maps.js';
-const ready=()=>{let c=createInitialCharacter({name:'QA',job:'warrior'});c=surveyOperation(surveyOperation(c,'book').character,'intro').character;c.specialMaps.stampPoints=10;return c;};
-test('lantern costs 10p at reincarnation zero, persists, and cannot be exchanged twice',()=>{
- const c=ready();assert.equal(surveyOperation({...c,specialMaps:{...c.specialMaps,stampPoints:9}},'exchange','magic_lantern').error,'ポイント不足');
+const ready=()=>{let c=createInitialCharacter({name:'QA',job:'warrior'});c=surveyOperation(surveyOperation(c,'book').character,'intro').character;c.specialMaps.stampPoints=15;return c;};
+test('lantern costs 15p at reincarnation zero, persists, and cannot be exchanged twice',()=>{
+ const c=ready();assert.equal(surveyOperation({...c,specialMaps:{...c.specialMaps,stampPoints:14}},'exchange','magic_lantern').error,'ポイント不足');
  const r=surveyOperation(c,'exchange','magic_lantern');assert.ok(r.ok);assert.equal(r.character.specialMaps.stampPoints,0);
  const restored=normalizeCharacter(JSON.parse(JSON.stringify(r.character)));assert.ok(hasKeyItem(restored.keyItems,'magic_lantern'));assert.equal(surveyOperation(restored,'exchange','magic_lantern').ok,false);
  assert.match(surveyPrizeDetails(SURVEY_PRIZES.find(p=>p.id==='magic_lantern')).image,/magic_lantern.avif$/);
@@ -66,4 +66,29 @@ test('lantern refills ascending, descending and return warp only after successfu
  assert.equal(warpV2ToEntrance(s),true);assert.equal(s.torchFuel,100);
  // The existing dark-zone restriction still takes precedence after arrival.
  s.generatedMap.themeId='black';syncV2ThemeEnvironment(s,ready());assert.equal(s.torchFuel,0);
+});
+
+import {getMapTorchEffects} from '../js/special-map/theme-environment-v2.js';
+import {hasCardEffect} from '../data/cards.js';
+test('Ewige Laterne is a unique 45p key item with atomic exchange and no reincarnation gate',()=>{
+ let c=ready();c.specialMaps.stampPoints=44;assert.equal(surveyOperation(c,'exchange','ewige_laterne').error,'ポイント不足');
+ c.specialMaps.stampPoints=45;const r=surveyOperation(c,'exchange','ewige_laterne');assert.ok(r.ok);assert.equal(r.character.specialMaps.stampPoints,0);
+ const restored=normalizeCharacter(JSON.parse(JSON.stringify(r.character)));assert.ok(hasKeyItem(restored.keyItems,'ewige_laterne'));assert.equal(surveyOperation(restored,'exchange','ewige_laterne').ok,false);
+ let current=c;assert.equal(transactSurvey({getCharacter:()=>current,setCharacter:n=>current=n,save:()=>false},'exchange','ewige_laterne').ok,false);assert.equal(current,c);
+ const detail=surveyPrizeDetails(SURVEY_PRIZES.find(p=>p.id==='ewige_laterne'));assert.match(detail.image,/ewige_laterne.avif$/);assert.doesNotMatch(detail.description+detail.effect,/ミニマップ/);
+});
+test('eternal lantern forces map light and minimap in black without changing ordinary abyss card effects',()=>{
+ let c=ready();c.specialMaps.stampPoints=45;c=surveyOperation(c,'exchange','ewige_laterne').character;
+ assert.deepEqual(getMapTorchEffects(c),{lanternActive:true,consumptionDisabled:true,effectForced:true});
+ const s={kind:'specialMapV2',generatedMap:{themeId:'black'},torchFuel:100,renderState:{}};
+ assert.equal(syncV2ThemeEnvironment(s,c,getMapTorchEffects(c)),'black');assert.equal(s.torchFuel,0);assert.equal(s.renderState.torchEffectForced,true);assert.equal(s.renderState.minimapEffectForced,true);assert.equal(getV2ThemeBattleOptions(s,c).concealed,false);
+ assert.equal(hasCardEffect(c.cards.deckSlots,'force_torch_effect_active'),false);assert.equal(hasCardEffect(c.cards.deckSlots,'torch_consumption_disabled'),false);
+ const rejected=resolveSpecialFieldItem({character:c,itemId:'guiding_torch',session:s});assert.equal(rejected.accepted,false);assert.match(rejected.message,/エーヴィゲ・ラテルネ/);
+ c.specialMaps.stampPoints=15;c=surveyOperation(c,'exchange','magic_lantern').character;assert.equal(getMapTorchEffects(c).consumptionDisabled,true);
+});
+test('eternal lantern prevents fuel loss during actual movement',t=>{
+ let c=ready();c.specialMaps.stampPoints=45;c=surveyOperation(c,'exchange','ewige_laterne').character;
+ const map={rulesetVersion:'special-map-v2',seed:12345,level:60,rarity:'WHITE',discovererName:'QA'};const s=createSpecialMapV2Session([map],mapOriginalId(map));t.after(()=>s.disposeSurvey());
+ s.torchConsumptionDisabled=()=>getMapTorchEffects(c).consumptionDisabled;
+ for(let i=0;i<250;i++){s.motion={started:0,duration:1,x:0,y:0,toX:0,toY:0,angle:0,toAngle:0,isStep:true};updateSpecialMotion(s,1);}assert.equal(s.torchFuel,100);
 });

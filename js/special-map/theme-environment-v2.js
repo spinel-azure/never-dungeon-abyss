@@ -5,6 +5,13 @@ import {hasKeyItem} from '../../data/key-items.js';
 import {hasCardEffect} from '../../data/cards.js';
 import {getNonlethalPoisonDamage} from '../../combat/status-lifecycle.js';
 
+// Only the map host uses these effects; ordinary abyss card rules stay separate.
+export function getMapTorchEffects(character){
+ const eternal=hasKeyItem(character?.keyItems,'ewige_laterne');
+ return {lanternActive:eternal||hasKeyItem(character?.keyItems,'magic_lantern'),
+  consumptionDisabled:eternal||hasCardEffect(character?.cards?.deckSlots,'torch_consumption_disabled'),
+  effectForced:eternal||hasCardEffect(character?.cards?.deckSlots,'force_torch_effect_active')};
+}
 // Representative ordinary depths select the existing zone rules, never map Lv
 // or the suspended ordinary dungeon's depth/counters.
 export function isV2TorchRestricted(session,character){

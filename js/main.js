@@ -8,7 +8,7 @@ import { createAutosaveScheduler } from "./autosave-scheduler.js";
 import {needsTrelirenRequest,completeTrelirenEncounter} from '../data/map-beta.js';
 import { renderItemGetItems } from "./item-get-presentation.js";
 import { getDungeonStairImage } from './dungeon-stair-presentation.js';
-import {applyV2ThemeStep,syncV2ThemeEnvironment,getV2ThemeBattleOptions} from './special-map/theme-environment-v2.js';
+import {getMapTorchEffects,applyV2ThemeStep,syncV2ThemeEnvironment,getV2ThemeBattleOptions} from './special-map/theme-environment-v2.js';
 import {developmentMapOptions} from './special-map/development-map.js';
 import {startSpecialMapExploration} from './special-map/exploration-ui.js';
 import {resumeV2Encounter,matchesV2Battle} from './special-map/encounter-v2.js';
@@ -5566,14 +5566,16 @@ import {
       if (dungeonStairImage.getAttribute('src') !== stair.src) dungeonStairImage.src = stair.src;
       dungeonStairImage.alt = stair.alt;
     }
-    const lanternActive=Boolean(special&&hasKeyItem(character?.keyItems,'magic_lantern'));
+    const eternalLanternActive=Boolean(special&&hasKeyItem(character?.keyItems,'ewige_laterne'));
+    const lanternActive=Boolean(special&&getMapTorchEffects(character).lanternActive);
     torchMeterEl.parentElement.classList.toggle('is-lantern',lanternActive);
-    torchMeterEl.parentElement.dataset.lightLabel=lanternActive?'LANTERN':'TORCH';
+    torchMeterEl.parentElement.dataset.lightLabel=eternalLanternActive?'EWIGE LATERNE':lanternActive?'LANTERN':'TORCH';
     if(special){
       const s=special.session;
       depthEl.textContent=s.kind==='specialMapV2'?`B${s.currentFloor+1}F`:'特殊地図';posEl.textContent=`X:${s.playerX} Y:${s.playerY}`;
       const chip=document.getElementById('specialSurveyChip');if(chip)chip.textContent=s.kind==='specialMapV2'?`調査${s.surveyedCount}/100\n総合${s.totalSurveyed}/300`:s.surveyComplete?'調査完了':`調査 ${s.surveyedCount} / 100`;
-      torchMeterEl.style.width=`${s.renderState.torchFuel}%`;torchMeterEl.parentElement.classList.toggle('is-critical',s.renderState.torchFuel<=20);
+      const displayedFuel=s.renderState.torchEffectForced?100:s.renderState.torchFuel;
+      torchMeterEl.style.width=`${displayedFuel}%`;torchMeterEl.parentElement.classList.toggle('is-critical',displayedFuel<=20);
       presenceMeterEl.style.setProperty('--presence',`${s.presence||0}%`);presenceMeterEl.setAttribute('aria-valuenow',String(s.presence||0));
       drawCompass(performance.now(),{canvas:compassCanvas,ctx:compassCanvas.getContext('2d'),state:s.renderState,size:compassCanvas.width});
       if(fpsIndicator)fpsIndicator.textContent=`${getEffectiveFrameRate()}fps`;
@@ -5880,7 +5882,7 @@ import {
       if(result.spDamage)showStepSpDamage(result.spDamage);
       updateCharacterUi();
     },
-    syncMapEnvironment:session=>syncV2ThemeEnvironment(session,character,{effectForced:hasCardEffect(character?.cards?.deckSlots,'force_torch_effect_active')}),
+    syncMapEnvironment:session=>syncV2ThemeEnvironment(session,character,getMapTorchEffects(character)),
     checkMapEntry:(map,options)=>{
       if(!options.developmentTheme){const access=getSpecialMapAccess(character,map);if(!access.ok)return access;}
       if(map?.rulesetVersion!=='special-map-v2'||map.themeOverride!=null||options.developmentTheme)return {ok:true};
@@ -5895,9 +5897,7 @@ import {
       return transactSpecialMaps({getCharacter:()=>character,setCharacter:next=>{character=next;},save:()=>saveGame()},maps=>prepareMapBossReward(maps,context,{random:()=>context.rewardRandomValues[drawIndex++]}));
     },
     getTorchCardEffects:()=>({
-      lanternActive:hasKeyItem(character?.keyItems,'magic_lantern'),
-      consumptionDisabled:hasCardEffect(character?.cards?.deckSlots,'torch_consumption_disabled'),
-      effectForced:hasCardEffect(character?.cards?.deckSlots,'force_torch_effect_active'),
+      ...getMapTorchEffects(character),
       presenceIncreaseReduction:sumCardEffectValues(character?.cards?.deckSlots,'presence_gain_reduction')
     }),
     playSurveyCompletion:()=>playSeToEnd('importantItem'),

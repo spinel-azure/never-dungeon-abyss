@@ -15,6 +15,7 @@ export const SPECIAL_FIELD_EFFECT_TARGETS=Object.freeze({
 });
 export function resolveSpecialFieldItem({character,itemId,session}){
  const item=getItem(itemId);
+ if(itemId==='guiding_torch'&&hasKeyItem(character?.keyItems,'ewige_laterne'))return {accepted:false,reason:'lanternActive',message:'「エーヴィゲ・ラテルネ」には導きのたいまつを使用できません。燃料の補充は不要です。'};
  if(itemId==='guiding_torch'&&hasKeyItem(character?.keyItems,'magic_lantern'))return {accepted:false,reason:'lanternActive',message:'「魔法のランタン」には導きのたいまつを使用できません。地図迷宮の階層を移動すると、ゲージが全回復します。'};
  if(itemId==='attracting_incense'&&session.attractingIncenseActive)return {accepted:false,reason:'alreadyActive',message:'引き寄せのお香の効果はまだ続いている。'};
  if(item?.effects.some(e=>['attracting_incense','warding_incense','reset_presence','suppress_presence_steps'].includes(e.id))&&session.kind!=='specialMapV2')return {accepted:false,reason:'noEffect'};
