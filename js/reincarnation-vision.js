@@ -24,7 +24,7 @@ export function createReincarnationVision({host,message,celebration=null}){
   const root=document.createElement('div');root.className='reincarnation-vision';
   root.style.cssText='position:absolute;inset:0;z-index:4;background:#fff;overflow:hidden';
   if(celebration)root.style.zIndex='40';
-  const picture=document.createElement('img');picture.src=images[0];picture.alt=celebration?'調査報告1000件達成記念':'黄金の稲穂の女神ルミナ';
+  const picture=document.createElement('img');picture.src=images[0];picture.alt=celebration?(celebration.alt||'調査報告1000件達成記念'):'黄金の稲穂の女神ルミナ';
   picture.style.cssText='visibility:hidden;position:absolute;inset:0;width:100%;height:100%;object-fit:cover';
   const canvas=document.createElement('canvas');canvas.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none';
   root.append(picture,canvas);host.append(root);
