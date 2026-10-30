@@ -34,7 +34,7 @@ export const ITEMS = Object.freeze([
   }),
   Object.freeze({
     number: 1, id: "healing_potion", name: "回復薬（小）", category: "recovery",
-    buyPrice: 20, sellPrice: 10, source: "shop", usableIn: Object.freeze(["town", "dungeon", "battle"]),
+    buyPrice: 14, sellPrice: 7, source: "shop", usableIn: Object.freeze(["town", "dungeon", "battle"]),
     effects: Object.freeze([{ id: "heal_hp", value: 30 }]),
     description: "HPを30回復する。", maxOwned: 99, iconId: "healing-potion", version: 1
   }),
@@ -47,7 +47,7 @@ export const ITEMS = Object.freeze([
   }),
   Object.freeze({
     number: 3, id: "guiding_torch", name: "導きのたいまつ", category: "exploration",
-    buyPrice: 40, sellPrice: 20, source: "shop", usableIn: Object.freeze(["dungeon"]),
+    buyPrice: 10, sellPrice: 5, source: "shop", usableIn: Object.freeze(["dungeon"]),
     effects: Object.freeze([{ id: "restore_torch", value: 100 }]),
     description: "たいまつの残量を最大まで回復する。", maxOwned: 99, iconId: "guiding-torch", version: 1
   }),
@@ -117,7 +117,7 @@ export const ITEMS = Object.freeze([
   }),
   Object.freeze({
     number: 14, id: "healing_potion_medium", name: "回復薬（中）", category: "recovery",
-    buyPrice: 60, sellPrice: 30, source: "shop", usableIn: Object.freeze(["town", "dungeon", "battle"]),
+    buyPrice: 30, sellPrice: 15, source: "shop", usableIn: Object.freeze(["town", "dungeon", "battle"]),
     effects: Object.freeze([{ id: "heal_hp", value: 60 }]),
     description: "HPを60回復する。B10F到達後に商店へ入荷する。", maxOwned: 99,
     iconId: "healing-potion", version: 1, shopUnlockDepth: 10

@@ -5566,6 +5566,9 @@ import {
       if (dungeonStairImage.getAttribute('src') !== stair.src) dungeonStairImage.src = stair.src;
       dungeonStairImage.alt = stair.alt;
     }
+    const lanternActive=Boolean(special&&hasKeyItem(character?.keyItems,'magic_lantern'));
+    torchMeterEl.parentElement.classList.toggle('is-lantern',lanternActive);
+    torchMeterEl.parentElement.dataset.lightLabel=lanternActive?'LANTERN':'TORCH';
     if(special){
       const s=special.session;
       depthEl.textContent=s.kind==='specialMapV2'?`B${s.currentFloor+1}F`:'特殊地図';posEl.textContent=`X:${s.playerX} Y:${s.playerY}`;
@@ -5892,6 +5895,7 @@ import {
       return transactSpecialMaps({getCharacter:()=>character,setCharacter:next=>{character=next;},save:()=>saveGame()},maps=>prepareMapBossReward(maps,context,{random:()=>context.rewardRandomValues[drawIndex++]}));
     },
     getTorchCardEffects:()=>({
+      lanternActive:hasKeyItem(character?.keyItems,'magic_lantern'),
       consumptionDisabled:hasCardEffect(character?.cards?.deckSlots,'torch_consumption_disabled'),
       effectForced:hasCardEffect(character?.cards?.deckSlots,'force_torch_effect_active'),
       presenceIncreaseReduction:sumCardEffectValues(character?.cards?.deckSlots,'presence_gain_reduction')

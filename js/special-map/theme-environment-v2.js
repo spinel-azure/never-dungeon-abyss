@@ -19,7 +19,7 @@ export function syncV2ThemeEnvironment(session,character,effects={}){
  return session.generatedMap.themeId==='black'&&!restricted?'light':session.generatedMap.themeId;
 }
 export function getV2ThemeBattleOptions(session,character,{boss=false}={}){
- const dark=session?.kind==='specialMapV2'&&session.generatedMap.themeId==='black'&&session.torchFuel<=0&&!session.renderState.torchEffectForced;
+ const dark=session?.kind==='specialMapV2'&&session.torchFuel<=0&&!session.renderState.torchEffectForced;
  return {concealed:dark,ambush:dark&&!boss&&!hasCardEffect(character?.cards?.deckSlots,'zodiac_aries')};
 }
 export function applyV2ThemeStep(character,session){

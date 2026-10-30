@@ -180,7 +180,9 @@ function moveV2To(s,destination){
  if(!s.flushSurvey())return false;
  s.cellPrompt=null;
  s.autoPath=null;
+ const floorChanged=s.currentFloor!==destination.floor-1;
  s.currentFloor=destination.floor-1;
+ if(floorChanged&&s.lanternActive?.())s.torchFuel=100;
  s.playerX=destination.x;s.playerY=destination.y;
  s.direction=resolveSpecialStartDirection({...s.generatedMap,entrance:destination});
  s.renderState.x=destination.x+.5;s.renderState.y=destination.y+.5;s.renderState.angle=s.direction*Math.PI/2-Math.PI/2;

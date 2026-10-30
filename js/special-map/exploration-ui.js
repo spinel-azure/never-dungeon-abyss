@@ -55,6 +55,8 @@ function createExploration({registered,mapKey,message,onExit,onEnter=()=>{},play
  const session=createSession(restoredRegistered,mapKey,{developmentTheme,persistSurvey:saveSurvey,playSe,onEnvironmentStep:host.onMapEnvironmentStep,onEncounter:host.onEncounter,onBossEncounter:host.onEncounter,prepareBossEncounter:host.prepareBossEncounter,say:text=>{message.textContent=text;}});
  session.developmentSession=Boolean(developmentTheme||developmentName);
  if(resumeSave)restoreSpecialMapSession(session,resumeSave);
+ session.lanternActive=()=>Boolean(host.getTorchCardEffects?.().lanternActive);
+ session.torchConsumptionRate=()=>session.lanternActive()?0.5:1;
  if(isV2Session(session)){
   session.torchConsumptionDisabled=()=>Boolean(host.getTorchCardEffects?.().consumptionDisabled);
   session.cardPresenceIncreaseReduction=Math.max(0,Math.min(1,Number(host.getTorchCardEffects?.().presenceIncreaseReduction)||0));

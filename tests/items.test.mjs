@@ -432,15 +432,15 @@ test("healing potion restores 30 HP and is consumed", () => {
 
 test("small, medium and large healing potions use the intended recovery and prices", () => {
   assert.deepEqual([
-    ["healing_potion", "回復薬（小）", 30, 20, 10],
-    ["healing_potion_medium", "回復薬（中）", 60, 60, 30],
+    ["healing_potion", "回復薬（小）", 30, 14, 7],
+    ["healing_potion_medium", "回復薬（中）", 60, 30, 15],
     ["healing_potion_large", "回復薬（大）", 120, 120, 60]
   ].map(([id, name, healing, buyPrice, sellPrice]) => {
     const item = getItem(id);
     return [item.id, item.name, item.effects[0].value, item.buyPrice, item.sellPrice];
   }), [
-    ["healing_potion", "回復薬（小）", 30, 20, 10],
-    ["healing_potion_medium", "回復薬（中）", 60, 60, 30],
+    ["healing_potion", "回復薬（小）", 30, 14, 7],
+    ["healing_potion_medium", "回復薬（中）", 60, 30, 15],
     ["healing_potion_large", "回復薬（大）", 120, 120, 60]
   ]);
 
@@ -708,11 +708,11 @@ test("styptic remains usable from the field inventory at full HP while bleeding"
 
 test("shop and temple purchases spend gold and grant the selected item", () => {
   let character = createInitialCharacter({ name: "TEST", job: "warrior" });
-  character.gold = 360;
+  character.gold = 324;
   for (const [itemId, price] of [
-    ["healing_potion", 20],
+    ["healing_potion", 14],
     ["antidote", 30],
-    ["guiding_torch", 40],
+    ["guiding_torch", 10],
     ["exorcism_talisman", 50],
     ["holy_water", 20],
     ["treasure_compass", 100],
@@ -736,7 +736,7 @@ test("purchases reject insufficient gold and send full-stack overflow to storage
   const result = purchaseItem(full, "healing_potion");
   assert.equal(result.accepted, true);
   assert.equal(result.stored, 1);
-  assert.equal(result.character.gold, 979);
+  assert.equal(result.character.gold, 985);
   assert.deepEqual(result.character.warehouse.itemStacks, [{ itemId: "healing_potion", count: 1 }]);
 });
 
@@ -746,8 +746,8 @@ test("shop can purchase several consumables at once", () => {
   const result = purchaseItem(character, "healing_potion", { amount: 4 });
   assert.equal(result.accepted, true);
   assert.equal(result.quantity, 4);
-  assert.equal(result.cost, 80);
-  assert.equal(result.character.gold, 20);
+  assert.equal(result.cost, 56);
+  assert.equal(result.character.gold, 44);
   assert.equal(getItemCount(result.character.inventory, "healing_potion"), 4);
 });
 

@@ -63,6 +63,7 @@ export const ITEM_COMPENDIUM_ENTRIES = Object.freeze({
     description: "カッツェンラントの女王が身に着けていたと言われる首飾り。柑橘系の匂いがする。所持しているだけでそのフロアのミニマップを全て表示する。ただしB100Fでは無効。"
   }),
   attracting_incense: Object.freeze({id:'attracting_incense',name:'引き寄せのお香',category:'消耗品',acquisition:'スタンプ交換',purchasePrice:null,imageSrc:'images/item-compendium/monster_attracting_incense.avif',description:'気配上昇量が2倍になる。奈落は区域移動まで、地図迷宮は帰還まで持続。'}),
+  magic_lantern:Object.freeze({id:'magic_lantern',name:'魔法のランタン',category:'貴重品',acquisition:'調査報告の景品交換（10p）',purchasePrice:null,imageSrc:'images/item-compendium/magic_lantern.avif',description:'所持中、地図迷宮でのたいまつ消費が半分になり、階層移動で全回復する。導きのたいまつは使用不可。奈落迷宮では無効。'}),
   hacking_device:Object.freeze({id:'hacking_device',name:'ハッキングデバイス',category:'貴重品',acquisition:'累計調査報告1000件達成報酬（転生3回・ポイント消費なし）',purchasePrice:null,imageSrc:'images/item-compendium/hacking_device.avif',description:'明らかにこの世界の物ではない。効果は不明。『HACKING AURORA OS』と書かれているが…？'}),
   stamp_book: Object.freeze({id:'stamp_book',name:'スタンプ帳',category:'貴重品',acquisition:'探検家テント',purchasePrice:null,imageSrc:'images/item-compendium/stamp_book.avif',description:'迷宮探検家トレリーレンから貰ったスタンプ帳。調査が完了する度にスタンプを押してくれる。'}),
   warding_incense: Object.freeze({

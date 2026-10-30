@@ -1,5 +1,6 @@
 import { mergeItemDiscovery } from "./item-discovery.js";
 export const KEY_ITEMS = Object.freeze({
+ magic_lantern:Object.freeze({id:'magic_lantern',name:'魔法のランタン',description:'所持中、地図迷宮でのたいまつ消費が半分になり、階層移動で全回復する。導きのたいまつは使用不可。奈落迷宮では無効。',sellable:false,consumable:false,version:1}),
  hacking_device:Object.freeze({id:'hacking_device',name:'ハッキングデバイス',description:'明らかにこの世界の物ではない。効果は不明。『HACKING AURORA OS』と書かれているが…？',sellable:false,consumable:false,version:1}),
  stamp_book:Object.freeze({id:'stamp_book',name:'スタンプ帳',description:'迷宮探検家トレリーレンから貰ったスタンプ帳。調査が完了する度にスタンプを押してくれる。',sellable:false,consumable:false,version:1}),
   gemini_emblem_other_half: Object.freeze({id:'gemini_emblem_other_half',name:'もう一つの紋様の片割れ',description:'壁のくぼみで見つけた、最初の紋様と対になる紫色の石版。',sellable:false,consumable:false,version:1}),
