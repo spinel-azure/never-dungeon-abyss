@@ -1,5 +1,7 @@
+import {createReincarnationVision} from './reincarnation-vision.js';
+import {getCurrentBgmKey,startBgm,stopBgm} from './audio.js';
 import {renderItemGetItems} from './item-get-presentation.js';
-import {surveyPrizeCost,totalSurveyReports,SURVEY_PRIZES,reportableMaps,surveyExchangeReason,surveyPrizeDetails} from '../data/survey-report.js';
+import {isSurveyCelebrationEligible,surveyPrizeCost,totalSurveyReports,SURVEY_PRIZES,reportableMaps,surveyExchangeReason,surveyPrizeDetails} from '../data/survey-report.js';
 import {describeTestMap,normalizeSpecialMaps} from '../data/special-maps.js';
 import {hasKeyItem} from '../data/key-items.js';
 import {mapNameColor} from './special-map/name-color.js';
@@ -10,6 +12,19 @@ export function createSurveyReportUI({host,commands,message,getCharacter,transac
  const overlay=document.createElement('div');overlay.className='survey-reward-overlay';overlay.hidden=true;host.append(overlay);
  const sortByKind={reports:-1,exchange:0};let listIndex=0;
  let active=false,mode='home',index=0,page=0,sort=-1,sortFocus=false,selected=null,locked=false,epoch=0,pages=[],pageIndex=0,nextTalk=null,background='';
+ const vision=createReincarnationVision({host,message,celebration:{images:['images/background/dungeon_event_26.avif','images/background/dungeon_event_26b.avif','images/background/dungeon_event_26c.avif'],playJingle}});
+ function celebrate(){
+  if(!isSurveyCelebrationEligible(getCharacter()))return false;
+  talk('わぁ…！報告してくれた件数が1000件になったよ！ここまで頑張ってくれてどうもありがとう！さ、ゆっくりと休みましょ！',async()=>{
+   const token=epoch;locked=true;panel.hidden=true;commands.hidden=true;message.textContent='';
+   const music=getCurrentBgmKey();stopBgm();
+   const completed=await vision.play('');
+   if(token!==epoch)return;
+   if(music)startBgm(music);locked=false;
+   if(completed&&commit('celebration')){close();onBack();}
+   else talk('演出の表示または記録の保存を完了できませんでした。もう一度お試しください。',()=>{if(!celebrate())home();});
+  });return true;
+ }
  const state=()=>normalizeSpecialMaps(getCharacter()?.specialMaps);
  const make=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;return e;};
  function button(text,action,chosen=false,disabled=false){const b=make('button'),label=make('span',text);label.className='explorer-button-label';b.append(label);b.type='button';b.disabled=disabled;b.classList.toggle('is-selected',chosen);b.onclick=()=>{if(locked||disabled)return;if(finishTyping())return;playSe(text.startsWith('戻る')?'cancel':'confirm');action();};return b;}
@@ -48,7 +63,7 @@ export function createSurveyReportUI({host,commands,message,getCharacter,transac
  async function confirm(){
   if(mode==='reportConfirm'){
    if(!commit('report',selected.id))return;
-   talk('…わぁ！隅々までじっくり調査してくれたのね。どうもありがとう！',async()=>{if(await present('report')){list('reports');say('他にも報告してくれる地図はあるのかな？');}});
+   talk('…わぁ！隅々までじっくり調査してくれたのね。どうもありがとう！',async()=>{if(await present('report')){if(celebrate())return;list('reports');say('他にも報告してくれる地図はあるのかな？');}});
   }else if(mode==='exchangeConfirm'){
    if(surveyExchangeReason(getCharacter(),selected)==='ポイント不足'){
     playSe('blocked');talk('ごめんね。ポイントが足りないみたい。他の物を選んでくれる？',()=>list('exchange',true));return;
@@ -97,10 +112,10 @@ export function createSurveyReportUI({host,commands,message,getCharacter,transac
   say(mode==='reports'?'報告してくれる地図を選んでね。':'貯まったスタンプポイントを景品と交換できるよ！何と交換する？');
  }
  function turn(delta){const count=Math.max(1,Math.ceil(rows().length/5));page=(page+delta+count)%count;index=page*5;sortFocus=false;render();}
- function input(action){if(!active)return false;if(locked)return true;if(action==='confirm'&&finishTyping())return true;if(action==='cancel'){playSe('cancel');back();return true;}
+ function input(action){if(!active)return false;if(vision.handleInput(action))return true;if(locked)return true;if(action==='confirm'&&finishTyping())return true;if(action==='cancel'){playSe('cancel');back();return true;}
   if(action==='confirm'){playSe('confirm');if(mode==='talk')advance();else if(mode==='home'){if(index===2)back();else list(index===0?'reports':'exchange');}else if(mode.endsWith('Confirm')){if(index===0)void confirm();else back();}else if(sortFocus)cycleSort();else {const row=rows()[index];if(row)select(row);}return true;}
   if(['up','down','left','right','pageLeft','pageRight'].includes(action)){playSe('cursorMove');if(mode==='talk')return true;if(mode==='home'||mode.endsWith('Confirm')){const count=mode==='home'?3:2;index=(index+(['down','right'].includes(action)?1:count-1))%count;render();}else if(['left','pageLeft','right','pageRight'].includes(action))turn(['left','pageLeft'].includes(action)?-1:1);else{const first=page*5,last=Math.min(first+4,rows().length-1);if(sortFocus){sortFocus=false;index=action==='up'?last:first;}else if((action==='up'&&index===first)||(action==='down'&&index===last))sortFocus=true;else index+=action==='down'?1:-1;render();}}return true;
  }
- function close(){active=false;epoch++;locked=false;overlay.hidden=true;overlay.classList.remove('is-fading');panel.hidden=true;}
- return {open(image){active=true;background=image;epoch++;if(state().surveyIntroductionComplete&&hasKeyItem(getCharacter()?.keyItems,'stamp_book'))home();else introduction();},input,close,isActive:()=>active,isTalking:()=>active&&['home','talk','reportConfirm','exchangeConfirm'].includes(mode)};
+ function close(){vision.dispose();active=false;epoch++;locked=false;overlay.hidden=true;overlay.classList.remove('is-fading');panel.hidden=true;}
+ return {open(image){active=true;background=image;epoch++;if(state().surveyIntroductionComplete&&hasKeyItem(getCharacter()?.keyItems,'stamp_book')){if(!celebrate())home();}else introduction();},input,close,isActive:()=>active,isTalking:()=>active&&['home','talk','reportConfirm','exchangeConfirm'].includes(mode)};
 }

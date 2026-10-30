@@ -7,7 +7,8 @@ export const REINCARNATION_VISION_IMAGES=[REINCARNATION_VISION_IMAGE,'images/bac
 export const isReincarnationVisionEligible=character=>Number(character?.reincarnationCount)===3 && Number(character?.level)>=197 && !character?.eventFlags?.reincarnation_lumina_completed;
 export const finalReincarnationMessage=name=>`黄金の稲穂の女神ルミナ「${name}、聞こえますか…。私たちがあなたの限界を引き上げる事が出来るのはここまでです。よくぞここまで己を鍛え上げましたね。あなたに安らぎを与えましょう…。」`;
 
-export function createReincarnationVision({host,message}){
+export function createReincarnationVision({host,message,celebration=null}){
+ const images=celebration?.images||REINCARNATION_VISION_IMAGES;
  let active=null;
  const hint='\n＊Aボタンで次へ';
  function handleInput(action){
@@ -22,7 +23,8 @@ export function createReincarnationVision({host,message}){
   message.dataset.instantText='true';
   const root=document.createElement('div');root.className='reincarnation-vision';
   root.style.cssText='position:absolute;inset:0;z-index:4;background:#fff;overflow:hidden';
-  const picture=document.createElement('img');picture.src=REINCARNATION_VISION_IMAGE;picture.alt='黄金の稲穂の女神ルミナ';
+  if(celebration)root.style.zIndex='40';
+  const picture=document.createElement('img');picture.src=images[0];picture.alt=celebration?'調査報告1000件達成記念':'黄金の稲穂の女神ルミナ';
   picture.style.cssText='visibility:hidden;position:absolute;inset:0;width:100%;height:100%;object-fit:cover';
   const canvas=document.createElement('canvas');canvas.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none';
   root.append(picture,canvas);host.append(root);
@@ -49,35 +51,50 @@ export function createReincarnationVision({host,message}){
    if(ended)return;
    picture.style.opacity='0';picture.src=src;
    await Promise.race([picture.decode().catch(()=>{}),pause(3000)]);
+   if(celebration&&!picture.naturalWidth){state.finish(false);return;}
    await animate([{filter:'blur(22px)',opacity:0},{filter:'blur(0px)',opacity:1}]);
    picture.style.opacity='1';
   };
   const next=()=>new Promise(done=>{state.next=done;state.ready=true;});
   const effect=parts=>({version:3,id:'reincarnation-vision',width:960,height:540,duration:reduced?160:1100,parts,audioTracks:[]});
+  if(celebration){
+   await Promise.race([root.animate([{opacity:0},{opacity:1}],{duration:reduced?160:700,fill:'forwards'}).finished,result]);
+   if(ended)return result;
+  }
   // Image loading is bounded; a missing asset must never lock the ceremony.
   await Promise.race([picture.decode().catch(()=>{}),new Promise(done=>setTimeout(done,3000))]);
   if(ended)return result;
+  if(celebration&&!picture.naturalWidth){state.finish(false);return result;}
   engine.load(effect([{type:'whiteout',enabled:true,start:0,duration:reduced?160:700,color:'#ffffff',intensity:1,fadeIn:0,hold:0,fadeOut:reduced?160:700}]));
   picture.style.visibility='visible';root.style.background='#000';
   picture.style.opacity='0';
   await Promise.all([engine.play(),animate([{filter:'blur(22px)',opacity:0},{filter:'blur(0px)',opacity:1}])]);
   picture.style.opacity='1';
   if(ended)return result;
-  const pages=paginateMessageToFit({element:message,text:finalReincarnationMessage(name),formatPage:text=>text+hint});
+  if(celebration)await pause(5000);
+  if(ended)return result;
+  const pages=celebration?[]:paginateMessageToFit({element:message,text:finalReincarnationMessage(name),formatPage:text=>text+hint});
   for(const page of pages){
    message.textContent=page+hint;
    await next();
    if(ended)return result;
   }
   message.textContent='';
-  await changeImage(REINCARNATION_VISION_IMAGES[1]);
+  await changeImage(images[1]);
   await pause(5000);
   if(ended)return result;
-  await changeImage(REINCARNATION_VISION_IMAGES[2]);
+  await changeImage(images[2]);
   if(ended)return result;
   message.textContent='＊Aボタンで次へ';
   await next();
   if(ended)return result;
+  if(celebration){
+   message.textContent='';
+   engine.load({version:3,id:'survey-rest',width:960,height:540,duration:reduced?160:1100,parts:[{type:'blackout',enabled:true,start:0,duration:reduced?160:1100,color:'#000000',intensity:1,fadeIn:reduced?160:1100,hold:0,fadeOut:0}],audioTracks:[]});
+   await Promise.race([Promise.all([engine.play().then(()=>{picture.style.visibility='hidden';root.style.background='#000';}),celebration.playJingle('goodNight'),pause(6000)]),result]);
+   if(!ended)state.finish(true);
+   return result;
+  }
   const closing=paginateMessageToFit({element:message,text:'黄金の稲穂の女神ルミナ「私たちはいつでもあなたを見守っておりますよ…。」',formatPage:text=>text+hint});
   for(let index=0;index<closing.length;index++){
    const last=index===closing.length-1;

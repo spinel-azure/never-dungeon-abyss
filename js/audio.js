@@ -172,6 +172,8 @@ export function startBgm(key) {
   return restartBgm();
 }
 
+export function getCurrentBgmKey(){return audio.desiredBgmKey;}
+
 export function stopBgm() {
   audio.cinematic?.stop();
   audio.desiredBgmKey = "";

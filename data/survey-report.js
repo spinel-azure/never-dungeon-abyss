@@ -30,6 +30,7 @@ export function surveyPrizeDetails(prize){
   description:prize.once?`DEF＋${item.statBonuses.def}／${item.description}。一品物・交換は1回のみ。ロック状態で受け取ります。`:item.description,
   image:catalog?.imageSrc||({alveter_schuhe:'images/item-compendium/allwetterschuhe.avif',zaubertrank:'images/item-compendium/zaubertrank.avif',allheilmittel:'images/item-compendium/allheilmittel.avif'}[prize.id]||'')};
 }
+export function isSurveyCelebrationEligible(character){return totalSurveyReports(character)>=1000&&!character?.eventFlags?.survey_1000_celebration_completed;}
 export function totalSurveyReports(character){return Object.keys(normalizeSpecialMaps(character?.specialMaps).surveyRewardClaims||{}).length;}
 export function reportableMaps(character){const s=normalizeSpecialMaps(character?.specialMaps);const ids=new Set(getMapSurveyReports(s).filter(r=>r.canReport).map(r=>r.mapId));return s.registered.filter(m=>ids.has(m.id));}
 const fail=error=>({ok:false,error});
@@ -58,6 +59,9 @@ export function surveyOperation(character,action,id){
   if(!hasKeyItem(character.keyItems,'stamp_book')||!s.surveyIntroductionComplete)return fail('説明を聞いてから報告してください。');
   const map=reportableMaps(character).find(m=>m.id===id);if(!map)return fail('この地図は報告できません。');
   next.specialMaps={...s,stampPoints:s.stampPoints+1,surveyRewardClaims:{...s.surveyRewardClaims,[mapContentId(map)]:true}};
+ }else if(action==='celebration'){
+  if(!isSurveyCelebrationEligible(character))return fail('達成演出の対象ではありません。');
+  next.eventFlags={...character.eventFlags,survey_1000_celebration_completed:true};
  }else if(action==='exchange'){
   const prize=SURVEY_PRIZES.find(p=>p.id===id);if(!prize)return fail('交換品が見つかりません。');
   const reason=surveyExchangeReason(character,prize);if(reason)return fail(reason);
