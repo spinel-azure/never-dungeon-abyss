@@ -1,5 +1,5 @@
 import {renderItemGetItems} from './item-get-presentation.js';
-import {totalSurveyReports,SURVEY_PRIZES,reportableMaps,surveyExchangeReason,surveyPrizeDetails} from '../data/survey-report.js';
+import {surveyPrizeCost,totalSurveyReports,SURVEY_PRIZES,reportableMaps,surveyExchangeReason,surveyPrizeDetails} from '../data/survey-report.js';
 import {describeTestMap,normalizeSpecialMaps} from '../data/special-maps.js';
 import {hasKeyItem} from '../data/key-items.js';
 import {mapNameColor} from './special-map/name-color.js';
@@ -42,7 +42,7 @@ export function createSurveyReportUI({host,commands,message,getCharacter,transac
  function home(){mode='home';index=0;render();const greeting=background.endsWith('01f.avif')?'おはよう':background.endsWith('01c.avif')?'こんばんは':'こんにちは';say(greeting+'！調査した地図を報告してくれるの？それとも何か交換する？');}
  function list(kind,resume=false){mode=kind;sort=sortByKind[kind];index=resume?listIndex:0;page=Math.floor(index/5);sortFocus=false;render();}
  function rows(){if(mode==='reports')return sortRegisteredMaps(reportableMaps(getCharacter()),sort);
- const list=[...SURVEY_PRIZES];return sort===0?list.sort((a,b)=>a.category-b.category):sort===1?list.sort((a,b)=>a.cost-b.cost):sort===2?list.sort((a,b)=>b.cost-a.cost):list;}
+ const list=[...SURVEY_PRIZES];return sort===0?list.sort((a,b)=>a.category-b.category):sort===1?list.sort((a,b)=>surveyPrizeCost(getCharacter(),a)-surveyPrizeCost(getCharacter(),b)):sort===2?list.sort((a,b)=>surveyPrizeCost(getCharacter(),b)-surveyPrizeCost(getCharacter(),a)):list;}
  function cycleSort(){sort=(sort+1)%(mode==='reports'?4:3);sortByKind[mode]=sort;index=page=0;render();}
  function select(row){listIndex=index;selected=row;mode=mode==='reports'?'reportConfirm':'exchangeConfirm';index=0;render();}
  async function confirm(){
@@ -75,7 +75,8 @@ export function createSurveyReportUI({host,commands,message,getCharacter,transac
     const info=surveyPrizeDetails(selected),top=make('div');top.className='survey-prize-top';
     const name=make('h3',selected.name);if(selected.once)name.style.color='#ff9d2e';top.append(name);
     if(info.image){const image=make('img');image.src=info.image;image.alt=selected.name;image.onerror=()=>image.remove();top.append(image);}
-    detail.append(top,make('p',`【${info.category}】${info.description}`),make('p',selected.requiredReports?`累計調査報告 ${totalSurveyReports(getCharacter())}／${selected.requiredReports}件・ポイント消費なし`:`必要 ${selected.cost}p ／ 所持 ${state().stampPoints}p`));
+    detail.append(top,make('p',`【${info.category}】${info.description}`),make('p',selected.requiredReports?`累計調査報告 ${totalSurveyReports(getCharacter())}／${selected.requiredReports}件・ポイント消費なし`:`必要 ${surveyPrizeCost(getCharacter(),selected)}p ／ 所持 ${state().stampPoints}p`));
+    if(surveyPrizeCost(getCharacter(),selected)<selected.cost)detail.append(make('p','魔法のランタン所持割引：45p → 30p'));
     if(info.effect)detail.append(make('p',info.effect));
     const reason=surveyExchangeReason(getCharacter(),selected);if(reason)detail.append(make('p',reason));panel.append(detail);
    }else panel.append(make('h3',selected.name||describeTestMap(selected)?.name));
@@ -88,7 +89,7 @@ export function createSurveyReportUI({host,commands,message,getCharacter,transac
   const listEl=make('div');listEl.className='transfer-destination-list';
   if(!items.length)listEl.append(make('p','報告できる地図はありません。'));
   items.slice(page*5,page*5+5).forEach((row,n)=>{const i=page*5+n,reason=mode==='exchange'?surveyExchangeReason(getCharacter(),row):'';
-   const label=mode==='reports'?describeTestMap(row)?.name:`${row.name}　${row.requiredReports?`累計${row.requiredReports}件達成報酬`:row.cost+'p'}${reason?'（'+reason+'）':''}`;
+   const label=mode==='reports'?describeTestMap(row)?.name:`${row.name}　${row.requiredReports?`累計${row.requiredReports}件達成報酬`:surveyPrizeCost(getCharacter(),row)+'p'}${reason?'（'+reason+'）':''}`;
    const b=button(label,()=>{index=i;select(row);},!sortFocus&&index===i);b.classList.toggle('is-unavailable',Boolean(reason));b.children[0].className='explorer-map-name';if(mode==='reports'){b.style.color=mapNameColor(row.rarity);const check=make('span','☑');check.className='explorer-map-complete';b.append(check);}if(row.once&&!reason)b.style.color='#ff9d2e';listEl.append(b);
   });panel.append(listEl);
   const pager=make('div');pager.className='transfer-destination-pager';pager.append(button('◀',()=>turn(-1)),make('strong',`${page+1} / ${Math.max(1,Math.ceil(items.length/5))}`),button('▶',()=>turn(1)));panel.append(pager);

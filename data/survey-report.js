@@ -17,6 +17,9 @@ export const SURVEY_PRIZES=Object.freeze([
  {id:'hacking_device',name:'ハッキングデバイス',cost:0,requiredReports:1000,category:3,keyItem:true,once:true},
  {id:'alveter_schuhe',name:'アルヴェターシューエ',cost:40,category:2,once:true}
 ]);
+export function surveyPrizeCost(character,prize){
+ return prize.id==='ewige_laterne'&&hasKeyItem(character?.keyItems,'magic_lantern')?30:prize.cost;
+}
 export function surveyPrizeDetails(prize){
  if(prize.id==='ewige_laterne')return {category:'貴重品',description:'所持中、地図迷宮でたいまつゲージが減らなくなる。奈落迷宮では無効。',effect:'所持で有効・消費なし・交換は1回のみ。',image:getItemCompendiumEntry(prize.id)?.imageSrc};
  if(prize.id==='magic_lantern')return {category:'貴重品',description:'地図迷宮でたいまつの消費量が半分になる。満タンで200歩分、階層移動で全回復。導きのたいまつは使用不可。奈落迷宮では無効。',effect:'所持で有効・消費なし・交換は1回のみ。',image:getItemCompendiumEntry(prize.id)?.imageSrc};
@@ -39,7 +42,7 @@ export function surveyExchangeReason(character,prize){
  }
  if(prize.requiredReports&&totalSurveyReports(character)<prize.requiredReports)return '累計調査報告1000件で受領可能';
  if(prize.once&&!prize.keyItem&&(s.surveyShoesExchanged||characterOwnsEquipment(character,prize.id)))return '交換済み・所持済み';
- if(s.stampPoints<prize.cost)return 'ポイント不足';
+ if(s.stampPoints<surveyPrizeCost(character,prize))return 'ポイント不足';
  if(!prize.once&&getItemCount(character.inventory,prize.id)>=getItem(prize.id).maxOwned)return '所持上限';
  return '';
 }
@@ -61,7 +64,7 @@ export function surveyOperation(character,action,id){
   if(prize.keyItem){next={...next,keyItems:grantKeyItem(next.keyItems,prize.id).keyItems};}
   else if(prize.once){const r=grantEquipmentInstance(next,prize.id,'footId',{locked:true});if(!r.accepted)return fail('装備を受け取れません。');next=r.character;}
   else{const r=grantItem(next.inventory,id);if(r.gained!==1)return fail('所持上限です。');next={...next,inventory:r.inventory};}
-  next.specialMaps={...s,stampPoints:s.stampPoints-prize.cost,...(prize.once&&!prize.keyItem?{surveyShoesExchanged:true}:{})};
+  next.specialMaps={...s,stampPoints:s.stampPoints-surveyPrizeCost(character,prize),...(prize.once&&!prize.keyItem?{surveyShoesExchanged:true}:{})};
  }else return fail('未対応の操作です。');
  return {ok:true,character:next};
 }

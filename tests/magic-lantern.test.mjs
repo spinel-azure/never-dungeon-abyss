@@ -92,3 +92,13 @@ test('eternal lantern prevents fuel loss during actual movement',t=>{
  s.torchConsumptionDisabled=()=>getMapTorchEffects(c).consumptionDisabled;
  for(let i=0;i<250;i++){s.motion={started:0,duration:1,x:0,y:0,toX:0,toY:0,angle:0,toAngle:0,isStep:true};updateSpecialMotion(s,1);}assert.equal(s.torchFuel,100);
 });
+
+test('owning the magic lantern discounts Ewige to 30p, preserves both items and rolls back on save failure',()=>{
+ let c=surveyOperation(ready(),'exchange','magic_lantern').character;
+ c.specialMaps.stampPoints=29;assert.equal(surveyOperation(c,'exchange','ewige_laterne').error,'ポイント不足');
+ c.specialMaps.stampPoints=30;const before=structuredClone(c);
+ let current=c;assert.equal(transactSurvey({getCharacter:()=>current,setCharacter:n=>current=n,save:()=>false},'exchange','ewige_laterne').ok,false);assert.deepEqual(current,before);
+ const r=surveyOperation(c,'exchange','ewige_laterne');assert.ok(r.ok);assert.equal(r.character.specialMaps.stampPoints,0);
+ for(const id of ['magic_lantern','ewige_laterne'])assert.ok(hasKeyItem(r.character.keyItems,id));
+ assert.equal(surveyOperation(r.character,'exchange','ewige_laterne').ok,false);
+});
