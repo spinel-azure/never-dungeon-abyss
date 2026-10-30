@@ -2262,3 +2262,9 @@
 - 赤箱由来刻印金箱の保存/付与成功後、既存importantItemジングル1回＋ボス報酬共通showV2RareRewardAcquisitionへ接続。箱を隠して画像付き未鑑定刻印ポップアップを表示。演出中transitioning、終了時解除、close時既存rareRewardPlayingで後始末。追加付与なし。
 - Node全2198成功/失敗0。ブラウザ全箱検証は途中freshPageフック初期化待ちtimeoutで未完走。対象限定ENGRAVING_ONLYケースを追加、PC1280x900/スマホ相当390x900で本編開封→ポップアップ→保存再開→鑑定前ラベル成功。初回PNGが演出冒頭だったため1秒待機を追加し画像確認を再実行。音声はコード接続確認、ブラウザQAはミュート。実端末未確認。
 - LAST UPDATE維持、main.jsキャッシュ20261021-5、CSS維持。README変更/コミット/pushなし。
+
+### 2026-10-30 商店買い戻しメニュー凍結
+
+- 商店上段右の買い戻しを空ラベル/empty-buybackへ変更。既存empty判定でdisabled/is-emptyとなり、カーソル候補から除外。枠と他5コマンド配置を維持。買い戻し処理・保存データは保持。
+- 構文/diff検査成功、関連Node73件成功。入力経路のdisabled除外をコード確認。今回はブラウザ/実端末未確認。
+- 既存LAST UPDATE2026-10-30維持、main.jsキャッシュ20261030-1。コミット/pushなし。

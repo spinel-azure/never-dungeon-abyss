@@ -61,7 +61,7 @@ const FACILITY_COMMANDS = Object.freeze({
     ["talk", "話す"], ["reincarnate", "転生"], ["return", "戻る"]
   ],
   shop: [
-    ["buy", "購入"], ["sell", "売却"], ["buyback", "買い戻す"],
+    ["buy", "購入"], ["sell", "売却"], ["empty-buyback", ""],
     ["storage", "倉庫"], ["talk", "話す"], ["return", "町へ戻る"]
   ],
   library: [
