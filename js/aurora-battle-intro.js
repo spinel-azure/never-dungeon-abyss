@@ -2,6 +2,7 @@ import {createAuroraBoot} from './aurora-boot.js';
 import {createAuroraSummoning} from './aurora-summoning.js';
 import {isSuperGoddess} from '../combat/goddess-superboss.js';
 import {canActivateHackingDevice} from '../combat/hacking-device.js';
+import {layoutAuroraSurface} from './aurora-layout.js';
 
 // Each map version verifies its own encounter metadata before setting mapBoss.
 // The common presentation does not interpret V2/V3 session or checkpoint shapes.
@@ -12,7 +13,7 @@ export function getAuroraBattleRoute(character,enemy,{mapBoss=false,resumed=null
 
 // One owner for the two presentations, the black interstitial and input release.
 // No battle state is created until startBattle runs under the closing cover.
-export function createAuroraBattleIntro({anchor=null,boot=createAuroraBoot({anchor,pollGamepad:false}),summoning=createAuroraSummoning({anchor,pollGamepad:false})}={}){
+export function createAuroraBattleIntro({anchor=null,embedded=!!anchor,boot=createAuroraBoot({anchor,pollGamepad:false,embedded}),summoning=createAuroraSummoning({anchor,pollGamepad:false,embedded})}={}){
  let active=null;
  function dispose(){active?.cancel();}
  async function play({route,isCurrent=()=>true,startBattle}){
@@ -22,6 +23,9 @@ export function createAuroraBattleIntro({anchor=null,boot=createAuroraBoot({anch
   shield.style.cssText='position:fixed;inset:0;margin:0;border:0;padding:0;width:100vw;height:100dvh;max-width:none;max-height:none;background:transparent;outline:none;touch-action:none;';
   const style=document.createElement('style');style.textContent='.aurora-battle-shield::backdrop{background:transparent}';shield.append(style);
   document.body.append(shield);
+  const cover=document.createElement('div');cover.style.cssText='position:absolute;background:#000;opacity:0;pointer-events:none;';shield.append(cover);
+  function layout(){if(embedded)layoutAuroraSurface(cover,anchor,true);else Object.assign(cover.style,{inset:'0'});}
+  layout();window.addEventListener('resize',layout);window.addEventListener('scroll',layout,true);
   const focus=document.activeElement,keys=new Set(),pads=new Map(),pointers=new Set();
   let cancelled=false,child=null,raf=0,drainResolve=null,lastInput=performance.now();
   const token={cancel(){cancelled=true;boot.dispose();summoning.dispose();drainResolve?.();}};
@@ -54,7 +58,7 @@ export function createAuroraBattleIntro({anchor=null,boot=createAuroraBoot({anch
   try{
    child=boot;await boot.play();
    if(cancelled||!isCurrent())return false;
-   shield.style.background='#000';
+   cover.style.opacity='1';
    child=summoning;await summoning.play({route});
    child=null;
    if(cancelled||!isCurrent())return false;
@@ -66,6 +70,7 @@ export function createAuroraBattleIntro({anchor=null,boot=createAuroraBoot({anch
    window.removeEventListener('keydown',key,true);window.removeEventListener('keyup',key,true);window.removeEventListener('pagehide',dispose);
    for(const type of ['pointerdown','pointerup','pointercancel'])window.removeEventListener(type,pointer,true);
    window.removeEventListener('blur',blur);
+   window.removeEventListener('resize',layout);window.removeEventListener('scroll',layout,true);
    shield.close();shield.remove();if(focus?.isConnected)focus.focus({preventScroll:true});
    if(active===token)active=null;
   }

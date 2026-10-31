@@ -11,11 +11,21 @@ const hook=scope.hook.replace("level:50,rarity:'SILVER'","level:100,rarity:'WHIT
  .replace("openTown({registrationRequired:false,mode:'dungeonEntrance'});",`character.reincarnationCount=window.introConfig.count;
  if(window.introConfig.owned)character.keyItems=(await import('/data/key-items.js')).grantKeyItem(character.keyItems,'hacking_device').keyItems;
  character.npcSystem={registeredIds:['alec'],activeIds:['alec'],records:{alec:{}},renewal:null,expeditionMaxDepth:0};
+ updateCharacterUi();
  openTown({registrationRequired:false,mode:'dungeonEntrance'});`);
 const main=await readFile('js/main.js','utf8'),battle=await readFile('js/battle.js','utf8');
 const output=await mkdtemp(join(tmpdir(),'nda-aurora-integration-'));
 const browser=await chromium.launch({channel:'msedge',headless:true});
+async function checkEmbedded(page){
+ const bounds=await page.locator('#screen').boundingBox(),overlay=await page.locator('dialog.aurora-boot canvas').boundingBox();
+ for(const key of ['x','y','width','height'])assert.ok(Math.abs(bounds[key]-overlay[key])<1,key+' matches main canvas');
+ assert.equal(await page.locator('dialog.aurora-boot').evaluate(e=>getComputedStyle(e).backgroundColor),'rgba(0, 0, 0, 0)');
+ assert.equal(await page.locator('dialog.aurora-boot > div').evaluate(e=>e.hidden),true);
+ assert.equal(await page.locator('.viewport .status').isVisible(),true);
+ assert.equal(await page.locator('#dungeonCommands').isVisible(),true);
+}
 try{for(const [width,theme,owned,count] of [[1280,'rice',false,3],[1280,'dusk',true,3],[390,'tender',true,3],[390,'rice',true,2],[768,'gold',true,3]]){
+ if(process.env.NDA_QA_THEMES&&!process.env.NDA_QA_THEMES.split(',').includes(theme))continue;
  const page=await browser.newPage({viewport:{width,height:900},hasTouch:width===390});page.setDefaultTimeout(30000);
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.addInitScript(config=>{window.introConfig=config;window.padDown=false;navigator.getGamepads=()=>[{index:0,buttons:[{pressed:padDown}],axes:[0,0]}];},{theme,owned,count});
@@ -41,6 +51,7 @@ try{for(const [width,theme,owned,count] of [[1280,'rice',false,3],[1280,'dusk',t
  assert.equal(initial.starts,0);assert.equal(await page.evaluate(()=>resumeQa.read().battle),false);
  await page.evaluate(()=>{for(const a of ['confirm','items','up','status','map'])introQa.dispatch(a);});
  await page.waitForTimeout(150);assert.equal(await page.evaluate(()=>window.battleStarts||0),0);
+ await checkEmbedded(page);
  await page.screenshot({path:join(output,`${width}-${theme}-boot.png`)});
  // Keep Enter held across the boundary. The next log must remain unskipped.
  await page.keyboard.down('Enter');await page.waitForTimeout(350);
@@ -51,6 +62,7 @@ try{for(const [width,theme,owned,count] of [[1280,'rice',false,3],[1280,'dusk',t
  for(const key of ['hp','sp','npcSystem','inventory','keyItems','cards','playerCharge'])assert.deepEqual(during[key],initial.c[key]);
  if(width===390)await page.locator('canvas[data-route]').tap();else await page.keyboard.press('Space');
  await page.waitForTimeout(350);assert.equal(await page.locator('canvas[data-route]').getAttribute('data-phase'),'complete');
+ await checkEmbedded(page);
  await page.screenshot({path:join(output,`${width}-${theme}-log.png`)});
  // Physical A edge exits; holding it prevents leakage into the battle.
  await page.evaluate(()=>padDown=true);await page.waitForTimeout(500);assert.equal(await page.evaluate(()=>window.battleStarts||0),0);

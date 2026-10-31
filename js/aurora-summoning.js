@@ -1,3 +1,4 @@
+import {layoutAuroraSurface} from './aurora-layout.js';
 export const SUMMONING_COLORS=Object.freeze({background:'#0B111C',normal:'#91E0DF',warning:'#FF7777',success:'#A8F0B5'});
 const common=['> AKASHIC RECORDS : CONNECTED','> DIVINE ENTITY DATA : FOUND','','> INITIALIZING REPRODUCTION...'];
 const normal=['','> LUMINA   : VERIFIED','> NOCTIA   : VERIFIED','> ZELENA   : VERIFIED','','> DIVINE AUTHORITY : 100%','> SUMMONING SEQUENCE : COMPLETE'];
@@ -44,7 +45,7 @@ export function drawSummoningLog(ctx,frame){
 }
 
 // No game, inventory, battle, audio or save dependencies. Route is fixed per play.
-export function createAuroraSummoning({anchor=null,pollGamepad=true}={}){
+export function createAuroraSummoning({anchor=null,pollGamepad=true,embedded=false}={}){
  let active=null;
  function dispose(){active?.finish(false);}
  function handleInput(action){if(!active)return false;if(action==='confirm')active.confirm();return true;}
@@ -53,24 +54,26 @@ export function createAuroraSummoning({anchor=null,pollGamepad=true}={}){
   if(active)return {route,completed:false};
   const dialog=document.createElement('dialog');dialog.setAttribute('aria-label','AURORA OS — DIVINE SUMMONING PROTOCOL');
   dialog.style.cssText='position:fixed;inset:0;margin:0;width:100vw;height:100dvh;max-width:none;max-height:none;border:0;padding:0;background:#000;overflow:hidden;touch-action:none;outline:none;';
+  if(embedded)dialog.style.background='transparent';
   const style=document.createElement('style');style.textContent='dialog.aurora-boot::backdrop{background:transparent}';dialog.className='aurora-boot';dialog.append(style);
   const canvas=document.createElement('canvas');canvas.width=960;canvas.height=540;canvas.setAttribute('aria-label','INITIALIZING...');
   canvas.style.cssText='position:absolute;image-rendering:auto;aspect-ratio:16/9;touch-action:none;';dialog.append(canvas);
   // Separate black cover hides the surrounding HUD without resizing the game.
   const cover=document.createElement('div');cover.style.cssText='position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;';dialog.prepend(cover);
+  if(embedded)cover.hidden=true;
   document.body.append(dialog);const previousFocus=document.activeElement;
   let raf=0,start=null,offset=0,lastConfirm=-Infinity,phase='loading',ended=false,resolve;
   const heldKeys=new Set(),heldPads=new Map();let pointer=null;
   const result=new Promise(r=>resolve=r);
   function layout(){
-   const rect=anchor?.getBoundingClientRect();const w=Math.min(rect?.width||innerWidth,innerWidth,innerHeight*16/9),h=w*9/16;
-   canvas.style.width=w+'px';canvas.style.height=h+'px';canvas.style.left=((innerWidth-w)/2)+'px';canvas.style.top=(rect?Math.max(0,Math.min(rect.top,innerHeight-h)):(innerHeight-h)/2)+'px';
+   layoutAuroraSurface(canvas,anchor,embedded);
   }
   const ctx=canvas.getContext('2d');
   function finish(ok){
    if(ended)return;ended=true;cancelAnimationFrame(raf);
    window.removeEventListener('keydown',key,true);window.removeEventListener('keyup',key,true);window.removeEventListener('resize',layout);
    window.removeEventListener('pagehide',dispose);dialog.close();dialog.remove();if(previousFocus?.isConnected)previousFocus.focus({preventScroll:true});active=null;resolve({route,completed:ok});
+   window.removeEventListener('scroll',layout,true);
   }
   function confirm(){
    const now=performance.now();if(start===null||phase==='closing'||now-lastConfirm<300)return;
@@ -97,6 +100,7 @@ export function createAuroraSummoning({anchor=null,pollGamepad=true}={}){
   dialog.addEventListener('pointercancel',()=>pointer=null);
   dialog.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();});
   window.addEventListener('keydown',key,true);window.addEventListener('keyup',key,true);window.addEventListener('resize',layout);window.addEventListener('pagehide',dispose);
+  window.addEventListener('scroll',layout,true);
   dialog.showModal();layout();pads();
   function tick(now){
    if(ended)return;pads();const frame=summoningFrameAt(timeline,now-start+offset);phase=frame.ended?'ended':frame.shade>0?'closing':frame.complete?'complete':'typing';

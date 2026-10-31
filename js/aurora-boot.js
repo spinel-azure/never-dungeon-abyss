@@ -1,3 +1,4 @@
+import {layoutAuroraSurface} from './aurora-layout.js';
 export const AURORA_BOOT_IMAGE='images/background/dungeon_event_28.avif';
 export const AURORA_SIZE=Object.freeze({width:960,height:540});
 export const AURORA_PROGRESS=Object.freeze([[0,0],[800,.35],[1500,.7],[2300,.9],[2800,.95],[3300,.95],[3500,1]].map(Object.freeze));
@@ -49,7 +50,7 @@ export function drawAuroraBoot(ctx,image,frame){
 // Independent presentation: no audio, storage, game state or battle dependency.
 // A future game caller must pause its simulation and route abstract gamepad
 // actions to handleInput(), or disable its own gamepad dispatcher while active.
-export function createAuroraBoot({imageUrl=new URL('../'+AURORA_BOOT_IMAGE,import.meta.url).href,anchor=null,pollGamepad=true}={}){
+export function createAuroraBoot({imageUrl=new URL('../'+AURORA_BOOT_IMAGE,import.meta.url).href,anchor=null,pollGamepad=true,embedded=false}={}){
  let active=null;
  function dispose(){active?.finish(false);}
  function handleInput(action){if(!active)return false;if(action==='confirm')active.confirm();return true;}
@@ -62,19 +63,20 @@ export function createAuroraBoot({imageUrl=new URL('../'+AURORA_BOOT_IMAGE,impor
   canvas.style.cssText='position:absolute;image-rendering:pixelated;aspect-ratio:16/9;touch-action:none;';dialog.append(canvas);
   // Separate black cover hides the surrounding HUD without resizing the game.
   const cover=document.createElement('div');cover.style.cssText='position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;';dialog.prepend(cover);
+  if(embedded)cover.hidden=true;
   document.body.append(dialog);const previousFocus=document.activeElement;
   let raf=0,loadTimer=0,start=null,offset=0,lastConfirm=-Infinity,phase='loading',ended=false,resolve;
   const heldKeys=new Set(),heldPads=new Map();let pointer=null;
   const image=new Image();const result=new Promise(r=>resolve=r);
   function layout(){
-   const rect=anchor?.getBoundingClientRect();const w=Math.min(rect?.width||innerWidth,innerWidth,innerHeight*16/9),h=w*9/16;
-   canvas.style.width=w+'px';canvas.style.height=h+'px';canvas.style.left=((innerWidth-w)/2)+'px';canvas.style.top=(rect?Math.max(0,Math.min(rect.top,innerHeight-h)):(innerHeight-h)/2)+'px';
+   layoutAuroraSurface(canvas,anchor,embedded);
   }
   const ctx=canvas.getContext('2d');
   function finish(ok){
    if(ended)return;ended=true;cancelAnimationFrame(raf);clearTimeout(loadTimer);image.onload=image.onerror=null;
    window.removeEventListener('keydown',key,true);window.removeEventListener('keyup',key,true);window.removeEventListener('resize',layout);
    window.removeEventListener('pagehide',dispose);dialog.close();dialog.remove();if(previousFocus?.isConnected)previousFocus.focus({preventScroll:true});active=null;resolve(ok);
+   window.removeEventListener('scroll',layout,true);
   }
   function confirm(){
    const now=performance.now();if(start===null||phase==='closing'||now-lastConfirm<300)return;
@@ -101,6 +103,7 @@ export function createAuroraBoot({imageUrl=new URL('../'+AURORA_BOOT_IMAGE,impor
   dialog.addEventListener('pointercancel',()=>pointer=null);
   dialog.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();});
   window.addEventListener('keydown',key,true);window.addEventListener('keyup',key,true);window.addEventListener('resize',layout);window.addEventListener('pagehide',dispose);
+  window.addEventListener('scroll',layout,true);
   dialog.showModal();layout();pads();
   function tick(now){
    if(ended)return;pads();const frame=auroraFrameAt(now-start+offset);phase=frame.phase;
