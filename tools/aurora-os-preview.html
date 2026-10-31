@@ -1,0 +1,18 @@
+<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AURORA OS — local preview</title>
+<style>body{background:#111;color:#eee;font:16px sans-serif;margin:20px}#stage{width:min(100%,960px);aspect-ratio:16/9;background:#223;display:grid;place-items:center;margin:auto}button{padding:12px}p{max-width:960px;margin:16px auto}</style>
+<div id="stage">呼び出し元の画面（終了後に復帰）</div><p><button id="play">AURORA OSを再生</button> <button id="normal">通常召喚ログ</button> <button id="hacking">ハッキング召喚ログ</button> <span id="result"></span></p><p>決定：Enter／Space／Z・ゲームパッドA・画面タップ。1回で完了へ、もう1回で終了。通常ゲームやセーブとは接続していません。</p>
+<script type="module">
+import {createAuroraSummoning} from '../js/aurora-summoning.js';
+import {createAuroraBoot} from '../js/aurora-boot.js';
+const button=document.querySelector('#play'),result=document.querySelector('#result');
+const boot=createAuroraBoot({anchor:document.querySelector('#stage')});
+button.onclick=async()=>{button.disabled=true;result.textContent='再生中';try{result.textContent=await boot.play()?'終了・元の画面に復帰':'中断または読み込み失敗';}finally{button.disabled=false;}};
+const summoning=createAuroraSummoning({anchor:document.querySelector('#stage')});
+for(const route of ['normal','hacking'])document.getElementById(route).onclick=async()=>{
+ const buttons=[...document.querySelectorAll('button')];buttons.forEach(b=>b.disabled=true);result.textContent='再生中';
+ try{const outcome=await summoning.play({route});result.textContent=(outcome.route==='normal'?'通常ルート':'ハッキングルート')+(outcome.completed?'：終了・元の画面に復帰':'：中断');}
+ finally{buttons.forEach(b=>b.disabled=false);}
+};
+window.auroraSummoningPreview=summoning;
+window.auroraPreview=boot;
+</script></html>

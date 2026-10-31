@@ -1,4 +1,6 @@
 import {getSpecialMapAccess} from '../data/special-map-access.js';
+import {createAuroraBattleIntro} from './aurora-battle-intro.js';
+import {getV2AuroraBattleRoute} from './special-map/aurora-v2.js';
 import {goddessCheckpoint,restoreGoddessCheckpoint} from './special-map/goddess-checkpoint.js';
 import {transactSurvey} from '../data/survey-report.js';
 import {createReincarnationVision, isReincarnationVisionEligible} from './reincarnation-vision.js';
@@ -330,6 +332,7 @@ import {
 
 (() => {
   const canvas = document.getElementById("screen");
+  const auroraBattleIntro=createAuroraBattleIntro({anchor:canvas});
   const ctx = canvas.getContext("2d", { alpha: false });
   const eventOverlayCanvas = document.getElementById("eventOverlay");
   const eventOverlayCtx = eventOverlayCanvas.getContext("2d");
@@ -650,6 +653,7 @@ import {
   }
 
   function canPresentPassiveNotification() {
+    if(auroraBattleIntro.isActive()||getSpecialMapContext()?.session?.battleOpening)return false;
     if (!passiveNotificationsReady || !character || document.hidden) return false;
     if (document.body.classList.contains("title-active") || endingSequenceActive
       || michaelaRestorationStarting || mainEndingStarting || sceneTransitionRunning
@@ -5632,6 +5636,7 @@ import {
   }
 
   function dispatchStrafe(amount) {
+    if(auroraBattleIntro.isActive())return true;
     if(document.body.classList.contains('title-active')||endingSequenceActive||sceneTransitionRunning
       ||firstDungeonTutorialActive||deckTutorialActive||lootBagTutorialActive||pendingLootIdentification||experienceSettlementCloseCallback
       ||michaelaRestorationStarting||michaelaRestorationController.isActive()
@@ -5642,6 +5647,8 @@ import {
   }
 
   function dispatchGamepadAction(action) {
+    // The intro polls physical A edges itself; suppress the game's repeat dispatcher.
+    if(auroraBattleIntro.isActive())return true;
     if(reincarnationVision.handleInput(action))return true;
     if (document.body.classList.contains("title-active")) {
       window.dispatchEvent(new CustomEvent("nda:title-input", { detail: { action } }));
@@ -5706,6 +5713,7 @@ import {
     onButtonPreviewChange: setGamepadPressedButtons,
     onConnectionChange: showGamepadConnectionNotification,
     toggleMinimap: () => {
+      if(auroraBattleIntro.isActive())return true;
       if (handleSpecialMapInput("map")) return true;
       if (endingSequenceActive || michaelaRestorationController.isActive()) return true;
       if (handleBlockingTutorialInput("dismiss")) return true;
@@ -5717,7 +5725,7 @@ import {
   });
 
   configureInput({
-    handleExplorationInput:handleSpecialMapInput,
+    handleExplorationInput:action=>auroraBattleIntro.isActive()||handleSpecialMapInput(action),
     handleStrafeInput:dispatchStrafe,
     strafeLeftBtn:document.getElementById('strafeLeft'),
     strafeRightBtn:document.getElementById('strafeRight'),
@@ -5774,7 +5782,12 @@ import {
     return result;
   }
   async function beginV2Battle(session,enemyData,context){
+    if(session.battleOpening||isBattleActive())return;
+    session.battleOpening=true;
+    passiveNotificationCoordinator.updateAvailability();
+    try{
     const resumed=restoreGoddessCheckpoint(session.goddessBattle,context);
+    const route=getV2AuroraBattleRoute(character,enemyData,context,resumed);
     session.battleStartCharacter=structuredClone(character);
     saveGame();
     const boss=['special-map-v2-boss','special-map-v2-special-boss'].includes(context.source);
@@ -5785,10 +5798,18 @@ import {
     const [image]=await Promise.all([prepared,wait(1400)]);
     if(getSpecialMapContext()?.session!==session||!matchesV2Battle(session,context))return;
     session.renderState.overlayEvent=null;
-    startBgm(enemyData.goddessTheme?'finalBoss':boss?'floorBoss':'normalBattle');
-    if(!startBattle(createEnemyCombatant({...enemyData,image}),{playStartSe:false,explorationContext:context,resumeBattleState:resumed,...environment})){
+    const begin=()=>{
+      startBgm(enemyData.goddessTheme?'finalBoss':boss?'floorBoss':'normalBattle');
+      return startBattle(createEnemyCombatant({...enemyData,image}),{playStartSe:false,explorationContext:context,resumeBattleState:resumed,...environment});
+    };
+    const started=route===null?begin():await auroraBattleIntro.play({route,
+      isCurrent:()=>getSpecialMapContext()?.session===session&&matchesV2Battle(session,context),startBattle:begin});
+    if(!started&&getSpecialMapContext()?.session===session){
+      // A cancelled intro retains its saved encounter for reload; no battle ran.
+      if(route!==null)return;
       resumeV2Encounter(session,context);startBgm(getSpecialMapBgmKey(session.generatedMap.themeId));
     }
+    }finally{session.battleOpening=false;passiveNotificationCoordinator.updateAvailability();}
   }
   async function finishV2Battle(battle,outcome){
     const active=getSpecialMapContext(),s=active?.session;
@@ -5928,7 +5949,7 @@ import {
     runStairsTransition:onDark=>runSceneTransition({playAudio:()=>playSeSequence('stairs',3),onDark}),
     floorChanged:({session})=>{startBgm(getSpecialMapBgmKey(session.generatedMap.themeId));updateHud();},
     viewport:viewportEl,status:viewportEl.querySelector('.status'),updateHud,
-    isPaused:()=>isBattleActive()||isMenuOpen()||!itemOverlay.hidden||!skillOverlay.hidden,
+    isPaused:()=>auroraBattleIntro.isActive()||isBattleActive()||isMenuOpen()||!itemOverlay.hidden||!skillOverlay.hidden,
     openMenu:()=>{getSpecialMapContext().session.autoPath=null;showGameCommands();openCampMenu();},
     handleInput:action=>{
       if(handleItemOverlayInput(action)||handleSkillOverlayInput(action))return true;

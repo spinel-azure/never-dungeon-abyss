@@ -58,8 +58,9 @@ test('special renderer binds ordinary pointer/touch minimap handlers and removes
 test('gamepad map action reaches special exploration before the ordinary world-location gate',()=>{
  const source=readFileSync(new URL('../js/main.js',import.meta.url),'utf8');
  const body=source.slice(source.indexOf('    toggleMinimap: () => {')).split('\n    }')[0].replace('    toggleMinimap: () => {','');
- const calls=[];const scope={handleSpecialMapInput:action=>{calls.push(action);return true;}};
+ const calls=[];const scope={auroraBattleIntro:{isActive:()=>false},handleSpecialMapInput:action=>{calls.push(action);return true;}};
  vm.runInNewContext('this.toggle=()=>{'+body+'};',scope);assert.equal(scope.toggle(),true);assert.deepEqual(calls,['map']);
+ scope.auroraBattleIntro.isActive=()=>true;assert.equal(scope.toggle(),true);assert.deepEqual(calls,['map']);scope.auroraBattleIntro.isActive=()=>false;
  // With no special session the ordinary dungeon gate and toggle stay intact.
  Object.assign(scope,{handleSpecialMapInput:()=>false,endingSequenceActive:false,michaelaRestorationController:{isActive:()=>false},handleBlockingTutorialInput:()=>false,recordUserInput(){},worldLocation:'town',isBattleActive:()=>false,isMenuOpen:()=>false,sceneTransitionRunning:false,state:{},toggleMinimapOverlay:()=>{calls.push('ordinary');return true;}});
  assert.equal(scope.toggle(),false);scope.worldLocation='dungeon';assert.equal(scope.toggle(),true);assert.equal(calls.at(-1),'ordinary');

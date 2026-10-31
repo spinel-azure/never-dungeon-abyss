@@ -1,7 +1,6 @@
 import {finalWeaponDamageMultiplier,applyFinalWeaponEndurance} from './final-cat-weapons.js';
 import { syncArmorState, beginArmorCommand, armorDamageMultiplier, recordArmorGuard, grantArmorBarrier, absorbArmorBarrier, finishArmorRound } from "./reincarnation-armor.js";
-import {hasKeyItem} from '../data/key-items.js';
-import {normalizeReincarnationCount} from '../data/reincarnation.js';
+import {canActivateHackingDevice} from './hacking-device.js';
 import {isSuperGoddess,recordGoddessInterruptionDamage,finishGoddessPlayerOpportunity} from './goddess-superboss.js';
 import { isCharmed, charmAction, getAkashicPreparation, capAkashicDot, reviveAkashicEnemy } from "./akashic-phantoms.js";
 import {isGoddess,selectGoddessAction,prepareGoddessAction,executeGoddessUtility,finishGoddessAction,reviveGoddess,capGoddessDot,recordGoddessStatus} from './karte-goddesses.js';
@@ -96,8 +95,7 @@ export function createBattleState({ character, enemy, enemies = null, targetInde
   const selectedEnemy = enemyParty ? enemyParty[selectedTargetIndex] : cloneCombatant(enemy);
   synchronizeEnemyStatCaps({ player: character, enemy: selectedEnemy, enemies: enemyParty });
   const hackedEnemies = (enemyParty || [selectedEnemy]).filter(member =>
-    isSuperGoddess(member) && normalizeReincarnationCount(character?.reincarnationCount) === 3
-    && hasKeyItem(character?.keyItems, 'hacking_device') && !member.hackingDeviceApplied);
+    canActivateHackingDevice(character,member) && !member.hackingDeviceApplied);
   for (const member of hackedEnemies) {
     member.hp = Math.min(member.hp, Math.floor(member.maxHp * 0.95));
     member.hackingDeviceApplied = true;
