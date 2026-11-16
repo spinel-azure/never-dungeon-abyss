@@ -39,6 +39,16 @@ try{for(const [label,width,height] of [['pc',1280,900],['mobile',390,844],['phon
   for(const selector of ['.touch-dpad','#buttonA','#buttonB']){const control=await p.locator(selector).boundingBox();assert.ok(box.y+box.height<=control.y-4,`${label}: strafe overlaps ${selector}`);}
   await p.evaluate(()=>document.fonts.ready);
   await p.screenshot({path:join(output,label+'.png')});
+  assert.equal(await p.locator('#dungeonCommands').isVisible(),false);
+  await p.locator('#buttonB').tap();await p.waitForTimeout(220);
+  assert.equal(await p.locator('#strafeLeft').isVisible(),false);
+  const commands=p.locator('#dungeonCommands [data-command]');assert.equal(await commands.count(),6);
+  for(const b of await commands.all()){const r=await b.boundingBox();assert.ok(r&&r.y>=0&&r.y+r.height<=height);}
+  await p.screenshot({path:join(output,label+'-commands.png')});
+  const before=await p.evaluate(()=>strafeQa.read());
+  await key('ArrowRight');await key('q');assert.deepEqual(await p.evaluate(()=>strafeQa.read()),before);
+  await p.locator('#buttonB').tap();assert.equal(await p.locator('#strafeLeft').isVisible(),true);
+
  }
  await key('z');const saved=await p.evaluate(()=>strafeQa.read());await key('q');assert.deepEqual(await p.evaluate(()=>strafeQa.read()),saved);await key('z');
  await p.evaluate(()=>strafeQa.map());await key('q');assert.equal((await p.evaluate(()=>strafeQa.mapRead())).x,3);
@@ -48,6 +58,12 @@ try{for(const [label,width,height] of [['pc',1280,900],['mobile',390,844],['phon
   assert.ok(game.y+game.height<=strafe.y,`${label}: content enters controls`);
   for(const selector of ['.touch-dpad','#buttonA','#buttonB']){const box=await p.locator(selector).boundingBox();assert.ok(strafe.y+strafe.height<=box.y-4);}
   await p.screenshot({path:join(output,label+'-map.png')});
+  await p.locator('#buttonB').tap();await p.waitForTimeout(220);
+  assert.equal(await p.locator('#strafeLeft').isVisible(),false);
+  for(const b of await p.locator('#dungeonCommands [data-command]').all()){const r=await b.boundingBox();assert.ok(r&&r.y>=0&&r.y+r.height<=height);}
+  await p.screenshot({path:join(output,label+'-map-commands.png')});
+  await p.locator('#buttonA').tap();assert.equal(await p.evaluate(()=>document.body.classList.contains('menu-open')),true);
+
  }
 
  assert.deepEqual(errors,[]);console.log(label+' passed');await p.close();
