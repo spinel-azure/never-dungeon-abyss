@@ -203,3 +203,14 @@ body.touch-controls-enabled.layout-tablet.orientation-portrait .strafe-controls{
 .nde-equipment strong .nde-equipment-name{flex:0 0 auto;max-width:100%;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
 .nde-equipment strong .nde-equipment-bonus{flex:0 1 auto;max-width:100%;white-space:normal;overflow-wrap:anywhere}
 @media(max-width:420px){.nde-equipment{grid-template-columns:64px minmax(0,1fr)}}
+
+/* Touch exploration: reserve an upper shoulder row and a lower movement/action row. */
+body.touch-controls-enabled:is(.layout-mobile,.layout-tablet){--touch-bottom:calc(24px + env(safe-area-inset-bottom));--touch-lower-height:144px;--touch-row-gap:16px;--touch-dock-height:calc(240px + env(safe-area-inset-bottom))}
+body.touch-controls-enabled:is(.layout-mobile,.layout-tablet) .strafe-controls{position:fixed;left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));bottom:calc(var(--touch-bottom) + var(--touch-lower-height) + var(--touch-row-gap));width:auto;margin:0;height:44px}
+body.touch-controls-enabled:is(.layout-mobile,.layout-tablet) .touch-dpad,
+body.touch-controls-enabled:is(.layout-mobile,.layout-tablet) .action-buttons{bottom:var(--touch-bottom)}
+body.touch-controls-enabled:is(.layout-mobile,.layout-tablet):not(.menu-open):not(.title-active):is(:not(.town-active),.special-map-active) .shell{align-items:start;padding-top:max(8px,env(safe-area-inset-top));padding-bottom:var(--touch-dock-height);min-height:100dvh}
+body.touch-controls-enabled:is(.layout-mobile,.layout-tablet):not(.menu-open):not(.title-active):is(:not(.town-active),.special-map-active) .game{width:min(97vw,880px);gap:8px;min-height:0;max-height:calc(var(--nde-visible-height,100dvh) - var(--touch-dock-height) - max(8px,env(safe-area-inset-top)));overflow-y:auto;overflow-x:hidden;touch-action:pan-y}
+body.touch-controls-enabled:is(.layout-mobile,.layout-tablet):not(.menu-open):not(.title-active):is(:not(.town-active),.special-map-active) .controls{min-height:0;padding-bottom:0}
+body.touch-controls-enabled:is(.layout-mobile,.layout-tablet):not(.menu-open):not(.title-active):is(:not(.town-active),.special-map-active),
+body.touch-controls-enabled:is(.layout-mobile,.layout-tablet):not(.menu-open):not(.title-active):is(:not(.town-active),.special-map-active) .shell{touch-action:pan-y}

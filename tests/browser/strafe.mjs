@@ -11,14 +11,14 @@ const hook=base+`window.strafeQa={
  read:()=>({x:state.gridX,y:state.gridY,dir:state.dir,torch:state.torchFuel,anim:!!state.anim}),
  pad:dispatchGamepadAction,
  wall(on){cells[state.gridY][state.gridX].walls.W=on;},
- async map(){worldLocation='town';const {normalizeSpecialMaps}=await import('../data/special-maps.js');character.specialMaps=normalizeSpecialMaps({discovererName:'QA',registered:[{rulesetVersion:'special-map-v2',seed:12345,level:50,rarity:'SILVER',discovererName:'QA'}]});
+ async map(){(await import('./special-map/context.js')).getSpecialMapHost().checkMapEntry=()=>({ok:true});worldLocation='town';const {normalizeSpecialMaps}=await import('../data/special-maps.js');character.specialMaps=normalizeSpecialMaps({discovererName:'QA',registered:[{rulesetVersion:'special-map-v2',seed:12345,level:50,rarity:'SILVER',discovererName:'QA'}]});
  const registered=character.specialMaps.registered;const c=startSpecialMapExploration({registered,mapKey:mapOriginalId(registered[0]),message:msgEl,playSe,saveSurvey:()=>({ok:true}),onExit:()=>{}});await c.ready;
  const s=c.session;s.renderState.overlayEvent=null;s.incenseActive=true;s.playerX=4;s.playerY=4;s.direction=0;s.renderState.x=4.5;s.renderState.y=4.5;s.renderState.angle=-Math.PI/2;
  s.cells[4][4].walls.W=false;s.cells[4][3].walls.E=false;return true;},
  mapRead:()=>{const s=getSpecialMapContext().session;return {x:s.playerX,y:s.playerY,dir:s.direction,motion:!!s.motion,torch:s.torchFuel};}
 };`;
 const browser=await chromium.launch({channel:'msedge',headless:true});
-try{for(const [label,width,height] of [['pc',1280,900],['mobile',390,844],['tablet',820,1180],['tablet-short',768,900]]){
+try{for(const [label,width,height] of [['pc',1280,900],['mobile',390,844],['phone-short',393,660],['phone-wide',440,740],['phone-landscape',844,390],['tablet',820,1180],['tablet-short',768,900]]){
  const p=await browser.newPage({viewport:{width,height},hasTouch:label!=='pc'}),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.addInitScript(()=>navigator.getGamepads=()=>[]);
  const main=await readFile('js/main.js','utf8');await p.route('**/js/main.js?*',r=>r.fulfill({contentType:'text/javascript',body:main.replace('  document.documentElement.dataset.ndaMainReady = "true";',hook+'\n document.documentElement.dataset.ndaMainReady="true";')}));
  const player=(await readFile('js/player.js','utf8')).replace('const encounterTriggered = onExplorationStep({','const encounterTriggered = false && onExplorationStep({');await p.route('**/js/player.js',r=>r.fulfill({contentType:'text/javascript',body:player}));
@@ -37,11 +37,18 @@ try{for(const [label,width,height] of [['pc',1280,900],['mobile',390,844],['tabl
   await p.locator('#strafeRight').tap();await p.waitForFunction(()=>!strafeQa.read().anim&&document.querySelector('.special-map-runtime')?.dataset.moving!=='true');assert.equal((await p.evaluate(()=>strafeQa.read())).x,4);
   const box=await p.locator('.strafe-controls').boundingBox();assert.ok(box.x>=0&&box.x+box.width<=width+1);
   for(const selector of ['.touch-dpad','#buttonA','#buttonB']){const control=await p.locator(selector).boundingBox();assert.ok(box.y+box.height<=control.y-4,`${label}: strafe overlaps ${selector}`);}
+  await p.evaluate(()=>document.fonts.ready);
   await p.screenshot({path:join(output,label+'.png')});
  }
  await key('z');const saved=await p.evaluate(()=>strafeQa.read());await key('q');assert.deepEqual(await p.evaluate(()=>strafeQa.read()),saved);await key('z');
  await p.evaluate(()=>strafeQa.map());await key('q');assert.equal((await p.evaluate(()=>strafeQa.mapRead())).x,3);
  await p.evaluate(()=>strafeQa.pad('pageRight'));await p.waitForFunction(()=>!strafeQa.read().anim&&document.querySelector('.special-map-runtime')?.dataset.moving!=='true');const m=await p.evaluate(()=>strafeQa.mapRead());assert.equal(m.x,4);assert.equal(m.dir,0);assert.equal(m.torch,98);
- if(label.startsWith('tablet')){const strafe=await p.locator('.strafe-controls').boundingBox();const message=await p.locator('#message').boundingBox();assert.ok(message.y+message.height<strafe.y);const commands=await p.locator("#dungeonCommands").boundingBox();assert.ok(commands.y+commands.height+4<strafe.y);await p.screenshot({path:join(output,label+'-map.png')});}
+ if(label!=='pc'){
+  const strafe=await p.locator('.strafe-controls').boundingBox(),game=await p.locator('.game').boundingBox();
+  assert.ok(game.y+game.height<=strafe.y,`${label}: content enters controls`);
+  for(const selector of ['.touch-dpad','#buttonA','#buttonB']){const box=await p.locator(selector).boundingBox();assert.ok(strafe.y+strafe.height<=box.y-4);}
+  await p.screenshot({path:join(output,label+'-map.png')});
+ }
+
  assert.deepEqual(errors,[]);console.log(label+' passed');await p.close();
 }}finally{await browser.close();}console.log(output);
